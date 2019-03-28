@@ -7,12 +7,14 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="test-editor-service" />
+        <module name="view" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
       <module name="asbestos" target="1.5" />
       <module name="test-editor-service" target="1.7" />
       <module name="test-editor-service (1)" target="1.5" />
+      <module name="view" target="1.5" />
     </bytecodeTargetLevel>
   </component>
 </project>
