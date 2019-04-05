@@ -6,8 +6,6 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="test-editor-service" />
-        <module name="view" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
