@@ -16,10 +16,11 @@ Commits from IntelliJ will naturally go to the correct repository
 If this is the first time running on this box in development
 
     cd view
+    npm init
     npm install
 
 to update the Javascript dependencies
 
     npm run serve
     
-in a terminal to start UI in development mode
+in a terminal to start UI in development mode. Do this from the view directory.

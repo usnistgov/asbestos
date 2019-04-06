@@ -2,11 +2,59 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="1bbcf1f6-ec92-42d3-ab8e-952522b46c20" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/asbestos-test-editor-service/asbestos-test-editor-service.yml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/asbestos-test-editor-service/src/main/java/gov/nist/asbestos/HelloWorldApplication.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/asbestos-test-editor-service/src/main/java/gov/nist/asbestos/HelloWorldConfiguration.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/asbestos-test-editor-service/src/main/java/gov/nist/asbestos/api/Saying.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/asbestos-test-editor-service/src/main/java/gov/nist/asbestos/health/TemplateHealthCheck.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/asbestos-test-editor-service/src/main/java/gov/nist/asbestos/resources/HelloWorldResource.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/asbestos-test-editor-service/test-editor-service.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/asbestos.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/asbestos.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/compiler.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/encodings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/encodings.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__javax_ws_rs_javax_ws_rs_api_2_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__org_eclipse_persistence_org_eclipse_persistence_antlr_2_5_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__org_eclipse_persistence_org_eclipse_persistence_asm_2_5_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__org_eclipse_persistence_org_eclipse_persistence_core_2_5_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__org_eclipse_persistence_org_eclipse_persistence_moxy_2_5_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__org_glassfish_grizzly_grizzly_framework_2_4_3.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__org_glassfish_grizzly_grizzly_http_2_4_3.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__org_glassfish_grizzly_grizzly_http_server_2_4_3.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__org_glassfish_hk2_external_aopalliance_repackaged_2_4_0_b10.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__org_glassfish_hk2_external_javax_inject_2_3_0_b05.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__org_glassfish_hk2_hk2_api_2_4_0_b10.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__org_glassfish_hk2_hk2_locator_2_4_0_b10.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__org_glassfish_hk2_hk2_utils_2_4_0_b10.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__org_glassfish_jersey_bundles_repackaged_jersey_guava_2_17.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__org_glassfish_jersey_containers_jersey_container_grizzly2_http_2_9_1.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__org_glassfish_jersey_core_jersey_client_2_17.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__org_glassfish_jersey_core_jersey_common_2_17.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__org_glassfish_jersey_core_jersey_server_2_17.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__org_glassfish_jersey_ext_jersey_entity_filtering_2_17.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__org_glassfish_jersey_media_jersey_media_jaxb_2_17.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__org_glassfish_jersey_media_jersey_media_moxy_2_17.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__org_javassist_javassist_3_18_1_GA.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/asbestos-test-editor-service" beforeDir="false" afterPath="$PROJECT_DIR$/asbestos-test-editor-service" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/asbestos-test-editor-service/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/asbestos-test-editor-service/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/asbestos-test-editor-service/src/main/java/gov/nist/asbestos/Main.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/asbestos-test-editor-service/src/main/java/gov/nist/asbestos/MyResource.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/asbestos-test-editor-service/src/main/java/gov/nist/asbestos/testEditorService/Config.groovy" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/asbestos-test-editor-service/src/main/java/gov/nist/asbestos/testEditorService/TestDefResource.groovy" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/asbestos-test-editor-service/src/test/java/gov/nist/asbestos/MyResourceTest.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/asbestos-test-editor-service/src/test/java/gov/nist/asbestos/testEditorService/TestDefResourceTest.groovy" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/view" beforeDir="false" afterPath="$PROJECT_DIR$/view" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/view/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/view/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/view/src/components/TestPartNav.vue" beforeDir="false" afterPath="$PROJECT_DIR$/view/src/components/TestPartNav.vue" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/target/" />
     <ignored path="$PROJECT_DIR$/test-editor-service/target/" />
     <ignored path="$PROJECT_DIR$/view/target/" />
+    <ignored path="$PROJECT_DIR$/asbestos-test-editor-service/target/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -17,39 +65,99 @@
     <option name="isMigrated" value="true" />
   </component>
   <component name="FileEditorManager">
-    <splitter split-orientation="horizontal" split-proportion="0.1491681">
-      <split-first>
-        <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-          <file pinned="false" current-in-tab="true">
-            <entry file="file://$PROJECT_DIR$/.gitmodules">
-              <provider selected="true" editor-type-id="text-editor" />
-            </entry>
-          </file>
-        </leaf>
-      </split-first>
-      <split-second>
-        <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-          <file pinned="false" current-in-tab="false">
-            <entry file="file://$PROJECT_DIR$/.gitmodules">
-              <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="45">
-                  <caret line="3" selection-start-line="3" selection-end-line="3" />
-                </state>
-              </provider>
-            </entry>
-          </file>
-          <file pinned="false" current-in-tab="true">
-            <entry file="file://$PROJECT_DIR$/.idea/workspace.xml">
-              <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="142">
-                  <caret line="329" column="12" lean-forward="true" selection-start-line="329" selection-start-column="12" selection-end-line="329" selection-end-column="12" />
-                </state>
-              </provider>
-            </entry>
-          </file>
-        </leaf>
-      </split-second>
-    </splitter>
+    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/asbestos-test-editor-service/src/main/java/gov/nist/asbestos/HelloWorldConfiguration.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="240">
+              <caret line="22" selection-start-line="21" selection-start-column="5" selection-end-line="22" />
+              <folding>
+                <element signature="imports" expanded="true" />
+                <element signature="e#387#388#0" expanded="true" />
+                <element signature="e#418#419#0" expanded="true" />
+                <element signature="e#484#485#0" expanded="true" />
+                <element signature="e#524#525#0" expanded="true" />
+                <element signature="e#580#581#0" expanded="true" />
+                <element signature="e#614#615#0" expanded="true" />
+                <element signature="e#679#680#0" expanded="true" />
+                <element signature="e#718#719#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/asbestos-test-editor-service/src/main/java/gov/nist/asbestos/HelloWorldApplication.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="390">
+              <caret line="32" column="69" selection-start-line="32" selection-start-column="69" selection-end-line="32" selection-end-column="69" />
+              <folding>
+                <element signature="imports" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/asbestos-test-editor-service/src/main/java/gov/nist/asbestos/health/TemplateHealthCheck.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="255">
+              <caret line="19" column="1" selection-start-line="19" selection-start-column="1" selection-end-line="19" selection-end-column="1" />
+              <folding>
+                <element signature="e#223#224#0" expanded="true" />
+                <element signature="e#263#264#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/asbestos-test-editor-service/src/main/java/gov/nist/asbestos/api/Saying.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="225">
+              <caret line="15" column="14" selection-start-line="15" selection-start-column="14" selection-end-line="15" selection-end-column="14" />
+              <folding>
+                <element signature="imports" expanded="true" />
+                <element signature="e#444#445#0" expanded="true" />
+                <element signature="e#469#470#0" expanded="true" />
+                <element signature="e#521#522#0" expanded="true" />
+                <element signature="e#551#552#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/asbestos-test-editor-service/src/main/java/gov/nist/asbestos/resources/HelloWorldResource.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="315">
+              <caret line="21" column="68" selection-start-line="21" selection-start-column="68" selection-end-line="21" selection-end-column="68" />
+              <folding>
+                <element signature="imports" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/asbestos-test-editor-service/asbestos-test-editor-service.yml">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="15">
+              <caret line="1" column="19" selection-start-line="1" selection-start-column="19" selection-end-line="1" selection-end-column="19" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/asbestos-test-editor-service/pom.xml">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="71">
+              <caret line="42" column="17" selection-start-line="42" selection-start-column="17" selection-end-line="42" selection-end-column="17" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+    </leaf>
   </component>
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
@@ -60,7 +168,7 @@
   </component>
   <component name="Git.Settings">
     <option name="ROOT_SYNC" value="DONT_SYNC" />
-    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/asbestos-test-editor-service" />
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
         <entry key="$PROJECT_DIR$/view" value="0fda0523238fc2c22bb29e90f8240b2da205cb06" />
@@ -71,9 +179,7 @@
     <option name="CHANGED_PATHS">
       <list>
         <option value="$PROJECT_DIR$/view/index.js" />
-        <option value="$PROJECT_DIR$/pom.xml" />
         <option value="$PROJECT_DIR$/view/pom.xml" />
-        <option value="$PROJECT_DIR$/README.md" />
         <option value="$PROJECT_DIR$/test-editor-service/src/test/java/gov/nist/asbestos/MyResourceTest.java" />
         <option value="$PROJECT_DIR$/test-editor-service/src/main/java/gov/nist/asbestos/TestDefResource.java" />
         <option value="$PROJECT_DIR$/test-editor-service/src/main/java/gov/nist/asbestos/Main.java" />
@@ -82,6 +188,17 @@
         <option value="$PROJECT_DIR$/test-editor-service/pom.xml" />
         <option value="$PROJECT_DIR$/test-editor-service/src/main/java/gov/nist/asbestos/testEditorService/TestDefResource.groovy" />
         <option value="$PROJECT_DIR$/test-editor-service/src/test/java/gov/nist/asbestos/testEditorService/TestDefResourceTest.groovy" />
+        <option value="$PROJECT_DIR$/README.md" />
+        <option value="$PROJECT_DIR$/view/src/components/TestPartNav.vue" />
+        <option value="$PROJECT_DIR$/pom.xml" />
+        <option value="$PROJECT_DIR$/asbestos-test-editor-service/src/main/java/gov/nist/asbestos/HelloWorldConfiguration.java" />
+        <option value="$PROJECT_DIR$/asbestos-test-editor-service/src/main/java/gov/nist/asbestos/testEditorService/TestDefResource.groovy" />
+        <option value="$PROJECT_DIR$/asbestos-test-editor-service/src/main/java/gov/nist/asbestos/api/Saying.java" />
+        <option value="$PROJECT_DIR$/asbestos-test-editor-service/src/main/java/gov/nist/asbestos/resources/HelloWorldResource.java" />
+        <option value="$PROJECT_DIR$/asbestos-test-editor-service/src/main/java/gov/nist/asbestos/health/TemplateHealthCheck.java" />
+        <option value="$PROJECT_DIR$/asbestos-test-editor-service/src/main/java/gov/nist/asbestos/HelloWorldApplication.java" />
+        <option value="$PROJECT_DIR$/asbestos-test-editor-service/pom.xml" />
+        <option value="$PROJECT_DIR$/asbestos-test-editor-service/asbestos-test-editor-service.yml" />
       </list>
     </option>
   </component>
@@ -97,12 +214,12 @@
       <expand>
         <path>
           <item name="" type="16c1761:MavenProjectsStructure$RootNode" />
-          <item name="asbestos" type="9519ce18:MavenProjectsStructure$ProjectNode" />
+          <item name="test-editor-service" type="9519ce18:MavenProjectsStructure$ProjectNode" />
         </path>
         <path>
           <item name="" type="16c1761:MavenProjectsStructure$RootNode" />
-          <item name="asbestos" type="9519ce18:MavenProjectsStructure$ProjectNode" />
-          <item name="Lifecycle" type="58874e2:MavenProjectsStructure$LifecycleNode" />
+          <item name="test-editor-service" type="9519ce18:MavenProjectsStructure$ProjectNode" />
+          <item name="Plugins" type="7aea1407:MavenProjectsStructure$PluginsNode" />
         </path>
       </expand>
       <select />
@@ -119,11 +236,12 @@
   </component>
   <component name="ProjectView">
     <navigator proportions="" version="1">
+      <hideEmptyPackages ProjectPane="true" />
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="Scope" />
       <pane id="PackagesPane" />
+      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -134,7 +252,86 @@
             <path>
               <item name="asbestos" type="b2602c69:ProjectViewProjectNode" />
               <item name="asbestos" type="462c0819:PsiDirectoryNode" />
-              <item name=".idea" type="462c0819:PsiDirectoryNode" />
+              <item name="asbestos-test-editor-service" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="asbestos" type="b2602c69:ProjectViewProjectNode" />
+              <item name="asbestos" type="462c0819:PsiDirectoryNode" />
+              <item name="asbestos-test-editor-service" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="asbestos" type="b2602c69:ProjectViewProjectNode" />
+              <item name="asbestos" type="462c0819:PsiDirectoryNode" />
+              <item name="asbestos-test-editor-service" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="main" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="asbestos" type="b2602c69:ProjectViewProjectNode" />
+              <item name="asbestos" type="462c0819:PsiDirectoryNode" />
+              <item name="asbestos-test-editor-service" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="main" type="462c0819:PsiDirectoryNode" />
+              <item name="java" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="asbestos" type="b2602c69:ProjectViewProjectNode" />
+              <item name="asbestos" type="462c0819:PsiDirectoryNode" />
+              <item name="asbestos-test-editor-service" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="main" type="462c0819:PsiDirectoryNode" />
+              <item name="java" type="462c0819:PsiDirectoryNode" />
+              <item name="asbestos" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="asbestos" type="b2602c69:ProjectViewProjectNode" />
+              <item name="asbestos" type="462c0819:PsiDirectoryNode" />
+              <item name="asbestos-test-editor-service" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="main" type="462c0819:PsiDirectoryNode" />
+              <item name="java" type="462c0819:PsiDirectoryNode" />
+              <item name="asbestos" type="462c0819:PsiDirectoryNode" />
+              <item name="api" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="asbestos" type="b2602c69:ProjectViewProjectNode" />
+              <item name="asbestos" type="462c0819:PsiDirectoryNode" />
+              <item name="asbestos-test-editor-service" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="test" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="asbestos" type="b2602c69:ProjectViewProjectNode" />
+              <item name="asbestos" type="462c0819:PsiDirectoryNode" />
+              <item name="asbestos-test-editor-service" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="test" type="462c0819:PsiDirectoryNode" />
+              <item name="java" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="asbestos" type="b2602c69:ProjectViewProjectNode" />
+              <item name="asbestos" type="462c0819:PsiDirectoryNode" />
+              <item name="asbestos-test-editor-service" type="462c0819:PsiDirectoryNode" />
+              <item name="target" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="asbestos" type="b2602c69:ProjectViewProjectNode" />
+              <item name="asbestos" type="462c0819:PsiDirectoryNode" />
+              <item name="view" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="asbestos" type="b2602c69:ProjectViewProjectNode" />
+              <item name="asbestos" type="462c0819:PsiDirectoryNode" />
+              <item name="view" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="asbestos" type="b2602c69:ProjectViewProjectNode" />
+              <item name="asbestos" type="462c0819:PsiDirectoryNode" />
+              <item name="view" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="components" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
           <select />
@@ -147,11 +344,14 @@
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="aspect.path.notification.shown" value="true" />
-    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1554429650160" />
+    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1554556813177" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="node.js.detected.package.eslint" value="true" />
+    <property name="node.js.detected.package.standard" value="true" />
     <property name="node.js.path.for.package.eslint" value="project" />
-    <property name="node.js.selected.package.eslint" value="(autodetect)" />
+    <property name="node.js.path.for.package.standard" value="project" />
+    <property name="node.js.selected.package.eslint" value="$PROJECT_DIR$/view/node_modules/eslint" />
+    <property name="node.js.selected.package.standard" value="$PROJECT_DIR$/view/node_modules/eslint" />
     <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
     <property name="nodejs_npm_path_reset_for_default_project" value="true" />
     <property name="project.structure.last.edited" value="SDKs" />
@@ -256,7 +456,9 @@
       <workItem from="1553791238539" duration="866000" />
       <workItem from="1553792380098" duration="3288000" />
       <workItem from="1553850947092" duration="12131000" />
-      <workItem from="1554428971781" duration="1455000" />
+      <workItem from="1554428971781" duration="7613000" />
+      <workItem from="1554554680367" duration="800000" />
+      <workItem from="1554555915337" duration="848000" />
     </task>
     <task id="LOCAL-00001" summary="work">
       <created>1554112530264</created>
@@ -286,7 +488,14 @@
       <option name="project" value="LOCAL" />
       <updated>1554429650070</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="work">
+      <created>1554546470014</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1554546470014</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="TestHistory">
@@ -304,7 +513,7 @@
     </history-entry>
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="17740000" />
+    <option name="totallyTimeSpent" value="25546000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -317,8 +526,9 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="2026" y="54" width="2326" height="1265" extended-state="0" />
+    <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.12807018" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.19122808" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Image Layers" order="2" />
       <window_info id="Designer" order="3" />
@@ -328,17 +538,17 @@
       <window_info anchor="bottom" id="Stack trace to UML" order="0" side_tool="true" />
       <window_info anchor="bottom" id="Sequence" order="1" />
       <window_info anchor="bottom" id="Message" order="2" />
-      <window_info anchor="bottom" id="Find" order="3" />
+      <window_info anchor="bottom" id="Find" order="3" visible="true" weight="0.32922536" />
       <window_info anchor="bottom" id="Run" order="4" weight="0.32922536" />
       <window_info anchor="bottom" id="Debug" order="5" weight="0.4" />
       <window_info anchor="bottom" id="Cvs" order="6" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="7" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="8" sideWeight="0.49966735" weight="0.32899022" />
       <window_info anchor="bottom" id="Docker" order="9" show_stripe_button="false" />
-      <window_info active="true" anchor="bottom" id="Version Control" order="10" visible="true" weight="0.57922536" />
+      <window_info anchor="bottom" id="Version Control" order="10" weight="0.57922536" />
       <window_info anchor="bottom" id="Database Changes" order="11" />
-      <window_info anchor="bottom" id="Terminal" order="12" weight="0.76584506" />
-      <window_info anchor="bottom" id="Event Log" order="13" sideWeight="0.50033265" side_tool="true" weight="0.32899022" />
+      <window_info anchor="bottom" id="Terminal" order="12" weight="0.35123238" />
+      <window_info anchor="bottom" id="Event Log" order="13" sideWeight="0.50033265" side_tool="true" weight="0.32834506" />
       <window_info anchor="bottom" id="Java Enterprise" order="14" sideWeight="0.49966735" weight="0.32899022" />
       <window_info anchor="bottom" id="Messages" order="15" sideWeight="0.49966735" weight="0.3274648" />
       <window_info anchor="right" id="Json Parser" order="0" />
@@ -406,99 +616,150 @@
   <component name="editorHistoryManager">
     <entry file="jar:///usr/lib/jvm/default-java/jre/lib/rt.jar!/com/sun/net/httpserver/HttpServer.class" />
     <entry file="file://$PROJECT_DIR$/view/index.js" />
-    <entry file="file://$PROJECT_DIR$/pom.xml">
+    <entry file="file://$PROJECT_DIR$/view/pom.xml" />
+    <entry file="file://$PROJECT_DIR$/test-editor-service/.gitignore" />
+    <entry file="file://$PROJECT_DIR$/.gitignore">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test-editor-service/pom.xml" />
+    <entry file="file://$PROJECT_DIR$/test-editor-service/src/main/java/gov/nist/asbestos/testEditorService/Config.groovy" />
+    <entry file="file://$PROJECT_DIR$/test-editor-service/src/main/java/gov/nist/asbestos/Main.java" />
+    <entry file="file://$PROJECT_DIR$/test-editor-service/src/test/java/gov/nist/asbestos/MyResourceTest.java" />
+    <entry file="file://$PROJECT_DIR$/test-editor-service/src/main/java/gov/nist/asbestos/MyResource.java" />
+    <entry file="file://$PROJECT_DIR$/test-editor-service/src/test/java/gov/nist/asbestos/testEditorService/TestDefResourceTest.groovy" />
+    <entry file="file://$PROJECT_DIR$/test-editor-service/src/main/java/gov/nist/asbestos/testEditorService/TestDefResource.groovy" />
+    <entry file="file://$PROJECT_DIR$/.idea/workspace.xml">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="255">
-          <caret line="17" column="10" selection-start-line="17" selection-start-column="10" selection-end-line="17" selection-end-column="10" />
+        <state relative-caret-position="-1253">
+          <caret line="236" column="12" selection-start-line="236" selection-start-column="12" selection-end-line="236" selection-end-column="12" />
         </state>
       </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/.gitmodules">
+      <provider selected="true" editor-type-id="text-editor" />
     </entry>
     <entry file="file://$PROJECT_DIR$/README.md">
       <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
         <state split_layout="SPLIT">
-          <first_editor relative-caret-position="360">
-            <caret line="24" column="14" selection-start-line="24" selection-start-column="14" selection-end-line="24" selection-end-column="14" />
+          <first_editor relative-caret-position="375">
+            <caret line="25" column="79" selection-start-line="25" selection-start-column="79" selection-end-line="25" selection-end-column="79" />
           </first_editor>
           <second_editor />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/view/pom.xml" />
-    <entry file="file://$PROJECT_DIR$/test-editor-service/.gitignore">
+    <entry file="file://$PROJECT_DIR$/view/src/components/NavPanel.vue">
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
-    <entry file="file://$PROJECT_DIR$/.gitignore">
+    <entry file="file://$PROJECT_DIR$/view/src/components/TestNav.vue">
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
-    <entry file="file://$PROJECT_DIR$/test-editor-service/pom.xml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="305">
-          <caret line="60" column="21" selection-start-line="60" selection-start-column="21" selection-end-line="60" selection-end-column="21" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/test-editor-service/src/main/java/gov/nist/asbestos/testEditorService/Config.groovy">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="330">
-          <caret line="22" column="60" selection-start-line="22" selection-start-column="60" selection-end-line="22" selection-end-column="60" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/test-editor-service/src/main/java/gov/nist/asbestos/Main.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="495">
-          <caret line="39" column="22" selection-start-line="39" selection-start-column="22" selection-end-line="39" selection-end-column="22" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/test-editor-service/src/test/java/gov/nist/asbestos/MyResourceTest.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="405">
-          <caret line="36" column="29" selection-start-line="36" selection-start-column="29" selection-end-line="36" selection-end-column="29" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/test-editor-service/src/main/java/gov/nist/asbestos/MyResource.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="255">
-          <caret line="20" column="35" selection-start-line="20" selection-start-column="35" selection-end-line="20" selection-end-column="35" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/test-editor-service/src/test/java/gov/nist/asbestos/testEditorService/TestDefResourceTest.groovy">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="60">
-          <caret line="4" column="56" selection-start-line="4" selection-start-column="56" selection-end-line="4" selection-end-column="56" />
-          <folding>
-            <element signature="e#45#76#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/test-editor-service/src/main/java/gov/nist/asbestos/testEditorService/TestDefResource.groovy">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="30">
-          <caret line="2" column="23" selection-start-line="2" selection-start-column="23" selection-end-line="2" selection-end-column="23" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/.gitmodules">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="45">
-          <caret line="3" selection-start-line="3" selection-end-line="3" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/.idea/workspace.xml">
+    <entry file="file://$PROJECT_DIR$/view/src/components/TestPartNav.vue">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="142">
-          <caret line="329" column="12" lean-forward="true" selection-start-line="329" selection-start-column="12" selection-end-line="329" selection-end-column="12" />
+          <caret line="41" column="45" selection-start-line="41" selection-start-column="45" selection-end-line="41" selection-end-column="45" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/asbestos-test-editor-service/src/main/java/gov/nist/asbestos/testEditorService/Config.groovy" />
+    <entry file="file://$PROJECT_DIR$/pom.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="180">
+          <caret line="12" column="44" selection-start-line="12" selection-start-column="44" selection-end-line="12" selection-end-column="44" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/asbestos-test-editor-service/src/main/java/gov/nist/asbestos/testEditorService/TestDefResource.groovy" />
+    <entry file="file://$PROJECT_DIR$/asbestos-test-editor-service/src/main/java/gov/nist/asbestos/Main.java" />
+    <entry file="file://$PROJECT_DIR$/asbestos-test-editor-service/src/main/java/gov/nist/asbestos/MyResource.java" />
+    <entry file="file://$PROJECT_DIR$/asbestos-test-editor-service/src/main/java/gov/nist/asbestos/HelloWorldConfiguration.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="240">
+          <caret line="22" selection-start-line="21" selection-start-column="5" selection-end-line="22" />
+          <folding>
+            <element signature="imports" expanded="true" />
+            <element signature="e#387#388#0" expanded="true" />
+            <element signature="e#418#419#0" expanded="true" />
+            <element signature="e#484#485#0" expanded="true" />
+            <element signature="e#524#525#0" expanded="true" />
+            <element signature="e#580#581#0" expanded="true" />
+            <element signature="e#614#615#0" expanded="true" />
+            <element signature="e#679#680#0" expanded="true" />
+            <element signature="e#718#719#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/asbestos-test-editor-service/src/main/java/gov/nist/asbestos/HelloWorldApplication.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="390">
+          <caret line="32" column="69" selection-start-line="32" selection-start-column="69" selection-end-line="32" selection-end-column="69" />
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/asbestos-test-editor-service/src/main/java/gov/nist/asbestos/health/TemplateHealthCheck.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="255">
+          <caret line="19" column="1" selection-start-line="19" selection-start-column="1" selection-end-line="19" selection-end-column="1" />
+          <folding>
+            <element signature="e#223#224#0" expanded="true" />
+            <element signature="e#263#264#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/asbestos-test-editor-service/src/test/java/gov/nist/asbestos/testEditorService/TestDefResourceTest.groovy">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="60">
+          <caret line="6" column="6" selection-start-line="6" selection-start-column="6" selection-end-line="6" selection-end-column="6" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/asbestos-test-editor-service/src/test/java/gov/nist/asbestos/MyResourceTest.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="60">
+          <caret line="13" column="13" selection-start-line="13" selection-start-column="13" selection-end-line="13" selection-end-column="13" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/asbestos-test-editor-service/pom.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="71">
+          <caret line="42" column="17" selection-start-line="42" selection-start-column="17" selection-end-line="42" selection-end-column="17" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/asbestos-test-editor-service/src/main/java/gov/nist/asbestos/api/Saying.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="225">
+          <caret line="15" column="14" selection-start-line="15" selection-start-column="14" selection-end-line="15" selection-end-column="14" />
+          <folding>
+            <element signature="imports" expanded="true" />
+            <element signature="e#444#445#0" expanded="true" />
+            <element signature="e#469#470#0" expanded="true" />
+            <element signature="e#521#522#0" expanded="true" />
+            <element signature="e#551#552#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/asbestos-test-editor-service/src/main/java/gov/nist/asbestos/resources/HelloWorldResource.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="315">
+          <caret line="21" column="68" selection-start-line="21" selection-start-column="68" selection-end-line="21" selection-end-column="68" />
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/asbestos-test-editor-service/asbestos-test-editor-service.yml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="15">
+          <caret line="1" column="19" selection-start-line="1" selection-start-column="19" selection-end-line="1" selection-end-column="19" />
         </state>
       </provider>
     </entry>

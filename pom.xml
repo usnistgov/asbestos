@@ -10,7 +10,7 @@
     <name>asbestos</name>
 
     <modules>
-        <module>test-editor-service</module>
+        <module>asbestos-test-editor-service</module>
         <module>view</module>
     </modules>
 

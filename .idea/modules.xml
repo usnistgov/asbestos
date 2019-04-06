@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/asbestos.iml" filepath="$PROJECT_DIR$/.idea/asbestos.iml" />
+      <module fileurl="file://$PROJECT_DIR$/asbestos-test-editor-service/test-editor-service.iml" filepath="$PROJECT_DIR$/asbestos-test-editor-service/test-editor-service.iml" />
       <module fileurl="file://$PROJECT_DIR$/view/view.iml" filepath="$PROJECT_DIR$/view/view.iml" />
     </modules>
   </component>
