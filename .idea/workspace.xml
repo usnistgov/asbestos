@@ -1,13 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="1bbcf1f6-ec92-42d3-ab8e-952522b46c20" name="Default Changelist" comment="work">
-      <change afterPath="$PROJECT_DIR$/view" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gitmodules" beforeDir="false" afterPath="$PROJECT_DIR$/.gitmodules" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/compiler.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+    <list default="true" id="1bbcf1f6-ec92-42d3-ab8e-952522b46c20" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test-editor-service/test-editor-service.iml" beforeDir="false" afterPath="$PROJECT_DIR$/test-editor-service/test-editor-service.iml" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/target/" />
     <ignored path="$PROJECT_DIR$/test-editor-service/target/" />
@@ -22,70 +17,12 @@
     <option name="isMigrated" value="true" />
   </component>
   <component name="FileEditorManager">
-    <splitter split-orientation="horizontal" split-proportion="0.5">
+    <splitter split-orientation="horizontal" split-proportion="0.1491681">
       <split-first>
         <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-          <file pinned="false" current-in-tab="false">
-            <entry file="file://$PROJECT_DIR$/test-editor-service/pom.xml">
-              <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="900">
-                  <caret line="60" column="21" selection-start-line="60" selection-start-column="21" selection-end-line="60" selection-end-column="21" />
-                </state>
-              </provider>
-            </entry>
-          </file>
-          <file pinned="false" current-in-tab="false">
-            <entry file="file://$PROJECT_DIR$/test-editor-service/src/main/java/gov/nist/asbestos/testEditorService/Config.groovy">
-              <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="330">
-                  <caret line="22" column="60" selection-start-line="22" selection-start-column="60" selection-end-line="22" selection-end-column="60" />
-                </state>
-              </provider>
-            </entry>
-          </file>
           <file pinned="false" current-in-tab="true">
-            <entry file="file://$PROJECT_DIR$/test-editor-service/src/test/java/gov/nist/asbestos/testEditorService/TestDefResourceTest.groovy">
-              <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="60">
-                  <caret line="4" column="56" selection-start-line="4" selection-start-column="56" selection-end-line="4" selection-end-column="56" />
-                  <folding>
-                    <element signature="e#45#76#0" expanded="true" />
-                  </folding>
-                </state>
-              </provider>
-            </entry>
-          </file>
-          <file pinned="false" current-in-tab="false">
-            <entry file="file://$PROJECT_DIR$/test-editor-service/src/main/java/gov/nist/asbestos/Main.java">
-              <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="495">
-                  <caret line="39" column="22" selection-start-line="39" selection-start-column="22" selection-end-line="39" selection-end-column="22" />
-                  <folding>
-                    <element signature="imports" expanded="true" />
-                  </folding>
-                </state>
-              </provider>
-            </entry>
-          </file>
-          <file pinned="false" current-in-tab="false">
-            <entry file="file://$PROJECT_DIR$/test-editor-service/src/test/java/gov/nist/asbestos/MyResourceTest.java">
-              <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="405">
-                  <caret line="36" column="29" selection-start-line="36" selection-start-column="29" selection-end-line="36" selection-end-column="29" />
-                  <folding>
-                    <element signature="imports" expanded="true" />
-                  </folding>
-                </state>
-              </provider>
-            </entry>
-          </file>
-          <file pinned="false" current-in-tab="false">
-            <entry file="file://$PROJECT_DIR$/test-editor-service/src/main/java/gov/nist/asbestos/MyResource.java">
-              <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="255">
-                  <caret line="20" column="35" selection-start-line="20" selection-start-column="35" selection-end-line="20" selection-end-column="35" />
-                </state>
-              </provider>
+            <entry file="file://$PROJECT_DIR$/.gitmodules">
+              <provider selected="true" editor-type-id="text-editor" />
             </entry>
           </file>
         </leaf>
@@ -93,17 +30,21 @@
       <split-second>
         <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
           <file pinned="false" current-in-tab="false">
-            <entry file="file://$PROJECT_DIR$/test-editor-service/src/main/java/gov/nist/asbestos/testEditorService/TestDefResource.groovy">
+            <entry file="file://$PROJECT_DIR$/.gitmodules">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="30">
-                  <caret line="2" column="23" selection-start-line="2" selection-start-column="23" selection-end-line="2" selection-end-column="23" />
+                <state relative-caret-position="45">
+                  <caret line="3" selection-start-line="3" selection-end-line="3" />
                 </state>
               </provider>
             </entry>
           </file>
           <file pinned="false" current-in-tab="true">
-            <entry file="file://$PROJECT_DIR$/.gitmodules">
-              <provider selected="true" editor-type-id="text-editor" />
+            <entry file="file://$PROJECT_DIR$/.idea/workspace.xml">
+              <provider selected="true" editor-type-id="text-editor">
+                <state relative-caret-position="142">
+                  <caret line="329" column="12" lean-forward="true" selection-start-line="329" selection-start-column="12" selection-end-line="329" selection-end-column="12" />
+                </state>
+              </provider>
             </entry>
           </file>
         </leaf>
@@ -120,6 +61,11 @@
   <component name="Git.Settings">
     <option name="ROOT_SYNC" value="DONT_SYNC" />
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$/view" value="0fda0523238fc2c22bb29e90f8240b2da205cb06" />
+      </map>
+    </option>
   </component>
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
@@ -155,11 +101,7 @@
         </path>
         <path>
           <item name="" type="16c1761:MavenProjectsStructure$RootNode" />
-          <item name="test-editor-service" type="9519ce18:MavenProjectsStructure$ProjectNode" />
-        </path>
-        <path>
-          <item name="" type="16c1761:MavenProjectsStructure$RootNode" />
-          <item name="test-editor-service" type="9519ce18:MavenProjectsStructure$ProjectNode" />
+          <item name="asbestos" type="9519ce18:MavenProjectsStructure$ProjectNode" />
           <item name="Lifecycle" type="58874e2:MavenProjectsStructure$LifecycleNode" />
         </path>
       </expand>
@@ -194,41 +136,6 @@
               <item name="asbestos" type="462c0819:PsiDirectoryNode" />
               <item name=".idea" type="462c0819:PsiDirectoryNode" />
             </path>
-            <path>
-              <item name="asbestos" type="b2602c69:ProjectViewProjectNode" />
-              <item name="asbestos" type="462c0819:PsiDirectoryNode" />
-              <item name="test-editor-service" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="asbestos" type="b2602c69:ProjectViewProjectNode" />
-              <item name="asbestos" type="462c0819:PsiDirectoryNode" />
-              <item name="test-editor-service" type="462c0819:PsiDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="asbestos" type="b2602c69:ProjectViewProjectNode" />
-              <item name="asbestos" type="462c0819:PsiDirectoryNode" />
-              <item name="test-editor-service" type="462c0819:PsiDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="asbestos" type="b2602c69:ProjectViewProjectNode" />
-              <item name="asbestos" type="462c0819:PsiDirectoryNode" />
-              <item name="test-editor-service" type="462c0819:PsiDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="462c0819:PsiDirectoryNode" />
-              <item name="java" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="asbestos" type="b2602c69:ProjectViewProjectNode" />
-              <item name="asbestos" type="462c0819:PsiDirectoryNode" />
-              <item name="test-editor-service" type="462c0819:PsiDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="462c0819:PsiDirectoryNode" />
-              <item name="java" type="462c0819:PsiDirectoryNode" />
-              <item name="asbestos" type="462c0819:PsiDirectoryNode" />
-            </path>
           </expand>
           <select />
         </subPane>
@@ -240,7 +147,7 @@
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="aspect.path.notification.shown" value="true" />
-    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1554429631681" />
+    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1554429650160" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="node.js.detected.package.eslint" value="true" />
     <property name="node.js.path.for.package.eslint" value="project" />
@@ -349,7 +256,7 @@
       <workItem from="1553791238539" duration="866000" />
       <workItem from="1553792380098" duration="3288000" />
       <workItem from="1553850947092" duration="12131000" />
-      <workItem from="1554428971781" duration="446000" />
+      <workItem from="1554428971781" duration="1455000" />
     </task>
     <task id="LOCAL-00001" summary="work">
       <created>1554112530264</created>
@@ -365,7 +272,21 @@
       <option name="project" value="LOCAL" />
       <updated>1554112714714</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="work">
+      <created>1554429627152</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1554429627152</updated>
+    </task>
+    <task id="LOCAL-00004" summary="work">
+      <created>1554429650070</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1554429650070</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="TestHistory">
@@ -383,7 +304,7 @@
     </history-entry>
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="16731000" />
+    <option name="totallyTimeSpent" value="17740000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -397,7 +318,7 @@
   <component name="ToolWindowManager">
     <frame x="2026" y="54" width="2326" height="1265" extended-state="0" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.12807018" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.12807018" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Image Layers" order="2" />
       <window_info id="Designer" order="3" />
@@ -414,7 +335,7 @@
       <window_info anchor="bottom" id="Inspection" order="7" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="8" sideWeight="0.49966735" weight="0.32899022" />
       <window_info anchor="bottom" id="Docker" order="9" show_stripe_button="false" />
-      <window_info anchor="bottom" id="Version Control" order="10" visible="true" weight="0.57922536" />
+      <window_info active="true" anchor="bottom" id="Version Control" order="10" visible="true" weight="0.57922536" />
       <window_info anchor="bottom" id="Database Changes" order="11" />
       <window_info anchor="bottom" id="Terminal" order="12" weight="0.76584506" />
       <window_info anchor="bottom" id="Event Log" order="13" sideWeight="0.50033265" side_tool="true" weight="0.32899022" />
@@ -511,7 +432,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/test-editor-service/pom.xml">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="900">
+        <state relative-caret-position="305">
           <caret line="60" column="21" selection-start-line="60" selection-start-column="21" selection-end-line="60" selection-end-column="21" />
         </state>
       </provider>
@@ -568,7 +489,18 @@
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/.gitmodules">
-      <provider selected="true" editor-type-id="text-editor" />
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="45">
+          <caret line="3" selection-start-line="3" selection-end-line="3" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/.idea/workspace.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="142">
+          <caret line="329" column="12" lean-forward="true" selection-start-line="329" selection-start-column="12" selection-end-line="329" selection-end-column="12" />
+        </state>
+      </provider>
     </entry>
   </component>
   <component name="masterDetails">
