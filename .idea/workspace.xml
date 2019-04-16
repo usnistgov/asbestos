@@ -2,9 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="1bbcf1f6-ec92-42d3-ab8e-952522b46c20" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/asbestos-adapter" beforeDir="false" afterPath="$PROJECT_DIR$/asbestos-adapter" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/asbestos-simapi" beforeDir="false" afterPath="$PROJECT_DIR$/asbestos-simapi" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/view" beforeDir="false" afterPath="$PROJECT_DIR$/view" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/target/" />
     <ignored path="$PROJECT_DIR$/test-editor-service/target/" />
@@ -32,11 +31,23 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/.gitmodules">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="154">
-              <caret line="11" column="59" selection-start-line="11" selection-start-column="59" selection-end-line="11" selection-end-column="59" />
+            <state relative-caret-position="224">
+              <caret line="16" lean-forward="true" selection-start-line="16" selection-end-line="16" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/README.md">
+          <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
+            <state split_layout="SPLIT">
+              <first_editor relative-caret-position="224">
+                <caret line="16" column="25" selection-start-line="16" selection-start-column="25" selection-end-line="16" selection-end-column="25" />
+              </first_editor>
+              <second_editor />
             </state>
           </provider>
         </entry>
@@ -81,10 +92,10 @@
         <option value="$PROJECT_DIR$/asbestos-test-editor-service/src/main/java/gov/nist/asbestos/HelloWorldApplication.java" />
         <option value="$PROJECT_DIR$/asbestos-test-editor-service/pom.xml" />
         <option value="$PROJECT_DIR$/asbestos-test-editor-service/asbestos-test-editor-service.yml" />
-        <option value="$PROJECT_DIR$/README.md" />
         <option value="$PROJECT_DIR$/pom.xml" />
         <option value="$PROJECT_DIR$/asbestos-simapi/pom.xml" />
         <option value="$PROJECT_DIR$/.gitmodules" />
+        <option value="$PROJECT_DIR$/README.md" />
       </list>
     </option>
   </component>
@@ -267,7 +278,7 @@
       <workItem from="1554554680367" duration="800000" />
       <workItem from="1554555915337" duration="2813000" />
       <workItem from="1555343682878" duration="3623000" />
-      <workItem from="1555433165888" duration="1051000" />
+      <workItem from="1555433165888" duration="2191000" />
     </task>
     <task id="LOCAL-00001" summary="work">
       <created>1554112530264</created>
@@ -353,7 +364,28 @@
       <option name="project" value="LOCAL" />
       <updated>1555434077363</updated>
     </task>
-    <option name="localTasksCounter" value="13" />
+    <task id="LOCAL-00013" summary="work">
+      <created>1555434248149</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1555434248149</updated>
+    </task>
+    <task id="LOCAL-00014" summary="work">
+      <created>1555434281318</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1555434281318</updated>
+    </task>
+    <task id="LOCAL-00015" summary="work">
+      <created>1555434996751</created>
+      <option name="number" value="00015" />
+      <option name="presentableId" value="LOCAL-00015" />
+      <option name="project" value="LOCAL" />
+      <updated>1555434996751</updated>
+    </task>
+    <option name="localTasksCounter" value="16" />
     <servers />
   </component>
   <component name="TestHistory">
@@ -371,7 +403,7 @@
     </history-entry>
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="32185000" />
+    <option name="totallyTimeSpent" value="33325000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -587,16 +619,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/README.md">
-      <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
-        <state split_layout="SPLIT">
-          <first_editor relative-caret-position="392">
-            <caret line="28" column="114" selection-start-line="28" selection-start-column="114" selection-end-line="28" selection-end-column="114" />
-          </first_editor>
-          <second_editor />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/pom.xml">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="196">
@@ -613,8 +635,18 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/.gitmodules">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="154">
-          <caret line="11" column="59" selection-start-line="11" selection-start-column="59" selection-end-line="11" selection-end-column="59" />
+        <state relative-caret-position="224">
+          <caret line="16" lean-forward="true" selection-start-line="16" selection-end-line="16" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/README.md">
+      <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
+        <state split_layout="SPLIT">
+          <first_editor relative-caret-position="224">
+            <caret line="16" column="25" selection-start-line="16" selection-start-column="25" selection-end-line="16" selection-end-column="25" />
+          </first_editor>
+          <second_editor />
         </state>
       </provider>
     </entry>

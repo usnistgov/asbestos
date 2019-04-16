@@ -14,7 +14,7 @@ subcomponents.  These directions show how to pull all the components into the de
 to pull shell of project. This will create directory asbestos
 
     cd asbestos
-    git submodule update --recursive --remote --init
+    git submodule update --remote --init
     
 to pull all the submodules (parts of build that come from separate github repositories)
 
