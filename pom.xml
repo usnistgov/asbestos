@@ -11,6 +11,8 @@
 
     <modules>
         <module>asbestos-test-editor-service</module>
+        <module>asbestos-adapter</module>
+        <module>asbestos-simapi</module>
         <module>view</module>
     </modules>
 
