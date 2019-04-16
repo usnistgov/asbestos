@@ -7,3 +7,6 @@
 [submodule "asbestos-simapi"]
 	path = asbestos-simapi
 	url = https://github.com/usnistgov/asbestos-simapi
+[submodule "asbestos-adapter"]
+	path = asbestos-adapter
+	url = https://github.com/usnistgov/asbestos-adapter
