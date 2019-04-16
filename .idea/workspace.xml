@@ -2,20 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="1bbcf1f6-ec92-42d3-ab8e-952522b46c20" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/asbestos-adapter/asbestos-adapter.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/asbestos-simapi/simapi.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/view/node/node" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/compiler.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/encodings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/encodings.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/asbestos-adapter" beforeDir="false" afterPath="$PROJECT_DIR$/asbestos-adapter" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/asbestos-simapi" beforeDir="false" afterPath="$PROJECT_DIR$/asbestos-simapi" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/asbestos-simapi/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/asbestos-simapi/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/view" beforeDir="false" afterPath="$PROJECT_DIR$/view" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/view/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/view/package-lock.json" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/target/" />
     <ignored path="$PROJECT_DIR$/test-editor-service/target/" />
@@ -34,11 +23,20 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/asbestos-simapi/pom.xml">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="132">
               <caret line="75" selection-start-line="75" selection-end-line="75" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/.gitmodules">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="154">
+              <caret line="11" column="59" selection-start-line="11" selection-start-column="59" selection-end-line="11" selection-end-column="59" />
             </state>
           </provider>
         </entry>
@@ -54,7 +52,7 @@
   </component>
   <component name="Git.Settings">
     <option name="ROOT_SYNC" value="DONT_SYNC" />
-    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/asbestos-simapi" />
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
         <entry key="$PROJECT_DIR$/view" value="0fda0523238fc2c22bb29e90f8240b2da205cb06" />
@@ -83,10 +81,10 @@
         <option value="$PROJECT_DIR$/asbestos-test-editor-service/src/main/java/gov/nist/asbestos/HelloWorldApplication.java" />
         <option value="$PROJECT_DIR$/asbestos-test-editor-service/pom.xml" />
         <option value="$PROJECT_DIR$/asbestos-test-editor-service/asbestos-test-editor-service.yml" />
-        <option value="$PROJECT_DIR$/.gitmodules" />
         <option value="$PROJECT_DIR$/README.md" />
         <option value="$PROJECT_DIR$/pom.xml" />
         <option value="$PROJECT_DIR$/asbestos-simapi/pom.xml" />
+        <option value="$PROJECT_DIR$/.gitmodules" />
       </list>
     </option>
   </component>
@@ -269,7 +267,7 @@
       <workItem from="1554554680367" duration="800000" />
       <workItem from="1554555915337" duration="2813000" />
       <workItem from="1555343682878" duration="3623000" />
-      <workItem from="1555433165888" duration="792000" />
+      <workItem from="1555433165888" duration="1051000" />
     </task>
     <task id="LOCAL-00001" summary="work">
       <created>1554112530264</created>
@@ -341,7 +339,21 @@
       <option name="project" value="LOCAL" />
       <updated>1555410894205</updated>
     </task>
-    <option name="localTasksCounter" value="11" />
+    <task id="LOCAL-00011" summary="work">
+      <created>1555434004738</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1555434004738</updated>
+    </task>
+    <task id="LOCAL-00012" summary="work">
+      <created>1555434077362</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1555434077363</updated>
+    </task>
+    <option name="localTasksCounter" value="13" />
     <servers />
   </component>
   <component name="TestHistory">
@@ -359,7 +371,7 @@
     </history-entry>
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="31926000" />
+    <option name="totallyTimeSpent" value="32185000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -455,10 +467,10 @@
   <component name="VcsManagerConfiguration">
     <option name="CHECK_CODE_SMELLS_BEFORE_PROJECT_COMMIT" value="false" />
     <option name="CHECK_NEW_TODO" value="false" />
-    <MESSAGE value="work" />
     <MESSAGE value="Adding simapi to overall project" />
     <MESSAGE value="Adding adapter to overall project" />
-    <option name="LAST_COMMIT_MESSAGE" value="Adding adapter to overall project" />
+    <MESSAGE value="work" />
+    <option name="LAST_COMMIT_MESSAGE" value="work" />
   </component>
   <component name="editorHistoryManager">
     <entry file="jar:///usr/lib/jvm/default-java/jre/lib/rt.jar!/com/sun/net/httpserver/HttpServer.class" />
@@ -561,13 +573,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/.gitmodules">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="154">
-          <caret line="11" column="55" selection-start-line="11" selection-start-column="55" selection-end-line="11" selection-end-column="55" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/asbestos-test-editor-service/asbestos-test-editor-service.yml">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="14">
@@ -603,6 +608,13 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="132">
           <caret line="75" selection-start-line="75" selection-end-line="75" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/.gitmodules">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="154">
+          <caret line="11" column="59" selection-start-line="11" selection-start-column="59" selection-end-line="11" selection-end-column="59" />
         </state>
       </provider>
     </entry>
