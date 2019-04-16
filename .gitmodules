@@ -4,3 +4,6 @@
 [submodule "asbestos-test-editor-service"]
 	path = asbestos-test-editor-service
 	url = https://github.com/usnistgov/asbestos-test-editor-service.git
+[submodule "asbestos-simapi"]
+	path = asbestos-simapi
+	url = https://github.com/usnistgov/asbestos-simapi

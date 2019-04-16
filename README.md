@@ -2,7 +2,7 @@ Wrapper for asbestos-* collection of components
 
 # To clone from github
 
-    git clone https://github.com/iheos/asbestos.git 
+    git clone https://github.com/usnistgov/asbestos.git 
 
 to pull shell of project. This will create directory asbestos
 
@@ -24,3 +24,13 @@ to update the Javascript dependencies
     npm run serve
     
 in a terminal to start UI in development mode. Do this from the view directory.
+
+# Organization
+
+The following GitHub repositories are pulled in...
+
+**usnistgov/view** - the UI (https://github.com/usnistgov/asbestos-view.git) 
+
+**usnistgov/asbestos-test-editor-service** -  test editor (https://github.com/usnistgov/asbestos-test-editor-service.git)
+
+
