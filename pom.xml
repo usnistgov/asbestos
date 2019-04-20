@@ -4,17 +4,26 @@
 
     <groupId>gov.nist.asbestos</groupId>
     <artifactId>asbestos</artifactId>
-    <packaging>pom</packaging>
     <version>1.0.0</version>
+    <packaging>pom</packaging>
 
     <name>asbestos</name>
 
     <modules>
-        <module>asbestos-test-editor-service</module>
+        <!--<module>asbestos-test-editor-service</module> removed since embedded Jetty not workable -->
         <module>asbestos-adapter</module>
         <module>asbestos-simapi</module>
         <module>view</module>
+        <module>asbestos-simapitest</module>
     </modules>
+
+    <dependencies>
+    </dependencies>
+
+    <build>
+        <plugins>
+        </plugins>
+    </build>
 
 
 </project>
