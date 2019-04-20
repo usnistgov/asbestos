@@ -5,6 +5,7 @@
     <mapping directory="$PROJECT_DIR$/asbestos-adapter" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/asbestos-simapi" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/asbestos-test-editor-service" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/simapiTest" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/view" vcs="Git" />
   </component>
 </project>

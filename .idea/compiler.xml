@@ -6,16 +6,20 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
+        <module name="asbestos-adapter" />
         <module name="simapi" />
+        <module name="simapi-test" />
         <module name="test-editor-service" />
         <module name="view" />
-        <module name="asbestos-adapter" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
       <module name="asbestos" target="1.5" />
       <module name="asbestos-adapter" target="1.5" />
       <module name="simapi" target="1.7" />
+      <module name="simapi-test" target="1.8" />
+      <module name="simapitest" target="1.5" />
+      <module name="simapiTest" target="1.8" />
       <module name="test-editor-service" target="1.7" />
       <module name="test-editor-service (1)" target="1.5" />
       <module name="view" target="1.5" />
