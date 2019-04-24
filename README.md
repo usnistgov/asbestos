@@ -15,8 +15,19 @@ to pull shell of project. This will create directory asbestos
 
     cd asbestos
     git submodule update --remote --init
+    (cd asbstos-adapter; git chechout master)
+    (cd asbstos-simapi; git chechout master)
+    (cd asbstos-simapitest; git chechout master)
+    (cd asbstos-test-editor-service; git chechout master)
+    (cd view; git chechout master)
     
 to pull all the submodules (parts of build that come from separate github repositories)
+
+The git checkout commands are to force each submodule onto master - by default it is on the
+last commit made instead of the branch.  This needs to be done once after you clone the 
+project.  More submodules may be added later.  Check .gitmodules for the list and repeat
+this on each submodule.  This procedure is not necessary if you are only going to 
+reference/build the project but it is critical if you are going to commit.
 
 Commits from IntelliJ will naturally go to the correct repository
 
