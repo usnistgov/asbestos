@@ -15,10 +15,10 @@ to pull shell of project. This will create directory asbestos
 
     cd asbestos
     git submodule update --remote --init
-    (cd asbstos-adapter; git chechout master)
-    (cd asbstos-simapi; git chechout master)
-    (cd asbstos-simapitest; git chechout master)
-    (cd asbstos-test-editor-service; git chechout master)
+    (cd asbstos-adapter; git checkout master)
+    (cd asbstos-simapi; git checkout master)
+    (cd asbstos-simapitest; git checkout master)
+    (cd asbstos-test-editor-service; git checkout master)
     (cd view; git chechout master)
     
 to pull all the submodules (parts of build that come from separate github repositories)
@@ -29,7 +29,7 @@ project.  More submodules may be added later.  Check .gitmodules for the list an
 this on each submodule.  This procedure is not necessary if you are only going to 
 reference/build the project but it is critical if you are going to commit.
 
-Commits from IntelliJ will naturally go to the correct repository
+Commit/push from IntelliJ will naturally go to the correct repository
 
 If this is the first time running on this box in development
 
