@@ -16,7 +16,7 @@
     <bytecodeTargetLevel>
       <module name="asbestos" target="1.5" />
       <module name="asbestos-adapter" target="1.5" />
-      <module name="simapi" target="1.7" />
+      <module name="simapi" target="1.8" />
       <module name="simapi-test" target="1.8" />
       <module name="simapitest" target="1.5" />
       <module name="simapiTest" target="1.8" />
