@@ -15,6 +15,7 @@
         <module>asbestos-simapi</module>
         <module>view</module>
         <module>asbestos-simapitest</module>
+        <module>asbestos-fproxy</module>
     </modules>
 
     <dependencies>

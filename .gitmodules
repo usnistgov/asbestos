@@ -17,3 +17,6 @@
 [submodule "asbestos-simapitest"]
 	path = asbestos-simapitest
 	url = https://github.com/usnistgov/asbestos-simapitest.git
+[submodule "asbestos-fproxy"]
+	path = asbestos-fproxy
+	url = https://github.com/usnistgov/asbestos-fproxy.git
