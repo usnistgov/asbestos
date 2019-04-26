@@ -16,6 +16,7 @@
         <module>view</module>
         <module>asbestos-simapitest</module>
         <module>asbestos-fproxy</module>
+        <module>asbestos-proxytest</module>
     </modules>
 
     <dependencies>
