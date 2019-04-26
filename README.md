@@ -19,7 +19,8 @@ to pull shell of project. This will create directory asbestos
     (cd asbstos-simapi; git checkout master)
     (cd asbstos-simapitest; git checkout master)
     (cd asbstos-test-editor-service; git checkout master)
-    (cd view; git chechout master)
+    (cd view; git checkout master)
+    (cd asbestos-fproxy; git checkout master)
     
 to pull all the submodules (parts of build that come from separate github repositories)
 
