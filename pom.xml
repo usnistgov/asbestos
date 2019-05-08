@@ -7,7 +7,7 @@
     <version>1.0.0</version>
     <packaging>pom</packaging>
 
-    <name>asbestos</name>
+    <name>Asbestos</name>
 
     <modules>
         <!--<module>asbestos-test-editor-service</module> removed since embedded Jetty not workable -->
