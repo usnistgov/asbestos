@@ -31,14 +31,14 @@
     </properties>
 
     <modules>
-        <!--<module>asbestos-test-editor-service</module> removed since embedded Jetty not workable -->
+        <!--<module>http-test-editor-service</module> removed since embedded Jetty not workable -->
         <module>asbestos-adapter</module>
         <module>asbestos-simapi</module>
         <!--<module>view</module>-->
         <module>asbestos-simapitest</module>
         <module>asbestos-fproxy</module>
-        <module>asbestos-proxytest</module>
-        <module>asbestosHttp</module>
+<!--        <module>http-proxytest</module>-->
+        <module>asbestos-http</module>
     </modules>
 
     <dependencyManagement>
@@ -92,35 +92,44 @@
 
         <plugins>
             <plugin>
-                <!--<groupId>org.apache.maven.plugins</groupId>-->
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>${mavenCompilerPluginVersion}</version>
-                <configuration>
-                    <compilerId>groovy-eclipse-compiler</compilerId>
-                    <source>${maven.compiler.source}</source>
-                    <target>${maven.compiler.target}</target>
-                </configuration>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.codehaus.groovy</groupId>
-                        <artifactId>groovy-eclipse-compiler</artifactId>
-                        <version>${groovyEclipseCompilerVersion}</version>
-                    </dependency>
-                    <dependency>
-                        <groupId>org.codehaus.groovy</groupId>
-                        <artifactId>groovy-eclipse-batch</artifactId>
-                        <version>${groovyEclipseBatchVersion}</version>
-                    </dependency>
-                </dependencies>
-            </plugin>
-            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-war-plugin</artifactId>
-                <version>${mavenWarPluginVersion}</version>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.8.1</version>
                 <configuration>
-
+                    <source>1.8</source>
+                    <target>1.8</target>
                 </configuration>
             </plugin>
+<!--            <plugin>-->
+<!--                &lt;!&ndash;<groupId>org.apache.maven.plugins</groupId>&ndash;&gt;-->
+<!--                <artifactId>maven-compiler-plugin</artifactId>-->
+<!--                <version>${mavenCompilerPluginVersion}</version>-->
+<!--                <configuration>-->
+<!--                    <compilerId>groovy-eclipse-compiler</compilerId>-->
+<!--                    <source>${maven.compiler.source}</source>-->
+<!--                    <target>${maven.compiler.target}</target>-->
+<!--                </configuration>-->
+<!--                <dependencies>-->
+<!--                    <dependency>-->
+<!--                        <groupId>org.codehaus.groovy</groupId>-->
+<!--                        <artifactId>groovy-eclipse-compiler</artifactId>-->
+<!--                        <version>${groovyEclipseCompilerVersion}</version>-->
+<!--                    </dependency>-->
+<!--                    <dependency>-->
+<!--                        <groupId>org.codehaus.groovy</groupId>-->
+<!--                        <artifactId>groovy-eclipse-batch</artifactId>-->
+<!--                        <version>${groovyEclipseBatchVersion}</version>-->
+<!--                    </dependency>-->
+<!--                </dependencies>-->
+<!--            </plugin>-->
+<!--            <plugin>-->
+<!--                <groupId>org.apache.maven.plugins</groupId>-->
+<!--                <artifactId>maven-war-plugin</artifactId>-->
+<!--                <version>${mavenWarPluginVersion}</version>-->
+<!--                <configuration>-->
+
+<!--                </configuration>-->
+<!--            </plugin>-->
         </plugins>
     </build>
 
