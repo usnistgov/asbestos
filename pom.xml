@@ -13,16 +13,17 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
+        <jdk.version>1.8</jdk.version>
 
         <!--Aligns with spock.version and groovy-eclipse-compiler version-->
-        <groovyVersion>2.5.2</groovyVersion> <!--  must match spock version  -->
-        <mavenCompilerPluginVersion>3.8.0</mavenCompilerPluginVersion>
+        <groovyVersion>2.4.8</groovyVersion> <!--  must match spock version  -->
+        <mavenCompilerPluginVersion>3.3</mavenCompilerPluginVersion>
 
-        <groovyEclipseCompilerVersion>3.3.0-01</groovyEclipseCompilerVersion>
-        <groovyEclipseBatchVersion>2.5.6-02</groovyEclipseBatchVersion>  <!--  should match groovy version   -->
+        <groovyEclipseCompilerVersion>2.9.2-01</groovyEclipseCompilerVersion>
+        <groovyEclipseBatchVersion>2.4.3-01</groovyEclipseBatchVersion>  <!--  should match groovy version   -->
 
         <mavenWarPluginVersion>3.2.2</mavenWarPluginVersion>
-        <spock.version>1.2-groovy-2.5</spock.version>  <!-- 1.0-groovy-2.3  -->
+        <spock.version>1.0-groovy-2.3</spock.version>  <!-- 1.0-groovy-2.3  -->
         <hapi.version>3.7.0</hapi.version>
         <jackson.version>2.6.3</jackson.version>
         <jersey.version>2.22.1</jersey.version>
@@ -37,6 +38,7 @@
         <module>asbestos-simapitest</module>
         <module>asbestos-fproxy</module>
         <module>asbestos-proxytest</module>
+        <module>asbestosHttp</module>
     </modules>
 
     <dependencyManagement>
@@ -50,7 +52,7 @@
             <groupId>org.codehaus.groovy</groupId>
             <artifactId>groovy-all</artifactId>
             <version>${groovyVersion}</version>
-            <type>pom</type>
+            <!--<type>pom</type>-->
         </dependency>
 
         <dependency>
@@ -95,8 +97,8 @@
                 <version>${mavenCompilerPluginVersion}</version>
                 <configuration>
                     <compilerId>groovy-eclipse-compiler</compilerId>
-                    <!--<source>${maven.compiler.source}</source>-->
-                    <!--<target>${maven.compiler.target}</target>-->
+                    <source>${maven.compiler.source}</source>
+                    <target>${maven.compiler.target}</target>
                 </configuration>
                 <dependencies>
                     <dependency>
