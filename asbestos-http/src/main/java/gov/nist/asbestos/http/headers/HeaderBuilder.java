@@ -1,8 +1,8 @@
 package gov.nist.asbestos.http.headers
 
 import java.net.URI;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 class HeaderBuilder {
 
@@ -13,41 +13,43 @@ class HeaderBuilder {
     }
 
     static RawHeaders rawHeadersFromString(String input) {
-        Map<String, List<String>> lines = [:]
-        String uriLine = null
+        Map<String, List<String>> lines = new HashMap<>();
+        String uriLine = null;
+        StringTokenizer st = new StringTokenizer(input, "\n");
 
-        input.eachLine {
-            if (!it.contains(':')) {
-                uriLine = it
-                return
+        while (st.hasMoreElements()) {
+            String it = st.nextToken();
+
+            if (!it.contains(":")) {
+                uriLine = it;
+                continue;
             }
-            String[] nameValue = it.split(':', 2)
-            assert nameValue.size() == 2
-            String name = nameValue[0].trim()
-            String value = nameValue[1].trim()
-            List<String> values = value.split(';')
-            assert values.size() > 0
-            (0..<values.size()).each { int i ->
-                values[i] = values[i].trim()
-            }
-            lines.put(name, values)
+            String[] nameValue = it.split(":", 2);
+            String name = nameValue[0].trim();
+            String value = nameValue[1].trim();
+            List<String> values = Arrays.asList(value.split(";"));
+            values = values.stream()
+                    .map(x -> x.trim())
+                    .collect(Collectors.toList());
+            lines.put(name, values);
         }
 
-        RawHeaders rawHeaders = new RawHeaders(lines)
-        rawHeaders.uriLine = uriLine
+        RawHeaders rawHeaders = new RawHeaders(lines);
+        rawHeaders.uriLine = uriLine;
 
 
-        rawHeaders
+        return rawHeaders;
     }
 
     static Headers parseHeaders(String headers) {
-        parseHeaders(rawHeadersFromString(headers))
+        parseHeaders(rawHeadersFromString(headers));
     }
 
     static Headers parseHeaders(RawHeaders rawHeaders) {
-        Headers headers = new Headers()
+        Headers headers = new Headers();
 
-        String[] lineParts = rawHeaders.uriLine.split()
+        String[] lineParts = rawHeaders.uriLine.split(" ");
+
         assert [2, 3].contains(lineParts.size()) : "HeaderBuilder : URI line should have two or three elements, has ${lineParts.size()}"
         headers.verb = lineParts[0]
         String x = (lineParts.size() == 2) ? lineParts[1] : lineParts[1] + '?' + lineParts[2]
