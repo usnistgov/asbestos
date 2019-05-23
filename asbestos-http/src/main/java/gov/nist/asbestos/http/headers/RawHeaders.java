@@ -19,21 +19,21 @@ public class RawHeaders {
 //
 //    }
 
-    public void addNames(Enumeration namesEnum) {
-        while (namesEnum.hasMoreElements()) {
-            String name = (String) namesEnum.nextElement();
-            names.add(name);
-        }
-    }
-
-    public void addHeaders(String name, Enumeration headersEnum) {
-        List<String> values = new ArrayList<>();
-        while(headersEnum.hasMoreElements()) {
-            String val = (String) headersEnum.nextElement();
-            values.add(val);
-        }
-        headers.put(name, values);
-    }
+//    public void addNames(Enumeration namesEnum) {
+//        while (namesEnum.hasMoreElements()) {
+//            String name = (String) namesEnum.nextElement();
+//            names.add(name);
+//        }
+//    }
+//
+//    public void addHeaders(String name, Enumeration headersEnum) {
+//        List<String> values = new ArrayList<>();
+//        while(headersEnum.hasMoreElements()) {
+//            String val = (String) headersEnum.nextElement();
+//            values.add(val);
+//        }
+//        headers.put(name, values);
+//    }
 
     public RawHeaders(Map<String, List<String>> headers) {
         this.headers = headers;

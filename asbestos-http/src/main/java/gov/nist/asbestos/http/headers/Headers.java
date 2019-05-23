@@ -4,6 +4,7 @@ package gov.nist.asbestos.http.headers;
 import org.apache.commons.lang3.StringUtils;
 
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -11,21 +12,44 @@ public class Headers {
     String verb = null;
     URI pathInfo = null;
     int status = 0;
-    List<NameValue> nameValueList = new ArrayList<>();
+    List<Header> headers = new ArrayList<>();
 
-    public Headers() {}
+    Headers() {}
 
-    private String getSimpleValue(String headerName) {
-        Optional<NameValue> nameValue = nameValueList.stream()
-                .filter(nv -> nv.name.equalsIgnoreCase(headerName))
-                .findFirst();
-        if (nameValue.isPresent()) {
-            String value = nameValue.get().value;
-            if (value.contains(";")) {
-                return value.split(";", 2)[0].trim();
+    public Headers(String headerString) throws URISyntaxException {
+        StringTokenizer st = new StringTokenizer(headerString, "\n");
+
+        while(st.hasMoreTokens()) {
+            String it = WhiteSpace.removeTrailing(st.nextToken());
+            if (!it.contains(":")) {
+                String[] parts = it.split(" ", 2);
+                if (parts.length == 2) {
+                    verb = parts[0];
+                    pathInfo = new URI(parts[1]);
+                }
+                continue;
             }
+            headers.add(new Header(it));
         }
-        return null;
+    }
+
+    public Headers(Map<String, ?> theHeaders) {
+        if (theHeaders == null || theHeaders.isEmpty())
+            return;
+        String aKey = theHeaders.keySet().iterator().next();
+        Object aValue = theHeaders.get(aKey);
+        if (aValue instanceof String) {
+            ((Map<String, String>) theHeaders).forEach((name, values) -> {
+                headers.add(new Header(name, values));
+            });
+        } else {
+            ((Map<String, List<String>>) theHeaders).forEach((name, values) -> {
+                if (values != null) {
+                    headers.add(new Header(name, values));
+                }
+            });
+
+        }
     }
 
     public String getContentType() {
@@ -40,22 +64,22 @@ public class Headers {
         return getAll("content-encoding");
     }
 
-    public String getAll(String type) {
-        List<String> list = nameValueList.stream()
-                .filter(nv -> nv.name.equalsIgnoreCase(type))
-                .map(NameValue::getValue)
+    public List<String> getAll(String theName) {
+        Objects.requireNonNull(theName);
+        return headers.stream()
+                .filter(header -> theName.equals(header.getName()))
+                .map(header -> header.getValues().toString())
                 .collect(Collectors.toList());
-        if (list.isEmpty()) return null;
-        return String.join("; ", list);
     }
 
     public Map<String, String> getAll() {
         Map<String, String> result = new HashMap<>();
 
-        nameValueList.forEach(nv ->
-                result.put(nv.name, getAll(nv.name)));
+        for
 
-        return result;
+        return headers.stream()
+                .map(header -> header.getName())
+                .collect(Collectors.toMap(name -> name, name -> getAll(name)));
     }
 
     public void removeHeader(String name) {

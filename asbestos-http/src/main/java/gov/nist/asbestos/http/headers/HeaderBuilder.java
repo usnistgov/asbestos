@@ -66,32 +66,32 @@ public class HeaderBuilder {
         return headers;
     }
 
-    static public Headers parseHeaders(Map<String, ?> theHeaders) {
-        Headers headers = new Headers();
-        if (theHeaders == null || theHeaders.isEmpty())
-            return headers;
-        String aKey = theHeaders.keySet().iterator().next();
-        Object aValue = theHeaders.get(aKey);
-        if (aValue instanceof String) {
-            ((Map<String, String>) theHeaders).forEach((name, values) -> {
-                if (values != null && !values.equals("")) {
-                    List<String> subValues = Arrays.asList(values.split(";"));
-                    subValues.forEach(value -> headers.nameValueList.add(new NameValue(name.trim(), value.trim())));
-                }
-            });
-        } else {
-            ((Map<String, List<String>>) theHeaders).forEach((name, values) -> {
-                if (values != null) {
-                    values.forEach(value -> {
-                        List<String> subValues = Arrays.asList(value.split(";"));
-                        subValues.forEach(val -> headers.nameValueList.add(new NameValue(name.trim(), val.trim())));
-                    });
-
-                }
-            });
-
-        }
-
-        return headers;
-    }
+//    static public Headers parseHeaders(Map<String, ?> theHeaders) {
+//        Headers headers = new Headers();
+//        if (theHeaders == null || theHeaders.isEmpty())
+//            return headers;
+//        String aKey = theHeaders.keySet().iterator().next();
+//        Object aValue = theHeaders.get(aKey);
+//        if (aValue instanceof String) {
+//            ((Map<String, String>) theHeaders).forEach((name, values) -> {
+//                if (values != null && !values.equals("")) {
+//                    List<String> subValues = Arrays.asList(values.split(";"));
+//                    subValues.forEach(value -> headers.nameValueList.add(new NameValue(name.trim(), value.trim())));
+//                }
+//            });
+//        } else {
+//            ((Map<String, List<String>>) theHeaders).forEach((name, values) -> {
+//                if (values != null) {
+//                    values.forEach(value -> {
+//                        List<String> subValues = Arrays.asList(value.split(";"));
+//                        subValues.forEach(val -> headers.nameValueList.add(new NameValue(name.trim(), val.trim())));
+//                    });
+//
+//                }
+//            });
+//
+//        }
+//
+//        return headers;
+//    }
 }
