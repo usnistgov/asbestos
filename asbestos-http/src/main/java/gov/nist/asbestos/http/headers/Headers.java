@@ -13,45 +13,47 @@ public class Headers {
     int status = 0;
     List<NameValue> nameValueList = new ArrayList<>();
 
-    private Optional<String> getSimpleValue(String headerName) {
+    public Headers() {}
+
+    private String getSimpleValue(String headerName) {
         Optional<NameValue> nameValue = nameValueList.stream()
                 .filter(nv -> nv.name.equalsIgnoreCase(headerName))
                 .findFirst();
         if (nameValue.isPresent()) {
             String value = nameValue.get().value;
             if (value.contains(";")) {
-                return Optional.of(value.split(";", 2)[0].trim());
+                return value.split(";", 2)[0].trim();
             }
         }
-        return Optional.empty();
+        return null;
     }
 
-    public Optional<String> getContentType() {
-        return getSimpleValue("content-type");
+    public String getContentType() {
+        return getAll("content-type");
     }
 
-    public Optional<String> getAccept() {
-        return getSimpleValue("accept");
+    public String getAccept() {
+        return getAll("accept");
     }
 
-    public Optional<String> getContentEncoding() {
-        return getSimpleValue("content-encoding");
+    public String getContentEncoding() {
+        return getAll("content-encoding");
     }
 
-    public Optional<String> getAll(String type) {
+    public String getAll(String type) {
         List<String> list = nameValueList.stream()
                 .filter(nv -> nv.name.equalsIgnoreCase(type))
-                .map(NameValue::getName)
+                .map(NameValue::getValue)
                 .collect(Collectors.toList());
-        if (list.isEmpty()) return Optional.empty();
-        return Optional.of(String.join("; ", list));
+        if (list.isEmpty()) return null;
+        return String.join("; ", list);
     }
 
     public Map<String, String> getAll() {
         Map<String, String> result = new HashMap<>();
 
         nameValueList.forEach(nv ->
-                result.put(nv.name, getAll(nv.name).get()));
+                result.put(nv.name, getAll(nv.name)));
 
         return result;
     }
@@ -68,7 +70,7 @@ public class Headers {
             nameValueList.forEach(nv -> {
                 String name = nv.name;
                 if (name.startsWith(pre) && !result.keySet().contains(name)) {
-                    result.put(name, getAll(name).get());
+                    result.put(name, getAll(name));
                 }
             });
         });
@@ -87,7 +89,7 @@ public class Headers {
         Map<String, String> hdrs = new HashMap<>();
 
         Map<String, String> map = nameValueList.stream()
-                .collect(Collectors.toMap(nv -> nv.name, nv -> getAll(nv.name).get()));
+                .collect(Collectors.toMap(nv -> nv.name, nv -> getAll(nv.name)));
 
         map.forEach((name, value) -> {
             buf.append(String.join(": ", name, value));

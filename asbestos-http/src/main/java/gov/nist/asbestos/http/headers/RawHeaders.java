@@ -1,49 +1,51 @@
-package gov.nist.asbestos.http.headers
+package gov.nist.asbestos.http.headers;
 
-class RawHeaders {
-    String uriLine  // GET|POST path [queryString]
-    Map<String, List<String>> headers = [:]
-    List<String> names = []
+import java.util.*;
 
-    RawHeaders(Enumeration names, Map<String, Enumeration> headers) {
-        while (names.hasMoreElements()) {
-            String name = names.nextElement()
-            this.names << name
-            generateNamesAsList(name, headers.get(name))
+public class RawHeaders {
+    String uriLine;  // GET|POST path [queryString]
+    Map<String, List<String>> headers = new HashMap<>();
+    List<String> names = new ArrayList<>();
+
+//    public RawHeaders(Enumeration namesEnum, Map<String, Enumeration> headers) {
+//        while (namesEnum.hasMoreElements()) {
+//            String name = (String) namesEnum.nextElement();
+//            names.add(name);
+//            generateNamesAsList(name, headers.get(name))
+//        }
+//    }
+
+//    RawHeaders() {
+//
+//    }
+
+    public void addNames(Enumeration namesEnum) {
+        while (namesEnum.hasMoreElements()) {
+            String name = (String) namesEnum.nextElement();
+            names.add(name);
         }
     }
 
-    RawHeaders() {
-
-    }
-
-    void addNames(Enumeration names) {
-        while (names.hasMoreElements()) {
-            String name = names.nextElement()
-            this.names << name
-        }
-    }
-
-    void addHeaders(String name, Enumeration headersEnum) {
-        List<String> values = []
+    public void addHeaders(String name, Enumeration headersEnum) {
+        List<String> values = new ArrayList<>();
         while(headersEnum.hasMoreElements()) {
-            String val = (String) headersEnum.nextElement()
-            values << val
+            String val = (String) headersEnum.nextElement();
+            values.add(val);
         }
-        headers[name] = values
+        headers.put(name, values);
     }
 
-    RawHeaders(Map<String, List<String>> headers) {
-        this.headers = headers
-        names = headers.keySet() as List<String>
+    public RawHeaders(Map<String, List<String>> headers) {
+        this.headers = headers;
+        names = new ArrayList<>(headers.keySet());
     }
 
-    static private Map<String, List<String>> generateHeadersAsList(String name, Enumeration<String> e) {
-        List<String> lst = []
-        while (e.hasMoreElements())
-            lst << e.nextElement()
-        lst
-    }
+//    static private Map<String, List<String>> generateHeadersAsList(String name, Enumeration<String> e) {
+//        List<String> lst = new ArrayList<>();
+//        while (e.hasMoreElements())
+//            lst.add(e.nextElement());
+//        return lst;
+//    }
 
 //    List<String> headersAsList(String name) {
 //        if (!headers) {
@@ -61,12 +63,12 @@ class RawHeaders {
 //        names
 //    }
 
-    private List<String> generateNamesAsList() {
-        List<String> lst = []
-
-        while(names.hasMoreElements())
-            lst << names.nextElement()
-
-        lst
-    }
+//    private List<String> generateNamesAsList(String name) {
+//        List<String> lst = new ArrayList<>();
+//
+//        while(names.hasMoreElements())
+//            lst << names.nextElement()
+//
+//        lst
+//    }
 }

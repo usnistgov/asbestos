@@ -32,11 +32,11 @@
 
     <modules>
         <!--<module>http-test-editor-service</module> removed since embedded Jetty not workable -->
-        <module>asbestos-adapter</module>
-        <module>asbestos-simapi</module>
+        <!--<module>asbestos-adapter</module>-->
+        <!--<module>asbestos-simapi</module>-->
         <!--<module>view</module>-->
-        <module>asbestos-simapitest</module>
-        <module>asbestos-fproxy</module>
+        <!--<module>asbestos-simapitest</module>-->
+        <!--<module>asbestos-fproxy</module>-->
 <!--        <module>http-proxytest</module>-->
         <module>asbestos-http</module>
     </modules>

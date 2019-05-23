@@ -1,18 +1,23 @@
-package gov.nist.asbestos.http.operations
+package gov.nist.asbestos.http.operations;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 class ParameterBuilder {
-    Map<String, List<String>> parameterMap = [:]
+    Map<String, List<String>> parameterMap = new HashMap<>();
 
     ParameterBuilder add(String name, String value) {
-        List<String> values = parameterMap.get(name)
-        if (values) {
-            values << value
+        List<String> values = parameterMap.get(name);
+        if (values != null) {
+            values.add(value);
         } else {
-            values = []
-            values << value
-            parameterMap.put(name, values)
+            values = new ArrayList<>();
+            values.add(value);
+            parameterMap.put(name, values);
         }
 
-        this
+        return this;
     }
 }

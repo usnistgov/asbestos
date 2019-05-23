@@ -1,60 +1,74 @@
-package gov.nist.asbestos.http.operations
+package gov.nist.asbestos.http.operations;
 
 
-class HttpGet extends HttpBase {
+import org.apache.commons.io.IOUtils;
+
+import java.io.IOException;
+import java.net.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+
+public class HttpGet extends HttpBase {
     // TODO GET parameters in the body
-    void get(URI uri, Map<String, String> headers) {
-        HttpURLConnection connection
+    void get(URI uri, Map<String, String> headers) throws IOException {
+        HttpURLConnection connection = null;
         try {
-            connection = (HttpURLConnection) uri.toURL().openConnection()
-            connection.setRequestMethod('GET')
-            if (headers)
-                addHeaders(connection, headers)
-            requestHeadersList = connection.getRequestProperties()
-            status = connection.getResponseCode()
+            connection = (HttpURLConnection) uri.toURL().openConnection();
+            connection.setRequestMethod("GET");
+            if (headers != null)
+                addHeaders(connection, headers);
+            requestHeadersList = connection.getRequestProperties();
+            status = connection.getResponseCode();
             if (status == HttpURLConnection.HTTP_OK) {
-                responseHeadersList = connection.getHeaderFields()
+                setResponseHeadersList(connection.getHeaderFields());
             }
             try {
-                setResponse(connection.inputStream.bytes)
+                setResponse(IOUtils.toByteArray(connection.getInputStream()));
             } catch (Throwable t) {
             }
         } finally {
-            if (connection)
-                connection.disconnect()
+            if (connection != null)
+                connection.disconnect();
         }
     }
 
-    void get(String url) {
-        get(new URI(url), (Map<String, String>) null)
+    public void get(String url) throws URISyntaxException, IOException {
+        get(new URI(url), (Map<String, String>) null);
     }
 
-    HttpGet get(URI uri, String contentType) {
-        Map<String, String> headers = [ accept: "${contentType}", 'accept-charset': 'utf-8']
-        get(uri, headers)
-        if (response)
-            setResponseText(new String(response))
-        this
+    public HttpGet get(URI uri, String contentType) throws IOException {
+        Map<String, String> headers = new HashMap<>();
+        headers.put("accept", contentType);
+        headers.put("accept-charset", "utf-8");
+        get(uri, headers);
+        if (getResponse() != null)
+            setResponseText(new String(getResponse()));
+        return this;
     }
 
-    HttpGet getJson(String url) {
-        Map<String, String> headers = [ accept: 'application/json', 'accept-charset': 'utf-8']
-        get(new URI(url), headers)
-        if (response)
-            setResponseText(new String(response))
-        this
+    public HttpGet getJson(String url) throws URISyntaxException, IOException {
+        Map<String, String> headers = new HashMap<>();
+        headers.put("accept", "application/json");
+        headers.put("accept-charset", "utf-8");
+        get(new URI(url), headers);
+        if (getResponse() != null)
+            setResponseText(new String(getResponse()));
+        return this;
     }
 
-    void getJson(URI uri) {
-        Map<String, String> headers = [ accept: 'application/json', 'accept-charset': 'utf-8']
-        get(uri, headers)
-        setResponseText(new String(response))
+    public void getJson(URI uri) throws IOException {
+        Map<String, String> headers = new HashMap<>();
+        headers.put("accept", "application/json");
+        headers.put("accept-charset", "utf-8");
+        get(uri, headers);
+        setResponseText(new String(getResponse()));
     }
 
-    HttpGet run() {
-        assert uri
-        get(uri, requestHeaders.all)
-        this
+    public HttpGet run() throws IOException {
+        Objects.requireNonNull(uri);
+        get(uri, getRequestHeaders().getAll());
+        return this;
     }
 
 }

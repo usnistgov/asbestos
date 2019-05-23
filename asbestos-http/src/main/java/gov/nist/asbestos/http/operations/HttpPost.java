@@ -1,57 +1,57 @@
-package gov.nist.asbestos.http.operations
+package gov.nist.asbestos.http.operations;
 
-import groovy.transform.TypeChecked
-import org.apache.log4j.Logger
+import org.apache.commons.io.IOUtils;
 
-@TypeChecked
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+
 class HttpPost  extends HttpBase {
-    static Logger log = Logger.getLogger(HttpPost);
 
-    void post(URI uri, Map<String, String> headers, byte[] content) {
-        HttpURLConnection connection
+    private void post(URI uri, Map<String, String> headers, byte[] content) throws IOException {
+        HttpURLConnection connection = null;
 
         try {
-            connection = (HttpURLConnection) uri.toURL().openConnection()
-            if (headers)
-                addHeaders(connection, headers)
-            requestHeadersList = connection.getRequestProperties()
-            connection.setRequestMethod('POST')
-            connection.setDoOutput(true)
-            connection.setDoInput(true)
+            connection = (HttpURLConnection) uri.toURL().openConnection();
+            if (headers != null)
+                addHeaders(connection, headers);
+            requestHeadersList = connection.getRequestProperties();
+            connection.setRequestMethod("POST");
+            connection.setDoOutput(true);
+            connection.setDoInput(true);
             // TODO use proper charset (from input)
-            if (content)
-                connection.getOutputStream().write(content)
-            status = connection.getResponseCode()
-            if (status == HttpURLConnection.HTTP_OK || HttpURLConnection.HTTP_CREATED) {
+            if (content != null)
+                connection.getOutputStream().write(content);
+            status = connection.getResponseCode();
+            if (status == HttpURLConnection.HTTP_OK || status == HttpURLConnection.HTTP_CREATED) {
                 //connection.getHeaderFields()
-                responseHeadersList = connection.getHeaderFields()
+                setResponseHeadersList(connection.getHeaderFields());
             }
             if (status >= 400)
-                return
-            try {
-                byte[] bb = connection.inputStream.bytes
-                setResponse(bb)
-            } catch (Throwable t) {
-                log.info(t.getMessage());
-                throw t
-            }
+                return;
+                byte[] bb = IOUtils.toByteArray(connection.getInputStream());
+                setResponse(bb);
         } finally {
-            if (connection)
-                connection.disconnect()
-            //requestHeadersList = connection.getRequestProperties()
+            if (connection != null)
+                connection.disconnect();
         }
     }
 
-    HttpPost postJson(URI uri, String json) {
-        Map<String, String> headers = ['content-type':'application/json']
-        post(uri, headers, json.bytes)
-        this
+    public HttpPost postJson(URI uri, String json) throws IOException {
+        Map<String, String> headers = new HashMap<>();
+        headers.put("content-type", "application/json");
+        post(uri, headers, json.getBytes());
+        return this;
     }
 
-    HttpPost run() {
-        assert uri
-        post(uri, requestHeaders.all,  request)
-        this
+    public HttpPost run() throws IOException {
+        Objects.requireNonNull(uri);
+        post(uri, getRequestHeaders().getAll(),  getRequest());
+        return this;
     }
 
 }

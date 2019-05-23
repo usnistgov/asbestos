@@ -1,15 +1,15 @@
-package gov.nist.asbestos.http.headers
+package gov.nist.asbestos.http.headers;
 
 import java.net.URI;
 import java.util.*;
 import java.util.stream.Collectors;
 
-class HeaderBuilder {
+public class HeaderBuilder {
 
     // does not include URI line
-    static String headersAsString(RawHeaders headers) {
-        Headers heads = parseHeaders(headers)
-        heads.toString()
+    static String headersAsString(RawHeaders headers) throws Exception {
+        Headers heads = parseHeaders(headers);
+        return heads.toString();
     }
 
     static RawHeaders rawHeadersFromString(String input) {
@@ -29,7 +29,7 @@ class HeaderBuilder {
             String value = nameValue[1].trim();
             List<String> values = Arrays.asList(value.split(";"));
             values = values.stream()
-                    .map(x -> x.trim())
+                    .map(String::trim)
                     .collect(Collectors.toList());
             lines.put(name, values);
         }
@@ -41,71 +41,57 @@ class HeaderBuilder {
         return rawHeaders;
     }
 
-    static Headers parseHeaders(String headers) {
-        parseHeaders(rawHeadersFromString(headers));
+    static public Headers parseHeaders(String headers) throws Exception {
+        return parseHeaders(rawHeadersFromString(headers));
     }
 
-    static Headers parseHeaders(RawHeaders rawHeaders) {
+    static public Headers parseHeaders(RawHeaders rawHeaders) throws Exception {
         Headers headers = new Headers();
 
         String[] lineParts = rawHeaders.uriLine.split(" ");
 
-        assert [2, 3].contains(lineParts.size()) : "HeaderBuilder : URI line should have two or three elements, has ${lineParts.size()}"
-        headers.verb = lineParts[0]
-        String x = (lineParts.size() == 2) ? lineParts[1] : lineParts[1] + '?' + lineParts[2]
-        headers.pathInfo = new URI(x)
+        int size = lineParts.length;
+        if (!(size == 2 || size == 3))
+            throw new Exception(String.format("HeaderBuilder : URI line should have two or three elements, has %s", size));
 
-        List<String> names = rawHeaders.names
-        names.each { String name ->
-            List<String> values = rawHeaders.headers.get(name)
-            values.each { String value ->
-                headers.nameValueList << new NameValue([name: name, value: value])
-            }
-        }
+        headers.verb = lineParts[0];
+        String x = (size == 2) ? lineParts[1] : lineParts[1] + '?' + lineParts[2];
+        headers.pathInfo = new URI(x);
 
-        headers
+        rawHeaders.names.forEach(name -> {
+            List<String> values = rawHeaders.headers.get(name);
+            values.forEach(value -> headers.nameValueList.add(new NameValue(name, value)));
+        });
+
+        return headers;
     }
 
-    // TODO  needs test
-    static Headers parseHeaders(Map<String, ?> theHeaders) {
-        Headers headers = new Headers()
-
-        if (!theHeaders)
-            return headers
-
-        String firstName = theHeaders.keySet().first()
-        Object firstValue = theHeaders.get(firstName)
-        if (firstValue instanceof String) {
-            theHeaders.each { String name, String value ->
-                if (value) {
-                    List<String> subValues = value.split(';')
-                    if (subValues) {
-                        subValues.each { String subValue ->
-                            headers.nameValueList << new NameValue([name: name?.trim(), value: subValue?.trim()])
-                        }
-                    }
+    static public Headers parseHeaders(Map<String, ?> theHeaders) {
+        Headers headers = new Headers();
+        if (theHeaders == null || theHeaders.isEmpty())
+            return headers;
+        String aKey = theHeaders.keySet().iterator().next();
+        Object aValue = theHeaders.get(aKey);
+        if (aValue instanceof String) {
+            ((Map<String, String>) theHeaders).forEach((name, values) -> {
+                if (values != null && !values.equals("")) {
+                    List<String> subValues = Arrays.asList(values.split(";"));
+                    subValues.forEach(value -> headers.nameValueList.add(new NameValue(name.trim(), value.trim())));
                 }
-            }
-        } else  {
-            List<String> names = theHeaders.keySet() as List
-            names.each {String name ->
-                if (!name) return
-                List<String> values = theHeaders.get(name)
-                if (values) {
-                    values.each { String value ->
-                        if (value) {
-                            List<String> subValues = value.split(';')
-                            if (subValues) {
-                                subValues.each { String subValue ->
-                                    headers.nameValueList << new NameValue([name: name?.trim(), value: subValue?.trim()])
-                                }
-                            }
-                        }
-                    }
+            });
+        } else {
+            ((Map<String, List<String>>) theHeaders).forEach((name, values) -> {
+                if (values != null) {
+                    values.forEach(value -> {
+                        List<String> subValues = Arrays.asList(value.split(";"));
+                        subValues.forEach(val -> headers.nameValueList.add(new NameValue(name.trim(), val.trim())));
+                    });
+
                 }
-            }
+            });
+
         }
 
-        headers
+        return headers;
     }
 }
