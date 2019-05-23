@@ -1,6 +1,5 @@
 package gov.nist.asbestos.http.operations;
 
-import gov.nist.asbestos.http.headers.HeaderBuilder;
 import gov.nist.asbestos.http.headers.Headers;
 
 import java.io.IOException;
@@ -47,7 +46,7 @@ abstract public class HttpBase {
     }
 
     public void setResponseHeadersList(Map<String, List<String>> responseHeadersList) {
-        _responseHeaders = HeaderBuilder.parseHeaders(responseHeadersList);
+        _responseHeaders = new Headers(responseHeadersList);
     }
 
     public void setResponse(byte[] bytes) {
@@ -90,7 +89,7 @@ abstract public class HttpBase {
 
     public Headers getRequestHeaders() {
         if (_requestHeaders == null)
-            _requestHeaders = HeaderBuilder.parseHeaders(requestHeadersList);
+            _requestHeaders = new Headers(requestHeadersList);
         return _requestHeaders;
     }
 
@@ -99,11 +98,11 @@ abstract public class HttpBase {
     }
 
     public String getResponseContentType() {
-        return getResponseHeaders().getContentType();
+        return getResponseHeaders().getContentType().getAllValuesAndParmsAsString();
     }
 
     public String getRequestContentType() {
-        return getRequestHeaders().getContentType();
+        return getRequestHeaders().getContentType().getAllValuesAndParmsAsString();
     }
 
     public static void addHeaders(HttpURLConnection connection, Map<String, String> headers) {

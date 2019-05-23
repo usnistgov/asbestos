@@ -3,20 +3,17 @@ package gov.nist.asbestos.http.headers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.io.IOException;
 import java.io.InputStream;
-import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+// TODO test response
 class HeadersTest {
-    Headers headers = null;
+    private Headers requestHeaders = null;
 
     @Test
     void getContentType() {
@@ -26,10 +23,33 @@ class HeadersTest {
     @Test
     void getAccept() {
         List<String> expected = Arrays.asList( "application/fhir+xml", "application/fhir+json", "application/xml+fhir", "application/json+fhir" );
-        String accepts = headers.getAccept();
+        String accepts = requestHeaders.getAccept().getAllValuesAndParmsAsString();
         expected.forEach(expect -> {
             assertTrue(accepts.contains(expect), "value " + expect + " missing");
         });
+    }
+
+    @Test
+    void getNames() {
+        List<String> names = Arrays.asList("user-agent", "accept-charset", "accept-encoding", "accept", "host", "connection");
+        List<String> returns = requestHeaders.getNames();
+        names.forEach(returns::contains);
+    }
+
+    @Test
+    void firstLine() {
+        assertEquals("GET", requestHeaders.verb);
+        assertEquals("/default__patient1/metadata", requestHeaders.pathInfo.toString());
+    }
+
+    @Test
+    void getAccepts() {
+
+    }
+
+    @Test
+    void getStatus() {
+
     }
 
     @Test
@@ -44,18 +64,10 @@ class HeadersTest {
     void getAll1() {
     }
 
-    @Test
-    void removeHeader() {
-    }
-
-    @Test
-    void getMultiple() {
-    }
-
     @BeforeEach
     void setUp() throws Exception {
-        InputStream is = this.getClass().getResourceAsStream("/http/headers/getHeaders1.txt");
-        String in = new String(Files.readAllBytes(Paths.get(getClass().getResource("/http/headers/getHeaders1.txt").toURI())));
-        headers = HeaderBuilder.parseHeaders(in);
+        InputStream is = this.getClass().getResourceAsStream("/http/headers/getRequestHeaders1.txt");
+        String in = new String(Files.readAllBytes(Paths.get(getClass().getResource("/http/headers/getRequestHeaders1.txt").toURI())));
+        requestHeaders = new Headers(in);
     }
 }

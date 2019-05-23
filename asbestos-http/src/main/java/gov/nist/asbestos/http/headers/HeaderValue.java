@@ -35,6 +35,10 @@ public class HeaderValue {
         return value;
     }
 
+    public String getValueAndParms() {
+        return value + ";" + String.join(":", parms);
+    }
+
     public List<String> getParms() {
         return parms;
     }

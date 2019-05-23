@@ -45,6 +45,20 @@ public class Header {
                 .collect(Collectors.toList());
     }
 
+    public String getAllValuesAsString() {
+        return String.join(",", getAllValues());
+    }
+
+    public List<String> getAllValuesAndParms() {
+        return values.stream()
+                .map(HeaderValue::getValueAndParms)
+                .collect(Collectors.toList());
+    }
+
+    public String getAllValuesAndParmsAsString() {
+        return String.join(",", getAllValuesAndParms());
+    }
+
     public String getName() {
         return name;
     }

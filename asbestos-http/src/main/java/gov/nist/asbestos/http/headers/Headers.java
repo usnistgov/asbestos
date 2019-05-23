@@ -1,8 +1,6 @@
 package gov.nist.asbestos.http.headers;
 
 
-import org.apache.commons.lang3.StringUtils;
-
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
@@ -12,7 +10,7 @@ public class Headers {
     String verb = null;
     URI pathInfo = null;
     int status = 0;
-    List<Header> headers = new ArrayList<>();
+    private List<Header> headers = new ArrayList<>();
 
     Headers() {}
 
@@ -52,19 +50,37 @@ public class Headers {
         }
     }
 
-    public String getContentType() {
-        return getAll("content-type");
+    public List<String> getNames() {
+        Set<String> nameSet = new HashSet<>();
+
+        for (Header header : headers) {
+            nameSet.add(header.getName());
+        }
+        return new ArrayList<>(nameSet);
     }
 
-    public String getAccept() {
-        return getAll("accept");
+    public Header getContentType() {
+        return headers.stream()
+                .filter(header -> header.getName().equalsIgnoreCase("content-type"))
+                .findFirst()
+                .get();
     }
 
-    public String getContentEncoding() {
-        return getAll("content-encoding");
+    public Header getAccept() {
+        return headers.stream()
+                .filter(header -> header.getName().equalsIgnoreCase("accept"))
+                .findFirst()
+                .get();
     }
 
-    public List<String> getAll(String theName) {
+    public Header getContentEncoding() {
+        return headers.stream()
+                .filter(header -> header.getName().equalsIgnoreCase("content-encoding"))
+                .findFirst()
+                .get();
+    }
+
+    private List<String> getAll(String theName) {
         Objects.requireNonNull(theName);
         return headers.stream()
                 .filter(header -> theName.equals(header.getName()))
@@ -73,53 +89,31 @@ public class Headers {
     }
 
     public Map<String, String> getAll() {
-        Map<String, String> result = new HashMap<>();
-
-        for
-
         return headers.stream()
-                .map(header -> header.getName())
-                .collect(Collectors.toMap(name -> name, name -> getAll(name)));
+                .collect(Collectors.toMap(Header::getName, Header::getAllValuesAndParmsAsString));
     }
 
-    public void removeHeader(String name) {
-        nameValueList.removeIf(nv -> nv.name.equals(name));
-    }
-
-    // this is for collecting headers accept* for example
-    public Map<String, String> getMultiple(List<String> namePrefixs) {
-        Map<String, String> result = new HashMap<>();
-
-        namePrefixs.forEach(pre -> {
-            nameValueList.forEach(nv -> {
-                String name = nv.name;
-                if (name.startsWith(pre) && !result.keySet().contains(name)) {
-                    result.put(name, getAll(name));
-                }
-            });
-        });
-
-
-        return result;
-    }
+//    // this is for collecting headers accept* for example
+//    public Map<String, String> getMultiple(List<String> namePrefixs) {
+//        Map<String, String> result = new HashMap<>();
+//
+//        namePrefixs.forEach(pre -> {
+//            nameValueList.forEach(nv -> {
+//                String name = nv.name;
+//                if (name.startsWith(pre) && !result.keySet().contains(name)) {
+//                    result.put(name, getAll(name));
+//                }
+//            });
+//        });
+//
+//
+//        return result;
+//    }
 
     public String toString() {
-        StringBuilder buf = new StringBuilder();
-
-        if (StringUtils.isEmpty(verb) && pathInfo != null)
-            buf.append(verb).append(' ').append(pathInfo).append("\r\n");
-        if (status != 0)
-            buf.append("1.1 ${status} unknown");
-        Map<String, String> hdrs = new HashMap<>();
-
-        Map<String, String> map = nameValueList.stream()
-                .collect(Collectors.toMap(nv -> nv.name, nv -> getAll(nv.name)));
-
-        map.forEach((name, value) -> {
-            buf.append(String.join(": ", name, value));
-                });
-
-        return buf.toString();
+        return headers.stream()
+                .map(Header::toString)
+                .collect(Collectors.joining("\r\n"));
     }
 
 
