@@ -39,6 +39,7 @@
         <!--<module>asbestos-fproxy</module>-->
 <!--        <module>http-proxytest</module>-->
         <module>asbestos-http</module>
+        <module>asbestos-shared-objects</module>
     </modules>
 
     <dependencyManagement>
