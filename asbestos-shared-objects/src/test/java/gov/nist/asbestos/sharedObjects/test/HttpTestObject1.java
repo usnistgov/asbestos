@@ -1,4 +1,4 @@
-package gov.nist.asbestos.sharedObjects.simple;
+package gov.nist.asbestos.sharedObjects.test;
 
 import java.util.List;
 import java.util.Objects;
@@ -7,10 +7,6 @@ public class HttpTestObject1 {
     String field1;
     String field2;
     List<String> list;
-
-    public HttpTestObject1() {
-
-    }
 
     @Override
     public boolean equals(Object o) {
