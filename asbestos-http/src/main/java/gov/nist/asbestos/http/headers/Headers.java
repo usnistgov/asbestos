@@ -12,9 +12,9 @@ public class Headers {
     int status = 0;
     private List<Header> headers = new ArrayList<>();
 
-    Headers() {}
+    public Headers() {}
 
-    public Headers(String headerString) throws URISyntaxException {
+    public Headers(String headerString) {
         StringTokenizer st = new StringTokenizer(headerString, "\n");
 
         while(st.hasMoreTokens()) {
@@ -23,7 +23,11 @@ public class Headers {
                 String[] parts = it.split(" ", 2);
                 if (parts.length == 2) {
                     verb = parts[0];
-                    pathInfo = new URI(parts[1]);
+                    try {
+                        pathInfo = new URI(parts[1]);
+                    } catch (Exception e) {
+                        throw new RuntimeException(parts[1], e);
+                    }
                 }
                 continue;
             }

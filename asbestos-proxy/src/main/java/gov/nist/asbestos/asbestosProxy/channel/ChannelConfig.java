@@ -2,16 +2,15 @@ package gov.nist.asbestos.asbestosProxy.channel;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Map;
 
 public class ChannelConfig {
-    String environment;
-    String testSession;
-    String channelId;
-    String actorType;
-    String channelType;
+//    String environment;
+//    String testSession;
+//    String channelId;
+//    String actorType;
+//    String channelType;
     String fhirBase;
-    Map extensions;
+//    Map extensions;
 
     // TODO test needed
     public URI translateEndpointToFhirBase(URI req) throws URISyntaxException {
@@ -23,4 +22,10 @@ public class ChannelConfig {
         }
         return new URI(req.getScheme(), req.getUserInfo(), req.getHost(), req.getPort(), path, req.getQuery(), req.getFragment());
     }
+
+    public String getFhirBase() {
+        return fhirBase;
+    }
+
+
 }

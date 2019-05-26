@@ -4,6 +4,9 @@ package gov.nist.asbestos.asbestosProxy.log;
 import gov.nist.asbestos.asbestosProxy.channel.ChannelConfig;
 import gov.nist.asbestos.asbestosProxy.events.Event;
 import gov.nist.asbestos.asbestosProxy.events.EventStore;
+import gov.nist.asbestos.simapi.tk.installation.Installation;
+import gov.nist.asbestos.simapi.tk.simCommon.SimId;
+import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.util.Calendar;
@@ -36,42 +39,35 @@ public class SimStore {
     ChannelConfig config;
     boolean channel = true;  // is this a channel to the backend system?
 
-    public SimStore(File externalCache, SimId channelId) throws Exception {
-        if (externalCache == null)
-            throw new Exception("SimStore: initialized with externalCache == null");
-        if (!channelId.validateState())
-            throw new Exception("SimStore: cannot open SimId " + channelId + ":\n" + channelId.validateState());
+    public SimStore(File externalCache, SimId channelId) {
+        Installation.validateExternalCache(externalCache);
+        channelId.validate();
         this.externalCache = externalCache;
         this.channelId = channelId;
     }
 
-    public SimStore(File externalCache) throws Exception {
-        if (externalCache == null)
-            throw new Exception("SimStore: initialized with externalCache == null");
+    public SimStore(File externalCache) {
+        Installation.validateExternalCache(externalCache);
         this.externalCache = externalCache;
     }
 
     // the following must initialized
     // externalCache
     // channelId
-    public File getStore(boolean create) throws Exception {
-        if (!externalCache.exists())
-                throw new Exception("SimStore: External Cache must exist (" + externalCache + ")");
+    public File getStore(boolean create)  {
         if (_simStoreLocation == null) {
             _simStoreLocation = testSessionDir(externalCache, channelId);
             if (create) {
                 newlyCreated = !_simStoreLocation.exists();
                 // assert !_simStoreLocation.exists() : "SimStore:Create: proxy ${channelId} at ${_simStoreLocation} already exists\n"
                 _simStoreLocation.mkdirs();
-                if(!(_simStoreLocation.exists() && _simStoreLocation.canWrite() && _simStoreLocation.isDirectory())
-                        throw new Exception("SimStore: cannot create writable simdb directory at " + _simStoreLocation);
+                if(!(_simStoreLocation.exists() && _simStoreLocation.canWrite() && _simStoreLocation.isDirectory()))
+                        throw new RuntimeException("SimStore: cannot create writable simdb directory at " + _simStoreLocation);
             } else {
-                if (!(_simStoreLocation.exists() && _simStoreLocation.canWrite() && _simStoreLocation.isDirectory())
-                    throw new Exception("SimStore: Sim " + channelId.toString() + " does not exist");
+                if (!(_simStoreLocation.exists() && _simStoreLocation.canWrite() && _simStoreLocation.isDirectory()))
+                    throw new RuntimeException("SimStore: Sim " + channelId.toString() + " does not exist");
             }
         }
-        if (channelId.actorType == null && config != null)
-            channelId.actorType = config.actorType;
         return  _simStoreLocation;
     }
 
@@ -86,15 +82,19 @@ public class SimStore {
     }
 
     public boolean expectingEvent() {
-        return channelId && channelId.actorType && resource;
+        return channelId != null && channelId.getActorType() != null && resource != null;
     }
 
-    public boolean deleteSim() {
-        return simDir.deleteDir();
+    public void deleteSim() {
+        try {
+            FileUtils.deleteDirectory(getSimDir());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public void setChannelId(SimId simId) throws Exception {
-        if (!simId.validateState())
+        if (simId.validateState() != null)
             throw new Exception("SimStore: cannot open SimId " + simId + ":\n" + simId.validateState());
         this.channelId = simId;
     }
@@ -107,12 +107,12 @@ public class SimStore {
         return new File(new File(externalCache, PSIMDB), simId.getTestSession().getValue());
     }
 
-    public String getActor() {
-        return return channelId.getActorType();
+    public String getActorType() {
+        return channelId.getActorType();
     }
 
     public void setActor(String actor) {
-        channelId.actorType = actor;
+        channelId.setActorType(actor);
     }
 
     public boolean existsSimDir() throws Exception {
@@ -123,19 +123,18 @@ public class SimStore {
         return _simIdDir.exists();
     }
 
-    public File getSimDir() throws Exception {
-        if (channelId == null)
-            throw new Exception("SimStore: channelId is null");
+    public File getSimDir() {
+        Objects.requireNonNull(channelId);
         if (_simIdDir == null)
             _simIdDir = new File(getStore(), channelId.getId());
         _simIdDir.mkdirs();
         return _simIdDir;
     }
 
-    public File getActorDir() throws Exception {
-        Objects.requireNonNull(actor);
+    public File getActorDir() {
+        Objects.requireNonNull(getActorType());
         if (_actorDir == null)
-            _actorDir = new File(simDir, actor);
+            _actorDir = new File(getSimDir(), getActorType());
         _actorDir.mkdirs();
         return _actorDir;
     }
@@ -144,7 +143,7 @@ public class SimStore {
     public File getResourceDir() {
         Objects.requireNonNull(resource);
         if (_resourceDir == null)
-            _resourceDir = new File(actorDir, resource);
+            _resourceDir = new File(getActorDir(), resource);
         _resourceDir.mkdirs();
         return _resourceDir;
     }
@@ -152,7 +151,7 @@ public class SimStore {
     public File getEventDir() {
         Objects.requireNonNull(eventId);
         if (_eventDir == null)
-            _eventDir = new File(resourceDir, eventId);
+            _eventDir = new File(getResourceDir(), eventId);
        // _eventDir.mkdirs()  // breaks createEvent(date)
         return _eventDir;
     }
@@ -165,15 +164,19 @@ public class SimStore {
     }
 
     // on some machines this is important to prevent hangs
-    private static void pause() throws InterruptedException {
-        sleep(5);
+    private static void pause()  {
+        try {
+            sleep(5);
+        } catch (InterruptedException e) {
+
+        }
     }
 
     public File createEvent() {
         return createEvent(new Date());
     }
 
-    public File createEvent(Date date) throws InterruptedException {
+    public File createEvent(Date date)  {
         File f = createEventDir(getEventIdFromDate(date));
         f.mkdirs();
         pause();
@@ -190,7 +193,7 @@ public class SimStore {
     }
 
     public SimStore withActorType(String actor) {
-        this.channelId.actorType = actor;
+        this.channelId.setActorType(actor);
         return this;
     }
 
@@ -211,21 +214,34 @@ public class SimStore {
             eventId = eventBase;
             if (incr != 0)
                 eventId = eventBase + '_' + incr;    // make unique
-            if (eventDir.exists()) {
+            if (getEventDir().exists()) {
                 // must be fresh new dir - try again
                 incr++;
             }
             else
                 break;
         }
-        return eventDir;
+        return getEventDir();
     }
 
     public String getEndpoint() {
 //        if (!config.fhirBase.endsWith('/'))
 //            config.fhirBase = "${config.fhirBase}/"
-        return config.fhirBase + "/" + resource;
+        return config.getFhirBase() + "/" + resource;
     }
+
+    public SimId getChannelId() {
+        return channelId;
+    }
+
+    public String getResource() {
+        return resource;
+    }
+
+    public String getEventId() {
+        return eventId;
+    }
+
 
 
     public static String asFilenameBase(Date date) {

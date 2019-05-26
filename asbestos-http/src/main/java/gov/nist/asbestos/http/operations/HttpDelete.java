@@ -6,7 +6,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Objects;
 
-class HttpDelete  extends HttpBase {
+public class HttpDelete  extends HttpBase {
     public HttpDelete run(URI uri) throws IOException {
         Objects.requireNonNull(uri);
         HttpURLConnection connection = null;

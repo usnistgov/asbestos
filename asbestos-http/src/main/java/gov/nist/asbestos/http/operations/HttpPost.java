@@ -10,7 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-class HttpPost  extends HttpBase {
+public class HttpPost  extends HttpBase {
 
     private void post(URI uri, Map<String, String> headers, byte[] content) throws IOException {
         HttpURLConnection connection = null;

@@ -1,8 +1,13 @@
 package gov.nist.asbestos.asbestosProxy.events;
 
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
+
 import java.io.File;
 
+@JsonIgnoreProperties(value = {"file"})
 public class EventStoreItem {
     String eventId;
     String actor;
@@ -11,15 +16,20 @@ public class EventStoreItem {
     File file;
 
     public String asJson() {
-        '''
-{
-  "eventId": "EVENTID",
-  "actor": "ACTOR",
-  "resource": "RESOURCE",
-  "verb": "VERB"
-}'''.replace('EVENTID', eventId)
-                .replace('ACTOR', actor)
-                .replace('RESOURCE', resource)
-                .replace('VERB', verb)
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            return objectMapper.writeValueAsString(this);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static EventStoreItem fromJson(String item) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            return objectMapper.readValue(item, EventStoreItem.class);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }

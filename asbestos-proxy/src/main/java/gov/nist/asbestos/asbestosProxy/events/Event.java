@@ -2,6 +2,7 @@ package gov.nist.asbestos.asbestosProxy.events;
 
 
 import gov.nist.asbestos.http.headers.Headers;
+import gov.nist.asbestos.simapi.tk.simCommon.SimId;
 
 public class Event {
     Headers _requestHeaders = null;

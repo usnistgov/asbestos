@@ -1,6 +1,8 @@
 package gov.nist.asbestos.asbestosProxy.events;
 
 
+import gov.nist.asbestos.asbestosProxy.log.SimStore;
+import gov.nist.asbestos.asbestosProxy.log.Task;
 import gov.nist.asbestos.http.headers.Headers;
 
 import java.io.File;
@@ -15,13 +17,12 @@ import java.util.List;
  * to satisfy that request.
  */
 public class EventStore {
-    SimStore simStore;
-    File root;
-    File _request = null; // interaction with client
-    List<File> _tasks = new ArrayList<>(); // downstream/backend interactions
-    File current = null; // either request or a task
-
-    Event e = null;
+    private SimStore simStore;
+    private File root;
+    private File _request = null; // interaction with client
+    private List<File> _tasks = new ArrayList<>(); // downstream/backend interactions
+    private File current = null; // either request or a task
+    private Event e = null;
 
     private void clearCache() {
         e = new Event();
@@ -30,7 +31,7 @@ public class EventStore {
     public Event newEvent() {
         e = new Event(this, simStore.getChannelId(), simStore.getResource(), simStore.getEventId());
         if (!e.isComplete())
-            throw new Exception("Trying to create new event without details.");
+            throw new RuntimeException("Trying to create new event without details.");
         return e;
     }
 
@@ -41,7 +42,7 @@ public class EventStore {
         while (true) {
             File taskFile = getTaskFile(i);
             if (taskFile.exists())
-                _tasks[i] = taskFile;
+                _tasks.set(i, taskFile);
             else
                 break;
             i++;
@@ -53,7 +54,7 @@ public class EventStore {
      * creates request (if doesn't exist) and sets it as current
      * @return the request dir
      */
-    public File getRequest() {
+    private File getRequest() {
         if (_request == null) {
             _request = new File(root, "request");
             _request.mkdir();
@@ -63,8 +64,8 @@ public class EventStore {
         return _request;
     }
 
-    public File getTaskFile(int i) {
-        return new File(root, "task${i}");
+    private File getTaskFile(int i) {
+        return new File(root, "task" + i);
     }
 
     /**
@@ -82,7 +83,7 @@ public class EventStore {
     }
 
     public int getTaskCount() {
-        _tasks.size();
+        return _tasks.size();
     }
 
     /**
@@ -91,11 +92,11 @@ public class EventStore {
      */
     public Task selectTask(int i) {
         if (i >= getTaskCount())
-            throw new Exception("EventStore: cannot return task #${i} - only ${taskCount} tasks\n");
+            throw new RuntimeException("EventStore: cannot return task #${i} - only ${taskCount} tasks\n");
         if (i < 0)
             current = _request;
         else
-            current = _tasks[i];
+            current = _tasks.get(i);
         clearCache();
         return new Task(this, i);
     }
@@ -104,17 +105,17 @@ public class EventStore {
         return selectTask(-1);
     }
 
-    /**
-     * select request as current
-     * @return
-     */
-    public EventStore selectRequest() {
-        if (_request == null)
-            return getRequest();
-        current = _request;
-        clearCache();
-        return this;
-    }
+//    /**
+//     * select request as current
+//     * @return
+//     */
+//    public EventStore selectRequest() {
+//        if (_request == null)
+//            return getRequest();
+//        current = _request;
+//        clearCache();
+//        return this;
+//    }
 
 
     private File getRequestHeaderFile() { return new File(current, "request_header.txt"); }
@@ -129,8 +130,12 @@ public class EventStore {
     public void putRequestHeader(Headers headers) {
         e._requestHeaders = headers;
         current.mkdirs();
-        try (PrintWriter out = new PrintWriter(getRequestHeaderFile())) {
-            out.print(headers.toString());
+        try {
+            try (PrintWriter out = new PrintWriter(getRequestHeaderFile())) {
+                out.print(headers.toString());
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -139,15 +144,24 @@ public class EventStore {
         e._requestBody = new String(body);
         current.mkdirs();
         if (body.length > 0) {
-            try (FileOutputStream stream = new FileOutputStream(getRequestBodyFile())) {
-                stream.write(body);
+            try {
+                try (FileOutputStream stream = new FileOutputStream(getRequestBodyFile())) {
+                    stream.write(body);
+                }
+            } catch (Exception e) {
+                throw new RuntimeException(e);
             }
         }
     }
 
     Headers getRequestHeader() {
         if (e._requestHeaders == null) {
-            String headerString = new String(Files.readAllBytes(getRequestHeaderFile().toPath()));
+            String headerString;
+            try {
+                headerString = new String(Files.readAllBytes(getRequestHeaderFile().toPath()));
+            } catch (Exception e) {
+                return new Headers();
+            }
             e._requestHeaders = new Headers(headerString);
         }
         return e._requestHeaders;
@@ -155,7 +169,10 @@ public class EventStore {
 
     public byte[] getRequestBody() {
         if (e._requestRawBody == null) {
-            e._requestRawBody = Files.readAllBytes(getRequestBodyFile().toPath());
+            try {
+                e._requestRawBody = Files.readAllBytes(getRequestBodyFile().toPath());
+            } catch (Exception e) {
+            }
             e._requestBody = new String(e._requestRawBody);
         }
         return e._requestRawBody;
@@ -169,8 +186,12 @@ public class EventStore {
     public void putResponseHeader(Headers headers) {
         e._responseHeaders = headers;
         current.mkdirs();
-        try (PrintWriter out = new PrintWriter(getResponseHeaderFile())) {
-            out.print(headers.toString());
+        try {
+            try (PrintWriter out = new PrintWriter(getResponseHeaderFile())) {
+                out.print(headers.toString());
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -178,8 +199,12 @@ public class EventStore {
         e._responseRawBody = body;
         current.mkdirs();
         if (body.length >  0) {
-            try (FileOutputStream out = new FileOutputStream(getResponseBodyFile())) {
-                out.write(body);
+            try {
+                try (FileOutputStream out = new FileOutputStream(getResponseBodyFile())) {
+                    out.write(body);
+                }
+            } catch (Exception e) {
+                throw new RuntimeException(e);
             }
         }
     }
@@ -187,15 +212,23 @@ public class EventStore {
     public void putResponseBodyText(String body) {
         e._responseBody = body;
         current.mkdirs();
-        try (PrintWriter out = new PrintWriter(getResponseBodyStringFile())) {
-            out.print(body);
+        try {
+            try (PrintWriter out = new PrintWriter(getResponseBodyStringFile())) {
+                out.print(body);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 
     public void putRequestBodyText(String body) {
         current.mkdirs();
-        try (PrintWriter out = new PrintWriter(getRequestBodyStringFile())) {
-            out.print(body);
+        try {
+            try (PrintWriter out = new PrintWriter(getRequestBodyStringFile())) {
+                out.print(body);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 

@@ -41,6 +41,7 @@
         <module>asbestos-http</module>
         <module>asbestos-shared-objects</module>
         <module>asbestos-proxy</module>
+        <module>asbestos-toolkit-api</module>
     </modules>
 
     <dependencyManagement>

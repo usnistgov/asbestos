@@ -1,6 +1,8 @@
 package gov.nist.asbestos.asbestosProxy.channel;
 
 
+import gov.nist.asbestos.asbestosProxy.events.EventStore;
+
 /**
  * Defines a proxy channel.
  * Implemented as a simulator.
