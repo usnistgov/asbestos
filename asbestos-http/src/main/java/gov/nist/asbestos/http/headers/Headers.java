@@ -110,6 +110,31 @@ public class Headers {
 //        return result;
 //    }
 
+
+    public String getVerb() {
+        return verb;
+    }
+
+    public void setVerb(String verb) {
+        this.verb = verb;
+    }
+
+    public URI getPathInfo() {
+        return pathInfo;
+    }
+
+    public void setPathInfo(URI pathInfo) {
+        this.pathInfo = pathInfo;
+    }
+
+    public int getStatus() {
+        return status;
+    }
+
+    public void setStatus(int status) {
+        this.status = status;
+    }
+
     public String toString() {
         return headers.stream()
                 .map(Header::toString)

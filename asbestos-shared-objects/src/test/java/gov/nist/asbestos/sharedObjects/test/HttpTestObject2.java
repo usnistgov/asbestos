@@ -2,7 +2,7 @@ package gov.nist.asbestos.sharedObjects.test;
 
 import java.util.Objects;
 
-public class HttpTestObject2 {
+class HttpTestObject2 {
     String field3;
     String field4;
     HttpTestObject1 object1;

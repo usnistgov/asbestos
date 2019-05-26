@@ -32,14 +32,15 @@
 
     <modules>
         <!--<module>http-test-editor-service</module> removed since embedded Jetty not workable -->
-        <!--<module>asbestos-adapter</module>-->
-        <!--<module>asbestos-simapi</module>-->
+        <module>asbestos-adapter</module>
+        <module>asbestos-simapi</module>
         <!--<module>view</module>-->
         <!--<module>asbestos-simapitest</module>-->
         <!--<module>asbestos-fproxy</module>-->
-<!--        <module>http-proxytest</module>-->
+        <!--<module>asbestos-proxytest</module>-->
         <module>asbestos-http</module>
         <module>asbestos-shared-objects</module>
+        <module>asbestos-proxy</module>
     </modules>
 
     <dependencyManagement>
@@ -50,17 +51,22 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.codehaus.groovy</groupId>
-            <artifactId>groovy-all</artifactId>
-            <version>${groovyVersion}</version>
-            <!--<type>pom</type>-->
-        </dependency>
-
-        <dependency>
-            <groupId>org.spockframework</groupId>
-            <artifactId>spock-core</artifactId>
-            <version>${spock.version}</version>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <version>5.3.1</version>
             <scope>test</scope>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-lang3 -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>3.8.1</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/commons-io/commons-io -->
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>2.6</version>
         </dependency>
         <dependency>
             <groupId>log4j</groupId>
@@ -94,43 +100,28 @@
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.8.1</version>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.0.0-M3</version>
                 <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
+                    <properties>
+                        <configurationParameters>
+                            junit.jupiter.conditions.deactivate = *
+                            junit.jupiter.extensions.autodetection.enabled = true
+                            junit.jupiter.testinstance.lifecycle.default = per_class
+                            junit.jupiter.execution.parallel.enabled = true
+                        </configurationParameters>
+                    </properties>
                 </configuration>
             </plugin>
-<!--            <plugin>-->
-<!--                &lt;!&ndash;<groupId>org.apache.maven.plugins</groupId>&ndash;&gt;-->
-<!--                <artifactId>maven-compiler-plugin</artifactId>-->
-<!--                <version>${mavenCompilerPluginVersion}</version>-->
-<!--                <configuration>-->
-<!--                    <compilerId>groovy-eclipse-compiler</compilerId>-->
-<!--                    <source>${maven.compiler.source}</source>-->
-<!--                    <target>${maven.compiler.target}</target>-->
-<!--                </configuration>-->
-<!--                <dependencies>-->
-<!--                    <dependency>-->
-<!--                        <groupId>org.codehaus.groovy</groupId>-->
-<!--                        <artifactId>groovy-eclipse-compiler</artifactId>-->
-<!--                        <version>${groovyEclipseCompilerVersion}</version>-->
-<!--                    </dependency>-->
-<!--                    <dependency>-->
-<!--                        <groupId>org.codehaus.groovy</groupId>-->
-<!--                        <artifactId>groovy-eclipse-batch</artifactId>-->
-<!--                        <version>${groovyEclipseBatchVersion}</version>-->
-<!--                    </dependency>-->
-<!--                </dependencies>-->
-<!--            </plugin>-->
-<!--            <plugin>-->
-<!--                <groupId>org.apache.maven.plugins</groupId>-->
-<!--                <artifactId>maven-war-plugin</artifactId>-->
-<!--                <version>${mavenWarPluginVersion}</version>-->
-<!--                <configuration>-->
-
-<!--                </configuration>-->
-<!--            </plugin>-->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>${mavenCompilerPluginVersion}</version>
+                <configuration>
+                    <source>${maven.compiler.source}</source>
+                    <target>${maven.compiler.target}</target>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 
