@@ -1,7 +1,7 @@
 package gov.nist.asbestos.asbestosProxy.Base;
 
-import gov.nist.asbestos.simapi.validation.Val
+import gov.nist.asbestos.simapi.validation.Val;
 
 interface IVal {
-    void setVal(Val val)
+    void setVal(Val val);
 }

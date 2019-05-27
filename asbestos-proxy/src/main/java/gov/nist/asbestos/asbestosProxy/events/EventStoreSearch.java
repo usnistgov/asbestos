@@ -2,64 +2,78 @@ package gov.nist.asbestos.asbestosProxy.events;
 
 
 
+import gov.nist.asbestos.asbestosProxy.log.SimStore;
+import gov.nist.asbestos.simapi.tk.simCommon.SimId;
+
+import java.io.BufferedReader;
 import java.io.File;
-import java.util.Collection;
-import java.util.Map;
+import java.io.FileReader;
+import java.util.*;
+import java.util.stream.Collectors;
 
 
-class EventStoreSearch {
-    File externalCache
-    SimStore simStore
-    File simDir
-    Map<String, EventStoreItem> eventItems = [:]  // eventId ->
+public class EventStoreSearch {
+    private File simDir;
 
-    EventStoreSearch(File externalCache, SimId channelId) {
-        this.externalCache = externalCache
-        simStore = new SimStore(externalCache)
-        simStore.channelId = channelId
-        simDir = simStore.simDir
+    public EventStoreSearch(File externalCache, SimId channelId) {
+        SimStore simStore = new SimStore(externalCache);
+        simStore.setChannelId(channelId);
+        simDir = simStore.getSimDir();
     }
 
-    Map<String, EventStoreItem> loadAllEventsItems() {
-        eventItems = [:]
+    private boolean focus(File x) {
+        return x.isDirectory() && !x.getName().startsWith(".") && !x.getName().startsWith("_");
+    }
 
-        Collection<File> actorFiles = simDir.listFiles() as List<File>
-        actorFiles = actorFiles.findAll { File file ->
-            file.isDirectory() && !file.name.startsWith('.') && !file.name.startsWith('_')
-        }
-        actorFiles.each { File actorFile ->
-            Collection<File> resourceFiles = actorFile.listFiles() as List<File>
-            resourceFiles = resourceFiles.findAll { File resourceFile ->
-                resourceFile.isDirectory() && !resourceFile.name.startsWith('.') && !resourceFile.name.startsWith('_')
-            }
-            resourceFiles.each { File resourceFile ->
-                Collection<File> eventFiles = resourceFile.listFiles() as List<File>
-                eventFiles = eventFiles.findAll { File eventFile ->
-                    eventFile.isDirectory() && !eventFile.name.startsWith('.') && !eventFile.name.startsWith('_')
-                }
-                eventFiles.each { File eventFile ->
-                    File requestHeaderFile = new File(new File(eventFile, 'request'), 'request_header.txt')
-                    String firstLine
-                    requestHeaderFile.withReader { firstLine = it.readLine() }
-                    String verb = ''
-                    if (firstLine) {
-                        String[] parts = firstLine.split(' ', 2)
-                        if (parts.size() > 1)
-                            verb = parts[0]
+    public Map<String, EventStoreItem> loadAllEventsItems() {
+        Map<String, EventStoreItem> eventItems = new HashMap<>();
+
+        File[] actorFileA = simDir.listFiles();
+        if (actorFileA != null) {
+            List<File> actorFiles = Arrays.stream(actorFileA)
+                    .filter(this::focus)
+                    .collect(Collectors.toList());
+            for (File actorFile : actorFiles) {
+                File[] resourceFileA = actorFile.listFiles();
+                if (resourceFileA != null) {
+                    List<File> resourceFiles = Arrays.stream(resourceFileA)
+                            .filter(this::focus)
+                            .collect(Collectors.toList());
+                    for (File resourceFile : resourceFiles) {
+                        File[] eventFileA = resourceFile.listFiles();
+                        if (eventFileA != null) {
+                            List<File> eventFiles = Arrays.stream(eventFileA)
+                                    .filter(this::focus)
+                                    .collect(Collectors.toList());
+                            for (File eventFile : eventFiles) {
+                                File requestHeaderFile = new File(new File(eventFile, "request"), "request_header.txt");
+                                String firstLine = null;
+                                try {
+                                    firstLine = new BufferedReader(new FileReader(requestHeaderFile)).readLine();
+                                } catch (Exception e) {
+
+                                }
+                                String verb = "";
+                                if (firstLine != null) {
+                                    String[] parts = firstLine.split(" ", 2);
+                                    if (parts.length > 1)
+                                        verb = parts[0];
+                                }
+
+                                EventStoreItem item = new EventStoreItem();
+                                item.file = eventFile;
+                                item.eventId = eventFile.getName();
+                                item.actor = actorFile.getName();
+                                item.resource = resourceFile.getName();
+                                item.verb = verb;
+
+                                eventItems.put(eventFile.getName(), item);
+                            }
+                        }
                     }
-
-                    EventStoreItem item = new EventStoreItem()
-                    item.file = eventFile
-                    item.eventId = eventFile.name
-                    item.actor = actorFile.name
-                    item.resource = resourceFile.name
-                    item.verb = verb
-
-                    eventItems[eventFile.name] = item
                 }
-
             }
         }
-        eventItems
+        return eventItems;
     }
 }

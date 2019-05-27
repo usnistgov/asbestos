@@ -158,7 +158,7 @@ class BundleToRegistryObjectList implements IVal {
 
             if (!referencedDocRef.resource) {
                 val.err(new Val()
-                        .msg("Trying to build ${xdsType} Association - ${ref.reference} cannot be resolved"))
+                        .msg("Trying to load ${xdsType} Association - ${ref.reference} cannot be resolved"))
                 return
             }
             addAssociation(xml, xdsType, resource, referencedDocRef.url, null, null)

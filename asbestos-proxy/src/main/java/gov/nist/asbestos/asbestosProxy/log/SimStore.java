@@ -36,7 +36,7 @@ public class SimStore {
     private static String PSIMDB = "psimdb";
     Event event;
     //EventStore eventStore
-    ChannelConfig config;
+    ChannelConfig channelConfig;
     boolean channel = true;  // is this a channel to the backend system?
 
     public SimStore(File externalCache, SimId channelId) {
@@ -71,9 +71,8 @@ public class SimStore {
         return  _simStoreLocation;
     }
 
-    public boolean exists() throws Exception {
-        if (!externalCache.exists())
-            throw new Exception("SimStore: External Cache must exist: " + externalCache);
+    public boolean exists() {
+        Objects.requireNonNull(externalCache);
         return new File(getStore(), channelId.getId()).exists();
     }
 
@@ -93,9 +92,9 @@ public class SimStore {
         }
     }
 
-    public void setChannelId(SimId simId) throws Exception {
+    public void setChannelId(SimId simId) {
         if (simId.validateState() != null)
-            throw new Exception("SimStore: cannot open SimId " + simId + ":\n" + simId.validateState());
+            throw new RuntimeException("SimStore: cannot open SimId " + simId + ":\n" + simId.validateState());
         this.channelId = simId;
     }
 
@@ -115,9 +114,8 @@ public class SimStore {
         channelId.setActorType(actor);
     }
 
-    public boolean existsSimDir() throws Exception {
-        if (channelId == null)
-            throw new Exception("SimStore: channelId is null");
+    public boolean existsSimDir() {
+        Objects.requireNonNull(channelId);
         if (_simIdDir == null)
             _simIdDir = new File(getStore(), channelId.getId());
         return _simIdDir.exists();
@@ -225,9 +223,9 @@ public class SimStore {
     }
 
     public String getEndpoint() {
-//        if (!config.fhirBase.endsWith('/'))
-//            config.fhirBase = "${config.fhirBase}/"
-        return config.getFhirBase() + "/" + resource;
+//        if (!channelConfig.fhirBase.endsWith('/'))
+//            channelConfig.fhirBase = "${channelConfig.fhirBase}/"
+        return channelConfig.getFhirBase() + "/" + resource;
     }
 
     public SimId getChannelId() {
@@ -242,7 +240,13 @@ public class SimStore {
         return eventId;
     }
 
+    public void setNewlyCreated(boolean newlyCreated) {
+        this.newlyCreated = newlyCreated;
+    }
 
+    public File getExternalCache() {
+        return externalCache;
+    }
 
     public static String asFilenameBase(Date date) {
         Calendar c  = Calendar.getInstance();

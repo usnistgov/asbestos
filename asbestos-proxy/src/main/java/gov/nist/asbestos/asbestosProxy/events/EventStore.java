@@ -237,8 +237,12 @@ public class EventStore {
         putResponseBody(body);
         String bodyString = new String(body);
         putResponseBodyText(bodyString);
-        try (PrintWriter out = new PrintWriter(getResponseBodyHTMLFile())) {
-            out.print(bodyString);
+        try {
+            try (PrintWriter out = new PrintWriter(getResponseBodyHTMLFile())) {
+                out.print(bodyString);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -247,23 +251,35 @@ public class EventStore {
         putRequestBody(body);
         String bodyString = new String(body);
         putRequestBodyText(bodyString);
-        try (PrintWriter out = new PrintWriter(getRequestBodyHTMLFile())) {
-            out.print(bodyString);
+        try {
+            try (PrintWriter out = new PrintWriter(getRequestBodyHTMLFile())) {
+                out.print(bodyString);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 
     public Headers getResponseHeader() {
         if (e._responseHeaders == null) {
-           String resp = new String(Files.readAllBytes(getResponseHeaderFile().toPath()));
-            e._responseHeaders = new Headers(resp);
+            try {
+                String resp = new String(Files.readAllBytes(getResponseHeaderFile().toPath()));
+                e._responseHeaders = new Headers(resp);
+            } catch (Exception e) {
+
+            }
         }
         return e._responseHeaders;
     }
 
     public byte[] getResponseBody() {
         if (e._responseRawBody == null) {
-            e._responseRawBody = Files.readAllBytes(getResponseBodyFile().toPath());
-            e._responseBody = new String(e._responseRawBody)
+            try {
+                e._responseRawBody = Files.readAllBytes(getResponseBodyFile().toPath());
+                e._responseBody = new String(e._responseRawBody);
+            } catch (Exception e) {
+
+            }
         }
         return e._responseRawBody;
     }

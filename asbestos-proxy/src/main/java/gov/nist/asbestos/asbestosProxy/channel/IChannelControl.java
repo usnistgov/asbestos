@@ -8,7 +8,7 @@ import gov.nist.asbestos.asbestosProxy.events.EventStore;
  * Implemented as a simulator.
  */
 
-interface ChannelControl {
+interface IChannelControl {
     void setup(ChannelConfig simConfig);
     void teardown();
     void validateConfig(ChannelConfig simConfig);

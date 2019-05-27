@@ -7,7 +7,7 @@ import gov.nist.asbestos.http.operations.HttpPost;
 
 import java.net.URI;
 
-interface BaseChannel extends ChannelControl {
+interface IBaseIChannel extends IChannelControl {
     void transformRequest(HttpPost requestIn, HttpPost requestOut);
     void transformRequest(HttpGet requestIn, HttpGet requestOut);
     URI transformRequestUrl(String endpoint, HttpBase requestIn);

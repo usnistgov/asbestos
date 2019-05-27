@@ -1,14 +1,19 @@
 package gov.nist.asbestos.asbestosProxy.wrapper;
 
 
+import gov.nist.asbestos.asbestosProxy.events.EventStoreItem;
+import gov.nist.asbestos.asbestosProxy.events.EventStoreItemFactory;
 import gov.nist.asbestos.asbestosProxy.events.EventStoreSearch;
+import gov.nist.asbestos.asbestosProxy.log.SimStore;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-class EventRequestHandler {
+public class EventRequestHandler {
 
-    static String eventRequest(SimStore simStore, List<String> uriParts, Map<String, List<String>> parameters) {
+    public static String eventRequest(SimStore simStore, List<String> uriParts, Map<String, List<String>> parameters) {
         int last = -1;
         if (uriParts.isEmpty()) {
             // asking for /Event  ??? - all events??? - must be some restricting parameters
@@ -20,21 +25,22 @@ class EventRequestHandler {
 
         EventStoreSearch search  = new EventStoreSearch(simStore.getExternalCache(), simStore.getChannelId());
         Map<String, EventStoreItem> items = search.loadAllEventsItems(); // key is eventId
-        List<String> eventIds = items.keySet().sort();
-        eventIds = eventIds.reverse();
+        List<String> eventIds = new ArrayList<>(items.keySet());
+        eventIds.sort(String::compareTo);
+        Collections.reverse(eventIds);
         if (last > -1) {
-            eventIds = eventIds.take(last);
+            eventIds = eventIds.subList(0, last);
         }
         StringBuilder buf = new StringBuilder();
         boolean first = true;
-        buf.append('{ "events":[\n');
-        eventIds.each { String eventId ->
-            if (!first) buf.append(',')
-            first = false
-            buf.append(items[eventId].asJson())
+        buf.append("{ \"events\":[\n");
+        for (String eventId : eventIds) {
+            if (!first) buf.append(",");
+            first = false;
+            buf.append(EventStoreItemFactory.asJson(items.get(eventId)));
         }
-        buf.append('\n]}');
-        buf.toString();
+        buf.append("\n]}");
+        return buf.toString();
     }
 
 }

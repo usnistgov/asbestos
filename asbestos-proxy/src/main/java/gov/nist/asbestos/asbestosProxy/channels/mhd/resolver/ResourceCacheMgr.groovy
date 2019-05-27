@@ -6,7 +6,7 @@ import org.apache.log4j.Logger
 import org.hl7.fhir.instance.model.api.IBaseResource
 
 /**
- * build by a factory - either TestResourceCacheFactory or ResourceCacheMgrFactory
+ * load by a factory - either TestResourceCacheFactory or ResourceCacheMgrFactory
  *
  * Manages multiple resource caches.  Each cache is identified by its BaseUrl
  *

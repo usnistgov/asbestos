@@ -1,25 +1,26 @@
-package gov.nist.asbestos.asbestosProxy.events
+package gov.nist.asbestos.asbestosProxy.events;
 
-import groovy.json.JsonSlurper
 
-class EventStoreItemFactory {
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
-    static List<EventStoreItem> parse(String json) {
-        def slurper = new JsonSlurper()
-        def data = slurper.parseText(json)
+public class EventStoreItemFactory {
 
-        List<EventStoreItem> items = []
-
-        (0..<data.events.size()).each { int ii ->
-            EventStoreItem item = new EventStoreItem()
-            def events = data.events
-            item.eventId = events[ii].eventId
-            item.actor = events[ii].actor
-            item.resource = events[ii].resource
-            item.verb = events[ii].verb
-            items << item
+    public static String asJson(EventStoreItem item) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            return objectMapper.writeValueAsString(item);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
         }
+    }
 
-        items
+    public static EventStoreItem fromJson(String item) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            return objectMapper.readValue(item, EventStoreItem.class);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }

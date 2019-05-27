@@ -405,7 +405,7 @@ class ProxyServlet extends HttpServlet {
 
         //
         // everything above this is handling control operations
-        // starting with this build of simStore, normal channel operations begin
+        // starting with this load of simStore, normal channel operations begin
         //
 
         simStore = SimStoreBuilder.sense(externalCache, simId.testSession, simId.id)
