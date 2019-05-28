@@ -17,4 +17,8 @@ public class Task {
     public void select() {
         event.selectTask(taskIndex);
     }
+
+    public EventStore getEvent() {
+        return event;
+    }
 }

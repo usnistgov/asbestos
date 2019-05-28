@@ -3,7 +3,7 @@ package gov.nist.asbestos.asbestosProxy.events;
 
 
 import gov.nist.asbestos.asbestosProxy.log.SimStore;
-import gov.nist.asbestos.simapi.tk.simCommon.SimId;
+import gov.nist.asbestos.simapi.simCommon.SimId;
 
 import java.io.BufferedReader;
 import java.io.File;

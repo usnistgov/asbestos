@@ -14,6 +14,15 @@ public class Headers {
 
     public Headers() {}
 
+    public Headers(List<Header> headerList) {
+        this.headers = headerList;
+    }
+
+    public Headers addAll(Headers theHeaders) {
+        this.headers.addAll(theHeaders.headers);
+        return this;
+    }
+
     public Headers(String headerString) {
         StringTokenizer st = new StringTokenizer(headerString, "\n");
 
@@ -97,23 +106,21 @@ public class Headers {
                 .collect(Collectors.toMap(Header::getName, Header::getAllValuesAndParmsAsString));
     }
 
-//    // this is for collecting headers accept* for example
-//    public Map<String, String> getMultiple(List<String> namePrefixs) {
-//        Map<String, String> result = new HashMap<>();
-//
-//        namePrefixs.forEach(pre -> {
-//            nameValueList.forEach(nv -> {
-//                String name = nv.name;
-//                if (name.startsWith(pre) && !result.keySet().contains(name)) {
-//                    result.put(name, getAll(name));
-//                }
-//            });
-//        });
-//
-//
-//        return result;
-//    }
+    // this is for collecting headers accept* for example
+    public Headers select(List<String> namePrefixs) {
+        Headers headers = new Headers();
+        for (String namePrefix : namePrefixs) {
+            headers.addAll(getAllWithPrefix(namePrefix));
+        }
+        return headers;
+    }
 
+    private Headers getAllWithPrefix(String prefix) {
+        List<Header> headerList = headers.stream()
+                .filter(header -> header.getName().toLowerCase().startsWith(prefix))
+                .collect(Collectors.toList());
+        return new Headers(headerList);
+    }
 
     public String getVerb() {
         return verb;

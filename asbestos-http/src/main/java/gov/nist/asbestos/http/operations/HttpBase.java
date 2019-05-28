@@ -113,15 +113,19 @@ abstract public class HttpBase {
         headers.getAll().forEach(connection::setRequestProperty);
     }
 
-    public static URI buildURI(String url, ParameterBuilder parameterBuilder) throws Exception {
+    public static URI buildURI(String url, ParameterBuilder parameterBuilder) {
         return buildURI(url, parameterBuilder.parameterMap);
     }
 
-    public static URI buildURI(String url, Map<String, List<String>> parameterMap) throws Exception {
+    public static URI buildURI(String url, Map<String, List<String>> parameterMap)  {
         String params = parameterMapToString(parameterMap);
-        if (params.length() > 0)
-            return new URI(url + '?' + params);
-        return new URI(url);
+        try {
+            if (params.length() > 0)
+                return new URI(url + '?' + params);
+            return new URI(url);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public static Map<String, List<String>> mapFromQuery(String query) {
@@ -153,4 +157,11 @@ abstract public class HttpBase {
         return map;
     }
 
+    public void setUri(URI uri) {
+        this.uri = uri;
+    }
+
+    public int getStatus() {
+        return status;
+    }
 }

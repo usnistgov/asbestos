@@ -154,7 +154,7 @@ public class EventStore {
         }
     }
 
-    Headers getRequestHeader() {
+    public Headers getRequestHeader() {
         if (e._requestHeaders == null) {
             String headerString;
             try {

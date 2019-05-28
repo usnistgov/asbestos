@@ -2,7 +2,7 @@ package gov.nist.asbestos.asbestosProxy.events;
 
 
 import gov.nist.asbestos.http.headers.Headers;
-import gov.nist.asbestos.simapi.tk.simCommon.SimId;
+import gov.nist.asbestos.simapi.simCommon.SimId;
 
 public class Event {
     Headers _requestHeaders = null;
@@ -33,6 +33,19 @@ public class Event {
         return store != null  && channelId != null && resource != null && eventId != null;
     }
 
+    public EventStore getStore() {
+        return store;
+    }
 
+    public SimId getChannelId() {
+        return channelId;
+    }
 
+    public String getResource() {
+        return resource;
+    }
+
+    public String getEventId() {
+        return eventId;
+    }
 }

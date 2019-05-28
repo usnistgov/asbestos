@@ -42,6 +42,7 @@
         <module>asbestos-shared-objects</module>
         <module>asbestos-proxy</module>
         <module>asbestos-toolkit-api</module>
+        <!--<module>asbestos-simapi-extra</module>-->
     </modules>
 
     <dependencyManagement>

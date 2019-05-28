@@ -1,14 +1,18 @@
 package gov.nist.asbestos.asbestosProxy.wrapper;
 
 
-import gov.nist.asbestos.asbestosProxy.channel.BaseChannel;
+import gov.nist.asbestos.asbestosProxy.channel.IBaseChannel;
+import gov.nist.asbestos.asbestosProxy.channels.passthrough.PassthroughChannel;
 import gov.nist.asbestos.asbestosProxy.events.Event;
+import gov.nist.asbestos.asbestosProxy.log.SimStore;
+import gov.nist.asbestos.asbestosProxy.log.Task;
 import gov.nist.asbestos.http.headers.Header;
 import gov.nist.asbestos.http.headers.Headers;
 import gov.nist.asbestos.http.operations.HttpBase;
 import gov.nist.asbestos.http.operations.HttpGet;
+import gov.nist.asbestos.http.operations.HttpPost;
 import gov.nist.asbestos.http.operations.Verb;
-import org.apache.http.client.methods.HttpPost;
+import gov.nist.asbestos.simapi.tk.installation.Installation;
 import org.apache.log4j.Logger;
 
 import javax.servlet.ServletConfig;
@@ -24,23 +28,22 @@ class ProxyServlet extends HttpServlet {
     static Logger log = Logger.getLogger(ProxyServlet.class);
     File externalCache = null;
 
-    Map<String, BaseChannel> proxyMap = new HashMap<>();
-    proxyMap.put("passthrough", new PassthroughChannel());
+    private Map<String, IBaseChannel> proxyMap = new HashMap<>();
 
-    public void init(ServletConfig config) {
+    public ProxyServlet() {
+        super();
+        proxyMap.put("passthrough", new PassthroughChannel());
+    }
+
+    public void init(ServletConfig config) throws ServletException {
         super.init(config);
         log.debug("init done");
         externalCache = new File("/home/bill/ec");
-        Installation.instance().externalCache = externalCache;
+        Installation.instance().setExternalCache(externalCache);
     }
 
-    static URI buildURI(HttpServletRequest req) {
-        HttpBase.buildURI(req.getRequestURI(), req.getParameterMap());
-//        String params = HttpBase.parameterMapToString(req.getParameterMap())
-//        if (params)
-//            new URI(req.requestURI + '?' + params)
-//        else
-//            new URI(req.requestURI)
+    private static URI buildURI(HttpServletRequest req) {
+        return HttpBase.buildURI(req.getRequestURI(), req.getParameterMap());
     }
 
     public void doPost(HttpServletRequest req, HttpServletResponse resp) {
@@ -63,10 +66,10 @@ class ProxyServlet extends HttpServlet {
                 throw new ServletException("Proxy - POST of configuration data not allowed on " + uri);
 
             // these should be redundant given what is done in parseUri()
-            String channelType = simStore.getConfig().getChannelType();
+            String channelType = simStore.getChannelConfig().getChannelType();
             if (channelType == null)
                 throw new ServletException("Sim " + simStore.getChannelId() + " does not define a Channel Type.");
-            BaseChannel channel = (BaseChannel) proxyMap.get(channelType);
+            IBaseChannel channel = (IBaseChannel) proxyMap.get(channelType);
             if (channel == null)
                 throw new ServletException("Cannot create Channel of type " + channelType);
 
@@ -95,17 +98,16 @@ class ProxyServlet extends HttpServlet {
             backSideTask.select();
             backSideTask.getEvent().putResponseHeader(requestOut.getResponseHeaders());
             logResponseBody(backSideTask, requestOut);
-            log.info("==> " + requestOut.getStatus() + " " +  (requestOut.getResponse() != null) ? requestOut.getResponseContentType() : "NULL");
+            log.info("==> " + requestOut.getStatus() + " " +  ((requestOut.getResponse() != null) ? requestOut.getResponseContentType() : "NULL"));
 
             // transform backend service response for client
             HttpBase responseOut = transformResponse(event.getStore().selectTask(Task.CLIENT_TASK), requestOut, channel);
             clientTask.select();
 
-            responseOut.getResponseHeaders().getAll().each { String name, String value ->
-                resp.addHeader(name, value)
-            }
+            responseOut.getResponseHeaders().getAll().forEach(resp::addHeader);
+
             if (responseOut.getResponse() != null) {
-                resp.outputStream.write(responseOut.response)
+                resp.getOutputStream().write(responseOut.getResponse());
             }
 
             log.info("OK");
@@ -114,7 +116,6 @@ class ProxyServlet extends HttpServlet {
             String msg = t.getMessage();
             log.error(msg);
             resp.setStatus(resp.SC_INTERNAL_SERVER_ERROR);
-            return;
         }
     }
 
@@ -128,7 +129,6 @@ class ProxyServlet extends HttpServlet {
         } catch (Throwable t) {
             log.error(t.getMessage());
             resp.setStatus(resp.SC_INTERNAL_SERVER_ERROR);
-            return;
         }
     }
 
@@ -261,7 +261,7 @@ class ProxyServlet extends HttpServlet {
         }
     }
 
-    static logResponseBody(Task task, HttpBase http) {
+    static void logResponseBody(Task task, HttpBase http) {
         task.select()
         Headers headers = http.responseHeaders
         byte[] bytes = http.response
@@ -279,7 +279,7 @@ class ProxyServlet extends HttpServlet {
         }
     }
 
-    static HttpBase transformRequest(Task task, HttpPost requestIn, BaseChannel channelTransform) {
+    static HttpBase transformRequest(Task task, HttpPost requestIn, IBaseChannel channelTransform) {
         HttpPost requestOut = new HttpPost()
 
         channelTransform.transformRequest(requestIn, requestOut)
@@ -291,7 +291,7 @@ class ProxyServlet extends HttpServlet {
         requestOut
     }
 
-    static HttpBase transformRequest(Task task, HttpGet requestIn, BaseChannel channelTransform) {
+    static HttpBase transformRequest(Task task, HttpGet requestIn, IBaseChannel channelTransform) {
         HttpGet requestOut = new HttpGet()
 
         channelTransform.transformRequest(requestIn, requestOut)
@@ -302,13 +302,13 @@ class ProxyServlet extends HttpServlet {
         requestOut
     }
 
-    static URI transformRequestUri(Task task, HttpBase requestIn, BaseChannel channelTransform) {
+    static URI transformRequestUri(Task task, HttpBase requestIn, IBaseChannel channelTransform) {
 
         channelTransform.transformRequestUrl(task.event.simStore.endpoint, requestIn)
 
     }
 
-    static HttpBase transformResponse(Task task, HttpBase responseIn, BaseChannel channelTransform) {
+    static HttpBase transformResponse(Task task, HttpBase responseIn, IBaseChannel channelTransform) {
         HttpBase responseOut = new HttpGet()  // here GET vs POST does not matter
 
         channelTransform.transformResponse(responseIn, responseOut)
