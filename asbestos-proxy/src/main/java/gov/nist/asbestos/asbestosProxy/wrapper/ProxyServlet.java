@@ -12,7 +12,12 @@ import gov.nist.asbestos.http.operations.HttpBase;
 import gov.nist.asbestos.http.operations.HttpGet;
 import gov.nist.asbestos.http.operations.HttpPost;
 import gov.nist.asbestos.http.operations.Verb;
+import gov.nist.asbestos.sharedObjects.ChannelConfig;
+import gov.nist.asbestos.sharedObjects.ChannelConfigFactory;
+import gov.nist.asbestos.simapi.simCommon.SimId;
+import gov.nist.asbestos.simapi.simCommon.TestSession;
 import gov.nist.asbestos.simapi.tk.installation.Installation;
+import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 
 import javax.servlet.ServletConfig;
@@ -20,8 +25,12 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.IOException;
 import java.net.URI;
+import java.nio.charset.Charset;
 import java.util.*;
 
 class ProxyServlet extends HttpServlet {
@@ -95,10 +104,7 @@ class ProxyServlet extends HttpServlet {
             requestOut.run();
 
             // log response from backend service
-            backSideTask.select();
-            backSideTask.getEvent().putResponseHeader(requestOut.getResponseHeaders());
-            logResponseBody(backSideTask, requestOut);
-            log.info("==> " + requestOut.getStatus() + " " +  ((requestOut.getResponse() != null) ? requestOut.getResponseContentType() : "NULL"));
+            logResponse(backSideTask, requestOut);
 
             // transform backend service response for client
             HttpBase responseOut = transformResponse(event.getStore().selectTask(Task.CLIENT_TASK), requestOut, channel);
@@ -140,19 +146,19 @@ class ProxyServlet extends HttpServlet {
             if (simStore == null)
                 return;
 
-            String channelType = simStore.getConfig().getChannelType();
+            String channelType = simStore.getChannelConfig().getChannelType();
             if (channelType == null)
                 throw new Exception("Sim " + simStore.getChannelId() + " does not define a Channel Type.");
-            BaseChannel channel = (BaseChannel) proxyMap.get(channelType);
+            IBaseChannel channel = (IBaseChannel) proxyMap.get(channelType);
             if (channel == null)
                 throw new Exception("Cannot create Channel of type " + channelType);
 
-            channel.setup(simStore.getConfig());
+            channel.setup(simStore.getChannelConfig());
 
             // handle non-channel requests
             if (!simStore.isChannel()) {
                 Map<String, List<String>> parameters = req.getParameterMap();
-                String result = controlRequest(simStore, uri,parameters)
+                String result = controlRequest(simStore, uri,parameters);
                 resp.getOutputStream().print(result);
                 return;
             }
@@ -176,26 +182,21 @@ class ProxyServlet extends HttpServlet {
 
             // transform input request for backend service
             HttpBase requestOut = transformRequest(backSideTask, requestIn, channel);
-            requestOut.uri = transformRequestUri(backSideTask, requestIn, channel);
+            requestOut.setUri(transformRequestUri(backSideTask, requestIn, channel));
             requestOut.getRequestHeaders().setPathInfo(requestOut.getUri());
 
             // send request to backend service
             requestOut.run();
 
             // log response from backend service
-            backSideTask.select();
-            backSideTask.getEvent().putResponseHeader(requestOut.getResponseHeaders());
-            // TODO make this next line not seem to work
-            //backSideTask.event._responseHeaders = requestOut._responseHeaders
-            logResponseBody(backSideTask, requestOut);
-            log.info("==> " + requestOut.getStatus() + " " + (requestOut.getResponse() != null) ? requestOut.getResponseContentType() : "NULL");
+            logResponse(backSideTask, requestOut);
 
             // transform backend service response for client
             clientTask.select();
             HttpBase responseOut = transformResponse(event.getStore().selectTask(Task.CLIENT_TASK), requestOut, channel);
 
-            for (Header header : responseOut.getResponseHeaders().getAll()) {
-                resp.addHeader(header.getName(), header.getValue());
+            for (Header header : responseOut.getResponseHeaders().getHeaders()) {
+                resp.addHeader(header.getName(), header.getAllValuesAsString());
             }
             if (responseOut.getResponse() != null) {
                 resp.getOutputStream().write(responseOut.getResponse());
@@ -205,12 +206,21 @@ class ProxyServlet extends HttpServlet {
         } catch (Throwable t) {
             log.error(t.getMessage());
             resp.setStatus(resp.SC_INTERNAL_SERVER_ERROR);
-            return;
         }
     }
 
+    private static void logResponse(Task backSideTask, HttpBase requestOut) {
+        // log response from backend service
+        backSideTask.select();
+        backSideTask.getEventStore().putResponseHeader(requestOut.getResponseHeaders());
+        // TODO make this next line not seem to work
+        //backSideTask.event._responseHeaders = requestOut._responseHeaders
+        logResponseBody(backSideTask, requestOut);
+        log.info("==> " + requestOut.getStatus() + " " + ((requestOut.getResponse() != null) ? requestOut.getResponseContentType() : "NULL"));
+    }
+
     static HttpBase logRequestIn(Event event, HttpBase http, HttpServletRequest req, Verb verb) {
-        event.getStore().selectRequest();
+        event.getStore().selectClientTask();
 
         // Log headers
         List<String> names = Collections.list(req.getHeaderNames());
@@ -221,142 +231,138 @@ class ProxyServlet extends HttpServlet {
         }
         Headers headers = new Headers(hdrs);
         headers.setVerb(verb.toString());
-        headers.set = "${verb} ${req.pathInfo} ${HttpBase.parameterMapToString(req.getParameterMap())}"
-        Headers headers = HeaderBuilder.parseHeaders(rawHeaders)
+        headers.setPathInfo(new URI(req.getPathInfo()));
 
-        event.store.putRequestHeader(headers)
-        http.requestHeaders = headers
+        event.getStore().putRequestHeader(headers);
+        http.setRequestHeaders(headers);
 
         // Log body of POST
         if (verb == Verb.POST) {
-            logRequestBody(event, headers, http, req)
+            logRequestBody(event, headers, http, req);
         }
 
         return http;
     }
 
-    static List<String> stringTypes = [
-            'application/fhir+json',
-            'application/json+fhir'
-    ]
+    private static List<String> stringTypes = Arrays.asList(
+            "application/fhir+json",
+            "application/json+fhir"
+    );
 
     static boolean isStringType(String type) {
-        type.startsWith('text') || stringTypes.contains(type)
+        return type.startsWith("text") || stringTypes.contains(type);
     }
 
-    static logRequestBody(Event event, Headers headers, HttpBase http, HttpServletRequest req) {
-        byte[] bytes = req.inputStream.bytes
-        event.store.putRequestBody(bytes)
-        http.request = bytes
-        String encoding = headers.getContentEncoding()
-        if (encoding == 'gzip') {
+    static void logRequestBody(Event event, Headers headers, HttpBase http, HttpServletRequest req) {
+        byte[] bytes = req.getInputStream().getBytes();
+        event.getStore().putRequestBody(bytes);
+        http.setRequest(bytes);
+        String encoding = headers.getContentEncoding().getAllValues().get(0);
+        if (encoding.equalsIgnoreCase("gzip")) {
             String txt = Gzip.unzipWithoutBase64(bytes)
-            event.store.putRequestBodyText(txt)
-            http.requestText = txt
-        } else if (headers.contentType == 'text/html') {
-            event.store.putRequestHTMLBody(bytes)
-            http.requestText = new String(bytes)
-        } else if (isStringType(headers.contentType)) {
-            http.requestText = new String(bytes)
+            event.getStore().putRequestBodyText(txt)
+            http.setRequest(txt.getBytes());
+        } else if (headers.getContentType().getAllValues().get(0).equalsIgnoreCase("text/html")) {
+            event.getStore().putRequestHTMLBody(bytes);
+            http.setRequestText(new String(bytes));
+        } else if (isStringType(headers.getContentType().getAllValues().get(0))) {
+            http.setRequestText(new String(bytes));
         }
     }
 
     static void logResponseBody(Task task, HttpBase http) {
-        task.select()
-        Headers headers = http.responseHeaders
-        byte[] bytes = http.response
-        task.event.putResponseBody(bytes)
-        String encoding = headers.getContentEncoding()
-        if (encoding == 'gzip') {
+        task.select();
+        Headers headers = http.getResponseHeaders();
+        byte[] bytes = http.getResponse();
+        task.getEventStore().putResponseBody(bytes);
+        String encoding = headers.getContentEncoding().getAllValues().get(0);
+        if (encoding.equalsIgnoreCase("gzip")) {
             String txt = Gzip.unzipWithoutBase64(bytes)
-            task.event.putResponseBodyText(txt)
-            http.responseText = txt
-        } else if (headers.contentType == 'text/html') {
-            task.event.putResponseHTMLBody(bytes)
-            http.responseText = new String(bytes)
-        } else if (isStringType(headers.contentType)) {
-            http.responseText = new String(bytes)
+            task.getEventStore().putResponseBodyText(txt)
+            http.setResponseText(txt);
+        } else if (headers.getContentType().getAllValues().get(0).equalsIgnoreCase("text/html")) {
+            task.getEventStore().putResponseHTMLBody(bytes);
+            http.setResponseText(new String(bytes));
+        } else if (isStringType(headers.getContentType().getAllValues().get(0))) {
+            http.setResponseText(new String(bytes));
         }
     }
 
     static HttpBase transformRequest(Task task, HttpPost requestIn, IBaseChannel channelTransform) {
-        HttpPost requestOut = new HttpPost()
+        HttpPost requestOut = new HttpPost();
 
         channelTransform.transformRequest(requestIn, requestOut)
 
-        task.select()
-        task.event.putRequestHeader(requestOut.requestHeaders)
-        task.event.putRequestBody(requestOut.request)
+        task.select();
+        task.getEventStore().putRequestHeader(requestOut.getRequestHeaders());
+        task.getEventStore().putRequestBody(requestOut.getRequest());
 
-        requestOut
+        return requestOut;
     }
 
     static HttpBase transformRequest(Task task, HttpGet requestIn, IBaseChannel channelTransform) {
-        HttpGet requestOut = new HttpGet()
+        HttpGet requestOut = new HttpGet();
 
-        channelTransform.transformRequest(requestIn, requestOut)
+        channelTransform.transformRequest(requestIn, requestOut);
 
-        task.select()
-        task.event.putRequestHeader(requestOut.requestHeaders)
+        task.select();
+        task.getEventStore().putRequestHeader(requestOut.getRequestHeaders());
 
-        requestOut
+        return requestOut;
     }
 
     static URI transformRequestUri(Task task, HttpBase requestIn, IBaseChannel channelTransform) {
 
-        channelTransform.transformRequestUrl(task.event.simStore.endpoint, requestIn)
+        return channelTransform.transformRequestUrl(task.getEventStore().getEvent().getRequestHeaders().getPathInfo().getPath(), requestIn);
 
     }
 
     static HttpBase transformResponse(Task task, HttpBase responseIn, IBaseChannel channelTransform) {
-        HttpBase responseOut = new HttpGet()  // here GET vs POST does not matter
+        HttpBase responseOut = new HttpGet();  // here GET vs POST does not matter
 
-        channelTransform.transformResponse(responseIn, responseOut)
+        channelTransform.transformResponse(responseIn, responseOut);
 
-        responseOut.responseHeaders.removeHeader('transfer-encoding')
+        responseOut.getResponseHeaders().removeHeader("transfer-encoding");
 
-        task.select()
+        task.select();
         //task.event.putResponseHeader(responseIn.responseHeaders)
-        task.event.putResponseBody(responseOut.response)
-        task.event.putResponseHeader(responseOut.responseHeaders)
-        logResponseBody(task, responseOut)
+        task.getEventStore().putResponseBody(responseOut.getResponse());
+        task.getEventStore().putResponseHeader(responseOut.getResponseHeaders());
+        logResponseBody(task, responseOut);
 
-        responseOut
+        return responseOut;
     }
 
-/**
- *
- * @param uri
- * @param req
- * @param resp
- * @param isDelete
- * @return SimStore
- */
-    SimStore parseUri(URI uri, HttpServletRequest req, HttpServletResponse resp, Verb verb) {
-        List<String> uriParts = uri.path.split('/') as List<String>
-        SimStore simStore = new SimStore(externalCache)  // temp - will be overwritten
+    SimStore parseUri(URI uri, HttpServletRequest req, HttpServletResponse resp, Verb verb) throws IOException {
+        List<String> uriParts = Arrays.asList(uri.getPath().split("/"));
+        SimStore simStore = new SimStore(externalCache);  // temp - will be overwritten
 
-        if (uriParts.size() == 3 && uriParts[2] == 'prox' && verb != Verb.DELETE) {
+        if (uriParts.size() == 3 && uriParts.get(2).equals("prox") && verb != Verb.DELETE) {
             // CREATE
             // /appContext/prox
             // control channel - request to create proxy channel
             // can be done with GET or POST
 
-            String parmameterString = uri.getQuery()
+            String parmameterString = uri.getQuery();
 
             if (verb == Verb.POST) {
-                String rawRequest = req.inputStream.text   // json
-                log.debug "CREATESIM ${rawRequest}"
-                simStore = SimStoreBuilder.builder(externalCache, SimStoreBuilder.buildSimConfig(rawRequest))
+                String rawRequest = IOUtils.toString(req.getInputStream(), Charset.defaultCharset());   // json
+                log.debug("CREATESIM " + rawRequest);
+                ChannelConfig channelConfig = ChannelConfigFactory.convert(rawRequest);
+                simStore = new SimStore(externalCache, new SimId(new TestSession(channelConfig.getTestSession()),
+                        channelConfig.getChannelId(),
+                        channelConfig.getActorType(),
+                        channelConfig.getEnvironment(),
+                        true));
 
-                resp.contentType = 'application/json'
-                resp.outputStream.print(rawRequest)
+                resp.setContentType("application/json");
+                resp.getOutputStream().print(rawRequest);
 
 
-                resp.setStatus((simStore.newlyCreated ? resp.SC_CREATED : resp.SC_OK))
-                log.info 'OK'
-                return null  // trigger - we are done - exit now
-            } else  if (parmameterString) {  // GET with parameters - also CREATE SIM
+                resp.setStatus((simStore.isNewlyCreated() ? resp.SC_CREATED : resp.SC_OK))
+                log.info("OK");
+                return null;  // trigger - we are done - exit now
+            } else  if (parmameterString != null) {  // GET with parameters - also CREATE SIM
                 Map<String, List<String>> queryMap = HttpBase.mapFromQuery(parmameterString)
                 String json = JsonOutput.toJson(HttpBase.flattenQueryMap(queryMap))
                 simStore = SimStoreBuilder.builder(externalCache, SimStoreBuilder.buildSimConfig(json))

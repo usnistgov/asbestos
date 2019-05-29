@@ -18,6 +18,15 @@ public class Headers {
         this.headers = headerList;
     }
 
+    public void removeHeader(String name) {
+        for (Header header : headers) {
+            if (header.getName().equalsIgnoreCase(name)) {
+                headers.remove(header);
+                return;
+            }
+        }
+    }
+
     public Headers addAll(Headers theHeaders) {
         this.headers.addAll(theHeaders.headers);
         return this;
@@ -61,6 +70,10 @@ public class Headers {
             });
 
         }
+    }
+
+    public List<Header> getHeaders() {
+        return headers;
     }
 
     public List<String> getNames() {

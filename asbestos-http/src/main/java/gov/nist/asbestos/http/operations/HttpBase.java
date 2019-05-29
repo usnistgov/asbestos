@@ -161,6 +161,10 @@ abstract public class HttpBase {
         this.uri = uri;
     }
 
+    public URI getUri() {
+        return uri;
+    }
+
     public int getStatus() {
         return status;
     }

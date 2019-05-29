@@ -105,6 +105,14 @@ public class EventStore {
         return selectTask(-1);
     }
 
+    public SimStore getSimStore() {
+        return simStore;
+    }
+
+    public Event getEvent() {
+        return e;
+    }
+
 //    /**
 //     * select request as current
 //     * @return
@@ -246,7 +254,7 @@ public class EventStore {
         }
     }
 
-    void putRequestHTMLBody(byte[] body) {
+    public void putRequestHTMLBody(byte[] body) {
         current.mkdirs();
         putRequestBody(body);
         String bodyString = new String(body);

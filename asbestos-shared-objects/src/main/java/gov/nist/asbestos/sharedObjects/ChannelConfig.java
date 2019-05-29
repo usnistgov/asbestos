@@ -1,4 +1,4 @@
-package gov.nist.asbestos.asbestosProxy.channel;
+package gov.nist.asbestos.sharedObjects;
 
 import java.net.URI;
 import java.net.URISyntaxException;

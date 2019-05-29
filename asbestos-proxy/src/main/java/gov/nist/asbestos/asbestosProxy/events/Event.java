@@ -48,4 +48,8 @@ public class Event {
     public String getEventId() {
         return eventId;
     }
+
+    public Headers getRequestHeaders() {
+        return _requestHeaders;
+    }
 }

@@ -1,8 +1,8 @@
 package gov.nist.asbestos.asbestosProxy.log;
 
 
-import gov.nist.asbestos.asbestosProxy.channel.ChannelConfig;
-import gov.nist.asbestos.asbestosProxy.channel.ChannelConfigFactory;
+import gov.nist.asbestos.sharedObjects.ChannelConfig;
+import gov.nist.asbestos.sharedObjects.ChannelConfigFactory;
 import gov.nist.asbestos.simapi.simCommon.SimId;
 import gov.nist.asbestos.simapi.simCommon.TestSession;
 

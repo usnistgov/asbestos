@@ -1,7 +1,7 @@
 package gov.nist.asbestos.asbestosProxy.log;
 
 
-import gov.nist.asbestos.asbestosProxy.channel.ChannelConfig;
+import gov.nist.asbestos.sharedObjects.ChannelConfig;
 import gov.nist.asbestos.asbestosProxy.events.Event;
 import gov.nist.asbestos.asbestosProxy.events.EventStore;
 import gov.nist.asbestos.simapi.simCommon.SimId;
@@ -253,6 +253,10 @@ public class SimStore {
 
     public ChannelConfig getChannelConfig() {
         return channelConfig;
+    }
+
+    public boolean isNewlyCreated() {
+        return newlyCreated;
     }
 
     //    public static String asFilenameBase(Date date) {

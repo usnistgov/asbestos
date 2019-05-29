@@ -2,6 +2,7 @@ package gov.nist.asbestos.asbestosProxy.channel;
 
 
 import gov.nist.asbestos.asbestosProxy.events.EventStore;
+import gov.nist.asbestos.sharedObjects.ChannelConfig;
 
 /**
  * Defines a proxy channel.

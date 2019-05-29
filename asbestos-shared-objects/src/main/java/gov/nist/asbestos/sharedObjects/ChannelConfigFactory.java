@@ -1,4 +1,4 @@
-package gov.nist.asbestos.asbestosProxy.channel;
+package gov.nist.asbestos.sharedObjects;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -20,6 +20,24 @@ public class ChannelConfigFactory {
         ObjectMapper objectMapper = new ObjectMapper();
         try {
             objectMapper.writerWithDefaultPrettyPrinter().writeValue(new FileOutputStream(file), config);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static ChannelConfig convert(String string) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            return objectMapper.readValue(string, ChannelConfig.class);
+        } catch (Exception e ) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static String convert(ChannelConfig config) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(config);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

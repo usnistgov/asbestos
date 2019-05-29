@@ -1,6 +1,6 @@
 package gov.nist.asbestos.asbestosProxy.channels.passthrough;
 
-import gov.nist.asbestos.asbestosProxy.channel.ChannelConfig;
+import gov.nist.asbestos.sharedObjects.ChannelConfig;
 import gov.nist.asbestos.asbestosProxy.channel.IBaseChannel;
 import gov.nist.asbestos.asbestosProxy.events.EventStore;
 import gov.nist.asbestos.http.headers.Headers;
