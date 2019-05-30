@@ -235,6 +235,10 @@ public class SimStore {
         return resource;
     }
 
+    public void setResource(String resource) {
+        this.resource = resource;
+    }
+
     public String getEventId() {
         return eventId;
     }
@@ -249,6 +253,10 @@ public class SimStore {
 
     public boolean isChannel() {
         return channel;
+    }
+
+    public void setChannel(boolean channel) {
+        this.channel = channel;
     }
 
     public ChannelConfig getChannelConfig() {

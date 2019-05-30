@@ -141,16 +141,16 @@ abstract public class HttpBase {
         return pb.parameterMap;
     }
 
-    public static Map<String, String> flattenQueryMap(Map<String, List<String>> queryMap) throws Exception {
+    public static Map<String, String> flattenQueryMap(Map<String, List<String>> queryMap) {
         Map<String, String> map = new HashMap<>();
 
         for (Map.Entry<String, List<String>> entry : queryMap.entrySet()) {
             String name = entry.getKey();
             List<String> values = entry.getValue();
             if (values.size() == 0)
-                throw new Exception("HttpBase#flttenQueryMap: called with empty value list for parameter " + name);
+                throw new RuntimeException("HttpBase#flttenQueryMap: called with empty value list for parameter " + name);
             if (values.size() > 1)
-                throw new Exception("HttpBase#flttenQueryMap: called with value list for parameter " + name + " containing multiple values");
+                throw new RuntimeException("HttpBase#flttenQueryMap: called with value list for parameter " + name + " containing multiple values");
             map.put(name, values.get(0));
         }
 

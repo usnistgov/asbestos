@@ -9,7 +9,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
-class Ref {
+public class Ref {
     private URI uri;
     private IBaseResource resource = null;
 
@@ -18,12 +18,12 @@ class Ref {
         this.uri = uri;
     }
 
-    public Ref(String ref) throws Exception {
+    public Ref(String ref)  {
         Objects.requireNonNull(ref);
         uri = build(ref);
     }
 
-    public Ref(String base, String resourceType, String id) throws Exception {
+    public Ref(String base, String resourceType, String id)  {
         String theRef;
         if (id == null || id.equals(""))
             theRef = String.join("/", base, resourceType);
@@ -32,7 +32,7 @@ class Ref {
         uri = build(theRef);
     }
 
-    public Ref(Ref base, String resourceType, String id) throws Exception {
+    public Ref(Ref base, String resourceType, String id)  {
         String theRef;
         if (id == null || id.equals(""))
             theRef = String.join("/", base.toString(), resourceType);
@@ -156,11 +156,15 @@ class Ref {
         return Objects.hash(uri, resource);
     }
 
-    private URI build(String ref) throws Exception {
+    private URI build(String ref) {
         if (ref.startsWith("#")) {
             ref = ref.substring(1);
         }
-        return new URI(ref);
+        try {
+            return new URI(ref);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     static private List<String> resourceNames = Arrays.asList(

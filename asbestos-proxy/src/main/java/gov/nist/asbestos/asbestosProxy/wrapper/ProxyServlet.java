@@ -1,11 +1,13 @@
 package gov.nist.asbestos.asbestosProxy.wrapper;
 
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import gov.nist.asbestos.asbestosProxy.channel.IBaseChannel;
 import gov.nist.asbestos.asbestosProxy.channels.passthrough.PassthroughChannel;
 import gov.nist.asbestos.asbestosProxy.events.Event;
 import gov.nist.asbestos.asbestosProxy.log.SimStore;
 import gov.nist.asbestos.asbestosProxy.log.Task;
+import gov.nist.asbestos.asbestosProxy.util.Gzip;
 import gov.nist.asbestos.http.headers.Header;
 import gov.nist.asbestos.http.headers.Headers;
 import gov.nist.asbestos.http.operations.HttpBase;
@@ -32,6 +34,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.util.*;
+import java.util.stream.IntStream;
 
 class ProxyServlet extends HttpServlet {
     static Logger log = Logger.getLogger(ProxyServlet.class);
@@ -231,7 +234,11 @@ class ProxyServlet extends HttpServlet {
         }
         Headers headers = new Headers(hdrs);
         headers.setVerb(verb.toString());
-        headers.setPathInfo(new URI(req.getPathInfo()));
+        try {
+            headers.setPathInfo(new URI(req.getPathInfo()));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
 
         event.getStore().putRequestHeader(headers);
         http.setRequestHeaders(headers);
@@ -254,13 +261,18 @@ class ProxyServlet extends HttpServlet {
     }
 
     static void logRequestBody(Event event, Headers headers, HttpBase http, HttpServletRequest req) {
-        byte[] bytes = req.getInputStream().getBytes();
+        byte[] bytes;
+        try {
+            bytes = IOUtils.toByteArray(req.getInputStream());
+        } catch (Exception e) {
+            throw new  RuntimeException(e);
+        }
         event.getStore().putRequestBody(bytes);
         http.setRequest(bytes);
         String encoding = headers.getContentEncoding().getAllValues().get(0);
         if (encoding.equalsIgnoreCase("gzip")) {
-            String txt = Gzip.unzipWithoutBase64(bytes)
-            event.getStore().putRequestBodyText(txt)
+            String txt = Gzip.decompressGZIP(bytes);
+            event.getStore().putRequestBodyText(txt);
             http.setRequest(txt.getBytes());
         } else if (headers.getContentType().getAllValues().get(0).equalsIgnoreCase("text/html")) {
             event.getStore().putRequestHTMLBody(bytes);
@@ -277,8 +289,8 @@ class ProxyServlet extends HttpServlet {
         task.getEventStore().putResponseBody(bytes);
         String encoding = headers.getContentEncoding().getAllValues().get(0);
         if (encoding.equalsIgnoreCase("gzip")) {
-            String txt = Gzip.unzipWithoutBase64(bytes)
-            task.getEventStore().putResponseBodyText(txt)
+            String txt = Gzip.decompressGZIP(bytes);
+            task.getEventStore().putResponseBodyText(txt);
             http.setResponseText(txt);
         } else if (headers.getContentType().getAllValues().get(0).equalsIgnoreCase("text/html")) {
             task.getEventStore().putResponseHTMLBody(bytes);
@@ -291,7 +303,7 @@ class ProxyServlet extends HttpServlet {
     static HttpBase transformRequest(Task task, HttpPost requestIn, IBaseChannel channelTransform) {
         HttpPost requestOut = new HttpPost();
 
-        channelTransform.transformRequest(requestIn, requestOut)
+        channelTransform.transformRequest(requestIn, requestOut);
 
         task.select();
         task.getEventStore().putRequestHeader(requestOut.getRequestHeaders());
@@ -359,118 +371,114 @@ class ProxyServlet extends HttpServlet {
                 resp.getOutputStream().print(rawRequest);
 
 
-                resp.setStatus((simStore.isNewlyCreated() ? resp.SC_CREATED : resp.SC_OK))
+                resp.setStatus((simStore.isNewlyCreated() ? resp.SC_CREATED : resp.SC_OK));
                 log.info("OK");
                 return null;  // trigger - we are done - exit now
             } else  if (parmameterString != null) {  // GET with parameters - also CREATE SIM
-                Map<String, List<String>> queryMap = HttpBase.mapFromQuery(parmameterString)
-                String json = JsonOutput.toJson(HttpBase.flattenQueryMap(queryMap))
-                simStore = SimStoreBuilder.builder(externalCache, SimStoreBuilder.buildSimConfig(json))
+                Map<String, List<String>> queryMap = HttpBase.mapFromQuery(parmameterString);
+                String json = new ObjectMapper().writeValueAsString(HttpBase.flattenQueryMap(queryMap));
+                ChannelConfig channelConfig = ChannelConfigFactory.convert(json);
+                SimId simId = new SimId(new TestSession(channelConfig.getTestSession()), channelConfig.getChannelId());
+                simStore = new SimStore(externalCache, simId);
 
-                resp.contentType = 'application/json'
-                resp.outputStream.print(json)
+                resp.setContentType("application/json");
+                resp.getOutputStream().print(json);
 
 
-                resp.setStatus((simStore.newlyCreated ? resp.SC_CREATED : resp.SC_OK))
-                log.info 'OK'
-                return null
+                resp.setStatus((simStore.isNewlyCreated() ? resp.SC_CREATED : resp.SC_OK));
+                log.info("OK");
+                return null;
             }
         }
 
-        SimId simId = null
+        SimId simId = null;
 
         if (uriParts.size() >= 4) {
             // /appContext/prox/channelId
-            if (uriParts[0] == '' && uriParts[2] == 'prox') { // no appContext
-                simId = SimId.buildFromRawId(uriParts[3])
+            if (uriParts.get(0).equals("") && uriParts.get(2).equals("prox")) { // no appContext
+                simId = SimId.buildFromRawId(uriParts.get(3));
+                simStore.setChannelId(simId);
 
-                uriParts.remove(0)  // leasing empty string
-                uriParts.remove(0)  // appContext
-                uriParts.remove(0)  // prox
-                uriParts.remove(0)  // channelId
+                uriParts.remove(0);  // leasing empty string
+                uriParts.remove(0);  // appContext
+                uriParts.remove(0);  // prox
+                uriParts.remove(0);  // channelId
 
-                try {
-                    SimStoreBuilder.sense(externalCache, simId.testSession, simId.id)
-                } catch (Throwable t) {
+                if (!simStore.exists()) {
                     if (verb == Verb.DELETE)
-                        resp.setStatus(resp.SC_OK)
+                        resp.setStatus(resp.SC_OK);
                     else
-                        resp.setStatus(resp.SC_NOT_FOUND)
-                    return
+                        resp.setStatus(resp.SC_NOT_FOUND);
+                    return null;
                 }
-                if (uriParts.empty && verb == Verb.GET) {
+                if (uriParts.isEmpty() && verb == Verb.GET) {
                     // return channel config
-                    ChannelConfig config = simStore.config
-                    String json = new JsonBuilder(config).toPrettyString()
-                    resp.contentType = 'application/json'
-                    resp.outputStream.print(json)
-                    return
+                    String json = ChannelConfigFactory.convert(simStore.getChannelConfig());
+                    resp.setContentType("application/json");
+                    resp.getOutputStream().print(json);
+                    return null;
                 }
             }
-        }
+            else
+                return null;
+        }  else
+            return null;
 
         //
         // everything above this is handling control operations
         // starting with this load of simStore, normal channel operations begin
         //
 
-        simStore = SimStoreBuilder.sense(externalCache, simId.testSession, simId.id)
+        simStore = new SimStore(externalCache, simId);
 
         if (verb == Verb.DELETE) {
-            boolean status = simStore.deleteSim()
-            assert status : "Proxy: Delete of ${simId} failed"
-            return null
+            simStore.deleteSim();
+            return null;
         }
 
-        simStore = SimStoreBuilder.loader(externalCache, simId.testSession, simId.id)
-
-        assert simStore.channelId : "ProxyServlet: request to ${uri} - ChannelId must be present in URI\n"
+        simStore = new SimStore(externalCache, simId);
 
         // ChannelId has been established - from now all errors result in Event logging
-
-
 
         // the request targets a Channel - maybe a control message or a pass through.
         // pass through have Channel/ as the next element of the URI
 
 
-        if (!uriParts.empty) {
-            simStore.channel = uriParts[0] == 'Channel'   // Channel -> message passes through to backend system
-            uriParts.remove(0)
+        if (!uriParts.isEmpty()) {
+            simStore.setChannel(uriParts.get(0).equals("Channel"));   // Channel -> message passes through to backend system
+            uriParts.remove(0);
         }
 
-//        assert simStore.isChannel() : "Proxy: Bad URL ${uri} - Channel/ must be present"
-
-        if (!uriParts.empty) {
-            simStore.resource = uriParts[0]
-            uriParts.remove(0)
+        if (!uriParts.isEmpty()) {
+            simStore.setResource(uriParts.get(0));
+            uriParts.remove(0);
         }
-
-//        assert simStore.resource : "Proxy: no resource specified ${uri}"
 
         // verify that proxy exists - only if this is a channel to a backend system
         if (simStore.isChannel())
-            simStore.getStore()  // exception if proxy does not exist
+            simStore.getStore();  // exception if proxy does not exist
 
-        log.debug "Sim ${simStore.channelId} ${simStore.actor} ${simStore.resource}"
+        log.debug("Sim " + simStore.getChannelId() + " " +  simStore.getActorType() + " " + simStore.getResource());
 
-        return simStore // expect content
+        return simStore; // expect content
 
     }
 
     // /appContext/prox/channelId/?
     static String controlRequest(SimStore simStore, URI uri, Map<String, List<String>> parameters) {
-        List<String> uriParts = uri.path.split('/') as List<String>
-        assert uriParts.size() > 4 : "Proxy control request - do not understand URI ${uri}\n"
-        (1..4).each { uriParts.remove(0) }
+        List<String> uriParts = Arrays.asList(uri.getPath().split("/"));
+        if (uriParts.size() <= 4)
+            throw new RuntimeException("Proxy control request - do not understand URI " + uri);
+        IntStream.rangeClosed(1, 4)
+                .forEach(x -> uriParts.remove(0));
 
-        String type = uriParts[0]
-        uriParts.remove(0)
+        String type = uriParts.get(0);
+        uriParts.remove(0);
 
-        if (type == 'Event') {
-            return EventRequestHandler.eventRequest(simStore, uriParts, parameters)
+        if (type.equals("Event")) {
+            return EventRequestHandler.eventRequest(simStore, uriParts, parameters);
         }
-        assert true : "Proxy: Do not understand control request type ${type} of ${uri}\n"
+        throw new RuntimeException("Proxy: Do not understand control request type " + type + " of " + uri);
     }
 
 }

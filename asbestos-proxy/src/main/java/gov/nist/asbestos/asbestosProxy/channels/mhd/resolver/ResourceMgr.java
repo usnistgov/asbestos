@@ -1,62 +1,66 @@
-package gov.nist.asbestos.asbestosProxy.channels.mhd.resolver
+package gov.nist.asbestos.asbestosProxy.channels.mhd.resolver;
 
-import gov.nist.asbestos.fproxy.Base.IVal
-import gov.nist.asbestos.fproxy.channels.mhd.transactionSupport.ResourceWrapper
-import gov.nist.asbestos.simapi.validation.Val
 
-import groovy.transform.TypeChecked
+import gov.nist.asbestos.asbestosProxy.Base.IVal;
+import gov.nist.asbestos.asbestosProxy.channels.mhd.transactionSupport.ResourceWrapper;
+import gov.nist.asbestos.simapi.validation.Val;
+import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Resource;
 
-import org.hl7.fhir.r4.model.Bundle
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 
 /**
  *
  */
-@TypeChecked
-class ResourceMgr implements IVal {
+public class ResourceMgr implements IVal {
 //    static private final Logger logger = Logger.getLogger(ResourceMgr.class);
-    Map<Ref, ResourceWrapper> resources = [:]   // url -> resource
-    ResourceCacheMgr resourceCacheMgr = null
-    Val val
+    private Map<Ref, ResourceWrapper> resources = new HashMap<>();   // url -> resource
+    private ResourceCacheMgr resourceCacheMgr = null;
+    private Val val;
 
-    ResourceMgr(Bundle bundle) {
-        if (bundle)
-            parse(bundle)
+    public ResourceMgr(Bundle bundle) {
+        if (bundle != null)
+            parse(bundle);
     }
 
-    ResourceMgr addResourceCacheMgr(ResourceCacheMgr resourceCacheMgr) {
-        this.resourceCacheMgr = resourceCacheMgr
-        this
+    public ResourceMgr addResourceCacheMgr(ResourceCacheMgr resourceCacheMgr) {
+        this.resourceCacheMgr = resourceCacheMgr;
+        return this;
     }
 
     // Load bundle and assign symbolic ids
-    void parse(Bundle bundle) {
-        assert val
-        Val thisVal = val.addSection("Load Bundle...")
+    public void parse(Bundle bundle) {
+        Objects.requireNonNull(bundle);
+        Objects.requireNonNull(val);
+        Val thisVal = val.addSection("Load Bundle...");
         thisVal.add(new Val()
-                .msg('All objects assigned symbolic IDs')
-                .frameworkDoc('3.65.4.1.2 Message Semantics'))
-        bundle.getEntry().each { Bundle.BundleEntryComponent component ->
+                .msg("All objects assigned symbolic IDs")
+                .frameworkDoc("3.65.4.1.2 Message Semantics"));
+        bundle.getEntry().forEach(component -> {
             if (component.hasResource()) {
-                String id = allocateSymbolicId()
-                thisVal.msg("Assigning ${id} to ${component.resource.class.simpleName}/${component.resource.idElement.value}")
-                ResourceWrapper wrapper = new ResourceWrapper(component.resource)
+                String id = allocateSymbolicId();
+                thisVal.msg("Assigning ${id} to ${component.resource.class.simpleName}/${component.resource.idElement.value}");
+                ResourceWrapper wrapper = new ResourceWrapper(component.getResource())
                         .setId(id)
-                        .setUrl(new Ref(component.fullUrl))
+                        .setUrl(new Ref(component.getFullUrl()));
 
-                thisVal.add("...${component.fullUrl}")
-                addResource(new Ref(component.fullUrl), wrapper)
+                thisVal.add("..." + component.getFullUrl());
+                addResource(new Ref(component.getFullUrl()), wrapper);
             }
-        }
+        });
     }
 
-    String toString() {
-        StringBuilder buf = new StringBuilder()
-        buf.append("Resources:\n")
+    public String toString() {
+        StringBuilder buf = new StringBuilder();
+        buf.append("Resources:\n");
 
-        resources.each { url, resource ->
-            buf.append(url).append('   ').append(resource.class.simpleName).append('\n')
+        for (Ref ref : resources.keySet()) {
+            ResourceWrapper resource = resources.get(ref);
+            buf.append(ref).append("   ").append(resource.getClass().getSimpleName()).append('\n');
         }
-        buf
+        return buf.toString();
     }
 
     /**
@@ -178,4 +182,9 @@ class ResourceMgr implements IVal {
         "ID${symbolicIdCounter++}"
     }
 
+
+    @Override
+    public void setVal(Val val) {
+        this.val = val;
+    }
 }

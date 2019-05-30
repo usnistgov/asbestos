@@ -1,17 +1,14 @@
 package gov.nist.asbestos.asbestosProxy.channels.mhd.transactions
 
-import gov.nist.asbestos.fproxy.Base.IVal
-import gov.nist.asbestos.fproxy.channels.mhd.resolver.Ref
-import gov.nist.asbestos.fproxy.channels.mhd.resolver.ResolverConfig
-import gov.nist.asbestos.fproxy.channels.mhd.resolver.ResourceCacheMgr
-import gov.nist.asbestos.fproxy.channels.mhd.resolver.ResourceMgr
-import gov.nist.asbestos.fproxy.channels.mhd.transactionSupport.*
-import gov.nist.asbestos.simapi.validation.Val
-import groovy.xml.MarkupBuilder
+
+import gov.nist.asbestos.asbestosProxy.Base.IVal;
+import gov.nist.asbestos.asbestosProxy.channels.mhd.resolver.ResourceCacheMgr;
 import org.hl7.fhir.r4.model.*
 import org.hl7.fhir.instance.model.api.IBaseResource
 
 import javax.xml.bind.DatatypeConverter
+import java.util.List;
+import java.util.Map;
 
 /**
  *
@@ -33,8 +30,8 @@ import javax.xml.bind.DatatypeConverter
  * ExtrinsicObject id = ID07
  */
 
-// @TypeChecked - not because of use of MarkupBuilder
-class BundleToRegistryObjectList implements IVal {
+
+public class BundleToRegistryObjectList implements IVal {
 //    static private final Logger logger = Logger.getLogger(BundleToRegistryObjectList.class)
     static acceptableResourceTypes = [DocumentManifest, DocumentReference, Binary, ListResource]
     static String comprehensiveMetadataProfile = 'http://ihe.net/fhir/StructureDefinition/IHE_MHD_Provide_Comprehensive_DocumentBundle'
