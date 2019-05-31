@@ -1,30 +1,32 @@
-package gov.nist.asbestos.asbestosProxy.channels.mhd.resolver
+package gov.nist.asbestos.asbestosProxy.channels.mhd.resolver;
 
-import gov.nist.asbestos.fproxy.channels.mhd.transactionSupport.ResourceWrapper
-import groovy.transform.TypeChecked
 
-@TypeChecked
-class MemoryResourceCache implements ResourceCache {
-    Map<Ref, ResourceWrapper> cache = [:]
+import gov.nist.asbestos.asbestosProxy.channels.mhd.transactionSupport.ResourceWrapper;
+
+import java.util.HashMap;
+import java.util.Map;
+
+public class MemoryResourceCache implements ResourceCache {
+    private Map<Ref, ResourceWrapper> cache = new HashMap<>();
 
     @Override
-    ResourceWrapper readResource(Ref url) {
-        cache[url]
+    public ResourceWrapper readResource(Ref url) {
+        return cache.get(url);
     }
 
     @Override
-    void add(Ref ref, ResourceWrapper resource) {
-        cache[ref] = resource
+    public void add(Ref ref, ResourceWrapper resource) {
+        cache.put(ref, resource);
     }
 
     @Override
-    String toString() {
-        StringBuilder buf = new StringBuilder()
+    public String toString() {
+        StringBuilder buf = new StringBuilder();
 
-        cache.each { Ref key, ResourceWrapper wrapper ->
-            buf.append("(MEM ${key} -> ${wrapper})\n")
-        }
+        cache.forEach((Ref ref, ResourceWrapper wrapper) -> {
+            buf.append("(MEM ").append(ref.toString()).append(" -> ").append(wrapper.toString()).append("\n");
+        });
 
-        buf.toString()
+        return buf.toString();
     }
 }

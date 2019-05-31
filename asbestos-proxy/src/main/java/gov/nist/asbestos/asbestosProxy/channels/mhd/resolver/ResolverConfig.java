@@ -1,55 +1,55 @@
-package gov.nist.asbestos.asbestosProxy.channels.mhd.resolver
+package gov.nist.asbestos.asbestosProxy.channels.mhd.resolver;
 /**
  * used to configure ResourceMgr
  */
 class ResolverConfig {
-    boolean relativeReferenceOk = true
-    boolean relativeReferenceRequired = false
+    boolean relativeReferenceOk = true;
+    boolean relativeReferenceRequired = false;
 
-    boolean externalRequired = false
-    boolean internalRequired = false
+    boolean externalRequired = false;
+    boolean internalRequired = false;
 
-    boolean containedOk = false
-    boolean containedRequired = false
+    boolean containedOk = false;
+    boolean containedRequired = false;
 
     ResolverConfig noRelative() {
-        relativeReferenceOk = false
-        this
+        relativeReferenceOk = false;
+        return this;
     }
 
     ResolverConfig relativeRequired() {
-        relativeReferenceRequired = true
-        this
+        relativeReferenceRequired = true;
+        return this;
     }
 
     ResolverConfig externalRequired() {
-        externalRequired = true
-        this
+        externalRequired = true;
+        return this;
     }
 
     ResolverConfig internalRequired() {
-        internalRequired = true
-        this
+        internalRequired = true;
+        return this;
     }
 
     ResolverConfig containedOk() {
-        containedOk = true
-        this
+        containedOk = true;
+        return this;
     }
 
     ResolverConfig containedRequired() {
-        containedRequired = true
-        containedOk = true
-        this
+        containedRequired = true;
+        containedOk = true;
+        return this;
     }
 
-    String toString() {
-        ((!relativeReferenceOk) ? " relativeNotAllowed" : '') +
-                ((relativeReferenceRequired) ? " relativeRequired" : '') +
-                ((externalRequired) ? " externalRequired" : '') +
-                ((internalRequired) ? " internalRequired" : '') +
-                ((containedOk) ? " containedOk" : '') +
-                ((containedRequired) ? " containedRequired" : '')
+    public String toString() {
+        return ((!relativeReferenceOk) ? " relativeNotAllowed" : "") +
+                ((relativeReferenceRequired) ? " relativeRequired" : "") +
+                ((externalRequired) ? " externalRequired" : "") +
+                ((internalRequired) ? " internalRequired" : "") +
+                ((containedOk) ? " containedOk" : "") +
+                ((containedRequired) ? " containedRequired" : "");
     }
 
 }

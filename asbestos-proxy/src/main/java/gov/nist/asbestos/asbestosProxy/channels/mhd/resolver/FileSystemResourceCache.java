@@ -1,51 +1,89 @@
-package gov.nist.asbestos.asbestosProxy.channels.mhd.resolver
+package gov.nist.asbestos.asbestosProxy.channels.mhd.resolver;
 
-import ca.uhn.fhir.context.FhirContext
-import gov.nist.asbestos.fproxy.channels.mhd.transactionSupport.ResourceWrapper
-import groovy.transform.TypeChecked
-import org.apache.log4j.Logger
+import ca.uhn.fhir.context.FhirContext;
+
+import gov.nist.asbestos.asbestosProxy.channels.mhd.transactionSupport.ResourceWrapper;
+import jdk.nashorn.internal.runtime.ECMAException;
+import org.apache.commons.io.IOUtils;
+import org.apache.log4j.Logger;
+
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.util.Properties;
+
 /**
  * Local cache of FHIR resources
  */
-@TypeChecked
-class FileSystemResourceCache implements ResourceCache {
-    private static final Logger logger = Logger.getLogger(FileSystemResourceCache.class)
-    static FhirContext ctx = FhirContext.forR4()
+public class FileSystemResourceCache implements ResourceCache {
+    private static final Logger logger = Logger.getLogger(FileSystemResourceCache.class);
+    private static FhirContext ctx = FhirContext.forR4();
 
-    private File cacheDir
-    Ref base
+    private File cacheDir;
+    private Ref base;
 
-    FileSystemResourceCache(File cacheDir) {
-        this.cacheDir = cacheDir
-        File propFile = new File(cacheDir, 'cache.properties')
-        assert propFile.exists() : "${cacheDir}/cache.properties does not exist"
-        Properties props = new Properties()
-        propFile.withInputStream { InputStream is -> props.load(is) }
-        String aBase = props.getProperty('baseUrl')
-        base = new Ref(aBase)
-        logger.info("New Resource cache: ${base}  --> ${cacheDir}")
+    public FileSystemResourceCache(File cacheDir) {
+        this.cacheDir = cacheDir;
+        File propFile = new File(cacheDir, "cache.properties");
+        if (!propFile.exists())
+            throw new RuntimeException(cacheDir + "/cache.properties does not exist");
+        Properties props = new Properties();
+        InputStream is = null;
+        try {
+            is = new FileInputStream(propFile);
+            props.load(is);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        } finally {
+            if (is != null) {
+                try {
+                    is.close();
+                } catch (Exception e) {
+                    ;
+                }
+            }
+        }
+        String aBase = props.getProperty("baseUrl");
+        base = new Ref(aBase);
+        logger.info("New Resource cache: " + base + " --> " + cacheDir);
     }
 
-    ResourceWrapper readResource(Ref url) {
-        File file = cacheFile(url, 'xml')
+    public ResourceWrapper readResource(Ref url) {
+        File file = cacheFile(url, "xml");
         if (file.exists())
-            return new ResourceWrapper(ctx.newXmlParser().parseResource(file.text))
-        file = cacheFile(url, 'json')
+            return new ResourceWrapper(ctx.newXmlParser().parseResource(fileToString(file)));
+        file = cacheFile(url, "json");
         if (file.exists())
-            return new ResourceWrapper(ctx.newJsonParser().parseResource(file.text))
-        return null
+            return new ResourceWrapper(ctx.newJsonParser().parseResource(fileToString(file)));
+        return null;
+    }
+
+    private String fileToString(File file) {
+        InputStream  is = null;
+        try {
+            is = new FileInputStream(file);
+            return IOUtils.toString(is, "UTF-8");
+        } catch (Exception e) {
+            if (is != null)
+                try {
+                    is.close();
+                } catch (Exception e1) {
+
+                }
+            throw new RuntimeException(e);
+        }
     }
 
     // TODO implement
     @Override
-    void add(Ref ref, ResourceWrapper resource) {
+    public void add(Ref ref, ResourceWrapper resource) {
 
     }
 
-    private File cacheFile(Ref relativeUrl, fileType) {
-        assert !relativeUrl.isAbsolute()
-        String type = relativeUrl.resourceType
-        String id = relativeUrl.id + ((fileType) ? ".${fileType}" : '')
-        return new File(new File(cacheDir, type), id)
+    private File cacheFile(Ref relativeUrl, String fileType) {
+        String type = relativeUrl.getResourceType();
+        String id = relativeUrl.getId() + ((fileType != null) ? "." + fileType : "");
+        return new File(new File(cacheDir, type), id);
     }
 }

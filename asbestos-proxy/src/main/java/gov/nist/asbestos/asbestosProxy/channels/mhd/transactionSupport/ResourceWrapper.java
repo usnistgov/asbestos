@@ -63,4 +63,20 @@ public class ResourceWrapper {
 
         return buf.toString();
     }
+
+    public IBaseResource getResource() {
+        return resource;
+    }
+
+    public Map<Ref, ResourceWrapper> getContained() {
+        return contained;
+    }
+
+    public Ref getUrl() {
+        return url;
+    }
+
+    public String getAssignedId() {
+        return assignedId;
+    }
 }

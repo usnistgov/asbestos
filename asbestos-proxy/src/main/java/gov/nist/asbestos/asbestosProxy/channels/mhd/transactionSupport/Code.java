@@ -1,12 +1,12 @@
-package gov.nist.asbestos.asbestosProxy.channels.mhd.transactionSupport
+package gov.nist.asbestos.asbestosProxy.channels.mhd.transactionSupport;
 
 
 public class Code {
-    private String code
-    private String codingScheme
-    private String display
-    private String system
-    private boolean deprecated
+    String code;
+    String codingScheme;
+    String display;
+    String system;
+    boolean deprecated;
 
     public Code (MarkupBuilder xml) {
         code = xml.@code

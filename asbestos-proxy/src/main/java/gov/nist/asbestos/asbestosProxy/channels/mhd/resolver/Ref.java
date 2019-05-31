@@ -71,7 +71,7 @@ public class Ref {
         return "";
     }
 
-    public Ref getRelative() throws Exception {  // without base
+    public Ref getRelative() {  // without base
         String path = uri.getPath();
         List<String> parts = Arrays.asList(path.split("/"));
         for (int i=0; i<parts.size(); i++) {
@@ -81,7 +81,7 @@ public class Ref {
         return new Ref("");
     }
 
-    public Ref getBase() throws Exception {
+    public Ref getBase() {
         String path = uri.toString();
         List<String> parts = Arrays.asList(path.split("/"));
         for (int i=0; i<parts.size(); i++) {
@@ -91,33 +91,33 @@ public class Ref {
         return new Ref(uri.toString());
     }
 
-    public Ref withNewId(String newId) throws Exception {
+    public Ref withNewId(String newId) {
         Objects.requireNonNull(newId);
         return new Ref(getBase(), getResourceType(), newId);
     }
 
-    public Ref rebase(String newBase) throws Exception {
+    public Ref rebase(String newBase) {
         Objects.requireNonNull(newBase);
         Ref theBase = new Ref(newBase).getBase();
         return new Ref(theBase, getRelative().toString(), null);
     }
 
     // TODO needs test
-    public Ref rebase(Ref newBase) throws Exception {
+    public Ref rebase(Ref newBase) {
         Objects.requireNonNull(newBase);
         return new Ref(newBase.getBase(), getRelative().toString(), null);
     }
 
-    public Ref getFull() throws Exception {  // without version
+    public Ref getFull()  {  // without version
         String baseStr = getBase().toString();
         String resourceTypeStr = getResourceType();
         String idStr = getId();
         boolean hasScheme = uri.getScheme() != null;
-        if (!hasScheme && baseStr != null && resourceTypeStr != null && idStr != null)
+        if (!hasScheme && baseStr != null && resourceTypeStr != null && !idStr.isEmpty())
             return new Ref(baseStr, resourceTypeStr, idStr);
-        if (!hasScheme && resourceTypeStr != null && idStr == null)
+        if (!hasScheme && resourceTypeStr != null && idStr.isEmpty())
             return new Ref(getResourceType());
-        if (!hasScheme && resourceTypeStr != null && idStr != null)
+        if (!hasScheme && resourceTypeStr != null)
             return new Ref(String.format("%s/%s", resourceTypeStr, idStr));
         if (uri.toString().contains("_history"))
             return new Ref(uri.toString().split("/_history", 2)[0]);
@@ -131,10 +131,14 @@ public class Ref {
         return parts[1];
     }
 
-    public boolean isAbsolute() throws Exception {
-        return StringUtils.isEmpty(uri.getScheme()) &&
-                StringUtils.isEmpty(getBase().toString()) &&
-                        StringUtils.isEmpty(getId());
+    public boolean isAbsolute() {
+        try {
+            return StringUtils.isEmpty(uri.getScheme()) &&
+                    StringUtils.isEmpty(getBase().toString()) &&
+                    StringUtils.isEmpty(getId());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
