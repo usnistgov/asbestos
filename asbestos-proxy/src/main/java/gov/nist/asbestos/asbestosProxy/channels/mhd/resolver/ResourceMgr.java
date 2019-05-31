@@ -181,7 +181,7 @@ public class ResourceMgr implements IVal {
     }
 
     private int symbolicIdCounter = 1;
-    String allocateSymbolicId() {
+    public String allocateSymbolicId() {
         return "ID" + Integer.toString(symbolicIdCounter++);
     }
 

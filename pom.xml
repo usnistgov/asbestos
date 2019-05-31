@@ -42,8 +42,9 @@
         <module>asbestos-shared-objects</module>
         <module>asbestos-proxy</module>
         <module>asbestos-toolkit-api</module>
-        <module>asbestos-jaxb</module>
         <!--<module>asbestos-simapi-extra</module>-->
+        <module>asbestos-codes-jaxb</module>
+        <module>asbestos-xds-jaxb</module>
     </modules>
 
     <dependencyManagement>

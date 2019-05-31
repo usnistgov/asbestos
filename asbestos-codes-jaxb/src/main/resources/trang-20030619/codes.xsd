@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
+  <xs:element name="Codes">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element maxOccurs="unbounded" ref="CodeType"/>
+        <xs:element maxOccurs="unbounded" ref="AssigningAuthority"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="CodeType">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element maxOccurs="unbounded" ref="Code"/>
+      </xs:sequence>
+      <xs:attribute name="classScheme" type="xs:anyURI"/>
+      <xs:attribute name="name" use="required" type="xs:NCName"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="Code">
+    <xs:complexType>
+      <xs:attribute name="code" use="required" type="xs:anyURI"/>
+      <xs:attribute name="codingScheme" type="xs:NMTOKEN"/>
+      <xs:attribute name="display"/>
+      <xs:attribute name="ext" type="xs:NCName"/>
+      <xs:attribute name="system" type="xs:anyURI"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="AssigningAuthority">
+    <xs:complexType>
+      <xs:attribute name="display" use="required" type="xs:NCName"/>
+      <xs:attribute name="id" use="required"/>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

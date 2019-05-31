@@ -1,14 +1,28 @@
-package gov.nist.asbestos.asbestosProxy.channels.mhd.transactions
+package gov.nist.asbestos.asbestosProxy.channels.mhd.transactions;
 
 
 import gov.nist.asbestos.asbestosProxy.Base.IVal;
+import gov.nist.asbestos.asbestosProxy.channels.mhd.resolver.Ref;
 import gov.nist.asbestos.asbestosProxy.channels.mhd.resolver.ResourceCacheMgr;
-import org.hl7.fhir.r4.model.*
-import org.hl7.fhir.instance.model.api.IBaseResource
+import gov.nist.asbestos.asbestosProxy.channels.mhd.resolver.ResourceMgr;
+import gov.nist.asbestos.asbestosProxy.channels.mhd.transactionSupport.AssigningAuthorities;
+import gov.nist.asbestos.asbestosProxy.channels.mhd.transactionSupport.CodeTranslator;
+import gov.nist.asbestos.asbestosProxy.channels.mhd.transactionSupport.ResourceWrapper;
+import gov.nist.asbestos.asbestosProxy.channels.mhd.transactionSupport.Submission;
+import gov.nist.asbestos.simapi.validation.Val;
+import groovy.xml.MarkupBuilder;
+import oasis.names.tc.ebxml_regrep.xsd.rim._3.ExtrinsicObjectType;
+import oasis.names.tc.ebxml_regrep.xsd.rim._3.RegistryObjectType;
+import oasis.names.tc.ebxml_regrep.xsd.rim._3.SlotType1;
+import oasis.names.tc.ebxml_regrep.xsd.rim._3.ValueListType;
+import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 
-import javax.xml.bind.DatatypeConverter
-import java.util.List;
-import java.util.Map;
+import javax.xml.bind.DatatypeConverter;
+import java.io.StringWriter;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  *
@@ -33,47 +47,49 @@ import java.util.Map;
 
 public class BundleToRegistryObjectList implements IVal {
 //    static private final Logger logger = Logger.getLogger(BundleToRegistryObjectList.class)
-    static acceptableResourceTypes = [DocumentManifest, DocumentReference, Binary, ListResource]
-    static String comprehensiveMetadataProfile = 'http://ihe.net/fhir/StructureDefinition/IHE_MHD_Provide_Comprehensive_DocumentBundle'
-    static String minimalMetadataProfile = 'http://ihe.net/fhir/StructureDefinition/IHE_MHD_Provide_Minimal_DocumentBundle'
-    static List<String> profiles = [comprehensiveMetadataProfile, minimalMetadataProfile]
-    static String baseContentId = '.de1e4efca5ccc4886c8528535d2afb251e0d5fa31d58a815@ihexds.nist.gov'
-    static String mhdProfileRef = 'MHD Profile - Rev 3.1'
-    static Map<String, String> typeMap = [
-            replaces: 'urn:ihe:iti:2007:AssociationType:RPLC',
-            transforms: 'urn:ihe:iti:2007:AssociationType:XFRM',
-            signs: 'urn:ihe:iti:2007:AssociationType:signs',
-            appends: 'urn:ihe:iti:2007:AssociationType:APND'
-    ]
+    private static List<Class<?>> acceptableResourceTypes = Arrays.asList(DocumentManifest.class, DocumentReference.class, Binary.class, ListResource.class);
+    private static String comprehensiveMetadataProfile = "http://ihe.net/fhir/StructureDefinition/IHE_MHD_Provide_Comprehensive_DocumentBundle";
+    private static String minimalMetadataProfile = "http://ihe.net/fhir/StructureDefinition/IHE_MHD_Provide_Minimal_DocumentBundle";
+    private static List<String> profiles = Arrays.asList(comprehensiveMetadataProfile, minimalMetadataProfile);
+    private static String baseContentId = ".de1e4efca5ccc4886c8528535d2afb251e0d5fa31d58a815@ihexds.nist.gov";
+    private static String mhdProfileRef = "MHD Profile - Rev 3.1";
+    private static Map<String, String> buildTypeMap() {
+        return Collections.unmodifiableMap(Stream.of(
+                new AbstractMap.SimpleEntry<>("replaces", "urn:ihe:iti:2007:AssociationType:RPLC"),
+                new AbstractMap.SimpleEntry<>("transforms", "urn:ihe:iti:2007:AssociationType:XFRM"),
+                new AbstractMap.SimpleEntry<>("signs", "urn:ihe:iti:2007:AssociationType:signs"),
+                new AbstractMap.SimpleEntry<>("appends", "urn:ihe:iti:2007:AssociationType:APND"))
+                .collect(Collectors.toMap(AbstractMap.SimpleEntry::getKey, AbstractMap.SimpleEntry::getValue)));
+    }
 
-    ResourceCacheMgr resourceCacheMgr
-    CodeTranslator codeTranslator
-    Configuration config
-    AssigningAuthorities assigningAuthorities
-    Map<String, String> documents = [:]  // symbolidId -> contentId
-    ResourceMgr rMgr
-    String bundleProfile
-    Val val
+    private ResourceCacheMgr resourceCacheMgr;
+    private CodeTranslator codeTranslator;
+    private Configuration config;
+    private AssigningAuthorities assigningAuthorities;
+    private Map<String, String> documents = new HashMap<>();  // symbolidId -> contentId
+    private ResourceMgr rMgr;
+    private String bundleProfile;
+    private Val val;
 
 
     BundleToRegistryObjectList(ResourceCacheMgr resourceCacheMgr, CodeTranslator codeTranslator, AssigningAuthorities assigningAuthorities, Configuration config) {
-        this.resourceCacheMgr = resourceCacheMgr
-        this.codeTranslator = codeTranslator
-        this.assigningAuthorities = assigningAuthorities
-        this.config = config
-        this.val = val
+        this.resourceCacheMgr = resourceCacheMgr;
+        this.codeTranslator = codeTranslator;
+        this.assigningAuthorities = assigningAuthorities;
+        this.config = config;
     }
 
-    Submission build(Bundle bundle) {
-        assert val
-        rMgr = new ResourceMgr(bundle).addResourceCacheMgr(resourceCacheMgr)
-        rMgr.val = val
-        scanBundleForAcceptability(bundle, rMgr)
+    public Submission build(Bundle bundle) {
+        Objects.requireNonNull(val);
+        Objects.requireNonNull(bundle);
+        rMgr = new ResourceMgr(bundle).addResourceCacheMgr(resourceCacheMgr);
+        rMgr.setVal(val);
+        scanBundleForAcceptability(bundle, rMgr);
 
-        Submission submission = buildRegistryObjectList()
+        Submission submission = buildRegistryObjectList();
 
-        def writer = new StringWriter()
-        MarkupBuilder builder = new MarkupBuilder(writer)
+        StringWriter writer = new StringWriter();
+        MarkupBuilder builder = new MarkupBuilder(writer);
         submission.documentIdToContentId.each { id, contentId ->
             addDocument(builder, id, contentId)
         }
@@ -225,24 +241,44 @@ public class BundleToRegistryObjectList implements IVal {
      * @param dr - DocumentReference to source from
      * @return
      */
-    private addExtrinsicObject(MarkupBuilder builder, ResourceWrapper resource) {
-        DocumentReference dr = (DocumentReference) resource.resource
-        assert dr.content, 'DocumentReference has no content section'
-        assert dr.content.size() == 1, 'DocumentReference has multiple content sections'
-        assert dr.content[0].attachment, 'DocumentReference has no content/attachment'
+    private ExtrinsicObjectType addExtrinsicObject(ResourceWrapper resource) {
+        DocumentReference dr = (DocumentReference) resource.getResource();
+        if (dr.getContent() == null || dr.getContent().isEmpty()) {
+            val.err(new Val("DocumentReference has no content section"));
+            return null;
+        }
+        if (dr.getContent().size() > 1) {
+            val.err(new Val("DocumentReference has multiple content sections"));
+            return null;
+        }
+        if (dr.getContent().get(0).getAttachment() == null) {
+            val.err(new Val("DocumentReference has no content/attachment"));
+            return null;
+        }
 
+        ExtrinsicObjectType eo = new ExtrinsicObjectType();
 
-        if (!resource.assignedId)
-            resource.assignedId = rMgr.allocateSymbolicId()
+        DocumentReference.DocumentReferenceContextComponent context = dr.getContext();
+        DocumentReference.DocumentReferenceContentComponent content = dr.getContent().get(0);
 
-        builder.ExtrinsicObject(
-                id: resource.assignedId,
-                objectType:'urn:uuid:7edca82f-054d-47f2-a032-9b2a5b5186c1',
-                mimeType: dr.content[0].attachment.contentType)
-                {
-                    // 20130701231133
-                    if (dr.indexed)
-                        addSlot(builder, 'creationTime', [translateDateTime(dr.indexed)])
+        if (resource.getAssignedId() == null)
+            resource.setId(rMgr.allocateSymbolicId());
+
+        eo.setId(resource.getAssignedId());
+        eo.setObjectType("urn:uuid:7edca82f-054d-47f2-a032-9b2a5b5186c1");
+        eo.setMimeType(content.getAttachment().getContentType());
+        if (dr.getDate() != null)
+            addSlot(eo, "creationTime", translateDateTime(dr.getDate()));
+
+        if (context != null) {
+            Period period = context.getPeriod();
+            if (period != null) {
+                if (period.hasStart()) {
+                    Date start = period.getStart();
+                    addSlot(eo, "", translateDateTime(start));
+                }
+            }
+        }
 
                     if (dr.context?.period?.start)
                         addSlot(builder, 'serviceStartTime', [translateDateTime(dr.context.period.start)])
@@ -320,6 +356,14 @@ public class BundleToRegistryObjectList implements IVal {
                     }
 
                 }
+    }
+
+    private void addSlot(RegistryObjectType registryObject, String name, String value) {
+        SlotType1 slot = new SlotType1();
+        slot.setName(name);
+        ValueListType valueList = new ValueListType();
+        valueList.getValue().add(value);
+        registryObject.getSlot().add(slot);
     }
 
     /**

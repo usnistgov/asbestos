@@ -3,7 +3,7 @@ package gov.nist.asbestos.asbestosProxy.channels.mhd.transactionSupport;
 /**
  *
  */
-class Submission {
+public class Submission {
 // TODO insert real To address
 
 

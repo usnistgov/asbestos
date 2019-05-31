@@ -14,6 +14,11 @@
     <dependencies>
         <dependency>
             <groupId>gov.nist.asbestos</groupId>
+            <artifactId>asbestos-xds-jaxb</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>gov.nist.asbestos</groupId>
             <artifactId>asbestos-shared-objects</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
