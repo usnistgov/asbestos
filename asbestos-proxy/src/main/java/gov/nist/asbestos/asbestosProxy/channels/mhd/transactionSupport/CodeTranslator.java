@@ -1,87 +1,86 @@
 package gov.nist.asbestos.asbestosProxy.channels.mhd.transactionSupport;
 
-import org.w3c.dom.Document;
-import org.w3c.dom.NamedNodeMap;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
+import gov.nist.asbestos.asbestorCodesJaxb.*;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import java.io.ByteArrayInputStream;
-import java.util.ArrayList;
-import java.util.List;
-
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.Unmarshaller;
+import java.io.File;
+import java.util.Objects;
+import java.util.Optional;
 
 public class CodeTranslator {
-    List<CodeType> codeTypes = new ArrayList<>();
+    private Codes codes;
 
-    public CodeTranslator(String codesXmlFileContent) {
-        parse(codesXmlFileContent);
-    }
-
-    private void parse(String stringXML) {
-        DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-        Document document = builder.parse(new ByteArrayInputStream(stringXML.getBytes()));
-        NodeList codeTypesNL = document.getElementsByTagName("CodeType");
-        for (int i=0; i<codeTypesNL.getLength(); i++) {
-            Node codeTypeNode = codeTypesNL.item(i);
-            NamedNodeMap codeTypeNodeMap = codeTypeNode.getAttributes();
-            Node nameItem = codeTypeNodeMap.getNamedItem("name");
-            String name = nameItem.getNodeValue();
-            Node classSchemeItem = codeTypeNodeMap.getNamedItem("classScheme");
-            String classScheme = classSchemeItem.getNodeValue();
-            CodeType codeType = new CodeType(name, classScheme);
-            codeTypes.add(codeType);
-            NodeList codeTypeNL = codeTypeNode.getChildNodes();
-            for (int j=0; j<codeTypeNL.getLength(); j++) {
-                Node codeNode =  codeTypeNL.item(j);
-
-            }
-        }
-
-
-
-        def codes = new XmlSlurper().parseText(stringXML)
-
-        codes.CodeType.each { codeTypeEle ->
-            CodeType codeType = new CodeType(codeTypeEle)
-            codeTypes << codeType
-            codeTypeEle.Code.each { codeEle ->
-                codeType.codes << new Code(codeEle)
-            }
+    public CodeTranslator(File codesXmlFile) {
+        try {
+            JAXBContext jaxbContext = JAXBContext.newInstance(Codes.class);
+            Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
+            codes = (Codes) unmarshaller.unmarshal(codesXmlFile);
+        } catch (Exception e) {
+            throw new RuntimeException("Cannot load codes.xml from " + codesXmlFile, e);
         }
     }
 
-    public Code findCodeBySystem(String systemCodeType, String system, String code) {
-        codeTypes.find { it.name == systemCodeType }.codes.find { it.system == system && it.code == code }
+
+
+    public Optional<Code> findCodeBySystem(String theName, String theSystem, String theCode) {
+        Objects.requireNonNull(theName);
+        Objects.requireNonNull(theSystem);
+        Objects.requireNonNull(theCode);
+        Optional<CodeType> codeType = codes.getCodeType().stream()
+                .filter(codetype -> theName.equals(codetype.getName()))
+                .findFirst();
+        return codeType.flatMap(codeType1 -> codeType1.getCode().stream()
+                .filter(code -> code.getSystem().equals(theSystem) && code.getCode().equals(theCode))
+                .findFirst());
     }
 
-    public Code findCodeByClassificationAndSystem(String classification, String system, String code) {
-        def codeType = codeTypes.find { it.classScheme == classification }
-        codeType.codes.find { it.system == system && it.code == code }
+    public Optional<Code> findCodeByClassificationAndSystem(String theClassification, String theSystem, String theCode) {
+        Objects.requireNonNull(theClassification);
+        Objects.requireNonNull(theSystem);
+        Objects.requireNonNull(theCode);
+        Optional<CodeType> codeType = codes.getCodeType().stream()
+                .filter(codetype -> theClassification.equals(codetype.getClassScheme()))
+                .findFirst();
+        return codeType.flatMap(codeType1 -> codeType1.getCode().stream()
+        .filter(code -> code.getSystem().equals(theSystem) && code.getCode().equals(theCode))
+        .findFirst());
     }
 
+    public static final String CONFCODE = "urn:uuid:f4f85eac-e6cb-4883-b524-f2705394840f";
+    public static final String HCFTCODE = "urn:uuid:f33fb8ac-18af-42cc-ae0e-ed0b0bdb91e1";
+    public static final String PRACCODE = "urn:uuid:cccf5598-8b07-4b77-a05e-ae952c785ead";
+    public static final String EVENTCODE = "urn:uuid:2c6b8cb7-8b2a-4051-b291-b1ae6a575ef4";
+    public static final String FOLDERCODE = "urn:uuid:1ba97051-7806-41a8-a48b-8fce7af683c5";
+    public static final String TYPECODE = "urn:uuid:f0306f51-975f-434e-a61c-c59651d33983";
+    public static final String CONTENTTYPECODE = "urn:uuid:aa543740-bdda-424e-8c96-df4873be8500";
+    public static final String CLASSCODE = "urn:uuid:41a5887f-8865-4c09-adf7-e362475b143a";
+    public static final String FORMATCODE = "urn:uuid:a09d5840-386c-46f2-b5ad-9c3699a4309d";
 
-    static final String CONFCODE = "confidentialityCode";
-    static final String HCFTCODE = "healthcareFacilityTypeCode";
-    static final String PRACCODE = "practiceSettingCode";
-    static final String EVENTCODE = "eventCodeList";
-    static final String FOLDERCODE = "folderCodeList";
-    static final String TYPECODE = "typeCode";
-    static final String CONTENTTYPECODE = "contentTypeCode";
-    static final String CLASSCODE = "classCode";
-    static final String FORMATCODE = "formatCode";
+    // other non-codes
+    public static final String UNIQUEID = "urn:uuid:2e82c1f6-a085-4c72-9da3-8640a32e42ab";
+    public static final String DEPID = "urn:uuid:58a6f841-87b3-4a3e-92fd-a8ffeff98427";
+
+    static final String CONFCODENAME = "confidentialityCode";
+    static final String HCFTCODENAME = "healthcareFacilityTypeCode";
+    static final String PRACCODENAME = "practiceSettingCode";
+    static final String EVENTCODENAME = "eventCodeList";
+    static final String FOLDERCODENAME = "folderCodeList";
+    static final String TYPECODENAME = "typeCode";
+    static final String CONTENTTYPECODENAME = "contentTypeCode";
+    static final String CLASSCODENAME = "classCode";
+    static final String FORMATCODENAME = "formatCode";
 
     String[] systemCodeTypes = {
-            CONFCODE,
-            HCFTCODE,
-            PRACCODE,
-            EVENTCODE,
-            FOLDERCODE,
-            TYPECODE,
-            CONTENTTYPECODE,
-            CLASSCODE,
-            FORMATCODE
+            CONFCODENAME,
+            HCFTCODENAME,
+            PRACCODENAME,
+            EVENTCODENAME,
+            FOLDERCODENAME,
+            TYPECODENAME,
+            CONTENTTYPECODENAME,
+            CLASSCODENAME,
+            FORMATCODENAME
     };
 
 }

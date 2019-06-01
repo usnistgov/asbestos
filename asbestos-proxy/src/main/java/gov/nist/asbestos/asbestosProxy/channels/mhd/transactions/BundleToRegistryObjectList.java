@@ -1,8 +1,10 @@
 package gov.nist.asbestos.asbestosProxy.channels.mhd.transactions;
 
 
+import gov.nist.asbestos.asbestorCodesJaxb.Code;
 import gov.nist.asbestos.asbestosProxy.Base.IVal;
 import gov.nist.asbestos.asbestosProxy.channels.mhd.resolver.Ref;
+import gov.nist.asbestos.asbestosProxy.channels.mhd.resolver.ResolverConfig;
 import gov.nist.asbestos.asbestosProxy.channels.mhd.resolver.ResourceCacheMgr;
 import gov.nist.asbestos.asbestosProxy.channels.mhd.resolver.ResourceMgr;
 import gov.nist.asbestos.asbestosProxy.channels.mhd.transactionSupport.AssigningAuthorities;
@@ -11,10 +13,7 @@ import gov.nist.asbestos.asbestosProxy.channels.mhd.transactionSupport.ResourceW
 import gov.nist.asbestos.asbestosProxy.channels.mhd.transactionSupport.Submission;
 import gov.nist.asbestos.simapi.validation.Val;
 import groovy.xml.MarkupBuilder;
-import oasis.names.tc.ebxml_regrep.xsd.rim._3.ExtrinsicObjectType;
-import oasis.names.tc.ebxml_regrep.xsd.rim._3.RegistryObjectType;
-import oasis.names.tc.ebxml_regrep.xsd.rim._3.SlotType1;
-import oasis.names.tc.ebxml_regrep.xsd.rim._3.ValueListType;
+import oasis.names.tc.ebxml_regrep.xsd.rim._3.*;
 import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
@@ -233,14 +232,6 @@ public class BundleToRegistryObjectList implements IVal {
         }
     }
 
-    /**
-     * add ExtrinsicObject.
-     * Official Identifier (entryUUID) must be set and will be used in translation.
-     * @param builder
-     * @param fullUrl
-     * @param dr - DocumentReference to source from
-     * @return
-     */
     private ExtrinsicObjectType addExtrinsicObject(ResourceWrapper resource) {
         DocumentReference dr = (DocumentReference) resource.getResource();
         if (dr.getContent() == null || dr.getContent().isEmpty()) {
@@ -260,6 +251,7 @@ public class BundleToRegistryObjectList implements IVal {
 
         DocumentReference.DocumentReferenceContextComponent context = dr.getContext();
         DocumentReference.DocumentReferenceContentComponent content = dr.getContent().get(0);
+        Attachment attachment = content.getAttachment();
 
         if (resource.getAssignedId() == null)
             resource.setId(rMgr.allocateSymbolicId());
@@ -274,80 +266,54 @@ public class BundleToRegistryObjectList implements IVal {
             Period period = context.getPeriod();
             if (period != null) {
                 if (period.hasStart()) {
-                    Date start = period.getStart();
-                    addSlot(eo, "", translateDateTime(start));
+                    addSlot(eo, "serviceStartTime", translateDateTime(period.getStart()));
+                }
+                if (period.hasEnd()) {
+                    addSlot(eo, "serviceStopTime", translateDateTime(period.getEnd()));
                 }
             }
+            if (context.hasSourcePatientInfo())
+                addSourcePatientInfo(eo, resource, context.getSourcePatientInfo());
+            if (context.hasFacilityType())
+                addClassificationFromCodeableConcept(eo, context.getFacilityType(), CodeTranslator.HCFTCODE, resource.getAssignedId());
+            if (context.hasPracticeSetting())
+                addClassificationFromCodeableConcept(eo, context.getPracticeSetting(), CodeTranslator.PRACCODE, resource.getAssignedId());
+            if (context.hasEvent())
+                addClassificationFromCodeableConcept(eo, context.getEventFirstRep(), CodeTranslator.EVENTCODE, resource.getAssignedId());
+        }
+        if (attachment.hasLanguage())
+            addSlot(eo, "languageCode", attachment.getLanguage());
+        if (attachment.hasUrl())
+            addSlot(eo, "repositoryUniqueId", attachment.getUrl());
+        if (attachment.hasHash()) {
+            Base64BinaryType hash64 = attachment.getHashElement();
+            val.add("base64Binary is " + hash64.asStringValue());
+            byte[] hash = hash64.getValue();
+            String hashString = DatatypeConverter.printHexBinary(hash).toLowerCase();
+            val.add(new Val().msg("hexBinary is " + hashString));
+            addSlot(eo, "hash", hashString);
+        }
+        if (dr.hasDescription())
+            addName(eo, dr.getDescription());
+        if (dr.hasType())
+            addClassificationFromCodeableConcept(eo, dr.getType(), CodeTranslator.TYPECODE, resource.getAssignedId());
+        if (dr.hasCategory())
+            addClassificationFromCodeableConcept(eo, dr.getCategoryFirstRep(), CodeTranslator.CLASSCODE, resource.getAssignedId());
+        if (dr.hasSecurityLabel())
+            addClassificationFromCoding(eo, dr.getSecurityLabel().get(0).getCoding().get(0), CodeTranslator.CONFCODE, resource.getAssignedId());
+        if(content.hasFormat())
+            addClassificationFromCoding(eo, dr.getContent().get(0).getFormat(), CodeTranslator.FORMATCODE, resource.getAssignedId());
+        if (!dr.hasMasterIdentifier())
+            val.err(new Val("DocumentReference.masterIdentifier not present - declared by IHE to be [1..1]"));
+        else
+            addExternalIdentifier(eo, CodeTranslator.UNIQUEID, unURN(dr.getMasterIdentifier().getValue()), rMgr.allocateSymbolicId(), resource.getAssignedId(), "XDSDocumentEntry.uniqueId");
+        if (dr.hasSubject() && dr.getSubject().hasReference()) {
+
         }
 
-                    if (dr.context?.period?.start)
-                        addSlot(builder, 'serviceStartTime', [translateDateTime(dr.context.period.start)])
-
-                    if (dr.context?.period?.end)
-                        addSlot(builder, 'serviceStopTime', [translateDateTime(dr.context.period.end)])
-
-                    if (dr.content[0].attachment.language)
-                        addSlot(builder, 'languageCode', dr.content.attachment.language)
-
-                    if (dr.content?.attachment?.url)
-                        addSlot(builder, 'repositoryUniqueId', dr.content.attachment.url)
-
-                    if (dr.content[0].attachment.hashElement.value) {
-                        Base64BinaryType hash64 = dr.content[0].attachment.hashElement
-                        //logger.info("value is ${hash64.getValue()}")
-                        val.add(new Val().msg("base64Binary is ${hash64.asStringValue()}"))
-                        byte[] hash = hash64.getValue() //DatatypeConverter.parseBase64Binary(hash64.asStringValue())
-                        val.add(new Val().msg("via groovy = ${hash.encodeHex().toString()}"))
-
-                        val.add(new Val().msg("encoded is ${hash.toString()}"))
-
-                        String hashString = DatatypeConverter.printHexBinary(hash).toLowerCase()
-                        val.add(new Val().msg("hexBinary is ${hashString}"))
-                        addSlot(builder, 'hash', [hashString])
-
-//                        byte[] hash = HashTranslator.toByteArray(hash64.toString())
-//                        byte[] hash = HashTranslator.toByteArrayFromBase64Binary(hash64.asStringValue())
-//                        String hashString = hash.encodeHex().toString() as String
-//                        addSlot(builder, 'hash', [hashString])
-                    }
-
-                    if (dr.context?.sourcePatientInfo)
-                        this.addSourcePatient(builder, resource, dr.context.sourcePatientInfo)
-
-                    if (dr.description)
-                        addName(builder, dr.description)
-
-                    if (dr.type)
-                        addClassificationFromCodeableConcept(builder, dr.type, 'urn:uuid:f0306f51-975f-434e-a61c-c59651d33983', resource.assignedId)
-
-                    if (dr.class_)
-                        addClassificationFromCodeableConcept(builder, dr.class_, 'urn:uuid:41a5887f-8865-4c09-adf7-e362475b143a', resource.assignedId)
-
-                    if (dr.securityLabel?.coding)
-                        addClassificationFromCoding(builder, dr.securityLabel[0].coding[0], 'urn:uuid:f4f85eac-e6cb-4883-b524-f2705394840f', resource.assignedId)
-
-                    if (dr.content.format.size() > 0) {
-                        Coding format = dr.content.format[0]
-                        if (format.system)
-                            addClassificationFromCoding(builder, dr.content[0].format, 'urn:uuid:a09d5840-386c-46f2-b5ad-9c3699a4309d', resource.assignedId)
-                    }
-
-                    if (dr.context?.facilityType)
-                        addClassificationFromCodeableConcept(builder, dr.context.facilityType, 'urn:uuid:f33fb8ac-18af-42cc-ae0e-ed0b0bdb91e1', resource.assignedId)
-
-                    if (dr.context?.practiceSetting)
-                        addClassificationFromCodeableConcept(builder, dr.context.practiceSetting, 'urn:uuid:cccf5598-8b07-4b77-a05e-ae952c785ead', resource.assignedId)
-
-                    if (dr.context?.event)
-                        addClassificationFromCodeableConcept(builder, dr.context.event?.first(), 'urn:uuid:2c6b8cb7-8b2a-4051-b291-b1ae6a575ef4', resource.assignedId)
-
-                    assert dr.masterIdentifier, 'DocumentReference.masterIdentifier not present - declared by IHE to be [1..1]'
-                    assert dr.masterIdentifier.value, 'DocumentReference.masterIdentifier has no value - declared by IHE to be [1..1]'
-                    String masterId = unURN(dr.masterIdentifier.value)
-                    addExternalIdentifier(builder, 'urn:uuid:2e82c1f6-a085-4c72-9da3-8640a32e42ab', masterId, rMgr.allocateSymbolicId(), resource.assignedId, 'XDSDocumentEntry.uniqueId')
 
                     if (dr.subject?.hasReference())
-                        addSubject(builder, resource,  new Ref(dr.subject), 'urn:uuid:58a6f841-87b3-4a3e-92fd-a8ffeff98427', 'XDSDocumentEntry.patientId')
+                        addSubject(eo, resource,  new Ref(dr.getSubject()), CodeTranslator.DEPID, "XDSDocumentEntry.patientId");
 
                     if (dr.author) {
                         dr.author.each { Reference ref ->
@@ -355,7 +321,15 @@ public class BundleToRegistryObjectList implements IVal {
                         }
                     }
 
-                }
+
+    }
+
+    private void addName(RegistryObjectType eo, String name) {
+        LocalizedStringType lst = new LocalizedStringType();
+        lst.setValue(name);
+        InternationalStringType ist = new InternationalStringType();
+        ist.getLocalizedString().add(lst);
+        eo.setName(ist);
     }
 
     private void addSlot(RegistryObjectType registryObject, String name, String value) {
@@ -421,14 +395,14 @@ public class BundleToRegistryObjectList implements IVal {
 
     // TODO must be absolute reference
     // TODO official identifiers must be changed
-    private addSubject(MarkupBuilder builder, ResourceWrapper resource, Ref referenced, String scheme, String attName) {
+    private void addSubject(RegistryObjectType ro, ResourceWrapper resource, Ref referenced, String scheme, String attName) {
 
-        ResourceWrapper loadedResource = rMgr.resolveReference(resource, referenced, new ResolverConfig().externalRequired())
+        ResourceWrapper loadedResource = rMgr.resolveReference(resource, referenced, new ResolverConfig().externalRequired());
         if (!loadedResource.url) {
             val.err(new Val()
                     .msg("${resource} makes reference to ${referenced}")
-                    .msg('All DocumentReference.subject and DocumentManifest.subject values shall be References to FHIR Patient Resources identified by an absolute external reference (URL).')
-                    .frameworkDoc('3.65.4.1.2.2 Patient Identity'))
+                    .msg("All DocumentReference.subject and DocumentManifest.subject values shall be References to FHIR Patient Resources identified by an absolute external reference (URL).")
+                    .frameworkDoc("3.65.4.1.2.2 Patient Identity"));
         }
         if (!(loadedResource.resource instanceof Patient))
             val.err(new Val()
@@ -444,33 +418,37 @@ public class BundleToRegistryObjectList implements IVal {
             addExternalIdentifier(builder, scheme, pid, rMgr.allocateSymbolicId(), resource.id, attName)
     }
 
-    private addExternalIdentifier(MarkupBuilder builder, String scheme, String value, String id, String registryObject, String name) {
-        val.add(new Val().msg("ExternalIdentifier ${scheme}"))
-        builder.ExternalIdentifier(
-                identificationScheme: scheme,
-                value: "${value}",
-                id: "${id}",
-                objectType: 'urn:oasis:names:tc:ebxml-regrep:ObjectType:RegistryObject:ExternalIdentifier',
-                registryObject: "${registryObject}") {
-            Name() {
-                LocalizedString(value: "${name}")
-            }
-        }
+    private void addExternalIdentifier(RegistryObjectType ro, String scheme, String value, String id, String registryObject, String name) {
+        val.add(new Val().msg("ExternalIdentifier " + scheme));
+        List<ExternalIdentifierType> eits = ro.getExternalIdentifier();
+        ExternalIdentifierType eit = new ExternalIdentifierType();
+        eit.setIdentificationScheme(scheme);
+        eit.setId(id);
+        eit.setRegistryObject(registryObject);
+        eit.setValue(value);
+        eit.setObjectType("urn:oasis:names:tc:ebxml-regrep:ObjectType:RegistryObject:ExternalIdentifier");
+
+        InternationalStringType ist = new InternationalStringType();
+        LocalizedStringType lst = new LocalizedStringType();
+        lst.setValue(name);
+        ist.getLocalizedString().add(lst);
+        eit.setName(ist);
     }
 
     // TODO - no profile guidance on how to convert coding.system URL to existing OIDs
 
-    private addClassificationFromCodeableConcept(MarkupBuilder builder, CodeableConcept cc, String scheme, String classifiedObjectId) {
-        Coding coding = cc.coding[0]
-        if (coding)
-            addClassificationFromCoding(builder, coding, scheme, classifiedObjectId)
+    private void addClassificationFromCodeableConcept(RegistryObjectType ro, CodeableConcept cc, String scheme, String classifiedObjectId) {
+        List<Coding> coding = cc.getCoding();
+        addClassificationFromCoding(ro, coding.get(0), scheme, classifiedObjectId);
     }
 
-    private addClassificationFromCoding(MarkupBuilder builder, Coding coding, String scheme, String classifiedObjectId) {
-        Code systemCode = codeTranslator.findCodeByClassificationAndSystem(scheme, coding.system, coding.code)
-        if (!systemCode)
-        val.err(new Val().msg("Cannot find translation for code ${coding.system}|${coding.code} (FHIR) into XDS coding scheme ${scheme} in configured codes.xml file"))
-        addClassification(builder, scheme, rMgr.allocateSymbolicId(), classifiedObjectId, coding.code, systemCode.codingScheme, coding.display)
+    private void addClassificationFromCoding(RegistryObjectType ro, Coding coding, String scheme, String classifiedObjectId) {
+        Optional<Code> systemCodeOpt = codeTranslator.findCodeByClassificationAndSystem(scheme, coding.getSystem(), coding.getCode());
+        if (systemCodeOpt.isPresent()) {
+            Code systemCode = systemCodeOpt.get();
+            addClassification(ro, scheme, rMgr.allocateSymbolicId(), classifiedObjectId, coding.getCode(), systemCode.getCodingScheme(), coding.getDisplay());
+        } else
+            val.err(new Val().msg("Cannot find translation for code ${coding.system}|${coding.code} (FHIR) into XDS coding scheme ${scheme} in configured codes.xml file"))
     }
 
     /**
@@ -484,17 +462,16 @@ public class BundleToRegistryObjectList implements IVal {
      * @param displayName
      * @return
      */
-    private addClassification(MarkupBuilder builder, String scheme, String id, String registryObject, String value, String codeScheme, String displayName) {
-        builder.Classification(
-                classificationScheme: "${scheme}",
-                id: "${id}",
-                objectType: 'urn:oasis:names:tc:ebxml-regrep:ObjectType:RegistryObject:Classification',
-                nodeRepresentation: "${value}",
-                classifiedObject: "${registryObject}"
-        ) {
-            addSlot(builder, 'codingScheme', [codeScheme])
-            addName(builder, displayName)
-        }
+    private void addClassification(RegistryObjectType ro, String scheme, String id, String registryObject, String value, String codeScheme, String displayName) {
+        ClassificationType ct = new ClassificationType();
+        ct.setClassificationScheme(scheme);
+        ct.setId(id);
+        ct.setObjectType("urn:oasis:names:tc:ebxml-regrep:ObjectType:RegistryObject:Classification");
+        ct.setNodeRepresentation(value);
+        ct.setClassifiedObject(registryObject);
+        addSlot(ct, "codingScheme", codeScheme);
+        addName(ct, displayName);
+        ro.getClassification().add(ct);
     }
 
     private addClassification(MarkupBuilder builder, String node, String id, String classifiedObject) {
@@ -566,4 +543,8 @@ public class BundleToRegistryObjectList implements IVal {
         }
     }
 
+    @Override
+    public void setVal(Val val) {
+        this.val = val;
+    }
 }
