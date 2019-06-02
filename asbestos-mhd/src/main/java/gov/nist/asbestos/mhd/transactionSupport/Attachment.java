@@ -1,4 +1,4 @@
-package gov.nist.asbestos.asbestosProxy.channels.mhd.transactionSupport;
+package gov.nist.asbestos.mhd.transactionSupport;
 
 /**
  *

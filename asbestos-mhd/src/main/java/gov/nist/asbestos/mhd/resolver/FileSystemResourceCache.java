@@ -1,9 +1,8 @@
-package gov.nist.asbestos.asbestosProxy.channels.mhd.resolver;
+package gov.nist.asbestos.mhd.resolver;
 
 import ca.uhn.fhir.context.FhirContext;
 
-import gov.nist.asbestos.asbestosProxy.channels.mhd.transactionSupport.ResourceWrapper;
-import jdk.nashorn.internal.runtime.ECMAException;
+import gov.nist.asbestos.mhd.transactionSupport.ResourceWrapper;
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 

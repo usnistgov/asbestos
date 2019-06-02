@@ -26,47 +26,57 @@ public class ChannelConfig {
         return environment;
     }
 
-    public void setEnvironment(String environment) {
+    public ChannelConfig setEnvironment(String environment) {
         this.environment = environment;
+        return this;
     }
 
     public String getTestSession() {
         return testSession;
     }
 
-    public void setTestSession(String testSession) {
+    public ChannelConfig setTestSession(String testSession) {
         this.testSession = testSession;
+        return this;
     }
 
     public String getChannelId() {
         return channelId;
     }
 
-    public void setChannelId(String channelId) {
+    public ChannelConfig setChannelId(String channelId) {
         this.channelId = channelId;
+        return this;
     }
 
     public String getActorType() {
         return actorType;
     }
 
-    public void setActorType(String actorType) {
+    public ChannelConfig setActorType(String actorType) {
         this.actorType = actorType;
+        return this;
     }
 
     public String getChannelType() {
         return channelType;
     }
 
-    public void setChannelType(String channelType) {
+    public ChannelConfig setChannelType(String channelType) {
         this.channelType = channelType;
+        return this;
     }
 
     public String getFhirBase() {
         return fhirBase;
     }
 
-    public void setFhirBase(String fhirBase) {
+    public ChannelConfig setFhirBase(String fhirBase) {
         this.fhirBase = fhirBase;
+        return this;
+    }
+
+    public String asFullId() {
+        return testSession + "__" + channelId;
     }
 }

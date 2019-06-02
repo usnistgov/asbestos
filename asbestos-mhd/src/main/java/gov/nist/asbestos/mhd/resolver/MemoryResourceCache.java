@@ -1,7 +1,7 @@
-package gov.nist.asbestos.asbestosProxy.channels.mhd.resolver;
+package gov.nist.asbestos.mhd.resolver;
 
 
-import gov.nist.asbestos.asbestosProxy.channels.mhd.transactionSupport.ResourceWrapper;
+import gov.nist.asbestos.mhd.transactionSupport.ResourceWrapper;
 
 import java.util.HashMap;
 import java.util.Map;

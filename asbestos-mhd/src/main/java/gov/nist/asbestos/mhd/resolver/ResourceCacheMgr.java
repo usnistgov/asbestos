@@ -1,6 +1,6 @@
-package gov.nist.asbestos.asbestosProxy.channels.mhd.resolver;
+package gov.nist.asbestos.mhd.resolver;
 
-import gov.nist.asbestos.asbestosProxy.channels.mhd.transactionSupport.ResourceWrapper;
+import gov.nist.asbestos.mhd.transactionSupport.ResourceWrapper;
 import org.apache.log4j.Logger;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 

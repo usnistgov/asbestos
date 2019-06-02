@@ -1,4 +1,4 @@
-package gov.nist.asbestos.asbestosProxy.channels.mhd.resolver;
+package gov.nist.asbestos.mhd.resolver;
 /**
  * used to configure ResourceMgr
  */

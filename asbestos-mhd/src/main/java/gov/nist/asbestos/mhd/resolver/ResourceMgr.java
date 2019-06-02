@@ -1,8 +1,8 @@
-package gov.nist.asbestos.asbestosProxy.channels.mhd.resolver;
+package gov.nist.asbestos.mhd.resolver;
 
 
 import gov.nist.asbestos.asbestosProxy.Base.IVal;
-import gov.nist.asbestos.asbestosProxy.channels.mhd.transactionSupport.ResourceWrapper;
+import gov.nist.asbestos.mhd.transactionSupport.ResourceWrapper;
 import gov.nist.asbestos.simapi.validation.Val;
 import org.hl7.fhir.r4.model.Bundle;
 

@@ -1,16 +1,16 @@
-package gov.nist.asbestos.asbestosProxy.channels.mhd.transactions;
+package gov.nist.asbestos.mhd.transactions;
 
 
 import gov.nist.asbestos.asbestorCodesJaxb.Code;
 import gov.nist.asbestos.asbestosProxy.Base.IVal;
-import gov.nist.asbestos.asbestosProxy.channels.mhd.resolver.Ref;
-import gov.nist.asbestos.asbestosProxy.channels.mhd.resolver.ResolverConfig;
-import gov.nist.asbestos.asbestosProxy.channels.mhd.resolver.ResourceCacheMgr;
-import gov.nist.asbestos.asbestosProxy.channels.mhd.resolver.ResourceMgr;
-import gov.nist.asbestos.asbestosProxy.channels.mhd.transactionSupport.AssigningAuthorities;
-import gov.nist.asbestos.asbestosProxy.channels.mhd.transactionSupport.CodeTranslator;
-import gov.nist.asbestos.asbestosProxy.channels.mhd.transactionSupport.ResourceWrapper;
-import gov.nist.asbestos.asbestosProxy.channels.mhd.transactionSupport.Submission;
+import gov.nist.asbestos.mhd.resolver.Ref;
+import gov.nist.asbestos.mhd.resolver.ResolverConfig;
+import gov.nist.asbestos.mhd.resolver.ResourceCacheMgr;
+import gov.nist.asbestos.mhd.resolver.ResourceMgr;
+import gov.nist.asbestos.mhd.transactionSupport.AssigningAuthorities;
+import gov.nist.asbestos.mhd.transactionSupport.CodeTranslator;
+import gov.nist.asbestos.mhd.transactionSupport.ResourceWrapper;
+import gov.nist.asbestos.mhd.transactionSupport.Submission;
 import gov.nist.asbestos.simapi.validation.Val;
 import groovy.xml.MarkupBuilder;
 import oasis.names.tc.ebxml_regrep.xsd.rim._3.*;

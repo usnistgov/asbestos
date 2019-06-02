@@ -36,9 +36,9 @@ import java.nio.charset.Charset;
 import java.util.*;
 import java.util.stream.IntStream;
 
-class ProxyServlet extends HttpServlet {
-    static Logger log = Logger.getLogger(ProxyServlet.class);
-    File externalCache = null;
+public class ProxyServlet extends HttpServlet {
+    private static Logger log = Logger.getLogger(ProxyServlet.class);
+    private File externalCache = null;
 
     private Map<String, IBaseChannel> proxyMap = new HashMap<>();
 
@@ -49,8 +49,8 @@ class ProxyServlet extends HttpServlet {
 
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
-        log.debug("init done");
         externalCache = new File("/home/bill/ec");
+        log.debug("Asbestos Proxy init EC is " + externalCache.getPath());
         Installation.instance().setExternalCache(externalCache);
     }
 
