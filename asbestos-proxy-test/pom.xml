@@ -48,7 +48,7 @@
     </dependencies>
 
     <build>
-        <finalName>asbestos-proxytest</finalName>
+        <finalName>asbestos-proxy-test</finalName>
     </build>
 
 </project>

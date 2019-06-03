@@ -101,7 +101,7 @@
     </dependencies>
 
     <build>
-        <finalName>simapi</finalName>
+        <finalName>asbestos-simapi</finalName>
     </build>
 
 
