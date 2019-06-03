@@ -1,0 +1,1 @@
+{"id":"ITI-67","name":"Read DocumentReference","shortName":"rdr","code":"rdr","asyncCode":"rdr.as","needsRepUid":false,"requestAction":"fhir","responseAction":"fhir","requiresMtom":false,"http":false,"fhir":true,"endpointSimPropertyName":"Read Document Reference Endpoint","tlsEndpointSimPropertyName":"Read Document Reference Endpoint","fhirVerb":"READ"}

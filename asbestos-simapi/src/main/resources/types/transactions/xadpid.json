@@ -1,0 +1,1 @@
+{"id":"ITI-43","name":"XAD-PID","shortName":"xadpid","code":"xadpid","asyncCode":"xadpid","needsRepUid":false,"requestAction":"","responseAction":"","requiresMtom":false,"http":false,"fhir":false,"endpointSimPropertyName":null,"tlsEndpointSimPropertyName":null,"fhirVerb":"NONE"}

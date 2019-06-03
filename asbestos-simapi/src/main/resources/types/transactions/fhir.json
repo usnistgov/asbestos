@@ -1,0 +1,1 @@
+{"id":"FHIR","name":"FHIR","shortName":"fhir","code":"fhir","asyncCode":"fhir.as","needsRepUid":true,"requestAction":"fhir","responseAction":"fhir","requiresMtom":true,"http":false,"fhir":true,"endpointSimPropertyName":"FHIR Endpoint","tlsEndpointSimPropertyName":"FHIR TLS Endpoint","fhirVerb":"NONE"}

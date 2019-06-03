@@ -1,0 +1,1 @@
+{"name":"Integrated Source/Repository","altNames":["EMBED_REPOS"],"shortName":"isr","transactionTypes":["ISR_RETRIEVE"],"showInConfig":true,"actorsFileLabel":"isr","simulatorFactoryName":null,"simulatorClassName":null,"httpTransactionTypes":[],"httpSimulatorClassName":null,"isFhir":false,"proxyTransforms":null,"actorCode":null}

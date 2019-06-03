@@ -1,0 +1,1 @@
+{"name":"Document Administrator","altNames":["docadmin"],"shortName":"docadmin","transactionTypes":["STORED_QUERY","UPDATE"],"showInConfig":false,"actorsFileLabel":null,"simulatorFactoryName":"","simulatorClassName":"","httpTransactionTypes":[],"httpSimulatorClassName":null,"isFhir":false,"proxyTransforms":[],"actorCode":null}

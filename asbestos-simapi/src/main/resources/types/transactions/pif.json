@@ -1,0 +1,1 @@
+{"id":"PIF","name":"Patient Identity Feed","shortName":"pif","code":"pif","asyncCode":"pif","needsRepUid":false,"requestAction":"","responseAction":"","requiresMtom":false,"http":false,"fhir":false,"endpointSimPropertyName":null,"tlsEndpointSimPropertyName":null,"fhirVerb":"NONE"}

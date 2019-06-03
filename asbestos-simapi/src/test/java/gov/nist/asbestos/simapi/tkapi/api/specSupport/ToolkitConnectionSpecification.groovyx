@@ -1,0 +1,145 @@
+package gov.nist.tkapi.api.specSupport
+
+import gov.nist.tkapi.api.configDataTypes.client.Pid
+import gov.nist.tkapi.api.installation.TestSession
+import gov.nist.tkapi.api.results.Result
+import gov.nist.tkapi.api.results.TestInstance
+import gov.nist.tkapi.api.toolkitApi.SimulatorBuilder
+import gov.nist.tkapi.api.toolkitServicesCommon.SimId
+import spock.lang.Shared
+import spock.lang.Specification
+
+
+/**
+ *
+ */
+
+class ToolkitConnectionSpecification extends Specification {
+    @Rule TestName name = new TestName()
+    // these are usable by the specification that extend this class
+    @Shared GrizzlyController server = null
+    @Shared ToolkitApi api
+    @Shared Session session
+    @Shared static String remoteToolkitPort = '8889'
+    @Shared static final boolean localServerMode = true
+
+    /*
+     * When running it-tests as part of the build, the it-tests plugin launches a one-time startup http server.
+     *
+     * When running a single IT test inside the IDE, a local server is required.
+     *
+     * This block below will decide which mode the test is running in to automatically use the server as needed.
+    static {
+        try {
+            Client client = ClientBuilder.newClient()
+            WebTarget target = client.target('http://localhost:' + remoteToolkitPort + '/testEnvPidPort?cmd=status')
+
+            Response response = target
+                    .request('text/xml')
+                    .get()
+
+            localServerMode = !(response.status == 200)
+        } catch (Exception ex) {
+            localServerMode = true
+        }
+    }
+     */
+
+    def setupSpec() {  // there can be multiple setupSpec() fixture methods - they all get run
+        Installation.instance().setServletContextName("");
+        session = UnitTestEnvironmentManager.setupLocalToolkit()
+        api = UnitTestEnvironmentManager.localToolkitApi()
+
+        Installation.setTestRunning(true)
+        cleanupDir()
+    }
+
+    def setup() {
+        println 'Running method: ' + name.methodName
+    }
+
+    // clean out simdb, testlogcache, and actors
+    def cleanupDir() {
+        if (localServerMode) {
+            TestSessionFactory.inTestLogs().each { String testSessionName ->
+                Io.delete(Installation.instance().testLogCache(new TestSession(testSessionName)))
+            }
+            Installation.instance().simDbFile(TestSession.DEFAULT_TEST_SESSION).mkdirs()
+            Installation.instance().actorsDir(TestSession.DEFAULT_TEST_SESSION).mkdirs()
+            Installation.instance().testLogCache(TestSession.DEFAULT_TEST_SESSION).mkdirs()
+        }
+    }
+
+    static String prefixNonce(String name) {
+        if ("default".equals(name))
+            throw new Exception("Default session cannot be prefixed with a nonce.")
+
+        return name + TestSessionFactory.nonce()
+    }
+
+
+    SimulatorBuilder getSimulatorApi(String remoteToolkitPort) {
+        String urlRoot = String.format("http://localhost:%s/xdstools2", remoteToolkitPort)
+        new SimulatorBuilder(urlRoot)
+    }
+
+    SimulatorBuilder getSimulatorApi(String host, String remoteToolkitPort) {
+        String urlRoot = String.format("http://%s:%s/xdstools2", host, remoteToolkitPort)
+        new SimulatorBuilder(urlRoot)
+    }
+
+    def cleanupSpec() {  // one time shutdown when everything is done
+        if (localServerMode) {
+            if (server) {
+                server.stop()
+                server = null
+            }
+            ListenerFactory.terminateAll()
+        }
+    }
+
+    def initializeRegistryWithPatientId(String testSession, SimId channelId, Pid pid) {
+        TestInstance testId = new TestInstance("15804")
+        List<String> sections = new ArrayList<>()
+        sections.add("section")
+        Map<String, String> params = new HashMap<>()
+        params.put('$patientid$', pid.toString())
+        boolean stopOnFirstError = true
+
+        List<Result> results = api.runTest(testSession, channelId.fullId, testId, sections, params, stopOnFirstError)
+
+        assert results.size() == 1
+        assert results.get(0).passed()
+    }
+
+    TestLogs initializeRepository(String testSession, SimId channelId, Pid pid, TestInstance testInstance) {
+        List<String> sections = new ArrayList<>()
+        Map<String, String> params = new HashMap<>()
+        params.put('$patientid$', pid.toString())
+        boolean stopOnFirstError = true
+
+        List<Result> results = api.runTest(testSession, channelId.fullId, testInstance, sections, params, stopOnFirstError)
+
+        TestLogs testLogs = api.getTestLogs(testInstance)
+
+        assert testLogs
+        assert results.size() == 1
+        assert results.get(0).passed()
+        return testLogs
+    }
+
+    boolean assertionsContain(List<Result> results, String target) {
+        boolean found = false
+
+        results.each { Result result ->
+            result.assertions.each { AssertionResults ars->
+                ars.assertions.each { AssertionResult ar ->
+                    if (ar.assertion.contains(target)) found = true
+                }
+            }
+        }
+
+        return found
+    }
+
+}

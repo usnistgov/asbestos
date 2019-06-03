@@ -1,0 +1,1 @@
+{"id":"ITI-68","name":"Binary","shortName":"br","code":"br","asyncCode":"br.as","needsRepUid":false,"requestAction":"fhir","responseAction":"fhir","requiresMtom":false,"http":false,"fhir":true,"endpointSimPropertyName":"Read Binary Endpoint","tlsEndpointSimPropertyName":"Read Binary Endpoint","fhirVerb":"READ"}

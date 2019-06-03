@@ -1,0 +1,1 @@
+{"id":"RAD-55","name":"WADO Retrieve","shortName":"wado.ret.ids","code":"wado.ret.ids","asyncCode":"wado","needsRepUid":false,"requestAction":"","responseAction":"","requiresMtom":false,"http":true,"fhir":false,"endpointSimPropertyName":"WADO_endpoint","tlsEndpointSimPropertyName":"WADO_TLS_endpoint","fhirVerb":"NONE"}

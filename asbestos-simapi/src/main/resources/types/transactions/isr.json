@@ -1,0 +1,1 @@
+{"id":"ITI-43","name":"Integrated Source/Repository Retrieve","shortName":"isr","code":"isr","asyncCode":"isr.as","needsRepUid":false,"requestAction":"urn:ihe:iti:2007:RetrieveDocumentSet","responseAction":"urn:ihe:iti:2007:RetrieveDocumentSetResponse","requiresMtom":true,"http":false,"fhir":false,"endpointSimPropertyName":null,"tlsEndpointSimPropertyName":null,"fhirVerb":"NONE"}

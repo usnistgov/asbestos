@@ -1,0 +1,1 @@
+{"id":"STS","name":"Secure Token Service","shortName":"sts","code":"sts","asyncCode":"sts.as","needsRepUid":true,"requestAction":"sts","responseAction":"sts","requiresMtom":true,"http":false,"fhir":false,"endpointSimPropertyName":null,"tlsEndpointSimPropertyName":null,"fhirVerb":"NONE"}

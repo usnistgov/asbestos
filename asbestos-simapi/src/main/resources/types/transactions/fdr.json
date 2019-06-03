@@ -1,0 +1,1 @@
+{"id":"ITI-67","name":"Find DocumentReference","shortName":"fdr","code":"fdr","asyncCode":"fdr.as","needsRepUid":false,"requestAction":"fhir","responseAction":"fhir","requiresMtom":false,"http":false,"fhir":true,"endpointSimPropertyName":"Find Document Reference Endpoint","tlsEndpointSimPropertyName":"Find Document Reference Endpoint","fhirVerb":"QUERY"}

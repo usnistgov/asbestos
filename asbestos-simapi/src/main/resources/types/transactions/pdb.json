@@ -1,0 +1,1 @@
+{"id":"ITI-65","name":"Provide Document Bundle","shortName":"pdb","code":"pdb","asyncCode":"pdb.as","needsRepUid":false,"requestAction":"fhir","responseAction":"fhir","requiresMtom":false,"http":false,"fhir":true,"endpointSimPropertyName":"Provide DocumentBundle Endpoint","tlsEndpointSimPropertyName":"Provide DocumentBundle TLS Endpoint","fhirVerb":"TRANSACTION"}

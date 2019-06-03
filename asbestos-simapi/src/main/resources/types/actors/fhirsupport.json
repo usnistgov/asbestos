@@ -1,0 +1,1 @@
+{"name":"FHIR Support","altNames":[""],"shortName":"fhirsupport","transactionTypes":["NONE"],"showInConfig":false,"actorsFileLabel":null,"simulatorFactoryName":"","simulatorClassName":"","httpTransactionTypes":[],"httpSimulatorClassName":null,"isFhir":true,"proxyTransforms":[],"actorCode":null}

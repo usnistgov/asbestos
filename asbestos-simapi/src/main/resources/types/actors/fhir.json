@@ -1,0 +1,19 @@
+{
+  "name": "FHIR Server",
+  "altNames": [
+    ""
+  ],
+  "shortName": "fhir",
+  "transactionTypes": [
+    "FHIR"
+  ],
+  "showInConfig": true,
+  "actorsFileLabel": null,
+  "simulatorFactoryName": "gov.nist.toolkit.simcommon.server.factories.FhirActorFactory",
+  "simulatorClassName": "gov.nist.toolkit.fhir.simulators.fhir.FhirSimulator",
+  "httpTransactionTypes": [],
+  "httpSimulatorClassName": null,
+  "isFhir": true,
+  "proxyTransforms": null,
+  "actorCode": null
+}

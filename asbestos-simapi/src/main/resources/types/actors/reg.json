@@ -1,0 +1,28 @@
+{
+  "name": "Document Registry",
+  "altNames": [
+    "DOC_REGISTRY",
+    "registryb",
+    "initialize_for_stored_query"
+  ],
+  "shortName": "reg",
+  "transactionTypes": [
+    "REGISTER",
+    "REGISTER_ODDE",
+    "STORED_QUERY",
+    "UPDATE",
+    "RMU",
+    "MPQ",
+    "REMOVE_METADATA",
+    "XAD_PID"
+  ],
+  "showInConfig": true,
+  "actorsFileLabel": null,
+  "simulatorFactoryName": "gov.nist.toolkit.simcommon.server.factories.RegistryActorFactory",
+  "simulatorClassName": "gov.nist.toolkit.fhir.simulators.sim.reg.RegistryActorSimulator",
+  "httpTransactionTypes": [],
+  "httpSimulatorClassName": null,
+  "isFhir": false,
+  "proxyTransforms": null,
+  "actorCode": null
+}

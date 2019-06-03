@@ -1,0 +1,1 @@
+{"id":"ONC-DIRECT","name":"ONC-DIRECT","shortName":"direct","code":"direct","asyncCode":"direct.as","needsRepUid":false,"requestAction":"","responseAction":"","requiresMtom":false,"http":false,"fhir":false,"endpointSimPropertyName":null,"tlsEndpointSimPropertyName":null,"fhirVerb":"NONE"}

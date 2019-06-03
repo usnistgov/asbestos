@@ -1,0 +1,1 @@
+{"id":"ITI-51","name":"Multi-Patient Query","shortName":"mpq","code":"mpq","asyncCode":"mpq.as","needsRepUid":false,"requestAction":"urn:ihe:iti:2009:MultiPatientStoredQuery","responseAction":"urn:ihe:iti:2009:MultiPatientStoredQueryResponse","requiresMtom":false,"http":false,"fhir":false,"endpointSimPropertyName":null,"tlsEndpointSimPropertyName":null,"fhirVerb":"NONE"}
