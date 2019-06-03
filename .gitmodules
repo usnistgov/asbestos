@@ -1,6 +1,0 @@
-[submodule "asbestos-fproxy"]
-	path = asbestos-fproxy
-	url = https://github.com/usnistgov/asbestos-fproxy.git
-[submodule "asbestos-proxytest"]
-	path = asbestos-proxytest
-	url = https://github.com/usnistgov/asbestos-proxytest.git
