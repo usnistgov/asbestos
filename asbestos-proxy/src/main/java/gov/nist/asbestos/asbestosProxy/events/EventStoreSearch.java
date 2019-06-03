@@ -18,7 +18,7 @@ public class EventStoreSearch {
     public EventStoreSearch(File externalCache, SimId channelId) {
         SimStore simStore = new SimStore(externalCache);
         simStore.setChannelId(channelId);
-        simDir = simStore.getSimDir();
+        simDir = simStore.getChannelDir();
     }
 
     private boolean focus(File x) {

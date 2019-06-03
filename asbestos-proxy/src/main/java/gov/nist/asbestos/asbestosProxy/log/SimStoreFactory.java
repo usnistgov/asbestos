@@ -15,7 +15,7 @@ public class SimStoreFactory {
         simStore.channelConfig = channelConfig;
         simStore.setChannelId(getSimId(channelConfig));
         simStore.getStore(true); // create
-        File configFile = new File(simStore.getSimDir(), "channelConfig.json");
+        File configFile = new File(simStore.getChannelDir(), "channelConfig.json");
         simStore.setNewlyCreated(!configFile.exists());
         ChannelConfigFactory.store(channelConfig, configFile);
         return simStore;
@@ -24,7 +24,7 @@ public class SimStoreFactory {
     public static SimStore load(File externalCache, TestSession testSession, String id) {
         SimStore simStore = new SimStore(externalCache);
         simStore.setSimIdForLoader(new SimId(testSession, id));  // doesn't do Id validation
-        ChannelConfig channelConfig = ChannelConfigFactory.load(new File(simStore.getSimDir(), "channelConfig.json"));
+        ChannelConfig channelConfig = ChannelConfigFactory.load(new File(simStore.getChannelDir(), "channelConfig.json"));
         simStore.setChannelId(getSimId(channelConfig));
         simStore.channelConfig = channelConfig;
         return simStore;

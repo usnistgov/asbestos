@@ -64,7 +64,7 @@ public class Headers {
             });
         } else {
             ((Map<String, List<String>>) theHeaders).forEach((name, values) -> {
-                if (values != null) {
+                if (name != null && values != null) {
                     headers.add(new Header(name, values));
                 }
             });

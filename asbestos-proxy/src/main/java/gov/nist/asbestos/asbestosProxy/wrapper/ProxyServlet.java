@@ -346,7 +346,8 @@ public class ProxyServlet extends HttpServlet {
     }
 
     SimStore parseUri(URI uri, HttpServletRequest req, HttpServletResponse resp, Verb verb) throws IOException {
-        List<String> uriParts = Arrays.asList(uri.getPath().split("/"));
+        List<String> uriParts1 = Arrays.asList(uri.getPath().split("/"));
+        List<String> uriParts = new ArrayList<>(uriParts1);  // so parts are deletable
         SimStore simStore = new SimStore(externalCache);  // temp - will be overwritten
 
         if (uriParts.size() == 3 && uriParts.get(2).equals("prox") && verb != Verb.DELETE) {
@@ -361,11 +362,15 @@ public class ProxyServlet extends HttpServlet {
                 String rawRequest = IOUtils.toString(req.getInputStream(), Charset.defaultCharset());   // json
                 log.debug("CREATESIM " + rawRequest);
                 ChannelConfig channelConfig = ChannelConfigFactory.convert(rawRequest);
-                simStore = new SimStore(externalCache, new SimId(new TestSession(channelConfig.getTestSession()),
-                        channelConfig.getChannelId(),
-                        channelConfig.getActorType(),
-                        channelConfig.getEnvironment(),
-                        true));
+                simStore = new SimStore(externalCache,
+                        new SimId(new TestSession(channelConfig.getTestSession()),
+                            channelConfig.getChannelId(),
+                            channelConfig.getActorType(),
+                            channelConfig.getEnvironment(),
+                            true));
+
+                simStore.create(channelConfig);
+                log.info("Channel " + simStore.getChannelId().toString() + " created (type " + simStore.getActorType() + ")" );
 
                 resp.setContentType("application/json");
                 resp.getOutputStream().print(rawRequest);
@@ -397,18 +402,24 @@ public class ProxyServlet extends HttpServlet {
             // /appContext/prox/channelId
             if (uriParts.get(0).equals("") && uriParts.get(2).equals("prox")) { // no appContext
                 simId = SimId.buildFromRawId(uriParts.get(3));
-                simStore.setChannelId(simId);
+                simStore = new SimStore(externalCache, simId);
+                if (!simStore.exists()) {
+                    resp.setStatus(resp.SC_NOT_FOUND);
+                    return null;
+                }
+                simStore.open();
 
-                uriParts.remove(0);  // leasing empty string
+                uriParts.remove(0);  // leading empty string
                 uriParts.remove(0);  // appContext
                 uriParts.remove(0);  // prox
                 uriParts.remove(0);  // channelId
 
                 if (!simStore.exists()) {
-                    if (verb == Verb.DELETE)
+                    if (verb == Verb.DELETE) {
                         resp.setStatus(resp.SC_OK);
-                    else
+                    } else {
                         resp.setStatus(resp.SC_NOT_FOUND);
+                    }
                     return null;
                 }
                 if (uriParts.isEmpty() && verb == Verb.GET) {

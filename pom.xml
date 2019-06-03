@@ -14,20 +14,11 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <jdk.version>1.8</jdk.version>
-
-        <!--Aligns with spock.version and groovy-eclipse-compiler version-->
-        <groovyVersion>2.4.8</groovyVersion> <!--  must match spock version  -->
         <mavenCompilerPluginVersion>3.3</mavenCompilerPluginVersion>
-
-        <groovyEclipseCompilerVersion>2.9.2-01</groovyEclipseCompilerVersion>
-        <groovyEclipseBatchVersion>2.4.3-01</groovyEclipseBatchVersion>  <!--  should match groovy version   -->
-
         <mavenWarPluginVersion>3.2.2</mavenWarPluginVersion>
-        <spock.version>1.0-groovy-2.3</spock.version>  <!-- 1.0-groovy-2.3  -->
         <hapi.version>3.7.0</hapi.version>
         <jackson.version>2.6.3</jackson.version>
         <jersey.version>2.22.1</jersey.version>
-
     </properties>
 
     <modules>
@@ -55,6 +46,14 @@
     </dependencyManagement>
 
     <dependencies>
+        <!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-databind -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>2.9.8</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-annotations -->
+
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-engine</artifactId>

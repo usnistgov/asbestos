@@ -57,12 +57,13 @@ public class HttpGet extends HttpBase {
         return this;
     }
 
-    public void getJson(URI uri) throws IOException {
-        Map<String, String> headers = new HashMap<>();
-        headers.put("accept", "application/json");
-        headers.put("accept-charset", "utf-8");
-        get(uri, headers);
-        setResponseText(new String(getResponse()));
+    public HttpGet getJson(URI uri) throws IOException {
+//        Map<String, String> headers = new HashMap<>();
+//        headers.put("accept", "application/json");
+//        headers.put("accept-charset", "utf-8");
+        get(uri, "application/json");
+//        setResponseText(new String(getResponse()));
+        return this;
     }
 
     public HttpGet run() throws IOException {

@@ -1,6 +1,7 @@
 package gov.nist.asbestos.asbestosProxy.events;
 
-import org.codehaus.jackson.annotate.JsonIgnoreProperties;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import java.io.File;
 

@@ -2,6 +2,7 @@ package gov.nist.asbestos.sharedObjects;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Objects;
 
 public class ChannelConfig {
     private String environment;
@@ -10,6 +11,12 @@ public class ChannelConfig {
     private String actorType;
     private String channelType;
     private String fhirBase;
+
+    public String toString() {
+        return new StringBuilder().append("Channel ").append(testSession).append("__").append(channelId)
+                .append(" of ").append(actorType).append(" in ").append(environment)
+                .append(" with base ").append(fhirBase).toString();
+    }
 
     // TODO test needed
     public URI translateEndpointToFhirBase(URI req) throws URISyntaxException {
@@ -78,5 +85,23 @@ public class ChannelConfig {
 
     public String asFullId() {
         return testSession + "__" + channelId;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ChannelConfig that = (ChannelConfig) o;
+        return Objects.equals(environment, that.environment) &&
+                Objects.equals(testSession, that.testSession) &&
+                Objects.equals(channelId, that.channelId) &&
+                Objects.equals(actorType, that.actorType) &&
+                Objects.equals(channelType, that.channelType) &&
+                Objects.equals(fhirBase, that.fhirBase);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(environment, testSession, channelId, actorType, channelType, fhirBase);
     }
 }

@@ -4,7 +4,9 @@ package gov.nist.asbestos.asbestosProxy.log;
 import gov.nist.asbestos.sharedObjects.ChannelConfig;
 import gov.nist.asbestos.asbestosProxy.events.Event;
 import gov.nist.asbestos.asbestosProxy.events.EventStore;
+import gov.nist.asbestos.sharedObjects.ChannelConfigFactory;
 import gov.nist.asbestos.simapi.simCommon.SimId;
+import gov.nist.asbestos.simapi.simCommon.TestSession;
 import gov.nist.asbestos.simapi.tk.installation.Installation;
 import org.apache.commons.io.FileUtils;
 
@@ -22,7 +24,7 @@ import static java.lang.Thread.sleep;
 public class SimStore {
     private File externalCache;
     private File _simStoreLocation = null;
-    private File _simIdDir = null;
+    private File _channelIdDir = null;
     private File _resourceDir = null;
     private File _actorDir;
     private File _eventDir = null;
@@ -32,7 +34,8 @@ public class SimStore {
     private String eventId = null; // within resource
 
     private boolean newlyCreated = false;
-    private static String PSIMDB = "psimdb";
+    private static final String PSIMDB = "psimdb";
+    private static final String CHANNEL_CONFIG_FILE = "config.json";
     Event event;
     //EventStore eventStore
     ChannelConfig channelConfig;
@@ -40,7 +43,6 @@ public class SimStore {
 
     public SimStore(File externalCache, SimId channelId) {
         Installation.validateExternalCache(externalCache);
-        channelId.validate();
         this.externalCache = externalCache;
         this.channelId = channelId;
     }
@@ -53,7 +55,7 @@ public class SimStore {
     // the following must initialized
     // externalCache
     // channelId
-    public File getStore(boolean create)  {
+    File getStore(boolean create)  {
         if (_simStoreLocation == null) {
             _simStoreLocation = testSessionDir(externalCache, channelId);
             if (create) {
@@ -70,9 +72,30 @@ public class SimStore {
         return  _simStoreLocation;
     }
 
+    public SimStore create(ChannelConfig channelConfig) {
+        this.channelConfig = channelConfig;
+        getStore(true);
+        ChannelConfigFactory.store(channelConfig, new File(getChannelDir(), CHANNEL_CONFIG_FILE));
+        channelId = getSimId(channelConfig);
+        channelId.validate();
+        return this;
+    }
+
+    public SimStore open() {
+        getStore(false);
+        channelConfig = ChannelConfigFactory.load(new File(getChannelDir(), CHANNEL_CONFIG_FILE));
+        channelId = getSimId(channelConfig);
+        channelId.validate();
+        return this;
+    }
+
     public boolean exists() {
         Objects.requireNonNull(externalCache);
         return new File(getStore(), channelId.getId()).exists();
+    }
+
+    private SimId getSimId(ChannelConfig channelConfig) {
+        return new SimId(new TestSession(channelConfig.getTestSession()), channelConfig.getChannelId(), channelConfig.getActorType(), channelConfig.getEnvironment());
     }
 
     public File getStore() {
@@ -85,7 +108,7 @@ public class SimStore {
 
     public void deleteSim() {
         try {
-            FileUtils.deleteDirectory(getSimDir());
+            FileUtils.deleteDirectory(getChannelDir());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -115,23 +138,23 @@ public class SimStore {
 
     public boolean existsSimDir() {
         Objects.requireNonNull(channelId);
-        if (_simIdDir == null)
-            _simIdDir = new File(getStore(), channelId.getId());
-        return _simIdDir.exists();
+        if (_channelIdDir == null)
+            _channelIdDir = new File(getStore(), channelId.getId());
+        return _channelIdDir.exists();
     }
 
-    public File getSimDir() {
+    public File getChannelDir() {
         Objects.requireNonNull(channelId);
-        if (_simIdDir == null)
-            _simIdDir = new File(getStore(), channelId.getId());
-        _simIdDir.mkdirs();
-        return _simIdDir;
+        if (_channelIdDir == null)
+            _channelIdDir = new File(getStore(), channelId.getId());
+        _channelIdDir.mkdirs();
+        return _channelIdDir;
     }
 
     public File getActorDir() {
         Objects.requireNonNull(getActorType());
         if (_actorDir == null)
-            _actorDir = new File(getSimDir(), getActorType());
+            _actorDir = new File(getChannelDir(), getActorType());
         _actorDir.mkdirs();
         return _actorDir;
     }
