@@ -139,8 +139,7 @@ class TransactionCollection {
 		this.collectionName = collectionName;
 	}
 
-	@Deprecated
-	 void setName(String name) {
+	void setName(String name) {
 		collectionName = name;
 	}
 

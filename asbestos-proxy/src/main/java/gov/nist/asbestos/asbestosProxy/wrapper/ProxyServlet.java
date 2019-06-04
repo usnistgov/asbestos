@@ -50,9 +50,7 @@ public class ProxyServlet extends HttpServlet {
     @Override
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
-        externalCache = new File("/home/bill/ec");
-        log.debug("Asbestos Proxy init EC is " + externalCache.getPath());
-        Installation.instance().setExternalCache(externalCache);
+        setExternalCache(new File("/home/bill/ec"));
     }
 
     private static URI buildURI(HttpServletRequest req) {
@@ -498,4 +496,9 @@ public class ProxyServlet extends HttpServlet {
         throw new RuntimeException("Proxy: Do not understand control request type " + type + " of " + uri);
     }
 
+    public void setExternalCache(File externalCache) {
+        this.externalCache = externalCache;
+        Installation.instance().setExternalCache(externalCache);
+        log.debug("Asbestos Proxy init EC is " + externalCache.getPath());
+    }
 }

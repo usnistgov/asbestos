@@ -97,7 +97,7 @@ public class SimStore {
         return new File(getStore(), channelId.getId()).exists();
     }
 
-    private SimId getSimId(ChannelConfig channelConfig) {
+    public static SimId getSimId(ChannelConfig channelConfig) {
         return new SimId(new TestSession(channelConfig.getTestSession()), channelConfig.getChannelId(), channelConfig.getActorType(), channelConfig.getEnvironment());
     }
 
