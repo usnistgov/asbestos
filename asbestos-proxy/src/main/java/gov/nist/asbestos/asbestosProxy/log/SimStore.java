@@ -75,9 +75,11 @@ public class SimStore {
     public SimStore create(ChannelConfig channelConfig) {
         this.channelConfig = channelConfig;
         getStore(true);
-        ChannelConfigFactory.store(channelConfig, new File(getChannelDir(), CHANNEL_CONFIG_FILE));
         channelId = getSimId(channelConfig);
+        if (!exists())
+            newlyCreated = true;
         channelId.validate();
+        ChannelConfigFactory.store(channelConfig, new File(getChannelDir(), CHANNEL_CONFIG_FILE));
         return this;
     }
 
@@ -91,6 +93,7 @@ public class SimStore {
 
     public boolean exists() {
         Objects.requireNonNull(externalCache);
+        Objects.requireNonNull(channelId);
         return new File(getStore(), channelId.getId()).exists();
     }
 

@@ -1,27 +1,93 @@
 package gov.nist.asbestos.proxyTest;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.client.api.IGenericClient;
 import gov.nist.asbestos.http.operations.HttpDelete;
 import gov.nist.asbestos.http.operations.HttpGet;
 import gov.nist.asbestos.http.operations.HttpPost;
 import gov.nist.asbestos.sharedObjects.ChannelConfig;
 import gov.nist.asbestos.sharedObjects.ChannelConfigFactory;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.Patient;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 class PassthroughTest {
+    private static FhirContext ctx;
+    private IGenericClient client;
 
-   @Test
-    void createAChannel() throws URISyntaxException, IOException {
+    @BeforeAll
+    static void beforeAll() {
+        ctx = FhirContext.forR4();
+    }
 
-       // create
+   // @Test
+    void deleteChannelsTest() throws URISyntaxException, IOException {
+        deleteChannels();
+        assertEquals(404, new HttpGet().getJson(new URI("http://localhost:8081/proxy/prox/default__fhirpass")).getStatus());
+    }
+
+    private void deleteChannels() {
+        new HttpDelete().run("http://localhost:8081/proxy/prox/default__fhirpass");
+        new HttpDelete().run("http://localhost:8081/proxy/prox/default__test");
+        new HttpDelete().run("http://localhost:8081/proxy/prox/default__abc");
+    }
+
+    @Test
+    void createPatientDirectTest() throws IOException, URISyntaxException {
+        client = ctx.newRestfulGenericClient("http://localhost:8080/fhir/fhir");
+
+        Patient patient = new Patient();
+        patient.addIdentifier().setSystem("urn:system").setValue("12345");
+        patient.addName().setFamily("Smith").addGiven("John");
+        String id = createPatient(patient);
+        assertNotNull(id);
+    }
+
+    @Test
+    void createPatientThroughProxyTest() throws IOException, URISyntaxException {
+        deleteChannels();
+        String base = createChannel("default", "fhirpass");
+        client = ctx.newRestfulGenericClient(base);
+
+        Patient patient = new Patient();
+        patient.addIdentifier().setSystem("urn:system").setValue("12345");
+        patient.addName().setFamily("Smith").addGiven("John");
+        String id = createPatient(patient);
+        assertNotNull(id);
+    }
+
+    private String createPatient(Patient patient) {
+        // Invoke the server create method (and send pretty-printed JSON
+        // encoding to the server
+        // instead of the default which is non-pretty printed XML)
+        MethodOutcome outcome = client.create()
+                .resource(patient)
+                .prettyPrint()
+                .encodedJson()
+                .execute();
+
+        // The MethodOutcome object will contain information about the
+        // response from the server, including the ID of the created
+        // resource, the OperationOutcome response, etc. (assuming that
+        // any of these things were provided by the server! They may not
+        // always be)
+        IIdType id = (IIdType) outcome.getId();
+        System.out.println("Got ID: " + id.getValue());
+        return id.getValue();
+    }
+
+    private String createChannel(String testSession, String channelId) throws URISyntaxException, IOException {
         ChannelConfig channelConfig = new ChannelConfig()
-                .setTestSession("default")
-                .setChannelId("test")
+                .setTestSession(testSession)
+                .setChannelId(channelId)
                 .setEnvironment("default")
                 .setActorType("fhir")
                 .setChannelType("passthrough")
@@ -29,23 +95,11 @@ class PassthroughTest {
         String json = ChannelConfigFactory.convert(channelConfig);
         HttpPost poster = new HttpPost();
         poster.postJson(new URI("http://localhost:8081/proxy/prox"), json);
-        assertEquals(200, poster.getStatus());
-
-        // verify
-        HttpGet getter = new HttpGet();
-        getter.getJson(new URI("http://localhost:8081/proxy/prox/default__test"));
-        assertEquals(200, getter.getStatus());
-        ChannelConfig returnConfig = ChannelConfigFactory.convert(getter.getResponseText());
-        assertEquals(channelConfig, returnConfig);
-
-        // delete
-       HttpDelete deleter = new HttpDelete();
-       deleter.run(new URI("http://localhost:8081/proxy/prox/default__test"));
-       assertEquals(200, deleter.getStatus());
-
-       // verify
-       getter = new HttpGet();
-       getter.getJson(new URI("http://localhost:8081/proxy/prox/default__test"));
-       assertEquals(404, getter.getStatus());
+        int status = poster.getStatus();
+        if (!(status == 200 || status == 201))
+            fail("200 or 201 required - returned " + status);
+        //return "http://localhost:8080/fhir/fhir";
+        return "http://localhost:8081/proxy/prox/" + testSession + "__" + channelId + "/Channel";
     }
+
 }

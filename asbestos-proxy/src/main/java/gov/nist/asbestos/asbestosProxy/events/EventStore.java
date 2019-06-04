@@ -11,6 +11,7 @@ import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * An EventStore is a request (the trigger) and any number of tasks undertaken
@@ -23,6 +24,10 @@ public class EventStore {
     private List<File> _tasks = new ArrayList<>(); // downstream/backend interactions
     private File current = null; // either request or a task
     private Event e = null;
+
+    public String toString() {
+        return "EventStore: current=" + ((current == null) ? "null" : current.getPath());
+    }
 
     private void clearCache() {
         e = new Event();
@@ -93,8 +98,9 @@ public class EventStore {
     public Task selectTask(int i) {
         if (i >= getTaskCount())
             throw new RuntimeException("EventStore: cannot return task #${i} - only ${taskCount} tasks\n");
-        if (i < 0)
-            current = _request;
+        if (i < 0) {
+            current = getRequest();
+        }
         else
             current = _tasks.get(i);
         clearCache();

@@ -30,7 +30,27 @@ public class Installation {
 
     public static void validateExternalCache(File externalCache) {
         if (externalCache == null || !externalCache.exists() || !externalCache.isDirectory()|| !externalCache.canWrite())
-            throw new RuntimeException("External Cache - " + externalCache + " is invalid");
+            throw new RuntimeException("External Cache error - " + describeExternalCache(externalCache));
+    }
+
+    private static String describeExternalCache(File externalCache) {
+        StringBuilder buf = new StringBuilder()
+                .append("ExternalCache: location=")
+                .append((externalCache == null) ? "null" : externalCache.getPath());
+        if (externalCache != null && externalCache.exists()) {
+            buf.append(" exists");
+            if (!externalCache.isDirectory())
+                buf.append(" not");
+            else
+                buf.append(" is");
+            buf.append(" a directory");
+            if (externalCache.canWrite())
+                buf.append(" can");
+            else
+                buf.append(" can not");
+            buf.append(" write");
+        }
+        return buf.toString();
     }
 
     public File fsimDbFile()  {

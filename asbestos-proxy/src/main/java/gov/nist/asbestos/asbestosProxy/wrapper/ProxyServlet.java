@@ -47,6 +47,7 @@ public class ProxyServlet extends HttpServlet {
         proxyMap.put("passthrough", new PassthroughChannel());
     }
 
+    @Override
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
         externalCache = new File("/home/bill/ec");
@@ -58,6 +59,7 @@ public class ProxyServlet extends HttpServlet {
         return HttpBase.buildURI(req.getRequestURI(), req.getParameterMap());
     }
 
+    @Override
     public void doPost(HttpServletRequest req, HttpServletResponse resp) {
 
         // typical URI is
@@ -128,6 +130,7 @@ public class ProxyServlet extends HttpServlet {
         }
     }
 
+    @Override
     public void doDelete(HttpServletRequest req, HttpServletResponse resp) {
         try {
             URI uri = buildURI(req);
@@ -141,6 +144,7 @@ public class ProxyServlet extends HttpServlet {
         }
     }
 
+    @Override
     public void doGet(HttpServletRequest req, HttpServletResponse resp) {
         try {
             URI uri = buildURI(req);
@@ -240,6 +244,7 @@ public class ProxyServlet extends HttpServlet {
             throw new RuntimeException(e);
         }
 
+        event.getStore().selectClientTask();
         event.getStore().putRequestHeader(headers);
         http.setRequestHeaders(headers);
 
@@ -348,7 +353,7 @@ public class ProxyServlet extends HttpServlet {
     SimStore parseUri(URI uri, HttpServletRequest req, HttpServletResponse resp, Verb verb) throws IOException {
         List<String> uriParts1 = Arrays.asList(uri.getPath().split("/"));
         List<String> uriParts = new ArrayList<>(uriParts1);  // so parts are deletable
-        SimStore simStore = new SimStore(externalCache);  // temp - will be overwritten
+        SimStore simStore;
 
         if (uriParts.size() == 3 && uriParts.get(2).equals("prox") && verb != Verb.DELETE) {
             // CREATE
@@ -435,17 +440,17 @@ public class ProxyServlet extends HttpServlet {
         }  else
             return null;
 
-        //
-        // everything above this is handling control operations
-        // starting with this load of simStore, normal channel operations begin
-        //
-
         simStore = new SimStore(externalCache, simId);
 
         if (verb == Verb.DELETE) {
             simStore.deleteSim();
             return null;
         }
+
+        //
+        // everything above this is handling control operations
+        // starting with this load of simStore, normal channel operations begin
+        //
 
         simStore = new SimStore(externalCache, simId);
 
@@ -468,6 +473,7 @@ public class ProxyServlet extends HttpServlet {
         // verify that proxy exists - only if this is a channel to a backend system
         if (simStore.isChannel())
             simStore.getStore();  // exception if proxy does not exist
+        simStore.open();
 
         log.debug("Sim " + simStore.getChannelId() + " " +  simStore.getActorType() + " " + simStore.getResource());
 

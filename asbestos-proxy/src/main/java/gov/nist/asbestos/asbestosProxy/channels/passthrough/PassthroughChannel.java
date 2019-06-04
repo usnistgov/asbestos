@@ -14,7 +14,7 @@ import java.util.Objects;
 
 
 public class PassthroughChannel implements IBaseChannel {
-    ChannelConfig channelConfig = null;
+    private ChannelConfig channelConfig = null;
 
     @Override
     public void setup(ChannelConfig simConfig) {
