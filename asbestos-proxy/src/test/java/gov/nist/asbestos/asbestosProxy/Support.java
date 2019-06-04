@@ -53,7 +53,8 @@ public class Support {
         return ec.toFile();
     }
 
-    static ChannelConfig mockServlet(HttpServletRequest request, HttpServletResponse response, String uri, String testSession, String channelId) {
+    static ChannelConfig sendChannelConfig(HttpServletRequest request, String uri, String testSession, String channelId) {
+        mockServlet(request, uri);
         Map<String, List<String>> req = new HashMap<>();
         req.put("content-type", Collections.singletonList("application/json"));
         when(request.getParameterMap()).thenReturn(req);
@@ -69,4 +70,10 @@ public class Support {
         return channelConfig;
     }
 
+    static void mockServlet(HttpServletRequest request, String uri) {
+        Map<String, List<String>> req = new HashMap<>();
+        req.put("content-type", Collections.singletonList("application/json"));
+        when(request.getParameterMap()).thenReturn(req);
+        when(request.getRequestURI()).thenReturn(uri);
+    }
 }
