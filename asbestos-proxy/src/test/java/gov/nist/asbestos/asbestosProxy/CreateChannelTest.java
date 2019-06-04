@@ -44,34 +44,12 @@ class CreateChannelTest {
 
     @Test
     void createChannelTest() throws URISyntaxException {
-        externalCache = findExternalCache();
+        externalCache = Support.findExternalCache();
         // Begin Mock
         request = mock(HttpServletRequest.class);
         response = mock(HttpServletResponse.class);
-        Map<String, List<String>> req = new HashMap<>();
-        req.put("content-type", Collections.singletonList("application/json"));
-        when(request.getRequestURI()).thenReturn("/proxy/prox/");
-        when(request.getParameterMap()).thenReturn(req);
+        ChannelConfig channelConfig = Support.mockServlet(request, response, "/proxy/prox/", "default", "proxtest");
 
-        ChannelConfig channelConfig = new ChannelConfig()
-                .setTestSession("default")
-                .setChannelId("proxtest")
-                .setEnvironment("default")
-                .setActorType("fhir")
-                .setChannelType("passthrough")
-                .setFhirBase("http://localhost:8080/fhir/fhir");
-        String json = ChannelConfigFactory.convert(channelConfig);
-        ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(json.getBytes());
-        ServletInputStream servletInputStream=new ServletInputStream(){
-            public int read() throws IOException {
-                return byteArrayInputStream.read();
-            }
-        };
-        try {
-            when(request.getInputStream()).thenReturn(servletInputStream);
-        } catch (Exception e) {
-            fail(e);
-        }
         final StubServletOutputStream servletOutputStream = new StubServletOutputStream();
         try {
             when(response.getOutputStream()).thenReturn(servletOutputStream);
@@ -93,19 +71,4 @@ class CreateChannelTest {
         assertEquals(channelConfig, simStore.getChannelConfig());
     }
 
-    private File findExternalCache() throws URISyntaxException {
-        Path ec = Paths.get(getClass().getResource("/external_cache/findme.txt").toURI()).getParent();
-        return ec.toFile();
-    }
-
-    class StubServletOutputStream extends ServletOutputStream {
-        public ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        public void write(int i) throws IOException {
-            baos.write(i);
-        }
-
-        public String toString() {
-            return baos.toString();
-        }
-    }
 }
