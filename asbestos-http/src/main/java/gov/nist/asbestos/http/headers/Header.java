@@ -14,10 +14,12 @@ public class Header {
         Objects.requireNonNull(header);
         String[] parts = header.split(":", 2);
         name = parts[0];
-        String[] valParts = parts[1].split(",");
-        Arrays.asList(valParts).forEach(val -> {
-            values.add(new HeaderValue(val));
-        });
+        if (parts.length == 2) {
+            String[] valParts = parts[1].split(",");
+            Arrays.asList(valParts).forEach(val -> {
+                values.add(new HeaderValue(val));
+            });
+        }
     }
 
     public Header(String name, String value) {

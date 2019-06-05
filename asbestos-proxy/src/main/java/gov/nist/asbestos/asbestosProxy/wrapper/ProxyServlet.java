@@ -168,6 +168,7 @@ public class ProxyServlet extends HttpServlet {
                 return;
             }
 
+            // will be used to pass request on to back end
             HttpGet requestIn = new HttpGet();
 
             Event event = simStore.newEvent();
@@ -203,8 +204,9 @@ public class ProxyServlet extends HttpServlet {
             for (Header header : responseOut.getResponseHeaders().getHeaders()) {
                 resp.addHeader(header.getName(), header.getAllValuesAsString());
             }
-            if (responseOut.getResponse() != null) {
-                resp.getOutputStream().write(responseOut.getResponse());
+            byte[] response = responseOut.getResponse();
+            if (response != null) {
+                resp.getOutputStream().write(response);
             }
 
             log.info("OK");
@@ -290,16 +292,24 @@ public class ProxyServlet extends HttpServlet {
         Headers headers = http.getResponseHeaders();
         byte[] bytes = http.getResponse();
         task.getEventStore().putResponseBody(bytes);
-        String encoding = headers.getContentEncoding().getAllValues().get(0);
-        if (encoding.equalsIgnoreCase("gzip")) {
-            String txt = Gzip.decompressGZIP(bytes);
-            task.getEventStore().putResponseBodyText(txt);
-            http.setResponseText(txt);
-        } else if (headers.getContentType().getAllValues().get(0).equalsIgnoreCase("text/html")) {
-            task.getEventStore().putResponseHTMLBody(bytes);
-            http.setResponseText(new String(bytes));
-        } else if (isStringType(headers.getContentType().getAllValues().get(0))) {
-            http.setResponseText(new String(bytes));
+        List<String> encodings = headers.getContentEncoding().getAllValues();
+        if (encodings.isEmpty()) {
+            if (isStringType(headers.getContentType().getAllValues().get(0))) {
+                http.setResponseText(new String(bytes));
+            }
+        }
+        else {
+            String encoding = encodings.get(0);
+            if (encoding != null && encoding.equalsIgnoreCase("gzip")) {
+                String txt = Gzip.decompressGZIP(bytes);
+                task.getEventStore().putResponseBodyText(txt);
+                http.setResponseText(txt);
+            } else if (headers.getContentType().getAllValues().get(0).equalsIgnoreCase("text/html")) {
+                task.getEventStore().putResponseHTMLBody(bytes);
+                http.setResponseText(new String(bytes));
+            } else if (isStringType(headers.getContentType().getAllValues().get(0))) {
+                http.setResponseText(new String(bytes));
+            }
         }
     }
 

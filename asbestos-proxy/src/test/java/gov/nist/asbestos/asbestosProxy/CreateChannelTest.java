@@ -31,7 +31,7 @@ class CreateChannelTest {
         // Begin Mock
         channelSetupRequest = mock(HttpServletRequest.class);
         channelSetupResponse = mock(HttpServletResponse.class);
-        ChannelConfig channelConfig = Support.sendChannelConfig(channelSetupRequest, "/proxy/prox/", "default", "proxtest");
+        ChannelConfig channelConfig = Support.sendChannelConfig(channelSetupRequest, "/proxy/prox/", "/proxy/prox/", "default", "proxtest");
 
         final StubServletOutputStream servletOutputStream = new StubServletOutputStream();
         when(channelSetupResponse.getOutputStream()).thenReturn(servletOutputStream);

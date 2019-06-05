@@ -1,7 +1,6 @@
-package gov.nist.asbestos.asbestosProxy;
+package gov.nist.asbestos.proxyTest;
 
 import gov.nist.asbestos.asbestosProxy.wrapper.ProxyServlet;
-import gov.nist.asbestos.sharedObjects.ChannelConfig;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 
@@ -12,7 +11,8 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 class GetMetadataTest {
 

@@ -100,10 +100,10 @@ public class Headers {
     }
 
     public Header getContentEncoding() {
-        return headers.stream()
+        Optional<Header> hdr = headers.stream()
                 .filter(header -> header.getName().equalsIgnoreCase("content-encoding"))
-                .findFirst()
-                .get();
+                .findFirst();
+        return hdr.orElse(new Header("content-encoding"));
     }
 
     private List<String> getAll(String theName) {
