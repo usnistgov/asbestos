@@ -19,30 +19,34 @@ import java.net.URISyntaxException;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class PassthroughTest {
+class PassthroughIT {
     private static FhirContext ctx;
     private IGenericClient client;
+    private static String fhirPort;
+    private static String proxyPort;
 
     @BeforeAll
     static void beforeAll() {
         ctx = FhirContext.forR4();
+        fhirPort = System.getProperty("fhir.port", "8080");
+        proxyPort = System.getProperty("proxy.port", "8081");
     }
 
    // @Test
     void deleteChannelsTest() throws URISyntaxException, IOException {
         deleteChannels();
-        assertEquals(404, new HttpGet().getJson(new URI("http://localhost:8081/proxy/prox/default__fhirpass")).getStatus());
+        assertEquals(404, new HttpGet().getJson(new URI("http://localhost:" + fhirPort + "/proxy/prox/default__fhirpass")).getStatus());
     }
 
     private void deleteChannels() {
-        new HttpDelete().run("http://localhost:8081/proxy/prox/default__fhirpass");
-        new HttpDelete().run("http://localhost:8081/proxy/prox/default__test");
-        new HttpDelete().run("http://localhost:8081/proxy/prox/default__abc");
+        new HttpDelete().run("http://localhost:" + proxyPort + "/proxy/prox/default__fhirpass");
+        new HttpDelete().run("http://localhost:"  + proxyPort + "/proxy/prox/default__test");
+        new HttpDelete().run("http://localhost:" + proxyPort + "/proxy/prox/default__abc");
     }
 
     @Test
     void createPatientDirectTest() throws IOException, URISyntaxException {
-        client = ctx.newRestfulGenericClient("http://localhost:8080/fhir/fhir");
+        client = ctx.newRestfulGenericClient("http://localhost:" + fhirPort + "/fhir/fhir");
 
         Patient patient = new Patient();
         patient.addIdentifier().setSystem("urn:system").setValue("12345");
@@ -91,15 +95,15 @@ class PassthroughTest {
                 .setEnvironment("default")
                 .setActorType("fhir")
                 .setChannelType("passthrough")
-                .setFhirBase("http://localhost:8080/fhir/fhir");
+                .setFhirBase("http://localhost:" + fhirPort + "/fhir/fhir");
         String json = ChannelConfigFactory.convert(channelConfig);
         HttpPost poster = new HttpPost();
-        poster.postJson(new URI("http://localhost:8081/proxy/prox"), json);
+        poster.postJson(new URI("http://localhost:" + proxyPort + "/proxy/prox"), json);
         int status = poster.getStatus();
         if (!(status == 200 || status == 201))
             fail("200 or 201 required - returned " + status);
         //return "http://localhost:8080/fhir/fhir";
-        return "http://localhost:8081/proxy/prox/" + testSession + "__" + channelId + "/Channel";
+        return "http://localhost:" + proxyPort + "/proxy/prox/" + testSession + "__" + channelId + "/Channel";
     }
 
 }
