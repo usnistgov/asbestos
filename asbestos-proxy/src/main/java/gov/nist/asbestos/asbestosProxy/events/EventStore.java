@@ -21,7 +21,7 @@ public class EventStore {
     private SimStore simStore;
     private File root;
     private File _request = null; // interaction with client
-    private List<File> _tasks = new ArrayList<>(); // downstream/backend interactions
+    private ArrayList<File> _tasks = new ArrayList<>(); // downstream/backend interactions
     private File current = null; // either request or a task
     private Event e = null;
 
@@ -46,8 +46,12 @@ public class EventStore {
         int i = 0;
         while (true) {
             File taskFile = getTaskFile(i);
-            if (taskFile.exists())
-                _tasks.set(i, taskFile);
+            if (taskFile.exists()) {
+                if (_tasks.size() <= i)
+                    _tasks.add(taskFile);
+                else
+                    _tasks.set(i, taskFile);
+            }
             else
                 break;
             i++;
@@ -132,14 +136,14 @@ public class EventStore {
 //    }
 
 
-    private File getRequestHeaderFile() { return new File(current, "request_header.txt"); }
-    private File getRequestBodyFile() { return new File(current, "request_body.bin"); }
-    private File getRequestBodyStringFile() {  return new File(current, "request_body.txt"); }
-    private File getResponseHeaderFile() {  return new File(current, "response_header.txt"); }
-    private File getResponseBodyFile() {  return new File(current, "response_body.bin"); }
-    private File getResponseBodyStringFile() {  return new File(current, "response_body.txt"); }
-    private File getResponseBodyHTMLFile() {  return new File(current, "response_body.html"); }
-    private File getRequestBodyHTMLFile() {  return new File(current, "request_body.html"); }
+    public File getRequestHeaderFile() { return new File(current, "request_header.txt"); }
+    public File getRequestBodyFile() { return new File(current, "request_body.bin"); }
+    public File getRequestBodyStringFile() {  return new File(current, "request_body.txt"); }
+    public File getResponseHeaderFile() {  return new File(current, "response_header.txt"); }
+    public File getResponseBodyFile() {  return new File(current, "response_body.bin"); }
+    public File getResponseBodyStringFile() {  return new File(current, "response_body.txt"); }
+    public File getResponseBodyHTMLFile() {  return new File(current, "response_body.html"); }
+    public File getRequestBodyHTMLFile() {  return new File(current, "request_body.html"); }
 
     public void putRequestHeader(Headers headers) {
         e._requestHeaders = headers;

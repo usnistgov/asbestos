@@ -10,16 +10,14 @@ import gov.nist.asbestos.asbestosProxy.log.Task;
 import gov.nist.asbestos.asbestosProxy.util.Gzip;
 import gov.nist.asbestos.http.headers.Header;
 import gov.nist.asbestos.http.headers.Headers;
-import gov.nist.asbestos.http.operations.HttpBase;
-import gov.nist.asbestos.http.operations.HttpGet;
-import gov.nist.asbestos.http.operations.HttpPost;
-import gov.nist.asbestos.http.operations.Verb;
+import gov.nist.asbestos.http.operations.*;
 import gov.nist.asbestos.sharedObjects.ChannelConfig;
 import gov.nist.asbestos.sharedObjects.ChannelConfigFactory;
 import gov.nist.asbestos.simapi.simCommon.SimId;
 import gov.nist.asbestos.simapi.simCommon.TestSession;
 import gov.nist.asbestos.simapi.tk.installation.Installation;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.log4j.Logger;
 
 import javax.servlet.ServletConfig;
@@ -85,14 +83,19 @@ public class ProxyServlet extends HttpServlet {
             if (channel == null)
                 throw new ServletException("Cannot create Channel of type " + channelType);
 
-            HttpPost requestIn = new HttpPost();
+            Headers inHeaders = getRequestHeaders(req, Verb.GET);
+            byte[] inBody = getRequestBody(req);
+
+           // HttpPost requestIn = new HttpPost();
 
             Event event = simStore.newEvent();
+            HttpGet requestIn = (HttpGet) logClientRequestIn(event, inHeaders, inBody, Verb.POST);
+
             // request from and response to client
-            Task clientTask = event.getStore().selectClientTask();
+            //Task clientTask = event.getStore().selectClientTask();
 
             // log input from client
-            logRequestIn(event, requestIn, req, Verb.POST);
+            //logRequestIn(event, requestIn, req, Verb.POST);
 
             log.info("=> " + simStore.getEndpoint() + " " +  event.getStore().getRequestHeader().getContentType());
 
@@ -102,6 +105,7 @@ public class ProxyServlet extends HttpServlet {
             // transform input request for backend service
             HttpBase requestOut = transformRequest(backSideTask, requestIn, channel);
             requestOut.setUri(transformRequestUri(backSideTask, requestIn, channel));
+            requestOut.getRequestHeaders().setPathInfo(requestIn.getUri());
 
             // send request to backend service
             requestOut.run();
@@ -110,8 +114,8 @@ public class ProxyServlet extends HttpServlet {
             logResponse(backSideTask, requestOut);
 
             // transform backend service response for client
+            event.getStore().selectClientTask();
             HttpBase responseOut = transformResponse(event.getStore().selectTask(Task.CLIENT_TASK), requestOut, channel);
-            clientTask.select();
 
             responseOut.getResponseHeaders().getAll().forEach(resp::addHeader);
 
@@ -122,8 +126,7 @@ public class ProxyServlet extends HttpServlet {
             log.info("OK");
 
         } catch (Throwable t) {
-            String msg = t.getMessage();
-            log.error(msg);
+            log.error(ExceptionUtils.getStackTrace(t));
             resp.setStatus(resp.SC_INTERNAL_SERVER_ERROR);
         }
     }
@@ -137,7 +140,7 @@ public class ProxyServlet extends HttpServlet {
             resp.setStatus(resp.SC_OK);
             log.info("OK");
         } catch (Throwable t) {
-            log.error(t.getMessage());
+            log.error(ExceptionUtils.getStackTrace(t));
             resp.setStatus(resp.SC_INTERNAL_SERVER_ERROR);
         }
     }
@@ -168,28 +171,31 @@ public class ProxyServlet extends HttpServlet {
                 return;
             }
 
-            // will be used to pass request on to back end
-            HttpGet requestIn = new HttpGet();
+            Headers inHeaders = getRequestHeaders(req, Verb.GET);
+            byte[] inBody = getRequestBody(req);
+
 
             Event event = simStore.newEvent();
-            Task clientTask = event.getStore().selectClientTask();
+            HttpGet requestIn = (HttpGet) logClientRequestIn(event, inHeaders, inBody, Verb.GET);
 
-            // log input request from client
-            logRequestIn(event, requestIn, req, Verb.GET);
+//            Task clientTask = event.getStore().selectClientTask();
+//
+//            // log input request from client
+//            logRequestIn(event, requestOut, req, Verb.GET);
 
+            Task backSideTask = event.getStore().newTask();
+//            HttpGet requestOut = new HttpGet();
+//            requestOut.setRequestHeaders(inHeaders);
             // key request headers
             // accept-encoding: gzip
             // accept: *
 
             log.info("=> " + simStore.getEndpoint() + " " + event.getStore().getRequestHeader().getAccept());
 
-            // create new event task to manage interaction with service behind proxy
-            Task backSideTask = event.getStore().newTask();
-
             // transform input request for backend service
             HttpBase requestOut = transformRequest(backSideTask, requestIn, channel);
             requestOut.setUri(transformRequestUri(backSideTask, requestIn, channel));
-            requestOut.getRequestHeaders().setPathInfo(requestOut.getUri());
+            requestOut.getRequestHeaders().setPathInfo(requestIn.getUri());
 
             // send request to backend service
             requestOut.run();
@@ -198,7 +204,7 @@ public class ProxyServlet extends HttpServlet {
             logResponse(backSideTask, requestOut);
 
             // transform backend service response for client
-            clientTask.select();
+            event.getStore().selectClientTask();
             HttpBase responseOut = transformResponse(event.getStore().selectTask(Task.CLIENT_TASK), requestOut, channel);
 
             for (Header header : responseOut.getResponseHeaders().getHeaders()) {
@@ -210,7 +216,7 @@ public class ProxyServlet extends HttpServlet {
             }
             log.info("OK");
         } catch (Throwable t) {
-            log.error(t.getMessage());
+            log.error(ExceptionUtils.getStackTrace(t));
             resp.setStatus(resp.SC_INTERNAL_SERVER_ERROR);
         }
     }
@@ -218,17 +224,16 @@ public class ProxyServlet extends HttpServlet {
     private static void logResponse(Task backSideTask, HttpBase requestOut) {
         // log response from backend service
         backSideTask.select();
-        backSideTask.getEventStore().putResponseHeader(requestOut.getResponseHeaders());
+        Headers responseHeaders = requestOut.getResponseHeaders();
+        responseHeaders.setStatus(requestOut.getStatus());
+        backSideTask.getEventStore().putResponseHeader(responseHeaders);
         // TODO make this next line not seem to work
         //backSideTask.event._responseHeaders = requestOut._responseHeaders
         logResponseBody(backSideTask, requestOut);
         log.info("==> " + requestOut.getStatus() + " " + ((requestOut.getResponse() != null) ? requestOut.getResponseContentType() + " " + requestOut.getResponse().length + " bytes": "NULL"));
     }
 
-    static HttpBase logRequestIn(Event event, HttpBase http, HttpServletRequest req, Verb verb) {
-        event.getStore().selectClientTask();
-
-        // Log headers
+    static Headers getRequestHeaders(HttpServletRequest req, Verb verb) {
         List<String> names = Collections.list(req.getHeaderNames());
         Map<String, List<String>> hdrs = new HashMap<>();
         for (String name : names) {
@@ -242,17 +247,30 @@ public class ProxyServlet extends HttpServlet {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+        return headers;
+    }
 
+    static HttpBase logClientRequestIn(Event event, Headers headers, byte[] body, Verb verb) {
+        HttpBase base = (verb == Verb.GET) ? new HttpGet() : new HttpPost();
         event.getStore().selectClientTask();
         event.getStore().putRequestHeader(headers);
-        http.setRequestHeaders(headers);
+        base.setRequestHeaders(headers);
 
-        // Log body of POST
-        if (verb == Verb.POST) {
-            logRequestBody(event, headers, http, req);
+        event.getStore().putRequestBody(body);
+        base.setResponse(body);
+        String encoding = (headers.getContentEncoding().getAllValues().isEmpty()) ? "" : headers.getContentEncoding().getAllValues().get(0);
+        if (encoding.equalsIgnoreCase("gzip")) {
+            String txt = Gzip.decompressGZIP(body);
+            event.getStore().putRequestBodyText(txt);
+            base.setRequestText(txt);
+        } else if (headers.getContentType().getAllValues().get(0).equalsIgnoreCase("text/html")) {
+            event.getStore().putRequestHTMLBody(body);
+            base.setRequestText(new String(body));
+        } else if (headers.getContentType().getAllValues().get(0).startsWith("text/")) {
+            event.getStore().putRequestBodyText(new String(body));
+            base.setRequestText(new String(body));
         }
-
-        return http;
+        return base;
     }
 
     private static List<String> stringTypes = Arrays.asList(
@@ -262,6 +280,16 @@ public class ProxyServlet extends HttpServlet {
 
     static boolean isStringType(String type) {
         return type.startsWith("text") || stringTypes.contains(type);
+    }
+
+    static byte[] getRequestBody(HttpServletRequest req) {
+        byte[] bytes;
+        try {
+            bytes = IOUtils.toByteArray(req.getInputStream());
+        } catch (Exception e) {
+            throw new  RuntimeException(e);
+        }
+        return bytes;
     }
 
     static void logRequestBody(Event event, Headers headers, HttpBase http, HttpServletRequest req) {
@@ -294,7 +322,9 @@ public class ProxyServlet extends HttpServlet {
         List<String> encodings = headers.getContentEncoding().getAllValues();
         if (encodings.isEmpty()) {
             if (isStringType(headers.getContentType().getAllValues().get(0))) {
-                http.setResponseText(new String(bytes));
+                String txt = new String(bytes);
+                http.setResponseText(txt);
+                task.getEventStore().putResponseBodyText(txt);
             }
         }
         else {

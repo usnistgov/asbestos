@@ -36,10 +36,10 @@ public class SimStore {
     private boolean newlyCreated = false;
     private static final String PSIMDB = "psimdb";
     private static final String CHANNEL_CONFIG_FILE = "config.json";
-    Event event;
+    private Event event;
     //EventStore eventStore
     ChannelConfig channelConfig;
-    boolean channel = true;  // is this a channel to the backend system?
+    private boolean channel = true;  // is this a channel to the backend system?
 
     public SimStore(File externalCache, SimId channelId) {
         Installation.validateExternalCache(externalCache);

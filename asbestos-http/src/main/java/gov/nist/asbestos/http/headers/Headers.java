@@ -38,13 +38,14 @@ public class Headers {
         while(st.hasMoreTokens()) {
             String it = WhiteSpace.removeTrailing(st.nextToken());
             if (!it.contains(":")) {
-                String[] parts = it.split(" ", 2);
-                if (parts.length == 2) {
+                String[] parts = it.split(" ", 3);
+                if (parts.length == 3) {
                     verb = parts[0];
+                    status = Integer.parseInt(parts[1]);
                     try {
-                        pathInfo = new URI(parts[1]);
+                        pathInfo = new URI(parts[2]);
                     } catch (Exception e) {
-                        throw new RuntimeException(parts[1], e);
+                        throw new RuntimeException(parts[2], e);
                     }
                 }
                 continue;
@@ -93,10 +94,10 @@ public class Headers {
     }
 
     public Header getAccept() {
-        return headers.stream()
+        Optional<Header> accepts = headers.stream()
                 .filter(header -> header.getName().equalsIgnoreCase("accept"))
-                .findFirst()
-                .get();
+                .findFirst();
+        return accepts.orElseGet(() -> new Header("accept", "*/*"));
     }
 
     public Header getContentEncoding() {
@@ -160,7 +161,9 @@ public class Headers {
     }
 
     public String toString() {
-        return headers.stream()
+        return
+                verb + " " + status + " " + pathInfo + "\n" +
+                headers.stream()
                 .map(Header::toString)
                 .collect(Collectors.joining("\r\n"));
     }

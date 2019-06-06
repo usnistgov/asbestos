@@ -14,7 +14,7 @@ import java.net.URISyntaxException;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 
-class GetMetadataTest {
+class GetMetadataTestxxx {
 
     @Mock
     HttpServletRequest channelSetupRequest;
@@ -27,6 +27,7 @@ class GetMetadataTest {
 
     @Test
     void getMetadataTest() throws URISyntaxException, IOException {
+
         String testSession = "default";
         String channelId = "proxtest";
         externalCache = Support.findExternalCache();

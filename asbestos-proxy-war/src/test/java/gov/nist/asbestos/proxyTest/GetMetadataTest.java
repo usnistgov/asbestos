@@ -1,6 +1,11 @@
 package gov.nist.asbestos.proxyTest;
 
+import gov.nist.asbestos.asbestosProxy.events.EventStore;
+import gov.nist.asbestos.asbestosProxy.events.EventStoreItem;
+import gov.nist.asbestos.asbestosProxy.events.EventStoreSearch;
+import gov.nist.asbestos.asbestosProxy.log.SimStore;
 import gov.nist.asbestos.asbestosProxy.wrapper.ProxyServlet;
+import gov.nist.asbestos.simapi.simCommon.SimId;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 
@@ -10,7 +15,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -49,9 +54,35 @@ class GetMetadataTest {
 
         final StubServletOutputStream servletOutputStream2 = new StubServletOutputStream();
         when(getSetupResponse.getOutputStream()).thenReturn(servletOutputStream2);
+        when(getSetupRequest.getInputStream()).thenReturn(new StubServletInputStream(""));
 
         ps.doGet(getSetupRequest, getSetupResponse);
         String out = servletOutputStream2.toString();
+
+        SimId simId = SimId.buildFromRawId(testSession + "__" + channelId).withActorType("fhir").withEnvironment("default");
+        EventStoreItem mostRecent = new EventStoreSearch(externalCache, simId).getMostRecent();
+        assertNotNull(mostRecent);
+        EventStore eventStore = new EventStore(new SimStore(externalCache, simId),mostRecent.getFile());
+        assertNotNull(eventStore);
+        assertEquals(1, eventStore.getTaskCount());
+
+        eventStore.selectClientTask();
+        assertTrue(eventStore.getRequestHeaderFile().exists());
+
+        eventStore.selectTask(0);
+        assertTrue(eventStore.getRequestHeaderFile().exists());
+        assertTrue(eventStore.getResponseHeaderFile().exists());
+        assertTrue(eventStore.getResponseBodyAsString().contains("CapabilityStatement"));
+        assertTrue(eventStore.getResponseBodyFile().exists());
+        assertTrue(eventStore.getResponseBodyStringFile().exists());
+
+        eventStore.selectClientTask();
+        assertTrue(eventStore.getResponseHeaderFile().exists());
+        assertEquals(200, eventStore.getResponseHeader().getStatus());
+        assertTrue(eventStore.getResponseBodyFile().exists());
+        assertTrue(eventStore.getResponseBodyStringFile().exists());
+        assertTrue(eventStore.getResponseBodyAsString().contains("CapabilityStatement"));
+
         assertTrue(out.contains("CapabilityStatement"));
     }
 }

@@ -62,12 +62,12 @@ public class SimId {
         return new SimId(new TestSession(testSession), id);
     }
 
-    SimId withActorType(String actor) {
+    public SimId withActorType(String actor) {
         this.actorType = actor;
         return this;
     }
 
-    SimId withEnvironment(String environment) {
+    public SimId withEnvironment(String environment) {
         this.environmentName = environment;
         return this;
     }

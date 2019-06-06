@@ -12,13 +12,13 @@ import java.util.Map;
 
 abstract public class HttpBase {
     Map<String, List<String>> requestHeadersList = null;
-    private Headers _requestHeaders = null;
-    private Headers _responseHeaders = null;
+    Headers _requestHeaders = null;
+    Headers _responseHeaders = null;
     int status;
-    private String _responseText = null;
-    private byte[] _response;
-    private String _requestText = null;
-    private byte[] _request;
+    String _responseText = null;
+    byte[] _response;
+    String _requestText = null;
+    byte[] _request;
     URI uri;
 
     public abstract HttpBase run() throws IOException;

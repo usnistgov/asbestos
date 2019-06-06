@@ -25,6 +25,12 @@ public class EventStoreSearch {
         return x.isDirectory() && !x.getName().startsWith(".") && !x.getName().startsWith("_");
     }
 
+    public EventStoreItem getMostRecent() {
+        Map<String, EventStoreItem> eventItems = loadAllEventsItems();
+        Optional<String> theItem = eventItems.keySet().stream().max(Comparator.naturalOrder());
+        return theItem.map(eventItems::get).orElse(null);
+    }
+
     public Map<String, EventStoreItem> loadAllEventsItems() {
         Map<String, EventStoreItem> eventItems = new HashMap<>();
 
