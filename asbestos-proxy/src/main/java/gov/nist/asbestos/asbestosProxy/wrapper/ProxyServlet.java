@@ -208,7 +208,6 @@ public class ProxyServlet extends HttpServlet {
             if (response != null) {
                 resp.getOutputStream().write(response);
             }
-
             log.info("OK");
         } catch (Throwable t) {
             log.error(t.getMessage());
@@ -223,7 +222,7 @@ public class ProxyServlet extends HttpServlet {
         // TODO make this next line not seem to work
         //backSideTask.event._responseHeaders = requestOut._responseHeaders
         logResponseBody(backSideTask, requestOut);
-        log.info("==> " + requestOut.getStatus() + " " + ((requestOut.getResponse() != null) ? requestOut.getResponseContentType() : "NULL"));
+        log.info("==> " + requestOut.getStatus() + " " + ((requestOut.getResponse() != null) ? requestOut.getResponseContentType() + " " + requestOut.getResponse().length + " bytes": "NULL"));
     }
 
     static HttpBase logRequestIn(Event event, HttpBase http, HttpServletRequest req, Verb verb) {

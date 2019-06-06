@@ -28,7 +28,7 @@
         <!--<module>view</module>-->
         <!--<module>asbestos-simapitest</module>-->
         <!--<module>asbestos-fproxy</module>-->
-        <module>asbestos-proxy-test</module>
+<!--        <module>asbestos-proxy-test</module>-->
         <module>asbestos-http</module>
         <module>asbestos-shared-objects</module>
         <module>asbestos-proxy</module>
