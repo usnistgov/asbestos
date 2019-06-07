@@ -53,4 +53,8 @@ public class HttpPost  extends HttpBase {
         return this;
     }
 
+    public String getVerb() {
+        return "POST";
+    }
+
 }

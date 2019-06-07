@@ -7,4 +7,9 @@ public class HttpAny extends HttpBase {
     public HttpBase run() throws IOException {
         throw new RuntimeException("HttpAny is not runnable");
     }
+
+    public String getVerb() {
+        return "ANY";
+    }
+
 }

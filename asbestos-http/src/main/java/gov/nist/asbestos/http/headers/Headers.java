@@ -35,9 +35,10 @@ public class Headers {
     public Headers(String headerString) {
         StringTokenizer st = new StringTokenizer(headerString, "\n");
 
+        boolean isFirst = true;
         while(st.hasMoreTokens()) {
             String it = WhiteSpace.removeTrailing(st.nextToken());
-            if (!it.contains(":")) {
+            if (isFirst) {
                 String[] parts = it.split(" ", 3);
                 if (parts.length == 3) {
                     verb = parts[0];
@@ -48,6 +49,7 @@ public class Headers {
                         throw new RuntimeException(parts[2], e);
                     }
                 }
+                isFirst = false;
                 continue;
             }
             headers.add(new Header(it));
@@ -166,9 +168,9 @@ public class Headers {
     public String toString() {
         return
                 verb + " " + status + " " + pathInfo + "\n" +
-                headers.stream()
-                .map(Header::toString)
-                .collect(Collectors.joining("\r\n"));
+                        headers.stream()
+                                .map(Header::toString)
+                                .collect(Collectors.joining("\r\n"));
     }
 
 

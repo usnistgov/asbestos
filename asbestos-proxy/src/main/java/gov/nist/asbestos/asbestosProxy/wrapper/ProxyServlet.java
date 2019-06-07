@@ -212,6 +212,8 @@ public class ProxyServlet extends HttpServlet {
         backSideTask.select();
         Headers responseHeaders = requestOut.getResponseHeaders();
         responseHeaders.setStatus(requestOut.getStatus());
+        responseHeaders.setVerb(requestOut.getVerb());
+        responseHeaders.setPathInfo(requestOut.getUri());
         backSideTask.getEventStore().putResponseHeader(responseHeaders);
         // TODO make this next line not seem to work
         //backSideTask.event._responseHeaders = requestOut._responseHeaders
@@ -252,7 +254,7 @@ public class ProxyServlet extends HttpServlet {
         } else if (headers.getContentType().getAllValues().get(0).equalsIgnoreCase("text/html")) {
             event.getStore().putRequestHTMLBody(body);
             base.setRequestText(new String(body));
-        } else if (headers.getContentType().getAllValues().get(0).startsWith("text/")) {
+        } else if (isStringType(headers.getContentType().getAllValues().get(0))) {
             event.getStore().putRequestBodyText(new String(body));
             base.setRequestText(new String(body));
         }
@@ -328,14 +330,42 @@ public class ProxyServlet extends HttpServlet {
         }
     }
 
+    static void logBackendRequest(Task task, HttpBase http) {
+        task.select();
+        Headers headers = http.getRequestHeaders();
+        task.getEventStore().putRequestHeader(headers);
+        byte[] bytes = http.getRequest();
+        task.getEventStore().putRequestBody(bytes);
+        List<String> encodings = headers.getContentEncoding().getAllValues();
+        if (encodings.isEmpty()) {
+            if (isStringType(headers.getContentType().getAllValues().get(0))) {
+                String txt = new String(bytes);
+                http.setRequestText(txt);
+                task.getEventStore().putRequestBodyText(txt);
+            }
+        }
+        else {
+            String encoding = encodings.get(0);
+            if (encoding != null && encoding.equalsIgnoreCase("gzip")) {
+                String txt = Gzip.decompressGZIP(bytes);
+                task.getEventStore().putRequestBodyText(txt);
+                http.setRequestText(txt);
+            } else if (headers.getContentType().getAllValues().get(0).equalsIgnoreCase("text/html")) {
+                task.getEventStore().putRequestHTMLBody(bytes);
+                http.setRequestText(new String(bytes));
+            } else if (isStringType(headers.getContentType().getAllValues().get(0))) {
+                http.setRequestText(new String(bytes));
+            }
+        }
+    }
+
     static HttpBase transformRequest(Task task, HttpPost requestIn, IBaseChannel channelTransform) {
         HttpPost requestOut = new HttpPost();
 
         channelTransform.transformRequest(requestIn, requestOut);
 
         task.select();
-        task.getEventStore().putRequestHeader(requestOut.getRequestHeaders());
-        task.getEventStore().putRequestBody(requestOut.getRequest());
+        logBackendRequest(task, requestOut);
 
         return requestOut;
     }

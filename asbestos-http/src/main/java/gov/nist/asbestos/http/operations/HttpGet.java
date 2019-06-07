@@ -72,4 +72,8 @@ public class HttpGet extends HttpBase {
         return this;
     }
 
+    public String getVerb() {
+        return "GET";
+    }
+
 }

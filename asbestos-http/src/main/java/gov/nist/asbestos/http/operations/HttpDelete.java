@@ -40,4 +40,9 @@ public class HttpDelete  extends HttpBase {
         run(uri);
         return this;
     }
+
+    public String getVerb() {
+        return "DELETE";
+    }
+
 }

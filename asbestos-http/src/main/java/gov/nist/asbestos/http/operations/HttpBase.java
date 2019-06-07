@@ -22,6 +22,7 @@ abstract public class HttpBase {
     URI uri;
 
     public abstract HttpBase run() throws IOException;
+    public abstract String getVerb();
 
     public static String parameterMapToString(Map<String, List<String>> parameterMap) {
         if (parameterMap == null || parameterMap.isEmpty())

@@ -3,11 +3,16 @@ package gov.nist.asbestos.proxyTest;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import gov.nist.asbestos.asbestosProxy.events.EventStore;
+import gov.nist.asbestos.asbestosProxy.events.EventStoreItem;
+import gov.nist.asbestos.asbestosProxy.events.EventStoreSearch;
+import gov.nist.asbestos.asbestosProxy.log.SimStore;
 import gov.nist.asbestos.http.operations.HttpDelete;
 import gov.nist.asbestos.http.operations.HttpGet;
 import gov.nist.asbestos.http.operations.HttpPost;
 import gov.nist.asbestos.sharedObjects.ChannelConfig;
 import gov.nist.asbestos.sharedObjects.ChannelConfigFactory;
+import gov.nist.asbestos.simapi.simCommon.SimId;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.BeforeAll;
@@ -28,8 +33,8 @@ class PassthroughIT {
     @BeforeAll
     static void beforeAll() {
         ctx = FhirContext.forR4();
-        fhirPort = "8080"; //System.getProperty("fhir.port", "8080");
-        proxyPort = "8081"; //System.getProperty("proxy.port", "8081");
+        fhirPort = System.getProperty("fhir.port", "8080");
+        proxyPort = System.getProperty("proxy.port", "8081");
     }
 
    // @Test
@@ -57,8 +62,10 @@ class PassthroughIT {
 
     @Test
     void createPatientThroughProxyTest() throws IOException, URISyntaxException {
+        String testSession = "default";
+        String channelId = "fhirpass";
         deleteChannels();
-        String base = createChannel("default", "fhirpass");
+        String base = createChannel(testSession, channelId);
         client = ctx.newRestfulGenericClient(base);
 
         Patient patient = new Patient();
