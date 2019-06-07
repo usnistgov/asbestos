@@ -31,14 +31,29 @@ abstract public class HttpBase {
         boolean isFirst = true;
 
         for (String name : parameterMap.keySet()) {
-            List<String> values = parameterMap.get(name);
-            for (String value : values) {
-                if (isFirst) {
-                    isFirst = false;
-                } else {
-                    buf.append('&');
+            Object o = parameterMap.get(name);
+            // sometimes it is an array
+            if (o instanceof List) {
+                List<String> values = (List) o;
+                for (String value : values) {
+                    if (isFirst) {
+                        isFirst = false;
+                    } else {
+                        buf.append('&');
+                    }
+                    buf.append(name).append('=').append(value);
                 }
-                buf.append(name).append('=').append(value);
+            }
+            if (o.getClass().isArray()) {
+                String[] values = (String[]) o;
+                for (String value : values) {
+                    if (isFirst) {
+                        isFirst = false;
+                    } else {
+                        buf.append('&');
+                    }
+                    buf.append(name).append('=').append(value);
+                }
             }
         }
 

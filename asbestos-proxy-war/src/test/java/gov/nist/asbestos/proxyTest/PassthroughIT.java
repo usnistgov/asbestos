@@ -45,7 +45,7 @@ class PassthroughIT {
     }
 
     @Test
-    void createPatientDirectTest() throws IOException, URISyntaxException {
+    void createPatientDirectTest() {
         client = ctx.newRestfulGenericClient("http://localhost:" + fhirPort + "/fhir/fhir");
 
         Patient patient = new Patient();

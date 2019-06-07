@@ -87,10 +87,13 @@ public class Headers {
     }
 
     public Header getContentType() {
-        return headers.stream()
+        Optional<Header> theHeader = headers.stream()
                 .filter(header -> header.getName().equalsIgnoreCase("content-type"))
-                .findFirst()
-                .get();
+                .findFirst();
+        if (theHeader.isPresent())
+            return theHeader.get();
+        else
+            return new Header("content-type", "");
     }
 
     public Header getAccept() {

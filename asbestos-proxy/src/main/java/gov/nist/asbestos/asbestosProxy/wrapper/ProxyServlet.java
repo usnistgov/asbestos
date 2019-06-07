@@ -83,19 +83,13 @@ public class ProxyServlet extends HttpServlet {
             if (channel == null)
                 throw new ServletException("Cannot create Channel of type " + channelType);
 
-            Headers inHeaders = getRequestHeaders(req, Verb.GET);
+            Headers inHeaders = getRequestHeaders(req, Verb.POST);
             byte[] inBody = getRequestBody(req);
 
-           // HttpPost requestIn = new HttpPost();
+            // HttpPost requestIn = new HttpPost();
 
             Event event = simStore.newEvent();
-            HttpGet requestIn = (HttpGet) logClientRequestIn(event, inHeaders, inBody, Verb.POST);
-
-            // request from and response to client
-            //Task clientTask = event.getStore().selectClientTask();
-
-            // log input from client
-            //logRequestIn(event, requestIn, req, Verb.POST);
+            HttpPost requestIn = (HttpPost) logClientRequestIn(event, inHeaders, inBody, Verb.POST);
 
             log.info("=> " + simStore.getEndpoint() + " " +  event.getStore().getRequestHeader().getContentType());
 
@@ -104,8 +98,10 @@ public class ProxyServlet extends HttpServlet {
 
             // transform input request for backend service
             HttpBase requestOut = transformRequest(backSideTask, requestIn, channel);
-            requestOut.setUri(transformRequestUri(backSideTask, requestIn, channel));
-            requestOut.getRequestHeaders().setPathInfo(requestIn.getUri());
+            URI outUri = transformRequestUri(backSideTask, requestIn, channel);
+            requestOut.setUri(outUri);
+            requestOut.getRequestHeaders().setPathInfo(outUri);
+            requestOut.setRequest(requestIn.getRequest());
 
             // send request to backend service
             requestOut.run();
@@ -178,17 +174,7 @@ public class ProxyServlet extends HttpServlet {
             Event event = simStore.newEvent();
             HttpGet requestIn = (HttpGet) logClientRequestIn(event, inHeaders, inBody, Verb.GET);
 
-//            Task clientTask = event.getStore().selectClientTask();
-//
-//            // log input request from client
-//            logRequestIn(event, requestOut, req, Verb.GET);
-
             Task backSideTask = event.getStore().newTask();
-//            HttpGet requestOut = new HttpGet();
-//            requestOut.setRequestHeaders(inHeaders);
-            // key request headers
-            // accept-encoding: gzip
-            // accept: *
 
             log.info("=> " + simStore.getEndpoint() + " " + event.getStore().getRequestHeader().getAccept());
 
@@ -230,7 +216,7 @@ public class ProxyServlet extends HttpServlet {
         // TODO make this next line not seem to work
         //backSideTask.event._responseHeaders = requestOut._responseHeaders
         logResponseBody(backSideTask, requestOut);
-        log.info("==> " + requestOut.getStatus() + " " + ((requestOut.getResponse() != null) ? requestOut.getResponseContentType() + " " + requestOut.getResponse().length + " bytes": "NULL"));
+        log.info("==> " + requestOut.getStatus() + " " + ((requestOut.getResponse() != null) ? requestOut.getResponseContentType() + " " + requestOut.getResponse().length + " bytes" : "NULL"));
     }
 
     static Headers getRequestHeaders(HttpServletRequest req, Verb verb) {
@@ -257,7 +243,7 @@ public class ProxyServlet extends HttpServlet {
         base.setRequestHeaders(headers);
 
         event.getStore().putRequestBody(body);
-        base.setResponse(body);
+        base.setRequest(body);
         String encoding = (headers.getContentEncoding().getAllValues().isEmpty()) ? "" : headers.getContentEncoding().getAllValues().get(0);
         if (encoding.equalsIgnoreCase("gzip")) {
             String txt = Gzip.decompressGZIP(body);
@@ -379,7 +365,6 @@ public class ProxyServlet extends HttpServlet {
         responseOut.getResponseHeaders().removeHeader("transfer-encoding");
 
         task.select();
-        //task.event.putResponseHeader(responseIn.responseHeaders)
         task.getEventStore().putResponseBody(responseOut.getResponse());
         task.getEventStore().putResponseHeader(responseOut.getResponseHeaders());
         logResponseBody(task, responseOut);
@@ -406,10 +391,10 @@ public class ProxyServlet extends HttpServlet {
                 ChannelConfig channelConfig = ChannelConfigFactory.convert(rawRequest);
                 simStore = new SimStore(externalCache,
                         new SimId(new TestSession(channelConfig.getTestSession()),
-                            channelConfig.getChannelId(),
-                            channelConfig.getActorType(),
-                            channelConfig.getEnvironment(),
-                            true));
+                                channelConfig.getChannelId(),
+                                channelConfig.getActorType(),
+                                channelConfig.getEnvironment(),
+                                true));
 
                 simStore.create(channelConfig);
                 log.info("Channel " + simStore.getChannelId().toString() + " created (type " + simStore.getActorType() + ")" );

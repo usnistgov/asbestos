@@ -26,7 +26,8 @@ public class ChannelConfig {
             int beyondChannelI = channelI + "/Channel".length();
             path = fhirBase + path.substring(beyondChannelI);
         }
-        return new URI(req.getScheme(), req.getUserInfo(), req.getHost(), req.getPort(), path, req.getQuery(), req.getFragment());
+        URI uri = new URI(req.getScheme(), req.getUserInfo(), req.getHost(), req.getPort(), path, req.getQuery(), req.getFragment());
+        return uri;
     }
 
     public String getEnvironment() {

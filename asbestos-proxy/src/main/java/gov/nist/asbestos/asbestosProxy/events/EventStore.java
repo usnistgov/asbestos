@@ -159,15 +159,17 @@ public class EventStore {
 
     public void putRequestBody(byte[] body) {
         e._requestRawBody = body;
-        e._requestBody = new String(body);
-        current.mkdirs();
-        if (body.length > 0) {
-            try {
-                try (FileOutputStream stream = new FileOutputStream(getRequestBodyFile())) {
-                    stream.write(body);
+        if (body != null) {
+            e._requestBody = new String(body);
+            current.mkdirs();
+            if (body.length > 0) {
+                try {
+                    try (FileOutputStream stream = new FileOutputStream(getRequestBodyFile())) {
+                        stream.write(body);
+                    }
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
                 }
-            } catch (Exception e) {
-                throw new RuntimeException(e);
             }
         }
     }
