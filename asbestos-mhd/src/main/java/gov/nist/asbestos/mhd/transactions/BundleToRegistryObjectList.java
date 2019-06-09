@@ -236,7 +236,6 @@ public class BundleToRegistryObjectList implements IVal {
 
     AssociationType1 createAssociation(String type, String sourceId, String targetId, String slotName, List<String> slotValues) {
         AssociationType1 at = new AssociationType1();
-        //val.add(new Val().msg("Association(" + type + ") source=" + sourceId + " target=" + targetId));
         at.setSourceObject(sourceId);
         at.setTargetObject(targetId);
         at.setAssociationType(type);
