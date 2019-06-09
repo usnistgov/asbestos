@@ -1,4 +1,4 @@
-package gov.nist.asbestos.asbestosProxy.Base;
+package gov.nist.asbestos.asbestosProxySupport.Base;
 
 import ca.uhn.fhir.context.FhirContext;
 

@@ -1,4 +1,5 @@
-package gov.nist.asbestos.asbestosProxy.Base;
+package gov.nist.asbestos.asbestosProxySupport.Base;
+
 
 import gov.nist.asbestos.simapi.validation.Val;
 

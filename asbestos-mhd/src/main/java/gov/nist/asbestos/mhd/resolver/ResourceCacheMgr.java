@@ -32,7 +32,7 @@ public class ResourceCacheMgr {
                 if (cache.isDirectory() && new File(cache, "cache.properties").exists()) {
                     logger.info("Scanning Resource Cache directory " + cache);
                     FileSystemResourceCache rcache = new FileSystemResourceCache(cache);
-                    caches.put(rcache.base, rcache);
+                    caches.put(rcache.getBase(), rcache);
                 }
             }
         }

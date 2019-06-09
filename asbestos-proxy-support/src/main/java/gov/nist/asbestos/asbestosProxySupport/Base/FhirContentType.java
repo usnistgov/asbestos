@@ -1,4 +1,4 @@
-package gov.nist.asbestos.asbestosProxy.Base;
+package gov.nist.asbestos.asbestosProxySupport.Base;
 
 enum FhirContentType {
     JSON("application/fhir+json", true), XML("application/fhir+xml", false);

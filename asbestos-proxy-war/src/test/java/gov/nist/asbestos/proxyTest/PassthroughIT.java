@@ -60,6 +60,7 @@ class PassthroughIT {
         assertNotNull(id);
     }
 
+    //TODO add gzip version
     @Test
     void createPatientThroughProxyTest() throws IOException, URISyntaxException {
         String testSession = "default";

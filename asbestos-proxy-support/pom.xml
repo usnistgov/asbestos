@@ -9,20 +9,9 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>asbestos-proxy</artifactId>
-
+    <artifactId>asbestos-proxy-support</artifactId>
 
     <dependencies>
-        <dependency>
-            <groupId>gov.nist.asbestos</groupId>
-            <artifactId>asbestos-mhd</artifactId>
-            <version>1.0-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>gov.nist.asbestos</groupId>
-            <artifactId>asbestos-shared-objects</artifactId>
-            <version>1.0-SNAPSHOT</version>
-        </dependency>
         <dependency>
             <groupId>gov.nist.asbestos</groupId>
             <artifactId>asbestos-http</artifactId>
@@ -30,8 +19,9 @@
         </dependency>
         <dependency>
             <groupId>gov.nist.asbestos</groupId>
-            <artifactId>asbestos-adapter</artifactId>
+            <artifactId>asbestos-http</artifactId>
             <version>1.0-SNAPSHOT</version>
+            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>gov.nist.asbestos</groupId>
@@ -39,18 +29,11 @@
             <version>1.0-SNAPSHOT</version>
         </dependency>
         <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-compress</artifactId>
-            <version>1.14</version>
+            <groupId>gov.nist.asbestos</groupId>
+            <artifactId>simapi</artifactId>
+            <version>1.0-SNAPSHOT</version>
+            <scope>compile</scope>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/javax.servlet/servlet-api -->
-        <!-- https://mvnrepository.com/artifact/javax.xml/jaxp-api -->
-        <dependency>
-            <groupId>javax.xml</groupId>
-            <artifactId>jaxp-api</artifactId>
-            <version>1.4.2</version>
-        </dependency>
-        <!-- https://mvnrepository.com/artifact/org.mockito/mockito-all -->
-
     </dependencies>
+
 </project>

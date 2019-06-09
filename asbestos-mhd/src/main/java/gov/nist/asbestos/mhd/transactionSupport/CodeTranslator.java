@@ -58,8 +58,11 @@ public class CodeTranslator {
     public static final String FORMATCODE = "urn:uuid:a09d5840-386c-46f2-b5ad-9c3699a4309d";
 
     // other non-codes
-    public static final String UNIQUEID = "urn:uuid:2e82c1f6-a085-4c72-9da3-8640a32e42ab";
-    public static final String DEPID = "urn:uuid:58a6f841-87b3-4a3e-92fd-a8ffeff98427";
+    public static final String DE_UNIQUEID = "urn:uuid:2e82c1f6-a085-4c72-9da3-8640a32e42ab";
+    public static final String SS_UNIQUEID = "urn:uuid:96fdda7c-d067-4183-912e-bf5ee74998a8";
+    public static final String SS_SOURCEID = "urn:uuid:554ac39e-e3fe-47fe-b233-965d2a147832";
+    public static final String DE_PID = "urn:uuid:58a6f841-87b3-4a3e-92fd-a8ffeff98427";
+    public static final String SS_PID = "urn:uuid:6b5aea1a-874d-4603-a4bc-96a0a7b38446";
 
     static final String CONFCODENAME = "confidentialityCode";
     static final String HCFTCODENAME = "healthcareFacilityTypeCode";

@@ -1,5 +1,6 @@
 package gov.nist.asbestos.mhd.resolver;
 
+import gov.nist.asbestos.mhd.transactionSupport.ResourceWrapper;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Reference;
@@ -45,7 +46,7 @@ public class Ref {
 //        this.uri = ref.uri;
 //    }
 
-    public Ref(Reference reference) throws Exception {
+    public Ref(Reference reference) {
         Objects.requireNonNull(reference);
         uri = build(reference.getReference());
     }
@@ -318,4 +319,7 @@ public class Ref {
     );
 
 
+    public ResourceWrapper load() {
+        return null;
+    }
 }

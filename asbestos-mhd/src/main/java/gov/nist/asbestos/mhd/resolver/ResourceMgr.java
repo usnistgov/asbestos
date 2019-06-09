@@ -1,14 +1,12 @@
 package gov.nist.asbestos.mhd.resolver;
 
 
-import gov.nist.asbestos.asbestosProxy.Base.IVal;
+import gov.nist.asbestos.asbestosProxySupport.Base.IVal;
 import gov.nist.asbestos.mhd.transactionSupport.ResourceWrapper;
 import gov.nist.asbestos.simapi.validation.Val;
 import org.hl7.fhir.r4.model.Bundle;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -20,6 +18,10 @@ public class ResourceMgr implements IVal {
     private ResourceCacheMgr resourceCacheMgr = null;
     private Val val;
 
+    public ResourceMgr() {
+
+    }
+
     public ResourceMgr(Bundle bundle) {
         if (bundle != null)
             parse(bundle);
@@ -28,6 +30,18 @@ public class ResourceMgr implements IVal {
     public ResourceMgr addResourceCacheMgr(ResourceCacheMgr resourceCacheMgr) {
         this.resourceCacheMgr = resourceCacheMgr;
         return this;
+    }
+
+    public List<Ref> getResourceRefs() {
+        return new ArrayList<>(resources.keySet());
+    }
+
+    public ResourceWrapper getResource(Ref ref) {
+        return resources.get(ref);
+    }
+
+    public List<ResourceWrapper> getResources() {
+        return new ArrayList<>(resources.values());
     }
 
     // Load bundle and assign symbolic ids
@@ -88,7 +102,7 @@ public class ResourceMgr implements IVal {
      * @return [url, Resource]
      */
     // TODO - needs toughening - containingURL could be null if referenceURL is absolute
-    ResourceWrapper resolveReference(ResourceWrapper containing, Ref referenceUrl, ResolverConfig config) {
+    public ResourceWrapper resolveReference(ResourceWrapper containing, Ref referenceUrl, ResolverConfig config) {
         Objects.requireNonNull(val);
         Objects.requireNonNull(containing);
         Objects.requireNonNull(referenceUrl);
@@ -177,12 +191,13 @@ public class ResourceMgr implements IVal {
         }
 
         thisVal.err(new Val().msg("Resolver: ...failed"));
-        new ResourceWrapper(null, null);
+        return new ResourceWrapper(null, null);
     }
 
-    private int symbolicIdCounter = 1;
+    private SymbolicIdBuilder symbolicIdBuilder = new SymbolicIdBuilder();
+
     public String allocateSymbolicId() {
-        return "ID" + Integer.toString(symbolicIdCounter++);
+        return symbolicIdBuilder.allocate();
     }
 
 

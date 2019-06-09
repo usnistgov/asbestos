@@ -2,7 +2,7 @@ package gov.nist.asbestos.mhd.resolver;
 /**
  * used to configure ResourceMgr
  */
-class ResolverConfig {
+public class ResolverConfig {
     boolean relativeReferenceOk = true;
     boolean relativeReferenceRequired = false;
 
@@ -12,32 +12,32 @@ class ResolverConfig {
     boolean containedOk = false;
     boolean containedRequired = false;
 
-    ResolverConfig noRelative() {
+    public ResolverConfig noRelative() {
         relativeReferenceOk = false;
         return this;
     }
 
-    ResolverConfig relativeRequired() {
+    public ResolverConfig relativeRequired() {
         relativeReferenceRequired = true;
         return this;
     }
 
-    ResolverConfig externalRequired() {
+    public ResolverConfig externalRequired() {
         externalRequired = true;
         return this;
     }
 
-    ResolverConfig internalRequired() {
+    public ResolverConfig internalRequired() {
         internalRequired = true;
         return this;
     }
 
-    ResolverConfig containedOk() {
+    public ResolverConfig containedOk() {
         containedOk = true;
         return this;
     }
 
-    ResolverConfig containedRequired() {
+    public ResolverConfig containedRequired() {
         containedRequired = true;
         containedOk = true;
         return this;

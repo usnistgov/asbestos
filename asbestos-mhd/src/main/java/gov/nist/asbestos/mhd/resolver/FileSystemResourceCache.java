@@ -85,4 +85,8 @@ public class FileSystemResourceCache implements ResourceCache {
         String id = relativeUrl.getId() + ((fileType != null) ? "." + fileType : "");
         return new File(new File(cacheDir, type), id);
     }
+
+    public Ref getBase() {
+        return base;
+    }
 }

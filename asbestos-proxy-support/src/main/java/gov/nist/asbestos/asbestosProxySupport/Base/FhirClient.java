@@ -1,9 +1,8 @@
-package gov.nist.asbestos.asbestosProxy.Base;
+package gov.nist.asbestos.asbestosProxySupport.Base;
 
 
 import gov.nist.asbestos.http.operations.HttpGet;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-
 
 import java.io.IOException;
 import java.net.URI;

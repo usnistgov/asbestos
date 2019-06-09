@@ -35,9 +35,10 @@
         <module>asbestos-proxy-war</module>
         <!--<module>asbestos-toolkit-api</module>-->
         <!--<module>asbestos-simapi-extra</module>-->
-        <!--<module>asbestos-codes-jaxb</module>-->
-        <!--<module>asbestos-xds-jaxb</module>-->
-        <!--<module>asbestos-mhd</module>-->
+        <module>asbestos-codes-jaxb</module>
+        <module>asbestos-xds-jaxb</module>
+        <module>asbestos-mhd</module>
+        <module>asbestos-proxy-support</module>
     </modules>
 
     <dependencyManagement>
