@@ -461,9 +461,9 @@ public class BundleToRegistryObjectList implements IVal {
             addExternalIdentifier(ro, scheme, pid, rMgr.allocateSymbolicId(), resource.getId(), attName);
     }
 
-    private void addExternalIdentifier(RegistryObjectType ro, String scheme, String value, String id, String registryObject, String name) {
+    void addExternalIdentifier(RegistryObjectType ro, String scheme, String value, String id, String registryObject, String name) {
         val.add(new Val().msg("ExternalIdentifier " + scheme));
-        List<ExternalIdentifierType> eits = ro.getExternalIdentifier();
+        //List<ExternalIdentifierType> eits = ro.getExternalIdentifier();
         ExternalIdentifierType eit = new ExternalIdentifierType();
         eit.setIdentificationScheme(scheme);
         eit.setId(id);
@@ -476,22 +476,26 @@ public class BundleToRegistryObjectList implements IVal {
         lst.setValue(name);
         ist.getLocalizedString().add(lst);
         eit.setName(ist);
+        ro.getExternalIdentifier().add(eit);
     }
 
     // TODO - no profile guidance on how to convert coding.system URL to existing OIDs
 
-    private void addClassificationFromCodeableConcept(RegistryObjectType ro, CodeableConcept cc, String scheme, String classifiedObjectId) {
+    void addClassificationFromCodeableConcept(RegistryObjectType ro, CodeableConcept cc, String scheme, String classifiedObjectId) {
         List<Coding> coding = cc.getCoding();
         addClassificationFromCoding(ro, coding.get(0), scheme, classifiedObjectId);
     }
 
     private void addClassificationFromCoding(RegistryObjectType ro, Coding coding, String scheme, String classifiedObjectId) {
+        Objects.requireNonNull(codeTranslator);
+        Objects.requireNonNull(val);
+        Objects.requireNonNull(rMgr);
         Optional<Code> systemCodeOpt = codeTranslator.findCodeByClassificationAndSystem(scheme, coding.getSystem(), coding.getCode());
         if (systemCodeOpt.isPresent()) {
             Code systemCode = systemCodeOpt.get();
             addClassification(ro, scheme, rMgr.allocateSymbolicId(), classifiedObjectId, coding.getCode(), systemCode.getCodingScheme(), coding.getDisplay());
         } else
-            val.err(new Val().msg("Cannot find translation for code ${coding.system}|${coding.code} (FHIR) into XDS coding scheme ${scheme} in configured codes.xml file"));
+            val.err(new Val().msg("Cannot find translation for code " + coding.getSystem() + "|" + coding.getCode() + " as part of " + scheme + " (FHIR) into XDS coding scheme " + scheme + " in configured codes.xml file"));
     }
 
     /**
@@ -570,5 +574,9 @@ public class BundleToRegistryObjectList implements IVal {
     @Override
     public void setVal(Val val) {
         this.val = val;
+    }
+
+    public void setResourceMgr(ResourceMgr rMgr) {
+        this.rMgr = rMgr;
     }
 }

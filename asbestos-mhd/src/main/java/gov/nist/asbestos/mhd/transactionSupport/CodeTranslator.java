@@ -3,25 +3,27 @@ package gov.nist.asbestos.mhd.transactionSupport;
 import gov.nist.asbestos.asbestorCodesJaxb.*;
 
 import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.util.Objects;
 import java.util.Optional;
 
 public class CodeTranslator {
     private Codes codes;
 
-    public CodeTranslator(File codesXmlFile) {
-        try {
+    CodeTranslator(InputStream codesStream) throws JAXBException {
             JAXBContext jaxbContext = JAXBContext.newInstance(Codes.class);
             Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
-            codes = (Codes) unmarshaller.unmarshal(codesXmlFile);
-        } catch (Exception e) {
-            throw new RuntimeException("Cannot load codes.xml from " + codesXmlFile, e);
-        }
+            codes = (Codes) unmarshaller.unmarshal(codesStream);
     }
 
-
+    CodeTranslator(File codesXmlFile) throws FileNotFoundException, JAXBException {
+        this(new FileInputStream(codesXmlFile));
+    }
 
     public Optional<Code> findCodeBySystem(String theName, String theSystem, String theCode) {
         Objects.requireNonNull(theName);

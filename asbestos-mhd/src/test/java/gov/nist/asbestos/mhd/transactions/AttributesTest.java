@@ -1,23 +1,78 @@
 package gov.nist.asbestos.mhd.transactions;
 
 
+import ca.uhn.fhir.context.FhirContext;
+import gov.nist.asbestos.asbestosProxySupport.Base.Base;
 import gov.nist.asbestos.mhd.resolver.ResourceMgr;
+import gov.nist.asbestos.mhd.transactionSupport.CodeTranslator;
+import gov.nist.asbestos.mhd.transactionSupport.CodeTranslatorBuilder;
+import gov.nist.asbestos.simapi.validation.Val;
 import oasis.names.tc.ebxml_regrep.xsd.lcm._3.SubmitObjectsRequest;
 import oasis.names.tc.ebxml_regrep.xsd.rim._3.AssociationType1;
 import oasis.names.tc.ebxml_regrep.xsd.rim._3.ExtrinsicObjectType;
 import oasis.names.tc.ebxml_regrep.xsd.rim._3.RegistryObjectListType;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.DocumentReference;
 import org.junit.jupiter.api.Test;
 
+import javax.print.Doc;
 import javax.xml.bind.*;
 import javax.xml.namespace.QName;
-import java.io.StringReader;
-import java.io.StringWriter;
+import java.io.*;
 import java.util.Arrays;
 import java.util.Collections;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 class AttributesTest {
+
+    @Test
+    void addClassificationFromCodeableConcept()  throws JAXBException {
+        InputStream is = this.getClass().getResourceAsStream("/gov/nist/asbestos/mhd/transactions/attributesTest/codeableConcept.xml");
+        IBaseResource resource = Base.getFhirContext().newXmlParser().parseResource(is);
+        assertTrue(resource instanceof DocumentReference);
+        DocumentReference dr = (DocumentReference) resource;
+        CodeableConcept type = dr.getType();
+
+        InputStream is2 = this.getClass().getResourceAsStream("/gov/nist/asbestos/mhd/transactions/attributesTest/theCodes.xml");
+        CodeTranslator codeTranslator = CodeTranslatorBuilder.read(is2);
+
+        ExtrinsicObjectType eo = new ExtrinsicObjectType();
+        BundleToRegistryObjectList brol = new BundleToRegistryObjectList(null, codeTranslator, null, null);
+        Val val = new Val();
+        brol.setVal(val);
+        brol.setResourceMgr(new ResourceMgr());
+
+        brol.addClassificationFromCodeableConcept(eo, type, "urn:uuid:f0306f51-975f-434e-a61c-c59651d33983", "classifiedObjectId");
+
+        if (val.hasErrors()) {
+            fail(val.toString());
+        }
+
+        String eoString = toXml(eo);
+        System.out.println(eoString);
+
+        ExtrinsicObjectType eo2 = toEo(eoString);
+
+        assertEquals("34133-9", eo2.getClassification().get(0).getNodeRepresentation());
+    }
+
+    @Test
+    void addExternalIdentifier()  throws JAXBException {
+        ExtrinsicObjectType eo = new ExtrinsicObjectType();
+        BundleToRegistryObjectList brol = new BundleToRegistryObjectList();
+        brol.setVal(new Val());
+
+        brol.addExternalIdentifier(eo, "scheme", "value", "id", "registryObject", "name");
+
+        String eoString = toXml(eo);
+        System.out.println(eoString);
+
+        ExtrinsicObjectType eo2 = toEo(eoString);
+
+        assertEquals("scheme", eo2.getExternalIdentifier().get(0).getIdentificationScheme());
+    }
 
     @Test
     void addSlot() throws JAXBException {

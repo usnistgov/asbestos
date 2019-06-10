@@ -3,7 +3,7 @@ package gov.nist.asbestos.asbestosProxySupport.Base;
 import ca.uhn.fhir.context.FhirContext;
 
 
-class Base {
+public class Base {
     static private FhirContext ourCtx;
 
     public static FhirContext getFhirContext() {
