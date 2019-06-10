@@ -1,24 +1,24 @@
 package gov.nist.asbestos.mhd.resolver;
+
 /**
  * used to configure ResourceMgr
  */
 public class ResolverConfig {
-    boolean relativeReferenceOk = true;
-    boolean relativeReferenceRequired = false;
+    private boolean relativeReferenceOk = true;
 
-    boolean externalRequired = false;
-    boolean internalRequired = false;
+    private boolean externalRequired = false;
+    private boolean inBundleRequired = false;
 
-    boolean containedOk = false;
-    boolean containedRequired = false;
+    private boolean containedOk = false;
+    private boolean containedRequired = false;
 
     public ResolverConfig noRelative() {
         relativeReferenceOk = false;
         return this;
     }
 
-    public ResolverConfig relativeRequired() {
-        relativeReferenceRequired = true;
+    public ResolverConfig relativeOk() {
+        this.relativeReferenceOk = true;
         return this;
     }
 
@@ -27,8 +27,8 @@ public class ResolverConfig {
         return this;
     }
 
-    public ResolverConfig internalRequired() {
-        internalRequired = true;
+    public ResolverConfig inBundleRequired() {
+        inBundleRequired = true;
         return this;
     }
 
@@ -43,11 +43,22 @@ public class ResolverConfig {
         return this;
     }
 
+    public boolean isInBundleOk() {
+        return !externalRequired;
+    }
+
+    public boolean isContainedOk() {
+        return containedOk;
+    }
+
+    boolean isRelativeOk() {
+        return relativeReferenceOk;
+    }
+
     public String toString() {
         return ((!relativeReferenceOk) ? " relativeNotAllowed" : "") +
-                ((relativeReferenceRequired) ? " relativeRequired" : "") +
                 ((externalRequired) ? " externalRequired" : "") +
-                ((internalRequired) ? " internalRequired" : "") +
+                ((inBundleRequired) ? " inBundleRequired" : "") +
                 ((containedOk) ? " containedOk" : "") +
                 ((containedRequired) ? " containedRequired" : "");
     }

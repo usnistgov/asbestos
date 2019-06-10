@@ -8,11 +8,12 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 public class ResourceWrapper {
-    private IBaseResource resource;    // basic content of the resource
-    private String assignedId;         // assigned symbolic id - used in XDS submissionm
-    private Ref url;               // FHIR URL - used when available - read from server
+    private IBaseResource resource = null;    // basic content of the resource
+    private String assignedId = null;         // assigned symbolic id - used in XDS submissionm
+    private Ref url = null;               // FHIR URL - used when available - read from server
     // String is the fragment without the leading #
     // https://www.hl7.org/fhir/references.html#contained
     // lists the rules for contained resources
@@ -25,9 +26,25 @@ public class ResourceWrapper {
         this.resource = resource;
     }
 
+    public ResourceWrapper() {
+
+    }
+
     public ResourceWrapper(IBaseResource resource, Ref url) {
         this.resource = resource;
         this.url = url;
+    }
+
+    public ResourceWrapper(Ref url) {
+        this.url = url;
+    }
+
+    public ResourceWrapper relativeTo(ResourceWrapper reference) {
+        Objects.requireNonNull(reference);
+        Objects.requireNonNull(reference.getUrl());
+        Objects.requireNonNull(url);
+        Ref theEnd = url.rebase(reference.getUrl());
+        return new ResourceWrapper(theEnd);
     }
 
     public ResourceWrapper setId(String id) {
@@ -55,11 +72,22 @@ public class ResourceWrapper {
         return duplicate;
     }
 
+    public boolean isLoaded() {
+        if (url == null) return false;
+        return resource != null;
+    }
+
     @Override
     public String toString() {
         StringBuilder buf = new  StringBuilder();
 
-        buf.append("RW[" + assignedId + ", " + url + "] => " + resource.getClass().getSimpleName());
+        String name;
+        if (resource == null)
+            name = "null";
+        else
+            name = resource.getClass().getSimpleName();
+
+        buf.append("RW[" + assignedId + ", " + url + "] => " + name);
 
         return buf.toString();
     }

@@ -51,6 +51,10 @@ public class Ref {
         uri = build(reference.getReference());
     }
 
+    public boolean isContained() {
+        return uri.toString().startsWith("#");
+    }
+
     public String getId() {
         String path = uri.getPath();
         if (!path.contains("/")) return path;
@@ -132,14 +136,16 @@ public class Ref {
         return parts[1];
     }
 
-    public boolean isAbsolute() {
-        try {
-            return StringUtils.isEmpty(uri.getScheme()) &&
-                    StringUtils.isEmpty(getBase().toString()) &&
-                    StringUtils.isEmpty(getId());
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+    boolean isAbsolute() {
+        if (uri == null) return false;
+        if (uri.toString().startsWith("http")) return true;
+        if (uri.toString().startsWith("file")) return true;
+        return false;
+    }
+
+    boolean isRelative() {
+        if (uri == null) return false;
+        return !isAbsolute();
     }
 
     @Override
@@ -162,9 +168,9 @@ public class Ref {
     }
 
     private URI build(String ref) {
-        if (ref.startsWith("#")) {
-            ref = ref.substring(1);
-        }
+//        if (ref.startsWith("#")) {
+//            ref = ref.substring(1);
+//        }
         try {
             return new URI(ref);
         } catch (Exception e) {

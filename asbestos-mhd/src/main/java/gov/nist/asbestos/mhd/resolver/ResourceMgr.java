@@ -5,6 +5,8 @@ import gov.nist.asbestos.asbestosProxySupport.Base.IVal;
 import gov.nist.asbestos.mhd.transactionSupport.ResourceWrapper;
 import gov.nist.asbestos.simapi.validation.Val;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.DomainResource;
+import org.hl7.fhir.r4.model.Resource;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -14,7 +16,7 @@ import java.util.stream.Collectors;
  */
 public class ResourceMgr implements IVal {
 //    static private final Logger logger = Logger.getLogger(ResourceMgr.class);
-    private Map<Ref, ResourceWrapper> resources = new HashMap<>();   // url -> resource
+    private Map<Ref, ResourceWrapper> bundleResources = new HashMap<>();   // url -> resource; for contents of bundle
     private ResourceCacheMgr resourceCacheMgr = null;
     private Val val;
 
@@ -22,9 +24,9 @@ public class ResourceMgr implements IVal {
 
     }
 
-    public ResourceMgr(Bundle bundle) {
-        if (bundle != null)
-            parse(bundle);
+    public void setBundle(Bundle bundle) {
+        bundleResources = new HashMap<>();
+        parse(bundle);
     }
 
     public ResourceMgr addResourceCacheMgr(ResourceCacheMgr resourceCacheMgr) {
@@ -32,16 +34,16 @@ public class ResourceMgr implements IVal {
         return this;
     }
 
-    public List<Ref> getResourceRefs() {
-        return new ArrayList<>(resources.keySet());
+    private boolean inBundle(Ref ref) {
+        return bundleResources.containsKey(ref);
     }
 
-    public ResourceWrapper getResource(Ref ref) {
-        return resources.get(ref);
+    private ResourceWrapper getFromBundle(Ref ref) {
+        return bundleResources.get(ref);
     }
 
-    public List<ResourceWrapper> getResources() {
-        return new ArrayList<>(resources.values());
+    public List<ResourceWrapper> getBundleResources() {
+        return new ArrayList<>(bundleResources.values());
     }
 
     // Load bundle and assign symbolic ids
@@ -70,8 +72,8 @@ public class ResourceMgr implements IVal {
         StringBuilder buf = new StringBuilder();
         buf.append("Resources:\n");
 
-        for (Ref ref : resources.keySet()) {
-            ResourceWrapper resource = resources.get(ref);
+        for (Ref ref : bundleResources.keySet()) {
+            ResourceWrapper resource = bundleResources.get(ref);
             buf.append(ref).append("   ").append(resource.getClass().getSimpleName()).append('\n');
         }
         return buf.toString();
@@ -83,115 +85,112 @@ public class ResourceMgr implements IVal {
      * @param resource
      * @return already present
      */
-    void addResource(Ref url, ResourceWrapper resource) {
+    private void addResource(Ref url, ResourceWrapper resource) {
         Objects.requireNonNull(val);
         Objects.requireNonNull(url);
         Objects.requireNonNull(resource);
-        boolean duplicate = resources.containsKey(url);
+        boolean duplicate = bundleResources.containsKey(url);
         if (duplicate)
             val.err(new Val()
                     .msg("Duplicate resource found in bundle for URL ${url}"));
         else
-            resources.put(url, resource);
+            bundleResources.put(url, resource);
+    }
+
+    private ResourceWrapper getContains(ResourceWrapper resource, Ref refUrl) {
+        Objects.requireNonNull(resource);
+        Objects.requireNonNull(resource.getResource());
+        Objects.requireNonNull(refUrl);
+        String ref = refUrl.toString();
+        if (resource.getResource() instanceof DomainResource) {
+            DomainResource res = (DomainResource) resource.getResource();
+            for (Resource r : res.getContained()) {
+                if (r.hasId() && r.getId().equals(ref))
+                    return new ResourceWrapper(r, refUrl);
+            }
+        }
+        return null;
+    }
+
+    private ResourceWrapper getRelative(ResourceWrapper resource, Ref refUrl) {
+        Objects.requireNonNull(resource);
+        Objects.requireNonNull(refUrl);
+        if (refUrl.isRelative())
+            return new ResourceWrapper(refUrl).relativeTo(resource);
+        return new ResourceWrapper(refUrl);
     }
 
     /**
-     *
-     * @param containing  (fullUrl)
-     * @param referenceUrl   (reference)
-     * @return [url, Resource]
+     * Return resource if internal or reference if external.
+     * @param containing
+     * @param referenceUrl
+     * @param config
+     * @return
      */
-    // TODO - needs toughening - containingURL could be null if referenceURL is absolute
-    public ResourceWrapper resolveReference(ResourceWrapper containing, Ref referenceUrl, ResolverConfig config) {
+    public Optional<ResourceWrapper> resolveReference(ResourceWrapper containing, Ref referenceUrl, ResolverConfig config) {
         Objects.requireNonNull(val);
-        Objects.requireNonNull(containing);
         Objects.requireNonNull(referenceUrl);
         Objects.requireNonNull(config);
         Val thisVal = val.addSection("Resolver: Resolve URL " + referenceUrl + " ... " + config);
 
-        if (config.containedRequired || (config.containedOk && referenceUrl.getId().startsWith("#"))) {
-            if (config.relativeReferenceOk && referenceUrl.toString().startsWith("#") && config.containedOk) {
-                thisVal.msg("Resolver: ...contained");
-                return new ResourceWrapper(containing.getResource(), referenceUrl);
-            }
-            return new ResourceWrapper(null, null);
-        }
-        if (!config.externalRequired) {
-            if (config.relativeReferenceOk && referenceUrl.toString().startsWith("#") && config.containedOk) {
-                ResourceWrapper res = containing.getContained().get(referenceUrl);
-                res.setUrl(referenceUrl);
-                thisVal.msg("Resolver: ...contained");
-                return res;
-            }
-            if (resources.containsKey(referenceUrl)) {
-                thisVal.msg("Resolver: ...in bundle");
-                return resources.get(referenceUrl);
-            }
-            boolean isRelativeReference = !referenceUrl.isAbsolute();
-            if (config.relativeReferenceRequired && !isRelativeReference) {
-                thisVal.msg("Resolver: ...relative reference required - not relative");
-                return new ResourceWrapper(null, null);
-            }
-            String resourceType = referenceUrl.getResourceType();
-            // TODO - isAbsolute does an assert on containing... here is why... if we have gotten to this point...
-            // Resource.fullUrl (containing) is a uuid (not a real reference) then it is not absolute
-            // if it is not absolute then this refernceUrl cannot be relative (relative to what???).
-            // this is a correct validation but needs a lot more on the error message (now a Groovy assert)
-            if (!containing.getUrl().isAbsolute() && !referenceUrl.isAbsolute()) {
-                Map<Ref, ResourceWrapper> x = resources.entrySet().stream()
-//                        .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue))
-//                        .entrySet().stream()
-                        .filter(ref -> !("Patient".equals(resourceType) && isRelativeReference && !config.relativeReferenceOk))
-                        .filter(ref -> ref.toString().endsWith(referenceUrl.toString()))
-                        .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-
-                // TODO should check for multiples
-                if (!x.isEmpty()) {
-                    return x.entrySet().iterator().next().getValue();
-                }
-            }
-            if (containing.getUrl().isAbsolute() && !referenceUrl.isAbsolute()) {
-                Ref url = containing.getUrl().rebase(referenceUrl);
-                if (resources.containsKey(url)) {
-                    thisVal.msg("Resolver: ...found in bundle");
-                    return resources.get(url);
-                }
-                if (resourceCacheMgr != null) {
-                    thisVal.msg("Resolver: ...looking in Resource Cache");
-                    ResourceWrapper resource = resourceCacheMgr.getResource(url);
-                    if (resource != null) {
-                        thisVal.msg("Resolver: ...returned from cache");
-                        return resource;
-                    }
-                } else
-                    thisVal.msg("Resource Cache not configured");
-            }
-        }
-
-        // external
-        if (!config.internalRequired && referenceUrl.isAbsolute()) {
-            if (resourceCacheMgr != null) {
-                thisVal.msg("Resolver: ...looking in Resource Cache");
-                ResourceWrapper resource = resourceCacheMgr.getResource(referenceUrl);
-                if (resource != null) {
-                    thisVal.msg("Resolver: ...returned from cache");
-                    return resource;
+        //
+        // Absolute
+        //
+        if (referenceUrl.isAbsolute()) {
+            if (inBundle(referenceUrl)) {
+                //
+                // In bundle ok?
+                //
+                if (config.isInBundleOk()) {
+                    return Optional.of(getFromBundle(referenceUrl));
+                } else {
+                    thisVal.err(new Val("Resolver: ...absolute reference to resource in bundle " + referenceUrl  + " - external reference required "));
+                    return Optional.empty();
                 }
             } else {
-                thisVal.msg("Resource Cache not configured");
-            }
-            ResourceWrapper res = referenceUrl.load();
-            if (res != null) {
-                thisVal.msg("Resolver: ...found");
-                return res;
-            } else {
-                thisVal.msg("Resolver: " + referenceUrl + " ...not available");
-                return new ResourceWrapper(null, null);
+                //
+                // External
+                //
+                return Optional.of(new ResourceWrapper(referenceUrl));
             }
         }
-
-        thisVal.err(new Val().msg("Resolver: ...failed"));
-        return new ResourceWrapper(null, null);
+        if (containing == null) {
+            thisVal.err(new Val("Resolver: ... reference is not absolute " + referenceUrl + " but no containing resource is offered"));
+            return Optional.empty();
+        }
+        //
+        // Contained
+        //
+        if (referenceUrl.isContained()) {
+            if (config.isContainedOk()) {
+                thisVal.msg("Resolver: ...contained");
+                return Optional.ofNullable(getContains(containing, referenceUrl));
+            }
+            thisVal.err(new Val("Resolver: ...reference is to contained resource (" + referenceUrl + " but contained is not acceptable"));
+            return Optional.empty();
+        }
+        //
+        // Relative to containing resource or found in bundle
+        //   if in bundle must be fullUrl but temp labels (urn:...) look like local -
+        //   don't start with http or file
+        //
+        if (referenceUrl.isRelative()) {
+            if (config.isRelativeOk()) {
+                ResourceWrapper res = getFromBundle(referenceUrl);
+                if (res == null) {
+                    if (containing.getUrl() == null)
+                        return Optional.empty();
+                    // relative/external
+                    return Optional.of(new ResourceWrapper(referenceUrl.rebase(containing.getUrl().getBase())));
+                } else {
+                    return Optional.of(res);
+                }
+            }
+            thisVal.err(new Val("Resolver: ...reference is to relative resource (" + referenceUrl + " but relative is not acceptable"));
+            return Optional.empty();
+        }
+        thisVal.err(new Val().msg("Resolver: ...failed to resolve " + referenceUrl + " in " + containing));
+        return Optional.empty();
     }
 
     private SymbolicIdBuilder symbolicIdBuilder = new SymbolicIdBuilder();

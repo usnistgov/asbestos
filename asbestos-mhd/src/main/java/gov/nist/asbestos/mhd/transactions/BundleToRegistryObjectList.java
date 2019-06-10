@@ -14,11 +14,9 @@ import gov.nist.asbestos.mhd.transactionSupport.Submission;
 import gov.nist.asbestos.simapi.validation.Val;
 import oasis.names.tc.ebxml_regrep.xsd.rim._3.*;
 import org.hl7.fhir.r4.model.*;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import javax.xml.bind.DatatypeConverter;
 import javax.xml.bind.JAXBElement;
-import java.io.StringWriter;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -27,6 +25,7 @@ import java.util.stream.Stream;
  *
  */
 
+// TODO enable runtime assertions with ClassLoader.getSystemClassLoader().setClassAssertionStatus("gov.nist");
 // TODO - add legalAuthenticator
 // TODO - add sourcePatientInfo
 // TODO - add referenceIdList
@@ -82,15 +81,15 @@ public class BundleToRegistryObjectList implements IVal {
         rMgr = new ResourceMgr();
     }
 
-    public Submission build(Bundle bundle) {
-        Objects.requireNonNull(val);
-        Objects.requireNonNull(bundle);
-        rMgr = new ResourceMgr(bundle).addResourceCacheMgr(resourceCacheMgr);
-        rMgr.setVal(val);
-        scanBundleForAcceptability(bundle, rMgr);
-        Submission submission = new Submission();
-
-        buildRegistryObjectList();
+//    public Submission build(Bundle bundle) {
+//        Objects.requireNonNull(val);
+//        Objects.requireNonNull(bundle);
+//        rMgr = new ResourceMgr(bundle).addResourceCacheMgr(resourceCacheMgr);
+//        rMgr.setVal(val);
+//        scanBundleForAcceptability(bundle, rMgr);
+//        Submission submission = new Submission();
+//
+//        buildRegistryObjectList();
 //
 //        StringWriter writer = new StringWriter();
 //        MarkupBuilder builder = new MarkupBuilder(writer);
@@ -99,18 +98,18 @@ public class BundleToRegistryObjectList implements IVal {
 //        }
 //        submission.documentDefinitions = writer.toString()
 //
-        return submission;
-    }
+//        return submission;
+//    }
 
     // TODO handle List/Folder or signal error
     private RegistryObjectListType buildRegistryObjectList() {
         RegistryObjectListType rol = new RegistryObjectListType();
 
-        List<ResourceWrapper> docMans = rMgr.getResources().stream()
+        List<ResourceWrapper> docMans = rMgr.getBundleResources().stream()
                 .filter(rw -> rw.getResource().getClass().equals(DocumentManifest.class))
                 .collect(Collectors.toList());
 
-        List<ResourceWrapper> docRefs = rMgr.getResources().stream()
+        List<ResourceWrapper> docRefs = rMgr.getBundleResources().stream()
                 .filter(rw -> rw.getResource().getClass().equals(DocumentReference.class))
                 .collect(Collectors.toList());
 
@@ -234,7 +233,7 @@ public class BundleToRegistryObjectList implements IVal {
         return at;
     }
 
-    AssociationType1 createAssociation(String type, String sourceId, String targetId, String slotName, List<String> slotValues) {
+    public AssociationType1 createAssociation(String type, String sourceId, String targetId, String slotName, List<String> slotValues) {
         AssociationType1 at = new AssociationType1();
         at.setSourceObject(sourceId);
         at.setTargetObject(targetId);
@@ -362,7 +361,7 @@ public class BundleToRegistryObjectList implements IVal {
         return "";
     }
 
-    void addName(RegistryObjectType eo, String name) {
+    public void addName(RegistryObjectType eo, String name) {
         LocalizedStringType lst = new LocalizedStringType();
         lst.setValue(name);
         InternationalStringType ist = new InternationalStringType();
@@ -370,7 +369,7 @@ public class BundleToRegistryObjectList implements IVal {
         eo.setName(ist);
     }
 
-    void addSlot(RegistryObjectType registryObject, String name, String value) {
+    public void addSlot(RegistryObjectType registryObject, String name, String value) {
         Objects.requireNonNull(name);
         Objects.requireNonNull(value);
         SlotType1 slot = new SlotType1();
@@ -381,7 +380,7 @@ public class BundleToRegistryObjectList implements IVal {
         registryObject.getSlot().add(slot);
     }
 
-    void addSlot(RegistryObjectType registryObject, String name, List<String> values) {
+    public void addSlot(RegistryObjectType registryObject, String name, List<String> values) {
         Objects.requireNonNull(name);
         SlotType1 slot = new SlotType1();
         slot.setName(name);
@@ -440,10 +439,10 @@ public class BundleToRegistryObjectList implements IVal {
     // TODO official identifiers must be changed
     private void addSubject(RegistryObjectType ro, ResourceWrapper resource, Ref referenced, String scheme, String attName) {
 
-        ResourceWrapper loadedResource = rMgr.resolveReference(resource, referenced, new ResolverConfig().externalRequired());
+        ResourceWrapper loadedResource = rMgr.resolveReference(resource, referenced, new ResolverConfig().externalRequired()).get();
         if (loadedResource.getUrl() == null) {
             val.err(new Val()
-                    .msg("${resource} makes reference to ${referenced}")
+                    .msg(resource + " makes reference to " + referenced)
                     .msg("All DocumentReference.subject and DocumentManifest.subject values shall be References to FHIR Patient Resources identified by an absolute external reference (URL).")
                     .frameworkDoc("3.65.4.1.2.2 Patient Identity"));
         }
@@ -461,7 +460,7 @@ public class BundleToRegistryObjectList implements IVal {
             addExternalIdentifier(ro, scheme, pid, rMgr.allocateSymbolicId(), resource.getId(), attName);
     }
 
-    void addExternalIdentifier(RegistryObjectType ro, String scheme, String value, String id, String registryObject, String name) {
+    public void addExternalIdentifier(RegistryObjectType ro, String scheme, String value, String id, String registryObject, String name) {
         val.add(new Val().msg("ExternalIdentifier " + scheme));
         //List<ExternalIdentifierType> eits = ro.getExternalIdentifier();
         ExternalIdentifierType eit = new ExternalIdentifierType();
@@ -481,7 +480,7 @@ public class BundleToRegistryObjectList implements IVal {
 
     // TODO - no profile guidance on how to convert coding.system URL to existing OIDs
 
-    void addClassificationFromCodeableConcept(RegistryObjectType ro, CodeableConcept cc, String scheme, String classifiedObjectId) {
+    public void addClassificationFromCodeableConcept(RegistryObjectType ro, CodeableConcept cc, String scheme, String classifiedObjectId) {
         List<Coding> coding = cc.getCoding();
         addClassificationFromCoding(ro, coding.get(0), scheme, classifiedObjectId);
     }
@@ -562,7 +561,7 @@ public class BundleToRegistryObjectList implements IVal {
                     .msg("Do not understand profile declared in bundle - ${bundleProfile}")
                     .frameworkDoc("3.65.4.1.2.1 Bundle Resources"));
 
-        for (ResourceWrapper res : rMgr.getResources()) {
+        for (ResourceWrapper res : rMgr.getBundleResources()) {
             if (!acceptableResourceTypes.contains(res.getResource().getClass()))
                 val.warn(new Val()
                         .msg("Resource type ${resource.resource.class.simpleName} is not part of MHD and will be ignored"))
