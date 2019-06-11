@@ -43,6 +43,7 @@ class ResourceManagerBundleTest {
 
     @Test
     void absolute_noContaining_externalRequired() {
+        rMgr.getResourceMgrConfig().internalOnly();
         Optional<ResourceWrapper> oResource = rMgr.resolveReference(null, new Ref("http://myserver/Patient/1"), new ResolverConfig().externalRequired());
         if (val.hasErrors()) {
             fail(val.toString());
@@ -55,6 +56,7 @@ class ResourceManagerBundleTest {
 
     @Test
     void absolute_hasContaining_externalRequired() {
+        rMgr.getResourceMgrConfig().internalOnly();
         Optional<ResourceWrapper> oResource = rMgr.resolveReference(bundleMgr.getBundleResources().get(0), new Ref("http://myserver/Patient/1"), new ResolverConfig().externalRequired());
         if (val.hasErrors()) {
             fail(val.toString());

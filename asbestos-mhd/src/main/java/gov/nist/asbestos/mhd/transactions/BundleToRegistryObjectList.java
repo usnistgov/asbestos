@@ -10,8 +10,8 @@ import gov.nist.asbestos.mhd.resolver.ResourceMgr;
 import gov.nist.asbestos.mhd.transactionSupport.AssigningAuthorities;
 import gov.nist.asbestos.mhd.transactionSupport.CodeTranslator;
 import gov.nist.asbestos.mhd.transactionSupport.ResourceWrapper;
-import gov.nist.asbestos.mhd.transactionSupport.Submission;
 import gov.nist.asbestos.simapi.validation.Val;
+import gov.nist.asbestos.simapi.validation.ValE;
 import oasis.names.tc.ebxml_regrep.xsd.rim._3.*;
 import org.hl7.fhir.r4.model.*;
 
@@ -107,7 +107,7 @@ public class BundleToRegistryObjectList implements IVal {
                 .collect(Collectors.toList());
 
         if (docMans.size() != 1)
-            val.err(new Val("Found " + docMans.size() + " DocumentManifests - one required"));
+            val.add(new ValE("Found " + docMans.size() + " DocumentManifests - one required").asError());
 
         RegistryPackageType ss = null;
         if (docMans.size() > 0) {
@@ -215,7 +215,7 @@ public class BundleToRegistryObjectList implements IVal {
 
     private AssociationType1 createAssociation(String type, ResourceWrapper source, Ref target, String slotName, List<String> slotValues) {
         AssociationType1 at = new AssociationType1();
-        val.add(new Val().msg("Association(" + type + ") source=" + source + " target=" + target));
+        val.add(new ValE("Association(" + type + ") source=" + source + " target=" + target));
         at.setSourceObject(source.getAssignedId());
         at.setTargetObject(target.getId());
         at.setAssociationType(type);
@@ -240,7 +240,7 @@ public class BundleToRegistryObjectList implements IVal {
 
         RegistryPackageType ss = new RegistryPackageType();
 
-        val.add(new Val().msg("SubmissionSet(" + resource.getAssignedId() + ")"));
+        val.add(new ValE("SubmissionSet(" + resource.getAssignedId() + ")"));
         ss.setId(resource.getAssignedId());
         ss.setObjectType("urn:oasis:names:tc:ebxml-regrep:ObjectType:RegistryObject:RegistryPackage");
 
@@ -252,7 +252,7 @@ public class BundleToRegistryObjectList implements IVal {
         if (dm.hasType())
             addClassificationFromCodeableConcept(ss, dm.getType(), CodeTranslator.TYPECODE, resource.getAssignedId());
         if (!dm.hasMasterIdentifier())
-            val.err(new Val("DocumentManifest.masterIdentifier not present - declared by IHE to be [1..1]"));
+            val.add(new ValE("DocumentManifest.masterIdentifier not present - declared by IHE to be [1..1]").asError());
         else
             addExternalIdentifier(ss, CodeTranslator.SS_UNIQUEID, unURN(dm.getMasterIdentifier().getValue()), rMgr.allocateSymbolicId(), resource.getAssignedId(), "XDSSubmissionSet.uniqueId");
         if (dm.hasSource())
@@ -265,15 +265,15 @@ public class BundleToRegistryObjectList implements IVal {
     private ExtrinsicObjectType createExtrinsicObject(ResourceWrapper resource) {
         DocumentReference dr = (DocumentReference) resource.getResource();
         if (dr.getContent() == null || dr.getContent().isEmpty()) {
-            val.err(new Val("DocumentReference has no content section"));
+            val.add(new ValE("DocumentReference has no content section").asError());
             return null;
         }
         if (dr.getContent().size() > 1) {
-            val.err(new Val("DocumentReference has multiple content sections"));
+            val.add(new ValE("DocumentReference has multiple content sections").asError());
             return null;
         }
         if (dr.getContent().get(0).getAttachment() == null) {
-            val.err(new Val("DocumentReference has no content/attachment"));
+            val.add(new ValE("DocumentReference has no content/attachment").asError());
             return null;
         }
 
@@ -317,10 +317,10 @@ public class BundleToRegistryObjectList implements IVal {
             addSlot(eo, "repositoryUniqueId", attachment.getUrl());
         if (attachment.hasHash()) {
             Base64BinaryType hash64 = attachment.getHashElement();
-            val.add("base64Binary is " + hash64.asStringValue());
+            val.add(new ValE("base64Binary is " + hash64.asStringValue()));
             byte[] hash = hash64.getValue();
             String hashString = DatatypeConverter.printHexBinary(hash).toLowerCase();
-            val.add(new Val().msg("hexBinary is " + hashString));
+            val.add(new ValE("hexBinary is " + hashString));
             addSlot(eo, "hash", hashString);
         }
         if (dr.hasDescription())
@@ -334,7 +334,7 @@ public class BundleToRegistryObjectList implements IVal {
         if(content.hasFormat())
             addClassificationFromCoding(eo, dr.getContent().get(0).getFormat(), CodeTranslator.FORMATCODE, resource.getAssignedId());
         if (!dr.hasMasterIdentifier())
-            val.err(new Val("DocumentReference.masterIdentifier not present - declared by IHE to be [1..1]"));
+            val.add(new ValE("DocumentReference.masterIdentifier not present - declared by IHE to be [1..1]").asError());
         else
             addExternalIdentifier(eo, CodeTranslator.DE_UNIQUEID, unURN(dr.getMasterIdentifier().getValue()), rMgr.allocateSymbolicId(), resource.getAssignedId(), "XDSDocumentEntry.uniqueId");
         if (dr.hasSubject() && dr.getSubject().hasReference()) {
@@ -433,16 +433,14 @@ public class BundleToRegistryObjectList implements IVal {
         Optional<ResourceWrapper> loadedResource = rMgr.resolveReference(resource, referenced, new ResolverConfig().externalRequired());
         boolean isLoaded = loadedResource.isPresent() && loadedResource.get().isLoaded();
         if (!isLoaded) {
-            val.err(new Val()
-                    .msg(resource + " makes reference to " + referenced + " which cannot be loaded")
-                    .msg("   All DocumentReference.subject and DocumentManifest.subject values shall be References to FHIR Patient Resources identified by an absolute external reference (URL).")
-                    .frameworkDoc("3.65.4.1.2.2 Patient Identity"));
+            val.add(new ValE(resource + " makes reference to " + referenced + " which cannot be loaded").asError()
+                    .add(new ValE("   All DocumentReference.subject and DocumentManifest.subject values shall be References to FHIR Patient Resources identified by an absolute external reference (URL).").asDoc())
+                    .add(new ValE("3.65.4.1.2.2 Patient Identity").asDoc()));
             return;
         }
         if (!(loadedResource.get().getResource() instanceof Patient)) {
-            val.err(new Val()
-                    .msg(resource + " points to a " + loadedResource.get().getResource().getClass().getSimpleName() + " - it must be a Patient")
-                    .frameworkDoc("3.65.4.1.2.2 Patient Identity"));
+            val.add(new ValE(resource + " points to a " + loadedResource.get().getResource().getClass().getSimpleName() + " - it must be a Patient").asError()
+                    .add(new ValE("3.65.4.1.2.2 Patient Identity").asDoc()));
             return;
         }
 
@@ -456,7 +454,7 @@ public class BundleToRegistryObjectList implements IVal {
     }
 
     public void addExternalIdentifier(RegistryObjectType ro, String scheme, String value, String id, String registryObject, String name) {
-        val.add(new Val().msg("ExternalIdentifier " + scheme));
+        val.add(new ValE("ExternalIdentifier " + scheme));
         //List<ExternalIdentifierType> eits = ro.getExternalIdentifier();
         ExternalIdentifierType eit = new ExternalIdentifierType();
         eit.setIdentificationScheme(scheme);
@@ -488,8 +486,11 @@ public class BundleToRegistryObjectList implements IVal {
         if (systemCodeOpt.isPresent()) {
             Code systemCode = systemCodeOpt.get();
             addClassification(ro, scheme, rMgr.allocateSymbolicId(), classifiedObjectId, coding.getCode(), systemCode.getCodingScheme(), coding.getDisplay());
-        } else
-            val.err(new Val().msg("Cannot find translation for code " + coding.getSystem() + "|" + coding.getCode() + " as part of MHD coding scheme " + scheme + "  into XDS coding scheme " + scheme + " in configured codes.xml file"));
+        } else {
+            Optional<gov.nist.asbestos.asbestorCodesJaxb.CodeType> type = codeTranslator.findCodeTypeForScheme(scheme);
+            String schemeName = (type.isPresent()) ? type.get().getName() : scheme;
+            val.add(new ValE("Cannot find translation for code " + coding.getSystem() + "|" + coding.getCode() + " as part of attribute " + schemeName + " in configured codes.xml file").asError());
+        }
     }
 
     /**
@@ -515,7 +516,7 @@ public class BundleToRegistryObjectList implements IVal {
     }
 
     private void addClassification(RegistryObjectType ro, String node, String id, String classifiedObject) {
-        val.add(new Val().msg("Classification " + node));
+        val.add(new ValE("Classification " + node));
         ClassificationType ct = new ClassificationType();
         ct.setClassificationScheme(node);
         ct.setId(id);
@@ -547,20 +548,17 @@ public class BundleToRegistryObjectList implements IVal {
 
     private void scanBundleForAcceptability(Bundle bundle, ResourceMgr rMgr) {
         if (bundle.getMeta().getProfile().size() != 1)
-            val.err(new Val()
-                    .msg("No profile declaration present in bundle")
-                    .frameworkDoc("3.65.4.1.2.1 Bundle Resources"));
+            val.add(new ValE("No profile declaration present in bundle").asError()
+                    .add(new ValE("3.65.4.1.2.1 Bundle Resources").asDoc()));
         CanonicalType bundleProfile = bundle.getMeta().getProfile().get(0);
         if (!profiles.contains(bundleProfile))
-            val.err(new Val()
-                    .msg("Do not understand profile declared in bundle - ${bundleProfile}")
-                    .frameworkDoc("3.65.4.1.2.1 Bundle Resources"));
+            val.add(new ValE("Do not understand profile declared in bundle - " + bundleProfile).asError()
+                    .add(new ValE("3.65.4.1.2.1 Bundle Resources").asDoc()));
 
         for (ResourceWrapper res : rMgr.getBundleResources()) {
             if (!acceptableResourceTypes.contains(res.getResource().getClass()))
-                val.warn(new Val()
-                        .msg("Resource type ${resource.resource.class.simpleName} is not part of MHD and will be ignored"))
-                        .frameworkDoc(mhdProfileRef);
+                val.add(new ValE("Resource type ${resource.resource.class.simpleName} is not part of MHD and will be ignored").asWarning()
+                        .add(new ValE(mhdProfileRef).asDoc()));
         }
 
     }

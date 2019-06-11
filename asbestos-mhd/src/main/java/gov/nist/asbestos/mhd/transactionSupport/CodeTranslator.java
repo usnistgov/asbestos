@@ -49,6 +49,13 @@ public class CodeTranslator {
         .findFirst());
     }
 
+    public Optional<CodeType> findCodeTypeForScheme(String scheme) {
+        Objects.requireNonNull(scheme);
+        return codes.getCodeType().stream()
+                .filter(codetype -> scheme.equals(codetype.getClassScheme()))
+                .findFirst();
+    }
+
     public static final String CONFCODE = "urn:uuid:f4f85eac-e6cb-4883-b524-f2705394840f";
     public static final String HCFTCODE = "urn:uuid:f33fb8ac-18af-42cc-ae0e-ed0b0bdb91e1";
     public static final String PRACCODE = "urn:uuid:cccf5598-8b07-4b77-a05e-ae952c785ead";

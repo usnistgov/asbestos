@@ -3,6 +3,7 @@ package gov.nist.asbestos.mhd.transactionSupport;
 
 import gov.nist.asbestos.mhd.resolver.Ref;
 import gov.nist.asbestos.simapi.validation.Val;
+import gov.nist.asbestos.simapi.validation.ValE;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 
@@ -72,7 +73,7 @@ public class ResourceWrapper {
         boolean duplicate = contained.containsKey(id);
         if (!duplicate) contained.put(id, resource);
         if (duplicate)
-            val.err(new Val().msg("Contained resource ${id} is a duplicate within ${resource.id}"));
+            val.add(new ValE("Contained resource " + id + " is a duplicate within " + resource.getId()).asError());
         return duplicate;
     }
 

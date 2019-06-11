@@ -185,8 +185,8 @@
                 <status value="current"/>
                 <type>
                     <coding>
-                        <system value="http://snomed.info/sct"/>
-                        <code value="22232009"/>
+                        <system value="http://loinc.org"/>
+                        <code value="54094-8"/>
                         <display value="Hospital"/>
                     </coding>
                     <text value="Hospital"/>

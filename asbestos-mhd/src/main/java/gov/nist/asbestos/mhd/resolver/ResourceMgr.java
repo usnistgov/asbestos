@@ -4,6 +4,7 @@ package gov.nist.asbestos.mhd.resolver;
 import gov.nist.asbestos.asbestosProxySupport.Base.IVal;
 import gov.nist.asbestos.mhd.transactionSupport.ResourceWrapper;
 import gov.nist.asbestos.simapi.validation.Val;
+import gov.nist.asbestos.simapi.validation.ValE;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.Resource;
@@ -55,19 +56,19 @@ public class ResourceMgr implements IVal {
     public void parse(Bundle bundle) {
         Objects.requireNonNull(bundle);
         Objects.requireNonNull(val);
-        Val thisVal = val.addSection("Load Bundle...");
-        thisVal.add(new Val()
-                .msg("All objects assigned symbolic IDs")
-                .frameworkDoc("3.65.4.1.2 Message Semantics"));
+        ValE thisVal = new ValE("Load Bundle...");
+        val.add(thisVal);
+        thisVal.add(new ValE("All objects assigned symbolic IDs")
+                .add(new ValE("3.65.4.1.2 Message Semantics").asDoc()));
         bundle.getEntry().forEach(component -> {
             if (component.hasResource()) {
                 String id = allocateSymbolicId();
-                thisVal.msg("Assigning " + id + " to " + component.getResource().getClass().getSimpleName() + "(" + component.getResource().getIdElement().getValue() + ")");
+                thisVal.add(new ValE("Assigning " + id + " to " + component.getResource().getClass().getSimpleName() + "(" + component.getResource().getIdElement().getValue() + ")"));
                 ResourceWrapper wrapper = new ResourceWrapper(component.getResource())
                         .setId(id)
                         .setUrl(new Ref(component.getFullUrl()));
 
-                thisVal.add("..." + component.getFullUrl());
+                thisVal.add(new ValE("..." + component.getFullUrl()));
                 addResource(new Ref(component.getFullUrl()), wrapper);
             }
         });
@@ -96,8 +97,7 @@ public class ResourceMgr implements IVal {
         Objects.requireNonNull(resource);
         boolean duplicate = bundleResources.containsKey(url);
         if (duplicate)
-            val.err(new Val()
-                    .msg("Duplicate resource found in bundle for URL ${url}"));
+            val.add(new ValE("Duplicate resource found in bundle for URL " + url).asError());
         else
             bundleResources.put(url, resource);
     }
@@ -136,7 +136,7 @@ public class ResourceMgr implements IVal {
         Objects.requireNonNull(val);
         Objects.requireNonNull(referenceUrl);
         Objects.requireNonNull(config);
-        Val thisVal = val.addSection("Resolver: Resolve URL " + referenceUrl + " ... " + config);
+        Val thisVal = val.add(new ValE("Resolver: Resolve URL " + referenceUrl + " ... " + config));
 
         //
         // Absolute
@@ -149,7 +149,7 @@ public class ResourceMgr implements IVal {
                 if (config.isInBundleOk()) {
                     return Optional.of(getFromBundle(referenceUrl));
                 } else {
-                    thisVal.err(new Val("Resolver: ...absolute reference to resource in bundle " + referenceUrl  + " - external reference required "));
+                    thisVal.add(new ValE("Resolver: ...absolute reference to resource in bundle " + referenceUrl  + " - external reference required ").asError());
                     return Optional.empty();
                 }
             } else {
@@ -160,7 +160,7 @@ public class ResourceMgr implements IVal {
             }
         }
         if (containing == null) {
-            thisVal.err(new Val("Resolver: ... reference is not absolute " + referenceUrl + " but no containing resource is offered"));
+            thisVal.add(new ValE("Resolver: ... reference is not absolute " + referenceUrl + " but no containing resource is offered").asError());
             return Optional.empty();
         }
         //
@@ -171,7 +171,7 @@ public class ResourceMgr implements IVal {
                 thisVal.msg("Resolver: ...contained");
                 return Optional.ofNullable(getContains(containing, referenceUrl));
             }
-            thisVal.err(new Val("Resolver: ...reference is to contained resource (" + referenceUrl + " but contained is not acceptable"));
+            thisVal.add(new ValE("Resolver: ...reference is to contained resource (" + referenceUrl + " but contained is not acceptable").asError());
             return Optional.empty();
         }
         //
@@ -196,10 +196,10 @@ public class ResourceMgr implements IVal {
                     return Optional.of(res);
                 }
             }
-            thisVal.err(new Val("Resolver: ...reference is to relative resource (" + referenceUrl + " but relative is not acceptable"));
+            thisVal.add(new ValE("Resolver: ...reference is to relative resource (" + referenceUrl + " but relative is not acceptable").asError());
             return Optional.empty();
         }
-        thisVal.err(new Val().msg("Resolver: ...failed to resolve " + referenceUrl + " in " + containing));
+        thisVal.add(new ValE("Resolver: ...failed to resolve " + referenceUrl + " in " + containing).asError());
         return Optional.empty();
     }
 
@@ -211,7 +211,7 @@ public class ResourceMgr implements IVal {
                     resource.setResource(loaded.getResource());
             }
             if (!resource.isLoaded() && resourceMgrConfig.isOpen()) {
-                val.err(new Val("ResourceMgr#load: External resource loading is not implemented"));
+                val.add(new ValE("ResourceMgr#load: External resource loading is not implemented").asError());
             }
         }
         return resource;

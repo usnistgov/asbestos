@@ -6,6 +6,8 @@ import gov.nist.asbestos.mhd.transactionSupport.CodeTranslator;
 import gov.nist.asbestos.mhd.transactionSupport.CodeTranslatorBuilder;
 import gov.nist.asbestos.mhd.transactions.BundleToRegistryObjectList;
 import gov.nist.asbestos.simapi.validation.Val;
+import gov.nist.asbestos.simapi.validation.ValErrors;
+import gov.nist.asbestos.simapi.validation.ValFactory;
 import oasis.names.tc.ebxml_regrep.xsd.rim._3.RegistryObjectListType;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
@@ -57,7 +59,9 @@ class BuildRegistryObjectListTest {
 
         RegistryObjectListType rol = xlate.buildRegistryObjectList();
         if (val.hasErrors())
-            fail(val.toString());
+            fail( ValFactory.toJson(new ValErrors(val)));
+        else
+            System.out.println(ValFactory.toJson(val));
 
         assertNotNull(rol);
     }
