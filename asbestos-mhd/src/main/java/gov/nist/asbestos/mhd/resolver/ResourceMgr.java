@@ -19,6 +19,7 @@ public class ResourceMgr implements IVal {
     private Map<Ref, ResourceWrapper> bundleResources = new HashMap<>();   // url -> resource; for contents of bundle
     private ResourceCacheMgr resourceCacheMgr = null;
     private Val val;
+    private ResourceMgrConfig resourceMgrConfig = new ResourceMgrConfig();
 
     public ResourceMgr() {
 
@@ -27,6 +28,10 @@ public class ResourceMgr implements IVal {
     public void setBundle(Bundle bundle) {
         bundleResources = new HashMap<>();
         parse(bundle);
+    }
+
+    public ResourceMgrConfig getResourceMgrConfig() {
+        return resourceMgrConfig;
     }
 
     public ResourceMgr addResourceCacheMgr(ResourceCacheMgr resourceCacheMgr) {
@@ -57,7 +62,7 @@ public class ResourceMgr implements IVal {
         bundle.getEntry().forEach(component -> {
             if (component.hasResource()) {
                 String id = allocateSymbolicId();
-                thisVal.msg("Assigning ${id} to ${component.resource.class.simpleName}/${component.resource.idElement.value}");
+                thisVal.msg("Assigning " + id + " to " + component.getResource().getClass().getSimpleName() + "(" + component.getResource().getIdElement().getValue() + ")");
                 ResourceWrapper wrapper = new ResourceWrapper(component.getResource())
                         .setId(id)
                         .setUrl(new Ref(component.getFullUrl()));
@@ -151,7 +156,7 @@ public class ResourceMgr implements IVal {
                 //
                 // External
                 //
-                return Optional.of(new ResourceWrapper(referenceUrl));
+                return Optional.of(load(new ResourceWrapper(referenceUrl)));
             }
         }
         if (containing == null) {
@@ -181,7 +186,12 @@ public class ResourceMgr implements IVal {
                     if (containing.getUrl() == null)
                         return Optional.empty();
                     // relative/external
-                    return Optional.of(new ResourceWrapper(referenceUrl.rebase(containing.getUrl().getBase())));
+                    ResourceWrapper resource = new ResourceWrapper(referenceUrl.rebase(containing.getUrl().getBase()));
+                    if (resource.getUrl() != null) {
+                        if (getFromBundle(resource.getUrl()) != null)
+                            resource = getFromBundle(resource.getUrl());  // this includes Resource as well as URL
+                    }
+                    return Optional.of(resource);
                 } else {
                     return Optional.of(res);
                 }
@@ -191,6 +201,20 @@ public class ResourceMgr implements IVal {
         }
         thisVal.err(new Val().msg("Resolver: ...failed to resolve " + referenceUrl + " in " + containing));
         return Optional.empty();
+    }
+
+    private ResourceWrapper load(ResourceWrapper resource) {
+        if (resource != null && resource.getUrl() != null) {
+            if (resourceCacheMgr != null) {
+                ResourceWrapper loaded = resourceCacheMgr.getResource(resource.getUrl());
+                if (loaded != null)
+                    resource.setResource(loaded.getResource());
+            }
+            if (!resource.isLoaded() && resourceMgrConfig.isOpen()) {
+                val.err(new Val("ResourceMgr#load: External resource loading is not implemented"));
+            }
+        }
+        return resource;
     }
 
     private SymbolicIdBuilder symbolicIdBuilder = new SymbolicIdBuilder();

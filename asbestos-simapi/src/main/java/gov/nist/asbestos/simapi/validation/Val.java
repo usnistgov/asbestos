@@ -90,18 +90,19 @@ public class Val {
         }
 
         if (val.errs.size() != 0) {
-            buf.append("Errors:\n");
+            buf.append("\nErrors:\n");
             val.errs.forEach(err -> {
                 indent(level, buf);
                 buf.append(err).append('\n');
             });
         }
         if (val.frameworkDocs.size() != 0) {
-            buf.append("Framework Documentation:\n");
+            buf.append("   Framework Documentation: ");
             val.frameworkDocs.forEach(doc -> {
-                indent(level, buf);
+                //indent(level, buf);
                 buf.append(doc).append('\n');
             });
+            buf.append("\n");
         } else if (val.refs.size() != 0) {
             buf.append("References:\n");
             val.refs.forEach(ref -> {

@@ -57,12 +57,14 @@ public class ResourceCacheMgr {
      * @return
      */
      ResourceWrapper getResource(Ref fullUrl) {
-        assert fullUrl.isAbsolute();
-        Ref baseUrl = fullUrl.getBase();
-        ResourceCache cache = caches.get(baseUrl);
-        if (cache == null)
-            throw new RuntimeException("Cannot access " + fullUrl + "\nNo cache defined for baseUrl " + baseUrl + "\nCaches exist for " + caches.keySet());
-        return cache.readResource(fullUrl.getRelative());
+         if (fullUrl.isAbsolute()) {
+             Ref baseUrl = fullUrl.getBase();
+             ResourceCache cache = caches.get(baseUrl);
+             if (cache == null)
+                 throw new RuntimeException("Cannot access " + fullUrl + "\nNo cache defined for baseUrl " + baseUrl + "\nCaches exist for " + caches.keySet());
+            return cache.readResource(fullUrl.getRelative());
+         }
+         return null;
     }
 
     @Override

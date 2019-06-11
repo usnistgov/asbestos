@@ -17,6 +17,7 @@ import org.hl7.fhir.r4.model.*;
 
 import javax.xml.bind.DatatypeConverter;
 import javax.xml.bind.JAXBElement;
+import javax.xml.namespace.QName;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -69,14 +70,6 @@ public class BundleToRegistryObjectList implements IVal {
     private CanonicalType bundleProfile;
     private Val val;
 
-
-    public BundleToRegistryObjectList(ResourceCacheMgr resourceCacheMgr, CodeTranslator codeTranslator, AssigningAuthorities assigningAuthorities, Configuration config) {
-        this.resourceCacheMgr = resourceCacheMgr;
-        this.codeTranslator = codeTranslator;
-        this.assigningAuthorities = assigningAuthorities;
-        this.config = config;
-    }
-
     public BundleToRegistryObjectList() {
         rMgr = new ResourceMgr();
     }
@@ -102,7 +95,7 @@ public class BundleToRegistryObjectList implements IVal {
 //    }
 
     // TODO handle List/Folder or signal error
-    private RegistryObjectListType buildRegistryObjectList() {
+    public RegistryObjectListType buildRegistryObjectList() {
         RegistryObjectListType rol = new RegistryObjectListType();
 
         List<ResourceWrapper> docMans = rMgr.getBundleResources().stream()
@@ -120,8 +113,7 @@ public class BundleToRegistryObjectList implements IVal {
         if (docMans.size() > 0) {
             ResourceWrapper dm = docMans.get(0);
             ss = createSubmissionSet(dm);
-            Object o = ss;
-            rol.getIdentifiable().add((JAXBElement<? extends IdentifiableType>) o);
+            rol.getIdentifiable().add(new JAXBElement<>(new QName("urn:oasis:names:tc:ebxml-regrep:xsd:rim:3.0", "RegistryPackage"), RegistryPackageType.class, ss));
         }
 
         List<ExtrinsicObjectType> eos = docRefs.stream()
@@ -129,12 +121,11 @@ public class BundleToRegistryObjectList implements IVal {
                 .collect(Collectors.toList());
 
         for (ExtrinsicObjectType eo : eos) {
-            Object o = eo;
-            rol.getIdentifiable().add((JAXBElement<? extends IdentifiableType>) o);
+            rol.getIdentifiable().add(new JAXBElement<>(new QName("urn:oasis:names:tc:ebxml-regrep:xsd:rim:3.0", "ExtrinsicObject"), ExtrinsicObjectType.class, eo));
+
             if (ss != null) {
                 AssociationType1 a = createSSDEAssociation(ss, eo);
-                Object o1 = a;
-                rol.getIdentifiable().add((JAXBElement<? extends IdentifiableType>) o1);
+                rol.getIdentifiable().add((new JAXBElement<>(new QName("urn:oasis:names:tc:ebxml-regrep:xsd:rim:3.0", "Association"), AssociationType1.class, a)));
             }
         }
         return rol;
@@ -249,7 +240,7 @@ public class BundleToRegistryObjectList implements IVal {
 
         RegistryPackageType ss = new RegistryPackageType();
 
-        val.add(new Val().msg("SubmissionSet(${resource.assignedId})"));
+        val.add(new Val().msg("SubmissionSet(" + resource.getAssignedId() + ")"));
         ss.setId(resource.getAssignedId());
         ss.setObjectType("urn:oasis:names:tc:ebxml-regrep:ObjectType:RegistryObject:RegistryPackage");
 
@@ -439,19 +430,23 @@ public class BundleToRegistryObjectList implements IVal {
     // TODO official identifiers must be changed
     private void addSubject(RegistryObjectType ro, ResourceWrapper resource, Ref referenced, String scheme, String attName) {
 
-        ResourceWrapper loadedResource = rMgr.resolveReference(resource, referenced, new ResolverConfig().externalRequired()).get();
-        if (loadedResource.getUrl() == null) {
+        Optional<ResourceWrapper> loadedResource = rMgr.resolveReference(resource, referenced, new ResolverConfig().externalRequired());
+        boolean isLoaded = loadedResource.isPresent() && loadedResource.get().isLoaded();
+        if (!isLoaded) {
             val.err(new Val()
-                    .msg(resource + " makes reference to " + referenced)
-                    .msg("All DocumentReference.subject and DocumentManifest.subject values shall be References to FHIR Patient Resources identified by an absolute external reference (URL).")
+                    .msg(resource + " makes reference to " + referenced + " which cannot be loaded")
+                    .msg("   All DocumentReference.subject and DocumentManifest.subject values shall be References to FHIR Patient Resources identified by an absolute external reference (URL).")
                     .frameworkDoc("3.65.4.1.2.2 Patient Identity"));
+            return;
         }
-        if (!(loadedResource.getResource() instanceof Patient))
+        if (!(loadedResource.get().getResource() instanceof Patient)) {
             val.err(new Val()
-                    .msg(resource + " points to a " + loadedResource.getResource().getClass().getSimpleName() + " - it must be a Patient")
+                    .msg(resource + " points to a " + loadedResource.get().getResource().getClass().getSimpleName() + " - it must be a Patient")
                     .frameworkDoc("3.65.4.1.2.2 Patient Identity"));
+            return;
+        }
 
-        Patient patient = (Patient) loadedResource.getResource();
+        Patient patient = (Patient) loadedResource.get().getResource();
 
         List<Identifier> identifiers = patient.getIdentifier();
         String pid = findAcceptablePID(identifiers);
@@ -494,7 +489,7 @@ public class BundleToRegistryObjectList implements IVal {
             Code systemCode = systemCodeOpt.get();
             addClassification(ro, scheme, rMgr.allocateSymbolicId(), classifiedObjectId, coding.getCode(), systemCode.getCodingScheme(), coding.getDisplay());
         } else
-            val.err(new Val().msg("Cannot find translation for code " + coding.getSystem() + "|" + coding.getCode() + " as part of " + scheme + " (FHIR) into XDS coding scheme " + scheme + " in configured codes.xml file"));
+            val.err(new Val().msg("Cannot find translation for code " + coding.getSystem() + "|" + coding.getCode() + " as part of MHD coding scheme " + scheme + "  into XDS coding scheme " + scheme + " in configured codes.xml file"));
     }
 
     /**
@@ -575,7 +570,23 @@ public class BundleToRegistryObjectList implements IVal {
         this.val = val;
     }
 
-    public void setResourceMgr(ResourceMgr rMgr) {
+    public BundleToRegistryObjectList setResourceMgr(ResourceMgr rMgr) {
         this.rMgr = rMgr;
+        return this;
+    }
+
+    public BundleToRegistryObjectList setAssigningAuthorities(AssigningAuthorities assigningAuthorities) {
+        this.assigningAuthorities = assigningAuthorities;
+        return this;
+    }
+
+    public BundleToRegistryObjectList setCodeTranslator(CodeTranslator codeTranslator) {
+        this.codeTranslator = codeTranslator;
+        return this;
+    }
+
+    public BundleToRegistryObjectList setBundleProfile(CanonicalType bundleProfile) {
+        this.bundleProfile = bundleProfile;
+        return this;
     }
 }

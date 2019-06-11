@@ -6,7 +6,7 @@
     </meta>
     <type value="transaction"/>
     <entry>
-        <fullUrl value="urn:uuid:3fdc72f4-a11d-4a9d-9260-a9f745779e1d"/>
+        <fullUrl value="http://localhost:9556/svc/fhir/DocumentReference/45"/>
         <resource>
             <DocumentReference>
                 <contained>

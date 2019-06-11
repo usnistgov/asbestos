@@ -38,10 +38,10 @@ class AttributesTest {
         CodeTranslator codeTranslator = CodeTranslatorBuilder.read(is2);
 
         ExtrinsicObjectType eo = new ExtrinsicObjectType();
-        BundleToRegistryObjectList brol = new BundleToRegistryObjectList(null, codeTranslator, null, null);
+        BundleToRegistryObjectList brol = new BundleToRegistryObjectList();
         Val val = new Val();
         brol.setVal(val);
-        brol.setResourceMgr(new ResourceMgr());
+        brol.setCodeTranslator(codeTranslator);
 
         brol.addClassificationFromCodeableConcept(eo, type, "urn:uuid:f0306f51-975f-434e-a61c-c59651d33983", "classifiedObjectId");
 

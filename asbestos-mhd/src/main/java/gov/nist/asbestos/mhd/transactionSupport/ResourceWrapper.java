@@ -39,6 +39,10 @@ public class ResourceWrapper {
         this.url = url;
     }
 
+    public void setResource(IBaseResource resource) {
+        this.resource = resource;
+    }
+
     public ResourceWrapper relativeTo(ResourceWrapper reference) {
         Objects.requireNonNull(reference);
         Objects.requireNonNull(reference.getUrl());
@@ -77,6 +81,11 @@ public class ResourceWrapper {
         return resource != null;
     }
 
+    public boolean isLoadable() {
+        if (url == null) return false;
+        return resource == null;
+    }
+
     @Override
     public String toString() {
         StringBuilder buf = new  StringBuilder();
@@ -87,7 +96,9 @@ public class ResourceWrapper {
         else
             name = resource.getClass().getSimpleName();
 
-        buf.append("RW[" + assignedId + ", " + url + "] => " + name);
+        buf.append(url).append("(").append(name).append(")");
+
+//        buf.append("RW[" + assignedId + ", " + url + "] => " + name);
 
         return buf.toString();
     }

@@ -86,12 +86,14 @@ class ResourceManagerBundleTest {
         assertTrue(oResource.isPresent());
         assertNotNull(oResource.get().getUrl());
         assertEquals("http://myhost/fhir/Patient/12", oResource.get().getUrl().toString());
+        assertFalse(oResource.get().isLoaded());
     }
 
     @Test
     void relativeInBundle() {
+        rMgr.setBundle(bundle);
         ResourceWrapper containing = new ResourceWrapper();
-        containing.setUrl(new Ref("http://localhost:9556/svc/fhir/DocumentReference/33"));
+        containing.setUrl(new Ref("http://localhost:9556/svc/fhir/DocumentReference/45"));
         Ref reference = new Ref("Binary/1e404af3-077f-4bee-b7a6-a9be97e1ce32");
         Optional<ResourceWrapper> oResource = rMgr.resolveReference(containing, reference,
                 new ResolverConfig().relativeOk());
@@ -100,11 +102,12 @@ class ResourceManagerBundleTest {
         assertTrue(oResource.isPresent());
         assertNotNull(oResource.get().getUrl());
         assertEquals("http://localhost:9556/svc/fhir/Binary/1e404af3-077f-4bee-b7a6-a9be97e1ce32", oResource.get().getUrl().toString());
+        assertTrue(oResource.get().isLoaded());
     }
 
-    // TODO  not relative - must fail
     @Test
     void absoluteInBundle() {
+        rMgr.setBundle(bundle);
         Optional<ResourceWrapper> oResource = rMgr.resolveReference(null,
                 new Ref("http://localhost:9556/svc/fhir/Binary/1e404af3-077f-4bee-b7a6-a9be97e1ce32"),
                 new ResolverConfig().relativeOk());
@@ -113,5 +116,6 @@ class ResourceManagerBundleTest {
         assertTrue(oResource.isPresent());
         assertNotNull(oResource.get().getUrl());
         assertEquals("http://localhost:9556/svc/fhir/Binary/1e404af3-077f-4bee-b7a6-a9be97e1ce32", oResource.get().getUrl().toString());
+        assertTrue(oResource.get().isLoaded());
     }
 }
