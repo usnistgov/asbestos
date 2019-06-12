@@ -29,7 +29,7 @@ public class TransactionType {
     private static void init(File ec) throws IOException {
         ObjectMapper objectMapper = new ObjectMapper();
 
-        File typesDir = new File(new File(ec, "types"), "transactions");
+        File typesDir = new File(new File(ec, "types"), "translation");
         File[] files = typesDir.listFiles();
         if (files != null) {
             for (File file : files) {

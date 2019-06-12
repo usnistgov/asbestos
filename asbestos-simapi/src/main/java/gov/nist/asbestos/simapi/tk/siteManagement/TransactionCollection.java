@@ -67,11 +67,11 @@ class TransactionCollection {
 //	 void removeEmptyEndpoints() {
 //		List<TransactionBean> removable = new ArrayList<TransactionBean>();
 //
-//		for (TransactionBean transbean : transactions) {
+//		for (TransactionBean transbean : translation) {
 //			if (transbean.endpoint == null || transbean.endpoint.trim().equals(""))
 //				removable.add(transbean);
 //		}
-//		transactions.removeAll(removable);
+//		translation.removeAll(removable);
 //	}
 
 	 void removeEmptyNames() {

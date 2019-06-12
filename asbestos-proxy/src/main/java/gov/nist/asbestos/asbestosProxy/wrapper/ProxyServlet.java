@@ -59,7 +59,7 @@ public class ProxyServlet extends HttpServlet {
     public void doPost(HttpServletRequest req, HttpServletResponse resp) {
 
         // typical URI is
-        // for FHIR transactions
+        // for FHIR translation
         // http://host:port/appContext/prox/simId/actor/transaction
         // for general stuff
         // http://host:port/appContext/prox/simId

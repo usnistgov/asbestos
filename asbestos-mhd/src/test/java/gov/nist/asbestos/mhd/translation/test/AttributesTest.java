@@ -1,11 +1,10 @@
-package gov.nist.asbestos.mhd.transactions.test;
+package gov.nist.asbestos.mhd.translation.test;
 
 
 import gov.nist.asbestos.asbestosProxySupport.Base.Base;
-import gov.nist.asbestos.mhd.resolver.ResourceMgr;
 import gov.nist.asbestos.mhd.transactionSupport.CodeTranslator;
 import gov.nist.asbestos.mhd.transactionSupport.CodeTranslatorBuilder;
-import gov.nist.asbestos.mhd.transactions.BundleToRegistryObjectList;
+import gov.nist.asbestos.mhd.translation.BundleToRegistryObjectList;
 import gov.nist.asbestos.simapi.validation.Val;
 import oasis.names.tc.ebxml_regrep.xsd.lcm._3.SubmitObjectsRequest;
 import oasis.names.tc.ebxml_regrep.xsd.rim._3.AssociationType1;
@@ -28,13 +27,13 @@ class AttributesTest {
 
     @Test
     void addClassificationFromCodeableConcept()  throws JAXBException {
-        InputStream is = this.getClass().getResourceAsStream("/gov/nist/asbestos/mhd/transactions/shared/DocumentReference1.xml");
+        InputStream is = this.getClass().getResourceAsStream("/gov/nist/asbestos/mhd/translation/shared/DocumentReference1.xml");
         IBaseResource resource = Base.getFhirContext().newXmlParser().parseResource(is);
         assertTrue(resource instanceof DocumentReference);
         DocumentReference dr = (DocumentReference) resource;
         CodeableConcept type = dr.getType();
 
-        InputStream is2 = this.getClass().getResourceAsStream("/gov/nist/asbestos/mhd/transactions/shared/theCodes.xml");
+        InputStream is2 = this.getClass().getResourceAsStream("/gov/nist/asbestos/mhd/translation/shared/theCodes.xml");
         CodeTranslator codeTranslator = CodeTranslatorBuilder.read(is2);
 
         ExtrinsicObjectType eo = new ExtrinsicObjectType();

@@ -208,7 +208,7 @@ public class ActorType  {
     /**
      * Return TransactionType for passed actor name.
     * @param name of actor, matched to TransactionType short name, name,
-    * or id. Both SOAP and Http transactions are searched
+    * or id. Both SOAP and Http translation are searched
     * @return TransactionType for this name, or null if no match found.
     */
     public TransactionType getTransaction(String name) {

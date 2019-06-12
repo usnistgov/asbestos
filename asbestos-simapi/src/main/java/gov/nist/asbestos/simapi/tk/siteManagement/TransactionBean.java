@@ -8,7 +8,7 @@ import gov.nist.asbestos.simapi.tk.actors.TransactionType;
  * Configuration of a single instance of a actor. Transactions are
  * split into two major types: Retrieve and All Others. The isRetrieve()
  * determines which kind this is.  In theory a actor must belong to an
- * Actor definition.  Toolkit is a bit looser and transactions belong
+ * Actor definition.  Toolkit is a bit looser and translation belong
  * to TransactionOfferings which can be thought of as a lightweight
  * definition of an Actor.
  * @author bill

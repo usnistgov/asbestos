@@ -1,4 +1,4 @@
-package gov.nist.asbestos.mhd.transactions.test;
+package gov.nist.asbestos.mhd.translation.test;
 
 import gov.nist.asbestos.asbestosProxySupport.Base.Base;
 import gov.nist.asbestos.mhd.resolver.ResourceCacheMgr;
@@ -6,7 +6,7 @@ import gov.nist.asbestos.mhd.resolver.ResourceMgr;
 import gov.nist.asbestos.mhd.transactionSupport.AssigningAuthorities;
 import gov.nist.asbestos.mhd.transactionSupport.CodeTranslator;
 import gov.nist.asbestos.mhd.transactionSupport.CodeTranslatorBuilder;
-import gov.nist.asbestos.mhd.transactions.BundleToRegistryObjectList;
+import gov.nist.asbestos.mhd.translation.BundleToRegistryObjectList;
 import gov.nist.asbestos.simapi.validation.Val;
 import gov.nist.asbestos.simapi.validation.ValErrors;
 import gov.nist.asbestos.simapi.validation.ValFactory;
@@ -34,7 +34,7 @@ class BuildRegistryObjectListTest {
     @BeforeAll
     static void beforeAll() throws URISyntaxException {
         externalCache = Paths.get(BuildRegistryObjectListTest.class.getResource("/external_cache/findme.txt").toURI()).getParent().toFile();
-        InputStream is = ResourceMgrContainedTest.class.getResourceAsStream("/gov/nist/asbestos/mhd/transactions/shared/bundle.xml");
+        InputStream is = ResourceMgrContainedTest.class.getResourceAsStream("/gov/nist/asbestos/mhd/translation/shared/bundle.xml");
         IBaseResource resource = Base.getFhirContext().newXmlParser().parseResource(is);
         assertTrue(resource instanceof Bundle);
         bundle = (Bundle) resource;
@@ -53,7 +53,7 @@ class BuildRegistryObjectListTest {
 
     @Test
     void build() {
-        InputStream is2 = this.getClass().getResourceAsStream("/gov/nist/asbestos/mhd/transactions/shared/theCodes.xml");
+        InputStream is2 = this.getClass().getResourceAsStream("/gov/nist/asbestos/mhd/translation/shared/theCodes.xml");
         CodeTranslator codeTranslator = CodeTranslatorBuilder.read(is2);
 
         rMgr.setBundle(bundle);

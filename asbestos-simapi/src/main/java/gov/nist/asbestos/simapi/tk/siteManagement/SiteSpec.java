@@ -9,7 +9,7 @@ import gov.nist.asbestos.simapi.tk.actors.ActorType;
  * A Site references multiple actor types but it can hold only one copy of an actor type:
  * one Registry, one Repository etc.
  * A SiteSpec is a reference to a Site and a selection of one actor type. Having a SiteSpec you know
- * exactly which transactions are possible. The actorType parameter is the actor type of interest (personality
+ * exactly which translation are possible. The actorType parameter is the actor type of interest (personality
  * to be used in an operation) and name is the site name.
  *
  * SiteSpec reference the Site through the name attribute.

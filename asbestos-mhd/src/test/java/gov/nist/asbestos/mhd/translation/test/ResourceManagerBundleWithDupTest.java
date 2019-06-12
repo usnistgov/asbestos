@@ -1,4 +1,4 @@
-package gov.nist.asbestos.mhd.transactions.test;
+package gov.nist.asbestos.mhd.translation.test;
 
 import gov.nist.asbestos.asbestosProxySupport.Base.Base;
 import gov.nist.asbestos.mhd.resolver.ResourceMgr;
@@ -20,7 +20,7 @@ public class ResourceManagerBundleWithDupTest {
 
     @BeforeAll
     static void beforeAll() {
-        InputStream is = ResourceMgrContainedTest.class.getResourceAsStream("/gov/nist/asbestos/mhd/transactions/shared/bundleWithDuplicate.xml");
+        InputStream is = ResourceMgrContainedTest.class.getResourceAsStream("/gov/nist/asbestos/mhd/translation/shared/bundleWithDuplicate.xml");
         IBaseResource resource = Base.getFhirContext().newXmlParser().parseResource(is);
         assertTrue(resource instanceof Bundle);
         bundle = (Bundle) resource;

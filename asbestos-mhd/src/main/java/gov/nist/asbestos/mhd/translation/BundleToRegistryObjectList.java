@@ -1,11 +1,10 @@
-package gov.nist.asbestos.mhd.transactions;
+package gov.nist.asbestos.mhd.translation;
 
 
 import gov.nist.asbestos.asbestorCodesJaxb.Code;
 import gov.nist.asbestos.asbestosProxySupport.Base.IVal;
 import gov.nist.asbestos.mhd.resolver.Ref;
 import gov.nist.asbestos.mhd.resolver.ResolverConfig;
-import gov.nist.asbestos.mhd.resolver.ResourceCacheMgr;
 import gov.nist.asbestos.mhd.resolver.ResourceMgr;
 import gov.nist.asbestos.mhd.transactionSupport.AssigningAuthorities;
 import gov.nist.asbestos.mhd.transactionSupport.CodeTranslator;
@@ -73,13 +72,13 @@ public class BundleToRegistryObjectList implements IVal {
         rMgr = new ResourceMgr();
     }
 
-//    public Submission build(Bundle bundle) {
+//    public PnrWrapper build(Bundle bundle) {
 //        Objects.requireNonNull(val);
 //        Objects.requireNonNull(bundle);
 //        rMgr = new ResourceMgr(bundle).addResourceCacheMgr(resourceCacheMgr);
 //        rMgr.setVal(val);
 //        scanBundleForAcceptability(bundle, rMgr);
-//        Submission submission = new Submission();
+//        PnrWrapper submission = new PnrWrapper();
 //
 //        buildRegistryObjectList();
 //
@@ -132,7 +131,7 @@ public class BundleToRegistryObjectList implements IVal {
 
 
 //    private void buildSubmission() {
-//        Submission submission = new Submission()
+//        PnrWrapper submission = new PnrWrapper()
 //        submission.contentId = 'm' + baseContentId
 //
 //        int index = 1

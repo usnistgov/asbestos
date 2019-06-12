@@ -10,7 +10,7 @@ import java.util.*;
  * A Site references multiple actor types but it can hold only one copy of an actor type:
  * one Registry, one Repository etc.
  * A SiteSpec is a reference to a Site and a selection of one actor type. Having a SiteSpec you know
- * exactly which transactions are possible.
+ * exactly which translation are possible.
  *
  * Usage for Orchestration
  *
@@ -146,7 +146,7 @@ public class Site  {
 				}
 		}
 
-		// All Repository transactions must be for the same repositoryUniqueId
+		// All Repository translation must be for the same repositoryUniqueId
 		Set<String> repUids = repositoryUniqueIds();
 		if (repUids.size() > 1) {
 			buf.append("Site ").append(name).append(" contains more than one repositoryUniqueId: " + repUids)

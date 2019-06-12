@@ -17,7 +17,7 @@ public class Initialization {
         if (types == null)
             throw new Exception("Cannot find types resource in Initialization constructor");
 
-        File internalTransactionTypesDir = new File(types, "transactions");
+        File internalTransactionTypesDir = new File(types, "translation");
         if (!internalTransactionTypesDir.exists())
             throw new Exception("No internal TransactionTypes");
         File internalActorTypesDir = new File(types, "actors");
