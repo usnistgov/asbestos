@@ -39,6 +39,7 @@
         <module>asbestos-xds-jaxb</module>
         <module>asbestos-mhd</module>
         <module>asbestos-proxy-support</module>
+        <module>asbestos-utilities</module>
     </modules>
 
     <dependencyManagement>

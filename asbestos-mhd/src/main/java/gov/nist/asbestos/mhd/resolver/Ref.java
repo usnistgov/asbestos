@@ -12,7 +12,6 @@ import java.util.Objects;
 
 public class Ref {
     private URI uri;
-    private IBaseResource resource = null;
 
     public Ref(URI uri) {
         Objects.requireNonNull(uri);
@@ -107,11 +106,24 @@ public class Ref {
         return new Ref(uri.toString());
     }
 
+    // TODO needs test
+    public boolean hasResource() {
+        return ! ("".equals(getResourceType()));
+    }
+
+    // TODO needs test
+    public Ref withResource(Class<?> resourceType) {
+        String type = resourceType.getSimpleName();
+        return new Ref(getBase(), type, null);
+    }
+
+    // TODO needs test?
     public Ref withNewId(String newId) {
         Objects.requireNonNull(newId);
         return new Ref(getBase(), getResourceType(), newId);
     }
 
+    // TODO all needs tests history present
     public Ref rebase(String newBase) {
         Objects.requireNonNull(newBase);
         Ref theBase = new Ref(newBase).getBase();
@@ -169,19 +181,15 @@ public class Ref {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Ref ref = (Ref) o;
-        return Objects.equals(uri, ref.uri) &&
-                Objects.equals(resource, ref.resource);
+        return Objects.equals(uri, ref.uri);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(uri, resource);
+        return Objects.hash(uri);
     }
 
     private URI build(String ref) {
-//        if (ref.startsWith("#")) {
-//            ref = ref.substring(1);
-//        }
         try {
             return httpize(new URI(ref));
         } catch (Exception e) {
@@ -334,9 +342,4 @@ public class Ref {
             "SubstanceReferenceInformation",
             "SubstanceSpecification"
     );
-
-
-    public ResourceWrapper load() {
-        return null;
-    }
 }
