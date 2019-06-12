@@ -1,7 +1,9 @@
 package gov.nist.asbestos.mhd.transactions.test;
 
 import gov.nist.asbestos.asbestosProxySupport.Base.Base;
+import gov.nist.asbestos.mhd.resolver.ResourceCacheMgr;
 import gov.nist.asbestos.mhd.resolver.ResourceMgr;
+import gov.nist.asbestos.mhd.transactionSupport.AssigningAuthorities;
 import gov.nist.asbestos.mhd.transactionSupport.CodeTranslator;
 import gov.nist.asbestos.mhd.transactionSupport.CodeTranslatorBuilder;
 import gov.nist.asbestos.mhd.transactions.BundleToRegistryObjectList;
@@ -15,7 +17,10 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.io.File;
 import java.io.InputStream;
+import java.net.URISyntaxException;
+import java.nio.file.Paths;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -24,9 +29,11 @@ class BuildRegistryObjectListTest {
     private static Val val;
     private ResourceMgr rMgr;
     private static ResourceMgr bundleMgr;
+    private static File externalCache;
 
     @BeforeAll
-    static void beforeAll() {
+    static void beforeAll() throws URISyntaxException {
+        externalCache = Paths.get(BuildRegistryObjectListTest.class.getResource("/external_cache/findme.txt").toURI()).getParent().toFile();
         InputStream is = ResourceMgrContainedTest.class.getResourceAsStream("/gov/nist/asbestos/mhd/transactions/shared/bundle.xml");
         IBaseResource resource = Base.getFhirContext().newXmlParser().parseResource(is);
         assertTrue(resource instanceof Bundle);
@@ -38,6 +45,7 @@ class BuildRegistryObjectListTest {
         rMgr = new ResourceMgr();
         val = new Val();
         rMgr.setVal(val);
+        rMgr.setResourceCacheMgr(new ResourceCacheMgr(externalCache));
         bundleMgr = new ResourceMgr();
         bundleMgr.setVal(val);
         bundleMgr.setBundle(bundle);
@@ -55,6 +63,7 @@ class BuildRegistryObjectListTest {
         xlate
                 .setCodeTranslator(codeTranslator)
                 .setResourceMgr(rMgr)
+                .setAssigningAuthorities(AssigningAuthorities.allowAny())
                 .setVal(val);
 
         RegistryObjectListType rol = xlate.buildRegistryObjectList();

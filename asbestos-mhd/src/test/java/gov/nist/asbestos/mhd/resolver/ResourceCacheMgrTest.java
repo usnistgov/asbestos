@@ -8,24 +8,23 @@ import java.io.File;
 import java.net.URISyntaxException;
 import java.nio.file.Paths;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class FileSystemResourceCacheTest {
-
+public class ResourceCacheMgrTest {
     @Test
     void cacheTest() throws URISyntaxException {
-        File cacheFile = Paths.get(getClass().getResource("/gov/nist/asbestos/mhd/resolver/cache/cache.properties").toURI()).getParent().toFile();
+        File externalCache = Paths.get(getClass().getResource("/external_cache/findme.txt").toURI()).getParent().toFile();
 
-        FileSystemResourceCache cache = new FileSystemResourceCache(cacheFile);
+        ResourceCacheMgr mgr = new ResourceCacheMgr(externalCache);
         Ref ref = new Ref("http://localhost:8080/fhir/Patient/a2");
-        ResourceWrapper resource = cache.readResource(ref);
+        ResourceWrapper resource = mgr.getResource(ref);
 
         assertNotNull(resource);
         assertNotNull(resource.getUrl());
         assertNotNull(resource.getResource());
         assertTrue(resource.isLoaded());
         assertTrue(resource.getResource() instanceof Patient);
-        assertEquals("a2", resource.getResource().getIdElement().getValue());
 
     }
 }

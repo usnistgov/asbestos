@@ -35,7 +35,7 @@ public class ResourceMgr implements IVal {
         return resourceMgrConfig;
     }
 
-    public ResourceMgr addResourceCacheMgr(ResourceCacheMgr resourceCacheMgr) {
+    public ResourceMgr setResourceCacheMgr(ResourceCacheMgr resourceCacheMgr) {
         this.resourceCacheMgr = resourceCacheMgr;
         return this;
     }

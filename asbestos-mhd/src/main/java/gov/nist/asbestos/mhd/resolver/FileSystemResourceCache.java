@@ -33,7 +33,7 @@ public class FileSystemResourceCache implements ResourceCache {
             is = new FileInputStream(propFile);
             props.load(is);
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new Error(e);
         } finally {
             if (is != null) {
                 try {
@@ -50,11 +50,23 @@ public class FileSystemResourceCache implements ResourceCache {
 
     public ResourceWrapper readResource(Ref url) {
         File file = cacheFile(url, "xml");
-        if (file.exists())
-            return new ResourceWrapper(ctx.newXmlParser().parseResource(fileToString(file)));
+        String id = file.getName();
+        id = id.substring(0, id.indexOf(".xml"));
+        if (file.exists()) {
+            ResourceWrapper wrapper = new ResourceWrapper(ctx.newXmlParser().parseResource(fileToString(file)));
+            wrapper.setUrl(url);
+            wrapper.getResource().setId(id);
+            return wrapper;
+        }
         file = cacheFile(url, "json");
-        if (file.exists())
-            return new ResourceWrapper(ctx.newJsonParser().parseResource(fileToString(file)));
+        id = file.getName();
+        id = id.substring(0, id.indexOf(".json"));
+        if (file.exists()) {
+            ResourceWrapper wrapper = new ResourceWrapper(ctx.newJsonParser().parseResource(fileToString(file)));
+            wrapper.setUrl(url);
+            wrapper.getResource().setId(id);
+            return wrapper;
+        }
         return null;
     }
 
@@ -70,7 +82,7 @@ public class FileSystemResourceCache implements ResourceCache {
                 } catch (Exception e1) {
 
                 }
-            throw new RuntimeException(e);
+            throw new Error(e);
         }
     }
 

@@ -16,12 +16,23 @@ public class Ref {
 
     public Ref(URI uri) {
         Objects.requireNonNull(uri);
-        this.uri = uri;
+        this.uri = httpize(uri);
     }
 
     public Ref(String ref)  {
         Objects.requireNonNull(ref);
         uri = build(ref);
+    }
+
+    private URI httpize(URI theUri) {
+        String s = theUri.toString();
+        try {
+            if (s.startsWith("https"))
+                theUri = new URI(s.replace("https", "http"));
+        } catch (Exception e) {
+            throw new Error(e);
+        }
+        return theUri;
     }
 
     public Ref(String base, String resourceType, String id)  {
@@ -172,7 +183,7 @@ public class Ref {
 //            ref = ref.substring(1);
 //        }
         try {
-            return new URI(ref);
+            return httpize(new URI(ref));
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

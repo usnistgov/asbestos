@@ -8,9 +8,10 @@ public class AssigningAuthorities {
     private boolean any = false;
     private static String oidPrefix = "urn:oid:";
 
-    public AssigningAuthorities allowAny() {
-        any = true;
-        return this;
+    public static AssigningAuthorities allowAny() {
+        AssigningAuthorities a = new AssigningAuthorities();
+        a.any = true;
+        return a;
     }
 
     public AssigningAuthorities addAuthority(String value) {

@@ -7,6 +7,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * load by a factory - either TestResourceCacheFactory or ResourceCacheMgrFactory
@@ -17,21 +18,22 @@ import java.util.Map;
 public class ResourceCacheMgr {
     private static final Logger logger = Logger.getLogger(ResourceCacheMgr.class);
     private Map<Ref, ResourceCache> caches = new HashMap<>();  // baseUrl -> cache
-    private File externalCache;
 
     public ResourceCacheMgr(File externalCache) {
-        this.externalCache = externalCache;
-        if (externalCache != null)
-            loadCache(new File(externalCache, "fhirResourceCache"));
+        Objects.requireNonNull(externalCache);
+        assert externalCache.isDirectory();
+        loadCache(new File(externalCache, "resourceCache"));
     }
 
-    public void loadCache(File cacheCollectionDir) {
-        File[] files = cacheCollectionDir.listFiles();
-        if (files != null) {
-            for (File cache : files) {
-                if (cache.isDirectory() && new File(cache, "cache.properties").exists()) {
-                    logger.info("Scanning Resource Cache directory " + cache);
-                    FileSystemResourceCache rcache = new FileSystemResourceCache(cache);
+    private void loadCache(File cacheCollection) {
+        if (cacheCollection.exists() && cacheCollection.isDirectory()) {
+            File[] dirs = cacheCollection.listFiles();
+            if (dirs == null)
+                return;
+            for (File dir : dirs) {
+                if (dir.isDirectory() && new File(dir, "cache.properties").exists()) {
+                    logger.info("Scanning Resource Cache directory " + dir);
+                    FileSystemResourceCache rcache = new FileSystemResourceCache(dir);
                     caches.put(rcache.getBase(), rcache);
                 }
             }
@@ -50,21 +52,15 @@ public class ResourceCacheMgr {
         cache.add(uri.getRelative(), new ResourceWrapper(resource));
     }
 
-
-    /**
-     * return resource or throw exception
-     * @param fullUrl
-     * @return
-     */
-     ResourceWrapper getResource(Ref fullUrl) {
-         if (fullUrl.isAbsolute()) {
-             Ref baseUrl = fullUrl.getBase();
-             ResourceCache cache = caches.get(baseUrl);
-             if (cache == null)
-                 throw new RuntimeException("Cannot access " + fullUrl + "\nNo cache defined for baseUrl " + baseUrl + "\nCaches exist for " + caches.keySet());
+    public ResourceWrapper getResource(Ref fullUrl) {
+        if (fullUrl.isAbsolute()) {
+            Ref baseUrl = fullUrl.getBase();
+            ResourceCache cache = caches.get(baseUrl);
+            if (cache == null)
+                return null;
             return cache.readResource(fullUrl.getRelative());
-         }
-         return null;
+        }
+        return null;
     }
 
     @Override

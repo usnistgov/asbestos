@@ -61,7 +61,6 @@ public class BundleToRegistryObjectList implements IVal {
                 .collect(Collectors.toMap(AbstractMap.SimpleEntry::getKey, AbstractMap.SimpleEntry::getValue)));
     }
 
-    private ResourceCacheMgr resourceCacheMgr;
     private CodeTranslator codeTranslator;
     private Configuration config;
     private AssigningAuthorities assigningAuthorities;
@@ -418,6 +417,7 @@ public class BundleToRegistryObjectList implements IVal {
 //    }
 
     private String findAcceptablePID(List<Identifier> identifiers) {
+        Objects.requireNonNull(assigningAuthorities);
         List<String> pids = identifiers.stream()
                 .filter(identifier -> assigningAuthorities.check(unURN(identifier.getSystem())))
                 .map(identifier -> identifier.getValue() + "^^^" + unURN(identifier.getSystem()) + "&ISO")
@@ -450,7 +450,7 @@ public class BundleToRegistryObjectList implements IVal {
         String pid = findAcceptablePID(identifiers);
 
         if (pid != null)
-            addExternalIdentifier(ro, scheme, pid, rMgr.allocateSymbolicId(), resource.getId(), attName);
+            addExternalIdentifier(ro, scheme, pid, rMgr.allocateSymbolicId(), resource.getAssignedId(), attName);
     }
 
     public void addExternalIdentifier(RegistryObjectType ro, String scheme, String value, String id, String registryObject, String name) {
@@ -587,4 +587,5 @@ public class BundleToRegistryObjectList implements IVal {
         this.bundleProfile = bundleProfile;
         return this;
     }
+
 }
