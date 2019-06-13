@@ -1,6 +1,7 @@
 package gov.nist.asbestos.mhd.translation.test;
 
 import gov.nist.asbestos.asbestosProxySupport.Base.Base;
+import gov.nist.asbestos.mhd.client.FhirClient;
 import gov.nist.asbestos.mhd.resolver.Ref;
 import gov.nist.asbestos.mhd.resolver.ResolverConfig;
 import gov.nist.asbestos.mhd.resolver.ResourceMgr;
@@ -34,6 +35,7 @@ class ResourceManagerBundleTest {
     @BeforeEach
     void beforeEach() {
         rMgr = new ResourceMgr();
+        rMgr.setFhirClient(new FhirClient());
         val = new Val();
         rMgr.setVal(val);
         bundleMgr = new ResourceMgr();

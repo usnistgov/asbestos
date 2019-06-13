@@ -4,6 +4,7 @@ package gov.nist.asbestos.mhd.resolver;
 import gov.nist.asbestos.mhd.transactionSupport.ResourceWrapper;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class MemoryResourceCache implements ResourceCache {
@@ -17,6 +18,11 @@ public class MemoryResourceCache implements ResourceCache {
     @Override
     public void add(Ref ref, ResourceWrapper resource) {
         cache.put(ref, resource);
+    }
+
+    @Override
+    public List<ResourceWrapper> getAll(Ref base, String type) {
+        return null;
     }
 
     @Override

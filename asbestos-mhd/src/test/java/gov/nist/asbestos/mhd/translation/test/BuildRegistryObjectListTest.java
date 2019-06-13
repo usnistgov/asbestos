@@ -1,6 +1,7 @@
 package gov.nist.asbestos.mhd.translation.test;
 
 import gov.nist.asbestos.asbestosProxySupport.Base.Base;
+import gov.nist.asbestos.mhd.client.FhirClient;
 import gov.nist.asbestos.mhd.resolver.ResourceCacheMgr;
 import gov.nist.asbestos.mhd.resolver.ResourceMgr;
 import gov.nist.asbestos.mhd.transactionSupport.AssigningAuthorities;
@@ -30,6 +31,7 @@ class BuildRegistryObjectListTest {
     private ResourceMgr rMgr;
     private static ResourceMgr bundleMgr;
     private static File externalCache;
+    private FhirClient fhirClient;
 
     @BeforeAll
     static void beforeAll() throws URISyntaxException {
@@ -45,7 +47,9 @@ class BuildRegistryObjectListTest {
         rMgr = new ResourceMgr();
         val = new Val();
         rMgr.setVal(val);
-        rMgr.setResourceCacheMgr(new ResourceCacheMgr(externalCache));
+        fhirClient = new FhirClient();
+        fhirClient.setResourceCacheMgr(new ResourceCacheMgr(externalCache));
+        rMgr.setFhirClient(fhirClient);
         bundleMgr = new ResourceMgr();
         bundleMgr.setVal(val);
         bundleMgr.setBundle(bundle);

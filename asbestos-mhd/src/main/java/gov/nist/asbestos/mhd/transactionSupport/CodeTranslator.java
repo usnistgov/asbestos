@@ -56,6 +56,19 @@ public class CodeTranslator {
                 .findFirst();
     }
 
+    public Optional<Code> findCodeForCodeAndScheme(String theClassification, String theCode, String theCodingScheme) {
+        Objects.requireNonNull(theClassification);
+        Objects.requireNonNull(theCode);
+        Objects.requireNonNull(theCodingScheme);
+        Optional<CodeType> codeType = codes.getCodeType().stream()
+                .filter(codetype -> theClassification.equals(codetype.getClassScheme()))
+                .findFirst();
+        return codeType.flatMap(codeType1 -> codeType1.getCode().stream()
+        .filter(code -> code.getCode().equals(theCode) && code.getCodingScheme().equals(theCodingScheme))
+        .findFirst());
+
+    }
+
     public static final String CONFCODE = "urn:uuid:f4f85eac-e6cb-4883-b524-f2705394840f";
     public static final String HCFTCODE = "urn:uuid:f33fb8ac-18af-42cc-ae0e-ed0b0bdb91e1";
     public static final String PRACCODE = "urn:uuid:cccf5598-8b07-4b77-a05e-ae952c785ead";

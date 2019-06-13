@@ -1,21 +1,20 @@
 package gov.nist.asbestos.mhd.translation;
 
-import ca.uhn.fhir.model.api.IValueSetEnumBinder;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import gov.nist.asbestos.asbestosProxySupport.Base.IVal;
 import gov.nist.asbestos.mhd.exceptions.MetadataAttributeTranslationException;
 import gov.nist.asbestos.mhd.resolver.ResourceMgr;
 import gov.nist.asbestos.mhd.transactionSupport.CodeTranslator;
-import gov.nist.asbestos.mhd.transactionSupport.ResourceWrapper;
 import gov.nist.asbestos.simapi.validation.Val;
 import gov.nist.asbestos.simapi.validation.ValE;
 import oasis.names.tc.ebxml_regrep.xsd.rim._3.*;
 import org.hl7.fhir.r4.model.*;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
-public class ExtrinsicObjectToDocumentReference implements IVal {
+// TODO author, related, binary (content.attachment), logical id, identifier (entryUUID), legalAuthenticator, sourcePatientInfo, sourcePatientId
+public class DocumentEntryToDocumentReference implements IVal {
     private Val val;
     private CodeTranslator codeTranslator;
     private ResourceMgr resourceMgr = null;
@@ -25,9 +24,17 @@ public class ExtrinsicObjectToDocumentReference implements IVal {
 
         String objectType = eo.getObjectType();
         if (!"urn:uuid:7edca82f-054d-47f2-a032-9b2a5b5186c1".equals(objectType)) {
-            val.add(new ValE("ExtrinsicObjectToDocumentReference: this transform only handles stable DocumentEntries - objectType " + objectType + " received").asError());
+            val.add(new ValE("DocumentEntryToDocumentReference: this transform only handles stable DocumentEntries - objectType " + objectType + " received").asError());
             return dr;
         }
+
+        DocumentReference.DocumentReferenceContentComponent content = new DocumentReference.DocumentReferenceContentComponent();
+        dr.addContent(content);
+        Attachment attachment = new Attachment();
+        dr.getContent().get(0).setAttachment(attachment);
+        attachment.setContentType(eo.getMimeType());
+        DocumentReference.DocumentReferenceContextComponent context = new DocumentReference.DocumentReferenceContextComponent();
+        dr.setContext(context);
 
         if (eo.getId() != null) {
             Identifier idr = new Identifier();
@@ -39,17 +46,12 @@ public class ExtrinsicObjectToDocumentReference implements IVal {
             String scheme = ei.getIdentificationScheme();
             if ("urn:uuid:58a6f841-87b3-4a3e-92fd-a8ffeff98427".equals(scheme)) {
                 // PatientID
-                PatientId patientId = new PatientId().setPatientid(ei.getValue());
-                String system = "urn:oid:" + patientId.getAa();
-                String id = patientId.getId();
-                List<String> searchParams = new ArrayList<>();
-                searchParams.add("identifier=" + system + "|" + id);
-                List<ResourceWrapper> results = resourceMgr.search(null, Patient.class, searchParams, true);
-                if (results.isEmpty())
-                    val.add(new ValE("ExtrinsicObjectToDocumentReference: cannot find Patient resource for " + system + "|" + id).asError());
-                else {
-                    dr.setSubject(new Reference(results.get(0).getUrl().toString()));
-                }
+                PatientId patientId = new PatientId()
+                        .setPatientid(ei.getValue())
+                        .setResourceMgr(resourceMgr);
+                patientId.setVal(val);
+                Optional<Reference> reference = patientId.getFhirReference();
+                reference.ifPresent(dr::setSubject);
             } else if ("urn:uuid:2e82c1f6-a085-4c72-9da3-8640a32e42ab".equals(scheme)) {
                 // Unique ID
                 Identifier idr = new Identifier();
@@ -57,16 +59,38 @@ public class ExtrinsicObjectToDocumentReference implements IVal {
                 idr.setValue(stripUrnPrefix(ei.getValue()));
                 dr.setMasterIdentifier(idr);
             } else {
-                val.add(new ValE("ExtrinsicObjectToDocumentReference: Do not understand ExternalIdentifier identification scheme " + scheme).asError());
-                return dr;
+                val.add(new ValE("DocumentEntryToDocumentReference: Do not understand ExternalIdentifier identification scheme " + scheme).asError());
             }
         }
-        dr.addContent(new DocumentReference.DocumentReferenceContentComponent());
-        Attachment attachment = new Attachment();
-        dr.getContent().get(0).setAttachment(attachment);
-        attachment.setContentType(eo.getMimeType());
-        DocumentReference.DocumentReferenceContextComponent context = new DocumentReference.DocumentReferenceContextComponent();
-        dr.setContext(context);
+        for (ClassificationType c : eo.getClassification()) {
+            String scheme = c.getClassificationScheme();
+            if ("urn:uuid:93606bcf-9494-43ec-9b4e-a7748d1a838d".equals(scheme)) {
+                // Author
+            } else {
+                XdsCode xdsCode = new XdsCode()
+                        .setCodeTranslator(codeTranslator)
+                        .setClassificationType(c);
+                xdsCode.setVal(val);
+
+                if (CodeTranslator.FORMATCODE.equals(scheme)) {
+                    content.setFormat(xdsCode.asCoding());
+                } else if (CodeTranslator.CLASSCODE.equals(scheme)) {
+                    dr.setCategory(Collections.singletonList(xdsCode.asCodeableConcept()));
+                } else if (CodeTranslator.PRACCODE.equals(scheme)) {
+                    context.setPracticeSetting(xdsCode.asCodeableConcept());
+                } else if (CodeTranslator.HCFTCODE.equals(scheme)) {
+                    context.setFacilityType(xdsCode.asCodeableConcept());
+                } else if (CodeTranslator.EVENTCODE.equals(scheme)) {
+                    context.setEvent(Collections.singletonList(xdsCode.asCodeableConcept()));
+                } else if (CodeTranslator.CONFCODE.equals(scheme)) {
+                    dr.setSecurityLabel(Collections.singletonList(xdsCode.asCodeableConcept()));
+                } else if (CodeTranslator.TYPECODE.equals(scheme)) {
+                    dr.setType(xdsCode.asCodeableConcept());
+                } else {
+                    val.add(new ValE("DocumentEntryToDocumentReference: Do not understand Classification scheme " + scheme).asError());
+                }
+            }
+        }
         for (SlotType1 slot : eo.getSlot()) {
             String name = slot.getName();
             List<String> values = slot.getValueList().getValue();
@@ -133,13 +157,9 @@ public class ExtrinsicObjectToDocumentReference implements IVal {
         }
 
         if (eo.getDescription() != null) {
-            InternationalStringType ist = eo.getDescription();
-            List<LocalizedStringType> local = ist.getLocalizedString();
-            if (!local.isEmpty()) {
-                LocalizedStringType lst = local.get(0);
-                String value = lst.getValue();
-                attachment.setTitle(value);
-            }
+            String desc = Slot.getValue(eo.getDescription());
+            if (desc != null)
+                attachment.setTitle(desc);
         }
 
         return dr;
@@ -151,6 +171,7 @@ public class ExtrinsicObjectToDocumentReference implements IVal {
         if (id.startsWith("urn:oid:")) return id.substring("urn:oid:".length());
         return id;
     }
+
     @Override
     public void setVal(Val val) {
         this.val = val;
