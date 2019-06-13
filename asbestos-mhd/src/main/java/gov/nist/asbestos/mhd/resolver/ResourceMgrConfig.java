@@ -15,6 +15,10 @@ public class ResourceMgrConfig {
     }
 
     public boolean isOpen() {
-        return this.state == OPEN;
+        return state == OPEN;
+    }
+
+    public boolean isInternalOnly() {
+        return state == INTERNAL;
     }
 }

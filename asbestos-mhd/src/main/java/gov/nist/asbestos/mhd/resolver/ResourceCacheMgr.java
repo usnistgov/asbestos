@@ -3,11 +3,10 @@ package gov.nist.asbestos.mhd.resolver;
 import gov.nist.asbestos.mhd.transactionSupport.ResourceWrapper;
 import org.apache.log4j.Logger;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.Patient;
 
 import java.io.File;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * load by a factory - either TestResourceCacheFactory or ResourceCacheMgrFactory
@@ -23,6 +22,10 @@ public class ResourceCacheMgr {
         Objects.requireNonNull(externalCache);
         assert externalCache.isDirectory();
         loadCache(new File(externalCache, "resourceCache"));
+    }
+
+    public List<Ref> getCachedServers() {
+        return new ArrayList<>(caches.keySet());
     }
 
     private void loadCache(File cacheCollection) {
@@ -61,6 +64,37 @@ public class ResourceCacheMgr {
             return cache.readResource(fullUrl.getRelative());
         }
         return null;
+    }
+
+    public List<ResourceWrapper> search(Ref base, Class<?> resourceType, List<String> params, boolean stopAtFirst) {
+        if (params.size() > 1)
+            throw new Error("Don't support search params " + params);
+        if (resourceType != Patient.class)
+            throw new Error("Don't support search on resources other than Patient (search was for " + resourceType.getSimpleName() + ")" );
+        String param = params.get(0);
+        String[] parts = param.split("=");
+        if (parts.length != 2)
+            throw new Error("Don't understand params = " + param);
+        if (!parts[0].equals("identifier"))
+            throw new Error("Don't support param " + parts[0]);
+        String systemAndId = parts[1];
+        if (!systemAndId.contains("|"))
+            throw new Error("Param format (" + systemAndId + ") not supported");
+        String[] sparts = systemAndId.split("|");
+        String system = sparts[0];
+        String id = sparts[1];
+
+        List<ResourceWrapper> results = new ArrayList<>();
+        for (Ref ref : caches.keySet()) {
+            ResourceCache cache = caches.get(ref);
+            List<ResourceWrapper> all = cache.getAll(base, resourceType.getSimpleName());
+            if (stopAtFirst && !all.isEmpty()) {
+                results.add(all.get(0));
+                return results;
+            }
+            results.addAll(all);
+        }
+        return results;
     }
 
     @Override

@@ -10,6 +10,8 @@ import org.apache.log4j.Logger;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 
 /**
@@ -68,6 +70,37 @@ public class FileSystemResourceCache implements ResourceCache {
             return wrapper;
         }
         return null;
+    }
+
+    private ResourceWrapper readFile(File file) {
+        if (file.getName().endsWith("xml")) {
+            return new ResourceWrapper(ctx.newXmlParser().parseResource(fileToString(file)));
+        } else if (file.getName().endsWith("json")) {
+            return new ResourceWrapper(ctx.newJsonParser().parseResource(fileToString(file)));
+        }
+        else
+            return null;
+    }
+
+    public List<ResourceWrapper> getAll(Ref base, String type) {
+        List<ResourceWrapper> all = new ArrayList<>();
+
+        File dir = new File(cacheDir, type);
+        File[] files = dir.listFiles();
+        if (files != null) {
+            for (File file : files) {
+                String name = file.getName();
+                if (!(name.endsWith(".xml") || name.endsWith(".json")))
+                    continue;
+                ResourceWrapper wrapper = readFile(file);
+                String[] parts = file.getName().split("\\.", 2);
+                String id = parts[1];
+                wrapper.setUrl(new Ref(base, type, id));
+                all.add(wrapper);
+            }
+        }
+
+        return all;
     }
 
     private String fileToString(File file) {

@@ -2,6 +2,8 @@ package gov.nist.asbestos.mhd.resolver;
 
 
 import gov.nist.asbestos.asbestosProxySupport.Base.IVal;
+import gov.nist.asbestos.mhd.client.FhirClient;
+import gov.nist.asbestos.mhd.client.Format;
 import gov.nist.asbestos.mhd.transactionSupport.ResourceWrapper;
 import gov.nist.asbestos.simapi.validation.Val;
 import gov.nist.asbestos.simapi.validation.ValE;
@@ -18,9 +20,10 @@ import java.util.stream.Collectors;
 public class ResourceMgr implements IVal {
 //    static private final Logger logger = Logger.getLogger(ResourceMgr.class);
     private Map<Ref, ResourceWrapper> bundleResources = new HashMap<>();   // url -> resource; for contents of bundle
-    private ResourceCacheMgr resourceCacheMgr = null;
     private Val val;
     private ResourceMgrConfig resourceMgrConfig = new ResourceMgrConfig();
+    private FhirClient fhirClient = null;
+    private List<Ref> knownServers = new ArrayList<>();
 
     public ResourceMgr() {
 
@@ -33,11 +36,6 @@ public class ResourceMgr implements IVal {
 
     public ResourceMgrConfig getResourceMgrConfig() {
         return resourceMgrConfig;
-    }
-
-    public ResourceMgr setResourceCacheMgr(ResourceCacheMgr resourceCacheMgr) {
-        this.resourceCacheMgr = resourceCacheMgr;
-        return this;
     }
 
     private boolean inBundle(Ref ref) {
@@ -204,17 +202,55 @@ public class ResourceMgr implements IVal {
     }
 
     private ResourceWrapper load(ResourceWrapper resource) {
-        if (resource != null && resource.getUrl() != null) {
-            if (resourceCacheMgr != null) {
-                ResourceWrapper loaded = resourceCacheMgr.getResource(resource.getUrl());
-                if (loaded != null)
-                    resource.setResource(loaded.getResource());
+        Objects.requireNonNull(resource);
+        if (resource.isLoaded())
+            return resource;
+        if (resource.getUrl() == null)
+            return resource;
+        if (fhirClient == null)
+            throw new Error("ResourceMgr#load: FHIR Client is not configured");
+        if (resourceMgrConfig.isInternalOnly()) {
+            Optional<ResourceWrapper> cached = fhirClient.readCachedResource(resource.getUrl());
+            if (cached.isPresent() && cached.get().isLoaded()) {
+                resource.setResource(cached.get().getResource());
             }
-            if (!resource.isLoaded() && resourceMgrConfig.isOpen()) {
-                val.add(new ValE("ResourceMgr#load: External resource loading is not implemented").asError());
-            }
+            return resource;
         }
+        Optional<ResourceWrapper> wrapper = fhirClient.readResource(resource.getUrl());
+        wrapper.ifPresent(resourceWrapper -> resource.setResource(resourceWrapper.getResource()));
         return resource;
+    }
+
+    public List<ResourceWrapper> search(Ref base, Class<?> resourceType, List<String> params, boolean stopAtFirst) {
+        Objects.requireNonNull(resourceType);
+        Objects.requireNonNull(params);
+        if (fhirClient == null)
+            throw new Error("ResourceMgr#search: FHIR Client is not configured");
+
+        if (base == null) {
+            List<ResourceWrapper> results = new ArrayList<>();
+            List<Ref> cachedServers = fhirClient.getCachedServers();
+            for (Ref server : cachedServers) {
+                List<ResourceWrapper> cacheResults = fhirClient.searchCache(server, resourceType, params, stopAtFirst);
+                if (!cacheResults.isEmpty() && stopAtFirst)
+                    return cacheResults;
+                results.addAll(cacheResults);
+            }
+            if (resourceMgrConfig.isOpen()) {
+                for (Ref server : knownServers) {
+                    List<ResourceWrapper> theResults = fhirClient.searchCache(server, resourceType, params, stopAtFirst);
+                    if (!theResults.isEmpty() && stopAtFirst)
+                        return theResults;
+                    results.addAll(theResults);
+
+                }
+            }
+            return results;
+        }
+
+        if (resourceMgrConfig.isInternalOnly())
+            return fhirClient.searchCache(base, resourceType, params, stopAtFirst);
+        return fhirClient.search(base, resourceType, params, stopAtFirst, false);
     }
 
     private SymbolicIdBuilder symbolicIdBuilder = new SymbolicIdBuilder();
@@ -227,5 +263,19 @@ public class ResourceMgr implements IVal {
     @Override
     public void setVal(Val val) {
         this.val = val;
+    }
+
+    public void setFhirClient(FhirClient fhirClient) {
+        this.fhirClient = fhirClient;
+    }
+
+    public List<Ref> getKnownServers() {
+        return knownServers;
+    }
+
+    public void addKnownServer(Ref server) {
+        server = server.getBase();
+        if (!knownServers.contains(server))
+            knownServers.add(server);
     }
 }

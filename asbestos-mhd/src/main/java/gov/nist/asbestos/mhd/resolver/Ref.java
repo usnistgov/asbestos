@@ -193,8 +193,12 @@ public class Ref {
         try {
             return httpize(new URI(ref));
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new Error(e);
         }
+    }
+
+    public URI getUri() {
+        return uri;
     }
 
     static private List<String> resourceNames = Arrays.asList(

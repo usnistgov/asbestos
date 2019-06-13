@@ -4,7 +4,9 @@ import ca.uhn.fhir.model.api.IValueSetEnumBinder;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import gov.nist.asbestos.asbestosProxySupport.Base.IVal;
 import gov.nist.asbestos.mhd.exceptions.MetadataAttributeTranslationException;
+import gov.nist.asbestos.mhd.resolver.ResourceMgr;
 import gov.nist.asbestos.mhd.transactionSupport.CodeTranslator;
+import gov.nist.asbestos.mhd.transactionSupport.ResourceWrapper;
 import gov.nist.asbestos.simapi.validation.Val;
 import gov.nist.asbestos.simapi.validation.ValE;
 import oasis.names.tc.ebxml_regrep.xsd.rim._3.*;
@@ -16,6 +18,7 @@ import java.util.List;
 public class ExtrinsicObjectToDocumentReference implements IVal {
     private Val val;
     private CodeTranslator codeTranslator;
+    private ResourceMgr resourceMgr = null;
 
     public DocumentReference getDocumentReference(ExtrinsicObjectType eo) {
         DocumentReference dr = new DocumentReference();
@@ -41,7 +44,12 @@ public class ExtrinsicObjectToDocumentReference implements IVal {
                 String id = patientId.getId();
                 List<String> searchParams = new ArrayList<>();
                 searchParams.add("identifier=" + system + "|" + id);
-
+                List<ResourceWrapper> results = resourceMgr.search(null, Patient.class, searchParams, true);
+                if (results.isEmpty())
+                    val.add(new ValE("ExtrinsicObjectToDocumentReference: cannot find Patient resource for " + system + "|" + id).asError());
+                else {
+                    dr.setSubject(new Reference(results.get(0).getUrl().toString()));
+                }
             } else if ("urn:uuid:2e82c1f6-a085-4c72-9da3-8640a32e42ab".equals(scheme)) {
                 // Unique ID
                 Identifier idr = new Identifier();
@@ -65,8 +73,7 @@ public class ExtrinsicObjectToDocumentReference implements IVal {
             if (!values.isEmpty()) {
                 String value1 = values.get(0);
                 if ("hash".equals(name)) {
-                    byte[] value;
-                    attachment.setHash(value);
+                    attachment.setHash(HashTranslator.toByteArray(value1));
                 } else if ("size".equals(name)) {
                     attachment.setSize(Integer.parseInt(value1));
                 } else if ("repositoryUniqueId".equals(name)) {
@@ -147,5 +154,13 @@ public class ExtrinsicObjectToDocumentReference implements IVal {
     @Override
     public void setVal(Val val) {
         this.val = val;
+    }
+
+    public void setResourceMgr(ResourceMgr resourceMgr) {
+        this.resourceMgr = resourceMgr;
+    }
+
+    public void setCodeTranslator(CodeTranslator codeTranslator) {
+        this.codeTranslator = codeTranslator;
     }
 }
