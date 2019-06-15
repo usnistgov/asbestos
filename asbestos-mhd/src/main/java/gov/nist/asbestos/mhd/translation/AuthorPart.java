@@ -9,11 +9,13 @@ public abstract class AuthorPart {
     abstract void validate(Val val);
 
     void parse() {
-        parts = value.split("^");
+        parts = value.split("\\^");
     }
 
-    public AuthorPart setValue(String value) {
+    public AuthorPart setValue(String value, Val val) {
         this.value = value;
+        parse();
+        validate(val);
         return this;
     }
 

@@ -5,16 +5,15 @@ import gov.nist.asbestos.simapi.validation.ValE;
 
 class AuthorPerson extends AuthorPart {
     // datatype is XCN
-    String id = null;
-    String familyName = null;
-    String givenName = null;
-    String suffix = null;
-    String prefix = null;
-    String assigningAuthority = null;
+    String id = "";
+    String familyName = "";
+    String givenName = "";
+    String suffix = "";
+    String prefix = "";
+    String assigningAuthority = "";
 
     @Override
     void validate(Val val) {
-        parse();
         id = get(1);
         familyName = get(2);
         givenName = get(3);
@@ -36,5 +35,9 @@ class AuthorPerson extends AuthorPart {
                 val.add(new ValE("AssigningAuthority third sub-component shall be ISO.").asError());
             // TODO validate oid in aparts[1]
         }
+    }
+
+    public String toString() {
+        return id + "^" + familyName + "^" + givenName + "^^" + suffix + "^" + prefix + "^^^" + assigningAuthority;
     }
 }

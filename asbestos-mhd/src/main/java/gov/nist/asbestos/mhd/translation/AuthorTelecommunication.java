@@ -4,31 +4,61 @@ import gov.nist.asbestos.simapi.validation.Val;
 import gov.nist.asbestos.simapi.validation.ValE;
 
 class AuthorTelecommunication extends AuthorPart {
-    // format is XTN
-    String telecomAddr = null;
-    String subscriberNumber = null;
-    String phoneNumber = null;
-    String countryCode = null;
-    String cityCode = null;
+    // format is XTN which is two formats, phone number OR email address
+
+    // shared
+    String type = "";
+
+    // phone number
+    String phoneNumber = "";
+    String countryCode = "";
+    String areaCode = "";
+    String subscriberNumber = "";
+    String extension = "";
+
+    // email
+    String telecomAddr = "";
 
     @Override
     void validate(Val val) {
-        parse();
-        if (!get(2).isEmpty() && !get(2).equals("NET"))
-            val.add(new ValE("AuthorTelecommunication segment 2. if present must be NET - found " + get(2)).asError());
-        if (!get(3).equals("Internet"))
-            val.add(new ValE("AuthorTelecommunication segment 3 must be Internet - found " + get(3)).asError());
-        if (get(4).equals(""))
-            val.add(new ValE("AuthorTelecommunication segment 4 (telecommunications address) must be present").asError());
-        if (get(7).equals(""))
-            val.add(new ValE("AuthorTelecommunication segment 7 (Subscriber Number) must be present").asError());
-        if (parts.length > 8)
-            val.add(new ValE("Author segments above 8 shall not be present").asError());
-        telecomAddr = get(4);
-        subscriberNumber = get(7);
-        phoneNumber = get(2);
-        countryCode = get(5);
-        cityCode = get(6);
+        type = get(3);
+        if (type.equals(""))
+            val.add(new ValE("AuthorTelecommunication segment 3 must be present").asError());
+        if (type.equals("PH")) {
+            countryCode = get(5);
+            areaCode = get(6);
+            subscriberNumber = get(7);
+            extension = get(8);
+            if (subscriberNumber.equals(""))
+                val.add(new ValE("AuthorTelecommunication segment 7 (as part of phone number) must be present").asError());
+        } else if (type.equals("Internet")) {
+            if (!get(2).equals("") && !get(2).equals("NET"))
+                val.add(new ValE("AuthorTelecommunication segment 2 (as part of internet address) must be empty or NET").asError());
+            telecomAddr = get(4);
+            if (telecomAddr.equals(""))
+                val.add(new ValE("AuthorTelecommunication segment 4 (as part of internet address) must be present").asError());
+        } else {
+            val.add(new ValE("AuthorTelecommunication segment 3 must be PH or Internet - found " + type).asError());
+        }
+    }
+
+    boolean isFull() {
+        return !type.equals("");
+    }
+
+    public void setInternet() {
+        type = "Internet";
+    }
+
+    public void setPhone() {
+        type = "PH";
+    }
+
+    public String toString() {
+        if (type.equals("Internet"))
+            return "^NET^Internet" + "^" + telecomAddr;
+        else
+            return "^^PH^^" + countryCode + "^" + areaCode + "^" + subscriberNumber + "^" + extension;
     }
 
 }
