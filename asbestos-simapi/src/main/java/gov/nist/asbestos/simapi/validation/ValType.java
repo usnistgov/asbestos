@@ -3,7 +3,7 @@ package gov.nist.asbestos.simapi.validation;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonValue;
 
-public enum ValType { Msg("Msg"), Error("Error"), Warn("Warn"), Ref("Ref"), Doc("Doc");
+public enum ValType { Msg("Msg"), Error("Error"), Warn("Warn"), Ref("Ref"), Doc("Doc"), Ignored("Ignored");
 private String title;
     ValType(final String title) {
         this.title = title;

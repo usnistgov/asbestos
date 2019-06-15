@@ -39,6 +39,15 @@ public class ValE {
         return this;
     }
 
+    public ValE ignore(String msg) {
+        if (msg.equals(this.msg)) {
+            this.type = ValType.Ignored;
+            for (ValE e : ele)
+                e.ignore(msg);
+        }
+        return this;
+    }
+
     public String getMsg() {
         return msg;
     }

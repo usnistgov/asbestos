@@ -8,6 +8,7 @@ import gov.nist.asbestos.mhd.resolver.ResolverConfig;
 import gov.nist.asbestos.mhd.resolver.ResourceMgr;
 import gov.nist.asbestos.mhd.transactionSupport.AssigningAuthorities;
 import gov.nist.asbestos.mhd.transactionSupport.CodeTranslator;
+import gov.nist.asbestos.mhd.transactionSupport.PnrWrapper;
 import gov.nist.asbestos.mhd.transactionSupport.ResourceWrapper;
 import gov.nist.asbestos.simapi.validation.Val;
 import gov.nist.asbestos.simapi.validation.ValE;
@@ -17,6 +18,7 @@ import org.hl7.fhir.r4.model.*;
 import javax.xml.bind.DatatypeConverter;
 import javax.xml.bind.JAXBElement;
 import javax.xml.namespace.QName;
+import java.io.StringWriter;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -72,25 +74,25 @@ public class BundleToRegistryObjectList implements IVal {
         rMgr = new ResourceMgr();
     }
 
-//    public PnrWrapper build(Bundle bundle) {
-//        Objects.requireNonNull(val);
-//        Objects.requireNonNull(bundle);
+    public PnrWrapper build(Bundle bundle) {
+        Objects.requireNonNull(val);
+        Objects.requireNonNull(bundle);
 //        rMgr = new ResourceMgr(bundle).addResourceCacheMgr(resourceCacheMgr);
 //        rMgr.setVal(val);
-//        scanBundleForAcceptability(bundle, rMgr);
-//        PnrWrapper submission = new PnrWrapper();
-//
-//        buildRegistryObjectList();
-//
+        scanBundleForAcceptability(bundle, rMgr);
+        PnrWrapper submission = new PnrWrapper();
+
+        buildRegistryObjectList();
+
 //        StringWriter writer = new StringWriter();
 //        MarkupBuilder builder = new MarkupBuilder(writer);
 //        submission.documentIdToContentId.each { id, contentId ->
 //            addDocument(builder, id, contentId)
 //        }
 //        submission.documentDefinitions = writer.toString()
-//
-//        return submission;
-//    }
+
+        return submission;
+    }
 
     // TODO handle List/Folder or signal error
     public RegistryObjectListType buildRegistryObjectList() {
@@ -260,22 +262,25 @@ public class BundleToRegistryObjectList implements IVal {
         return ss;
     }
 
-    private ExtrinsicObjectType createExtrinsicObject(ResourceWrapper resource) {
+    public ExtrinsicObjectType createExtrinsicObject(ResourceWrapper resource) {
+        Objects.requireNonNull(val);
+
+        ExtrinsicObjectType eo = new ExtrinsicObjectType();
+        eo.setObjectType("urn:uuid:7edca82f-054d-47f2-a032-9b2a5b5186c1");
+
         DocumentReference dr = (DocumentReference) resource.getResource();
         if (dr.getContent() == null || dr.getContent().isEmpty()) {
             val.add(new ValE("DocumentReference has no content section").asError());
-            return null;
+            return eo;
         }
         if (dr.getContent().size() > 1) {
             val.add(new ValE("DocumentReference has multiple content sections").asError());
-            return null;
+            return eo;
         }
         if (dr.getContent().get(0).getAttachment() == null) {
             val.add(new ValE("DocumentReference has no content/attachment").asError());
-            return null;
+            return eo;
         }
-
-        ExtrinsicObjectType eo = new ExtrinsicObjectType();
 
         DocumentReference.DocumentReferenceContextComponent context = dr.getContext();
         DocumentReference.DocumentReferenceContentComponent content = dr.getContent().get(0);

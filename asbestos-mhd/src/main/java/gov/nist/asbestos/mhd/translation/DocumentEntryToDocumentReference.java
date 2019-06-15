@@ -11,6 +11,7 @@ import org.hl7.fhir.r4.model.*;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 // TODO author, related, binary (content.attachment), logical id, identifier (entryUUID), legalAuthenticator, sourcePatientInfo, sourcePatientId
@@ -20,6 +21,7 @@ public class DocumentEntryToDocumentReference implements IVal {
     private ResourceMgr resourceMgr = null;
 
     public DocumentReference getDocumentReference(ExtrinsicObjectType eo) {
+        Objects.requireNonNull(eo);
         DocumentReference dr = new DocumentReference();
 
         String objectType = eo.getObjectType();
@@ -29,17 +31,18 @@ public class DocumentEntryToDocumentReference implements IVal {
         }
 
         DocumentReference.DocumentReferenceContentComponent content = new DocumentReference.DocumentReferenceContentComponent();
-        dr.addContent(content);
         Attachment attachment = new Attachment();
-        dr.getContent().get(0).setAttachment(attachment);
+        dr.addContent(content);
         attachment.setContentType(eo.getMimeType());
+        dr.getContent().get(0).setAttachment(attachment);
         DocumentReference.DocumentReferenceContextComponent context = new DocumentReference.DocumentReferenceContextComponent();
         dr.setContext(context);
 
         if (eo.getId() != null) {
+            String id = eo.getId();
             Identifier idr = new Identifier();
             idr.setSystem("urn:ietf:rfc:3986");
-            idr.setValue(stripUrnPrefix(eo.getId()));
+            idr.setValue(stripUrnPrefix(id));
             dr.getIdentifier().add(idr);
         }
         for (ExternalIdentifierType ei : eo.getExternalIdentifier()) {
@@ -140,10 +143,12 @@ public class DocumentEntryToDocumentReference implements IVal {
             }
         }
 
-        if (eo.getStatus().endsWith("Approved")) {
-            dr.setStatus(Enumerations.DocumentReferenceStatus.CURRENT);
-        } else if (eo.getStatus().endsWith("Deprecated")) {
-            dr.setStatus(Enumerations.DocumentReferenceStatus.SUPERSEDED);
+        if (eo.getStatus() != null) {
+            if (eo.getStatus().endsWith("Approved")) {
+                dr.setStatus(Enumerations.DocumentReferenceStatus.CURRENT);
+            } else if (eo.getStatus().endsWith("Deprecated")) {
+                dr.setStatus(Enumerations.DocumentReferenceStatus.SUPERSEDED);
+            }
         }
 
         if (eo.getName() != null) {
@@ -165,7 +170,7 @@ public class DocumentEntryToDocumentReference implements IVal {
         return dr;
     }
 
-    private static String stripUrnPrefix(String id) {
+    public static String stripUrnPrefix(String id) {
         if (id == null) return id;
         if (id.startsWith("urn:uuid:")) return id.substring("urn:uuid:".length());
         if (id.startsWith("urn:oid:")) return id.substring("urn:oid:".length());

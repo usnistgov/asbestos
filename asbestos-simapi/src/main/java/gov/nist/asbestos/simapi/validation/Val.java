@@ -49,6 +49,13 @@ public class Val {
         return false;
     }
 
+    public Val ignore(String msg) {
+        for (ValE e : elements)
+            e.ignore(msg);
+        return this;
+    }
+
+
     public String toString() {
         return ValFactory.toJson(this);
     }

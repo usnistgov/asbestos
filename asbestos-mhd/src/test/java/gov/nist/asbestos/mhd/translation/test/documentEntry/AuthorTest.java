@@ -61,6 +61,7 @@ class AuthorTest {
 
         ObjectMapper objectMapper = new  ObjectMapper();
         JsonFactory jsonFactory = objectMapper.getFactory();
+
         JsonParser jsonParser1 = jsonFactory.createParser(json1);
         JsonNode node1 = objectMapper.readTree(jsonParser1);
         JsonParser jsonParser2 = jsonFactory.createParser(json2);
