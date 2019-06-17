@@ -52,7 +52,7 @@ public class ResourceWrapper {
         return new ResourceWrapper(theEnd);
     }
 
-    public ResourceWrapper setId(String id) {
+    public ResourceWrapper setAssignedId(String id) {
         assignedId = id;
         return this;
     }

@@ -70,8 +70,14 @@ public class Ref {
         if (!path.contains("/")) return path;
         String[] parts = path.split("/");
         for (int i=0; i<parts.length-1; i++) {
-            if (resourceNames.contains(parts[i]))
-                return parts[i+1];
+            if (resourceNames.contains(parts[i])) {
+                String id = parts[i+1];
+                if (id.endsWith(".xml"))
+                    id = id.replace(".xml","");
+                if (id.endsWith(".json"))
+                    id = id.replace(".json","");
+                return id;
+            }
         }
         return "";
     }

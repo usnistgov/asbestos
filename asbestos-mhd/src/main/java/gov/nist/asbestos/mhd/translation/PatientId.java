@@ -44,7 +44,7 @@ public class PatientId implements IVal {
         return id;
     }
 
-    public Optional<Reference> getFhirReference() {
+    Optional<Reference> getFhirReference() {
         Objects.requireNonNull(resourceMgr);
         Objects.requireNonNull(val);
         String system = "urn:oid:" + getAa();
@@ -59,7 +59,7 @@ public class PatientId implements IVal {
         return Optional.of(new Reference(results.get(0).getUrl().toString()));
     }
 
-    public PatientId setResourceMgr(ResourceMgr resourceMgr) {
+    PatientId setResourceMgr(ResourceMgr resourceMgr) {
         this.resourceMgr = resourceMgr;
         return this;
     }

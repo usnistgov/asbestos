@@ -43,6 +43,8 @@ public class DocumentEntryToDocumentReference implements IVal {
             Identifier idr = new Identifier();
             idr.setSystem("urn:ietf:rfc:3986");
             idr.setValue(stripUrnPrefix(id));
+            if (ResourceMgr.isUUID(id))
+                idr.setUse(Identifier.IdentifierUse.OFFICIAL);
             dr.getIdentifier().add(idr);
         }
         for (ExternalIdentifierType ei : eo.getExternalIdentifier()) {
@@ -74,6 +76,7 @@ public class DocumentEntryToDocumentReference implements IVal {
                         .setCodeTranslator(codeTranslator)
                         .setClassificationType(c);
                 xdsCode.setVal(val);
+                xdsCode.setCodeTranslator(codeTranslator);
 
                 if (CodeTranslator.FORMATCODE.equals(scheme)) {
                     content.setFormat(xdsCode.asCoding());

@@ -2,6 +2,7 @@ package gov.nist.asbestos.mhd.translation.test;
 
 
 import gov.nist.asbestos.asbestosProxySupport.Base.Base;
+import gov.nist.asbestos.mhd.resolver.ResourceMgr;
 import gov.nist.asbestos.mhd.transactionSupport.CodeTranslator;
 import gov.nist.asbestos.mhd.transactionSupport.CodeTranslatorBuilder;
 import gov.nist.asbestos.mhd.translation.BundleToRegistryObjectList;
@@ -41,6 +42,9 @@ class AttributesTest {
         Val val = new Val();
         brol.setVal(val);
         brol.setCodeTranslator(codeTranslator);
+        ResourceMgr rMgr = new ResourceMgr();
+        rMgr.setVal(val);
+        brol.setResourceMgr(rMgr);
 
         brol.addClassificationFromCodeableConcept(eo, type, "urn:uuid:f0306f51-975f-434e-a61c-c59651d33983", "classifiedObjectId");
 
@@ -125,7 +129,12 @@ class AttributesTest {
 
     @Test
     void createAssociation() throws JAXBException {
+        Val val = new Val();
         BundleToRegistryObjectList brol = new BundleToRegistryObjectList();
+        ResourceMgr rMgr = new ResourceMgr();
+        rMgr.setVal(val);
+        brol.setResourceMgr(rMgr);
+
         AssociationType1 a = brol.createAssociation("HasMember", "id1", "id2", "name", Collections.singletonList("foo"));
 
         String aString = toXml(a);

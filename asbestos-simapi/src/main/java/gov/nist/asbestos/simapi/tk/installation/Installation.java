@@ -77,6 +77,10 @@ public class Installation {
       return "External Cache is " + externalCache().toString();
     }
 
+    public File getCodesFile(String environmentName) {
+        return new File(new File(new File(externalCache, "environment"), environmentName), "codes.xml");
+    }
+
     public File fhirSimDbFile(TestSession testSession) {
         return simDbFile(testSession);
     }

@@ -3,7 +3,6 @@ package gov.nist.asbestos.mhd.resolver;
 
 import gov.nist.asbestos.asbestosProxySupport.Base.IVal;
 import gov.nist.asbestos.mhd.client.FhirClient;
-import gov.nist.asbestos.mhd.client.Format;
 import gov.nist.asbestos.mhd.transactionSupport.ResourceWrapper;
 import gov.nist.asbestos.simapi.validation.Val;
 import gov.nist.asbestos.simapi.validation.ValE;
@@ -12,7 +11,6 @@ import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.Resource;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  *
@@ -51,7 +49,7 @@ public class ResourceMgr implements IVal {
     }
 
     // Load bundle and assign symbolic ids
-    public void parse(Bundle bundle) {
+    private void parse(Bundle bundle) {
         Objects.requireNonNull(bundle);
         Objects.requireNonNull(val);
         ValE thisVal = new ValE("Load Bundle...");
@@ -63,7 +61,7 @@ public class ResourceMgr implements IVal {
                 String id = allocateSymbolicId();
                 thisVal.add(new ValE("Assigning " + id + " to " + component.getResource().getClass().getSimpleName() + "(" + component.getResource().getIdElement().getValue() + ")"));
                 ResourceWrapper wrapper = new ResourceWrapper(component.getResource())
-                        .setId(id)
+                        .setAssignedId(id)
                         .setUrl(new Ref(component.getFullUrl()));
 
                 thisVal.add(new ValE("..." + component.getFullUrl()));
@@ -83,12 +81,6 @@ public class ResourceMgr implements IVal {
         return buf.toString();
     }
 
-    /**
-     *
-     * @param url
-     * @param resource
-     * @return already present
-     */
     private void addResource(Ref url, ResourceWrapper resource) {
         Objects.requireNonNull(val);
         Objects.requireNonNull(url);
@@ -278,4 +270,25 @@ public class ResourceMgr implements IVal {
         if (!knownServers.contains(server))
             knownServers.add(server);
     }
+
+    private static final List<Integer> ignores = Arrays.asList(8,13,18,23);
+    public static boolean isUUID(String u) {
+        if (u.startsWith("urn:uuid:")) u = u.substring(9);
+        u = u.toLowerCase();
+        if (u.length() != 36)
+            return false;
+        for (Integer i : ignores) {
+           if (u.charAt(i) != '-')
+               return false;
+        }
+        for (int i=0; i<36; i++) {
+            if (ignores.contains(i))
+                continue;
+            String hexChars = "0123456789abcdef";
+            if (hexChars.indexOf(u.charAt(i)) == -1)
+                return false;
+        }
+        return true;
+    }
+
 }

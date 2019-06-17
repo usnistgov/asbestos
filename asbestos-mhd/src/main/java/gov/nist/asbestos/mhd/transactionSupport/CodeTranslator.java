@@ -21,7 +21,7 @@ public class CodeTranslator {
             codes = (Codes) unmarshaller.unmarshal(codesStream);
     }
 
-    CodeTranslator(File codesXmlFile) throws FileNotFoundException, JAXBException {
+    public CodeTranslator(File codesXmlFile) throws FileNotFoundException, JAXBException {
         this(new FileInputStream(codesXmlFile));
     }
 

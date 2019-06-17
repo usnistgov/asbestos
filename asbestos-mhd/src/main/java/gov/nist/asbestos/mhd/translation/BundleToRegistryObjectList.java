@@ -18,7 +18,6 @@ import org.hl7.fhir.r4.model.*;
 import javax.xml.bind.DatatypeConverter;
 import javax.xml.bind.JAXBElement;
 import javax.xml.namespace.QName;
-import java.io.StringWriter;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -67,12 +66,7 @@ public class BundleToRegistryObjectList implements IVal {
     private AssigningAuthorities assigningAuthorities;
     private Map<String, String> documents = new HashMap<>();  // symbolidId -> contentId
     private ResourceMgr rMgr;
-    private CanonicalType bundleProfile;
     private Val val;
-
-    public BundleToRegistryObjectList() {
-        rMgr = new ResourceMgr();
-    }
 
     public PnrWrapper build(Bundle bundle) {
         Objects.requireNonNull(val);
@@ -264,6 +258,7 @@ public class BundleToRegistryObjectList implements IVal {
 
     public ExtrinsicObjectType createExtrinsicObject(ResourceWrapper resource) {
         Objects.requireNonNull(val);
+        Objects.requireNonNull(rMgr);
 
         ExtrinsicObjectType eo = new ExtrinsicObjectType();
         eo.setObjectType("urn:uuid:7edca82f-054d-47f2-a032-9b2a5b5186c1");
@@ -286,14 +281,35 @@ public class BundleToRegistryObjectList implements IVal {
         DocumentReference.DocumentReferenceContentComponent content = dr.getContent().get(0);
         Attachment attachment = content.getAttachment();
 
-        if (resource.getAssignedId() == null)
-            resource.setId(rMgr.allocateSymbolicId());
+        for (Identifier id : dr.getIdentifier()) {
+            if (id.hasValue() && ResourceMgr.isUUID(id.getValue())) {
+                boolean isOfficial = id.hasUse() && id.getUse() == Identifier.IdentifierUse.OFFICIAL;
+                if (!isOfficial)
+                    val.add(new ValE("DocumentReference.identifier is UUID but not labeled as official").asError());
+                else
+                    resource.setAssignedId(id.getValue());
+            }
+        }
 
-        eo.setId(resource.getAssignedId());
+        if (resource.getAssignedId() == null)
+            resource.setAssignedId(rMgr.allocateSymbolicId());
+
+        String entryUUID = resource.getAssignedId();
+        eo.setId(entryUUID);
         eo.setObjectType("urn:uuid:7edca82f-054d-47f2-a032-9b2a5b5186c1");
         eo.setMimeType(content.getAttachment().getContentType());
         if (dr.getDate() != null)
             addSlot(eo, "creationTime", translateDateTime(dr.getDate()));
+        if (dr.hasStatus()) {
+            Enumerations.DocumentReferenceStatus fStatus = dr.getStatus();
+            String status = null;
+            if (fStatus == Enumerations.DocumentReferenceStatus.CURRENT)
+                status = "urn:oasis:names:tc:ebxml-regrep:StatusType:Approved";
+            else if (fStatus == Enumerations.DocumentReferenceStatus.SUPERSEDED)
+                status = "urn:oasis:names:tc:ebxml-regrep:StatusType:Deprecated";
+            if (status != null)
+                eo.setStatus(status);
+        }
 
         if (context != null) {
             Period period = context.getPeriod();
@@ -489,7 +505,8 @@ public class BundleToRegistryObjectList implements IVal {
         Optional<Code> systemCodeOpt = codeTranslator.findCodeByClassificationAndSystem(scheme, coding.getSystem(), coding.getCode());
         if (systemCodeOpt.isPresent()) {
             Code systemCode = systemCodeOpt.get();
-            addClassification(ro, scheme, rMgr.allocateSymbolicId(), classifiedObjectId, coding.getCode(), systemCode.getCodingScheme(), coding.getDisplay());
+            String displayName = coding.getDisplay() == null ? systemCode.getDisplay() : coding.getDisplay();
+            addClassification(ro, scheme, rMgr.allocateSymbolicId(), classifiedObjectId, coding.getCode(), systemCode.getCodingScheme(), displayName);
         } else {
             Optional<gov.nist.asbestos.asbestorCodesJaxb.CodeType> type = codeTranslator.findCodeTypeForScheme(scheme);
             String schemeName = (type.isPresent()) ? type.get().getName() : scheme;
@@ -570,6 +587,8 @@ public class BundleToRegistryObjectList implements IVal {
     @Override
     public void setVal(Val val) {
         this.val = val;
+        if (rMgr != null)
+            rMgr.setVal(val);
     }
 
     public BundleToRegistryObjectList setResourceMgr(ResourceMgr rMgr) {
@@ -588,7 +607,6 @@ public class BundleToRegistryObjectList implements IVal {
     }
 
     public BundleToRegistryObjectList setBundleProfile(CanonicalType bundleProfile) {
-        this.bundleProfile = bundleProfile;
         return this;
     }
 

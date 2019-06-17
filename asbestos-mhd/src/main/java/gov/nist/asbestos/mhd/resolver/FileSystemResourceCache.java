@@ -94,7 +94,7 @@ public class FileSystemResourceCache implements ResourceCache {
                     continue;
                 ResourceWrapper wrapper = readFile(file);
                 String[] parts = file.getName().split("\\.", 2);
-                String id = parts[1];
+                String id = parts[0];
                 wrapper.setUrl(new Ref(base, type, id));
                 all.add(wrapper);
             }

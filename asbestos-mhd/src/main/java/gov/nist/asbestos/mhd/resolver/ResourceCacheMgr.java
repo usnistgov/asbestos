@@ -80,7 +80,7 @@ public class ResourceCacheMgr {
         String systemAndId = parts[1];
         if (!systemAndId.contains("|"))
             throw new Error("Param format (" + systemAndId + ") not supported");
-        String[] sparts = systemAndId.split("|");
+        String[] sparts = systemAndId.split("\\|");
         String system = sparts[0];
         String id = sparts[1];
 

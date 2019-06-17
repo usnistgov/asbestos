@@ -49,10 +49,11 @@ public class Val {
         return false;
     }
 
-    public Val ignore(String msg) {
+    public boolean ignore(String msg) {
+        boolean ignored = false;
         for (ValE e : elements)
-            e.ignore(msg);
-        return this;
+            ignored = ignored || e.ignore(msg);
+        return ignored;
     }
 
 

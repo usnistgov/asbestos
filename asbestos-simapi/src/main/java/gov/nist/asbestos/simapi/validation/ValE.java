@@ -39,13 +39,15 @@ public class ValE {
         return this;
     }
 
-    public ValE ignore(String msg) {
+    boolean ignore(String msg) {
+        boolean ignored = false;
         if (msg.equals(this.msg)) {
             this.type = ValType.Ignored;
-            for (ValE e : ele)
-                e.ignore(msg);
+            ignored = true;
         }
-        return this;
+        for (ValE e : ele)
+            ignored = ignored || e.ignore(msg);
+        return ignored;
     }
 
     public String getMsg() {
