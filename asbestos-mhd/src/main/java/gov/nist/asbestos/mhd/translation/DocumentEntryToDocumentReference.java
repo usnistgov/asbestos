@@ -7,6 +7,7 @@ import gov.nist.asbestos.mhd.transactionSupport.CodeTranslator;
 import gov.nist.asbestos.simapi.validation.Val;
 import gov.nist.asbestos.simapi.validation.ValE;
 import oasis.names.tc.ebxml_regrep.xsd.rim._3.*;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.*;
 
 import java.util.Collections;
@@ -67,17 +68,18 @@ public class DocumentEntryToDocumentReference implements IVal {
                 val.add(new ValE("DocumentEntryToDocumentReference: Do not understand ExternalIdentifier identification scheme " + scheme).asError());
             }
         }
-        int authorCount = 1;
         for (ClassificationType c : eo.getClassification()) {
             String scheme = c.getClassificationScheme();
             if ("urn:uuid:93606bcf-9494-43ec-9b4e-a7748d1a838d".equals(scheme)) {
                 Author author = new Author();
                 author.setVal(val);
-                Practitioner practitioner = author.classificationToPractitioner(c);
-                String id = "author" + authorCount++;
-                practitioner.setId(id);
-                dr.addContained(practitioner);
-                dr.addAuthor(new Reference().setReference("#" + id));
+                List<Resource> contained = author.authorClassificationToContained(c);
+                // Either Practitioner or PractitionerRole
+                Resource resource = contained.get(contained.size() - 1);
+                for (Resource r : contained) {
+                    dr.addContained(r);
+                }
+                dr.addAuthor(new Reference().setReference("#" + resource.getId()));
             } else {
                 XdsCode xdsCode = new XdsCode()
                         .setCodeTranslator(codeTranslator)

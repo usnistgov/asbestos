@@ -373,6 +373,24 @@ public class BundleToRegistryObjectList implements IVal {
                     classificationType.setClassifiedObject(eo.getId());
                     eo.getClassification().add(classificationType);
                 }
+                 else if (contained.isPresent() && contained.get().getResource() instanceof PractitionerRole) {
+                     PractitionerRole practitionerRole = (PractitionerRole) contained.get().getResource();
+                     if (practitionerRole.hasPractitioner()) {
+                         Optional<ResourceWrapper> contained2 = rMgr.resolveReference(containing, new Ref(practitionerRole.getPractitioner()), new ResolverConfig().containedRequired());
+                         if (contained2.isPresent() && contained2.get().getResource() instanceof Practitioner) {
+                             Practitioner practitioner = (Practitioner) contained2.get().getResource();
+                             Author author = new Author();
+                             for (CodeableConcept cc : practitionerRole.getCode()) {
+                                 AuthorRole role = new AuthorRole(cc);
+                                 author.getAuthorRoles().add(role);
+                             }
+                             ClassificationType classificationType = author.practitionerToClassification(practitioner);
+                             classificationType.setClassificationScheme("urn:uuid:93606bcf-9494-43ec-9b4e-a7748d1a838d");
+                             classificationType.setClassifiedObject(eo.getId());
+                             eo.getClassification().add(classificationType);
+                         }
+                     }
+                }
             }
         }
         return eo;

@@ -4,10 +4,8 @@ import gov.nist.asbestos.asbestosProxySupport.Base.IVal;
 import gov.nist.asbestos.simapi.validation.Val;
 import oasis.names.tc.ebxml_regrep.xsd.rim._3.ClassificationType;
 import oasis.names.tc.ebxml_regrep.xsd.rim._3.SlotType1;
-import org.hl7.fhir.r4.model.ContactPoint;
-import org.hl7.fhir.r4.model.HumanName;
-import org.hl7.fhir.r4.model.Identifier;
-import org.hl7.fhir.r4.model.Practitioner;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -61,6 +59,12 @@ public class Author implements IVal {
                 SlotType1 slot = Slot.makeSlot("authorTelecommunication", authorTelecommunication.toString());
                 c.getSlot().add(slot);
             }
+            for (AuthorRole authorRole : authorRoles) {
+                if (authorRole.hasCodeAndSystem()) {
+                    SlotType1 slot = Slot.makeSlot("authorRole", authorRole.getCodeAndSystem());
+                    c.getSlot().add(slot);
+                }
+            }
             c.setNodeRepresentation("");
             c.setObjectType("urn:oasis:names:tc:ebxml-regrep:ObjectType:RegistryObject:Classification");
             return c;
@@ -68,8 +72,11 @@ public class Author implements IVal {
         return null;
     }
 
-    public Practitioner classificationToPractitioner(ClassificationType c) {
+    public List<Resource> authorClassificationToContained(ClassificationType c) {
         Practitioner practitioner = new Practitioner();
+        practitioner.setId(ContainedIdAllocator.newId(Practitioner.class));
+        List<Resource> contained = new ArrayList<>();
+        contained.add(practitioner);
         for (SlotType1 slot : c.getSlot()) {
             String name = slot.getName();
             for (String value  : slot.getValueList().getValue()) {
@@ -80,7 +87,9 @@ public class Author implements IVal {
                     authorInstitutions.add((AuthorInstitution) new AuthorInstitution().setValue(value, val));
                 }
                 else if ("authorRole".equals(name)) {
-                    authorRoles.add((AuthorRole) new AuthorRole().setValue(value, val));
+                    AuthorRole authorRole = new AuthorRole();
+                    authorRole.setCodeAndSystem(value);
+                    authorRoles.add(authorRole);
                 }
                 else if ("authorSpecialty".equals(name)) {
                     authorSpecialtys.add((AuthorSpecialty) new AuthorSpecialty().setValue(value, val));
@@ -89,6 +98,18 @@ public class Author implements IVal {
                     authorTelecommunications.add((AuthorTelecommunication) new AuthorTelecommunication().setValue(value, val));
                 }
             }
+        }
+        if (!authorRoles.isEmpty()) {
+            PractitionerRole practitionerRole = new PractitionerRole();
+            practitionerRole.setId(ContainedIdAllocator.newId(PractitionerRole.class));
+            for (AuthorRole authorRole : authorRoles) {
+                if (authorRole.hasCodeableConcept()) {
+                    CodeableConcept cc = authorRole.getCodeableConcept();
+                    practitionerRole.getCode().add(cc);
+                }
+            }
+            practitionerRole.setPractitioner(new Reference().setReference("#" + practitioner.getId()));
+            contained.add(practitionerRole);
         }
         for (AuthorPerson authorPerson : authorPersons) {
             if (!authorPerson.id.equals("")) {
@@ -114,7 +135,12 @@ public class Author implements IVal {
                 practitioner.addTelecom(contactPoint);
             }
         }
-        return practitioner;
+        assert !contained.isEmpty() && contained.get(0) instanceof Practitioner;
+        return contained;
+    }
+
+    public List<AuthorRole> getAuthorRoles() {
+        return authorRoles;
     }
 
     @Override

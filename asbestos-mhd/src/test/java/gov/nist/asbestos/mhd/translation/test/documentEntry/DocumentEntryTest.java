@@ -445,32 +445,36 @@ class DocumentEntryTest {
     private DocumentReference withAuthorPractitionerRole() {
         DocumentReference documentReference = withOfficialEntryUUID();
 
-        PractitionerRole practitionerRole = new PractitionerRole();
         Practitioner practitioner = new Practitioner();
         practitioner.addName().setFamily("Jones").addGiven("Fred");
-        practitionerRole.setPractitioner()
         practitioner.setId("author1");
-
         documentReference.addContained(practitioner);
-        documentReference.addAuthor(new Reference().setReference("#author1"));
+
+        PractitionerRole practitionerRole = new PractitionerRole();
+        practitionerRole.getCode().add(new CodeableConcept().addCoding(new Coding().setSystem("http://snomed.info/sct").setCode("8724009")));
+        practitionerRole.setId("role1");
+        practitionerRole.setPractitioner(new Reference().setReference("#author1"));
+        documentReference.addContained(practitionerRole);
+
+        documentReference.addAuthor(new Reference().setReference("#role1"));
 
         return documentReference;
     }
 
-    private List<DocumentReference> withAuthorPractitionerAndExpected() {
+    private List<DocumentReference> withAuthorPractitionerRoleAndExpected() {
         List<DocumentReference> x = new ArrayList<>();
-        DocumentReference original = withAuthorPractitioner();
+        DocumentReference original = withAuthorPractitionerRole();
         x.add(original);
 
-        DocumentReference expected = withAuthorPractitioner();
+        DocumentReference expected = withAuthorPractitionerRole();
         expected.getIdentifier().remove(0);  // ID1 not appropriate (was placeholder for ID)
         x.add(expected);
         return x;
     }
 
     @Test
-    void authorPractitioner() throws IOException, JAXBException {
-        List<DocumentReference> x = withAuthorPractitionerAndExpected();
+    void authorPractitionerRole() throws IOException, JAXBException {
+        List<DocumentReference> x = withAuthorPractitionerRoleAndExpected();
         DocumentReference documentReference = x.get(0);
         DocumentReference expected = x.get(1);
 
