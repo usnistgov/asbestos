@@ -3,6 +3,7 @@ package gov.nist.asbestos.mhd.translation;
 
 import gov.nist.asbestos.asbestorCodesJaxb.Code;
 import gov.nist.asbestos.asbestosProxySupport.Base.IVal;
+import gov.nist.asbestos.mhd.exceptions.MetadataAttributeTranslationException;
 import gov.nist.asbestos.mhd.resolver.Ref;
 import gov.nist.asbestos.mhd.resolver.ResolverConfig;
 import gov.nist.asbestos.mhd.resolver.ResourceMgr;
@@ -18,6 +19,7 @@ import org.hl7.fhir.r4.model.*;
 import javax.xml.bind.DatatypeConverter;
 import javax.xml.bind.JAXBElement;
 import javax.xml.namespace.QName;
+import java.text.DateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -360,15 +362,24 @@ public class BundleToRegistryObjectList implements IVal {
             addSubject(eo, resource,  new Ref(dr.getSubject()), CodeTranslator.DE_PID, "XDSDocumentEntry.patientId");
         }
         if (dr.hasAuthor()) {
+            ResourceWrapper containing = new ResourceWrapper();
+            containing.setResource(dr);
             for (Reference reference : dr.getAuthor()) {
-
+                Optional<ResourceWrapper> contained = rMgr.resolveReference(containing, new Ref(reference.getReference()), new ResolverConfig().containedRequired());
+                if (contained.isPresent() && contained.get().getResource() instanceof Practitioner) {
+                    Practitioner practitioner = (Practitioner) contained.get().getResource();
+                    ClassificationType classificationType = new Author().practitionerToClassification(practitioner);
+                    classificationType.setClassificationScheme("urn:uuid:93606bcf-9494-43ec-9b4e-a7748d1a838d");
+                    classificationType.setClassifiedObject(eo.getId());
+                    eo.getClassification().add(classificationType);
+                }
             }
         }
         return eo;
     }
 
     private String translateDateTime(Date date) {
-        return "";
+        return DateTransform.fhirToDtm(date);
     }
 
     public void addName(RegistryObjectType eo, String name) {
@@ -544,6 +555,7 @@ public class BundleToRegistryObjectList implements IVal {
         ct.setObjectType("urn:oasis:names:tc:ebxml-regrep:ObjectType:RegistryObject:Classification");
         ro.getClassification().add(ct);
     }
+
 
 //    private addDocument(MarkupBuilder builder, String drId, String contentId) {
 //        val.add(new Val().msg("Attach Document ${drId}"))

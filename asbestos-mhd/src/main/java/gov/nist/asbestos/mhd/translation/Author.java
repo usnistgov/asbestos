@@ -61,6 +61,8 @@ public class Author implements IVal {
                 SlotType1 slot = Slot.makeSlot("authorTelecommunication", authorTelecommunication.toString());
                 c.getSlot().add(slot);
             }
+            c.setNodeRepresentation("");
+            c.setObjectType("urn:oasis:names:tc:ebxml-regrep:ObjectType:RegistryObject:Classification");
             return c;
         }
         return null;

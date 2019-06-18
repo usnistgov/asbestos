@@ -2,6 +2,8 @@ package gov.nist.asbestos.mhd.translation;
 
 import gov.nist.asbestos.simapi.validation.Val;
 
+import java.util.Objects;
+
 public abstract class AuthorPart {
     String value;
     String[] parts;
@@ -13,6 +15,7 @@ public abstract class AuthorPart {
     }
 
     public AuthorPart setValue(String value, Val val) {
+        Objects.requireNonNull(val);
         this.value = value;
         parse();
         validate(val);

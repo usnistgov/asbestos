@@ -67,10 +67,17 @@ public class DocumentEntryToDocumentReference implements IVal {
                 val.add(new ValE("DocumentEntryToDocumentReference: Do not understand ExternalIdentifier identification scheme " + scheme).asError());
             }
         }
+        int authorCount = 1;
         for (ClassificationType c : eo.getClassification()) {
             String scheme = c.getClassificationScheme();
             if ("urn:uuid:93606bcf-9494-43ec-9b4e-a7748d1a838d".equals(scheme)) {
-                // Author
+                Author author = new Author();
+                author.setVal(val);
+                Practitioner practitioner = author.classificationToPractitioner(c);
+                String id = "author" + authorCount++;
+                practitioner.setId(id);
+                dr.addContained(practitioner);
+                dr.addAuthor(new Reference().setReference("#" + id));
             } else {
                 XdsCode xdsCode = new XdsCode()
                         .setCodeTranslator(codeTranslator)

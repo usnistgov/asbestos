@@ -3,6 +3,8 @@ package gov.nist.asbestos.mhd.translation;
 import gov.nist.asbestos.simapi.validation.Val;
 import gov.nist.asbestos.simapi.validation.ValE;
 
+import java.util.Objects;
+
 class AuthorPerson extends AuthorPart {
     // datatype is XCN
     String id = "";
@@ -14,6 +16,7 @@ class AuthorPerson extends AuthorPart {
 
     @Override
     void validate(Val val) {
+        Objects.requireNonNull(val);
         id = get(1);
         familyName = get(2);
         givenName = get(3);
@@ -23,7 +26,7 @@ class AuthorPerson extends AuthorPart {
 
         if (id == null && familyName == null)
             val.add(new ValE("AuthorPerson identifier or last name must be present.").asError());
-        if (assigningAuthority != null) {
+        if (assigningAuthority != null && !assigningAuthority.equals("")) {
             String[] aparts = assigningAuthority.split("&");
             if (aparts.length != 3) {
                 val.add(new ValE("AssigningAuthority is specified but does not have 3 parts separated by & character").asError());

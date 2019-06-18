@@ -61,7 +61,7 @@ public class Ref {
         uri = build(reference.getReference());
     }
 
-    public boolean isContained() {
+    boolean isContained() {
         return uri.toString().startsWith("#");
     }
 

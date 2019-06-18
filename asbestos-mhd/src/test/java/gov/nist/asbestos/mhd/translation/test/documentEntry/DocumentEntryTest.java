@@ -7,12 +7,14 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import gov.nist.asbestos.asbestosProxySupport.Base.Base;
 import gov.nist.asbestos.mhd.client.FhirClient;
+import gov.nist.asbestos.mhd.exceptions.MetadataAttributeTranslationException;
 import gov.nist.asbestos.mhd.resolver.ResourceCacheMgr;
 import gov.nist.asbestos.mhd.resolver.ResourceMgr;
 import gov.nist.asbestos.mhd.transactionSupport.AssigningAuthorities;
 import gov.nist.asbestos.mhd.transactionSupport.CodeTranslator;
 import gov.nist.asbestos.mhd.transactionSupport.ResourceWrapper;
 import gov.nist.asbestos.mhd.translation.BundleToRegistryObjectList;
+import gov.nist.asbestos.mhd.translation.DateTransform;
 import gov.nist.asbestos.mhd.translation.DocumentEntryToDocumentReference;
 import gov.nist.asbestos.simapi.tk.installation.Installation;
 import gov.nist.asbestos.simapi.validation.Val;
@@ -31,6 +33,7 @@ import java.net.URISyntaxException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -65,7 +68,7 @@ class DocumentEntryTest {
         return Installation.instance().getCodesFile("default");
     }
 
-    void run(DocumentReference documentReference, DocumentReference expected) throws IOException, JAXBException {
+    void run(DocumentReference documentReference, DocumentReference expected, boolean checkForErrors) throws IOException, JAXBException {
         ResourceWrapper resource = new ResourceWrapper(documentReference);
         if (expected == null)
             expected = documentReference;
@@ -103,6 +106,9 @@ class DocumentEntryTest {
         JsonParser jsonParser2 = jsonFactory.createParser(json2);
         JsonNode node2 = objectMapper.readTree(jsonParser2);
 
+        if (checkForErrors && val.hasErrors())
+            fail(ValFactory.toJson(new ValErrors(val)));
+
         assertEquals(node1, node2);
     }
 
@@ -123,7 +129,7 @@ class DocumentEntryTest {
     void emptyDR() throws IOException, JAXBException {
         DocumentReference documentReference = getEmptyDR();
 
-        run(documentReference, null);
+        run(documentReference, null, false);
 
         if (!val.ignore("DocumentReference.masterIdentifier not present - declared by IHE to be [1..1]"))
             fail("Error did not occur");
@@ -147,10 +153,7 @@ class DocumentEntryTest {
     void masterIdentifier() throws IOException, JAXBException {
         DocumentReference documentReference = withMasterIdentifier();
 
-        run(documentReference, null);
-
-        if (val.hasErrors())
-            fail(ValFactory.toJson(new ValErrors(val)));
+        run(documentReference, null, true);
     }
 
     private DocumentReference withMasterIdentifierAndExtension() {
@@ -168,10 +171,7 @@ class DocumentEntryTest {
     void masterIdentifierAndExtension() throws IOException, JAXBException {
         DocumentReference documentReference = withMasterIdentifierAndExtension();
 
-        run(documentReference, null);
-
-        if (val.hasErrors())
-            fail(ValFactory.toJson(new ValErrors(val)));
+        run(documentReference, null, true);
     }
 
     private DocumentReference withUnOfficialEntryUUID() {
@@ -194,7 +194,7 @@ class DocumentEntryTest {
         DocumentReference expected = withUnOfficialEntryUUID();
         expected.getIdentifier().remove(1);  // second (almost official) will not be processed
 
-        run(documentReference, expected);
+        run(documentReference, expected, false);
 
         if (!val.ignore("DocumentReference.identifier is UUID but not labeled as official"))
             fail("Error did not occur");
@@ -223,10 +223,7 @@ class DocumentEntryTest {
         DocumentReference expected = withOfficialEntryUUID();
         expected.getIdentifier().remove(0);  // ID1 not appropriate (was placeholder for ID)
 
-        run(documentReference, expected);
-
-        if (val.hasErrors())
-            fail(ValFactory.toJson(new ValErrors(val)));
+        run(documentReference, expected, true);
     }
 
 
@@ -255,10 +252,8 @@ class DocumentEntryTest {
         DocumentReference documentReference = x.get(0);
         DocumentReference expected = x.get(1);
 
-        run(documentReference, expected);
+        run(documentReference, expected, true);
 
-        if (val.hasErrors())
-            fail(ValFactory.toJson(new ValErrors(val)));
     }
 
     private DocumentReference withTypeCode() {
@@ -290,10 +285,7 @@ class DocumentEntryTest {
         DocumentReference documentReference = x.get(0);
         DocumentReference expected = x.get(1);
 
-        run(documentReference, expected);
-
-        if (val.hasErrors())
-            fail(ValFactory.toJson(new ValErrors(val)));
+        run(documentReference, expected, true);
     }
 
     private DocumentReference withTypeCodeNoDisplay() {
@@ -325,10 +317,7 @@ class DocumentEntryTest {
         DocumentReference documentReference = x.get(0);
         DocumentReference expected = x.get(1);
 
-        run(documentReference, expected);
-
-        if (val.hasErrors())
-            fail(ValFactory.toJson(new ValErrors(val)));
+        run(documentReference, expected, true);
     }
 
     private DocumentReference withClassCode() {
@@ -360,10 +349,7 @@ class DocumentEntryTest {
         DocumentReference documentReference = x.get(0);
         DocumentReference expected = x.get(1);
 
-        run(documentReference, expected);
-
-        if (val.hasErrors())
-            fail(ValFactory.toJson(new ValErrors(val)));
+        run(documentReference, expected, true);
     }
 
     private DocumentReference withPatient() {
@@ -391,9 +377,103 @@ class DocumentEntryTest {
         DocumentReference documentReference = x.get(0);
         DocumentReference expected = x.get(1);
 
-        run(documentReference, expected);
+        run(documentReference, expected, true);
+    }
 
-        if (val.hasErrors())
-            fail(ValFactory.toJson(new ValErrors(val)));
+    private DocumentReference withCreationTime() {
+        DocumentReference documentReference = withOfficialEntryUUID();
+
+        documentReference.setDate(new Date());
+
+        return documentReference;
+    }
+
+    private List<DocumentReference> withCreationTimeAndExpected() throws MetadataAttributeTranslationException {
+        List<DocumentReference> x = new ArrayList<>();
+        DocumentReference original = withCreationTime();
+        x.add(original);
+
+        DocumentReference expected = withCreationTime();
+        expected.setDate(DateTransform.xdsPrecision(original.getDate()));  // DTM format in XDS limits precision - no milli
+        expected.getIdentifier().remove(0);  // ID1 not appropriate (was placeholder for ID)
+        x.add(expected);
+        return x;
+    }
+
+    @Test
+    void creationTime() throws IOException, JAXBException, MetadataAttributeTranslationException {
+        List<DocumentReference> x = withCreationTimeAndExpected();
+        DocumentReference documentReference = x.get(0);
+        DocumentReference expected = x.get(1);
+
+        run(documentReference, expected, true);
+    }
+
+    private DocumentReference withAuthorPractitioner() {
+        DocumentReference documentReference = withOfficialEntryUUID();
+
+        Practitioner practitioner = new Practitioner();
+        practitioner.addName().setFamily("Jones").addGiven("Fred");
+        practitioner.setId("author1");
+
+        documentReference.addContained(practitioner);
+        documentReference.addAuthor(new Reference().setReference("#author1"));
+
+        return documentReference;
+    }
+
+    private List<DocumentReference> withAuthorPractitionerAndExpected() {
+        List<DocumentReference> x = new ArrayList<>();
+        DocumentReference original = withAuthorPractitioner();
+        x.add(original);
+
+        DocumentReference expected = withAuthorPractitioner();
+        expected.getIdentifier().remove(0);  // ID1 not appropriate (was placeholder for ID)
+        x.add(expected);
+        return x;
+    }
+
+    @Test
+    void authorPractitioner() throws IOException, JAXBException {
+        List<DocumentReference> x = withAuthorPractitionerAndExpected();
+        DocumentReference documentReference = x.get(0);
+        DocumentReference expected = x.get(1);
+
+        run(documentReference, expected, true);
+    }
+
+    private DocumentReference withAuthorPractitionerRole() {
+        DocumentReference documentReference = withOfficialEntryUUID();
+
+        PractitionerRole practitionerRole = new PractitionerRole();
+        Practitioner practitioner = new Practitioner();
+        practitioner.addName().setFamily("Jones").addGiven("Fred");
+        practitionerRole.setPractitioner()
+        practitioner.setId("author1");
+
+        documentReference.addContained(practitioner);
+        documentReference.addAuthor(new Reference().setReference("#author1"));
+
+        return documentReference;
+    }
+
+    private List<DocumentReference> withAuthorPractitionerAndExpected() {
+        List<DocumentReference> x = new ArrayList<>();
+        DocumentReference original = withAuthorPractitioner();
+        x.add(original);
+
+        DocumentReference expected = withAuthorPractitioner();
+        expected.getIdentifier().remove(0);  // ID1 not appropriate (was placeholder for ID)
+        x.add(expected);
+        return x;
+    }
+
+    @Test
+    void authorPractitioner() throws IOException, JAXBException {
+        List<DocumentReference> x = withAuthorPractitionerAndExpected();
+        DocumentReference documentReference = x.get(0);
+        DocumentReference expected = x.get(1);
+
+        run(documentReference, expected, true);
     }
 }
