@@ -41,6 +41,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
+// TODO relatesTo (no tests, no impl)
 class DocumentEntryTest {
     private static Val val;
     private static FhirContext fhirContext;
@@ -415,6 +416,39 @@ class DocumentEntryTest {
         run(documentReference, expected, true);
     }
 
+    private DocumentReference withLegalAuthenticator() {
+        DocumentReference documentReference = withOfficialEntryUUID();
+
+        Practitioner practitioner = new Practitioner();
+        practitioner.addName().setFamily("Flintstone").addGiven("Fred");
+        practitioner.setId("#practitioner1");
+
+        documentReference.addContained(practitioner);
+        documentReference.setAuthenticator(new Reference().setReference("#practitioner1"));
+
+        return documentReference;
+    }
+
+    private List<DocumentReference> withLegalAuthenticatorAndExpected() {
+        List<DocumentReference> x = new ArrayList<>();
+        DocumentReference original = withLegalAuthenticator();
+        x.add(original);
+
+        DocumentReference expected = withLegalAuthenticator();
+        expected.getIdentifier().remove(0);  // ID1 not appropriate (was placeholder for ID)
+        x.add(expected);
+        return x;
+    }
+
+    @Test
+    void legalAuthenticator() throws IOException, JAXBException {
+        List<DocumentReference> x = withLegalAuthenticatorAndExpected();
+        DocumentReference documentReference = x.get(0);
+        DocumentReference expected = x.get(1);
+
+        run(documentReference, expected, true);
+    }
+
     private DocumentReference withAuthorPractitioner() {
         DocumentReference documentReference = withOfficialEntryUUID();
 
@@ -596,6 +630,66 @@ class DocumentEntryTest {
     @Test
     void authorPractitionerRole() throws IOException, JAXBException {
         List<DocumentReference> x = withAuthorPractitionerRoleAndExpected();
+        DocumentReference documentReference = x.get(0);
+        DocumentReference expected = x.get(1);
+
+        run(documentReference, expected, true);
+    }
+
+    private DocumentReference withDescription() {
+        DocumentReference documentReference = withOfficialEntryUUID();
+
+        documentReference.setDescription("Hello World!");
+
+        return documentReference;
+    }
+
+    private List<DocumentReference> withDescriptionAndExpected() {
+        List<DocumentReference> x = new ArrayList<>();
+        DocumentReference original = withDescription();
+        x.add(original);
+
+        DocumentReference expected = withDescription();
+        expected.getIdentifier().remove(0);  // ID1 not appropriate (was placeholder for ID)
+        x.add(expected);
+        return x;
+    }
+
+    @Test
+    void description() throws IOException, JAXBException {
+        List<DocumentReference> x = withDescriptionAndExpected();
+        DocumentReference documentReference = x.get(0);
+        DocumentReference expected = x.get(1);
+
+        run(documentReference, expected, true);
+    }
+
+    private DocumentReference withSecurityLabel() {
+        DocumentReference documentReference = withOfficialEntryUUID();
+
+        documentReference.addSecurityLabel(new CodeableConcept()
+                .addCoding(new Coding()
+                        .setCode("L")
+                        .setSystem("http://terminology.hl7.org/CodeSystem/v3-Confidentiality")
+                        .setDisplay("low")));
+
+        return documentReference;
+    }
+
+    private List<DocumentReference> withSecurityLabelAndExpected() {
+        List<DocumentReference> x = new ArrayList<>();
+        DocumentReference original = withSecurityLabel();
+        x.add(original);
+
+        DocumentReference expected = withSecurityLabel();
+        expected.getIdentifier().remove(0);  // ID1 not appropriate (was placeholder for ID)
+        x.add(expected);
+        return x;
+    }
+
+    @Test
+    void securityLabel() throws IOException, JAXBException {
+        List<DocumentReference> x = withSecurityLabelAndExpected();
         DocumentReference documentReference = x.get(0);
         DocumentReference expected = x.get(1);
 

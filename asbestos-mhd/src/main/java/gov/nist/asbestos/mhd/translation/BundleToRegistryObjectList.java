@@ -370,46 +370,77 @@ public class BundleToRegistryObjectList implements IVal {
                 Optional<ResourceWrapper> contained = rMgr.resolveReference(containing, new Ref(reference.getReference()), new ResolverConfig().containedRequired());
                 if (contained.isPresent()) {
                     IBaseResource resource1 = contained.get().getResource();
-                    if (resource1 instanceof Practitioner) {
-                        Practitioner practitioner = (Practitioner) resource1;
-                        ClassificationType classificationType = new Author().practitionerToClassification(practitioner);
-                        classificationType.setClassificationScheme("urn:uuid:93606bcf-9494-43ec-9b4e-a7748d1a838d");
+                    ClassificationType classificationType = classificationFromAuthor(resource1, containing);
+                    if (classificationType != null) {
                         classificationType.setClassifiedObject(eo.getId());
                         eo.getClassification().add(classificationType);
-                    } else if (resource1 instanceof PractitionerRole) {
-                        PractitionerRole practitionerRole = (PractitionerRole) resource1;
-                        if (practitionerRole.hasPractitioner()) {
-                            Optional<ResourceWrapper> contained2 = rMgr.resolveReference(containing, new Ref(practitionerRole.getPractitioner()), new ResolverConfig().containedRequired());
-                            if (contained2.isPresent() && contained2.get().getResource() instanceof Practitioner) {
-                                Practitioner practitioner = (Practitioner) contained2.get().getResource();
-                                Author author = new Author();
-                                for (CodeableConcept cc : practitionerRole.getCode()) {
-                                    AuthorRole role = new AuthorRole(cc);
-                                    author.getAuthorRoles().add(role);
-                                }
-                                ClassificationType classificationType = author.practitionerToClassification(practitioner);
-                                classificationType.setClassificationScheme("urn:uuid:93606bcf-9494-43ec-9b4e-a7748d1a838d");
-                                classificationType.setClassifiedObject(eo.getId());
-                                eo.getClassification().add(classificationType);
+                    }
+                }
+            }
+        }
+        if (dr.hasAuthenticator()) {
+            ResourceWrapper containing = new ResourceWrapper();
+            containing.setResource(dr);
+            Reference reference = dr.getAuthenticator();
+            Optional<ResourceWrapper> contained = rMgr.resolveReference(containing, new Ref(reference.getReference()), new ResolverConfig().containedRequired());
+            if (contained.isPresent()) {
+                IBaseResource resource1 = contained.get().getResource();
+                ClassificationType classificationType = classificationFromAuthor(resource1, containing);
+                if (classificationType != null) {
+                    for (SlotType1 slot1 : classificationType.getSlot()) {
+                        if ("authorPerson".equals(slot1.getName())) {
+                            if (!slot1.getValueList().getValue().isEmpty()) {
+                                String auth = slot1.getValueList().getValue().get(0);
+                                SlotType1 legalAuthenticator = new SlotType1();
+                                legalAuthenticator.setName("legalAuthenticator");
+                                ValueListType valueListType = new ValueListType();
+                                legalAuthenticator.setValueList(valueListType);
+                                valueListType.getValue().add(auth);
+                                eo.getSlot().add(legalAuthenticator);
                             }
                         }
-                    } else if (resource1 instanceof Organization) {
-                        Organization organization = (Organization) resource1;
-                        Author author = new Author();
-                        author.setVal(val);
-                        ClassificationType classificationType = author.organizationToClassification(organization);
-                        if (classificationType != null) {
-                            classificationType.setClassificationScheme("urn:uuid:93606bcf-9494-43ec-9b4e-a7748d1a838d");
-                            classificationType.setClassifiedObject(eo.getId());
-                            eo.getClassification().add(classificationType);
-                        }
-                    } else {
-                        val.add(new ValE("Cannot process author of type " + resource1.getClass().getSimpleName()).asWarning());
                     }
                 }
             }
         }
         return eo;
+    }
+
+    private ClassificationType classificationFromAuthor(IBaseResource resource1, ResourceWrapper containing) {
+        if (resource1 instanceof Practitioner) {
+            Practitioner practitioner = (Practitioner) resource1;
+            ClassificationType classificationType = new Author().practitionerToClassification(practitioner);
+            classificationType.setClassificationScheme("urn:uuid:93606bcf-9494-43ec-9b4e-a7748d1a838d");
+            return classificationType;
+        } else if (resource1 instanceof PractitionerRole) {
+            PractitionerRole practitionerRole = (PractitionerRole) resource1;
+            if (practitionerRole.hasPractitioner()) {
+                Optional<ResourceWrapper> contained2 = rMgr.resolveReference(containing, new Ref(practitionerRole.getPractitioner()), new ResolverConfig().containedRequired());
+                if (contained2.isPresent() && contained2.get().getResource() instanceof Practitioner) {
+                    Practitioner practitioner = (Practitioner) contained2.get().getResource();
+                    Author author = new Author();
+                    for (CodeableConcept cc : practitionerRole.getCode()) {
+                        AuthorRole role = new AuthorRole(cc);
+                        author.getAuthorRoles().add(role);
+                    }
+                    ClassificationType classificationType = author.practitionerToClassification(practitioner);
+                    classificationType.setClassificationScheme("urn:uuid:93606bcf-9494-43ec-9b4e-a7748d1a838d");
+                    return classificationType;
+                }
+            }
+        } else if (resource1 instanceof Organization) {
+            Organization organization = (Organization) resource1;
+            Author author = new Author();
+            author.setVal(val);
+            ClassificationType classificationType = author.organizationToClassification(organization);
+            if (classificationType != null) {
+                classificationType.setClassificationScheme("urn:uuid:93606bcf-9494-43ec-9b4e-a7748d1a838d");
+                return classificationType;
+            }
+        } else {
+            val.add(new ValE("Cannot process author of type " + resource1.getClass().getSimpleName()).asWarning());
+        }
+        return null;
     }
 
     private String translateDateTime(Date date) {

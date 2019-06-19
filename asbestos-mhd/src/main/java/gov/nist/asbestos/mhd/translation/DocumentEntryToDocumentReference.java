@@ -168,6 +168,25 @@ public class DocumentEntryToDocumentReference implements IVal {
                 } else if ("sourcePatientInfo".equals(name)) {
 
                 } else if ("legalAuthenticator".equals(name)) {
+                    String auth = value1;
+                    AuthorPerson authorPerson = new AuthorPerson();
+                    authorPerson.setValue(value1, val);
+                    authorPerson.parse();
+                    String lastName = authorPerson.get(2);
+                    if (lastName != null && !lastName.equals("")) {
+                        String firstName = authorPerson.get(3);
+                        HumanName humanName = new HumanName();
+                        humanName.setFamily(lastName);
+                        if (firstName != null && !firstName.equals("")) {
+                            humanName.addGiven(firstName);
+                        }
+                        Practitioner practitioner = new Practitioner();
+                        practitioner.addName(humanName);
+                        String id = ContainedIdAllocator.newId(Practitioner.class);
+                        practitioner.setId(id);
+                        dr.addContained(practitioner);
+                        dr.setAuthenticator(new Reference().setReference(id));
+                    }
 
                 } else if ("referenceIdList".equals(name)) {
 
