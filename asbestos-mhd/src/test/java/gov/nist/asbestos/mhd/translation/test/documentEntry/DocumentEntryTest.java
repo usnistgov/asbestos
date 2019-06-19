@@ -417,7 +417,7 @@ class DocumentEntryTest {
 
         Practitioner practitioner = new Practitioner();
         practitioner.addName().setFamily("Jones").addGiven("Fred");
-        practitioner.setId("practitioner1");
+        practitioner.setId("#practitioner1");
 
         documentReference.addContained(practitioner);
         documentReference.addAuthor(new Reference().setReference("#practitioner1"));
@@ -450,12 +450,12 @@ class DocumentEntryTest {
 
         Practitioner practitioner = new Practitioner();
         practitioner.addName().setFamily("Jones").addGiven("Fred");
-        practitioner.setId("practitioner1");
+        practitioner.setId("#practitioner1");
         documentReference.addContained(practitioner);
 
         PractitionerRole practitionerRole = new PractitionerRole();
         practitionerRole.getCode().add(new CodeableConcept().addCoding(new Coding().setSystem("http://snomed.info/sct").setCode("8724009")));
-        practitionerRole.setId("practitionerrole1");
+        practitionerRole.setId("#practitionerrole1");
         practitionerRole.setPractitioner(new Reference().setReference("#practitioner1"));
         documentReference.addContained(practitionerRole);
 

@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import gov.nist.asbestos.asbestosProxySupport.Base.Base;
 import gov.nist.asbestos.mhd.translation.Author;
+import gov.nist.asbestos.mhd.translation.ContainedIdAllocator;
 import gov.nist.asbestos.simapi.validation.Val;
 import oasis.names.tc.ebxml_regrep.xsd.rim._3.ClassificationType;
 import org.hl7.fhir.r4.model.ContactPoint;
@@ -87,6 +88,7 @@ class AuthorTest {
         contactPoint.setValue("bob@go.com");
         contactPoint.setSystem(ContactPoint.ContactPointSystem.EMAIL);
         practitioner1.addTelecom(contactPoint);
+        practitioner1.setId("#practitioner1");
 
         Author author = new Author();
         author.setVal(val);
@@ -94,6 +96,7 @@ class AuthorTest {
         ClassificationType c = author.practitionerToClassification(practitioner1);
         Author author2 = new Author();
         author2.setVal(val);
+        ContainedIdAllocator.reset();
         Practitioner practitioner2 = (Practitioner) author2.authorClassificationToContained(c).get(0);
 
         String json1 = fhirContext.newJsonParser().encodeResourceToString(practitioner1);

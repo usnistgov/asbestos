@@ -79,7 +79,7 @@ public class DocumentEntryToDocumentReference implements IVal {
                 for (Resource r : contained) {
                     dr.addContained(r);
                 }
-                dr.addAuthor(new Reference().setReference("#" + resource.getId()));
+                dr.addAuthor(new Reference().setReference(resource.getId()));
             } else {
                 XdsCode xdsCode = new XdsCode()
                         .setCodeTranslator(codeTranslator)

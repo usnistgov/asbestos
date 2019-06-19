@@ -108,7 +108,7 @@ public class Author implements IVal {
                     practitionerRole.getCode().add(cc);
                 }
             }
-            practitionerRole.setPractitioner(new Reference().setReference("#" + practitioner.getId()));
+            practitionerRole.setPractitioner(new Reference().setReference(practitioner.getId()));
             contained.add(practitionerRole);
         }
         for (AuthorPerson authorPerson : authorPersons) {
