@@ -99,7 +99,7 @@ public class ResourceMgr implements IVal {
         String ref = refUrl.toString();
         if (ref == null || !ref.startsWith("#"))
             return null;
-        //ref = ref.substring(1);
+        ref = ref.substring(1);
         if (resource.getResource() instanceof DomainResource) {
             DomainResource res = (DomainResource) resource.getResource();
             for (Resource r : res.getContained()) {

@@ -103,7 +103,7 @@ public class Author implements IVal {
             PractitionerRole practitionerRole = new PractitionerRole();
             practitionerRole.setId(ContainedIdAllocator.newId(PractitionerRole.class));
             for (AuthorRole authorRole : authorRoles) {
-                if (authorRole.hasCodeableConcept()) {
+                if (authorRole.hasCodeableConcept() || authorRole.hasCodeAndSystem()) {
                     CodeableConcept cc = authorRole.getCodeableConcept();
                     practitionerRole.getCode().add(cc);
                 }

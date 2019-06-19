@@ -11,6 +11,10 @@ public class ContainedIdAllocator {
             indexMap.put(clas, 1);
         int index = indexMap.get(clas);
         indexMap.put(clas, index+1);
-        return clas.getSimpleName() + index;
+        return clas.getSimpleName().toLowerCase() + index;
+    }
+
+    public static void reset() {
+        indexMap.clear();
     }
 }

@@ -14,6 +14,7 @@ import gov.nist.asbestos.mhd.transactionSupport.AssigningAuthorities;
 import gov.nist.asbestos.mhd.transactionSupport.CodeTranslator;
 import gov.nist.asbestos.mhd.transactionSupport.ResourceWrapper;
 import gov.nist.asbestos.mhd.translation.BundleToRegistryObjectList;
+import gov.nist.asbestos.mhd.translation.ContainedIdAllocator;
 import gov.nist.asbestos.mhd.translation.DateTransform;
 import gov.nist.asbestos.mhd.translation.DocumentEntryToDocumentReference;
 import gov.nist.asbestos.simapi.tk.installation.Installation;
@@ -93,6 +94,7 @@ class DocumentEntryTest {
         rMgr = new ResourceMgr();
         rMgr.setVal(val);
         rMgr.setFhirClient(fhirClient);
+        ContainedIdAllocator.reset();
 
         ExtrinsicObjectType extrinsicObjectType = bundleToRegistryObjectList.createExtrinsicObject(resource);
 
@@ -100,6 +102,7 @@ class DocumentEntryTest {
         documentEntryToDocumentReference.setVal(val);
         documentEntryToDocumentReference.setResourceMgr(rMgr);
         documentEntryToDocumentReference.setCodeTranslator(codeTranslator);
+        ContainedIdAllocator.reset();
         DocumentReference documentReference1 = documentEntryToDocumentReference.getDocumentReference(extrinsicObjectType);
 
         String json2 = fhirContext.newJsonParser().encodeResourceToString(documentReference1);
@@ -414,10 +417,10 @@ class DocumentEntryTest {
 
         Practitioner practitioner = new Practitioner();
         practitioner.addName().setFamily("Jones").addGiven("Fred");
-        practitioner.setId("author1");
+        practitioner.setId("practitioner1");
 
         documentReference.addContained(practitioner);
-        documentReference.addAuthor(new Reference().setReference("#author1"));
+        documentReference.addAuthor(new Reference().setReference("#practitioner1"));
 
         return documentReference;
     }
@@ -447,16 +450,16 @@ class DocumentEntryTest {
 
         Practitioner practitioner = new Practitioner();
         practitioner.addName().setFamily("Jones").addGiven("Fred");
-        practitioner.setId("author1");
+        practitioner.setId("practitioner1");
         documentReference.addContained(practitioner);
 
         PractitionerRole practitionerRole = new PractitionerRole();
         practitionerRole.getCode().add(new CodeableConcept().addCoding(new Coding().setSystem("http://snomed.info/sct").setCode("8724009")));
-        practitionerRole.setId("role1");
-        practitionerRole.setPractitioner(new Reference().setReference("#author1"));
+        practitionerRole.setId("practitionerrole1");
+        practitionerRole.setPractitioner(new Reference().setReference("#practitioner1"));
         documentReference.addContained(practitionerRole);
 
-        documentReference.addAuthor(new Reference().setReference("#role1"));
+        documentReference.addAuthor(new Reference().setReference("#practitionerrole1"));
 
         return documentReference;
     }

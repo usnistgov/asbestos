@@ -34,7 +34,8 @@ class AuthorRole extends AuthorPart {
         if (hasCodeAndSystem()) {
             if (codeSystemId.equals(SNOMED_OID))
                 cc = new CodeableConcept().addCoding(new Coding().setCode(code).setSystem(SNOMED_URL));
-            cc = new CodeableConcept().addCoding(new Coding().setDisplay(codeSystemId + "|" + code));
+            else
+                cc = new CodeableConcept().addCoding(new Coding().setDisplay(codeSystemId + "|" + code));
         }
         return cc;
     }
@@ -54,7 +55,7 @@ class AuthorRole extends AuthorPart {
     }
 
     public void setCodeAndSystem(String codeAndSystem) {
-        String[] parts = codeAndSystem.split("^");
+        String[] parts = codeAndSystem.split("\\^");
         if (parts.length == 4) {
             code = parts[0];
             String[] parts2 = parts[3].split("&");
