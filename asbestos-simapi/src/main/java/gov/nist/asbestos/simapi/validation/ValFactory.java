@@ -21,4 +21,13 @@ public class ValFactory {
             throw new Error(e);
         }
     }
+
+    public static String toJson(ValWarnings val) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(val);
+        } catch (Exception e) {
+            throw new Error(e);
+        }
+    }
 }

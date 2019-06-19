@@ -74,12 +74,32 @@ public class DocumentEntryToDocumentReference implements IVal {
                 Author author = new Author();
                 author.setVal(val);
                 List<Resource> contained = author.authorClassificationToContained(c);
-                // Either Practitioner or PractitionerRole
-                Resource resource = contained.get(contained.size() - 1);
+                // Either Practitioner or PractitionerRole or Organization
                 for (Resource r : contained) {
                     dr.addContained(r);
                 }
-                dr.addAuthor(new Reference().setReference(resource.getId()));
+                // if Practitioner AND PractitionerRole, only add PractitionerRole as author
+                Practitioner practitioner = null;
+                PractitionerRole practitionerRole = null;
+                Organization organization = null;
+                for (Resource r : contained) {
+                    if (r instanceof PractitionerRole)
+                        practitionerRole = (PractitionerRole) r;
+                    if (r instanceof Practitioner)
+                        practitioner = (Practitioner) r;
+                    if (r instanceof Organization)
+                        organization = (Organization) r;
+                }
+                Resource resource = null;
+                // practitioner and organization should not come together
+                if (practitionerRole != null)
+                    resource = practitionerRole;
+                else if (practitioner != null)
+                    resource = practitioner;
+                else if (organization != null)
+                    resource = organization;
+                if (resource != null)
+                    dr.addAuthor(new Reference().setReference(resource.getId()));
             } else {
                 XdsCode xdsCode = new XdsCode()
                         .setCodeTranslator(codeTranslator)

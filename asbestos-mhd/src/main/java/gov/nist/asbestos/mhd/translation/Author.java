@@ -1,7 +1,9 @@
 package gov.nist.asbestos.mhd.translation;
 
+import com.sun.org.apache.xpath.internal.operations.Or;
 import gov.nist.asbestos.asbestosProxySupport.Base.IVal;
 import gov.nist.asbestos.simapi.validation.Val;
+import gov.nist.asbestos.simapi.validation.ValE;
 import oasis.names.tc.ebxml_regrep.xsd.rim._3.ClassificationType;
 import oasis.names.tc.ebxml_regrep.xsd.rim._3.SlotType1;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -9,6 +11,7 @@ import org.hl7.fhir.r4.model.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class Author implements IVal {
     private Val val = null;
@@ -18,7 +21,27 @@ public class Author implements IVal {
     private List<AuthorSpecialty> authorSpecialtys = new ArrayList<>(); // zero or more
     private List<AuthorTelecommunication> authorTelecommunications = new ArrayList<>(); // zero or more
 
+    public ClassificationType organizationToClassification(Organization organization) {
+        Objects.requireNonNull(val);
+        Objects.requireNonNull(organization);
+        if (organization.hasName()) {
+            AuthorInstitution authorInstitution = new AuthorInstitution();
+            authorInstitution.setValue(organization.getName(), val);
+            authorInstitutions.add(authorInstitution);
+            ClassificationType c = new ClassificationType();
+            c.setNodeRepresentation("");
+            c.setObjectType("urn:oasis:names:tc:ebxml-regrep:ObjectType:RegistryObject:Classification");
+            SlotType1 slot = Slot.makeSlot("authorInstitution", authorInstitution.toString());
+            c.getSlot().add(slot);
+            return c;
+        } else {
+            val.add(new ValE("Cannot translate Organization - no name component").asWarning());
+        }
+        return null;
+    }
+
     public ClassificationType practitionerToClassification(Practitioner practitioner) {
+        Objects.requireNonNull(practitioner);
         if (practitioner.hasName()) {
             for (HumanName humanName : practitioner.getName()) {
                 AuthorPerson authorPerson = new AuthorPerson();
@@ -73,10 +96,9 @@ public class Author implements IVal {
     }
 
     public List<Resource> authorClassificationToContained(ClassificationType c) {
-        Practitioner practitioner = new Practitioner();
-        practitioner.setId(ContainedIdAllocator.newId(Practitioner.class));
+        Practitioner practitioner = null; //new Practitioner();
+        Organization organization = null;
         List<Resource> contained = new ArrayList<>();
-        contained.add(practitioner);
         for (SlotType1 slot : c.getSlot()) {
             String name = slot.getName();
             for (String value  : slot.getValueList().getValue()) {
@@ -99,7 +121,43 @@ public class Author implements IVal {
                 }
             }
         }
+        for (AuthorPerson authorPerson : authorPersons) {  // can only be singular
+            if (!authorPerson.id.equals("")) {
+                if (practitioner == null) {
+                    practitioner = new Practitioner();
+                    practitioner.setId(ContainedIdAllocator.newId(Practitioner.class));
+                    contained.add(practitioner);
+                }
+                Identifier identifier = new Identifier();
+                identifier.setValue(authorPerson.id);
+                practitioner.addIdentifier(identifier);
+            }
+            if (!authorPerson.familyName.equals("")) {
+                if (practitioner == null) {
+                    practitioner = new Practitioner();
+                    practitioner.setId(ContainedIdAllocator.newId(Practitioner.class));
+                    contained.add(practitioner);
+                }
+                HumanName humanName = new HumanName();
+                humanName.setFamily(authorPerson.familyName);
+                if (authorPerson.givenName != null)
+                    humanName.addGiven(authorPerson.givenName);
+                practitioner.addName(humanName);
+            }
+        }
+        if (!authorInstitutions.isEmpty()) {
+            organization = new Organization();
+            String name = authorInstitutions.get(0).getOrgName();
+            organization.setName(name);
+            organization.setId(ContainedIdAllocator.newId(Organization.class));
+            contained.add(organization);
+        }
         if (!authorRoles.isEmpty()) {
+            if (practitioner == null) {
+                practitioner = new Practitioner();
+                practitioner.setId(ContainedIdAllocator.newId(Practitioner.class));
+                contained.add(practitioner);
+            }
             PractitionerRole practitionerRole = new PractitionerRole();
             practitionerRole.setId(ContainedIdAllocator.newId(PractitionerRole.class));
             for (AuthorRole authorRole : authorRoles) {
@@ -111,31 +169,17 @@ public class Author implements IVal {
             practitionerRole.setPractitioner(new Reference().setReference(practitioner.getId()));
             contained.add(practitionerRole);
         }
-        for (AuthorPerson authorPerson : authorPersons) {
-            if (!authorPerson.id.equals("")) {
-                Identifier identifier = new Identifier();
-                identifier.setValue(authorPerson.id);
-                practitioner.addIdentifier(identifier);
-            }
-        }
-        for (AuthorPerson authorPerson : authorPersons) {
-            if (!authorPerson.familyName.equals("")) {
-                HumanName humanName = new HumanName();
-                humanName.setFamily(authorPerson.familyName);
-                if (authorPerson.givenName != null)
-                    humanName.addGiven(authorPerson.givenName);
-                practitioner.addName(humanName);
-            }
-        }
         for (AuthorTelecommunication authorTelecommunication : authorTelecommunications) {
             if (!authorTelecommunication.telecomAddr.equals("")) {
                 ContactPoint contactPoint = new ContactPoint();
                 contactPoint.setSystem(ContactPoint.ContactPointSystem.EMAIL);
                 contactPoint.setValue(authorTelecommunication.telecomAddr);
-                practitioner.addTelecom(contactPoint);
+                if (practitioner != null)
+                    practitioner.addTelecom(contactPoint);
+                else if (organization != null)
+                    organization.addTelecom(contactPoint);
             }
         }
-        assert !contained.isEmpty() && contained.get(0) instanceof Practitioner;
         return contained;
     }
 

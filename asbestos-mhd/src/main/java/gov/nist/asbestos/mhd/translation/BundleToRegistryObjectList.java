@@ -14,6 +14,7 @@ import gov.nist.asbestos.mhd.transactionSupport.ResourceWrapper;
 import gov.nist.asbestos.simapi.validation.Val;
 import gov.nist.asbestos.simapi.validation.ValE;
 import oasis.names.tc.ebxml_regrep.xsd.rim._3.*;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.*;
 
 import javax.xml.bind.DatatypeConverter;
@@ -362,34 +363,49 @@ public class BundleToRegistryObjectList implements IVal {
             addSubject(eo, resource,  new Ref(dr.getSubject()), CodeTranslator.DE_PID, "XDSDocumentEntry.patientId");
         }
         if (dr.hasAuthor()) {
+            // TODO all author types may have a telecom - make sure it gets added
             ResourceWrapper containing = new ResourceWrapper();
             containing.setResource(dr);
             for (Reference reference : dr.getAuthor()) {
                 Optional<ResourceWrapper> contained = rMgr.resolveReference(containing, new Ref(reference.getReference()), new ResolverConfig().containedRequired());
-                if (contained.isPresent() && contained.get().getResource() instanceof Practitioner) {
-                    Practitioner practitioner = (Practitioner) contained.get().getResource();
-                    ClassificationType classificationType = new Author().practitionerToClassification(practitioner);
-                    classificationType.setClassificationScheme("urn:uuid:93606bcf-9494-43ec-9b4e-a7748d1a838d");
-                    classificationType.setClassifiedObject(eo.getId());
-                    eo.getClassification().add(classificationType);
-                }
-                 else if (contained.isPresent() && contained.get().getResource() instanceof PractitionerRole) {
-                     PractitionerRole practitionerRole = (PractitionerRole) contained.get().getResource();
-                     if (practitionerRole.hasPractitioner()) {
-                         Optional<ResourceWrapper> contained2 = rMgr.resolveReference(containing, new Ref(practitionerRole.getPractitioner()), new ResolverConfig().containedRequired());
-                         if (contained2.isPresent() && contained2.get().getResource() instanceof Practitioner) {
-                             Practitioner practitioner = (Practitioner) contained2.get().getResource();
-                             Author author = new Author();
-                             for (CodeableConcept cc : practitionerRole.getCode()) {
-                                 AuthorRole role = new AuthorRole(cc);
-                                 author.getAuthorRoles().add(role);
-                             }
-                             ClassificationType classificationType = author.practitionerToClassification(practitioner);
-                             classificationType.setClassificationScheme("urn:uuid:93606bcf-9494-43ec-9b4e-a7748d1a838d");
-                             classificationType.setClassifiedObject(eo.getId());
-                             eo.getClassification().add(classificationType);
-                         }
-                     }
+                if (contained.isPresent()) {
+                    IBaseResource resource1 = contained.get().getResource();
+                    if (resource1 instanceof Practitioner) {
+                        Practitioner practitioner = (Practitioner) resource1;
+                        ClassificationType classificationType = new Author().practitionerToClassification(practitioner);
+                        classificationType.setClassificationScheme("urn:uuid:93606bcf-9494-43ec-9b4e-a7748d1a838d");
+                        classificationType.setClassifiedObject(eo.getId());
+                        eo.getClassification().add(classificationType);
+                    } else if (resource1 instanceof PractitionerRole) {
+                        PractitionerRole practitionerRole = (PractitionerRole) resource1;
+                        if (practitionerRole.hasPractitioner()) {
+                            Optional<ResourceWrapper> contained2 = rMgr.resolveReference(containing, new Ref(practitionerRole.getPractitioner()), new ResolverConfig().containedRequired());
+                            if (contained2.isPresent() && contained2.get().getResource() instanceof Practitioner) {
+                                Practitioner practitioner = (Practitioner) contained2.get().getResource();
+                                Author author = new Author();
+                                for (CodeableConcept cc : practitionerRole.getCode()) {
+                                    AuthorRole role = new AuthorRole(cc);
+                                    author.getAuthorRoles().add(role);
+                                }
+                                ClassificationType classificationType = author.practitionerToClassification(practitioner);
+                                classificationType.setClassificationScheme("urn:uuid:93606bcf-9494-43ec-9b4e-a7748d1a838d");
+                                classificationType.setClassifiedObject(eo.getId());
+                                eo.getClassification().add(classificationType);
+                            }
+                        }
+                    } else if (resource1 instanceof Organization) {
+                        Organization organization = (Organization) resource1;
+                        Author author = new Author();
+                        author.setVal(val);
+                        ClassificationType classificationType = author.organizationToClassification(organization);
+                        if (classificationType != null) {
+                            classificationType.setClassificationScheme("urn:uuid:93606bcf-9494-43ec-9b4e-a7748d1a838d");
+                            classificationType.setClassifiedObject(eo.getId());
+                            eo.getClassification().add(classificationType);
+                        }
+                    } else {
+                        val.add(new ValE("Cannot process author of type " + resource1.getClass().getSimpleName()).asWarning());
+                    }
                 }
             }
         }

@@ -21,4 +21,12 @@ class AuthorInstitution extends AuthorPart {
 
         // TODO validate orgId and higher indexes not present
     }
+
+    public String getOrgName() {
+        return orgName;
+    }
+
+    public String toString() {
+        return orgName;
+    }
 }

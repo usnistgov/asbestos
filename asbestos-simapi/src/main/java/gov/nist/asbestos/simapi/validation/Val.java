@@ -49,6 +49,14 @@ public class Val {
         return false;
     }
 
+    public boolean hasWarnings() {
+        for (ValE e : elements) {
+            if (e.getType().equals(ValType.Warn))
+                return true;
+        }
+        return false;
+    }
+
     public boolean ignore(String msg) {
         boolean ignored = false;
         for (ValE e : elements)

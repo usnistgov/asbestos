@@ -21,6 +21,7 @@ import gov.nist.asbestos.simapi.tk.installation.Installation;
 import gov.nist.asbestos.simapi.validation.Val;
 import gov.nist.asbestos.simapi.validation.ValErrors;
 import gov.nist.asbestos.simapi.validation.ValFactory;
+import gov.nist.asbestos.simapi.validation.ValWarnings;
 import oasis.names.tc.ebxml_regrep.xsd.rim._3.ExtrinsicObjectType;
 import org.hl7.fhir.r4.model.*;
 import org.junit.jupiter.api.BeforeAll;
@@ -111,6 +112,8 @@ class DocumentEntryTest {
 
         if (checkForErrors && val.hasErrors())
             fail(ValFactory.toJson(new ValErrors(val)));
+        if (checkForErrors && val.hasWarnings())
+            fail(ValFactory.toJson(new ValWarnings(val)));
 
         assertEquals(node1, node2);
     }
@@ -444,6 +447,121 @@ class DocumentEntryTest {
 
         run(documentReference, expected, true);
     }
+
+    private DocumentReference withAuthorOrganization() {
+        DocumentReference documentReference = withOfficialEntryUUID();
+
+        Organization organization = new Organization();
+        organization.setName("Wall Street");
+        ContactPoint contactPoint = new ContactPoint();
+        contactPoint.setSystem(ContactPoint.ContactPointSystem.EMAIL);
+        contactPoint.setValue("444-789-6543");
+        organization.setId("#organization1");
+
+        documentReference.addContained(organization);
+        documentReference.addAuthor(new Reference().setReference("#organization1"));
+
+        return documentReference;
+    }
+
+    private List<DocumentReference> withAuthorOrganizationAndExpected() {
+        List<DocumentReference> x = new ArrayList<>();
+        DocumentReference original = withAuthorOrganization();
+        x.add(original);
+
+        DocumentReference expected = withAuthorOrganization();
+        expected.getIdentifier().remove(0);  // ID1 not appropriate (was placeholder for ID)
+        x.add(expected);
+        return x;
+    }
+
+    @Test
+    void authorOrganization() throws IOException, JAXBException {
+        List<DocumentReference> x = withAuthorOrganizationAndExpected();
+        DocumentReference documentReference = x.get(0);
+        DocumentReference expected = x.get(1);
+
+        run(documentReference, expected, true);
+    }
+
+
+
+    private DocumentReference with2AuthorPractitioner() {
+        DocumentReference documentReference = withOfficialEntryUUID();
+
+        Practitioner practitioner = new Practitioner();
+        practitioner.addName().setFamily("Flintstone").addGiven("Fred");
+        practitioner.setId("#practitioner1");
+
+        Practitioner practitioner2 = new Practitioner();
+        practitioner2.addName().setFamily("Rubble").addGiven("Barney");
+        practitioner2.setId("#practitioner2");
+
+        documentReference.addContained(practitioner);
+        documentReference.addContained(practitioner2);
+        documentReference.addAuthor(new Reference().setReference("#practitioner1"));
+        documentReference.addAuthor(new Reference().setReference("#practitioner2"));
+
+        return documentReference;
+    }
+
+    private List<DocumentReference> with2AuthorPractitionerAndExpected() {
+        List<DocumentReference> x = new ArrayList<>();
+        DocumentReference original = with2AuthorPractitioner();
+        x.add(original);
+
+        DocumentReference expected = with2AuthorPractitioner();
+        expected.getIdentifier().remove(0);  // ID1 not appropriate (was placeholder for ID)
+        x.add(expected);
+        return x;
+    }
+
+    @Test
+    void author2Practitioner() throws IOException, JAXBException {
+        List<DocumentReference> x = with2AuthorPractitionerAndExpected();
+        DocumentReference documentReference = x.get(0);
+        DocumentReference expected = x.get(1);
+
+        run(documentReference, expected, true);
+    }
+
+    private DocumentReference withAuthorPractitionerAndTelecom() {
+        DocumentReference documentReference = withOfficialEntryUUID();
+
+        Practitioner practitioner = new Practitioner();
+        practitioner.addName().setFamily("Jones").addGiven("Fred");
+        practitioner.setId("#practitioner1");
+        ContactPoint contactPoint = new ContactPoint();
+        contactPoint.setSystem(ContactPoint.ContactPointSystem.EMAIL);
+        contactPoint.setValue("301-777-7766");
+        practitioner.addTelecom(contactPoint);
+
+        documentReference.addContained(practitioner);
+        documentReference.addAuthor(new Reference().setReference("#practitioner1"));
+
+        return documentReference;
+    }
+
+    private List<DocumentReference> withAuthorPractitionerAndTelecomAndExpected() {
+        List<DocumentReference> x = new ArrayList<>();
+        DocumentReference original = withAuthorPractitionerAndTelecom();
+        x.add(original);
+
+        DocumentReference expected = withAuthorPractitionerAndTelecom();
+        expected.getIdentifier().remove(0);  // ID1 not appropriate (was placeholder for ID)
+        x.add(expected);
+        return x;
+    }
+
+    @Test
+    void authorPractitionerAndTelecom() throws IOException, JAXBException {
+        List<DocumentReference> x = withAuthorPractitionerAndTelecomAndExpected();
+        DocumentReference documentReference = x.get(0);
+        DocumentReference expected = x.get(1);
+
+        run(documentReference, expected, true);
+    }
+
 
     private DocumentReference withAuthorPractitionerRole() {
         DocumentReference documentReference = withOfficialEntryUUID();
