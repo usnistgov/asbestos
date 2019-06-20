@@ -43,7 +43,7 @@ public class Val {
 
     public boolean hasErrors() {
         for (ValE e : elements) {
-            if (e.getType().equals(ValType.Error))
+            if (e.getTypes().contains(ValType.Error) && !e.getTypes().contains(ValType.Ignored))
                 return true;
         }
         return false;
@@ -51,7 +51,7 @@ public class Val {
 
     public boolean hasWarnings() {
         for (ValE e : elements) {
-            if (e.getType().equals(ValType.Warn))
+            if (e.getTypes().contains(ValType.Warn))
                 return true;
         }
         return false;

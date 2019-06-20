@@ -14,7 +14,7 @@ public class ValErrors {
         List<ValE> items = new ArrayList<>();
 
         for (ValE e : val.elements) {
-            if (e.getType().equals(ValType.Error)) {
+            if (e.getTypes().contains(ValType.Error)) {
                 items.add(e);
             }
             items.addAll(get(e));
@@ -26,7 +26,7 @@ public class ValErrors {
         List<ValE> items = new ArrayList<>();
 
         for (ValE e : ve.getEle()) {
-            if (e.getType().equals(ValType.Error)) {
+            if (e.getTypes().contains(ValType.Error)) {
                 items.add(e);
             }
             items.addAll(get(e));

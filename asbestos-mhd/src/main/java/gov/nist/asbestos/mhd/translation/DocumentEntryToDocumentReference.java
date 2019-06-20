@@ -4,6 +4,7 @@ import gov.nist.asbestos.asbestosProxySupport.Base.IVal;
 import gov.nist.asbestos.mhd.exceptions.MetadataAttributeTranslationException;
 import gov.nist.asbestos.mhd.resolver.ResourceMgr;
 import gov.nist.asbestos.mhd.transactionSupport.CodeTranslator;
+import gov.nist.asbestos.mhd.translation.attribute.EntryUuid;
 import gov.nist.asbestos.simapi.validation.Val;
 import gov.nist.asbestos.simapi.validation.ValE;
 import oasis.names.tc.ebxml_regrep.xsd.rim._3.*;
@@ -25,6 +26,9 @@ public class DocumentEntryToDocumentReference implements IVal {
         Objects.requireNonNull(eo);
         DocumentReference dr = new DocumentReference();
 
+        ValE vale = new ValE(val).asTranslation();
+        vale.setMsg("DocumentEntry to DocumentReference");
+
         String objectType = eo.getObjectType();
         if (!"urn:uuid:7edca82f-054d-47f2-a032-9b2a5b5186c1".equals(objectType)) {
             val.add(new ValE("DocumentEntryToDocumentReference: this transform only handles stable DocumentEntries - objectType " + objectType + " received").asError());
@@ -40,12 +44,13 @@ public class DocumentEntryToDocumentReference implements IVal {
         dr.setContext(context);
 
         if (eo.getId() != null) {
-            String id = eo.getId();
-            Identifier idr = new Identifier();
-            idr.setSystem("urn:ietf:rfc:3986");
-            idr.setValue(stripUrnPrefix(id));
-            if (ResourceMgr.isUUID(id))
-                idr.setUse(Identifier.IdentifierUse.OFFICIAL);
+//            String id = eo.getId();
+            Identifier idr = new EntryUuid().setVal(vale).getIdentifier(eo.getId());
+//            Identifier idr = new Identifier();
+//            idr.setSystem("urn:ietf:rfc:3986");
+//            idr.setValue(stripUrnPrefix(id));
+//            if (ResourceMgr.isUUID(id))
+//                idr.setUse(Identifier.IdentifierUse.OFFICIAL);
             dr.getIdentifier().add(idr);
         }
         for (ExternalIdentifierType ei : eo.getExternalIdentifier()) {

@@ -11,6 +11,7 @@ import gov.nist.asbestos.mhd.transactionSupport.AssigningAuthorities;
 import gov.nist.asbestos.mhd.transactionSupport.CodeTranslator;
 import gov.nist.asbestos.mhd.transactionSupport.PnrWrapper;
 import gov.nist.asbestos.mhd.transactionSupport.ResourceWrapper;
+import gov.nist.asbestos.mhd.translation.attribute.EntryUuid;
 import gov.nist.asbestos.simapi.validation.Val;
 import gov.nist.asbestos.simapi.validation.ValE;
 import oasis.names.tc.ebxml_regrep.xsd.rim._3.*;
@@ -63,6 +64,7 @@ public class BundleToRegistryObjectList implements IVal {
                 new AbstractMap.SimpleEntry<>("appends", "urn:ihe:iti:2007:AssociationType:APND"))
                 .collect(Collectors.toMap(AbstractMap.SimpleEntry::getKey, AbstractMap.SimpleEntry::getValue)));
     }
+    private static final String DRTable = "MHD: Table 4.5.1.1-1";
 
     private CodeTranslator codeTranslator;
     private Configuration config;
@@ -237,6 +239,10 @@ public class BundleToRegistryObjectList implements IVal {
 
         RegistryPackageType ss = new RegistryPackageType();
 
+        ValE vale = new ValE(val);
+        ValE tr;
+        vale.setMsg("DocumentManifest to SubmissionSet");
+
         val.add(new ValE("SubmissionSet(" + resource.getAssignedId() + ")"));
         ss.setId(resource.getAssignedId());
         ss.setObjectType("urn:oasis:names:tc:ebxml-regrep:ObjectType:RegistryObject:RegistryPackage");
@@ -247,7 +253,7 @@ public class BundleToRegistryObjectList implements IVal {
             addName(ss, dm.getDescription());
         addClassification(ss, "", rMgr.allocateSymbolicId(), resource.getAssignedId());
         if (dm.hasType())
-            addClassificationFromCodeableConcept(ss, dm.getType(), CodeTranslator.TYPECODE, resource.getAssignedId());
+            addClassificationFromCodeableConcept(ss, dm.getType(), CodeTranslator.TYPECODE, resource.getAssignedId(), vale);
         if (!dm.hasMasterIdentifier())
             val.add(new ValE("DocumentManifest.masterIdentifier not present - declared by IHE to be [1..1]").asError());
         else
@@ -255,7 +261,7 @@ public class BundleToRegistryObjectList implements IVal {
         if (dm.hasSource())
             addExternalIdentifier(ss, CodeTranslator.SS_SOURCEID, unURN(dm.getMasterIdentifier().getValue()), rMgr.allocateSymbolicId(), resource.getAssignedId(), "XDSSubmissionSet.uniqueId");
         if (dm.hasSubject() && dm.getSubject().hasReference())
-            addSubject(ss, resource,  new Ref(dm.getSubject()), CodeTranslator.SS_PID, "XDSSubmissionSet.patientId");
+            addSubject(ss, resource,  new Ref(dm.getSubject()), CodeTranslator.SS_PID, "XDSSubmissionSet.patientId", vale);
         return ss;
     }
 
@@ -263,20 +269,26 @@ public class BundleToRegistryObjectList implements IVal {
         Objects.requireNonNull(val);
         Objects.requireNonNull(rMgr);
 
+        ValE vale = new ValE(val);
+        ValE tr;
+        vale.setMsg("DocumentReference to DocumentEntry");
+
         ExtrinsicObjectType eo = new ExtrinsicObjectType();
         eo.setObjectType("urn:uuid:7edca82f-054d-47f2-a032-9b2a5b5186c1");
 
         DocumentReference dr = (DocumentReference) resource.getResource();
+        vale.add(new ValE("Content section is [1..1]").addIheRequirement(DRTable));
         if (dr.getContent() == null || dr.getContent().isEmpty()) {
-            val.add(new ValE("DocumentReference has no content section").asError());
+            vale.add(new ValE("DocumentReference has no content section").asError());
             return eo;
         }
         if (dr.getContent().size() > 1) {
-            val.add(new ValE("DocumentReference has multiple content sections").asError());
+            vale.add(new ValE("DocumentReference has multiple content sections").asError());
             return eo;
         }
+        vale.add(new ValE("Content.Attachment section is [1..1]").addIheRequirement(DRTable));
         if (dr.getContent().get(0).getAttachment() == null) {
-            val.add(new ValE("DocumentReference has no content/attachment").asError());
+            vale.add(new ValE("DocumentReference has no content/attachment").asError());
             return eo;
         }
 
@@ -284,26 +296,24 @@ public class BundleToRegistryObjectList implements IVal {
         DocumentReference.DocumentReferenceContentComponent content = dr.getContent().get(0);
         Attachment attachment = content.getAttachment();
 
-        for (Identifier id : dr.getIdentifier()) {
-            if (id.hasValue() && ResourceMgr.isUUID(id.getValue())) {
-                boolean isOfficial = id.hasUse() && id.getUse() == Identifier.IdentifierUse.OFFICIAL;
-                if (!isOfficial)
-                    val.add(new ValE("DocumentReference.identifier is UUID but not labeled as official").asError());
-                else
-                    resource.setAssignedId(id.getValue());
-            }
-        }
+        new EntryUuid().setVal(vale).setrMgr(rMgr).setResource(resource).assignId(dr.getIdentifier());
 
-        if (resource.getAssignedId() == null)
-            resource.setAssignedId(rMgr.allocateSymbolicId());
-
-        String entryUUID = resource.getAssignedId();
-        eo.setId(entryUUID);
+        eo.setId(resource.getAssignedId());
         eo.setObjectType("urn:uuid:7edca82f-054d-47f2-a032-9b2a5b5186c1");
-        eo.setMimeType(content.getAttachment().getContentType());
-        if (dr.getDate() != null)
+
+        tr = vale.add(new ValE("content.attachment.contentType is [1..1]").addIheRequirement(DRTable));
+        tr.add(new ValE("content.attachment.contentType to mimeType").asTranslation());
+        if (content.getAttachment().getContentType() == null)
+            tr.add(new ValE("content.attachment.contentType not present").asError());
+        else
+            eo.setMimeType(content.getAttachment().getContentType());
+
+        if (dr.getDate() != null) {
+            vale.addTr(new ValE("creationTime"));
             addSlot(eo, "creationTime", translateDateTime(dr.getDate()));
+        }
         if (dr.hasStatus()) {
+            vale.addTr(new ValE("availabilityStatus"));
             Enumerations.DocumentReferenceStatus fStatus = dr.getStatus();
             String status = null;
             if (fStatus == Enumerations.DocumentReferenceStatus.CURRENT)
@@ -318,60 +328,96 @@ public class BundleToRegistryObjectList implements IVal {
             Period period = context.getPeriod();
             if (period != null) {
                 if (period.hasStart()) {
+                    vale.addTr(new ValE("serviceStartTime"));
                     addSlot(eo, "serviceStartTime", translateDateTime(period.getStart()));
                 }
                 if (period.hasEnd()) {
+                    vale.addTr(new ValE("serviceStopTime"));
                     addSlot(eo, "serviceStopTime", translateDateTime(period.getEnd()));
                 }
             }
-            if (context.hasSourcePatientInfo())
-                addSourcePatientInfo(eo, resource, context.getSourcePatientInfo());
-            if (context.hasFacilityType())
-                addClassificationFromCodeableConcept(eo, context.getFacilityType(), CodeTranslator.HCFTCODE, resource.getAssignedId());
-            if (context.hasPracticeSetting())
-                addClassificationFromCodeableConcept(eo, context.getPracticeSetting(), CodeTranslator.PRACCODE, resource.getAssignedId());
-            if (context.hasEvent())
-                addClassificationFromCodeableConcept(eo, context.getEventFirstRep(), CodeTranslator.EVENTCODE, resource.getAssignedId());
+            if (context.hasSourcePatientInfo()) {
+                vale.addTr(new ValE("sourcePatientInfo"));
+                addSourcePatientInfo(eo, resource, context.getSourcePatientInfo(), vale);
+            }
+            if (context.hasFacilityType()) {
+                vale.addTr(new ValE("facilityType"));
+                addClassificationFromCodeableConcept(eo, context.getFacilityType(), CodeTranslator.HCFTCODE, resource.getAssignedId(), vale);
+            }
+            if (context.hasPracticeSetting()) {
+                vale.addTr(new ValE("practiceSetting"));
+                addClassificationFromCodeableConcept(eo, context.getPracticeSetting(), CodeTranslator.PRACCODE, resource.getAssignedId(), vale);
+            }
+            if (context.hasEvent()) {
+                vale.addTr(new ValE("eventCode"));
+                addClassificationFromCodeableConcept(eo, context.getEventFirstRep(), CodeTranslator.EVENTCODE, resource.getAssignedId(), vale);
+            }
         }
-        if (attachment.hasLanguage())
+        if (attachment.hasLanguage()) {
+            vale.addTr(new ValE("languageCode"));
             addSlot(eo, "languageCode", attachment.getLanguage());
-        if (attachment.hasUrl())
+        }
+        if (attachment.hasUrl()) {
+            vale.addTr(new ValE("repositoryUniqueId"));
             addSlot(eo, "repositoryUniqueId", attachment.getUrl());
+        }
         if (attachment.hasHash()) {
+            vale.addTr(new ValE("hash"));
             Base64BinaryType hash64 = attachment.getHashElement();
-            val.add(new ValE("base64Binary is " + hash64.asStringValue()));
             byte[] hash = hash64.getValue();
             String hashString = DatatypeConverter.printHexBinary(hash).toLowerCase();
-            val.add(new ValE("hexBinary is " + hashString));
             addSlot(eo, "hash", hashString);
         }
-        if (dr.hasDescription())
+        if (dr.hasDescription()) {
+            vale.addTr(new ValE("description"));
             addName(eo, dr.getDescription());
-        if (attachment.hasTitle())
+        }
+        if (attachment.hasTitle()) {
+            vale.addTr(new ValE("title"));
             addDescription(eo, attachment.getTitle());
-        if (attachment.hasCreation())
+        }
+        if (attachment.hasCreation()) {
+            vale.addTr(new ValE("creationTime"));
             addCreationTime(eo, attachment.getCreation());
-        if (dr.hasType())
-            addClassificationFromCodeableConcept(eo, dr.getType(), CodeTranslator.TYPECODE, resource.getAssignedId());
-        if (dr.hasCategory())
-            addClassificationFromCodeableConcept(eo, dr.getCategoryFirstRep(), CodeTranslator.CLASSCODE, resource.getAssignedId());
-        if (dr.hasSecurityLabel())
-            addClassificationFromCoding(eo, dr.getSecurityLabel().get(0).getCoding().get(0), CodeTranslator.CONFCODE, resource.getAssignedId());
-        if(content.hasFormat())
-            addClassificationFromCoding(eo, dr.getContent().get(0).getFormat(), CodeTranslator.FORMATCODE, resource.getAssignedId());
+        }
+        if (dr.hasType()) {
+            tr = vale.addTr(new ValE("typeCode"));
+            addClassificationFromCodeableConcept(eo, dr.getType(), CodeTranslator.TYPECODE, resource.getAssignedId(), tr);
+        }
+        if (dr.hasCategory()) {
+            tr = vale.addTr(new ValE("classCode"));
+            addClassificationFromCodeableConcept(eo, dr.getCategoryFirstRep(), CodeTranslator.CLASSCODE, resource.getAssignedId(), tr);
+        }
+        if (dr.hasSecurityLabel()) {
+            tr = vale.addTr(new ValE("confCode"));
+            addClassificationFromCoding(eo, dr.getSecurityLabel().get(0).getCoding().get(0), CodeTranslator.CONFCODE, resource.getAssignedId(), tr);
+        }
+        if(content.hasFormat()) {
+            tr = vale.addTr(new ValE("formatCode"));
+            addClassificationFromCoding(eo, dr.getContent().get(0).getFormat(), CodeTranslator.FORMATCODE, resource.getAssignedId(), tr);
+        }
+
+        tr = vale.add(new ValE("DocumentReference.masterIdentifier is [1..1]").addIheRequirement(DRTable));
         if (!dr.hasMasterIdentifier())
-            val.add(new ValE("DocumentReference.masterIdentifier not present - declared by IHE to be [1..1]").asError());
-        else
+            tr.add(new ValE("masterIdentifier not present").asError());
+        else {
+            tr.add(new ValE("masterIdentifier").asTranslation());
             addExternalIdentifier(eo, CodeTranslator.DE_UNIQUEID, unURN(dr.getMasterIdentifier().getValue()), rMgr.allocateSymbolicId(), resource.getAssignedId(), "XDSDocumentEntry.uniqueId");
-        if (dr.hasSubject() && dr.getSubject().hasReference()) {
-            addSubject(eo, resource,  new Ref(dr.getSubject()), CodeTranslator.DE_PID, "XDSDocumentEntry.patientId");
+        }
+
+        tr = vale.add(new ValE("DocumentReference.subject is [1..1]").addIheRequirement(DRTable));
+        if (!dr.hasSubject() || !dr.getSubject().hasReference()) {
+            tr.add(new ValE("subject not present or has no reference").asError());
+        } else {
+            vale.add(new ValE("subject to Patient Id").asTranslation());
+            addSubject(eo, resource,  new Ref(dr.getSubject()), CodeTranslator.DE_PID, "XDSDocumentEntry.patientId", tr);
         }
         if (dr.hasAuthor()) {
-            // TODO all author types may have a telecom - make sure it gets added
+            tr = vale.addTr(new ValE("author"));
             ResourceWrapper containing = new ResourceWrapper();
             containing.setResource(dr);
             for (Reference reference : dr.getAuthor()) {
-                Optional<ResourceWrapper> contained = rMgr.resolveReference(containing, new Ref(reference.getReference()), new ResolverConfig().containedRequired());
+                Optional<ResourceWrapper> contained = rMgr.resolveReference(containing, new Ref(reference.getReference()), new ResolverConfig().containedRequired(), tr);
                 if (contained.isPresent()) {
                     IBaseResource resource1 = contained.get().getResource();
                     ClassificationType classificationType = classificationFromAuthor(resource1, containing);
@@ -383,10 +429,11 @@ public class BundleToRegistryObjectList implements IVal {
             }
         }
         if (dr.hasAuthenticator()) {
+            tr = vale.addTr(new ValE("authenticator"));
             ResourceWrapper containing = new ResourceWrapper();
             containing.setResource(dr);
             Reference reference = dr.getAuthenticator();
-            Optional<ResourceWrapper> contained = rMgr.resolveReference(containing, new Ref(reference.getReference()), new ResolverConfig().containedRequired());
+            Optional<ResourceWrapper> contained = rMgr.resolveReference(containing, new Ref(reference.getReference()), new ResolverConfig().containedRequired(), tr);
             if (contained.isPresent()) {
                 IBaseResource resource1 = contained.get().getResource();
                 ClassificationType classificationType = classificationFromAuthor(resource1, containing);
@@ -498,7 +545,7 @@ public class BundleToRegistryObjectList implements IVal {
      * Patient resources shall not be in the bundle so don't look there.  Must have fullUrl reference
      */
 
-    private void addSourcePatientInfo(ExtrinsicObjectType eo, ResourceWrapper resource, Reference sourcePatient) {
+    private void addSourcePatientInfo(ExtrinsicObjectType eo, ResourceWrapper resource, Reference sourcePatient, ValE val) {
     }
         // TODO sourcePatientInfo is not populated
 //    private void addSourcePatient(ExtrinsicObjectType eo, ResourceWrapper resource, Reference sourcePatient) {
@@ -541,7 +588,7 @@ public class BundleToRegistryObjectList implements IVal {
 
     // TODO must be absolute reference
     // TODO official identifiers must be changed
-    private void addSubject(RegistryObjectType ro, ResourceWrapper resource, Ref referenced, String scheme, String attName) {
+    private void addSubject(RegistryObjectType ro, ResourceWrapper resource, Ref referenced, String scheme, String attName, ValE val) {
 
         Optional<ResourceWrapper> loadedResource = rMgr.resolveReference(resource, referenced, new ResolverConfig().externalRequired());
         boolean isLoaded = loadedResource.isPresent() && loadedResource.get().isLoaded();
@@ -586,12 +633,12 @@ public class BundleToRegistryObjectList implements IVal {
 
     // TODO - no profile guidance on how to convert coding.system URL to existing OIDs
 
-    public void addClassificationFromCodeableConcept(RegistryObjectType ro, CodeableConcept cc, String scheme, String classifiedObjectId) {
+    public void addClassificationFromCodeableConcept(RegistryObjectType ro, CodeableConcept cc, String scheme, String classifiedObjectId, ValE val) {
         List<Coding> coding = cc.getCoding();
-        addClassificationFromCoding(ro, coding.get(0), scheme, classifiedObjectId);
+        addClassificationFromCoding(ro, coding.get(0), scheme, classifiedObjectId, val);
     }
 
-    private void addClassificationFromCoding(RegistryObjectType ro, Coding coding, String scheme, String classifiedObjectId) {
+    private void addClassificationFromCoding(RegistryObjectType ro, Coding coding, String scheme, String classifiedObjectId, ValE val) {
         Objects.requireNonNull(codeTranslator);
         Objects.requireNonNull(val);
         Objects.requireNonNull(rMgr);

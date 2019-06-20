@@ -118,6 +118,9 @@ public class ResourceMgr implements IVal {
         return new ResourceWrapper(refUrl);
     }
 
+    public Optional<ResourceWrapper> resolveReference(ResourceWrapper containing, Ref referenceUrl, ResolverConfig config) {
+        return resolveReference(containing, referenceUrl, config, new ValE(val));
+    }
     /**
      * Return resource if internal or reference if external.
      * @param containing
@@ -125,11 +128,12 @@ public class ResourceMgr implements IVal {
      * @param config
      * @return
      */
-    public Optional<ResourceWrapper> resolveReference(ResourceWrapper containing, Ref referenceUrl, ResolverConfig config) {
+    public Optional<ResourceWrapper> resolveReference(ResourceWrapper containing, Ref referenceUrl, ResolverConfig config, ValE val) {
         Objects.requireNonNull(val);
         Objects.requireNonNull(referenceUrl);
         Objects.requireNonNull(config);
-        Val thisVal = val.add(new ValE("Resolver: Resolve URL " + referenceUrl + " ... " + config));
+        ValE thisVal = new ValE(val);
+        thisVal.add(new ValE("Resolver: Resolve URL " + referenceUrl + " ... " + config));
 
         //
         // Absolute
@@ -161,7 +165,7 @@ public class ResourceMgr implements IVal {
         //
         if (referenceUrl.isContained()) {
             if (config.isContainedOk()) {
-                thisVal.msg("Resolver: ...contained");
+                thisVal.setMsg("Resolver: ...contained");
                 return Optional.ofNullable(getContains(containing, referenceUrl));
             }
             thisVal.add(new ValE("Resolver: ...reference is to contained resource (" + referenceUrl + " but contained is not acceptable").asError());

@@ -14,7 +14,7 @@ public class ValWarnings {
         List<ValE> items = new ArrayList<>();
 
         for (ValE e : val.elements) {
-            if (e.getType().equals(ValType.Warn)) {
+            if (e.getTypes().contains(ValType.Warn)) {
                 items.add(e);
             }
             items.addAll(get(e));
@@ -26,7 +26,7 @@ public class ValWarnings {
         List<ValE> items = new ArrayList<>();
 
         for (ValE e : ve.getEle()) {
-            if (e.getType().equals(ValType.Warn)) {
+            if (e.getTypes().contains(ValType.Warn)) {
                 items.add(e);
             }
             items.addAll(get(e));

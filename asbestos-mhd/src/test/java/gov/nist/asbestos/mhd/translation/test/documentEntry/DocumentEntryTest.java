@@ -233,6 +233,8 @@ class DocumentEntryTest {
         expected.getIdentifier().remove(0);  // ID1 not appropriate (was placeholder for ID)
 
         run(documentReference, expected, true);
+
+        System.out.println(ValFactory.toJson(val));
     }
 
 

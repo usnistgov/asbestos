@@ -1,36 +1,56 @@
 package gov.nist.asbestos.simapi.validation;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class ValE {
-    ValType type = ValType.Msg;
+    Set<ValType> types = new HashSet<>();
     String msg;
     List<ValE> ele = new ArrayList<>();
 
     public ValE() {}
+
+    public ValE(Val val) {
+        val.add(this);
+    }
+
+    public ValE(ValE val) {
+        val.add(this);
+    }
 
     public ValE(String msg) {
         this.msg = msg;
     }
 
     public ValE asError() {
-        type = ValType.Error;
+        types.add(ValType.Error);
         return this;
     }
 
     public ValE asWarning() {
-        type = ValType.Warn;
+        types.add(ValType.Warn);
         return this;
     }
 
     public ValE asRef() {
-        type = ValType.Ref;
+        types.add(ValType.Ref);
         return this;
     }
 
     public ValE asDoc() {
-        type = ValType.Doc;
+        types.add(ValType.Doc);
+        return this;
+    }
+
+    public ValE asTranslation() {
+        types.add(ValType.Translation);
+        return this;
+    }
+
+    public ValE addIheRequirement(String reference) {
+        ValE req = new ValE(this);
+        this.getTypes().add(ValType.IHERequirement);
+        req.setMsg(reference);
+        req.getTypes().add(ValType.Reference);
         return this;
     }
 
@@ -39,10 +59,16 @@ public class ValE {
         return this;
     }
 
+    public ValE addTr(ValE ele) {
+        ele.asTranslation();
+        this.ele.add(ele);
+        return ele;
+    }
+
     boolean ignore(String msg) {
         boolean ignored = false;
         if (msg.equals(this.msg)) {
-            this.type = ValType.Ignored;
+            this.types.add(ValType.Ignored);
             ignored = true;
         }
         for (ValE e : ele)
@@ -54,11 +80,15 @@ public class ValE {
         return msg;
     }
 
+    public void setMsg(String msg) {
+        this.msg = msg;
+    }
+
     public List<ValE> getEle() {
         return ele;
     }
 
-    public ValType getType() {
-        return type;
+    public Set<ValType> getTypes() {
+        return types;
     }
 }
