@@ -21,9 +21,11 @@ public class DocumentEntryToDocumentReference implements IVal {
     private Val val;
     private CodeTranslator codeTranslator;
     private ResourceMgr resourceMgr = null;
+    private ContainedIdAllocator containedIdAllocator = null;
 
     public DocumentReference getDocumentReference(ExtrinsicObjectType eo) {
         Objects.requireNonNull(eo);
+        Objects.requireNonNull(containedIdAllocator);
         DocumentReference dr = new DocumentReference();
 
         ValE vale = new ValE(val).asTranslation();
@@ -77,6 +79,7 @@ public class DocumentEntryToDocumentReference implements IVal {
             String scheme = c.getClassificationScheme();
             if ("urn:uuid:93606bcf-9494-43ec-9b4e-a7748d1a838d".equals(scheme)) {
                 Author author = new Author();
+                author.setContainedIdAllocator(containedIdAllocator);
                 author.setVal(val);
                 List<Resource> contained = author.authorClassificationToContained(c);
                 // Either Practitioner or PractitionerRole or Organization
@@ -187,7 +190,7 @@ public class DocumentEntryToDocumentReference implements IVal {
                         }
                         Practitioner practitioner = new Practitioner();
                         practitioner.addName(humanName);
-                        String id = ContainedIdAllocator.newId(Practitioner.class);
+                        String id = containedIdAllocator.newId(Practitioner.class);
                         practitioner.setId(id);
                         dr.addContained(practitioner);
                         dr.setAuthenticator(new Reference().setReference(id));
@@ -244,5 +247,9 @@ public class DocumentEntryToDocumentReference implements IVal {
 
     public void setCodeTranslator(CodeTranslator codeTranslator) {
         this.codeTranslator = codeTranslator;
+    }
+
+    public void setContainedIdAllocator(ContainedIdAllocator containedIdAllocator) {
+        this.containedIdAllocator = containedIdAllocator;
     }
 }

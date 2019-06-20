@@ -93,10 +93,15 @@ class AuthorTest {
         Author author = new Author();
         author.setVal(val);
 
+        ContainedIdAllocator containedIdAllocator;
+
+        containedIdAllocator = new ContainedIdAllocator();
         ClassificationType c = author.practitionerToClassification(practitioner1);
+        containedIdAllocator = new ContainedIdAllocator();
         Author author2 = new Author();
+        author2.setContainedIdAllocator(containedIdAllocator);
         author2.setVal(val);
-        ContainedIdAllocator.reset();
+
         Practitioner practitioner2 = (Practitioner) author2.authorClassificationToContained(c).get(0);
 
         String json1 = fhirContext.newJsonParser().encodeResourceToString(practitioner1);

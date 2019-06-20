@@ -81,7 +81,7 @@ public class BundleToRegistryObjectList implements IVal {
         scanBundleForAcceptability(bundle, rMgr);
         PnrWrapper submission = new PnrWrapper();
 
-        buildRegistryObjectList();
+        RegistryObjectListType rol = buildRegistryObjectList();
 
 //        StringWriter writer = new StringWriter();
 //        MarkupBuilder builder = new MarkupBuilder(writer);

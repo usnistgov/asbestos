@@ -1,11 +1,13 @@
 package gov.nist.asbestos.mhd.transactionSupport;
 
+import oasis.names.tc.ebxml_regrep.xsd.rim._3.RegistryObjectListType;
+
 /**
  *
  */
 public class PnrWrapper {
 
-    public static String wrap(String toAddr, String registryObjectList, String documentDefinitions) {
+    public static String wrap(String toAddr, RegistryObjectListType registryObjectList, String documentDefinitions) {
         try {
             String part1 = (String) PnrWrapper.class.getResource("/pnr/part1.txt").getContent();
             part1 = part1.replace("TO_ADDR", toAddr);

@@ -15,6 +15,7 @@ import java.util.Objects;
 
 public class Author implements IVal {
     private Val val = null;
+    private ContainedIdAllocator containedIdAllocator = null;
     private List<AuthorPerson> authorPersons = new ArrayList<>();  // zero or one
     private List<AuthorInstitution> authorInstitutions = new ArrayList<>(); // zero or more
     private List<AuthorRole> authorRoles = new ArrayList<>(); // zero or more
@@ -96,6 +97,8 @@ public class Author implements IVal {
     }
 
     public List<Resource> authorClassificationToContained(ClassificationType c) {
+        Objects.requireNonNull(containedIdAllocator);
+        Objects.requireNonNull(c);
         Practitioner practitioner = null; //new Practitioner();
         Organization organization = null;
         List<Resource> contained = new ArrayList<>();
@@ -125,7 +128,7 @@ public class Author implements IVal {
             if (!authorPerson.id.equals("")) {
                 if (practitioner == null) {
                     practitioner = new Practitioner();
-                    practitioner.setId(ContainedIdAllocator.newId(Practitioner.class));
+                    practitioner.setId(containedIdAllocator.newId(Practitioner.class));
                     contained.add(practitioner);
                 }
                 Identifier identifier = new Identifier();
@@ -135,7 +138,7 @@ public class Author implements IVal {
             if (!authorPerson.familyName.equals("")) {
                 if (practitioner == null) {
                     practitioner = new Practitioner();
-                    practitioner.setId(ContainedIdAllocator.newId(Practitioner.class));
+                    practitioner.setId(containedIdAllocator.newId(Practitioner.class));
                     contained.add(practitioner);
                 }
                 HumanName humanName = new HumanName();
@@ -149,17 +152,17 @@ public class Author implements IVal {
             organization = new Organization();
             String name = authorInstitutions.get(0).getOrgName();
             organization.setName(name);
-            organization.setId(ContainedIdAllocator.newId(Organization.class));
+            organization.setId(containedIdAllocator.newId(Organization.class));
             contained.add(organization);
         }
         if (!authorRoles.isEmpty()) {
             if (practitioner == null) {
                 practitioner = new Practitioner();
-                practitioner.setId(ContainedIdAllocator.newId(Practitioner.class));
+                practitioner.setId(containedIdAllocator.newId(Practitioner.class));
                 contained.add(practitioner);
             }
             PractitionerRole practitionerRole = new PractitionerRole();
-            practitionerRole.setId(ContainedIdAllocator.newId(PractitionerRole.class));
+            practitionerRole.setId(containedIdAllocator.newId(PractitionerRole.class));
             for (AuthorRole authorRole : authorRoles) {
                 if (authorRole.hasCodeableConcept() || authorRole.hasCodeAndSystem()) {
                     CodeableConcept cc = authorRole.getCodeableConcept();
@@ -185,6 +188,10 @@ public class Author implements IVal {
 
     public List<AuthorRole> getAuthorRoles() {
         return authorRoles;
+    }
+
+    public void setContainedIdAllocator(ContainedIdAllocator containedIdAllocator) {
+        this.containedIdAllocator = containedIdAllocator;
     }
 
     @Override

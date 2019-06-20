@@ -94,11 +94,11 @@ class DocumentEntryTest {
         bundleToRegistryObjectList.setResourceMgr(rMgr);
         bundleToRegistryObjectList.setAssigningAuthorities(AssigningAuthorities.allowAny());
 
+        ContainedIdAllocator containedIdAllocator = new ContainedIdAllocator();
 
         rMgr = new ResourceMgr();
         rMgr.setVal(val);
         rMgr.setFhirClient(fhirClient);
-        ContainedIdAllocator.reset();
 
         ExtrinsicObjectType extrinsicObjectType = bundleToRegistryObjectList.createExtrinsicObject(resource);
 
@@ -106,7 +106,9 @@ class DocumentEntryTest {
         documentEntryToDocumentReference.setVal(val);
         documentEntryToDocumentReference.setResourceMgr(rMgr);
         documentEntryToDocumentReference.setCodeTranslator(codeTranslator);
-        ContainedIdAllocator.reset();
+
+        containedIdAllocator = new ContainedIdAllocator();
+        documentEntryToDocumentReference.setContainedIdAllocator(containedIdAllocator);
         DocumentReference documentReference1 = documentEntryToDocumentReference.getDocumentReference(extrinsicObjectType);
 
         String json2 = fhirContext.newJsonParser().encodeResourceToString(documentReference1);
@@ -140,7 +142,7 @@ class DocumentEntryTest {
 
         run(documentReference, null, false);
 
-        if (!val.ignore("DocumentReference.masterIdentifier not present - declared by IHE to be [1..1]"))
+        if (!val.ignore("masterIdentifier not present"))
             fail("Error did not occur");
 
         if (val.hasErrors())
