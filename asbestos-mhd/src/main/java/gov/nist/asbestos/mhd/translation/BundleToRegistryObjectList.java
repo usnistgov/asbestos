@@ -347,6 +347,10 @@ public class BundleToRegistryObjectList implements IVal {
         }
         if (dr.hasDescription())
             addName(eo, dr.getDescription());
+        if (attachment.hasTitle())
+            addDescription(eo, attachment.getTitle());
+        if (attachment.hasCreation())
+            addCreationTime(eo, attachment.getCreation());
         if (dr.hasType())
             addClassificationFromCodeableConcept(eo, dr.getType(), CodeTranslator.TYPECODE, resource.getAssignedId());
         if (dr.hasCategory())
@@ -404,6 +408,19 @@ public class BundleToRegistryObjectList implements IVal {
             }
         }
         return eo;
+    }
+
+    private void addCreationTime(ExtrinsicObjectType eo, Date creation) {
+        String creationTime = translateDateTime(creation);
+        addSlot(eo, "creationTime", creationTime);
+    }
+
+    private void addDescription(RegistryObjectType eo, String description) {
+        LocalizedStringType lst = new LocalizedStringType();
+        lst.setValue(description);
+        InternationalStringType ist = new InternationalStringType();
+        ist.getLocalizedString().add(lst);
+        eo.setDescription(ist);
     }
 
     private ClassificationType classificationFromAuthor(IBaseResource resource1, ResourceWrapper containing) {

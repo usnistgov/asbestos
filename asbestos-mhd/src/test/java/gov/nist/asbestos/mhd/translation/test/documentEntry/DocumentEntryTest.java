@@ -42,6 +42,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
 // TODO relatesTo (no tests, no impl)
+// TODO content.attachment.data
+// TODO referenceIdList
 class DocumentEntryTest {
     private static Val val;
     private static FhirContext fhirContext;
@@ -387,35 +389,6 @@ class DocumentEntryTest {
         run(documentReference, expected, true);
     }
 
-    private DocumentReference withCreationTime() {
-        DocumentReference documentReference = withOfficialEntryUUID();
-
-        documentReference.setDate(new Date());
-
-        return documentReference;
-    }
-
-    private List<DocumentReference> withCreationTimeAndExpected() throws MetadataAttributeTranslationException {
-        List<DocumentReference> x = new ArrayList<>();
-        DocumentReference original = withCreationTime();
-        x.add(original);
-
-        DocumentReference expected = withCreationTime();
-        expected.setDate(DateTransform.xdsPrecision(original.getDate()));  // DTM format in XDS limits precision - no milli
-        expected.getIdentifier().remove(0);  // ID1 not appropriate (was placeholder for ID)
-        x.add(expected);
-        return x;
-    }
-
-    @Test
-    void creationTime() throws IOException, JAXBException, MetadataAttributeTranslationException {
-        List<DocumentReference> x = withCreationTimeAndExpected();
-        DocumentReference documentReference = x.get(0);
-        DocumentReference expected = x.get(1);
-
-        run(documentReference, expected, true);
-    }
-
     private DocumentReference withLegalAuthenticator() {
         DocumentReference documentReference = withOfficialEntryUUID();
 
@@ -690,6 +663,44 @@ class DocumentEntryTest {
     @Test
     void securityLabel() throws IOException, JAXBException {
         List<DocumentReference> x = withSecurityLabelAndExpected();
+        DocumentReference documentReference = x.get(0);
+        DocumentReference expected = x.get(1);
+
+        run(documentReference, expected, true);
+    }
+
+    private DocumentReference withContentType() {
+        DocumentReference documentReference = withOfficialEntryUUID();
+
+        DocumentReference.DocumentReferenceContentComponent content = documentReference.getContent().get(0);
+        Attachment attachment = content.getAttachment();
+        attachment.setContentType("text/plain");
+        attachment.setLanguage("en-us");
+        attachment.setTitle("comments");
+        attachment.setCreation(new Date());
+        content.setFormat(new Coding()
+                .setCode("1.2.840.10008.5.1.4.1.1.88.59")
+                .setSystem("http://dicom.nema.org/resources/ontology/DCM")
+                .setDisplay("Key Object Selection Document"));
+
+        return documentReference;
+    }
+
+    private List<DocumentReference> withContentTypeAndExpected() {
+        List<DocumentReference> x = new ArrayList<>();
+        DocumentReference original = withContentType();
+        x.add(original);
+
+        DocumentReference expected = withContentType();
+        expected.getIdentifier().remove(0);  // ID1 not appropriate (was placeholder for ID)
+        x.add(expected);
+        expected.getContent().get(0).getAttachment().setCreation(original.getContent().get(0).getAttachment().getCreation());
+        return x;
+    }
+
+    @Test
+    void contentType() throws IOException, JAXBException {
+        List<DocumentReference> x = withContentTypeAndExpected();
         DocumentReference documentReference = x.get(0);
         DocumentReference expected = x.get(1);
 
