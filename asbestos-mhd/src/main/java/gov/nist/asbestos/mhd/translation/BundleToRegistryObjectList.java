@@ -69,17 +69,16 @@ public class BundleToRegistryObjectList implements IVal {
     private CodeTranslator codeTranslator;
     private Configuration config;
     private AssigningAuthorities assigningAuthorities;
-    private Map<String, String> documents = new HashMap<>();  // symbolidId -> contentId
     private ResourceMgr rMgr;
     private Val val;
 
     public PnrWrapper build(Bundle bundle) {
         Objects.requireNonNull(val);
         Objects.requireNonNull(bundle);
-//        rMgr = new ResourceMgr(bundle).addResourceCacheMgr(resourceCacheMgr);
-//        rMgr.setVal(val);
+        Objects.requireNonNull(rMgr);
+
         scanBundleForAcceptability(bundle, rMgr);
-        PnrWrapper submission = new PnrWrapper();
+        PnrWrapper pnrWrapper = new PnrWrapper();
 
         RegistryObjectListType rol = buildRegistryObjectList();
 
@@ -90,11 +89,16 @@ public class BundleToRegistryObjectList implements IVal {
 //        }
 //        submission.documentDefinitions = writer.toString()
 
-        return submission;
+        return pnrWrapper;
     }
 
     // TODO handle List/Folder or signal error
     public RegistryObjectListType buildRegistryObjectList() {
+        Objects.requireNonNull(val);
+        Objects.requireNonNull(rMgr);
+
+        //rMgr.setBundle(bundle);
+        //scanBundleForAcceptability(bundle, rMgr);
         RegistryObjectListType rol = new RegistryObjectListType();
 
         List<ResourceWrapper> docMans = rMgr.getBundleResources().stream()

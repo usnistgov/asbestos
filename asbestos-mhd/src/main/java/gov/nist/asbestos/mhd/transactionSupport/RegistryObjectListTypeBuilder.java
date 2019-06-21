@@ -1,6 +1,5 @@
 package gov.nist.asbestos.mhd.transactionSupport;
 
-import gov.nist.asbestos.asbestorCodesJaxb.Codes;
 import oasis.names.tc.ebxml_regrep.xsd.rim._3.RegistryObjectListType;
 
 import javax.xml.bind.JAXBContext;
@@ -11,19 +10,19 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 public class RegistryObjectListTypeBuilder {
-    private static Marshaller marshaller = null;
-    private static Unmarshaller unmarshaller = null;
+    private static Marshaller marshaller;
+    private static Unmarshaller unmarshaller;
 
     static {
         try {
-            JAXBContext context = JAXBContext.newInstance("path.to.package");
+            JAXBContext context = JAXBContext.newInstance(RegistryObjectListType.class);
             marshaller = context.createMarshaller();
             marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
             marshaller.setProperty(Marshaller.JAXB_ENCODING, "UTF-8");
 
             unmarshaller = context.createUnmarshaller();
         } catch (JAXBException e) {
-            throw new RuntimeException("There was a problem creating a JAXBContext object for formatting the object to XML.");
+            throw new RuntimeException("There was a problem creating a JAXBContext object for formatting the RegistryObjectListType object to XML.");
         }
     }
     public RegistryObjectListType fromInputStream(InputStream is) throws JAXBException {
