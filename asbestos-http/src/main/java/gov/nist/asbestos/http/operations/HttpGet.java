@@ -20,10 +20,10 @@ public class HttpGet extends HttpBase {
                 addHeaders(connection, headers);
             requestHeadersList = connection.getRequestProperties();
             status = connection.getResponseCode();
-            if (status == HttpURLConnection.HTTP_OK) {
+            if (status == HttpURLConnection.HTTP_OK || status == HttpURLConnection.HTTP_CREATED) {
                 setResponseHeadersList(connection.getHeaderFields());
+                setResponse(IOUtils.toByteArray(connection.getInputStream()));
             }
-            setResponse(IOUtils.toByteArray(connection.getInputStream()));
         } catch (Throwable t) {
             throw new Error("GET " + uri, t);
         } finally {
@@ -41,8 +41,9 @@ public class HttpGet extends HttpBase {
         headers.put("accept", contentType);
         headers.put("accept-charset", "utf-8");
         get(uri, headers);
-        if (getResponse() != null)
+        if (getResponse() != null) {
             setResponseText(new String(getResponse()));
+        }
         return this;
     }
 

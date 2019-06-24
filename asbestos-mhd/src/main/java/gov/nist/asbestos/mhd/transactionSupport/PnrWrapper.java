@@ -1,31 +1,24 @@
 package gov.nist.asbestos.mhd.transactionSupport;
 
 import oasis.names.tc.ebxml_regrep.xsd.rim._3.RegistryObjectListType;
+import org.apache.commons.io.IOUtils;
 
 import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 
 /**
  *
  */
 public class PnrWrapper {
 
-    /**
-     * Build SOAP Envelope
-     * @param toAddr
-     * @param registryObjectList
-     * @param documentDefinitions
-     * @return xml string
-     */
-    public static String wrap(String toAddr, RegistryObjectListType registryObjectList, String documentDefinitions) {
+    public static String wrap(String toAddr, String soapBody) {
         try {
-            ByteArrayOutputStream os = new ByteArrayOutputStream();
-            new RegistryObjectListTypeBuilder().toOutputStream(registryObjectList, os);
-            String xml = new String(os.toByteArray());
-            String part1 = (String) PnrWrapper.class.getResource("/pnr/part1.txt").getContent();
-            part1 = part1.replace("TO_ADDR", toAddr);
-            String part2 = (String) PnrWrapper.class.getResource("/pnr/part2.txt").getContent();
-            String part3 = (String) PnrWrapper.class.getResource("/pnr/part3.txt").getContent();
-            return part1 + xml + part2 + documentDefinitions + part3;
+
+            String header = (String) IOUtils.toString((InputStream)PnrWrapper.class.getResource("/pnr/header.txt").getContent(), StandardCharsets.UTF_8);
+            header = header.replace("TO_ADDR", toAddr);
+            String footer = (String) IOUtils.toString((InputStream)PnrWrapper.class.getResource("/pnr/footer.txt").getContent(), StandardCharsets.UTF_8);
+            return header + soapBody + footer;
         } catch (Exception e) {
             throw new Error(e);
         }
