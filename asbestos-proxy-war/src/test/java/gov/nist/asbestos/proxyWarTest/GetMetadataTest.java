@@ -1,4 +1,4 @@
-package gov.nist.asbestos.proxyTest;
+package gov.nist.asbestos.proxyWarTest;
 
 import gov.nist.asbestos.asbestosProxy.events.EventStore;
 import gov.nist.asbestos.asbestosProxy.events.EventStoreItem;

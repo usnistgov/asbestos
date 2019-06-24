@@ -1,4 +1,4 @@
-package gov.nist.asbestos.proxyTest;
+package gov.nist.asbestos.proxyWarTest;
 
 import javax.servlet.ServletOutputStream;
 import java.io.ByteArrayOutputStream;

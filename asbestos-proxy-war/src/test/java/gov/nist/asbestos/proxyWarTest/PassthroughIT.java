@@ -1,18 +1,13 @@
-package gov.nist.asbestos.proxyTest;
+package gov.nist.asbestos.proxyWarTest;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
-import gov.nist.asbestos.asbestosProxy.events.EventStore;
-import gov.nist.asbestos.asbestosProxy.events.EventStoreItem;
-import gov.nist.asbestos.asbestosProxy.events.EventStoreSearch;
-import gov.nist.asbestos.asbestosProxy.log.SimStore;
 import gov.nist.asbestos.http.operations.HttpDelete;
 import gov.nist.asbestos.http.operations.HttpGet;
 import gov.nist.asbestos.http.operations.HttpPost;
 import gov.nist.asbestos.sharedObjects.ChannelConfig;
 import gov.nist.asbestos.sharedObjects.ChannelConfigFactory;
-import gov.nist.asbestos.simapi.simCommon.SimId;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.BeforeAll;
