@@ -91,4 +91,24 @@ public class ValE {
     public Set<ValType> getTypes() {
         return types;
     }
+
+    public boolean hasErrors() {
+        if (types.contains(ValType.Error) && !types.contains(ValType.Ignored))
+            return true;
+        for (ValE e : ele) {
+            if (e.hasErrors())
+                return true;
+        }
+        return false;
+    }
+
+    public boolean hasWarnings() {
+        if (types.contains(ValType.Warn) && !types.contains(ValType.Ignored))
+            return true;
+        for (ValE e : ele) {
+            if (e.hasWarnings())
+                return true;
+        }
+        return false;
+    }
 }

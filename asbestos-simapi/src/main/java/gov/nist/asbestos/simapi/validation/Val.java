@@ -45,13 +45,17 @@ public class Val {
         for (ValE e : elements) {
             if (e.getTypes().contains(ValType.Error) && !e.getTypes().contains(ValType.Ignored))
                 return true;
+            if (!e.ele.isEmpty() && e.hasErrors())
+                return true;
         }
         return false;
     }
 
     public boolean hasWarnings() {
         for (ValE e : elements) {
-            if (e.getTypes().contains(ValType.Warn))
+            if (e.getTypes().contains(ValType.Warn) && !e.getTypes().contains(ValType.Ignored))
+                return true;
+            if (!e.ele.isEmpty() && e.hasWarnings())
                 return true;
         }
         return false;

@@ -1,6 +1,7 @@
 package gov.nist.asbestos.utilities;
 
 import oasis.names.tc.ebxml_regrep.xsd.rs._3.RegistryError;
+import oasis.names.tc.ebxml_regrep.xsd.rs._3.RegistryErrorList;
 import oasis.names.tc.ebxml_regrep.xsd.rs._3.RegistryResponseType;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.ClientProtocolException;
@@ -18,6 +19,7 @@ import org.apache.http.util.EntityUtils;
 import javax.xml.bind.JAXBException;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.util.List;
 
 public class MultipartSender {
 
@@ -68,8 +70,14 @@ public class MultipartSender {
     private static RegErrorList asErrorList(RegistryResponseType registryResponseType) {
         RegErrorList list = new RegErrorList();
 
-        for (RegistryError rError: registryResponseType.getRegistryErrorList().getRegistryError()) {
-            list.getList().add(new RegError(rError.getCodeContext(), rError.getSeverity().endsWith("Warning") ? ErrorType.Warning : ErrorType.Error));
+        RegistryErrorList registryErrorList = registryResponseType.getRegistryErrorList();
+        if (registryErrorList != null) {
+            List<RegistryError> registryErrors = registryErrorList.getRegistryError();
+            if (registryErrors != null) {
+                for (RegistryError rError : registryErrors) {
+                    list.getList().add(new RegError(rError.getCodeContext(), rError.getSeverity().endsWith("Warning") ? ErrorType.Warning : ErrorType.Error));
+                }
+            }
         }
 
         return list;
@@ -81,8 +89,13 @@ public class MultipartSender {
             return null;
         while (in.charAt(start) != '<') start--;
         int end = in.indexOf("RegistryResponse", start+20);
-        if (end == -1)
-            return null;
+        if (end == -1) {
+            // no formal end - must have been successful - settle for />
+            end = in.indexOf("/>", start + 10);
+            if (end == -1)
+                return null;
+            return in.substring(start, end+2);
+        }
         while(in.charAt(end) != '>') end++;
         return in.substring(start, end+1);
     }

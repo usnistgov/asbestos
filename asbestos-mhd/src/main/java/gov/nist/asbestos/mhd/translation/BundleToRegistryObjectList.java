@@ -51,7 +51,7 @@ public class BundleToRegistryObjectList implements IVal {
     private static List<Class<?>> acceptableResourceTypes = Arrays.asList(DocumentManifest.class, DocumentReference.class, Binary.class, ListResource.class);
     private static String comprehensiveMetadataProfile = "http://ihe.net/fhir/StructureDefinition/IHE_MHD_Provide_Comprehensive_DocumentBundle";
     private static String minimalMetadataProfile = "http://ihe.net/fhir/StructureDefinition/IHE_MHD_Provide_Minimal_DocumentBundle";
-    private static List<CanonicalType> profiles = Arrays.asList(new CanonicalType(comprehensiveMetadataProfile), new CanonicalType(minimalMetadataProfile));
+    private static List<String> profiles = Arrays.asList(comprehensiveMetadataProfile, minimalMetadataProfile);
     private static String baseContentId = ".de1e4efca5ccc4886c8528535d2afb251e0d5fa31d58a815@ihexds.nist.gov";
     private static String mhdProfileRef = "MHD Profile - Rev 3.1";
     private static Map<String, String> buildTypeMap() {
@@ -69,25 +69,16 @@ public class BundleToRegistryObjectList implements IVal {
     private AssigningAuthorities assigningAuthorities;
     private ResourceMgr rMgr;
     private Val val;
+    private Map<String, byte[]> documentContents = new HashMap<>();
 
-    public PnrWrapper build(Bundle bundle) {
+    public RegistryObjectListType build(Bundle bundle) {
         Objects.requireNonNull(val);
         Objects.requireNonNull(bundle);
         Objects.requireNonNull(rMgr);
 
         scanBundleForAcceptability(bundle, rMgr);
-        PnrWrapper pnrWrapper = new PnrWrapper();
 
-        RegistryObjectListType rol = buildRegistryObjectList();
-
-//        StringWriter writer = new StringWriter();
-//        MarkupBuilder builder = new MarkupBuilder(writer);
-//        submission.documentIdToContentId.each { id, contentId ->
-//            addDocument(builder, id, contentId)
-//        }
-//        submission.documentDefinitions = writer.toString()
-
-        return pnrWrapper;
+        return buildRegistryObjectList();
     }
 
     // TODO handle List/Folder or signal error
@@ -253,9 +244,9 @@ public class BundleToRegistryObjectList implements IVal {
             addSlot(ss, "submissionTime", translateDateTime(dm.getCreated()));
         if (dm.hasDescription())
             addName(ss, dm.getDescription());
-        addClassification(ss, "", rMgr.allocateSymbolicId(), resource.getAssignedId());
+        addClassification(ss, "urn:uuid:a54d6aa5-d40d-43f9-88c5-b4633d873bdd", rMgr.allocateSymbolicId(), resource.getAssignedId());
         if (dm.hasType())
-            addClassificationFromCodeableConcept(ss, dm.getType(), CodeTranslator.TYPECODE, resource.getAssignedId(), vale);
+            addClassificationFromCodeableConcept(ss, dm.getType(), CodeTranslator.CONTENTTYPECODE, resource.getAssignedId(), vale);
         if (!dm.hasMasterIdentifier())
             val.add(new ValE("DocumentManifest.masterIdentifier not present - declared by IHE to be [1..1]").asError());
         else
@@ -305,10 +296,10 @@ public class BundleToRegistryObjectList implements IVal {
 
         tr = vale.add(new ValE("content.attachment.contentType is [1..1]").addIheRequirement(DRTable));
         tr.add(new ValE("content.attachment.contentType to mimeType").asTranslation());
-        if (content.getAttachment().getContentType() == null)
-            tr.add(new ValE("content.attachment.contentType not present").asError());
-        else
-            eo.setMimeType(content.getAttachment().getContentType());
+//        if (content.getAttachment().getContentType() == null)
+//            tr.add(new ValE("content.attachment.contentType not present").asError());
+//        else
+//            eo.setMimeType(content.getAttachment().getContentType());
 
         if (dr.getDate() != null) {
             vale.addTr(new ValE("creationTime"));
@@ -359,10 +350,10 @@ public class BundleToRegistryObjectList implements IVal {
             vale.addTr(new ValE("languageCode"));
             addSlot(eo, "languageCode", attachment.getLanguage());
         }
-        if (attachment.hasUrl()) {
-            vale.addTr(new ValE("repositoryUniqueId"));
-            addSlot(eo, "repositoryUniqueId", attachment.getUrl());
-        }
+//        if (attachment.hasUrl()) {
+//            vale.addTr(new ValE("repositoryUniqueId"));
+//            addSlot(eo, "repositoryUniqueId", attachment.getUrl());
+//        }
         if (attachment.hasHash()) {
             vale.addTr(new ValE("hash"));
             Base64BinaryType hash64 = attachment.getHashElement();
@@ -425,6 +416,7 @@ public class BundleToRegistryObjectList implements IVal {
                     ClassificationType classificationType = classificationFromAuthor(resource1, containing);
                     if (classificationType != null) {
                         classificationType.setClassifiedObject(eo.getId());
+                        classificationType.setId(rMgr.allocateSymbolicId());
                         eo.getClassification().add(classificationType);
                     }
                 }
@@ -440,6 +432,7 @@ public class BundleToRegistryObjectList implements IVal {
                 IBaseResource resource1 = contained.get().getResource();
                 ClassificationType classificationType = classificationFromAuthor(resource1, containing);
                 if (classificationType != null) {
+                    classificationType.setId(rMgr.allocateSymbolicId());
                     for (SlotType1 slot1 : classificationType.getSlot()) {
                         if ("authorPerson".equals(slot1.getName())) {
                             if (!slot1.getValueList().getValue().isEmpty()) {
@@ -455,6 +448,24 @@ public class BundleToRegistryObjectList implements IVal {
                     }
                 }
             }
+        }
+        if (attachment.hasUrl()) {
+            String url = attachment.getUrl();
+            ResourceWrapper resourceWrapper = new ResourceWrapper();
+            resourceWrapper.setUrl(new Ref(url));
+            Optional<ResourceWrapper> binary = rMgr.resolveReference(resourceWrapper, new Ref(url), new ResolverConfig(), vale);
+            if (!binary.isPresent()) {
+                vale.add(new ValE("Document(Binary) is not retrievable").asError());
+                return eo;
+            }
+            if (!(binary.get().getResource() instanceof Binary)) {
+                vale.add(new ValE("Document(Binary) is not a Binary (" + binary.get().getClass().getSimpleName() + " instead").asError());
+                return eo;
+            }
+            Binary theBinary = (Binary) binary.get().getResource();
+            eo.setMimeType(theBinary.getContentType());
+            byte[] data = theBinary.getData();
+            documentContents.put(eo.getId(), data);
         }
         return eo;
     }
@@ -582,7 +593,7 @@ public class BundleToRegistryObjectList implements IVal {
         Objects.requireNonNull(assigningAuthorities);
         List<String> pids = identifiers.stream()
                 .filter(identifier -> assigningAuthorities.check(unURN(identifier.getSystem())))
-                .map(identifier -> identifier.getValue() + "^^^" + unURN(identifier.getSystem()) + "&ISO")
+                .map(identifier -> identifier.getValue() + "^^^&" + unURN(identifier.getSystem()) + "&ISO")
                 .collect(Collectors.toList());
 
         return (pids.isEmpty()) ? null : pids.get(0);
@@ -681,7 +692,8 @@ public class BundleToRegistryObjectList implements IVal {
     private void addClassification(RegistryObjectType ro, String node, String id, String classifiedObject) {
         val.add(new ValE("Classification " + node));
         ClassificationType ct = new ClassificationType();
-        ct.setClassificationScheme(node);
+        ct.setClassifiedObject(classifiedObject);
+        ct.setClassificationNode(node);
         ct.setId(id);
         ct.setObjectType("urn:oasis:names:tc:ebxml-regrep:ObjectType:RegistryObject:Classification");
         ro.getClassification().add(ct);
@@ -715,7 +727,7 @@ public class BundleToRegistryObjectList implements IVal {
             val.add(new ValE("No profile declaration present in bundle").asError()
                     .add(new ValE("3.65.4.1.2.1 Bundle Resources").asDoc()));
         CanonicalType bundleProfile = bundle.getMeta().getProfile().get(0);
-        if (!profiles.contains(bundleProfile))
+        if (!profiles.contains(bundleProfile.asStringValue()))
             val.add(new ValE("Do not understand profile declared in bundle - " + bundleProfile).asError()
                     .add(new ValE("3.65.4.1.2.1 Bundle Resources").asDoc()));
 
@@ -753,4 +765,7 @@ public class BundleToRegistryObjectList implements IVal {
         return this;
     }
 
+    public byte[] getDocumentContents(String id) {
+        return documentContents.get(id);
+    }
 }
