@@ -67,7 +67,7 @@ class AttributesTest {
         BundleToRegistryObjectList brol = new BundleToRegistryObjectList();
         brol.setVal(new Val());
 
-        brol.addExternalIdentifier(eo, "scheme", "value", "id", "registryObject", "name");
+        brol.addExternalIdentifier(eo, "scheme", "value", "id", "registryObject", "name", null);
 
         String eoString = toXml(eo);
         System.out.println(eoString);

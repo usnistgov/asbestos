@@ -5,6 +5,7 @@ import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import gov.nist.asbestos.asbestosProxySupport.Base.Base;
 import gov.nist.asbestos.mhd.client.FhirClient;
+import gov.nist.asbestos.mhd.resolver.IdBuilder;
 import gov.nist.asbestos.mhd.resolver.ResourceCacheMgr;
 import gov.nist.asbestos.mhd.resolver.ResourceMgr;
 import gov.nist.asbestos.mhd.transactionSupport.AssigningAuthorities;
@@ -82,6 +83,7 @@ class Pnr1IT {
         bundleToRegistryObjectList.setCodeTranslator(codeTranslator);
         bundleToRegistryObjectList.setResourceMgr(rMgr);
         bundleToRegistryObjectList.setAssigningAuthorities(AssigningAuthorities.allowAny());
+        bundleToRegistryObjectList.setIdBuilder(new IdBuilder(true));
     }
 
     private static File getCodesFile() {
@@ -152,7 +154,7 @@ class Pnr1IT {
 
         String pnrString = deleteXMLInstruction(new String(pnrStream.toByteArray()));
         String soapString = PnrWrapper.wrap(toAddr, pnrString);
-        System.out.println(soapString);
+        //System.out.println(soapString);
 
         RegErrorList regErrorList = MultipartSender.send(pnrString, toAddr);
         for (RegError re : regErrorList.getList()) {

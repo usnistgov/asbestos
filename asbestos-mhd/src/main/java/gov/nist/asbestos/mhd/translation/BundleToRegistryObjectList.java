@@ -3,6 +3,7 @@ package gov.nist.asbestos.mhd.translation;
 
 import gov.nist.asbestos.asbestorCodesJaxb.Code;
 import gov.nist.asbestos.asbestosProxySupport.Base.IVal;
+import gov.nist.asbestos.mhd.resolver.IdBuilder;
 import gov.nist.asbestos.mhd.resolver.Ref;
 import gov.nist.asbestos.mhd.resolver.ResolverConfig;
 import gov.nist.asbestos.mhd.resolver.ResourceMgr;
@@ -69,12 +70,14 @@ public class BundleToRegistryObjectList implements IVal {
     private AssigningAuthorities assigningAuthorities;
     private ResourceMgr rMgr;
     private Val val;
+    private IdBuilder idBuilder;
     private Map<String, byte[]> documentContents = new HashMap<>();
 
     public RegistryObjectListType build(Bundle bundle) {
         Objects.requireNonNull(val);
         Objects.requireNonNull(bundle);
         Objects.requireNonNull(rMgr);
+        Objects.requireNonNull(idBuilder);
 
         scanBundleForAcceptability(bundle, rMgr);
 
@@ -250,9 +253,9 @@ public class BundleToRegistryObjectList implements IVal {
         if (!dm.hasMasterIdentifier())
             val.add(new ValE("DocumentManifest.masterIdentifier not present - declared by IHE to be [1..1]").asError());
         else
-            addExternalIdentifier(ss, CodeTranslator.SS_UNIQUEID, unURN(dm.getMasterIdentifier().getValue()), rMgr.allocateSymbolicId(), resource.getAssignedId(), "XDSSubmissionSet.uniqueId");
+            addExternalIdentifier(ss, CodeTranslator.SS_UNIQUEID, unURN(dm.getMasterIdentifier().getValue()), rMgr.allocateSymbolicId(), resource.getAssignedId(), "XDSSubmissionSet.uniqueId", idBuilder);
         if (dm.hasSource())
-            addExternalIdentifier(ss, CodeTranslator.SS_SOURCEID, unURN(dm.getMasterIdentifier().getValue()), rMgr.allocateSymbolicId(), resource.getAssignedId(), "XDSSubmissionSet.uniqueId");
+            addExternalIdentifier(ss, CodeTranslator.SS_SOURCEID, unURN(dm.getMasterIdentifier().getValue()), rMgr.allocateSymbolicId(), resource.getAssignedId(), "XDSSubmissionSet.sourceId", null);
         if (dm.hasSubject() && dm.getSubject().hasReference())
             addSubject(ss, resource,  new Ref(dm.getSubject()), CodeTranslator.SS_PID, "XDSSubmissionSet.patientId", vale);
         return ss;
@@ -395,7 +398,7 @@ public class BundleToRegistryObjectList implements IVal {
             tr.add(new ValE("masterIdentifier not present").asError());
         else {
             tr.add(new ValE("masterIdentifier").asTranslation());
-            addExternalIdentifier(eo, CodeTranslator.DE_UNIQUEID, unURN(dr.getMasterIdentifier().getValue()), rMgr.allocateSymbolicId(), resource.getAssignedId(), "XDSDocumentEntry.uniqueId");
+            addExternalIdentifier(eo, CodeTranslator.DE_UNIQUEID, unURN(dr.getMasterIdentifier().getValue()), rMgr.allocateSymbolicId(), resource.getAssignedId(), "XDSDocumentEntry.uniqueId", idBuilder);
         }
 
         tr = vale.add(new ValE("DocumentReference.subject is [1..1]").addIheRequirement(DRTable));
@@ -623,12 +626,14 @@ public class BundleToRegistryObjectList implements IVal {
         String pid = findAcceptablePID(identifiers);
 
         if (pid != null)
-            addExternalIdentifier(ro, scheme, pid, rMgr.allocateSymbolicId(), resource.getAssignedId(), attName);
+            addExternalIdentifier(ro, scheme, pid, rMgr.allocateSymbolicId(), resource.getAssignedId(), attName, null);
     }
 
-    public void addExternalIdentifier(RegistryObjectType ro, String scheme, String value, String id, String registryObject, String name) {
+    public void addExternalIdentifier(RegistryObjectType ro, String scheme, String value, String id, String registryObject, String name, IdBuilder idBuilder) {
         val.add(new ValE("ExternalIdentifier " + scheme));
         //List<ExternalIdentifierType> eits = ro.getExternalIdentifier();
+        if (idBuilder != null)
+            value = idBuilder.allocate(value); // maybe override
         ExternalIdentifierType eit = new ExternalIdentifierType();
         eit.setIdentificationScheme(scheme);
         eit.setId(id);
@@ -767,5 +772,9 @@ public class BundleToRegistryObjectList implements IVal {
 
     public byte[] getDocumentContents(String id) {
         return documentContents.get(id);
+    }
+
+    public void setIdBuilder(IdBuilder idBuilder) {
+        this.idBuilder = idBuilder;
     }
 }
