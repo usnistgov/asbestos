@@ -1,8 +1,8 @@
 package gov.nist.asbestos.mhd.translation.test;
 
 
-import gov.nist.asbestos.asbestosProxySupport.Base.Base;
-import gov.nist.asbestos.mhd.resolver.ResourceMgr;
+import gov.nist.asbestos.asbestosProxySupport.Base.ProxyBase;
+import gov.nist.asbestos.asbestosProxySupport.resolver.ResourceMgr;
 import gov.nist.asbestos.mhd.transactionSupport.CodeTranslator;
 import gov.nist.asbestos.mhd.transactionSupport.CodeTranslatorBuilder;
 import gov.nist.asbestos.mhd.translation.BundleToRegistryObjectList;
@@ -30,7 +30,7 @@ class AttributesTest {
     @Test
     void addClassificationFromCodeableConcept()  throws JAXBException {
         InputStream is = this.getClass().getResourceAsStream("/gov/nist/asbestos/mhd/translation/shared/DocumentReference1.xml");
-        IBaseResource resource = Base.getFhirContext().newXmlParser().parseResource(is);
+        IBaseResource resource = ProxyBase.getFhirContext().newXmlParser().parseResource(is);
         assertTrue(resource instanceof DocumentReference);
         DocumentReference dr = (DocumentReference) resource;
         CodeableConcept type = dr.getType();

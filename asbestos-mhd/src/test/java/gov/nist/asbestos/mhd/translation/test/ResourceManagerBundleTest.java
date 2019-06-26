@@ -1,11 +1,11 @@
 package gov.nist.asbestos.mhd.translation.test;
 
-import gov.nist.asbestos.asbestosProxySupport.Base.Base;
-import gov.nist.asbestos.mhd.client.FhirClient;
-import gov.nist.asbestos.mhd.resolver.Ref;
-import gov.nist.asbestos.mhd.resolver.ResolverConfig;
-import gov.nist.asbestos.mhd.resolver.ResourceMgr;
-import gov.nist.asbestos.mhd.transactionSupport.ResourceWrapper;
+import gov.nist.asbestos.asbestosProxySupport.Base.ProxyBase;
+import gov.nist.asbestos.asbestosProxySupport.client.FhirClient;
+import gov.nist.asbestos.asbestosProxySupport.resolver.Ref;
+import gov.nist.asbestos.asbestosProxySupport.resolver.ResolverConfig;
+import gov.nist.asbestos.asbestosProxySupport.resolver.ResourceMgr;
+import gov.nist.asbestos.asbestosProxySupport.resolver.ResourceWrapper;
 import gov.nist.asbestos.simapi.validation.Val;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
@@ -27,7 +27,7 @@ class ResourceManagerBundleTest {
     @BeforeAll
     static void beforeAll() {
         InputStream is = ResourceMgrContainedTest.class.getResourceAsStream("/gov/nist/asbestos/mhd/translation/shared/bundle.xml");
-        IBaseResource resource = Base.getFhirContext().newXmlParser().parseResource(is);
+        IBaseResource resource = ProxyBase.getFhirContext().newXmlParser().parseResource(is);
         assertTrue(resource instanceof Bundle);
         bundle = (Bundle) resource;
     }

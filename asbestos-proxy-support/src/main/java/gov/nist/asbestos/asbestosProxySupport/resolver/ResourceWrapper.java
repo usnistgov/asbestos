@@ -1,7 +1,6 @@
-package gov.nist.asbestos.mhd.transactionSupport;
+package gov.nist.asbestos.asbestosProxySupport.resolver;
 
 
-import gov.nist.asbestos.mhd.resolver.Ref;
 import gov.nist.asbestos.simapi.validation.Val;
 import gov.nist.asbestos.simapi.validation.ValE;
 import org.hl7.fhir.instance.model.api.IBaseResource;

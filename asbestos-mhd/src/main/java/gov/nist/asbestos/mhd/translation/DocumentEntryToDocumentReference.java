@@ -2,13 +2,12 @@ package gov.nist.asbestos.mhd.translation;
 
 import gov.nist.asbestos.asbestosProxySupport.Base.IVal;
 import gov.nist.asbestos.mhd.exceptions.MetadataAttributeTranslationException;
-import gov.nist.asbestos.mhd.resolver.ResourceMgr;
+import gov.nist.asbestos.asbestosProxySupport.resolver.ResourceMgr;
 import gov.nist.asbestos.mhd.transactionSupport.CodeTranslator;
 import gov.nist.asbestos.mhd.translation.attribute.EntryUuid;
 import gov.nist.asbestos.simapi.validation.Val;
 import gov.nist.asbestos.simapi.validation.ValE;
 import oasis.names.tc.ebxml_regrep.xsd.rim._3.*;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.*;
 
 import java.util.Collections;

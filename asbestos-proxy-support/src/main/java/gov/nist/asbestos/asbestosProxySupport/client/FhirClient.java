@@ -1,10 +1,10 @@
-package gov.nist.asbestos.mhd.client;
+package gov.nist.asbestos.asbestosProxySupport.client;
 
-import gov.nist.asbestos.asbestosProxySupport.Base.Base;
+import gov.nist.asbestos.asbestosProxySupport.Base.ProxyBase;
 import gov.nist.asbestos.http.operations.HttpGet;
-import gov.nist.asbestos.mhd.resolver.Ref;
-import gov.nist.asbestos.mhd.resolver.ResourceCacheMgr;
-import gov.nist.asbestos.mhd.transactionSupport.ResourceWrapper;
+import gov.nist.asbestos.asbestosProxySupport.resolver.Ref;
+import gov.nist.asbestos.asbestosProxySupport.resolver.ResourceCacheMgr;
+import gov.nist.asbestos.asbestosProxySupport.resolver.ResourceWrapper;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
 
@@ -26,9 +26,9 @@ public class FhirClient {
             return Optional.empty();
         IBaseResource resource;
         if (format == Format.XML)
-            resource = Base.getFhirContext().newXmlParser().parseResource(resourceText);
+            resource = ProxyBase.getFhirContext().newXmlParser().parseResource(resourceText);
         else
-            resource = Base.getFhirContext().newJsonParser().parseResource(resourceText);
+            resource = ProxyBase.getFhirContext().newJsonParser().parseResource(resourceText);
         ResourceWrapper wrapper = new ResourceWrapper();
         wrapper.setUrl(ref);
         wrapper.setResource(resource);

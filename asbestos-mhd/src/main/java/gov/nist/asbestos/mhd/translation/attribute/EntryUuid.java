@@ -1,8 +1,7 @@
 package gov.nist.asbestos.mhd.translation.attribute;
 
-import gov.nist.asbestos.mhd.resolver.ResourceMgr;
-import gov.nist.asbestos.mhd.transactionSupport.ResourceWrapper;
-import gov.nist.asbestos.simapi.validation.Val;
+import gov.nist.asbestos.asbestosProxySupport.resolver.ResourceMgr;
+import gov.nist.asbestos.asbestosProxySupport.resolver.ResourceWrapper;
 import gov.nist.asbestos.simapi.validation.ValE;
 import org.hl7.fhir.r4.model.Identifier;
 

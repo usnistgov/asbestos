@@ -40,6 +40,7 @@
         <module>asbestos-mhd</module>
         <module>asbestos-proxy-support</module>
         <module>asbestos-utilities</module>
+        <module>asbestos-test-engine</module>
     </modules>
 
     <dependencyManagement>
@@ -108,6 +109,11 @@
         <dependency>
             <groupId>ca.uhn.hapi.fhir</groupId>
             <artifactId>hapi-fhir-structures-r4</artifactId>
+            <version>${hapi.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>ca.uhn.hapi.fhir</groupId>
+            <artifactId>hapi-fhir-validation</artifactId>
             <version>${hapi.version}</version>
         </dependency>
         <dependency>

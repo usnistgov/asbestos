@@ -3,11 +3,11 @@ package gov.nist.asbestos.mhd.translation.it;
 import ca.uhn.fhir.context.FhirContext;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import gov.nist.asbestos.asbestosProxySupport.Base.Base;
-import gov.nist.asbestos.mhd.client.FhirClient;
-import gov.nist.asbestos.mhd.resolver.IdBuilder;
-import gov.nist.asbestos.mhd.resolver.ResourceCacheMgr;
-import gov.nist.asbestos.mhd.resolver.ResourceMgr;
+import gov.nist.asbestos.asbestosProxySupport.Base.ProxyBase;
+import gov.nist.asbestos.asbestosProxySupport.client.FhirClient;
+import gov.nist.asbestos.asbestosProxySupport.resolver.IdBuilder;
+import gov.nist.asbestos.asbestosProxySupport.resolver.ResourceCacheMgr;
+import gov.nist.asbestos.asbestosProxySupport.resolver.ResourceMgr;
 import gov.nist.asbestos.mhd.transactionSupport.AssigningAuthorities;
 import gov.nist.asbestos.mhd.transactionSupport.CodeTranslator;
 import gov.nist.asbestos.mhd.transactionSupport.ProvideAndRegisterBuilder;
@@ -59,7 +59,7 @@ class Pnr1IT {
     @BeforeAll
     static void beforeAll() throws URISyntaxException, FileNotFoundException, JAXBException {
         externalCache = Paths.get(Pnr1IT.class.getResource("/external_cache/findme.txt").toURI()).getParent().toFile();
-        fhirContext = Base.getFhirContext();
+        fhirContext = ProxyBase.getFhirContext();
         objectMapper = new  ObjectMapper();
         jsonFactory = objectMapper.getFactory();
         Installation.instance().setExternalCache(externalCache);
@@ -93,7 +93,7 @@ class Pnr1IT {
     @Test
     void test1() {
         InputStream is = Pnr1IT.class.getResourceAsStream("/gov/nist/asbestos/mhd/translation/pnr1/bundle.xml");
-        IBaseResource resource = Base.getFhirContext().newXmlParser().parseResource(is);
+        IBaseResource resource = ProxyBase.getFhirContext().newXmlParser().parseResource(is);
         assertTrue(resource instanceof Bundle);
         Bundle bundle = (Bundle) resource;
 

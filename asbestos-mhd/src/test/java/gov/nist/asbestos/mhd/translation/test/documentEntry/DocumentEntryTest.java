@@ -5,17 +5,15 @@ import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import gov.nist.asbestos.asbestosProxySupport.Base.Base;
-import gov.nist.asbestos.mhd.client.FhirClient;
-import gov.nist.asbestos.mhd.exceptions.MetadataAttributeTranslationException;
-import gov.nist.asbestos.mhd.resolver.ResourceCacheMgr;
-import gov.nist.asbestos.mhd.resolver.ResourceMgr;
+import gov.nist.asbestos.asbestosProxySupport.Base.ProxyBase;
+import gov.nist.asbestos.asbestosProxySupport.client.FhirClient;
+import gov.nist.asbestos.asbestosProxySupport.resolver.ResourceCacheMgr;
+import gov.nist.asbestos.asbestosProxySupport.resolver.ResourceMgr;
 import gov.nist.asbestos.mhd.transactionSupport.AssigningAuthorities;
 import gov.nist.asbestos.mhd.transactionSupport.CodeTranslator;
-import gov.nist.asbestos.mhd.transactionSupport.ResourceWrapper;
+import gov.nist.asbestos.asbestosProxySupport.resolver.ResourceWrapper;
 import gov.nist.asbestos.mhd.translation.BundleToRegistryObjectList;
 import gov.nist.asbestos.mhd.translation.ContainedIdAllocator;
-import gov.nist.asbestos.mhd.translation.DateTransform;
 import gov.nist.asbestos.mhd.translation.DocumentEntryToDocumentReference;
 import gov.nist.asbestos.simapi.tk.installation.Installation;
 import gov.nist.asbestos.simapi.validation.Val;
@@ -56,7 +54,7 @@ class DocumentEntryTest {
     @BeforeAll
     static void beforeAll() throws URISyntaxException {
         externalCache = Paths.get(DocumentEntryTest.class.getResource("/external_cache/findme.txt").toURI()).getParent().toFile();
-        fhirContext = Base.getFhirContext();
+        fhirContext = ProxyBase.getFhirContext();
         objectMapper = new  ObjectMapper();
         jsonFactory = objectMapper.getFactory();
         Installation.instance().setExternalCache(externalCache);
@@ -143,6 +141,8 @@ class DocumentEntryTest {
         run(documentReference, null, false);
 
         if (!val.ignore("masterIdentifier not present"))
+            fail("Error did not occur");
+        if ( !val.ignore("subject not present or has no reference"))
             fail("Error did not occur");
 
         if (val.hasErrors())
@@ -234,7 +234,13 @@ class DocumentEntryTest {
         DocumentReference expected = withOfficialEntryUUID();
         expected.getIdentifier().remove(0);  // ID1 not appropriate (was placeholder for ID)
 
-        run(documentReference, expected, true);
+        run(documentReference, expected, false);
+
+        if (!val.ignore("subject not present or has no reference"))
+            fail("Error did not occur");
+
+        if (val.hasErrors())
+            fail(ValFactory.toJson(new ValErrors(val)));
 
         System.out.println(ValFactory.toJson(val));
     }
@@ -265,7 +271,13 @@ class DocumentEntryTest {
         DocumentReference documentReference = x.get(0);
         DocumentReference expected = x.get(1);
 
-        run(documentReference, expected, true);
+        run(documentReference, expected, false);
+
+        if (!val.ignore("subject not present or has no reference"))
+            fail("Error did not occur");
+
+        if (val.hasErrors())
+            fail(ValFactory.toJson(new ValErrors(val)));
 
     }
 
@@ -492,7 +504,13 @@ class DocumentEntryTest {
         DocumentReference documentReference = x.get(0);
         DocumentReference expected = x.get(1);
 
-        run(documentReference, expected, true);
+        run(documentReference, expected, false);
+
+        if (!val.ignore("subject not present or has no reference"))
+            fail("Error did not occur");
+
+        if (val.hasErrors())
+            fail(ValFactory.toJson(new ValErrors(val)));
     }
 
 
@@ -570,7 +588,13 @@ class DocumentEntryTest {
         DocumentReference documentReference = x.get(0);
         DocumentReference expected = x.get(1);
 
-        run(documentReference, expected, true);
+        run(documentReference, expected, false);
+
+        if (!val.ignore("subject not present or has no reference"))
+            fail("Error did not occur");
+
+        if (val.hasErrors())
+            fail(ValFactory.toJson(new ValErrors(val)));
     }
 
 
@@ -638,7 +662,13 @@ class DocumentEntryTest {
         DocumentReference documentReference = x.get(0);
         DocumentReference expected = x.get(1);
 
-        run(documentReference, expected, true);
+        run(documentReference, expected, false);
+
+        if (!val.ignore("subject not present or has no reference"))
+            fail("Error did not occur");
+
+        if (val.hasErrors())
+            fail(ValFactory.toJson(new ValErrors(val)));
     }
 
     private DocumentReference withSecurityLabel() {
@@ -670,7 +700,13 @@ class DocumentEntryTest {
         DocumentReference documentReference = x.get(0);
         DocumentReference expected = x.get(1);
 
-        run(documentReference, expected, true);
+        run(documentReference, null, false);
+
+        if ( !val.ignore("subject not present or has no reference"))
+            fail("Error did not occur");
+
+        if (val.hasErrors())
+            fail(ValFactory.toJson(new ValErrors(val)));
     }
 
     private DocumentReference withContentType() {

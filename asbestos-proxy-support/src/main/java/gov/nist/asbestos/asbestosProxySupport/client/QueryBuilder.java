@@ -1,6 +1,6 @@
-package gov.nist.asbestos.mhd.client;
+package gov.nist.asbestos.asbestosProxySupport.client;
 
-import gov.nist.asbestos.mhd.resolver.Ref;
+import gov.nist.asbestos.asbestosProxySupport.resolver.Ref;
 
 import java.net.URI;
 import java.util.List;

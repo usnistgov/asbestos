@@ -1,4 +1,4 @@
-package gov.nist.asbestos.mhd.resolver;
+package gov.nist.asbestos.asbestosProxySupport.resolver;
 
 import gov.nist.asbestos.simapi.tk.installation.Installation;
 

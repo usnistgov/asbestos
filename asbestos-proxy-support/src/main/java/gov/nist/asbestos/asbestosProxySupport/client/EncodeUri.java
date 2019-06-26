@@ -1,4 +1,4 @@
-package gov.nist.asbestos.mhd.client;
+package gov.nist.asbestos.asbestosProxySupport.client;
 
 import java.net.URI;
 /**

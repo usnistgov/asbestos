@@ -3,10 +3,9 @@ package gov.nist.asbestos.mhd.translation.test.documentEntry;
 import ca.uhn.fhir.context.FhirContext;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import gov.nist.asbestos.asbestosProxySupport.Base.Base;
+import gov.nist.asbestos.asbestosProxySupport.Base.ProxyBase;
 import gov.nist.asbestos.mhd.translation.Author;
 import gov.nist.asbestos.mhd.translation.ContainedIdAllocator;
 import gov.nist.asbestos.simapi.validation.Val;
@@ -30,7 +29,7 @@ class AuthorTest {
 
     @BeforeAll
     static void beforeAll() {
-        fhirContext = Base.getFhirContext();
+        fhirContext = ProxyBase.getFhirContext();
     }
 
     @BeforeEach
