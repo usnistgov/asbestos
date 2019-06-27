@@ -469,6 +469,8 @@ public class BundleToRegistryObjectList implements IVal {
             byte[] data = theBinary.getData();
             documentContents.put(eo.getId(), data);
         }
+        if (attachment.hasContentType())
+            eo.setMimeType(attachment.getContentType());
         return eo;
     }
 

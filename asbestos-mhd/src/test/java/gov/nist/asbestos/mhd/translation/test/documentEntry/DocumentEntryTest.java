@@ -164,7 +164,13 @@ class DocumentEntryTest {
     void masterIdentifier() throws IOException, JAXBException {
         DocumentReference documentReference = withMasterIdentifier();
 
-        run(documentReference, null, true);
+        run(documentReference, null, false);
+
+        if (!val.ignore("subject not present or has no reference"))
+            fail("Error did not occur");
+
+        if (val.hasErrors())
+            fail(ValFactory.toJson(new ValErrors(val)));
     }
 
     private DocumentReference withMasterIdentifierAndExtension() {
@@ -182,7 +188,13 @@ class DocumentEntryTest {
     void masterIdentifierAndExtension() throws IOException, JAXBException {
         DocumentReference documentReference = withMasterIdentifierAndExtension();
 
-        run(documentReference, null, true);
+        run(documentReference, null, false);
+
+        if (!val.ignore("subject not present or has no reference"))
+            fail("Error did not occur");
+
+        if (val.hasErrors())
+            fail(ValFactory.toJson(new ValErrors(val)));
     }
 
     private DocumentReference withUnOfficialEntryUUID() {
@@ -208,6 +220,8 @@ class DocumentEntryTest {
         run(documentReference, expected, false);
 
         if (!val.ignore("DocumentReference.identifier is UUID but not labeled as official"))
+            fail("Error did not occur");
+        if (!val.ignore("subject not present or has no reference"))
             fail("Error did not occur");
 
         if (val.hasErrors())
@@ -310,7 +324,13 @@ class DocumentEntryTest {
         DocumentReference documentReference = x.get(0);
         DocumentReference expected = x.get(1);
 
-        run(documentReference, expected, true);
+        run(documentReference, expected, false);
+
+        if (!val.ignore("subject not present or has no reference"))
+            fail("Error did not occur");
+
+        if (val.hasErrors())
+            fail(ValFactory.toJson(new ValErrors(val)));
     }
 
     private DocumentReference withTypeCodeNoDisplay() {
@@ -342,7 +362,13 @@ class DocumentEntryTest {
         DocumentReference documentReference = x.get(0);
         DocumentReference expected = x.get(1);
 
-        run(documentReference, expected, true);
+        run(documentReference, expected, false);
+
+        if (!val.ignore("subject not present or has no reference"))
+            fail("Error did not occur");
+
+        if (val.hasErrors())
+            fail(ValFactory.toJson(new ValErrors(val)));
     }
 
     private DocumentReference withClassCode() {
@@ -374,7 +400,13 @@ class DocumentEntryTest {
         DocumentReference documentReference = x.get(0);
         DocumentReference expected = x.get(1);
 
-        run(documentReference, expected, true);
+        run(documentReference, expected, false);
+
+        if (!val.ignore("subject not present or has no reference"))
+            fail("Error did not occur");
+
+        if (val.hasErrors())
+            fail(ValFactory.toJson(new ValErrors(val)));
     }
 
     private DocumentReference withPatient() {
@@ -435,7 +467,13 @@ class DocumentEntryTest {
         DocumentReference documentReference = x.get(0);
         DocumentReference expected = x.get(1);
 
-        run(documentReference, expected, true);
+        run(documentReference, expected, false);
+
+        if (!val.ignore("subject not present or has no reference"))
+            fail("Error did not occur");
+
+        if (val.hasErrors())
+            fail(ValFactory.toJson(new ValErrors(val)));
     }
 
     private DocumentReference withAuthorPractitioner() {
@@ -468,7 +506,13 @@ class DocumentEntryTest {
         DocumentReference documentReference = x.get(0);
         DocumentReference expected = x.get(1);
 
-        run(documentReference, expected, true);
+        run(documentReference, expected, false);
+
+        if (!val.ignore("subject not present or has no reference"))
+            fail("Error did not occur");
+
+        if (val.hasErrors())
+            fail(ValFactory.toJson(new ValErrors(val)));
     }
 
     private DocumentReference withAuthorOrganization() {
@@ -551,7 +595,13 @@ class DocumentEntryTest {
         DocumentReference documentReference = x.get(0);
         DocumentReference expected = x.get(1);
 
-        run(documentReference, expected, true);
+        run(documentReference, expected, false);
+
+        if (!val.ignore("subject not present or has no reference"))
+            fail("Error did not occur");
+
+        if (val.hasErrors())
+            fail(ValFactory.toJson(new ValErrors(val)));
     }
 
     private DocumentReference withAuthorPractitionerAndTelecom() {
@@ -634,7 +684,13 @@ class DocumentEntryTest {
         DocumentReference documentReference = x.get(0);
         DocumentReference expected = x.get(1);
 
-        run(documentReference, expected, true);
+        run(documentReference, expected, false);
+
+        if (!val.ignore("subject not present or has no reference"))
+            fail("Error did not occur");
+
+        if (val.hasErrors())
+            fail(ValFactory.toJson(new ValErrors(val)));
     }
 
     private DocumentReference withDescription() {
@@ -700,7 +756,7 @@ class DocumentEntryTest {
         DocumentReference documentReference = x.get(0);
         DocumentReference expected = x.get(1);
 
-        run(documentReference, null, false);
+        run(documentReference, expected, false);
 
         if ( !val.ignore("subject not present or has no reference"))
             fail("Error did not occur");
@@ -744,6 +800,12 @@ class DocumentEntryTest {
         DocumentReference documentReference = x.get(0);
         DocumentReference expected = x.get(1);
 
-        run(documentReference, expected, true);
+        run(documentReference, expected, false);
+
+        if ( !val.ignore("subject not present or has no reference"))
+            fail("Error did not occur");
+
+        if (val.hasErrors())
+            fail(ValFactory.toJson(new ValErrors(val)));
     }
 }
