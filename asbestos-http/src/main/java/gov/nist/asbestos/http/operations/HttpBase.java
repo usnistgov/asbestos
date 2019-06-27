@@ -184,4 +184,8 @@ abstract public class HttpBase {
     public int getStatus() {
         return status;
     }
+
+    public boolean isSuccess() {
+        return status == 200;
+    }
 }

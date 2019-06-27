@@ -1,10 +1,10 @@
 package gov.nist.asbestos.mhd.translation.test;
 
-import gov.nist.asbestos.asbestosProxySupport.Base.ProxyBase;
-import gov.nist.asbestos.asbestosProxySupport.resolver.Ref;
-import gov.nist.asbestos.asbestosProxySupport.resolver.ResolverConfig;
-import gov.nist.asbestos.asbestosProxySupport.resolver.ResourceMgr;
-import gov.nist.asbestos.asbestosProxySupport.resolver.ResourceWrapper;
+import gov.nist.asbestos.client.Base.ProxyBase;
+import gov.nist.asbestos.client.resolver.Ref;
+import gov.nist.asbestos.client.resolver.ResolverConfig;
+import gov.nist.asbestos.client.resolver.ResourceMgr;
+import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import gov.nist.asbestos.simapi.validation.Val;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.DocumentReference;

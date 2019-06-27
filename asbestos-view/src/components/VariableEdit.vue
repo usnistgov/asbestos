@@ -25,8 +25,8 @@
       <div></div>
       <div class="grid-status"></div>
       <div class="grid-documentation">Fixture Id of source expression or headerField within this variable.
-        This can be a statically defined fixture (at the top of the TestScript) or a dynamically
-        set fixture created by responseId of the action.operation element</div>
+        This can be a statically defined fixtureMgr (at the top of the TestScript) or a dynamically
+        set fixtureMgr created by responseId of the action.operation element</div>
       <div></div>
       <label for="sourceId" class="grid-name">SourceId</label>
       <input id="sourceId" class="grid-item space-after" v-on:blur="validate" v-model="current.sourceId">
@@ -34,10 +34,10 @@
       <div class="grid-status yellow-background">{{ expressionErr }}</div>
       <div class="grid-documentation yellow-background bold-font">One of...</div>
       <div class="grid-documentation yellow-background"></div>
-      <div class="grid-documentation yellow-background">The FHIRPath expression against the fixture body. If headerField is defined,
+      <div class="grid-documentation yellow-background">The FHIRPath expression against the fixtureMgr body. If headerField is defined,
         then the variable will be evaluated against the headers that sourceId is pointing to.
         If expression or path is defined, then the variable will be evaluated against the
-        fixture body that sourceId is pointing to. It is an error to define any combination of
+        fixtureMgr body that sourceId is pointing to. It is an error to define any combination of
         expression, headerField and path.</div>
       <div></div>
       <label for="expression" class="grid-name">Expression</label>
@@ -49,7 +49,7 @@
       <div class="grid-status yellow-background"></div>
       <div class="grid-documentation yellow-background">HTTP header field name for source. If headerField is defined,
         then the variable will be evaluated against the headers that sourceId is pointing to.
-        If path is defined, then the variable will be evaluated against the fixture body that
+        If path is defined, then the variable will be evaluated against the fixtureMgr body that
         sourceId is pointing to. It is an error to define both headerField and path.</div>
       <div></div>
       <label for="headerField" class="grid-name">HeaderField</label>
@@ -57,9 +57,9 @@
 
       <div></div>
       <div class="grid-status yellow-background"></div>
-      <div class="grid-documentation yellow-background">XPath or JSONPath against the fixture body. If headerField is defined,
+      <div class="grid-documentation yellow-background">XPath or JSONPath against the fixtureMgr body. If headerField is defined,
         then the variable will be evaluated against the headers that sourceId is pointing to.
-        If expression or path is defined, then the variable will be evaluated against the fixture
+        If expression or path is defined, then the variable will be evaluated against the fixtureMgr
         body that sourceId is pointing to. It is an error to define any combination of expression,
         headerField and path.</div>
       <div></div>

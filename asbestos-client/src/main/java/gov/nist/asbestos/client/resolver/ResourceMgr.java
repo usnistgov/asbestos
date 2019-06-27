@@ -1,0 +1,300 @@
+package gov.nist.asbestos.client.resolver;
+
+
+import gov.nist.asbestos.client.Base.IVal;
+import gov.nist.asbestos.client.client.FhirClient;
+import gov.nist.asbestos.simapi.validation.Val;
+import gov.nist.asbestos.simapi.validation.ValE;
+import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.DomainResource;
+import org.hl7.fhir.r4.model.Resource;
+
+import java.util.*;
+
+/**
+ *
+ */
+public class ResourceMgr implements IVal {
+//    static private final Logger logger = Logger.getLogger(ResourceMgr.class);
+    private Map<Ref, ResourceWrapper> bundleResources = new HashMap<>();   // url -> resource; for contents of bundle
+    private Val val;
+    private ResourceMgrConfig resourceMgrConfig = new ResourceMgrConfig();
+    private FhirClient fhirClient = null;
+    private List<Ref> knownServers = new ArrayList<>();
+
+    public ResourceMgr() {
+
+    }
+
+    public void setBundle(Bundle bundle) {
+        bundleResources = new HashMap<>();
+        parse(bundle);
+    }
+
+    public ResourceMgrConfig getResourceMgrConfig() {
+        return resourceMgrConfig;
+    }
+
+    private boolean inBundle(Ref ref) {
+        return bundleResources.containsKey(ref);
+    }
+
+    private ResourceWrapper getFromBundle(Ref ref) {
+        return bundleResources.get(ref);
+    }
+
+    public List<ResourceWrapper> getBundleResources() {
+        return new ArrayList<>(bundleResources.values());
+    }
+
+    // Load bundle and assign symbolic ids
+    private void parse(Bundle bundle) {
+        Objects.requireNonNull(bundle);
+        Objects.requireNonNull(val);
+        ValE thisVal = new ValE("Load Bundle...");
+        val.add(thisVal);
+        thisVal.add(new ValE("All objects assigned symbolic IDs")
+                .add(new ValE("3.65.4.1.2 Message Semantics").asDoc()));
+        bundle.getEntry().forEach(component -> {
+            if (component.hasResource()) {
+                String id = allocateSymbolicId();
+                thisVal.add(new ValE("Assigning " + id + " to " + component.getResource().getClass().getSimpleName() + "(" + component.getResource().getIdElement().getValue() + ")"));
+                ResourceWrapper wrapper = new ResourceWrapper(component.getResource())
+                        .setAssignedId(id)
+                        .setUrl(new Ref(component.getFullUrl()));
+
+                thisVal.add(new ValE("..." + component.getFullUrl()));
+                addResource(new Ref(component.getFullUrl()), wrapper);
+            }
+        });
+    }
+
+    public String toString() {
+        StringBuilder buf = new StringBuilder();
+        buf.append("Resources:\n");
+
+        for (Ref ref : bundleResources.keySet()) {
+            ResourceWrapper resource = bundleResources.get(ref);
+            buf.append(ref).append("   ").append(resource.getClass().getSimpleName()).append('\n');
+        }
+        return buf.toString();
+    }
+
+    private void addResource(Ref url, ResourceWrapper resource) {
+        Objects.requireNonNull(val);
+        Objects.requireNonNull(url);
+        Objects.requireNonNull(resource);
+        boolean duplicate = bundleResources.containsKey(url);
+        if (duplicate)
+            val.add(new ValE("Duplicate resource found in bundle for URL " + url).asError());
+        else
+            bundleResources.put(url, resource);
+    }
+
+    private ResourceWrapper getContains(ResourceWrapper resource, Ref refUrl) {
+        Objects.requireNonNull(resource);
+        Objects.requireNonNull(resource.getResource());
+        Objects.requireNonNull(refUrl);
+        String ref = refUrl.toString();
+        if (ref == null || !ref.startsWith("#"))
+            return null;
+        //ref = ref.substring(1);
+        if (resource.getResource() instanceof DomainResource) {
+            DomainResource res = (DomainResource) resource.getResource();
+            for (Resource r : res.getContained()) {
+                if (r.hasId() && r.getId().equals(ref))
+                    return new ResourceWrapper(r, refUrl);
+            }
+        }
+        return null;
+    }
+
+    private ResourceWrapper getRelative(ResourceWrapper resource, Ref refUrl) {
+        Objects.requireNonNull(resource);
+        Objects.requireNonNull(refUrl);
+        if (refUrl.isRelative())
+            return new ResourceWrapper(refUrl).relativeTo(resource);
+        return new ResourceWrapper(refUrl);
+    }
+
+    public Optional<ResourceWrapper> resolveReference(ResourceWrapper containing, Ref referenceUrl, ResolverConfig config) {
+        return resolveReference(containing, referenceUrl, config, new ValE(val));
+    }
+    /**
+     * Return resource if internal or reference if external.
+     * @param containing
+     * @param referenceUrl
+     * @param config
+     * @return
+     */
+    public Optional<ResourceWrapper> resolveReference(ResourceWrapper containing, Ref referenceUrl, ResolverConfig config, ValE val) {
+        Objects.requireNonNull(val);
+        Objects.requireNonNull(referenceUrl);
+        Objects.requireNonNull(config);
+        ValE thisVal = new ValE(val);
+        thisVal.add(new ValE("Resolver: Resolve URL " + referenceUrl + " ... " + config));
+
+        //
+        // Absolute
+        //
+        if (referenceUrl.isAbsolute()) {
+            if (inBundle(referenceUrl)) {
+                //
+                // In bundle ok?
+                //
+                if (config.isInBundleOk()) {
+                    return Optional.of(getFromBundle(referenceUrl));
+                } else {
+                    thisVal.add(new ValE("Resolver: ...absolute reference to resource in bundle " + referenceUrl  + " - external reference required ").asError());
+                    return Optional.empty();
+                }
+            } else {
+                //
+                // External
+                //
+                return Optional.of(load(new ResourceWrapper(referenceUrl)));
+            }
+        }
+        if (containing == null) {
+            thisVal.add(new ValE("Resolver: ... reference is not absolute " + referenceUrl + " but no containing resource is offered").asError());
+            return Optional.empty();
+        }
+        //
+        // Contained
+        //
+        if (referenceUrl.isContained()) {
+            if (config.isContainedOk()) {
+                thisVal.setMsg("Resolver: ...contained");
+                return Optional.ofNullable(getContains(containing, referenceUrl));
+            }
+            thisVal.add(new ValE("Resolver: ...reference is to contained resource (" + referenceUrl + " but contained is not acceptable").asError());
+            return Optional.empty();
+        }
+        //
+        // Relative to containing resource or found in bundle
+        //   if in bundle must be fullUrl but temp labels (urn:...) look like local -
+        //   don't start with http or file
+        //
+        if (referenceUrl.isRelative()) {
+            if (config.isRelativeOk()) {
+                ResourceWrapper res = getFromBundle(referenceUrl);
+                if (res == null) {
+                    if (containing.getUrl() == null)
+                        return Optional.empty();
+                    // relative/external
+                    ResourceWrapper resource = new ResourceWrapper(referenceUrl.rebase(containing.getUrl().getBase()));
+                    if (resource.getUrl() != null) {
+                        if (getFromBundle(resource.getUrl()) != null)
+                            resource = getFromBundle(resource.getUrl());  // this includes Resource as well as URL
+                    }
+                    return Optional.of(resource);
+                } else {
+                    return Optional.of(res);
+                }
+            }
+            thisVal.add(new ValE("Resolver: ...reference is to relative resource (" + referenceUrl + " but relative is not acceptable").asError());
+            return Optional.empty();
+        }
+        thisVal.add(new ValE("Resolver: ...failed to resolve " + referenceUrl + " in " + containing).asError());
+        return Optional.empty();
+    }
+
+    private ResourceWrapper load(ResourceWrapper resource) {
+        Objects.requireNonNull(resource);
+        if (resource.isLoaded())
+            return resource;
+        if (resource.getUrl() == null)
+            return resource;
+        if (fhirClient == null)
+            throw new Error("ResourceMgr#load: FHIR Client is not configured");
+        if (resourceMgrConfig.isInternalOnly()) {
+            Optional<ResourceWrapper> cached = fhirClient.readCachedResource(resource.getUrl());
+            if (cached.isPresent() && cached.get().isLoaded()) {
+                resource.setResource(cached.get().getResource());
+            }
+            return resource;
+        }
+        ResourceWrapper wrapper = fhirClient.readResource(resource.getUrl());
+        resource.setResource(wrapper.getResource());
+        return resource;
+    }
+
+    public List<ResourceWrapper> search(Ref base, Class<?> resourceType, List<String> params, boolean stopAtFirst) {
+        Objects.requireNonNull(resourceType);
+        Objects.requireNonNull(params);
+        if (fhirClient == null)
+            throw new Error("ResourceMgr#search: FHIR Client is not configured");
+
+        if (base == null) {
+            List<ResourceWrapper> results = new ArrayList<>();
+            List<Ref> cachedServers = fhirClient.getCachedServers();
+            for (Ref server : cachedServers) {
+                List<ResourceWrapper> cacheResults = fhirClient.searchCache(server, resourceType, params, stopAtFirst);
+                if (!cacheResults.isEmpty() && stopAtFirst)
+                    return cacheResults;
+                results.addAll(cacheResults);
+            }
+            if (resourceMgrConfig.isOpen()) {
+                for (Ref server : knownServers) {
+                    List<ResourceWrapper> theResults = fhirClient.searchCache(server, resourceType, params, stopAtFirst);
+                    if (!theResults.isEmpty() && stopAtFirst)
+                        return theResults;
+                    results.addAll(theResults);
+
+                }
+            }
+            return results;
+        }
+
+        if (resourceMgrConfig.isInternalOnly())
+            return fhirClient.searchCache(base, resourceType, params, stopAtFirst);
+        return fhirClient.search(base, resourceType, params, stopAtFirst, false);
+    }
+
+    private SymbolicIdBuilder symbolicIdBuilder = new SymbolicIdBuilder();
+
+    public String allocateSymbolicId() {
+        return symbolicIdBuilder.allocate();
+    }
+
+
+    @Override
+    public void setVal(Val val) {
+        this.val = val;
+    }
+
+    public void setFhirClient(FhirClient fhirClient) {
+        this.fhirClient = fhirClient;
+    }
+
+    public List<Ref> getKnownServers() {
+        return knownServers;
+    }
+
+    public void addKnownServer(Ref server) {
+        server = server.getBase();
+        if (!knownServers.contains(server))
+            knownServers.add(server);
+    }
+
+    private static final List<Integer> ignores = Arrays.asList(8,13,18,23);
+    public static boolean isUUID(String u) {
+        if (u.startsWith("urn:uuid:")) u = u.substring(9);
+        u = u.toLowerCase();
+        if (u.length() != 36)
+            return false;
+        for (Integer i : ignores) {
+           if (u.charAt(i) != '-')
+               return false;
+        }
+        for (int i=0; i<36; i++) {
+            if (ignores.contains(i))
+                continue;
+            String hexChars = "0123456789abcdef";
+            if (hexChars.indexOf(u.charAt(i)) == -1)
+                return false;
+        }
+        return true;
+    }
+
+}

@@ -11,7 +11,7 @@ class TestEngineTest {
 
     @Test
     void test1() throws URISyntaxException {
-        File test1 = Paths.get(getClass().getResource("/fixtures/test1/TestScript.xml").toURI()).getParent().toFile();
+        File test1 = Paths.get(getClass().getResource("/fixtures/simple/TestScript.xml").toURI()).getParent().toFile();
         TestEngine testEngine = new TestEngine(test1, new URI(""));
         testEngine.run();
     }

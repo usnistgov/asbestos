@@ -1,7 +1,7 @@
 package gov.nist.asbestos.mhd.translation.test;
 
-import gov.nist.asbestos.asbestosProxySupport.Base.ProxyBase;
-import gov.nist.asbestos.asbestosProxySupport.resolver.ResourceMgr;
+import gov.nist.asbestos.client.Base.ProxyBase;
+import gov.nist.asbestos.client.resolver.ResourceMgr;
 import gov.nist.asbestos.simapi.validation.Val;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;

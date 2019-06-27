@@ -45,7 +45,7 @@ class ToolkitConnectionSpecification extends Specification {
     }
      */
 
-    def setupSpec() {  // there can be multiple setupSpec() fixture methods - they all get run
+    def setupSpec() {  // there can be multiple setupSpec() fixtureMgr methods - they all get run
         Installation.instance().setServletContextName("");
         session = UnitTestEnvironmentManager.setupLocalToolkit()
         api = UnitTestEnvironmentManager.localToolkitApi()

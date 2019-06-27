@@ -51,6 +51,17 @@ public class Val {
         return false;
     }
 
+    public List<ValE> getErrors() {
+        List<ValE> errors = new ArrayList<>();
+        for (ValE e : elements) {
+            if (e.getTypes().contains(ValType.Error) && !e.getTypes().contains(ValType.Ignored))
+                errors.add(e);
+            if (!e.ele.isEmpty())
+                errors.addAll(e.getErrors());
+        }
+        return errors;
+    }
+
     public boolean hasWarnings() {
         for (ValE e : elements) {
             if (e.getTypes().contains(ValType.Warn) && !e.getTypes().contains(ValType.Ignored))

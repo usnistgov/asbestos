@@ -5,7 +5,7 @@ import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import gov.nist.asbestos.asbestosProxySupport.Base.ProxyBase;
+import gov.nist.asbestos.client.Base.ProxyBase;
 import gov.nist.asbestos.mhd.translation.Author;
 import gov.nist.asbestos.mhd.translation.ContainedIdAllocator;
 import gov.nist.asbestos.simapi.validation.Val;

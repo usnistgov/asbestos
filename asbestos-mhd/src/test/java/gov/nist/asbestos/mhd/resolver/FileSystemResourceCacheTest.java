@@ -1,8 +1,8 @@
 package gov.nist.asbestos.mhd.resolver;
 
-import gov.nist.asbestos.asbestosProxySupport.resolver.FileSystemResourceCache;
-import gov.nist.asbestos.asbestosProxySupport.resolver.Ref;
-import gov.nist.asbestos.asbestosProxySupport.resolver.ResourceWrapper;
+import gov.nist.asbestos.client.resolver.FileSystemResourceCache;
+import gov.nist.asbestos.client.resolver.Ref;
+import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.Test;
 

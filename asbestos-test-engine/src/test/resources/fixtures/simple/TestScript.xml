@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<TestScript xmlns="http://hl7.org/fhir">
+    <id value="test1"/>
+    <name value="test1"/>
+    <status value="draft"/>
+    <fixtureMgr id="example-patient">
+        <resource>
+            <reference value="Patient/patient-example.xml"/>
+        </resource>
+    </fixtureMgr>
+</TestScript>

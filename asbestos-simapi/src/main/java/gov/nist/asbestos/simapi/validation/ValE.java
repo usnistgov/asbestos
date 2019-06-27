@@ -80,8 +80,9 @@ public class ValE {
         return msg;
     }
 
-    public void setMsg(String msg) {
+    public ValE setMsg(String msg) {
         this.msg = msg;
+        return this;
     }
 
     public List<ValE> getEle() {
@@ -111,4 +112,16 @@ public class ValE {
         }
         return false;
     }
+
+    public List<ValE> getErrors() {
+        List<ValE> errors = new ArrayList<>();
+        for (ValE e : ele) {
+            if (e.getTypes().contains(ValType.Error) && !e.getTypes().contains(ValType.Ignored))
+                errors.add(e);
+            if (!e.ele.isEmpty())
+                errors.addAll(e.getErrors());
+        }
+        return errors;
+    }
+
 }

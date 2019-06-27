@@ -1,8 +1,8 @@
 package gov.nist.asbestos.mhd.translation.test;
 
 
-import gov.nist.asbestos.asbestosProxySupport.Base.ProxyBase;
-import gov.nist.asbestos.asbestosProxySupport.resolver.ResourceMgr;
+import gov.nist.asbestos.client.Base.ProxyBase;
+import gov.nist.asbestos.client.resolver.ResourceMgr;
 import gov.nist.asbestos.mhd.transactionSupport.CodeTranslator;
 import gov.nist.asbestos.mhd.transactionSupport.CodeTranslatorBuilder;
 import gov.nist.asbestos.mhd.translation.BundleToRegistryObjectList;

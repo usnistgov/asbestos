@@ -1,12 +1,10 @@
 package gov.nist.asbestos.mhd.translation;
 
-import com.sun.org.apache.xpath.internal.operations.Or;
-import gov.nist.asbestos.asbestosProxySupport.Base.IVal;
+import gov.nist.asbestos.client.Base.IVal;
 import gov.nist.asbestos.simapi.validation.Val;
 import gov.nist.asbestos.simapi.validation.ValE;
 import oasis.names.tc.ebxml_regrep.xsd.rim._3.ClassificationType;
 import oasis.names.tc.ebxml_regrep.xsd.rim._3.SlotType1;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.*;
 
 import java.util.ArrayList;

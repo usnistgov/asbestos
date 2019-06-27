@@ -1,0 +1,81 @@
+package gov.nist.asbestos.testEngine;
+
+import gov.nist.asbestos.client.Base.ProxyBase;
+import gov.nist.asbestos.client.resolver.ResourceWrapper;
+import gov.nist.asbestos.simapi.validation.*;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.TestScript;
+import org.junit.jupiter.api.Test;
+
+import java.io.File;
+import java.io.InputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.nio.file.Paths;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+class FixtureTest {
+
+    private TestScript load(String path) {
+        InputStream is = FixtureTest.class.getResourceAsStream(path);
+        IBaseResource resource = ProxyBase.getFhirContext().newXmlParser().parseResource(is);
+        assertTrue(resource instanceof TestScript);
+        return (TestScript) resource;
+    }
+
+    @Test
+    void simpleFixture() {
+        TestScript testScript = load("/fixtures/simple/TestScript.xml");
+        assertNotNull(testScript);
+        assertEquals(1, testScript.getFixture().size());
+        assertNotNull(testScript.getFixture().get(0).getResource());
+        assertEquals("Patient/patient-example2.xml", testScript.getFixture().get(0).getResource().getReference());
+        assertFalse(testScript.getFixture().get(0).getAutocreate());
+    }
+
+//    @Test
+//    void autoCreateFlag() {
+//        TestScript testScript = load("/fixtures/autoCreate/TestScript.xml");
+//        assertNotNull(testScript);
+//        assertEquals(1, testScript.getFixture().size());
+//        assertTrue(testScript.getFixture().get(0).getAutocreate());
+//    }
+//
+    @Test
+    void loadFixtureFromTestDefinition() throws URISyntaxException {
+        Val val = new Val();
+        File testDef = Paths.get(getClass().getResource("/fixtures/fixtureFromTestDefinition/TestScript.xml").toURI()).getParent().toFile();
+        URI sut = new URI("http://localhost:8080/fhir/fhir");
+        TestEngine testEngine = new TestEngine(testDef, sut).setVal(val);
+        testEngine.run();
+
+        if (val.hasErrors())
+            fail(ValFactory.toJson(new ValErrors(val)));
+        if (val.hasWarnings())
+            fail(ValFactory.toJson(new ValWarnings(val)));
+
+        assertEquals(1, testEngine.getFixtures().keySet().size());
+        FixtureMgr fixtureMgr = testEngine.getFixtures().values().iterator().next();
+        ResourceWrapper wrapper = fixtureMgr.getResourceWrapper();
+        assertEquals(200, wrapper.getStatus());
+        IBaseResource resource = wrapper.getResource();
+        assertNotNull(resource);
+        assertTrue(resource instanceof Patient);
+    }
+
+    @Test
+    void loadFixtureFromTestDefinitionBadReference() throws URISyntaxException {
+        Val val = new Val();
+        File testDef = Paths.get(getClass().getResource("/fixtures/fixtureFromBadTestDefinition/TestScript.xml").toURI()).getParent().toFile();
+        URI sut = new URI("http://localhost:8080/fhir/fhir");
+        TestEngine testEngine = new TestEngine(testDef, sut).setVal(val);
+        testEngine.run();
+
+        List<ValE> errors = val.getErrors();
+        assertFalse(errors.isEmpty());
+        assertEquals("GET Patient/patient-example.xml", errors.get(0).getMsg());
+    }
+}

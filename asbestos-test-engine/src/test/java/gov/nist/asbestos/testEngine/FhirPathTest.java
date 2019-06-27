@@ -1,7 +1,7 @@
 package gov.nist.asbestos.testEngine;
 
 import ca.uhn.fhir.context.FhirContext;
-import gov.nist.asbestos.asbestosProxySupport.Base.ProxyBase;
+import gov.nist.asbestos.client.Base.ProxyBase;
 import org.hl7.fhir.r4.hapi.ctx.HapiWorkerContext;
 import org.hl7.fhir.r4.hapi.ctx.IValidationSupport;
 import org.hl7.fhir.r4.hapi.validation.PrePopulatedValidationSupport;

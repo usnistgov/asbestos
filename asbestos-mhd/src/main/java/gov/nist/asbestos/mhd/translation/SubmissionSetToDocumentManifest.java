@@ -1,7 +1,7 @@
 package gov.nist.asbestos.mhd.translation;
 
-import gov.nist.asbestos.asbestosProxySupport.Base.IVal;
-import gov.nist.asbestos.asbestosProxySupport.resolver.ResourceMgr;
+import gov.nist.asbestos.client.Base.IVal;
+import gov.nist.asbestos.client.resolver.ResourceMgr;
 import gov.nist.asbestos.mhd.transactionSupport.CodeTranslator;
 import gov.nist.asbestos.simapi.validation.Val;
 import gov.nist.asbestos.simapi.validation.ValE;

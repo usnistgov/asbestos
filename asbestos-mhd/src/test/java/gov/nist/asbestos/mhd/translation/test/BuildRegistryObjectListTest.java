@@ -1,9 +1,9 @@
 package gov.nist.asbestos.mhd.translation.test;
 
-import gov.nist.asbestos.asbestosProxySupport.Base.ProxyBase;
-import gov.nist.asbestos.asbestosProxySupport.client.FhirClient;
-import gov.nist.asbestos.asbestosProxySupport.resolver.ResourceCacheMgr;
-import gov.nist.asbestos.asbestosProxySupport.resolver.ResourceMgr;
+import gov.nist.asbestos.client.Base.ProxyBase;
+import gov.nist.asbestos.client.client.FhirClient;
+import gov.nist.asbestos.client.resolver.ResourceCacheMgr;
+import gov.nist.asbestos.client.resolver.ResourceMgr;
 import gov.nist.asbestos.mhd.transactionSupport.AssigningAuthorities;
 import gov.nist.asbestos.mhd.transactionSupport.CodeTranslator;
 import gov.nist.asbestos.mhd.transactionSupport.CodeTranslatorBuilder;
