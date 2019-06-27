@@ -2,6 +2,7 @@ package gov.nist.asbestos.testEngine;
 
 import ca.uhn.fhir.parser.IParser;
 import gov.nist.asbestos.client.Base.ProxyBase;
+import gov.nist.asbestos.client.client.FhirClient;
 import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.client.resolver.ResourceCacheMgr;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
@@ -26,10 +27,10 @@ public class TestEngine  {
     private File testDef = null;
     private URI sut = null;
     private TestScript testScript = null;
-    private Map<String, FixtureMgr> fixtures = new HashMap<>();
-    private ResourceCacheMgr inTestResources;
+    private Map<String, FixtureComponent> fixtures = new HashMap<>();
     private Val val;
     private ValE engineVal;
+    private FhirClient fhirClient;
 
     /**
      *
@@ -41,7 +42,8 @@ public class TestEngine  {
         Objects.requireNonNull(sut);
         this.testDef = testDef;
         this.sut = sut;
-        inTestResources = new ResourceCacheMgr(testDef, new Ref(""));
+        ResourceCacheMgr inTestResources = new ResourceCacheMgr(testDef, new Ref(""));
+        fhirClient = new FhirClient().setResourceCacheMgr(inTestResources);
     }
 
     public TestEngine run() {
@@ -52,7 +54,7 @@ public class TestEngine  {
         return this;
     }
 
-    void doWorkflow() {
+    private void doWorkflow() {
         testScript = loadTestScript();
         doPreProcessing();
         doLoadFixtures();
@@ -63,11 +65,14 @@ public class TestEngine  {
         doPostProcessing();
     }
 
-    void doPreProcessing() {
+    private void doPreProcessing() {
 
     }
 
-    void doLoadFixtures() {
+
+    private void doLoadFixtures() {
+        TestScript.SetupActionComponent c;
+        c.
         if (testScript.hasFixture()) {
             ValE fVal = new ValE(engineVal).setMsg("Fixtures");
 
@@ -79,35 +84,52 @@ public class TestEngine  {
                 }
                 fVal.add(new ValE("Fixture " + id));
                 ResourceWrapper wrapper = new ResourceWrapper(new Ref(comp.getResource().getReference()));
-                FixtureMgr fixtureMgr;
+                FixtureComponent fixtureMgr;
                 try {
-                    fixtureMgr = new FixtureMgr(id, wrapper, inTestResources).load();
+                    fixtureMgr = new FixtureComponent(id, wrapper, fhirClient).setVal(fVal).load();
                 } catch (Throwable e) {
                     fVal.add(new ValE(e.getMessage()).asError());
                     return;
                 }
+                if (!fixtureMgr.IsOk())
+                    fVal.add(new ValE("Failed to load Fixture " + id).asError());
                 fixtures.put(id, fixtureMgr);
             }
         }
     }
 
-    void doAutoCreates() {
+    private void doAutoCreates() {
 
     }
 
-    void doSetup() {
+    private void doSetup() {
 
     }
 
-    void doTest() {
+    private void doTest() {
+        if (testScript.hasTest()) {
+            ValE fVal = new ValE(engineVal).setMsg("Tests");
+
+            for (TestScript.TestScriptTestComponent comp : testScript.getTest()) {
+                String id = comp.getId();
+                if (id == null || id.equals("")) {
+                    fVal.add(new ValE("Fixture has no id").asError());
+                    return;
+                }
+                fVal.add(new ValE("Test " + id));
+
+
+            }
+
+        }
 
     }
 
-    void doTearDown() {
+    private void doTearDown() {
 
     }
 
-    void doPostProcessing() {
+    private void doPostProcessing() {
 
     }
 
@@ -136,21 +158,33 @@ public class TestEngine  {
         return fixtures.containsKey(id);
     }
 
-    private TestEngine addFixture(FixtureMgr fixtureMgr) {
+    private TestEngine addFixture(FixtureComponent fixtureMgr) {
         fixtures.put(fixtureMgr.getId(), fixtureMgr);
         return this;
     }
 
     private TestEngine addFixture(String id, ResourceWrapper resourceWrapper) {
-        FixtureMgr fixtureMgr = new FixtureMgr(id, resourceWrapper, inTestResources);
+        FixtureComponent fixtureMgr = new FixtureComponent(id, resourceWrapper, fhirClient);
         return addFixture(fixtureMgr);
     }
 
-    public Map<String, FixtureMgr> getFixtures() {
+    Map<String, FixtureComponent> getFixtures() {
         return fixtures;
     }
 
-    public TestEngine setVal(Val val) {
+    boolean isOk() {
+        return fixturesOk();
+    }
+
+    private boolean fixturesOk() {
+        for (FixtureComponent fixtureMgr : fixtures.values()) {
+            if (!fixtureMgr.IsOk())
+                return false;
+        }
+        return true;
+    }
+
+    TestEngine setVal(Val val) {
         this.val = val;
         return this;
     }

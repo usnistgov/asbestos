@@ -130,7 +130,8 @@ public class ResourceWrapper {
     }
 
     public boolean isOk() {
-        return getter != null && getter.isSuccess();
+        int status = getStatus();
+        return 200 <= status && status < 300;
     }
 
     public int getStatus() {

@@ -32,7 +32,7 @@ class FixtureTest {
         assertNotNull(testScript);
         assertEquals(1, testScript.getFixture().size());
         assertNotNull(testScript.getFixture().get(0).getResource());
-        assertEquals("Patient/patient-example2.xml", testScript.getFixture().get(0).getResource().getReference());
+        assertEquals("Patient/patient-example.xml", testScript.getFixture().get(0).getResource().getReference());
         assertFalse(testScript.getFixture().get(0).getAutocreate());
     }
 
@@ -58,12 +58,13 @@ class FixtureTest {
             fail(ValFactory.toJson(new ValWarnings(val)));
 
         assertEquals(1, testEngine.getFixtures().keySet().size());
-        FixtureMgr fixtureMgr = testEngine.getFixtures().values().iterator().next();
+        FixtureComponent fixtureMgr = testEngine.getFixtures().values().iterator().next();
         ResourceWrapper wrapper = fixtureMgr.getResourceWrapper();
         assertEquals(200, wrapper.getStatus());
         IBaseResource resource = wrapper.getResource();
         assertNotNull(resource);
         assertTrue(resource instanceof Patient);
+        assertTrue(testEngine.isOk());
     }
 
     @Test
@@ -73,9 +74,12 @@ class FixtureTest {
         URI sut = new URI("http://localhost:8080/fhir/fhir");
         TestEngine testEngine = new TestEngine(testDef, sut).setVal(val);
         testEngine.run();
+        assertEquals(1, testEngine.getFixtures().size());
+
+        assertFalse(testEngine.isOk());
 
         List<ValE> errors = val.getErrors();
         assertFalse(errors.isEmpty());
-        assertEquals("GET Patient/patient-example.xml", errors.get(0).getMsg());
+        assertEquals("Failed to load Fixture example-patient", errors.get(0).getMsg());
     }
 }

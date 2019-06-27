@@ -4,9 +4,9 @@
     <id value="test1"/>
     <name value="test1"/>
     <status value="draft"/>
-    <fixtureMgr id="example-patient">
+    <fixture id="example-patient">
         <resource>
             <reference value="Patient/patient-example.xml"/>
         </resource>
-    </fixtureMgr>
+    </fixture>
 </TestScript>

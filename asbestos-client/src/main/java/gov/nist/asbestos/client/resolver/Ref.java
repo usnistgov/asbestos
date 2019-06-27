@@ -179,6 +179,8 @@ public class Ref {
         return uri.toString();
     }
 
+    public String asString() { return uri.toString(); }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

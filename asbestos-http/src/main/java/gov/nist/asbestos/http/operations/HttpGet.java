@@ -58,11 +58,7 @@ public class HttpGet extends HttpBase {
     }
 
     public HttpGet getJson(URI uri)  {
-//        Map<String, String> headers = new HashMap<>();
-//        headers.put("accept", "application/json");
-//        headers.put("accept-charset", "utf-8");
         get(uri, "application/json");
-//        setResponseText(new String(getResponse()));
         return this;
     }
 

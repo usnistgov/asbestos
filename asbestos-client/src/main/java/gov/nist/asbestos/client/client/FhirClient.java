@@ -40,6 +40,10 @@ public class FhirClient {
     public ResourceWrapper readResource(Ref uri) {
         Objects.requireNonNull(uri);
         Optional<ResourceWrapper> cached = readCachedResource(uri);
+        if (cached.isPresent())
+            return cached.get();
+        if ("".equals(uri.getBase().asString()))
+            return new ResourceWrapper(uri);
         return cached.orElseGet(() -> readResource(uri, format));
     }
 
