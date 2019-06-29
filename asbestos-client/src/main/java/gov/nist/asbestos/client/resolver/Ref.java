@@ -31,6 +31,10 @@ public class Ref {
         return theUri;
     }
 
+    public Ref(URI base, String resourceType, String id) {
+        this(base.toString(), resourceType, id);
+    }
+
     public Ref(String base, String resourceType, String id)  {
         String theRef;
         if (id == null || id.equals(""))
@@ -130,13 +134,18 @@ public class Ref {
     public Ref rebase(String newBase) {
         Objects.requireNonNull(newBase);
         Ref theBase = new Ref(newBase).getBase();
-        return new Ref(theBase, getRelative().toString(), null);
+        return new Ref(theBase, getRelative().toString(), getId());
     }
 
     // TODO needs test
     public Ref rebase(Ref newBase) {
         Objects.requireNonNull(newBase);
-        return new Ref(newBase.getBase(), getRelative().toString(), null);
+        return new Ref(newBase.getBase(), getRelative().toString(), getId());
+    }
+
+    public Ref rebase(URI uri) {
+        Objects.requireNonNull(uri);
+        return rebase(new Ref(uri));
     }
 
     public Ref getFull()  {  // without version

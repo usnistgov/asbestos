@@ -33,11 +33,11 @@ public class SetupAction {
             if (op.hasParams()) elementCount++;
             if (op.hasUrl()) elementCount++;
             if (elementCount == 0) {
-                val.add(new ValE("Setup.Action " + id + " has none of sourceId, targetId, params, or url - one is required").asError());
+                val.add(new ValE("Setup.Action " + id + " has none of sourceId, targetId, params, url - one is required").asError());
                 return;
             }
             if (elementCount > 1) {
-                val.add(new ValE("Setup.Action " + id + " has multiple of sourceId, targetId, params, or url - only one is allowed").asError());
+                val.add(new ValE("Setup.Action " + id + " has multiple of sourceId, targetId, params, url - only one is allowed").asError());
                 return;
             }
             if (!op.hasType()) {
@@ -51,6 +51,7 @@ public class SetupAction {
                 val.add(new ValE("Setup.Action " + id + " do not understand code.system " + system).asError());
                 return;
             }
+
             if ("read".equals(code)) {
                 new SetupActionRead(fixtures, op).setVal(val).run();
             } else {

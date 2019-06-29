@@ -1,39 +1,100 @@
 package gov.nist.asbestos.client.client;
 
 import gov.nist.asbestos.client.Base.ProxyBase;
+import gov.nist.asbestos.http.headers.Headers;
 import gov.nist.asbestos.http.operations.HttpGet;
 import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.client.resolver.ResourceCacheMgr;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
+import gov.nist.asbestos.http.operations.HttpPost;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Practitioner;
 
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 public class FhirClient {
     private Format format = Format.JSON;
     private ResourceCacheMgr resourceCacheMgr = null;
 
+    public ResourceWrapper writeResource(IBaseResource resource, Ref ref, Format format, Map<String, String> headers) {
+        Objects.requireNonNull(resource);
+        Objects.requireNonNull(ref);
+        ResourceWrapper response = new ResourceWrapper();
+        if (headers == null)
+            headers = new HashMap<>();
+        if (format == null)
+            format = Format.XML;
+        String contentType = (format == Format.XML) ? "application/fhir+xml" : (format == Format.JSON ? "application/fhir+json" : null);
+        if (contentType != null)
+            headers.put("content-type", contentType);
+        HttpPost post = new HttpPost();
+        post.setRequestHeaders(new Headers(headers));
+        post.setUri(ref.getUri());
+        byte[] content;
+        if (format == Format.JSON)
+            content = ProxyBase.getFhirContext().newJsonParser().encodeResourceToString(resource).getBytes();
+        else
+            content = ProxyBase.getFhirContext().newXmlParser().encodeResourceToString(resource).getBytes();
+        post.setRequest(content);
+
+        post.post();
+
+        response.setUrl(ref);
+        response.setResource(resource);
+        response.setHttpBase(post);
+
+        return response;
+    }
+
+    public ResourceWrapper writeResource(ResourceWrapper resource, Ref ref, Format format, Map<String, String> headers) {
+        return writeResource(resource.getResource(), ref, format, headers);
+    }
+
+
     private ResourceWrapper readResource(Ref ref, Format format) {
         HttpGet getter = new HttpGet();
         ResourceWrapper wrapper = new ResourceWrapper();
         wrapper.setUrl(ref);
-        wrapper.setGetter(getter);
-        String contentType = (format == Format.XML) ? "application/fhir+xml" : "application/fhir+json";
-            getter.get(ref.getUri(), contentType);
+        wrapper.setHttpBase(getter);
+        String contentType = (format == Format.JSON) ? "application/fhir+json" : "application/fhir+xml";
+        getter.get(ref.getUri(), contentType);
+        return gobbleGetResponse(getter, wrapper, format);
+    }
+
+    public ResourceWrapper readResource(Ref ref, Map<String, String> requestHeader) {
+        HttpGet getter = new HttpGet();
+        ResourceWrapper wrapper = new ResourceWrapper();
+        wrapper.setUrl(ref);
+        wrapper.setHttpBase(getter);
+        getter.setUri(ref.getUri());
+        Headers headers = new Headers(requestHeader);
+        getter.setRequestHeaders(headers);
+        getter.get();
+        return gobbleGetResponse(getter, wrapper, asFormat(headers));
+    }
+
+    Format asFormat(Headers headers) {
+        String contentType = headers.getContentType().getValue();
+        if ("application/fhir+xml".equals(contentType))
+            return  Format.XML;
+        if ("application/fhir+json".equals(contentType))
+            return Format.JSON;
+        return Format.NONE;
+    }
+
+    private ResourceWrapper gobbleGetResponse(HttpGet getter, ResourceWrapper wrapper, Format format) {
         String resourceText = getter.getResponseText();
         if (resourceText == null)
             return wrapper;
         IBaseResource resource;
-        if (format == Format.XML)
-            resource = ProxyBase.getFhirContext().newXmlParser().parseResource(resourceText);
-        else
+        if (format == Format.JSON)
             resource = ProxyBase.getFhirContext().newJsonParser().parseResource(resourceText);
+        else
+            resource = ProxyBase.getFhirContext().newXmlParser().parseResource(resourceText);
         wrapper.setResource(resource);
+
         return wrapper;
     }
 

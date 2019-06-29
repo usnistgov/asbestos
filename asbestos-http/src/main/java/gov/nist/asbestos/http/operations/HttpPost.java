@@ -1,6 +1,7 @@
 package gov.nist.asbestos.http.operations;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -38,6 +39,18 @@ public class HttpPost  extends HttpBase {
             if (connection != null)
                 connection.disconnect();
         }
+    }
+
+    public HttpPost post() {
+        try {
+            post(uri, getRequestHeaders().getAll(), getRequest());
+        } catch (IOException e) {
+            status = 400;
+            String msg = e.getMessage() + "\n" + ExceptionUtils.getStackTrace(e);
+            setResponseText(msg);
+            setResponse(msg.getBytes());
+        }
+        return this;
     }
 
     public HttpPost postJson(URI uri, String json) throws IOException {

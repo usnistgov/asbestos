@@ -2,6 +2,7 @@ package gov.nist.asbestos.http.operations;
 
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import java.io.IOException;
 import java.net.*;
@@ -34,6 +35,17 @@ public class HttpGet extends HttpBase {
 
     public void get(String url) throws URISyntaxException {
         get(new URI(url), (Map<String, String>) null);
+    }
+
+    public void get() {
+        try {
+            get(getUri(), getRequestHeaders().getAll());
+        } catch (Throwable e) {
+            status = 404;
+            String msg = e.getMessage() + "\n" + ExceptionUtils.getStackTrace(e);
+            setResponseText(msg);
+            setResponse(msg.getBytes());
+        }
     }
 
     public HttpGet get(URI uri, String contentType)  {

@@ -41,6 +41,12 @@ public class Header {
         });
     }
 
+    public String getValue() {
+        if (values.isEmpty())
+            return null;
+        return values.get(0).getValue();
+    }
+
     public List<String> getAllValues() {
         return values.stream()
                 .map(HeaderValue::getValue)

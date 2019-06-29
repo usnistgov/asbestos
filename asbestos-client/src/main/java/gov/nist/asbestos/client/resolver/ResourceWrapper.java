@@ -1,6 +1,7 @@
 package gov.nist.asbestos.client.resolver;
 
 
+import gov.nist.asbestos.http.operations.HttpBase;
 import gov.nist.asbestos.http.operations.HttpGet;
 import gov.nist.asbestos.simapi.validation.Val;
 import gov.nist.asbestos.simapi.validation.ValE;
@@ -15,7 +16,8 @@ public class ResourceWrapper {
     private IBaseResource resource = null;    // basic content of the resource
     private String assignedId = null;         // assigned symbolic id - used in XDS submissionm
     private Ref url = null;               // FHIR URL - used when available - read from server
-    private HttpGet getter = null;        // used to retrieve resource
+    private HttpBase httpBase = null;        // used in operation
+    private ResourceWrapper source = null;  // if httpBase is HttpPost then source  may be HttpGet that obtained resource
     // String is the fragment without the leading #
     // https://www.hl7.org/fhir/references.html#contained
     // lists the rules for contained resources
@@ -121,12 +123,12 @@ public class ResourceWrapper {
         return assignedId;
     }
 
-    public HttpGet getGetter() {
-        return getter;
+    public HttpBase getHttpBase() {
+        return httpBase;
     }
 
-    public void setGetter(HttpGet getter) {
-        this.getter = getter;
+    public void setHttpBase(HttpBase httpBase) {
+        this.httpBase = httpBase;
     }
 
     public boolean isOk() {
@@ -135,11 +137,11 @@ public class ResourceWrapper {
     }
 
     public int getStatus() {
-        if (getter == null) {
+        if (httpBase == null) {
             if (resource != null)
                 return 200;  // may have come from cache
             return -1;
         }
-        return getter.getStatus();
+        return httpBase.getStatus();
     }
 }
