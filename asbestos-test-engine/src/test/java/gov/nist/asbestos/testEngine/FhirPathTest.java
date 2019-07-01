@@ -16,16 +16,11 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class FhirPathTest {
-    private static FhirContext fhirContext = ProxyBase.getFhirContext();
-    private static IValidationSupport iValidationSupport;
-    private static HapiWorkerContext hapiWorkerContext;
     private static FHIRPathEngine fhirPathEngine;
 
     @BeforeAll
     static void beforeAll() {
-        iValidationSupport = new PrePopulatedValidationSupport();
-        hapiWorkerContext = new HapiWorkerContext(fhirContext, iValidationSupport);
-        fhirPathEngine = new FHIRPathEngine(hapiWorkerContext);
+        fhirPathEngine = FhirPathEngineBuilder.build();
     }
 
     @Test

@@ -2,10 +2,10 @@ package gov.nist.asbestos.client.resolver;
 
 
 import gov.nist.asbestos.http.operations.HttpBase;
-import gov.nist.asbestos.http.operations.HttpGet;
 import gov.nist.asbestos.simapi.validation.Val;
 import gov.nist.asbestos.simapi.validation.ValE;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.BaseResource;
 
 
 import java.util.HashMap;
@@ -15,7 +15,7 @@ import java.util.Objects;
 public class ResourceWrapper {
     private IBaseResource resource = null;    // basic content of the resource
     private String assignedId = null;         // assigned symbolic id - used in XDS submissionm
-    private Ref url = null;               // FHIR URL - used when available - read from server
+    private Ref ref = null;               // FHIR URL - used when available - read from server
     private HttpBase httpBase = null;        // used in operation
     private ResourceWrapper source = null;  // if httpBase is HttpPost then source  may be HttpGet that obtained resource
     // String is the fragment without the leading #
@@ -34,13 +34,13 @@ public class ResourceWrapper {
 
     }
 
-    public ResourceWrapper(IBaseResource resource, Ref url) {
+    public ResourceWrapper(IBaseResource resource, Ref ref) {
         this.resource = resource;
-        this.url = url;
+        this.ref = ref;
     }
 
-    public ResourceWrapper(Ref url) {
-        this.url = url;
+    public ResourceWrapper(Ref ref) {
+        this.ref = ref;
     }
 
     public void setResource(IBaseResource resource) {
@@ -49,9 +49,9 @@ public class ResourceWrapper {
 
     public ResourceWrapper relativeTo(ResourceWrapper reference) {
         Objects.requireNonNull(reference);
-        Objects.requireNonNull(reference.getUrl());
-        Objects.requireNonNull(url);
-        Ref theEnd = url.rebase(reference.getUrl());
+        Objects.requireNonNull(reference.getRef());
+        Objects.requireNonNull(ref);
+        Ref theEnd = ref.rebase(reference.getRef());
         return new ResourceWrapper(theEnd);
     }
 
@@ -60,13 +60,13 @@ public class ResourceWrapper {
         return this;
     }
 
-    public ResourceWrapper setUrl(Ref url) {
-        this.url = url;
+    public ResourceWrapper setRef(Ref ref) {
+        this.ref = ref;
         return this;
     }
 
     public String getId() {
-        if (url.getId() != null) return url.getId();
+        if (ref.getId() != null) return ref.getId();
         if (assignedId != null) return assignedId;
         throw new RuntimeException("Cannot retreive id for " + resource);
     }
@@ -81,12 +81,12 @@ public class ResourceWrapper {
     }
 
     public boolean isLoaded() {
-        if (url == null) return false;
+        if (ref == null) return false;
         return resource != null;
     }
 
     public boolean isLoadable() {
-        if (url == null) return false;
+        if (ref == null) return false;
         return resource == null;
     }
 
@@ -100,9 +100,9 @@ public class ResourceWrapper {
         else
             name = resource.getClass().getSimpleName();
 
-        buf.append(url).append("(").append(name).append(")");
+        buf.append(ref).append("(").append(name).append(")");
 
-//        buf.append("RW[" + assignedId + ", " + url + "] => " + name);
+//        buf.append("RW[" + assignedId + ", " + ref + "] => " + name);
 
         return buf.toString();
     }
@@ -115,8 +115,8 @@ public class ResourceWrapper {
         return contained;
     }
 
-    public Ref getUrl() {
-        return url;
+    public Ref getRef() {
+        return ref;
     }
 
     public String getAssignedId() {

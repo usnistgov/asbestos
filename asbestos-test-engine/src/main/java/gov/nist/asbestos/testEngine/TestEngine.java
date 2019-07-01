@@ -19,6 +19,7 @@ import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * See http://hl7.org/fhir/testing.html
@@ -103,7 +104,15 @@ public class TestEngine  {
     }
 
     private void doSetup() {
-
+        if (testScript.hasSetup()) {
+            TestScript.TestScriptSetupComponent comp = testScript.getSetup();
+            if (comp.hasAction()) {
+                for (TestScript.SetupActionComponent aComp : comp.getAction()) {
+                    FixtureComponent fixtureComponent = new Se
+                }
+                fixtureComponent = new SetupAction(fixtures, comp.get)
+            }
+        }
     }
 
     private void doTest() {

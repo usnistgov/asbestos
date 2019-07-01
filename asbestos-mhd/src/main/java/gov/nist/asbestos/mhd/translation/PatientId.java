@@ -56,7 +56,7 @@ public class PatientId implements IVal {
             val.add(new ValE("DocumentEntryToDocumentReference: cannot find Patient resource for " + system + "|" + id).asError());
             return Optional.empty();
         }
-        return Optional.of(new Reference(results.get(0).getUrl().toString()));
+        return Optional.of(new Reference(results.get(0).getRef().toString()));
     }
 
     PatientId setResourceMgr(ResourceMgr resourceMgr) {

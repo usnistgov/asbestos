@@ -61,7 +61,7 @@ public class ResourceMgr implements IVal {
                 thisVal.add(new ValE("Assigning " + id + " to " + component.getResource().getClass().getSimpleName() + "(" + component.getResource().getIdElement().getValue() + ")"));
                 ResourceWrapper wrapper = new ResourceWrapper(component.getResource())
                         .setAssignedId(id)
-                        .setUrl(new Ref(component.getFullUrl()));
+                        .setRef(new Ref(component.getFullUrl()));
 
                 thisVal.add(new ValE("..." + component.getFullUrl()));
                 addResource(new Ref(component.getFullUrl()), wrapper);
@@ -179,13 +179,13 @@ public class ResourceMgr implements IVal {
             if (config.isRelativeOk()) {
                 ResourceWrapper res = getFromBundle(referenceUrl);
                 if (res == null) {
-                    if (containing.getUrl() == null)
+                    if (containing.getRef() == null)
                         return Optional.empty();
                     // relative/external
-                    ResourceWrapper resource = new ResourceWrapper(referenceUrl.rebase(containing.getUrl().getBase()));
-                    if (resource.getUrl() != null) {
-                        if (getFromBundle(resource.getUrl()) != null)
-                            resource = getFromBundle(resource.getUrl());  // this includes Resource as well as URL
+                    ResourceWrapper resource = new ResourceWrapper(referenceUrl.rebase(containing.getRef().getBase()));
+                    if (resource.getRef() != null) {
+                        if (getFromBundle(resource.getRef()) != null)
+                            resource = getFromBundle(resource.getRef());  // this includes Resource as well as URL
                     }
                     return Optional.of(resource);
                 } else {
@@ -203,18 +203,18 @@ public class ResourceMgr implements IVal {
         Objects.requireNonNull(resource);
         if (resource.isLoaded())
             return resource;
-        if (resource.getUrl() == null)
+        if (resource.getRef() == null)
             return resource;
         if (fhirClient == null)
             throw new Error("ResourceMgr#load: FHIR Client is not configured");
         if (resourceMgrConfig.isInternalOnly()) {
-            Optional<ResourceWrapper> cached = fhirClient.readCachedResource(resource.getUrl());
+            Optional<ResourceWrapper> cached = fhirClient.readCachedResource(resource.getRef());
             if (cached.isPresent() && cached.get().isLoaded()) {
                 resource.setResource(cached.get().getResource());
             }
             return resource;
         }
-        ResourceWrapper wrapper = fhirClient.readResource(resource.getUrl());
+        ResourceWrapper wrapper = fhirClient.readResource(resource.getRef());
         resource.setResource(wrapper.getResource());
         return resource;
     }

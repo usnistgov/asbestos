@@ -114,7 +114,7 @@
                     <attachment>
                         <contentType value="text/plain"/>
                         <language value="en-us"/>
-                        <url value="http://localhost:9556/svc/fhir/Binary/1e404af3-077f-4bee-b7a6-a9be97e1ce32"/>
+                        <ref value="http://localhost:9556/svc/fhir/Binary/1e404af3-077f-4bee-b7a6-a9be97e1ce32"/>
                     </attachment>
                     <format>
                         <system value="http://ihe.net/fhir/ValueSet/IHE.FormatCode.codsystem"/>
@@ -148,7 +148,7 @@
         </resource>
         <request>
             <method value="POST"/>
-            <url value="DocumentReference"/>
+            <ref value="DocumentReference"/>
         </request>
     </entry>
     <entry>
@@ -234,7 +234,7 @@
         </resource>
         <request>
             <method value="POST"/>
-            <url value="Binary"/>
+            <ref value="Binary"/>
         </request>
     </entry>
 </Bundle>

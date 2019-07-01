@@ -2,6 +2,7 @@ package gov.nist.asbestos.client.client;
 
 import gov.nist.asbestos.client.Base.ProxyBase;
 import gov.nist.asbestos.http.headers.Headers;
+import gov.nist.asbestos.http.operations.HttpBase;
 import gov.nist.asbestos.http.operations.HttpGet;
 import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.client.resolver.ResourceCacheMgr;
@@ -9,7 +10,6 @@ import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import gov.nist.asbestos.http.operations.HttpPost;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.Practitioner;
 
 import java.net.URI;
 import java.util.*;
@@ -17,6 +17,8 @@ import java.util.*;
 public class FhirClient {
     private Format format = Format.JSON;
     private ResourceCacheMgr resourceCacheMgr = null;
+    private HttpBase httpBase = null;
+    private Op op = null;
 
     public ResourceWrapper writeResource(IBaseResource resource, Ref ref, Format format, Map<String, String> headers) {
         Objects.requireNonNull(resource);
@@ -41,9 +43,11 @@ public class FhirClient {
 
         post.post();
 
-        response.setUrl(ref);
+        response.setRef(ref);
         response.setResource(resource);
         response.setHttpBase(post);
+        this.httpBase = post;
+        op = Op.POST;
 
         return response;
     }
@@ -56,7 +60,7 @@ public class FhirClient {
     private ResourceWrapper readResource(Ref ref, Format format) {
         HttpGet getter = new HttpGet();
         ResourceWrapper wrapper = new ResourceWrapper();
-        wrapper.setUrl(ref);
+        wrapper.setRef(ref);
         wrapper.setHttpBase(getter);
         String contentType = (format == Format.JSON) ? "application/fhir+json" : "application/fhir+xml";
         getter.get(ref.getUri(), contentType);
@@ -66,7 +70,7 @@ public class FhirClient {
     public ResourceWrapper readResource(Ref ref, Map<String, String> requestHeader) {
         HttpGet getter = new HttpGet();
         ResourceWrapper wrapper = new ResourceWrapper();
-        wrapper.setUrl(ref);
+        wrapper.setRef(ref);
         wrapper.setHttpBase(getter);
         getter.setUri(ref.getUri());
         Headers headers = new Headers(requestHeader);
@@ -94,6 +98,8 @@ public class FhirClient {
         else
             resource = ProxyBase.getFhirContext().newXmlParser().parseResource(resourceText);
         wrapper.setResource(resource);
+        this.httpBase = getter;
+        op = Op.GET;
 
         return wrapper;
     }
@@ -140,7 +146,7 @@ public class FhirClient {
             IBaseResource resource = comp.getResource();
             ResourceWrapper wrapper1 = new ResourceWrapper();
             wrapper1.setResource(resource);
-            wrapper1.setUrl(new Ref(fullUrl));
+            wrapper1.setRef(new Ref(fullUrl));
             list.add(wrapper1);
         }
 
@@ -167,5 +173,13 @@ public class FhirClient {
     public FhirClient setResourceCacheMgr(ResourceCacheMgr resourceCacheMgr) {
         this.resourceCacheMgr = resourceCacheMgr;
         return this;
+    }
+
+    public HttpBase getHttpBase() {
+        return httpBase;
+    }
+
+    public Op getOp() {
+        return op;
     }
 }

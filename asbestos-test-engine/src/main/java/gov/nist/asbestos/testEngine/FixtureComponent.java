@@ -1,37 +1,33 @@
 package gov.nist.asbestos.testEngine;
 
-import gov.nist.asbestos.client.Base.IVal;
 import gov.nist.asbestos.client.client.FhirClient;
 import gov.nist.asbestos.client.client.Format;
-import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
-import gov.nist.asbestos.simapi.validation.Val;
 import gov.nist.asbestos.simapi.validation.ValE;
 
 import java.util.Objects;
 
 public class FixtureComponent {
     private String id;
-    private ResourceWrapper resourceWrapper;
-    private boolean is_static = false;
+    private ResourceWrapper request;  // empty for GET, loaded for POST
+    private ResourceWrapper response; // results of GET, results of POST
+    private boolean is_static = false; // if true then has response and no request
     private FhirClient fhirClient;
     private ValE val;
 
-    FixtureComponent(String id, ResourceWrapper resourceWrapper, FhirClient fhirClient) {
+    FixtureComponent(String id) {
         Objects.requireNonNull(id);
-        Objects.requireNonNull(resourceWrapper);
         this.id = id;
-        this.resourceWrapper = resourceWrapper;
-        this.fhirClient = fhirClient;
     }
 
-    FixtureComponent load() {
-        Objects.requireNonNull(resourceWrapper);
-        Objects.requireNonNull(resourceWrapper.getUrl());
+    FixtureComponent load(ResourceWrapper it) {  //  static loads
+        Objects.requireNonNull(it);
+        Objects.requireNonNull(it.getRef());
         Objects.requireNonNull(fhirClient);
+        response = it;
         if (isLoaded())
             return this;
-        resourceWrapper = fhirClient.readResource(resourceWrapper.getUrl());
+        response = fhirClient.readResource(it.getRef());
         is_static = true;
         return this;
     }
@@ -41,25 +37,15 @@ public class FixtureComponent {
      * @return -1 if not loaded or HTTP status
      */
     boolean IsOk() {
-        return resourceWrapper.getStatus() == 200;
+        return response.getStatus() == 200;
     }
 
     public boolean isLoaded() {
-        return resourceWrapper.isLoaded() && resourceWrapper.isOk();
+        return response.isLoaded() && response.isOk();
     }
 
     String getId() {
         return id;
-    }
-
-    ResourceWrapper getResourceWrapper() {
-        return resourceWrapper;
-    }
-
-    Ref getRef() {
-        if (resourceWrapper != null)
-            return resourceWrapper.getUrl();
-        return null;
     }
 
     public FixtureComponent withFormat(Format format) {
@@ -69,6 +55,24 @@ public class FixtureComponent {
 
     public FixtureComponent setVal(ValE val) {
         this.val = val;
+        return this;
+    }
+
+    public ResourceWrapper getRequest() {
+        return request;
+    }
+
+    public FixtureComponent setRequest(ResourceWrapper request) {
+        this.request = request;
+        return this;
+    }
+
+    public ResourceWrapper getResponse() {
+        return response;
+    }
+
+    public FixtureComponent setResponse(ResourceWrapper response) {
+        this.response = response;
         return this;
     }
 }

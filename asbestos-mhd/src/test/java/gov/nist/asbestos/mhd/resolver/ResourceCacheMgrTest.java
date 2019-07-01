@@ -23,7 +23,7 @@ public class ResourceCacheMgrTest {
         ResourceWrapper resource = mgr.getResource(ref);
 
         assertNotNull(resource);
-        assertNotNull(resource.getUrl());
+        assertNotNull(resource.getRef());
         assertNotNull(resource.getResource());
         assertTrue(resource.isLoaded());
         assertTrue(resource.getResource() instanceof Patient);

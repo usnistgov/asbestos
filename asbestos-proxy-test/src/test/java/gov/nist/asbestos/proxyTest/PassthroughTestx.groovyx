@@ -32,7 +32,7 @@ class PassthroughTestx {
         deleteChannels();
     }
 
-    // TODO parameterize base url of proxy
+    // TODO parameterize base ref of proxy
     // TODO discover location of EC instead of having it hard coded
 
 
@@ -152,7 +152,7 @@ class PassthroughTestx {
         bundle3.entry.size() == 0
     }
 
-    def 'run with bad base url' () {
+    def 'run with bad base ref' () {
         setup:  // create channel
         deleteChannels()
         // /Channel missing from end of uri
@@ -259,14 +259,14 @@ class PassthroughTestx {
         id.value
     }
 
-    String cleanUrl(String url) {
-        url = url.split('_',2)[0]
-        url = url.substring(0, url.size()-1)  // remove trailing /
-        url
+    String cleanUrl(String ref) {
+        ref = ref.split('_',2)[0]
+        ref = ref.substring(0, ref.size()-1)  // remove trailing /
+        ref
     }
 
-    String idFromUrl(String url) {
-        String[] parts = url.split('/')
+    String idFromUrl(String ref) {
+        String[] parts = ref.split('/')
         parts[-1]
     }
 

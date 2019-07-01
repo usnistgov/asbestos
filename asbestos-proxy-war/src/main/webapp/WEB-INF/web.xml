@@ -13,7 +13,7 @@
 
   <servlet-mapping>
     <servlet-name>Proxy</servlet-name>
-    <url-pattern>/prox/*</url-pattern>
+    <ref-pattern>/prox/*</ref-pattern>
   </servlet-mapping>
 
 </web-app>

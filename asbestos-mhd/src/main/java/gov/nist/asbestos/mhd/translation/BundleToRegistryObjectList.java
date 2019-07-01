@@ -354,7 +354,7 @@ public class BundleToRegistryObjectList implements IVal {
         }
 //        if (attachment.hasUrl()) {
 //            vale.addTr(new ValE("repositoryUniqueId"));
-//            addSlot(eo, "repositoryUniqueId", attachment.getUrl());
+//            addSlot(eo, "repositoryUniqueId", attachment.getRef());
 //        }
         if (attachment.hasHash()) {
             vale.addTr(new ValE("hash"));
@@ -454,7 +454,7 @@ public class BundleToRegistryObjectList implements IVal {
         if (attachment.hasUrl()) {
             String url = attachment.getUrl();
             ResourceWrapper resourceWrapper = new ResourceWrapper();
-            resourceWrapper.setUrl(new Ref(url));
+            resourceWrapper.setRef(new Ref(url));
             Optional<ResourceWrapper> binary = rMgr.resolveReference(resourceWrapper, new Ref(url), new ResolverConfig(), vale);
             if (!binary.isPresent()) {
                 vale.add(new ValE("Document(Binary) is not retrievable").asError());

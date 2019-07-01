@@ -60,7 +60,7 @@ public class FileSystemResourceCache implements ResourceCache {
         id = id.substring(0, id.indexOf(".xml"));
         if (file.exists()) {
             ResourceWrapper wrapper = new ResourceWrapper(ctx.newXmlParser().parseResource(fileToString(file)));
-            wrapper.setUrl(url);
+            wrapper.setRef(url);
             wrapper.getResource().setId(id);
             return wrapper;
         }
@@ -69,7 +69,7 @@ public class FileSystemResourceCache implements ResourceCache {
         id = id.substring(0, id.indexOf(".json"));
         if (file.exists()) {
             ResourceWrapper wrapper = new ResourceWrapper(ctx.newJsonParser().parseResource(fileToString(file)));
-            wrapper.setUrl(url);
+            wrapper.setRef(url);
             wrapper.getResource().setId(id);
             return wrapper;
         }
@@ -99,7 +99,7 @@ public class FileSystemResourceCache implements ResourceCache {
                 ResourceWrapper wrapper = readFile(file);
                 String[] parts = file.getName().split("\\.", 2);
                 String id = parts[0];
-                wrapper.setUrl(new Ref(base, type, id));
+                wrapper.setRef(new Ref(base, type, id));
                 all.add(wrapper);
             }
         }

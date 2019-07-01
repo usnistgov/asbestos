@@ -1,6 +1,5 @@
 package gov.nist.asbestos.testEngine;
 
-import ca.uhn.fhir.context.FhirContext;
 import gov.nist.asbestos.client.client.FhirClient;
 import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
@@ -25,7 +24,7 @@ class SetupActionRead {
         this.op = op;
     }
 
-    ResourceWrapper run() {
+    FixtureComponent run() {
         Objects.requireNonNull(val);
         Objects.requireNonNull(fhirClient);
         val = new ValE(val).setMsg("setup.read");
@@ -78,7 +77,7 @@ class SetupActionRead {
         else if (op.hasTargetId()) {
             FixtureComponent fixture  = fixtures.get(op.getTargetId());
             if (fixture != null) {
-                Ref targetRef = fixture.getRef();
+                Ref targetRef = fixture.getResponse().getRef();
                 if (targetRef != null)
                     ref = targetRef.rebase(base);
             }
@@ -89,10 +88,11 @@ class SetupActionRead {
         }
         ResourceWrapper wrapper = fhirClient.readResource(ref, requestHeader);
 
+        FixtureComponent fixtureComponent =  new FixtureComponent(op.getResponseId()).setResponse(wrapper);
         if (op.hasResponseId())
-            fixtures.put(op.getResponseId(), new FixtureComponent(op.getResponseId(), wrapper, null));
+            fixtures.put(op.getResponseId(), fixtureComponent);
 
-        return wrapper;
+        return fixtureComponent;
     }
 
     SetupActionRead setVal(ValE val) {

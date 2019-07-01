@@ -23,7 +23,7 @@ class FileSystemResourceCacheTest {
         ResourceWrapper resource = cache.readResource(ref);
 
         assertNotNull(resource);
-        assertNotNull(resource.getUrl());
+        assertNotNull(resource.getRef());
         assertNotNull(resource.getResource());
         assertTrue(resource.isLoaded());
         assertTrue(resource.getResource() instanceof Patient);
