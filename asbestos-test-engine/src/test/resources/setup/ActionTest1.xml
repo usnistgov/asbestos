@@ -1,0 +1,21 @@
+<TestScript>
+    <setup id="setup1">
+        <action>
+            <operation>
+                <type>
+                    <code value="read"/>
+                </type>
+                <url value="http://localhost:8080/fhir/fhir/Patient/1"/>
+            </operation>
+        </action>
+        <action>
+            <assert>
+                <direction value="response"/>
+                <compareToSourceId value="setup1"/>
+                <compareToSourceExpression value="Patient.name.family = 'Smith'"/>
+                <contentType value="text/xml"/>
+                <response value="okay"/>
+            </assert>
+        </action>
+    </setup>
+</TestScript>

@@ -9,7 +9,10 @@ import gov.nist.asbestos.client.resolver.ResourceCacheMgr;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import gov.nist.asbestos.http.operations.HttpPost;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.BaseResource;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Resource;
 
 import java.net.URI;
 import java.util.*;
@@ -20,7 +23,7 @@ public class FhirClient {
     private HttpBase httpBase = null;
     private Op op = null;
 
-    public ResourceWrapper writeResource(IBaseResource resource, Ref ref, Format format, Map<String, String> headers) {
+    public ResourceWrapper writeResource(BaseResource resource, Ref ref, Format format, Map<String, String> headers) {
         Objects.requireNonNull(resource);
         Objects.requireNonNull(ref);
         ResourceWrapper response = new ResourceWrapper();
@@ -92,11 +95,17 @@ public class FhirClient {
         String resourceText = getter.getResponseText();
         if (resourceText == null)
             return wrapper;
-        IBaseResource resource;
-        if (format == Format.JSON)
-            resource = ProxyBase.getFhirContext().newJsonParser().parseResource(resourceText);
-        else
-            resource = ProxyBase.getFhirContext().newXmlParser().parseResource(resourceText);
+        BaseResource resource = null;
+        IBaseResource iBaseResource;
+        if (format == Format.JSON) {
+            iBaseResource = ProxyBase.getFhirContext().newJsonParser().parseResource(resourceText);
+            if (iBaseResource instanceof BaseResource)
+                resource = (BaseResource) iBaseResource;
+        } else {
+            iBaseResource = ProxyBase.getFhirContext().newXmlParser().parseResource(resourceText);
+            if (iBaseResource instanceof BaseResource)
+                resource = (BaseResource) iBaseResource;
+        }
         wrapper.setResource(resource);
         this.httpBase = getter;
         op = Op.GET;
@@ -143,7 +152,7 @@ public class FhirClient {
 
         for (Bundle.BundleEntryComponent comp : bundle.getEntry()) {
             String fullUrl = comp.getFullUrl();
-            IBaseResource resource = comp.getResource();
+            Resource resource = comp.getResource();
             ResourceWrapper wrapper1 = new ResourceWrapper();
             wrapper1.setResource(resource);
             wrapper1.setRef(new Ref(fullUrl));

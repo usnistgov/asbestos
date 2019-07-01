@@ -75,4 +75,12 @@ public class FixtureComponent {
         this.response = response;
         return this;
     }
+
+    public boolean hasRequest() {
+        return request != null;
+    }
+
+    public boolean hasResponse() {
+        return response != null;
+    }
 }

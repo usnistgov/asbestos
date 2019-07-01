@@ -13,7 +13,7 @@ import java.util.Map;
 import java.util.Objects;
 
 public class ResourceWrapper {
-    private IBaseResource resource = null;    // basic content of the resource
+    private BaseResource resource = null;    // basic content of the resource
     private String assignedId = null;         // assigned symbolic id - used in XDS submissionm
     private Ref ref = null;               // FHIR URL - used when available - read from server
     private HttpBase httpBase = null;        // used in operation
@@ -26,7 +26,7 @@ public class ResourceWrapper {
     private Map<Ref, ResourceWrapper> contained = new HashMap<>();
 
 
-    public ResourceWrapper(IBaseResource resource) {
+    public ResourceWrapper(BaseResource resource) {
         this.resource = resource;
     }
 
@@ -34,7 +34,7 @@ public class ResourceWrapper {
 
     }
 
-    public ResourceWrapper(IBaseResource resource, Ref ref) {
+    public ResourceWrapper(BaseResource resource, Ref ref) {
         this.resource = resource;
         this.ref = ref;
     }
@@ -43,7 +43,7 @@ public class ResourceWrapper {
         this.ref = ref;
     }
 
-    public void setResource(IBaseResource resource) {
+    public void setResource(BaseResource resource) {
         this.resource = resource;
     }
 
@@ -107,7 +107,7 @@ public class ResourceWrapper {
         return buf.toString();
     }
 
-    public IBaseResource getResource() {
+    public BaseResource getResource() {
         return resource;
     }
 

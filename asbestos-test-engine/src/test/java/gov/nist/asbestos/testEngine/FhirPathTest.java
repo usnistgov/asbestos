@@ -41,6 +41,7 @@ class FhirPathTest {
         patient.addName(humanName1);
 
         List<Base> results = fhirPathEngine.evaluate(patient, "Patient.name.family = 'Smith' and name.given = 'George'");
+        fhirPathEngine.
 
         assertFalse(results.isEmpty());
         assertTrue(results.get(0) instanceof BooleanType);
