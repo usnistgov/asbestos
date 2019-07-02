@@ -59,9 +59,8 @@ class FixtureTest {
 
         assertEquals(1, testEngine.getFixtures().keySet().size());
         FixtureComponent fixtureMgr = testEngine.getFixtures().values().iterator().next();
-        ResourceWrapper wrapper = fixtureMgr.getResourceWrapper();
-        assertEquals(200, wrapper.getStatus());
-        IBaseResource resource = wrapper.getResource();
+        assertEquals(200, fixtureMgr.IsOk());
+        IBaseResource resource = fixtureMgr.getResponseResource();
         assertNotNull(resource);
         assertTrue(resource instanceof Patient);
         assertTrue(testEngine.isOk());

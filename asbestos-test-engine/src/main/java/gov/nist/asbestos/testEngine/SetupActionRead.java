@@ -4,6 +4,7 @@ import gov.nist.asbestos.client.client.FhirClient;
 import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import gov.nist.asbestos.simapi.validation.ValE;
+import org.hl7.fhir.r4.model.TestReport;
 import org.hl7.fhir.r4.model.TestScript;
 
 import java.net.URI;
@@ -18,6 +19,8 @@ class SetupActionRead {
     private ValE val;
     private URI base;
     private FhirClient fhirClient;
+    private TestReport testReport = null;
+
 
     SetupActionRead(Map<String, FixtureComponent> fixtures, TestScript.SetupActionOperationComponent op) {
         this.fixtures = fixtures;
@@ -77,7 +80,7 @@ class SetupActionRead {
         else if (op.hasTargetId()) {
             FixtureComponent fixture  = fixtures.get(op.getTargetId());
             if (fixture != null) {
-                Ref targetRef = fixture.getResponse().getRef();
+                Ref targetRef = new Ref(fixture.getFhirClient().getHttpBase().getUri());
                 if (targetRef != null)
                     ref = targetRef.rebase(base);
             }
@@ -100,11 +103,19 @@ class SetupActionRead {
         return this;
     }
 
-    public void setBase(URI base) {
+    public SetupActionRead setBase(URI base) {
         this.base = base;
+        return this;
     }
 
-    public void setFhirClient(FhirClient fhirClient) {
+    public SetupActionRead setFhirClient(FhirClient fhirClient) {
         this.fhirClient = fhirClient;
+        return this;
     }
+
+    public SetupActionRead setTestReport(TestReport testReport) {
+        this.testReport = testReport;
+        return this;
+    }
+
 }

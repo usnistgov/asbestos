@@ -9,6 +9,7 @@ import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import gov.nist.asbestos.simapi.validation.Val;
 import gov.nist.asbestos.simapi.validation.ValE;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.TestReport;
 import org.hl7.fhir.r4.model.TestScript;
 
 import java.io.File;
@@ -32,6 +33,7 @@ public class TestEngine  {
     private Val val;
     private ValE engineVal;
     private FhirClient fhirClient;
+    private TestReport testReport = new TestReport();
 
     /**
      *
@@ -72,8 +74,7 @@ public class TestEngine  {
 
 
     private void doLoadFixtures() {
-        TestScript.SetupActionComponent c;
-        c.
+
         if (testScript.hasFixture()) {
             ValE fVal = new ValE(engineVal).setMsg("Fixtures");
 
@@ -87,7 +88,7 @@ public class TestEngine  {
                 ResourceWrapper wrapper = new ResourceWrapper(new Ref(comp.getResource().getReference()));
                 FixtureComponent fixtureMgr;
                 try {
-                    fixtureMgr = new FixtureComponent(id, wrapper, fhirClient).setVal(fVal).load();
+                    fixtureMgr = new FixtureComponent(id).setResponse(wrapper).setFhirClient(fhirClient).setVal(fVal).load(wrapper);
                 } catch (Throwable e) {
                     fVal.add(new ValE(e.getMessage()).asError());
                     return;
@@ -107,10 +108,16 @@ public class TestEngine  {
         if (testScript.hasSetup()) {
             TestScript.TestScriptSetupComponent comp = testScript.getSetup();
             if (comp.hasAction()) {
-                for (TestScript.SetupActionComponent aComp : comp.getAction()) {
-                    FixtureComponent fixtureComponent = new Se
+                ValE fVal = new ValE(engineVal).setMsg("Setup");
+                String lastOp = null;
+                for (TestScript.SetupActionComponent action : comp.getAction()) {
+                    SetupAction setupAction = new SetupAction(fixtures, action)
+                        .setVal(fVal)
+                        .setLastOp(lastOp)
+                        .setTestReport(testReport);
+                    setupAction.run();
+                    lastOp = setupAction.getLastOp();
                 }
-                fixtureComponent = new SetupAction(fixtures, comp.get)
             }
         }
     }
@@ -170,11 +177,6 @@ public class TestEngine  {
     private TestEngine addFixture(FixtureComponent fixtureMgr) {
         fixtures.put(fixtureMgr.getId(), fixtureMgr);
         return this;
-    }
-
-    private TestEngine addFixture(String id, ResourceWrapper resourceWrapper) {
-        FixtureComponent fixtureMgr = new FixtureComponent(id, resourceWrapper, fhirClient);
-        return addFixture(fixtureMgr);
     }
 
     Map<String, FixtureComponent> getFixtures() {

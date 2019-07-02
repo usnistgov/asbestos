@@ -191,4 +191,10 @@ public class FhirClient {
     public Op getOp() {
         return op;
     }
+
+    public int getStatus() {
+        if (httpBase == null)
+            return 200;
+        return httpBase.getStatus();
+    }
 }

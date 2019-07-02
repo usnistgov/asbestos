@@ -40,7 +40,7 @@ public class FixtureComponent {
      * @return -1 if not loaded or HTTP status
      */
     boolean IsOk() {
-        return response.getStatus() == 200;
+        return fhirClient.getStatus() == 200;
     }
 
     public boolean isLoaded() {
@@ -65,7 +65,7 @@ public class FixtureComponent {
         return request.getResource();
     }
 
-    public FixtureComponent setRequest(ResourceWrapper request) {
+    public FixtureComponent setRequestResource(ResourceWrapper request) {
         this.request = request;
         return this;
     }
@@ -96,5 +96,14 @@ public class FixtureComponent {
 
     public HttpBase getHttpBase() {
         return fhirClient.getHttpBase();
+    }
+
+    public FixtureComponent setFhirClient(FhirClient fhirClient) {
+        this.fhirClient = fhirClient;
+        return this;
+    }
+
+    public FhirClient getFhirClient() {
+        return fhirClient;
     }
 }

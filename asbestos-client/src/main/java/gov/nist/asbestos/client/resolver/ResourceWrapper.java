@@ -30,6 +30,13 @@ public class ResourceWrapper {
         this.resource = resource;
     }
 
+    public ResourceWrapper(IBaseResource iBaseResource) {
+        if (iBaseResource instanceof BaseResource)
+            resource = (BaseResource) iBaseResource;
+        else
+            throw new Error("Cannot convert IBaseResource " + iBaseResource + " to BaseResource");
+    }
+
     public ResourceWrapper() {
 
     }

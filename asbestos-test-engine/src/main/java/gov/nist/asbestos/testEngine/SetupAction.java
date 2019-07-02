@@ -14,9 +14,9 @@ import java.util.Objects;
 class SetupAction {
     private Map<String, FixtureComponent> fixtures;
     private TestScript.SetupActionComponent action;
-    private String lastOp;  // name of last FixtureComponent
+    private String lastOp = null;  // name of last FixtureComponent
     private ValE val;
-    private TestReport testReport = new TestReport();
+    private TestReport testReport = null;
     private FixtureComponent result = null;
 
     SetupAction(Map<String, FixtureComponent> fixtures, TestScript.SetupActionComponent action) {
@@ -26,6 +26,7 @@ class SetupAction {
 
     void run() {
         Objects.requireNonNull(val);
+        Objects.requireNonNull(testReport);
         TestReport.TestReportSetupComponent setupReport = testReport.getSetup();
         String id = action.hasId() ? action.getId() : "No ID";
         if (action.hasOperation() && action.hasAssert()) {
@@ -72,7 +73,8 @@ class SetupAction {
 //            }
 
             if ("read".equals(code)) {
-                new SetupActionRead(fixtures, op).setVal(val).run();
+                FixtureComponent fixture = new SetupActionRead(fixtures, op).setVal(val).run();
+                lastOp = fixture.getId();
                 return;
             } else {
                 val.add(new ValE("Setup.Action " + id + " do not understand code.code of " + code).asError());
@@ -322,8 +324,13 @@ class SetupAction {
         return this;
     }
 
-    public void setLastOp(String lastOp) {
+    public SetupAction setLastOp(String lastOp) {
         this.lastOp = lastOp;
+        return this;
+    }
+
+    public String getLastOp() {
+        return lastOp;
     }
 
     public TestReport getTestReport() {
@@ -332,5 +339,10 @@ class SetupAction {
 
     public FixtureComponent getResult() {
         return result;
+    }
+
+    public SetupAction setTestReport(TestReport testReport) {
+        this.testReport = testReport;
+        return this;
     }
 }
