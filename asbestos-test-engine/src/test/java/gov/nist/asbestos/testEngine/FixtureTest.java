@@ -59,11 +59,9 @@ class FixtureTest {
 
         assertEquals(1, testEngine.getFixtures().keySet().size());
         FixtureComponent fixtureMgr = testEngine.getFixtures().values().iterator().next();
-        assertEquals(200, fixtureMgr.IsOk());
         IBaseResource resource = fixtureMgr.getResponseResource();
         assertNotNull(resource);
         assertTrue(resource instanceof Patient);
-        assertTrue(testEngine.isOk());
     }
 
     @Test
@@ -74,8 +72,6 @@ class FixtureTest {
         TestEngine testEngine = new TestEngine(testDef, sut).setVal(val);
         testEngine.run();
         assertEquals(1, testEngine.getFixtures().size());
-
-        assertFalse(testEngine.isOk());
 
         List<ValE> errors = val.getErrors();
         assertFalse(errors.isEmpty());

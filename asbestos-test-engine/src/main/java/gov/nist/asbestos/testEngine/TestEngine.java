@@ -93,7 +93,7 @@ public class TestEngine  {
                     fVal.add(new ValE(e.getMessage()).asError());
                     return;
                 }
-                if (!fixtureMgr.IsOk())
+                if (!fixtureMgr.hasResponse() || fixtureMgr.getResponseResource() == null)
                     fVal.add(new ValE("Failed to load Fixture " + id).asError());
                 fixtures.put(id, fixtureMgr);
             }
@@ -181,10 +181,6 @@ public class TestEngine  {
 
     Map<String, FixtureComponent> getFixtures() {
         return fixtures;
-    }
-
-    boolean isOk() {
-        return fixturesOk();
     }
 
     private boolean fixturesOk() {
