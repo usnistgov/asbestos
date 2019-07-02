@@ -3,14 +3,17 @@ package gov.nist.asbestos.testEngine;
 import gov.nist.asbestos.client.client.FhirClient;
 import gov.nist.asbestos.client.client.Format;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
+import gov.nist.asbestos.http.operations.HttpBase;
 import gov.nist.asbestos.simapi.validation.ValE;
+import org.hl7.fhir.r4.model.BaseResource;
 
 import java.util.Objects;
 
 public class FixtureComponent {
     private String id;
-    private ResourceWrapper request;  // empty for GET, loaded for POST
-    private ResourceWrapper response; // results of GET, results of POST
+    // these are for holding request/response bodies.  For HTTP operation, see fhirClient
+    private ResourceWrapper request;
+    private ResourceWrapper response;
     private boolean is_static = false; // if true then has response and no request
     private FhirClient fhirClient;
     private ValE val;
@@ -58,8 +61,8 @@ public class FixtureComponent {
         return this;
     }
 
-    public ResourceWrapper getRequest() {
-        return request;
+    public BaseResource getRequestResource() {
+        return request.getResource();
     }
 
     public FixtureComponent setRequest(ResourceWrapper request) {
@@ -67,8 +70,15 @@ public class FixtureComponent {
         return this;
     }
 
-    public ResourceWrapper getResponse() {
-        return response;
+    public BaseResource getResponseResource() {
+        return response.getResource();
+    }
+
+    public String getResponseType() {
+        BaseResource resource = getResponseResource();
+        if (resource == null)
+            return null;
+        return resource.getClass().getSimpleName();
     }
 
     public FixtureComponent setResponse(ResourceWrapper response) {
@@ -82,5 +92,9 @@ public class FixtureComponent {
 
     public boolean hasResponse() {
         return response != null;
+    }
+
+    public HttpBase getHttpBase() {
+        return fhirClient.getHttpBase();
     }
 }
