@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<TestScript xmlns="http://hl7.org/fhir">
+    <id value="test1"/>
+    <name value="test1"/>
+    <fixture id="example-patient">
+        <resource>
+            <reference value="Patient/patient-example.xml"/>
+        </resource>
+    </fixture>
+    <setup>
+        <action>
+            <assert>
+                <sourceId value="example-patient"/>
+                <expression value="Patient.name.family"/>
+                <value value="Chalmers"/>
+<!--                <warningOnly value="false"/>-->
+            </assert>
+        </action>
+    </setup>
+</TestScript>

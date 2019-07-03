@@ -10,6 +10,7 @@ import org.hl7.fhir.r4.model.BaseResource;
 import java.util.Objects;
 
 public class FixtureComponent {
+    private static int idCounter = 1;
     private String id;
     // these are for holding request/response bodies.  For HTTP operation, see fhirClient
     private ResourceWrapper request;
@@ -62,6 +63,8 @@ public class FixtureComponent {
     }
 
     public BaseResource getRequestResource() {
+        if (request == null)
+            return null;
         return request.getResource();
     }
 
@@ -105,5 +108,9 @@ public class FixtureComponent {
 
     public FhirClient getFhirClient() {
         return fhirClient;
+    }
+
+    public static String getNewId() {
+        return "ID" + idCounter++;
     }
 }

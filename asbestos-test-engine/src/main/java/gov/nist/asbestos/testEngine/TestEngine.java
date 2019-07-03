@@ -17,10 +17,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.net.URI;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 /**
  * See http://hl7.org/fhir/testing.html
@@ -34,6 +31,7 @@ public class TestEngine  {
     private ValE engineVal;
     private FhirClient fhirClient;
     private TestReport testReport = new TestReport();
+    private List<String> errors;
 
     /**
      *
@@ -66,6 +64,59 @@ public class TestEngine  {
         doTest();
         doTearDown();
         doPostProcessing();
+        errors = doReportResult();
+    }
+
+    private List<String> doReportResult() {
+        List<String> failingComponents = new ArrayList<>();
+
+        TestReport.TestReportSetupComponent setup = testReport.getSetup();
+        for (TestReport.SetupActionComponent action : setup.getAction()) {
+            if (action.hasOperation()) {
+                TestReport.SetupActionOperationComponent op = action.getOperation();
+                TestReport.TestReportActionResult result = op.getResult();
+                if (result == TestReport.TestReportActionResult.FAIL || result == TestReport.TestReportActionResult.ERROR)
+                    failingComponents.add(op.getMessage());
+            }
+            if (action.hasAssert()) {
+                TestReport.SetupActionAssertComponent as = action.getAssert();
+                TestReport.TestReportActionResult result2 = as.getResult();
+                if (result2 == TestReport.TestReportActionResult.FAIL || result2 == TestReport.TestReportActionResult.ERROR)
+                    failingComponents.add(as.getMessage());
+            }
+        }
+        for (TestReport.TestReportTestComponent test : testReport.getTest()) {
+            for (TestReport.TestActionComponent action : test.getAction()) {
+                if (action.hasOperation()) {
+                    TestReport.SetupActionOperationComponent op = action.getOperation();
+                    TestReport.TestReportActionResult result = op.getResult();
+                    if (result == TestReport.TestReportActionResult.FAIL || result == TestReport.TestReportActionResult.ERROR)
+                        failingComponents.add(op.getMessage());
+                }
+                if (action.hasAssert()) {
+                    TestReport.SetupActionAssertComponent as = action.getAssert();
+                    TestReport.TestReportActionResult result2 = as.getResult();
+                    if (result2 == TestReport.TestReportActionResult.FAIL || result2 == TestReport.TestReportActionResult.ERROR)
+                        failingComponents.add(as.getMessage());
+                }
+            }
+        }
+        TestReport.TestReportTeardownComponent teardown = testReport.getTeardown();
+        for (TestReport.TeardownActionComponent action : teardown.getAction()) {
+            if (action.hasOperation()) {
+                TestReport.SetupActionOperationComponent op = action.getOperation();
+                TestReport.TestReportActionResult result = op.getResult();
+                if (result == TestReport.TestReportActionResult.FAIL || result == TestReport.TestReportActionResult.ERROR)
+                    failingComponents.add(op.getMessage());
+            }
+        }
+
+        testReport.setResult(
+                failingComponents.isEmpty()
+                        ? TestReport.TestReportResult.PASS
+                        : TestReport.TestReportResult.FAIL
+        );
+        return failingComponents;
     }
 
     private void doPreProcessing() {
@@ -194,5 +245,13 @@ public class TestEngine  {
     TestEngine setVal(Val val) {
         this.val = val;
         return this;
+    }
+
+    public TestReport getTestReport() {
+        return testReport;
+    }
+
+    public List<String> getErrors() {
+        return errors;
     }
 }

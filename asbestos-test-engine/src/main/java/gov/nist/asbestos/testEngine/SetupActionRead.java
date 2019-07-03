@@ -81,8 +81,7 @@ class SetupActionRead {
             FixtureComponent fixture  = fixtures.get(op.getTargetId());
             if (fixture != null) {
                 Ref targetRef = new Ref(fixture.getFhirClient().getHttpBase().getUri());
-                if (targetRef != null)
-                    ref = targetRef.rebase(base);
+                ref = targetRef.rebase(base);
             }
         }
         if (ref == null) {
@@ -91,9 +90,9 @@ class SetupActionRead {
         }
         ResourceWrapper wrapper = fhirClient.readResource(ref, requestHeader);
 
-        FixtureComponent fixtureComponent =  new FixtureComponent(op.getResponseId()).setResponse(wrapper);
-        if (op.hasResponseId())
-            fixtures.put(op.getResponseId(), fixtureComponent);
+        String fixtureId =op.hasResponseId() ? op.getResponseId() : FixtureComponent.getNewId();
+        FixtureComponent fixtureComponent =  new FixtureComponent(fixtureId).setResponse(wrapper);
+        fixtures.put(fixtureId, fixtureComponent);
 
         return fixtureComponent;
     }
