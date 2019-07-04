@@ -35,6 +35,10 @@ public class ResourceCacheMgr {
         return new ArrayList<>(caches.keySet());
     }
 
+    public void addCache(File cacheCollection) {
+        loadCache(cacheCollection);
+    }
+
     private void loadCache(File cacheCollection) {
         if (cacheCollection.exists() && cacheCollection.isDirectory()) {
             File[] dirs = cacheCollection.listFiles();

@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <TestScript xmlns="http://hl7.org/fhir">
-    <id value="good"/>
     <name value="good"/>
     <fixture id="example-patient">
         <resource>
