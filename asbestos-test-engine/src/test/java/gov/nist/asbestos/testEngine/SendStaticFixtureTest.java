@@ -2,6 +2,7 @@ package gov.nist.asbestos.testEngine;
 
 import gov.nist.asbestos.simapi.validation.Val;
 import org.hl7.fhir.r4.model.TestReport;
+import org.hl7.fhir.r4.model.TestScript;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
@@ -11,6 +12,7 @@ import java.nio.file.Paths;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class SendStaticFixtureTest {
 
@@ -24,6 +26,10 @@ class SendStaticFixtureTest {
         TestReport report = testEngine.getTestReport();
         TestReport.TestReportResult result = report.getResult();
         assertEquals(TestReport.TestReportResult.PASS, result);
+
+        // verify test name
+        TestScript testScript = testEngine.getTestScript();
+        assertEquals(testScript.getName(), report.getName());
     }
 
     @Test
@@ -69,7 +75,6 @@ class SendStaticFixtureTest {
         TestReport.TestReportResult result = report.getResult();
         assertEquals(TestReport.TestReportResult.FAIL, result);
         assertEquals(1, errors.size());
-        //assertEquals("setup.action.assert : No ID : warningOnly is required but missing", errors.get(0));
     }
 
     @Test
@@ -114,7 +119,8 @@ class SendStaticFixtureTest {
         printErrors(errors);
         TestReport.TestReportResult result = report.getResult();
         assertEquals(TestReport.TestReportResult.FAIL, result);
-        assertEquals(0, errors.size());
+        assertEquals(1, errors.size());
+        assertTrue(errors.get(0).contains("Assertion failed"));
     }
 
 

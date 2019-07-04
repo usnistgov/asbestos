@@ -9,6 +9,7 @@ import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import gov.nist.asbestos.simapi.validation.Val;
 import gov.nist.asbestos.simapi.validation.ValE;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.TestReport;
 import org.hl7.fhir.r4.model.TestScript;
 
@@ -57,6 +58,8 @@ public class TestEngine  {
 
     private void doWorkflow() {
         testScript = loadTestScript();
+        testReport.setName(testScript.getName());
+        testReport.setTestScript(new Reference(testScript.getId()));
         doPreProcessing();
         doLoadFixtures();
         doAutoCreates();
@@ -131,22 +134,24 @@ public class TestEngine  {
 
             for (TestScript.TestScriptFixtureComponent comp : testScript.getFixture()) {
                 String id = comp.getId();
-                if (id == null || id.equals("")) {
-                    fVal.add(new ValE("Fixture has no id").asError());
-                    return;
-                }
-                fVal.add(new ValE("Fixture " + id));
+//                if (id == null || id.equals("")) {
+//                    fVal.add(new ValE("Fixture has no id").asError());
+//                    return;
+//                }
+//                fVal.add(new ValE("Fixture " + id));
                 ResourceWrapper wrapper = new ResourceWrapper(new Ref(comp.getResource().getReference()));
                 FixtureComponent fixtureMgr;
                 try {
                     fixtureMgr = new FixtureComponent(id).setResponse(wrapper).setFhirClient(fhirClient).setVal(fVal).load(wrapper);
                 } catch (Throwable e) {
-                    fVal.add(new ValE(e.getMessage()).asError());
-                    return;
+                    throw new Error(e);
+//                    fVal.add(new ValE(e.getMessage()).asError());
+//                    return;
                 }
-                if (!fixtureMgr.hasResponse() || fixtureMgr.getResponseResource() == null)
-                    fVal.add(new ValE("Failed to load Fixture " + id).asError());
-                fixtures.put(id, fixtureMgr);
+//                if (!fixtureMgr.hasResponse() || fixtureMgr.getResponseResource() == null)
+//                    fVal.add(new ValE("Failed to load Fixture " + id).asError());
+                if (id != null)
+                    fixtures.put(id, fixtureMgr);
             }
         }
     }
@@ -253,5 +258,9 @@ public class TestEngine  {
 
     public List<String> getErrors() {
         return errors;
+    }
+
+    public TestScript getTestScript() {
+        return testScript;
     }
 }

@@ -120,8 +120,7 @@ class SetupAction {
                     reportError(val, assertReport, type, id,"Fixture referenced " +  source.getId()  + "has no " + (directionIsResponse ? "response" : "request"));
                     return;
                 }
-                List<Base> results = FhirPathEngineBuilder.build().evaluate(sourceResource, expression);
-                if (results.isEmpty()) {
+                if (!eval(sourceResource, expression)) {
                     reportFail(val, assertReport, type, id, "Assertion failed", warningOnly);
                     return;
                 }
@@ -209,8 +208,7 @@ class SetupAction {
                     reportError(val, assertReport, type, id,"Fixture referenced " + fixture.getId()  + " has no " + (directionIsResponse ? "response" : "request"));
                     return;
                 }
-                List<Base> results = FhirPathEngineBuilder.build().evaluate(sourceResource, expression);
-                if (results.isEmpty()) {
+                if (!eval(sourceResource, expression)) {
                     reportFail(val, assertReport, type, id, "Assertion failed", warningOnly);
                     return;
                 }
@@ -246,6 +244,18 @@ class SetupAction {
             }
 
         }
+    }
+
+    private boolean eval(BaseResource resource, String expression) {
+        List<Base> results = FhirPathEngineBuilder.build().evaluate(resource, expression);
+        if (results.isEmpty())
+            return false;
+        Base result = results.get(0);
+        if (result instanceof BooleanType) {
+            boolean val = ((BooleanType) result).booleanValue();
+            return val;
+        }
+        return true;
     }
 
     private String responseCodeAsString(int code) {
