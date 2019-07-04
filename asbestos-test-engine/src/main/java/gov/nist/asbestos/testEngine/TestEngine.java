@@ -30,7 +30,8 @@ public class TestEngine  {
     private Map<String, FixtureComponent> fixtures = new HashMap<>();
     private Val val;
     private ValE engineVal;
-    private FhirClient fhirClient;
+    private FhirClient fhirClientForFixtures;
+    private FhirClient fhirClient;  // for real interactions
     private TestReport testReport = new TestReport();
     private List<String> errors;
 
@@ -45,11 +46,12 @@ public class TestEngine  {
         this.testDef = testDef;
         this.sut = sut;
         ResourceCacheMgr inTestResources = new ResourceCacheMgr(testDef, new Ref(""));
-        fhirClient = new FhirClient().setResourceCacheMgr(inTestResources);
+        fhirClientForFixtures = new FhirClient().setResourceCacheMgr(inTestResources);
     }
 
     public TestEngine run() {
         Objects.requireNonNull(val);
+        Objects.requireNonNull(fhirClient);
         engineVal = new ValE(val);
         engineVal.setMsg("TestEngine");
         doWorkflow();
@@ -142,7 +144,7 @@ public class TestEngine  {
                 ResourceWrapper wrapper = new ResourceWrapper(new Ref(comp.getResource().getReference()));
                 FixtureComponent fixtureMgr;
                 try {
-                    fixtureMgr = new FixtureComponent(id).setResponse(wrapper).setFhirClient(fhirClient).setVal(fVal).load(wrapper);
+                    fixtureMgr = new FixtureComponent(id).setResponse(wrapper).setFhirClient(fhirClientForFixtures).setVal(fVal).load(wrapper);
                 } catch (Throwable e) {
                     throw new Error(e);
 //                    fVal.add(new ValE(e.getMessage()).asError());
@@ -262,5 +264,14 @@ public class TestEngine  {
 
     public TestScript getTestScript() {
         return testScript;
+    }
+
+    public FhirClient getFhirClient() {
+        return fhirClient;
+    }
+
+    public TestEngine setFhirClient(FhirClient fhirClient) {
+        this.fhirClient = fhirClient;
+        return this;
     }
 }

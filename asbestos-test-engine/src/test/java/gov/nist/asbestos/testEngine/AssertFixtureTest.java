@@ -1,5 +1,6 @@
 package gov.nist.asbestos.testEngine;
 
+import gov.nist.asbestos.client.client.FhirClient;
 import gov.nist.asbestos.simapi.validation.Val;
 import org.hl7.fhir.r4.model.TestReport;
 import org.hl7.fhir.r4.model.TestScript;
@@ -14,14 +15,15 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class SendStaticFixtureTest {
+class AssertFixtureTest {
 
     @Test
     void verifyPatientName() throws URISyntaxException {
         Val val = new Val();
-        File test1 = Paths.get(getClass().getResource("/setup/SendStaticFixture/patientNameGood/TestScript.xml").toURI()).getParent().toFile();
+        File test1 = Paths.get(getClass().getResource("/setup/assertFixture/patientNameGood/TestScript.xml").toURI()).getParent().toFile();
         TestEngine testEngine = new TestEngine(test1, new URI(""))
                 .setVal(val)
+                .setFhirClient(new FhirClient())
                 .run();
         TestReport report = testEngine.getTestReport();
         TestReport.TestReportResult result = report.getResult();
@@ -35,9 +37,10 @@ class SendStaticFixtureTest {
     @Test
     void warningOnlyMissing() throws URISyntaxException {
         Val val = new Val();
-        File test1 = Paths.get(getClass().getResource("/setup/SendStaticFixture/warningOnlyMissing/TestScript.xml").toURI()).getParent().toFile();
+        File test1 = Paths.get(getClass().getResource("/setup/assertFixture/warningOnlyMissing/TestScript.xml").toURI()).getParent().toFile();
         TestEngine testEngine = new TestEngine(test1, new URI(""))
                 .setVal(val)
+                .setFhirClient(new FhirClient())
                 .run();
         TestReport report = testEngine.getTestReport();
         List<String> errors = testEngine.getErrors();
@@ -50,9 +53,10 @@ class SendStaticFixtureTest {
     @Test
     void patientNameWarning() throws URISyntaxException {
         Val val = new Val();
-        File test1 = Paths.get(getClass().getResource("/setup/SendStaticFixture/patientNameWarning/TestScript.xml").toURI()).getParent().toFile();
+        File test1 = Paths.get(getClass().getResource("/setup/assertFixture/patientNameWarning/TestScript.xml").toURI()).getParent().toFile();
         TestEngine testEngine = new TestEngine(test1, new URI(""))
                 .setVal(val)
+                .setFhirClient(new FhirClient())
                 .run();
         TestReport report = testEngine.getTestReport();
         List<String> errors = testEngine.getErrors();
@@ -65,9 +69,10 @@ class SendStaticFixtureTest {
     @Test
     void patientNameError() throws URISyntaxException {
         Val val = new Val();
-        File test1 = Paths.get(getClass().getResource("/setup/SendStaticFixture/patientNameError/TestScript.xml").toURI()).getParent().toFile();
+        File test1 = Paths.get(getClass().getResource("/setup/assertFixture/patientNameError/TestScript.xml").toURI()).getParent().toFile();
         TestEngine testEngine = new TestEngine(test1, new URI(""))
                 .setVal(val)
+                .setFhirClient(new FhirClient())
                 .run();
         TestReport report = testEngine.getTestReport();
         List<String> errors = testEngine.getErrors();
@@ -80,9 +85,10 @@ class SendStaticFixtureTest {
     @Test
     void patientNameGood() throws URISyntaxException {
         Val val = new Val();
-        File test1 = Paths.get(getClass().getResource("/setup/SendStaticFixture/patientNameGood/TestScript.xml").toURI()).getParent().toFile();
+        File test1 = Paths.get(getClass().getResource("/setup/assertFixture/patientNameGood/TestScript.xml").toURI()).getParent().toFile();
         TestEngine testEngine = new TestEngine(test1, new URI(""))
                 .setVal(val)
+                .setFhirClient(new FhirClient())
                 .run();
         TestReport report = testEngine.getTestReport();
         List<String> errors = testEngine.getErrors();
@@ -95,9 +101,10 @@ class SendStaticFixtureTest {
     @Test
     void patientNameWithSourceId() throws URISyntaxException {
         Val val = new Val();
-        File test1 = Paths.get(getClass().getResource("/setup/SendStaticFixture/patientNameWithSourceId/TestScript.xml").toURI()).getParent().toFile();
+        File test1 = Paths.get(getClass().getResource("/setup/assertFixture/patientNameWithSourceId/TestScript.xml").toURI()).getParent().toFile();
         TestEngine testEngine = new TestEngine(test1, new URI(""))
                 .setVal(val)
+                .setFhirClient(new FhirClient())
                 .run();
         TestReport report = testEngine.getTestReport();
         List<String> errors = testEngine.getErrors();
@@ -110,9 +117,10 @@ class SendStaticFixtureTest {
     @Test
     void patientNameBadWithSourceId() throws URISyntaxException {
         Val val = new Val();
-        File test1 = Paths.get(getClass().getResource("/setup/SendStaticFixture/patientNameBadWithSourceId/TestScript.xml").toURI()).getParent().toFile();
+        File test1 = Paths.get(getClass().getResource("/setup/assertFixture/patientNameBadWithSourceId/TestScript.xml").toURI()).getParent().toFile();
         TestEngine testEngine = new TestEngine(test1, new URI(""))
                 .setVal(val)
+                .setFhirClient(new FhirClient())
                 .run();
         TestReport report = testEngine.getTestReport();
         List<String> errors = testEngine.getErrors();
