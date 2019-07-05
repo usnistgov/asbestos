@@ -10,10 +10,12 @@
     <setup>
         <action>
             <operation>
+                <label value="create"/>
                 <type>
                     <code value="create"/>
                 </type>
                 <sourceId value="example-patient"/>
+                <url value="http://localhost:9999/fhir/Patient"/>
             </operation>
         </action>
         <action>

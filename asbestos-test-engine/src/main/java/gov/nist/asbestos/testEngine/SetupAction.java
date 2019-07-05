@@ -1,5 +1,6 @@
 package gov.nist.asbestos.testEngine;
 
+import gov.nist.asbestos.client.client.FhirClient;
 import gov.nist.asbestos.simapi.validation.ValE;
 import org.hl7.fhir.r4.model.*;
 
@@ -16,6 +17,7 @@ class SetupAction {
     private ValE val;
     private TestReport testReport = null;
     private FixtureComponent result = null;
+    private FhirClient fhirClient = null;
 
     SetupAction(Map<String, FixtureComponent> fixtures, TestScript.SetupActionComponent action) {
         this.fixtures = fixtures;
@@ -25,17 +27,19 @@ class SetupAction {
     void run() {
         Objects.requireNonNull(val);
         Objects.requireNonNull(testReport);
-        String id = action.hasId() ? action.getId() : "No ID";
+        Objects.requireNonNull(fhirClient);
 
         TestReport.TestReportSetupComponent setupReport = testReport.getSetup();
         TestReport.SetupActionComponent actionReport = setupReport.addAction();
 
         if (action.hasOperation()) {
-            runOperation(id, actionReport);
+            String label = action.getOperation().hasLabel() ? action.getOperation().getLabel() : "No Label";
+            runOperation(label, actionReport);
             return;
         }
         if (action.hasAssert()) {
-            runAssert(id, actionReport);
+            String label = action.getAssert().hasLabel() ? action.getAssert().getLabel() : "No Label";
+            runAssert(label, actionReport);
 
         }
     }
@@ -226,7 +230,6 @@ class SetupAction {
         }
         TestScript.SetupActionOperationComponent op = action.getOperation();
         int elementCount = 0;
-        if (op.hasSourceId()) elementCount++;
         if (op.hasTargetId()) elementCount++;
         if (op.hasParams()) elementCount++;
         if (op.hasUrl()) elementCount++;
@@ -250,9 +253,13 @@ class SetupAction {
             lastOp = fixture.getId();
             return;
         } else if ("create".equals(code)) {
-            SetupActionCreate setupActionCreate = new SetupActionCreate(fixtures, op, operationReport).setVal(val);
+            SetupActionCreate setupActionCreate = new SetupActionCreate(fixtures, op, operationReport)
+                    .setFhirClient(fhirClient)
+                    .setVal(val);
             setupActionCreate.run();
             FixtureComponent fixture = setupActionCreate.getFixtureComponent();
+            if (fixture == null)
+                return;  // failed
             lastOp = fixture.getId();
             return;
         } else {
@@ -368,6 +375,11 @@ class SetupAction {
 
     public SetupAction setTestReport(TestReport testReport) {
         this.testReport = testReport;
+        return this;
+    }
+
+    public SetupAction setFhirClient(FhirClient fhirClient) {
+        this.fhirClient = fhirClient;
         return this;
     }
 }

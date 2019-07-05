@@ -171,6 +171,7 @@ public class TestEngine  {
                 for (TestScript.SetupActionComponent action : comp.getAction()) {
                     SetupAction setupAction = new SetupAction(fixtures, action)
                         .setVal(fVal)
+                            .setFhirClient(fhirClient)
                         .setLastOp(lastOp)
                         .setTestReport(testReport);
                     setupAction.run();
