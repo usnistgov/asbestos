@@ -1,5 +1,6 @@
 package gov.nist.asbestos.http.operations;
 
+import gov.nist.asbestos.http.headers.Header;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
@@ -11,6 +12,7 @@ import java.util.Map;
 import java.util.Objects;
 
 public class HttpPost  extends HttpBase {
+    private Header locationHeader = null;
 
     private void post(URI uri, Map<String, String> headers, byte[] content) throws IOException {
         HttpURLConnection connection = null;
@@ -39,6 +41,8 @@ public class HttpPost  extends HttpBase {
             if (connection != null)
                 connection.disconnect();
         }
+        if (getResponseHeaders() != null)
+            locationHeader = getResponseHeaders().get("Location");
     }
 
     public HttpPost post() {
@@ -70,4 +74,7 @@ public class HttpPost  extends HttpBase {
         return "POST";
     }
 
+    public Header getLocationHeader() {
+        return locationHeader;
+    }
 }

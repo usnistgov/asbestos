@@ -9,18 +9,17 @@ import gov.nist.asbestos.simapi.validation.Val;
 import org.hl7.fhir.r4.model.BaseResource;
 import org.hl7.fhir.r4.model.TestReport;
 import org.junit.jupiter.api.Test;
-import org.mockito.Matchers;
 
 import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Paths;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Matchers.*;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -35,9 +34,34 @@ class CreateTest {
         wrapper.setHttpBase(poster);
 
         when(fhirClientMock.writeResource(any(BaseResource.class), any(Ref.class), eq(Format.XML), any(Map.class))).thenReturn(wrapper);
+        when(wrapper.getLocation())
 
         Val val = new Val();
         File test1 = Paths.get(getClass().getResource("/setup/write/createPatient/TestScript.xml").toURI()).getParent().toFile();
+        TestEngine testEngine = new TestEngine(test1, new URI(""))
+                .setVal(val)
+                .setFhirClient(fhirClientMock)
+                .run();
+        List<String> errors = testEngine.getErrors();
+        printErrors(errors);
+        assertEquals(0, errors.size());
+        TestReport report = testEngine.getTestReport();
+        TestReport.TestReportResult result = report.getResult();
+        assertEquals(TestReport.TestReportResult.PASS, result);
+    }
+
+    @Test
+    void createPatientAndRead() throws URISyntaxException {
+        FhirClient fhirClientMock = mock(FhirClient.class);
+        ResourceWrapper wrapper = new ResourceWrapper();
+        HttpPost poster = new HttpPost();
+        poster.setStatus(200);
+        wrapper.setHttpBase(poster);
+
+        when(fhirClientMock.writeResource(any(BaseResource.class), any(Ref.class), eq(Format.XML), any(Map.class))).thenReturn(wrapper);
+
+        Val val = new Val();
+        File test1 = Paths.get(getClass().getResource("/setup/writeread/createPatient/TestScript.xml").toURI()).getParent().toFile();
         TestEngine testEngine = new TestEngine(test1, new URI(""))
                 .setVal(val)
                 .setFhirClient(fhirClientMock)

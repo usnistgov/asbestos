@@ -1,7 +1,9 @@
 package gov.nist.asbestos.client.resolver;
 
 
+import gov.nist.asbestos.http.headers.Header;
 import gov.nist.asbestos.http.operations.HttpBase;
+import gov.nist.asbestos.http.operations.HttpPost;
 import gov.nist.asbestos.simapi.validation.Val;
 import gov.nist.asbestos.simapi.validation.ValE;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -95,6 +97,16 @@ public class ResourceWrapper {
     public boolean isLoadable() {
         if (ref == null) return false;
         return resource == null;
+    }
+
+    public String getLocation() {
+        if (httpBase != null && httpBase instanceof HttpPost) {
+            HttpPost post = (HttpPost) httpBase;
+            Header header = post.getLocationHeader();
+            if (header != null)
+                return header.getValue();
+        }
+        return null;
     }
 
     @Override

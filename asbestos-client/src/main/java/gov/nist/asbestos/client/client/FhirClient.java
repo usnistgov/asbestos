@@ -1,6 +1,7 @@
 package gov.nist.asbestos.client.client;
 
 import gov.nist.asbestos.client.Base.ProxyBase;
+import gov.nist.asbestos.http.headers.Header;
 import gov.nist.asbestos.http.headers.Headers;
 import gov.nist.asbestos.http.operations.HttpBase;
 import gov.nist.asbestos.http.operations.HttpGet;
