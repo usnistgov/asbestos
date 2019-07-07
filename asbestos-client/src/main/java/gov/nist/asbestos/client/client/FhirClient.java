@@ -121,7 +121,7 @@ public class FhirClient {
             return cached.get();
         if ("".equals(uri.getBase().asString()))
             return new ResourceWrapper(uri);
-        return cached.orElseGet(() -> readResource(uri, format));
+        return cached.orElseGet(() -> readResource(uri, getFormat()));
     }
 
     public Optional<ResourceWrapper> readCachedResource(Ref ref) {
@@ -178,6 +178,10 @@ public class FhirClient {
     public FhirClient setFormat(Format format) {
         this.format = format;
         return this;
+    }
+
+    public Format getFormat() {
+        return format;
     }
 
     public FhirClient setResourceCacheMgr(ResourceCacheMgr resourceCacheMgr) {

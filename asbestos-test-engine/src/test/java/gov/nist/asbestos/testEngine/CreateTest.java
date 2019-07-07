@@ -4,9 +4,12 @@ import gov.nist.asbestos.client.client.FhirClient;
 import gov.nist.asbestos.client.client.Format;
 import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
+import gov.nist.asbestos.http.headers.Header;
 import gov.nist.asbestos.http.operations.HttpPost;
 import gov.nist.asbestos.simapi.validation.Val;
 import org.hl7.fhir.r4.model.BaseResource;
+import org.hl7.fhir.r4.model.HumanName;
+import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.TestReport;
 import org.junit.jupiter.api.Test;
 
@@ -34,7 +37,6 @@ class CreateTest {
         wrapper.setHttpBase(poster);
 
         when(fhirClientMock.writeResource(any(BaseResource.class), any(Ref.class), eq(Format.XML), any(Map.class))).thenReturn(wrapper);
-        when(wrapper.getLocation())
 
         Val val = new Val();
         File test1 = Paths.get(getClass().getResource("/setup/write/createPatient/TestScript.xml").toURI()).getParent().toFile();
@@ -57,8 +59,15 @@ class CreateTest {
         HttpPost poster = new HttpPost();
         poster.setStatus(200);
         wrapper.setHttpBase(poster);
+        Patient patient = new Patient().addName(new HumanName().setFamily("Fred"));
+        wrapper.setResource(patient);
+        String url = "http://localhost:9999/fhir/Patient/45";
+        poster.setLocation(url);
+
 
         when(fhirClientMock.writeResource(any(BaseResource.class), any(Ref.class), eq(Format.XML), any(Map.class))).thenReturn(wrapper);
+        when(fhirClientMock.getFormat()).thenReturn(Format.XML);
+        when(fhirClientMock.readResource(new Ref(url))).thenReturn(wrapper);
 
         Val val = new Val();
         File test1 = Paths.get(getClass().getResource("/setup/writeread/createPatient/TestScript.xml").toURI()).getParent().toFile();

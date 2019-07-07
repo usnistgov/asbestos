@@ -77,4 +77,9 @@ public class HttpPost  extends HttpBase {
     public Header getLocationHeader() {
         return locationHeader;
     }
+
+    public HttpPost setLocation(String location) {
+        this.locationHeader = new Header("Location", location);
+        return this;
+    }
 }

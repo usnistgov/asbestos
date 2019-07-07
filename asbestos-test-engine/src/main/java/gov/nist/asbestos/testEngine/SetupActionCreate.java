@@ -54,7 +54,7 @@ class SetupActionCreate {
         }
         BaseResource resourceToSend = sourceFixture.getResponseResource();
         if (resourceToSend == null) {
-            reporter.reportError("sourceId " + op.getSourceId() + "sourceId " + op.getSourceId() + " does not have a response resource to send");
+            reporter.reportError("sourceId " + op.getSourceId() + " does not have a response resource to send");
             return;
         }
 

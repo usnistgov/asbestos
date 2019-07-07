@@ -249,8 +249,12 @@ class SetupAction {
         String code = typeCoding.getCode();
 
         if ("read".equals(code)) {
-            FixtureComponent fixture = new SetupActionRead(fixtures, op).setVal(val).run();
-            lastOp = fixture.getId();
+            FixtureComponent fixture = new SetupActionRead(fixtures, op)
+                    .setVal(val)
+                    .setFhirClient(fhirClient)
+                    .run();
+            if (fixture != null)
+                lastOp = fixture.getId();
             return;
         } else if ("create".equals(code)) {
             SetupActionCreate setupActionCreate = new SetupActionCreate(fixtures, op, operationReport)
@@ -260,7 +264,8 @@ class SetupAction {
             FixtureComponent fixture = setupActionCreate.getFixtureComponent();
             if (fixture == null)
                 return;  // failed
-            lastOp = fixture.getId();
+            if (fixture != null)
+                lastOp = fixture.getId();
             return;
         } else {
             Reporter.reportError(val, operationReport, type, id,"do not understand code.code of " + code);

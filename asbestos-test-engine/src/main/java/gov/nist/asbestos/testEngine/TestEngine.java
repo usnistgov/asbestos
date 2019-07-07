@@ -136,22 +136,13 @@ public class TestEngine  {
 
             for (TestScript.TestScriptFixtureComponent comp : testScript.getFixture()) {
                 String id = comp.getId();
-//                if (id == null || id.equals("")) {
-//                    fVal.add(new ValE("Fixture has no id").asError());
-//                    return;
-//                }
-//                fVal.add(new ValE("Fixture " + id));
                 ResourceWrapper wrapper = new ResourceWrapper(new Ref(comp.getResource().getReference()));
                 FixtureComponent fixtureMgr;
                 try {
                     fixtureMgr = new FixtureComponent(id).setResponse(wrapper).setFhirClient(fhirClientForFixtures).setVal(fVal).load(wrapper);
                 } catch (Throwable e) {
                     throw new Error(e);
-//                    fVal.add(new ValE(e.getMessage()).asError());
-//                    return;
                 }
-//                if (!fixtureMgr.hasResponse() || fixtureMgr.getResponseResource() == null)
-//                    fVal.add(new ValE("Failed to load Fixture " + id).asError());
                 if (id != null)
                     fixtures.put(id, fixtureMgr);
             }
@@ -170,10 +161,10 @@ public class TestEngine  {
                 String lastOp = null;
                 for (TestScript.SetupActionComponent action : comp.getAction()) {
                     SetupAction setupAction = new SetupAction(fixtures, action)
-                        .setVal(fVal)
+                            .setVal(fVal)
                             .setFhirClient(fhirClient)
-                        .setLastOp(lastOp)
-                        .setTestReport(testReport);
+                            .setLastOp(lastOp)
+                            .setTestReport(testReport);
                     setupAction.run();
                     lastOp = setupAction.getLastOp();
                 }
