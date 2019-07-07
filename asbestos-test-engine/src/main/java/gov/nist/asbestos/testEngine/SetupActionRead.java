@@ -18,7 +18,6 @@ class SetupActionRead {
     private TestScript.SetupActionOperationComponent op;
     private ValE val;
     private URI base;
-    private FhirClient fhirClient;
     private TestReport testReport = null;
 
 
@@ -29,7 +28,6 @@ class SetupActionRead {
 
     FixtureComponent run() {
         Objects.requireNonNull(val);
-        Objects.requireNonNull(fhirClient);
         val = new ValE(val).setMsg("setup.read");
 
         String label = null;
@@ -79,8 +77,8 @@ class SetupActionRead {
         }
         else if (op.hasTargetId()) {
             FixtureComponent fixture  = fixtures.get(op.getTargetId());
-            if (fixture != null) {
-                Ref targetRef = new Ref(fixture.getFhirClient().getHttpBase().getUri());
+            if (fixture != null && fixture.hasHttpBase()) {
+                Ref targetRef = new Ref(fixture.getHttpBase().getUri());
                 ref = targetRef.rebase(base);
             }
         }
@@ -88,10 +86,10 @@ class SetupActionRead {
             val.add(new ValE("Unable to construct URL for operation").asError());
             return null;
         }
-        ResourceWrapper wrapper = fhirClient.readResource(ref, requestHeader);
+        ResourceWrapper wrapper = new FhirClient().readResource(ref, requestHeader);
 
         String fixtureId =op.hasResponseId() ? op.getResponseId() : FixtureComponent.getNewId();
-        FixtureComponent fixtureComponent =  new FixtureComponent(fixtureId).setResponse(wrapper);
+        FixtureComponent fixtureComponent =  new FixtureComponent(fixtureId).setResource(wrapper);
         fixtures.put(fixtureId, fixtureComponent);
 
         return fixtureComponent;
@@ -104,11 +102,6 @@ class SetupActionRead {
 
     public SetupActionRead setBase(URI base) {
         this.base = base;
-        return this;
-    }
-
-    public SetupActionRead setFhirClient(FhirClient fhirClient) {
-        this.fhirClient = fhirClient;
         return this;
     }
 

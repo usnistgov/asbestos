@@ -1,7 +1,6 @@
 package gov.nist.asbestos.testEngine;
 
 import gov.nist.asbestos.client.Base.ProxyBase;
-import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import gov.nist.asbestos.simapi.validation.*;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Patient;
@@ -59,7 +58,7 @@ class FixtureTest {
 
         assertEquals(1, testEngine.getFixtures().keySet().size());
         FixtureComponent fixtureMgr = testEngine.getFixtures().values().iterator().next();
-        IBaseResource resource = fixtureMgr.getResponseResource();
+        IBaseResource resource = fixtureMgr.getResourceResource();
         assertNotNull(resource);
         assertTrue(resource instanceof Patient);
     }
@@ -70,11 +69,12 @@ class FixtureTest {
         File testDef = Paths.get(getClass().getResource("/fixtures/fixtureFromBadTestDefinition/TestScript.xml").toURI()).getParent().toFile();
         URI sut = new URI("http://localhost:8080/fhir/fhir");
         TestEngine testEngine = new TestEngine(testDef, sut).setVal(val);
-        testEngine.run();
-        assertEquals(1, testEngine.getFixtures().size());
-
-        List<ValE> errors = val.getErrors();
-        assertFalse(errors.isEmpty());
-        assertEquals("Failed to load Fixture example-patient", errors.get(0).getMsg());
+        boolean caught = false;
+        try {
+            testEngine.run();
+        } catch (Error er) {
+            caught = true;
+        }
+        assertTrue(caught);
     }
 }

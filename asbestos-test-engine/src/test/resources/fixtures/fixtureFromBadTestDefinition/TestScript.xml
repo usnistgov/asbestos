@@ -6,7 +6,7 @@
     <status value="draft"/>
     <fixture id="example-patient">
         <resource>
-            <reference value="Patient/patient-example.xml"/>
+            <reference value="Patient/patient-example.xml"/>  <!-- wrong filename -->
         </resource>
     </fixture>
 </TestScript>

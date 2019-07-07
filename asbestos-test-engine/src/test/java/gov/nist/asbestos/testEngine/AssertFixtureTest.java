@@ -23,9 +23,10 @@ class AssertFixtureTest {
         File test1 = Paths.get(getClass().getResource("/setup/assertFixture/patientNameGood/TestScript.xml").toURI()).getParent().toFile();
         TestEngine testEngine = new TestEngine(test1, new URI(""))
                 .setVal(val)
-                .setFhirClient(new FhirClient())
                 .run();
         TestReport report = testEngine.getTestReport();
+        List<String> errors = testEngine.getErrors();
+        printErrors(errors);
         TestReport.TestReportResult result = report.getResult();
         assertEquals(TestReport.TestReportResult.PASS, result);
 
@@ -47,7 +48,7 @@ class AssertFixtureTest {
         TestReport.TestReportResult result = report.getResult();
         assertEquals(TestReport.TestReportResult.FAIL, result);
         assertEquals(1, errors.size());
-        assertEquals("setup.action.assert : No ID : warningOnly is required but missing", errors.get(0));
+        assertEquals("setup.action.assert : No Label : warningOnly is required but missing", errors.get(0));
     }
 
     @Test

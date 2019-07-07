@@ -11,7 +11,7 @@
         (Patient Administration); description: Demographics and other administrative information
         about an individual or animal receiving care or other health-related services.; purpose:
         Tracking patient is the center of the healthcare process.; 4.0.0; RESOURCE; type: Patient;
-        baseDefinition: http://hl7.org/fhir/StructureDefinition/DomainResource; SPECIALIZATION</a> </p> <blockquote> <p> <b> variable</b> </p> <p> <b> name</b> : KnownPatientResourceId</p> <p> <b> defaultValue</b> : example</p> </blockquote> <blockquote> <p> <b> variable</b> </p> <p> <b> name</b> : NonExistsPatientResourceId</p> <p> <b> defaultValue</b> : does-not-exist</p> </blockquote> <blockquote> <p> <b> test</b> </p> <p> <b> name</b> : Sprinkler Read Test R001</p> <p> <b> description</b> : Read a known Patient and validate response.</p> <blockquote> <p> <b> action</b> </p> <h3> Operations</h3> <table> <tr> <td> -</td> </tr> <tr> <td> *</td> </tr> </table> </blockquote> <blockquote> <p> <b> action</b> </p> <h3> Asserts</h3> <table> <tr> <td> -</td> </tr> <tr> <td> *</td> </tr> </table> </blockquote> <blockquote> <p> <b> action</b> </p> <h3> Asserts</h3> <table> <tr> <td> -</td> </tr> <tr> <td> *</td> </tr> </table> </blockquote> <blockquote> <p> <b> action</b> </p> <h3> Asserts</h3> <table> <tr> <td> -</td> </tr> <tr> <td> *</td> </tr> </table> </blockquote> <blockquote> <p> <b> action</b> </p> <h3> Asserts</h3> <table> <tr> <td> -</td> </tr> <tr> <td> *</td> </tr> </table> </blockquote> <blockquote> <p> <b> action</b> </p> <h3> Asserts</h3> <table> <tr> <td> -</td> </tr> <tr> <td> *</td> </tr> </table> </blockquote> </blockquote> <blockquote> <p> <b> test</b> </p> <p> <b> name</b> : Sprinkler Read Test R002</p> <p> <b> description</b> : Read an unknown Resource Type and validate response.</p> <blockquote> <p> <b> action</b> </p> <h3> Operations</h3> <table> <tr> <td> -</td> </tr> <tr> <td> *</td> </tr> </table> </blockquote> <blockquote> <p> <b> action</b> </p> <h3> Asserts</h3> <table> <tr> <td> -</td> </tr> <tr> <td> *</td> </tr> </table> </blockquote> </blockquote> <blockquote> <p> <b> test</b> </p> <p> <b> name</b> : Sprinkler Read Test R003</p> <p> <b> description</b> : Read a known, non-existing Patient and validate response.</p> <blockquote> <p> <b> action</b> </p> <h3> Operations</h3> <table> <tr> <td> -</td> </tr> <tr> <td> *</td> </tr> </table> </blockquote> <blockquote> <p> <b> action</b> </p> <h3> Asserts</h3> <table> <tr> <td> -</td> </tr> <tr> <td> *</td> </tr> </table> </blockquote> </blockquote> <blockquote> <p> <b> test</b> </p> <p> <b> name</b> : Sprinkler Read Test R004</p> <p> <b> description</b> : Read a Patient using a known bad formatted resource id and validate response.</p> <blockquote> <p> <b> action</b> </p> <h3> Operations</h3> <table> <tr> <td> -</td> </tr> <tr> <td> *</td> </tr> </table> </blockquote> <blockquote> <p> <b> action</b> </p> <h3> Asserts</h3> <table> <tr> <td> -</td> </tr> <tr> <td> *</td> </tr> </table> </blockquote> </blockquote> </div> </text> <ref value="http://hl7.org/fhir/TestScript/testscript-example-readtest"/>
+        baseDefinition: http://hl7.org/fhir/StructureDefinition/DomainResource; SPECIALIZATION</a> </p> <blockquote> <p> <b> variable</b> </p> <p> <b> name</b> : KnownPatientResourceId</p> <p> <b> defaultValue</b> : example</p> </blockquote> <blockquote> <p> <b> variable</b> </p> <p> <b> name</b> : NonExistsPatientResourceId</p> <p> <b> defaultValue</b> : does-not-exist</p> </blockquote> <blockquote> <p> <b> test</b> </p> <p> <b> name</b> : Sprinkler Read Test R001</p> <p> <b> description</b> : Read a known Patient and validate resource.</p> <blockquote> <p> <b> action</b> </p> <h3> Operations</h3> <table> <tr> <td> -</td> </tr> <tr> <td> *</td> </tr> </table> </blockquote> <blockquote> <p> <b> action</b> </p> <h3> Asserts</h3> <table> <tr> <td> -</td> </tr> <tr> <td> *</td> </tr> </table> </blockquote> <blockquote> <p> <b> action</b> </p> <h3> Asserts</h3> <table> <tr> <td> -</td> </tr> <tr> <td> *</td> </tr> </table> </blockquote> <blockquote> <p> <b> action</b> </p> <h3> Asserts</h3> <table> <tr> <td> -</td> </tr> <tr> <td> *</td> </tr> </table> </blockquote> <blockquote> <p> <b> action</b> </p> <h3> Asserts</h3> <table> <tr> <td> -</td> </tr> <tr> <td> *</td> </tr> </table> </blockquote> <blockquote> <p> <b> action</b> </p> <h3> Asserts</h3> <table> <tr> <td> -</td> </tr> <tr> <td> *</td> </tr> </table> </blockquote> </blockquote> <blockquote> <p> <b> test</b> </p> <p> <b> name</b> : Sprinkler Read Test R002</p> <p> <b> description</b> : Read an unknown Resource Type and validate resource.</p> <blockquote> <p> <b> action</b> </p> <h3> Operations</h3> <table> <tr> <td> -</td> </tr> <tr> <td> *</td> </tr> </table> </blockquote> <blockquote> <p> <b> action</b> </p> <h3> Asserts</h3> <table> <tr> <td> -</td> </tr> <tr> <td> *</td> </tr> </table> </blockquote> </blockquote> <blockquote> <p> <b> test</b> </p> <p> <b> name</b> : Sprinkler Read Test R003</p> <p> <b> description</b> : Read a known, non-existing Patient and validate resource.</p> <blockquote> <p> <b> action</b> </p> <h3> Operations</h3> <table> <tr> <td> -</td> </tr> <tr> <td> *</td> </tr> </table> </blockquote> <blockquote> <p> <b> action</b> </p> <h3> Asserts</h3> <table> <tr> <td> -</td> </tr> <tr> <td> *</td> </tr> </table> </blockquote> </blockquote> <blockquote> <p> <b> test</b> </p> <p> <b> name</b> : Sprinkler Read Test R004</p> <p> <b> description</b> : Read a Patient using a known bad formatted resource id and validate resource.</p> <blockquote> <p> <b> action</b> </p> <h3> Operations</h3> <table> <tr> <td> -</td> </tr> <tr> <td> *</td> </tr> </table> </blockquote> <blockquote> <p> <b> action</b> </p> <h3> Asserts</h3> <table> <tr> <td> -</td> </tr> <tr> <td> *</td> </tr> </table> </blockquote> </blockquote> </div> </text> <ref value="http://hl7.org/fhir/TestScript/testscript-example-readtest"/>
     <identifier>
         <system value="urn:ietf:rfc:3986"/>
         <value value="urn:oid:1.3.6.1.4.1.21367.2005.3.7.9879"/>
@@ -69,7 +69,7 @@
     </variable>
     <test id="R001">
         <name value="Sprinkler Read Test R001"/>
-        <description value="Read a known Patient and validate response."/>
+        <description value="Read a known Patient and validate resource."/>
         <action>
             <operation>
                 <type>
@@ -87,7 +87,7 @@
         <action>
             <assert>
                 <description value="Confirm that the returned HTTP status is 200(OK)."/>
-                <response value="okay"/>
+                <resource value="okay"/>
                 <warningOnly value="false"/>
             </assert>
         </action>
@@ -124,7 +124,7 @@
     </test>
     <test id="R002">
         <name value="Sprinkler Read Test R002"/>
-        <description value="Read an unknown Resource Type and validate response."/>
+        <description value="Read an unknown Resource Type and validate resource."/>
         <action>
             <operation>
                 <type>
@@ -143,14 +143,14 @@
         <action>
             <assert>
                 <description value="Confirm that the returned HTTP status is 404(Not Found)."/>
-                <response value="notFound"/>
+                <resource value="notFound"/>
                 <warningOnly value="false"/>
             </assert>
         </action>
     </test>
     <test id="R003">
         <name value="Sprinkler Read Test R003"/>
-        <description value="Read a known, non-existing Patient and validate response."/>
+        <description value="Read a known, non-existing Patient and validate resource."/>
         <action>
             <operation>
                 <type>
@@ -168,14 +168,14 @@
         <action>
             <assert>
                 <description value="Confirm that the returned HTTP status is 404(Not Found)."/>
-                <response value="notFound"/>
+                <resource value="notFound"/>
                 <warningOnly value="false"/>
             </assert>
         </action>
     </test>
     <test id="R004">
         <name value="Sprinkler Read Test R004"/>
-        <description value="Read a Patient using a known bad formatted resource id and validate response."/>
+        <description value="Read a Patient using a known bad formatted resource id and validate resource."/>
         <action>
             <operation>
                 <type>
@@ -193,7 +193,7 @@
         <action>
             <assert>
                 <description value="Confirm that the returned HTTP status is 400(Bad Request)."/>
-                <response value="bad"/>
+                <resource value="bad"/>
                 <warningOnly value="false"/>
             </assert>
         </action>

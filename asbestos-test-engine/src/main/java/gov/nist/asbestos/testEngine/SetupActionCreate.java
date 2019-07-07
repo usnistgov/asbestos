@@ -1,6 +1,5 @@
 package gov.nist.asbestos.testEngine;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import gov.nist.asbestos.client.client.FhirClient;
 import gov.nist.asbestos.client.client.Format;
 import gov.nist.asbestos.client.resolver.Ref;
@@ -22,8 +21,8 @@ class SetupActionCreate {
     private TestReport.SetupActionOperationComponent operationReport;
     private ValE val;
     private URI base;
-    private FhirClient fhirClient;
     private FixtureComponent fixtureComponent = null;
+    private FhirClient fhirClient = null;
 
 
     SetupActionCreate(Map<String, FixtureComponent> fixtures, TestScript.SetupActionOperationComponent op, TestReport.SetupActionOperationComponent operationReport) {
@@ -34,7 +33,6 @@ class SetupActionCreate {
 
     void run() {
         Objects.requireNonNull(val);
-        Objects.requireNonNull(fhirClient);
         Objects.requireNonNull(operationReport);
         val = new ValE(val).setMsg("setup.create");
 
@@ -52,7 +50,7 @@ class SetupActionCreate {
             reporter.reportError("sourceId " + op.getSourceId() + "does not exist");
             return;
         }
-        BaseResource resourceToSend = sourceFixture.getResponseResource();
+        BaseResource resourceToSend = sourceFixture.getResourceResource();
         if (resourceToSend == null) {
             reporter.reportError("sourceId " + op.getSourceId() + " does not have a response resource to send");
             return;
@@ -72,9 +70,9 @@ class SetupActionCreate {
         if (targetUrl == null)
             return;
 
-        ResourceWrapper wrapper = fhirClient.writeResource(resourceToSend, targetUrl, format, requestHeader);
+        ResourceWrapper wrapper = getFhirClient().writeResource(resourceToSend, targetUrl, format, requestHeader);
         String fixtureId = op.hasResponseId() ? op.getResponseId() : FixtureComponent.getNewId();
-        fixtureComponent =  new FixtureComponent(fixtureId).setResponse(wrapper);
+        fixtureComponent =  new FixtureComponent(fixtureId).setResource(wrapper);
         fixtures.put(fixtureId, fixtureComponent);
     }
 
@@ -88,12 +86,18 @@ class SetupActionCreate {
         return this;
     }
 
+    public FixtureComponent getFixtureComponent() {
+        return fixtureComponent;
+    }
+
     public SetupActionCreate setFhirClient(FhirClient fhirClient) {
         this.fhirClient = fhirClient;
         return this;
     }
 
-    public FixtureComponent getFixtureComponent() {
-        return fixtureComponent;
+    private FhirClient getFhirClient() {
+        if (fhirClient == null)
+            fhirClient = new FhirClient();
+        return fhirClient;
     }
 }

@@ -67,7 +67,7 @@
 							</xs:element>
 							<xs:element name="NewDocumentUniqueId" type="rim:LongName" minOccurs="0">
 								<xs:annotation>
-									<xs:documentation>This identifies the document returned in the response when retrieval is of an On-Demand Document.  This is required when retrieval is of an On-Demand Document.</xs:documentation>
+									<xs:documentation>This identifies the document returned in the resource when retrieval is of an On-Demand Document.  This is required when retrieval is of an On-Demand Document.</xs:documentation>
 								</xs:annotation>
 							</xs:element>
 							<xs:element name="mimeType" type="rim:LongName"/>
@@ -101,7 +101,7 @@
 		</xs:sequence>
 	</xs:complexType>
 	<xs:element name="ProvideAndRegisterDocumentSetRequest" type="ProvideAndRegisterDocumentSetRequestType"/>
-	
+
 		<xs:element name="DocumentRequest">
 		<xs:complexType>
 			<xs:sequence>

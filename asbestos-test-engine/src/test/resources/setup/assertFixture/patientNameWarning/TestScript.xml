@@ -12,7 +12,7 @@
         <action>
             <assert>
                 <compareToSourceId value="example-patient"/>
-                <direction value="response"/>  <!-- response is the default -->
+                <direction value="response"/>
                 <compareToSourceExpression value="Patient.name.family = 'Smith'"/>
                 <warningOnly value="true"/>
             </assert>

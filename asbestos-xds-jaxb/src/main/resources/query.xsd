@@ -44,7 +44,7 @@
   </element>
   <element name="AdhocQueryResponse">
     <annotation>
-      <documentation xml:lang="en"> The response includes a RegistryObjectList which has zero or
+      <documentation xml:lang="en"> The resource includes a RegistryObjectList which has zero or
         more RegistryObjects that match the query specified in AdhocQueryRequest. </documentation>
     </annotation>
     <complexType>

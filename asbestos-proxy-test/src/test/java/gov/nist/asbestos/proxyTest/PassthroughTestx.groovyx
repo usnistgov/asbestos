@@ -188,9 +188,9 @@ class PassthroughTestx {
         }
         HttpGet getter = new HttpGet()
         getter.getJson(HttpBase.buildURI('http://localhost:8081/fproxy_war/prox', pb))
-        String response = getter.responseText
-        response = JsonOutput.prettyPrint(response)
-        def jsonReturned = new JsonSlurper().parseText(response)
+        String resource = getter.responseText
+        resource = JsonOutput.prettyPrint(resource)
+        def jsonReturned = new JsonSlurper().parseText(resource)
 
         then:
         jsonRequest == jsonReturned
@@ -250,8 +250,8 @@ class PassthroughTestx {
                 .execute();
 
         // The MethodOutcome object will contain information about the
-        // response from the server, including the ID of the created
-        // resource, the OperationOutcome response, etc. (assuming that
+        // resource from the server, including the ID of the created
+        // resource, the OperationOutcome resource, etc. (assuming that
         // any of these things were provided by the server! They may not
         // always be)
         IIdType id = (IIdType) outcome.getId();

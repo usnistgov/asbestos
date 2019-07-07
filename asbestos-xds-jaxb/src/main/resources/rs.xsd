@@ -52,12 +52,12 @@
       <documentation xml:lang="en">Base type for all ebXML Registry responses</documentation>
     </annotation>
     <sequence>
-      <!-- every response may be extended using Slots. -->
+      <!-- every resource may be extended using Slots. -->
       <element maxOccurs="1" minOccurs="0" name="ResponseSlotList" type="rim:SlotListType"/>
       <element minOccurs="0" ref="tns:RegistryErrorList"/>
     </sequence>
     <attribute name="status" type="rim:referenceURI" use="required"/>
-    <!-- id is the request if for the request for which this is a response -->
+    <!-- id is the request if for the request for which this is a resource -->
     <attribute name="requestId" type="anyURI" use="optional"/>
   </complexType>
   <element name="RegistryResponse" type="tns:RegistryResponseType"/>

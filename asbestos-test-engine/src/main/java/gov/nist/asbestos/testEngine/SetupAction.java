@@ -27,7 +27,6 @@ class SetupAction {
     void run() {
         Objects.requireNonNull(val);
         Objects.requireNonNull(testReport);
-        Objects.requireNonNull(fhirClient);
 
         TestReport.TestReportSetupComponent setupReport = testReport.getSetup();
         TestReport.SetupActionComponent actionReport = setupReport.addAction();
@@ -44,17 +43,22 @@ class SetupAction {
         }
     }
 
-    private void runAssert(String id, TestReport.SetupActionComponent actionReport) {
-        TestReport.SetupActionAssertComponent assertReport = actionReport.getAssert();
+    TestReport.SetupActionAssertComponent assertReport;
+    String label;
+    String type;
+
+    private void runAssert(String theLabel, TestReport.SetupActionComponent actionReport) {
+        assertReport = actionReport.getAssert();
         assertReport.setResult(TestReport.TestReportActionResult.PASS);  // may be overwritten
 
-        String type = "setup.action.assert";
+        label = theLabel;
+        type = "setup.action.assert";
 
         FixtureComponent fixture = null;
         if (lastOp != null) {
             fixture = fixtures.get(lastOp);
             if (fixture == null) {
-                Reporter.reportError(val, assertReport, type, id,"last operation - " + lastOp + " - does not name a fixture");
+                Reporter.reportError(val, assertReport, type, label,"last operation - " + lastOp + " - does not name a fixture");
                 return;
             }
         }
@@ -64,13 +68,12 @@ class SetupAction {
         if (as.hasWarningOnly())
             warningOnly = as.getWarningOnly();
         else {
-            Reporter.reportError(val, assertReport, type, id, "warningOnly is required but missing");
+            Reporter.reportError(val, assertReport, type, label, "warningOnly is required but missing");
             return;
         }
-        boolean directionIsResponse =  !as.hasDirection() || as.getDirection().toCode().equals("response");
 
         if (as.hasCompareToSourcePath() && as.hasCompareToSourceExpression()) {
-            Reporter.reportError(val, assertReport, type, id, "has both compareToSourcePath and compareToSourceExpression");
+            Reporter.reportError(val, assertReport, type, label, "has both compareToSourcePath and compareToSourceExpression");
             return;
         }
 
@@ -83,146 +86,175 @@ class SetupAction {
         } else if (as.hasCompareToSourceId()) {
             source = fixtures.get(as.getCompareToSourceId());
             if (source == null) {
-                Reporter.reportError(val, assertReport, type, id, "has compareToSourceId " + as.getCompareToSourceId() + " which is undefined");
+                Reporter.reportError(val, assertReport, type, label, "has compareToSourceId " + as.getCompareToSourceId() + " which is undefined");
                 return;
             }
         }
         if (as.hasCompareToSourceExpression() && source != null) {
             String expression = as.getCompareToSourceExpression();
-            BaseResource sourceResource = directionIsResponse ? source.getResponseResource() : source.getRequestResource();
+            BaseResource sourceResource = source.getResourceResource();
             if (sourceResource == null) {
-                Reporter.reportError(val, assertReport, type, id,"Fixture referenced " +  source.getId()  + "has no " + (directionIsResponse ? "response" : "request"));
+                Reporter.reportError(val, assertReport, type, label,"Fixture referenced in compareToSourceExpression" +  source.getId()  + "has no resource");
                 return;
             }
             if (!eval(sourceResource, expression)) {
-                Reporter.reportFail(val, assertReport, type, id, "Assertion failed", warningOnly);
+                Reporter.reportFail(val, assertReport, type, label, "Assertion failed", warningOnly);
                 return;
             }
         }
         if (as.hasSourceId())
             fixture = fixtures.get(as.getSourceId());
 
-        if (directionIsResponse && fixture != null && !fixture.hasResponse()) {
-            Reporter.reportError(val, assertReport, type, id,"referenced fixture " + fixture.getId() + " has no response");
-            return;
-        }
-        if (!directionIsResponse && fixture != null && !fixture.hasRequest()) {
-            Reporter.reportError(val, assertReport, type, id, "referenced fixture " + fixture.getId() + " has no request");
-            return;
-        }
         if (as.hasMinimumId()) {
             FixtureComponent comp = fixtures.get(as.getMinimumId());
             if (comp == null) {
-                Reporter.reportError(val, assertReport, type, id, "has minimumId " + as.getMinimumId() + " which is undefined");
+                Reporter.reportError(val, assertReport, type, label, "has minimumId " + as.getMinimumId() + " which is undefined");
                 return;
             }
-            minimumToCompare = comp.hasResponse() ? comp.getResponseResource() : null;
+            minimumToCompare = comp.hasResource() ? comp.getResourceResource() : null;
         }
         String operator = as.hasOperator() ? as.getOperator().toCode() : "equals";
-        if (valueToCompare != null) {
-            if (fixture == null) {
-                Reporter.reportError(val, assertReport, type, id, "no sourceId to compare against");
+
+        if (as.hasHeaderField()) {
+            if (!as.hasValue()) {
+                Reporter.reportError(val, assertReport, type, label, "has headerField but no value for comparison is specified");
                 return;
             }
-            if (as.hasContentType()) {
-                String expected = as.getContentType();
-                String found = fixture.getHttpBase().getResponseContentType();
-                if (!compare(val, assertReport, found, expected, operator, warningOnly, type, id))
+            if (hasNoFixtureResource(fixture, "cannot reference headerField - no fixture "))
+                return;
+
+            assert fixture != null; // guaranteed by hasFixtureResource
+            if (!fixture.hasHttpBase()) {
+                Reporter.reportError(val, assertReport, type, label, "cannot reference headerField - fixture includes no HTTP operation");
+                return;
+            }
+            String headerFieldName = as.getHeaderField();
+            if (as.hasDirection() && as.getDirection() == TestScript.AssertionDirectionType.REQUEST) {
+                String found = fixture.getHttpBase().getRequestHeaders().get(headerFieldName).getValue();
+                if (!compare(val, assertReport, found, valueToCompare, operator, warningOnly, type, label))
+                    return;
+            } else {
+                String found = fixture.getHttpBase().getResponseHeaders().get(headerFieldName).getValue();
+                if (!compare(val, assertReport, found, valueToCompare, operator, warningOnly, type, label))
                     return;
             }
-            if (as.hasHeaderField()) {
-                String headerFieldName = as.getHeaderField();
-                String expected = valueToCompare;
-                if (directionIsResponse) {
-                    String found = fixture.getHttpBase().getResponseHeaders().get(headerFieldName).getValue();
-                    if (!compare(val, assertReport, found, expected, operator, warningOnly, type, id))
-                        return;
-                } else {
-                    String found = fixture.getHttpBase().getRequestHeaders().get(headerFieldName).getValue();
-                    if (!compare(val, assertReport, found, expected, operator, warningOnly, type, id))
-                        return;
-                }
+        }
+
+
+        if (valueToCompare != null) {
+            if (as.hasContentType()) {
+                if (hasNoFixtureResource(fixture, "cannot reference contentType - no fixture "))
+                    return;
+                assert fixture != null;    // guaranteed by hasFixtureResource
+                String expected = as.getContentType();
+                String found = fixture.getHttpBase().getResponseContentType();
+                if (!compare(val, assertReport, found, expected, operator, warningOnly, type, label))
+                    return;
             }
             if (as.hasRequestMethod()) {
+                if (hasNoFixtureResource(fixture, "cannot reference requestMethod - no fixture "))
+                    return;
+                assert fixture != null;    // guaranteed by hasFixtureResource
                 String expected = as.getRequestMethod().toCode();
                 String found = fixture.getHttpBase().getVerb();
-                if (!compare(val, assertReport, found, expected, operator, warningOnly, type, id))
+                if (!compare(val, assertReport, found, expected, operator, warningOnly, type, label))
                     return;
             }
             if (as.hasResource()) {
+                if (hasNoFixtureResource(fixture, "cannot reference resource - no fixture "))
+                    return;
+                assert fixture != null;    // guaranteed by hasFixtureResource
                 // expected resource type in response body (GET)
                 String expected = valueToCompare;
                 String found = fixture.getResponseType();
-                if (!compare(val, assertReport, found, expected, operator, warningOnly, type, id))
+                if (!compare(val, assertReport, found, expected, operator, warningOnly, type, label))
                     return;
             }
             if (as.hasResponse()) {
+                if (hasNoFixtureResource(fixture, "cannot reference response - no fixture "))
+                    return;
+                assert fixture != null;    // guaranteed by hasFixtureResource
                 int codeFound = fixture.getHttpBase().getStatus();
                 String found = responseCodeAsString(codeFound);
                 String expected = valueToCompare;
-                if (!compare(val, assertReport, found, expected, operator, warningOnly, type, id))
+                if (!compare(val, assertReport, found, expected, operator, warningOnly, type, label))
                     return;
             }
             if (as.hasResponseCode()) {
+                if (hasNoFixtureResource(fixture, "cannot reference contentType - no fixture "))
+                    return;
+                assert fixture != null;    // guaranteed by hasFixtureResource
                 int codeFound = fixture.getHttpBase().getStatus();
                 String found = String.valueOf(codeFound);
                 String expected = valueToCompare;
-                if (!compare(val, assertReport, found, expected, operator, warningOnly, type, id))
+                if (!compare(val, assertReport, found, expected, operator, warningOnly, type, label))
                     return;
             }
         }
         if (as.hasExpression()) {
-            if (fixture == null) {
-                Reporter.reportError(val, assertReport, type, id, "no sourceId to compare against");
-                return;
-            }
             String expression = as.getExpression();
-            BaseResource sourceResource = directionIsResponse ? fixture.getResponseResource() : fixture.getRequestResource();
+            if (hasNoFixtureResource(fixture, "cannot evaluate expression - no fixture"))
+                return;
+            assert fixture != null;    // guaranteed by hasFixtureResource
+            BaseResource sourceResource = fixture.getResourceResource();
             if (sourceResource == null) {
-                Reporter.reportError(val, assertReport, type, id,"Fixture referenced " + fixture.getId()  + " has no " + (directionIsResponse ? "response" : "request"));
+                Reporter.reportError(val, assertReport, type, label,"Fixture referenced " + fixture.getId()  + " has no resource");
                 return;
             }
             if (!eval(sourceResource, expression)) {
-                Reporter.reportFail(val, assertReport, type, id, "Assertion failed", warningOnly);
+                Reporter.reportFail(val, assertReport, type, label, "Assertion failed", warningOnly);
                 return;
             }
 
         }
         if (as.hasMinimumId()) {
-            Reporter.reportError(val, assertReport, type, id, "minumumId not supported");
+            Reporter.reportError(val, assertReport, type, label, "minumumId not supported");
             return;
         }
         if (as.hasNavigationLinks()) {
-            Reporter.reportError(val, assertReport, type, id, "navigationLinks not supported");
+            Reporter.reportError(val, assertReport, type, label, "navigationLinks not supported");
             return;
         }
         if (as.hasValidateProfileId()) {
-            Reporter.reportError(val, assertReport, type, id, "validateProfileId not supported");
+            Reporter.reportError(val, assertReport, type, label, "validateProfileId not supported");
             return;
         }
         if (as.hasRequestURL()) {
             if (lastOp == null) {
-                Reporter.reportError(val, assertReport, type, id, " has requestURL tested but no last operation recorded");
+                Reporter.reportError(val, assertReport, type, label, " has requestURL tested but no last operation recorded");
                 return;
             }
             String expected = null;
             try {
                 expected = new URI(as.getRequestURL()).getPath();
             } catch (URISyntaxException e) {
-                Reporter.reportError(val, assertReport, type, id, " requestURL (" + as.getRequestURL() + ") cannot be parsed");
+                Reporter.reportError(val, assertReport, type, label, " requestURL (" + as.getRequestURL() + ") cannot be parsed");
                 return;
             }
             String found = fixtures.get(lastOp).getHttpBase().getUri().getPath();
-            if (!compare(val, assertReport, found, expected, operator, warningOnly, type, id))
+            if (!compare(val, assertReport, found, expected, operator, warningOnly, type, label))
                 return;
         }
+    }
+
+    private boolean hasNoFixtureResource(FixtureComponent fixture, String msg) {
+        if (fixture == null) {
+            Reporter.reportError(val, assertReport, type, label, msg + "no fixture is referenced");
+            return true;
+        }
+        if (!fixture.hasResource()) {
+            Reporter.reportError(val, assertReport, type, label, msg + "referenced fixture " + fixture.getId() + " has no response");
+            return true;
+        }
+        return false;
     }
 
     private void runOperation(String id, TestReport.SetupActionComponent actionReport) {
         TestReport.SetupActionOperationComponent operationReport = actionReport.getOperation();
         operationReport.setResult(TestReport.TestReportActionResult.PASS);  // may be overwritten
 
-        String type = "setup.action.operation";
+        label = id;
+        type = "setup.action.operation";
 
         if (action.hasAssert()) {
             Reporter.reportError(val, operationReport, type, id,"has both an Operation and an Assertion");
@@ -251,7 +283,6 @@ class SetupAction {
         if ("read".equals(code)) {
             FixtureComponent fixture = new SetupActionRead(fixtures, op)
                     .setVal(val)
-                    .setFhirClient(fhirClient)
                     .run();
             if (fixture != null)
                 lastOp = fixture.getId();
@@ -386,5 +417,11 @@ class SetupAction {
     public SetupAction setFhirClient(FhirClient fhirClient) {
         this.fhirClient = fhirClient;
         return this;
+    }
+
+    private FhirClient getFhirClient() {
+        if (fhirClient == null)
+            fhirClient = new FhirClient();
+        return fhirClient;
     }
 }

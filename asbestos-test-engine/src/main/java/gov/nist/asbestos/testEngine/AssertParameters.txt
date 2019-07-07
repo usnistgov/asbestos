@@ -3,7 +3,7 @@ assert.direction
 
 The direction to use for the assertion.
 
-If the direction is specified as "response" (the default), then the processing of this assert is against the received response message. If the direction is specified as "request", then the processing of this assert is against the sent request message.
+If the direction is specified as "resource" (the default), then the processing of this assert is against the received resource message. If the direction is specified as "request", then the processing of this assert is against the sent request message.
 
 assert.compareToSourceId
 
@@ -23,66 +23,66 @@ The XPath or JSONPath expression to be evaluated against the expected fixture to
 
 assert.contentType
 
-The mime-type contents to compare against the request or response message 'Content-Type' header.
+The mime-type contents to compare against the request or resource message 'Content-Type' header.
 
-If this is specified, then test engine shall confirm that the content-type of the last operation's headers is set to this value. 
+If this is specified, then test engine shall confirm that the content-type of the last operation's headers is set to this value.
 
-If "assert.sourceId" element is specified, then the evaluation will be done against the headers mapped to that sourceId (and not the last operation's headers). 
+If "assert.sourceId" element is specified, then the evaluation will be done against the headers mapped to that sourceId (and not the last operation's headers).
 
 If you'd like to have more control over the string, then use 'assert.headerField' instead.
 
 assert.expression
 
-The FHIRPath expression to be evaluated against the request or response message contents - HTTP headers and payload.
+The FHIRPath expression to be evaluated against the request or resource message contents - HTTP headers and payload.
 
-If both "expression" and a "fixtureId" are specified, then the expression will be evaluated against the request or response body mapped to the fixtureId. 
+If both "expression" and a "fixtureId" are specified, then the expression will be evaluated against the request or resource body mapped to the fixtureId.
 
-If "expression" is specified and a "fixtureId" is not, then the expression will be evaluated against the response body of the last operation. Test engines are to store the request and response body and headers of the last operation at all times for subsequent assertions.
+If "expression" is specified and a "fixtureId" is not, then the expression will be evaluated against the resource body of the last operation. Test engines are to store the request and resource body and headers of the last operation at all times for subsequent assertions.
 
 assert.headerField
 
 The HTTP header field name e.g. 'Location'.
 
-If "headerField" is specified then "value" must be specified. If "sourceId" is not specified, then "headerField" will be evaluated against the last operation's response headers. Test engines are to keep track of the last operation's response body and response headers.
+If "headerField" is specified then "value" must be specified. If "sourceId" is not specified, then "headerField" will be evaluated against the last operation's resource headers. Test engines are to keep track of the last operation's resource body and resource headers.
 
 assert.minimumId
 
-The ID of a fixture. Asserts that the response contains at a minimum the fixture specified by minimumId.
+The ID of a fixture. Asserts that the resource contains at a minimum the fixture specified by minimumId.
 
-Asserts that the response contains all the element/content in another fixture pointed to by minimumId. This can be a statically defined fixture or one that is dynamically set via responseId.
+Asserts that the resource contains all the element/content in another fixture pointed to by minimumId. This can be a statically defined fixture or one that is dynamically set via responseId.
 
 assert.operator
 
 The operator type defines the conditional behavior of the assert. If not defined, the default is equals.
 
-Operators are useful especially for negative testing. If operator is not specified, then the "equals" operator is assumed; e.g. 
-<code> 
-  <assert> 
-    <operator value="in" /> 
-    <responseCode value="200,201,204" /> 
-  </assert> 
-  <assert> 
-    <operator value="notEquals" /> 
-    <response value="okay"/> 
-  </assert> 
-  <assert> 
-    <operator value="greaterThan" /> 
-    <responseHeader> 
-      <field value="Content-Length" /> 
-      <value value="0" /> 
-    </responseHeader/> 
-  </assert> 
+Operators are useful especially for negative testing. If operator is not specified, then the "equals" operator is assumed; e.g.
+<code>
+  <assert>
+    <operator value="in" />
+    <responseCode value="200,201,204" />
+  </assert>
+  <assert>
+    <operator value="notEquals" />
+    <resource value="okay"/>
+  </assert>
+  <assert>
+    <operator value="greaterThan" />
+    <responseHeader>
+      <field value="Content-Length" />
+      <value value="0" />
+    </responseHeader/>
+  </assert>
 </code>.
 
 assert.path
 
-The XPath or JSONPath expression to be evaluated against the fixture representing the response received from server.
+The XPath or JSONPath expression to be evaluated against the fixture representing the resource received from server.
 
-If both "path" and a "fixtureId" are specified, then the path will be evaluated against the request or response body mapped to the fixtureId. 
+If both "path" and a "fixtureId" are specified, then the path will be evaluated against the request or resource body mapped to the fixtureId.
 
-If "path" is specified and a "fixtureId" is not, then the path will be evaluated against the response body of the last operation. 
+If "path" is specified and a "fixtureId" is not, then the path will be evaluated against the resource body of the last operation.
 
-Test engines are to store the request and response body and headers of the last operation at all times for subsequent assertions.
+Test engines are to store the request and resource body and headers of the last operation at all times for subsequent assertions.
 
 assert.requestMethod
 
@@ -100,7 +100,7 @@ assert.resource
 
 The type of the resource. See http://build.fhir.org/resourcelist.html.
 
-This will be expected resource type in response body e.g. in read, vread, search, etc. See http://build.fhir.org/resourcelist.html for complete list of resource types; e.g. <assert > <resourceType value="Patient" </assert>.
+This will be expected resource type in resource body e.g. in read, vread, search, etc. See http://build.fhir.org/resourcelist.html for complete list of resource types; e.g. <assert > <resourceType value="Patient" </assert>.
 
 assert.sourceId
 

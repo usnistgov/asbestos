@@ -25,8 +25,8 @@ class OperationURLBuilder {
             }
         } else if (op.hasTargetId()) {
             FixtureComponent fixture = fixtures.get(op.getTargetId());
-            if (fixture != null) {
-                Ref targetRef = new Ref(fixture.getFhirClient().getHttpBase().getUri());
+            if (fixture != null && fixture.hasHttpBase()) {
+                Ref targetRef = new Ref(fixture.getHttpBase().getUri());
                 ref = targetRef.rebase(base);
             }
         }

@@ -21,7 +21,7 @@
         </action>
         <action>
             <assert>
-                <response value="created"/>
+                <resource value="created"/>
                 <warningOnly value="false"/>
             </assert>
         </action>

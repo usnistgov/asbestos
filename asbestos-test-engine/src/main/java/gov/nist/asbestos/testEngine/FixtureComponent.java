@@ -12,12 +12,13 @@ import java.util.Objects;
 public class FixtureComponent {
     private static int idCounter = 1;
     private String id;
-    // these are for holding request/response bodies.  For HTTP operation, see fhirClient
-    private ResourceWrapper request;
-    private ResourceWrapper response;
-    private boolean is_static = false; // if true then has response and no request
-    private FhirClient fhirClient;
+    // these are for holding request/resource bodies.  For HTTP operation, see fhirClient
+//    private ResourceWrapper request;
+    private ResourceWrapper resource;
+    private boolean is_static = false; // if true then has resource and no request
+    private HttpBase httpBase;  //
     private ValE val;
+    private FhirClient fhirClient = null;
 
     FixtureComponent(String id) {
         Objects.requireNonNull(id);
@@ -27,11 +28,12 @@ public class FixtureComponent {
     FixtureComponent load(ResourceWrapper it) {  //  static loads
         Objects.requireNonNull(it);
         Objects.requireNonNull(it.getRef());
-        Objects.requireNonNull(fhirClient);
-        response = it;
+        resource = it;
         if (isLoaded())
             return this;
-        response = fhirClient.readResource(it.getRef());
+        if (fhirClient == null)
+            fhirClient = new FhirClient();
+        resource = fhirClient.readResource(it.getRef());
         is_static = true;
         return this;
     }
@@ -41,20 +43,15 @@ public class FixtureComponent {
      * @return -1 if not loaded or HTTP status
      */
     boolean IsOk() {
-        return fhirClient.getStatus() == 200;
+        return httpBase.getStatus() == 200;
     }
 
     public boolean isLoaded() {
-        return response.isLoaded() && response.isOk();
+        return resource.isLoaded() && resource.isOk();
     }
 
     String getId() {
         return id;
-    }
-
-    public FixtureComponent withFormat(Format format) {
-        fhirClient.setFormat(format);
-        return this;
     }
 
     public FixtureComponent setVal(ValE val) {
@@ -62,55 +59,43 @@ public class FixtureComponent {
         return this;
     }
 
-    public BaseResource getRequestResource() {
-        if (request == null)
-            return null;
-        return request.getResource();
-    }
-
-    public FixtureComponent setRequestResource(ResourceWrapper request) {
-        this.request = request;
-        return this;
-    }
-
-    public BaseResource getResponseResource() {
-        return response.getResource();
+    public BaseResource getResourceResource() {
+        if (resource != null)
+            return resource.getResource();
+        return null;
     }
 
     public String getResponseType() {
-        BaseResource resource = getResponseResource();
+        BaseResource resource = getResourceResource();
         if (resource == null)
             return null;
         return resource.getClass().getSimpleName();
     }
 
-    public FixtureComponent setResponse(ResourceWrapper response) {
-        this.response = response;
+    public FixtureComponent setResource(ResourceWrapper resource) {
+        this.resource = resource;
         return this;
     }
 
-    public boolean hasRequest() {
-        return request != null;
-    }
 
-    public boolean hasResponse() {
-        return response != null;
+    public boolean hasResource() {
+        return resource != null;
     }
 
     public HttpBase getHttpBase() {
-        return fhirClient.getHttpBase();
+        return httpBase;
+    }
+
+    public boolean hasHttpBase() {
+        return httpBase != null;
+    }
+
+    public static String getNewId() {
+        return "ID" + idCounter++;
     }
 
     public FixtureComponent setFhirClient(FhirClient fhirClient) {
         this.fhirClient = fhirClient;
         return this;
-    }
-
-    public FhirClient getFhirClient() {
-        return fhirClient;
-    }
-
-    public static String getNewId() {
-        return "ID" + idCounter++;
     }
 }

@@ -31,9 +31,9 @@ public class TestEngine  {
     private Val val;
     private ValE engineVal;
     private FhirClient fhirClientForFixtures;
-    private FhirClient fhirClient;  // for real interactions
     private TestReport testReport = new TestReport();
     private List<String> errors;
+    private FhirClient fhirClient = null;
 
     /**
      *
@@ -51,7 +51,6 @@ public class TestEngine  {
 
     public TestEngine run() {
         Objects.requireNonNull(val);
-        Objects.requireNonNull(fhirClient);
         engineVal = new ValE(val);
         engineVal.setMsg("TestEngine");
         doWorkflow();
@@ -136,10 +135,14 @@ public class TestEngine  {
 
             for (TestScript.TestScriptFixtureComponent comp : testScript.getFixture()) {
                 String id = comp.getId();
-                ResourceWrapper wrapper = new ResourceWrapper(new Ref(comp.getResource().getReference()));
+                Ref ref = new Ref(comp.getResource().getReference());
+                Optional<ResourceWrapper> optWrapper = fhirClientForFixtures.readCachedResource(ref);
+                if (!optWrapper.isPresent())
+                    throw new Error("Static Fixture " + ref + " cannot be loaded");
+                ResourceWrapper wrapper = optWrapper.get();
                 FixtureComponent fixtureMgr;
                 try {
-                    fixtureMgr = new FixtureComponent(id).setResponse(wrapper).setFhirClient(fhirClientForFixtures).setVal(fVal).load(wrapper);
+                    fixtureMgr = new FixtureComponent(id).setResource(wrapper).setVal(fVal).load(wrapper);
                 } catch (Throwable e) {
                     throw new Error(e);
                 }
@@ -162,8 +165,8 @@ public class TestEngine  {
                 for (TestScript.SetupActionComponent action : comp.getAction()) {
                     SetupAction setupAction = new SetupAction(fixtures, action)
                             .setVal(fVal)
-                            .setFhirClient(fhirClient)
                             .setLastOp(lastOp)
+                            .setFhirClient(fhirClient)
                             .setTestReport(testReport);
                     setupAction.run();
                     lastOp = setupAction.getLastOp();

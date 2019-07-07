@@ -34,11 +34,11 @@ class ToolkitConnectionSpecification extends Specification {
             Client client = ClientBuilder.newClient()
             WebTarget target = client.target('http://localhost:' + remoteToolkitPort + '/testEnvPidPort?cmd=status')
 
-            Response response = target
+            Response resource = target
                     .request('text/xml')
                     .get()
 
-            localServerMode = !(response.status == 200)
+            localServerMode = !(resource.status == 200)
         } catch (Exception ex) {
             localServerMode = true
         }
