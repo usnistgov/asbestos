@@ -98,4 +98,8 @@ public class FixtureComponent {
         this.fhirClient = fhirClient;
         return this;
     }
+
+    public boolean isStatic() {
+        return is_static;
+    }
 }
