@@ -6,7 +6,6 @@ import org.hl7.fhir.r4.model.*;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -18,6 +17,7 @@ class SetupAction {
     private TestReport testReport = null;
     private FixtureComponent result = null;
     private FhirClient fhirClient = null;
+    private TestScript testScript = null;
 
     SetupAction(Map<String, FixtureComponent> fixtures, TestScript.SetupActionComponent action) {
         this.fixtures = fixtures;
@@ -27,6 +27,7 @@ class SetupAction {
     void run() {
         Objects.requireNonNull(val);
         Objects.requireNonNull(testReport);
+        Objects.requireNonNull(testScript);
 
         TestReport.TestReportSetupComponent setupReport = testReport.getSetup();
         TestReport.SetupActionComponent actionReport = setupReport.addAction();
@@ -83,6 +84,7 @@ class SetupAction {
         FixtureComponent source = null;
         if (as.hasValue()) {
             valueToCompare = as.getValue();
+            valueToCompare = new VariableMgr(testScript, fixtures, opReport).updateReference(valueToCompare);
         } else if (as.hasCompareToSourceId()) {
             source = fixtures.get(as.getCompareToSourceId());
             if (source == null) {
@@ -97,7 +99,7 @@ class SetupAction {
                 Reporter.reportError(val, assertReport, type, label,"Fixture referenced in compareToSourceExpression" +  source.getId()  + "has no resource");
                 return;
             }
-            if (!eval(sourceResource, expression)) {
+            if (!FhirPathEngineBuilder.evalForBoolean(sourceResource, expression)) {
                 Reporter.reportFail(val, assertReport, type, label, "Assertion failed", warningOnly);
                 return;
             }
@@ -201,7 +203,7 @@ class SetupAction {
                 Reporter.reportError(val, assertReport, type, label,"Fixture referenced " + fixture.getId()  + " has no resource");
                 return;
             }
-            if (!eval(sourceResource, expression)) {
+            if (!FhirPathEngineBuilder.evalForBoolean(sourceResource, expression)) {
                 Reporter.reportFail(val, assertReport, type, label, "Assertion failed", warningOnly);
                 return;
             }
@@ -283,6 +285,7 @@ class SetupAction {
         if ("read".equals(code)) {
             FixtureComponent fixture = new SetupActionRead(fixtures, op)
                     .setVal(val)
+                    .setVariableMgr(new VariableMgr(testScript, fixtures).setVal(val))
                     .run();
             if (fixture != null)
                 lastOp = fixture.getId();
@@ -290,6 +293,7 @@ class SetupAction {
         } else if ("create".equals(code)) {
             SetupActionCreate setupActionCreate = new SetupActionCreate(fixtures, op, operationReport)
                     .setFhirClient(fhirClient)
+                    .setVariableMgr(new VariableMgr(testScript, fixtures).setVal(val);)
                     .setVal(val);
             setupActionCreate.run();
             FixtureComponent fixture = setupActionCreate.getFixtureComponent();
@@ -304,17 +308,7 @@ class SetupAction {
         }
     }
 
-    private boolean eval(BaseResource resource, String expression) {
-        List<Base> results = FhirPathEngineBuilder.build().evaluate(resource, expression);
-        if (results.isEmpty())
-            return false;
-        Base result = results.get(0);
-        if (result instanceof BooleanType) {
-            boolean val = ((BooleanType) result).booleanValue();
-            return val;
-        }
-        return true;
-    }
+
 
     private String responseCodeAsString(int code) {
         switch (code) {
@@ -423,5 +417,9 @@ class SetupAction {
         if (fhirClient == null)
             fhirClient = new FhirClient();
         return fhirClient;
+    }
+
+    public void setTestScript(TestScript testScript) {
+        this.testScript = testScript;
     }
 }

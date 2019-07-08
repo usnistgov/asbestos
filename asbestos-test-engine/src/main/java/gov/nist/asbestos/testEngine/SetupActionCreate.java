@@ -23,6 +23,7 @@ class SetupActionCreate {
     private URI base;
     private FixtureComponent fixtureComponent = null;
     private FhirClient fhirClient = null;
+    private VariableMgr variableMgr = null;
 
 
     SetupActionCreate(Map<String, FixtureComponent> fixtures, TestScript.SetupActionOperationComponent op, TestReport.SetupActionOperationComponent operationReport) {
@@ -31,9 +32,11 @@ class SetupActionCreate {
         this.operationReport = operationReport;
     }
 
+    // TODO doesn't handle params or params with variables
     void run() {
         Objects.requireNonNull(val);
         Objects.requireNonNull(operationReport);
+        Objects.requireNonNull(variableMgr);
         val = new ValE(val).setMsg("setup.create");
 
         String type = "setup.action.operation";
@@ -60,7 +63,9 @@ class SetupActionCreate {
         if (op.hasRequestHeader()) {
             List<TestScript.SetupActionOperationRequestHeaderComponent> hdrs = op.getRequestHeader();
             for (TestScript.SetupActionOperationRequestHeaderComponent hdr : hdrs) {
-                requestHeader.put(hdr.getField(), hdr.getValue());
+                String value = hdr.getValue();
+                value = variableMgr.updateReference(value, operationReport);
+                requestHeader.put(hdr.getField(), value);
             }
         }
 
@@ -99,5 +104,9 @@ class SetupActionCreate {
         if (fhirClient == null)
             fhirClient = new FhirClient();
         return fhirClient;
+    }
+
+    public void setVariableMgr(VariableMgr variableMgr) {
+        this.variableMgr = variableMgr;
     }
 }

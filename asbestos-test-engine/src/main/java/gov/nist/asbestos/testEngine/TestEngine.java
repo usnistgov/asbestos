@@ -62,6 +62,7 @@ public class TestEngine  {
         testReport.setName(testScript.getName());
         testReport.setTestScript(new Reference(testScript.getId()));
         doPreProcessing();
+        doLoadVariables();
         doLoadFixtures();
         doAutoCreates();
         doSetup();
@@ -125,6 +126,18 @@ public class TestEngine  {
 
     private void doPreProcessing() {
 
+    }
+
+    private void doLoadVariables() {
+        if (testScript.hasVariable()) {
+            ValE fVal = new ValE(engineVal).setMsg("Variables");
+
+            for(TestScript.TestScriptVariableComponent comp : testScript.getVariable()) {
+                if (!comp.hasName())
+                    throw new Error("Variable defined without name");
+
+            }
+        }
     }
 
 

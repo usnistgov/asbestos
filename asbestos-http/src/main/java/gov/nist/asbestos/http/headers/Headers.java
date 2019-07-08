@@ -108,6 +108,11 @@ public class Headers {
             return new Header("content-type", "");
     }
 
+    public String getValue(String name) {
+        Header header = get(name);
+        return header.getValue();
+    }
+
     public Header getAccept() {
         Optional<Header> accepts = headers.stream()
                 .filter(header -> header.getName().equalsIgnoreCase("accept"))

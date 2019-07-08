@@ -19,6 +19,7 @@ class SetupActionRead {
     private ValE val;
     private URI base;
     private TestReport testReport = null;
+    private VariableMgr variableMgr = null;
 
 
     SetupActionRead(Map<String, FixtureComponent> fixtures, TestScript.SetupActionOperationComponent op) {
@@ -28,6 +29,7 @@ class SetupActionRead {
 
     FixtureComponent run() {
         Objects.requireNonNull(val);
+        Objects.requireNonNull(variableMgr);
         val = new ValE(val).setMsg("setup.read");
 
         String label = null;
@@ -45,16 +47,19 @@ class SetupActionRead {
         if (op.hasRequestHeader()) {
             List<TestScript.SetupActionOperationRequestHeaderComponent> hdrs = op.getRequestHeader();
             for (TestScript.SetupActionOperationRequestHeaderComponent hdr : hdrs) {
-                requestHeader.put(hdr.getField(), hdr.getValue());
+                String value = hdr.getValue();
+                value = variableMgr.updateReference(value, opReport);
+                requestHeader.put(hdr.getField(), value);
             }
         }
         if (op.hasSourceId())
             sourceId = op.getSourceId();
         if (op.hasTargetId())
             targetId = op.getTargetId();
-        if (op.hasUrl())
+        if (op.hasUrl()) {
             url = op.getUrl();
-
+            url = variableMgr.updateReference(url, opReport);
+        }
 
         if (!requestHeader.containsKey("accept-charset"))
             requestHeader.put("accept-charset", "utf-8");
@@ -67,6 +72,7 @@ class SetupActionRead {
         } else if (op.hasParams()) {
             if (op.hasResource()) {
                 String params = op.getParams();
+                params = variableMgr.updateReference(params, opReport);
                 if (params.startsWith("/"))
                     params = params.substring(1);  // should only be ID and _format (this is a READ)
                 ref = new Ref(base, op.getResource(), params);
@@ -110,4 +116,7 @@ class SetupActionRead {
         return this;
     }
 
+    public void setVariableMgr(VariableMgr variableMgr) {
+        this.variableMgr = variableMgr;
+    }
 }
