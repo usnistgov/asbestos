@@ -193,14 +193,17 @@ public class AssertionRunner {
 
         }
         if (as.hasMinimumId()) {
+            // TODO support  minimumId
             Reporter.reportError(val, assertReport, type, label, "minumumId not supported");
             return;
         }
         if (as.hasNavigationLinks()) {
+            // TODO support navigationLinks
             Reporter.reportError(val, assertReport, type, label, "navigationLinks not supported");
             return;
         }
         if (as.hasValidateProfileId()) {
+            // TODO support validateProfileId
             Reporter.reportError(val, assertReport, type, label, "validateProfileId not supported");
             return;
         }
@@ -221,6 +224,7 @@ public class AssertionRunner {
                 return;
         }
         if (as.hasPath()) {
+            // TODO support path
             Reporter.reportError(val, assertReport, type, label, "path not supported - please use expression (FHIRPath)");
             return;
         }

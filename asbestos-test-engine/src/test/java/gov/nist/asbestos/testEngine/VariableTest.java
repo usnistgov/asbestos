@@ -16,6 +16,7 @@ import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Paths;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -44,7 +45,10 @@ class VariableTest {
 
         when(fhirClientMock.writeResource(any(BaseResource.class), any(Ref.class), eq(Format.XML), any(Map.class))).thenReturn(wrapper);
         when(fhirClientMock.getFormat()).thenReturn(Format.XML);
-        when(fhirClientMock.readResource(new Ref(url))).thenReturn(wrapper);
+        Map<String, String> headers = new HashMap<>();
+        headers.put("accept-charset", "utf-8");
+        headers.put("accept", "json");
+        when(fhirClientMock.readResource(new Ref(url), headers)).thenReturn(wrapper);
 
         Val val = new Val();
         File test1 = Paths.get(getClass().getResource("/variable/createread/TestScript.xml").toURI()).getParent().toFile();

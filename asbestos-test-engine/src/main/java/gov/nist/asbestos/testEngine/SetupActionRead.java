@@ -68,7 +68,8 @@ class SetupActionRead {
 
         // http://build.fhir.org/testscript-definitions.html#TestScript.setup.action.operation.params
         if (op.hasUrl()) {
-            ref = new Ref(op.getUrl());
+            String theUrl = variableMgr.updateReference(op.getUrl());
+            ref = new Ref(theUrl);
         } else if (op.hasParams()) {
             if (op.hasResource()) {
                 String params = op.getParams();

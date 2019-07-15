@@ -2,6 +2,7 @@ package gov.nist.asbestos.testEngine;
 
 import gov.nist.asbestos.http.headers.Headers;
 import gov.nist.asbestos.http.operations.HttpBase;
+import gov.nist.asbestos.http.operations.HttpPost;
 import gov.nist.asbestos.simapi.validation.ValE;
 import org.hl7.fhir.r4.model.TestReport;
 import org.hl7.fhir.r4.model.TestScript;
@@ -83,7 +84,13 @@ public class VariableMgr {
                 return null;
             }
             HttpBase base = fixture.getHttpBase();
+            if (var.getHeaderField().equals("Location") && base instanceof HttpPost) {
+                HttpPost poster = (HttpPost) base;
+                return poster.getLocationHeader().getValue();
+            }
             Headers responseHeaders = base.getResponseHeaders();
+            if (responseHeaders == null)
+                responseHeaders = new Headers();
             return responseHeaders.getValue(var.getHeaderField());
         } else if (var.hasExpression()) {
             return FhirPathEngineBuilder.evalForString(fixture.getResourceResource(), var.getExpression());
