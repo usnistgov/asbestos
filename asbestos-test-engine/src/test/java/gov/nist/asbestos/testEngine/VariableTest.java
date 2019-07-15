@@ -4,7 +4,6 @@ import gov.nist.asbestos.client.client.FhirClient;
 import gov.nist.asbestos.client.client.Format;
 import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
-import gov.nist.asbestos.http.headers.Header;
 import gov.nist.asbestos.http.operations.HttpPost;
 import gov.nist.asbestos.simapi.validation.Val;
 import org.hl7.fhir.r4.model.BaseResource;
@@ -17,52 +16,26 @@ import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Paths;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-class CreateTest {
-
-    @Test
-    void createPatient() throws URISyntaxException {
-        FhirClient fhirClientMock = mock(FhirClient.class);
-        ResourceWrapper wrapper = new ResourceWrapper();
-        HttpPost poster = new HttpPost();
-        poster.setStatus(200);
-        wrapper.setHttpBase(poster);
-
-        when(fhirClientMock.writeResource(any(BaseResource.class), any(Ref.class), eq(Format.XML), any(Map.class))).thenReturn(wrapper);
-
-        Val val = new Val();
-        File test1 = Paths.get(getClass().getResource("/setup/write/createPatient/TestScript.xml").toURI()).getParent().toFile();
-        TestEngine testEngine = new TestEngine(test1, new URI(""))
-                .setVal(val)
-                .setFhirClient(fhirClientMock)
-                .run();
-        System.out.println(testEngine.getTestReportAsJson());
-        List<String> errors = testEngine.getErrors();
-        printErrors(errors);
-        assertEquals(0, errors.size());
-        TestReport report = testEngine.getTestReport();
-        TestReport.TestReportResult result = report.getResult();
-        assertEquals(TestReport.TestReportResult.PASS, result);
-    }
+class VariableTest {
 
     @Test
     void createPatientAndRead() throws URISyntaxException {
         FhirClient fhirClientMock = mock(FhirClient.class);
         ResourceWrapper wrapper = new ResourceWrapper();
         HttpPost poster = new HttpPost();
-        poster.setUri(new URI("http://localhost:9999/fhir/Patient"));
         poster.setStatus(200);
         wrapper.setHttpBase(poster);
-        Patient patient = new Patient().addName(new HumanName().setFamily("Flintstone"));
+        Patient patient = new Patient().addName(new HumanName().setFamily("Fred"));
         wrapper.setResource(patient);
         String url = "http://localhost:9999/fhir/Patient/45";
         poster.setLocation(url);
@@ -71,25 +44,22 @@ class CreateTest {
 
         when(fhirClientMock.writeResource(any(BaseResource.class), any(Ref.class), eq(Format.XML), any(Map.class))).thenReturn(wrapper);
         when(fhirClientMock.getFormat()).thenReturn(Format.XML);
-        Map<String, String> headers = new HashMap<>();
-        headers.put("accept-charset", "utf-8");
-        when(fhirClientMock.readResource(new Ref(url), headers)).thenReturn(wrapper);
+        when(fhirClientMock.readResource(new Ref(url))).thenReturn(wrapper);
 
         Val val = new Val();
-        File test1 = Paths.get(getClass().getResource("/setup/writeread/createPatient/TestScript.xml").toURI()).getParent().toFile();
+        File test1 = Paths.get(getClass().getResource("/variable/createread/TestScript.xml").toURI()).getParent().toFile();
         TestEngine testEngine = new TestEngine(test1, new URI(""))
                 .setVal(val)
-                .setFhirClient(fhirClientMock);
-
-        testEngine.getFixtures().put("http://localhost:9999/fhir/Patient/45", new FixtureComponent("create").setHttpBase(poster));
-        testEngine.run();
-        System.out.println(testEngine.getTestReportAsJson());
+                .setFhirClient(fhirClientMock)
+                .run();
         List<String> errors = testEngine.getErrors();
         printErrors(errors);
         assertEquals(0, errors.size());
         TestReport report = testEngine.getTestReport();
         TestReport.TestReportResult result = report.getResult();
         assertEquals(TestReport.TestReportResult.PASS, result);
+        System.out.println(val.toString());
+        assertFalse(val.hasErrors());
     }
 
     private void printErrors(List<String> errors) {

@@ -48,7 +48,7 @@ class AssertFixtureTest {
         TestReport.TestReportResult result = report.getResult();
         assertEquals(TestReport.TestReportResult.FAIL, result);
         assertEquals(1, errors.size());
-        assertEquals("setup.action.assert : No Label : warningOnly is required but missing", errors.get(0));
+        assertEquals("setup.action.assert : null : warningOnly is required but missing", errors.get(0));
     }
 
     @Test

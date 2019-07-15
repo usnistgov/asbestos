@@ -47,7 +47,7 @@ public class FhirClient {
 
         post.post();
 
-        response.setRef(ref);
+        response.setRef(new Ref(post.getLocationHeader().getValue()));
         response.setResource(resource);
         response.setHttpBase(post);
         this.httpBase = post;
@@ -93,6 +93,9 @@ public class FhirClient {
     }
 
     private ResourceWrapper gobbleGetResponse(HttpGet getter, ResourceWrapper wrapper, Format format) {
+        if (getter.getStatus() != 200) {
+           return wrapper;
+        }
         String resourceText = getter.getResponseText();
         if (resourceText == null)
             return wrapper;

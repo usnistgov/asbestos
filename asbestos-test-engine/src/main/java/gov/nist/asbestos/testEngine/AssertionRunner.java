@@ -1,69 +1,49 @@
 package gov.nist.asbestos.testEngine;
 
-import gov.nist.asbestos.client.client.FhirClient;
 import gov.nist.asbestos.simapi.validation.ValE;
-import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.Base;
+import org.hl7.fhir.r4.model.BaseResource;
+import org.hl7.fhir.r4.model.TestReport;
+import org.hl7.fhir.r4.model.TestScript;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Map;
 import java.util.Objects;
 
-class SetupAction {
-    private Map<String, FixtureComponent> fixtures;
-    private TestScript.SetupActionComponent action;
-    private String lastOp = null;  // name of last FixtureComponent
+public class AssertionRunner {
+    private String label;
+    private String type;
+    private String typePrefix;
     private ValE val;
-    private TestReport testReport = null;
-    private FixtureComponent result = null;
-    private FhirClient fhirClient = null;
     private TestScript testScript = null;
+    private FixtureMgr fixtureMgr;
+    private TestReport.SetupActionAssertComponent assertReport;
+    private TestReport testReport = null;
 
-    SetupAction(Map<String, FixtureComponent> fixtures, TestScript.SetupActionComponent action) {
-        this.fixtures = fixtures;
-        this.action = action;
+    AssertionRunner(FixtureMgr fixtureMgr) {
+        Objects.requireNonNull(fixtureMgr);
+        this.fixtureMgr = fixtureMgr;
     }
 
-    void run() {
+    void run(TestScript.SetupActionAssertComponent as, TestReport.SetupActionAssertComponent assertReport) {
+        Objects.requireNonNull(typePrefix);
         Objects.requireNonNull(val);
-        Objects.requireNonNull(testReport);
         Objects.requireNonNull(testScript);
+        this.assertReport = assertReport;
 
-        TestReport.TestReportSetupComponent setupReport = testReport.getSetup();
-        TestReport.SetupActionComponent actionReport = setupReport.addAction();
-
-        if (action.hasOperation()) {
-            String label = action.getOperation().hasLabel() ? action.getOperation().getLabel() : "No Label";
-            runOperation(label, actionReport);
-            return;
-        }
-        if (action.hasAssert()) {
-            String label = action.getAssert().hasLabel() ? action.getAssert().getLabel() : "No Label";
-            runAssert(label, actionReport);
-
-        }
-    }
-
-    TestReport.SetupActionAssertComponent assertReport;
-    String label;
-    String type;
-
-    private void runAssert(String theLabel, TestReport.SetupActionComponent actionReport) {
-        assertReport = actionReport.getAssert();
         assertReport.setResult(TestReport.TestReportActionResult.PASS);  // may be overwritten
 
-        label = theLabel;
-        type = "setup.action.assert";
+        label = as.getLabel();
+        type = typePrefix + ".assert";
 
         FixtureComponent fixture = null;
-        if (lastOp != null) {
-            fixture = fixtures.get(lastOp);
+        if (fixtureMgr.getLastOp() != null) {
+            fixture = fixtureMgr.get(fixtureMgr.getLastOp());
             if (fixture == null) {
-                Reporter.reportError(val, assertReport, type, label,"last operation - " + lastOp + " - does not name a fixture");
+                Reporter.reportError(val, assertReport, type, label,"last operation - " + fixtureMgr.getLastOp() + " - does not name a fixture");
                 return;
             }
         }
-        TestScript.SetupActionAssertComponent as = action.getAssert();
 
         boolean warningOnly;
         if (as.hasWarningOnly())
@@ -84,9 +64,12 @@ class SetupAction {
         FixtureComponent source = null;
         if (as.hasValue()) {
             valueToCompare = as.getValue();
-            valueToCompare = new VariableMgr(testScript, fixtures, opReport).updateReference(valueToCompare);
+            valueToCompare = new VariableMgr(testScript, fixtureMgr)
+                    .setVal(val)
+                    .setAsReport(assertReport)
+                    .updateReference(valueToCompare);
         } else if (as.hasCompareToSourceId()) {
-            source = fixtures.get(as.getCompareToSourceId());
+            source = fixtureMgr.get(as.getCompareToSourceId());
             if (source == null) {
                 Reporter.reportError(val, assertReport, type, label, "has compareToSourceId " + as.getCompareToSourceId() + " which is undefined");
                 return;
@@ -105,10 +88,10 @@ class SetupAction {
             }
         }
         if (as.hasSourceId())
-            fixture = fixtures.get(as.getSourceId());
+            fixture = fixtureMgr.get(as.getSourceId());
 
         if (as.hasMinimumId()) {
-            FixtureComponent comp = fixtures.get(as.getMinimumId());
+            FixtureComponent comp = fixtureMgr.get(as.getMinimumId());
             if (comp == null) {
                 Reporter.reportError(val, assertReport, type, label, "has minimumId " + as.getMinimumId() + " which is undefined");
                 return;
@@ -222,7 +205,7 @@ class SetupAction {
             return;
         }
         if (as.hasRequestURL()) {
-            if (lastOp == null) {
+            if (fixtureMgr.getLastOp() == null) {
                 Reporter.reportError(val, assertReport, type, label, " has requestURL tested but no last operation recorded");
                 return;
             }
@@ -233,9 +216,13 @@ class SetupAction {
                 Reporter.reportError(val, assertReport, type, label, " requestURL (" + as.getRequestURL() + ") cannot be parsed");
                 return;
             }
-            String found = fixtures.get(lastOp).getHttpBase().getUri().getPath();
+            String found = fixtureMgr.get(fixtureMgr.getLastOp()).getHttpBase().getUri().getPath();
             if (!compare(val, assertReport, found, expected, operator, warningOnly, type, label))
                 return;
+        }
+        if (as.hasPath()) {
+            Reporter.reportError(val, assertReport, type, label, "path not supported - please use expression (FHIRPath)");
+            return;
         }
     }
 
@@ -250,65 +237,6 @@ class SetupAction {
         }
         return false;
     }
-
-    private void runOperation(String id, TestReport.SetupActionComponent actionReport) {
-        TestReport.SetupActionOperationComponent operationReport = actionReport.getOperation();
-        operationReport.setResult(TestReport.TestReportActionResult.PASS);  // may be overwritten
-
-        label = id;
-        type = "setup.action.operation";
-
-        if (action.hasAssert()) {
-            Reporter.reportError(val, operationReport, type, id,"has both an Operation and an Assertion");
-            return;
-        }
-        TestScript.SetupActionOperationComponent op = action.getOperation();
-        int elementCount = 0;
-        if (op.hasTargetId()) elementCount++;
-        if (op.hasParams()) elementCount++;
-        if (op.hasUrl()) elementCount++;
-        if (elementCount == 0) {
-            Reporter.reportError(val, operationReport, type, id,"has none of sourceId, targetId, params, url - one is required");
-            return;
-        }
-        if (elementCount > 1) {
-            Reporter.reportError(val, operationReport, type, id,"has multiple of sourceId, targetId, params, url - only one is allowed");
-            return;
-        }
-        if (!op.hasType()) {
-            Reporter.reportError(val, operationReport, type, id,"has no type");
-            return;
-        }
-        Coding typeCoding = op.getType();
-        String code = typeCoding.getCode();
-
-        if ("read".equals(code)) {
-            FixtureComponent fixture = new SetupActionRead(fixtures, op)
-                    .setVal(val)
-                    .setVariableMgr(new VariableMgr(testScript, fixtures).setVal(val))
-                    .run();
-            if (fixture != null)
-                lastOp = fixture.getId();
-            return;
-        } else if ("create".equals(code)) {
-            SetupActionCreate setupActionCreate = new SetupActionCreate(fixtures, op, operationReport)
-                    .setFhirClient(fhirClient)
-                    .setVariableMgr(new VariableMgr(testScript, fixtures).setVal(val);)
-                    .setVal(val);
-            setupActionCreate.run();
-            FixtureComponent fixture = setupActionCreate.getFixtureComponent();
-            if (fixture == null)
-                return;  // failed
-            if (fixture != null)
-                lastOp = fixture.getId();
-            return;
-        } else {
-            Reporter.reportError(val, operationReport, type, id,"do not understand code.code of " + code);
-            return;
-        }
-    }
-
-
 
     private String responseCodeAsString(int code) {
         switch (code) {
@@ -381,45 +309,24 @@ class SetupAction {
         return assertReport.getResult() != TestReport.TestReportActionResult.FAIL;
     }
 
-    SetupAction setVal(ValE val) {
+
+    public AssertionRunner setTypePrefix(String typePrefix) {
+        this.typePrefix = typePrefix;
+        return this;
+    }
+
+    public AssertionRunner setVal(ValE val) {
         this.val = val;
         return this;
     }
 
-    public SetupAction setLastOp(String lastOp) {
-        this.lastOp = lastOp;
+    public AssertionRunner setTestScript(TestScript testScript) {
+        this.testScript = testScript;
         return this;
     }
 
-    public String getLastOp() {
-        return lastOp;
-    }
-
-    public TestReport getTestReport() {
-        return testReport;
-    }
-
-    public FixtureComponent getResult() {
-        return result;
-    }
-
-    public SetupAction setTestReport(TestReport testReport) {
+    public AssertionRunner setTestReport(TestReport testReport) {
         this.testReport = testReport;
         return this;
-    }
-
-    public SetupAction setFhirClient(FhirClient fhirClient) {
-        this.fhirClient = fhirClient;
-        return this;
-    }
-
-    private FhirClient getFhirClient() {
-        if (fhirClient == null)
-            fhirClient = new FhirClient();
-        return fhirClient;
-    }
-
-    public void setTestScript(TestScript testScript) {
-        this.testScript = testScript;
     }
 }

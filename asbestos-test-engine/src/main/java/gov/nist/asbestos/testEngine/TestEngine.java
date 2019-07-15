@@ -27,13 +27,15 @@ public class TestEngine  {
     private File testDef = null;
     private URI sut = null;
     private TestScript testScript = null;
-    private Map<String, FixtureComponent> fixtures = new HashMap<>();
+    private FixtureMgr fixtureMgr = new FixtureMgr();
     private Val val;
     private ValE engineVal;
     private FhirClient fhirClientForFixtures;
     private TestReport testReport = new TestReport();
     private List<String> errors;
     private FhirClient fhirClient = null;
+
+    public static final String LAST_OP = "_LAST_OP_";
 
     /**
      *
@@ -69,6 +71,7 @@ public class TestEngine  {
         doTest();
         doTearDown();
         doPostProcessing();
+        propagateStatus(testReport);
         errors = doReportResult();
     }
 
@@ -146,21 +149,25 @@ public class TestEngine  {
         if (testScript.hasFixture()) {
             ValE fVal = new ValE(engineVal).setMsg("Fixtures");
 
+            int nameI = 1;
             for (TestScript.TestScriptFixtureComponent comp : testScript.getFixture()) {
                 String id = comp.getId();
+                if (id == null || id.equals("")) {
+                    throw new Error("Static Fixture has no id and cannot be referenced");
+                }
                 Ref ref = new Ref(comp.getResource().getReference());
                 Optional<ResourceWrapper> optWrapper = fhirClientForFixtures.readCachedResource(ref);
                 if (!optWrapper.isPresent())
                     throw new Error("Static Fixture " + ref + " cannot be loaded");
                 ResourceWrapper wrapper = optWrapper.get();
-                FixtureComponent fixtureMgr;
+                FixtureComponent fixtureComponent;
                 try {
-                    fixtureMgr = new FixtureComponent(id).setResource(wrapper).setVal(fVal).load(wrapper);
+                    fixtureComponent = new FixtureComponent(id).setResource(wrapper).setVal(fVal).load(wrapper);
+                    if (fixtureComponent != null)
+                        fixtureMgr.put(id, fixtureComponent);
                 } catch (Throwable e) {
                     throw new Error(e);
                 }
-                if (id != null)
-                    fixtures.put(id, fixtureMgr);
             }
         }
     }
@@ -172,35 +179,68 @@ public class TestEngine  {
     private void doSetup() {
         if (testScript.hasSetup()) {
             TestScript.TestScriptSetupComponent comp = testScript.getSetup();
+            ValE fVal = new ValE(engineVal).setMsg("Setup");
+            TestReport.TestReportSetupComponent setupReportComponent = testReport.getSetup();
             if (comp.hasAction()) {
-                ValE fVal = new ValE(engineVal).setMsg("Setup");
-                String lastOp = null;
+                String typePrefix = "setup.action";
                 for (TestScript.SetupActionComponent action : comp.getAction()) {
-                    SetupAction setupAction = new SetupAction(fixtures, action)
-                            .setVal(fVal)
-                            .setLastOp(lastOp)
-                            .setFhirClient(fhirClient)
-                            .setTestReport(testReport);
-                    setupAction.run();
-                    lastOp = setupAction.getLastOp();
+                    TestReport.SetupActionComponent actionReport = setupReportComponent.addAction();
+                    if (action.hasOperation() && action.hasAssert()) {
+                        Reporter.reportError(fVal, actionReport.getOperation(), "setup", "", "action has both operation and assertion");
+                        return;
+                    }
+                    doAction(typePrefix, action.hasOperation(), action.getOperation(), actionReport.getOperation(), action.hasAssert(), action.getAssert(), actionReport.getAssert());
                 }
             }
         }
     }
 
+    private void doAction(String typePrefix, boolean isOperation, TestScript.SetupActionOperationComponent operation, TestReport.SetupActionOperationComponent operation2, boolean isAssert, TestScript.SetupActionAssertComponent anAssert, TestReport.SetupActionAssertComponent anAssert2) {
+        if (isOperation) {
+            TestScript.SetupActionOperationComponent opComponent = operation;
+            TestReport.SetupActionOperationComponent opReport = operation2;
+            OperationRunner runner = new OperationRunner(fixtureMgr)
+                    .setVal(new ValE(val).setMsg(typePrefix))
+                    .setTypePrefix(typePrefix)
+                    .setFhirClient(fhirClient)
+                    .setTestReport(testReport)
+                    .setTestScript(testScript);
+            runner.run(opComponent, opReport);
+        } else if (isAssert) {
+            TestScript.SetupActionAssertComponent actionAssertComponent = anAssert;
+            TestReport.SetupActionAssertComponent assertComponent = anAssert2;
+            AssertionRunner runner = new AssertionRunner(fixtureMgr)
+                    .setVal(new ValE(val).setMsg(typePrefix))
+                    .setTypePrefix(typePrefix)
+                    .setTestReport(testReport)
+                    .setTestScript(testScript);
+            runner.run(actionAssertComponent, assertComponent);
+        }
+    }
+
     private void doTest() {
         if (testScript.hasTest()) {
-            ValE fVal = new ValE(engineVal).setMsg("Tests");
+            ValE fVal = new ValE(engineVal).setMsg("Test");
 
-            for (TestScript.TestScriptTestComponent comp : testScript.getTest()) {
-                String id = comp.getId();
-                if (id == null || id.equals("")) {
-                    fVal.add(new ValE("Fixture has no id").asError());
-                    return;
+            int testCounter = 1;
+            for (TestScript.TestScriptTestComponent testComponent : testScript.getTest()) {
+                String testName = testComponent.getName();
+                if (testName == null || testName.equals(""))
+                    testName = "Test" + testCounter;
+                testCounter++;
+                ValE tVal = new ValE(fVal).setMsg(testName);
+                TestReport.TestReportTestComponent testReportComponent = testReport.addTest();
+                if (testComponent.hasAction()) {
+                    String typePrefix = "test.action";
+                    TestReport.TestActionComponent actionReport = testReportComponent.addAction();
+                    for (TestScript.TestActionComponent testActionComponent : testComponent.getAction()) {
+                        if (testActionComponent.hasOperation() && testActionComponent.hasAssert()) {
+                            Reporter.reportError(tVal, actionReport.getOperation(), "test.action", testName, "action has both operation and assertion");
+                            return;
+                        }
+                        doAction(typePrefix, testActionComponent.hasOperation(), testActionComponent.getOperation(), actionReport.getOperation(), testActionComponent.hasAssert(), testActionComponent.getAssert(), actionReport.getAssert());
+                    }
                 }
-                fVal.add(new ValE("Test " + id));
-
-
             }
 
         }
@@ -233,28 +273,90 @@ public class TestEngine  {
         IParser parser = (location.toString().endsWith("xml") ? ProxyBase.getFhirContext().newXmlParser() : ProxyBase.getFhirContext().newJsonParser());
         IBaseResource resource = parser.parseResource(is);
         assert resource instanceof TestScript;
-        return (TestScript) resource;
+        TestScript testScript = (TestScript) resource;
+        testScript.setName(location.toString());
+        return testScript;
     }
 
     private boolean isFixtureDefined(String id) {
-        return fixtures.containsKey(id);
+        return fixtureMgr.containsKey(id);
     }
 
-    private TestEngine addFixture(FixtureComponent fixtureMgr) {
-        fixtures.put(fixtureMgr.getId(), fixtureMgr);
+    private TestEngine addFixture(FixtureComponent fixtureComp) {
+        fixtureMgr.put(fixtureComp.getId(), fixtureComp);
         return this;
     }
 
-    Map<String, FixtureComponent> getFixtures() {
-        return fixtures;
+    FixtureMgr getFixtures() {
+        return fixtureMgr;
     }
 
     private boolean fixturesOk() {
-        for (FixtureComponent fixtureMgr : fixtures.values()) {
-            if (!fixtureMgr.IsOk())
+        for (FixtureComponent fixtureComp : fixtureMgr.values()) {
+            if (!fixtureComp.IsOk())
                 return false;
         }
         return true;
+    }
+
+    void propagateStatus(TestReport testReport) {
+        testReport.setResult(TestReport.TestReportResult.PASS);
+        if (testReport.hasSetup()) {
+            TestReport.TestReportSetupComponent setupComponent = testReport.getSetup();
+            for (TestReport.SetupActionComponent setupActionComponent : setupComponent.getAction()) {
+                if (setupActionComponent.hasOperation()) {
+                    reportOnOperation(testReport, setupActionComponent.getOperation());
+                }
+                if (setupActionComponent.hasAssert()) {
+                    reportOnAssertion(testReport, setupActionComponent.getAssert());
+                }
+            }
+        }
+        if (testReport.hasTest()) {
+            for (TestReport.TestReportTestComponent testComponent : testReport.getTest()) {
+                if (testComponent.hasAction()) {
+                    for (TestReport.TestActionComponent testActionComponent : testComponent.getAction()) {
+                        if (testActionComponent.hasOperation()) {
+                            reportOnOperation(testReport, testActionComponent.getOperation());
+                        }
+                        if (testActionComponent.hasAssert()) {
+                            reportOnAssertion(testReport, testActionComponent.getAssert());
+                        }
+                    }
+                }
+            }
+        }
+        if (testReport.hasTeardown()) {
+            TestReport.TestReportTeardownComponent teardownActionComponent = testReport.getTeardown();
+            for (TestReport.TeardownActionComponent teardownActionComponent1 : teardownActionComponent.getAction()) {
+                if (teardownActionComponent1.hasOperation()) {
+                    reportOnOperation(testReport, teardownActionComponent1.getOperation());
+                }
+            }
+        }
+        testReport.setStatus(TestReport.TestReportStatus.COMPLETED);
+    }
+
+    private void reportOnOperation(TestReport testReport, TestReport.SetupActionOperationComponent setupActionOperationComponent) {
+        if (setupActionOperationComponent.hasResult()) {
+            TestReport.TestReportActionResult testReportActionResult = setupActionOperationComponent.getResult();
+            if (testReportActionResult == TestReport.TestReportActionResult.ERROR
+                    || testReportActionResult == TestReport.TestReportActionResult.FAIL) {
+                setupActionOperationComponent.setResult(testReportActionResult);
+                testReport.setResult(TestReport.TestReportResult.FAIL);
+            }
+        }
+    }
+
+    private void reportOnAssertion(TestReport testReport, TestReport.SetupActionAssertComponent setupActionAssertionComponent) {
+        if (setupActionAssertionComponent.hasResult()) {
+            TestReport.TestReportActionResult testReportActionResult = setupActionAssertionComponent.getResult();
+            if (testReportActionResult == TestReport.TestReportActionResult.ERROR
+                    || testReportActionResult == TestReport.TestReportActionResult.FAIL) {
+                setupActionAssertionComponent.setResult(testReportActionResult);
+                testReport.setResult(TestReport.TestReportResult.FAIL);
+            }
+        }
     }
 
     TestEngine setVal(Val val) {
@@ -264,6 +366,14 @@ public class TestEngine  {
 
     public TestReport getTestReport() {
         return testReport;
+    }
+
+    String getTestReportAsJson() {
+        return ProxyBase
+                .getFhirContext()
+                .newJsonParser()
+                .setPrettyPrint(true)
+                .encodeResourceToString(testReport);
     }
 
     public List<String> getErrors() {
@@ -281,5 +391,9 @@ public class TestEngine  {
     public TestEngine setFhirClient(FhirClient fhirClient) {
         this.fhirClient = fhirClient;
         return this;
+    }
+
+    public FixtureMgr getFixtureMgr() {
+        return fixtureMgr;
     }
 }

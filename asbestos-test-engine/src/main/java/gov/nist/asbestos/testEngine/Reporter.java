@@ -30,6 +30,15 @@ class Reporter {
         return type + " : " + id + " : " + msg;
     }
 
+    static void reportError(ValE val, TestReport.SetupActionOperationComponent opReport, TestReport.SetupActionAssertComponent assertReport, String type, String id, String msg) {
+        assert assertReport != null || opReport != null;
+        if (assertReport != null)
+            reportError(val, assertReport, type, id, msg);
+        else
+            reportError(val, opReport, type, id, msg);
+    }
+
+
     static void reportError(ValE val, TestReport.SetupActionOperationComponent opReport, String type, String id, String msg) {
         String theMsg = formatMsg(type, id, msg);
         val.add(new ValE(theMsg).asError());

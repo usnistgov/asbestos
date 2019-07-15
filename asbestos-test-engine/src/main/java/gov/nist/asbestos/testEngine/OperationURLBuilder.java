@@ -4,11 +4,10 @@ import gov.nist.asbestos.client.resolver.Ref;
 import org.hl7.fhir.r4.model.TestScript;
 
 import java.net.URI;
-import java.util.Map;
 
 class OperationURLBuilder {
 
-    static Ref build(TestScript.SetupActionOperationComponent op, URI base, Map<String, FixtureComponent> fixtures, Reporter reporter) {
+    static Ref build(TestScript.SetupActionOperationComponent op, URI base, FixtureMgr fixtureMgr, Reporter reporter) {
         Ref ref = null;
         // http://build.fhir.org/testscript-definitions.html#TestScript.setup.action.operation.params
         if (op.hasUrl()) {
@@ -24,7 +23,7 @@ class OperationURLBuilder {
                 return null;
             }
         } else if (op.hasTargetId()) {
-            FixtureComponent fixture = fixtures.get(op.getTargetId());
+            FixtureComponent fixture = fixtureMgr.get(op.getTargetId());
             if (fixture != null && fixture.hasHttpBase()) {
                 Ref targetRef = new Ref(fixture.getHttpBase().getUri());
                 ref = targetRef.rebase(base);

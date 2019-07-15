@@ -86,6 +86,11 @@ public class FixtureComponent {
         return httpBase;
     }
 
+    public FixtureComponent setHttpBase(HttpBase httpBase) {
+        this.httpBase = httpBase;
+        return this;
+    }
+
     public boolean hasHttpBase() {
         return httpBase != null;
     }

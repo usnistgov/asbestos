@@ -3,34 +3,39 @@ package gov.nist.asbestos.testEngine;
 import gov.nist.asbestos.client.client.FhirClient;
 import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
+import gov.nist.asbestos.http.operations.HttpGet;
+import gov.nist.asbestos.http.operations.HttpPost;
 import gov.nist.asbestos.simapi.validation.ValE;
 import org.hl7.fhir.r4.model.TestReport;
 import org.hl7.fhir.r4.model.TestScript;
 
 import java.net.URI;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
 class SetupActionRead {
-    private Map<String, FixtureComponent> fixtures;  // static fixtures and history of operations
+    private FixtureMgr fixtureMgr;  // static fixtures and history of operations
     private TestScript.SetupActionOperationComponent op;
     private ValE val;
     private URI base;
     private TestReport testReport = null;
     private VariableMgr variableMgr = null;
+    private FhirClient fhirClient = null;
 
 
-    SetupActionRead(Map<String, FixtureComponent> fixtures, TestScript.SetupActionOperationComponent op) {
-        this.fixtures = fixtures;
+    SetupActionRead(FixtureMgr fixtureMgr) {
+        this.fixtureMgr = fixtureMgr;
         this.op = op;
     }
 
-    FixtureComponent run() {
+    void run(TestScript.SetupActionOperationComponent op, TestReport.SetupActionOperationComponent opReport) {
         Objects.requireNonNull(val);
         Objects.requireNonNull(variableMgr);
-        val = new ValE(val).setMsg("setup.read");
+        Objects.requireNonNull(testReport);
+        Objects.requireNonNull(fhirClient);
+        String type = "setup.read";
+        val = new ValE(val).setMsg(type);
 
         String label = null;
         boolean encodeRequestUrl;
@@ -45,12 +50,7 @@ class SetupActionRead {
         if (op.hasEncodeRequestUrl())
             encodeRequestUrl = op.getEncodeRequestUrl();
         if (op.hasRequestHeader()) {
-            List<TestScript.SetupActionOperationRequestHeaderComponent> hdrs = op.getRequestHeader();
-            for (TestScript.SetupActionOperationRequestHeaderComponent hdr : hdrs) {
-                String value = hdr.getValue();
-                value = variableMgr.updateReference(value, opReport);
-                requestHeader.put(hdr.getField(), value);
-            }
+            SetupActionCreate.handleRequestHeader(requestHeader, op, variableMgr);
         }
         if (op.hasSourceId())
             sourceId = op.getSourceId();
@@ -58,7 +58,7 @@ class SetupActionRead {
             targetId = op.getTargetId();
         if (op.hasUrl()) {
             url = op.getUrl();
-            url = variableMgr.updateReference(url, opReport);
+            url = variableMgr.updateReference(url);
         }
 
         if (!requestHeader.containsKey("accept-charset"))
@@ -72,33 +72,48 @@ class SetupActionRead {
         } else if (op.hasParams()) {
             if (op.hasResource()) {
                 String params = op.getParams();
-                params = variableMgr.updateReference(params, opReport);
+                params = variableMgr.updateReference(params);
                 if (params.startsWith("/"))
                     params = params.substring(1);  // should only be ID and _format (this is a READ)
                 ref = new Ref(base, op.getResource(), params);
             } else {
-                val.add(new ValE("Resource (" + op.getResource() + ") specified but no params holding ID").asError());
-                return null;
+                Reporter.reportError(val, opReport, null, type, label, "Resource (" + op.getResource() + ") specified but no params holding ID");
+                return;
             }
         }
         else if (op.hasTargetId()) {
-            FixtureComponent fixture  = fixtures.get(op.getTargetId());
+            FixtureComponent fixture  = fixtureMgr.get(op.getTargetId());
             if (fixture != null && fixture.hasHttpBase()) {
-                Ref targetRef = new Ref(fixture.getHttpBase().getUri());
-                ref = targetRef.rebase(base);
+                String location = null;
+                if (fixture.getHttpBase() instanceof HttpPost) {
+                    location = ((HttpPost) fixture.getHttpBase()).getLocationHeader().getValue();
+                } else if (fixture.getHttpBase() instanceof HttpGet) {
+                    location = ((HttpGet) fixture.getHttpBase()).getUri().toString();
+                }
+                if (location == null) {
+                    Reporter.reportError(val, opReport, null, type, label, "targetId does not have id and type");
+                    return;
+                }
+                Ref targetRef = new Ref(location);
+                if (base == null)
+                    ref = targetRef;
+                else
+                    ref = targetRef.rebase(base);
             }
         }
         if (ref == null) {
-            val.add(new ValE("Unable to construct URL for operation").asError());
-            return null;
+            Reporter.reportError(val, opReport, null, type, label, "Unable to construct URL for operation");
+            return;
         }
-        ResourceWrapper wrapper = new FhirClient().readResource(ref, requestHeader);
+        ResourceWrapper wrapper = fhirClient.readResource(ref, requestHeader);
+        if (!wrapper.isOk()) {
+            Reporter.reportError(val, opReport, null, type, label, "Unable to retrieve " + ref);
+            return;
+        }
 
         String fixtureId =op.hasResponseId() ? op.getResponseId() : FixtureComponent.getNewId();
         FixtureComponent fixtureComponent =  new FixtureComponent(fixtureId).setResource(wrapper);
-        fixtures.put(fixtureId, fixtureComponent);
-
-        return fixtureComponent;
+        fixtureMgr.put(fixtureId, fixtureComponent);
     }
 
     SetupActionRead setVal(ValE val) {
@@ -116,7 +131,13 @@ class SetupActionRead {
         return this;
     }
 
-    public void setVariableMgr(VariableMgr variableMgr) {
+    public SetupActionRead setVariableMgr(VariableMgr variableMgr) {
         this.variableMgr = variableMgr;
+        return this;
+    }
+
+    public SetupActionRead setFhirClient(FhirClient fhirClient) {
+        this.fhirClient = fhirClient;
+        return this;
     }
 }

@@ -16,9 +16,7 @@ import java.util.Map;
 import java.util.Objects;
 
 class SetupActionCreate {
-    private Map<String, FixtureComponent> fixtures;  // static fixtures and history of operations
-    private TestScript.SetupActionOperationComponent op;
-    private TestReport.SetupActionOperationComponent operationReport;
+    private FixtureMgr fixtureMgr;  // static fixtures and history of operations
     private ValE val;
     private URI base;
     private FixtureComponent fixtureComponent = null;
@@ -26,14 +24,13 @@ class SetupActionCreate {
     private VariableMgr variableMgr = null;
 
 
-    SetupActionCreate(Map<String, FixtureComponent> fixtures, TestScript.SetupActionOperationComponent op, TestReport.SetupActionOperationComponent operationReport) {
-        this.fixtures = fixtures;
-        this.op = op;
-        this.operationReport = operationReport;
+    SetupActionCreate(FixtureMgr fixtureMgr) {
+        Objects.requireNonNull(fixtureMgr);
+        this.fixtureMgr = fixtureMgr;
     }
 
     // TODO doesn't handle params or params with variables
-    void run() {
+    void run(TestScript.SetupActionOperationComponent op, TestReport.SetupActionOperationComponent operationReport) {
         Objects.requireNonNull(val);
         Objects.requireNonNull(operationReport);
         Objects.requireNonNull(variableMgr);
@@ -48,7 +45,7 @@ class SetupActionCreate {
             reporter.reportError("has no sourceId");
             return;
         }
-        FixtureComponent sourceFixture = fixtures.get(op.getSourceId());
+        FixtureComponent sourceFixture = fixtureMgr.get(op.getSourceId());
         if (sourceFixture == null) {
             reporter.reportError("sourceId " + op.getSourceId() + "does not exist");
             return;
@@ -61,24 +58,30 @@ class SetupActionCreate {
 
         Map<String, String> requestHeader = new HashMap<>();
         if (op.hasRequestHeader()) {
-            List<TestScript.SetupActionOperationRequestHeaderComponent> hdrs = op.getRequestHeader();
-            for (TestScript.SetupActionOperationRequestHeaderComponent hdr : hdrs) {
-                String value = hdr.getValue();
-                value = variableMgr.updateReference(value, operationReport);
-                requestHeader.put(hdr.getField(), value);
-            }
+            handleRequestHeader(requestHeader, op, variableMgr);
         }
 
         Ref targetUrl = op.hasUrl()
                 ? new Ref(op.getUrl())
-                : OperationURLBuilder.build(op, base, fixtures, reporter);
+                : OperationURLBuilder.build(op, base, fixtureMgr, reporter);
         if (targetUrl == null)
             return;
 
         ResourceWrapper wrapper = getFhirClient().writeResource(resourceToSend, targetUrl, format, requestHeader);
         String fixtureId = op.hasResponseId() ? op.getResponseId() : FixtureComponent.getNewId();
-        fixtureComponent =  new FixtureComponent(fixtureId).setResource(wrapper);
-        fixtures.put(fixtureId, fixtureComponent);
+        fixtureComponent =  new FixtureComponent(fixtureId)
+                .setResource(wrapper)
+                .setHttpBase(wrapper.getHttpBase());
+        fixtureMgr.put(fixtureId, fixtureComponent);
+    }
+
+    static void handleRequestHeader(Map<String, String> requestHeader, TestScript.SetupActionOperationComponent op, VariableMgr variableMgr) {
+        List<TestScript.SetupActionOperationRequestHeaderComponent> hdrs = op.getRequestHeader();
+        for (TestScript.SetupActionOperationRequestHeaderComponent hdr : hdrs) {
+            String value = hdr.getValue();
+            value = variableMgr.updateReference(value);
+            requestHeader.put(hdr.getField(), value);
+        }
     }
 
     SetupActionCreate setVal(ValE val) {
