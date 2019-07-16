@@ -248,7 +248,20 @@ public class TestEngine  {
     }
 
     private void doTearDown() {
-
+        if (testScript.hasTeardown()) {
+            ValE fVal = new ValE(engineVal).setMsg("Teardown");
+            TestReport.TestReportTeardownComponent teardownReportComponent = testReport.getTeardown();
+            TestScript.TestScriptTeardownComponent testScriptTeardownComponent = testScript.getTeardown();
+            if (testScriptTeardownComponent.hasAction()) {
+                TestReport.TeardownActionComponent actionReport = teardownReportComponent.addAction();
+                for (TestScript.TeardownActionComponent teardownActionComponent : testScriptTeardownComponent.getAction()) {
+                    if (teardownActionComponent.hasOperation()) {
+                        TestScript.SetupActionOperationComponent setupActionOperationComponent = teardownActionComponent.getOperation();
+                        doAction("teardown", true, setupActionOperationComponent, actionReport.getOperation(), false, null, null);
+                    }
+                }
+            }
+        }
     }
 
     private void doPostProcessing() {

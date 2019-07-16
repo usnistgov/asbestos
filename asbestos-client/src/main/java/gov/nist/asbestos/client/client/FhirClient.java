@@ -4,6 +4,7 @@ import gov.nist.asbestos.client.Base.ProxyBase;
 import gov.nist.asbestos.http.headers.Header;
 import gov.nist.asbestos.http.headers.Headers;
 import gov.nist.asbestos.http.operations.HttpBase;
+import gov.nist.asbestos.http.operations.HttpDelete;
 import gov.nist.asbestos.http.operations.HttpGet;
 import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.client.resolver.ResourceCacheMgr;
@@ -52,6 +53,24 @@ public class FhirClient {
         response.setHttpBase(post);
         this.httpBase = post;
         op = Op.POST;
+
+        return response;
+    }
+
+    public ResourceWrapper deleteResource(Ref ref, Map<String, String> headers) {
+        Objects.requireNonNull(ref);
+        ResourceWrapper response = new ResourceWrapper();
+        if (headers == null)
+            headers = new HashMap<>();
+        HttpDelete delete = new HttpDelete();
+        delete.setRequestHeaders(new Headers(headers));
+        delete.setUri(ref.getUri());
+
+        delete.run();
+
+        response.setHttpBase(delete);
+        this.httpBase = delete;
+        op = Op.DELETE;
 
         return response;
     }

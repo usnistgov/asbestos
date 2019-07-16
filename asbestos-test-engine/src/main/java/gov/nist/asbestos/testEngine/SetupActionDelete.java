@@ -1,11 +1,10 @@
 package gov.nist.asbestos.testEngine;
 
 import gov.nist.asbestos.client.client.FhirClient;
-import gov.nist.asbestos.client.client.Format;
 import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
+import gov.nist.asbestos.http.operations.HttpBase;
 import gov.nist.asbestos.simapi.validation.ValE;
-import org.hl7.fhir.r4.model.BaseResource;
 import org.hl7.fhir.r4.model.TestReport;
 import org.hl7.fhir.r4.model.TestScript;
 
@@ -15,7 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-class SetupActionCreate {
+class SetupActionDelete {
     private FixtureMgr fixtureMgr;  // static fixtures and history of operations
     private ValE val;
     private URI base;
@@ -23,8 +22,7 @@ class SetupActionCreate {
     private FhirClient fhirClient = null;
     private VariableMgr variableMgr = null;
 
-
-    SetupActionCreate(FixtureMgr fixtureMgr) {
+    SetupActionDelete(FixtureMgr fixtureMgr) {
         Objects.requireNonNull(fixtureMgr);
         this.fixtureMgr = fixtureMgr;
     }
@@ -35,23 +33,40 @@ class SetupActionCreate {
         Objects.requireNonNull(variableMgr);
         val = new ValE(val).setMsg("setup.create");
 
-        String type = "setup.action.operation";
+        String type = "teardown.action.operation";
         String label = op.hasLabel() ? op.getLabel() : "No Label";
         Reporter reporter = new Reporter(val, operationReport, type, label);
 
-        Format format = op.hasContentType() && op.getContentType().contains("json") ? Format.JSON : Format.XML;
-        if (!op.hasSourceId()) {
-            reporter.reportError("has no sourceId");
+        if (op.hasTargetId() && op.hasUrl()) {
+            reporter.reportError("both targetId and url specified");
             return;
         }
-        FixtureComponent sourceFixture = fixtureMgr.get(op.getSourceId());
-        if (sourceFixture == null) {
-            reporter.reportError("sourceId " + op.getSourceId() + "does not exist");
+        if (!op.hasTargetId() && !op.hasUrl()) {
+            reporter.reportError("targetId or url must be specified");
             return;
         }
-        BaseResource resourceToSend = sourceFixture.getResourceResource();
-        if (resourceToSend == null) {
-            reporter.reportError("sourceId " + op.getSourceId() + " does not have a response resource to send");
+
+        Ref targetUrl = null;
+        if (op.hasTargetId()) {
+            FixtureComponent targetFixture = fixtureMgr.get(op.getTargetId());
+            if (targetFixture == null) {
+                reporter.reportError("targetId " + op.getTargetId() + "does not exist");
+                return;
+            }
+            if (targetFixture.hasHttpBase()) {
+                HttpBase base = targetFixture.getHttpBase();
+                URI uri = base.getUri();
+                targetUrl = new Ref(uri);
+            } else {
+                reporter.reportError("targetId " + op.getTargetId() + "has not been run");
+                return;
+            }
+        }
+        if (op.hasUrl()) {
+            targetUrl = new Ref(op.getUrl());
+        }
+        if (targetUrl == null) {
+            reporter.reportError("target URL not available");
             return;
         }
 
@@ -60,13 +75,7 @@ class SetupActionCreate {
             handleRequestHeader(requestHeader, op, variableMgr);
         }
 
-        Ref targetUrl = op.hasUrl()
-                ? new Ref(op.getUrl())
-                : OperationURLBuilder.build(op, base, fixtureMgr, reporter);
-        if (targetUrl == null)
-            return;
-
-        ResourceWrapper wrapper = getFhirClient().writeResource(resourceToSend, targetUrl, format, requestHeader);
+        ResourceWrapper wrapper = getFhirClient().deleteResource(targetUrl, requestHeader);
         String fixtureId = op.hasResponseId() ? op.getResponseId() : FixtureComponent.getNewId();
         fixtureComponent =  new FixtureComponent(fixtureId)
                 .setResource(wrapper)
@@ -83,12 +92,12 @@ class SetupActionCreate {
         }
     }
 
-    SetupActionCreate setVal(ValE val) {
+    SetupActionDelete setVal(ValE val) {
         this.val = val;
         return this;
     }
 
-    public SetupActionCreate setBase(URI base) {
+    public SetupActionDelete setBase(URI base) {
         this.base = base;
         return this;
     }
@@ -97,7 +106,7 @@ class SetupActionCreate {
         return fixtureComponent;
     }
 
-    public SetupActionCreate setFhirClient(FhirClient fhirClient) {
+    SetupActionDelete setFhirClient(FhirClient fhirClient) {
         this.fhirClient = fhirClient;
         return this;
     }
@@ -108,8 +117,9 @@ class SetupActionCreate {
         return fhirClient;
     }
 
-    public SetupActionCreate setVariableMgr(VariableMgr variableMgr) {
+    SetupActionDelete setVariableMgr(VariableMgr variableMgr) {
         this.variableMgr = variableMgr;
         return this;
     }
+
 }

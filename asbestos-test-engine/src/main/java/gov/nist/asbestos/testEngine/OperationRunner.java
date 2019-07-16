@@ -49,6 +49,12 @@ public class OperationRunner {
             Reporter.reportError(val, operationReport, type, label,"has no type");
             return;
         }
+
+        if (op.hasDestination()) {
+            Reporter.reportError(val, operationReport, type, label,"destination not supported");
+            return;
+        }
+
         Coding typeCoding = op.getType();
         String code = typeCoding.getCode();
 
@@ -71,6 +77,16 @@ public class OperationRunner {
                             .setVal(val)
                             .setOpReport(operationReport));
             setupActionCreate.run(op, operationReport);
+        } else if ("delete".equals(code)) {
+            SetupActionDelete setupActionDelete =
+                    new SetupActionDelete(fixtureMgr)
+                            .setFhirClient(fhirClient)
+                            .setVal(val);
+            setupActionDelete.setVariableMgr(
+                    new VariableMgr(testScript, fixtureMgr)
+                            .setVal(val)
+                            .setOpReport(operationReport));
+            setupActionDelete.run(op, operationReport);
         } else {
             Reporter.reportError(val, operationReport, type, label,"do not understand code.code of " + code);
         }
