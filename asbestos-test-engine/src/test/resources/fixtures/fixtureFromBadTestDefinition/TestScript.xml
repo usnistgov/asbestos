@@ -6,6 +6,7 @@
     <status value="draft"/>
     <fixture id="example-patient">
         <resource>
+           <!-- real file name is patient-example2.xml -->
             <reference value="Patient/patient-example.xml"/>  <!-- wrong filename -->
         </resource>
     </fixture>

@@ -146,6 +146,10 @@ public class ResourceWrapper {
         return httpBase;
     }
 
+    public boolean hasHttpBase() {
+        return httpBase != null;
+    }
+
     public void setHttpBase(HttpBase httpBase) {
         this.httpBase = httpBase;
     }

@@ -38,7 +38,13 @@
         </action>
         <action>
             <assert>
-                <resource value="created"/>
+                <resource value="Patient"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
+            <assert>
+                <response value="okay"/>
                 <warningOnly value="false"/>
             </assert>
         </action>

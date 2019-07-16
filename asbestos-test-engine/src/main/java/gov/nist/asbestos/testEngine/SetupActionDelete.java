@@ -21,6 +21,7 @@ class SetupActionDelete {
     private FixtureComponent fixtureComponent = null;
     private FhirClient fhirClient = null;
     private VariableMgr variableMgr = null;
+    private URI sut = null;
 
     SetupActionDelete(FixtureMgr fixtureMgr) {
         Objects.requireNonNull(fixtureMgr);
@@ -46,7 +47,7 @@ class SetupActionDelete {
             return;
         }
 
-        Ref targetUrl = null;
+        Ref targetUrl = sut == null ? null : new Ref(sut);
         if (op.hasTargetId()) {
             FixtureComponent targetFixture = fixtureMgr.get(op.getTargetId());
             if (targetFixture == null) {
@@ -122,4 +123,8 @@ class SetupActionDelete {
         return this;
     }
 
+    SetupActionDelete setSut(URI sut) {
+        this.sut = sut;
+        return this;
+    }
 }

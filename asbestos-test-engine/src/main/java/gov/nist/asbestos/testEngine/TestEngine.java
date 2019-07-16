@@ -8,6 +8,7 @@ import gov.nist.asbestos.client.resolver.ResourceCacheMgr;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import gov.nist.asbestos.simapi.validation.Val;
 import gov.nist.asbestos.simapi.validation.ValE;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.TestReport;
@@ -55,7 +56,18 @@ public class TestEngine  {
         Objects.requireNonNull(val);
         engineVal = new ValE(val);
         engineVal.setMsg("TestEngine");
-        doWorkflow();
+        try {
+            doWorkflow();
+        } catch (Throwable t) {
+            String trace = ExceptionUtils.getStackTrace(t);
+            TestReport.TestReportSetupComponent setup = testReport.getSetup();
+            TestReport.SetupActionComponent comp = setup.addAction();
+            TestReport.SetupActionAssertComponent asComp = new TestReport.SetupActionAssertComponent();
+            asComp.setMessage(trace);
+            asComp.setResult(TestReport.TestReportActionResult.ERROR);
+            comp.setAssert(asComp);
+            propagateStatus(testReport);
+        }
         return this;
     }
 
@@ -64,15 +76,33 @@ public class TestEngine  {
         testReport.setName(testScript.getName());
         testReport.setTestScript(new Reference(testScript.getId()));
         doPreProcessing();
+        if (errorOut()) return;
         doLoadVariables();
+        if (errorOut()) return;
         doLoadFixtures();
+        if (errorOut()) return;
         doAutoCreates();
+        if (errorOut()) return;
         doSetup();
+        if (errorOut()) return;
         doTest();
+        if (errorOut()) return;
         doTearDown();
         doPostProcessing();
-        propagateStatus(testReport);
+    }
+
+    private boolean errorOut() {
+//        propagateStatus(testReport);
         errors = doReportResult();
+        if (hasError()) {
+            doTearDown();
+            return true;
+        }
+        return false;
+    }
+
+    public boolean hasError() {
+        return testReport.hasResult() && testReport.getResult() == TestReport.TestReportResult.FAIL;
     }
 
     private List<String> doReportResult() {
@@ -149,12 +179,15 @@ public class TestEngine  {
         if (testScript.hasFixture()) {
             ValE fVal = new ValE(engineVal).setMsg("Fixtures");
 
-            int nameI = 1;
             for (TestScript.TestScriptFixtureComponent comp : testScript.getFixture()) {
                 String id = comp.getId();
                 if (id == null || id.equals("")) {
                     throw new Error("Static Fixture has no id and cannot be referenced");
                 }
+//                if (!comp.hasAutocreate())
+//                    throw new Error("fixture.autocreate is a required field");
+//                if (!comp.hasAutodelete())
+//                    throw new Error("fixture.autodelete is a required field");
                 Ref ref = new Ref(comp.getResource().getReference());
                 Optional<ResourceWrapper> optWrapper = fhirClientForFixtures.readCachedResource(ref);
                 if (!optWrapper.isPresent())
@@ -173,7 +206,18 @@ public class TestEngine  {
     }
 
     private void doAutoCreates() {
+        if (testScript.hasFixture()) {
+            ValE fVal = new ValE(engineVal).setMsg("Fixtures.autocreate");
 
+            int nameI = 1;
+            for (TestScript.TestScriptFixtureComponent comp : testScript.getFixture()) {
+                if (comp.hasAutocreate()) {
+                    if (comp.getAutocreate()) {
+
+                    }
+                }
+            }
+        }
     }
 
     private void doSetup() {
@@ -190,6 +234,8 @@ public class TestEngine  {
                         return;
                     }
                     doAction(typePrefix, action.hasOperation(), action.getOperation(), actionReport.getOperation(), action.hasAssert(), action.getAssert(), actionReport.getAssert());
+                    if (hasError())
+                        return;
                 }
             }
         }
@@ -203,6 +249,7 @@ public class TestEngine  {
                     .setVal(new ValE(val).setMsg(typePrefix))
                     .setTypePrefix(typePrefix)
                     .setFhirClient(fhirClient)
+                    .setSut(sut)
                     .setTestReport(testReport)
                     .setTestScript(testScript);
             runner.run(opComponent, opReport);
@@ -216,6 +263,7 @@ public class TestEngine  {
                     .setTestScript(testScript);
             runner.run(actionAssertComponent, assertComponent);
         }
+        propagateStatus(testReport);
     }
 
     private void doTest() {
@@ -239,6 +287,8 @@ public class TestEngine  {
                             return;
                         }
                         doAction(typePrefix, testActionComponent.hasOperation(), testActionComponent.getOperation(), actionReport.getOperation(), testActionComponent.hasAssert(), testActionComponent.getAssert(), actionReport.getAssert());
+                        if (hasError())
+                            return;
                     }
                 }
             }
@@ -258,6 +308,8 @@ public class TestEngine  {
                     if (teardownActionComponent.hasOperation()) {
                         TestScript.SetupActionOperationComponent setupActionOperationComponent = teardownActionComponent.getOperation();
                         doAction("teardown", true, setupActionOperationComponent, actionReport.getOperation(), false, null, null);
+                        if (hasError())
+                            return;
                     }
                 }
             }
@@ -408,5 +460,10 @@ public class TestEngine  {
 
     public FixtureMgr getFixtureMgr() {
         return fixtureMgr;
+    }
+
+    public TestEngine setSut(URI sut) {
+        this.sut = sut;
+        return this;
     }
 }

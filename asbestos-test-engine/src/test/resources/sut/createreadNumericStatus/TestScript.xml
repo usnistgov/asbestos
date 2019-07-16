@@ -7,6 +7,11 @@
             <reference value="Patient/patient-example.xml"/>
         </resource>
     </fixture>
+    <variable>
+        <name value="V1"/>
+        <headerField value="Location"/>
+        <sourceId value="R1"/>
+    </variable>
     <setup>
         <action>
             <operation>
@@ -15,31 +20,33 @@
                     <code value="create"/>
                 </type>
                 <sourceId value="example-patient"/>
-                <url value="http://localhost:9999/fhir/Patient"/>
-                <responseId value="patient-create"/>
+<!--                <url value="http://localhost:9999/fhir/Patient"/>-->
+                <responseId value="R1"/>
             </operation>
         </action>
-        <action>
-            <assert>
-                <response value="okay"/>
-                <warningOnly value="false"/>
-            </assert>
-        </action>
+    </setup>
+    <test>
         <action>
             <operation>
-                <label value="read"/>
                 <type>
                     <code value="read"/>
                 </type>
-                <targetId value="patient-create"/>
+                <accept value="json"/>
+                <responseId value="R2"/>
+                <url value="${V1}"/>
             </operation>
         </action>
         <action>
             <assert>
-                <label value="verify-name"/>
-                <expression value="Patient.name.family = 'Flintstone'"/>
+                <resource value="Patient"/>
                 <warningOnly value="false"/>
             </assert>
         </action>
-    </setup>
+        <action>
+            <assert>
+                <responseCode value="200"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+    </test>
 </TestScript>

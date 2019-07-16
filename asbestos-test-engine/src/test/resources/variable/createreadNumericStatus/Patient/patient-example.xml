@@ -1,0 +1,6 @@
+<Patient xmlns="http://hl7.org/fhir">
+    <name>
+        <family value="Chalmers"/>
+        <given value="Peter"/>
+    </name>
+</Patient>

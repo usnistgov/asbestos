@@ -22,13 +22,12 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
 
-class VariableTest {
-
+class ReadTest {
     @Test
     void createPatientAndRead() throws URISyntaxException {
         FhirClient fhirClientMock = mock(FhirClient.class);

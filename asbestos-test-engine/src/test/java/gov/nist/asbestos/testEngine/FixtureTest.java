@@ -68,13 +68,8 @@ class FixtureTest {
         Val val = new Val();
         File testDef = Paths.get(getClass().getResource("/fixtures/fixtureFromBadTestDefinition/TestScript.xml").toURI()).getParent().toFile();
         URI sut = new URI("http://localhost:8080/fhir/fhir");
-        TestEngine testEngine = new TestEngine(testDef, sut).setVal(val);
-        boolean caught = false;
-        try {
-            testEngine.run();
-        } catch (Error er) {
-            caught = true;
-        }
-        assertTrue(caught);
+        TestEngine testEngine = new TestEngine(testDef, sut).setVal(val).run();
+        System.out.println(testEngine.getTestReportAsJson());
+        assertTrue(testEngine.hasError());
     }
 }

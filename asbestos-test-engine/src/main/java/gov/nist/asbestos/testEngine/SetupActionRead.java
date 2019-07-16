@@ -22,6 +22,7 @@ class SetupActionRead {
     private TestReport testReport = null;
     private VariableMgr variableMgr = null;
     private FhirClient fhirClient = null;
+    private URI sut = null;
 
 
     SetupActionRead(FixtureMgr fixtureMgr) {
@@ -43,7 +44,7 @@ class SetupActionRead {
         String sourceId = null;
         String targetId = null;  // responseId of a GET or sourceId of POST/PUT
         String url = null;
-        Ref ref = null;
+        Ref ref = (sut == null) ? null : new Ref(sut);
 
         if (op.hasLabel())
             label = op.getLabel();
@@ -69,6 +70,8 @@ class SetupActionRead {
         // http://build.fhir.org/testscript-definitions.html#TestScript.setup.action.operation.params
         if (op.hasUrl()) {
             String theUrl = variableMgr.updateReference(op.getUrl());
+            if (theUrl == null)
+                return;
             ref = new Ref(theUrl);
         } else if (op.hasParams()) {
             if (op.hasResource()) {
@@ -139,6 +142,11 @@ class SetupActionRead {
 
     public SetupActionRead setFhirClient(FhirClient fhirClient) {
         this.fhirClient = fhirClient;
+        return this;
+    }
+
+    public SetupActionRead setSut(URI sut) {
+        this.sut = sut;
         return this;
     }
 }

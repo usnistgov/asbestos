@@ -87,8 +87,13 @@ public class AssertionRunner {
                 return;
             }
         }
-        if (as.hasSourceId())
+        if (as.hasSourceId()) {
             fixture = fixtureMgr.get(as.getSourceId());
+            if (fixture == null) {
+                Reporter.reportFail(val, assertReport, type, label, "sourceId " + as.getSourceId() + " not defined", warningOnly);
+                return;
+            }
+        }
 
         if (as.hasMinimumId()) {
             FixtureComponent comp = fixtureMgr.get(as.getMinimumId());
@@ -125,6 +130,39 @@ public class AssertionRunner {
             }
         }
 
+        if (as.hasResource()) {
+            if (hasNoFixtureResource(fixture, "cannot reference resource - no fixture "))
+                return;
+            // expected resource type in response body (GET)
+            String expected = as.getResource();
+            String found = fixture.getResponseType();
+            if (!compare(val, assertReport, found, expected, operator, warningOnly, type, label))
+                return;
+        }
+        if (as.hasResponse()) {
+            if (hasNoFixtureResource(fixture, "cannot reference response - no fixture "))
+                return;
+            assert fixture != null;  // guarenteed by hasNoFixtureReference
+//            if (!fixture.hasHttpBase()) {
+//                Reporter.reportFail(val, assertReport, type, label, "fixture has no HTTP operation associated with it", warningOnly);
+//                return;
+//            }
+            int codeFound = fixture.getResourceWrapper().getHttpBase().getStatus();
+            String found = responseCodeAsString(codeFound);
+            String expected = as.getResponse().toCode();
+            if (!compare(val, assertReport, found, expected, operator, warningOnly, type, label))
+                return;
+        }
+        if (as.hasResponseCode()) {
+            if (hasNoFixtureResource(fixture, "cannot reference contentType - no fixture "))
+                return;
+            assert fixture != null;    // guaranteed by hasFixtureResource
+            int codeFound = fixture.getResourceWrapper().getHttpBase().getStatus();
+            String found = String.valueOf(codeFound);
+            String expected = as.getResponseCode();
+            if (!compare(val, assertReport, found, expected, operator, warningOnly, type, label))
+                return;
+        }
 
         if (valueToCompare != null) {
             if (as.hasContentType()) {
@@ -145,36 +183,7 @@ public class AssertionRunner {
                 if (!compare(val, assertReport, found, expected, operator, warningOnly, type, label))
                     return;
             }
-            if (as.hasResource()) {
-                if (hasNoFixtureResource(fixture, "cannot reference resource - no fixture "))
-                    return;
-                assert fixture != null;    // guaranteed by hasFixtureResource
-                // expected resource type in response body (GET)
-                String expected = valueToCompare;
-                String found = fixture.getResponseType();
-                if (!compare(val, assertReport, found, expected, operator, warningOnly, type, label))
-                    return;
-            }
-            if (as.hasResponse()) {
-                if (hasNoFixtureResource(fixture, "cannot reference response - no fixture "))
-                    return;
-                assert fixture != null;    // guaranteed by hasFixtureResource
-                int codeFound = fixture.getHttpBase().getStatus();
-                String found = responseCodeAsString(codeFound);
-                String expected = valueToCompare;
-                if (!compare(val, assertReport, found, expected, operator, warningOnly, type, label))
-                    return;
-            }
-            if (as.hasResponseCode()) {
-                if (hasNoFixtureResource(fixture, "cannot reference contentType - no fixture "))
-                    return;
-                assert fixture != null;    // guaranteed by hasFixtureResource
-                int codeFound = fixture.getHttpBase().getStatus();
-                String found = String.valueOf(codeFound);
-                String expected = valueToCompare;
-                if (!compare(val, assertReport, found, expected, operator, warningOnly, type, label))
-                    return;
-            }
+
         }
         if (as.hasExpression()) {
             String expression = as.getExpression();
@@ -232,7 +241,7 @@ public class AssertionRunner {
 
     private boolean hasNoFixtureResource(FixtureComponent fixture, String msg) {
         if (fixture == null) {
-            Reporter.reportError(val, assertReport, type, label, msg + "no fixture is referenced");
+            Reporter.reportError(val, assertReport, type, label, msg + " - no fixture is referenced");
             return true;
         }
         if (!fixture.hasResource()) {
@@ -262,50 +271,50 @@ public class AssertionRunner {
 
     private boolean compare(ValE val, TestReport.SetupActionAssertComponent assertReport, String found, String expected, String operator, boolean warningOnly, String type, String id) {
         if (found == null)
-            return Reporter.reportFail(val, assertReport, type, operator,"Operator " + operator + " - no value found to compare with " + expected, warningOnly);
+            return Reporter.reportFail(val, assertReport, type, operator,"Operator is " + operator + " - no value found to compare with " + expected, warningOnly);
         if (operator.equals("equals"))
-            return Reporter.report(found.equals(expected), val, assertReport, type, operator,"Operator " + operator, warningOnly);
+            return Reporter.report(found.equals(expected), val, assertReport, type, operator,"Operator is " + operator + " expected is " + expected + " found is " + found, warningOnly);
         if (operator.equals("notEquals"))
-            return Reporter.report(!found.equals(expected), val, assertReport, type, operator,"Operator " + operator, warningOnly);
+            return Reporter.report(!found.equals(expected), val, assertReport, type, operator,"Operator is " + operator + " expected is " + expected + " found is " + found, warningOnly);
         if (operator.equals("in")) {
             String[] values = expected.split(",");
             for (String value : values) {
                 if (value.equals(found))
-                    return Reporter.report(true, val, assertReport, type, operator,"Operator " + operator, warningOnly);
+                    return Reporter.report(true, val, assertReport, type, operator,"Operator is " + operator + " expected is " + expected + " found is " + found, warningOnly);
             }
-            return Reporter.report(false, val, assertReport, type, operator,"Operator " + operator, warningOnly);
+            return Reporter.report(false, val, assertReport, type, operator,"Operator is " + operator + " expected is " + expected + " found is " + found, warningOnly);
         }
         if (operator.equals("notIn")) {
             String[] values = expected.split(",");
             for (String value : values) {
                 if (value.equals(found))
-                    return Reporter.report(false, val, assertReport, type, operator,"Operator " + operator, warningOnly);
+                    return Reporter.report(false, val, assertReport, type, operator,"Operator is " + operator + " expected is " + expected + " found is " + found, warningOnly);
             }
-            return Reporter.report(true, val, assertReport, type, operator,"Operator " + operator, warningOnly);
+            return Reporter.report(true, val, assertReport, type, operator,"Operator is " + operator, warningOnly);
         }
         if (operator.equals("greaterThan")) {
             int iExpected = Integer.parseInt(expected);
             int iFound = Integer.parseInt(found);
-            return Reporter.report(iFound > iExpected, val, assertReport, type, operator,"Operator " + operator, warningOnly);
+            return Reporter.report(iFound > iExpected, val, assertReport, type, operator,"Operator is " + operator + " expected is " + expected + " found is " + found, warningOnly);
         }
         if (operator.equals("lessThan")) {
             int iExpected = Integer.parseInt(expected);
             int iFound = Integer.parseInt(found);
-            return Reporter.report(iFound < iExpected, val, assertReport, type, operator,"Operator " + operator, warningOnly);
+            return Reporter.report(iFound < iExpected, val, assertReport, type, operator,"Operator is " + operator + " expected is " + expected + " found is " + found, warningOnly);
         }
         if (operator.equals("empty")) {
-            return Reporter.report("".equals(found), val, assertReport, type, operator,"Operator " + operator, warningOnly);
+            return Reporter.report("".equals(found), val, assertReport, type, operator,"Operator is " + operator + " expected is " + expected + " found is " + found, warningOnly);
         }
         if (operator.equals("notEmpty")) {
-            return Reporter.report(!"".equals(found), val, assertReport, type, operator,"Operator " + operator, warningOnly);
+            return Reporter.report(!"".equals(found), val, assertReport, type, operator,"Operator is " + operator + " expected is " + expected + " found is " + found, warningOnly);
         }
         if (operator.equals("contains")) {
-            return Reporter.report(found.contains(expected), val, assertReport, type, operator,"Operator " + operator, warningOnly);
+            return Reporter.report(found.contains(expected), val, assertReport, type, operator,"Operator is " + operator + " expected is " + expected + " found is " + found, warningOnly);
         }
         if (operator.equals("notContains")) {
-            return Reporter.report(!found.contains(expected), val, assertReport, type, operator, "Operator " + operator, warningOnly);
+            return Reporter.report(!found.contains(expected), val, assertReport, type, operator, "Operator is " + operator + " expected is " + expected + " found is " + found, warningOnly);
         }
-        return Reporter.report(false, val, assertReport, type, id, "Do not understand operator " + operator, warningOnly);
+        return Reporter.report(false, val, assertReport, type, id, "Do not understand operator " + operator + " expected is " + expected + " found is " + found, warningOnly);
     }
 
 

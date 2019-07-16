@@ -1,5 +1,6 @@
 package gov.nist.asbestos.testEngine;
 
+import java.net.URI;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;

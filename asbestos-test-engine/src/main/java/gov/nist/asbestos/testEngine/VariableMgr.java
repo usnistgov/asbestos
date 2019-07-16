@@ -50,7 +50,7 @@ public class VariableMgr {
         int from = reference.indexOf("${");
         int to = reference.indexOf("}");
         if (to == -1) {
-
+            throw new Error("reference " + reference + " has no closing }");
         }
         String varName = reference.substring(from+2, to);
         String update = eval(varName);

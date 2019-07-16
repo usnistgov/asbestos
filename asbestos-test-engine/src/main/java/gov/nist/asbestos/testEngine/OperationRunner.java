@@ -6,6 +6,7 @@ import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.TestReport;
 import org.hl7.fhir.r4.model.TestScript;
 
+import java.net.URI;
 import java.util.Objects;
 
 public class OperationRunner {
@@ -17,6 +18,7 @@ public class OperationRunner {
     private TestScript testScript = null;
     private FixtureMgr fixtureMgr;
     private TestReport testReport = null;
+    private URI sut = null;
 
     OperationRunner(FixtureMgr fixtureMgr) {
         Objects.requireNonNull(fixtureMgr);
@@ -34,16 +36,31 @@ public class OperationRunner {
         type = typePrefix + ".operation";
 
         int elementCount = 0;
+        if (op.hasSourceId()) elementCount++;
         if (op.hasTargetId()) elementCount++;
         if (op.hasParams()) elementCount++;
         if (op.hasUrl()) elementCount++;
-        if (elementCount == 0) {
+        if (elementCount == 0 && sut == null) {
             Reporter.reportError(val, operationReport, type, label,"has none of sourceId, targetId, params, url - one is required");
             return;
         }
         if (elementCount > 1) {
-            Reporter.reportError(val, operationReport, type, label,"has multiple of sourceId, targetId, params, url - only one is allowed");
-            return;
+            boolean itsOk = false;
+            if (op.hasSourceId()) {
+                FixtureComponent fixtureComponent = fixtureMgr.get(op.getSourceId());
+                if (fixtureComponent == null) {
+                    Reporter.reportError(val, operationReport, type, label,"fixture " + op.getSourceId() + " is not defined");
+                    return;
+                }
+                if (!fixtureComponent.getResourceWrapper().hasHttpBase()) {
+                    // it's ok - loaded as static fixture
+                    itsOk = true;
+                }
+            }
+            if (!itsOk) {
+                Reporter.reportError(val, operationReport, type, label, "has multiple of sourceId, targetId, params, url - only one is allowed");
+                return;
+            }
         }
         if (!op.hasType()) {
             Reporter.reportError(val, operationReport, type, label,"has no type");
@@ -62,6 +79,7 @@ public class OperationRunner {
             SetupActionRead setupActionRead = new SetupActionRead(fixtureMgr)
                     .setVal(val)
                     .setFhirClient(fhirClient)
+                    .setSut(sut)
                     .setTestReport(testReport);
             setupActionRead.setVariableMgr(new VariableMgr(testScript, fixtureMgr)
                     .setOpReport(operationReport)
@@ -71,6 +89,7 @@ public class OperationRunner {
             SetupActionCreate setupActionCreate =
                     new SetupActionCreate(fixtureMgr)
                             .setFhirClient(fhirClient)
+                            .setSut(sut)
                             .setVal(val);
             setupActionCreate.setVariableMgr(
                     new VariableMgr(testScript, fixtureMgr)
@@ -80,6 +99,7 @@ public class OperationRunner {
         } else if ("delete".equals(code)) {
             SetupActionDelete setupActionDelete =
                     new SetupActionDelete(fixtureMgr)
+                            .setSut(sut)
                             .setFhirClient(fhirClient)
                             .setVal(val);
             setupActionDelete.setVariableMgr(
@@ -114,6 +134,11 @@ public class OperationRunner {
 
     public OperationRunner setTestReport(TestReport testReport) {
         this.testReport = testReport;
+        return this;
+    }
+
+    public OperationRunner setSut(URI sut) {
+        this.sut = sut;
         return this;
     }
 }

@@ -43,7 +43,7 @@ public class FixtureComponent {
      * @return -1 if not loaded or HTTP status
      */
     boolean IsOk() {
-        return httpBase.getStatus() == 200;
+        return httpBase != null && httpBase.getStatus() == 200;
     }
 
     public boolean isLoaded() {
@@ -63,6 +63,10 @@ public class FixtureComponent {
         if (resource != null)
             return resource.getResource();
         return null;
+    }
+
+    public ResourceWrapper getResourceWrapper() {
+        return resource;
     }
 
     public String getResponseType() {

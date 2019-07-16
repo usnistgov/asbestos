@@ -7,6 +7,11 @@
             <reference value="Patient/patient-example.xml"/>
         </resource>
     </fixture>
+    <variable>
+        <name value="V1"/>
+        <headerField value="Location"/>
+        <sourceId value="R1"/>
+    </variable>
     <setup>
         <action>
             <operation>
@@ -16,13 +21,32 @@
                 </type>
                 <sourceId value="example-patient"/>
                 <url value="http://localhost:9999/fhir/Patient"/>
+                <responseId value="R1"/>
+            </operation>
+        </action>
+    </setup>
+    <test>
+        <action>
+            <operation>
+                <type>
+                    <code value="read"/>
+                </type>
+                <accept value="json"/>
+                <responseId value="R2"/>
+                <url value="${V1}"/>
             </operation>
         </action>
         <action>
             <assert>
-                <response value="okay"/>
+                <resource value="Patient"/>
                 <warningOnly value="false"/>
             </assert>
         </action>
-    </setup>
+        <action>
+            <assert>
+                <responseCode value="201"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+    </test>
 </TestScript>

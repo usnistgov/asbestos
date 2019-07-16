@@ -18,10 +18,10 @@ import java.util.Objects;
 class SetupActionCreate {
     private FixtureMgr fixtureMgr;  // static fixtures and history of operations
     private ValE val;
-    private URI base;
     private FixtureComponent fixtureComponent = null;
     private FhirClient fhirClient = null;
     private VariableMgr variableMgr = null;
+    private URI sut = null;
 
 
     SetupActionCreate(FixtureMgr fixtureMgr) {
@@ -62,7 +62,7 @@ class SetupActionCreate {
 
         Ref targetUrl = op.hasUrl()
                 ? new Ref(op.getUrl())
-                : OperationURLBuilder.build(op, base, fixtureMgr, reporter);
+                : OperationURLBuilder.build(op, sut, fixtureMgr, reporter, resourceToSend.getClass());
         if (targetUrl == null)
             return;
 
@@ -88,11 +88,6 @@ class SetupActionCreate {
         return this;
     }
 
-    public SetupActionCreate setBase(URI base) {
-        this.base = base;
-        return this;
-    }
-
     public FixtureComponent getFixtureComponent() {
         return fixtureComponent;
     }
@@ -110,6 +105,11 @@ class SetupActionCreate {
 
     public SetupActionCreate setVariableMgr(VariableMgr variableMgr) {
         this.variableMgr = variableMgr;
+        return this;
+    }
+
+    public SetupActionCreate setSut(URI sut) {
+        this.sut = sut;
         return this;
     }
 }

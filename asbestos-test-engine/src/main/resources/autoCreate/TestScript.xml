@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <TestScript xmlns="http://hl7.org/fhir">
-    <name value="createPatient"/>
-    <fixture id="example-patient">
+    <fixture id="F1">
         <resource>
             <reference value="Patient/patient-example.xml"/>
         </resource>
@@ -10,18 +9,18 @@
     <setup>
         <action>
             <operation>
-                <label value="create"/>
                 <type>
                     <code value="create"/>
                 </type>
-                <sourceId value="example-patient"/>
+                <sourceId value="F1"/>
                 <url value="http://localhost:9999/fhir/Patient"/>
+                <responseId value="R1"/>
             </operation>
         </action>
         <action>
             <assert>
-                <response value="okay"/>
-                <warningOnly value="false"/>
+                <sourceId value="R1"/>
+                <response value="created"/>
             </assert>
         </action>
     </setup>

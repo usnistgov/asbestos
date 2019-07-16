@@ -7,7 +7,7 @@ import java.net.URI;
 
 class OperationURLBuilder {
 
-    static Ref build(TestScript.SetupActionOperationComponent op, URI base, FixtureMgr fixtureMgr, Reporter reporter) {
+    static Ref build(TestScript.SetupActionOperationComponent op, URI base, FixtureMgr fixtureMgr, Reporter reporter, Class<?> resourceType) {
         Ref ref = null;
         // http://build.fhir.org/testscript-definitions.html#TestScript.setup.action.operation.params
         if (op.hasUrl()) {
@@ -28,6 +28,9 @@ class OperationURLBuilder {
                 Ref targetRef = new Ref(fixture.getHttpBase().getUri());
                 ref = targetRef.rebase(base);
             }
+        } else if (resourceType != null && base != null) {
+            ref = new Ref(base);
+            ref = ref.withResource(resourceType);
         }
         if (ref == null) {
             reporter.reportError("Unable to construct URL for operation");
