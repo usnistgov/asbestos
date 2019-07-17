@@ -18,10 +18,13 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import javax.xml.bind.JAXBElement;
 import java.io.File;
 import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -77,6 +80,14 @@ class BuildRegistryObjectListTest {
             System.out.println(ValFactory.toJson(val));
 
         assertNotNull(rol);
+        List<String> objectTypes = new ArrayList<>();
+        for (JAXBElement ele : rol.getIdentifiable()) {
+            objectTypes.add(ele.getName().getLocalPart());
+        }
+        assertEquals(3, objectTypes.size());
+        assertTrue(objectTypes.contains("RegistryPackage"));
+        assertTrue(objectTypes.contains("ExtrinsicObject"));
+        assertTrue(objectTypes.contains("Association"));
     }
 
 

@@ -22,7 +22,7 @@ class SetupActionCreate {
     private FhirClient fhirClient = null;
     private VariableMgr variableMgr = null;
     private URI sut = null;
-
+    private String type = null;
 
     SetupActionCreate(FixtureMgr fixtureMgr) {
         Objects.requireNonNull(fixtureMgr);
@@ -35,7 +35,8 @@ class SetupActionCreate {
         Objects.requireNonNull(variableMgr);
         val = new ValE(val).setMsg("setup.create");
 
-        String type = "setup.action.operation";
+        operationReport.setResult(TestReport.TestReportActionResult.PASS);  // may be overwritten
+
         String label = op.hasLabel() ? op.getLabel() : "No Label";
         Reporter reporter = new Reporter(val, operationReport, type, label);
 
@@ -110,6 +111,11 @@ class SetupActionCreate {
 
     public SetupActionCreate setSut(URI sut) {
         this.sut = sut;
+        return this;
+    }
+
+    public SetupActionCreate setType(String type) {
+        this.type = type;
         return this;
     }
 }

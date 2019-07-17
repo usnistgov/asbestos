@@ -233,7 +233,10 @@ public class TestEngine  {
                         Reporter.reportError(fVal, actionReport.getOperation(), "setup", "", "action has both operation and assertion");
                         return;
                     }
-                    doAction(typePrefix, action.hasOperation(), action.getOperation(), actionReport.getOperation(), action.hasAssert(), action.getAssert(), actionReport.getAssert());
+                    if (action.hasOperation())
+                        doOperation(typePrefix, action.getOperation(), actionReport.getOperation());
+                    if (action.hasAssert())
+                        doAssert(typePrefix, action.getAssert(), actionReport.getAssert());
                     if (hasError())
                         return;
                 }
@@ -241,10 +244,32 @@ public class TestEngine  {
         }
     }
 
-    private void doAction(String typePrefix, boolean isOperation, TestScript.SetupActionOperationComponent operation, TestReport.SetupActionOperationComponent operation2, boolean isAssert, TestScript.SetupActionAssertComponent anAssert, TestReport.SetupActionAssertComponent anAssert2) {
-        if (isOperation) {
-            TestScript.SetupActionOperationComponent opComponent = operation;
-            TestReport.SetupActionOperationComponent opReport = operation2;
+//    private void doAction(String typePrefix, boolean isOperation, TestScript.SetupActionOperationComponent operation, TestReport.TestActionComponent actionReport, boolean isAssert, TestScript.SetupActionAssertComponent anAssert) {
+//        if (isOperation) {
+//            TestScript.SetupActionOperationComponent opComponent = operation;
+//            TestReport.SetupActionOperationComponent opReport = actionReport.getOperation();
+//            OperationRunner runner = new OperationRunner(fixtureMgr)
+//                    .setVal(new ValE(val).setMsg(typePrefix))
+//                    .setTypePrefix(typePrefix)
+//                    .setFhirClient(fhirClient)
+//                    .setSut(sut)
+//                    .setTestReport(testReport)
+//                    .setTestScript(testScript);
+//            runner.run(opComponent, opReport);
+//        } else if (isAssert) {
+//            TestScript.SetupActionAssertComponent actionAssertComponent = anAssert;
+//            TestReport.SetupActionAssertComponent assertComponent = actionReport.getAssert();
+//            AssertionRunner runner = new AssertionRunner(fixtureMgr)
+//                    .setVal(new ValE(val).setMsg(typePrefix))
+//                    .setTypePrefix(typePrefix)
+//                    .setTestReport(testReport)
+//                    .setTestScript(testScript);
+//            runner.run(actionAssertComponent, assertComponent);
+//        }
+//        propagateStatus(testReport);
+//    }
+
+    private void doOperation(String typePrefix, TestScript.SetupActionOperationComponent operation, TestReport.SetupActionOperationComponent report) {
             OperationRunner runner = new OperationRunner(fixtureMgr)
                     .setVal(new ValE(val).setMsg(typePrefix))
                     .setTypePrefix(typePrefix)
@@ -252,17 +277,19 @@ public class TestEngine  {
                     .setSut(sut)
                     .setTestReport(testReport)
                     .setTestScript(testScript);
-            runner.run(opComponent, opReport);
-        } else if (isAssert) {
-            TestScript.SetupActionAssertComponent actionAssertComponent = anAssert;
-            TestReport.SetupActionAssertComponent assertComponent = anAssert2;
+            runner.run(operation, report);
+        propagateStatus(testReport);
+    }
+
+    private void doAssert(String typePrefix, TestScript.SetupActionAssertComponent operation, TestReport.SetupActionAssertComponent report) {
+
             AssertionRunner runner = new AssertionRunner(fixtureMgr)
                     .setVal(new ValE(val).setMsg(typePrefix))
                     .setTypePrefix(typePrefix)
                     .setTestReport(testReport)
                     .setTestScript(testScript);
-            runner.run(actionAssertComponent, assertComponent);
-        }
+            runner.run(operation, report);
+
         propagateStatus(testReport);
     }
 
@@ -280,13 +307,16 @@ public class TestEngine  {
                 TestReport.TestReportTestComponent testReportComponent = testReport.addTest();
                 if (testComponent.hasAction()) {
                     String typePrefix = "test.action";
-                    TestReport.TestActionComponent actionReport = testReportComponent.addAction();
-                    for (TestScript.TestActionComponent testActionComponent : testComponent.getAction()) {
-                        if (testActionComponent.hasOperation() && testActionComponent.hasAssert()) {
+                    for (TestScript.TestActionComponent action : testComponent.getAction()) {
+                        TestReport.TestActionComponent actionReport = testReportComponent.addAction();
+                        if (action.hasOperation() && action.hasAssert()) {
                             Reporter.reportError(tVal, actionReport.getOperation(), "test.action", testName, "action has both operation and assertion");
                             return;
                         }
-                        doAction(typePrefix, testActionComponent.hasOperation(), testActionComponent.getOperation(), actionReport.getOperation(), testActionComponent.hasAssert(), testActionComponent.getAssert(), actionReport.getAssert());
+                        if (action.hasOperation())
+                            doOperation(typePrefix, action.getOperation(), actionReport.getOperation());
+                        if (action.hasAssert())
+                            doAssert(typePrefix, action.getAssert(), actionReport.getAssert());
                         if (hasError())
                             return;
                     }
@@ -299,15 +329,18 @@ public class TestEngine  {
 
     private void doTearDown() {
         if (testScript.hasTeardown()) {
+            String typePrefix = "teardown";
             ValE fVal = new ValE(engineVal).setMsg("Teardown");
             TestReport.TestReportTeardownComponent teardownReportComponent = testReport.getTeardown();
             TestScript.TestScriptTeardownComponent testScriptTeardownComponent = testScript.getTeardown();
             if (testScriptTeardownComponent.hasAction()) {
                 TestReport.TeardownActionComponent actionReport = teardownReportComponent.addAction();
-                for (TestScript.TeardownActionComponent teardownActionComponent : testScriptTeardownComponent.getAction()) {
-                    if (teardownActionComponent.hasOperation()) {
-                        TestScript.SetupActionOperationComponent setupActionOperationComponent = teardownActionComponent.getOperation();
-                        doAction("teardown", true, setupActionOperationComponent, actionReport.getOperation(), false, null, null);
+                for (TestScript.TeardownActionComponent action : testScriptTeardownComponent.getAction()) {
+                    if (action.hasOperation()) {
+                        TestScript.SetupActionOperationComponent setupActionOperationComponent = action.getOperation();
+                        if (action.hasOperation())
+                            doOperation(typePrefix, action.getOperation(), actionReport.getOperation());
+
                         if (hasError())
                             return;
                     }
@@ -424,7 +457,7 @@ public class TestEngine  {
         }
     }
 
-    TestEngine setVal(Val val) {
+    public TestEngine setVal(Val val) {
         this.val = val;
         return this;
     }
@@ -433,7 +466,7 @@ public class TestEngine  {
         return testReport;
     }
 
-    String getTestReportAsJson() {
+    public String getTestReportAsJson() {
         return ProxyBase
                 .getFhirContext()
                 .newJsonParser()

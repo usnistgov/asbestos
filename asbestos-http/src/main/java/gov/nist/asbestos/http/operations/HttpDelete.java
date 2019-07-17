@@ -31,7 +31,7 @@ public class HttpDelete  extends HttpBase {
             run(new URI(url));
             return this;
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException(url, e);
         }
     }
 

@@ -23,6 +23,7 @@ class SetupActionRead {
     private VariableMgr variableMgr = null;
     private FhirClient fhirClient = null;
     private URI sut = null;
+    private String type = null;
 
 
     SetupActionRead(FixtureMgr fixtureMgr) {
@@ -35,8 +36,9 @@ class SetupActionRead {
         Objects.requireNonNull(variableMgr);
         Objects.requireNonNull(testReport);
         Objects.requireNonNull(fhirClient);
-        String type = "setup.read";
         val = new ValE(val).setMsg(type);
+
+        opReport.setResult(TestReport.TestReportActionResult.PASS);  // may be overwritten
 
         String label = null;
         boolean encodeRequestUrl;
@@ -147,6 +149,11 @@ class SetupActionRead {
 
     public SetupActionRead setSut(URI sut) {
         this.sut = sut;
+        return this;
+    }
+
+    public SetupActionRead setType(String type) {
+        this.type = type;
         return this;
     }
 }

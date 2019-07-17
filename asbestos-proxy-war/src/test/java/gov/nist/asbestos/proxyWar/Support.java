@@ -1,7 +1,11 @@
-package gov.nist.asbestos.proxyWarTest;
+package gov.nist.asbestos.proxyWar;
 
+import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.client.api.IGenericClient;
 import gov.nist.asbestos.sharedObjects.ChannelConfig;
 import gov.nist.asbestos.sharedObjects.ChannelConfigFactory;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.Patient;
 
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
@@ -76,5 +80,30 @@ public class Support {
         when(request.getHeaders("accept")).thenReturn(new StringTokenizer("application/json"));
         when(request.getRequestURI()).thenReturn(uri);
         when(request.getPathInfo()).thenReturn(pathInfo);
+    }
+
+    /**
+     *
+     * @param patient
+     * @return id
+     */
+    static String createPatient(Patient patient, IGenericClient client) {
+        // Invoke the server create method (and send pretty-printed JSON
+        // encoding to the server
+        // instead of the default which is non-pretty printed XML)
+        MethodOutcome outcome = client.create()
+                .resource(patient)
+                .prettyPrint()
+                .encodedJson()
+                .execute();
+
+        // The MethodOutcome object will contain information about the
+        // response from the server, including the ID of the created
+        // resource, the OperationOutcome response, etc. (assuming that
+        // any of these things were provided by the server! They may not
+        // always be)
+        IIdType id = (IIdType) outcome.getId();
+        System.out.println("Got ID: " + id.getValue());
+        return id.getValue();
     }
 }

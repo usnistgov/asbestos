@@ -1,4 +1,4 @@
-package gov.nist.asbestos.proxyWarTest;
+package gov.nist.asbestos.proxyWar;
 
 import gov.nist.asbestos.utilities.MultipartSender;
 import gov.nist.asbestos.utilities.PnrWrapper;
@@ -11,7 +11,6 @@ import oasis.names.tc.ebxml_regrep.xsd.rim._3.AssociationType1;
 import oasis.names.tc.ebxml_regrep.xsd.rim._3.ExtrinsicObjectType;
 import oasis.names.tc.ebxml_regrep.xsd.rim._3.RegistryObjectListType;
 import oasis.names.tc.ebxml_regrep.xsd.rim._3.RegistryPackageType;
-import oasis.names.tc.ebxml_regrep.xsd.rs._3.RegistryResponseType;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 

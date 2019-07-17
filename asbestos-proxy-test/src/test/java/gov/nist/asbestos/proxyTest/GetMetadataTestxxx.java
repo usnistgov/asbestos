@@ -1,4 +1,4 @@
-package gov.nist.asbestos.proxyWarTest;
+package gov.nist.asbestos.proxyWar;
 
 import gov.nist.asbestos.asbestosProxy.wrapper.ProxyServlet;
 import org.junit.jupiter.api.Test;

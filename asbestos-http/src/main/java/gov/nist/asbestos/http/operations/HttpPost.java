@@ -50,7 +50,7 @@ public class HttpPost  extends HttpBase {
             post(uri, getRequestHeaders().getAll(), getRequest());
         } catch (IOException e) {
             status = 400;
-            String msg = e.getMessage() + "\n" + ExceptionUtils.getStackTrace(e);
+            String msg = uri + "\n" + e.getMessage() + "\n" + ExceptionUtils.getStackTrace(e);
             setResponseText(msg);
             setResponse(msg.getBytes());
         }

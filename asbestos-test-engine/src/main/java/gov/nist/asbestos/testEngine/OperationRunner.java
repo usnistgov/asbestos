@@ -30,6 +30,7 @@ public class OperationRunner {
         Objects.requireNonNull(val);
         Objects.requireNonNull(fhirClient);
         Objects.requireNonNull(testScript);
+
         operationReport.setResult(TestReport.TestReportActionResult.PASS);  // may be overwritten
 
         this.label = op.getLabel();
@@ -80,6 +81,7 @@ public class OperationRunner {
                     .setVal(val)
                     .setFhirClient(fhirClient)
                     .setSut(sut)
+                    .setType(type + ".read")
                     .setTestReport(testReport);
             setupActionRead.setVariableMgr(new VariableMgr(testScript, fixtureMgr)
                     .setOpReport(operationReport)
@@ -89,6 +91,7 @@ public class OperationRunner {
             SetupActionCreate setupActionCreate =
                     new SetupActionCreate(fixtureMgr)
                             .setFhirClient(fhirClient)
+                            .setType(type + ".create")
                             .setSut(sut)
                             .setVal(val);
             setupActionCreate.setVariableMgr(
@@ -101,6 +104,7 @@ public class OperationRunner {
                     new SetupActionDelete(fixtureMgr)
                             .setSut(sut)
                             .setFhirClient(fhirClient)
+                            .setType(type + ".delete")
                             .setVal(val);
             setupActionDelete.setVariableMgr(
                     new VariableMgr(testScript, fixtureMgr)

@@ -22,6 +22,7 @@ class SetupActionDelete {
     private FhirClient fhirClient = null;
     private VariableMgr variableMgr = null;
     private URI sut = null;
+    private String type = null;
 
     SetupActionDelete(FixtureMgr fixtureMgr) {
         Objects.requireNonNull(fixtureMgr);
@@ -34,7 +35,6 @@ class SetupActionDelete {
         Objects.requireNonNull(variableMgr);
         val = new ValE(val).setMsg("setup.create");
 
-        String type = "teardown.action.operation";
         String label = op.hasLabel() ? op.getLabel() : "No Label";
         Reporter reporter = new Reporter(val, operationReport, type, label);
 
@@ -125,6 +125,11 @@ class SetupActionDelete {
 
     SetupActionDelete setSut(URI sut) {
         this.sut = sut;
+        return this;
+    }
+
+    public SetupActionDelete setType(String type) {
+        this.type = type;
         return this;
     }
 }
