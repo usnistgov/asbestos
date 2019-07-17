@@ -140,7 +140,8 @@ public class Ref {
     // TODO needs test
     public Ref rebase(Ref newBase) {
         Objects.requireNonNull(newBase);
-        return new Ref(newBase.getBase(), getRelative().toString(), getId());
+        return new Ref(newBase.getBase(), getResourceType(), getId());
+//        return new Ref(newBase.getBase(), getRelative().toString(), getId());
     }
 
     public Ref rebase(URI uri) {
