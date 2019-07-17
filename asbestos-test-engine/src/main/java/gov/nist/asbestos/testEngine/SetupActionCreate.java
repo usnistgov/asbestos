@@ -6,6 +6,7 @@ import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import gov.nist.asbestos.simapi.validation.ValE;
 import org.hl7.fhir.r4.model.BaseResource;
+import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.TestReport;
 import org.hl7.fhir.r4.model.TestScript;
 
@@ -23,23 +24,56 @@ class SetupActionCreate {
     private VariableMgr variableMgr = null;
     private URI sut = null;
     private String type = null;
+    private String resourceType = null;  // used in autoCreate
 
     SetupActionCreate(FixtureMgr fixtureMgr) {
         Objects.requireNonNull(fixtureMgr);
         this.fixtureMgr = fixtureMgr;
     }
 
+    /**
+     * for autocreates
+     * @param fixtureId
+     * @param reference
+     * @param operationReport
+     */
+    void run(String fixtureId, Reference reference, TestReport.SetupActionOperationComponent operationReport) {
+        Reporter reporter = new Reporter(val, operationReport, type, "");
+        FixtureComponent sourceFixture = fixtureMgr.get(fixtureId);
+        if (sourceFixture == null) {
+            reporter.reportError("reference " + reference + " does not exist");
+            return;
+        }
+        BaseResource resourceToSend = sourceFixture.getResourceResource();
+        if (resourceToSend == null) {  // should be impossible
+            reporter.reportError("reference " + reference + " does not have a response resource to send");
+            return;
+        }
+        Map<String, String> requestHeader = new HashMap<>();
+        Ref targetUrl = OperationURLBuilder.build(null, sut, fixtureMgr, reporter, resourceToSend.getClass());
+        if (targetUrl == null)
+            return;
+        ResourceWrapper wrapper = getFhirClient().writeResource(resourceToSend, targetUrl, Format.JSON, requestHeader);
+        if (wrapper.isOk())
+            reporter.report(wrapper.getRef() + " created");
+        else
+            reporter.report(wrapper.getRef() + " not created");
+        fixtureComponent = new FixtureComponent(fixtureId)
+                .setResource(wrapper)
+                .setHttpBase(wrapper.getHttpBase());
+        fixtureMgr.put(fixtureId, fixtureComponent);
+    }
+
     void run(TestScript.SetupActionOperationComponent op, TestReport.SetupActionOperationComponent operationReport) {
         Objects.requireNonNull(val);
         Objects.requireNonNull(operationReport);
         Objects.requireNonNull(variableMgr);
-        val = new ValE(val).setMsg("setup.create");
+        val = new ValE(val).setMsg(type);
 
         operationReport.setResult(TestReport.TestReportActionResult.PASS);  // may be overwritten
 
         String label = op.hasLabel() ? op.getLabel() : "No Label";
         Reporter reporter = new Reporter(val, operationReport, type, label);
-
         Format format = op.hasContentType() && op.getContentType().contains("json") ? Format.JSON : Format.XML;
         if (!op.hasSourceId()) {
             reporter.reportError("has no sourceId");
@@ -68,8 +102,12 @@ class SetupActionCreate {
             return;
 
         ResourceWrapper wrapper = getFhirClient().writeResource(resourceToSend, targetUrl, format, requestHeader);
+        if (wrapper.isOk())
+            reporter.report(wrapper.getRef() + " created");
+        else
+            reporter.report(wrapper.getRef() + " not created");
         String fixtureId = op.hasResponseId() ? op.getResponseId() : FixtureComponent.getNewId();
-        fixtureComponent =  new FixtureComponent(fixtureId)
+        fixtureComponent = new FixtureComponent(fixtureId)
                 .setResource(wrapper)
                 .setHttpBase(wrapper.getHttpBase());
         fixtureMgr.put(fixtureId, fixtureComponent);
@@ -116,6 +154,11 @@ class SetupActionCreate {
 
     public SetupActionCreate setType(String type) {
         this.type = type;
+        return this;
+    }
+
+    public SetupActionCreate setResourceType(String resourceType) {
+        this.resourceType = resourceType;
         return this;
     }
 }

@@ -77,6 +77,8 @@ class SetupActionDelete {
         }
 
         ResourceWrapper wrapper = getFhirClient().deleteResource(targetUrl, requestHeader);
+        if (wrapper.isOk())
+            reporter.report(wrapper.getRef() + " deleted");
         String fixtureId = op.hasResponseId() ? op.getResponseId() : FixtureComponent.getNewId();
         fixtureComponent =  new FixtureComponent(fixtureId)
                 .setResource(wrapper)

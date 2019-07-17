@@ -25,6 +25,11 @@ class Reporter {
         opReport.setMessage(theMsg);
     }
 
+    void report(String msg) {
+        String theMsg = formatMsg(type, label, msg);
+        String existing = opReport.getMessage();
+        opReport.setMessage(existing == null ? theMsg : existing + "\n" + theMsg);
+    }
 
     static String formatMsg(String type, String id, String msg) {
         return type + " : " + id + " : " + msg;

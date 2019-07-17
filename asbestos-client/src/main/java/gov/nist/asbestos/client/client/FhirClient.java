@@ -48,7 +48,8 @@ public class FhirClient {
 
         post.post();
 
-        response.setRef(new Ref(post.getLocationHeader().getValue()));
+        if (post.getLocationHeader() != null)
+            response.setRef(new Ref(post.getLocationHeader().getValue()));
         response.setResource(resource);
         response.setHttpBase(post);
         this.httpBase = post;

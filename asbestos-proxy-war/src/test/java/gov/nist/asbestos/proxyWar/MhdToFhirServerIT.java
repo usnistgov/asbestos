@@ -19,20 +19,25 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class MhdToFhirServerIT {
     private static FhirContext ctx;
     private IGenericClient client;
-    private static String fhirPort;
-    private static String proxyPort;
 
     @BeforeAll
     static void beforeAll() {
         ctx = FhirContext.forR4();
-        fhirPort = ITConfig.getFhirPort();
-        proxyPort = ITConfig.getProxyPort();
     }
 
     @Test
     void patientToFhir() throws URISyntaxException {
+        run("/mhdToFhirServer/createPatient/TestScript.xml");
+    }
+
+    @Test
+    void patientWithAutoCreateToFhir() throws URISyntaxException {
+        run("/mhdToFhirServer/createPatientWithAutoCreate/TestScript.xml");
+    }
+
+    void run(String resourceLocation) throws URISyntaxException {
         Val val = new Val();
-        File test1 = Paths.get(getClass().getResource("/mhdToFhirServer/createPatient/TestScript.xml").toURI()).getParent().toFile();
+        File test1 = Paths.get(getClass().getResource(resourceLocation).toURI()).getParent().toFile();
         TestEngine testEngine = new TestEngine(test1, new URI(ITConfig.getFhirBase()))
                 .setVal(val)
                 .setFhirClient(new FhirClient())
@@ -41,6 +46,5 @@ class MhdToFhirServerIT {
         TestReport report = testEngine.getTestReport();
         TestReport.TestReportResult result = report.getResult();
         assertEquals(TestReport.TestReportResult.PASS, result);
-
     }
 }

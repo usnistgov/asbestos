@@ -210,10 +210,25 @@ public class TestEngine  {
             ValE fVal = new ValE(engineVal).setMsg("Fixtures.autocreate");
 
             int nameI = 1;
+            TestReport.TestReportSetupComponent setupReportComponent = testReport.getSetup();
             for (TestScript.TestScriptFixtureComponent comp : testScript.getFixture()) {
                 if (comp.hasAutocreate()) {
                     if (comp.getAutocreate()) {
-
+                        TestReport.SetupActionComponent actionReport = setupReportComponent.addAction();
+                        Reference resource = comp.getResource();
+                        String resourceType = resource.getType();
+                        TestReport.SetupActionOperationComponent operationReport = actionReport.getOperation();
+                        SetupActionCreate create = new SetupActionCreate(fixtureMgr)
+                                .setFhirClient(fhirClient)
+                                .setSut(sut)
+                                .setType("fixture.autocreate")
+                                .setVal(fVal)
+                                .setVariableMgr(new VariableMgr(testScript, fixtureMgr)
+                                        .setVal(fVal)
+                                        .setOpReport(operationReport));
+                        create.run(comp.getId(), comp.getResource(), operationReport);
+                        if (propagateStatus(testReport))
+                            return;  // fail
                     }
                 }
             }
@@ -397,16 +412,23 @@ public class TestEngine  {
         return true;
     }
 
-    void propagateStatus(TestReport testReport) {
+    /**
+     *
+     * @param testReport
+     * @return fail
+     */
+    boolean propagateStatus(TestReport testReport) {
         testReport.setResult(TestReport.TestReportResult.PASS);
         if (testReport.hasSetup()) {
             TestReport.TestReportSetupComponent setupComponent = testReport.getSetup();
             for (TestReport.SetupActionComponent setupActionComponent : setupComponent.getAction()) {
                 if (setupActionComponent.hasOperation()) {
-                    reportOnOperation(testReport, setupActionComponent.getOperation());
+                    if (reportOnOperation(testReport, setupActionComponent.getOperation()))
+                        return true;
                 }
                 if (setupActionComponent.hasAssert()) {
-                    reportOnAssertion(testReport, setupActionComponent.getAssert());
+                    if (reportOnAssertion(testReport, setupActionComponent.getAssert()))
+                        return true;
                 }
             }
         }
@@ -415,10 +437,12 @@ public class TestEngine  {
                 if (testComponent.hasAction()) {
                     for (TestReport.TestActionComponent testActionComponent : testComponent.getAction()) {
                         if (testActionComponent.hasOperation()) {
-                            reportOnOperation(testReport, testActionComponent.getOperation());
+                            if (reportOnOperation(testReport, testActionComponent.getOperation()))
+                                return true;
                         }
                         if (testActionComponent.hasAssert()) {
-                            reportOnAssertion(testReport, testActionComponent.getAssert());
+                            if (reportOnAssertion(testReport, testActionComponent.getAssert()))
+                                return true;
                         }
                     }
                 }
@@ -428,33 +452,51 @@ public class TestEngine  {
             TestReport.TestReportTeardownComponent teardownActionComponent = testReport.getTeardown();
             for (TestReport.TeardownActionComponent teardownActionComponent1 : teardownActionComponent.getAction()) {
                 if (teardownActionComponent1.hasOperation()) {
-                    reportOnOperation(testReport, teardownActionComponent1.getOperation());
+                    if (reportOnOperation(testReport, teardownActionComponent1.getOperation()))
+                        return true;
                 }
             }
         }
         testReport.setStatus(TestReport.TestReportStatus.COMPLETED);
+        return false;
     }
 
-    private void reportOnOperation(TestReport testReport, TestReport.SetupActionOperationComponent setupActionOperationComponent) {
+    /**
+     *
+     * @param testReport
+     * @param setupActionOperationComponent
+     * @return fail
+     */
+    private boolean reportOnOperation(TestReport testReport, TestReport.SetupActionOperationComponent setupActionOperationComponent) {
         if (setupActionOperationComponent.hasResult()) {
             TestReport.TestReportActionResult testReportActionResult = setupActionOperationComponent.getResult();
             if (testReportActionResult == TestReport.TestReportActionResult.ERROR
                     || testReportActionResult == TestReport.TestReportActionResult.FAIL) {
                 setupActionOperationComponent.setResult(testReportActionResult);
                 testReport.setResult(TestReport.TestReportResult.FAIL);
+                return true;
             }
         }
+        return false;
     }
 
-    private void reportOnAssertion(TestReport testReport, TestReport.SetupActionAssertComponent setupActionAssertionComponent) {
+    /**
+     *
+     * @param testReport
+     * @param setupActionAssertionComponent
+     * @return fail
+     */
+    private boolean reportOnAssertion(TestReport testReport, TestReport.SetupActionAssertComponent setupActionAssertionComponent) {
         if (setupActionAssertionComponent.hasResult()) {
             TestReport.TestReportActionResult testReportActionResult = setupActionAssertionComponent.getResult();
             if (testReportActionResult == TestReport.TestReportActionResult.ERROR
                     || testReportActionResult == TestReport.TestReportActionResult.FAIL) {
                 setupActionAssertionComponent.setResult(testReportActionResult);
                 testReport.setResult(TestReport.TestReportResult.FAIL);
+                return true;
             }
         }
+        return false;
     }
 
     public TestEngine setVal(Val val) {

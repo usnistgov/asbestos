@@ -10,9 +10,9 @@ class OperationURLBuilder {
     static Ref build(TestScript.SetupActionOperationComponent op, URI base, FixtureMgr fixtureMgr, Reporter reporter, Class<?> resourceType) {
         Ref ref = null;
         // http://build.fhir.org/testscript-definitions.html#TestScript.setup.action.operation.params
-        if (op.hasUrl()) {
+        if (op != null && op.hasUrl()) {
             ref = new Ref(op.getUrl());
-        } else if (op.hasParams()) {
+        } else if (op != null && op.hasParams()) {
             if (op.hasResource()) {
                 String params = op.getParams();
                 if (params.startsWith("/"))
@@ -22,7 +22,7 @@ class OperationURLBuilder {
                 reporter.reportError("Resource (" + op.getResource() + ") specified but no params holding ID");
                 return null;
             }
-        } else if (op.hasTargetId()) {
+        } else if (op != null && op.hasTargetId()) {
             FixtureComponent fixture = fixtureMgr.get(op.getTargetId());
             if (fixture != null && fixture.hasHttpBase()) {
                 Ref targetRef = new Ref(fixture.getHttpBase().getUri());

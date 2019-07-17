@@ -41,6 +41,9 @@ class SetupActionRead {
         opReport.setResult(TestReport.TestReportActionResult.PASS);  // may be overwritten
 
         String label = null;
+        Reporter reporter = new Reporter(val, opReport, type, label);
+
+
         boolean encodeRequestUrl;
         Map<String, String> requestHeader = new HashMap<>();
         String sourceId = null;
@@ -55,10 +58,6 @@ class SetupActionRead {
         if (op.hasRequestHeader()) {
             SetupActionCreate.handleRequestHeader(requestHeader, op, variableMgr);
         }
-        if (op.hasSourceId())
-            sourceId = op.getSourceId();
-        if (op.hasTargetId())
-            targetId = op.getTargetId();
         if (op.hasUrl()) {
             url = op.getUrl();
             url = variableMgr.updateReference(url);
@@ -88,38 +87,52 @@ class SetupActionRead {
             }
         }
         else if (op.hasTargetId()) {
-            FixtureComponent fixture  = fixtureMgr.get(op.getTargetId());
-            if (fixture != null && fixture.hasHttpBase()) {
-                String location = null;
-                if (fixture.getHttpBase() instanceof HttpPost) {
-                    location = ((HttpPost) fixture.getHttpBase()).getLocationHeader().getValue();
-                } else if (fixture.getHttpBase() instanceof HttpGet) {
-                    location = ((HttpGet) fixture.getHttpBase()).getUri().toString();
-                }
-                if (location == null) {
-                    Reporter.reportError(val, opReport, null, type, label, "targetId does not have id and type");
-                    return;
-                }
-                Ref targetRef = new Ref(location);
-                if (base == null)
-                    ref = targetRef;
-                else
-                    ref = targetRef.rebase(base);
-            }
+            ref = refFromTargetId(op.getTargetId(), opReport, label);
+        } else if (fixtureMgr.getLastOp() != null) {
+            ref = refFromTargetId(fixtureMgr.getLastOp(), opReport, label);
         }
         if (ref == null) {
             Reporter.reportError(val, opReport, null, type, label, "Unable to construct URL for operation");
+            return;
+        }
+        if (ref.getResourceType().equals("")) {
+            Reporter.reportError(val, opReport, null, type, label, "no resource type");
             return;
         }
         ResourceWrapper wrapper = fhirClient.readResource(ref, requestHeader);
         if (!wrapper.isOk()) {
             Reporter.reportError(val, opReport, null, type, label, "Unable to retrieve " + ref);
             return;
+        } else {
+            reporter.report(wrapper.getRef() + " read");
         }
 
         String fixtureId =op.hasResponseId() ? op.getResponseId() : FixtureComponent.getNewId();
         FixtureComponent fixtureComponent =  new FixtureComponent(fixtureId).setResource(wrapper);
         fixtureMgr.put(fixtureId, fixtureComponent);
+    }
+
+    private Ref refFromTargetId(String targetId, TestReport.SetupActionOperationComponent opReport, String label) {
+        Ref ref = null;
+        FixtureComponent fixture  = fixtureMgr.get(targetId);
+        if (fixture != null && fixture.hasHttpBase()) {
+            String location = null;
+            if (fixture.getHttpBase() instanceof HttpPost) {
+                location = ((HttpPost) fixture.getHttpBase()).getLocationHeader().getValue();
+            } else if (fixture.getHttpBase() instanceof HttpGet) {
+                location = fixture.getHttpBase().getUri().toString();
+            }
+            if (location == null) {
+                Reporter.reportError(val, opReport, null, type, label, "targetId does not have id and type");
+                return null;
+            }
+            Ref targetRef = new Ref(location);
+            if (base == null)
+                ref = targetRef;
+            else
+                ref = targetRef.rebase(base);
+        }
+        return ref;
     }
 
     SetupActionRead setVal(ValE val) {
