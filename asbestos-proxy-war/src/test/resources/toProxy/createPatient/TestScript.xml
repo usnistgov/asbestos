@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<TestScript xmlns="http://hl7.org/fhir">
+    <fixture id="example-patient">
+        <resource>
+            <reference value="Patient/patient-example.xml"/>
+        </resource>
+    </fixture>
+    <variable>
+        <name value="V1"/>
+        <description value="Location of Patient"/>
+        <headerField value="Location"/>
+        <sourceId value="R1"/>
+    </variable>
+    <test>
+        <action>
+            <operation>
+                <description value="send patient to server"/>
+                <label value="create"/>
+                <type>
+                    <code value="create"/>
+                </type>
+                <sourceId value="example-patient"/>
+                <responseId value="R1"/>
+            </operation>
+        </action>
+        <action>
+            <operation>
+                <description value="read back the patient resource - in JSON"/>
+                <type>
+                    <code value="read"/>
+                </type>
+                <accept value="json"/>
+                <url value="${V1}"/>
+            </operation>
+        </action>
+        <action>
+            <assert>
+                <description value="read was successful"/>
+                <response value="okay"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+    </test>
+</TestScript>

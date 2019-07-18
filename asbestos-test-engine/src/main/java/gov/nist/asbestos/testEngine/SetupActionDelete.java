@@ -1,10 +1,13 @@
 package gov.nist.asbestos.testEngine;
 
 import gov.nist.asbestos.client.client.FhirClient;
+import gov.nist.asbestos.client.client.Format;
 import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import gov.nist.asbestos.http.operations.HttpBase;
 import gov.nist.asbestos.simapi.validation.ValE;
+import org.hl7.fhir.r4.model.BaseResource;
+import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.TestReport;
 import org.hl7.fhir.r4.model.TestScript;
 
@@ -27,6 +30,39 @@ class SetupActionDelete {
     SetupActionDelete(FixtureMgr fixtureMgr) {
         Objects.requireNonNull(fixtureMgr);
         this.fixtureMgr = fixtureMgr;
+    }
+
+    /**
+     * for autodeletes
+     * @param fixtureId
+     * @param reference
+     * @param operationReport
+     */
+    void run(String fixtureId, Reference reference, TestReport.SetupActionOperationComponent operationReport) {
+        Reporter reporter = new Reporter(val, operationReport, type, "");
+        FixtureComponent sourceFixture = fixtureMgr.get(fixtureId);
+        if (sourceFixture == null) {
+            reporter.reportError("reference " + reference + " does not exist");
+            return;
+        }
+//        BaseResource resourceToDelete = sourceFixture.getResourceResource();
+//        if (resourceToDelete == null) {  // should be impossible
+//            reporter.reportError("reference " + reference + " does not have a response resource to delete");
+//            return;
+//        }
+        Map<String, String> requestHeader = new HashMap<>();
+//        Ref targetUrl = OperationURLBuilder.build(null, sut, fixtureMgr, reporter, resourceToDelete.getClass());
+        Ref createUrl = sourceFixture.getResourceWrapper().getRef();  // contains version (_history/1) at end
+        if (createUrl == null)
+            return;
+        Ref targetUrl = new Ref(createUrl.getBase(), createUrl.getResourceType(), createUrl.getId());
+        ResourceWrapper wrapper = getFhirClient().deleteResource(targetUrl, requestHeader);
+        if (wrapper.isOk())
+            reporter.report(targetUrl + " deleted");
+        else {
+            reporter.report(targetUrl + " not deleted");
+            operationReport.setResult(TestReport.TestReportActionResult.FAIL);
+        }
     }
 
     void run(TestScript.SetupActionOperationComponent op, TestReport.SetupActionOperationComponent operationReport) {
@@ -79,11 +115,15 @@ class SetupActionDelete {
         ResourceWrapper wrapper = getFhirClient().deleteResource(targetUrl, requestHeader);
         if (wrapper.isOk())
             reporter.report(wrapper.getRef() + " deleted");
-        String fixtureId = op.hasResponseId() ? op.getResponseId() : FixtureComponent.getNewId();
-        fixtureComponent =  new FixtureComponent(fixtureId)
-                .setResource(wrapper)
-                .setHttpBase(wrapper.getHttpBase());
-        fixtureMgr.put(fixtureId, fixtureComponent);
+        else {
+            reporter.report(wrapper.getRef() + " not deleted");
+            operationReport.setResult(TestReport.TestReportActionResult.FAIL);
+        }
+//        String fixtureId = op.hasResponseId() ? op.getResponseId() : FixtureComponent.getNewId();
+//        fixtureComponent =  new FixtureComponent(fixtureId)
+//                .setResource(wrapper)
+//                .setHttpBase(wrapper.getHttpBase());
+//        fixtureMgr.put(fixtureId, fixtureComponent);
     }
 
     static void handleRequestHeader(Map<String, String> requestHeader, TestScript.SetupActionOperationComponent op, VariableMgr variableMgr) {

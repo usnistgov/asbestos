@@ -104,8 +104,10 @@ class SetupActionCreate {
         ResourceWrapper wrapper = getFhirClient().writeResource(resourceToSend, targetUrl, format, requestHeader);
         if (wrapper.isOk())
             reporter.report(wrapper.getRef() + " created");
-        else
-            reporter.report(wrapper.getRef() + " not created");
+        else {
+            reporter.report("create to " + targetUrl + " failed with status " + wrapper.getHttpBase().getStatus());
+            operationReport.setResult(TestReport.TestReportActionResult.FAIL);
+        }
         String fixtureId = op.hasResponseId() ? op.getResponseId() : FixtureComponent.getNewId();
         fixtureComponent = new FixtureComponent(fixtureId)
                 .setResource(wrapper)

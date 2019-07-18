@@ -1,7 +1,6 @@
 package gov.nist.asbestos.proxyWar;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.client.api.IGenericClient;
 import gov.nist.asbestos.client.client.FhirClient;
 import gov.nist.asbestos.simapi.validation.Val;
 import gov.nist.asbestos.testEngine.TestEngine;
@@ -16,9 +15,8 @@ import java.nio.file.Paths;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class MhdToFhirServerIT {
+class ToFhirServerIT {
     private static FhirContext ctx;
-    private IGenericClient client;
 
     @BeforeAll
     static void beforeAll() {
@@ -26,18 +24,23 @@ class MhdToFhirServerIT {
     }
 
     @Test
-    void patientToFhir() throws URISyntaxException {
-        run("/mhdToFhirServer/createPatient/TestScript.xml");
+    void patient() throws URISyntaxException {
+        run("/toFhirServer/createPatient/TestScript.xml");
     }
 
     @Test
-    void patientWithAutoCreateToFhir() throws URISyntaxException {
-        run("/mhdToFhirServer/createPatientWithAutoCreate/TestScript.xml");
+    void patientWithAutoCreate() throws URISyntaxException {
+        run("/toFhirServer/createPatientWithAutoCreate/TestScript.xml");
     }
 
-    void run(String resourceLocation) throws URISyntaxException {
+    @Test
+    void patientWithAutoCreateDelete() throws URISyntaxException {
+        run("/toFhirServer/createPatientWithAutoCreateDelete/TestScript.xml");
+    }
+
+    void run(String testScriptLocation) throws URISyntaxException {
         Val val = new Val();
-        File test1 = Paths.get(getClass().getResource(resourceLocation).toURI()).getParent().toFile();
+        File test1 = Paths.get(getClass().getResource(testScriptLocation).toURI()).getParent().toFile();
         TestEngine testEngine = new TestEngine(test1, new URI(ITConfig.getFhirBase()))
                 .setVal(val)
                 .setFhirClient(new FhirClient())

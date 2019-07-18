@@ -88,6 +88,7 @@ public class TestEngine  {
         doTest();
         if (errorOut()) return;
         doTearDown();
+        doAutoDeletes();
         doPostProcessing();
     }
 
@@ -209,7 +210,6 @@ public class TestEngine  {
         if (testScript.hasFixture()) {
             ValE fVal = new ValE(engineVal).setMsg("Fixtures.autocreate");
 
-            int nameI = 1;
             TestReport.TestReportSetupComponent setupReportComponent = testReport.getSetup();
             for (TestScript.TestScriptFixtureComponent comp : testScript.getFixture()) {
                 if (comp.hasAutocreate()) {
@@ -218,6 +218,7 @@ public class TestEngine  {
                         Reference resource = comp.getResource();
                         String resourceType = resource.getType();
                         TestReport.SetupActionOperationComponent operationReport = actionReport.getOperation();
+                        operationReport.setResult(TestReport.TestReportActionResult.PASS);  // may be overwritten
                         SetupActionCreate create = new SetupActionCreate(fixtureMgr)
                                 .setFhirClient(fhirClient)
                                 .setSut(sut)
@@ -227,6 +228,36 @@ public class TestEngine  {
                                         .setVal(fVal)
                                         .setOpReport(operationReport));
                         create.run(comp.getId(), comp.getResource(), operationReport);
+                        if (propagateStatus(testReport))
+                            return;  // fail
+                    }
+                }
+            }
+        }
+    }
+
+    private void doAutoDeletes() {
+        if (testScript.hasFixture()) {
+            ValE fVal = new ValE(engineVal).setMsg("Fixtures.autodelete");
+
+            TestReport.TestReportTeardownComponent teardownReportComponent = testReport.getTeardown();
+            for (TestScript.TestScriptFixtureComponent comp : testScript.getFixture()) {
+                if (comp.hasAutodelete()) {
+                    if (comp.getAutodelete()) {
+                        TestReport.TeardownActionComponent actionReport = teardownReportComponent.addAction();
+                        Reference resource = comp.getResource();
+                        String resourceType = resource.getType();
+                        TestReport.SetupActionOperationComponent operationReport = actionReport.getOperation();
+                        operationReport.setResult(TestReport.TestReportActionResult.PASS);  // may be overwritten
+                        SetupActionDelete delete = new SetupActionDelete(fixtureMgr)
+                                .setFhirClient(fhirClient)
+                                .setSut(sut)
+                                .setType("fixture.autodelete")
+                                .setVal(fVal)
+                                .setVariableMgr(new VariableMgr(testScript, fixtureMgr)
+                                        .setVal(fVal)
+                                        .setOpReport(operationReport));
+                        delete.run(comp.getId(), comp.getResource(), operationReport);
                         if (propagateStatus(testReport))
                             return;  // fail
                     }

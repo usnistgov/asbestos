@@ -84,6 +84,8 @@ public class ProxyServlet extends HttpServlet {
             if (channel == null)
                 throw new ServletException("Cannot create Channel of type " + channelType);
 
+            channel.setup(simStore.getChannelConfig());
+
             Headers inHeaders = getRequestHeaders(req, Verb.POST);
             byte[] inBody = getRequestBody(req);
 
