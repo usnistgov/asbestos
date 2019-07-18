@@ -83,6 +83,13 @@ public class Header {
         this.values = values;
     }
 
+    public void setValue(String val) {
+        HeaderValue headerValue = new HeaderValue(val);
+        List<HeaderValue> headerValues = new ArrayList<>();
+        headerValues.add(headerValue);
+        setValues(headerValues);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

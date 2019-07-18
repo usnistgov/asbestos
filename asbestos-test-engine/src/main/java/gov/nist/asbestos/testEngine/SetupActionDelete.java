@@ -45,17 +45,11 @@ class SetupActionDelete {
             reporter.reportError("reference " + reference + " does not exist");
             return;
         }
-//        BaseResource resourceToDelete = sourceFixture.getResourceResource();
-//        if (resourceToDelete == null) {  // should be impossible
-//            reporter.reportError("reference " + reference + " does not have a response resource to delete");
-//            return;
-//        }
         Map<String, String> requestHeader = new HashMap<>();
-//        Ref targetUrl = OperationURLBuilder.build(null, sut, fixtureMgr, reporter, resourceToDelete.getClass());
         Ref createUrl = sourceFixture.getResourceWrapper().getRef();  // contains version (_history/1) at end
         if (createUrl == null)
             return;
-        Ref targetUrl = new Ref(createUrl.getBase(), createUrl.getResourceType(), createUrl.getId());
+        Ref targetUrl = new Ref(createUrl.getBase(), createUrl.getResourceType(), createUrl.getId(), createUrl.getVersion());
         ResourceWrapper wrapper = getFhirClient().deleteResource(targetUrl, requestHeader);
         if (wrapper.isOk())
             reporter.report(targetUrl + " deleted");

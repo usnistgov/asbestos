@@ -12,4 +12,6 @@ public interface IBaseChannel extends IChannelControl {
     void transformRequest(HttpGet requestIn, HttpGet requestOut);
     URI transformRequestUrl(String endpoint, HttpBase requestIn);
     void transformResponse(HttpBase responseIn, HttpBase responseOut);
+    void setServerBase(String serverBase);
+    void setProxyBase(String proxyBase);
 }

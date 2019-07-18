@@ -1,5 +1,7 @@
 package gov.nist.asbestos.asbestosProxy.channels.passthrough;
 
+import gov.nist.asbestos.client.resolver.Ref;
+import gov.nist.asbestos.http.headers.Header;
 import gov.nist.asbestos.sharedObjects.ChannelConfig;
 import gov.nist.asbestos.asbestosProxy.channel.IBaseChannel;
 import gov.nist.asbestos.asbestosProxy.events.EventStore;
@@ -15,6 +17,11 @@ import java.util.Objects;
 
 public class PassthroughChannel implements IBaseChannel {
     private ChannelConfig channelConfig = null;
+    private String serverBase;
+    private String proxyBase;
+
+    public PassthroughChannel() {
+    }
 
     @Override
     public void setup(ChannelConfig simConfig) {
@@ -68,7 +75,37 @@ public class PassthroughChannel implements IBaseChannel {
 
     @Override
     public void transformResponse(HttpBase responseIn, HttpBase responseOut) {
-        responseOut.setResponseHeaders(responseIn.getResponseHeaders());
+        Headers headers = responseIn.getResponseHeaders();
+        if (proxyBase != null) {
+            URI path = headers.getPathInfo();
+            Ref ref = new Ref(path);
+            ref = ref.rebase(proxyBase);
+            headers.setPathInfo(ref.getUri());
+
+            Header loc = headers.get("Content-Location");
+            if (loc != null) {
+                Ref locRef = new Ref(loc.getValue());
+                ref = locRef.rebase(proxyBase);
+                //ref.httpizeTo()
+                loc.setValue(ref.toString());
+            }
+            loc = headers.get("Location");
+            if (loc != null) {
+                ref = new Ref(loc.getValue()).rebase(proxyBase);
+                loc.setValue(ref.toString());
+            }
+        }
+        responseOut.setResponseHeaders(headers);
         responseOut.setResponse(responseIn.getResponse());
+    }
+
+    @Override
+    public void setServerBase(String serverBase) {
+        this.serverBase = serverBase;
+    }
+
+    @Override
+    public void setProxyBase(String proxyBase) {
+        this.proxyBase = proxyBase;
     }
 }

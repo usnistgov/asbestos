@@ -8,6 +8,7 @@ import gov.nist.asbestos.asbestosProxy.events.Event;
 import gov.nist.asbestos.asbestosProxy.log.SimStore;
 import gov.nist.asbestos.asbestosProxy.log.Task;
 import gov.nist.asbestos.asbestosProxy.util.Gzip;
+import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.http.headers.Header;
 import gov.nist.asbestos.http.headers.Headers;
 import gov.nist.asbestos.http.operations.*;
@@ -98,6 +99,11 @@ public class ProxyServlet extends HttpServlet {
 
             // interaction between proxy and target service
             Task backSideTask = event.getStore().newTask();
+
+            String proxyBase = new Ref(uri).getBase().toString();
+            String fhirBase = new Ref(requestIn.getRequestHeaders().getPathInfo()).getBase().toString();
+            channel.setProxyBase(proxyBase);
+            channel.setServerBase(fhirBase);
 
             // transform input request for backend service
             HttpBase requestOut = transformRequest(backSideTask, requestIn, channel);

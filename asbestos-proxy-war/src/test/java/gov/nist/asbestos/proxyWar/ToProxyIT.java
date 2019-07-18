@@ -17,8 +17,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Paths;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.*;
 
 class ToProxyIT {
     private static String testSession = "default";
@@ -29,7 +28,14 @@ class ToProxyIT {
 
     @Test
     void createPatient() throws URISyntaxException {
-        run("/toProxy/createPatient/TestScript.xml");
+        TestEngine testEngine = run("/toProxy/createPatient/TestScript.xml");
+        TestReport testReport = testEngine.getTestReport();
+        System.out.println("foo");
+        String message = testReport.getTest().get(0).getAction().get(0).getOperation().getMessage();
+        int httpI = message.indexOf("http");
+        assertNotEquals(-1, httpI);
+        String http  = message.substring(httpI); // has extra at the end
+        assertTrue(http.contains("prox"));
     }
 
     @Test
@@ -42,7 +48,7 @@ class ToProxyIT {
         run("/toProxy/createPatientWithAutoCreateDelete/TestScript.xml");
     }
 
-    void run(String testScriptLocation) throws URISyntaxException {
+    TestEngine run(String testScriptLocation) throws URISyntaxException {
         Val val = new Val();
         File test1 = Paths.get(getClass().getResource(testScriptLocation).toURI()).getParent().toFile();
         TestEngine testEngine = new TestEngine(test1, base)
@@ -53,6 +59,7 @@ class ToProxyIT {
         TestReport report = testEngine.getTestReport();
         TestReport.TestReportResult result = report.getResult();
         assertEquals(TestReport.TestReportResult.PASS, result);
+        return testEngine;
     }
 
 

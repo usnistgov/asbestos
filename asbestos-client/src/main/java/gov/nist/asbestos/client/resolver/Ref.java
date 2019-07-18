@@ -3,6 +3,7 @@ package gov.nist.asbestos.client.resolver;
 import org.hl7.fhir.r4.model.Reference;
 
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -31,6 +32,19 @@ public class Ref {
         return theUri;
     }
 
+    public Ref httpizeTo(URI reference) {
+        try {
+            return new Ref(new URI(reference.getScheme()
+                    + "://"
+                    + reference.getHost()
+                    + ":"
+                    + reference.getPort()
+                    + uri.getPath()));
+        } catch (URISyntaxException e) {
+            throw new Error(e);
+        }
+    }
+
     public Ref(URI base, String resourceType, String id) {
         this(base.toString(), resourceType, id);
     }
@@ -44,12 +58,15 @@ public class Ref {
         uri = build(theRef);
     }
 
-    public Ref(Ref base, String resourceType, String id)  {
+    public Ref(Ref base, String resourceType, String id, String version)  {
         String theRef;
         if (id == null || id.equals(""))
             theRef = String.join("/", base.toString(), resourceType);
-        else
+        else if (version == null || version.equals(""))
             theRef = String.join("/", base.toString(), resourceType, id);
+        else
+            theRef = String.join("/", base.toString(), resourceType, id, "_history", version);
+
         uri = build(theRef);
     }
 
@@ -121,32 +138,33 @@ public class Ref {
     // TODO needs test
     public Ref withResource(Class<?> resourceType) {
         String type = resourceType.getSimpleName();
-        return new Ref(getBase(), type, null);
+        return new Ref(getBase(), type, null, null);
     }
 
     // TODO needs test?
     public Ref withNewId(String newId) {
         Objects.requireNonNull(newId);
-        return new Ref(getBase(), getResourceType(), newId);
+        return new Ref(getBase(), getResourceType(), newId, null);
     }
 
     // TODO all needs tests history present
     public Ref rebase(String newBase) {
         Objects.requireNonNull(newBase);
         Ref theBase = new Ref(newBase).getBase();
-        return new Ref(theBase, getRelative().toString(), getId());
+        String resourceType = getResourceType();
+        String id = getId();
+        String version = getVersion();
+        return new Ref(theBase, resourceType, id, version).httpizeTo(uri);
     }
 
-    // TODO needs test
     public Ref rebase(Ref newBase) {
         Objects.requireNonNull(newBase);
-        return new Ref(newBase.getBase(), getResourceType(), getId());
-//        return new Ref(newBase.getBase(), getRelative().toString(), getId());
+        return new Ref(newBase.getBase(), getResourceType(), getId(), getVersion()).httpizeTo(uri);
     }
 
-    public Ref rebase(URI uri) {
-        Objects.requireNonNull(uri);
-        return rebase(new Ref(uri));
+    public Ref rebase(URI theUri) {
+        Objects.requireNonNull(theUri);
+        return rebase(new Ref(theUri));
     }
 
     public Ref getFull()  {  // without version
