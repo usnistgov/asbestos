@@ -34,15 +34,43 @@ public class Ref {
 
     public Ref httpizeTo(URI reference) {
         try {
-            return new Ref(new URI(reference.getScheme()
+            String port;
+            if (reference.getPort() == -1) {
+                if (this.uri.getPort() == -1) {
+                    port = "";
+                } else {
+                    port = ":" + this.uri.getPort();
+                }
+            } else {
+                port = ":" + reference.getPort();
+            }
+            return new Ref(new URI((reference.getScheme() == null ? "http" : reference.getScheme())
                     + "://"
-                    + reference.getHost()
-                    + ":"
-                    + reference.getPort()
+                    + ((reference.getHost() == null) ? this.uri.getHost() : reference.getHost())
+                    + port
                     + uri.getPath()));
         } catch (URISyntaxException e) {
             throw new Error(e);
         }
+    }
+
+    public Ref withHostPort(String hostPort) {
+        String[] hp = hostPort.split(":");
+        if (hp.length == 2) {
+            String host = hp[0];
+            String port = hp[1];
+            try {
+                return new Ref(new URI(uri.getScheme()
+                        + "://"
+                        + host
+                        + ":"
+                        + port
+                        + uri.getPath()));
+            } catch (URISyntaxException e) {
+                throw new Error(e);
+            }
+        }
+        return this;  // oops
     }
 
     public Ref(URI base, String resourceType, String id) {

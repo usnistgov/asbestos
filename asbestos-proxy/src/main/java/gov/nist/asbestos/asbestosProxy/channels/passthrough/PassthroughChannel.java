@@ -2,6 +2,7 @@ package gov.nist.asbestos.asbestosProxy.channels.passthrough;
 
 import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.http.headers.Header;
+import gov.nist.asbestos.http.operations.HttpDelete;
 import gov.nist.asbestos.sharedObjects.ChannelConfig;
 import gov.nist.asbestos.asbestosProxy.channel.IBaseChannel;
 import gov.nist.asbestos.asbestosProxy.events.EventStore;
@@ -61,6 +62,15 @@ public class PassthroughChannel implements IBaseChannel {
     @Override
     public void transformRequest(HttpGet requestIn, HttpGet requestOut) {
         passHeaders(requestIn, requestOut);
+
+        requestOut.setRequest(requestIn.getRequest());
+    }
+
+    @Override
+    public void transformRequest(HttpDelete requestIn, HttpDelete requestOut) {
+        passHeaders(requestIn, requestOut);
+
+        requestOut.setRequest(requestIn.getRequest());
     }
 
     @Override
@@ -74,25 +84,24 @@ public class PassthroughChannel implements IBaseChannel {
     }
 
     @Override
-    public void transformResponse(HttpBase responseIn, HttpBase responseOut) {
+    public void transformResponse(HttpBase responseIn, HttpBase responseOut, String proxyHostPort) {
         Headers headers = responseIn.getResponseHeaders();
+        Header loc = headers.get("Content-Location");
+        Header loc2 = headers.get("Location");
         if (proxyBase != null) {
             URI path = headers.getPathInfo();
             Ref ref = new Ref(path);
             ref = ref.rebase(proxyBase);
             headers.setPathInfo(ref.getUri());
 
-            Header loc = headers.get("Content-Location");
             if (loc != null) {
                 Ref locRef = new Ref(loc.getValue());
-                ref = locRef.rebase(proxyBase);
-                //ref.httpizeTo()
+                ref = locRef.rebase(proxyBase).withHostPort(proxyHostPort);
                 loc.setValue(ref.toString());
             }
-            loc = headers.get("Location");
-            if (loc != null) {
-                ref = new Ref(loc.getValue()).rebase(proxyBase);
-                loc.setValue(ref.toString());
+            if (loc2 != null) {
+                ref = new Ref(loc2.getValue()).rebase(proxyBase).withHostPort(proxyHostPort);
+                loc2.setValue(ref.toString());
             }
         }
         responseOut.setResponseHeaders(headers);

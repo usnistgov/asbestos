@@ -5,6 +5,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.util.HashMap;
@@ -29,14 +30,21 @@ public class HttpPost  extends HttpBase {
             if (content != null)
                 connection.getOutputStream().write(content);
             status = connection.getResponseCode();
-            if (status == HttpURLConnection.HTTP_OK || status == HttpURLConnection.HTTP_CREATED) {
-                //connection.getHeaderFields()
+            try {
+                InputStream is = connection.getInputStream();
                 setResponseHeadersList(connection.getHeaderFields());
+                setResponse(IOUtils.toByteArray(is));
+            } catch (Throwable t) {
+                // ok - won't always be available
             }
+//            if (status == HttpURLConnection.HTTP_OK || status == HttpURLConnection.HTTP_CREATED) {
+//                //connection.getHeaderFields()
+//                setResponseHeadersList(connection.getHeaderFields());
+//            }
             if (status >= 400)
                 return;
-                byte[] bb = IOUtils.toByteArray(connection.getInputStream());
-                setResponse(bb);
+//            byte[] bb = IOUtils.toByteArray(connection.getInputStream());
+//            setResponse(bb);
         } finally {
             if (connection != null)
                 connection.disconnect();

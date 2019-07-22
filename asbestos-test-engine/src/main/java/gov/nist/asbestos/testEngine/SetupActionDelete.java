@@ -49,7 +49,7 @@ class SetupActionDelete {
         Ref createUrl = sourceFixture.getResourceWrapper().getRef();  // contains version (_history/1) at end
         if (createUrl == null)
             return;
-        Ref targetUrl = new Ref(createUrl.getBase(), createUrl.getResourceType(), createUrl.getId(), createUrl.getVersion());
+        Ref targetUrl = new Ref(createUrl.getBase(), createUrl.getResourceType(), createUrl.getId(), null);
         ResourceWrapper wrapper = getFhirClient().deleteResource(targetUrl, requestHeader);
         if (wrapper.isOk())
             reporter.report(targetUrl + " deleted");

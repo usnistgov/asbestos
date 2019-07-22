@@ -8,6 +8,8 @@ import gov.nist.asbestos.asbestosProxy.events.Event;
 import gov.nist.asbestos.asbestosProxy.log.SimStore;
 import gov.nist.asbestos.asbestosProxy.log.Task;
 import gov.nist.asbestos.asbestosProxy.util.Gzip;
+import gov.nist.asbestos.client.Base.ProxyBase;
+import gov.nist.asbestos.client.client.Op;
 import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.http.headers.Header;
 import gov.nist.asbestos.http.headers.Headers;
@@ -20,6 +22,7 @@ import gov.nist.asbestos.simapi.tk.installation.Installation;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.log4j.Logger;
+import org.hl7.fhir.r4.model.OperationOutcome;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -58,7 +61,7 @@ public class ProxyServlet extends HttpServlet {
     }
 
     @Override
-    public void doPost(HttpServletRequest req, HttpServletResponse resp) {
+    public void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
 
         // typical URI is
         // for FHIR translation
@@ -88,6 +91,10 @@ public class ProxyServlet extends HttpServlet {
             channel.setup(simStore.getChannelConfig());
 
             Headers inHeaders = getRequestHeaders(req, Verb.POST);
+            String hostport = inHeaders.getValue("host");
+            if (hostport == null || !hostport.contains(":"))
+                throw new ServletException("host header missing or not formatted as host:port");
+
             byte[] inBody = getRequestBody(req);
 
             // HttpPost requestIn = new HttpPost();
@@ -95,7 +102,7 @@ public class ProxyServlet extends HttpServlet {
             Event event = simStore.newEvent();
             HttpPost requestIn = (HttpPost) logClientRequestIn(event, inHeaders, inBody, Verb.POST);
 
-            log.info("=> " + simStore.getEndpoint() + " " +  event.getStore().getRequestHeader().getContentType());
+            log.info("=> " + simStore.getEndpoint() + " " + event.getStore().getRequestHeader().getContentType());
 
             // interaction between proxy and target service
             Task backSideTask = event.getStore().newTask();
@@ -120,7 +127,7 @@ public class ProxyServlet extends HttpServlet {
 
             // transform backend service response for client
             event.getStore().selectClientTask();
-            HttpBase responseOut = transformResponse(event.getStore().selectTask(Task.CLIENT_TASK), requestOut, channel);
+            HttpBase responseOut = transformResponse(event.getStore().selectTask(Task.CLIENT_TASK), requestOut, channel, hostport);
 
             responseOut.getResponseHeaders().getAll().forEach(resp::addHeader);
 
@@ -133,25 +140,53 @@ public class ProxyServlet extends HttpServlet {
         } catch (Throwable t) {
             log.error(ExceptionUtils.getStackTrace(t));
             resp.setStatus(resp.SC_INTERNAL_SERVER_ERROR);
+            returnOperationOutcome(req, resp, t);
         }
     }
 
     @Override
-    public void doDelete(HttpServletRequest req, HttpServletResponse resp) {
+    public void doDelete(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         try {
             URI uri = buildURI(req);
             log.info("doDelete  " + uri);
-            parseUri(uri, req, resp, Verb.DELETE);
-            resp.setStatus(resp.SC_OK);
-            log.info("OK");
+            SimStore simStore = parseUri(uri, req, resp, Verb.DELETE);
+            if (simStore == null) {
+                resp.setStatus(resp.SC_OK);
+                log.info("channel deleted");
+                return;
+            }
+            doGetDelete(req, resp, uri, simStore, Verb.DELETE);
         } catch (Throwable t) {
             log.error(ExceptionUtils.getStackTrace(t));
             resp.setStatus(resp.SC_INTERNAL_SERVER_ERROR);
+            returnOperationOutcome(req, resp, t);
         }
     }
 
+    private void returnOperationOutcome(HttpServletRequest req, HttpServletResponse resp, Throwable t) throws IOException {
+        Headers headers = getRequestHeaders(req, Verb.GET);  // verb not used
+        Header acceptHeader = headers.getAccept();
+        OperationOutcome oo = outcomeFromException(t);
+        if (acceptHeader != null && acceptHeader.getValue().contains("json")) {
+            String ooString = ProxyBase.getFhirContext().newJsonParser().encodeResourceToString(oo);
+            resp.getWriter().print(ooString);
+        } else {
+            String ooString = ProxyBase.getFhirContext().newXmlParser().encodeResourceToString(oo);
+            resp.getWriter().print(ooString);
+        }
+    }
+
+    private OperationOutcome outcomeFromException(Throwable t) {
+        OperationOutcome oo = new OperationOutcome();
+        OperationOutcome.OperationOutcomeIssueComponent issue = oo.addIssue();
+        issue.setSeverity(OperationOutcome.IssueSeverity.ERROR);
+        issue.setCode(OperationOutcome.IssueType.EXCEPTION);
+        issue.setDiagnostics(ExceptionUtils.getStackTrace(t));
+        return oo;
+    }
+
     @Override
-    public void doGet(HttpServletRequest req, HttpServletResponse resp) {
+    public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         try {
             URI uri = buildURI(req);
             log.info("doGet " + uri);
@@ -159,61 +194,74 @@ public class ProxyServlet extends HttpServlet {
             if (simStore == null)
                 return;
 
-            String channelType = simStore.getChannelConfig().getChannelType();
-            if (channelType == null)
-                throw new Exception("Sim " + simStore.getChannelId() + " does not define a Channel Type.");
-            IBaseChannel channel = (IBaseChannel) proxyMap.get(channelType);
-            if (channel == null)
-                throw new Exception("Cannot create Channel of type " + channelType);
+            doGetDelete(req, resp, uri, simStore, Verb.GET);
 
-            channel.setup(simStore.getChannelConfig());
-
-            // handle non-channel requests
-            if (!simStore.isChannel()) {
-                Map<String, List<String>> parameters = req.getParameterMap();
-                String result = controlRequest(simStore, uri,parameters);
-                resp.getOutputStream().print(result);
-                return;
-            }
-
-            Headers inHeaders = getRequestHeaders(req, Verb.GET);
-            byte[] inBody = getRequestBody(req);
-
-
-            Event event = simStore.newEvent();
-            HttpGet requestIn = (HttpGet) logClientRequestIn(event, inHeaders, inBody, Verb.GET);
-
-            Task backSideTask = event.getStore().newTask();
-
-            log.info("=> " + simStore.getEndpoint() + " " + event.getStore().getRequestHeader().getAccept());
-
-            // transform input request for backend service
-            HttpBase requestOut = transformRequest(backSideTask, requestIn, channel);
-            requestOut.setUri(transformRequestUri(backSideTask, requestIn, channel));
-            requestOut.getRequestHeaders().setPathInfo(requestIn.getUri());
-
-            // send request to backend service
-            requestOut.run();
-
-            // log response from backend service
-            logResponse(backSideTask, requestOut);
-
-            // transform backend service response for client
-            event.getStore().selectClientTask();
-            HttpBase responseOut = transformResponse(event.getStore().selectTask(Task.CLIENT_TASK), requestOut, channel);
-
-            for (Header header : responseOut.getResponseHeaders().getHeaders()) {
-                resp.addHeader(header.getName(), header.getAllValuesAsString());
-            }
-            byte[] response = responseOut.getResponse();
-            if (response != null) {
-                resp.getOutputStream().write(response);
-            }
-            log.info("OK");
         } catch (Throwable t) {
             log.error(ExceptionUtils.getStackTrace(t));
             resp.setStatus(resp.SC_INTERNAL_SERVER_ERROR);
+            returnOperationOutcome(req, resp, t);
         }
+    }
+
+    private void doGetDelete(HttpServletRequest req, HttpServletResponse resp, URI uri, SimStore simStore, Verb verb) throws Exception {
+        String channelType = simStore.getChannelConfig().getChannelType();
+        if (channelType == null)
+            throw new Exception("Sim " + simStore.getChannelId() + " does not define a Channel Type.");
+        IBaseChannel channel = (IBaseChannel) proxyMap.get(channelType);
+        if (channel == null)
+            throw new Exception("Cannot create Channel of type " + channelType);
+
+        channel.setup(simStore.getChannelConfig());
+
+        // handle non-channel requests
+        if (!simStore.isChannel()) {
+            Map<String, List<String>> parameters = req.getParameterMap();
+            String result = controlRequest(simStore, uri, parameters);
+            resp.getOutputStream().print(result);
+            return;
+        }
+
+        Headers inHeaders = getRequestHeaders(req, verb);
+        byte[] inBody = getRequestBody(req);
+        String hostport = inHeaders.getValue("host");
+
+        Event event = simStore.newEvent();
+        HttpBase requestIn = logClientRequestIn(event, inHeaders, inBody, verb);
+
+        Task backSideTask = event.getStore().newTask();
+
+        log.info("=> " + simStore.getEndpoint() + " " + event.getStore().getRequestHeader().getAccept());
+
+        // transform input request for backend service
+        HttpBase requestOut;
+        if (requestIn instanceof HttpGet)
+            requestOut = transformRequest(backSideTask, (HttpGet) requestIn, channel);
+        else if (requestIn instanceof HttpPost)
+            requestOut = transformRequest(backSideTask, (HttpPost) requestIn, channel);
+        else
+            requestOut = transformRequest(backSideTask, (HttpDelete) requestIn, channel);
+
+        requestOut.setUri(transformRequestUri(backSideTask, requestIn, channel));
+        requestOut.getRequestHeaders().setPathInfo(requestIn.getUri());
+
+        // send request to backend service
+        requestOut.run();
+
+        // log response from backend service
+        logResponse(backSideTask, requestOut);
+
+        // transform backend service response for client
+        event.getStore().selectClientTask();
+        HttpBase responseOut = transformResponse(event.getStore().selectTask(Task.CLIENT_TASK), requestOut, channel, hostport);
+
+        for (Header header : responseOut.getResponseHeaders().getHeaders()) {
+            resp.addHeader(header.getName(), header.getAllValuesAsString());
+        }
+        byte[] response = responseOut.getResponse();
+        if (response != null) {
+            resp.getOutputStream().write(response);
+        }
+        log.info("OK");
     }
 
     private static void logResponse(Task backSideTask, HttpBase requestOut) {
@@ -248,7 +296,7 @@ public class ProxyServlet extends HttpServlet {
     }
 
     static HttpBase logClientRequestIn(Event event, Headers headers, byte[] body, Verb verb) {
-        HttpBase base = (verb == Verb.GET) ? new HttpGet() : new HttpPost();
+        HttpBase base = (verb == Verb.GET) ? new HttpGet() : (verb == Verb.DELETE ? new HttpDelete() : new HttpPost());
         event.getStore().selectClientTask();
         event.getStore().putRequestHeader(headers);
         base.setRequestHeaders(headers);
@@ -390,16 +438,27 @@ public class ProxyServlet extends HttpServlet {
         return requestOut;
     }
 
+    static HttpBase transformRequest(Task task, HttpDelete requestIn, IBaseChannel channelTransform) {
+        HttpDelete requestOut = new HttpDelete();
+
+        channelTransform.transformRequest(requestIn, requestOut);
+
+        task.select();
+        task.getEventStore().putRequestHeader(requestOut.getRequestHeaders());
+
+        return requestOut;
+    }
+
     static URI transformRequestUri(Task task, HttpBase requestIn, IBaseChannel channelTransform) {
 
         return channelTransform.transformRequestUrl(task.getEventStore().getEvent().getRequestHeaders().getPathInfo().getPath(), requestIn);
 
     }
 
-    static HttpBase transformResponse(Task task, HttpBase responseIn, IBaseChannel channelTransform) {
+    static HttpBase transformResponse(Task task, HttpBase responseIn, IBaseChannel channelTransform, String proxyHostPort) {
         HttpBase responseOut = new HttpGet();  // here GET vs POST does not matter
 
-        channelTransform.transformResponse(responseIn, responseOut);
+        channelTransform.transformResponse(responseIn, responseOut, proxyHostPort);
 
         responseOut.getResponseHeaders().removeHeader("transfer-encoding");
 
@@ -504,8 +563,11 @@ public class ProxyServlet extends HttpServlet {
         simStore = new SimStore(externalCache, simId);
 
         if (verb == Verb.DELETE) {
-            simStore.deleteSim();
-            return null;
+            Ref ref = new Ref(uri);
+            if (!ref.hasResource()) {
+                simStore.deleteSim();
+                return null;  // delete channel
+            }
         }
 
         //
@@ -513,7 +575,6 @@ public class ProxyServlet extends HttpServlet {
         // starting with this load of simStore, normal channel operations begin
         //
 
-        simStore = new SimStore(externalCache, simId);
 
         // ChannelId has been established - from now all errors result in Event logging
 

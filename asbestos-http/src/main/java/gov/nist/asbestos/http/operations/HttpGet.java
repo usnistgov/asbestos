@@ -5,6 +5,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.*;
 import java.util.HashMap;
 import java.util.Map;
@@ -21,9 +22,16 @@ public class HttpGet extends HttpBase {
                 addHeaders(connection, headers);
             requestHeadersList = connection.getRequestProperties();
             status = connection.getResponseCode();
-            if (status == HttpURLConnection.HTTP_OK || status == HttpURLConnection.HTTP_CREATED) {
+//            if (status == HttpURLConnection.HTTP_OK || status == HttpURLConnection.HTTP_CREATED) {
+//                setResponseHeadersList(connection.getHeaderFields());
+//                setResponse(IOUtils.toByteArray(connection.getInputStream()));
+//            }
+            try {
+                InputStream is = connection.getInputStream();
                 setResponseHeadersList(connection.getHeaderFields());
-                setResponse(IOUtils.toByteArray(connection.getInputStream()));
+                setResponse(IOUtils.toByteArray(is));
+            } catch (Throwable t) {
+                    // ok - won't always be available
             }
         } catch (Throwable t) {
             throw new Error("GET " + uri, t);

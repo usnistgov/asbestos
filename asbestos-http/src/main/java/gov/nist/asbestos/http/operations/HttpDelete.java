@@ -1,6 +1,10 @@
 package gov.nist.asbestos.http.operations;
 
+import org.apache.commons.io.IOUtils;
+import sun.nio.ch.IOUtil;
+
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -17,6 +21,13 @@ public class HttpDelete  extends HttpBase {
                     "Content-Type", "application/x-www-form-urlencoded");
             connection.setRequestMethod("DELETE");
             status = connection.getResponseCode();
+            try {
+                InputStream is = connection.getInputStream();
+                setResponseHeadersList(connection.getHeaderFields());
+                setResponse(IOUtils.toByteArray(is));
+            } catch (Throwable t) {
+                // ok - won't always be available
+            }
         } catch (Exception e) {
             throw new RuntimeException(e);
         } finally {

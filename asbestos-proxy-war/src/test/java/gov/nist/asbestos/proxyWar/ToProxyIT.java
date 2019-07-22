@@ -9,6 +9,7 @@ import gov.nist.asbestos.simapi.validation.Val;
 import gov.nist.asbestos.testEngine.TestEngine;
 import org.hl7.fhir.r4.model.TestReport;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
@@ -26,6 +27,10 @@ class ToProxyIT {
     private static String proxyPort = ITConfig.getProxyPort();
     private static URI base;
 
+    /**
+     * create patient and verify the returned reference is via the proxy
+     * @throws URISyntaxException
+     */
     @Test
     void createPatient() throws URISyntaxException {
         TestEngine testEngine = run("/toProxy/createPatient/TestScript.xml");
@@ -63,11 +68,9 @@ class ToProxyIT {
     }
 
 
-    @BeforeAll
-    static void beforeAll() throws IOException, URISyntaxException {
-        // delete channel
-        new HttpDelete().run("http://localhost:" + proxyPort + "/proxy/prox/default__fhirpass");
-        // create channel
+   @BeforeAll
+     static void beforeAll() throws IOException, URISyntaxException {
+       // new HttpDelete().run("http://localhost:" + proxyPort + "/proxy/prox/default__fhirpass");
         base = new URI(createChannel());
     }
 
@@ -85,7 +88,6 @@ class ToProxyIT {
         int status = poster.getStatus();
         if (!(status == 200 || status == 201))
             fail("200 or 201 required - returned " + status);
-        //return "http://localhost:8080/fhir/fhir";
         return "http://localhost:" + proxyPort + "/proxy/prox/" + testSession + "__" + channelId + "/Channel";
     }
 
