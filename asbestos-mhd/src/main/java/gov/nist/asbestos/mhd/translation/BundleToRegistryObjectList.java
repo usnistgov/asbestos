@@ -775,6 +775,10 @@ public class BundleToRegistryObjectList implements IVal {
         return documentContents.get(id);
     }
 
+    public Map<String,  byte[]> getDocumentContents() {
+        return documentContents;
+    }
+
     public void setIdBuilder(IdBuilder idBuilder) {
         this.idBuilder = idBuilder;
     }

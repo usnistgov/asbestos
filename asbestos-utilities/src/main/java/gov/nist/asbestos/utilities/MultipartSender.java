@@ -58,48 +58,14 @@ public class MultipartSender {
                 }
             };
             String responseBody = httpClient.execute(request, responseHandler);
-            String registryResponse = extractRegistryResponse(responseBody);
+            String registryResponse = RegistryResponseExtractor.extractRegistryResponse(responseBody);
             System.out.println(registryResponse);
             RegistryResponseType rrt = new RegistryResponseBuilder().fromInputStream(new ByteArrayInputStream(registryResponse.getBytes()));
-            return asErrorList(rrt);
+            return RegistryResponseBuilder.asErrorList(rrt);
         } catch (IOException | JAXBException e) {
             throw new Error("Send to " + toAddr + " + failed - \n" + e.getMessage(), e);
         }
     }
-
-    private static RegErrorList asErrorList(RegistryResponseType registryResponseType) {
-        RegErrorList list = new RegErrorList();
-
-        RegistryErrorList registryErrorList = registryResponseType.getRegistryErrorList();
-        if (registryErrorList != null) {
-            List<RegistryError> registryErrors = registryErrorList.getRegistryError();
-            if (registryErrors != null) {
-                for (RegistryError rError : registryErrors) {
-                    list.getList().add(new RegError(rError.getCodeContext(), rError.getSeverity().endsWith("Warning") ? ErrorType.Warning : ErrorType.Error));
-                }
-            }
-        }
-
-        return list;
-    }
-
-    private static String extractRegistryResponse(String in) {
-        int start = in.indexOf("RegistryResponse");
-        if (start == -1)
-            return null;
-        while (in.charAt(start) != '<') start--;
-        int end = in.indexOf("RegistryResponse", start+20);
-        if (end == -1) {
-            // no formal end - must have been successful - settle for />
-            end = in.indexOf("/>", start + 10);
-            if (end == -1)
-                return null;
-            return in.substring(start, end+2);
-        }
-        while(in.charAt(end) != '>') end++;
-        return in.substring(start, end+1);
-    }
-
 
 
 }
