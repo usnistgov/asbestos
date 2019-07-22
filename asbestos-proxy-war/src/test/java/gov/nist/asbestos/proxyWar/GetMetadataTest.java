@@ -19,6 +19,10 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+
+/**
+ * this test depends on hapi running on port 8080 at /fhir/fhir
+ */
 class GetMetadataTest {
 
     @Mock

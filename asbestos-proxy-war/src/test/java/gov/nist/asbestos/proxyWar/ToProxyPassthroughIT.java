@@ -20,7 +20,7 @@ import java.nio.file.Paths;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class ToProxyIT {
+class ToProxyPassthroughIT {
     private static String testSession = "default";
     private static String channelId = "fhirpass";
     private static String fhirPort = ITConfig.getFhirPort();
