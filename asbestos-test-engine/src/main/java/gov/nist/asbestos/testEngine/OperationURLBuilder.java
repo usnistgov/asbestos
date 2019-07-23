@@ -28,9 +28,10 @@ class OperationURLBuilder {
                 Ref targetRef = new Ref(fixture.getHttpBase().getUri());
                 ref = targetRef.rebase(base);
             }
-        } else if (resourceType != null && base != null) {
+        } else if (base != null) {
             ref = new Ref(base);
-            ref = ref.withResource(resourceType);
+            if (resourceType != null)
+                ref = ref.withResource(resourceType);
         }
         if (ref == null) {
             reporter.reportError("Unable to construct URL for operation");

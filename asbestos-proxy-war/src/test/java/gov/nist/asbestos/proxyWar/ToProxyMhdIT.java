@@ -1,22 +1,26 @@
 package gov.nist.asbestos.proxyWar;
 
+import gov.nist.asbestos.client.Base.ProxyBase;
 import gov.nist.asbestos.client.client.FhirClient;
 import gov.nist.asbestos.http.operations.HttpPost;
 import gov.nist.asbestos.sharedObjects.ChannelConfig;
 import gov.nist.asbestos.sharedObjects.ChannelConfigFactory;
 import gov.nist.asbestos.simapi.validation.Val;
 import gov.nist.asbestos.testEngine.TestEngine;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.TestReport;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Paths;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.*;
 
 class ToProxyMhdIT {
     private static String testSession = "default";
@@ -24,6 +28,11 @@ class ToProxyMhdIT {
     private static String fhirPort = ITConfig.getFhirPort();
     private static String proxyPort = ITConfig.getProxyPort();
     private static URI base;
+
+    @Test
+    void sendSimplePdb() throws URISyntaxException {
+        run("/toProxyMhd/simpleSubmission/TestScript.xml");
+    }
 
     TestEngine run(String testScriptLocation) throws URISyntaxException {
         Val val = new Val();
@@ -52,6 +61,7 @@ class ToProxyMhdIT {
                 .setEnvironment("default")
                 .setActorType("fhir")
                 .setChannelType("mhd")
+                .setXdsSiteName("default__rr")
                 .setFhirBase("http://localhost:" + fhirPort + "/fhir/fhir");
         String json = ChannelConfigFactory.convert(channelConfig);
         HttpPost poster = new HttpPost();

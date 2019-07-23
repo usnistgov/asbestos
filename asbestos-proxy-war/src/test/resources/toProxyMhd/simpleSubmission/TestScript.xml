@@ -1,0 +1,31 @@
+<TestScript xmlns="http://hl7.org/fhir">
+    <fixture id="pdb-bundle">
+        <resource>
+            <reference value="Bundle/pdb.xml"/>
+        </resource>
+    </fixture>
+    <fixture id="example-patient">
+        <resource>
+            <reference value="Patient/patient-example.xml"/>
+        </resource>
+    </fixture>
+    <test>
+        <action>
+            <operation>
+                <description value="send patient to server"/>
+                <label value="create"/>
+                <type>
+                    <code value="transaction"/>
+                </type>
+                <sourceId value="pdb-bundle"/>
+            </operation>
+        </action>
+        <action>
+            <assert>
+                <description value="PDB was successful"/>
+                <response value="okay"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+    </test>
+</TestScript>

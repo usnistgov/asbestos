@@ -10,6 +10,7 @@ import gov.nist.asbestos.asbestosProxy.log.SimStore;
 import gov.nist.asbestos.asbestosProxy.log.Task;
 import gov.nist.asbestos.asbestosProxy.util.Gzip;
 import gov.nist.asbestos.client.Base.ProxyBase;
+import gov.nist.asbestos.client.client.Format;
 import gov.nist.asbestos.client.client.Op;
 import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.http.headers.Header;
@@ -115,7 +116,26 @@ public class ProxyServlet extends HttpServlet {
             channel.setServerBase(fhirBase);
 
             // transform input request for backend service
-            HttpBase requestOut = transformRequest(backSideTask, requestIn, channel);
+            HttpBase requestOut;
+            try {
+                requestOut = transformRequest(backSideTask, requestIn, channel);
+            } catch (TransformException te) {
+                Format format = te.getFormat();
+                String body = te.getResponse();
+                byte[] bodyBytes = body.getBytes();
+                Headers headers = new Headers();
+                headers.setStatus(200);
+                headers.getHeaders().add(new Header("Content-Type", format.getContentType()));
+
+                event.getStore().selectClientTask();
+                event.getStore().putResponseBodyText(body);
+                event.getStore().putResponseHeader(headers);
+
+                resp.addHeader("Content-Type", format.getContentType());
+                resp.getOutputStream().write(bodyBytes);
+                log.error(body);
+                return;
+            }
             URI outUri = transformRequestUri(backSideTask, requestIn, channel);
             requestOut.setUri(outUri);
             requestOut.getRequestHeaders().setPathInfo(outUri);
@@ -316,6 +336,9 @@ public class ProxyServlet extends HttpServlet {
         } else if (isStringType(headers.getContentType().getAllValues().get(0))) {
             event.getStore().putRequestBodyText(new String(body));
             base.setRequestText(new String(body));
+        } else {
+            event.getStore().putRequestBodyText(new String(body));
+            base.setRequestText(new String(body));
         }
         return base;
     }
@@ -452,8 +475,9 @@ public class ProxyServlet extends HttpServlet {
     }
 
     static URI transformRequestUri(Task task, HttpBase requestIn, IBaseChannel channelTransform) {
-
-        return channelTransform.transformRequestUrl(task.getEventStore().getEvent().getRequestHeaders().getPathInfo().getPath(), requestIn);
+        Event event = task.getEventStore().getEvent();
+        Headers headers = requestIn.getRequestHeaders();
+        return channelTransform.transformRequestUrl(headers.getPathInfo().getPath(), requestIn);
 
     }
 
@@ -592,6 +616,9 @@ public class ProxyServlet extends HttpServlet {
         if (!uriParts.isEmpty()) {
             simStore.setResource(uriParts.get(0));
             uriParts.remove(0);
+        } else {
+            // this only happens with transaction or batch
+            simStore.setResource("Bundle");
         }
 
         // verify that proxy exists - only if this is a channel to a backend system

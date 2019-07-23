@@ -11,11 +11,13 @@ public class ChannelConfig {
     private String actorType;
     private String channelType;
     private String fhirBase;
+    private String xdsSiteName;
 
     public String toString() {
         return new StringBuilder().append("Channel ").append(testSession).append("__").append(channelId)
                 .append(" of ").append(actorType).append(" in ").append(environment)
-                .append(" with base ").append(fhirBase).toString();
+                .append(" with base ").append(fhirBase)
+                .append(" with xdsSite ").append(xdsSiteName).toString();
     }
 
     // TODO test needed
@@ -98,11 +100,21 @@ public class ChannelConfig {
                 Objects.equals(channelId, that.channelId) &&
                 Objects.equals(actorType, that.actorType) &&
                 Objects.equals(channelType, that.channelType) &&
-                Objects.equals(fhirBase, that.fhirBase);
+                Objects.equals(fhirBase, that.fhirBase) &&
+                Objects.equals(xdsSiteName, that.xdsSiteName);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(environment, testSession, channelId, actorType, channelType, fhirBase);
+        return Objects.hash(environment, testSession, channelId, actorType, channelType, fhirBase, xdsSiteName);
+    }
+
+    public String getXdsSiteName() {
+        return xdsSiteName;
+    }
+
+    public ChannelConfig setXdsSiteName(String xdsSiteName) {
+        this.xdsSiteName = xdsSiteName;
+        return this;
     }
 }

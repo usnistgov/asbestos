@@ -2,8 +2,11 @@ package gov.nist.asbestos.asbestosProxy.channels.mhd;
 
 import gov.nist.asbestos.asbestosProxy.channel.IBaseChannel;
 import gov.nist.asbestos.asbestosProxy.events.EventStore;
+import gov.nist.asbestos.asbestosProxy.util.XdsActorMapper;
+import gov.nist.asbestos.asbestosProxy.wrapper.TransformException;
 import gov.nist.asbestos.client.Base.ProxyBase;
 import gov.nist.asbestos.client.client.FhirClient;
+import gov.nist.asbestos.client.client.Format;
 import gov.nist.asbestos.client.resolver.IdBuilder;
 import gov.nist.asbestos.client.resolver.ResourceCacheMgr;
 import gov.nist.asbestos.client.resolver.ResourceMgr;
@@ -16,7 +19,6 @@ import gov.nist.asbestos.mhd.transactionSupport.AssigningAuthorities;
 import gov.nist.asbestos.mhd.transactionSupport.CodeTranslator;
 import gov.nist.asbestos.mhd.transactionSupport.ProvideAndRegisterBuilder;
 import gov.nist.asbestos.mhd.translation.BundleToRegistryObjectList;
-import gov.nist.asbestos.mhd.translation.ContainedIdAllocator;
 import gov.nist.asbestos.sharedObjects.ChannelConfig;
 import gov.nist.asbestos.simapi.tk.installation.Installation;
 import gov.nist.asbestos.simapi.validation.Val;
@@ -32,11 +34,9 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.OperationOutcome;
 
-import javax.xml.bind.JAXBException;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.net.URI;
 import java.util.List;
 import java.util.Objects;
@@ -113,8 +113,7 @@ public class MhdChannel implements IBaseChannel {
         ByteArrayOutputStream pnrStream = new ByteArrayOutputStream();
         new ProvideAndRegisterBuilder().toOutputStream(pnr, pnrStream);
 
-        String pnrString = deleteXMLInstruction(new String(pnrStream.toByteArray()));
-        return pnrString;
+        return deleteXMLInstruction(new String(pnrStream.toByteArray()));
     }
 
     @Override
@@ -124,11 +123,13 @@ public class MhdChannel implements IBaseChannel {
         byte[] request = requestIn.getRequest();
         String contentType = requestIn.getRequestContentType();
         IBaseResource resource;
+        boolean isXml = true;
         if (contentType == null)
             throw new RuntimeException("No Content Type");
-        if (contentType.equals("application/fhir+json")) {
+        if (contentType.startsWith("application/fhir+json")) {
+            isXml = false;
             resource = ProxyBase.getFhirContext().newJsonParser().parseResource(new String(request));
-        } else if (contentType.equals("application/fhir+xml")) {
+        } else if (contentType.startsWith("application/fhir+xml")) {
             resource = ProxyBase.getFhirContext().newXmlParser().parseResource(new String(request));
         } else
             throw new RuntimeException("Do not understand Content-Type " + contentType);
@@ -137,10 +138,18 @@ public class MhdChannel implements IBaseChannel {
         Bundle bundle = (Bundle) resource;
 
         String pnrString = transformPDBToPNR(bundle);
-
+        if (pnrString == null) {
+            // OperationOutcome is loaded with errors to return
+            String response;
+            if (isXml)
+                response = ProxyBase.getFhirContext().newXmlParser().setPrettyPrint(true).encodeResourceToString(oo);
+            else
+                response = ProxyBase.getFhirContext().newJsonParser().setPrettyPrint(true).encodeResourceToString(oo);
+            throw new TransformException(response, isXml ? Format.XML : Format.JSON);
+        }
         URI toAddr;
         try {
-            toAddr = channelConfig.translateEndpointToFhirBase(requestIn.getRequestHeaders().getPathInfo());
+            toAddr = transformRequestUrl(null, requestIn); //channelConfig.translateEndpointToFhirBase(requestIn.getRequestHeaders().getPathInfo());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -161,7 +170,6 @@ public class MhdChannel implements IBaseChannel {
         scanner.close();
         return  buf.toString();
     }
-
 
     private static File getCodesFile() {
         return Installation.instance().getCodesFile("default");
@@ -184,8 +192,13 @@ public class MhdChannel implements IBaseChannel {
     @Override
     public URI transformRequestUrl(String endpoint, HttpBase requestIn) {
         Objects.requireNonNull(channelConfig);
+        if (channelConfig.getXdsSiteName() == null || channelConfig.getXdsSiteName().equals(""))
+            throw new RuntimeException("ChannelConfig does not have XdsSiteName");
+        String addr =  new XdsActorMapper().getEndpoint(channelConfig.getXdsSiteName(), "rep", "pnr", false);
+        if (addr == null || addr.equals(""))
+            throw new RuntimeException("XdsActorMapper cannot map site=" + channelConfig.getXdsSiteName() + " actorType=rep transactionType=pnr isTls=false");
         try {
-            return channelConfig.translateEndpointToFhirBase(requestIn.getRequestHeaders().getPathInfo());
+            return new URI(addr);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -193,7 +206,6 @@ public class MhdChannel implements IBaseChannel {
 
     @Override
     public void transformResponse(HttpBase responseIn, HttpBase responseOut, String proxyHostPort) {
-
         String responseBody = responseIn.getResponseText();
         String registryResponse = RegistryResponseExtractor.extractRegistryResponse(responseBody);
         if (registryResponse == null)

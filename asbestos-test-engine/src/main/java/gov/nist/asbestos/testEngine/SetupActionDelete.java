@@ -17,15 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-class SetupActionDelete {
-    private FixtureMgr fixtureMgr;  // static fixtures and history of operations
-    private ValE val;
-    private URI base;
-    private FixtureComponent fixtureComponent = null;
-    private FhirClient fhirClient = null;
-    private VariableMgr variableMgr = null;
-    private URI sut = null;
-    private String type = null;
+class SetupActionDelete extends GenericSetupAction {
 
     SetupActionDelete(FixtureMgr fixtureMgr) {
         Objects.requireNonNull(fixtureMgr);

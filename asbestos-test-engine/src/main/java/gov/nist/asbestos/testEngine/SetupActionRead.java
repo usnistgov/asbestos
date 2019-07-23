@@ -14,12 +14,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-class SetupActionRead {
+class SetupActionRead extends GenericSetupAction{
     private FixtureMgr fixtureMgr;  // static fixtures and history of operations
-    private TestScript.SetupActionOperationComponent op;
     private ValE val;
     private URI base;
-    private TestReport testReport = null;
     private VariableMgr variableMgr = null;
     private FhirClient fhirClient = null;
     private URI sut = null;

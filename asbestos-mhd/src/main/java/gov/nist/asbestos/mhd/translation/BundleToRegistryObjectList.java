@@ -13,6 +13,7 @@ import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import gov.nist.asbestos.mhd.translation.attribute.EntryUuid;
 import gov.nist.asbestos.simapi.validation.Val;
 import gov.nist.asbestos.simapi.validation.ValE;
+import gov.nist.asbestos.simapi.validation.ValOO;
 import oasis.names.tc.ebxml_regrep.xsd.rim._3.*;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.*;
@@ -71,6 +72,7 @@ public class BundleToRegistryObjectList implements IVal {
     private Val val;
     private IdBuilder idBuilder;
     private Map<String, byte[]> documentContents = new HashMap<>();
+    private Bundle responseBundle = new Bundle();  // holds results of translation
 
     public RegistryObjectListType build(Bundle bundle) {
         Objects.requireNonNull(val);
@@ -82,6 +84,8 @@ public class BundleToRegistryObjectList implements IVal {
 
         return buildRegistryObjectList();
     }
+
+    Bundle.BundleEntryResponseComponent responseEntry;
 
     // TODO handle List/Folder or signal error
     public RegistryObjectListType buildRegistryObjectList() {
@@ -103,25 +107,66 @@ public class BundleToRegistryObjectList implements IVal {
         if (docMans.size() != 1)
             val.add(new ValE("Found " + docMans.size() + " DocumentManifests - one required").asError());
 
+        DocumentManifest documentManifest = null;
         RegistryPackageType ss = null;
-        if (docMans.size() > 0) {
-            ResourceWrapper dm = docMans.get(0);
-            ss = createSubmissionSet(dm);
-            rol.getIdentifiable().add(new JAXBElement<>(new QName("urn:oasis:names:tc:ebxml-regrep:xsd:rim:3.0", "RegistryPackage"), RegistryPackageType.class, ss));
+        List<ExtrinsicObjectType> eos = new ArrayList<>();
+        for ( ResourceWrapper resourceWrapper : rMgr.getBundleResources()) {
+                BaseResource resource = resourceWrapper.getResource();
+                responseEntry = responseBundle.addEntry().getResponse();
+                responseEntry.setStatus("200");
+                OperationOutcome oo = new OperationOutcome();
+                if (resource instanceof DocumentManifest) {
+                    if (documentManifest == null) {
+                        documentManifest = (DocumentManifest) resource;
+                        ss = createSubmissionSet(resourceWrapper);
+                        rol.getIdentifiable().add(new JAXBElement<>(new QName("urn:oasis:names:tc:ebxml-regrep:xsd:rim:3.0", "RegistryPackage"), RegistryPackageType.class, ss));
+                    } else {
+                        responseEntry.setStatus("400");
+                        oo.addIssue(new OperationOutcome.OperationOutcomeIssueComponent()
+                                .setSeverity(OperationOutcome.IssueSeverity.ERROR)
+                                .setDiagnostics("Multiple DocumentManifest"));
+                    }
+
+                } else if (resource instanceof DocumentReference) {
+                    ExtrinsicObjectType eo = createExtrinsicObject(resourceWrapper);
+                    eos.add(eo);
+                    rol.getIdentifiable().add(new JAXBElement<>(new QName("urn:oasis:names:tc:ebxml-regrep:xsd:rim:3.0", "ExtrinsicObject"), ExtrinsicObjectType.class, eo));
+                } else if (resource instanceof Binary) {
+
+                } else {
+                    responseEntry.setStatus("400");
+                    oo.addIssue(new OperationOutcome.OperationOutcomeIssueComponent()
+                            .setSeverity(OperationOutcome.IssueSeverity.ERROR)
+                            .setDiagnostics("Do not understand resource type " + resource.getClass().getSimpleName()));
+                }
         }
 
-        List<ExtrinsicObjectType> eos = docRefs.stream()
-                .map(this::createExtrinsicObject)
-                .collect(Collectors.toList());
-
-        for (ExtrinsicObjectType eo : eos) {
-            rol.getIdentifiable().add(new JAXBElement<>(new QName("urn:oasis:names:tc:ebxml-regrep:xsd:rim:3.0", "ExtrinsicObject"), ExtrinsicObjectType.class, eo));
-
-            if (ss != null) {
+        if (ss != null) {
+            for (ExtrinsicObjectType eo : eos) {
                 AssociationType1 a = createSSDEAssociation(ss, eo);
                 rol.getIdentifiable().add((new JAXBElement<>(new QName("urn:oasis:names:tc:ebxml-regrep:xsd:rim:3.0", "Association"), AssociationType1.class, a)));
             }
         }
+
+//        RegistryPackageType ss = null;
+//        if (docMans.size() > 0) {
+//            ResourceWrapper dm = docMans.get(0);
+//            ss = createSubmissionSet(dm);
+//            rol.getIdentifiable().add(new JAXBElement<>(new QName("urn:oasis:names:tc:ebxml-regrep:xsd:rim:3.0", "RegistryPackage"), RegistryPackageType.class, ss));
+//        }
+//
+//        List<ExtrinsicObjectType> eos = docRefs.stream()
+//                .map(this::createExtrinsicObject)
+//                .collect(Collectors.toList());
+//
+//        for (ExtrinsicObjectType eo : eos) {
+//            rol.getIdentifiable().add(new JAXBElement<>(new QName("urn:oasis:names:tc:ebxml-regrep:xsd:rim:3.0", "ExtrinsicObject"), ExtrinsicObjectType.class, eo));
+//
+//            if (ss != null) {
+//                AssociationType1 a = createSSDEAssociation(ss, eo);
+//                rol.getIdentifiable().add((new JAXBElement<>(new QName("urn:oasis:names:tc:ebxml-regrep:xsd:rim:3.0", "Association"), AssociationType1.class, a)));
+//            }
+//        }
         return rol;
     }
 
@@ -264,8 +309,8 @@ public class BundleToRegistryObjectList implements IVal {
         Objects.requireNonNull(val);
         Objects.requireNonNull(rMgr);
 
-        ValE vale = new ValE(val);
-        ValE tr;
+        ValOO vale = new ValOO(responseEntry, new ValE(val));
+        ValOO tr;
         vale.setMsg("DocumentReference to DocumentEntry");
 
         ExtrinsicObjectType eo = new ExtrinsicObjectType();
@@ -652,12 +697,12 @@ public class BundleToRegistryObjectList implements IVal {
 
     // TODO - no profile guidance on how to convert coding.system URL to existing OIDs
 
-    public void addClassificationFromCodeableConcept(RegistryObjectType ro, CodeableConcept cc, String scheme, String classifiedObjectId, ValE val) {
+    public void addClassificationFromCodeableConcept(RegistryObjectType ro, CodeableConcept cc, String scheme, String classifiedObjectId, ValOO val) {
         List<Coding> coding = cc.getCoding();
         addClassificationFromCoding(ro, coding.get(0), scheme, classifiedObjectId, val);
     }
 
-    private void addClassificationFromCoding(RegistryObjectType ro, Coding coding, String scheme, String classifiedObjectId, ValE val) {
+    private void addClassificationFromCoding(RegistryObjectType ro, Coding coding, String scheme, String classifiedObjectId, ValOO val) {
         Objects.requireNonNull(codeTranslator);
         Objects.requireNonNull(val);
         Objects.requireNonNull(rMgr);

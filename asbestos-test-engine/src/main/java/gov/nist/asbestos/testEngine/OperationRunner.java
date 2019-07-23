@@ -111,6 +111,18 @@ public class OperationRunner {
                             .setVal(val)
                             .setOpReport(operationReport));
             setupActionDelete.run(op, operationReport);
+        } else if ("transaction".equals(code)) {
+            SetupActionTransaction setupActionTransaction =
+                    new SetupActionTransaction(fixtureMgr)
+                            .setSut(sut)
+                            .setFhirClient(fhirClient)
+                            .setType(type + ".transaction")
+                            .setVal(val);
+            setupActionTransaction.setVariableMgr(
+                    new VariableMgr(testScript, fixtureMgr)
+                            .setVal(val)
+                            .setOpReport(operationReport));
+            setupActionTransaction.run(op, operationReport);
         } else {
             Reporter.reportError(val, operationReport, type, label,"do not understand code.code of " + code);
         }
