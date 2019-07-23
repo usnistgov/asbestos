@@ -3,6 +3,7 @@ package gov.nist.asbestos.asbestosProxy.wrapper;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import gov.nist.asbestos.asbestosProxy.channel.IBaseChannel;
+import gov.nist.asbestos.asbestosProxy.channels.mhd.MhdChannel;
 import gov.nist.asbestos.asbestosProxy.channels.passthrough.PassthroughChannel;
 import gov.nist.asbestos.asbestosProxy.events.Event;
 import gov.nist.asbestos.asbestosProxy.log.SimStore;
@@ -47,6 +48,7 @@ public class ProxyServlet extends HttpServlet {
     public ProxyServlet() {
         super();
         proxyMap.put("passthrough", new PassthroughChannel());
+        proxyMap.put("mhd", new MhdChannel());
     }
 
     @Override

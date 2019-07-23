@@ -45,12 +45,12 @@ public class Site  {
 	// can have the same repositoryUniqueId and endpoint. But
 	// they require two entries to identify them.
 	private TransactionCollection repositories = new TransactionCollection(true);
-	private String home = null;
-	private String pifHost = null;
-	private String pifPort = null;
+	String home = null;
+	String pifHost = null;
+	String pifPort = null;
 	private String owner = null;
 
-	private String pidAllocateURI = null;
+	String pidAllocateURI = null;
 	private transient  boolean changed = false;
 	private TestSession testSession = null;  // required to be valid
 	private String orchestrationSiteName = null;

@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 class TransactionCollection {
-	 private List<TransactionBean> transactions = new ArrayList<TransactionBean>();
+	 List<TransactionBean> transactions = new ArrayList<TransactionBean>();
 	 private String collectionName;    // never really used
 	private boolean repositories = false; // a TransactionCollection is either for Repositories
 									// or not

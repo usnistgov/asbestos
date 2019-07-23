@@ -18,7 +18,7 @@ import gov.nist.asbestos.simapi.tk.actors.TransactionType;
  public class TransactionBean {
 	 private boolean secure = false;
 	 private boolean async = false;
-	 private String endpoint = "";
+	 String endpoint = "";
 
 	String name = "";   // can be actor name or repository uid
 						// when a actor name, it is related to transType

@@ -51,7 +51,7 @@ class ToProxyMhdIT {
                 .setChannelId(channelId)
                 .setEnvironment("default")
                 .setActorType("fhir")
-                .setChannelType("passthrough")
+                .setChannelType("mhd")
                 .setFhirBase("http://localhost:" + fhirPort + "/fhir/fhir");
         String json = ChannelConfigFactory.convert(channelConfig);
         HttpPost poster = new HttpPost();
