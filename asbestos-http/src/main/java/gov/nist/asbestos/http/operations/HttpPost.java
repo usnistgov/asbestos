@@ -51,6 +51,11 @@ public class HttpPost  extends HttpBase {
         }
         if (getResponseHeaders() != null)
             locationHeader = getResponseHeaders().get("Location");
+        try {
+            setResponseText(new String(getResponse()));
+        } catch (Throwable t) {
+            // ignore
+        }
     }
 
     public HttpPost post() {

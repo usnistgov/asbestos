@@ -5,10 +5,7 @@ import gov.nist.asbestos.client.client.Format;
 import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import gov.nist.asbestos.simapi.validation.ValE;
-import org.hl7.fhir.r4.model.BaseResource;
-import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.TestReport;
-import org.hl7.fhir.r4.model.TestScript;
+import org.hl7.fhir.r4.model.*;
 
 import java.net.URI;
 import java.util.HashMap;
@@ -61,10 +58,12 @@ public class SetupActionTransaction extends GenericSetupAction {
 
         ResourceWrapper wrapper = getFhirClient().writeResource(resourceToSend, targetUrl, format, requestHeader);
         if (wrapper.isOk()) {
-            if (wrapper.getResource() != null && (wrapper.getResource() instanceof Bundle)) {
-                //Bundle bundle =
-            }
-            reporter.report(wrapper.getRef() + " transaction");
+            BaseResource resource = wrapper.getResource();
+            if (wrapper.getResource() != null && (wrapper.getResource() instanceof Bundle) && bundleContainsError((Bundle) resource) ) {
+                reporter.report(wrapper.getRef() + " transaction failed : \n" + getOperationOutcomeIssues((Bundle) wrapper.getResource()));
+                operationReport.setResult(TestReport.TestReportActionResult.FAIL);
+            } else
+                reporter.report(wrapper.getRef() + " transaction");
         } else {
             reporter.report("transaction to " + targetUrl + " failed with status " + wrapper.getHttpBase().getStatus());
             operationReport.setResult(TestReport.TestReportActionResult.FAIL);
@@ -74,6 +73,43 @@ public class SetupActionTransaction extends GenericSetupAction {
                 .setResource(wrapper)
                 .setHttpBase(wrapper.getHttpBase());
         fixtureMgr.put(fixtureId, fixtureComponent);
+    }
+
+    private String getOperationOutcomeIssues(Bundle bundle) {
+        StringBuilder buf = new StringBuilder();
+        boolean first = true;
+        for (Bundle.BundleEntryComponent component : bundle.getEntry()) {
+            Bundle.BundleEntryResponseComponent responseComponent = component.getResponse();
+            Resource outcome = responseComponent.getOutcome();
+            if (outcome instanceof OperationOutcome) {
+                OperationOutcome oo = (OperationOutcome) outcome;
+                for (OperationOutcome.OperationOutcomeIssueComponent issueComponent : oo.getIssue()) {
+                    if (issueComponent.getSeverity() == OperationOutcome.IssueSeverity.ERROR) {
+                        String details = issueComponent.getDiagnostics();
+                        if (first)
+                            first = false;
+                        else
+                            buf.append("\n");
+                        buf.append(details);
+
+                    }
+                }
+            }
+        }
+
+        return buf.toString();
+    }
+
+    private boolean bundleContainsError(Bundle bundle) {
+        if (bundle.hasEntry()) {
+            for (Bundle.BundleEntryComponent component : bundle.getEntry()) {
+                Bundle.BundleEntryResponseComponent response = component.getResponse();
+                if (response.hasStatus() && !response.getStatus().startsWith("200")) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     public SetupActionTransaction setFixtureMgr(FixtureMgr fixtureMgr) {

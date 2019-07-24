@@ -73,6 +73,7 @@ public class BundleToRegistryObjectList implements IVal {
     private Map<String, byte[]> documentContents = new HashMap<>();
     private boolean errorsOnly = true;
     private Bundle responseBundle = null;
+    private boolean responseHasError = false;
 
     public RegistryObjectListType build(Bundle bundle) {
         Objects.requireNonNull(val);
@@ -127,7 +128,7 @@ public class BundleToRegistryObjectList implements IVal {
             } else {
                 vale.add(new ValE("Ignoring resource of type " + resource.getClass().getSimpleName()));
             }
-            valeToResponseComponent(vale, responseComponent, errorsOnly);
+            responseHasError |= valeToResponseComponent(vale, responseComponent, errorsOnly);
         }
 
         if (ss != null) {
@@ -140,9 +141,11 @@ public class BundleToRegistryObjectList implements IVal {
         return rol;
     }
 
-    private OperationOutcome valeToResponseComponent(ValE vale, Bundle.BundleEntryResponseComponent responseComponent, boolean errorsOnly) {
+    private boolean valeToResponseComponent(ValE vale, Bundle.BundleEntryResponseComponent responseComponent, boolean errorsOnly) {
         OperationOutcome oo = null;
+        boolean returnError = false;
         if (vale.hasErrors()) {
+            returnError = true;
             responseComponent.setStatus("400");
             oo = new OperationOutcome();
             responseComponent.setOutcome(oo);
@@ -180,7 +183,7 @@ public class BundleToRegistryObjectList implements IVal {
 
         if (oo != null)
             responseComponent.setOutcome(oo);
-        return oo;
+        return returnError;
     }
 
 
@@ -846,5 +849,9 @@ public class BundleToRegistryObjectList implements IVal {
 
     public Bundle getResponseBundle() {
         return responseBundle;
+    }
+
+    public boolean isResponseHasError() {
+        return responseHasError;
     }
 }
