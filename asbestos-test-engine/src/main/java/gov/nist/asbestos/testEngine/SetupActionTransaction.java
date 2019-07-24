@@ -62,7 +62,7 @@ public class SetupActionTransaction extends GenericSetupAction {
         ResourceWrapper wrapper = getFhirClient().writeResource(resourceToSend, targetUrl, format, requestHeader);
         if (wrapper.isOk()) {
             if (wrapper.getResource() != null && (wrapper.getResource() instanceof Bundle)) {
-                Bundle bundle =
+                //Bundle bundle =
             }
             reporter.report(wrapper.getRef() + " transaction");
         } else {

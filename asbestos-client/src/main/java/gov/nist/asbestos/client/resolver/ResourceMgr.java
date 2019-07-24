@@ -5,7 +5,6 @@ import gov.nist.asbestos.client.Base.IVal;
 import gov.nist.asbestos.client.client.FhirClient;
 import gov.nist.asbestos.simapi.validation.Val;
 import gov.nist.asbestos.simapi.validation.ValE;
-import gov.nist.asbestos.simapi.validation.ValOO;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.Resource;
@@ -18,19 +17,17 @@ import java.util.*;
 public class ResourceMgr implements IVal {
 //    static private final Logger logger = Logger.getLogger(ResourceMgr.class);
     private Map<Ref, ResourceWrapper> bundleResources = new HashMap<>();   // url -> resource; for contents of bundle
-    private List<ResourceWrapper> bundleResourceList = new ArrayList<>();
     private Val val;
     private ResourceMgrConfig resourceMgrConfig = new ResourceMgrConfig();
     private FhirClient fhirClient = null;
     private List<Ref> knownServers = new ArrayList<>();
-    private Bundle bundle = null;
+    private List<ResourceWrapper> bundleResourceList = new ArrayList<>();
 
     public ResourceMgr() {
 
     }
 
     public void setBundle(Bundle bundle) {
-        this.bundle = bundle;
         bundleResources = new HashMap<>();
         parse(bundle);
     }
@@ -69,6 +66,7 @@ public class ResourceMgr implements IVal {
 
                 thisVal.add(new ValE("..." + component.getFullUrl()));
                 addResource(new Ref(component.getFullUrl()), wrapper);
+                bundleResourceList.add(wrapper);
             }
         });
     }
@@ -93,7 +91,6 @@ public class ResourceMgr implements IVal {
             val.add(new ValE("Duplicate resource found in bundle for URL " + url).asError());
         else
             bundleResources.put(url, resource);
-        bundleResourceList.add(resource);
     }
 
     private ResourceWrapper getContains(ResourceWrapper resource, Ref refUrl) {
@@ -123,7 +120,7 @@ public class ResourceMgr implements IVal {
     }
 
     public Optional<ResourceWrapper> resolveReference(ResourceWrapper containing, Ref referenceUrl, ResolverConfig config) {
-        return resolveReference(containing, referenceUrl, config, new ValOO(new ValE(val)));
+        return resolveReference(containing, referenceUrl, config, new ValE(val));
     }
     /**
      * Return resource if internal or reference if external.
@@ -132,11 +129,11 @@ public class ResourceMgr implements IVal {
      * @param config
      * @return
      */
-    public Optional<ResourceWrapper> resolveReference(ResourceWrapper containing, Ref referenceUrl, ResolverConfig config, ValOO val) {
+    public Optional<ResourceWrapper> resolveReference(ResourceWrapper containing, Ref referenceUrl, ResolverConfig config, ValE val) {
         Objects.requireNonNull(val);
         Objects.requireNonNull(referenceUrl);
         Objects.requireNonNull(config);
-        ValE thisVal = new ValOO(val);
+        ValE thisVal = new ValE(val);
         thisVal.add(new ValE("Resolver: Resolve URL " + referenceUrl + " ... " + config));
 
         //
@@ -300,10 +297,6 @@ public class ResourceMgr implements IVal {
                 return false;
         }
         return true;
-    }
-
-    public Bundle getBundle() {
-        return bundle;
     }
 
     public List<ResourceWrapper> getBundleResourceList() {

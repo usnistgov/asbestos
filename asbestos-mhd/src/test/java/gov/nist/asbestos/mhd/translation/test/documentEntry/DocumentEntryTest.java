@@ -16,10 +16,7 @@ import gov.nist.asbestos.mhd.translation.BundleToRegistryObjectList;
 import gov.nist.asbestos.mhd.translation.ContainedIdAllocator;
 import gov.nist.asbestos.mhd.translation.DocumentEntryToDocumentReference;
 import gov.nist.asbestos.simapi.tk.installation.Installation;
-import gov.nist.asbestos.simapi.validation.Val;
-import gov.nist.asbestos.simapi.validation.ValErrors;
-import gov.nist.asbestos.simapi.validation.ValFactory;
-import gov.nist.asbestos.simapi.validation.ValWarnings;
+import gov.nist.asbestos.simapi.validation.*;
 import oasis.names.tc.ebxml_regrep.xsd.rim._3.ExtrinsicObjectType;
 import org.hl7.fhir.r4.model.*;
 import org.junit.jupiter.api.BeforeAll;
@@ -98,7 +95,7 @@ class DocumentEntryTest {
         rMgr.setVal(val);
         rMgr.setFhirClient(fhirClient);
 
-        ExtrinsicObjectType extrinsicObjectType = bundleToRegistryObjectList.createExtrinsicObject(resource);
+        ExtrinsicObjectType extrinsicObjectType = bundleToRegistryObjectList.createExtrinsicObject(resource, new ValE(val));
 
         DocumentEntryToDocumentReference documentEntryToDocumentReference = new DocumentEntryToDocumentReference();
         documentEntryToDocumentReference.setVal(val);

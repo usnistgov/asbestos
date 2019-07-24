@@ -136,7 +136,7 @@ class AttributesTest {
         rMgr.setVal(val);
         brol.setResourceMgr(rMgr);
 
-        AssociationType1 a = brol.createAssociation("HasMember", "id1", "id2", "name", Collections.singletonList("foo"));
+        AssociationType1 a = brol.createAssociation("HasMember", "id1", "id2", "name", Collections.singletonList("foo"), new ValE(val));
 
         String aString = toXml(a);
         System.out.println(aString);

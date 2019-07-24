@@ -113,6 +113,33 @@ public class ValE {
         return false;
     }
 
+    public boolean hasInfo() {
+        for (ValType type : types) {
+            if (type != ValType.Warn && type != ValType.Error)
+                return true;
+        }
+        for (ValE e : ele) {
+            if (e.hasInfo())
+                return true;
+        }
+        return false;
+    }
+
+    // if this is names get* then translating to JSON via Jackson gets into loop
+    public List<ValE> infos() {
+        List<ValE> infos = new ArrayList<>();
+        boolean includeMe = false;
+        for (ValType type : types) {
+            if (type != ValType.Warn && type != ValType.Error)
+                includeMe = true;
+        }
+        if (includeMe)
+            infos.add(this);
+        for (ValE e : ele)
+            infos.addAll(e.infos());
+        return infos;
+    }
+
     public List<ValE> getErrors() {
         List<ValE> errors = new ArrayList<>();
         for (ValE e : ele) {
@@ -122,6 +149,17 @@ public class ValE {
                 errors.addAll(e.getErrors());
         }
         return errors;
+    }
+
+    public List<ValE> getWarnings() {
+        List<ValE> warnings = new ArrayList<>();
+        for (ValE e : ele) {
+            if (e.getTypes().contains(ValType.Warn) && !e.getTypes().contains(ValType.Ignored))
+                warnings.add(e);
+            if (!e.ele.isEmpty())
+                warnings.addAll(e.getWarnings());
+        }
+        return warnings;
     }
 
 }
