@@ -84,7 +84,7 @@ public class SetupActionTransaction extends GenericSetupAction {
             if (outcome instanceof OperationOutcome) {
                 OperationOutcome oo = (OperationOutcome) outcome;
                 for (OperationOutcome.OperationOutcomeIssueComponent issueComponent : oo.getIssue()) {
-                    if (issueComponent.getSeverity() == OperationOutcome.IssueSeverity.ERROR) {
+                    if (issueComponent.getSeverity() == OperationOutcome.IssueSeverity.ERROR ) {
                         String details = issueComponent.getDiagnostics();
                         if (first)
                             first = false;

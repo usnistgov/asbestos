@@ -120,20 +120,7 @@ public class ProxyServlet extends HttpServlet {
             try {
                 requestOut = transformRequest(backSideTask, requestIn, channel);
             } catch (TransformException te) {
-                Format format = te.getFormat();
-                String body = te.getResponse();
-                byte[] bodyBytes = body.getBytes();
-                Headers headers = new Headers();
-                headers.setStatus(200);
-                headers.getHeaders().add(new Header("Content-Type", format.getContentType()));
-
-                event.getStore().selectClientTask();
-                event.getStore().putResponseBodyText(body);
-                event.getStore().putResponseHeader(headers);
-
-                resp.addHeader("Content-Type", format.getContentType());
-                resp.getOutputStream().write(bodyBytes);
-                log.error(body);
+                returnTransformException(resp, event, te);
                 return;
             }
             URI outUri = transformRequestUri(backSideTask, requestIn, channel);
@@ -149,7 +136,13 @@ public class ProxyServlet extends HttpServlet {
 
             // transform backend service response for client
             event.getStore().selectClientTask();
-            HttpBase responseOut = transformResponse(event.getStore().selectTask(Task.CLIENT_TASK), requestOut, channel, hostport);
+            HttpBase responseOut;
+            try {
+                responseOut = transformResponse(event.getStore().selectTask(Task.CLIENT_TASK), requestOut, channel, hostport);
+            } catch (TransformException te) {
+                returnTransformException(resp, event, te);
+                return;
+            }
 
             responseOut.getResponseHeaders().getAll().forEach(resp::addHeader);
 
@@ -164,6 +157,23 @@ public class ProxyServlet extends HttpServlet {
             resp.setStatus(resp.SC_INTERNAL_SERVER_ERROR);
             returnOperationOutcome(req, resp, t);
         }
+    }
+
+    private void returnTransformException(HttpServletResponse resp, Event event, TransformException te) throws IOException {
+        Format format = te.getFormat();
+        String body = te.getResponse();
+        byte[] bodyBytes = body.getBytes();
+        Headers headers = new Headers();
+        headers.setStatus(200);
+        headers.getHeaders().add(new Header("Content-Type", format.getContentType()));
+
+        event.getStore().selectClientTask();
+        event.getStore().putResponseBodyText(body);
+        event.getStore().putResponseHeader(headers);
+
+        resp.addHeader("Content-Type", format.getContentType());
+        resp.getOutputStream().write(bodyBytes);
+        log.error(body);
     }
 
     @Override
@@ -420,7 +430,8 @@ public class ProxyServlet extends HttpServlet {
         task.getEventStore().putRequestBody(bytes);
         List<String> encodings = headers.getContentEncoding().getAllValues();
         if (encodings.isEmpty()) {
-            if (isStringType(headers.getContentType().getAllValues().get(0))) {
+            String contentType = headers.getContentType().getAllValues().get(0);
+            if (isStringType(contentType) || "".equals(contentType)) {
                 String txt = new String(bytes);
                 http.setRequestText(txt);
                 task.getEventStore().putRequestBodyText(txt);
@@ -484,14 +495,17 @@ public class ProxyServlet extends HttpServlet {
     static HttpBase transformResponse(Task task, HttpBase responseIn, IBaseChannel channelTransform, String proxyHostPort) {
         HttpBase responseOut = new HttpGet();  // here GET vs POST does not matter
 
-        channelTransform.transformResponse(responseIn, responseOut, proxyHostPort);
 
-        responseOut.getResponseHeaders().removeHeader("transfer-encoding");
+        try {
+            channelTransform.transformResponse(responseIn, responseOut, proxyHostPort);
+        } finally {
+            responseOut.getResponseHeaders().removeHeader("transfer-encoding");
 
-        task.select();
-        task.getEventStore().putResponseBody(responseOut.getResponse());
-        task.getEventStore().putResponseHeader(responseOut.getResponseHeaders());
-        logResponseBody(task, responseOut);
+            task.select();
+            task.getEventStore().putResponseBody(responseOut.getResponse());
+            task.getEventStore().putResponseHeader(responseOut.getResponseHeaders());
+            logResponseBody(task, responseOut);
+        }
 
         return responseOut;
     }

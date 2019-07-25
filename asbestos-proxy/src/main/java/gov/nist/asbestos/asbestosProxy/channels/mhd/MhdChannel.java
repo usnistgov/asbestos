@@ -89,27 +89,6 @@ public class MhdChannel implements IBaseChannel {
                             , Format.XML);
         }
 
-//        if (val.hasWarnings()) {
-//            for (ValE valE : new ValWarnings(val).getWarnings()) {
-//                OperationOutcome.OperationOutcomeIssueComponent issue = oo.addIssue();
-//                issue.setSeverity(OperationOutcome.IssueSeverity.WARNING);
-//                issue.setCode(OperationOutcome.IssueType.UNKNOWN);
-//                issue.setDiagnostics(valE.getMsg());
-//            }
-//        }
-//
-//        if (val.hasErrors()) {
-//            for (ValE valE : new ValErrors(val).getErrors()) {
-//                OperationOutcome.OperationOutcomeIssueComponent issue = oo.addIssue();
-//                issue.setSeverity(OperationOutcome.IssueSeverity.ERROR);
-//                issue.setCode(OperationOutcome.IssueType.UNKNOWN);
-//                issue.setDiagnostics(valE.getMsg());
-//            }
-//
-//            return null;
-//        }
-
-
         ProvideAndRegisterDocumentSetRequestType pnr = new ProvideAndRegisterDocumentSetRequestType();
         SubmitObjectsRequest sor = new SubmitObjectsRequest();
         sor.setRegistryObjectList(registryObjectListType);
@@ -222,22 +201,28 @@ public class MhdChannel implements IBaseChannel {
         String responseBody = responseIn.getResponseText();
         String registryResponse = RegistryResponseExtractor.extractRegistryResponse(responseBody);
         if (registryResponse == null) {
-            String faultReason = null;
+            String faultReason;
             try {
                 faultReason = FaultParser.parse(responseBody);
             } catch (Exception e) {
                 OperationOutcome.OperationOutcomeIssueComponent issue = oo.addIssue();
                 issue.setCode(OperationOutcome.IssueType.EXCEPTION);
+                issue.setSeverity(OperationOutcome.IssueSeverity.ERROR);
                 issue.setDiagnostics(ExceptionUtils.getStackTrace(e));
                 return;
             }
             if (faultReason != null) {
                 OperationOutcome.OperationOutcomeIssueComponent issue = oo.addIssue();
                 issue.setCode(OperationOutcome.IssueType.EXCEPTION);
+                issue.setSeverity(OperationOutcome.IssueSeverity.ERROR);
                 issue.setDiagnostics(faultReason);
-                return;
+                Bundle response = new Bundle();
+                Bundle.BundleEntryComponent entry = response.addEntry();
+                Bundle.BundleEntryResponseComponent errResponse = entry.getResponse();
+                errResponse.setStatus("500");
+                errResponse.setOutcome(oo);
+                throw new TransformException(ProxyBase.getFhirContext().newXmlParser().setPrettyPrint(true).encodeResourceToString(response), Format.XML);
             }
-            throw new RuntimeException("Registry Response does not parse");
         }
         RegistryResponseType rrt;
         try {

@@ -86,6 +86,8 @@ abstract public class HttpBase {
     }
 
     public byte[] getRequest() {
+        if (_request == null && _requestText != null)
+            return _requestText.getBytes();
         return _request;
     }
 
