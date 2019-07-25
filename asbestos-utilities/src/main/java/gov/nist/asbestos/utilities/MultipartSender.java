@@ -1,7 +1,5 @@
 package gov.nist.asbestos.utilities;
 
-import oasis.names.tc.ebxml_regrep.xsd.rs._3.RegistryError;
-import oasis.names.tc.ebxml_regrep.xsd.rs._3.RegistryErrorList;
 import oasis.names.tc.ebxml_regrep.xsd.rs._3.RegistryResponseType;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.ClientProtocolException;
@@ -19,7 +17,6 @@ import org.apache.http.util.EntityUtils;
 import javax.xml.bind.JAXBException;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.util.List;
 
 public class MultipartSender {
 
@@ -27,25 +24,16 @@ public class MultipartSender {
         String soapString = PnrWrapper.wrap(toAddr, body);
 
         try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
-            String boundary = "alksdjflkdjfslkdfjslkdjfslkdjf";
-            MultipartEntity mp = new MultipartEntity(null, boundary, null);
-
-            ByteArrayBody bab = new ByteArrayBody(soapString.getBytes(), ContentType.parse("application/xop+xml"), "foo");
-            FormBodyPart fbp = new FormBodyPart("content", bab);
-            fbp.addField("Content-ID", "<0.1.1.1@example.org>");
-            mp.addPart(fbp);
+            MultipartEntity mp = getMultipartEntity(soapString);
 
             RequestBuilder builder = RequestBuilder
                     .post()
                     .setUri(toAddr)
                     .setEntity(mp);
 
-            String contentType = "multipart/related; type=\"application/xop+xml\"; boundary=\"" + boundary + "\";" +
-                    "action=\"urn:ihe:iti:2007:ProvideAndRegisterDocumentSet-b\"";
-
             HttpUriRequest request = builder.build();
 
-            request.setHeader("Content-type", contentType);
+            request.setHeader("Content-type", getContentType());
 
             ResponseHandler<String> responseHandler = response -> {
                 int status = response.getStatusLine().getStatusCode();
@@ -67,5 +55,23 @@ public class MultipartSender {
         }
     }
 
+    public static MultipartEntity getMultipartEntity(String soapString) {
+        MultipartEntity mp = new MultipartEntity(null, getBoundary(), null);
+
+        ByteArrayBody bab = new ByteArrayBody(soapString.getBytes(), ContentType.parse("application/xop+xml"), "foo");
+        FormBodyPart fbp = new FormBodyPart("content", bab);
+        fbp.addField("Content-ID", "<0.1.1.1@example.org>");
+        mp.addPart(fbp);
+        return mp;
+    }
+
+    public static String getContentType() {
+        return "multipart/related; type=\"application/xop+xml\"; boundary=\"" + getBoundary() + "\";" +
+                "action=\"urn:ihe:iti:2007:ProvideAndRegisterDocumentSet-b\"";
+    }
+
+    private static String getBoundary() {
+        return "alksdjflkdjfslkdfjslkdjfslkdjf";
+    }
 
 }

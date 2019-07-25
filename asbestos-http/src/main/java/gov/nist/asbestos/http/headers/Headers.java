@@ -18,6 +18,12 @@ public class Headers {
         this.headers = headerList;
     }
 
+    public Headers withContentType(String type) {
+        Header ct = new Header("Content Type", type);
+        headers.add(ct);
+        return this;
+    }
+
     public void removeHeader(String name) {
         for (Header header : headers) {
             if (header.getName().equalsIgnoreCase(name)) {

@@ -59,8 +59,12 @@ public class SetupActionTransaction extends GenericSetupAction {
         ResourceWrapper wrapper = getFhirClient().writeResource(resourceToSend, targetUrl, format, requestHeader);
         if (wrapper.isOk()) {
             BaseResource resource = wrapper.getResource();
-            if (wrapper.getResource() != null && (wrapper.getResource() instanceof Bundle) && bundleContainsError((Bundle) resource) ) {
-                reporter.report(wrapper.getRef() + " transaction failed : \n" + getOperationOutcomeIssues((Bundle) wrapper.getResource()));
+            if ((resource instanceof Bundle) && bundleContainsError((Bundle) resource) ) {
+                reporter.report(wrapper.getRef() + " transaction failed : \n" + getBundleIssues((Bundle) wrapper.getResource()));
+                operationReport.setResult(TestReport.TestReportActionResult.FAIL);
+            } else if ((resource instanceof OperationOutcome && operationOutcomeContainsError((OperationOutcome) resource))) {
+                String issues = getOperationOutcomeIssues((OperationOutcome) resource);
+                reporter.report(wrapper.getRef() + " transaction failed : \n" + issues);
                 operationReport.setResult(TestReport.TestReportActionResult.FAIL);
             } else
                 reporter.report(wrapper.getRef() + " transaction");
@@ -75,7 +79,7 @@ public class SetupActionTransaction extends GenericSetupAction {
         fixtureMgr.put(fixtureId, fixtureComponent);
     }
 
-    private String getOperationOutcomeIssues(Bundle bundle) {
+    private String getBundleIssues(Bundle bundle) {
         StringBuilder buf = new StringBuilder();
         boolean first = true;
         for (Bundle.BundleEntryComponent component : bundle.getEntry()) {
@@ -83,17 +87,25 @@ public class SetupActionTransaction extends GenericSetupAction {
             Resource outcome = responseComponent.getOutcome();
             if (outcome instanceof OperationOutcome) {
                 OperationOutcome oo = (OperationOutcome) outcome;
-                for (OperationOutcome.OperationOutcomeIssueComponent issueComponent : oo.getIssue()) {
-                    if (issueComponent.getSeverity() == OperationOutcome.IssueSeverity.ERROR ) {
-                        String details = issueComponent.getDiagnostics();
-                        if (first)
-                            first = false;
-                        else
-                            buf.append("\n");
-                        buf.append(details);
+                buf.append(getOperationOutcomeIssues(oo));
+            }
+        }
 
-                    }
-                }
+        return buf.toString();
+    }
+
+    private String getOperationOutcomeIssues(OperationOutcome oo) {
+        StringBuilder buf = new StringBuilder();
+        boolean first = true;
+
+        for (OperationOutcome.OperationOutcomeIssueComponent issueComponent : oo.getIssue()) {
+            if (issueComponent.getSeverity() == OperationOutcome.IssueSeverity.ERROR ) {
+                String details = issueComponent.getDiagnostics();
+                if (first)
+                    first = false;
+                else
+                    buf.append("\n");
+                buf.append(details);
             }
         }
 
@@ -107,6 +119,15 @@ public class SetupActionTransaction extends GenericSetupAction {
                 if (response.hasStatus() && !response.getStatus().startsWith("200")) {
                     return true;
                 }
+            }
+        }
+        return false;
+    }
+
+    private boolean operationOutcomeContainsError(OperationOutcome oo) {
+        for (OperationOutcome.OperationOutcomeIssueComponent component : oo.getIssue()) {
+            if (component.getSeverity() == OperationOutcome.IssueSeverity.ERROR || component.getSeverity() == OperationOutcome.IssueSeverity.FATAL) {
+                return true;
             }
         }
         return false;

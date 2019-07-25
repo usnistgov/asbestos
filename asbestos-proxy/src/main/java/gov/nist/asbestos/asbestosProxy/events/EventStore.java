@@ -205,20 +205,22 @@ public class EventStore {
 
     public void putResponseHeader(Headers headers) {
         e._responseHeaders = headers;
-        current.mkdirs();
-        try {
-            try (PrintWriter out = new PrintWriter(getResponseHeaderFile())) {
-                out.print(headers.toString());
+        if (headers != null) {
+            current.mkdirs();
+            try {
+                try (PrintWriter out = new PrintWriter(getResponseHeaderFile())) {
+                    out.print(headers.toString());
+                }
+            } catch (Exception e) {
+                throw new RuntimeException(e);
             }
-        } catch (Exception e) {
-            throw new RuntimeException(e);
         }
     }
 
     public void putResponseBody(byte[] body) {
         e._responseRawBody = body;
         current.mkdirs();
-        if (body.length >  0) {
+        if (body != null && body.length >  0) {
             try {
                 try (FileOutputStream out = new FileOutputStream(getResponseBodyFile())) {
                     out.write(body);

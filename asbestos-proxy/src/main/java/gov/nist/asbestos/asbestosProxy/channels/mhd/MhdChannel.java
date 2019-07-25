@@ -50,7 +50,6 @@ public class MhdChannel implements IBaseChannel {
     private ChannelConfig channelConfig = null;
     private String serverBase;
     private String proxyBase;
-    OperationOutcome oo = new OperationOutcome();
 
     private String transformPDBToPNR(Bundle bundle) {
         Val val = new Val();
@@ -105,12 +104,20 @@ public class MhdChannel implements IBaseChannel {
         ByteArrayOutputStream pnrStream = new ByteArrayOutputStream();
         new ProvideAndRegisterBuilder().toOutputStream(pnr, pnrStream);
 
-        return deleteXMLInstruction(new String(pnrStream.toByteArray()));
+        String soapString = deleteXMLInstruction(new String(pnrStream.toByteArray()));
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+        try {
+            MultipartSender.getMultipartEntity(soapString).writeTo(os);
+        } catch (IOException e) {
+            //
+        }
+        return os.toString();
     }
 
     @Override
     public void transformRequest(HttpPost requestIn, HttpPost requestOut)  {
         Objects.requireNonNull(channelConfig);
+        OperationOutcome oo = new OperationOutcome();
         Headers headers  = requestIn.getRequestHeaders();
         byte[] request = requestIn.getRequest();
         String contentType = requestIn.getRequestContentType();
@@ -146,9 +153,10 @@ public class MhdChannel implements IBaseChannel {
             throw new RuntimeException(e);
         }
 
-        String soapString = PnrWrapper.wrap(toAddr.toString(), pnrString);
+        //String soapString = PnrWrapper.wrap(toAddr.toString(), pnrString);
 
-        requestOut.setRequestText(soapString);
+        requestOut.setRequestText(pnrString);
+        requestOut.setRequestHeaders(new Headers().withContentType(MultipartSender.getContentType()));
     }
 
     private static String deleteXMLInstruction(String in) {
@@ -198,6 +206,8 @@ public class MhdChannel implements IBaseChannel {
 
     @Override
     public void transformResponse(HttpBase responseIn, HttpBase responseOut, String proxyHostPort) {
+        OperationOutcome oo = new OperationOutcome();
+
         String responseBody = responseIn.getResponseText();
         String registryResponse = RegistryResponseExtractor.extractRegistryResponse(responseBody);
         if (registryResponse == null) {

@@ -144,7 +144,8 @@ public class ProxyServlet extends HttpServlet {
                 return;
             }
 
-            responseOut.getResponseHeaders().getAll().forEach(resp::addHeader);
+            if (responseOut.getResponseHeaders() != null)
+                responseOut.getResponseHeaders().getAll().forEach(resp::addHeader);
 
             if (responseOut.getResponse() != null) {
                 resp.getOutputStream().write(responseOut.getResponse());
@@ -355,7 +356,8 @@ public class ProxyServlet extends HttpServlet {
 
     private static List<String> stringTypes = Arrays.asList(
             "application/fhir+json",
-            "application/json+fhir"
+            "application/json+fhir",
+            "application/soap+xml"
     );
 
     static boolean isStringType(String type) {
@@ -399,25 +401,31 @@ public class ProxyServlet extends HttpServlet {
         Headers headers = http.getResponseHeaders();
         byte[] bytes = http.getResponse();
         task.getEventStore().putResponseBody(bytes);
-        List<String> encodings = headers.getContentEncoding().getAllValues();
-        if (encodings.isEmpty()) {
-            if (isStringType(headers.getContentType().getAllValues().get(0))) {
-                String txt = new String(bytes);
-                http.setResponseText(txt);
-                task.getEventStore().putResponseBodyText(txt);
-            }
-        }
-        else {
-            String encoding = encodings.get(0);
-            if (encoding != null && encoding.equalsIgnoreCase("gzip")) {
-                String txt = Gzip.decompressGZIP(bytes);
-                task.getEventStore().putResponseBodyText(txt);
-                http.setResponseText(txt);
-            } else if (headers.getContentType().getAllValues().get(0).equalsIgnoreCase("text/html")) {
-                task.getEventStore().putResponseHTMLBody(bytes);
-                http.setResponseText(new String(bytes));
-            } else if (isStringType(headers.getContentType().getAllValues().get(0))) {
-                http.setResponseText(new String(bytes));
+        if (headers == null) {
+            String txt = new String(bytes);
+            http.setResponseText(txt);
+            task.getEventStore().putResponseBodyText(txt);
+        } else {
+            List<String> encodings = headers.getContentEncoding().getAllValues();
+            if (encodings.isEmpty()) {
+                String contentType = headers.getContentType().getAllValues().get(0);
+                if (isStringType(contentType)) {
+                    String txt = new String(bytes);
+                    http.setResponseText(txt);
+                    task.getEventStore().putResponseBodyText(txt);
+                }
+            } else {
+                String encoding = encodings.get(0);
+                if (encoding != null && encoding.equalsIgnoreCase("gzip")) {
+                    String txt = Gzip.decompressGZIP(bytes);
+                    task.getEventStore().putResponseBodyText(txt);
+                    http.setResponseText(txt);
+                } else if (headers.getContentType().getAllValues().get(0).equalsIgnoreCase("text/html")) {
+                    task.getEventStore().putResponseHTMLBody(bytes);
+                    http.setResponseText(new String(bytes));
+                } else if (isStringType(headers.getContentType().getAllValues().get(0))) {
+                    http.setResponseText(new String(bytes));
+                }
             }
         }
     }
@@ -498,13 +506,23 @@ public class ProxyServlet extends HttpServlet {
 
         try {
             channelTransform.transformResponse(responseIn, responseOut, proxyHostPort);
-        } finally {
-            responseOut.getResponseHeaders().removeHeader("transfer-encoding");
+        } catch (TransformException te) {
+            if (responseOut.getResponseHeaders() != null)
+                responseOut.getResponseHeaders().removeHeader("transfer-encoding");
 
             task.select();
-            task.getEventStore().putResponseBody(responseOut.getResponse());
-            task.getEventStore().putResponseHeader(responseOut.getResponseHeaders());
-            logResponseBody(task, responseOut);
+            responseOut.setResponse(te.getResponse().getBytes());
+            responseOut.setRequestHeaders(new Headers().withContentType(te.getFormat().getContentType()));
+        } finally {
+            if (responseOut.getResponseHeaders() != null)
+                responseOut.getResponseHeaders().removeHeader("transfer-encoding");
+
+            task.select();
+            if (responseOut.getResponse() != null) {
+                task.getEventStore().putResponseBody(responseOut.getResponse());
+                task.getEventStore().putResponseHeader(responseOut.getResponseHeaders());
+                logResponseBody(task, responseOut);
+            }
         }
 
         return responseOut;
