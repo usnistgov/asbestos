@@ -1,6 +1,9 @@
 package gov.nist.asbestos.client.Base;
 
 import ca.uhn.fhir.context.FhirContext;
+import gov.nist.asbestos.client.client.Format;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.BaseResource;
 
 
 public class ProxyBase {
@@ -10,6 +13,28 @@ public class ProxyBase {
         if (ourCtx == null)
             ourCtx = FhirContext.forR4();
         return ourCtx;
+    }
+
+    public static String encode(BaseResource resource, Format format) {
+        if (format == Format.JSON) {
+            return getFhirContext().newJsonParser().setPrettyPrint(true).encodeResourceToString(resource);
+        } else {
+            return getFhirContext().newXmlParser().setPrettyPrint(true).encodeResourceToString(resource);
+        }
+    }
+
+    public static BaseResource parse(String resourceString, Format format) {
+        IBaseResource ibase;
+        if (format == Format.JSON) {
+            ibase = getFhirContext().newJsonParser().parseResource(resourceString);
+            if (ibase instanceof BaseResource)
+                return (BaseResource) ibase;
+        } else {
+            ibase = getFhirContext().newXmlParser().parseResource(resourceString);
+            if (ibase instanceof BaseResource)
+                return (BaseResource) ibase;
+        }
+        throw new RuntimeException("Cannot parse resource - type " + ibase.getClass().getSimpleName() + " cannot be converted to BaseResource");
     }
 
 //    private static hexChars = ('0'..'9') + ('a'..'f')

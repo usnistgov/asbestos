@@ -52,7 +52,7 @@ public class FhirClient {
             response.setRef(new Ref(post.getLocationHeader().getValue()));
         boolean isXml = post.getRequestContentType().contains("xml");
         String returnedResourceText = post.getResponseText();
-        if (returnedResourceText != null) {
+        if (returnedResourceText != null && !returnedResourceText.equals("")) {
             IBaseResource returnedResource = isXml
                     ? ProxyBase.getFhirContext().newXmlParser().parseResource(returnedResourceText)
                     : ProxyBase.getFhirContext().newJsonParser().parseResource(returnedResourceText);

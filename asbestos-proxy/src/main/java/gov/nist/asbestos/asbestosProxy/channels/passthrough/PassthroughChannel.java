@@ -1,5 +1,6 @@
 package gov.nist.asbestos.asbestosProxy.channels.passthrough;
 
+import gov.nist.asbestos.asbestosProxy.channel.BaseChannel;
 import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.http.headers.Header;
 import gov.nist.asbestos.http.operations.HttpDelete;
@@ -16,7 +17,7 @@ import java.util.Arrays;
 import java.util.Objects;
 
 
-public class PassthroughChannel implements IBaseChannel {
+public class PassthroughChannel extends BaseChannel /*implements IBaseChannel*/ {
     private ChannelConfig channelConfig = null;
     private String serverBase;
     private String proxyBase;

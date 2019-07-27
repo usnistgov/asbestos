@@ -1,0 +1,11 @@
+--MIMEBoundary112233445566778899
+Content-Type: application/xop+xml; charset=UTF-8; type="application/soap+xml"
+Content-Transfer-Encoding: binary
+Content-ID: <doc0@ihexds.nist.gov>
+
+<S:Envelope xmlns:S="http://www.w3.org/2003/05/soap-envelope"><S:Header/><S:Body>
+<foo/>
+</S:Body></S:Envelope>
+
+
+--MIMEBoundary112233445566778899--

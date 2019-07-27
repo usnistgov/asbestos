@@ -1,5 +1,6 @@
 package gov.nist.asbestos.asbestosProxy.channels.mhd;
 
+import gov.nist.asbestos.asbestosProxy.channel.BaseChannel;
 import gov.nist.asbestos.asbestosProxy.channel.IBaseChannel;
 import gov.nist.asbestos.asbestosProxy.events.EventStore;
 import gov.nist.asbestos.asbestosProxy.parser.FaultParser;
@@ -46,12 +47,13 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Scanner;
 
-public class MhdChannel implements IBaseChannel {
+public class MhdChannel extends BaseChannel /*implements IBaseChannel*/ {
     private ChannelConfig channelConfig = null;
+    private Bundle requestBundle = null;
     private String serverBase;
     private String proxyBase;
 
-    private String transformPDBToPNR(Bundle bundle) {
+    private String transformPDBToPNR(Bundle bundle, URI toAddr) {
         Val val = new Val();
         FhirClient fhirClient = new FhirClient();
         fhirClient.setResourceCacheMgr(new ResourceCacheMgr(getExternalCache()));
@@ -85,7 +87,7 @@ public class MhdChannel implements IBaseChannel {
                     .setPrettyPrint(true)
                     .encodeResourceToString(
                             bundleToRegistryObjectList.getResponseBundle())
-                            , Format.XML);
+                    , Format.XML);
         }
 
         ProvideAndRegisterDocumentSetRequestType pnr = new ProvideAndRegisterDocumentSetRequestType();
@@ -104,7 +106,8 @@ public class MhdChannel implements IBaseChannel {
         ByteArrayOutputStream pnrStream = new ByteArrayOutputStream();
         new ProvideAndRegisterBuilder().toOutputStream(pnr, pnrStream);
 
-        String soapString = deleteXMLInstruction(new String(pnrStream.toByteArray()));
+        String pnrString = deleteXMLInstruction(new String(pnrStream.toByteArray()));
+        String soapString = PnrWrapper.wrap(toAddr.toString(), pnrString);
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         try {
             MultipartSender.getMultipartEntity(soapString).writeTo(os);
@@ -135,9 +138,17 @@ public class MhdChannel implements IBaseChannel {
         if (!(resource instanceof Bundle) )
             throw new RuntimeException("Expecting Bundle - got " + resource.getClass().getSimpleName());
         Bundle bundle = (Bundle) resource;
+        requestBundle = bundle;
 
-        String pnrString = transformPDBToPNR(bundle);
-        if (pnrString == null) {
+        URI toAddr;
+        try {
+            toAddr = transformRequestUrl(null, requestIn); //channelConfig.translateEndpointToFhirBase(requestIn.getRequestHeaders().getPathInfo());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+        String soapString = transformPDBToPNR(bundle, toAddr);
+        if (soapString == null) {
             // OperationOutcome is loaded with errors to return
             String response;
             if (isXml)
@@ -146,16 +157,10 @@ public class MhdChannel implements IBaseChannel {
                 response = ProxyBase.getFhirContext().newJsonParser().setPrettyPrint(true).encodeResourceToString(oo);
             throw new TransformException(response, isXml ? Format.XML : Format.JSON);
         }
-        URI toAddr;
-        try {
-            toAddr = transformRequestUrl(null, requestIn); //channelConfig.translateEndpointToFhirBase(requestIn.getRequestHeaders().getPathInfo());
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
 
-        //String soapString = PnrWrapper.wrap(toAddr.toString(), pnrString);
 
-        requestOut.setRequestText(pnrString);
+
+        requestOut.setRequestText(soapString);
         requestOut.setRequestHeaders(new Headers().withContentType(MultipartSender.getContentType()));
     }
 
@@ -204,36 +209,51 @@ public class MhdChannel implements IBaseChannel {
         }
     }
 
+    private void throwTransformException(String msg, Throwable t) {
+        throwTransformException(msg + "\n" + ExceptionUtils.getStackTrace(t));
+    }
+
+    private void throwTransformException(String message) {
+        OperationOutcome oo = new OperationOutcome();
+        OperationOutcome.OperationOutcomeIssueComponent issue = oo.addIssue();
+        issue.setCode(OperationOutcome.IssueType.EXCEPTION);
+        issue.setSeverity(OperationOutcome.IssueSeverity.ERROR);
+        issue.setDiagnostics(message);
+        Bundle response = new Bundle();
+        Bundle.BundleEntryComponent entry = response.addEntry();
+        Bundle.BundleEntryResponseComponent errResponse = entry.getResponse();
+        errResponse.setStatus("500");
+        errResponse.setOutcome(oo);
+        throw new TransformException(ProxyBase.getFhirContext().newXmlParser().setPrettyPrint(true).encodeResourceToString(response), Format.XML);
+    }
+
     @Override
     public void transformResponse(HttpBase responseIn, HttpBase responseOut, String proxyHostPort) {
+        Objects.requireNonNull(requestBundle);
         OperationOutcome oo = new OperationOutcome();
-
-        String responseBody = responseIn.getResponseText();
-        String registryResponse = RegistryResponseExtractor.extractRegistryResponse(responseBody);
-        if (registryResponse == null) {
-            String faultReason;
-            try {
-                faultReason = FaultParser.parse(responseBody);
-            } catch (Exception e) {
-                OperationOutcome.OperationOutcomeIssueComponent issue = oo.addIssue();
-                issue.setCode(OperationOutcome.IssueType.EXCEPTION);
-                issue.setSeverity(OperationOutcome.IssueSeverity.ERROR);
-                issue.setDiagnostics(ExceptionUtils.getStackTrace(e));
-                return;
+        String responsePart = responseIn.getResponseText();
+        String registryResponse = "";
+        try {
+            if (responsePart == null || responsePart.equals("")) {
+                throwTransformException("Empty response from XDS.ProvideAndRegister");
             }
-            if (faultReason != null) {
-                OperationOutcome.OperationOutcomeIssueComponent issue = oo.addIssue();
-                issue.setCode(OperationOutcome.IssueType.EXCEPTION);
-                issue.setSeverity(OperationOutcome.IssueSeverity.ERROR);
-                issue.setDiagnostics(faultReason);
-                Bundle response = new Bundle();
-                Bundle.BundleEntryComponent entry = response.addEntry();
-                Bundle.BundleEntryResponseComponent errResponse = entry.getResponse();
-                errResponse.setStatus("500");
-                errResponse.setOutcome(oo);
-                throw new TransformException(ProxyBase.getFhirContext().newXmlParser().setPrettyPrint(true).encodeResourceToString(response), Format.XML);
+            String envelope = FaultParser.unwrapPart(responsePart);
+            if (envelope == null || envelope.equals("")) {
+                throwTransformException("Empty SOAP Envelope from XDS.ProvideAndRegister");
             }
+            String faultMsg = FaultParser.parse(envelope);
+            if (faultMsg != null && !faultMsg.equals("")) {
+                throwTransformException(faultMsg);
+            }
+            registryResponse = FaultParser.extractRegistryResponse(envelope);
+            if (registryResponse == null || registryResponse.equals("")) {
+                throwTransformException("No RegistryResponse returned from XDS.ProvideAndRegister");
+            }
+        } catch (Throwable e) {
+            throwTransformException("Error processing RegistryResponse:\n" + responsePart + "\n", e);
         }
+
+
         RegistryResponseType rrt;
         try {
             rrt = new RegistryResponseBuilder().fromInputStream(new ByteArrayInputStream(registryResponse.getBytes()));
@@ -255,6 +275,30 @@ public class MhdChannel implements IBaseChannel {
             issue.setDiagnostics(msg);
             issue.setSeverity(errorType == ErrorType.Error ? OperationOutcome.IssueSeverity.ERROR : OperationOutcome.IssueSeverity.WARNING);
         }
+        Bundle responseBundle = packageResponse(
+                lst.isEmpty() ? null : oo
+        );
+        if (returnFormatType == null)
+            returnFormatType = Format.XML;
+        responseOut.setResponseText(ProxyBase.encode(responseBundle, returnFormatType));
+        responseOut.setResponseContentType(returnFormatType.getContentType());
+    }
+
+    private Bundle packageResponse(OperationOutcome oo) {
+        Bundle response = new Bundle();
+        boolean first = true;
+        for (Bundle.BundleEntryComponent componentIn : requestBundle.getEntry()) {
+            Bundle.BundleEntryComponent componentOut = response.addEntry();
+            Bundle.BundleEntryResponseComponent responseComponent = componentOut.getResponse();
+            if (first && oo != null) {
+                responseComponent.setStatus("400");
+                responseComponent.setOutcome(oo);
+            } else {
+                responseComponent.setStatus("200");
+            }
+            first = false;
+        }
+        return response;
     }
 
     @Override
@@ -285,5 +329,9 @@ public class MhdChannel implements IBaseChannel {
     @Override
     public void handle(EventStore event) {
 
+    }
+
+    public void setReturnFormatType(Format returnFormatType) {
+        this.returnFormatType = returnFormatType;
     }
 }

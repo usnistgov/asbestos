@@ -1,0 +1,10 @@
+--MIMEBoundary112233445566778899
+Content-Type: application/xop+xml; charset=UTF-8; type="application/soap+xml"
+Content-Transfer-Encoding: binary
+Content-ID: <doc0@ihexds.nist.gov>
+
+<S:Envelope xmlns:S="http://www.w3.org/2003/05/soap-envelope"><S:Header><wsa:Action xmlns:wsa="http://www.w3.org/2005/08/addressing" xmlns:s="http://www.w3.org/2003/05/soap-envelope" s:mustUnderstand="1">urn:ihe:iti:2007:ProvideAndRegisterDocumentSet-bResponse</wsa:Action><wsa:RelatesTo xmlns:wsa="http://www.w3.org/2005/08/addressing">urn:uuid:B163C7B266257EAA091504010552642</wsa:RelatesTo></S:Header><S:Body>
+<rs:RegistryResponse xmlns:rs="urn:oasis:names:tc:ebxml-regrep:xsd:rs:3.0" status="urn:oasis:names:tc:ebxml-regrep:ResponseStatusType:Failure"><rs:RegistryErrorList><rs:RegistryError codeContext="Document contents for document ID1 not available in message" errorCode="XDSMissingDocument" location="" severity="urn:oasis:names:tc:ebxml-regrep:ErrorSeverityType:Error"/><rs:RegistryError codeContext="Document contents for document ID1 not available in message&#xa;Exception XDSMissingDocumentException&#xa;&#x9;gov.nist.toolkit.xdsexception.XDSMissingDocumentException: Document contents for document ID1 not available in message&#xa;&#x9;at gov.nist.toolkit.fhir.simulators.sim.rep.RepPnRSim.run(RepPnRSim.java:109)&#xa;&#x9;at gov.nist.toolkit.valsupport.engine.MessageValidatorEngine.run(MessageValidatorEngine.java:165)&#xa;&#x9;at gov.nist.toolkit.fhir.simulators.sim.rep.RepositoryActorSimulator.run(RepositoryActorSimulator.java:128)&#xa;&#x9;at gov.nist.toolkit.fhir.simulators.sim.RegRepActorSimulator.run(RegRepActorSimulator.java:71)&#xa;&#x9;at gov.nist.toolkit.fhir.simulators.servlet.SimServlet.doPost(SimServlet.java:625)&#xa;&#x9;at gov.nist.toolkit.fhir.simulators.servlet.SimServletFilter.doFilter(SimServletFilter.java:31)" errorCode="XDSRepositoryError" location="" severity="urn:oasis:names:tc:ebxml-regrep:ErrorSeverityType:Error"/></rs:RegistryErrorList></rs:RegistryResponse></S:Body></S:Envelope>
+
+
+--MIMEBoundary112233445566778899--

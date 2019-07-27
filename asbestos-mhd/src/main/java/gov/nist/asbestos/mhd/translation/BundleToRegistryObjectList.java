@@ -510,6 +510,7 @@ public class BundleToRegistryObjectList implements IVal {
                 }
             }
         }
+        // TODO attachment could also have inline data instead of reference to Binary
         if (attachment.hasUrl()) {
             String url = attachment.getUrl();
             ResourceWrapper resourceWrapper = new ResourceWrapper();

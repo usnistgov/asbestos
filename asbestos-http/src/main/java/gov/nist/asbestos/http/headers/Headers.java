@@ -19,7 +19,7 @@ public class Headers {
     }
 
     public Headers withContentType(String type) {
-        Header ct = new Header("Content Type", type);
+        Header ct = new Header("Content-Type", type);
         headers.add(ct);
         return this;
     }

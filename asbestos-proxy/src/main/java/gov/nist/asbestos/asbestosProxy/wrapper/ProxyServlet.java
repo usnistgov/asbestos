@@ -2,7 +2,7 @@ package gov.nist.asbestos.asbestosProxy.wrapper;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import gov.nist.asbestos.asbestosProxy.channel.IBaseChannel;
+import gov.nist.asbestos.asbestosProxy.channel.*;
 import gov.nist.asbestos.asbestosProxy.channels.mhd.MhdChannel;
 import gov.nist.asbestos.asbestosProxy.channels.passthrough.PassthroughChannel;
 import gov.nist.asbestos.asbestosProxy.events.Event;
@@ -44,12 +44,12 @@ public class ProxyServlet extends HttpServlet {
     private static Logger log = Logger.getLogger(ProxyServlet.class);
     private File externalCache = null;
 
-    private Map<String, IBaseChannel> proxyMap = new HashMap<>();
+    private Map<String, IChannelBuilder> proxyMap = new HashMap<>();
 
     public ProxyServlet() {
         super();
-        proxyMap.put("passthrough", new PassthroughChannel());
-        proxyMap.put("mhd", new MhdChannel());
+        proxyMap.put("passthrough", new PassthroughChannelBuilder());
+        proxyMap.put("mhd", new MhdChannelBuilder());
     }
 
     @Override
@@ -87,13 +87,13 @@ public class ProxyServlet extends HttpServlet {
             String channelType = simStore.getChannelConfig().getChannelType();
             if (channelType == null)
                 throw new ServletException("Sim " + simStore.getChannelId() + " does not define a Channel Type.");
-            IBaseChannel channel = (IBaseChannel) proxyMap.get(channelType);
-            if (channel == null)
-                throw new ServletException("Cannot create Channel of type " + channelType);
+            IChannelBuilder channelBuilder = proxyMap.get(channelType);
+            BaseChannel channel = channelBuilder.build();
 
             channel.setup(simStore.getChannelConfig());
 
             Headers inHeaders = getRequestHeaders(req, Verb.POST);
+            channel.setReturnFormatType(getReturnContentType(req));
             String hostport = inHeaders.getValue("host");
             if (hostport == null || !hostport.contains(":"))
                 throw new ServletException("host header missing or not formatted as host:port");
@@ -125,8 +125,8 @@ public class ProxyServlet extends HttpServlet {
             }
             URI outUri = transformRequestUri(backSideTask, requestIn, channel);
             requestOut.setUri(outUri);
-            requestOut.getRequestHeaders().setPathInfo(outUri);
-            requestOut.setRequest(requestIn.getRequest());
+//            requestOut.getRequestHeaders().setPathInfo(outUri);
+//            requestOut.setRequest(requestIn.getRequest());
 
             // send request to backend service
             requestOut.run();
@@ -236,15 +236,29 @@ public class ProxyServlet extends HttpServlet {
         }
     }
 
+    private Format getReturnContentType(HttpServletRequest req) {
+        Headers inHeaders = getRequestHeaders(req, Verb.POST);
+        Header acceptHeader = inHeaders.getAccept();
+        String acceptHeaderValue = acceptHeader == null ? "" : acceptHeader.getValue();
+        Header contentType = inHeaders.getContentType();
+        String contentTypeString = contentType == null ? "" : contentType.getValue();
+        if (Format.isFormat(acceptHeaderValue)) {
+            return Format.fromContentType(acceptHeaderValue);
+        } else if (Format.isFormat(contentTypeString)) {
+            return Format.fromContentType(contentTypeString);
+        }
+        return Format.XML;
+    }
+
     private void doGetDelete(HttpServletRequest req, HttpServletResponse resp, URI uri, SimStore simStore, Verb verb) throws Exception {
         String channelType = simStore.getChannelConfig().getChannelType();
         if (channelType == null)
             throw new Exception("Sim " + simStore.getChannelId() + " does not define a Channel Type.");
-        IBaseChannel channel = (IBaseChannel) proxyMap.get(channelType);
-        if (channel == null)
-            throw new Exception("Cannot create Channel of type " + channelType);
+        IChannelBuilder channelBuilder = proxyMap.get(channelType);
+        BaseChannel channel = channelBuilder.build();
 
         channel.setup(simStore.getChannelConfig());
+        channel.setReturnFormatType(getReturnContentType(req));
 
         // handle non-channel requests
         if (!simStore.isChannel()) {
@@ -357,7 +371,8 @@ public class ProxyServlet extends HttpServlet {
     private static List<String> stringTypes = Arrays.asList(
             "application/fhir+json",
             "application/json+fhir",
-            "application/soap+xml"
+            "application/soap+xml",
+            "multipart/related"
     );
 
     static boolean isStringType(String type) {

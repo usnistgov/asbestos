@@ -71,6 +71,8 @@ abstract public class HttpBase {
 
     public void setResponseText(String txt) {
         _responseText = txt;
+        if (txt != null)
+            _response = txt.getBytes();
     }
 
     public byte[] getResponse() {
@@ -121,6 +123,12 @@ abstract public class HttpBase {
 
     public String getRequestContentType() {
         return getRequestHeaders().getContentType().getAllValuesAndParmsAsString();
+    }
+
+    public void setResponseContentType(String contentType) {
+        if (_responseHeaders == null)
+            _responseHeaders = new Headers();
+        _responseHeaders.getAll().put("Content-Type", contentType);
     }
 
     public static void addHeaders(HttpURLConnection connection, Map<String, String> headers) {

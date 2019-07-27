@@ -66,7 +66,7 @@ public class MultipartSender {
     }
 
     public static String getContentType() {
-        return "multipart/related; type=\"application/xop+xml\"; boundary=\"" + getBoundary() + "\";" +
+        return "multipart/related; type=\"application/xop+xml\"; boundary=\"" + getBoundary() + "\"; " +
                 "action=\"urn:ihe:iti:2007:ProvideAndRegisterDocumentSet-b\"";
     }
 
