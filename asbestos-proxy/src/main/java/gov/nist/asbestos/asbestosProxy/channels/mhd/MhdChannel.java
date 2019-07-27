@@ -209,22 +209,17 @@ public class MhdChannel extends BaseChannel /*implements IBaseChannel*/ {
         }
     }
 
-    private void throwTransformException(String msg, Throwable t) {
-        throwTransformException(msg + "\n" + ExceptionUtils.getStackTrace(t));
+    private void transformError(String msg, Throwable t, HttpBase responseOut) {
+        transformError(msg + "\n" + ExceptionUtils.getStackTrace(t), responseOut);
     }
 
-    private void throwTransformException(String message) {
+    private void transformError(String message, HttpBase responseOut) {
         OperationOutcome oo = new OperationOutcome();
         OperationOutcome.OperationOutcomeIssueComponent issue = oo.addIssue();
         issue.setCode(OperationOutcome.IssueType.EXCEPTION);
         issue.setSeverity(OperationOutcome.IssueSeverity.ERROR);
         issue.setDiagnostics(message);
-        Bundle response = new Bundle();
-        Bundle.BundleEntryComponent entry = response.addEntry();
-        Bundle.BundleEntryResponseComponent errResponse = entry.getResponse();
-        errResponse.setStatus("500");
-        errResponse.setOutcome(oo);
-        throw new TransformException(ProxyBase.getFhirContext().newXmlParser().setPrettyPrint(true).encodeResourceToString(response), Format.XML);
+        packageResponse(responseOut, oo);
     }
 
     @Override
@@ -235,30 +230,35 @@ public class MhdChannel extends BaseChannel /*implements IBaseChannel*/ {
         String registryResponse = "";
         try {
             if (responsePart == null || responsePart.equals("")) {
-                throwTransformException("Empty response from XDS.ProvideAndRegister");
+                transformError("Empty response from XDS.ProvideAndRegister", responseOut);
+                return;
             }
             String envelope = FaultParser.unwrapPart(responsePart);
             if (envelope == null || envelope.equals("")) {
-                throwTransformException("Empty SOAP Envelope from XDS.ProvideAndRegister");
+                transformError("Empty SOAP Envelope from XDS.ProvideAndRegister", responseOut);
+                return;
             }
             String faultMsg = FaultParser.parse(envelope);
             if (faultMsg != null && !faultMsg.equals("")) {
-                throwTransformException(faultMsg);
+                transformError(faultMsg ,responseOut);
+                return;
             }
             registryResponse = FaultParser.extractRegistryResponse(envelope);
             if (registryResponse == null || registryResponse.equals("")) {
-                throwTransformException("No RegistryResponse returned from XDS.ProvideAndRegister");
+                transformError("No RegistryResponse returned from XDS.ProvideAndRegister" ,responseOut);
+                return;
             }
         } catch (Throwable e) {
-            throwTransformException("Error processing RegistryResponse:\n" + responsePart + "\n", e);
+            transformError("Error processing RegistryResponse:\n" + responsePart + "\n", e ,responseOut);
+            return;
         }
-
 
         RegistryResponseType rrt;
         try {
             rrt = new RegistryResponseBuilder().fromInputStream(new ByteArrayInputStream(registryResponse.getBytes()));
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            transformError(ExceptionUtils.getStackTrace(e), responseOut);
+            return;
         }
         RegErrorList regErrorList = RegistryResponseBuilder.asErrorList(rrt);
 
@@ -275,16 +275,14 @@ public class MhdChannel extends BaseChannel /*implements IBaseChannel*/ {
             issue.setDiagnostics(msg);
             issue.setSeverity(errorType == ErrorType.Error ? OperationOutcome.IssueSeverity.ERROR : OperationOutcome.IssueSeverity.WARNING);
         }
-        Bundle responseBundle = packageResponse(
+        packageResponse(
+                responseOut,
                 lst.isEmpty() ? null : oo
         );
-        if (returnFormatType == null)
-            returnFormatType = Format.XML;
-        responseOut.setResponseText(ProxyBase.encode(responseBundle, returnFormatType));
-        responseOut.setResponseContentType(returnFormatType.getContentType());
+
     }
 
-    private Bundle packageResponse(OperationOutcome oo) {
+    private void packageResponse(HttpBase responseOut, OperationOutcome oo) {
         Bundle response = new Bundle();
         boolean first = true;
         for (Bundle.BundleEntryComponent componentIn : requestBundle.getEntry()) {
@@ -298,7 +296,10 @@ public class MhdChannel extends BaseChannel /*implements IBaseChannel*/ {
             }
             first = false;
         }
-        return response;
+        if (returnFormatType == null)
+            returnFormatType = Format.XML;
+        responseOut.setResponseText(ProxyBase.encode(response, returnFormatType));
+        responseOut.setResponseContentType(returnFormatType.getContentType());
     }
 
     @Override
