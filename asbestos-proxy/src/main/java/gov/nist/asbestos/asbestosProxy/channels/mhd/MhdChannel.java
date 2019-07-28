@@ -43,6 +43,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Scanner;
@@ -266,10 +267,14 @@ public class MhdChannel extends BaseChannel /*implements IBaseChannel*/ {
             System.out.println(re.getSeverity() + " - " + re.getMsg());
         }
         List<RegError> lst = regErrorList.getList();
+        List<String> raw = new ArrayList<>();
 
         for (RegError re : lst) {
             ErrorType errorType = re.getSeverity();
-            String msg = re.getMsg();
+            String msg = trim(re.getMsg());
+            if (raw.contains(msg))
+                continue;
+            raw.add(msg);
             OperationOutcome.OperationOutcomeIssueComponent issue = oo.addIssue();
             issue.setCode(OperationOutcome.IssueType.UNKNOWN);
             issue.setDiagnostics(msg);
@@ -279,11 +284,25 @@ public class MhdChannel extends BaseChannel /*implements IBaseChannel*/ {
                 responseOut,
                 lst.isEmpty() ? null : oo
         );
+    }
 
+    private boolean isWhite(char c) {
+        if (c == ' ') return true;
+        if (c == '\n') return true;
+        if (c == '\t') return true;
+        return false;
+    }
+
+    private String trim(String s) {
+        if (s == null) return s;
+        while (s.length() > 0 && isWhite(s.charAt(0))) s = s.substring(1);
+        while (s.length() > 0 && isWhite(s.charAt(s.length()-1))) s = s.substring(0, s.length()-1);
+        return s;
     }
 
     private void packageResponse(HttpBase responseOut, OperationOutcome oo) {
         Bundle response = new Bundle();
+        response.setType(Bundle.BundleType.TRANSACTIONRESPONSE);
         boolean first = true;
         for (Bundle.BundleEntryComponent componentIn : requestBundle.getEntry()) {
             Bundle.BundleEntryComponent componentOut = response.addEntry();

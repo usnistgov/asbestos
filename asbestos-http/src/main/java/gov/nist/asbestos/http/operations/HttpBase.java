@@ -1,5 +1,6 @@
 package gov.nist.asbestos.http.operations;
 
+import gov.nist.asbestos.http.headers.Header;
 import gov.nist.asbestos.http.headers.Headers;
 
 import java.io.IOException;
@@ -128,7 +129,7 @@ abstract public class HttpBase {
     public void setResponseContentType(String contentType) {
         if (_responseHeaders == null)
             _responseHeaders = new Headers();
-        _responseHeaders.getAll().put("Content-Type", contentType);
+        _responseHeaders.add(new Header("Content-Type", contentType));
     }
 
     public static void addHeaders(HttpURLConnection connection, Map<String, String> headers) {

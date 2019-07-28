@@ -33,6 +33,11 @@ public class Headers {
         }
     }
 
+    public Headers add(Header header) {
+        headers.add(header);
+        return this;
+    }
+
     public Headers addAll(Headers theHeaders) {
         this.headers.addAll(theHeaders.headers);
         return this;
