@@ -87,6 +87,17 @@ public class OperationRunner {
                     .setOpReport(operationReport)
                     .setVal(val));
             setupActionRead.run(op, operationReport);
+        } else if ("search".equals(code)) {
+                SetupActionSearch setupActionSearch = new SetupActionSearch(fixtureMgr)
+                        .setVal(val)
+                        .setFhirClient(fhirClient)
+                        .setSut(sut)
+                        .setType(type + ".read")
+                        .setTestReport(testReport);
+                setupActionSearch.setVariableMgr(new VariableMgr(testScript, fixtureMgr)
+                        .setOpReport(operationReport)
+                        .setVal(val));
+                setupActionSearch.run(op, operationReport);
         } else if ("create".equals(code)) {
             SetupActionCreate setupActionCreate =
                     new SetupActionCreate(fixtureMgr)
