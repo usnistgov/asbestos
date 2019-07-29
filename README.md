@@ -17,7 +17,7 @@ to pull shell of project. This will create directory asbestos
     
 to update the Javascript dependencies. These can be run at any time to refresh the Javascript libraries. Then run:
 
-    cd view
+    cd asbestos-view
     npm run serve
     
 in a terminal to start UI in development mode. Do this from the view directory.
