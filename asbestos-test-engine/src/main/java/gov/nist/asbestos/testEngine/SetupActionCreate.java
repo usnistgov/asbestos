@@ -42,7 +42,7 @@ class SetupActionCreate extends GenericSetupAction {
             return;
         }
         Map<String, String> requestHeader = new HashMap<>();
-        Ref targetUrl = OperationURLBuilder.build(null, sut, fixtureMgr, reporter, resourceToSend.getClass());
+        Ref targetUrl = OperationURLBuilder.build(null, sut, fixtureMgr, reporter, resourceToSend.getClass().getSimpleName());
         if (targetUrl == null)
             return;
         ResourceWrapper wrapper = getFhirClient().writeResource(resourceToSend, targetUrl, Format.JSON, requestHeader);
@@ -75,8 +75,8 @@ class SetupActionCreate extends GenericSetupAction {
         postExecute(wrapper);
     }
 
-    Class<?> resourceTypeToSend() {
-        return resourceToSend.getClass();
+    String resourceTypeToSend() {
+        return resourceToSend.getClass().getSimpleName();
     }
 
     @Override

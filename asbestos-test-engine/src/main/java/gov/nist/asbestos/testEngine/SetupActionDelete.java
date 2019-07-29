@@ -113,7 +113,7 @@ class SetupActionDelete extends GenericSetupAction {
     }
 
     @Override
-    Class<?> resourceTypeToSend() {
+    String resourceTypeToSend() {
         return null;
     }
 

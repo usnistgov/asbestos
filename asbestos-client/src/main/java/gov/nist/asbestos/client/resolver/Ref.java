@@ -172,8 +172,7 @@ public class Ref {
     }
 
     // TODO needs test
-    public Ref withResource(Class<?> resourceType) {
-        String type = resourceType.getSimpleName();
+    public Ref withResource(String type) {
         return new Ref(getBase(), type, null, null);
     }
 

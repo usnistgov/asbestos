@@ -51,7 +51,7 @@ public class SetupActionTransaction extends GenericSetupAction {
                 : OperationURLBuilder.build(op, sut, fixtureMgr, reporter, resourceTypeToSend());
     }
 
-    Class<?> resourceTypeToSend() {
+    String resourceTypeToSend() {
         return null;
     }
 

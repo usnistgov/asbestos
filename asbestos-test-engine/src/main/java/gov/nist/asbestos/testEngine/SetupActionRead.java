@@ -13,8 +13,7 @@ import org.hl7.fhir.r4.model.TestScript;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 
-class SetupActionRead extends GenericSetupAction{
-
+class SetupActionRead extends GenericSetupAction {
 
     SetupActionRead(FixtureMgr fixtureMgr) {
         this.fixtureMgr = fixtureMgr;
@@ -33,6 +32,21 @@ class SetupActionRead extends GenericSetupAction{
             reporter.report(wrapper.getRef() + " read");
         }
         postExecute(wrapper);
+    }
+
+    // key difference between read and search
+    boolean isSearchOk() {
+        return false;
+    }
+
+    @Override
+    String resourceTypeToSend() {
+        if (op.hasResource()) {
+            return op.getResource();
+        }
+        if (op.hasTargetId())
+            return new Ref(op.getTargetId()).getResourceType();
+        return null;
     }
 
     @Override
@@ -56,7 +70,7 @@ class SetupActionRead extends GenericSetupAction{
             SearchParms searchParms = prepParams();
             if (searchParms == null)
                 return null;  // coding issue
-            if (searchParms.isSearch()) {
+            if (searchParms.isSearch() && isSearchOk()) {
                 Reporter.reportError(val, opReport, null, type, label, "resulting URL is search (contains ?) - use search operation type instead");
                 return null ;
             }
@@ -89,14 +103,14 @@ class SetupActionRead extends GenericSetupAction{
         return null;
     }
 
-    private boolean isReadable(Ref ref) {
+    boolean isReadable(Ref ref) {
         if (!ref.asString().startsWith("http")) return false;
         if (!ref.hasResource()) return false;
         if (!ref.hasId()) return false;
         return true;
     }
 
-    private SearchParms prepParams() {
+    SearchParms prepParams() {
         assert op.hasParams();
         SearchParms searchParms = new SearchParms();
         boolean encodeRequestUrl = true;
@@ -115,12 +129,8 @@ class SetupActionRead extends GenericSetupAction{
         return searchParms;
     }
 
-    @Override
-    Class<?> resourceTypeToSend() {
-        return null;
-    }
 
-    private Ref refFromTargetId(String targetId, TestReport.SetupActionOperationComponent opReport, String label) {
+    Ref refFromTargetId(String targetId, TestReport.SetupActionOperationComponent opReport, String label) {
         Ref ref = null;
         FixtureComponent fixture  = fixtureMgr.get(targetId);
         if (fixture != null && fixture.hasHttpBase()) {

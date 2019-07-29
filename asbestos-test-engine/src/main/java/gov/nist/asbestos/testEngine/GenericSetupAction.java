@@ -32,7 +32,7 @@ abstract class GenericSetupAction {
     Reporter reporter;
     String label;
 
-    abstract Class<?> resourceTypeToSend();
+    abstract String resourceTypeToSend();
     abstract Ref buildTargetUrl();
 
     static void handleRequestHeader(Map<String, String> requestHeader, TestScript.SetupActionOperationComponent op, VariableMgr variableMgr) {
