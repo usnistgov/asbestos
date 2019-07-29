@@ -112,6 +112,16 @@ class SetupActionDelete extends GenericSetupAction {
 //        fixtureMgr.put(fixtureId, fixtureComponent);
     }
 
+    @Override
+    Class<?> resourceTypeToSend() {
+        return null;
+    }
+
+    @Override
+    Ref buildTargetUrl() {
+        return null;
+    }
+
     static void handleRequestHeader(Map<String, String> requestHeader, TestScript.SetupActionOperationComponent op, VariableMgr variableMgr) {
         List<TestScript.SetupActionOperationRequestHeaderComponent> hdrs = op.getRequestHeader();
         for (TestScript.SetupActionOperationRequestHeaderComponent hdr : hdrs) {

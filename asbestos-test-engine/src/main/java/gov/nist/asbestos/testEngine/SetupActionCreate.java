@@ -57,41 +57,13 @@ class SetupActionCreate extends GenericSetupAction {
     }
 
     void run(TestScript.SetupActionOperationComponent op, TestReport.SetupActionOperationComponent operationReport) {
-        Objects.requireNonNull(val);
-        Objects.requireNonNull(operationReport);
-        Objects.requireNonNull(variableMgr);
-        val = new ValE(val).setMsg(type);
-
-        operationReport.setResult(TestReport.TestReportActionResult.PASS);  // may be overwritten
-
-        String label = op.hasLabel() ? op.getLabel() : "No Label";
-        Reporter reporter = new Reporter(val, operationReport, type, label);
-        Format format = op.hasContentType() && op.getContentType().contains("json") ? Format.JSON : Format.XML;
-        if (!op.hasSourceId()) {
-            reporter.reportError("has no sourceId");
+        if (!preExecute(op, operationReport))
             return;
-        }
-        FixtureComponent sourceFixture = fixtureMgr.get(op.getSourceId());
-        if (sourceFixture == null) {
-            reporter.reportError("sourceId " + op.getSourceId() + "does not exist");
-            return;
-        }
-        BaseResource resourceToSend = sourceFixture.getResourceResource();
+
         if (resourceToSend == null) {
             reporter.reportError("sourceId " + op.getSourceId() + " does not have a response resource to send");
             return;
         }
-
-        Map<String, String> requestHeader = new HashMap<>();
-        if (op.hasRequestHeader()) {
-            handleRequestHeader(requestHeader, op, variableMgr);
-        }
-
-        Ref targetUrl = op.hasUrl()
-                ? new Ref(op.getUrl())
-                : OperationURLBuilder.build(op, sut, fixtureMgr, reporter, resourceToSend.getClass());
-        if (targetUrl == null)
-            return;
 
         ResourceWrapper wrapper = getFhirClient().writeResource(resourceToSend, targetUrl, format, requestHeader);
         if (wrapper.isOk())
@@ -100,13 +72,19 @@ class SetupActionCreate extends GenericSetupAction {
             reporter.report("create to " + targetUrl + " failed with status " + wrapper.getHttpBase().getStatus());
             operationReport.setResult(TestReport.TestReportActionResult.FAIL);
         }
-        String fixtureId = op.hasResponseId() ? op.getResponseId() : FixtureComponent.getNewId();
-        fixtureComponent = new FixtureComponent(fixtureId)
-                .setResource(wrapper)
-                .setHttpBase(wrapper.getHttpBase());
-        fixtureMgr.put(fixtureId, fixtureComponent);
+        postExecute(wrapper);
     }
 
+    Class<?> resourceTypeToSend() {
+        return resourceToSend.getClass();
+    }
+
+    @Override
+    Ref buildTargetUrl() {
+        return op.hasUrl()
+                ? new Ref(op.getUrl())
+                : OperationURLBuilder.build(op, sut, fixtureMgr, reporter, resourceTypeToSend());
+    }
 
     SetupActionCreate setVal(ValE val) {
         this.val = val;

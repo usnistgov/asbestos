@@ -1,13 +1,16 @@
 package gov.nist.asbestos.testEngine;
 
 import gov.nist.asbestos.client.client.FhirClient;
+import gov.nist.asbestos.client.client.Format;
+import gov.nist.asbestos.client.resolver.Ref;
+import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import gov.nist.asbestos.simapi.validation.ValE;
+import org.hl7.fhir.r4.model.BaseResource;
 import org.hl7.fhir.r4.model.TestReport;
 import org.hl7.fhir.r4.model.TestScript;
 
 import java.net.URI;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 abstract class GenericSetupAction {
     FixtureMgr fixtureMgr;  // static fixtures and history of operations
@@ -19,8 +22,18 @@ abstract class GenericSetupAction {
     String type = null;
     String resourceType = null;  // used in autoCreate
     TestScript.SetupActionOperationComponent op;
+    TestReport.SetupActionOperationComponent opReport;
     TestReport testReport = null;
     URI base = null;
+    Ref targetUrl;
+    Format format;
+    Map<String, String> requestHeader = new HashMap<>();
+    BaseResource resourceToSend;
+    Reporter reporter;
+    String label;
+
+    abstract Class<?> resourceTypeToSend();
+    abstract Ref buildTargetUrl();
 
     static void handleRequestHeader(Map<String, String> requestHeader, TestScript.SetupActionOperationComponent op, VariableMgr variableMgr) {
         List<TestScript.SetupActionOperationRequestHeaderComponent> hdrs = op.getRequestHeader();
@@ -31,4 +44,60 @@ abstract class GenericSetupAction {
         }
     }
 
+    boolean preExecute(TestScript.SetupActionOperationComponent op, TestReport.SetupActionOperationComponent operationReport) {
+        Objects.requireNonNull(val);
+        Objects.requireNonNull(op);
+        Objects.requireNonNull(operationReport);
+        Objects.requireNonNull(variableMgr);
+        val = new ValE(val).setMsg(type);
+        this.op = op;
+        this.opReport = operationReport;
+
+        operationReport.setResult(TestReport.TestReportActionResult.PASS);  // may be overwritten
+
+        label = op.hasLabel() ? op.getLabel() : "No Label";
+        reporter = new Reporter(val, operationReport, type, label);
+        format = op.hasContentType() && op.getContentType().contains("json") ? Format.JSON : Format.XML;
+        if (isPUTorPOST()) {
+            if (!op.hasSourceId()) {
+                reporter.reportError("has no sourceId on operation " + op.getType().getCode());
+                return false;
+            }
+            FixtureComponent sourceFixture = fixtureMgr.get(op.getSourceId());
+            if (sourceFixture == null) {
+                reporter.reportError("sourceId " + op.getSourceId() + " does not exist");
+                return false;
+            }
+            resourceToSend = sourceFixture.getResourceResource();
+        }
+        if (op.hasRequestHeader())
+            handleRequestHeader(requestHeader, op, variableMgr);
+        if (!requestHeader.containsKey("accept-charset"))
+            requestHeader.put("accept-charset", "utf-8");
+        if (op.hasAccept())
+            requestHeader.put("accept", op.getAccept());
+
+
+        targetUrl = buildTargetUrl();
+        return targetUrl != null;
+    }
+
+    void postExecute(ResourceWrapper wrapper) {
+        String fixtureId = op.hasResponseId() ? op.getResponseId() : FixtureComponent.getNewId();
+        fixtureComponent = new FixtureComponent(fixtureId)
+                .setResource(wrapper)
+                .setHttpBase(wrapper.getHttpBase());
+        fixtureMgr.put(fixtureId, fixtureComponent);
+    }
+
+    private List<String> putPostTypes = new ArrayList<String>(
+            Arrays.asList(
+            "update", "updateCreate", "create", "transaction"
+            )
+    );
+
+    boolean isPUTorPOST() {
+        String type = op.getType().getCode();
+        return putPostTypes.contains(type);
+    }
 }

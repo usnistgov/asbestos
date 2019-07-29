@@ -316,6 +316,7 @@ public class TestEngine  {
 //    }
 
     private void doOperation(String typePrefix, TestScript.SetupActionOperationComponent operation, TestReport.SetupActionOperationComponent report) {
+        try {
             OperationRunner runner = new OperationRunner(fixtureMgr)
                     .setVal(new ValE(val).setMsg(typePrefix))
                     .setTypePrefix(typePrefix)
@@ -324,18 +325,25 @@ public class TestEngine  {
                     .setTestReport(testReport)
                     .setTestScript(testScript);
             runner.run(operation, report);
+        } catch (Throwable t) {
+            report.setMessage(ExceptionUtils.getStackTrace(t));
+            report.setResult(TestReport.TestReportActionResult.ERROR);
+        }
         propagateStatus(testReport);
     }
 
     private void doAssert(String typePrefix, TestScript.SetupActionAssertComponent operation, TestReport.SetupActionAssertComponent report) {
-
+        try {
             AssertionRunner runner = new AssertionRunner(fixtureMgr)
                     .setVal(new ValE(val).setMsg(typePrefix))
                     .setTypePrefix(typePrefix)
                     .setTestReport(testReport)
                     .setTestScript(testScript);
             runner.run(operation, report);
-
+        } catch (Throwable t) {
+            report.setMessage(ExceptionUtils.getStackTrace(t));
+            report.setResult(TestReport.TestReportActionResult.ERROR);
+        }
         propagateStatus(testReport);
     }
 

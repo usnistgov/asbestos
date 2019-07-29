@@ -73,6 +73,10 @@ public class Ref {
         return this;  // oops
     }
 
+    public Ref(URI base, String resourceType, SearchParms searchParms) {
+        this(base.toString(), resourceType, searchParms.getParms());
+    }
+
     public Ref(URI base, String resourceType, String id) {
         this(base.toString(), resourceType, id);
     }
@@ -126,6 +130,10 @@ public class Ref {
             }
         }
         return "";
+    }
+
+    public boolean hasId() {
+        return !getId().equals("");
     }
 
     public String getResourceType() {

@@ -3,111 +3,121 @@ package gov.nist.asbestos.testEngine;
 import gov.nist.asbestos.client.client.FhirClient;
 import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
+import gov.nist.asbestos.client.resolver.SearchParms;
 import gov.nist.asbestos.http.operations.HttpGet;
 import gov.nist.asbestos.http.operations.HttpPost;
 import gov.nist.asbestos.simapi.validation.ValE;
 import org.hl7.fhir.r4.model.TestReport;
 import org.hl7.fhir.r4.model.TestScript;
 
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
 
 class SetupActionRead extends GenericSetupAction{
-    private FixtureMgr fixtureMgr;  // static fixtures and history of operations
-    private ValE val;
-    private URI base;
-    private VariableMgr variableMgr = null;
-    private FhirClient fhirClient = null;
-    private URI sut = null;
-    private String type = null;
 
 
     SetupActionRead(FixtureMgr fixtureMgr) {
         this.fixtureMgr = fixtureMgr;
-        this.op = op;
     }
 
     void run(TestScript.SetupActionOperationComponent op, TestReport.SetupActionOperationComponent opReport) {
-        Objects.requireNonNull(val);
-        Objects.requireNonNull(variableMgr);
-        Objects.requireNonNull(testReport);
-        Objects.requireNonNull(fhirClient);
-        val = new ValE(val).setMsg(type);
 
-        opReport.setResult(TestReport.TestReportActionResult.PASS);  // may be overwritten
+        if (!preExecute(op, opReport))
+            return;
 
-        String label = null;
-        Reporter reporter = new Reporter(val, opReport, type, label);
-
-
-        boolean encodeRequestUrl;
-        Map<String, String> requestHeader = new HashMap<>();
-        String sourceId = null;
-        String targetId = null;  // responseId of a GET or sourceId of POST/PUT
-        String url = null;
-        Ref ref = (sut == null) ? null : new Ref(sut);
-
-        if (op.hasLabel())
-            label = op.getLabel();
-        if (op.hasEncodeRequestUrl())
-            encodeRequestUrl = op.getEncodeRequestUrl();
-        if (op.hasRequestHeader()) {
-            SetupActionCreate.handleRequestHeader(requestHeader, op, variableMgr);
+        ResourceWrapper wrapper = fhirClient.readResource(targetUrl, requestHeader);
+        if (!wrapper.isOk()) {
+            Reporter.reportError(val, opReport, null, type, label, "Unable to retrieve " + targetUrl);
+            return;
+        } else {
+            reporter.report(wrapper.getRef() + " read");
         }
-        if (op.hasUrl()) {
-            url = op.getUrl();
-            url = variableMgr.updateReference(url);
-        }
+        postExecute(wrapper);
+    }
 
-        if (!requestHeader.containsKey("accept-charset"))
-            requestHeader.put("accept-charset", "utf-8");
-        if (op.hasAccept())
-            requestHeader.put("accept", op.getAccept());
+    @Override
+    Ref buildTargetUrl() {
+        if (base == null)
+            base = sut;
 
         // http://build.fhir.org/testscript-definitions.html#TestScript.setup.action.operation.params
         if (op.hasUrl()) {
             String theUrl = variableMgr.updateReference(op.getUrl());
             if (theUrl == null)
-                return;
-            ref = new Ref(theUrl);
-        } else if (op.hasParams()) {
-            if (op.hasResource()) {
-                String params = op.getParams();
-                params = variableMgr.updateReference(params);
-                if (params.startsWith("/"))
-                    params = params.substring(1);  // should only be ID and _format (this is a READ)
-                ref = new Ref(base, op.getResource(), params);
-            } else {
-                Reporter.reportError(val, opReport, null, type, label, "Resource (" + op.getResource() + ") specified but no params holding ID");
-                return;
+                return null;
+            return new Ref(theUrl);
+        }
+        // for READ this can only be ID
+        if (op.hasParams()) {
+            if (!op.hasResource()) {
+                Reporter.reportError(val, opReport, null, type, label, "has params but no resource");
+                return null ;
             }
+            SearchParms searchParms = prepParams();
+            if (searchParms == null)
+                return null;  // coding issue
+            if (searchParms.isSearch()) {
+                Reporter.reportError(val, opReport, null, type, label, "resulting URL is search (contains ?) - use search operation type instead");
+                return null ;
+            }
+
+            Ref ref = new Ref(base, op.getResource(), searchParms);
+            if (!isReadable(ref)) {
+                Reporter.reportError(val, opReport, null, type, label, "resulting URL is not complete - " + ref.asString());
+                return null ;
+            }
+            return ref;
         }
-        else if (op.hasTargetId()) {
-            ref = refFromTargetId(op.getTargetId(), opReport, label);
-        } else if (fixtureMgr.getLastOp() != null) {
-            ref = refFromTargetId(fixtureMgr.getLastOp(), opReport, label);
-        }
-        if (ref == null) {
-            Reporter.reportError(val, opReport, null, type, label, "Unable to construct URL for operation");
-            return;
-        }
-        if (ref.getResourceType().equals("")) {
-            Reporter.reportError(val, opReport, null, type, label, "no resource type");
-            return;
-        }
-        ResourceWrapper wrapper = fhirClient.readResource(ref, requestHeader);
-        if (!wrapper.isOk()) {
-            Reporter.reportError(val, opReport, null, type, label, "Unable to retrieve " + ref);
-            return;
-        } else {
-            reporter.report(wrapper.getRef() + " read");
+        if (op.hasTargetId()) {
+            Ref ref = refFromTargetId(op.getTargetId(), opReport, label);
+            if (!isReadable(ref)) {
+                Reporter.reportError(val, opReport, null, type, label, "resulting URL is not complete - " + ref.asString());
+                return null ;
+            }
+            return ref;
         }
 
-        String fixtureId =op.hasResponseId() ? op.getResponseId() : FixtureComponent.getNewId();
-        FixtureComponent fixtureComponent =  new FixtureComponent(fixtureId).setResource(wrapper);
-        fixtureMgr.put(fixtureId, fixtureComponent);
+        if (fixtureMgr.getLastOp() != null) {
+            Ref ref = refFromTargetId(fixtureMgr.getLastOp(), opReport, label);
+            if (!isReadable(ref)) {
+                Reporter.reportError(val, opReport, null, type, label, "resulting URL is not complete - " + ref.asString());
+                return null ;
+            }
+            return ref;
+        }
+        Reporter.reportError(val, opReport, null, type, label, "Unable to construct URL for operation");
+        return null;
+    }
+
+    private boolean isReadable(Ref ref) {
+        if (!ref.asString().startsWith("http")) return false;
+        if (!ref.hasResource()) return false;
+        if (!ref.hasId()) return false;
+        return true;
+    }
+
+    private SearchParms prepParams() {
+        assert op.hasParams();
+        SearchParms searchParms = new SearchParms();
+        boolean encodeRequestUrl = true;
+        if (op.hasEncodeRequestUrl())
+            encodeRequestUrl = op.getEncodeRequestUrl();
+        String rawParms = op.getParams();
+        rawParms = variableMgr.updateReference(rawParms);
+        if (rawParms.startsWith("/"))
+            rawParms = rawParms.substring(1);  // should only be ID and _format (this is a READ)
+        try {
+            searchParms.setParms(rawParms, encodeRequestUrl);
+        } catch (UnsupportedEncodingException e) {
+            Reporter.reportError(val, opReport, null, type, label, "Unable to encode URL parameters - " + e.getMessage());
+            return null;
+        }
+        return searchParms;
+    }
+
+    @Override
+    Class<?> resourceTypeToSend() {
+        return null;
     }
 
     private Ref refFromTargetId(String targetId, TestReport.SetupActionOperationComponent opReport, String label) {
@@ -167,4 +177,6 @@ class SetupActionRead extends GenericSetupAction{
         this.type = type;
         return this;
     }
+
+
 }
