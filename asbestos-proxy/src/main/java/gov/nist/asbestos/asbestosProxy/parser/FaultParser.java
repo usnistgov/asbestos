@@ -78,6 +78,31 @@ public class FaultParser {
 
     }
 
+    public static String extractAdhocQueryResponse(String xml) throws IOException, SAXException {
+        DOMParser dp = new DOMParser();
+        dp.parse(new InputSource(new StringReader(xml)));
+        Document document = dp.getDocument();
+        //Element envelope = document.getDocumentElement();
+        NodeList top = document.getChildNodes();
+        if (top.getLength() == 1 ) {
+            Node envelope = top.item(0);
+            if ("Envelope".equals(envelope.getLocalName())) {
+                Node body;
+                for (body = envelope.getFirstChild(); !"Body".equals(body.getLocalName()); body = body.getNextSibling()) {
+                }
+                if (body == null)
+                    return null;
+                Node contents;
+                for (contents = body.getFirstChild(); contents != null  && !"AdhocQueryResponse".equals(contents.getLocalName()); contents = contents.getNextSibling()) {
+                }
+                if (contents != null)
+                    return nodeToString(contents);
+            }
+        }
+        return null;
+
+    }
+
     private static String nodeToString(Node node) {
         StringWriter sw = new StringWriter();
         try {

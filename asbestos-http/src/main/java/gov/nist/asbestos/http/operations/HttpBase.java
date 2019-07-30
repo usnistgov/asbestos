@@ -137,7 +137,7 @@ abstract public class HttpBase {
             _requestHeaders = new Headers();
         if (_requestHeaders.hasContentType())
             _requestHeaders.deleteContentType();
-        _responseHeaders.add(new Header("Content-Type", contentType));
+        _requestHeaders.add(new Header("Content-Type", contentType));
     }
 
     public static void addHeaders(HttpURLConnection connection, Map<String, String> headers) {

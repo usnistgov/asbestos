@@ -2,6 +2,7 @@ package gov.nist.asbestos.asbestosProxy.channels.mhd;
 
 import gov.nist.asbestos.asbestosProxy.channel.BaseChannel;
 import gov.nist.asbestos.asbestosProxy.events.EventStore;
+import gov.nist.asbestos.asbestosProxy.parser.AhqrSender;
 import gov.nist.asbestos.asbestosProxy.parser.FaultParser;
 import gov.nist.asbestos.asbestosProxy.util.XdsActorMapper;
 import gov.nist.asbestos.asbestosProxy.wrapper.TransformException;
@@ -134,6 +135,7 @@ public class MhdChannel extends BaseChannel /*implements IBaseChannel*/ {
         valueList.getValue().add("('" + uid + "')");
         slot.setValueList(valueList);
         adhocQueryType.getSlot().add(slot);
+        adhocQueryRequest.setAdhocQuery(adhocQueryType);
 
         ByteArrayOutputStream queryStream = new ByteArrayOutputStream();
         new AdhocQueryBuilder().toOutputStream(adhocQueryRequest, queryStream);
@@ -141,11 +143,8 @@ public class MhdChannel extends BaseChannel /*implements IBaseChannel*/ {
         String queryString = deleteXMLInstruction(new String(queryStream.toByteArray()));
         String soapString = AdhocQueryWrapper.wrap(toAddr.toString(), queryString);
         ByteArrayOutputStream os = new ByteArrayOutputStream();
-        try {
-            MultipartSender.getMultipartEntity(soapString).writeTo(os);
-        } catch (IOException e) {
-            //
-        }
+        AhqrSender sender = new AhqrSender();
+        sender.send(soapString, toAddr.toString());
         return os.toString();
     }
 
@@ -219,12 +218,19 @@ public class MhdChannel extends BaseChannel /*implements IBaseChannel*/ {
 
     @Override
     public void transformRequest(HttpGet requestIn, HttpGet requestOut) {
-        Ref ref = new Ref(requestIn.getUri());
+        URI toAddr;
+        try {
+            toAddr = transformRequestUrl(null, requestIn); //channelConfig.translateEndpointToFhirBase(requestIn.getRequestHeaders().getPathInfo());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+        Ref ref = new Ref(requestIn.getRequestHeaders().getPathInfo());
         String resourceType = ref.getResourceType();
         String uid = ref.getId();
         if (resourceType != null) {
             if (resourceType.equals("DocumentReference")) {
-
+                String x = documentEntryByUidQuery(uid, toAddr);
             } else if (resourceType.equals("DocumentManifest")) {
 
             } else {
