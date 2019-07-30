@@ -79,15 +79,30 @@ abstract class GenericSetupAction {
 
 
         targetUrl = buildTargetUrl();
+        if (targetUrl == null)
+            reporter.reportError("cannot generate targetUrl");
         return targetUrl != null;
     }
 
     void postExecute(ResourceWrapper wrapper) {
+        if (wrapper.hasResource()) {
+            String receivedResourceType = wrapper.getResource().getClass().getSimpleName();
+            String expectedResourceType = resourceTypeToBeReturned();
+            if (expectedResourceType != null && !receivedResourceType.equals(expectedResourceType)) {
+                reporter.reportError("Expected resource of type " +  expectedResourceType + " received " + receivedResourceType + " instead");
+                return;
+            }
+        }
+
         String fixtureId = op.hasResponseId() ? op.getResponseId() : FixtureComponent.getNewId();
         fixtureComponent = new FixtureComponent(fixtureId)
                 .setResource(wrapper)
                 .setHttpBase(wrapper.getHttpBase());
         fixtureMgr.put(fixtureId, fixtureComponent);
+    }
+
+    String resourceTypeToBeReturned() {
+        return resourceTypeToSend();
     }
 
     private List<String> putPostTypes = new ArrayList<String>(

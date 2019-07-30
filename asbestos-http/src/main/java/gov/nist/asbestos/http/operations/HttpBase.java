@@ -132,6 +132,14 @@ abstract public class HttpBase {
         _responseHeaders.add(new Header("Content-Type", contentType));
     }
 
+    public void setRequestContentType(String contentType) {
+        if (_requestHeaders == null)
+            _requestHeaders = new Headers();
+        if (_requestHeaders.hasContentType())
+            _requestHeaders.deleteContentType();
+        _responseHeaders.add(new Header("Content-Type", contentType));
+    }
+
     public static void addHeaders(HttpURLConnection connection, Map<String, String> headers) {
         headers.forEach(connection::setRequestProperty);
     }

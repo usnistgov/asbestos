@@ -55,12 +55,15 @@ public class Ref {
     }
 
     public Ref withHostPort(String hostPort) {
+        String scheme = uri.getScheme();
+        if (scheme == null)
+            scheme = "http";
         String[] hp = hostPort.split(":");
         if (hp.length == 2) {
             String host = hp[0];
             String port = hp[1];
             try {
-                return new Ref(new URI(uri.getScheme()
+                return new Ref(new URI(scheme
                         + "://"
                         + host
                         + ":"

@@ -23,7 +23,12 @@ public class ProxyBase {
         }
     }
 
-    public static BaseResource parse(String resourceString, Format format) {
+    public static BaseResource parse(byte[] resource, Format format) {
+        String resourceString = new String(resource);
+        return parse(resourceString, format);
+    }
+
+        public static BaseResource parse(String resourceString, Format format) {
         IBaseResource ibase;
         if (format == Format.JSON) {
             ibase = getFhirContext().newJsonParser().parseResource(resourceString);

@@ -27,7 +27,17 @@ class SetupActionSearch extends SetupActionRead {
 
     @Override
     String resourceTypeToSend() {
+        if (op.hasResource()) {
+            return op.getResource();
+        }
+        if (op.hasTargetId())
+            return new Ref(op.getTargetId()).getResourceType();
         return null;
+    }
+
+    @Override
+    String resourceTypeToBeReturned() {
+        return "Bundle";
     }
 
     SetupActionSearch setVal(ValE val) {

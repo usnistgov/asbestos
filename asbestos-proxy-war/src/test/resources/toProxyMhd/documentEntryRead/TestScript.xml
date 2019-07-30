@@ -9,11 +9,6 @@
             <reference value="Patient/patient-example.xml"/>
         </resource>
     </fixture>
-    <variable>
-        <name value="DocRefUrl"/>
-        <expression value="Bundle.entry[0].response.location"/>
-        <sourceId value="pdb-response"/>
-    </variable>
     <test>
         <action>
             <operation>
@@ -23,7 +18,6 @@
                     <code value="transaction"/>
                 </type>
                 <sourceId value="pdb-bundle"/>
-                <responseId value="pdb-response"/>
             </operation>
         </action>
         <action>
@@ -35,20 +29,11 @@
         </action>
         <action>
             <operation>
-                <description value="read DocumentReference"/>
-                <label value="read-back"/>
+                <description value="Read back DocumentEntry"/>
                 <type>
                     <code value="read"/>
                 </type>
-                <url value="${DocRefUrl}"/>
             </operation>
-        </action>
-        <action>
-            <assert>
-                <description value="read was successful"/>
-                <response value="okay"/>
-                <warningOnly value="false"/>
-            </assert>
         </action>
     </test>
 </TestScript>

@@ -1,7 +1,6 @@
 package gov.nist.asbestos.asbestosProxy.channels.mhd;
 
 import gov.nist.asbestos.asbestosProxy.channel.BaseChannel;
-import gov.nist.asbestos.asbestosProxy.channel.IBaseChannel;
 import gov.nist.asbestos.asbestosProxy.events.EventStore;
 import gov.nist.asbestos.asbestosProxy.parser.FaultParser;
 import gov.nist.asbestos.asbestosProxy.util.XdsActorMapper;
@@ -10,6 +9,7 @@ import gov.nist.asbestos.client.Base.ProxyBase;
 import gov.nist.asbestos.client.client.FhirClient;
 import gov.nist.asbestos.client.client.Format;
 import gov.nist.asbestos.client.resolver.IdBuilder;
+import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.client.resolver.ResourceCacheMgr;
 import gov.nist.asbestos.client.resolver.ResourceMgr;
 import gov.nist.asbestos.http.headers.Headers;
@@ -17,6 +17,8 @@ import gov.nist.asbestos.http.operations.HttpBase;
 import gov.nist.asbestos.http.operations.HttpDelete;
 import gov.nist.asbestos.http.operations.HttpGet;
 import gov.nist.asbestos.http.operations.HttpPost;
+import gov.nist.asbestos.mhd.SubmittedObject;
+import gov.nist.asbestos.mhd.transactionSupport.AdhocQueryBuilder;
 import gov.nist.asbestos.mhd.transactionSupport.AssigningAuthorities;
 import gov.nist.asbestos.mhd.transactionSupport.CodeTranslator;
 import gov.nist.asbestos.mhd.transactionSupport.ProvideAndRegisterBuilder;
@@ -24,19 +26,18 @@ import gov.nist.asbestos.mhd.translation.BundleToRegistryObjectList;
 import gov.nist.asbestos.sharedObjects.ChannelConfig;
 import gov.nist.asbestos.simapi.tk.installation.Installation;
 import gov.nist.asbestos.simapi.validation.Val;
-import gov.nist.asbestos.simapi.validation.ValE;
-import gov.nist.asbestos.simapi.validation.ValErrors;
-import gov.nist.asbestos.simapi.validation.ValWarnings;
 import gov.nist.asbestos.utilities.*;
 import ihe.iti.xds_b._2007.ProvideAndRegisterDocumentSetRequestType;
 import oasis.names.tc.ebxml_regrep.xsd.lcm._3.SubmitObjectsRequest;
-import oasis.names.tc.ebxml_regrep.xsd.rim._3.RegistryObjectListType;
+import oasis.names.tc.ebxml_regrep.xsd.query._3.AdhocQueryRequest;
+import oasis.names.tc.ebxml_regrep.xsd.query._3.ResponseOptionType;
+import oasis.names.tc.ebxml_regrep.xsd.rim._3.*;
 import oasis.names.tc.ebxml_regrep.xsd.rs._3.RegistryResponseType;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.BaseResource;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.OperationOutcome;
-import org.xml.sax.SAXException;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -53,6 +54,7 @@ public class MhdChannel extends BaseChannel /*implements IBaseChannel*/ {
     private Bundle requestBundle = null;
     private String serverBase;
     private String proxyBase;
+    private BundleToRegistryObjectList bundleToRegistryObjectList = new BundleToRegistryObjectList();
 
     private String transformPDBToPNR(Bundle bundle, URI toAddr) {
         Val val = new Val();
@@ -70,7 +72,6 @@ public class MhdChannel extends BaseChannel /*implements IBaseChannel*/ {
             throw new RuntimeException(e);
         }
 
-        BundleToRegistryObjectList bundleToRegistryObjectList = new BundleToRegistryObjectList();
         bundleToRegistryObjectList.setVal(val);
         bundleToRegistryObjectList.setCodeTranslator(codeTranslator);
         bundleToRegistryObjectList.setResourceMgr(rMgr);
@@ -117,6 +118,37 @@ public class MhdChannel extends BaseChannel /*implements IBaseChannel*/ {
         }
         return os.toString();
     }
+
+
+    private String documentEntryByUidQuery(String uid, URI toAddr)  {
+        AdhocQueryRequest adhocQueryRequest = new AdhocQueryRequest();
+        ResponseOptionType responseOptionType = new ResponseOptionType();
+        responseOptionType.setReturnType("LeafClass");
+        adhocQueryRequest.setResponseOption(responseOptionType);
+        AdhocQueryType adhocQueryType = new AdhocQueryType();
+        QueryExpressionType queryExpressionType = new QueryExpressionType();
+        adhocQueryType.setQueryExpression(queryExpressionType);
+        SlotType1 slot = new SlotType1();
+        slot.setName("$XDSDocumentEntryUniqueId");
+        ValueListType valueList = new ValueListType();
+        valueList.getValue().add("('" + uid + "')");
+        slot.setValueList(valueList);
+        adhocQueryType.getSlot().add(slot);
+
+        ByteArrayOutputStream queryStream = new ByteArrayOutputStream();
+        new AdhocQueryBuilder().toOutputStream(adhocQueryRequest, queryStream);
+
+        String queryString = deleteXMLInstruction(new String(queryStream.toByteArray()));
+        String soapString = AdhocQueryWrapper.wrap(toAddr.toString(), queryString);
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+        try {
+            MultipartSender.getMultipartEntity(soapString).writeTo(os);
+        } catch (IOException e) {
+            //
+        }
+        return os.toString();
+    }
+
 
     @Override
     public void transformRequest(HttpPost requestIn, HttpPost requestOut)  {
@@ -187,7 +219,18 @@ public class MhdChannel extends BaseChannel /*implements IBaseChannel*/ {
 
     @Override
     public void transformRequest(HttpGet requestIn, HttpGet requestOut) {
-        throw new RuntimeException("GET not supported on this channel");
+        Ref ref = new Ref(requestIn.getUri());
+        String resourceType = ref.getResourceType();
+        String uid = ref.getId();
+        if (resourceType != null) {
+            if (resourceType.equals("DocumentReference")) {
+
+            } else if (resourceType.equals("DocumentManifest")) {
+
+            } else {
+                throw new RuntimeException("GET " + resourceType + " not supported");
+            }
+        }
     }
 
     @Override
@@ -305,6 +348,8 @@ public class MhdChannel extends BaseChannel /*implements IBaseChannel*/ {
         response.setType(Bundle.BundleType.TRANSACTIONRESPONSE);
         boolean first = true;
         for (Bundle.BundleEntryComponent componentIn : requestBundle.getEntry()) {
+            BaseResource resource = componentIn.getResource();
+            SubmittedObject submittedObject = bundleToRegistryObjectList.findSubmittedObject(resource);
             Bundle.BundleEntryComponent componentOut = response.addEntry();
             Bundle.BundleEntryResponseComponent responseComponent = componentOut.getResponse();
             if (first && oo != null) {
@@ -312,6 +357,10 @@ public class MhdChannel extends BaseChannel /*implements IBaseChannel*/ {
                 responseComponent.setOutcome(oo);
             } else {
                 responseComponent.setStatus("200");
+                if (submittedObject != null) {
+                    String url = proxyBase + "/" + resource.getClass().getSimpleName() + "/" + submittedObject.getUid();
+                    responseComponent.setLocation(url);
+                }
             }
             first = false;
         }

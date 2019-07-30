@@ -110,7 +110,7 @@ public class ProxyServlet extends HttpServlet {
             // interaction between proxy and target service
             Task backSideTask = event.getStore().newTask();
 
-            String proxyBase = new Ref(uri).getBase().toString();
+            String proxyBase = new Ref(uri).getBase().withHostPort(hostport).toString();
             String fhirBase = new Ref(requestIn.getRequestHeaders().getPathInfo()).getBase().toString();
             channel.setProxyBase(proxyBase);
             channel.setServerBase(fhirBase);
@@ -231,7 +231,6 @@ public class ProxyServlet extends HttpServlet {
 
         } catch (Throwable t) {
             log.error(ExceptionUtils.getStackTrace(t));
-            resp.setStatus(resp.SC_INTERNAL_SERVER_ERROR);
             returnOperationOutcome(req, resp, t);
         }
     }

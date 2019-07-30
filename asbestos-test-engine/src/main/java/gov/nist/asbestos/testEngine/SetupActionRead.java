@@ -12,6 +12,7 @@ import org.hl7.fhir.r4.model.TestScript;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
+import java.util.List;
 
 class SetupActionRead extends GenericSetupAction {
 
@@ -26,7 +27,11 @@ class SetupActionRead extends GenericSetupAction {
 
         ResourceWrapper wrapper = fhirClient.readResource(targetUrl, requestHeader);
         if (!wrapper.isOk()) {
-            Reporter.reportError(val, opReport, null, type, label, "Unable to retrieve " + targetUrl);
+            List<String> errors = wrapper.errorsFromOperationOutcome();
+            String errs = "";
+            for (String error : errors)
+                errs = errs + "\n" + error;
+            Reporter.reportError(val, opReport, null, type, label, "Unable to retrieve " + targetUrl + "\n" + errs);
             return;
         } else {
             reporter.report(wrapper.getRef() + " read");

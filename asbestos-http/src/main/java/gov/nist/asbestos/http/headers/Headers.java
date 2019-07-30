@@ -99,6 +99,23 @@ public class Headers {
         return new ArrayList<>(nameSet);
     }
 
+    public boolean hasContentType() {
+        Optional<Header> theHeader = headers.stream()
+                .filter(header -> header.getName().equalsIgnoreCase("content-type"))
+                .findFirst();
+        return theHeader.isPresent();
+    }
+
+    public void deleteContentType() {
+        for (Header header : headers) {
+            if (header.getName().equalsIgnoreCase("Content-Type")) {
+                headers.remove(header);
+                return;
+            }
+        }
+        return;
+    }
+
     public Header getContentType() {
         Optional<Header> theHeader = headers.stream()
                 .filter(header -> header.getName().equalsIgnoreCase("content-type"))

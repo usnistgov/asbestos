@@ -1,6 +1,8 @@
 package gov.nist.asbestos.client.resolver;
 
 
+import gov.nist.asbestos.client.Base.ProxyBase;
+import gov.nist.asbestos.client.client.Format;
 import gov.nist.asbestos.http.headers.Header;
 import gov.nist.asbestos.http.operations.HttpBase;
 import gov.nist.asbestos.http.operations.HttpPost;
@@ -8,15 +10,15 @@ import gov.nist.asbestos.simapi.validation.Val;
 import gov.nist.asbestos.simapi.validation.ValE;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.BaseResource;
+import org.hl7.fhir.r4.model.OperationOutcome;
 
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 public class ResourceWrapper {
     private BaseResource resource = null;    // basic content of the resource
-    private String assignedId = null;         // assigned symbolic id - used in XDS submissionm
+    private String assignedId = null;         // assigned symbolic id - used in XDS submission
+    private String assignedUid = null;
     private Ref ref = null;               // FHIR URL - used when available - read from server
     private HttpBase httpBase = null;        // used in operation
     private ResourceWrapper source = null;  // if httpBase is HttpPost then source  may be HttpGet that obtained resource
@@ -155,8 +157,41 @@ public class ResourceWrapper {
     }
 
     public boolean isOk() {
+        if (ref != null && httpBase != null && httpBase.getResponse() != null) {
+            String resourceType = ref.getResourceType();
+            if (!resourceType.equals("")) {
+                BaseResource resource = getResponseResource();
+                if (!resource.getClass().getSimpleName().equals(resourceType))
+                    return false;
+            }
+        }
         int status = getStatus();
         return 200 <= status && status < 300;
+    }
+
+    public BaseResource getResponseResource() {
+        if (httpBase != null && httpBase.getResponse() != null) {
+            byte[] responseBytes = httpBase.getResponse();
+            String contentType = httpBase.getResponseContentType();
+            Format format = Format.fromContentType(contentType);
+            return ProxyBase.parse(responseBytes, format);
+        }
+        return null;
+    }
+
+    public List<String> errorsFromOperationOutcome() {
+        List<String> errors = new ArrayList<>();
+
+        BaseResource resource = getResponseResource();
+        if (resource != null && (resource instanceof OperationOutcome)) {
+            OperationOutcome oo = (OperationOutcome) resource;
+            for (OperationOutcome.OperationOutcomeIssueComponent component : oo.getIssue()) {
+                if (component.getSeverity() == OperationOutcome.IssueSeverity.ERROR)
+                    errors.add(component.getDiagnostics());
+            }
+        }
+
+        return errors;
     }
 
     public int getStatus() {
@@ -166,5 +201,17 @@ public class ResourceWrapper {
             return -1;
         }
         return httpBase.getStatus();
+    }
+
+    public boolean hasResource() {
+        return resource != null;
+    }
+
+    public String getAssignedUid() {
+        return assignedUid;
+    }
+
+    public void setAssignedUid(String assignedUid) {
+        this.assignedUid = assignedUid;
     }
 }

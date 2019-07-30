@@ -7,6 +7,7 @@ import gov.nist.asbestos.client.resolver.IdBuilder;
 import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.client.resolver.ResolverConfig;
 import gov.nist.asbestos.client.resolver.ResourceMgr;
+import gov.nist.asbestos.mhd.SubmittedObject;
 import gov.nist.asbestos.mhd.transactionSupport.AssigningAuthorities;
 import gov.nist.asbestos.mhd.transactionSupport.CodeTranslator;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
@@ -74,6 +75,15 @@ public class BundleToRegistryObjectList implements IVal {
     private boolean errorsOnly = true;
     private Bundle responseBundle = null;
     private boolean responseHasError = false;
+    private List<SubmittedObject> submittedObjects = new ArrayList<>();
+
+    public SubmittedObject findSubmittedObject(BaseResource resource) {
+        for (SubmittedObject submittedObject : submittedObjects) {
+            if (submittedObject.getResource().equals(resource))
+                return submittedObject;
+        }
+        return null;
+    }
 
     public RegistryObjectListType build(Bundle bundle) {
         Objects.requireNonNull(val);
@@ -114,6 +124,7 @@ public class BundleToRegistryObjectList implements IVal {
                 if (documentManifest == null) {
                     documentManifest = dm;
                     ss = createSubmissionSet(wrapper, vale);
+                    submittedObjects.add(new SubmittedObject(wrapper.getAssignedUid(), resource));
                     rol.getIdentifiable().add(new JAXBElement<>(new QName("urn:oasis:names:tc:ebxml-regrep:xsd:rim:3.0", "RegistryPackage"), RegistryPackageType.class, ss));
                 } else {
                     vale.add(new ValE("Found multiple DocumentManifests - one required").asError());
@@ -122,9 +133,9 @@ public class BundleToRegistryObjectList implements IVal {
                 DocumentReference dr = (DocumentReference) resource;
                 ExtrinsicObjectType eo = createExtrinsicObject(wrapper, vale);
                 eos.add(eo);
+                submittedObjects.add(new SubmittedObject(wrapper.getAssignedUid(), resource));
                 rol.getIdentifiable().add(new JAXBElement<>(new QName("urn:oasis:names:tc:ebxml-regrep:xsd:rim:3.0", "ExtrinsicObject"), ExtrinsicObjectType.class, eo));
             } else if (resource instanceof Binary) {
-
             } else {
                 vale.add(new ValE("Ignoring resource of type " + resource.getClass().getSimpleName()));
             }
@@ -311,8 +322,10 @@ public class BundleToRegistryObjectList implements IVal {
             addClassificationFromCodeableConcept(ss, dm.getType(), CodeTranslator.CONTENTTYPECODE, resource.getAssignedId(), vale);
         if (!dm.hasMasterIdentifier())
             val.add(new ValE("DocumentManifest.masterIdentifier not present - declared by IHE to be [1..1]").asError());
-        else
+        else {
             addExternalIdentifier(ss, CodeTranslator.SS_UNIQUEID, unURN(dm.getMasterIdentifier().getValue()), rMgr.allocateSymbolicId(), resource.getAssignedId(), "XDSSubmissionSet.uniqueId", idBuilder);
+            resource.setAssignedUid(dm.getMasterIdentifier().getId());
+        }
         if (dm.hasSource())
             addExternalIdentifier(ss, CodeTranslator.SS_SOURCEID, unURN(dm.getMasterIdentifier().getValue()), rMgr.allocateSymbolicId(), resource.getAssignedId(), "XDSSubmissionSet.sourceId", null);
         if (dm.hasSubject() && dm.getSubject().hasReference())
@@ -457,6 +470,7 @@ public class BundleToRegistryObjectList implements IVal {
         else {
             tr.add(new ValE("masterIdentifier").asTranslation());
             addExternalIdentifier(eo, CodeTranslator.DE_UNIQUEID, unURN(dr.getMasterIdentifier().getValue()), rMgr.allocateSymbolicId(), resource.getAssignedId(), "XDSDocumentEntry.uniqueId", idBuilder);
+            resource.setAssignedUid(unURN(dr.getMasterIdentifier().getValue()));
         }
 
         tr = vale.add(new ValE("DocumentReference.subject is [1..1]").addIheRequirement(DRTable));
