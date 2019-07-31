@@ -36,8 +36,12 @@ public class FhirClient {
         String contentType = (format == Format.XML) ? "application/fhir+xml" : (format == Format.JSON ? "application/fhir+json" : null);
         if (contentType != null)
             headers.put("content-type", contentType);
+        Headers theHeaders = new Headers(headers);
+        if (theHeaders.getHeaderValue("accept") == null)
+            theHeaders.add(new Header("accept", Format.XML.getContentType()));
+
         HttpPost post = new HttpPost();
-        post.setRequestHeaders(new Headers(headers));
+        post.setRequestHeaders(theHeaders);
         post.setUri(ref.getUri());
         byte[] content;
         if (format == Format.JSON)
@@ -106,6 +110,8 @@ public class FhirClient {
         wrapper.setHttpBase(getter);
         getter.setUri(ref.getUri());
         Headers headers = new Headers(requestHeader);
+        if (headers.getHeaderValue("accept") == null)
+            headers.add(new Header("accept", Format.XML.getContentType()));
         getter.setRequestHeaders(headers);
         getter.get();
         return gobbleGetResponse(getter, wrapper, asFormat(headers));

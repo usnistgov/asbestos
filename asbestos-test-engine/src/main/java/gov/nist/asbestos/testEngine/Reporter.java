@@ -31,12 +31,32 @@ class Reporter {
         opReport.setMessage(existing == null ? theMsg : existing + "\n" + theMsg);
     }
 
+    void report(String msg, String link) {
+        if (link != null) {
+            msg = "loglink=" + link + " " + msg;
+        }
+        String theMsg = formatMsg(type, label, msg);
+        String existing = opReport.getMessage();
+        opReport.setMessage(existing == null ? theMsg : existing + "\n" + theMsg);
+    }
+
     static String formatMsg(String type, String id, String msg) {
         return type + " : " + id + " : " + msg;
     }
 
     static void reportError(ValE val, TestReport.SetupActionOperationComponent opReport, TestReport.SetupActionAssertComponent assertReport, String type, String id, String msg) {
         assert assertReport != null || opReport != null;
+        if (assertReport != null)
+            reportError(val, assertReport, type, id, msg);
+        else
+            reportError(val, opReport, type, id, msg);
+    }
+
+    static void reportError(ValE val, TestReport.SetupActionOperationComponent opReport, TestReport.SetupActionAssertComponent assertReport, String type, String id, String msg, String link) {
+        assert assertReport != null || opReport != null;
+        if (link != null) {
+            msg = "loglink=" + link + " " + msg;
+        }
         if (assertReport != null)
             reportError(val, assertReport, type, id, msg);
         else

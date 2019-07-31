@@ -31,10 +31,10 @@ class SetupActionRead extends GenericSetupAction {
             String errs = "";
             for (String error : errors)
                 errs = errs + "\n" + error;
-            Reporter.reportError(val, opReport, null, type, label, "Unable to retrieve " + targetUrl + "\n" + errs);
+            Reporter.reportError(val, opReport, null, type, label, "Unable to retrieve " + targetUrl + "\n" + errs, wrapper.logLink());
             return;
         } else {
-            reporter.report(wrapper.getRef() + " read");
+            reporter.report(wrapper.getRef() + " read", wrapper.logLink());
         }
         postExecute(wrapper);
     }

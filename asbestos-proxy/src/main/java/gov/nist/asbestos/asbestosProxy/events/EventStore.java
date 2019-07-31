@@ -311,4 +311,7 @@ public class EventStore {
         return e._responseBody;
     }
 
+    public File getRoot() {
+        return root;
+    }
 }

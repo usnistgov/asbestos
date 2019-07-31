@@ -1,5 +1,8 @@
 package gov.nist.asbestos.client.client;
 
+import gov.nist.asbestos.http.headers.Header;
+import gov.nist.asbestos.http.headers.Headers;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,5 +30,13 @@ public enum Format {
         if (contentType != null && contentType.equals("application/fhir+json"))
             return Format.JSON;
         return Format.XML;
+    }
+
+    public static Format resultContentType(Headers inHeaders) {
+        Header acceptHeader = inHeaders.getAccept();
+        Format format = Format.XML;
+        if (acceptHeader != null && acceptHeader.getValue().contains("json"))
+            format = Format.JSON;
+        return format;
     }
 }

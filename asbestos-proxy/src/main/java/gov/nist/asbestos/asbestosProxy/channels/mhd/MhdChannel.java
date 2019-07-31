@@ -1,10 +1,12 @@
 package gov.nist.asbestos.asbestosProxy.channels.mhd;
 
 import gov.nist.asbestos.asbestosProxy.channel.BaseChannel;
+import gov.nist.asbestos.asbestosProxy.events.Event;
 import gov.nist.asbestos.asbestosProxy.events.EventStore;
 import gov.nist.asbestos.asbestosProxy.parser.AhqrSender;
 import gov.nist.asbestos.asbestosProxy.parser.FaultParser;
 import gov.nist.asbestos.asbestosProxy.util.XdsActorMapper;
+import gov.nist.asbestos.asbestosProxy.wrapper.ProxyServlet;
 import gov.nist.asbestos.asbestosProxy.wrapper.TransformException;
 import gov.nist.asbestos.client.Base.ProxyBase;
 import gov.nist.asbestos.client.client.FhirClient;
@@ -13,17 +15,17 @@ import gov.nist.asbestos.client.resolver.IdBuilder;
 import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.client.resolver.ResourceCacheMgr;
 import gov.nist.asbestos.client.resolver.ResourceMgr;
+import gov.nist.asbestos.http.headers.Header;
 import gov.nist.asbestos.http.headers.Headers;
-import gov.nist.asbestos.http.operations.HttpBase;
-import gov.nist.asbestos.http.operations.HttpDelete;
-import gov.nist.asbestos.http.operations.HttpGet;
-import gov.nist.asbestos.http.operations.HttpPost;
+import gov.nist.asbestos.http.operations.*;
 import gov.nist.asbestos.mhd.SubmittedObject;
 import gov.nist.asbestos.mhd.transactionSupport.AdhocQueryBuilder;
 import gov.nist.asbestos.mhd.transactionSupport.AssigningAuthorities;
 import gov.nist.asbestos.mhd.transactionSupport.CodeTranslator;
 import gov.nist.asbestos.mhd.transactionSupport.ProvideAndRegisterBuilder;
 import gov.nist.asbestos.mhd.translation.BundleToRegistryObjectList;
+import gov.nist.asbestos.mhd.translation.ContainedIdAllocator;
+import gov.nist.asbestos.mhd.translation.DocumentEntryToDocumentReference;
 import gov.nist.asbestos.sharedObjects.ChannelConfig;
 import gov.nist.asbestos.simapi.tk.installation.Installation;
 import gov.nist.asbestos.simapi.validation.Val;
@@ -36,10 +38,11 @@ import oasis.names.tc.ebxml_regrep.xsd.rim._3.*;
 import oasis.names.tc.ebxml_regrep.xsd.rs._3.RegistryResponseType;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.BaseResource;
-import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.OperationOutcome;
+import org.hl7.fhir.r4.model.*;
 
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -56,6 +59,7 @@ public class MhdChannel extends BaseChannel /*implements IBaseChannel*/ {
     private String serverBase;
     private String proxyBase;
     private BundleToRegistryObjectList bundleToRegistryObjectList = new BundleToRegistryObjectList();
+    private AhqrSender sender = null;
 
     private String transformPDBToPNR(Bundle bundle, URI toAddr) {
         Val val = new Val();
@@ -121,12 +125,14 @@ public class MhdChannel extends BaseChannel /*implements IBaseChannel*/ {
     }
 
 
-    private String documentEntryByUidQuery(String uid, URI toAddr)  {
+    private AhqrSender documentEntryByUidQuery(String uid, URI toAddr)  {
         AdhocQueryRequest adhocQueryRequest = new AdhocQueryRequest();
         ResponseOptionType responseOptionType = new ResponseOptionType();
         responseOptionType.setReturnType("LeafClass");
+        responseOptionType.setReturnComposedObjects(true);
         adhocQueryRequest.setResponseOption(responseOptionType);
         AdhocQueryType adhocQueryType = new AdhocQueryType();
+        adhocQueryType.setId("urn:uuid:5c4f972b-d56b-40ac-a5fc-c8ca9b40b9d4");
         QueryExpressionType queryExpressionType = new QueryExpressionType();
         adhocQueryType.setQueryExpression(queryExpressionType);
         SlotType1 slot = new SlotType1();
@@ -145,9 +151,21 @@ public class MhdChannel extends BaseChannel /*implements IBaseChannel*/ {
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         AhqrSender sender = new AhqrSender();
         sender.send(soapString, toAddr.toString());
-        return os.toString();
+        return sender;
     }
 
+    private OperationOutcome regErrorListAsOperationOutcome(RegErrorList regErrorList) {
+        OperationOutcome oo = new OperationOutcome();
+
+        for (RegError regError : regErrorList.getList()) {
+            OperationOutcome.OperationOutcomeIssueComponent issue = new OperationOutcome.OperationOutcomeIssueComponent();
+            oo.addIssue(issue);
+            issue.setDiagnostics(regError.getMsg());
+            issue.setSeverity(OperationOutcome.IssueSeverity.ERROR);
+        }
+
+        return oo;
+    }
 
     @Override
     public void transformRequest(HttpPost requestIn, HttpPost requestOut)  {
@@ -172,12 +190,7 @@ public class MhdChannel extends BaseChannel /*implements IBaseChannel*/ {
         Bundle bundle = (Bundle) resource;
         requestBundle = bundle;
 
-        URI toAddr;
-        try {
-            toAddr = transformRequestUrl(null, requestIn); //channelConfig.translateEndpointToFhirBase(requestIn.getRequestHeaders().getPathInfo());
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        URI toAddr = transformRequestUrl(null, requestIn);
 
         String soapString = transformPDBToPNR(bundle, toAddr);
         if (soapString == null) {
@@ -189,9 +202,6 @@ public class MhdChannel extends BaseChannel /*implements IBaseChannel*/ {
                 response = ProxyBase.getFhirContext().newJsonParser().setPrettyPrint(true).encodeResourceToString(oo);
             throw new TransformException(response, isXml ? Format.XML : Format.JSON);
         }
-
-
-
         requestOut.setRequestText(soapString);
         requestOut.setRequestHeaders(new Headers().withContentType(MultipartSender.getContentType()));
     }
@@ -218,26 +228,36 @@ public class MhdChannel extends BaseChannel /*implements IBaseChannel*/ {
 
     @Override
     public void transformRequest(HttpGet requestIn, HttpGet requestOut) {
-        URI toAddr;
-        try {
-            toAddr = transformRequestUrl(null, requestIn); //channelConfig.translateEndpointToFhirBase(requestIn.getRequestHeaders().getPathInfo());
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-
         Ref ref = new Ref(requestIn.getRequestHeaders().getPathInfo());
         String resourceType = ref.getResourceType();
-        String uid = ref.getId();
-        if (resourceType != null) {
-            if (resourceType.equals("DocumentReference")) {
-                String x = documentEntryByUidQuery(uid, toAddr);
-            } else if (resourceType.equals("DocumentManifest")) {
+        if (resourceType == null)
+            throw new Error("Cannot retrieve XDS contents for resource type " + resourceType);
 
-            } else {
-                throw new RuntimeException("GET " + resourceType + " not supported");
-            }
+        URI toAddr = transformRequestUrl(null, requestIn);
+
+        String uid = ref.getId();
+        if (resourceType.equals("DocumentReference")) {
+            sender = documentEntryByUidQuery(uid, toAddr);
+            requestOut.setRequestHeaders(sender.getHeaders());
+            requestOut.setRequestText(sender.getBody());
+            getEvent().getStore().putResponseHeader(sender.getHeaders());
+            getEvent().getStore().putRequestBodyText(sender.getBody());
+//        } else if (resourceType.equals("DocumentManifest")) {
+
+        } else {
+            throw new RuntimeException("GET " + resourceType + " not supported");
         }
     }
+
+    private void returnOperationOutcome(HttpBase resp, Event event, OperationOutcome oo) {
+        Headers responseHeaders = new Headers();
+        event.getStore().putResponseHeader(responseHeaders);
+        Format format = getReturnFormatType();
+        String encoded = ProxyBase.encode(oo, format);
+        resp.setResponseText(encoded);
+        resp.getResponseHeaders().add(new Header("Content-Type", format.getContentType()));
+    }
+
 
     @Override
     public void transformRequest(HttpDelete requestIn, HttpDelete requestOut) {
@@ -249,90 +269,194 @@ public class MhdChannel extends BaseChannel /*implements IBaseChannel*/ {
         Objects.requireNonNull(channelConfig);
         if (channelConfig.getXdsSiteName() == null || channelConfig.getXdsSiteName().equals(""))
             throw new RuntimeException("ChannelConfig does not have XdsSiteName");
-        String addr =  new XdsActorMapper().getEndpoint(channelConfig.getXdsSiteName(), "rep", "pnr", false);
-        if (addr == null || addr.equals(""))
-            throw new RuntimeException("XdsActorMapper cannot map site=" + channelConfig.getXdsSiteName() + " actorType=rep transactionType=pnr isTls=false");
-        try {
-            return new URI(addr);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+        if (requestIn instanceof HttpPost) {
+            String actorType;
+            String transType;
+            actorType = "rep";
+            transType = "prb";
+
+            return new XdsActorMapper().getEndpoint(channelConfig.getXdsSiteName(), actorType, transType, false);
+        } else if (requestIn instanceof  HttpGet) {
+            Ref ref = new Ref(requestIn.getRequestHeaders().getPathInfo());
+            String actorType;
+            String transType;
+            String resourceType = ref.getResourceType();
+            if (resourceType == null)
+                throw new Error("Cannot retrieve XDS contents for resource type " + resourceType);
+
+            if (resourceType.equals("DocumentReference") || resourceType.equals("DocumentManifest")) {
+                actorType = "reg";
+                transType = "sq";
+            } else if (resourceType.equals("Binary")) {
+                actorType = "rep";
+                transType = "ret";
+            } else {
+                throw new Error("Cannot retrieve XDS contents for resource type " + resourceType);
+            }
+
+            return  new XdsActorMapper().getEndpoint(channelConfig.getXdsSiteName(), actorType, transType, false);
         }
+        return null;
     }
 
     private void transformError(String msg, Throwable t, HttpBase responseOut) {
         transformError(msg + "\n" + ExceptionUtils.getStackTrace(t), responseOut);
     }
 
-    private void transformError(String message, HttpBase responseOut) {
+    private OperationOutcome wrapErrorInOperationOutcome(String msg) {
         OperationOutcome oo = new OperationOutcome();
+        addErrorToOperationOutcome(oo, msg);
+        return oo;
+    }
+
+    private OperationOutcome addErrorToOperationOutcome(OperationOutcome oo, String msg) {
         OperationOutcome.OperationOutcomeIssueComponent issue = oo.addIssue();
-        issue.setCode(OperationOutcome.IssueType.EXCEPTION);
+        issue.setCode(OperationOutcome.IssueType.UNKNOWN);
         issue.setSeverity(OperationOutcome.IssueSeverity.ERROR);
-        issue.setDiagnostics(message);
+        issue.setDiagnostics(msg);
+        return oo;
+    }
+
+    private void transformError(String message, HttpBase responseOut) {
+        OperationOutcome oo = wrapErrorInOperationOutcome(message);
         packageResponse(responseOut, oo);
+    }
+
+    private Bundle bundleWith(List<Resource> in) {
+        Bundle bundle = new Bundle();
+
+        for (Resource resource : in) {
+            Bundle.BundleEntryComponent entry = new Bundle.BundleEntryComponent();
+            bundle.addEntry(entry);
+            if (resource instanceof OperationOutcome) {
+                Bundle.BundleEntryResponseComponent resp = new Bundle.BundleEntryResponseComponent();
+                resp.setStatus("500");
+                resp.setOutcome(resource);
+            } else {
+                entry.setResource(resource);
+                Bundle.BundleEntryResponseComponent resp = new Bundle.BundleEntryResponseComponent();
+                entry.setResponse(resp);
+                resp.setStatus("200");
+            }
+        }
+
+        return bundle;
+    }
+
+    private String logResponse(String text) {
+        getEvent().getStore().putResponseBodyText(text);
+        getEvent().getStore().putResponseHeader(new Headers().withContentType(this.getReturnFormatType().getContentType()));
+        return text;
     }
 
     @Override
     public void transformResponse(HttpBase responseIn, HttpBase responseOut, String proxyHostPort) {
-        Objects.requireNonNull(requestBundle);
-        OperationOutcome oo = new OperationOutcome();
-        String responsePart = responseIn.getResponseText();
-        String registryResponse = "";
-        try {
-            if (responsePart == null || responsePart.equals("")) {
-                transformError("Empty response from XDS.ProvideAndRegister", responseOut);
+        if (sender != null) {
+            getEvent().getStore().putResponseBodyText(sender.getResponseText());
+            if (responseOut.getVerb().equals(Verb.GET.toString())) {
+                if (sender.hasErrors()) {
+                    logResponse(sender.getResponseText());
+                    OperationOutcome oo = regErrorListAsOperationOutcome(sender.getErrorList());
+                    returnOperationOutcome(responseOut, getEvent(), oo);
+                } else if (sender.getContents().size() == 1) {
+                    Val val = new Val();
+                    DocumentEntryToDocumentReference trans = new DocumentEntryToDocumentReference();
+                    trans
+                            .setContainedIdAllocator(new ContainedIdAllocator())
+                            .setVal(val);
+                    DocumentReference dr = trans.getDocumentReference((ExtrinsicObjectType) sender.getContents().get(0));
+                    responseOut.setResponseText(logResponse(ProxyBase.encode(dr, returnFormatType)));
+                    responseOut.setResponseContentType(returnFormatType.getContentType());
+                } else if (sender.getContents().size() > 1){
+                    OperationOutcome oo = wrapErrorInOperationOutcome("XDS Query returned " + sender.getContents().size() + " objects");
+                    responseOut.setResponseText(logResponse(ProxyBase.encode(oo, returnFormatType)));
+                    responseOut.setResponseContentType(returnFormatType.getContentType());
+                }
+            } else {
+                if (sender.hasErrors()) {
+                    OperationOutcome oo = regErrorListAsOperationOutcome(sender.getErrorList());
+                    returnOperationOutcome(responseOut, getEvent(), oo);
+                } else {
+                    List<IdentifiableType> inContents = sender.getContents();
+                    List<Resource> outContents = new ArrayList<>();
+                    for (IdentifiableType it : inContents) {
+                        if (it instanceof ExtrinsicObjectType) {
+                            Val val = new Val();
+                            DocumentEntryToDocumentReference trans = new DocumentEntryToDocumentReference();
+                            trans
+                                    .setContainedIdAllocator(new ContainedIdAllocator())
+                                    .setVal(val);
+                            DocumentReference dr = trans.getDocumentReference((ExtrinsicObjectType) it);
+                            outContents.add(dr);
+                        } else {
+                            OperationOutcome oo = wrapErrorInOperationOutcome("Cannot transform " + it.getClass().getSimpleName() + " to FHIR");
+                            outContents.add(oo);
+                        }
+                    }
+                    Bundle bundle = bundleWith(outContents);
+                }
+            }
+        } else {
+            Objects.requireNonNull(requestBundle);
+            OperationOutcome oo = new OperationOutcome();
+            String responsePart = responseIn.getResponseText();
+            String registryResponse = "";
+            try {
+                if (responsePart == null || responsePart.equals("")) {
+                    transformError("Empty response from XDS.ProvideAndRegister", responseOut);
+                    return;
+                }
+                String envelope = FaultParser.unwrapPart(responsePart);
+                if (envelope == null || envelope.equals("")) {
+                    transformError("Empty SOAP Envelope from XDS.ProvideAndRegister", responseOut);
+                    return;
+                }
+                String faultMsg = FaultParser.parse(envelope);
+                if (faultMsg != null && !faultMsg.equals("")) {
+                    transformError(faultMsg, responseOut);
+                    return;
+                }
+                registryResponse = FaultParser.extractRegistryResponse(envelope);
+                if (registryResponse == null || registryResponse.equals("")) {
+                    transformError("No RegistryResponse returned from XDS.ProvideAndRegister", responseOut);
+                    return;
+                }
+            } catch (Throwable e) {
+                transformError("Error processing RegistryResponse:\n" + responsePart + "\n", e, responseOut);
                 return;
             }
-            String envelope = FaultParser.unwrapPart(responsePart);
-            if (envelope == null || envelope.equals("")) {
-                transformError("Empty SOAP Envelope from XDS.ProvideAndRegister", responseOut);
-                return;
-            }
-            String faultMsg = FaultParser.parse(envelope);
-            if (faultMsg != null && !faultMsg.equals("")) {
-                transformError(faultMsg ,responseOut);
-                return;
-            }
-            registryResponse = FaultParser.extractRegistryResponse(envelope);
-            if (registryResponse == null || registryResponse.equals("")) {
-                transformError("No RegistryResponse returned from XDS.ProvideAndRegister" ,responseOut);
-                return;
-            }
-        } catch (Throwable e) {
-            transformError("Error processing RegistryResponse:\n" + responsePart + "\n", e ,responseOut);
-            return;
-        }
 
-        RegistryResponseType rrt;
-        try {
-            rrt = new RegistryResponseBuilder().fromInputStream(new ByteArrayInputStream(registryResponse.getBytes()));
-        } catch (Exception e) {
-            transformError(ExceptionUtils.getStackTrace(e), responseOut);
-            return;
-        }
-        RegErrorList regErrorList = RegistryResponseBuilder.asErrorList(rrt);
+            RegistryResponseType rrt;
+            try {
+                rrt = new RegistryResponseBuilder().fromInputStream(new ByteArrayInputStream(registryResponse.getBytes()));
+            } catch (Exception e) {
+                transformError(ExceptionUtils.getStackTrace(e), responseOut);
+                return;
+            }
+            RegErrorList regErrorList = RegistryResponseBuilder.asErrorList(rrt);
 
-        for (RegError re : regErrorList.getList()) {
-            System.out.println(re.getSeverity() + " - " + re.getMsg());
-        }
-        List<RegError> lst = regErrorList.getList();
-        List<String> raw = new ArrayList<>();
+            for (RegError re : regErrorList.getList()) {
+                System.out.println(re.getSeverity() + " - " + re.getMsg());
+            }
+            List<RegError> lst = regErrorList.getList();
+            List<String> raw = new ArrayList<>();
 
-        for (RegError re : lst) {
-            ErrorType errorType = re.getSeverity();
-            String msg = trim(re.getMsg());
-            if (raw.contains(msg))
-                continue;
-            raw.add(msg);
-            OperationOutcome.OperationOutcomeIssueComponent issue = oo.addIssue();
-            issue.setCode(OperationOutcome.IssueType.UNKNOWN);
-            issue.setDiagnostics(msg);
-            issue.setSeverity(errorType == ErrorType.Error ? OperationOutcome.IssueSeverity.ERROR : OperationOutcome.IssueSeverity.WARNING);
+            for (RegError re : lst) {
+                ErrorType errorType = re.getSeverity();
+                String msg = trim(re.getMsg());
+                if (raw.contains(msg))
+                    continue;
+                raw.add(msg);
+                OperationOutcome.OperationOutcomeIssueComponent issue = oo.addIssue();
+                issue.setCode(OperationOutcome.IssueType.UNKNOWN);
+                issue.setDiagnostics(msg);
+                issue.setSeverity(errorType == ErrorType.Error ? OperationOutcome.IssueSeverity.ERROR : OperationOutcome.IssueSeverity.WARNING);
+            }
+            packageResponse(
+                    responseOut,
+                    lst.isEmpty() ? null : oo
+            );
         }
-        packageResponse(
-                responseOut,
-                lst.isEmpty() ? null : oo
-        );
     }
 
     private boolean isWhite(char c) {

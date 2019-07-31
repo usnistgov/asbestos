@@ -115,6 +115,8 @@ abstract public class HttpBase {
     }
 
     public Headers getResponseHeaders() {
+        if (_responseHeaders == null)
+            _responseHeaders = new Headers();
         return _responseHeaders;
     }
 

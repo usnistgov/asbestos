@@ -240,15 +240,18 @@ public class DocumentEntryToDocumentReference implements IVal {
         this.val = val;
     }
 
-    public void setResourceMgr(ResourceMgr resourceMgr) {
+    public DocumentEntryToDocumentReference setResourceMgr(ResourceMgr resourceMgr) {
         this.resourceMgr = resourceMgr;
+        return this;
     }
 
-    public void setCodeTranslator(CodeTranslator codeTranslator) {
+    public DocumentEntryToDocumentReference setCodeTranslator(CodeTranslator codeTranslator) {
         this.codeTranslator = codeTranslator;
+        return this;
     }
 
-    public void setContainedIdAllocator(ContainedIdAllocator containedIdAllocator) {
+    public DocumentEntryToDocumentReference setContainedIdAllocator(ContainedIdAllocator containedIdAllocator) {
         this.containedIdAllocator = containedIdAllocator;
+        return this;
     }
 }

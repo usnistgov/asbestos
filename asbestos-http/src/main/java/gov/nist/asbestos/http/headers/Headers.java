@@ -90,6 +90,14 @@ public class Headers {
         return headers;
     }
 
+    public String getHeaderValue(String name) {
+        for (Header header : headers) {
+            if (name.equalsIgnoreCase(header.getName()))
+                return header.getValue();
+        }
+        return null;
+    }
+
     public List<String> getNames() {
         Set<String> nameSet = new HashSet<>();
 

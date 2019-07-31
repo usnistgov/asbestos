@@ -11,9 +11,18 @@
     <load-on-startup>1</load-on-startup>
   </servlet>
 
+  <servlet>
+    <servlet-name>logViewer</servlet-name>
+    <servlet-class>gov.nist.asbestos.asbestosProxy.wrapper.ProxyLogServlet</servlet-class>
+  </servlet>
+
   <servlet-mapping>
     <servlet-name>Proxy</servlet-name>
     <url-pattern>/prox/*</url-pattern>
   </servlet-mapping>
 
+  <servlet-mapping>
+    <servlet-name>logViewer</servlet-name>
+    <url-pattern>/log/*</url-pattern>
+  </servlet-mapping>
 </web-app>

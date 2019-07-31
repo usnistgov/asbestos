@@ -44,9 +44,9 @@ class SetupActionDelete extends GenericSetupAction {
         Ref targetUrl = new Ref(createUrl.getBase(), createUrl.getResourceType(), createUrl.getId(), null);
         ResourceWrapper wrapper = getFhirClient().deleteResource(targetUrl, requestHeader);
         if (wrapper.isOk())
-            reporter.report(targetUrl + " deleted");
+            reporter.report(targetUrl + " deleted", wrapper.logLink());
         else {
-            reporter.report(targetUrl + " not deleted");
+            reporter.report(targetUrl + " not deleted", wrapper.logLink());
             operationReport.setResult(TestReport.TestReportActionResult.FAIL);
         }
     }
@@ -100,9 +100,9 @@ class SetupActionDelete extends GenericSetupAction {
 
         ResourceWrapper wrapper = getFhirClient().deleteResource(targetUrl, requestHeader);
         if (wrapper.isOk())
-            reporter.report(wrapper.getRef() + " deleted");
+            reporter.report(wrapper.getRef() + " deleted", wrapper.logLink());
         else {
-            reporter.report(wrapper.getRef() + " not deleted");
+            reporter.report(wrapper.getRef() + " not deleted", wrapper.logLink());
             operationReport.setResult(TestReport.TestReportActionResult.FAIL);
         }
 //        String fixtureId = op.hasResponseId() ? op.getResponseId() : FixtureComponent.getNewId();

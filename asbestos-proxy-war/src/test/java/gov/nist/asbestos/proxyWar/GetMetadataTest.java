@@ -9,6 +9,7 @@ import gov.nist.asbestos.simapi.simCommon.SimId;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
@@ -35,7 +36,7 @@ class GetMetadataTest {
     private File externalCache;
 
     @Test
-    void getMetadataTest() throws URISyntaxException, IOException {
+    void getMetadataTest() throws URISyntaxException, IOException, ServletException {
         String testSession = "default";
         String channelId = "proxtest";
         externalCache = Support.findExternalCache();

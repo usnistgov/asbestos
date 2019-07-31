@@ -54,6 +54,12 @@ public class ResourceWrapper {
         this.ref = ref;
     }
 
+    public String logLink() {
+        if (httpBase == null)
+            return null;
+        return httpBase.getResponseHeaders().getHeaderValue("x-proxy-event");
+    }
+
     public void setResource(BaseResource resource) {
         this.resource = resource;
     }
