@@ -1,10 +1,10 @@
 package gov.nist.asbestos.asbestosProxy.wrapper;
 
 
-import gov.nist.asbestos.asbestosProxy.events.EventStoreItem;
-import gov.nist.asbestos.asbestosProxy.events.EventStoreItemFactory;
-import gov.nist.asbestos.asbestosProxy.events.EventStoreSearch;
-import gov.nist.asbestos.asbestosProxy.log.SimStore;
+import gov.nist.asbestos.client.events.EventStoreItem;
+import gov.nist.asbestos.client.events.EventStoreItemFactory;
+import gov.nist.asbestos.client.events.EventStoreSearch;
+import gov.nist.asbestos.client.log.SimStore;
 
 import java.util.ArrayList;
 import java.util.Collections;

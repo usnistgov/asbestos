@@ -1,6 +1,6 @@
 package gov.nist.asbestos.asbestosProxy.channel;
 
-import gov.nist.asbestos.asbestosProxy.events.Event;
+import gov.nist.asbestos.client.events.Event;
 import gov.nist.asbestos.client.client.Format;
 
 public abstract class BaseChannel implements IBaseChannel {

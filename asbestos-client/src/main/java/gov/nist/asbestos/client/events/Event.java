@@ -1,4 +1,4 @@
-package gov.nist.asbestos.asbestosProxy.events;
+package gov.nist.asbestos.client.events;
 
 
 import gov.nist.asbestos.http.headers.Headers;
@@ -12,6 +12,7 @@ public class Event {
     Headers _responseHeaders = null;
     byte[] _responseRawBody = null;
     String _responseBody = null;
+    String _description = null;
 
     EventStore store = null;
     SimId channelId = null;
@@ -35,6 +36,12 @@ public class Event {
 
     public EventStore getStore() {
         return store;
+    }
+
+    public Task newTask() {
+        Task task = store.newTask();
+        task.setEventStore(store);
+        return task;
     }
 
     public SimId getChannelId() {

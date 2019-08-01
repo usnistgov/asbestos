@@ -1,9 +1,9 @@
-package gov.nist.asbestos.asbestosProxy.log;
+package gov.nist.asbestos.client.log;
 
 
+import gov.nist.asbestos.client.events.Event;
+import gov.nist.asbestos.client.events.EventStore;
 import gov.nist.asbestos.sharedObjects.ChannelConfig;
-import gov.nist.asbestos.asbestosProxy.events.Event;
-import gov.nist.asbestos.asbestosProxy.events.EventStore;
 import gov.nist.asbestos.sharedObjects.ChannelConfigFactory;
 import gov.nist.asbestos.simapi.simCommon.SimId;
 import gov.nist.asbestos.simapi.simCommon.TestSession;

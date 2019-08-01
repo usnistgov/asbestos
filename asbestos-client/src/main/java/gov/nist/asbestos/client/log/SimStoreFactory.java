@@ -1,4 +1,4 @@
-package gov.nist.asbestos.asbestosProxy.log;
+package gov.nist.asbestos.client.log;
 
 
 import gov.nist.asbestos.sharedObjects.ChannelConfig;

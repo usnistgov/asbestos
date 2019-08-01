@@ -1,8 +1,7 @@
-package gov.nist.asbestos.asbestosProxy.events;
+package gov.nist.asbestos.client.events;
 
 
-import gov.nist.asbestos.asbestosProxy.log.SimStore;
-import gov.nist.asbestos.asbestosProxy.log.Task;
+import gov.nist.asbestos.client.log.SimStore;
 import gov.nist.asbestos.http.headers.Headers;
 
 import java.io.File;
@@ -10,8 +9,6 @@ import java.io.FileOutputStream;
 import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
 
 /**
  * An EventStore is a request (the trigger) and any number of tasks undertaken
@@ -81,18 +78,29 @@ public class EventStore {
      * creates new task and sets it as current
      * @return the task dir
      */
-    public Task newTask() {
+    public Task newTask(Event event) {
         int i = _tasks.size();
         File task = getTaskFile(i);
         task.mkdir();
         current = task;
         _tasks.add(task);
         clearCache();
-        return new Task(this, i);
+        return new Task(event, i);
     }
 
     public int getTaskCount() {
         return _tasks.size();
+    }
+
+    public int getCurrentTask() {
+        if (current == null)
+            return -1;
+        for (int i=0; i<_tasks.size(); i++) {
+            File file = _tasks.get(i);
+            if (file == current)
+                return i;
+        }
+        return -1;
     }
 
     /**
@@ -144,6 +152,7 @@ public class EventStore {
     public File getResponseBodyStringFile() {  return new File(current, "response_body.txt"); }
     public File getResponseBodyHTMLFile() {  return new File(current, "response_body.html"); }
     public File getRequestBodyHTMLFile() {  return new File(current, "request_body.html"); }
+    public File getDescriptionFile() { return new File(current, "description.txt"); }
 
     public void putRequestHeader(Headers headers) {
         e._requestHeaders = headers;
@@ -243,6 +252,18 @@ public class EventStore {
         }
     }
 
+    public void putDescription(String description) {
+        e._description = description;
+        current.mkdirs();
+        try {
+            try (PrintWriter out = new PrintWriter(getDescriptionFile())) {
+                out.print(description);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public void putRequestBodyText(String body) {
         current.mkdirs();
         try {
@@ -304,6 +325,17 @@ public class EventStore {
             }
         }
         return e._responseRawBody;
+    }
+
+    public String getDescription() {
+        if (e._description == null) {
+            try {
+                e._description = new String(Files.readAllBytes(getResponseBodyFile().toPath()));
+            } catch (Exception e) {
+
+            }
+        }
+        return e._description;
     }
 
     public String getResponseBodyAsString() {

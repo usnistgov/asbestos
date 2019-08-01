@@ -1,8 +1,8 @@
-package gov.nist.asbestos.asbestosProxy.events;
+package gov.nist.asbestos.client.events;
 
 
 
-import gov.nist.asbestos.asbestosProxy.log.SimStore;
+import gov.nist.asbestos.client.log.SimStore;
 import gov.nist.asbestos.simapi.simCommon.SimId;
 
 import java.io.BufferedReader;

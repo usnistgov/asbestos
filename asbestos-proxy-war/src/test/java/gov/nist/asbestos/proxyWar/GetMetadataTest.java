@@ -1,9 +1,9 @@
 package gov.nist.asbestos.proxyWar;
 
-import gov.nist.asbestos.asbestosProxy.events.EventStore;
-import gov.nist.asbestos.asbestosProxy.events.EventStoreItem;
-import gov.nist.asbestos.asbestosProxy.events.EventStoreSearch;
-import gov.nist.asbestos.asbestosProxy.log.SimStore;
+import gov.nist.asbestos.client.events.EventStore;
+import gov.nist.asbestos.client.events.EventStoreItem;
+import gov.nist.asbestos.client.events.EventStoreSearch;
+import gov.nist.asbestos.client.log.SimStore;
 import gov.nist.asbestos.asbestosProxy.wrapper.ProxyServlet;
 import gov.nist.asbestos.simapi.simCommon.SimId;
 import org.junit.jupiter.api.Test;

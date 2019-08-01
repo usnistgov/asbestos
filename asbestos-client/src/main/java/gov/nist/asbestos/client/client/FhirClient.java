@@ -25,6 +25,8 @@ public class FhirClient {
     private HttpBase httpBase = null;
     private Op op = null;
 
+    public FhirClient() {}
+
     public ResourceWrapper writeResource(BaseResource resource, Ref ref, Format format, Map<String, String> headers) {
         Objects.requireNonNull(resource);
         Objects.requireNonNull(ref);

@@ -1,8 +1,8 @@
 package gov.nist.asbestos.asbestosProxy.channels.mhd;
 
 import gov.nist.asbestos.asbestosProxy.channel.BaseChannel;
-import gov.nist.asbestos.asbestosProxy.events.Event;
-import gov.nist.asbestos.asbestosProxy.events.EventStore;
+import gov.nist.asbestos.client.events.Event;
+import gov.nist.asbestos.client.events.EventStore;
 import gov.nist.asbestos.asbestosProxy.parser.AhqrSender;
 import gov.nist.asbestos.asbestosProxy.parser.FaultParser;
 import gov.nist.asbestos.asbestosProxy.util.XdsActorMapper;
@@ -57,7 +57,10 @@ public class MhdChannel extends BaseChannel /*implements IBaseChannel*/ {
     private BundleToRegistryObjectList bundleToRegistryObjectList = new BundleToRegistryObjectList();
     private AhqrSender sender = null;
 
+    public MhdChannel() {}
+
     private String transformPDBToPNR(Bundle bundle, URI toAddr) {
+        Objects.requireNonNull(getEvent());
         Val val = new Val();
         FhirClient fhirClient = new FhirClient();
         fhirClient.setResourceCacheMgr(new ResourceCacheMgr(getExternalCache()));
@@ -65,6 +68,7 @@ public class MhdChannel extends BaseChannel /*implements IBaseChannel*/ {
         ResourceMgr rMgr = new ResourceMgr();
         rMgr.setVal(val);
         rMgr.setFhirClient(fhirClient);
+        rMgr.setEvent(getEvent());
 
         CodeTranslator codeTranslator;
         try {
@@ -81,6 +85,7 @@ public class MhdChannel extends BaseChannel /*implements IBaseChannel*/ {
 
         // perform translation
         rMgr.setBundle(bundle);
+
 
         RegistryObjectListType registryObjectListType = bundleToRegistryObjectList.build(bundle);
         if (bundleToRegistryObjectList.isResponseHasError()) {

@@ -3,15 +3,12 @@ package gov.nist.asbestos.asbestosProxy.wrapper;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import gov.nist.asbestos.asbestosProxy.channel.*;
-import gov.nist.asbestos.asbestosProxy.channels.mhd.MhdChannel;
-import gov.nist.asbestos.asbestosProxy.channels.passthrough.PassthroughChannel;
-import gov.nist.asbestos.asbestosProxy.events.Event;
-import gov.nist.asbestos.asbestosProxy.log.SimStore;
-import gov.nist.asbestos.asbestosProxy.log.Task;
+import gov.nist.asbestos.client.events.Event;
+import gov.nist.asbestos.client.log.SimStore;
+import gov.nist.asbestos.client.events.Task;
 import gov.nist.asbestos.asbestosProxy.util.Gzip;
 import gov.nist.asbestos.client.Base.ProxyBase;
 import gov.nist.asbestos.client.client.Format;
-import gov.nist.asbestos.client.client.Op;
 import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.http.headers.Header;
 import gov.nist.asbestos.http.headers.Headers;
@@ -31,8 +28,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
@@ -561,7 +556,8 @@ public class ProxyServlet extends HttpServlet {
 
     static HttpBase transformRequest(Task task, HttpPost requestIn, IBaseChannel channelTransform) {
         HttpPost requestOut = new HttpPost();
-
+        channelTransform.setEvent(task.getEventStore().getEvent());
+        task.getEventStore().getEvent();
         channelTransform.transformRequest(requestIn, requestOut);
 
         task.select();

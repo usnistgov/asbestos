@@ -1,6 +1,7 @@
 package gov.nist.asbestos.asbestosProxy.channel;
 
 
+import gov.nist.asbestos.client.events.Event;
 import gov.nist.asbestos.http.operations.HttpBase;
 import gov.nist.asbestos.http.operations.HttpDelete;
 import gov.nist.asbestos.http.operations.HttpGet;
@@ -16,4 +17,6 @@ public interface IBaseChannel extends IChannelControl {
     void transformResponse(HttpBase responseIn, HttpBase responseOut, String proxyHostPort);
     void setServerBase(String serverBase);
     void setProxyBase(String proxyBase);
+
+    void setEvent(Event event);
 }

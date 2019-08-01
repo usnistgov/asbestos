@@ -1,4 +1,4 @@
-package gov.nist.asbestos.asbestosProxy.events;
+package gov.nist.asbestos.client.events;
 
 
 import com.fasterxml.jackson.core.JsonProcessingException;

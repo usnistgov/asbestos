@@ -3,6 +3,9 @@ package gov.nist.asbestos.client.resolver;
 
 import gov.nist.asbestos.client.Base.IVal;
 import gov.nist.asbestos.client.client.FhirClient;
+import gov.nist.asbestos.client.events.Event;
+import gov.nist.asbestos.client.events.EventStore;
+import gov.nist.asbestos.http.operations.HttpBase;
 import gov.nist.asbestos.simapi.validation.Val;
 import gov.nist.asbestos.simapi.validation.ValE;
 import org.hl7.fhir.r4.model.Bundle;
@@ -22,6 +25,7 @@ public class ResourceMgr implements IVal {
     private FhirClient fhirClient = null;
     private List<Ref> knownServers = new ArrayList<>();
     private List<ResourceWrapper> bundleResourceList = new ArrayList<>();
+    private Event event = null;
 
     public ResourceMgr() {
 
@@ -203,6 +207,7 @@ public class ResourceMgr implements IVal {
 
     private ResourceWrapper load(ResourceWrapper resource) {
         Objects.requireNonNull(resource);
+        Objects.requireNonNull(fhirClient);
         if (resource.isLoaded())
             return resource;
         if (resource.getRef() == null)
@@ -213,12 +218,36 @@ public class ResourceMgr implements IVal {
             Optional<ResourceWrapper> cached = fhirClient.readCachedResource(resource.getRef());
             if (cached.isPresent() && cached.get().isLoaded()) {
                 resource.setResource(cached.get().getResource());
+                logResourceWrapper(resource, "Read from cache");
             }
             return resource;
         }
         ResourceWrapper wrapper = fhirClient.readResource(resource.getRef());
+        logResourceWrapper(wrapper, "auto loaded");
         resource.setResource(wrapper.getResource());
         return resource;
+    }
+
+    private void logResourceWrapper(ResourceWrapper wrapper, String msg) {
+        Objects.requireNonNull(event);
+        EventStore eventStore = event.getStore();
+        int previousTask = eventStore.getCurrentTask();
+
+        try {
+            eventStore.newTask();
+            eventStore.putDescription(msg);
+            logResourceWrapper(wrapper, eventStore);
+        } finally {
+            eventStore.selectTask(previousTask);
+        }
+    }
+
+    private void logResourceWrapper(ResourceWrapper wrapper, EventStore store) {
+        HttpBase base = wrapper.getHttpBase();
+        store.putRequestHeader(base.getRequestHeaders());
+        store.putRequestBody(base.getRequest());
+        store.putResponseHeader(base.getResponseHeaders());
+        store.putResponseBody(base.getResponse());
     }
 
     public List<ResourceWrapper> search(Ref base, Class<?> resourceType, List<String> params, boolean stopAtFirst) {
@@ -302,5 +331,10 @@ public class ResourceMgr implements IVal {
 
     public List<ResourceWrapper> getBundleResourceList() {
         return bundleResourceList;
+    }
+
+    public ResourceMgr setEvent(Event event) {
+        this.event = event;
+        return this;
     }
 }
