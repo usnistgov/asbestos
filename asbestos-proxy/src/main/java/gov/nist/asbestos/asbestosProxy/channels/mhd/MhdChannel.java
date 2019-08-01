@@ -6,7 +6,6 @@ import gov.nist.asbestos.asbestosProxy.events.EventStore;
 import gov.nist.asbestos.asbestosProxy.parser.AhqrSender;
 import gov.nist.asbestos.asbestosProxy.parser.FaultParser;
 import gov.nist.asbestos.asbestosProxy.util.XdsActorMapper;
-import gov.nist.asbestos.asbestosProxy.wrapper.ProxyServlet;
 import gov.nist.asbestos.asbestosProxy.wrapper.TransformException;
 import gov.nist.asbestos.client.Base.ProxyBase;
 import gov.nist.asbestos.client.client.FhirClient;
@@ -40,9 +39,6 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.*;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -146,7 +142,8 @@ public class MhdChannel extends BaseChannel /*implements IBaseChannel*/ {
         ByteArrayOutputStream queryStream = new ByteArrayOutputStream();
         new AdhocQueryBuilder().toOutputStream(adhocQueryRequest, queryStream);
 
-        String queryString = deleteXMLInstruction(new String(queryStream.toByteArray()));
+        String queryString1 = deleteXMLInstruction(new String(queryStream.toByteArray()));
+        String queryString = deleteQueryExpression(queryString1);
         String soapString = AdhocQueryWrapper.wrap(toAddr.toString(), queryString);
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         AhqrSender sender = new AhqrSender();
@@ -218,6 +215,18 @@ public class MhdChannel extends BaseChannel /*implements IBaseChannel*/ {
         return  buf.toString();
     }
 
+    private static String deleteQueryExpression(String in) {
+        StringBuilder buf = new StringBuilder();
+        Scanner scanner = new Scanner(in);
+        while(scanner.hasNextLine()) {
+            String line = scanner.nextLine();
+            if (!line.contains("<QueryExpression/>"))
+                buf.append(line).append(("\n"));
+        }
+        scanner.close();
+        return  buf.toString();
+    }
+
     private static File getCodesFile() {
         return Installation.instance().getCodesFile("default");
     }
@@ -238,10 +247,10 @@ public class MhdChannel extends BaseChannel /*implements IBaseChannel*/ {
         String uid = ref.getId();
         if (resourceType.equals("DocumentReference")) {
             sender = documentEntryByUidQuery(uid, toAddr);
-            requestOut.setRequestHeaders(sender.getHeaders());
-            requestOut.setRequestText(sender.getBody());
-            getEvent().getStore().putResponseHeader(sender.getHeaders());
-            getEvent().getStore().putRequestBodyText(sender.getBody());
+            requestOut.setRequestHeaders(sender.getRequestHeaders());
+            requestOut.setRequestText(sender.getRequestBody());
+            getEvent().getStore().putRequestHeader(sender.getRequestHeaders());
+            getEvent().getStore().putRequestBodyText(sender.getRequestBody());
 //        } else if (resourceType.equals("DocumentManifest")) {
 
         } else {
@@ -353,16 +362,24 @@ public class MhdChannel extends BaseChannel /*implements IBaseChannel*/ {
     public void transformResponse(HttpBase responseIn, HttpBase responseOut, String proxyHostPort) {
         if (sender != null) {
             getEvent().getStore().putResponseBodyText(sender.getResponseText());
-            if (responseOut.getVerb().equals(Verb.GET.toString())) {
+            if (responseOut.getVerb().equals(Verb.GET.toString())) {  // FHIR READ
                 if (sender.hasErrors()) {
                     logResponse(sender.getResponseText());
                     OperationOutcome oo = regErrorListAsOperationOutcome(sender.getErrorList());
                     returnOperationOutcome(responseOut, getEvent(), oo);
                 } else if (sender.getContents().size() == 1) {
                     Val val = new Val();
+                    CodeTranslator codeTranslator;
+                    try {
+                        codeTranslator = new CodeTranslator(Installation.instance().getCodesFile(channelConfig.getEnvironment()));
+                    } catch (Exception e) {
+                        throw new RuntimeException("Cannot load codes file for environment " + channelConfig.getEnvironment(), e);
+                    }
                     DocumentEntryToDocumentReference trans = new DocumentEntryToDocumentReference();
                     trans
                             .setContainedIdAllocator(new ContainedIdAllocator())
+                            .setResourceMgr(new ResourceMgr().setFhirClient(new FhirClient()))
+                            .setCodeTranslator(codeTranslator)
                             .setVal(val);
                     DocumentReference dr = trans.getDocumentReference((ExtrinsicObjectType) sender.getContents().get(0));
                     responseOut.setResponseText(logResponse(ProxyBase.encode(dr, returnFormatType)));

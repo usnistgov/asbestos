@@ -265,8 +265,9 @@ public class ResourceMgr implements IVal {
         this.val = val;
     }
 
-    public void setFhirClient(FhirClient fhirClient) {
+    public ResourceMgr setFhirClient(FhirClient fhirClient) {
         this.fhirClient = fhirClient;
+        return this;
     }
 
     public List<Ref> getKnownServers() {
