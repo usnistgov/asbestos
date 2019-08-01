@@ -134,6 +134,18 @@ public class OperationRunner {
                             .setVal(val)
                             .setOpReport(operationReport));
             setupActionTransaction.run(op, operationReport);
+        } else if ("mhd-pdb-transaction".equals(code)) {
+            SetupActionMhdPdbTransaction setupActionTransaction =
+                    new SetupActionMhdPdbTransaction(fixtureMgr);
+            setupActionTransaction.setSut(sut)
+                            .setFhirClient(fhirClient)
+                            .setType(type + ".mhd-pdb-transaction")
+                            .setVal(val);
+            setupActionTransaction.setVariableMgr(
+                    new VariableMgr(testScript, fixtureMgr)
+                            .setVal(val)
+                            .setOpReport(operationReport));
+            setupActionTransaction.run(op, operationReport);
         } else {
             Reporter.reportError(val, operationReport, type, label,"do not understand code.code of " + code);
         }

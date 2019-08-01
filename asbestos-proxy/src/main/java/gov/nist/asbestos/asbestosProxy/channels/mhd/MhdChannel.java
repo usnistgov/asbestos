@@ -388,6 +388,9 @@ public class MhdChannel extends BaseChannel /*implements IBaseChannel*/ {
                     OperationOutcome oo = wrapErrorInOperationOutcome("XDS Query returned " + sender.getContents().size() + " objects");
                     responseOut.setResponseText(logResponse(ProxyBase.encode(oo, returnFormatType)));
                     responseOut.setResponseContentType(returnFormatType.getContentType());
+                } else { // no contents
+                    responseOut.setResponseContentType(returnFormatType.getContentType());
+                    responseOut.setStatus(404);
                 }
             } else {
                 if (sender.hasErrors()) {

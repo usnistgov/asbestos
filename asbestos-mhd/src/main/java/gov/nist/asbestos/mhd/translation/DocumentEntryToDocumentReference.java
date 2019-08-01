@@ -68,7 +68,8 @@ public class DocumentEntryToDocumentReference implements IVal {
                 // Unique ID
                 Identifier idr = new Identifier();
                 idr.setSystem("urn:ietf:rfc:3986");
-                idr.setValue(stripUrnPrefix(ei.getValue()));
+                String value = ei.getValue();
+                idr.setValue(stripUrnPrefix(value));
                 dr.setMasterIdentifier(idr);
             } else {
                 val.add(new ValE("DocumentEntryToDocumentReference: Do not understand ExternalIdentifier identification scheme " + scheme).asError());

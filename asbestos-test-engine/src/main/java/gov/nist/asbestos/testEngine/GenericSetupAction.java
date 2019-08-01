@@ -69,6 +69,7 @@ abstract class GenericSetupAction {
                 return false;
             }
             resourceToSend = sourceFixture.getResourceResource();
+            updateResourceToSend(resourceToSend);
         }
         if (op.hasRequestHeader())
             handleRequestHeader(requestHeader, op, variableMgr);
@@ -82,6 +83,10 @@ abstract class GenericSetupAction {
         if (targetUrl == null)
             reporter.reportError("cannot generate targetUrl");
         return targetUrl != null;
+    }
+
+    public void updateResourceToSend(BaseResource resource) {
+
     }
 
     void postExecute(ResourceWrapper wrapper) {
@@ -107,7 +112,7 @@ abstract class GenericSetupAction {
 
     private List<String> putPostTypes = new ArrayList<String>(
             Arrays.asList(
-            "update", "updateCreate", "create", "transaction"
+            "update", "updateCreate", "create", "transaction", "mhd-pdb-transaction"
             )
     );
 

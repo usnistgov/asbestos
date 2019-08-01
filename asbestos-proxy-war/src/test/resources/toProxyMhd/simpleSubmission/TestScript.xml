@@ -5,6 +5,9 @@
         </resource>
     </fixture>
     <fixture id="example-patient">
+        <!--
+           This patient comes out of the test definition
+        -->
         <resource>
             <reference value="Patient/patient-example.xml"/>
         </resource>
@@ -17,10 +20,11 @@
     <test>
         <action>
             <operation>
-                <description value="send patient to server"/>
+                <description value="send PDB to server"/>
                 <label value="create"/>
                 <type>
-                    <code value="transaction"/>
+                    <system value="https://github.com/usnistgov/asbestos/wiki/Testscript-Operation-Codes"/>
+                    <code value="mhd-pdb-transaction"/>
                 </type>
                 <sourceId value="pdb-bundle"/>
                 <responseId value="pdb-response"/>

@@ -167,6 +167,8 @@ public class ResourceWrapper {
             String resourceType = ref.getResourceType();
             if (!resourceType.equals("")) {
                 BaseResource resource = getResponseResource();
+                if (resource == null)
+                    return false;
                 if (!resource.getClass().getSimpleName().equals(resourceType))
                     return false;
             }
@@ -178,6 +180,8 @@ public class ResourceWrapper {
     public BaseResource getResponseResource() {
         if (httpBase != null && httpBase.getResponse() != null) {
             byte[] responseBytes = httpBase.getResponse();
+            if (responseBytes.length == 0)
+                return null;
             String contentType = httpBase.getResponseContentType();
             Format format = Format.fromContentType(contentType);
             return ProxyBase.parse(responseBytes, format);

@@ -710,8 +710,8 @@ public class BundleToRegistryObjectList implements IVal {
     public void addExternalIdentifier(RegistryObjectType ro, String scheme, String value, String id, String registryObject, String name, IdBuilder idBuilder) {
         val.add(new ValE("ExternalIdentifier " + scheme));
         //List<ExternalIdentifierType> eits = ro.getExternalIdentifier();
-        if (idBuilder != null)
-            value = idBuilder.allocate(value); // maybe override
+//        if (idBuilder != null)
+//            value = idBuilder.allocate(value); // maybe override
         ExternalIdentifierType eit = new ExternalIdentifierType();
         eit.setIdentificationScheme(scheme);
         eit.setId(id);
