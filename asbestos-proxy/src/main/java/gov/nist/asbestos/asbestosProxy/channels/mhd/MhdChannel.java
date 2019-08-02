@@ -2,7 +2,6 @@ package gov.nist.asbestos.asbestosProxy.channels.mhd;
 
 import gov.nist.asbestos.asbestosProxy.channel.BaseChannel;
 import gov.nist.asbestos.client.events.Event;
-import gov.nist.asbestos.client.events.EventStore;
 import gov.nist.asbestos.asbestosProxy.parser.AhqrSender;
 import gov.nist.asbestos.asbestosProxy.parser.FaultParser;
 import gov.nist.asbestos.asbestosProxy.util.XdsActorMapper;
@@ -10,6 +9,7 @@ import gov.nist.asbestos.asbestosProxy.wrapper.TransformException;
 import gov.nist.asbestos.client.Base.ProxyBase;
 import gov.nist.asbestos.client.client.FhirClient;
 import gov.nist.asbestos.client.client.Format;
+import gov.nist.asbestos.client.events.Task;
 import gov.nist.asbestos.client.resolver.IdBuilder;
 import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.client.resolver.ResourceCacheMgr;
@@ -60,7 +60,7 @@ public class MhdChannel extends BaseChannel /*implements IBaseChannel*/ {
     public MhdChannel() {}
 
     private String transformPDBToPNR(Bundle bundle, URI toAddr) {
-        Objects.requireNonNull(getEvent());
+        Objects.requireNonNull(getTask());
         Val val = new Val();
         FhirClient fhirClient = new FhirClient();
         fhirClient.setResourceCacheMgr(new ResourceCacheMgr(getExternalCache()));
@@ -68,7 +68,7 @@ public class MhdChannel extends BaseChannel /*implements IBaseChannel*/ {
         ResourceMgr rMgr = new ResourceMgr();
         rMgr.setVal(val);
         rMgr.setFhirClient(fhirClient);
-        rMgr.setEvent(getEvent());
+        rMgr.setTask(getTask());
 
         CodeTranslator codeTranslator;
         try {
@@ -254,8 +254,8 @@ public class MhdChannel extends BaseChannel /*implements IBaseChannel*/ {
             sender = documentEntryByUidQuery(uid, toAddr);
             requestOut.setRequestHeaders(sender.getRequestHeaders());
             requestOut.setRequestText(sender.getRequestBody());
-            getEvent().getStore().putRequestHeader(sender.getRequestHeaders());
-            getEvent().getStore().putRequestBodyText(sender.getRequestBody());
+            getTask().putRequestHeader(sender.getRequestHeaders());
+            getTask().putRequestBodyText(sender.getRequestBody());
 //        } else if (resourceType.equals("DocumentManifest")) {
 
         } else {
@@ -263,9 +263,9 @@ public class MhdChannel extends BaseChannel /*implements IBaseChannel*/ {
         }
     }
 
-    private void returnOperationOutcome(HttpBase resp, Event event, OperationOutcome oo) {
+    private void returnOperationOutcome(HttpBase resp, Task task, OperationOutcome oo) {
         Headers responseHeaders = new Headers();
-        event.getStore().putResponseHeader(responseHeaders);
+        task.putResponseHeader(responseHeaders);
         Format format = getReturnFormatType();
         String encoded = ProxyBase.encode(oo, format);
         resp.setResponseText(encoded);
@@ -358,20 +358,20 @@ public class MhdChannel extends BaseChannel /*implements IBaseChannel*/ {
     }
 
     private String logResponse(String text) {
-        getEvent().getStore().putResponseBodyText(text);
-        getEvent().getStore().putResponseHeader(new Headers().withContentType(this.getReturnFormatType().getContentType()));
+        getTask().putResponseBodyText(text);
+        getTask().putResponseHeader(new Headers().withContentType(this.getReturnFormatType().getContentType()));
         return text;
     }
 
     @Override
     public void transformResponse(HttpBase responseIn, HttpBase responseOut, String proxyHostPort) {
         if (sender != null) {
-            getEvent().getStore().putResponseBodyText(sender.getResponseText());
+            getTask().putResponseBodyText(sender.getResponseText());
             if (responseOut.getVerb().equals(Verb.GET.toString())) {  // FHIR READ
                 if (sender.hasErrors()) {
                     logResponse(sender.getResponseText());
                     OperationOutcome oo = regErrorListAsOperationOutcome(sender.getErrorList());
-                    returnOperationOutcome(responseOut, getEvent(), oo);
+                    returnOperationOutcome(responseOut, getTask(), oo);
                 } else if (sender.getContents().size() == 1) {
                     Val val = new Val();
                     CodeTranslator codeTranslator;
@@ -400,7 +400,7 @@ public class MhdChannel extends BaseChannel /*implements IBaseChannel*/ {
             } else {
                 if (sender.hasErrors()) {
                     OperationOutcome oo = regErrorListAsOperationOutcome(sender.getErrorList());
-                    returnOperationOutcome(responseOut, getEvent(), oo);
+                    returnOperationOutcome(responseOut, getTask(), oo);
                 } else {
                     List<IdentifiableType> inContents = sender.getContents();
                     List<Resource> outContents = new ArrayList<>();
@@ -551,7 +551,7 @@ public class MhdChannel extends BaseChannel /*implements IBaseChannel*/ {
     }
 
     @Override
-    public void handle(EventStore event) {
+    public void handle(Event event) {
 
     }
 

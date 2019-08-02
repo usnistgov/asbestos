@@ -16,7 +16,7 @@ public class EventRequestHandler {
     public static String eventRequest(SimStore simStore, List<String> uriParts, Map<String, List<String>> parameters) {
         int last = -1;
         if (uriParts.isEmpty()) {
-            // asking for /Event  ??? - all events??? - must be some restricting parameters
+            // asking for /TaskStore  ??? - all events??? - must be some restricting parameters
             if (parameters.containsKey("_last")) {   //}   hasProperty('_last')) {
                 List<String> lasts = parameters.get("_last");
                 last = Integer.parseInt(lasts.get(0));

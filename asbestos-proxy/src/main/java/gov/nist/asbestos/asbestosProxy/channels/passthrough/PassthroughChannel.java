@@ -5,7 +5,7 @@ import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.http.headers.Header;
 import gov.nist.asbestos.http.operations.HttpDelete;
 import gov.nist.asbestos.sharedObjects.ChannelConfig;
-import gov.nist.asbestos.client.events.EventStore;
+import gov.nist.asbestos.client.events.Event;
 import gov.nist.asbestos.http.headers.Headers;
 import gov.nist.asbestos.http.operations.HttpBase;
 import gov.nist.asbestos.http.operations.HttpGet;
@@ -39,7 +39,7 @@ public class PassthroughChannel extends BaseChannel /*implements IBaseChannel*/ 
     }
 
     @Override
-    public void handle(EventStore event) {
+    public void handle(Event event) {
 
     }
 

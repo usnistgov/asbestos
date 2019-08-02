@@ -172,7 +172,7 @@
     <complexContent>
       <extension base="tns:RegistryObjectType">
         <sequence>
-          <!-- List of all objects that have been effected by this event -->
+          <!-- List of all objects that have been effected by this theTask -->
           <element maxOccurs="1" minOccurs="1" name="affectedObjects" type="tns:ObjectRefListType"/>
         </sequence>
         <attribute name="eventType" type="tns:referenceURI" use="required"/>
@@ -415,8 +415,8 @@
       <extension base="tns:RegistryObjectType">
         <sequence maxOccurs="1" minOccurs="1">
           <element maxOccurs="unbounded" minOccurs="0" ref="tns:Address"/>
-          <!-- 
-          PersonName is optional because it is not needed in SAML Profile 
+          <!--
+          PersonName is optional because it is not needed in SAML Profile
           when an external IdentityProvider is used.
           -->
           <element maxOccurs="1" minOccurs="0" ref="tns:PersonName"/>
@@ -486,7 +486,7 @@
   <complexType name="QueryExpressionType" mixed="true">
     <sequence>
       <!--
-      MAY be any query language syntax supported. 
+      MAY be any query language syntax supported.
       MUST support FilterQuery. SHOULD support SQLQuery
       -->
       <any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="1"/>

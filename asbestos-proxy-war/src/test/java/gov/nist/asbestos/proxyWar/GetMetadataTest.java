@@ -1,8 +1,9 @@
 package gov.nist.asbestos.proxyWar;
 
-import gov.nist.asbestos.client.events.EventStore;
+import gov.nist.asbestos.client.events.Event;
 import gov.nist.asbestos.client.events.EventStoreItem;
 import gov.nist.asbestos.client.events.EventStoreSearch;
+import gov.nist.asbestos.client.events.Task;
 import gov.nist.asbestos.client.log.SimStore;
 import gov.nist.asbestos.asbestosProxy.wrapper.ProxyServlet;
 import gov.nist.asbestos.simapi.simCommon.SimId;
@@ -74,32 +75,32 @@ class GetMetadataTest {
         SimId simId = SimId.buildFromRawId(testSession + "__" + channelId).withActorType("fhir").withEnvironment("default");
         EventStoreItem mostRecent = new EventStoreSearch(externalCache, simId).getMostRecent();
         assertNotNull(mostRecent);
-        EventStore eventStore = new EventStore(new SimStore(externalCache, simId),mostRecent.getFile());
-        assertNotNull(eventStore);
-        assertEquals(1, eventStore.getTaskCount());
+        Event event = new Event(new SimStore(externalCache, simId),mostRecent.getFile());
+        assertNotNull(event);
+        assertEquals(1, event.getTaskCount());
 
-        eventStore.selectClientTask();
-        assertTrue(eventStore.getRequestHeaderFile().exists());
+        Task task = event.getClientTask();
+        int taski = 0;
 
-        eventStore.selectTask(0);
-        assertTrue(eventStore.getRequestHeaderFile().exists());
-        assertEquals("/proxy/prox/" + testSession + "__" + channelId + "/Channel/metadata", "/proxy/prox/" + testSession + "__" + channelId + "/Channel/metadata", eventStore.getRequestHeader().getPathInfo().toString());
-        assertEquals("GET", eventStore.getRequestHeader().getVerb());
-        assertTrue(eventStore.getResponseHeaderFile().exists());
-        assertEquals(200, eventStore.getResponseHeader().getStatus());
-        assertTrue(eventStore.getResponseBodyAsString().contains("CapabilityStatement"));
-        assertTrue(eventStore.getResponseBodyFile().exists());
-        assertTrue(eventStore.getResponseBodyStringFile().exists());
+        assertTrue(event.getRequestHeaderFile(taski).exists());
 
-        eventStore.selectClientTask();
-        assertTrue(eventStore.getRequestHeaderFile().exists());
-        assertEquals("/proxy/prox/" + testSession + "__" + channelId + "/Channel/metadata", "/proxy/prox/" + testSession + "__" + channelId + "/Channel/metadata", eventStore.getRequestHeader().getPathInfo().toString());
-        assertEquals("GET", eventStore.getRequestHeader().getVerb());
-        assertTrue(eventStore.getResponseHeaderFile().exists());
-        assertEquals(200, eventStore.getResponseHeader().getStatus());
-        assertTrue(eventStore.getResponseBodyFile().exists());
-        assertTrue(eventStore.getResponseBodyStringFile().exists());
-        assertTrue(eventStore.getResponseBodyAsString().contains("CapabilityStatement"));
+        assertTrue(event.getRequestHeaderFile(taski).exists());
+        assertEquals("/proxy/prox/" + testSession + "__" + channelId + "/Channel/metadata", "/proxy/prox/" + testSession + "__" + channelId + "/Channel/metadata", task.getRequestHeader().getPathInfo().toString());
+        assertEquals("GET", task.getRequestHeader().getVerb());
+        assertTrue(event.getResponseHeaderFile(taski).exists());
+        assertEquals(200, task.getResponseHeader().getStatus());
+        assertTrue(task.getResponseBodyAsString().contains("CapabilityStatement"));
+        assertTrue(event.getResponseBodyFile(taski).exists());
+        assertTrue(event.getResponseBodyStringFile(taski).exists());
+
+        assertTrue(event.getRequestHeaderFile(taski).exists());
+        assertEquals("/proxy/prox/" + testSession + "__" + channelId + "/Channel/metadata", "/proxy/prox/" + testSession + "__" + channelId + "/Channel/metadata", task.getRequestHeader().getPathInfo().toString());
+        assertEquals("GET", task.getRequestHeader().getVerb());
+        assertTrue(event.getResponseHeaderFile(taski).exists());
+        assertEquals(200, task.getResponseHeader().getStatus());
+        assertTrue(event.getResponseBodyFile(taski).exists());
+        assertTrue(event.getResponseBodyStringFile(taski).exists());
+        assertTrue(task.getResponseBodyAsString().contains("CapabilityStatement"));
 
         assertTrue(out.contains("CapabilityStatement"));
     }

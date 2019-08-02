@@ -3,8 +3,7 @@ package gov.nist.asbestos.client.resolver;
 
 import gov.nist.asbestos.client.Base.IVal;
 import gov.nist.asbestos.client.client.FhirClient;
-import gov.nist.asbestos.client.events.Event;
-import gov.nist.asbestos.client.events.EventStore;
+import gov.nist.asbestos.client.events.Task;
 import gov.nist.asbestos.http.operations.HttpBase;
 import gov.nist.asbestos.simapi.validation.Val;
 import gov.nist.asbestos.simapi.validation.ValE;
@@ -18,14 +17,14 @@ import java.util.*;
  *
  */
 public class ResourceMgr implements IVal {
-//    static private final Logger logger = Logger.getLogger(ResourceMgr.class);
+    //    static private final Logger logger = Logger.getLogger(ResourceMgr.class);
     private Map<Ref, ResourceWrapper> bundleResources = new HashMap<>();   // url -> resource; for contents of bundle
     private Val val;
     private ResourceMgrConfig resourceMgrConfig = new ResourceMgrConfig();
     private FhirClient fhirClient = null;
     private List<Ref> knownServers = new ArrayList<>();
     private List<ResourceWrapper> bundleResourceList = new ArrayList<>();
-    private Event event = null;
+    private Task theTask = null;
 
     public ResourceMgr() {
 
@@ -229,25 +228,19 @@ public class ResourceMgr implements IVal {
     }
 
     private void logResourceWrapper(ResourceWrapper wrapper, String msg) {
-        Objects.requireNonNull(event);
-        EventStore eventStore = event.getStore();
-        int previousTask = eventStore.getCurrentTask();
+        Objects.requireNonNull(theTask);
 
-        try {
-            eventStore.newTask();
-            eventStore.putDescription(msg);
-            logResourceWrapper(wrapper, eventStore);
-        } finally {
-            eventStore.selectTask(previousTask);
-        }
+        Task task = theTask.newTask();
+        task.putDescription(msg);
+        logResourceWrapper(wrapper, task);
     }
 
-    private void logResourceWrapper(ResourceWrapper wrapper, EventStore store) {
+    private void logResourceWrapper(ResourceWrapper wrapper, Task task) {
         HttpBase base = wrapper.getHttpBase();
-        store.putRequestHeader(base.getRequestHeaders());
-        store.putRequestBody(base.getRequest());
-        store.putResponseHeader(base.getResponseHeaders());
-        store.putResponseBody(base.getResponse());
+        task.putRequestHeader(base.getRequestHeaders());
+        task.putRequestBody(base.getRequest());
+        task.putResponseHeader(base.getResponseHeaders());
+        task.putResponseBody(base.getResponse());
     }
 
     public List<ResourceWrapper> search(Ref base, Class<?> resourceType, List<String> params, boolean stopAtFirst) {
@@ -316,8 +309,8 @@ public class ResourceMgr implements IVal {
         if (u.length() != 36)
             return false;
         for (Integer i : ignores) {
-           if (u.charAt(i) != '-')
-               return false;
+            if (u.charAt(i) != '-')
+                return false;
         }
         for (int i=0; i<36; i++) {
             if (ignores.contains(i))
@@ -333,8 +326,8 @@ public class ResourceMgr implements IVal {
         return bundleResourceList;
     }
 
-    public ResourceMgr setEvent(Event event) {
-        this.event = event;
+    public ResourceMgr setTask(Task task) {
+        this.theTask = task;
         return this;
     }
 }

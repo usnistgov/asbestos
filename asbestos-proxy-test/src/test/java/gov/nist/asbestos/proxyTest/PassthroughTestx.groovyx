@@ -91,7 +91,7 @@ class PassthroughTestx {
         items[0].resource == 'Patient'
         items[1].resource == 'metadata'
 
-        when: // pull only the last log event
+        when: // pull only the last log theTask
         getter.getJson("http://localhost:8081/fproxy_war/prox/default__fhirpass/Event?_last=1")
 
         then:

@@ -1,7 +1,7 @@
 package gov.nist.asbestos.asbestosProxy.channel;
 
 
-import gov.nist.asbestos.client.events.EventStore;
+import gov.nist.asbestos.client.events.Event;
 import gov.nist.asbestos.sharedObjects.ChannelConfig;
 
 /**
@@ -14,5 +14,5 @@ interface IChannelControl {
     void teardown();
     void validateConfig(ChannelConfig simConfig);
     // throws Exception if error
-    void handle(EventStore event);
+    void handle(Event event);
 }

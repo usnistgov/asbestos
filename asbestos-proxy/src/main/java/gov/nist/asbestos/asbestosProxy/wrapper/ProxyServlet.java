@@ -58,8 +58,8 @@ public class ProxyServlet extends HttpServlet {
         return HttpBase.buildURI(req.getRequestURI(), req.getParameterMap());
     }
 
-    public static String[] addEventHeader(HttpServletResponse resp, String hostport, Event theEvent) {
-        Header header = buildEventHeader(hostport, theEvent);
+    public static String[] addEventHeader(HttpServletResponse resp, String hostport, Task task) {
+        Header header = buildEventHeader(hostport, task);
         resp.addHeader(header.getName(), header.getValue());
         String[] returned = new String[2];
         returned[0] = header.getName();
@@ -68,8 +68,8 @@ public class ProxyServlet extends HttpServlet {
     }
 
 
-    public static String[] addEventHeader(HttpBase resp, String hostport, Event theEvent) {
-        Header header = buildEventHeader(hostport, theEvent);
+    public static String[] addEventHeader(HttpBase resp, String hostport, Task task) {
+        Header header = buildEventHeader(hostport, task);
         resp.getResponseHeaders().add(header);
         String[] returned = new String[2];
         returned[0] = header.getName();
@@ -77,10 +77,10 @@ public class ProxyServlet extends HttpServlet {
         return returned;
     }
 
-    private static Header buildEventHeader(String hostport, Event theEvent) {
+    private static Header buildEventHeader(String hostport, Task task) {
         if (hostport == null) return null;
-        if (theEvent == null) return null;
-        File eventDir = theEvent.getStore().getRoot();
+        if (task == null) return null;
+        File eventDir = task.getEvent().getEventDir();
         String[] parts = eventDir.toString().split("/");
         int length = parts.length;
         if (length < 6) return null;
@@ -99,7 +99,7 @@ public class ProxyServlet extends HttpServlet {
         return new Header("x-proxy-event", uri);
     }
 
-    public static String getHostPort(HttpServletRequest req) throws ServletException {
+    private static String getHostPort(HttpServletRequest req) throws ServletException {
         Headers inHeaders = getRequestHeaders(req, Verb.POST);
         String hostport = inHeaders.getValue("host");
         if (hostport == null || !hostport.contains(":"))
@@ -111,6 +111,8 @@ public class ProxyServlet extends HttpServlet {
     public void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException, ServletException {
         Event event = null;
         String hostport = null;
+
+        Task clientTask = null;
 
         // typical URI is
         // for FHIR translation
@@ -149,12 +151,13 @@ public class ProxyServlet extends HttpServlet {
             // HttpPost requestIn = new HttpPost();
 
             event = simStore.newEvent();
-            HttpPost requestIn = (HttpPost) logClientRequestIn(event, inHeaders, inBody, Verb.POST);
+            clientTask = event.getClientTask();
+            HttpPost requestIn = (HttpPost) logClientRequestIn(clientTask, inHeaders, inBody, Verb.POST);
 
-            log.info("=> " + simStore.getEndpoint() + " " + event.getStore().getRequestHeader().getContentType());
+            log.info("=> " + simStore.getEndpoint() + " " + clientTask.getRequestHeader().getContentType());
 
             // interaction between proxy and target service
-            Task backSideTask = event.getStore().newTask();
+            Task backSideTask = clientTask.newTask();
 
             String proxyBase = new Ref(uri).getBase().withHostPort(hostport).toString();
             String fhirBase = new Ref(requestIn.getRequestHeaders().getPathInfo()).getBase().toString();
@@ -166,13 +169,13 @@ public class ProxyServlet extends HttpServlet {
             try {
                 requestOut = transformRequest(backSideTask, requestIn, channel);
             } catch (TransformException te) {
-                returnTransformException(resp, event, te);
-                addEventHeader(resp, hostport, event);
+                returnTransformException(resp, clientTask, te);
+                addEventHeader(resp, hostport, clientTask);
                 return;
             } catch (Throwable t) {
                 log.error(ExceptionUtils.getStackTrace(t));
-                returnOperationOutcome(req, resp, event, t);
-                addEventHeader(resp, hostport, event);
+                returnOperationOutcome(req, resp, clientTask, t);
+                addEventHeader(resp, hostport, clientTask);
                 return;
             }
             URI outUri = transformRequestUri(backSideTask, requestIn, channel);
@@ -187,13 +190,12 @@ public class ProxyServlet extends HttpServlet {
             logResponse(backSideTask, requestOut);
 
             // transform backend service response for client
-            event.getStore().selectTask(0);
             HttpBase responseOut;
             try {
-                responseOut = transformResponse(event.getStore().selectTask(Task.CLIENT_TASK), requestOut, channel, hostport);
+                responseOut = transformResponse(clientTask, requestOut, channel, hostport);
             } catch (TransformException te) {
-                returnTransformException(resp, event, te);
-                addEventHeader(resp, hostport, event);
+                returnTransformException(resp, clientTask, te);
+                addEventHeader(resp, hostport, clientTask);
                 return;
             }
 
@@ -203,19 +205,21 @@ public class ProxyServlet extends HttpServlet {
             if (responseOut.getResponse() != null) {
                 resp.getOutputStream().write(responseOut.getResponse());
             }
-            addEventHeader(resp, hostport, event);
+            addEventHeader(resp, hostport, clientTask);
 
             log.info("OK");
 
         } catch (Throwable t) {
             log.error(ExceptionUtils.getStackTrace(t));
             resp.setStatus(resp.SC_INTERNAL_SERVER_ERROR);
-            returnOperationOutcome(req, resp, event, t);
-            addEventHeader(resp, hostport, event);
+            if (clientTask != null) {
+                returnOperationOutcome(req, resp, clientTask, t);
+                addEventHeader(resp, hostport, clientTask);
+            }
         }
     }
 
-    private void returnTransformException(HttpServletResponse resp, Event event, TransformException te) throws IOException {
+    private void returnTransformException(HttpServletResponse resp, Task task, TransformException te) throws IOException {
         Format format = te.getFormat();
         String body = te.getResponse();
         byte[] bodyBytes = body.getBytes();
@@ -223,9 +227,8 @@ public class ProxyServlet extends HttpServlet {
         headers.setStatus(200);
         headers.getHeaders().add(new Header("Content-Type", format.getContentType()));
 
-        event.getStore().selectClientTask();
-        event.getStore().putResponseBodyText(body);
-        event.getStore().putResponseHeader(headers);
+        task.putResponseBodyText(body);
+        task.putResponseHeader(headers);
 
         resp.addHeader("Content-Type", format.getContentType());
         resp.getOutputStream().write(bodyBytes);
@@ -249,35 +252,34 @@ public class ProxyServlet extends HttpServlet {
         } catch (Throwable t) {
             log.error(ExceptionUtils.getStackTrace(t));
             resp.setStatus(resp.SC_INTERNAL_SERVER_ERROR);
-            returnOperationOutcome(req, resp, event, t);
+            returnOperationOutcome(req, resp, event.getClientTask(), t);
         }
     }
 
-    private void returnOperationOutcome(HttpServletRequest req, HttpServletResponse resp, Event event, Throwable t) throws IOException, ServletException {
+    private void returnOperationOutcome(HttpServletRequest req, HttpServletResponse resp, Task task, Throwable t) throws IOException, ServletException {
         Headers headers = getRequestHeaders(req, Verb.GET);  // verb not used
         Header acceptHeader = headers.getAccept();
-        event.getStore().selectClientTask();
         Headers responseHeaders = new Headers();
 
         OperationOutcome oo = outcomeFromException(t);
         if (acceptHeader != null && acceptHeader.getValue().contains("json")) {
             String ooString = ProxyBase.encode(oo, Format.JSON);
-            event.getStore().putResponseBodyText(ooString);
+            task.putResponseBodyText(ooString);
             resp.getWriter().print(ooString);
             resp.addHeader("Content-Type", Format.JSON.getContentType());
             responseHeaders.add(new Header("Content-Type", Format.JSON.getContentType()));
         } else {
             String ooString = ProxyBase.encode(oo, Format.XML);
-            event.getStore().putResponseBodyText(ooString);
+            task.putResponseBodyText(ooString);
             resp.getWriter().print(ooString);
             resp.addHeader("Content-Type", Format.XML.getContentType());
             responseHeaders.add(new Header("Content-Type", Format.XML.getContentType()));
         }
         String hostport = getHostPort(req);
-        String[] eventHeader = addEventHeader(resp, hostport, event);
+        String[] eventHeader = addEventHeader(resp, hostport, task);
         if (eventHeader != null)
             responseHeaders.add(new Header(eventHeader[0], eventHeader[1]));
-        event.getStore().putResponseHeader(responseHeaders);
+        task.putResponseHeader(responseHeaders);
     }
 
     private OperationOutcome outcomeFromException(Throwable t) {
@@ -304,7 +306,7 @@ public class ProxyServlet extends HttpServlet {
 
         } catch (Throwable t) {
             log.error(ExceptionUtils.getStackTrace(t));
-            returnOperationOutcome(req, resp, event, t);
+            returnOperationOutcome(req, resp, event.getClientTask(), t);
         }
     }
 
@@ -323,6 +325,7 @@ public class ProxyServlet extends HttpServlet {
     }
 
     private void doGetDelete(HttpServletRequest req, HttpServletResponse resp, URI uri, SimStore simStore, Event event, Verb verb) throws Exception {
+        Task clientTask = event.getClientTask();
         String channelType = simStore.getChannelConfig().getChannelType();
         if (channelType == null)
             throw new Exception("Sim " + simStore.getChannelId() + " does not define a Channel Type.");
@@ -331,7 +334,7 @@ public class ProxyServlet extends HttpServlet {
 
         channel.setup(simStore.getChannelConfig());
         channel.setReturnFormatType(getReturnContentType(req));
-        channel.setEvent(event);
+        channel.setTask(clientTask);
         channel.setHostport(getHostPort(req));
 
         // handle non-channel requests
@@ -347,11 +350,11 @@ public class ProxyServlet extends HttpServlet {
         String hostport = inHeaders.getValue("host");
 
         try {
-            HttpBase requestIn = logClientRequestIn(event, inHeaders, inBody, verb);
+            HttpBase requestIn = logClientRequestIn(clientTask, inHeaders, inBody, verb);
 
-            Task backSideTask = event.getStore().newTask();
+            log.info("=> " + simStore.getEndpoint() + " " + clientTask.getRequestHeader().getAccept());
 
-            log.info("=> " + simStore.getEndpoint() + " " + event.getStore().getRequestHeader().getAccept());
+            Task backSideTask = clientTask.newTask();
 
             // transform input request for backend service
             HttpBase requestOut;
@@ -372,9 +375,8 @@ public class ProxyServlet extends HttpServlet {
             logResponse(backSideTask, requestOut);
 
             // transform backend service response for client
-            event.getStore().selectTask(0);
-            HttpBase responseOut = transformResponse(event.getStore().selectTask(0), requestOut, channel, hostport);
-            logResponse(event.getStore().selectClientTask(), responseOut);
+            HttpBase responseOut = transformResponse(backSideTask, requestOut, channel, hostport);
+            logResponse(backSideTask, responseOut);
 
             for (Header header : responseOut.getResponseHeaders().getHeaders()) {
                 resp.addHeader(header.getName(), header.getAllValuesAsString());
@@ -386,25 +388,24 @@ public class ProxyServlet extends HttpServlet {
             log.info("OK");
 
         } finally {
-            addEventHeader(resp, hostport, event);
+            addEventHeader(resp, hostport, clientTask);
         }
     }
 
     private static void logResponse(Task backSideTask, HttpBase requestOut) {
         // log response from backend service
-        backSideTask.select();
         Headers responseHeaders = requestOut.getResponseHeaders();
         responseHeaders.setStatus(requestOut.getStatus());
         responseHeaders.setVerb(requestOut.getVerb());
         responseHeaders.setPathInfo(requestOut.getUri());
-        backSideTask.getEventStore().putResponseHeader(responseHeaders);
+        backSideTask.putResponseHeader(responseHeaders);
         // TODO make this next line not seem to work
         //backSideTask.event._responseHeaders = requestOut._responseHeaders
         logResponseBody(backSideTask, requestOut);
         log.info("==> " + requestOut.getStatus() + " " + ((requestOut.getResponse() != null) ? requestOut.getResponseContentType() + " " + requestOut.getResponse().length + " bytes" : "NULL"));
     }
 
-    public static Headers getRequestHeaders(HttpServletRequest req, Verb verb) {
+    private static Headers getRequestHeaders(HttpServletRequest req, Verb verb) {
         List<String> names = Collections.list(req.getHeaderNames());
         Map<String, List<String>> hdrs = new HashMap<>();
         for (String name : names) {
@@ -421,27 +422,26 @@ public class ProxyServlet extends HttpServlet {
         return headers;
     }
 
-    static HttpBase logClientRequestIn(Event event, Headers headers, byte[] body, Verb verb) {
+    static HttpBase logClientRequestIn(Task task, Headers headers, byte[] body, Verb verb) {
         HttpBase base = (verb == Verb.GET) ? new HttpGet() : (verb == Verb.DELETE ? new HttpDelete() : new HttpPost());
-        event.getStore().selectClientTask();
-        event.getStore().putRequestHeader(headers);
+        task.putRequestHeader(headers);
         base.setRequestHeaders(headers);
 
-        event.getStore().putRequestBody(body);
+        task.putRequestBody(body);
         base.setRequest(body);
         String encoding = (headers.getContentEncoding().getAllValues().isEmpty()) ? "" : headers.getContentEncoding().getAllValues().get(0);
         if (encoding.equalsIgnoreCase("gzip")) {
             String txt = Gzip.decompressGZIP(body);
-            event.getStore().putRequestBodyText(txt);
+            task.putRequestBodyText(txt);
             base.setRequestText(txt);
         } else if (headers.getContentType().getAllValues().get(0).equalsIgnoreCase("text/html")) {
-            event.getStore().putRequestHTMLBody(body);
+            task.putRequestHTMLBody(body);
             base.setRequestText(new String(body));
         } else if (isStringType(headers.getContentType().getAllValues().get(0))) {
-            event.getStore().putRequestBodyText(new String(body));
+            task.putRequestBodyText(new String(body));
             base.setRequestText(new String(body));
         } else {
-            event.getStore().putRequestBodyText(new String(body));
+            task.putRequestBodyText(new String(body));
             base.setRequestText(new String(body));
         }
         return base;
@@ -468,22 +468,22 @@ public class ProxyServlet extends HttpServlet {
         return bytes;
     }
 
-    static void logRequestBody(Event event, Headers headers, HttpBase http, HttpServletRequest req) {
+    static void logRequestBody(Task task, Headers headers, HttpBase http, HttpServletRequest req) {
         byte[] bytes;
         try {
             bytes = IOUtils.toByteArray(req.getInputStream());
         } catch (Exception e) {
             throw new  RuntimeException(e);
         }
-        event.getStore().putRequestBody(bytes);
+        task.putRequestBody(bytes);
         http.setRequest(bytes);
         String encoding = headers.getContentEncoding().getAllValues().get(0);
         if (encoding.equalsIgnoreCase("gzip")) {
             String txt = Gzip.decompressGZIP(bytes);
-            event.getStore().putRequestBodyText(txt);
+            task.putRequestBodyText(txt);
             http.setRequest(txt.getBytes());
         } else if (headers.getContentType().getAllValues().get(0).equalsIgnoreCase("text/html")) {
-            event.getStore().putRequestHTMLBody(bytes);
+            task.putRequestHTMLBody(bytes);
             http.setRequestText(new String(bytes));
         } else if (isStringType(headers.getContentType().getAllValues().get(0))) {
             http.setRequestText(new String(bytes));
@@ -491,14 +491,13 @@ public class ProxyServlet extends HttpServlet {
     }
 
     static void logResponseBody(Task task, HttpBase http) {
-        task.select();
         Headers headers = http.getResponseHeaders();
         byte[] bytes = http.getResponse();
-        task.getEventStore().putResponseBody(bytes);
+        task.putResponseBody(bytes);
         if (headers == null) {
             String txt = new String(bytes);
             http.setResponseText(txt);
-            task.getEventStore().putResponseBodyText(txt);
+            task.putResponseBodyText(txt);
         } else {
             List<String> encodings = headers.getContentEncoding().getAllValues();
             if (encodings.isEmpty()) {
@@ -506,16 +505,16 @@ public class ProxyServlet extends HttpServlet {
                 if (isStringType(contentType)) {
                     String txt = new String(bytes);
                     http.setResponseText(txt);
-                    task.getEventStore().putResponseBodyText(txt);
+                    task.putResponseBodyText(txt);
                 }
             } else {
                 String encoding = encodings.get(0);
                 if (encoding != null && encoding.equalsIgnoreCase("gzip")) {
                     String txt = Gzip.decompressGZIP(bytes);
-                    task.getEventStore().putResponseBodyText(txt);
+                    task.putResponseBodyText(txt);
                     http.setResponseText(txt);
                 } else if (headers.getContentType().getAllValues().get(0).equalsIgnoreCase("text/html")) {
-                    task.getEventStore().putResponseHTMLBody(bytes);
+                    task.putResponseHTMLBody(bytes);
                     http.setResponseText(new String(bytes));
                 } else if (isStringType(headers.getContentType().getAllValues().get(0))) {
                     http.setResponseText(new String(bytes));
@@ -525,28 +524,27 @@ public class ProxyServlet extends HttpServlet {
     }
 
     static void logBackendRequest(Task task, HttpBase http) {
-        task.select();
         Headers headers = http.getRequestHeaders();
-        task.getEventStore().putRequestHeader(headers);
+        task.putRequestHeader(headers);
         byte[] bytes = http.getRequest();
-        task.getEventStore().putRequestBody(bytes);
+        task.putRequestBody(bytes);
         List<String> encodings = headers.getContentEncoding().getAllValues();
         if (encodings.isEmpty()) {
             String contentType = headers.getContentType().getAllValues().get(0);
             if (isStringType(contentType) || "".equals(contentType)) {
                 String txt = new String(bytes);
                 http.setRequestText(txt);
-                task.getEventStore().putRequestBodyText(txt);
+                task.putRequestBodyText(txt);
             }
         }
         else {
             String encoding = encodings.get(0);
             if (encoding != null && encoding.equalsIgnoreCase("gzip")) {
                 String txt = Gzip.decompressGZIP(bytes);
-                task.getEventStore().putRequestBodyText(txt);
+                task.putRequestBodyText(txt);
                 http.setRequestText(txt);
             } else if (headers.getContentType().getAllValues().get(0).equalsIgnoreCase("text/html")) {
-                task.getEventStore().putRequestHTMLBody(bytes);
+                task.putRequestHTMLBody(bytes);
                 http.setRequestText(new String(bytes));
             } else if (isStringType(headers.getContentType().getAllValues().get(0))) {
                 http.setRequestText(new String(bytes));
@@ -556,11 +554,9 @@ public class ProxyServlet extends HttpServlet {
 
     static HttpBase transformRequest(Task task, HttpPost requestIn, IBaseChannel channelTransform) {
         HttpPost requestOut = new HttpPost();
-        channelTransform.setEvent(task.getEventStore().getEvent());
-        task.getEventStore().getEvent();
+        channelTransform.setTask(task);
         channelTransform.transformRequest(requestIn, requestOut);
 
-        task.select();
         logBackendRequest(task, requestOut);
 
         return requestOut;
@@ -571,8 +567,7 @@ public class ProxyServlet extends HttpServlet {
 
         channelTransform.transformRequest(requestIn, requestOut);
 
-        task.select();
-        task.getEventStore().putRequestHeader(requestOut.getRequestHeaders());
+        task.putRequestHeader(requestOut.getRequestHeaders());
 
         return requestOut;
     }
@@ -582,40 +577,34 @@ public class ProxyServlet extends HttpServlet {
 
         channelTransform.transformRequest(requestIn, requestOut);
 
-        task.select();
-        task.getEventStore().putRequestHeader(requestOut.getRequestHeaders());
+        task.putRequestHeader(requestOut.getRequestHeaders());
 
         return requestOut;
     }
 
     static URI transformRequestUri(Task task, HttpBase requestIn, IBaseChannel channelTransform) {
-        Event event = task.getEventStore().getEvent();
         Headers headers = requestIn.getRequestHeaders();
         return channelTransform.transformRequestUrl(headers.getPathInfo().getPath(), requestIn);
-
     }
 
     static HttpBase transformResponse(Task task, HttpBase responseIn, IBaseChannel channelTransform, String proxyHostPort) {
         HttpBase responseOut = new HttpGet();  // here GET vs POST does not matter
 
-        task.select();
         try {
             channelTransform.transformResponse(responseIn, responseOut, proxyHostPort);
         } catch (TransformException te) {
             if (responseOut.getResponseHeaders() != null)
                 responseOut.getResponseHeaders().removeHeader("transfer-encoding");
 
-            task.select();
             responseOut.setResponse(te.getResponse().getBytes());
             responseOut.setRequestHeaders(new Headers().withContentType(te.getFormat().getContentType()));
         } finally {
             if (responseOut.getResponseHeaders() != null)
                 responseOut.getResponseHeaders().removeHeader("transfer-encoding");
 
-            task.select();
             if (responseOut.getResponse() != null) {
-                task.getEventStore().putResponseBody(responseOut.getResponse());
-                task.getEventStore().putResponseHeader(responseOut.getResponseHeaders());
+                task.putResponseBody(responseOut.getResponse());
+                task.putResponseHeader(responseOut.getResponseHeaders());
                 logResponseBody(task, responseOut);
             }
         }
@@ -729,7 +718,7 @@ public class ProxyServlet extends HttpServlet {
         //
 
 
-        // ChannelId has been established - from now all errors result in Event logging
+        // ChannelId has been established - from now all errors result in TaskStore logging
 
         // the request targets a Channel - maybe a control message or a pass through.
         // pass through have Channel/ as the next element of the URI
@@ -770,7 +759,7 @@ public class ProxyServlet extends HttpServlet {
         String type = uriParts.get(0);
         uriParts.remove(0);
 
-        if (type.equals("Event")) {
+        if (type.equals("TaskStore")) {
             return EventRequestHandler.eventRequest(simStore, uriParts, parameters);
         }
         throw new RuntimeException("Proxy: Do not understand control request type " + type + " of " + uri);

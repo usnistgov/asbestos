@@ -2,7 +2,7 @@ package gov.nist.asbestos.client.log;
 
 
 import gov.nist.asbestos.client.events.Event;
-import gov.nist.asbestos.client.events.EventStore;
+import gov.nist.asbestos.client.events.Task;
 import gov.nist.asbestos.sharedObjects.ChannelConfig;
 import gov.nist.asbestos.sharedObjects.ChannelConfigFactory;
 import gov.nist.asbestos.simapi.simCommon.SimId;
@@ -18,8 +18,8 @@ import static java.lang.Thread.sleep;
 
 /**
  * Store is organized as:
- * EC/testSession/psimdb/channelId/actor/resource/event/event_files
- * The content starting from the event/ is handed off to the class EventStore
+ * EC/testSession/psimdb/channelId/actor/resource/taskStore/event_files
+ * The content starting from the taskStore/ is handed off to the class Event
  */
 public class SimStore {
     private File externalCache;
@@ -36,8 +36,8 @@ public class SimStore {
     private boolean newlyCreated = false;
     private static final String PSIMDB = "psimdb";
     private static final String CHANNEL_CONFIG_FILE = "config.json";
-    private Event event;
-    //EventStore eventStore
+    private Task task;
+    //Event eventStore
     ChannelConfig channelConfig;
     private boolean channel = true;  // is this a channel to the backend system?
 
@@ -171,19 +171,17 @@ public class SimStore {
         return _resourceDir;
     }
 
-    public File getEventDir() {
+    private File getEventDir(String eventId) {
         Objects.requireNonNull(eventId);
+        File eventDir;
         if (_eventDir == null)
             _eventDir = new File(getResourceDir(), eventId);
-       // _eventDir.mkdirs()  // breaks createEvent(date)
+       // _eventDir.mkdirs()  // breaks createEventDir(date)
         return _eventDir;
     }
 
     public Event newEvent() {
-        createEvent();
-        EventStore eventStore = new EventStore(this, _eventDir);
-        event = eventStore.newEvent();
-        return event;
+        return new Event(this, createEventDir());
     }
 
     // on some machines this is important to prevent hangs
@@ -195,56 +193,43 @@ public class SimStore {
         }
     }
 
-    public File createEvent() {
-        return createEvent(new Date());
+    private File createEventDir() {
+        return createEventDir(new Date());
     }
 
-    public File createEvent(Date date)  {
+    private File createEventDir(Date date)  {
         File f = createEventDir(getEventIdFromDate(date));
         f.mkdirs();
         pause();
         return f;
     }
 
-    public File useEvent(String eventId) {
-        return createEventDir(eventId);
-    }
-
-    public SimStore withResource(String resource) {
-        this.resource = resource;
-        return this;
-    }
-
-    public SimStore withActorType(String actor) {
-        this.channelId.setActorType(actor);
-        return this;
-    }
-
-    public String getEventIdFromDate(Date date) {
+    private String getEventIdFromDate(Date date) {
         return Installation.asFilenameBase(date);
     }
 
     /**
-     * Given base name of a new event - extend it to ensure it is unique.
+     * Given base name of a new taskStore - extend it to ensure it is unique.
      * Does not create the directory, just the File
      * @param eventBase - usually date/time stamp
      * @return
      */
     private File createEventDir(String eventBase) {
         int incr = 0;
-        _eventDir = null;  // restart
+        File eventDir;  // restart
         while (true) {
             eventId = eventBase;
             if (incr != 0)
                 eventId = eventBase + '_' + incr;    // make unique
-            if (getEventDir().exists()) {
+            eventDir = new File(getResourceDir(), eventId);
+            if (eventDir.exists()) {
                 // must be fresh new dir - try again
                 incr++;
             }
             else
                 break;
         }
-        return getEventDir();
+        return eventDir;
     }
 
     public String getEndpoint() {

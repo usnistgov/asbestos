@@ -1,36 +1,216 @@
 package gov.nist.asbestos.client.events;
 
 
+import gov.nist.asbestos.http.headers.Headers;
+
+import java.io.FileOutputStream;
+import java.io.PrintWriter;
+import java.nio.file.Files;
+
 public class Task {
-    private EventStore eventStore;
-    private int taskIndex;
     private Event event;
+    private int taskIndex;
 
-    public static final int CLIENT_TASK = -1;
+    private Headers _requestHeaders = null;
+    private byte[] _requestRawBody = null;
+    private String _requestBody = null;
 
-    public Task(Event event, int index) {
+    private Headers _responseHeaders = null;
+    private byte[] _responseRawBody = null;
+    private String _responseBody = null;
+    private String _description = null;
+
+
+    Task(int taskIndex, Event event) {
+        this.taskIndex = taskIndex;
         this.event = event;
-        this.eventStore = event.getStore();
-        this.taskIndex = index;
-    }
-
-    public void select() {
-        eventStore.selectTask(taskIndex);
-    }
-
-    public EventStore getEventStore() {
-        return eventStore;
-    }
-
-    int getTaskIndex() {
-        return taskIndex;
-    }
-
-    void setEventStore(EventStore eventStore) {
-        this.eventStore = eventStore;
     }
 
     public Event getEvent() {
         return event;
+    }
+
+    public Task newTask() {
+        return event.newTask();
+    }
+
+    public void putRequestHeader(Headers headers) {
+        _requestHeaders = headers;
+        try {
+            try (PrintWriter out = new PrintWriter(event.getRequestHeaderFile(taskIndex))) {
+                out.print(headers.toString());
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void putRequestBody(byte[] body) {
+        _requestRawBody = body;
+        if (body != null) {
+            _requestBody = new String(body);
+            if (body.length > 0) {
+                try {
+                    try (FileOutputStream stream = new FileOutputStream(event.getRequestBodyFile(taskIndex))) {
+                        stream.write(body);
+                    }
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
+    }
+
+    public byte[] getRequestBody() {
+        if (_requestRawBody == null) {
+            try {
+                _requestRawBody = Files.readAllBytes(event.getRequestBodyFile(taskIndex).toPath());
+            } catch (Exception e) {
+            }
+            _requestBody = new String(_requestRawBody);
+        }
+        return _requestRawBody;
+    }
+
+    public Headers getRequestHeader() {
+        if (_requestHeaders == null) {
+            String headerString;
+            try {
+                headerString = new String(Files.readAllBytes(event.getRequestHeaderFile(taskIndex).toPath()));
+            } catch (Exception e) {
+                return new Headers();
+            }
+            _requestHeaders = new Headers(headerString);
+        }
+        return _requestHeaders;
+    }
+
+    public String getRequestBodyAsString() {
+        getRequestBody();
+        return _requestBody;
+    }
+
+    public void putResponseHeader(Headers headers) {
+        _responseHeaders = headers;
+        if (headers != null) {
+            try {
+                try (PrintWriter out = new PrintWriter(event.getResponseHeaderFile(taskIndex))) {
+                    out.print(headers.toString());
+                }
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
+    public void putResponseBody(byte[] body) {
+        _responseRawBody = body;
+        if (body != null && body.length >  0) {
+            try {
+                try (FileOutputStream out = new FileOutputStream(event.getResponseBodyFile(taskIndex))) {
+                    out.write(body);
+                }
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
+    public void putResponseBodyText(String body) {
+        _responseBody = body;
+        try {
+            try (PrintWriter out = new PrintWriter(event.getResponseBodyStringFile(taskIndex))) {
+                out.print(body);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void putDescription(String description) {
+        _description = description;
+        try {
+            try (PrintWriter out = new PrintWriter(event.getDescriptionFile(taskIndex))) {
+                out.print(description);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void putRequestBodyText(String body) {
+        try {
+            try (PrintWriter out = new PrintWriter(event.getRequestBodyStringFile(taskIndex))) {
+                out.print(body);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void putResponseHTMLBody(byte[] body) {
+        putResponseBody(body);
+        String bodyString = new String(body);
+        putResponseBodyText(bodyString);
+        try {
+            try (PrintWriter out = new PrintWriter(event.getResponseBodyHTMLFile(taskIndex))) {
+                out.print(bodyString);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void putRequestHTMLBody(byte[] body) {
+        putRequestBody(body);
+        String bodyString = new String(body);
+        putRequestBodyText(bodyString);
+        try {
+            try (PrintWriter out = new PrintWriter(event.getRequestBodyHTMLFile(taskIndex))) {
+                out.print(bodyString);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public Headers getResponseHeader() {
+        if (_responseHeaders == null) {
+            try {
+                String resp = new String(Files.readAllBytes(event.getResponseHeaderFile(taskIndex).toPath()));
+                _responseHeaders = new Headers(resp);
+            } catch (Exception e) {
+
+            }
+        }
+        return _responseHeaders;
+    }
+
+    public byte[] getResponseBody() {
+        if (_responseRawBody == null) {
+            try {
+                _responseRawBody = Files.readAllBytes(event.getResponseBodyFile(taskIndex).toPath());
+                _responseBody = new String(_responseRawBody);
+            } catch (Exception e) {
+
+            }
+        }
+        return _responseRawBody;
+    }
+
+    public String getDescription() {
+        if (_description == null) {
+            try {
+                _description = new String(Files.readAllBytes(event.getResponseBodyFile(taskIndex).toPath()));
+            } catch (Exception e) {
+
+            }
+        }
+        return _description;
+    }
+
+    public String getResponseBodyAsString() {
+        getResponseBody();
+        return _responseBody;
     }
 }
