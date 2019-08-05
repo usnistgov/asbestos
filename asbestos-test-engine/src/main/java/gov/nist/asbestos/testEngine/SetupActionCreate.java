@@ -45,7 +45,7 @@ class SetupActionCreate extends GenericSetupAction {
         Ref targetUrl = OperationURLBuilder.build(null, sut, fixtureMgr, reporter, resourceToSend.getClass().getSimpleName());
         if (targetUrl == null)
             return;
-        ResourceWrapper wrapper = getFhirClient().writeResource(resourceToSend, targetUrl, Format.JSON, requestHeader);
+        ResourceWrapper wrapper = getFhirClient().writeResource(resourceToSend, targetUrl, Format.XML, requestHeader);
         if (wrapper.isOk())
             reporter.report(wrapper.getRef() + " created", wrapper.logLink());
         else

@@ -2,12 +2,17 @@ package gov.nist.asbestos.mhd.translation.test;
 
 import gov.nist.asbestos.client.Base.ProxyBase;
 import gov.nist.asbestos.client.client.FhirClient;
+import gov.nist.asbestos.client.events.Event;
+import gov.nist.asbestos.client.events.Task;
+import gov.nist.asbestos.client.log.SimStore;
 import gov.nist.asbestos.client.resolver.ResourceCacheMgr;
 import gov.nist.asbestos.client.resolver.ResourceMgr;
 import gov.nist.asbestos.mhd.transactionSupport.AssigningAuthorities;
 import gov.nist.asbestos.mhd.transactionSupport.CodeTranslator;
 import gov.nist.asbestos.mhd.transactionSupport.CodeTranslatorBuilder;
 import gov.nist.asbestos.mhd.translation.BundleToRegistryObjectList;
+import gov.nist.asbestos.sharedObjects.ChannelConfig;
+import gov.nist.asbestos.simapi.simCommon.SimId;
 import gov.nist.asbestos.simapi.validation.Val;
 import gov.nist.asbestos.simapi.validation.ValErrors;
 import gov.nist.asbestos.simapi.validation.ValFactory;
@@ -35,6 +40,8 @@ class BuildRegistryObjectListTest {
     private static ResourceMgr bundleMgr;
     private static File externalCache;
     private FhirClient fhirClient;
+    private String testSession = "default";
+    private String channelId = "test";
 
     @BeforeAll
     static void beforeAll() throws URISyntaxException {
@@ -47,12 +54,27 @@ class BuildRegistryObjectListTest {
 
     @BeforeEach
     void beforeEach() {
+        ChannelConfig channelConfig = new ChannelConfig()
+                .setChannelId("test")
+                .setChannelType("mhd")
+                .setActorType("fhir")
+                .setEnvironment("default")
+                .setFhirBase("http://localhost:8877/fhir/fhir")
+                .setTestSession("default");
+
         rMgr = new ResourceMgr();
         val = new Val();
         rMgr.setVal(val);
         fhirClient = new FhirClient();
         fhirClient.setResourceCacheMgr(new ResourceCacheMgr(externalCache));
         rMgr.setFhirClient(fhirClient);
+        SimId simId = SimId.buildFromRawId(testSession + "__" + channelId).withActorType("fhir").withEnvironment("default");
+        SimStore simStore = new SimStore(externalCache, simId);
+        simStore.create(channelConfig);
+        simStore.setResource("Bundle");
+        Event event = simStore.newEvent();
+        Task task = event.newTask();
+        rMgr.setTask(task);
         bundleMgr = new ResourceMgr();
         bundleMgr.setVal(val);
         bundleMgr.setBundle(bundle);

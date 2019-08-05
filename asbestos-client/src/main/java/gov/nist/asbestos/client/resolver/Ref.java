@@ -4,9 +4,7 @@ import org.hl7.fhir.r4.model.Reference;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 public class Ref {
     private URI uri;
@@ -19,6 +17,23 @@ public class Ref {
     public Ref(String ref)  {
         Objects.requireNonNull(ref);
         uri = build(ref);
+    }
+
+    public Map<String, String> getProperties() {
+        Map<String, String> map = new HashMap<>();
+
+        if (uri == null)
+            return map;
+        String[] parts = uri.toString().split("\\?");
+        if (parts.length == 0 || parts.length == 1)
+            return map;
+        String parms = parts[1];
+        parts = parms.split(";");
+        for (int i=0; i<parts.length; i++) {
+            String parm = parts[i];
+
+        }
+        return map;
     }
 
     private URI httpize(URI theUri) {
@@ -86,10 +101,12 @@ public class Ref {
 
     public Ref(String base, String resourceType, String id)  {
         String theRef;
-        if (id == null || id.equals(""))
+        if (id == null || id.equals("") || id.startsWith("?"))
             theRef = String.join("/", base, resourceType);
         else
             theRef = String.join("/", base, resourceType, id);
+        if (id.startsWith("?"))
+            theRef = theRef + id;
         uri = build(theRef);
     }
 
@@ -266,6 +283,10 @@ public class Ref {
         } catch (Exception e) {
             throw new Error(e);
         }
+    }
+
+    public boolean isQuery() {
+        return uri != null && uri.toString().contains("?");
     }
 
     public URI getUri() {

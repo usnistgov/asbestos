@@ -27,7 +27,7 @@ public enum Format {
     }
 
     public static Format fromContentType(String contentType) {
-        if (contentType != null && contentType.equals("application/fhir+json"))
+        if (contentType != null && contentType.contains("json"))
             return Format.JSON;
         return Format.XML;
     }

@@ -15,7 +15,12 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
@@ -66,7 +71,12 @@ class GetMetadataTest {
 
         final StubServletOutputStream servletOutputStream2 = new StubServletOutputStream();
         when(getSetupResponse.getOutputStream()).thenReturn(servletOutputStream2);
+        when(getSetupResponse.getWriter()).thenReturn(new PrintWriter(servletOutputStream2));
         when(getSetupRequest.getInputStream()).thenReturn(new StubServletInputStream(""));
+        List<String> headerNames = Collections.singletonList("host");
+        List<String> headerValues = Collections.singletonList("localhost:8080");
+        when(getSetupRequest.getHeaderNames()).thenReturn(Collections.enumeration(headerNames));
+        when(getSetupRequest.getHeaders("host")).thenReturn(Collections.enumeration(headerValues));
 
         ps.doGet(getSetupRequest, getSetupResponse);
         String out = servletOutputStream2.toString();
@@ -77,7 +87,7 @@ class GetMetadataTest {
         assertNotNull(mostRecent);
         Event event = new Event(new SimStore(externalCache, simId),mostRecent.getFile());
         assertNotNull(event);
-        assertEquals(1, event.getTaskCount());
+        assertEquals(2, event.getTaskCount());
 
         Task task = event.getClientTask();
         int taski = 0;

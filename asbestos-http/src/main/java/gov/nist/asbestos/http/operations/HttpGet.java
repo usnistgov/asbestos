@@ -16,6 +16,7 @@ public class HttpGet extends HttpBase {
     void get(URI uri, Map<String, String> headers) {
         HttpURLConnection connection = null;
         try {
+            URL url  = uri.toURL();
             connection = (HttpURLConnection) uri.toURL().openConnection();
             connection.setRequestMethod("GET");
             if (headers != null)

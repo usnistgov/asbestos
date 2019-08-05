@@ -76,7 +76,7 @@ abstract class GenericSetupAction {
         if (!requestHeader.containsKey("accept-charset"))
             requestHeader.put("accept-charset", "utf-8");
         if (op.hasAccept())
-            requestHeader.put("accept", op.getAccept());
+            requestHeader.put("accept", Format.fromContentType(op.getAccept()).getContentType());
 
 
         targetUrl = buildTargetUrl();

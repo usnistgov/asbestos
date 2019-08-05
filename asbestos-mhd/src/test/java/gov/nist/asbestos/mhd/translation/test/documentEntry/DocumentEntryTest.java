@@ -7,6 +7,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import gov.nist.asbestos.client.Base.ProxyBase;
 import gov.nist.asbestos.client.client.FhirClient;
+import gov.nist.asbestos.client.events.Event;
+import gov.nist.asbestos.client.events.Task;
+import gov.nist.asbestos.client.log.SimStore;
 import gov.nist.asbestos.client.resolver.ResourceCacheMgr;
 import gov.nist.asbestos.client.resolver.ResourceMgr;
 import gov.nist.asbestos.mhd.transactionSupport.AssigningAuthorities;
@@ -15,6 +18,8 @@ import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import gov.nist.asbestos.mhd.translation.BundleToRegistryObjectList;
 import gov.nist.asbestos.mhd.translation.ContainedIdAllocator;
 import gov.nist.asbestos.mhd.translation.DocumentEntryToDocumentReference;
+import gov.nist.asbestos.sharedObjects.ChannelConfig;
+import gov.nist.asbestos.simapi.simCommon.SimId;
 import gov.nist.asbestos.simapi.tk.installation.Installation;
 import gov.nist.asbestos.simapi.validation.*;
 import oasis.names.tc.ebxml_regrep.xsd.rim._3.ExtrinsicObjectType;
@@ -79,9 +84,25 @@ class DocumentEntryTest {
         JsonParser jsonParser1 = jsonFactory.createParser(json);
         JsonNode node1 = objectMapper.readTree(jsonParser1);
 
+        ChannelConfig channelConfig = new ChannelConfig()
+                .setChannelId("test")
+                .setChannelType("mhd")
+                .setActorType("fhir")
+                .setEnvironment("default")
+                .setFhirBase("http://localhost:8877/fhir/fhir")
+                .setTestSession("default");
+
+        SimId simId = SimId.buildFromRawId("default" + "__" + "test").withActorType("fhir").withEnvironment("default");
+        SimStore simStore = new SimStore(externalCache, simId);
+        simStore.create(channelConfig);
+        simStore.setResource("Bundle");
+        Event event = simStore.newEvent();
+
         rMgr = new ResourceMgr();
         rMgr.setVal(val);
         rMgr.setFhirClient(fhirClient);
+        Task task = event.newTask();
+        rMgr.setTask(task);
 
         BundleToRegistryObjectList bundleToRegistryObjectList = new BundleToRegistryObjectList();
         bundleToRegistryObjectList.setVal(val);

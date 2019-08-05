@@ -38,6 +38,7 @@ class ToFhirServerIT {
         run("/toFhirServer/createPatientWithAutoCreateDelete/TestScript.xml");
     }
 
+
     void run(String testScriptLocation) throws URISyntaxException {
         Val val = new Val();
         File test1 = Paths.get(getClass().getResource(testScriptLocation).toURI()).getParent().toFile();

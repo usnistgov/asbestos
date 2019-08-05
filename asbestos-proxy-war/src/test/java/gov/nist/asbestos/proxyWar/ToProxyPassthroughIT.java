@@ -67,6 +67,10 @@ class ToProxyPassthroughIT {
         return testEngine;
     }
 
+    @Test
+    void patientSearch() throws URISyntaxException {
+        run("/toFhirServer/searchPatient/TestScript.xml");
+    }
 
    @BeforeAll
      static void beforeAll() throws IOException, URISyntaxException {

@@ -13,7 +13,14 @@ public class SearchParms {
 
     public void setParms(String parms, boolean encode) throws UnsupportedEncodingException {
         if (encode) {
+            boolean startWithQuestion = false;
+            if (parms.startsWith("?")) {
+                startWithQuestion = true;
+                parms = parms.substring(1);
+            }
             this.parms = URLEncoder.encode(parms, StandardCharsets.UTF_8.toString());
+            if (startWithQuestion)
+                this.parms = "?" + this.parms;
         } else {
             this.parms = parms;
         }

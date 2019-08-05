@@ -105,6 +105,8 @@ abstract public class HttpBase {
     }
 
     public String getResponseText() {
+        if (_responseText == null && _response != null)
+            _responseText = new String(_response);
         return _responseText;
     }
 

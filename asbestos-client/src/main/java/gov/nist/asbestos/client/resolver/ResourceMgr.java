@@ -237,10 +237,12 @@ public class ResourceMgr implements IVal {
 
     private void logResourceWrapper(ResourceWrapper wrapper, Task task) {
         HttpBase base = wrapper.getHttpBase();
-        task.putRequestHeader(base.getRequestHeaders());
-        task.putRequestBody(base.getRequest());
-        task.putResponseHeader(base.getResponseHeaders());
-        task.putResponseBody(base.getResponse());
+        if (base != null) {
+            task.putRequestHeader(base.getRequestHeaders());
+            task.putRequestBody(base.getRequest());
+            task.putResponseHeader(base.getResponseHeaders());
+            task.putResponseBody(base.getResponse());
+        }
     }
 
     public List<ResourceWrapper> search(Ref base, Class<?> resourceType, List<String> params, boolean stopAtFirst) {

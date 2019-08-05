@@ -75,21 +75,24 @@ public class TestEngine  {
         testScript = loadTestScript();
         testReport.setName(testScript.getName());
         testReport.setTestScript(new Reference(testScript.getId()));
-        doPreProcessing();
-        if (errorOut()) return;
-        doLoadVariables();
-        if (errorOut()) return;
-        doLoadFixtures();
-        if (errorOut()) return;
-        doAutoCreates();
-        if (errorOut()) return;
-        doSetup();
-        if (errorOut()) return;
-        doTest();
-        if (errorOut()) return;
-        doTearDown();
-        doAutoDeletes();
-        doPostProcessing();
+        try {
+            doPreProcessing();
+            if (errorOut()) return;
+            doLoadVariables();
+            if (errorOut()) return;
+            doLoadFixtures();
+            if (errorOut()) return;
+            doAutoCreates();
+            if (errorOut()) return;
+            doSetup();
+            if (errorOut()) return;
+            doTest();
+            if (errorOut()) return;
+            doTearDown();
+        } finally {
+            doAutoDeletes();
+            doPostProcessing();
+        }
     }
 
     private boolean errorOut() {

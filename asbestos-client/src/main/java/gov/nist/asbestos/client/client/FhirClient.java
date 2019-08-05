@@ -116,11 +116,20 @@ public class FhirClient {
             headers.add(new Header("accept", Format.XML.getContentType()));
         getter.setRequestHeaders(headers);
         getter.get();
-        return gobbleGetResponse(getter, wrapper, asFormat(headers));
+        return gobbleGetResponse(getter, wrapper, asResponseFormat(headers));
     }
 
     Format asFormat(Headers headers) {
         String contentType = headers.getContentType().getValue();
+        if ("application/fhir+xml".equals(contentType))
+            return  Format.XML;
+        if ("application/fhir+json".equals(contentType))
+            return Format.JSON;
+        return Format.NONE;
+    }
+
+    Format asResponseFormat(Headers headers) {
+        String contentType = headers.getAccept().getValue();
         if ("application/fhir+xml".equals(contentType))
             return  Format.XML;
         if ("application/fhir+json".equals(contentType))
@@ -133,7 +142,7 @@ public class FhirClient {
            return wrapper;
         }
         String resourceText = getter.getResponseText();
-        if (resourceText == null)
+        if (resourceText == null || resourceText.equals(""))
             return wrapper;
         BaseResource resource = null;
         IBaseResource iBaseResource;

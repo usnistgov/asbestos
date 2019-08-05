@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<TestScript xmlns="http://hl7.org/fhir">
+    <fixture id="example-patient">
+        <resource>
+            <reference value="Patient/example-patient.xml"/>
+        </resource>
+        <autocreate value="true"/>
+        <autodelete value="true"/>
+    </fixture>
+    <test>
+        <action>
+            <operation>
+                <description value="read back the patient resource - in JSON"/>
+                <type>
+                    <code value="read"/>
+                </type>
+                <accept value="json"/>
+            </operation>
+        </action>
+        <action>
+            <assert>
+                <description value="read was successful"/>
+                <response value="okay"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
+            <operation>
+                <description value="search by last name"/>
+                <type>
+                    <code value="search"/>
+                </type>
+                <accept value="json"/>
+                <resource value="Patient"/>
+                <params value="?family=Bond"/>
+            </operation>
+        </action>
+        <action>
+            <assert>
+                <response value="okay"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
+            <assert>
+                <resource value="Bundle"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
+            <assert>
+                <expression value="Patient.name.given=James"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+    </test>
+</TestScript>

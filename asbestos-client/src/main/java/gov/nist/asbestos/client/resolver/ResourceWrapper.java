@@ -169,7 +169,10 @@ public class ResourceWrapper {
                 BaseResource resource = getResponseResource();
                 if (resource == null)
                     return false;
-                if (!resource.getClass().getSimpleName().equals(resourceType))
+                if (ref.isQuery()) {
+                    if (!resource.getClass().getSimpleName().equals("Bundle"))
+                        return false;
+                } else if (!resource.getClass().getSimpleName().equals(resourceType))
                     return false;
             }
         }

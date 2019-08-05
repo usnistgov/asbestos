@@ -92,7 +92,7 @@ public class OperationRunner {
                         .setVal(val)
                         .setFhirClient(fhirClient)
                         .setSut(sut)
-                        .setType(type + ".read")
+                        .setType(type + ".search")
                         .setTestReport(testReport);
                 setupActionSearch.setVariableMgr(new VariableMgr(testScript, fixtureMgr)
                         .setOpReport(operationReport)

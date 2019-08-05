@@ -31,7 +31,7 @@ class SetupActionRead extends GenericSetupAction {
             String errs = "";
             for (String error : errors)
                 errs = errs + "\n" + error;
-            Reporter.reportError(val, opReport, null, type, label, "Unable to retrieve " + targetUrl + "\n" + errs, wrapper.logLink());
+            Reporter.reportError(val, opReport, null, type, label, "Empty response to " + targetUrl + "\n" + errs, wrapper.logLink());
             return;
         } else {
             reporter.report(wrapper.getRef() + " read", wrapper.logLink());
@@ -75,13 +75,13 @@ class SetupActionRead extends GenericSetupAction {
             SearchParms searchParms = prepParams();
             if (searchParms == null)
                 return null;  // coding issue
-            if (searchParms.isSearch() && isSearchOk()) {
+            if (searchParms.isSearch() && !isSearchOk()) {
                 Reporter.reportError(val, opReport, null, type, label, "resulting URL is search (contains ?) - use search operation type instead");
                 return null ;
             }
 
             Ref ref = new Ref(base, op.getResource(), searchParms);
-            if (!isReadable(ref)) {
+            if (!isSearchOk() && !isReadable(ref)) {
                 Reporter.reportError(val, opReport, null, type, label, "resulting URL is not complete - " + ref.asString());
                 return null ;
             }
