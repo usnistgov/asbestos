@@ -6,7 +6,7 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import gov.nist.asbestos.client.Base.ProxyBase;
-import gov.nist.asbestos.mhd.translation.Author;
+import gov.nist.asbestos.mhd.translation.attribute.Author;
 import gov.nist.asbestos.mhd.translation.ContainedIdAllocator;
 import gov.nist.asbestos.simapi.validation.Val;
 import oasis.names.tc.ebxml_regrep.xsd.rim._3.ClassificationType;

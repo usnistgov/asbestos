@@ -1,4 +1,4 @@
-package gov.nist.asbestos.mhd.translation;
+package gov.nist.asbestos.mhd.transforms;
 
 import oasis.names.tc.ebxml_regrep.xsd.rs._3.RegistryError;
 import oasis.names.tc.ebxml_regrep.xsd.rs._3.RegistryErrorList;

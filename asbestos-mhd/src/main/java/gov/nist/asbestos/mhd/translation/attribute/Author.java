@@ -1,6 +1,7 @@
-package gov.nist.asbestos.mhd.translation;
+package gov.nist.asbestos.mhd.translation.attribute;
 
 import gov.nist.asbestos.client.Base.IVal;
+import gov.nist.asbestos.mhd.translation.ContainedIdAllocator;
 import gov.nist.asbestos.simapi.validation.Val;
 import gov.nist.asbestos.simapi.validation.ValE;
 import oasis.names.tc.ebxml_regrep.xsd.rim._3.ClassificationType;

@@ -1,4 +1,4 @@
-package gov.nist.asbestos.asbestosProxy.parser;
+package gov.nist.asbestos.mhd.transactionSupport;
 
 import org.apache.xerces.parsers.DOMParser;
 import org.w3c.dom.Document;

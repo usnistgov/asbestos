@@ -1,4 +1,4 @@
-package gov.nist.asbestos.mhd.translation;
+package gov.nist.asbestos.mhd.translation.attribute;
 
 import gov.nist.asbestos.simapi.validation.Val;
 

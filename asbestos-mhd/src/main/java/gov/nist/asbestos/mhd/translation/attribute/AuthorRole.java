@@ -1,12 +1,10 @@
-package gov.nist.asbestos.mhd.translation;
+package gov.nist.asbestos.mhd.translation.attribute;
 
 import gov.nist.asbestos.simapi.validation.Val;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 
-import java.util.List;
-
-class AuthorRole extends AuthorPart {
+public class AuthorRole extends AuthorPart {
     private CodeableConcept cc = null;
     // format is string or coded string (code^^^&CodeSystemID&ISO)
     private String code = null;

@@ -1,4 +1,4 @@
-package gov.nist.asbestos.mhd.translation;
+package gov.nist.asbestos.mhd.translation.attribute;
 
 import gov.nist.asbestos.simapi.validation.Val;
 
@@ -10,7 +10,7 @@ public abstract class AuthorPart {
 
     abstract void validate(Val val);
 
-    void parse() {
+    public void parse() {
         parts = value.split("\\^");
     }
 
@@ -22,7 +22,7 @@ public abstract class AuthorPart {
         return this;
     }
 
-    String get(int i) {
+    public String get(int i) {
         if (i > parts.length)
             return "";
         return parts[i-1];

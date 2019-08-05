@@ -1,14 +1,12 @@
 package gov.nist.asbestos.asbestosProxy.channels.mhd;
 
 import gov.nist.asbestos.asbestosProxy.channel.BaseChannel;
-import gov.nist.asbestos.client.events.Event;
-import gov.nist.asbestos.asbestosProxy.parser.AhqrSender;
-import gov.nist.asbestos.asbestosProxy.parser.FaultParser;
 import gov.nist.asbestos.asbestosProxy.util.XdsActorMapper;
 import gov.nist.asbestos.asbestosProxy.wrapper.TransformException;
 import gov.nist.asbestos.client.Base.ProxyBase;
 import gov.nist.asbestos.client.client.FhirClient;
 import gov.nist.asbestos.client.client.Format;
+import gov.nist.asbestos.client.events.Event;
 import gov.nist.asbestos.client.events.Task;
 import gov.nist.asbestos.client.resolver.IdBuilder;
 import gov.nist.asbestos.client.resolver.Ref;
@@ -18,22 +16,20 @@ import gov.nist.asbestos.http.headers.Header;
 import gov.nist.asbestos.http.headers.Headers;
 import gov.nist.asbestos.http.operations.*;
 import gov.nist.asbestos.mhd.SubmittedObject;
-import gov.nist.asbestos.mhd.transactionSupport.AdhocQueryBuilder;
-import gov.nist.asbestos.mhd.transactionSupport.AssigningAuthorities;
-import gov.nist.asbestos.mhd.transactionSupport.CodeTranslator;
-import gov.nist.asbestos.mhd.transactionSupport.ProvideAndRegisterBuilder;
-import gov.nist.asbestos.mhd.translation.BundleToRegistryObjectList;
+import gov.nist.asbestos.mhd.transactionSupport.*;
+import gov.nist.asbestos.mhd.transforms.BundleToRegistryObjectList;
+import gov.nist.asbestos.mhd.transforms.DocumentEntryToDocumentReference;
 import gov.nist.asbestos.mhd.translation.ContainedIdAllocator;
-import gov.nist.asbestos.mhd.translation.DocumentEntryToDocumentReference;
+import gov.nist.asbestos.mhd.translation.search.FhirSq;
 import gov.nist.asbestos.sharedObjects.ChannelConfig;
 import gov.nist.asbestos.simapi.tk.installation.Installation;
 import gov.nist.asbestos.simapi.validation.Val;
 import gov.nist.asbestos.utilities.*;
 import ihe.iti.xds_b._2007.ProvideAndRegisterDocumentSetRequestType;
 import oasis.names.tc.ebxml_regrep.xsd.lcm._3.SubmitObjectsRequest;
-import oasis.names.tc.ebxml_regrep.xsd.query._3.AdhocQueryRequest;
-import oasis.names.tc.ebxml_regrep.xsd.query._3.ResponseOptionType;
-import oasis.names.tc.ebxml_regrep.xsd.rim._3.*;
+import oasis.names.tc.ebxml_regrep.xsd.rim._3.ExtrinsicObjectType;
+import oasis.names.tc.ebxml_regrep.xsd.rim._3.IdentifiableType;
+import oasis.names.tc.ebxml_regrep.xsd.rim._3.RegistryObjectListType;
 import oasis.names.tc.ebxml_regrep.xsd.rs._3.RegistryResponseType;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -44,10 +40,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Scanner;
+import java.util.*;
 
 public class MhdChannel extends BaseChannel /*implements IBaseChannel*/ {
     private ChannelConfig channelConfig = null;
@@ -114,7 +107,7 @@ public class MhdChannel extends BaseChannel /*implements IBaseChannel*/ {
         ByteArrayOutputStream pnrStream = new ByteArrayOutputStream();
         new ProvideAndRegisterBuilder().toOutputStream(pnr, pnrStream);
 
-        String pnrString = deleteXMLInstruction(new String(pnrStream.toByteArray()));
+        String pnrString = XmlTools.deleteXMLInstruction(new String(pnrStream.toByteArray()));
         String soapString = PnrWrapper.wrap(toAddr.toString(), pnrString);
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         try {
@@ -127,33 +120,43 @@ public class MhdChannel extends BaseChannel /*implements IBaseChannel*/ {
 
 
     private AhqrSender documentEntryByUidQuery(String uid, URI toAddr)  {
-        AdhocQueryRequest adhocQueryRequest = new AdhocQueryRequest();
-        ResponseOptionType responseOptionType = new ResponseOptionType();
-        responseOptionType.setReturnType("LeafClass");
-        responseOptionType.setReturnComposedObjects(true);
-        adhocQueryRequest.setResponseOption(responseOptionType);
-        AdhocQueryType adhocQueryType = new AdhocQueryType();
-        adhocQueryType.setId("urn:uuid:5c4f972b-d56b-40ac-a5fc-c8ca9b40b9d4");
-        QueryExpressionType queryExpressionType = new QueryExpressionType();
-        adhocQueryType.setQueryExpression(queryExpressionType);
-        SlotType1 slot = new SlotType1();
-        slot.setName("$XDSDocumentEntryUniqueId");
-        ValueListType valueList = new ValueListType();
-        valueList.getValue().add("('" + uid + "')");
-        slot.setValueList(valueList);
-        adhocQueryType.getSlot().add(slot);
-        adhocQueryRequest.setAdhocQuery(adhocQueryType);
+        Map<String, List<String>> model = new HashMap<>();
+        model.put("$XDSDocumentEntryUniqueId", Collections.singletonList(uid));
 
-        ByteArrayOutputStream queryStream = new ByteArrayOutputStream();
-        new AdhocQueryBuilder().toOutputStream(adhocQueryRequest, queryStream);
+        return FhirSq.run(model, "urn:uuid:5c4f972b-d56b-40ac-a5fc-c8ca9b40b9d4", toAddr, true);
 
-        String queryString1 = deleteXMLInstruction(new String(queryStream.toByteArray()));
-        String queryString = deleteQueryExpression(queryString1);
-        String soapString = AdhocQueryWrapper.wrap(toAddr.toString(), queryString);
-        ByteArrayOutputStream os = new ByteArrayOutputStream();
-        AhqrSender sender = new AhqrSender();
-        sender.send(soapString, toAddr.toString());
-        return sender;
+
+//        AdhocQueryRequest adhocQueryRequest = new AdhocQueryRequest();
+//        ResponseOptionType responseOptionType = new ResponseOptionType();
+//        responseOptionType.setReturnType("LeafClass");
+//        responseOptionType.setReturnComposedObjects(true);
+//        adhocQueryRequest.setResponseOption(responseOptionType);
+//        AdhocQueryType adhocQueryType = new AdhocQueryType();
+//        adhocQueryType.setId("urn:uuid:5c4f972b-d56b-40ac-a5fc-c8ca9b40b9d4");
+//        QueryExpressionType queryExpressionType = new QueryExpressionType();
+//        adhocQueryType.setQueryExpression(queryExpressionType);
+//
+//        SlotType1 slot = new SlotType1();
+//        slot.setName("$XDSDocumentEntryUniqueId");
+//        ValueListType valueList = new ValueListType();
+//        valueList.getValue().add("('" + uid + "')");
+//        slot.setValueList(valueList);
+//        adhocQueryType.getSlot().add(slot);
+//        adhocQueryRequest.setAdhocQuery(adhocQueryType);
+//
+////        ByteArrayOutputStream queryStream = new ByteArrayOutputStream();
+////        new AdhocQueryBuilder().toOutputStream(adhocQueryRequest, queryStream);
+////
+////        String queryString1 = XmlTools.deleteXMLInstruction(new String(queryStream.toByteArray()));
+////        String queryString = XmlTools.deleteQueryExpression(queryString1);
+////        String soapString = AdhocQueryWrapper.wrap(toAddr.toString(), queryString);
+////        ByteArrayOutputStream os = new ByteArrayOutputStream();
+//        AhqrSender sender = new AhqrSender();
+//        sender.send(adhocQueryRequest, toAddr);
+
+
+
+//        return sender;
     }
 
     private OperationOutcome regErrorListAsOperationOutcome(RegErrorList regErrorList) {
@@ -208,29 +211,6 @@ public class MhdChannel extends BaseChannel /*implements IBaseChannel*/ {
         requestOut.setRequestHeaders(new Headers().withContentType(MultipartSender.getContentType()));
     }
 
-    private static String deleteXMLInstruction(String in) {
-        StringBuilder buf = new StringBuilder();
-        Scanner scanner = new Scanner(in);
-        while(scanner.hasNextLine()) {
-            String line = scanner.nextLine();
-            if (!line.startsWith("<?xml"))
-                buf.append(line).append(("\n"));
-        }
-        scanner.close();
-        return  buf.toString();
-    }
-
-    private static String deleteQueryExpression(String in) {
-        StringBuilder buf = new StringBuilder();
-        Scanner scanner = new Scanner(in);
-        while(scanner.hasNextLine()) {
-            String line = scanner.nextLine();
-            if (!line.contains("<QueryExpression/>"))
-                buf.append(line).append(("\n"));
-        }
-        scanner.close();
-        return  buf.toString();
-    }
 
     private static File getCodesFile() {
         return Installation.instance().getCodesFile("default");

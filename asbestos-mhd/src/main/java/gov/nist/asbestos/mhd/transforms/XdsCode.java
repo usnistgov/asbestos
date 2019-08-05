@@ -1,8 +1,9 @@
-package gov.nist.asbestos.mhd.translation;
+package gov.nist.asbestos.mhd.transforms;
 
 import gov.nist.asbestos.asbestorCodesJaxb.Code;
 import gov.nist.asbestos.client.Base.IVal;
 import gov.nist.asbestos.mhd.transactionSupport.CodeTranslator;
+import gov.nist.asbestos.mhd.translation.attribute.Slot;
 import gov.nist.asbestos.simapi.validation.Val;
 import gov.nist.asbestos.simapi.validation.ValE;
 import oasis.names.tc.ebxml_regrep.xsd.rim._3.ClassificationType;

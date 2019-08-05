@@ -1,6 +1,6 @@
 package gov.nist.asbestos.mhd.translation.test;
 
-import gov.nist.asbestos.mhd.translation.Id;
+import gov.nist.asbestos.mhd.translation.attribute.Id;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

@@ -5,7 +5,7 @@ import gov.nist.asbestos.client.Base.ProxyBase;
 import gov.nist.asbestos.client.resolver.ResourceMgr;
 import gov.nist.asbestos.mhd.transactionSupport.CodeTranslator;
 import gov.nist.asbestos.mhd.transactionSupport.CodeTranslatorBuilder;
-import gov.nist.asbestos.mhd.translation.BundleToRegistryObjectList;
+import gov.nist.asbestos.mhd.transforms.BundleToRegistryObjectList;
 import gov.nist.asbestos.simapi.validation.Val;
 import gov.nist.asbestos.simapi.validation.ValE;
 import oasis.names.tc.ebxml_regrep.xsd.lcm._3.SubmitObjectsRequest;

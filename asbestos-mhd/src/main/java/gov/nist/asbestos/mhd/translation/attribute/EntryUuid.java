@@ -8,7 +8,7 @@ import org.hl7.fhir.r4.model.Identifier;
 import java.util.List;
 import java.util.Objects;
 
-import static gov.nist.asbestos.mhd.translation.DocumentEntryToDocumentReference.stripUrnPrefix;
+import static gov.nist.asbestos.mhd.transforms.DocumentEntryToDocumentReference.stripUrnPrefix;
 
 public class EntryUuid extends AbstractAttribute {
     private ValE val = null;

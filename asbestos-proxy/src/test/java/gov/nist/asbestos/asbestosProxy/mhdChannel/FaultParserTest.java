@@ -1,6 +1,6 @@
 package gov.nist.asbestos.asbestosProxy.mhdChannel;
 
-import gov.nist.asbestos.asbestosProxy.parser.FaultParser;
+import gov.nist.asbestos.mhd.transactionSupport.FaultParser;
 import org.junit.jupiter.api.Test;
 import org.xml.sax.SAXException;
 

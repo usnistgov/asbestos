@@ -1,10 +1,10 @@
-package gov.nist.asbestos.mhd.translation;
+package gov.nist.asbestos.mhd.translation.attribute;
 
 import javax.xml.bind.DatatypeConverter;
 
 public class HashTranslator {
 
-    static byte[] toByteArray(String hash) {
+    public static byte[] toByteArray(String hash) {
         return DatatypeConverter.parseHexBinary(hash);
     }
 

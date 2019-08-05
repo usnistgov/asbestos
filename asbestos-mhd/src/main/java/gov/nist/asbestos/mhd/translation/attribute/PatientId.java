@@ -1,4 +1,4 @@
-package gov.nist.asbestos.mhd.translation;
+package gov.nist.asbestos.mhd.translation.attribute;
 
 import gov.nist.asbestos.client.Base.IVal;
 import gov.nist.asbestos.client.resolver.ResourceMgr;
@@ -44,7 +44,7 @@ public class PatientId implements IVal {
         return id;
     }
 
-    Optional<Reference> getFhirReference() {
+    public Optional<Reference> getFhirReference() {
         Objects.requireNonNull(resourceMgr);
         Objects.requireNonNull(val);
         String system = "urn:oid:" + getAa();
@@ -59,7 +59,7 @@ public class PatientId implements IVal {
         return Optional.of(new Reference(results.get(0).getRef().toString()));
     }
 
-    PatientId setResourceMgr(ResourceMgr resourceMgr) {
+    public PatientId setResourceMgr(ResourceMgr resourceMgr) {
         this.resourceMgr = resourceMgr;
         return this;
     }

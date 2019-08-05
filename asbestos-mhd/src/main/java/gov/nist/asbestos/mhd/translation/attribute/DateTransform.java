@@ -1,4 +1,4 @@
-package gov.nist.asbestos.mhd.translation;
+package gov.nist.asbestos.mhd.translation.attribute;
 
 import gov.nist.asbestos.mhd.exceptions.MetadataAttributeTranslationException;
 
@@ -11,7 +11,7 @@ public class DateTransform {
     private static SimpleDateFormat dtmFormat = new SimpleDateFormat("yyyyMMddHHmmss");
     private static SimpleDateFormat fhirFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 
-    static Date dtmToDate(String dtm) throws MetadataAttributeTranslationException {
+    public static Date dtmToDate(String dtm) throws MetadataAttributeTranslationException {
         try {
             return dtmFormat.parse(dtm);
         } catch (Throwable t) {
@@ -19,7 +19,7 @@ public class DateTransform {
         }
     }
 
-    static String fhirToDtm(Date date) {
+    public static String fhirToDtm(Date date) {
         return dtmFormat.format(date);
     }
 

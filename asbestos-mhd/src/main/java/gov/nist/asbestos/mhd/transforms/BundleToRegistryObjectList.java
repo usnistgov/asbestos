@@ -1,4 +1,4 @@
-package gov.nist.asbestos.mhd.translation;
+package gov.nist.asbestos.mhd.transforms;
 
 
 import gov.nist.asbestos.asbestorCodesJaxb.Code;
@@ -11,6 +11,9 @@ import gov.nist.asbestos.mhd.SubmittedObject;
 import gov.nist.asbestos.mhd.transactionSupport.AssigningAuthorities;
 import gov.nist.asbestos.mhd.transactionSupport.CodeTranslator;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
+import gov.nist.asbestos.mhd.translation.attribute.Author;
+import gov.nist.asbestos.mhd.translation.attribute.AuthorRole;
+import gov.nist.asbestos.mhd.translation.attribute.DateTransform;
 import gov.nist.asbestos.mhd.translation.attribute.EntryUuid;
 import gov.nist.asbestos.simapi.validation.Val;
 import gov.nist.asbestos.simapi.validation.ValE;

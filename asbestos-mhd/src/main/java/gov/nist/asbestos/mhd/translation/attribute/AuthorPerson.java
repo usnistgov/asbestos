@@ -1,11 +1,11 @@
-package gov.nist.asbestos.mhd.translation;
+package gov.nist.asbestos.mhd.translation.attribute;
 
 import gov.nist.asbestos.simapi.validation.Val;
 import gov.nist.asbestos.simapi.validation.ValE;
 
 import java.util.Objects;
 
-class AuthorPerson extends AuthorPart {
+public class AuthorPerson extends AuthorPart {
     // datatype is XCN
     String id = "";
     String familyName = "";

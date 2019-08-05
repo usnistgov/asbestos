@@ -10,7 +10,7 @@ import gov.nist.asbestos.client.resolver.ResourceMgr;
 import gov.nist.asbestos.mhd.transactionSupport.AssigningAuthorities;
 import gov.nist.asbestos.mhd.transactionSupport.CodeTranslator;
 import gov.nist.asbestos.mhd.transactionSupport.CodeTranslatorBuilder;
-import gov.nist.asbestos.mhd.translation.BundleToRegistryObjectList;
+import gov.nist.asbestos.mhd.transforms.BundleToRegistryObjectList;
 import gov.nist.asbestos.sharedObjects.ChannelConfig;
 import gov.nist.asbestos.simapi.simCommon.SimId;
 import gov.nist.asbestos.simapi.validation.Val;

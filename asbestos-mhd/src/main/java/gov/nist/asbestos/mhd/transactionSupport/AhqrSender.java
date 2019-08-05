@@ -1,13 +1,11 @@
-package gov.nist.asbestos.asbestosProxy.parser;
+package gov.nist.asbestos.mhd.transactionSupport;
 
 import gov.nist.asbestos.http.headers.Header;
 import gov.nist.asbestos.http.headers.Headers;
 import gov.nist.asbestos.http.operations.HttpPost;
 import gov.nist.asbestos.http.operations.Verb;
-import gov.nist.asbestos.utilities.AdhocQueryResponseBuilder;
-import gov.nist.asbestos.utilities.ErrorType;
-import gov.nist.asbestos.utilities.RegError;
-import gov.nist.asbestos.utilities.RegErrorList;
+import gov.nist.asbestos.utilities.*;
+import oasis.names.tc.ebxml_regrep.xsd.query._3.AdhocQueryRequest;
 import oasis.names.tc.ebxml_regrep.xsd.query._3.AdhocQueryResponse;
 import oasis.names.tc.ebxml_regrep.xsd.rim._3.IdentifiableType;
 import oasis.names.tc.ebxml_regrep.xsd.rim._3.RegistryObjectListType;
@@ -15,6 +13,7 @@ import org.apache.http.client.ClientProtocolException;
 
 import javax.xml.bind.JAXBElement;
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,6 +24,16 @@ public class AhqrSender {
     private String requestBody = null;
     private Headers requestHeaders = new Headers();
     private String responseText = null;
+
+    public void send(AdhocQueryRequest adhocQueryRequest, URI toAddr) {
+        ByteArrayOutputStream queryStream = new ByteArrayOutputStream();
+        new AdhocQueryBuilder().toOutputStream(adhocQueryRequest, queryStream);
+
+        String queryString1 = XmlTools.deleteXMLInstruction(new String(queryStream.toByteArray()));
+        String queryString = XmlTools.deleteQueryExpression(queryString1);
+        String soapString = AdhocQueryWrapper.wrap(toAddr.toString(), queryString);
+        send(soapString, toAddr.toString());
+    }
 
     public void send(String body, String toAddr) {
         this.requestBody = body;

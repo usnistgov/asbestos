@@ -1,4 +1,4 @@
-package gov.nist.asbestos.mhd.translation;
+package gov.nist.asbestos.mhd.translation.attribute;
 
 import oasis.names.tc.ebxml_regrep.xsd.rim._3.InternationalStringType;
 import oasis.names.tc.ebxml_regrep.xsd.rim._3.LocalizedStringType;
@@ -9,7 +9,7 @@ import java.util.List;
 
 public class Slot {
 
-    static String getSlotValue1(List<SlotType1> slots, String name) {
+    public static String getSlotValue1(List<SlotType1> slots, String name) {
         for (SlotType1 s : slots) {
             if (s.getName().equals(name)) {
                 List<String> values = s.getValueList().getValue();
@@ -28,7 +28,7 @@ public class Slot {
         return lsts.get(0).getValue();
     }
 
-    static SlotType1 makeSlot(String name, String value) {
+    public static SlotType1 makeSlot(String name, String value) {
         SlotType1 slot = new SlotType1();
         ValueListType valueListType = new ValueListType();
         valueListType.getValue().add(value);
@@ -37,7 +37,7 @@ public class Slot {
         return slot;
     }
 
-    static SlotType1 makeSlot(String name, List<String> values) {
+    public static SlotType1 makeSlot(String name, List<String> values) {
         SlotType1 slot = new SlotType1();
         ValueListType valueListType = new ValueListType();
         for (String value : values)
