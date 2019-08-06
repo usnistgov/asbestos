@@ -346,6 +346,7 @@ public class MhdChannel extends BaseChannel /*implements IBaseChannel*/ {
     @Override
     public void transformResponse(HttpBase responseIn, HttpBase responseOut, String proxyHostPort) {
         if (sender != null) {
+            // there is a query response to transform
             getTask().putResponseBodyText(sender.getResponseText());
             if (responseOut.getVerb().equals(Verb.GET.toString())) {  // FHIR READ
                 if (sender.hasErrors()) {

@@ -14,26 +14,23 @@ import java.util.*;
 import static gov.nist.asbestos.mhd.translation.search.DocRefSQParamTranslator.queryType;
 
 public class FhirSq {
-    // TODO - test encoding
 
     /**
      *
      * @param query is param1=value1;param2=value2...
-     * @return StoredQuery
+     * @return StoredQuery model
      */
-    static Map<String, List<String>> fhirQueryToSQModel(String query) {
+    private static Map<String, List<String>> docRefQueryToSQModel(String query) {
         List<String> params = Arrays.asList(query.split(";"));
         return new DocRefSQParamTranslator().run(params);
     }
 
     public static AhqrSender docRefQuery(String httpQueryString, URI toAddr) {
-        List<String> params = Arrays.asList(httpQueryString.split(";"));
-
-        return run(fhirQueryToSQModel(httpQueryString), "urn:uuid:14d4debf-8f97-4251-9a74-a90016b0af0d" /* FindDocuments */, toAddr, true);
+        return run(docRefQueryToSQModel(httpQueryString), "urn:uuid:14d4debf-8f97-4251-9a74-a90016b0af0d" /* FindDocuments */, toAddr, true);
     }
 
     // model is [queryParamName: [values]]
-    public static AhqrSender run(Map<String, List<String>> theModel, String sqid, URI toAddr, boolean leafClass) {
+    private static AhqrSender run(Map<String, List<String>> theModel, String sqid, URI toAddr, boolean leafClass) {
         Map<String, List<String>> model = new HashMap<>();
         for (String key : theModel.keySet())
             if (!key.equals(queryType))
