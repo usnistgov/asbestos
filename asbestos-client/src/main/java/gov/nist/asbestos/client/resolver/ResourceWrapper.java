@@ -5,6 +5,8 @@ import gov.nist.asbestos.client.Base.ProxyBase;
 import gov.nist.asbestos.client.client.Format;
 import gov.nist.asbestos.http.headers.Header;
 import gov.nist.asbestos.http.operations.HttpBase;
+import gov.nist.asbestos.http.operations.HttpDelete;
+import gov.nist.asbestos.http.operations.HttpGet;
 import gov.nist.asbestos.http.operations.HttpPost;
 import gov.nist.asbestos.simapi.validation.Val;
 import gov.nist.asbestos.simapi.validation.ValE;
@@ -163,17 +165,28 @@ public class ResourceWrapper {
     }
 
     public boolean isOk() {
-        if (ref != null && httpBase != null && httpBase.getResponse() != null) {
-            String resourceType = ref.getResourceType();
-            if (!resourceType.equals("")) {
+        if (httpBase != null) {
+            if ((httpBase instanceof HttpGet) || (httpBase instanceof HttpDelete)) {
+                if (ref != null && httpBase != null && httpBase.getResponse() != null) {
+                    String resourceType = ref.getResourceType();
+                    if (!resourceType.equals("")) {
+                        BaseResource resource = getResponseResource();
+                        if (resource == null)
+                            return false;
+                        if (ref.isQuery()) {
+                            if (!resource.getClass().getSimpleName().equals("Bundle"))
+                                return false;
+                        } else if (!resource.getClass().getSimpleName().equals(resourceType))
+                            return false;
+                    }
+                }
+            } else if (httpBase instanceof HttpPost) {
                 BaseResource resource = getResponseResource();
-                if (resource == null)
-                    return false;
-                if (ref.isQuery()) {
-                    if (!resource.getClass().getSimpleName().equals("Bundle"))
+                if (resource instanceof OperationOutcome) {
+                    List<String> errors =  errorsFromOperationOutcome();
+                    if (!errors.isEmpty())
                         return false;
-                } else if (!resource.getClass().getSimpleName().equals(resourceType))
-                    return false;
+                }
             }
         }
         int status = getStatus();

@@ -72,7 +72,7 @@ public class VariableMgr {
             Reporter.reportError(val, opReport, asReport, "variable", variableName, "Variable " + variableName + " does not have a sourceId and does not define a defaultValue");
             return null;
         }
-        if (var.hasSourceId() && !fixtureMgr.containsKey(sourceId)) {
+        if (!fixtureMgr.containsKey(sourceId)) {
             Reporter.reportError(val, opReport, asReport, "variable", variableName, "Variable " + variableName + " references sourceId " + sourceId + " which does  not exist");
             return null;
         }

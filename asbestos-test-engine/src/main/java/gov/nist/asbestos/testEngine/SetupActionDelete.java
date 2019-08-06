@@ -39,7 +39,7 @@ class SetupActionDelete extends GenericSetupAction {
         }
         Map<String, String> requestHeader = new HashMap<>();
         Ref createUrl = sourceFixture.getResourceWrapper().getRef();  // contains version (_history/1) at end
-        if (createUrl == null)
+        if (createUrl == null || createUrl.toString().equals(""))
             return;
         Ref targetUrl = new Ref(createUrl.getBase(), createUrl.getResourceType(), createUrl.getId(), null);
         ResourceWrapper wrapper = getFhirClient().deleteResource(targetUrl, requestHeader);

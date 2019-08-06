@@ -43,7 +43,7 @@ public class PassthroughChannel extends BaseChannel /*implements IBaseChannel*/ 
 
     }
 
-    private void passHeaders(HttpBase requestIn, HttpBase requestOut) {
+    public static void passHeaders(HttpBase requestIn, HttpBase requestOut) {
         Headers inHeaders = requestIn.getRequestHeaders();
         Headers thruHeaders = inHeaders.select(Arrays.asList("content", "accept"));
 

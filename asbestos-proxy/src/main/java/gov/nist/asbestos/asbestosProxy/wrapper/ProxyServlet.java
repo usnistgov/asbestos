@@ -21,6 +21,7 @@ import gov.nist.asbestos.simapi.tk.installation.Installation;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.log4j.Logger;
+import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.OperationOutcome;
 
 import javax.servlet.ServletConfig;
@@ -158,7 +159,7 @@ public class ProxyServlet extends HttpServlet {
             channel.setup(simStore.getChannelConfig());
 
             Headers inHeaders = getRequestHeaders(req, Verb.POST);
-            channel.setReturnFormatType(getReturnContentType(inHeaders));
+            channel.setReturnFormatType(Format.resultContentType(inHeaders));
             hostport = inHeaders.getValue("host");
             if (hostport == null || !hostport.contains(":"))
                 throw new ServletException("host header missing or not formatted as host:port");
@@ -196,8 +197,7 @@ public class ProxyServlet extends HttpServlet {
                 addEventHeader(resp, hostport, clientTask);
                 return;
             }
-            URI outUri = transformRequestUri(backSideTask, requestIn, channel);
-            requestOut.setUri(outUri);
+            requestOut.setUri(outURI);
 //            requestOut.getRequestHeaders().setPathInfo(outUri);
 //            requestOut.setRequest(requestIn.getRequest());
 
@@ -325,21 +325,22 @@ public class ProxyServlet extends HttpServlet {
 
         } catch (Throwable t) {
             log.error(ExceptionUtils.getStackTrace(t));
-            returnOperationOutcome(req, resp, event.getClientTask(), t);
-        }
-    }
+            if (new Ref(buildURI(req)).isQuery()) {
+                OperationOutcome oo = outcomeFromException(t);
+                Bundle bundle = new Bundle();
+                Bundle.BundleEntryComponent bundleEntryComponent = bundle.addEntry();
+                Bundle.BundleEntrySearchComponent search = bundleEntryComponent.getSearch();
+                search.setMode(Bundle.SearchEntryMode.OUTCOME);
+                Bundle.BundleEntryResponseComponent resp1 = bundleEntryComponent.getResponse();
+                resp1.setOutcome(oo);
 
-    private Format getReturnContentType(Headers inHeaders) {
-        Header acceptHeader = inHeaders.getAccept();
-        String acceptHeaderValue = acceptHeader == null ? "" : acceptHeader.getValue();
-        Header contentType = inHeaders.getContentType();
-        String contentTypeString = contentType == null ? "" : contentType.getValue();
-        if (Format.isFormat(acceptHeaderValue)) {
-            return Format.fromContentType(acceptHeaderValue);
-        } else if (Format.isFormat(contentTypeString)) {
-            return Format.fromContentType(contentTypeString);
+                Headers inHeaders = getRequestHeaders(req, Verb.GET);
+                String content = ProxyBase.encode(bundle, Format.resultContentType(inHeaders));
+                sendResponse(resp, content.getBytes(), Format.resultContentType(inHeaders), getHostPort(inHeaders), event.getClientTask());
+            } else {
+                returnOperationOutcome(req, resp, event.getClientTask(), t);
+            }
         }
-        return Format.XML;
     }
 
     private void doGetDelete(HttpServletRequest req, HttpServletResponse resp, URI uri, SimStore simStore, Event event, Verb verb) throws Exception {
@@ -352,7 +353,7 @@ public class ProxyServlet extends HttpServlet {
 
         channel.setup(simStore.getChannelConfig());
         Headers inHeaders = getRequestHeaders(req, verb);
-        channel.setReturnFormatType(getReturnContentType(inHeaders));
+        channel.setReturnFormatType(Format.resultContentType(inHeaders));
         channel.setHostport(getHostPort(inHeaders));
         channel.setTask(clientTask);
 
@@ -405,6 +406,16 @@ public class ProxyServlet extends HttpServlet {
             }
             log.info("OK");
 
+        } finally {
+            addEventHeader(resp, hostport, clientTask);
+        }
+    }
+
+    private static void sendResponse(HttpServletResponse resp, byte[] content, Format format, String hostport, Task clientTask) {
+        try {
+            resp.getOutputStream().write(content);
+            resp.addHeader("Content-Type", format.getContentType());
+        } catch (Exception e) {
         } finally {
             addEventHeader(resp, hostport, clientTask);
         }

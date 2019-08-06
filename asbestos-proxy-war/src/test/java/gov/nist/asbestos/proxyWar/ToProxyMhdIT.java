@@ -34,10 +34,10 @@ class ToProxyMhdIT {
         run("/toProxyMhd/simpleSubmission/TestScript.xml");
     }
 
-//    @Test
-//    void drSearchByPatient() throws URISyntaxException {
-//        run("/toProxyMhd/queryByPatient/TestScript.xml");
-//    }
+    @Test
+    void drSearchByPatient() throws URISyntaxException {
+        run("/toProxyMhd/queryByPatient/TestScript.xml");
+    }
 
     TestEngine run(String testScriptLocation) throws URISyntaxException {
         Val val = new Val();

@@ -49,7 +49,7 @@ class SetupActionCreate extends GenericSetupAction {
         if (wrapper.isOk())
             reporter.report(wrapper.getRef() + " created", wrapper.logLink());
         else
-            reporter.report(wrapper.getRef() + " not created", wrapper.logLink());
+            reporter.reportError(wrapper.getRef() + " not created - " + wrapper.logLink());
         fixtureComponent = new FixtureComponent(fixtureId)
                 .setResource(wrapper)
                 .setHttpBase(wrapper.getHttpBase());

@@ -51,6 +51,7 @@
                 <type>
                     <code value="search"/>
                 </type>
+                <resource value="DocumentReference"/>
                 <params value="?${patientLocation}"/>
             </operation>
         </action>

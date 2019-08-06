@@ -1,6 +1,7 @@
 package gov.nist.asbestos.asbestosProxy.channels.mhd;
 
 import gov.nist.asbestos.asbestosProxy.channel.BaseChannel;
+import gov.nist.asbestos.asbestosProxy.channels.passthrough.PassthroughChannel;
 import gov.nist.asbestos.asbestosProxy.util.XdsActorMapper;
 import gov.nist.asbestos.asbestosProxy.wrapper.TransformException;
 import gov.nist.asbestos.client.Base.ProxyBase;
@@ -156,12 +157,18 @@ public class MhdChannel extends BaseChannel /*implements IBaseChannel*/ {
             resource = ProxyBase.getFhirContext().newXmlParser().parseResource(new String(request));
         } else
             throw new RuntimeException("Do not understand Content-Type " + contentType);
-        if (!(resource instanceof Bundle) )
-            throw new RuntimeException("Expecting Bundle - got " + resource.getClass().getSimpleName());
+
+        URI toAddr = transformRequestUrl(null, requestIn);
+
+        if (!(resource instanceof Bundle) ) {
+            // forward to fhir server
+            PassthroughChannel.passHeaders(requestIn, requestOut);
+            requestOut.setRequest(requestIn.getRequest());
+            return;
+        }
         Bundle bundle = (Bundle) resource;
         requestBundle = bundle;
 
-        URI toAddr = transformRequestUrl(null, requestIn);
 
         String soapString = transformPDBToPNR(bundle, toAddr);
         if (soapString == null) {
@@ -198,8 +205,11 @@ public class MhdChannel extends BaseChannel /*implements IBaseChannel*/ {
         String uid = ref.getId();
         if (uid.equals("")) {
             // SEARCH
+            String params = ref.getParameters();
+            if (params == null || params.equals(""))
+                throw new RuntimeException("No search parameters - " + ref);
             if (resourceType.equals("DocumentReference")) {
-                sender = FhirSq.docRefQuery(ref.getParameters(), toAddr);
+                sender = FhirSq.docRefQuery(params, toAddr);
                 returnAhqrResults(requestOut);
             } else {
                 throw new RuntimeException("SEARCH " + resourceType + " not supported");
@@ -240,20 +250,26 @@ public class MhdChannel extends BaseChannel /*implements IBaseChannel*/ {
     @Override
     public URI transformRequestUrl(String endpoint, HttpBase requestIn) {
         Objects.requireNonNull(channelConfig);
+        Ref ref = new Ref(requestIn.getRequestHeaders().getPathInfo());
+        String resourceType = ref.getResourceType();
         if (channelConfig.getXdsSiteName() == null || channelConfig.getXdsSiteName().equals(""))
             throw new RuntimeException("ChannelConfig does not have XdsSiteName");
         if (requestIn instanceof HttpPost) {
-            String actorType;
-            String transType;
-            actorType = "rep";
-            transType = "prb";
-
-            return new XdsActorMapper().getEndpoint(channelConfig.getXdsSiteName(), actorType, transType, false);
+            if (resourceType.equals("")) {
+                // transaction - send to mhd back end
+                String actorType = "rep";
+                String transType = "prb";
+                return new XdsActorMapper().getEndpoint(channelConfig.getXdsSiteName(), actorType, transType, false);
+            } else {
+                // posting of resource - send to FHIR server
+                Ref fhir = new Ref(channelConfig.getFhirBase());
+                fhir = fhir.withResource(resourceType);
+                return fhir.getUri();
+            }
         } else if (requestIn instanceof  HttpGet) {
-            Ref ref = new Ref(requestIn.getRequestHeaders().getPathInfo());
             String actorType;
             String transType;
-            String resourceType = ref.getResourceType();
+
             if (resourceType == null)
                 throw new Error("Cannot retrieve XDS contents for resource type " + resourceType);
 
@@ -264,7 +280,7 @@ public class MhdChannel extends BaseChannel /*implements IBaseChannel*/ {
                 actorType = "rep";
                 transType = "ret";
             } else {
-                throw new Error("Cannot retrieve XDS contents for resource type " + resourceType);
+                return new Ref(channelConfig.getFhirBase()).withResource(resourceType).getUri();
             }
 
             return  new XdsActorMapper().getEndpoint(channelConfig.getXdsSiteName(), actorType, transType, false);
@@ -328,65 +344,70 @@ public class MhdChannel extends BaseChannel /*implements IBaseChannel*/ {
             // there is a query response to transform
             transformQueryResponse(responseOut);
         } else {
-            Objects.requireNonNull(requestBundle);
-            OperationOutcome oo = new OperationOutcome();
-            String responsePart = responseIn.getResponseText();
-            String registryResponse = "";
-            try {
-                if (responsePart == null || responsePart.equals("")) {
-                    transformError("Empty response from XDS.ProvideAndRegister", responseOut);
+            if (requestBundle == null) {
+                String resourceText = responseIn.getResponseText();
+                responseOut.setResponseText(resourceText);
+                responseOut.setResponseContentType(responseIn.getResponseContentType());
+            } else {
+                OperationOutcome oo = new OperationOutcome();
+                String responsePart = responseIn.getResponseText();
+                String registryResponse = "";
+                try {
+                    if (responsePart == null || responsePart.equals("")) {
+                        transformError("Empty response from XDS.ProvideAndRegister", responseOut);
+                        return;
+                    }
+                    String envelope = FaultParser.unwrapPart(responsePart);
+                    if (envelope == null || envelope.equals("")) {
+                        transformError("Empty SOAP Envelope from XDS.ProvideAndRegister", responseOut);
+                        return;
+                    }
+                    String faultMsg = FaultParser.parse(envelope);
+                    if (faultMsg != null && !faultMsg.equals("")) {
+                        transformError(faultMsg, responseOut);
+                        return;
+                    }
+                    registryResponse = FaultParser.extractRegistryResponse(envelope);
+                    if (registryResponse == null || registryResponse.equals("")) {
+                        transformError("No RegistryResponse returned from XDS.ProvideAndRegister", responseOut);
+                        return;
+                    }
+                } catch (Throwable e) {
+                    transformError("Error processing RegistryResponse:\n" + responsePart + "\n", e, responseOut);
                     return;
                 }
-                String envelope = FaultParser.unwrapPart(responsePart);
-                if (envelope == null || envelope.equals("")) {
-                    transformError("Empty SOAP Envelope from XDS.ProvideAndRegister", responseOut);
-                    return;
-                }
-                String faultMsg = FaultParser.parse(envelope);
-                if (faultMsg != null && !faultMsg.equals("")) {
-                    transformError(faultMsg, responseOut);
-                    return;
-                }
-                registryResponse = FaultParser.extractRegistryResponse(envelope);
-                if (registryResponse == null || registryResponse.equals("")) {
-                    transformError("No RegistryResponse returned from XDS.ProvideAndRegister", responseOut);
-                    return;
-                }
-            } catch (Throwable e) {
-                transformError("Error processing RegistryResponse:\n" + responsePart + "\n", e, responseOut);
-                return;
-            }
 
-            RegistryResponseType rrt;
-            try {
-                rrt = new RegistryResponseBuilder().fromInputStream(new ByteArrayInputStream(registryResponse.getBytes()));
-            } catch (Exception e) {
-                transformError(ExceptionUtils.getStackTrace(e), responseOut);
-                return;
-            }
-            RegErrorList regErrorList = RegistryResponseBuilder.asErrorList(rrt);
+                RegistryResponseType rrt;
+                try {
+                    rrt = new RegistryResponseBuilder().fromInputStream(new ByteArrayInputStream(registryResponse.getBytes()));
+                } catch (Exception e) {
+                    transformError(ExceptionUtils.getStackTrace(e), responseOut);
+                    return;
+                }
+                RegErrorList regErrorList = RegistryResponseBuilder.asErrorList(rrt);
 
-            for (RegError re : regErrorList.getList()) {
-                System.out.println(re.getSeverity() + " - " + re.getMsg());
-            }
-            List<RegError> lst = regErrorList.getList();
-            List<String> raw = new ArrayList<>();
+                for (RegError re : regErrorList.getList()) {
+                    System.out.println(re.getSeverity() + " - " + re.getMsg());
+                }
+                List<RegError> lst = regErrorList.getList();
+                List<String> raw = new ArrayList<>();
 
-            for (RegError re : lst) {
-                ErrorType errorType = re.getSeverity();
-                String msg = trim(re.getMsg());
-                if (raw.contains(msg))
-                    continue;
-                raw.add(msg);
-                OperationOutcome.OperationOutcomeIssueComponent issue = oo.addIssue();
-                issue.setCode(OperationOutcome.IssueType.UNKNOWN);
-                issue.setDiagnostics(msg);
-                issue.setSeverity(errorType == ErrorType.Error ? OperationOutcome.IssueSeverity.ERROR : OperationOutcome.IssueSeverity.WARNING);
+                for (RegError re : lst) {
+                    ErrorType errorType = re.getSeverity();
+                    String msg = trim(re.getMsg());
+                    if (raw.contains(msg))
+                        continue;
+                    raw.add(msg);
+                    OperationOutcome.OperationOutcomeIssueComponent issue = oo.addIssue();
+                    issue.setCode(OperationOutcome.IssueType.UNKNOWN);
+                    issue.setDiagnostics(msg);
+                    issue.setSeverity(errorType == ErrorType.Error ? OperationOutcome.IssueSeverity.ERROR : OperationOutcome.IssueSeverity.WARNING);
+                }
+                packageResponse(
+                        responseOut,
+                        lst.isEmpty() ? null : oo
+                );
             }
-            packageResponse(
-                    responseOut,
-                    lst.isEmpty() ? null : oo
-            );
         }
     }
 
