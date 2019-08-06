@@ -26,9 +26,19 @@ public class ChannelConfig {
         int channelI = path.indexOf("/Channel");
         if (channelI != -1) {
             int beyondChannelI = channelI + "/Channel".length();
-            path = fhirBase + path.substring(beyondChannelI);
+            String pathPart = path.substring(beyondChannelI);
+            path =  pathPart;
         }
-        URI uri = new URI(req.getScheme(), req.getUserInfo(), req.getHost(), req.getPort(), path, req.getQuery(), req.getFragment());
+        String scheme = req.getScheme();
+        String userInfo = req.getUserInfo();
+        String host = req.getHost();
+        int port = req.getPort();
+        String query = req.getQuery();
+        String frag = req.getFragment();
+
+        String uriString = fhirBase + path + (query.equals("") ? "" : "?" + query);
+        URI uri = new URI(uriString);
+//        URI uri = new URI(scheme, userInfo, host, port, path, query, frag);
         return uri;
     }
 

@@ -3,6 +3,8 @@ package gov.nist.asbestos.mhd.translation.attribute;
 import gov.nist.asbestos.mhd.exceptions.MetadataAttributeTranslationException;
 
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
 public class DateTransform {
@@ -21,6 +23,12 @@ public class DateTransform {
 
     public static String fhirToDtm(Date date) {
         return dtmFormat.format(date);
+    }
+
+    public static String fhirToDtm(String date) {
+        LocalDateTime dateTime = LocalDateTime.parse(date);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
+        return dateTime.format(formatter);
     }
 
     static public Date xdsPrecision(Date date) throws MetadataAttributeTranslationException {

@@ -29,8 +29,12 @@ public class FhirSq {
         return run(docRefQueryToSQModel(httpQueryString), "urn:uuid:14d4debf-8f97-4251-9a74-a90016b0af0d" /* FindDocuments */, toAddr, true);
     }
 
+    public static AhqrSender docRefQuery(List<String> queryParams, URI toAddr) {
+        return run(new DocRefSQParamTranslator().run(queryParams), "urn:uuid:14d4debf-8f97-4251-9a74-a90016b0af0d" /* FindDocuments */, toAddr, true);
+    }
+
     // model is [queryParamName: [values]]
-    private static AhqrSender run(Map<String, List<String>> theModel, String sqid, URI toAddr, boolean leafClass) {
+    public static AhqrSender run(Map<String, List<String>> theModel, String sqid, URI toAddr, boolean leafClass) {
         Map<String, List<String>> model = new HashMap<>();
         for (String key : theModel.keySet())
             if (!key.equals(queryType))

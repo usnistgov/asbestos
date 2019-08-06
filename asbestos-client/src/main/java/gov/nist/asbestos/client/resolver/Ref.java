@@ -19,19 +19,28 @@ public class Ref {
         uri = build(ref);
     }
 
-    public Map<String, String> getProperties() {
+    public String getParameters() {
+        if (uri == null)
+            return null;
+        return uri.getQuery();
+//        String[] parts = uri.toString().split("\\?");
+//        if (parts.length == 0 || parts.length == 1)
+//            return null;
+//        return parts[1];
+    }
+
+    public Map<String, String> getParametersAsMap() {
         Map<String, String> map = new HashMap<>();
 
-        if (uri == null)
+        String parms = getParameters();
+        if (parms == null)
             return map;
-        String[] parts = uri.toString().split("\\?");
-        if (parts.length == 0 || parts.length == 1)
-            return map;
-        String parms = parts[1];
-        parts = parms.split(";");
+        String[] parts = parms.split(";");
         for (int i=0; i<parts.length; i++) {
             String parm = parts[i];
-
+            List<String> namevalue = Arrays.asList(parm.split("=", 2));
+            if (!namevalue.get(0).equals(""))
+                map.put(namevalue.get(0), namevalue.get(1));
         }
         return map;
     }

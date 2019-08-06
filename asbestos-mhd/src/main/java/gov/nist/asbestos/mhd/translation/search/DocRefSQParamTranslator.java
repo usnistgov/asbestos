@@ -1,4 +1,4 @@
-package gov.nist.asbestos.mhd.translation.search
+package gov.nist.asbestos.mhd.translation.search;
 
 import gov.nist.asbestos.mhd.translation.attribute.DateTransform;
 
@@ -127,7 +127,7 @@ class DocRefSQParamTranslator {
 
         String asCode() { return type + "=" + system + "|" + code; }
 
-        public String toString() { asCode(); }
+        public String toString() { return asCode(); }
     }
 
     private class XdsCode extends Code {
@@ -156,7 +156,7 @@ class DocRefSQParamTranslator {
 
         String asCode() { return type + ":" + code + "^^" + system; }
 
-        public String toString() { asCode(); }
+        public String toString() { return asCode(); }
     }
 
     static String cannotTranslateFhir(String param) {
@@ -175,7 +175,7 @@ class DocRefSQParamTranslator {
     }
 
     Map<String, List<String>> run(List<String> params) {
-        params = addDEStatusIfNotPresent(params)
+        params = addDEStatusIfNotPresent(params);
         Map<String, List<String>> result = new HashMap<>();
         for (String param : params) {
             Map<String, List<String>> r = run(param);
@@ -228,8 +228,8 @@ class DocRefSQParamTranslator {
                 break;
 
             case "class":
-                FhirCode fcode = new FhirCode(param)
-                XdsCode xcode = fcode.findXds()
+                FhirCode fcode = new FhirCode(param);
+                XdsCode xcode = fcode.findXds();
                 if (xcode != null)
                     addResult(classKey, xcode.code + "^^" + xcode.system);
                 else

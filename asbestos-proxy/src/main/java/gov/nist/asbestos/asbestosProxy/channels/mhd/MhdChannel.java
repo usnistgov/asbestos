@@ -122,41 +122,7 @@ public class MhdChannel extends BaseChannel /*implements IBaseChannel*/ {
     private AhqrSender documentEntryByUidQuery(String uid, URI toAddr)  {
         Map<String, List<String>> model = new HashMap<>();
         model.put("$XDSDocumentEntryUniqueId", Collections.singletonList(uid));
-
         return FhirSq.run(model, "urn:uuid:5c4f972b-d56b-40ac-a5fc-c8ca9b40b9d4", toAddr, true);
-
-
-//        AdhocQueryRequest adhocQueryRequest = new AdhocQueryRequest();
-//        ResponseOptionType responseOptionType = new ResponseOptionType();
-//        responseOptionType.setReturnType("LeafClass");
-//        responseOptionType.setReturnComposedObjects(true);
-//        adhocQueryRequest.setResponseOption(responseOptionType);
-//        AdhocQueryType adhocQueryType = new AdhocQueryType();
-//        adhocQueryType.setId("urn:uuid:5c4f972b-d56b-40ac-a5fc-c8ca9b40b9d4");
-//        QueryExpressionType queryExpressionType = new QueryExpressionType();
-//        adhocQueryType.setQueryExpression(queryExpressionType);
-//
-//        SlotType1 slot = new SlotType1();
-//        slot.setName("$XDSDocumentEntryUniqueId");
-//        ValueListType valueList = new ValueListType();
-//        valueList.getValue().add("('" + uid + "')");
-//        slot.setValueList(valueList);
-//        adhocQueryType.getSlot().add(slot);
-//        adhocQueryRequest.setAdhocQuery(adhocQueryType);
-//
-////        ByteArrayOutputStream queryStream = new ByteArrayOutputStream();
-////        new AdhocQueryBuilder().toOutputStream(adhocQueryRequest, queryStream);
-////
-////        String queryString1 = XmlTools.deleteXMLInstruction(new String(queryStream.toByteArray()));
-////        String queryString = XmlTools.deleteQueryExpression(queryString1);
-////        String soapString = AdhocQueryWrapper.wrap(toAddr.toString(), queryString);
-////        ByteArrayOutputStream os = new ByteArrayOutputStream();
-//        AhqrSender sender = new AhqrSender();
-//        sender.send(adhocQueryRequest, toAddr);
-
-
-
-//        return sender;
     }
 
     private OperationOutcome regErrorListAsOperationOutcome(RegErrorList regErrorList) {
@@ -230,17 +196,30 @@ public class MhdChannel extends BaseChannel /*implements IBaseChannel*/ {
         URI toAddr = transformRequestUrl(null, requestIn);
 
         String uid = ref.getId();
-        if (resourceType.equals("DocumentReference")) {
-            sender = documentEntryByUidQuery(uid, toAddr);
-            requestOut.setRequestHeaders(sender.getRequestHeaders());
-            requestOut.setRequestText(sender.getRequestBody());
-            getTask().putRequestHeader(sender.getRequestHeaders());
-            getTask().putRequestBodyText(sender.getRequestBody());
-//        } else if (resourceType.equals("DocumentManifest")) {
-
+        if (uid.equals("")) {
+            // SEARCH
+            if (resourceType.equals("DocumentReference")) {
+                sender = FhirSq.docRefQuery(ref.getParameters(), toAddr);
+                returnAhqrResults(requestOut);
+            } else {
+                throw new RuntimeException("SEARCH " + resourceType + " not supported");
+            }
         } else {
-            throw new RuntimeException("GET " + resourceType + " not supported");
+            // GET
+            if (resourceType.equals("DocumentReference")) {
+                sender = documentEntryByUidQuery(uid, toAddr);
+                returnAhqrResults(requestOut);
+            } else {
+                throw new RuntimeException("GET " + resourceType + " not supported");
+            }
         }
+    }
+
+    private void returnAhqrResults(HttpGet requestOut) {
+        requestOut.setRequestHeaders(sender.getRequestHeaders());
+        requestOut.setRequestText(sender.getRequestBody());
+        getTask().putRequestHeader(sender.getRequestHeaders());
+        getTask().putRequestBodyText(sender.getRequestBody());
     }
 
     private void returnOperationOutcome(HttpBase resp, Task task, OperationOutcome oo) {
@@ -347,61 +326,7 @@ public class MhdChannel extends BaseChannel /*implements IBaseChannel*/ {
     public void transformResponse(HttpBase responseIn, HttpBase responseOut, String proxyHostPort) {
         if (sender != null) {
             // there is a query response to transform
-            getTask().putResponseBodyText(sender.getResponseText());
-            if (responseOut.getVerb().equals(Verb.GET.toString())) {  // FHIR READ
-                if (sender.hasErrors()) {
-                    logResponse(sender.getResponseText());
-                    OperationOutcome oo = regErrorListAsOperationOutcome(sender.getErrorList());
-                    returnOperationOutcome(responseOut, getTask(), oo);
-                } else if (sender.getContents().size() == 1) {
-                    Val val = new Val();
-                    CodeTranslator codeTranslator;
-                    try {
-                        codeTranslator = new CodeTranslator(Installation.instance().getCodesFile(channelConfig.getEnvironment()));
-                    } catch (Exception e) {
-                        throw new RuntimeException("Cannot load codes file for environment " + channelConfig.getEnvironment(), e);
-                    }
-                    DocumentEntryToDocumentReference trans = new DocumentEntryToDocumentReference();
-                    trans
-                            .setContainedIdAllocator(new ContainedIdAllocator())
-                            .setResourceMgr(new ResourceMgr().setFhirClient(new FhirClient()))
-                            .setCodeTranslator(codeTranslator)
-                            .setVal(val);
-                    DocumentReference dr = trans.getDocumentReference((ExtrinsicObjectType) sender.getContents().get(0));
-                    responseOut.setResponseText(logResponse(ProxyBase.encode(dr, returnFormatType)));
-                    responseOut.setResponseContentType(returnFormatType.getContentType());
-                } else if (sender.getContents().size() > 1){
-                    OperationOutcome oo = wrapErrorInOperationOutcome("XDS Query returned " + sender.getContents().size() + " objects");
-                    responseOut.setResponseText(logResponse(ProxyBase.encode(oo, returnFormatType)));
-                    responseOut.setResponseContentType(returnFormatType.getContentType());
-                } else { // no contents
-                    responseOut.setResponseContentType(returnFormatType.getContentType());
-                    responseOut.setStatus(404);
-                }
-            } else {
-                if (sender.hasErrors()) {
-                    OperationOutcome oo = regErrorListAsOperationOutcome(sender.getErrorList());
-                    returnOperationOutcome(responseOut, getTask(), oo);
-                } else {
-                    List<IdentifiableType> inContents = sender.getContents();
-                    List<Resource> outContents = new ArrayList<>();
-                    for (IdentifiableType it : inContents) {
-                        if (it instanceof ExtrinsicObjectType) {
-                            Val val = new Val();
-                            DocumentEntryToDocumentReference trans = new DocumentEntryToDocumentReference();
-                            trans
-                                    .setContainedIdAllocator(new ContainedIdAllocator())
-                                    .setVal(val);
-                            DocumentReference dr = trans.getDocumentReference((ExtrinsicObjectType) it);
-                            outContents.add(dr);
-                        } else {
-                            OperationOutcome oo = wrapErrorInOperationOutcome("Cannot transform " + it.getClass().getSimpleName() + " to FHIR");
-                            outContents.add(oo);
-                        }
-                    }
-                    Bundle bundle = bundleWith(outContents);
-                }
-            }
+            transformQueryResponse(responseOut);
         } else {
             Objects.requireNonNull(requestBundle);
             OperationOutcome oo = new OperationOutcome();
@@ -462,6 +387,66 @@ public class MhdChannel extends BaseChannel /*implements IBaseChannel*/ {
                     responseOut,
                     lst.isEmpty() ? null : oo
             );
+        }
+    }
+
+    private void transformQueryResponse(HttpBase responseOut) {
+        getTask().putResponseBodyText(sender.getResponseText());
+        if (responseOut.getVerb().equals(Verb.GET.toString())) {  // FHIR READ
+            if (sender.hasErrors()) {
+                logResponse(sender.getResponseText());
+                OperationOutcome oo = regErrorListAsOperationOutcome(sender.getErrorList());
+                returnOperationOutcome(responseOut, getTask(), oo);
+            } else if (sender.getContents().size() == 1) {
+                Val val = new Val();
+                CodeTranslator codeTranslator;
+                try {
+                    codeTranslator = new CodeTranslator(Installation.instance().getCodesFile(channelConfig.getEnvironment()));
+                } catch (Exception e) {
+                    throw new RuntimeException("Cannot load codes file for environment " + channelConfig.getEnvironment(), e);
+                }
+                DocumentEntryToDocumentReference trans = new DocumentEntryToDocumentReference();
+                trans
+                        .setContainedIdAllocator(new ContainedIdAllocator())
+                        .setResourceMgr(new ResourceMgr().setFhirClient(new FhirClient()))
+                        .setCodeTranslator(codeTranslator)
+                        .setVal(val);
+                DocumentReference dr = trans.getDocumentReference((ExtrinsicObjectType) sender.getContents().get(0));
+                responseOut.setResponseText(logResponse(ProxyBase.encode(dr, returnFormatType)));
+                responseOut.setResponseContentType(returnFormatType.getContentType());
+            } else if (sender.getContents().size() > 1){
+                OperationOutcome oo = wrapErrorInOperationOutcome("XDS Query returned " + sender.getContents().size() + " objects");
+                responseOut.setResponseText(logResponse(ProxyBase.encode(oo, returnFormatType)));
+                responseOut.setResponseContentType(returnFormatType.getContentType());
+            } else { // no contents
+                responseOut.setResponseContentType(returnFormatType.getContentType());
+                responseOut.setStatus(404);
+            }
+        } else {
+        // TODO when is AhqrSender used and verb is not GET?
+            if (sender.hasErrors()) {
+                OperationOutcome oo = regErrorListAsOperationOutcome(sender.getErrorList());
+                returnOperationOutcome(responseOut, getTask(), oo);
+            } else {
+                List<IdentifiableType> inContents = sender.getContents();
+                List<Resource> outContents = new ArrayList<>();
+                for (IdentifiableType it : inContents) {
+                    if (it instanceof ExtrinsicObjectType) {
+                        Val val = new Val();
+                        DocumentEntryToDocumentReference trans = new DocumentEntryToDocumentReference();
+                        trans
+                                .setContainedIdAllocator(new ContainedIdAllocator())
+                                .setVal(val);
+                        DocumentReference dr = trans.getDocumentReference((ExtrinsicObjectType) it);
+                        outContents.add(dr);
+                    } else {
+                        OperationOutcome oo = wrapErrorInOperationOutcome("Cannot transform " + it.getClass().getSimpleName() + " to FHIR");
+                        outContents.add(oo);
+                    }
+                }
+                // TODO HUH?
+                Bundle bundle = bundleWith(outContents);
+            }
         }
     }
 
