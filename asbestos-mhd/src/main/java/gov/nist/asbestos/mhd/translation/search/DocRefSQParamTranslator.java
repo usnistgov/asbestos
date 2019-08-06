@@ -29,8 +29,10 @@ class DocRefSQParamTranslator {
     static String entryUUID = "$XDSDocumentEntryEntryUUID";
     static String queryType = "QueryType";
 
+    static String docEntryUniqueId = "$XDSDocumentEntryUniqueId";
+
     // coded types
-    static List<String> codedTypes = Arrays.asList(
+    public static List<String> codedTypes = Arrays.asList(
             classKey,
             typeKey,
             settingKey,
@@ -38,7 +40,8 @@ class DocRefSQParamTranslator {
             eventKey,
             confKey,
             formatKey,
-            relatedKey
+            relatedKey,
+            docEntryUniqueId
     );
 
     static List<String> acceptsMultiple = Arrays.asList(

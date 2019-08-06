@@ -65,8 +65,6 @@ public class ProxyLogServlet extends HttpServlet {
 
         b.append("<h1>" + event + "</h1>");
 
-        displayEvent(b, theEvent, "Request");
-
         for (int task=0; ; task++) {
             File taskDir = new File(theEvent, "task" + task);
             if (!taskDir.exists())

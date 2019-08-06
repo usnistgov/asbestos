@@ -36,7 +36,7 @@ public class ChannelConfig {
         String query = req.getQuery();
         String frag = req.getFragment();
 
-        String uriString = fhirBase + path + (query.equals("") ? "" : "?" + query);
+        String uriString = fhirBase + path + (query == null || query.equals("") ? "" : "?" + query);
         URI uri = new URI(uriString);
 //        URI uri = new URI(scheme, userInfo, host, port, path, query, frag);
         return uri;
