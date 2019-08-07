@@ -1,21 +1,16 @@
 package gov.nist.asbestos.asbestosProxy.wrapper;
 
 import gov.nist.asbestos.client.client.Format;
+import org.hl7.fhir.r4.model.BaseResource;
 
 public class TransformException extends RuntimeException {
-    private String response = null;
-    private Format format;
+    private BaseResource response;
 
-    public TransformException(String response, Format format) {
+    public TransformException(BaseResource response) {
         this.response = response;
-        this.format = format;
     }
 
-    public String getResponse() {
+    public BaseResource getResponse() {
         return response;
-    }
-
-    public Format getFormat() {
-        return format;
     }
 }

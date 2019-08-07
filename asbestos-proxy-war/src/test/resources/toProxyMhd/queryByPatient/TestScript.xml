@@ -52,7 +52,7 @@
                     <code value="search"/>
                 </type>
                 <resource value="DocumentReference"/>
-                <params value="?${patientLocation}"/>
+                <params value="?patient=${patientLocation}"/>
             </operation>
         </action>
         <action>

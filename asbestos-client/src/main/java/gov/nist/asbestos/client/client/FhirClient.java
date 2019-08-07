@@ -142,8 +142,11 @@ public class FhirClient {
            return wrapper;
         }
         String resourceText = getter.getResponseText();
-        if (resourceText == null || resourceText.equals(""))
+        if (resourceText == null || resourceText.equals("")) {
+            if (getter.isSearch())
+                throw new Error("Search must return Bundle - received nothing instead");
             return wrapper;
+        }
         BaseResource resource = null;
         IBaseResource iBaseResource;
         if (format == Format.JSON) {
@@ -154,6 +157,19 @@ public class FhirClient {
             iBaseResource = ProxyBase.getFhirContext().newXmlParser().parseResource(resourceText);
             if (iBaseResource instanceof BaseResource)
                 resource = (BaseResource) iBaseResource;
+        }
+        if (getter.isSearch()) {
+            if (!(resource instanceof Bundle)) {
+                throw new Error("Search must return Bundle - received " + resource.getClass().getSimpleName() + " instead");
+            }
+        } else {
+            Ref ref = new Ref(getter.getUri());
+            String resourceType = ref.getResourceType();
+            if (resourceType != null && !resourceType.equals("")) {
+                if (!resource.getClass().getSimpleName().equals(resourceType)) {
+                    throw new Error("Read must return " + resourceType + " - received " + resource.getClass().getSimpleName() + " instead");
+                }
+            }
         }
         wrapper.setResource(resource);
         this.httpBase = getter;

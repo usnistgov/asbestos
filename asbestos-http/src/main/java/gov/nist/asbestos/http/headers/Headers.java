@@ -34,12 +34,14 @@ public class Headers {
     }
 
     public Headers add(Header header) {
-        headers.add(header);
+        if (!hasHeader(header.getName()))
+            headers.add(header);
         return this;
     }
 
     public Headers addAll(Headers theHeaders) {
-        this.headers.addAll(theHeaders.headers);
+        for (Header header : theHeaders.getHeaders())
+            add(header);
         return this;
     }
 
@@ -114,6 +116,14 @@ public class Headers {
         return theHeader.isPresent();
     }
 
+    public boolean hasHeader(String name) {
+        for (Header header : headers) {
+            if (header.getName().equalsIgnoreCase(name))
+                return true;
+        }
+        return false;
+    }
+
     public void deleteContentType() {
         for (Header header : headers) {
             if (header.getName().equalsIgnoreCase("Content-Type")) {
@@ -141,7 +151,7 @@ public class Headers {
         if (theHeader.isPresent())
             return theHeader.get();
         else
-            return new Header("content-type", "");
+            return null;
     }
 
     public String getValue(String name) {

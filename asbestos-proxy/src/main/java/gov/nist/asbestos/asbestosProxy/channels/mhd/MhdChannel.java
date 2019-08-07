@@ -83,13 +83,7 @@ public class MhdChannel extends BaseChannel /*implements IBaseChannel*/ {
 
         RegistryObjectListType registryObjectListType = bundleToRegistryObjectList.build(bundle);
         if (bundleToRegistryObjectList.isResponseHasError()) {
-            throw new TransformException(ProxyBase
-                    .getFhirContext()
-                    .newXmlParser()
-                    .setPrettyPrint(true)
-                    .encodeResourceToString(
-                            bundleToRegistryObjectList.getResponseBundle())
-                    , Format.XML);
+            throw new TransformException(bundleToRegistryObjectList.getResponseBundle());
         }
 
         ProvideAndRegisterDocumentSetRequestType pnr = new ProvideAndRegisterDocumentSetRequestType();
@@ -173,12 +167,7 @@ public class MhdChannel extends BaseChannel /*implements IBaseChannel*/ {
         String soapString = transformPDBToPNR(bundle, toAddr);
         if (soapString == null) {
             // OperationOutcome is loaded with errors to return
-            String response;
-            if (isXml)
-                response = ProxyBase.getFhirContext().newXmlParser().setPrettyPrint(true).encodeResourceToString(oo);
-            else
-                response = ProxyBase.getFhirContext().newJsonParser().setPrettyPrint(true).encodeResourceToString(oo);
-            throw new TransformException(response, isXml ? Format.XML : Format.JSON);
+            throw new TransformException(oo);
         }
         requestOut.setRequestText(soapString);
         requestOut.setRequestHeaders(new Headers().withContentType(MultipartSender.getContentType()));
@@ -338,12 +327,26 @@ public class MhdChannel extends BaseChannel /*implements IBaseChannel*/ {
         return text;
     }
 
+    public static void transferHeadersFromResponse(HttpBase responseIn, HttpBase responseOut) {
+        List<String> exclude = Arrays.asList("transfer-encoding", "x-powered-by", "content-length");
+        Headers inHeaders = responseIn.getResponseHeaders();
+        Headers outHeaders = responseOut.getResponseHeaders();
+
+        for (Header header : inHeaders.getHeaders()) {
+            if (exclude.contains(header.getName().toLowerCase()))
+                continue;
+            if (!outHeaders.hasHeader(header.getName()))
+                outHeaders.add(new Header(header.getName(), header.getValue()));
+        }
+    }
+
     @Override
     public void transformResponse(HttpBase responseIn, HttpBase responseOut, String proxyHostPort) {
         if (sender != null) {
             // there is a query response to transform
-            transformQueryResponse(responseOut);
+            transformDSResponse(responseOut);
         } else {
+            transferHeadersFromResponse(responseIn, responseOut);
             if (requestBundle == null) {
                 String resourceText = responseIn.getResponseText();
                 responseOut.setResponseText(resourceText);
@@ -411,7 +414,7 @@ public class MhdChannel extends BaseChannel /*implements IBaseChannel*/ {
         }
     }
 
-    private void transformQueryResponse(HttpBase responseOut) {
+    private void transformDSResponse(HttpBase responseOut) {
         getTask().putResponseBodyText(sender.getResponseText());
         if (responseOut.getVerb().equals(Verb.GET.toString())) {  // FHIR READ
             if (sender.hasErrors()) {
@@ -465,10 +468,9 @@ public class MhdChannel extends BaseChannel /*implements IBaseChannel*/ {
                         outContents.add(oo);
                     }
                 }
-                // TODO HUH?
-                Bundle bundle = bundleWith(outContents);
             }
         }
+
     }
 
     private boolean isWhite(char c) {

@@ -42,6 +42,11 @@ public class HttpGet extends HttpBase {
         }
     }
 
+    public boolean isSearch() {
+        String query = uri.getQuery();
+        return query != null && !query.equals("");
+    }
+
     public void get(String url) throws URISyntaxException {
         get(new URI(url), (Map<String, String>) null);
     }
