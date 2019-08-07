@@ -2,11 +2,15 @@ package gov.nist.asbestos.client.resolver;
 
 
 import gov.nist.asbestos.client.Base.IVal;
+import gov.nist.asbestos.client.Base.ProxyBase;
 import gov.nist.asbestos.client.client.FhirClient;
+import gov.nist.asbestos.client.client.Format;
 import gov.nist.asbestos.client.events.Task;
+import gov.nist.asbestos.http.headers.Headers;
 import gov.nist.asbestos.http.operations.HttpBase;
 import gov.nist.asbestos.simapi.validation.Val;
 import gov.nist.asbestos.simapi.validation.ValE;
+import org.hl7.fhir.r4.model.BaseResource;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.Resource;
@@ -222,7 +226,8 @@ public class ResourceMgr implements IVal {
             return resource;
         }
         ResourceWrapper wrapper = fhirClient.readResource(resource.getRef());
-        logResourceWrapper(wrapper, "auto loaded");
+        String msg = wrapper.getRef().isRelative() ? "loaded from test definition" : "";
+        logResourceWrapper(wrapper, msg);
         resource.setResource(wrapper.getResource());
         return resource;
     }
@@ -237,7 +242,12 @@ public class ResourceMgr implements IVal {
 
     private void logResourceWrapper(ResourceWrapper wrapper, Task task) {
         HttpBase base = wrapper.getHttpBase();
-        if (base != null) {
+        if (base == null) {
+            task.putRequestHeader(new Headers().withVerb("GET").withPathInfo(wrapper.getRef().getUri()));
+            BaseResource resource = wrapper.getResource();
+            String txt = ProxyBase.encode(resource, Format.XML);
+            task.putRequestBodyText(txt);
+        } else {
             task.putRequestHeader(base.getRequestHeaders());
             task.putRequestBody(base.getRequest());
             task.putResponseHeader(base.getResponseHeaders());

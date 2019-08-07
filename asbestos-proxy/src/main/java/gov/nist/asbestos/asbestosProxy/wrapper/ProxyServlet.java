@@ -450,6 +450,16 @@ public class ProxyServlet extends HttpServlet {
             task.putRequestBodyText(new String(body));
             base.setRequestText(new String(body));
         }
+
+        try {
+            // try to get input formatted
+            Format format = Format.fromContentType(headers.getContentType().getValue());
+            BaseResource resource = ProxyBase.parse(body, format);
+            String text = ProxyBase.encode(resource, format);
+            task.putRequestBodyText(text);
+        } catch (Throwable t) {
+
+        }
         return base;
     }
 

@@ -96,6 +96,7 @@ abstract public class HttpBase {
 
     public Headers setRequestHeaders(Headers hdrs) {
         _requestHeaders = hdrs;
+        hdrs.setVerb(getVerb());
         return hdrs;
     }
 
@@ -133,7 +134,7 @@ abstract public class HttpBase {
     public void setResponseContentType(String contentType) {
         if (_responseHeaders == null)
             _responseHeaders = new Headers();
-        _responseHeaders.add(new Header("Content-Type", contentType));
+        _responseHeaders.set(new Header("Content-Type", contentType));
     }
 
     public void setRequestContentType(String contentType) {

@@ -327,7 +327,7 @@ public class BundleToRegistryObjectList implements IVal {
             val.add(new ValE("DocumentManifest.masterIdentifier not present - declared by IHE to be [1..1]").asError());
         else {
             addExternalIdentifier(ss, CodeTranslator.SS_UNIQUEID, unURN(dm.getMasterIdentifier().getValue()), rMgr.allocateSymbolicId(), resource.getAssignedId(), "XDSSubmissionSet.uniqueId", idBuilder);
-            resource.setAssignedUid(dm.getMasterIdentifier().getId());
+            resource.setAssignedUid(unURN(dm.getMasterIdentifier().getValue()));
         }
         if (dm.hasSource())
             addExternalIdentifier(ss, CodeTranslator.SS_SOURCEID, unURN(dm.getMasterIdentifier().getValue()), rMgr.allocateSymbolicId(), resource.getAssignedId(), "XDSSubmissionSet.sourceId", null);

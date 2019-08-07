@@ -24,6 +24,16 @@ public class Headers {
         return this;
     }
 
+    public Headers withVerb(String verb) {
+        this.verb = verb;
+        return this;
+    }
+
+    public Headers withPathInfo(URI pathInfo) {
+        this.pathInfo = pathInfo;
+        return this;
+    }
+
     public void removeHeader(String name) {
         for (Header header : headers) {
             if (header.getName().equalsIgnoreCase(name)) {
@@ -31,6 +41,12 @@ public class Headers {
                 return;
             }
         }
+    }
+
+    public Headers set(Header header) {
+        removeHeader(header.getName());
+        add(header);
+        return this;
     }
 
     public Headers add(Header header) {
@@ -228,7 +244,7 @@ public class Headers {
 
     public String toString() {
         return
-                verb + " " + status + " " + pathInfo + "\n" +
+                (verb == null ? "" : verb + " ")  + (status == 0 ? "" : status + " ") + (pathInfo == null ? "" : pathInfo) + "\n" +
                         headers.stream()
                                 .map(Header::toString)
                                 .collect(Collectors.joining("\r\n"));

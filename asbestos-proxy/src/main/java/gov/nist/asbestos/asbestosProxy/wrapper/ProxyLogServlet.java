@@ -84,14 +84,20 @@ public class ProxyLogServlet extends HttpServlet {
     private void displayEvent(StringBuilder b, File theEvent, String label) {
         String section = label.toLowerCase();
         b.append("<h2>").append(label).append("</h2>");
+        String description = read(theEvent, section, "description.txt");
+        if (!description.equals("")) {
+            b.append("<h4>Description</h4>");
+            b.append("<pre>").append(description).append("</pre>");
+//            b.append("<br />");
+        }
         b.append("<h3>Request</h3>");
         b.append("<pre>").append(read(theEvent, section, "request_header.txt")).append("</pre>");
-        b.append("<br />");
+//        b.append("<br />");
         b.append("<pre>").append(read(theEvent, section, "request_body.txt")).append("</pre>");
 
         b.append("<h3>Response</h3>");
         b.append("<pre>").append(read(theEvent, section, "response_header.txt")).append("</pre>");
-        b.append("<br />");
+//        b.append("<br />");
         b.append("<pre>").append(read(theEvent, section, "response_body.txt")).append("</pre>");
     }
 
