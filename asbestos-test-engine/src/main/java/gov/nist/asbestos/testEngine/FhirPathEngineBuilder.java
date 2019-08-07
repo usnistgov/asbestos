@@ -15,7 +15,12 @@ class FhirPathEngineBuilder {
     }
 
     static boolean evalForBoolean(BaseResource resource, String expression) {
-        List<Base> results = FhirPathEngineBuilder.build().evaluate(resource, expression);
+        List<Base> results;
+        try {
+            results = FhirPathEngineBuilder.build().evaluate(resource, expression);
+        } catch (Throwable t) {
+            throw t;
+        }
         if (results.isEmpty())
             return false;
         Base result = results.get(0);
