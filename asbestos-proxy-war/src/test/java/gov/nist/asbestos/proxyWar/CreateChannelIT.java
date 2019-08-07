@@ -67,7 +67,8 @@ class CreateChannelIT {
         String json = ChannelConfigFactory.convert(channelConfig);
         HttpDelete deleter = new HttpDelete();
         deleter.run(new URI("http://localhost:"+ proxyPort + "/proxy/prox/default__test"));
-        assertEquals(200, deleter.getStatus());
+        // could be 200 or 404
+        //assertEquals(200, deleter.getStatus(), deleter.getResponseHeaders().toString());
 
         // verify
         HttpGet getter = new HttpGet();
@@ -77,12 +78,12 @@ class CreateChannelIT {
         // create - must return 201 (didn't exist)
         HttpPost poster = new HttpPost();
         poster.postJson(new URI("http://localhost:"+ proxyPort + "/proxy/prox"), json);
-        assertEquals(201, poster.getStatus());
+        assertEquals(201, poster.getStatus(), poster.getResponseHeaders().toString());
 
         // create - must return 200 (did exist)
         poster = new HttpPost();
         poster.postJson(new URI("http://localhost:"+ proxyPort + "/proxy/prox"), json);
-        assertEquals(200, poster.getStatus());
+        assertEquals(200, poster.getStatus(), poster.getResponseHeaders().toString());
 
     }
 

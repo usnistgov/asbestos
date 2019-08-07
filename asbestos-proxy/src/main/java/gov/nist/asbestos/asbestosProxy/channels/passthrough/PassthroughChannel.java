@@ -90,17 +90,19 @@ public class PassthroughChannel extends BaseChannel /*implements IBaseChannel*/ 
         Header loc2 = headers.get("Location");
         if (proxyBase != null) {
             URI path = headers.getPathInfo();
-            Ref ref = new Ref(path);
-            ref = ref.rebase(proxyBase);
-            headers.setPathInfo(ref.getUri());
+            if (path != null) {
+                Ref ref = new Ref(path);
+                ref = ref.rebase(proxyBase);
+                headers.setPathInfo(ref.getUri());
+            }
 
             if (loc != null) {
                 Ref locRef = new Ref(loc.getValue());
-                ref = locRef.rebase(proxyBase).withHostPort(proxyHostPort);
+                Ref ref = locRef.rebase(proxyBase).withHostPort(proxyHostPort);
                 loc.setValue(ref.toString());
             }
             if (loc2 != null) {
-                ref = new Ref(loc2.getValue()).rebase(proxyBase).withHostPort(proxyHostPort);
+                Ref ref = new Ref(loc2.getValue()).rebase(proxyBase).withHostPort(proxyHostPort);
                 loc2.setValue(ref.toString());
             }
         }

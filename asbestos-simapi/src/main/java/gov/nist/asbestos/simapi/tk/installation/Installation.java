@@ -131,7 +131,6 @@ public class Installation {
             mili = "0" + mili;
         else if (mili.length() == 1)
             mili = "00" + mili;
-
         String dot = connector;
 
         String val =

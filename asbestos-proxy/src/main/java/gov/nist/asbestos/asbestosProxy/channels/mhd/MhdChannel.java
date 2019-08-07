@@ -53,8 +53,8 @@ public class MhdChannel extends BaseChannel /*implements IBaseChannel*/ {
 
     public MhdChannel() {}
 
-    private String transformPDBToPNR(Bundle bundle, URI toAddr) {
-        Objects.requireNonNull(getTask());
+    private String transformPDBToPNR(Bundle bundle, URI toAddr, Task task) {
+        Objects.requireNonNull(task);
         Val val = new Val();
         FhirClient fhirClient = new FhirClient();
         fhirClient.setResourceCacheMgr(new ResourceCacheMgr(getExternalCache()));
@@ -62,7 +62,7 @@ public class MhdChannel extends BaseChannel /*implements IBaseChannel*/ {
         ResourceMgr rMgr = new ResourceMgr();
         rMgr.setVal(val);
         rMgr.setFhirClient(fhirClient);
-        rMgr.setTask(getTask());
+        rMgr.setTask(task);
 
         CodeTranslator codeTranslator;
         try {
@@ -164,7 +164,7 @@ public class MhdChannel extends BaseChannel /*implements IBaseChannel*/ {
         requestBundle = bundle;
 
 
-        String soapString = transformPDBToPNR(bundle, toAddr);
+        String soapString = transformPDBToPNR(bundle, toAddr, getTask());
         if (soapString == null) {
             // OperationOutcome is loaded with errors to return
             throw new TransformException(oo);
@@ -217,13 +217,10 @@ public class MhdChannel extends BaseChannel /*implements IBaseChannel*/ {
     private void returnAhqrResults(HttpGet requestOut) {
         requestOut.setRequestHeaders(sender.getRequestHeaders());
         requestOut.setRequestText(sender.getRequestBody());
-        getTask().putRequestHeader(sender.getRequestHeaders());
-        getTask().putRequestBodyText(sender.getRequestBody());
     }
 
-    private void returnOperationOutcome(HttpBase resp, Task task, OperationOutcome oo) {
+    private void returnOperationOutcome(HttpBase resp, OperationOutcome oo) {
         Headers responseHeaders = new Headers();
-        task.putResponseHeader(responseHeaders);
         Format format = getReturnFormatType();
         String encoded = ProxyBase.encode(oo, format);
         resp.setResponseText(encoded);
@@ -321,12 +318,6 @@ public class MhdChannel extends BaseChannel /*implements IBaseChannel*/ {
         return bundle;
     }
 
-    private String logResponse(String text) {
-        getTask().putResponseBodyText(text);
-        getTask().putResponseHeader(new Headers().withContentType(this.getReturnFormatType().getContentType()));
-        return text;
-    }
-
     public static void transferHeadersFromResponse(HttpBase responseIn, HttpBase responseOut) {
         List<String> exclude = Arrays.asList("transfer-encoding", "x-powered-by", "content-length");
         Headers inHeaders = responseIn.getResponseHeaders();
@@ -344,83 +335,81 @@ public class MhdChannel extends BaseChannel /*implements IBaseChannel*/ {
     public void transformResponse(HttpBase responseIn, HttpBase responseOut, String proxyHostPort) {
         if (sender != null) {
             // there is a query response to transform
-            transformDSResponse(responseOut);
+            transformDSResponse(sender, responseOut);
+            return;
+        }
+        transferHeadersFromResponse(responseIn, responseOut);
+        if (requestBundle == null) {
+            String resourceText = responseIn.getResponseText();
+            responseOut.setResponseText(resourceText);
+            responseOut.setResponseContentType(responseIn.getResponseContentType());
         } else {
-            transferHeadersFromResponse(responseIn, responseOut);
-            if (requestBundle == null) {
-                String resourceText = responseIn.getResponseText();
-                responseOut.setResponseText(resourceText);
-                responseOut.setResponseContentType(responseIn.getResponseContentType());
-            } else {
-                OperationOutcome oo = new OperationOutcome();
-                String responsePart = responseIn.getResponseText();
-                String registryResponse = "";
-                try {
-                    if (responsePart == null || responsePart.equals("")) {
-                        transformError("Empty response from XDS.ProvideAndRegister", responseOut);
-                        return;
-                    }
-                    String envelope = FaultParser.unwrapPart(responsePart);
-                    if (envelope == null || envelope.equals("")) {
-                        transformError("Empty SOAP Envelope from XDS.ProvideAndRegister", responseOut);
-                        return;
-                    }
-                    String faultMsg = FaultParser.parse(envelope);
-                    if (faultMsg != null && !faultMsg.equals("")) {
-                        transformError(faultMsg, responseOut);
-                        return;
-                    }
-                    registryResponse = FaultParser.extractRegistryResponse(envelope);
-                    if (registryResponse == null || registryResponse.equals("")) {
-                        transformError("No RegistryResponse returned from XDS.ProvideAndRegister", responseOut);
-                        return;
-                    }
-                } catch (Throwable e) {
-                    transformError("Error processing RegistryResponse:\n" + responsePart + "\n", e, responseOut);
+            OperationOutcome oo = new OperationOutcome();
+            String responsePart = responseIn.getResponseText();
+            String registryResponse = "";
+            try {
+                if (responsePart == null || responsePart.equals("")) {
+                    transformError("Empty response from XDS.ProvideAndRegister", responseOut);
                     return;
                 }
-
-                RegistryResponseType rrt;
-                try {
-                    rrt = new RegistryResponseBuilder().fromInputStream(new ByteArrayInputStream(registryResponse.getBytes()));
-                } catch (Exception e) {
-                    transformError(ExceptionUtils.getStackTrace(e), responseOut);
+                String envelope = FaultParser.unwrapPart(responsePart);
+                if (envelope == null || envelope.equals("")) {
+                    transformError("Empty SOAP Envelope from XDS.ProvideAndRegister", responseOut);
                     return;
                 }
-                RegErrorList regErrorList = RegistryResponseBuilder.asErrorList(rrt);
-
-                for (RegError re : regErrorList.getList()) {
-                    System.out.println(re.getSeverity() + " - " + re.getMsg());
+                String faultMsg = FaultParser.parse(envelope);
+                if (faultMsg != null && !faultMsg.equals("")) {
+                    transformError(faultMsg, responseOut);
+                    return;
                 }
-                List<RegError> lst = regErrorList.getList();
-                List<String> raw = new ArrayList<>();
-
-                for (RegError re : lst) {
-                    ErrorType errorType = re.getSeverity();
-                    String msg = trim(re.getMsg());
-                    if (raw.contains(msg))
-                        continue;
-                    raw.add(msg);
-                    OperationOutcome.OperationOutcomeIssueComponent issue = oo.addIssue();
-                    issue.setCode(OperationOutcome.IssueType.UNKNOWN);
-                    issue.setDiagnostics(msg);
-                    issue.setSeverity(errorType == ErrorType.Error ? OperationOutcome.IssueSeverity.ERROR : OperationOutcome.IssueSeverity.WARNING);
+                registryResponse = FaultParser.extractRegistryResponse(envelope);
+                if (registryResponse == null || registryResponse.equals("")) {
+                    transformError("No RegistryResponse returned from XDS.ProvideAndRegister", responseOut);
+                    return;
                 }
-                packageResponse(
-                        responseOut,
-                        lst.isEmpty() ? null : oo
-                );
+            } catch (Throwable e) {
+                transformError("Error processing RegistryResponse:\n" + responsePart + "\n", e, responseOut);
+                return;
             }
+
+            RegistryResponseType rrt;
+            try {
+                rrt = new RegistryResponseBuilder().fromInputStream(new ByteArrayInputStream(registryResponse.getBytes()));
+            } catch (Exception e) {
+                transformError(ExceptionUtils.getStackTrace(e), responseOut);
+                return;
+            }
+            RegErrorList regErrorList = RegistryResponseBuilder.asErrorList(rrt);
+
+            for (RegError re : regErrorList.getList()) {
+                System.out.println(re.getSeverity() + " - " + re.getMsg());
+            }
+            List<RegError> lst = regErrorList.getList();
+            List<String> raw = new ArrayList<>();
+
+            for (RegError re : lst) {
+                ErrorType errorType = re.getSeverity();
+                String msg = trim(re.getMsg());
+                if (raw.contains(msg))
+                    continue;
+                raw.add(msg);
+                OperationOutcome.OperationOutcomeIssueComponent issue = oo.addIssue();
+                issue.setCode(OperationOutcome.IssueType.UNKNOWN);
+                issue.setDiagnostics(msg);
+                issue.setSeverity(errorType == ErrorType.Error ? OperationOutcome.IssueSeverity.ERROR : OperationOutcome.IssueSeverity.WARNING);
+            }
+            packageResponse(
+                    responseOut,
+                    lst.isEmpty() ? null : oo
+            );
         }
     }
 
-    private void transformDSResponse(HttpBase responseOut) {
-        getTask().putResponseBodyText(sender.getResponseText());
+    private void transformDSResponse(AhqrSender sender, HttpBase responseOut) {
         if (responseOut.getVerb().equals(Verb.GET.toString())) {  // FHIR READ
             if (sender.hasErrors()) {
-                logResponse(sender.getResponseText());
                 OperationOutcome oo = regErrorListAsOperationOutcome(sender.getErrorList());
-                returnOperationOutcome(responseOut, getTask(), oo);
+                returnOperationOutcome(responseOut, oo);
             } else if (sender.getContents().size() == 1) {
                 Val val = new Val();
                 CodeTranslator codeTranslator;
@@ -436,21 +425,21 @@ public class MhdChannel extends BaseChannel /*implements IBaseChannel*/ {
                         .setCodeTranslator(codeTranslator)
                         .setVal(val);
                 DocumentReference dr = trans.getDocumentReference((ExtrinsicObjectType) sender.getContents().get(0));
-                responseOut.setResponseText(logResponse(ProxyBase.encode(dr, returnFormatType)));
+                responseOut.setResponseText(ProxyBase.encode(dr, returnFormatType));
                 responseOut.setResponseContentType(returnFormatType.getContentType());
             } else if (sender.getContents().size() > 1){
                 OperationOutcome oo = wrapErrorInOperationOutcome("XDS Query returned " + sender.getContents().size() + " objects");
-                responseOut.setResponseText(logResponse(ProxyBase.encode(oo, returnFormatType)));
+                responseOut.setResponseText(ProxyBase.encode(oo, returnFormatType));
                 responseOut.setResponseContentType(returnFormatType.getContentType());
             } else { // no contents
                 responseOut.setResponseContentType(returnFormatType.getContentType());
                 responseOut.setStatus(404);
             }
         } else {
-        // TODO when is AhqrSender used and verb is not GET?
+            // TODO when is AhqrSender used and verb is not GET?
             if (sender.hasErrors()) {
                 OperationOutcome oo = regErrorListAsOperationOutcome(sender.getErrorList());
-                returnOperationOutcome(responseOut, getTask(), oo);
+                returnOperationOutcome(responseOut, oo);
             } else {
                 List<IdentifiableType> inContents = sender.getContents();
                 List<Resource> outContents = new ArrayList<>();

@@ -94,7 +94,8 @@ public class SimStore {
     public boolean exists() {
         Objects.requireNonNull(externalCache);
         Objects.requireNonNull(channelId);
-        return new File(getStore(), channelId.getId()).exists();
+        File f = new File(getStore(), channelId.getId());
+        return f.exists();
     }
 
     public static SimId getSimId(ChannelConfig channelConfig) {

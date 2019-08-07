@@ -49,7 +49,7 @@ class ToProxyMhdIT {
         System.out.println(testEngine.getTestReportAsJson());
         TestReport report = testEngine.getTestReport();
         TestReport.TestReportResult result = report.getResult();
-        assertEquals(TestReport.TestReportResult.PASS, result);
+        assertEquals(TestReport.TestReportResult.PASS, result, testEngine.getTestReportAsJson());
         return testEngine;
     }
 

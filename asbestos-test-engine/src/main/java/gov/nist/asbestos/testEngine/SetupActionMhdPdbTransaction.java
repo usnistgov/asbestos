@@ -12,6 +12,7 @@ import java.util.Objects;
 
 public class SetupActionMhdPdbTransaction extends SetupActionTransaction {
     private IdBuilder idBuilder = new IdBuilder(true);
+    private int counter = 1;
 
     SetupActionMhdPdbTransaction(FixtureMgr fixtureMgr) {
         super(fixtureMgr);
@@ -32,7 +33,8 @@ public class SetupActionMhdPdbTransaction extends SetupActionTransaction {
                 DocumentManifest dm = (DocumentManifest) resource;
                 if (dm.hasMasterIdentifier()) {
                     Identifier ident = dm.getMasterIdentifier();
-                    String value = idBuilder.allocate(null); // maybe override
+                    String value = idBuilder.allocate(null);
+                    value = value + "." + counter++;
                     ident.setValue(value);
                 }
             } else if (resource instanceof DocumentReference) {
@@ -40,6 +42,7 @@ public class SetupActionMhdPdbTransaction extends SetupActionTransaction {
                 if (dr.hasMasterIdentifier()) {
                     Identifier ident = dr.getMasterIdentifier();
                     String value = idBuilder.allocate(null); // maybe override
+                    value = value + "." + counter++;
                     ident.setValue(value);
                 }
             }
