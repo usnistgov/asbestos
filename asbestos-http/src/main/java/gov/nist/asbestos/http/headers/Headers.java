@@ -69,13 +69,19 @@ public class Headers {
             String it = WhiteSpace.removeTrailing(st.nextToken());
             if (isFirst) {
                 String[] parts = it.split(" ", 3);
-                if (parts.length == 3) {
-                    verb = parts[0];
-                    status = Integer.parseInt(parts[1]);
+                if (parts.length >= 1) {
+                    String first = parts[0];
                     try {
-                        pathInfo = new URI(parts[2]);
-                    } catch (Exception e) {
-                        throw new RuntimeException(parts[2], e);
+                        int status = Integer.parseInt(first);
+                        this.status = status;
+                    } catch (Throwable t) {
+                        this.verb =first;
+                        try {
+                            if (parts.length >= 2)
+                                this.pathInfo = new URI(parts[1]);
+                        } catch (Throwable t1) {
+                            // ignore
+                        }
                     }
                 }
                 isFirst = false;
