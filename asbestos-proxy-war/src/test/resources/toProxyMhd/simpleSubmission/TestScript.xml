@@ -68,10 +68,9 @@
         <action>
             <assert>
                 <description value="verify Patient reference returned"/>
-                <compareToSourceExpression value="Bundle.entry.resource.DocumentReference.subject.reference"/>
-                <compareToSourceId value="readBackResponse"/>
+                <expression value="DocumentReference.subject.reference"/>
+                <sourceId value="readBackResponse"/>
                 <value value="http://localhost:8080/fhir/Patient/a2"/>
-                <operator value="equals"/>
                 <warningOnly value="false"/>
             </assert>
         </action>

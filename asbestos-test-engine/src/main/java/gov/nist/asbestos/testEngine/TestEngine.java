@@ -277,15 +277,17 @@ public class TestEngine  {
             if (comp.hasAction()) {
                 String typePrefix = "setup.action";
                 for (TestScript.SetupActionComponent action : comp.getAction()) {
-                    TestReport.SetupActionComponent actionReport = setupReportComponent.addAction();
+                    TestReport.SetupActionComponent actionReportComponent = setupReportComponent.addAction();
                     if (action.hasOperation() && action.hasAssert()) {
-                        Reporter.reportError(fVal, actionReport.getOperation(), "setup", "", "action has both operation and assertion");
+                        Reporter.reportError(fVal, actionReportComponent.getOperation(), "setup", "", "action has both operation and assertion");
                         return;
                     }
                     if (action.hasOperation())
-                        doOperation(typePrefix, action.getOperation(), actionReport.getOperation());
-                    if (action.hasAssert())
-                        doAssert(typePrefix, action.getAssert(), actionReport.getAssert());
+                        doOperation(typePrefix, action.getOperation(), actionReportComponent.getOperation());
+                    if (action.hasAssert()) {
+                        TestReport.SetupActionAssertComponent actionReport = doAssert(typePrefix, action.getAssert());
+
+                    }
                     if (hasError())
                         return;
                 }
@@ -335,19 +337,21 @@ public class TestEngine  {
         propagateStatus(testReport);
     }
 
-    private void doAssert(String typePrefix, TestScript.SetupActionAssertComponent operation, TestReport.SetupActionAssertComponent report) {
+    private TestReport.SetupActionAssertComponent doAssert(String typePrefix, TestScript.SetupActionAssertComponent operation) {
+        TestReport.SetupActionAssertComponent report;
         try {
             AssertionRunner runner = new AssertionRunner(fixtureMgr)
                     .setVal(new ValE(val).setMsg(typePrefix))
                     .setTypePrefix(typePrefix)
                     .setTestReport(testReport)
                     .setTestScript(testScript);
-            runner.run(operation, report);
+            report = runner.run(operation);
         } catch (Throwable t) {
+            report = new TestReport.SetupActionAssertComponent();
             report.setMessage(ExceptionUtils.getStackTrace(t));
             report.setResult(TestReport.TestReportActionResult.ERROR);
         }
-        propagateStatus(testReport);
+        return report;
     }
 
     private void doTest() {
@@ -365,15 +369,17 @@ public class TestEngine  {
                 if (testComponent.hasAction()) {
                     String typePrefix = "test.action";
                     for (TestScript.TestActionComponent action : testComponent.getAction()) {
-                        TestReport.TestActionComponent actionReport = testReportComponent.addAction();
+                        TestReport.TestActionComponent actionReportComponent = testReportComponent.addAction();
                         if (action.hasOperation() && action.hasAssert()) {
-                            Reporter.reportError(tVal, actionReport.getOperation(), "test.action", testName, "action has both operation and assertion");
+                            Reporter.reportError(tVal, actionReportComponent.getOperation(), "test.action", testName, "action has both operation and assertion");
                             return;
                         }
                         if (action.hasOperation())
-                            doOperation(typePrefix, action.getOperation(), actionReport.getOperation());
-                        if (action.hasAssert())
-                            doAssert(typePrefix, action.getAssert(), actionReport.getAssert());
+                            doOperation(typePrefix, action.getOperation(), actionReportComponent.getOperation());
+                        if (action.hasAssert()) {
+                            TestReport.SetupActionAssertComponent actionReport = doAssert(typePrefix, action.getAssert());
+                            actionReportComponent.setAssert(actionReport);
+                        }
                         if (hasError())
                             return;
                     }

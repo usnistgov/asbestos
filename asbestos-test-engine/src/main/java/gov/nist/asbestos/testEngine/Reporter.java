@@ -44,15 +44,16 @@ class Reporter {
         return type + " : " + id + " : " + msg;
     }
 
-    static void reportError(ValE val, TestReport.SetupActionOperationComponent opReport, TestReport.SetupActionAssertComponent assertReport, String type, String id, String msg) {
+    static TestReport.SetupActionOperationComponent reportError(ValE val, TestReport.SetupActionOperationComponent opReport, TestReport.SetupActionAssertComponent assertReport, String type, String id, String msg) {
         assert assertReport != null || opReport != null;
         if (assertReport != null)
             reportError(val, assertReport, type, id, msg);
         else
             reportError(val, opReport, type, id, msg);
+        return opReport;
     }
 
-    static void reportError(ValE val, TestReport.SetupActionOperationComponent opReport, TestReport.SetupActionAssertComponent assertReport, String type, String id, String msg, String link) {
+    static TestReport.SetupActionOperationComponent reportError(ValE val, TestReport.SetupActionOperationComponent opReport, TestReport.SetupActionAssertComponent assertReport, String type, String id, String msg, String link) {
         assert assertReport != null || opReport != null;
         if (link != null) {
             msg = "loglink=" + link + " " + msg;
@@ -61,21 +62,24 @@ class Reporter {
             reportError(val, assertReport, type, id, msg);
         else
             reportError(val, opReport, type, id, msg);
+        return opReport;
     }
 
 
-    static void reportError(ValE val, TestReport.SetupActionOperationComponent opReport, String type, String id, String msg) {
+    static TestReport.SetupActionOperationComponent reportError(ValE val, TestReport.SetupActionOperationComponent opReport, String type, String id, String msg) {
         String theMsg = formatMsg(type, id, msg);
         val.add(new ValE(theMsg).asError());
         opReport.setResult(TestReport.TestReportActionResult.ERROR);
         opReport.setMessage(theMsg);
+        return opReport;
     }
 
-    static void reportError(ValE val, TestReport.SetupActionAssertComponent assertReport, String type, String id, String msg) {
+    static TestReport.SetupActionAssertComponent reportError(ValE val, TestReport.SetupActionAssertComponent assertReport, String type, String id, String msg) {
         String theMsg = formatMsg(type, id, msg);
         val.add(new ValE(theMsg).asError());
         assertReport.setResult(TestReport.TestReportActionResult.ERROR);
         assertReport.setMessage(theMsg);
+        return assertReport;
     }
 
     static boolean report(boolean ok, ValE val, TestReport.SetupActionAssertComponent assertReport, String type, String id, String msg, boolean warningOnly) {

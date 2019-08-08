@@ -25,6 +25,10 @@ public class FixtureComponent {
         this.id = id;
     }
 
+    FixtureComponent(BaseResource baseResource) {
+        resource = new ResourceWrapper(baseResource);
+    }
+
     FixtureComponent load(ResourceWrapper it) {  //  static loads
         Objects.requireNonNull(it);
         Objects.requireNonNull(it.getRef());
