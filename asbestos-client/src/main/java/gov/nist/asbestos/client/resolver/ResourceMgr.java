@@ -246,7 +246,7 @@ public class ResourceMgr implements IVal {
             task.putRequestHeader(new Headers().withVerb("GET").withPathInfo(wrapper.getRef().getUri()));
             BaseResource resource = wrapper.getResource();
             String txt = ProxyBase.encode(resource, Format.XML);
-            task.putRequestBodyText(txt);
+            task.putResponseBodyText(txt);
         } else {
             task.putRequestHeader(base.getRequestHeaders());
             task.putRequestBody(base.getRequest());

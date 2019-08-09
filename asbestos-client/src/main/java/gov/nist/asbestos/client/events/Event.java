@@ -46,6 +46,9 @@ public class Event {
     }
 
     public Task getClientTask() {
+        if (tasks.size() == 0) {
+            initTask(new Task(0, this));
+        }
         return tasks.get(0);
     }
 
@@ -54,13 +57,13 @@ public class Event {
     }
 
     public Task newTask() {
-        int i = taskFiles.size();
-        File taskFile = getTaskFile(i);
-        taskFile.mkdirs();
-        taskFiles.add(taskFile);
-        Task task = new Task(NEWTASK, this);
-        tasks.add(task);
-        return task;
+//        int i = taskFiles.size();
+//        File taskFile = getTaskFile(i);
+//        taskFile.mkdirs();
+//        taskFiles.add(taskFile);
+//        Task task = new Task(NEWTASK, this);
+//        tasks.add(task);
+        return new Task(NEWTASK, this);
     }
 
     int initTask(Task task) {

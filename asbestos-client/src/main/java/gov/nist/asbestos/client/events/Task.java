@@ -2,6 +2,7 @@ package gov.nist.asbestos.client.events;
 
 
 import gov.nist.asbestos.http.headers.Headers;
+import gov.nist.asbestos.http.operations.HttpBase;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -41,6 +42,26 @@ public class Task {
             taskIndex = event.initTask(this);
     }
 
+    public boolean hasRun() {
+        if (taskIndex == Event.NEWTASK)
+            return false;
+        if (_responseHeaders == null)
+            return false;
+        if (_responseHeaders.getStatus() != 0)
+            return true;
+        return false;
+    }
+
+    public void fromTask(HttpBase base) {
+        base.setRequestHeaders(getRequestHeader());
+        base.setRequest(getRequestBody());
+        base.setRequestText(getRequestBodyAsString());
+        base.setResponseHeaders(getResponseHeader());
+        base.setStatus(_responseHeaders.getStatus());
+        base.setResponse(getResponseBody());
+        base.setRequestText(getResponseBodyAsString());
+    }
+
     public void putRequestHeader(Headers headers) {
         _requestHeaders = headers;
         initTask();
@@ -72,11 +93,16 @@ public class Task {
 
     public byte[] getRequestBody() {
         if (_requestRawBody == null) {
+            if (_requestBody != null) {
+                _requestRawBody = _requestBody.getBytes();
+                return _requestRawBody;
+            }
             try {
                 _requestRawBody = Files.readAllBytes(event.getRequestBodyFile(taskIndex).toPath());
             } catch (Exception e) {
             }
-            _requestBody = new String(_requestRawBody);
+            if (_requestRawBody != null)
+                _requestBody = new String(_requestRawBody);
         }
         return _requestRawBody;
     }
@@ -204,6 +230,10 @@ public class Task {
 
     public byte[] getResponseBody() {
         if (_responseRawBody == null) {
+            if (_responseBody != null) {
+                _responseRawBody = _responseBody.getBytes();
+                return _responseRawBody;
+            }
             try {
                 _responseRawBody = Files.readAllBytes(event.getResponseBodyFile(taskIndex).toPath());
                 _responseBody = new String(_responseRawBody);

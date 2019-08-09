@@ -120,6 +120,8 @@ abstract public class HttpBase {
     public Headers getResponseHeaders() {
         if (_responseHeaders == null)
             _responseHeaders = new Headers();
+        if (status != 0)
+            _responseHeaders.setStatus(status);
         return _responseHeaders;
     }
 

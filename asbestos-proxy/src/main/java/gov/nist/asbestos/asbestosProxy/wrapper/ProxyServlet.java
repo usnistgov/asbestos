@@ -315,6 +315,7 @@ public class ProxyServlet extends HttpServlet {
             URI outURI = transformRequestUri(requestIn, channel);
             // transform input request for backend service
             HttpBase requestOut;
+            channel.setTask(backSideTask);
             if (requestIn instanceof HttpGet)
                 requestOut = transformRequest(backSideTask, (HttpGet) requestIn, outURI, channel);
             else if (requestIn instanceof HttpPost)
@@ -324,11 +325,15 @@ public class ProxyServlet extends HttpServlet {
 
 
             // send request to backend service
-            requestOut.run();
+            if (!backSideTask.hasRun()) {
+                requestOut.run();
 
-            logRequest(backSideTask, requestOut);
-            // log response from backend service
-            logResponse(backSideTask, requestOut);
+                logRequest(backSideTask, requestOut);
+                // log response from backend service
+                logResponse(backSideTask, requestOut);
+            } else {
+                backSideTask.fromTask(requestOut);  // load requestOut
+            }
 
             // transform backend service response for client
             if (requestOut.isSuccess()) {
