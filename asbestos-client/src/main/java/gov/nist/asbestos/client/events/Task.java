@@ -3,6 +3,7 @@ package gov.nist.asbestos.client.events;
 
 import gov.nist.asbestos.http.headers.Headers;
 
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.PrintWriter;
 import java.nio.file.Files;
@@ -22,7 +23,8 @@ public class Task {
 
 
     Task(int taskIndex, Event event) {
-        this.taskIndex = taskIndex;
+        this.taskIndex = taskIndex;  // will be overwritten by initTask()
+        // this allows tasks to be allocated but not used - initialization happens on first use
         this.event = event;
     }
 
@@ -34,8 +36,14 @@ public class Task {
         return event.newTask();
     }
 
+    private void initTask() {
+        if (taskIndex == Event.NEWTASK)
+            taskIndex = event.initTask(this);
+    }
+
     public void putRequestHeader(Headers headers) {
         _requestHeaders = headers;
+        initTask();
         try {
             try (PrintWriter out = new PrintWriter(event.getRequestHeaderFile(taskIndex))) {
                 out.print(headers.toString());
@@ -47,6 +55,7 @@ public class Task {
 
     public void putRequestBody(byte[] body) {
         _requestRawBody = body;
+        initTask();
         if (body != null) {
             _requestBody = new String(body);
             if (body.length > 0) {
@@ -92,6 +101,7 @@ public class Task {
 
     public void putResponseHeader(Headers headers) {
         _responseHeaders = headers;
+        initTask();
         if (headers != null) {
             try {
                 try (PrintWriter out = new PrintWriter(event.getResponseHeaderFile(taskIndex))) {
@@ -105,6 +115,7 @@ public class Task {
 
     public void putResponseBody(byte[] body) {
         _responseRawBody = body;
+        initTask();
         if (body != null && body.length >  0) {
             try {
                 try (FileOutputStream out = new FileOutputStream(event.getResponseBodyFile(taskIndex))) {
@@ -118,6 +129,7 @@ public class Task {
 
     public void putResponseBodyText(String body) {
         _responseBody = body;
+        initTask();
         try {
             try (PrintWriter out = new PrintWriter(event.getResponseBodyStringFile(taskIndex))) {
                 out.print(body);
@@ -129,6 +141,7 @@ public class Task {
 
     public void putDescription(String description) {
         _description = description;
+        initTask();
         try {
             try (PrintWriter out = new PrintWriter(event.getDescriptionFile(taskIndex))) {
                 out.print(description);
@@ -139,6 +152,7 @@ public class Task {
     }
 
     public void putRequestBodyText(String body) {
+        initTask();
         try {
             try (PrintWriter out = new PrintWriter(event.getRequestBodyStringFile(taskIndex))) {
                 out.print(body);
@@ -149,6 +163,7 @@ public class Task {
     }
 
     public void putResponseHTMLBody(byte[] body) {
+        initTask();
         putResponseBody(body);
         String bodyString = new String(body);
         putResponseBodyText(bodyString);
@@ -162,6 +177,7 @@ public class Task {
     }
 
     public void putRequestHTMLBody(byte[] body) {
+        initTask();
         putRequestBody(body);
         String bodyString = new String(body);
         putRequestBodyText(bodyString);

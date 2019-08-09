@@ -5,7 +5,7 @@ import gov.nist.asbestos.client.client.Format;
 
 public abstract class BaseChannel implements IBaseChannel {
     protected Format returnFormatType = null;
-    private Task task = null;
+    protected Task task = null;
     private String hostport = null;
 
     public void setReturnFormatType(Format returnFormatType) {

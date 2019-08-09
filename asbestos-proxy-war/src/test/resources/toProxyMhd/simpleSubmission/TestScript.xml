@@ -30,6 +30,7 @@
     <test>
         <action>
             <operation>
+                <!-- references patient from resourceCache in EC -->
                 <description value="send PDB to server"/>
                 <label value="create"/>
                 <type>
@@ -62,6 +63,12 @@
             <assert>
                 <description value="read was successful"/>
                 <response value="okay"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
+            <assert>
+                <resource value="DocumentReference"/>
                 <warningOnly value="false"/>
             </assert>
         </action>

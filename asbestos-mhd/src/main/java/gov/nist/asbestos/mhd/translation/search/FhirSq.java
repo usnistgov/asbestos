@@ -1,5 +1,6 @@
 package gov.nist.asbestos.mhd.translation.search;
 
+import gov.nist.asbestos.client.events.Task;
 import gov.nist.asbestos.mhd.transactionSupport.AhqrSender;
 import gov.nist.asbestos.mhd.translation.attribute.Slot;
 import oasis.names.tc.ebxml_regrep.xsd.query._3.AdhocQueryRequest;
@@ -25,16 +26,16 @@ public class FhirSq {
         return new DocRefSQParamTranslator().run(params);
     }
 
-    public static AhqrSender docRefQuery(String httpQueryString, URI toAddr) {
-        return run(docRefQueryToSQModel(httpQueryString), "urn:uuid:14d4debf-8f97-4251-9a74-a90016b0af0d" /* FindDocuments */, toAddr, true);
+    public static AhqrSender docRefQuery(String httpQueryString, URI toAddr, Task task) {
+        return run(docRefQueryToSQModel(httpQueryString), "urn:uuid:14d4debf-8f97-4251-9a74-a90016b0af0d" /* FindDocuments */, toAddr, true, task);
     }
 
-    public static AhqrSender docRefQuery(List<String> queryParams, URI toAddr) {
-        return run(new DocRefSQParamTranslator().run(queryParams), "urn:uuid:14d4debf-8f97-4251-9a74-a90016b0af0d" /* FindDocuments */, toAddr, true);
+    public static AhqrSender docRefQuery(List<String> queryParams, URI toAddr, Task task) {
+        return run(new DocRefSQParamTranslator().run(queryParams), "urn:uuid:14d4debf-8f97-4251-9a74-a90016b0af0d" /* FindDocuments */, toAddr, true, task);
     }
 
     // model is [queryParamName: [values]]
-    public static AhqrSender run(Map<String, List<String>> theModel, String sqid, URI toAddr, boolean leafClass) {
+    public static AhqrSender run(Map<String, List<String>> theModel, String sqid, URI toAddr, boolean leafClass, Task task) {
         Map<String, List<String>> model = new HashMap<>();
         for (String key : theModel.keySet())
             if (!key.equals(queryType))
@@ -72,7 +73,7 @@ public class FhirSq {
         adhocQueryRequest.setAdhocQuery(adhocQueryType);
 
         AhqrSender sender = new AhqrSender();
-        sender.send(adhocQueryRequest, toAddr);
+        sender.send(adhocQueryRequest, toAddr, task);
 
         return sender;
     }

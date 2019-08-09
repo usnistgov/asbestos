@@ -164,10 +164,13 @@ public class FhirClient {
             }
         } else {
             Ref ref = new Ref(getter.getUri());
-            String resourceType = ref.getResourceType();
-            if (resourceType != null && !resourceType.equals("")) {
-                if (!resource.getClass().getSimpleName().equals(resourceType)) {
-                    throw new Error("Read must return " + resourceType + " - received " + resource.getClass().getSimpleName() + " instead");
+            String expectedResourceType = ref.getResourceType();
+            String returnedResourceType = resource.getClass().getSimpleName();
+            if (expectedResourceType != null && !expectedResourceType.equals("")) {
+                if (!returnedResourceType.equals("OperationOutcome")) {
+                    if (!returnedResourceType.equals(expectedResourceType)) {
+                        throw new Error("Read must return " + expectedResourceType + " - received " + resource.getClass().getSimpleName() + " instead");
+                    }
                 }
             }
         }

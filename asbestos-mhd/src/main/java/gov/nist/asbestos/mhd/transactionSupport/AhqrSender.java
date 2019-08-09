@@ -1,5 +1,6 @@
 package gov.nist.asbestos.mhd.transactionSupport;
 
+import gov.nist.asbestos.client.events.Task;
 import gov.nist.asbestos.http.headers.Header;
 import gov.nist.asbestos.http.headers.Headers;
 import gov.nist.asbestos.http.operations.HttpPost;
@@ -24,31 +25,37 @@ public class AhqrSender {
     private String requestBody = null;
     private Headers requestHeaders = new Headers();
     private String responseText = null;
+    private Task task;
 
-    public void send(AdhocQueryRequest adhocQueryRequest, URI toAddr) {
+    public void send(AdhocQueryRequest adhocQueryRequest, URI toAddr, Task task) {
         ByteArrayOutputStream queryStream = new ByteArrayOutputStream();
         new AdhocQueryBuilder().toOutputStream(adhocQueryRequest, queryStream);
 
         String queryString1 = XmlTools.deleteXMLInstruction(new String(queryStream.toByteArray()));
         String queryString = XmlTools.deleteQueryExpression(queryString1);
         String soapString = AdhocQueryWrapper.wrap(toAddr.toString(), queryString);
-        send(soapString, toAddr.toString());
+        send(soapString, toAddr.toString(), task);
     }
 
-    public void send(String body, String toAddr) {
+    public void send(String body, String toAddr, Task task) {
         this.requestBody = body;
+        this.task = task;
         try {
             HttpPost poster = new HttpPost();
             poster.setRequestText(body);
+            task.putRequestBodyText(body);
             poster.setUri(new URI(toAddr));
             poster.setRequestContentType("application/soap+xml");
             requestHeaders.add(new Header("Content-Type", "application/soap+xml"));
-            poster.post();
-            int status = poster.getStatus();
             requestHeaders.setVerb(Verb.POST.name());
             requestHeaders.setPathInfo(new URI(toAddr));
+            task.putRequestHeader(requestHeaders);
+            poster.post();
+            int status = poster.getStatus();
+            responseText = poster.getResponseText();
+            task.putResponseBodyText(responseText);
+            task.putResponseHeader(poster.getResponseHeaders());
             if (status == 200) {
-                responseText = poster.getResponseText();
                 String ahqr = FaultParser.extractAdhocQueryResponse(responseText);
                 if (ahqr == null) {
                     String faultReason = FaultParser.parse(responseText);

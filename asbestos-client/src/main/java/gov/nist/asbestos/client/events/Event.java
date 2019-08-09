@@ -1,6 +1,7 @@
 package gov.nist.asbestos.client.events;
 
 
+import com.sun.org.apache.bcel.internal.generic.NEW;
 import gov.nist.asbestos.client.log.SimStore;
 
 import java.io.File;
@@ -16,6 +17,7 @@ public class Event {
     private File eventDir;
     private List<File> taskFiles = new ArrayList<>();
     private List<Task> tasks = new ArrayList<>();
+    public static final int NEWTASK = -1;
 
     public Event(SimStore simStore, File eventDir) {
         this.simStore = simStore;
@@ -56,12 +58,21 @@ public class Event {
         File taskFile = getTaskFile(i);
         taskFile.mkdirs();
         taskFiles.add(taskFile);
-        Task task = new Task(i, this);
+        Task task = new Task(NEWTASK, this);
         tasks.add(task);
         return task;
     }
 
-    private File getTaskFile(int i) {
+    int initTask(Task task) {
+        int i = taskFiles.size();
+        File taskFile = getTaskFile(i);
+        taskFile.mkdirs();
+        taskFiles.add(taskFile);
+        tasks.add(task);
+        return i;
+    }
+
+    File getTaskFile(int i) {
         return new File(eventDir, "task" + i);
     }
 

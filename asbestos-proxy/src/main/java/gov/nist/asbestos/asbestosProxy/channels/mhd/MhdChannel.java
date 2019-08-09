@@ -25,6 +25,7 @@ import gov.nist.asbestos.mhd.translation.search.FhirSq;
 import gov.nist.asbestos.sharedObjects.ChannelConfig;
 import gov.nist.asbestos.simapi.tk.installation.Installation;
 import gov.nist.asbestos.simapi.validation.Val;
+import gov.nist.asbestos.simapi.validation.ValE;
 import gov.nist.asbestos.utilities.*;
 import ihe.iti.xds_b._2007.ProvideAndRegisterDocumentSetRequestType;
 import oasis.names.tc.ebxml_regrep.xsd.lcm._3.SubmitObjectsRequest;
@@ -114,10 +115,10 @@ public class MhdChannel extends BaseChannel /*implements IBaseChannel*/ {
     }
 
 
-    private AhqrSender documentEntryByUidQuery(String uid, URI toAddr)  {
+    private AhqrSender documentEntryByUidQuery(String uid, URI toAddr, Task task)  {
         Map<String, List<String>> model = new HashMap<>();
         model.put("$XDSDocumentEntryUniqueId", Collections.singletonList(uid));
-        return FhirSq.run(model, "urn:uuid:5c4f972b-d56b-40ac-a5fc-c8ca9b40b9d4", toAddr, true);
+        return FhirSq.run(model, "urn:uuid:5c4f972b-d56b-40ac-a5fc-c8ca9b40b9d4", toAddr, true, task);
     }
 
     private OperationOutcome regErrorListAsOperationOutcome(RegErrorList regErrorList) {
@@ -198,7 +199,7 @@ public class MhdChannel extends BaseChannel /*implements IBaseChannel*/ {
             if (params == null || params.equals(""))
                 throw new RuntimeException("No search parameters - " + ref);
             if (resourceType.equals("DocumentReference")) {
-                sender = FhirSq.docRefQuery(params, toAddr);
+                sender = FhirSq.docRefQuery(params, toAddr, task);
                 returnAhqrResults(requestOut);
             } else {
                 throw new RuntimeException("SEARCH " + resourceType + " not supported");
@@ -206,7 +207,7 @@ public class MhdChannel extends BaseChannel /*implements IBaseChannel*/ {
         } else {
             // GET
             if (resourceType.equals("DocumentReference")) {
-                sender = documentEntryByUidQuery(uid, toAddr);
+                sender = documentEntryByUidQuery(uid, toAddr, task);
                 returnAhqrResults(requestOut);
             } else {
                 throw new RuntimeException("GET " + resourceType + " not supported");
@@ -425,6 +426,16 @@ public class MhdChannel extends BaseChannel /*implements IBaseChannel*/ {
                         .setCodeTranslator(codeTranslator)
                         .setVal(val);
                 DocumentReference dr = trans.getDocumentReference((ExtrinsicObjectType) sender.getContents().get(0));
+
+                if (val.hasErrors()) {
+                    OperationOutcome oo = new OperationOutcome();
+                    for (ValE err: val.getErrors())
+                        addErrorToOperationOutcome(oo, err.getMsg());
+                    returnOperationOutcome(responseOut, oo);
+                    return;
+                }
+
+
                 responseOut.setResponseText(ProxyBase.encode(dr, returnFormatType));
                 responseOut.setResponseContentType(returnFormatType.getContentType());
             } else if (sender.getContents().size() > 1){

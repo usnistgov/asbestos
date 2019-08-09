@@ -3,7 +3,6 @@ package gov.nist.asbestos.asbestosProxy.wrapper;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import gov.nist.asbestos.asbestosProxy.channel.*;
-import gov.nist.asbestos.asbestosProxy.channels.mhd.MhdChannel;
 import gov.nist.asbestos.client.events.Event;
 import gov.nist.asbestos.client.log.SimStore;
 import gov.nist.asbestos.client.events.Task;
@@ -149,6 +148,7 @@ public class ProxyServlet extends HttpServlet {
 
         Event event = simStore.newEvent();
         Task clientTask = event.getClientTask();
+        clientTask.putDescription("PDB from client");
         Headers inHeaders = getRequestHeaders(req, Verb.POST);
         String hostport = inHeaders.getValue("host");
         if (hostport == null || hostport.equals(""))
@@ -177,6 +177,7 @@ public class ProxyServlet extends HttpServlet {
 
             // interaction between proxy and target service
             Task backSideTask = clientTask.newTask();
+            backSideTask.putDescription("PNR to target");
 
             String proxyBase = new Ref(uri).getBase().withHostPort(hostport).toString();
             String fhirBase = new Ref(requestIn.getRequestHeaders().getPathInfo()).getBase().toString();
@@ -242,11 +243,15 @@ public class ProxyServlet extends HttpServlet {
     }
 
     private OperationOutcome wrapInOutcome(Throwable t) {
+        return wrapInOutcome(ExceptionUtils.getStackTrace(t));
+    }
+
+    private OperationOutcome wrapInOutcome(String msg) {
         OperationOutcome oo = new OperationOutcome();
         OperationOutcome.OperationOutcomeIssueComponent issue = oo.addIssue();
         issue.setSeverity(OperationOutcome.IssueSeverity.ERROR);
         issue.setCode(OperationOutcome.IssueType.EXCEPTION);
-        issue.setDiagnostics(ExceptionUtils.getStackTrace(t));
+        issue.setDiagnostics(msg);
         return oo;
     }
 
@@ -321,13 +326,17 @@ public class ProxyServlet extends HttpServlet {
             // send request to backend service
             requestOut.run();
 
+            logRequest(backSideTask, requestOut);
             // log response from backend service
             logResponse(backSideTask, requestOut);
 
             // transform backend service response for client
-            HttpBase responseOut = transformResponse(backSideTask, requestOut, channel, hostport);
-
-            respond(resp, responseOut, inHeaders, clientTask);
+            if (requestOut.isSuccess()) {
+                HttpBase responseOut = transformResponse(backSideTask, requestOut, channel, hostport);
+                respond(resp, responseOut, inHeaders, clientTask);
+            } else {
+                respondWithError(req, resp, "backend call failed", inHeaders, clientTask);
+            }
             resp.setStatus(resp.SC_OK);
         } catch (TransformException e) {
             respond(resp, e.getResponse(), inHeaders, clientTask);
@@ -352,13 +361,21 @@ public class ProxyServlet extends HttpServlet {
         log.error(ExceptionUtils.getStackTrace(t));
         if (new Ref(buildURI(req)).isQuery()) {
             Bundle bundle = wrapInBundle(wrapInOutcome(t));
-
             respond(resp, bundle, inHeaders, clientTask);
         } else {
             OperationOutcome oo = wrapInOutcome(t);
             respond(resp, oo, inHeaders, clientTask);
         }
+    }
 
+    private void respondWithError(HttpServletRequest req, HttpServletResponse resp, String msg, Headers inHeaders, Task clientTask) {
+        if (new Ref(buildURI(req)).isQuery()) {
+            Bundle bundle = wrapInBundle(wrapInOutcome(msg));
+            respond(resp, bundle, inHeaders, clientTask);
+        } else {
+            OperationOutcome oo = wrapInOutcome(msg);
+            respond(resp, oo, inHeaders, clientTask);
+        }
     }
 
     private void respond(HttpServletResponse resp, BaseResource resource, Headers inHeaders, Task clientTask) {
@@ -541,7 +558,7 @@ public class ProxyServlet extends HttpServlet {
         }
     }
 
-    static void logBackendRequest(Task task, HttpBase http) {
+    static void logRequest(Task task, HttpBase http) {
         Headers headers = http.getRequestHeaders();
         task.putRequestHeader(headers);
         byte[] bytes = http.getRequest();
@@ -578,7 +595,7 @@ public class ProxyServlet extends HttpServlet {
         requestOut.setUri(newURI);
         requestOut.getRequestHeaders().setPathInfo(requestOut.getUri());
 
-        logBackendRequest(task, requestOut);
+        logRequest(task, requestOut);
 
         return requestOut;
     }
@@ -591,7 +608,7 @@ public class ProxyServlet extends HttpServlet {
         requestOut.setUri(newURI);
         requestOut.getRequestHeaders().setPathInfo(requestOut.getUri());
 
-        task.putRequestHeader(requestOut.getRequestHeaders());
+        //task.putRequestHeader(requestOut.getRequestHeaders());
 
         return requestOut;
     }
