@@ -215,8 +215,6 @@ public class ResourceMgr implements IVal {
             return resource;
         if (resource.getRef() == null)
             return resource;
-        if (fhirClient == null)
-            throw new Error("ResourceMgr#load: FHIR Client is not configured");
         if (resourceMgrConfig.isInternalOnly()) {
             Optional<ResourceWrapper> cached = fhirClient.readCachedResource(resource.getRef());
             if (cached.isPresent() && cached.get().isLoaded()) {

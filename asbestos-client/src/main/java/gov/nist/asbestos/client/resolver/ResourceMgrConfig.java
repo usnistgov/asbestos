@@ -1,24 +1,23 @@
 package gov.nist.asbestos.client.resolver;
 
 public class ResourceMgrConfig {
-    private static final int INTERNAL = 1;
-    private static final int OPEN   = 2;
+    enum State { INTERNAL, OPEN }
 
-    private int state;
+    private State state;
 
     public ResourceMgrConfig() {
-        this.state = OPEN;
+        this.state = State.OPEN;
     }
 
     public void internalOnly() {
-        this.state = INTERNAL;
+        this.state = State.INTERNAL;
     }
 
     public boolean isOpen() {
-        return state == OPEN;
+        return state == State.OPEN;
     }
 
     public boolean isInternalOnly() {
-        return state == INTERNAL;
+        return state == State.INTERNAL;
     }
 }

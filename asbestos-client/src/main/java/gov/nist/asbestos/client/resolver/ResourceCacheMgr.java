@@ -68,20 +68,10 @@ public class ResourceCacheMgr {
 
     public ResourceWrapper getResource(Ref fullUrl) {
         Objects.requireNonNull(fullUrl);
-        if (fullUrl.isAbsolute()) {
-            Ref baseUrl = fullUrl.getBase();
-            ResourceCache cache = caches.get(baseUrl);
-            if (cache == null)
-                return null;
-            return cache.readResource(fullUrl.getRelative());
-        } else {
-            Ref baseUrl = fullUrl.getBase();
-            ResourceCache cache = caches.get(baseUrl);
-            if (cache == null)
-                return null;
-            return cache.readResource(fullUrl.getRelative());
-        }
-        //return null;
+        ResourceCache cache = caches.get(fullUrl.getBase());
+        if (cache == null)
+            return null;
+        return cache.readResource(fullUrl.getRelative());
     }
 
     public List<ResourceWrapper> search(Ref base, Class<?> resourceType, List<String> params, boolean stopAtFirst) {
