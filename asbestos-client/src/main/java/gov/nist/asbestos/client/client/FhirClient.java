@@ -1,6 +1,7 @@
 package gov.nist.asbestos.client.client;
 
 import gov.nist.asbestos.client.Base.ProxyBase;
+import gov.nist.asbestos.client.resolver.PatientCacheMgr;
 import gov.nist.asbestos.http.headers.Header;
 import gov.nist.asbestos.http.headers.Headers;
 import gov.nist.asbestos.http.operations.HttpBase;
@@ -24,6 +25,7 @@ public class FhirClient {
     private ResourceCacheMgr resourceCacheMgr = null;
     private HttpBase httpBase = null;
     private Op op = null;
+    private PatientCacheMgr patientCacheMgr = null;
 
     public FhirClient() {}
 
@@ -105,20 +107,6 @@ public class FhirClient {
         return gobbleGetResponse(getter, wrapper, format);
     }
 
-    public ResourceWrapper readResource(Ref ref, Map<String, String> requestHeader) {
-        HttpGet getter = new HttpGet();
-        ResourceWrapper wrapper = new ResourceWrapper();
-        wrapper.setRef(ref);
-        wrapper.setHttpBase(getter);
-        getter.setUri(ref.getUri());
-        Headers headers = new Headers(requestHeader);
-        if (headers.getHeaderValue("accept") == null)
-            headers.add(new Header("accept", Format.XML.getContentType()));
-        getter.setRequestHeaders(headers);
-        getter.get();
-        return gobbleGetResponse(getter, wrapper, asResponseFormat(headers));
-    }
-
     Format asFormat(Headers headers) {
         String contentType = headers.getContentType().getValue();
         if ("application/fhir+xml".equals(contentType))
@@ -181,14 +169,48 @@ public class FhirClient {
         return wrapper;
     }
 
-    public ResourceWrapper readResource(Ref uri) {
-        Objects.requireNonNull(uri);
-        Optional<ResourceWrapper> cached = readCachedResource(uri);
+    public ResourceWrapper readResource(Ref ref, Map<String, String> requestHeader) {
+        if ("Patient".equals(ref.getResourceType()) && patientCacheMgr != null) {
+            PatientCacheMgr.PatientCacheItem item = patientCacheMgr.find(ref);
+            if (item != null)
+                return item.getWrapper();
+        }
+        HttpGet getter = new HttpGet();
+        ResourceWrapper wrapper = new ResourceWrapper();
+        wrapper.setRef(ref);
+        wrapper.setHttpBase(getter);
+        getter.setUri(ref.getUri());
+        Headers headers = new Headers(requestHeader);
+        if (headers.getHeaderValue("accept") == null)
+            headers.add(new Header("accept", Format.XML.getContentType()));
+        getter.setRequestHeaders(headers);
+        getter.get();
+        ResourceWrapper theWrapper = gobbleGetResponse(getter, wrapper, asResponseFormat(headers));
+        if (theWrapper.hasResource() && theWrapper.getResource() instanceof Patient && patientCacheMgr != null) {
+            patientCacheMgr.add(theWrapper);
+        }
+        return theWrapper;
+    }
+
+    public ResourceWrapper readResource(Ref ref) {
+        Objects.requireNonNull(ref);
+        Optional<ResourceWrapper> cached = readCachedResource(ref);
         if (cached.isPresent())
             return cached.get();
-        if ("".equals(uri.getBase().asString()))
-            return new ResourceWrapper(uri);
-        return cached.orElseGet(() -> readResource(uri, getFormat()));
+        if ("".equals(ref.getBase().asString()))
+            return new ResourceWrapper(ref);
+
+        if ("Patient".equals(ref.getResourceType()) && patientCacheMgr != null) {
+            PatientCacheMgr.PatientCacheItem item = patientCacheMgr.find(ref);
+            if (item != null)
+                return item.getWrapper();
+        }
+
+        ResourceWrapper theWrapper = cached.orElseGet(() -> readResource(ref, getFormat()));
+        if (theWrapper.hasResource() && theWrapper.getResource() instanceof Patient && patientCacheMgr != null) {
+            patientCacheMgr.add(theWrapper);
+        }
+        return theWrapper;
     }
 
     public Optional<ResourceWrapper> readCachedResource(Ref ref) {
@@ -253,6 +275,7 @@ public class FhirClient {
 
     public FhirClient setResourceCacheMgr(ResourceCacheMgr resourceCacheMgr) {
         this.resourceCacheMgr = resourceCacheMgr;
+        resourceCacheMgr.setFhirClient(this);
         return this;
     }
 
@@ -268,5 +291,9 @@ public class FhirClient {
         if (httpBase == null)
             return -1;
         return httpBase.getStatus();
+    }
+
+    public void setPatientCacheMgr(PatientCacheMgr patientCacheMgr) {
+        this.patientCacheMgr = patientCacheMgr;
     }
 }

@@ -1,11 +1,18 @@
 package gov.nist.asbestos.client.resolver;
 
+import gov.nist.asbestos.client.client.FhirClient;
 import org.apache.log4j.Logger;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Patient;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.*;
+import java.util.stream.Stream;
 
 /**
  * load by a factory - either TestResourceCacheFactory or ResourceCacheMgrFactory
@@ -15,28 +22,89 @@ import java.util.*;
  */
 public class ResourceCacheMgr {
     private static final Logger logger = Logger.getLogger(ResourceCacheMgr.class);
-    private Map<Ref, ResourceCache> caches = new HashMap<>();  // baseUrl -> cache
+
+    class CacheBundle {
+        MemoryResourceCache mem = null;
+        FileSystemResourceCache file = null;
+
+        CacheBundle() {
+
+        }
+
+        CacheBundle(MemoryResourceCache mcache) {
+            mem = mcache;
+        }
+
+        CacheBundle(File dir, Ref baseUrl) {
+            file = new FileSystemResourceCache(dir, baseUrl);
+            mem = new MemoryResourceCache();
+        }
+
+        CacheBundle(File cacheDir) {
+            if (cacheDir.exists() && cacheDir.isDirectory()  && new File(cacheDir, "cache.properties").exists()) {
+                logger.info("Scanning Resource Cache directory " + cacheDir);
+                CacheBundle bundle = new ResourceCacheMgr.CacheBundle();
+                file = new FileSystemResourceCache(cacheDir);
+                mem = new MemoryResourceCache();
+            }
+        }
+
+        Ref getBase() {
+            if (file == null)
+                return null;
+            return file.getBase();
+        }
+
+        ResourceWrapper getResource(Ref fullUrl) {
+            if (mem.hasResource(fullUrl))
+                return mem.readResource(fullUrl);
+            return file.readResource(fullUrl);
+        }
+
+        List<ResourceWrapper> getAll(Ref base, String resourceType) {
+            List<ResourceWrapper> result = new ArrayList<>();
+            result.addAll(mem.getAll(base, resourceType));
+            result.addAll(file.getAll(base, resourceType));
+            return result;
+        }
+    }
+
+    private Map<Ref, CacheBundle> caches = new HashMap<>();  // baseUrl -> cache
+    private List<Ref> knownPatientServers = new ArrayList<>();
+    private FhirClient fhirClient = null;
 
     public ResourceCacheMgr(File externalCache) {
         Objects.requireNonNull(externalCache);
         assert externalCache.isDirectory();
         loadCache(new File(externalCache, "resourceCache"));
+        loadPatientServers(externalCache);
     }
 
+    private void loadPatientServers(File externalCache) {
+        File patientServersFile = new File(externalCache, "patientServers.txt");
+        try (Stream<String> stream = Files.lines(Paths.get(patientServersFile.toString()))) {
+            stream.forEach(line -> {
+                String theLine = line.trim();
+                if (!line.equals("")) {
+                    knownPatientServers.add(new Ref(line).getBase());
+                }
+            });
+        } catch (IOException e) {
+            // ignore
+        }
+    }
+
+    // dir is File based backing cache
     public ResourceCacheMgr(File dir, Ref baseUrl) {
         Objects.requireNonNull(dir);
         Objects.requireNonNull(baseUrl);
         assert dir.exists() && dir.isDirectory();
-        FileSystemResourceCache rcache = new FileSystemResourceCache(dir, baseUrl);
-        caches.put(baseUrl, rcache);
+        CacheBundle cacheBundle = new CacheBundle(dir, baseUrl);
+        caches.put(cacheBundle.getBase(), cacheBundle);
     }
 
     public List<Ref> getCachedServers() {
         return new ArrayList<>(caches.keySet());
-    }
-
-    public void addCache(File cacheCollection) {
-        loadCache(cacheCollection);
     }
 
     private void loadCache(File cacheCollection) {
@@ -46,32 +114,67 @@ public class ResourceCacheMgr {
                 return;
             for (File dir : dirs) {
                 if (dir.isDirectory() && new File(dir, "cache.properties").exists()) {
-                    logger.info("Scanning Resource Cache directory " + dir);
-                    FileSystemResourceCache rcache = new FileSystemResourceCache(dir);
-                    caches.put(rcache.getBase(), rcache);
+                    CacheBundle cacheBundle = new CacheBundle(dir);
+                    caches.put(cacheBundle.getBase(), cacheBundle);
                 }
             }
         }
     }
 
+    // add to memory cache
     public void add(Ref uri, IBaseResource resource) {
         if (!uri.isAbsolute())
-            throw new RuntimeException("ResourceCacheMgr#add: cannot load " + uri + " - must be absolute URI");
+            throw new RuntimeException("ResourceCacheMgr#add: cannot add " + uri + " - must be absolute URI");
         Ref fhirbase = uri.getBase();
-        ResourceCache cache = caches.get(fhirbase);
-        if (cache == null) {
-            cache = new MemoryResourceCache();
-            caches.put(fhirbase, cache);
+        CacheBundle cacheBundle = caches.get(fhirbase);
+        if (cacheBundle == null) {
+            MemoryResourceCache mcache = new MemoryResourceCache();
+            mcache.add(uri, new ResourceWrapper(resource));
+            caches.put(fhirbase, new CacheBundle(mcache));
         }
-        cache.add(uri.getRelative(), new ResourceWrapper(resource));
+        cacheBundle.mem.add(uri, new ResourceWrapper(resource));
     }
 
     public ResourceWrapper getResource(Ref fullUrl) {
         Objects.requireNonNull(fullUrl);
-        ResourceCache cache = caches.get(fullUrl.getBase());
+        CacheBundle cache = caches.get(fullUrl.getBase());
         if (cache == null)
             return null;
-        return cache.readResource(fullUrl.getRelative());
+        return cache.getResource(fullUrl);
+    }
+
+
+    List<ResourceWrapper> searchForPatient(String system, String value) {
+        List<ResourceWrapper> results = new ArrayList<>();
+        for (Ref ref : caches.keySet()) {
+            CacheBundle cacheBundle = caches.get(ref);
+            List<ResourceWrapper> patients = cacheBundle.mem.getAll("Patient");
+            for (ResourceWrapper wrapper : patients) {
+                Patient patient = (Patient) wrapper.getResource();
+                if (hasIdentifier(patient, system, value))
+                    results.add(wrapper);
+            }
+        }
+        if (!results.isEmpty())
+            return results;
+
+        for (Ref patientServer : knownPatientServers) {
+            List<ResourceWrapper> patientWrappers = fhirClient.search(patientServer, Patient.class, Collections.singletonList("Patient.identifier=" + system + "|" + value), true, false);
+            if (!patientWrappers.isEmpty())
+                return patientWrappers;
+        }
+        return results;  // empty
+    }
+
+    private boolean hasIdentifier(Patient patient, String system, String value) {
+        for (Identifier identifier : patient.getIdentifier()) {
+            if (identifier.hasValue() && identifier.hasSystem()) {
+                if (system.equals(identifier.getSystem()) && value.equals(identifier.getValue())) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     public List<ResourceWrapper> search(Ref base, Class<?> resourceType, List<String> params, boolean stopAtFirst) {
@@ -94,8 +197,9 @@ public class ResourceCacheMgr {
 
         List<ResourceWrapper> results = new ArrayList<>();
         for (Ref ref : caches.keySet()) {
-            ResourceCache cache = caches.get(ref);
-            List<ResourceWrapper> all = cache.getAll(base, resourceType.getSimpleName());
+            CacheBundle cache = caches.get(ref);
+            Ref aBase = ref.getBase();
+            List<ResourceWrapper> all = cache.getAll(aBase, resourceType.getSimpleName());
             if (stopAtFirst && !all.isEmpty()) {
                 results.add(all.get(0));
                 return results;
@@ -109,11 +213,21 @@ public class ResourceCacheMgr {
     public String toString() {
         StringBuilder buf = new StringBuilder();
         buf.append(getClass().getSimpleName() + "\n");
-        caches.forEach((Ref key, ResourceCache value) -> {
+        caches.forEach((Ref key, CacheBundle value) -> {
             buf.append(key).append(" => ").append(value).append("\n");
         });
 
         return buf.toString();
     }
 
+    public void addKnownPatientServer(Ref server) {
+        server = server.getBase();
+        if (!knownPatientServers.contains(server))
+            knownPatientServers.add(server);
+    }
+
+    public ResourceCacheMgr setFhirClient(FhirClient fhirClient) {
+        this.fhirClient = fhirClient;
+        return this;
+    }
 }

@@ -52,8 +52,8 @@ public class ProxyServlet extends HttpServlet {
     @Override
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
-        // TODO put EC location in web.xml
-        setExternalCache(new File("/home/bill/ec"));
+        String ec = config.getInitParameter("ExternalCache");
+        setExternalCache(new File(ec));
     }
 
     private static URI buildURI(HttpServletRequest req) {

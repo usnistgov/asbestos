@@ -1,6 +1,7 @@
 package gov.nist.asbestos.mhd.transforms;
 
 import gov.nist.asbestos.client.Base.IVal;
+import gov.nist.asbestos.client.resolver.ResourceCacheMgr;
 import gov.nist.asbestos.mhd.exceptions.MetadataAttributeTranslationException;
 import gov.nist.asbestos.client.resolver.ResourceMgr;
 import gov.nist.asbestos.mhd.transactionSupport.CodeTranslator;
@@ -21,7 +22,7 @@ import java.util.Optional;
 public class DocumentEntryToDocumentReference implements IVal {
     private Val val;
     private CodeTranslator codeTranslator;
-    private ResourceMgr resourceMgr = null;
+    private ResourceCacheMgr resourceCacheMgr = null;
     private ContainedIdAllocator containedIdAllocator = null;
 
     public DocumentReference getDocumentReference(ExtrinsicObjectType eo) {
@@ -62,7 +63,7 @@ public class DocumentEntryToDocumentReference implements IVal {
                 // PatientID
                 PatientId patientId = new PatientId()
                         .setPatientid(ei.getValue())
-                        .setResourceMgr(resourceMgr);
+                        .setResourceCacheMgr(resourceCacheMgr);
                 patientId.setVal(val);
                 Optional<Reference> reference = patientId.getFhirReference();
                 if (reference.isPresent()) {
@@ -248,8 +249,8 @@ public class DocumentEntryToDocumentReference implements IVal {
         this.val = val;
     }
 
-    public DocumentEntryToDocumentReference setResourceMgr(ResourceMgr resourceMgr) {
-        this.resourceMgr = resourceMgr;
+    public DocumentEntryToDocumentReference setResourceCacheMgr(ResourceCacheMgr resourceCacheMgr) {
+        this.resourceCacheMgr = resourceCacheMgr;
         return this;
     }
 

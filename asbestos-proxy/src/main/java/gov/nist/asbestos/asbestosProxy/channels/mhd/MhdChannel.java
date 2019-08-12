@@ -58,7 +58,8 @@ public class MhdChannel extends BaseChannel /*implements IBaseChannel*/ {
         Objects.requireNonNull(task);
         Val val = new Val();
         FhirClient fhirClient = new FhirClient();
-        fhirClient.setResourceCacheMgr(new ResourceCacheMgr(getExternalCache()));
+        ResourceCacheMgr resourceCacheMgr = new ResourceCacheMgr(getExternalCache());
+        fhirClient.setResourceCacheMgr(resourceCacheMgr);
 
         ResourceMgr rMgr = new ResourceMgr();
         rMgr.setVal(val);
@@ -419,10 +420,13 @@ public class MhdChannel extends BaseChannel /*implements IBaseChannel*/ {
                 } catch (Exception e) {
                     throw new RuntimeException("Cannot load codes file for environment " + channelConfig.getEnvironment(), e);
                 }
+                ResourceCacheMgr resourceCacheMgr = new ResourceCacheMgr(getExternalCache());
+                FhirClient fhirClient = new FhirClient()
+                        .setResourceCacheMgr(resourceCacheMgr);
                 DocumentEntryToDocumentReference trans = new DocumentEntryToDocumentReference();
                 trans
                         .setContainedIdAllocator(new ContainedIdAllocator())
-                        .setResourceMgr(new ResourceMgr().setFhirClient(new FhirClient()))
+                        .setResourceCacheMgr(resourceCacheMgr)
                         .setCodeTranslator(codeTranslator)
                         .setVal(val);
                 DocumentReference dr = trans.getDocumentReference((ExtrinsicObjectType) sender.getContents().get(0));

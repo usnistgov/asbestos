@@ -240,4 +240,8 @@ public class ResourceWrapper {
     public void setAssignedUid(String assignedUid) {
         this.assignedUid = assignedUid;
     }
+
+    public boolean hasRef() {
+        return ref != null;
+    }
 }

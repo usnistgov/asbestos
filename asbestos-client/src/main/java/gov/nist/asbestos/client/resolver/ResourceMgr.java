@@ -26,7 +26,7 @@ public class ResourceMgr implements IVal {
     private Val val;
     private ResourceMgrConfig resourceMgrConfig = new ResourceMgrConfig();
     private FhirClient fhirClient = null;
-    private List<Ref> knownServers = new ArrayList<>();
+
     private List<ResourceWrapper> bundleResourceList = new ArrayList<>();
     private Task theTask = null;
 
@@ -253,38 +253,6 @@ public class ResourceMgr implements IVal {
         }
     }
 
-    public List<ResourceWrapper> search(Ref base, Class<?> resourceType, List<String> params, boolean stopAtFirst) {
-        Objects.requireNonNull(resourceType);
-        Objects.requireNonNull(params);
-        if (fhirClient == null)
-            throw new Error("ResourceMgr#search: FHIR Client is not configured");
-
-        if (base == null) {
-            List<ResourceWrapper> results = new ArrayList<>();
-            List<Ref> cachedServers = fhirClient.getCachedServers();
-            for (Ref server : cachedServers) {
-                List<ResourceWrapper> cacheResults = fhirClient.searchCache(server, resourceType, params, stopAtFirst);
-                if (!cacheResults.isEmpty() && stopAtFirst)
-                    return cacheResults;
-                results.addAll(cacheResults);
-            }
-            if (resourceMgrConfig.isOpen()) {
-                for (Ref server : knownServers) {
-                    List<ResourceWrapper> theResults = fhirClient.searchCache(server, resourceType, params, stopAtFirst);
-                    if (!theResults.isEmpty() && stopAtFirst)
-                        return theResults;
-                    results.addAll(theResults);
-
-                }
-            }
-            return results;
-        }
-
-        if (resourceMgrConfig.isInternalOnly())
-            return fhirClient.searchCache(base, resourceType, params, stopAtFirst);
-        return fhirClient.search(base, resourceType, params, stopAtFirst, false);
-    }
-
     private SymbolicIdBuilder symbolicIdBuilder = new SymbolicIdBuilder();
 
     public String allocateSymbolicId() {
@@ -302,15 +270,7 @@ public class ResourceMgr implements IVal {
         return this;
     }
 
-    public List<Ref> getKnownServers() {
-        return knownServers;
-    }
 
-    public void addKnownServer(Ref server) {
-        server = server.getBase();
-        if (!knownServers.contains(server))
-            knownServers.add(server);
-    }
 
     private static final List<Integer> ignores = Arrays.asList(8,13,18,23);
     public static boolean isUUID(String u) {

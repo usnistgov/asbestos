@@ -1,7 +1,7 @@
 package gov.nist.asbestos.mhd.translation.attribute;
 
 import gov.nist.asbestos.client.Base.IVal;
-import gov.nist.asbestos.client.resolver.ResourceMgr;
+import gov.nist.asbestos.client.resolver.ResourceCacheMgr;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import gov.nist.asbestos.simapi.validation.Val;
 import gov.nist.asbestos.simapi.validation.ValE;
@@ -17,7 +17,7 @@ public class PatientId implements IVal {
     private String patientid = "";
     private String aa = "";
     private String id = "";
-    private ResourceMgr resourceMgr = null;
+    private ResourceCacheMgr resourceCacheMgr = null;
     private Val val;
 
     public PatientId setPatientid(String patientid) {
@@ -45,13 +45,13 @@ public class PatientId implements IVal {
     }
 
     public Optional<Reference> getFhirReference() {
-        Objects.requireNonNull(resourceMgr);
+        Objects.requireNonNull(resourceCacheMgr);
         Objects.requireNonNull(val);
         String system = "urn:oid:" + getAa();
         String id = getId();
         List<String> searchParams = new ArrayList<>();
         searchParams.add("identifier=" + system + "|" + id);
-        List<ResourceWrapper> results = resourceMgr.search(null, Patient.class, searchParams, true);
+        List<ResourceWrapper> results = resourceCacheMgr.search(null, Patient.class, searchParams, true);
         if (results.isEmpty()) {
             val.add(new ValE("DocumentEntryToDocumentReference: cannot find Patient resource for " + system + "|" + id).asError());
             return Optional.empty();
@@ -59,8 +59,8 @@ public class PatientId implements IVal {
         return Optional.of(new Reference(results.get(0).getRef().toString()));
     }
 
-    public PatientId setResourceMgr(ResourceMgr resourceMgr) {
-        this.resourceMgr = resourceMgr;
+    public PatientId setResourceCacheMgr(ResourceCacheMgr resourceCacheMgr) {
+        this.resourceCacheMgr = resourceCacheMgr;
         return this;
     }
 

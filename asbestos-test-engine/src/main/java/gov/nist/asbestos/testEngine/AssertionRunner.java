@@ -221,6 +221,24 @@ public class AssertionRunner {
             return true;
         }
 
+        // expression
+        if (as.hasExpression()) {
+            sourceFixture = getSource(as);
+            if (sourceFixture == null) return false;
+            BaseResource sourceResource = sourceFixture.getResourceResource();
+            if (sourceResource == null) {
+                Reporter.reportError(val, assertReport, type, label,"Fixture referenced " + sourceFixture.getId()  + " has no resource");
+                return false;
+            }
+            boolean ok = FhirPathEngineBuilder.evalForBoolean(sourceResource, as.getExpression());
+            if (ok) {
+                Reporter.reportPass(val, assertReport, type, label, "expression evaluated");
+                return true;
+            }
+            Reporter.reportError(val, assertReport, type, label, "expression " + as.getExpression()  +  " failed");
+            return false;
+        }
+
 
         Reporter.reportError(val, assertReport, type, label, "No assertion");
         return false;

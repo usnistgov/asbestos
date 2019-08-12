@@ -51,11 +51,13 @@ class DocumentEntryTest {
     private static JsonFactory jsonFactory;
     private static File externalCache;
     private static ResourceMgr rMgr;
+    private static ResourceCacheMgr resourceCacheMgr;
     private static FhirClient fhirClient;
 
     @BeforeAll
     static void beforeAll() throws URISyntaxException {
         externalCache = Paths.get(DocumentEntryTest.class.getResource("/external_cache/findme.txt").toURI()).getParent().toFile();
+        resourceCacheMgr = new ResourceCacheMgr(externalCache);
         fhirContext = ProxyBase.getFhirContext();
         objectMapper = new  ObjectMapper();
         jsonFactory = objectMapper.getFactory();
@@ -65,8 +67,8 @@ class DocumentEntryTest {
     @BeforeEach
     void beforeEach() {
         val = new Val();
-        fhirClient = new FhirClient();
-        fhirClient.setResourceCacheMgr(new ResourceCacheMgr(externalCache));
+        fhirClient = new FhirClient()
+            .setResourceCacheMgr(new ResourceCacheMgr(externalCache));
     }
 
     private static File getCodesFile() {
@@ -120,7 +122,7 @@ class DocumentEntryTest {
 
         DocumentEntryToDocumentReference documentEntryToDocumentReference = new DocumentEntryToDocumentReference();
         documentEntryToDocumentReference.setVal(val);
-        documentEntryToDocumentReference.setResourceMgr(rMgr);
+        documentEntryToDocumentReference.setResourceCacheMgr(resourceCacheMgr);
         documentEntryToDocumentReference.setCodeTranslator(codeTranslator);
 
         containedIdAllocator = new ContainedIdAllocator();

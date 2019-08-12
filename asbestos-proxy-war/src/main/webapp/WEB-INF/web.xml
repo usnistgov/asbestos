@@ -8,6 +8,10 @@
   <servlet>
     <servlet-name>Proxy</servlet-name>
     <servlet-class>gov.nist.asbestos.asbestosProxy.wrapper.ProxyServlet</servlet-class>
+    <init-param>
+      <param-name>ExternalCache</param-name>
+      <param-value>/home/bill/ec</param-value>
+    </init-param>
     <load-on-startup>1</load-on-startup>
   </servlet>
 

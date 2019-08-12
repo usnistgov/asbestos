@@ -1,7 +1,7 @@
 package gov.nist.asbestos.mhd.transforms;
 
 import gov.nist.asbestos.client.Base.IVal;
-import gov.nist.asbestos.client.resolver.ResourceMgr;
+import gov.nist.asbestos.client.resolver.ResourceCacheMgr;
 import gov.nist.asbestos.mhd.transactionSupport.CodeTranslator;
 import gov.nist.asbestos.mhd.translation.attribute.PatientId;
 import gov.nist.asbestos.mhd.translation.attribute.Slot;
@@ -18,7 +18,7 @@ import java.util.Optional;
 public class SubmissionSetToDocumentManifest implements IVal {
     private Val val = null;
     private CodeTranslator codeTranslator = null;
-    private ResourceMgr resourceMgr = null;
+    private ResourceCacheMgr resourceCacheMgr = null;
 
     public DocumentManifest getDocumentManifest(RegistryPackageType ss) {
         DocumentManifest dm = new DocumentManifest();
@@ -35,7 +35,7 @@ public class SubmissionSetToDocumentManifest implements IVal {
                 // Patient ID
                 PatientId patientId = new PatientId()
                         .setPatientid(ei.getValue())
-                        .setResourceMgr(resourceMgr);
+                        .setResourceCacheMgr(resourceCacheMgr);
                 patientId.setVal(val);
                 Optional<Reference> reference = patientId.getFhirReference();
                 reference.ifPresent(dm::setSubject);
@@ -90,7 +90,8 @@ public class SubmissionSetToDocumentManifest implements IVal {
         this.codeTranslator = codeTranslator;
     }
 
-    public void setResourceMgr(ResourceMgr resourceMgr) {
-        this.resourceMgr = resourceMgr;
+    public SubmissionSetToDocumentManifest setResourceMgr(ResourceCacheMgr resourceCacheMgr) {
+        this.resourceCacheMgr = resourceCacheMgr;
+        return this;
     }
 }
