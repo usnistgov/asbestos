@@ -25,7 +25,7 @@
         <!--<module>http-test-editor-service</module> removed since embedded Jetty not workable -->
         <module>asbestos-adapter</module>
         <module>asbestos-simapi</module>
-        <!--<module>view</module>-->
+        <module>asbestos-view</module>
         <!--<module>asbestos-simapitest</module>-->
         <!--<module>asbestos-fproxy</module>-->
 <!--        <module>asbestos-proxy-test</module>-->

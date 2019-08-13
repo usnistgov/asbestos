@@ -8,10 +8,30 @@ export const baseStore = {
     state() {
         return {
             tests: [],
-            testIds: []
+            testIds: [],
+
+            channelIds: [],
+            channels: []
         }
     },
     mutations: {
+        installChannel(state, newChannel) {
+            const channelIndex = state.channels.findIndex( function(channel) {
+                return channel.channelId === newChannel.channelId
+            })
+            if (channelIndex === -1) {
+                state.channels.push(newChannel)
+            } else {
+                state.channels[channelIndex] = newChannel
+            }
+        },
+        installChannelIds(state, channelIds) {
+            state.channelIds.length = 0
+            for (let i in channelIds) {
+                const theId = channelIds[i]
+                state.channelIds.push(theId)
+            }
+        },
         clearTests(state) {
             state.testIds.length = 0
             state.tests.length = 0

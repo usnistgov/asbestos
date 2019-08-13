@@ -41,6 +41,15 @@
     <url-pattern>/channel</url-pattern>
   </servlet-mapping>
 
+  <filter>
+    <filter-name>CorsFilter</filter-name>
+    <filter-class>org.apache.catalina.filters.CorsFilter</filter-class>
+  </filter>
+  <filter-mapping>
+    <filter-name>CorsFilter</filter-name>
+    <url-pattern> /* </url-pattern>
+  </filter-mapping>
+
   <servlet-mapping>
     <servlet-name>logViewer</servlet-name>
     <url-pattern>/log/*</url-pattern>

@@ -11,6 +11,9 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Properties;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -133,5 +136,28 @@ class CreateChannelIT {
         poster.postJson(new URI("http://localhost:"+ proxyPort + "/proxy/channel"), channelConfig1);
         assertEquals(200, poster.getStatus());
 
+        getter = new HttpGet();
+        getter.get("http://localhost:"+ proxyPort + "/proxy/channel");
+        assertEquals(200, getter.getStatus());
+        String response = getter.getResponseText();
+        List<String> response2 = Arrays.asList(response.split("\n"));
+        List<String> theResponse = new ArrayList<>(response2);
+        theResponse = deleteEmpty(theResponse);
+        assertEquals(3, theResponse.size());
+        assertTrue(theResponse.contains("default/test2"));
+        assertTrue(theResponse.contains("default/fhirpass"));
+        assertTrue(theResponse.contains("default/test1"));
+    }
+
+    private static List<String> deleteEmpty(List<String> list) {
+        List<String> result = new ArrayList<>();
+
+        for (String item : list) {
+            if (item.equals(""))
+                continue;
+            result.add(item);
+        }
+
+        return result;
     }
 }
