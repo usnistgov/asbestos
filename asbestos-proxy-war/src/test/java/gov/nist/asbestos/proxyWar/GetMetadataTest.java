@@ -1,5 +1,6 @@
 package gov.nist.asbestos.proxyWar;
 
+import gov.nist.asbestos.asbestosProxy.wrapper.ChannelControlServlet;
 import gov.nist.asbestos.client.events.Event;
 import gov.nist.asbestos.client.events.EventStoreItem;
 import gov.nist.asbestos.client.events.EventStoreSearch;
@@ -52,22 +53,27 @@ class GetMetadataTest {
         // Begin Mock
         channelSetupRequest = mock(HttpServletRequest.class);
         channelSetupResponse = mock(HttpServletResponse.class);
-        Support.sendChannelConfig(channelSetupRequest, "/proxy/prox/", "/proxy/prox/", testSession, channelId);
+        Support.sendChannelConfig(channelSetupRequest, "/proxy/channel/", "/proxy/channel/", testSession, channelId);
 
         final StubServletOutputStream servletOutputStream = new StubServletOutputStream();
         when(channelSetupResponse.getOutputStream()).thenReturn(servletOutputStream);
 
-        // Create channel
+
         ProxyServlet ps = new ProxyServlet();
         ps.setExternalCache(externalCache);
-        ps.doPost(channelSetupRequest, channelSetupResponse);
+
+        ChannelControlServlet ccs = new ChannelControlServlet();
+        ccs.setExternalCache(externalCache);
+
+        // Create channel
+        ccs.doPost(channelSetupRequest, channelSetupResponse);
 
         //
         // BUILD GETMETADATA REQUEST/MOCK
         //
         getSetupRequest = mock(HttpServletRequest.class);
         getSetupResponse = mock(HttpServletResponse.class);
-        Support.mockServlet(getSetupRequest, "http://localhost:8081/proxy/prox/" + testSession + "__" + channelId + "/Channel/metadata", "/proxy/prox/" + testSession + "__" + channelId + "/Channel/metadata");
+        Support.mockServlet(getSetupRequest, "http://localhost:8081/proxy/fhir/" + testSession + "__" + channelId + "/metadata", "/proxy/fhir/" + testSession + "__" + channelId + "/metadata");
 
         final StubServletOutputStream servletOutputStream2 = new StubServletOutputStream();
         when(getSetupResponse.getOutputStream()).thenReturn(servletOutputStream2);
@@ -95,7 +101,7 @@ class GetMetadataTest {
         assertTrue(event.getRequestHeaderFile(taski).exists());
 
         assertTrue(event.getRequestHeaderFile(taski).exists());
-        assertEquals("/proxy/prox/" + testSession + "__" + channelId + "/Channel/metadata", "/proxy/prox/" + testSession + "__" + channelId + "/Channel/metadata", task.getRequestHeader().getPathInfo().toString());
+        assertEquals("/proxy/channel/" + testSession + "__" + channelId + "/fhir/metadata", "/proxy/channel/" + testSession + "__" + channelId + "/fhir/metadata", task.getRequestHeader().getPathInfo().toString());
         assertEquals("GET", task.getRequestHeader().getVerb());
         assertTrue(event.getResponseHeaderFile(taski).exists());
         assertEquals(200, task.getResponseHeader().getStatus());
@@ -104,7 +110,7 @@ class GetMetadataTest {
         assertTrue(event.getResponseBodyStringFile(taski).exists());
 
         assertTrue(event.getRequestHeaderFile(taski).exists());
-        assertEquals("/proxy/prox/" + testSession + "__" + channelId + "/Channel/metadata", "/proxy/prox/" + testSession + "__" + channelId + "/Channel/metadata", task.getRequestHeader().getPathInfo().toString());
+        assertEquals("/proxy/channel/" + testSession + "__" + channelId + "/fhir/metadata", "/proxy/channel/" + testSession + "__" + channelId + "/fhir/metadata", task.getRequestHeader().getPathInfo().toString());
         assertEquals("GET", task.getRequestHeader().getVerb());
         assertTrue(event.getResponseHeaderFile(taski).exists());
         assertEquals(200, task.getResponseHeader().getStatus());

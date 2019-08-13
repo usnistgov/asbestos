@@ -2,6 +2,9 @@ package gov.nist.asbestos.sharedObjects;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 
 public class ChannelConfig {
@@ -23,22 +26,21 @@ public class ChannelConfig {
     // TODO test needed
     public URI translateEndpointToFhirBase(URI req) throws URISyntaxException {
         String path  = req.getPath();
-        int channelI = path.indexOf("/Channel");
-        if (channelI != -1) {
-            int beyondChannelI = channelI + "/Channel".length();
-            String pathPart = path.substring(beyondChannelI);
-            path =  pathPart;
-        }
-        String scheme = req.getScheme();
-        String userInfo = req.getUserInfo();
-        String host = req.getHost();
-        int port = req.getPort();
+        List<String> parts1 = Arrays.asList(path.split("/"));
+        List<String> parts = new ArrayList<>(parts1);  // deletable
+        // 0 - empty
+        // 1 - proxy (appContext)
+        // 2 - fhir
+        // 3 - channelId
+        // 4+ - parts to pass on the FHIR server
+        parts.remove(0);
+        parts.remove(0);
+        parts.remove(0);
+        parts.remove(0);
         String query = req.getQuery();
-        String frag = req.getFragment();
 
-        String uriString = fhirBase + path + (query == null || query.equals("") ? "" : "?" + query);
+        String uriString = fhirBase + "/" +  String.join("/", parts) + (query == null || query.equals("") ? "" : "?" + query);
         URI uri = new URI(uriString);
-//        URI uri = new URI(scheme, userInfo, host, port, path, query, frag);
         return uri;
     }
 

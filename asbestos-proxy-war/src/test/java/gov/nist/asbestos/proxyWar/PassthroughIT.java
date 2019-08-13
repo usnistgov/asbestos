@@ -33,13 +33,13 @@ class PassthroughIT {
    // @Test
     void deleteChannelsTest() throws URISyntaxException, IOException {
         deleteChannels();
-        assertEquals(404, new HttpGet().getJson(new URI("http://localhost:" + fhirPort + "/proxy/prox/default__fhirpass")).getStatus());
+        assertEquals(404, new HttpGet().getJson(new URI("http://localhost:" + fhirPort + "/proxy/channel/default__fhirpass")).getStatus());
     }
 
     private void deleteChannels() {
-        new HttpDelete().run("http://localhost:" + proxyPort + "/proxy/prox/default__fhirpass");
-        new HttpDelete().run("http://localhost:"  + proxyPort + "/proxy/prox/default__test");
-        new HttpDelete().run("http://localhost:" + proxyPort + "/proxy/prox/default__abc");
+        new HttpDelete().run("http://localhost:" + proxyPort + "/proxy/channel/default__fhirpass");
+        new HttpDelete().run("http://localhost:"  + proxyPort + "/proxy/channel/default__test");
+        new HttpDelete().run("http://localhost:" + proxyPort + "/proxy/channel/default__abc");
     }
 
     @Test
@@ -81,12 +81,12 @@ class PassthroughIT {
                 .setFhirBase("http://localhost:" + fhirPort + "/fhir/fhir");
         String json = ChannelConfigFactory.convert(channelConfig);
         HttpPost poster = new HttpPost();
-        poster.postJson(new URI("http://localhost:" + proxyPort + "/proxy/prox"), json);
+        poster.postJson(new URI("http://localhost:" + proxyPort + "/proxy/channel"), json);
         int status = poster.getStatus();
         if (!(status == 200 || status == 201))
             fail("200 or 201 required - returned " + status);
         //return "http://localhost:8080/fhir/fhir";
-        return "http://localhost:" + proxyPort + "/proxy/prox/" + testSession + "__" + channelId + "/Channel";
+        return "http://localhost:" + proxyPort + "/proxy/fhir/" + testSession + "__" + channelId;
     }
 
 }

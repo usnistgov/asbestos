@@ -11,8 +11,7 @@ import gov.nist.asbestos.simapi.tk.installation.Installation;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
-import java.util.Date;
-import java.util.Objects;
+import java.util.*;
 
 import static java.lang.Thread.sleep;
 
@@ -72,6 +71,26 @@ public class SimStore {
         return  _simStoreLocation;
     }
 
+    // format for each id is testsession/id
+    public List<String> getChannelIds() {
+        List<String> results = new ArrayList<>();
+        File psimdb = new File(externalCache, PSIMDB);
+        if (psimdb.isDirectory() && psimdb.canRead()) {
+            File[] psimdbFiles = psimdb.listFiles();
+            if (psimdbFiles != null) {
+                for (File testSession : psimdbFiles) {
+                    File[] idFiles = testSession.listFiles();
+                    if (idFiles != null) {
+                        for (File id : idFiles) {
+                            results.add(testSession.getName() + "/" + id.getName());
+                        }
+                    }
+                }
+            }
+        }
+        return results;
+    }
+
     public SimStore create(ChannelConfig channelConfig) {
         this.channelConfig = channelConfig;
         getStore(true);
@@ -85,7 +104,10 @@ public class SimStore {
 
     public SimStore open() {
         getStore(false);
-        channelConfig = ChannelConfigFactory.load(new File(getChannelDir(), CHANNEL_CONFIG_FILE));
+        if (!existsChannelDir())
+            throw new RuntimeException("Channel does not exist");
+        File file = new File(getChannelDir(), CHANNEL_CONFIG_FILE);
+        channelConfig = ChannelConfigFactory.load(file);
         channelId = getSimId(channelConfig);
         channelId.validate();
         return this;
@@ -112,7 +134,8 @@ public class SimStore {
 
     public void deleteSim() {
         try {
-            FileUtils.deleteDirectory(getChannelDir());
+            File dir = getChannelDir();
+            FileUtils.deleteDirectory(dir);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -140,7 +163,7 @@ public class SimStore {
         channelId.setActorType(actor);
     }
 
-    public boolean existsSimDir() {
+    public boolean existsChannelDir() {
         Objects.requireNonNull(channelId);
         if (_channelIdDir == null)
             _channelIdDir = new File(getStore(), channelId.getId());

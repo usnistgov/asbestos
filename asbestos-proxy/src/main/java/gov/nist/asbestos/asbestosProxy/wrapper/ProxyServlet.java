@@ -52,30 +52,12 @@ public class ProxyServlet extends HttpServlet {
     @Override
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
+        log.info("ProxyServlet init");
         String ec = config.getInitParameter("ExternalCache");
         setExternalCache(new File(ec));
-    }
 
-    private static URI buildURI(HttpServletRequest req) {
-        Map<String, List<String>> parms = req.getParameterMap();
-        parms = fixParmMap(parms);
-        return HttpBase.buildURI(req.getRequestURI(), parms);
-    }
-
-    private static Map<String, List<String>> fixParmMap(Map<String, List<String>> parms) {
-        Map<String, List<String>> map = new HashMap<>();
-        for (String key : parms.keySet()) {
-            if (key.contains("=")) {
-                String[] parts = key.split("=");
-                String theKey = parts[0];
-                String[] values = parts[1].split(",");
-                List<String> theValues = new ArrayList<>(Arrays.asList(values));
-                map.put(theKey, theValues);
-            } else {
-                map.put(key, parms.get(key));
-            }
-        }
-        return map;
+        // announce location of ExternalCache to other servlets
+        config.getServletContext().setAttribute("ExternalCache", ec);
     }
 
     private static String[] addEventHeader(HttpServletResponse resp, String hostport, Task task) {
@@ -133,7 +115,7 @@ public class ProxyServlet extends HttpServlet {
     // http://host:port/appContext/prox/simId
     @Override
     public void doPost(HttpServletRequest req, HttpServletResponse resp)  {
-        URI uri = buildURI(req);
+        URI uri = Common.buildURI(req);
         log.info("doPost " + uri);
         SimStore simStore;
         try {
@@ -210,7 +192,7 @@ public class ProxyServlet extends HttpServlet {
 
     @Override
     public void doDelete(HttpServletRequest req, HttpServletResponse resp)  {
-        URI uri = buildURI(req);
+        URI uri = Common.buildURI(req);
         log.info("doDelete  " + uri);
         doGetDelete(req, resp, uri, Verb.DELETE);
     }
@@ -257,7 +239,7 @@ public class ProxyServlet extends HttpServlet {
 
     @Override
     public void doGet(HttpServletRequest req, HttpServletResponse resp)  {
-        URI uri = buildURI(req);
+        URI uri = Common.buildURI(req);
         log.info("doGet " + uri);
         doGetDelete(req, resp, uri, Verb.GET);
     }
@@ -364,7 +346,7 @@ public class ProxyServlet extends HttpServlet {
 
     private void respondWithError(HttpServletRequest req, HttpServletResponse resp, Throwable t, Headers inHeaders, Task clientTask) {
         log.error(ExceptionUtils.getStackTrace(t));
-        if (new Ref(buildURI(req)).isQuery()) {
+        if (new Ref(Common.buildURI(req)).isQuery()) {
             Bundle bundle = wrapInBundle(wrapInOutcome(t));
             respond(resp, bundle, inHeaders, clientTask);
         } else {
@@ -374,7 +356,7 @@ public class ProxyServlet extends HttpServlet {
     }
 
     private void respondWithError(HttpServletRequest req, HttpServletResponse resp, String msg, Headers inHeaders, Task clientTask) {
-        if (new Ref(buildURI(req)).isQuery()) {
+        if (new Ref(Common.buildURI(req)).isQuery()) {
             Bundle bundle = wrapInBundle(wrapInOutcome(msg));
             respond(resp, bundle, inHeaders, clientTask);
         } else {
@@ -443,7 +425,7 @@ public class ProxyServlet extends HttpServlet {
         Headers headers = new Headers(hdrs);
         headers.setVerb(verb.toString());
         try {
-            headers.setPathInfo(buildURI(req));
+            headers.setPathInfo(Common.buildURI(req));
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -656,49 +638,49 @@ public class ProxyServlet extends HttpServlet {
 
             String parmameterString = uri.getQuery();
 
-            if (verb == Verb.POST) {
-                String rawRequest = IOUtils.toString(req.getInputStream(), Charset.defaultCharset());   // json
-                log.debug("CREATESIM " + rawRequest);
-                ChannelConfig channelConfig = ChannelConfigFactory.convert(rawRequest);
-                simStore = new SimStore(externalCache,
-                        new SimId(new TestSession(channelConfig.getTestSession()),
-                                channelConfig.getChannelId(),
-                                channelConfig.getActorType(),
-                                channelConfig.getEnvironment(),
-                                true));
-
-                simStore.create(channelConfig);
-                log.info("Channel " + simStore.getChannelId().toString() + " created (type " + simStore.getActorType() + ")" );
-
-                resp.setContentType("application/json");
-                resp.getOutputStream().print(rawRequest);
-
-
-                resp.setStatus((simStore.isNewlyCreated() ? resp.SC_CREATED : resp.SC_OK));
-                log.info("OK");
-                return null;  // trigger - we are done - exit now
-            } else  if (parmameterString != null) {  // GET with parameters - also CREATE SIM
-                Map<String, List<String>> queryMap = HttpBase.mapFromQuery(parmameterString);
-                String json = new ObjectMapper().writeValueAsString(HttpBase.flattenQueryMap(queryMap));
-                ChannelConfig channelConfig = ChannelConfigFactory.convert(json);
-                SimId simId = new SimId(new TestSession(channelConfig.getTestSession()), channelConfig.getChannelId());
-                simStore = new SimStore(externalCache, simId);
-
-                resp.setContentType("application/json");
-                resp.getOutputStream().print(json);
-
-
-                resp.setStatus((simStore.isNewlyCreated() ? resp.SC_CREATED : resp.SC_OK));
-                log.info("OK");
-                return null;
-            }
+//            if (verb == Verb.POST) {
+//                String rawRequest = IOUtils.toString(req.getInputStream(), Charset.defaultCharset());   // json
+//                log.debug("CREATESIM " + rawRequest);
+//                ChannelConfig channelConfig = ChannelConfigFactory.convert(rawRequest);
+//                simStore = new SimStore(externalCache,
+//                        new SimId(new TestSession(channelConfig.getTestSession()),
+//                                channelConfig.getChannelId(),
+//                                channelConfig.getActorType(),
+//                                channelConfig.getEnvironment(),
+//                                true));
+//
+//                simStore.create(channelConfig);
+//                log.info("Channel " + simStore.getChannelId().toString() + " created (type " + simStore.getActorType() + ")" );
+//
+//                resp.setContentType("application/json");
+//                resp.getOutputStream().print(rawRequest);
+//
+//
+//                resp.setStatus((simStore.isNewlyCreated() ? resp.SC_CREATED : resp.SC_OK));
+//                log.info("OK");
+//                return null;  // trigger - we are done - exit now
+//            } else  if (parmameterString != null) {  // GET with parameters - also CREATE SIM
+//                Map<String, List<String>> queryMap = HttpBase.mapFromQuery(parmameterString);
+//                String json = new ObjectMapper().writeValueAsString(HttpBase.flattenQueryMap(queryMap));
+//                ChannelConfig channelConfig = ChannelConfigFactory.convert(json);
+//                SimId simId = new SimId(new TestSession(channelConfig.getTestSession()), channelConfig.getChannelId());
+//                simStore = new SimStore(externalCache, simId);
+//
+//                resp.setContentType("application/json");
+//                resp.getOutputStream().print(json);
+//
+//
+//                resp.setStatus((simStore.isNewlyCreated() ? resp.SC_CREATED : resp.SC_OK));
+//                log.info("OK");
+//                return null;
+//            }
         }
 
         SimId simId = null;
 
         if (uriParts.size() >= 4) {
             // /appContext/prox/channelId
-            if (uriParts.get(0).equals("") && uriParts.get(2).equals("prox")) { // no appContext
+            if (uriParts.get(0).equals("") && uriParts.get(2).equals("fhir")) { // no appContext
                 simId = SimId.buildFromRawId(uriParts.get(3));
                 simStore = new SimStore(externalCache, simId);
                 if (!simStore.exists()) {
@@ -713,11 +695,7 @@ public class ProxyServlet extends HttpServlet {
                 uriParts.remove(0);  // channelId
 
                 if (!simStore.exists()) {
-                    if (verb == Verb.DELETE) {
-                        resp.setStatus(resp.SC_OK);
-                    } else {
-                        resp.setStatus(resp.SC_NOT_FOUND);
-                    }
+                    resp.setStatus(resp.SC_NOT_FOUND);
                     return null;
                 }
                 if (uriParts.isEmpty() && verb == Verb.GET) {
@@ -735,13 +713,13 @@ public class ProxyServlet extends HttpServlet {
 
         simStore = new SimStore(externalCache, simId);
 
-        if (verb == Verb.DELETE) {
-            Ref ref = new Ref(uri);
-            if (!ref.hasResource()) {
-                simStore.deleteSim();
-                return null;  // delete channel
-            }
-        }
+//        if (verb == Verb.DELETE) {
+//            Ref ref = new Ref(uri);
+//            if (!ref.hasResource()) {
+//                simStore.deleteSim();
+//                return null;  // delete channel
+//            }
+//        }
 
         //
         // everything above this is handling control operations
@@ -754,11 +732,6 @@ public class ProxyServlet extends HttpServlet {
         // the request targets a Channel - maybe a control message or a pass through.
         // pass through have Channel/ as the next element of the URI
 
-
-        if (!uriParts.isEmpty()) {
-            simStore.setChannel(uriParts.get(0).equals("Channel"));   // Channel -> message passes through to backend system
-            uriParts.remove(0);
-        }
 
         if (!uriParts.isEmpty()) {
             simStore.setResource(uriParts.get(0));

@@ -6,7 +6,7 @@
   <display-name>Asbestos Proxy</display-name>
 
   <servlet>
-    <servlet-name>Proxy</servlet-name>
+    <servlet-name>ProxyService</servlet-name>
     <servlet-class>gov.nist.asbestos.asbestosProxy.wrapper.ProxyServlet</servlet-class>
     <init-param>
       <param-name>ExternalCache</param-name>
@@ -16,13 +16,29 @@
   </servlet>
 
   <servlet>
+    <servlet-name>ChannelControl</servlet-name>
+    <servlet-class>gov.nist.asbestos.asbestosProxy.wrapper.ChannelControlServlet</servlet-class>
+    <load-on-startup>2</load-on-startup>
+  </servlet>
+
+  <servlet>
     <servlet-name>logViewer</servlet-name>
     <servlet-class>gov.nist.asbestos.asbestosProxy.wrapper.ProxyLogServlet</servlet-class>
   </servlet>
 
   <servlet-mapping>
-    <servlet-name>Proxy</servlet-name>
-    <url-pattern>/prox/*</url-pattern>
+    <servlet-name>ProxyService</servlet-name>
+    <url-pattern>/fhir/*</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>ChannelControl</servlet-name>
+    <url-pattern>/channel/*</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>ChannelControl</servlet-name>
+    <url-pattern>/channel</url-pattern>
   </servlet-mapping>
 
   <servlet-mapping>
