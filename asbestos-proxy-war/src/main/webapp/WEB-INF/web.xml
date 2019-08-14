@@ -40,15 +40,22 @@
     <servlet-name>ChannelControl</servlet-name>
     <url-pattern>/channel</url-pattern>
   </servlet-mapping>
-
-  <filter>
-    <filter-name>CorsFilter</filter-name>
-    <filter-class>org.apache.catalina.filters.CorsFilter</filter-class>
-  </filter>
-  <filter-mapping>
-    <filter-name>CorsFilter</filter-name>
-    <url-pattern> /* </url-pattern>
-  </filter-mapping>
+    <filter>
+        <filter-name>CORS</filter-name>
+        <filter-class>com.thetransactioncompany.cors.CORSFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>CORS</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+<!--  <filter>-->
+<!--    <filter-name>CorsFilter</filter-name>-->
+<!--    <filter-class>org.apache.catalina.filters.CorsFilter</filter-class>-->
+<!--  </filter>-->
+<!--  <filter-mapping>-->
+<!--    <filter-name>CorsFilter</filter-name>-->
+<!--    <url-pattern> /* </url-pattern>-->
+<!--  </filter-mapping>-->
 
   <servlet-mapping>
     <servlet-name>logViewer</servlet-name>

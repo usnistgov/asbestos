@@ -1,5 +1,7 @@
 package gov.nist.asbestos.proxyWar;
 
+import com.google.common.reflect.TypeToken;
+import com.google.gson.Gson;
 import gov.nist.asbestos.http.operations.HttpDelete;
 import gov.nist.asbestos.http.operations.HttpGet;
 import gov.nist.asbestos.http.operations.HttpPost;
@@ -9,6 +11,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -140,13 +143,12 @@ class CreateChannelIT {
         getter.get("http://localhost:"+ proxyPort + "/proxy/channel");
         assertEquals(200, getter.getStatus());
         String response = getter.getResponseText();
-        List<String> response2 = Arrays.asList(response.split("\n"));
-        List<String> theResponse = new ArrayList<>(response2);
-        theResponse = deleteEmpty(theResponse);
-        assertEquals(3, theResponse.size());
-        assertTrue(theResponse.contains("default/test2"));
-        assertTrue(theResponse.contains("default/fhirpass"));
-        assertTrue(theResponse.contains("default/test1"));
+
+        Type stringListType = new TypeToken<ArrayList<String>>(){}.getType();
+        List<String> aList = new Gson().fromJson(response, stringListType);
+
+        assertTrue(aList.contains("default/test1"));
+        assertTrue(aList.contains("default/test2"));
     }
 
     private static List<String> deleteEmpty(List<String> list) {

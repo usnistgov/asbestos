@@ -1,4 +1,4 @@
-package gov.nist.asbestos.proxyWar;
+package gov.nist.asbestos.asbestosProxy.mhdChannel;
 
 import gov.nist.asbestos.asbestosProxy.wrapper.ChannelControlServlet;
 import gov.nist.asbestos.client.events.Event;
@@ -18,8 +18,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 

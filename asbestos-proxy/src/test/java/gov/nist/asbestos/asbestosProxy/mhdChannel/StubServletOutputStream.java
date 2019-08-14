@@ -1,4 +1,4 @@
-package gov.nist.asbestos.proxyWar;
+package gov.nist.asbestos.asbestosProxy.mhdChannel;
 
 import javax.servlet.ServletOutputStream;
 import java.io.ByteArrayOutputStream;
