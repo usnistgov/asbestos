@@ -5,10 +5,10 @@
         </div>
 
         <div v-for="channelId in $store.state.base.channelIds" :key="channelId">
-            <router-link class="" v-bind:to="">
+            <router-link class="element-nav" v-bind:to="channelLink(channelId)">
                 {{ channelId }}
             </router-link>
-            {{channelId}}
+            The Channel {{channelId}}
         </div>
     </div>
 </template>
@@ -25,7 +25,9 @@
         ],
         components: { },
         methods: {
-            chooseChannel
+            channelLink(channelId) {
+                return '/channel/' + channelId
+            },
         },
         name: "ChannelNav"
     }
@@ -34,5 +36,9 @@
 <style scoped>
     .channel-panel-header {
         font-weight: bold;
+    }
+    .element-nav {
+        position: relative;
+        left: 0px;
     }
 </style>

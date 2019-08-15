@@ -3,7 +3,7 @@
         <div class="window">
             <form class="grid-container">
                 <label class="grid-name">Id</label>
-                <div class="grid-item">{{ $route.params.channelId }}</div>
+                <div class="grid-item">{{ this.$parent.channelId }}</div>
 
                 <label class="grid-name">Test Session</label>
 
@@ -15,10 +15,21 @@
 
 <script>
     import {store} from "../store"
+    import axios from 'axios'
+
     export default {
         data () {
             return {
-                current: null
+
+            }
+        },
+        methods: {
+            loadChannel(channelId) {
+                axios.get(`http://localhost:8081/proxy/channel` + channelId)
+                    .then(response => {
+                        this.$store.commit('installChannel', response.data)
+                    })
+                // .catch...
             }
         },
         store: store,

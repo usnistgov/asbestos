@@ -3,7 +3,6 @@ import Vuex from 'vuex'
 
 Vue.use(Vuex)
 
-// TODO: When assigning id - check it doesnt already exist
 export const baseStore = {
     state() {
         return {
@@ -27,11 +26,16 @@ export const baseStore = {
         },
         installChannelIds(state, channelIds) {
             state.channelIds.length = 0
+            state.channels.length = 0
             for (let i in channelIds) {
                 const theId = channelIds[i]
                 state.channelIds.push(theId)
+                state.channels.push(null)
             }
         },
+
+
+
         clearTests(state) {
             state.testIds.length = 0
             state.tests.length = 0

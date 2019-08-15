@@ -16,6 +16,7 @@
     export default {
         data() {
             return {
+                currentChannelId: null
             }
         },
         components: { ChannelNav, ChannelView },
@@ -28,6 +29,12 @@
                 axios.get(`http://localhost:8081/proxy/channel`)
                     .then(response => {
                         this.$store.commit('installChannelIds', response.data)
+                        const channels = response.data
+                        if (channels.length == 0) {
+                            this.currentChannelId = null
+                        } else {
+                            this.currentChannelId = channels[0].channelId
+                        }
                     })
                 // .catch...
             }
