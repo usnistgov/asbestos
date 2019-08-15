@@ -2,12 +2,8 @@ package gov.nist.asbestos.asbestosProxy.wrapper;
 
 import com.google.gson.Gson;
 import gov.nist.asbestos.client.log.SimStore;
-import gov.nist.asbestos.client.resolver.Ref;
-import gov.nist.asbestos.http.operations.Verb;
 import gov.nist.asbestos.sharedObjects.ChannelConfig;
 import gov.nist.asbestos.sharedObjects.ChannelConfigFactory;
-import gov.nist.asbestos.sharedObjects.GenericJSFactory;
-import gov.nist.asbestos.sharedObjects.StringList;
 import gov.nist.asbestos.simapi.simCommon.SimId;
 import gov.nist.asbestos.simapi.simCommon.TestSession;
 import org.apache.commons.io.IOUtils;

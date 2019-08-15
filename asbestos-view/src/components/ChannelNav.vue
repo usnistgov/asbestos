@@ -5,14 +5,23 @@
         </div>
 
         <div v-for="channelId in $store.state.base.channelIds" :key="channelId">
-            Channel {{channelId}}
+            {{channelId}}
         </div>
     </div>
 </template>
 
 <script>
     export default {
-        name: "ChannelPanel"
+        data() {
+            return {
+
+            }
+        },
+        props: [
+            'channelId'  // channelId of channel currently being displayed
+        ],
+        components: { },
+        name: "ChannelNav"
     }
 </script>
 

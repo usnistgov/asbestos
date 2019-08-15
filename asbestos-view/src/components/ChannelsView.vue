@@ -1,7 +1,8 @@
 <template>
     <div class="main">
         <div class="nav">
-            <channel-panel></channel-panel>
+            <channel-nav></channel-nav>
+            <channel-view></channel-view>
         </div>
         <router-view class="body" name="panel"></router-view>
     </div>
@@ -9,14 +10,15 @@
 
 <script>
     import axios from 'axios'
-    import ChannelPanel from "./ChannelPanel"
+    import ChannelNav from "./ChannelNav"
+    import ChannelView from "./ChannelView"
 
     export default {
         data() {
             return {
             }
         },
-        components: { ChannelPanel },
+        components: { ChannelNav, ChannelView },
         name: "ChannelsView",
         mounted() {
             this.loadChannelNames()

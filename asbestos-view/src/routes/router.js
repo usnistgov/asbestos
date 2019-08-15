@@ -3,6 +3,7 @@ import VueRouter from 'vue-router'
 import TopLayout from "../components/TopLayout";
 import TestPanel from '@/components/TestPanel.vue'
 import VariableEdit from '@/components/VariableEdit.vue'
+import ChannelsView from "../components/ChannelsView";
 
 
 Vue.use( VueRouter )
@@ -29,7 +30,8 @@ export const routes = [
                 ]
             }
         ]
-    }
+    },
+    { path: '/channel/:channelId', component: ChannelsView }
 ]
 
 export const router = new VueRouter({
