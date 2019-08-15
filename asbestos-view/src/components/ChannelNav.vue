@@ -5,6 +5,9 @@
         </div>
 
         <div v-for="channelId in $store.state.base.channelIds" :key="channelId">
+            <router-link class="" v-bind:to="">
+                {{ channelId }}
+            </router-link>
             {{channelId}}
         </div>
     </div>
@@ -21,6 +24,9 @@
             'channelId'  // channelId of channel currently being displayed
         ],
         components: { },
+        methods: {
+            chooseChannel
+        },
         name: "ChannelNav"
     }
 </script>
