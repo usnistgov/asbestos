@@ -10,10 +10,27 @@ as a git submodule.
 # To clone from github
 
     git clone https://github.com/usnistgov/asbestos.git 
-
+    
 to pull shell of project. This will create directory asbestos
 
     cd asbestos
+    
+next you will need the Javascript utilities if they are not already present (this shows what I did on Ubuntu - YMMV)
+
+Install Yarn
+    
+    curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -
+    echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
+    sudo apt-get update && sudo apt-get install yarn
+    sudo apt-get update && sudo apt-get install --no-install-recommends yarn
+    
+verify 
+ 
+     yarn --version
+     
+Add Vue utilities
+
+    sudo yarn global add @vue/cli
     
 to update the Javascript dependencies. These can be run at any time to refresh the Javascript libraries. Then run:
 
