@@ -2,7 +2,9 @@
     <div class="main">
         <div class="nav">
             <channel-nav></channel-nav>
-            <channel-view></channel-view>
+            <div v-if="$route.params.index">
+                <channel-view :index="$route.params.index"></channel-view>
+            </div>
         </div>
         <router-view class="body" name="panel"></router-view>
     </div>
@@ -16,10 +18,13 @@
     export default {
         data() {
             return {
-                currentChannelId: null
+
             }
         },
-        components: { ChannelNav, ChannelView },
+        components: {
+            ChannelNav,
+            ChannelView
+        },
         name: "ChannelsView",
         mounted() {
             this.loadChannelNames()
@@ -29,12 +34,6 @@
                 axios.get(`http://localhost:8081/proxy/channel`)
                     .then(response => {
                         this.$store.commit('installChannelIds', response.data)
-                        const channels = response.data
-                        if (channels.length == 0) {
-                            this.currentChannelId = null
-                        } else {
-                            this.currentChannelId = channels[0].channelId
-                        }
                     })
                 // .catch...
             }

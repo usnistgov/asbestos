@@ -3,7 +3,7 @@
         <div class="window">
             <form class="grid-container">
                 <label class="grid-name">Id</label>
-                <div class="grid-item">{{ this.$parent.channelId }}</div>
+                <div class="grid-item">{{ this.id }}</div>
 
                 <label class="grid-name">Test Session</label>
 
@@ -20,16 +20,22 @@
     export default {
         data () {
             return {
-
+                channel: null
             }
         },
+        props: [
+            'index'
+        ],
         methods: {
-            loadChannel(channelId) {
-                axios.get(`http://localhost:8081/proxy/channel` + channelId)
-                    .then(response => {
-                        this.$store.commit('installChannel', response.data)
-                    })
-                // .catch...
+            loadChannel(index) {
+                if (this.$store.channels[index] == null) {
+                    axios.get(`http://localhost:8081/proxy/channel` + channelId)
+                        .then(response => {
+                            this.$store.commit('installChannel', response.data)
+                        })
+                    // .catch...
+                }
+                this.channel = this.$store.channels[index]
             }
         },
         store: store,

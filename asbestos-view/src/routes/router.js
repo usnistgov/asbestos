@@ -28,10 +28,15 @@ export const routes = [
 
                     }
                 ]
+            },
+            {
+                path: 'channels', component: ChannelsView
+            },
+            {
+                path: 'channel/:index', component: ChannelsView
             }
         ]
-    },
-    { path: '/channel/:channelId', component: ChannelsView }
+    }
 ]
 
 export const router = new VueRouter({

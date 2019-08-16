@@ -4,11 +4,11 @@
             Channels
         </div>
 
-        <div v-for="channelId in $store.state.base.channelIds" :key="channelId">
-            <router-link class="element-nav" v-bind:to="channelLink(channelId)">
-                {{ channelId }}
+        <div v-for="(channelId, index) in $store.state.base.channelIds" :key="channelId">
+            <router-link class="element-nav" v-bind:to="channelLink(index)">
+                {{index}} - {{ channelId }}
             </router-link>
-            The Channel {{channelId}}
+
         </div>
     </div>
 </template>
@@ -21,12 +21,12 @@
             }
         },
         props: [
-            'channelId'  // channelId of channel currently being displayed
+            'channelId'  // channelId - testsession/id
         ],
         components: { },
         methods: {
-            channelLink(channelId) {
-                return '/channel/' + channelId
+            channelLink(index) {
+                return '/channel/' + index
             },
         },
         name: "ChannelNav"

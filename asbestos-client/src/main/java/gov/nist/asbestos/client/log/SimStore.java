@@ -71,7 +71,7 @@ public class SimStore {
         return  _simStoreLocation;
     }
 
-    // format for each id is testsession/id
+    // format for each id is testsession__id
     public List<String> getChannelIds() {
         List<String> results = new ArrayList<>();
         File psimdb = new File(externalCache, PSIMDB);
@@ -82,7 +82,7 @@ public class SimStore {
                     File[] idFiles = testSession.listFiles();
                     if (idFiles != null) {
                         for (File id : idFiles) {
-                            results.add(testSession.getName() + "/" + id.getName());
+                            results.add(testSession.getName() + "__" + id.getName());
                         }
                     }
                 }
