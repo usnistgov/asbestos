@@ -1,7 +1,7 @@
 <template>
     <div>
       <div>Top Layout</div>
-        <router-link to="/channels">Go To Channels</router-link>
+        <router-link to="/channels">Go To Channels</router-link><br />
         <router-link to="/test">Go To Test</router-link>
 <!--        <ToolBody></ToolBody>-->
 <!--        <ChannelsView></ChannelsView>-->

@@ -4,6 +4,7 @@ import TopLayout from "../components/TopLayout";
 import TestPanel from '@/components/TestPanel.vue'
 import VariableEdit from '@/components/VariableEdit.vue'
 import ChannelsView from "../components/ChannelsView";
+//import ChannelView from "../components/ChannelView";
 
 
 Vue.use( VueRouter )
@@ -33,7 +34,7 @@ export const routes = [
                 path: 'channels', component: ChannelsView
             },
             {
-                path: 'channel/:index', component: ChannelsView
+                path: 'channel/:channelIndex', component: ChannelView
             }
         ]
     }

@@ -15,14 +15,11 @@ export const baseStore = {
     },
     mutations: {
         installChannel(state, newChannel) {
-            const channelIndex = state.channels.findIndex( function(channel) {
-                return channel.channelId === newChannel.channelId
+            const thisChannelId = newChannel.testSession + '__' + newChannel.channelId
+            const channelIndex = state.channelIds.findIndex( function(channelId) {
+                return channelId === thisChannelId
             })
-            if (channelIndex === -1) {
-                state.channels.push(newChannel)
-            } else {
-                state.channels[channelIndex] = newChannel
-            }
+            state.channels[channelIndex] = newChannel
         },
         installChannelIds(state, channelIds) {
             state.channelIds.length = 0

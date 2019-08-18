@@ -3,7 +3,7 @@
         <div class="nav">
             <channel-nav></channel-nav>
             <div v-if="$route.params.index">
-                <channel-view :index="$route.params.index"></channel-view>
+                <channel-view v-bind:index="$route.params.index"></channel-view>
             </div>
         </div>
         <router-view class="body" name="panel"></router-view>

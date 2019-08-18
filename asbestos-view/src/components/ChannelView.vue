@@ -1,21 +1,41 @@
 <template>
     <div>
+        <flash-message></flash-message>
         <div class="window">
-            <form class="grid-container">
+            <div v-if="channel" class="grid-container">
                 <label class="grid-name">Id</label>
-                <div class="grid-item">{{ this.id }}</div>
+                <div class="grid-item">{{ channel.channelId }}</div>
 
                 <label class="grid-name">Test Session</label>
+                <div class="grid-item">{{ channel.testSession }}</div>
 
+                <label class="grid-name">Environment</label>
+                <div class="grid-item">{{ channel.environment }}</div>
 
-            </form>
+                <label class="grid-name">Actor Type</label>
+                <div class="grid-item">{{ channel.actorType }}</div>
+
+                <label class="grid-name">Channel Type</label>
+                <div class="grid-item">{{ channel.channelType }}</div>
+
+                <label class="grid-name">Fhir Base</label>
+                <div class="grid-item">{{ channel.fhirBase }}</div>
+
+                <label class="grid-name">XDS Site Name</label>
+                <div class="grid-item">{{ channel.xdsSiteName }}</div>
+
+            </div>
         </div>
     </div>
 </template>
 
 <script>
+    import Vue from 'vue'
     import {store} from "../store"
     import axios from 'axios'
+    import VueFlashMessage from 'vue-flash-message';
+    Vue.use(VueFlashMessage);
+    require('vue-flash-message/dist/vue-flash-message.min.css')
 
     export default {
         data () {
@@ -24,18 +44,28 @@
             }
         },
         props: [
-            'index'
+
         ],
+        created() {
+            this.fetch()
+        },
+        watch: {
+            '$route': 'fetch'
+        },
         methods: {
-            loadChannel(index) {
-                if (this.$store.channels[index] == null) {
-                    axios.get(`http://localhost:8081/proxy/channel` + channelId)
+            fetch() {
+                if (this.$store.state.base.channelIds.length === 0)
+                    return
+                const index = this.$route.params.channelIndex
+                const channelId = this.$store.state.base.channelIds[index]
+                if (this.$store.state.base.channels[index] === null) {
+                    axios.get(`http://localhost:8081/proxy/channel/` + channelId)
                         .then(response => {
                             this.$store.commit('installChannel', response.data)
+                            this.channel =  this.$store.state.base.channels[index]
                         })
                     // .catch...
                 }
-                this.channel = this.$store.channels[index]
             }
         },
         store: store,

@@ -6,7 +6,7 @@
 
         <div v-for="(channelId, index) in $store.state.base.channelIds" :key="channelId">
             <router-link class="element-nav" v-bind:to="channelLink(index)">
-                {{index}} - {{ channelId }}
+                {{ channelId }}
             </router-link>
 
         </div>
