@@ -2,17 +2,21 @@
   "name": "view",
   "version": "0.1.0",
   "private": true,
+  "description": "## Project setup ``` npm install ```",
+  "author": "",
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint"
   },
+  "main": "babel.config.js",
   "dependencies": {
     "axios": "^0.19.0",
     "clone-deep": "^4.0.1",
     "vue": "^2.6.6",
     "vue-flash-message": "^0.7.2",
     "vue-router": "^3.0.2",
+    "vuetify": "^2.0.0",
     "vuex": "^3.1.0"
   },
   "devDependencies": {
@@ -22,7 +26,11 @@
     "babel-eslint": "^10.0.1",
     "eslint": "^5.15.2",
     "eslint-plugin-vue": "^5.2.2",
-    "vue-template-compiler": "^2.5.21"
+    "sass": "^1.17.4",
+    "sass-loader": "^7.1.0",
+    "vue-cli-plugin-vuetify": "^0.6.3",
+    "vue-template-compiler": "^2.5.21",
+    "vuetify-loader": "^1.2.2"
   },
   "eslintConfig": {
     "root": true,
@@ -51,16 +59,13 @@
     "last 2 versions",
     "not ie <= 8"
   ],
-  "description": "## Project setup ``` npm install ```",
-  "main": "babel.config.js",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/iheos/view.git"
-  },
-  "author": "",
-  "license": "ISC",
   "bugs": {
     "url": "https://github.com/iheos/view/issues"
   },
-  "homepage": "https://github.com/iheos/view#readme"
+  "homepage": "https://github.com/iheos/view#readme",
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/iheos/view.git"
+  }
 }

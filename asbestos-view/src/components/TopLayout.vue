@@ -4,7 +4,7 @@
         <div class="divider"/>
         <router-link to="/test">Tests</router-link>
         <div class="divider"/>
-        <div v-if="$route.params.sessionId" class="right">Session: {{ $route.params.sessionId }}</div>
+        <div v-if="$route.params.sessionId" class="right">Test Session: {{ $route.params.sessionId }}</div>
         <router-view></router-view>
     </div>
 </template>

@@ -1,4 +1,4 @@
-<template>
+<template xmlns:v-slot="http://www.w3.org/1999/XSL/Transform">
     <div>
         <flash-message></flash-message>
         <div class="window">
@@ -10,7 +10,13 @@
                 </div>
                 <div v-else>
                     <img src="../assets/pencil-edit-button.png" @click="toggleEdit()"/>
+                    <img src="../assets/add-button.png" @click="addChannel()"/>
+                    <div class="divider"/>
+                    <div class="divider"/>
+                    <div class="divider"/>
+                    <img src="../assets/delete-button.png" @click="deleteChannel()"/>
                 </div>
+
 
 
                 <label class="grid-name">Id</label>
@@ -67,6 +73,9 @@
     Vue.use(VueFlashMessage);
     require('vue-flash-message/dist/vue-flash-message.min.css')
     const cloneDeep = require('clone-deep')
+    import Vuetify from 'vuetify/lib'
+
+    Vue.use(Vuetify)
 
     export default {
         data () {
@@ -85,6 +94,22 @@
             '$route': 'fetch'
         },
         methods: {
+            addChannel() {
+
+            },
+            channelId() {
+                  return this.channel.testSession + '__' + this.channel.channelId
+            },
+            deleteChannel() {
+                const index = this.$route.params.channelIndex
+                this.$store.commit('deleteChannel', this.channelId())
+                if (index < this.$store.state.base.channelIds.length) {
+                    this.$router.push('/session/' + this.$route.params.sessionId + '/channel/' + this.$route.params.channelIndex)
+                } else {
+                    this.$router.push('/session/' + this.$route.params.sessionId + '/channel/' + (this.$store.state.base.channelIds.length - 1))
+                }
+                this.fetch()
+            },
             toggleEdit() {
                 this.edit = !this.edit
             },
