@@ -1,9 +1,6 @@
 <template>
     <div>
-        <div class="channel-panel-header">
-            ChannelNav
-        </div>
-
+        Channels
         <div v-for="(channelId, index) in $store.state.base.channelIds" :key="channelId">
             <router-link class="element-nav" v-bind:to="channelLink(index)">
                 {{ channelId }}

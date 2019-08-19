@@ -1,23 +1,29 @@
 <template>
     <div>
-      <div>Top Layout</div>
-        <router-link to="/session/default/channel">Go To Channels</router-link><br />
-        <router-link to="/test">Go To Test</router-link>
-<!--        <ToolBody></ToolBody>-->
-<!--        <ChannelsView></ChannelsView>-->
+        <router-link to="/session/default/channel">Channels</router-link>
+        <div class="divider"/>
+        <router-link to="/test">Tests</router-link>
+        <div class="divider"/>
+        <div v-if="$route.params.sessionId" class="right">Session: {{ $route.params.sessionId }}</div>
         <router-view></router-view>
     </div>
 </template>
 
 <script>
-
-    // import ToolBody from "@/components/ToolBody.vue"
-    // import ChannelsView from "@/components/ChannelsView.vue"
     export default {
         name: 'TopLayout',
         components: {
-            // ToolBody,
-            // ChannelsView
         }
     }
 </script>
+<style scoped>
+    .divider{
+        width:5px;
+        height:auto;
+        display:inline-block;
+    }
+    .right {
+        display:inline-block;
+        float: right;
+    }
+</style>

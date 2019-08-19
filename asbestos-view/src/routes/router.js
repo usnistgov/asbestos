@@ -36,14 +36,13 @@ export const routes = [
                 children: [
                     {
                         path: 'channel', components: {
-                            default: ChannelNav,
-                            a: ChannelView
+                            nav: ChannelNav
                         }
                     },
                     {
                         path: 'channel/:channelIndex', components: {
-                            default: ChannelNav,
-                            a: ChannelView
+                            nav: ChannelNav,
+                            detail: ChannelView
                         }
                     }
                 ]
@@ -55,4 +54,6 @@ export const routes = [
 export const router = new VueRouter({
     mode: 'history',
     routes
-});
+})
+
+router.push('/session/default')
