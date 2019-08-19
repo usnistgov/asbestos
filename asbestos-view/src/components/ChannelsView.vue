@@ -1,7 +1,10 @@
 <template>
     <div class="main">
+        <div>
+            Channels
+        </div>
         <div class="nav">
-            <channel-nav></channel-nav>
+<!--            <channel-nav></channel-nav>-->
             <div v-if="$route.params.index">
                 <channel-view v-bind:index="$route.params.index"></channel-view>
             </div>
@@ -12,7 +15,7 @@
 
 <script>
     import axios from 'axios'
-    import ChannelNav from "./ChannelNav"
+    // import ChannelNav from "./ChannelNav"
     import ChannelView from "./ChannelView"
 
     export default {
@@ -22,12 +25,12 @@
             }
         },
         components: {
-            ChannelNav,
+            // ChannelNav,
             ChannelView
         },
         name: "ChannelsView",
         mounted() {
-            this.loadChannelNames()
+           // this.loadChannelNames()
         },
         methods: {
             loadChannelNames() {

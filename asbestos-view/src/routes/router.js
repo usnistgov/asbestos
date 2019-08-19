@@ -3,8 +3,9 @@ import VueRouter from 'vue-router'
 import TopLayout from "../components/TopLayout";
 import TestPanel from '@/components/TestPanel.vue'
 import VariableEdit from '@/components/VariableEdit.vue'
-import ChannelsView from "../components/ChannelsView";
-//import ChannelView from "../components/ChannelView";
+import ChannelView from "../components/ChannelView";
+import ChannelNav from "../components/ChannelNav";
+import SessionView from "../components/SessionView";
 
 
 Vue.use( VueRouter )
@@ -31,10 +32,21 @@ export const routes = [
                 ]
             },
             {
-                path: 'channels', component: ChannelsView
-            },
-            {
-                path: 'channel/:channelIndex', component: ChannelView
+                path: 'session/:sessionId', component: SessionView,
+                children: [
+                    {
+                        path: 'channel', components: {
+                            default: ChannelNav,
+                            a: ChannelView
+                        }
+                    },
+                    {
+                        path: 'channel/:channelIndex', components: {
+                            default: ChannelNav,
+                            a: ChannelView
+                        }
+                    }
+                ]
             }
         ]
     }

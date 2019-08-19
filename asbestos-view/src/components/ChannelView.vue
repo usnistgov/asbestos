@@ -1,6 +1,9 @@
 <template>
     <div>
         <flash-message></flash-message>
+        <div>
+            Channel {{ $route.params.channelIndex }}
+        </div>
         <div class="window">
             <div v-if="channel" class="grid-container">
                 <label class="grid-name">Id</label>
@@ -65,6 +68,8 @@
                             this.channel =  this.$store.state.base.channels[index]
                         })
                     // .catch...
+                } else {
+                    this.channel =  this.$store.state.base.channels[index]
                 }
             }
         },

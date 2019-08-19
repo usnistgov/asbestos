@@ -1,7 +1,7 @@
 <template>
     <div>
         <div class="channel-panel-header">
-            Channels
+            ChannelNav
         </div>
 
         <div v-for="(channelId, index) in $store.state.base.channelIds" :key="channelId">
@@ -14,6 +14,7 @@
 </template>
 
 <script>
+    import axios from 'axios'
     export default {
         data() {
             return {
@@ -21,13 +22,23 @@
             }
         },
         props: [
-            'channelId'  // channelId - testsession/id
+            'channelId'
         ],
         components: { },
+        mounted() {
+            this.loadChannelNames()
+        },
         methods: {
             channelLink(index) {
-                return '/channel/' + index
+                return '/session/default/channel/' + index
             },
+            loadChannelNames() {
+                axios.get(`http://localhost:8081/proxy/channel`)
+                    .then(response => {
+                        this.$store.commit('installChannelIds', response.data)
+                    })
+                // .catch...
+            }
         },
         name: "ChannelNav"
     }
