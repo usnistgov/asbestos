@@ -1,6 +1,7 @@
 <template>
     <div>
         Channels
+        <img @click="pushNewChannelRoute" src="../assets/add-button.png"/>
         <div v-for="(channelId, index) in $store.state.base.channelIds" :key="channelId">
             <router-link class="element-nav" v-bind:to="channelLink(index)">
                 {{ channelName(channelId) }}
@@ -11,6 +12,8 @@
 
 <script>
     import axios from 'axios'
+    import {newChannel} from '../types/channel'
+
     export default {
         data() {
             return {
@@ -25,6 +28,14 @@
             this.loadChannelNames()
         },
         methods: {
+            pushNewChannelRoute() {
+                return this.$router.push(this.newChannelRoute())
+            },
+            newChannelRoute() {
+                this.$store.commit('installChannel', newChannel())
+                const newId = this.$store.state.base.channelIds.length - 1
+                return '/session/' + this.$route.params.sessionId + '/channel/' + newId
+            },
             channelName(id) {
                 const sepat = id.indexOf('__')
                 return id.substring(sepat+2)
@@ -35,7 +46,8 @@
             loadChannelNames() {
                 axios.get(`http://localhost:8081/proxy/channel`)
                     .then(response => {
-                        this.$store.commit('installChannelIds', response.data.sort())
+                        let theResponse = response.data
+                        this.$store.commit('installChannelIds', theResponse.sort())
                     })
                 // .catch...
             }

@@ -10,7 +10,6 @@
                 </div>
                 <div v-else>
                     <img src="../assets/pencil-edit-button.png" @click="toggleEdit()"/>
-                    <img src="../assets/add-button.png" @click="addChannel()"/>
                     <div class="divider"/>
                     <div class="divider"/>
                     <div class="divider"/>
@@ -20,10 +19,20 @@
 
 
                 <label class="grid-name">Id</label>
-                <div class="grid-item">{{ channel.channelId }}</div>
+                <div v-if="isNew" class="grid-item">
+                    <input v-model="channel.channelId">
+                </div>
+                <div v-else class="grid-item">{{ channel.channelId }}</div>
 
                 <label class="grid-name">Test Session</label>
-                <div class="grid-item">{{ channel.testSession }}</div>
+                <div v-if="isNew" class="grid-item">
+                    <select v-model="channel.testSession">
+                        <option v-for="e in $store.state.base.sessions" :key="e">
+                            {{e}}
+                        </option>
+                    </select>
+                </div>
+                <div v-else class="grid-item">{{ channel.testSession }}</div>
 
                 <label class="grid-name">Environment</label>
                 <div v-if="edit" class="grid-item">
@@ -73,15 +82,14 @@
     Vue.use(VueFlashMessage);
     require('vue-flash-message/dist/vue-flash-message.min.css')
     const cloneDeep = require('clone-deep')
-    import Vuetify from 'vuetify/lib'
 
-    Vue.use(Vuetify)
 
     export default {
         data () {
             return {
                 channel: null,
-                edit: false
+                edit: false,
+                isNew: false
             }
         },
         props: [
@@ -94,9 +102,6 @@
             '$route': 'fetch'
         },
         methods: {
-            addChannel() {
-
-            },
             channelId() {
                   return this.channel.testSession + '__' + this.channel.channelId
             },
@@ -119,14 +124,24 @@
                 this.toggleEdit()
             },
             discard() {
+                this.$store.commit('deleteChannel', this.channelId)
                 this.fetch()
                 this.toggleEdit()
             },
+            isNewChannelId(str) {
+                return str.endsWith('__new')
+            },
             fetch() {
+                const index = this.$route.params.channelIndex
                 if (this.$store.state.base.channelIds.length === 0)
                     return
-                const index = this.$route.params.channelIndex
                 const channelId = this.$store.state.base.channelIds[index]
+                if (this.isNewChannelId(channelId)) {
+                    this.edit = true
+                    this.isNew = true
+                    this.channel = cloneDeep(this.$store.state.base.channels[index])
+                    return
+                }
                 if (this.$store.state.base.channels[index] === null) {
                     axios.get(`http://localhost:8081/proxy/channel/` + channelId)
                         .then(response => {
