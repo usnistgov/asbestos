@@ -1,18 +1,22 @@
 <template>
     <div>
         Channels
-        <img @click="pushNewChannelRoute()" src="../assets/add-button.png"/>
+        <img id="add-button" @click="pushNewChannelRoute()" src="../assets/add-button.png"/>
         <div v-for="(channelId) in channelIds()" :key="channelId">
             <router-link class="element-nav" v-bind:to="channelLink(channelId)">
                 {{ channelId }}
             </router-link>
         </div>
+        <b-tooltip target="add-button" title="Add channel"></b-tooltip>
     </div>
 </template>
 
 <script>
     import axios from 'axios'
     import {newChannel} from '../types/channel'
+    import Vue from 'vue'
+    import { TooltipPlugin } from 'bootstrap-vue'
+    Vue.use(TooltipPlugin)
 
     export default {
         data() {
@@ -33,9 +37,11 @@
                 return this.$router.push(this.newChannelRoute())
             },
             newChannelRoute() {
-                this.$store.commit('installChannel', newChannel())
+                let chan = newChannel()
+                chan.testSession = this.sessionId
+                this.$store.commit('installChannel', chan)
                 //const newId = this.fullChannelIds().length - 1
-                return '/session/default/channel/new'
+                return '/session/' + this.sessionId + '/channel/new'
             },
             channelName(id) {
                 const sepat = id.indexOf('__')
