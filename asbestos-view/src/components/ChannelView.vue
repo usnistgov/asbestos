@@ -89,7 +89,9 @@
             return {
                 channel: null,
                 edit: false,
-                isNew: false
+                isNew: false,
+                originalFullChannelId: null,   // in case of delete
+                discarding: false
             }
         },
         props: [
@@ -110,35 +112,47 @@
                 this.$store.commit('deleteChannel', this.fullChannelId())
                 if (index < this.fullChannelIds().length) {
                     this.$router.push('/session/' + this.sessionId + '/channel/' + this.channelIndex)
+                    this.fetch()
                 } else {
                     this.$router.push('/session/' + this.sessionId + '/channel/' + (this.fullChannelIds().length - 1))
                 }
-                this.fetch()
             },
             toggleEdit() {
                 this.edit = !this.edit
             },
             save() {
+                if (this.isNew)
+                    this.$store.commit('deleteChannel', this.originalFullChannelId) // original has been renamed
                 this.$store.commit('installChannel', cloneDeep(this.channel))
-                this.fetch()
+                this.isNew = false
                 this.toggleEdit()
+                this.fetch()
             },
             discard() {
-                this.fetch()
+                this.isNew = false
                 this.toggleEdit()
+                this.discarding = true
+                this.fetch()
             },
             isNewChannelId(str) {
                 return str.endsWith('__new')
             },
             fetch() {
-                const index = this.channelIndex
+                let index = this.channelIndex
+                if (index === this.fullChannelIds().length) {
+                    // happens as part of delete of new channel
+                    this.channel = null
+                    return
+                }
                 if (this.fullChannelIds().length === 0)
                     return
                 const channelId = this.fullChannelIds()[index]
-                if (this.isNewChannelId(channelId)) {
+                this.originalFullChannelId = channelId
+                if (this.isNewChannelId(channelId) && !this.discarding) {
                     this.edit = true
                     this.isNew = true
                     this.channel = cloneDeep(this.$store.state.base.channels[index])
+                    this.discarding = false
                     return
                 }
                 if (this.$store.state.base.channels[index] === null) {
@@ -151,6 +165,7 @@
                 } else {
                     this.channel = cloneDeep(this.$store.state.base.channels[index])
                 }
+                this.discarding = false
             },
             fullChannelIds() {
                 return this.$store.state.base.fullChannelIds

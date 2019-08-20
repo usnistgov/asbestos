@@ -21,12 +21,16 @@ export const baseStore = {
             tests: [],
             testIds: [],
 
+            // these two must be in same order
+            //
+            // fullChannelId can exist without channel - ChannelView.fetch() will notice this
+            // and fetch channel from server
             fullChannelIds: [],  // testSession__channelId
             channels: []
         }
     },
     mutations: {
-        installChannel(state, newChannel) {
+        installChannel(state, newChannel) {  // adds to end
             const thisChannelId = newChannel.testSession + '__' + newChannel.channelId
             let channelIndex = state.fullChannelIds.findIndex( function(channelId) {
                 return channelId === thisChannelId
@@ -38,7 +42,7 @@ export const baseStore = {
                 state.channels[channelIndex] = newChannel
             }
         },
-        installChannelIds(state, channelIds) {
+        installChannelIds(state, channelIds) {  // must be pre-sorted
             state.fullChannelIds.length = 0
             state.channels.length = 0
             for (let i in channelIds) {
@@ -47,9 +51,9 @@ export const baseStore = {
                 state.channels.push(null)
             }
         },
-        deleteChannel(state, theChannelId) {
+        deleteChannel(state, theFullChannelId) {
             const channelIndex = state.fullChannelIds.findIndex( function(channelId) {
-                return channelId === theChannelId
+                return channelId === theFullChannelId
             })
             state.fullChannelIds.splice(channelIndex, 1)
             state.channels.splice(channelIndex, 1)
