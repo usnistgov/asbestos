@@ -2,7 +2,7 @@
     <div>
         Channels
         <img @click="pushNewChannelRoute" src="../assets/add-button.png"/>
-        <div v-for="(channelId, index) in $store.state.base.channelIds" :key="channelId">
+        <div v-for="(channelId, index) in fullChannelIds()" :key="channelId">
             <router-link class="element-nav" v-bind:to="channelLink(index)">
                 {{ channelName(channelId) }}
             </router-link>
@@ -21,7 +21,7 @@
             }
         },
         props: [
-            'channelId'
+            'sessionId'
         ],
         components: { },
         mounted() {
@@ -33,8 +33,8 @@
             },
             newChannelRoute() {
                 this.$store.commit('installChannel', newChannel())
-                const newId = this.$store.state.base.channelIds.length - 1
-                return '/session/' + this.$route.params.sessionId + '/channel/' + newId
+                const newId = this.fullChannelIds().length - 1
+                return '/session/' + this.sessionId + '/channel/' + newId
             },
             channelName(id) {
                 const sepat = id.indexOf('__')
@@ -50,6 +50,9 @@
                         this.$store.commit('installChannelIds', theResponse.sort())
                     })
                 // .catch...
+            },
+            fullChannelIds() {
+                return this.$store.state.base.fullChannelIds
             }
         },
         name: "ChannelNav"

@@ -35,15 +35,14 @@ export const routes = [
                 path: 'session/:sessionId', component: SessionView,
                 children: [
                     {
-                        path: 'channel', components: {
-                            nav: ChannelNav
-                        }
+                        path: 'channel',
+                        components: { nav: ChannelNav },
+                        props: { nav: true }
                     },
                     {
-                        path: 'channel/:channelIndex', components: {
-                            nav: ChannelNav,
-                            detail: ChannelView
-                        }
+                        path: 'channel/:channelIndex',
+                        components: { nav: ChannelNav, detail: ChannelView },
+                        props: { nav: true, detail: true }
                     }
                 ]
             }

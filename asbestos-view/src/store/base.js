@@ -21,37 +21,37 @@ export const baseStore = {
             tests: [],
             testIds: [],
 
-            channelIds: [],
+            fullChannelIds: [],  // testSession__channelId
             channels: []
         }
     },
     mutations: {
         installChannel(state, newChannel) {
             const thisChannelId = newChannel.testSession + '__' + newChannel.channelId
-            let channelIndex = state.channelIds.findIndex( function(channelId) {
+            let channelIndex = state.fullChannelIds.findIndex( function(channelId) {
                 return channelId === thisChannelId
             })
             if (channelIndex === -1) {
-                state.channelIds.push(thisChannelId)
+                state.fullChannelIds.push(thisChannelId)
                 state.channels.push(newChannel)
             } else {
                 state.channels[channelIndex] = newChannel
             }
         },
         installChannelIds(state, channelIds) {
-            state.channelIds.length = 0
+            state.fullChannelIds.length = 0
             state.channels.length = 0
             for (let i in channelIds) {
                 const theId = channelIds[i]
-                state.channelIds.push(theId)
+                state.fullChannelIds.push(theId)
                 state.channels.push(null)
             }
         },
         deleteChannel(state, theChannelId) {
-            const channelIndex = state.channelIds.findIndex( function(channelId) {
+            const channelIndex = state.fullChannelIds.findIndex( function(channelId) {
                 return channelId === theChannelId
             })
-            state.channelIds.splice(channelIndex, 1)
+            state.fullChannelIds.splice(channelIndex, 1)
             state.channels.splice(channelIndex, 1)
         },
 

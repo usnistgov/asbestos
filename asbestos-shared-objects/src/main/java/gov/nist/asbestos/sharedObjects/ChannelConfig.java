@@ -10,7 +10,7 @@ import java.util.Objects;
 public class ChannelConfig {
     private String environment;
     private String testSession;
-    private String channelId;
+    private String channelId;   // simple id (no testSesssion__ prefix)
     private String actorType;
     private String channelType;
     private String fhirBase;
