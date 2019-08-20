@@ -40,7 +40,7 @@ export const routes = [
                         props: { nav: true }
                     },
                     {
-                        path: 'channel/:channelIndex',
+                        path: 'channel/:channelId',
                         components: { nav: ChannelNav, detail: ChannelView },
                         props: { nav: true, detail: true }
                     }

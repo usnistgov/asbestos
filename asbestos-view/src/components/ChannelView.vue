@@ -6,10 +6,14 @@
                 <div v-if="edit">
                     <img src="../assets/save.png" @click="save()"/>
                     <div class="divider"/>
+                    <div class="divider"/>
+                    <div class="divider"/>
                     <img src="../assets/cancel.png" @click="discard()"/>
                 </div>
                 <div v-else>
                     <img src="../assets/pencil-edit-button.png" @click="toggleEdit()"/>
+                    <div class="divider"/>
+                    <img src="../assets/copy-document.png" @click="copy()"/>
                     <div class="divider"/>
                     <div class="divider"/>
                     <div class="divider"/>
@@ -95,7 +99,7 @@
             }
         },
         props: [
-            'sessionId', 'channelIndex'
+            'sessionId', 'channelId'
         ],
         created() {
             this.fetch()
@@ -104,25 +108,34 @@
             '$route': 'fetch'
         },
         methods: {
+            copy() {
+
+            },
             fullChannelId() {
-                  return this.channel.testSession + '__' + this.channel.channelId
+                  return this.sessionId + '__' + this.channelId
             },
             deleteChannel() {
-                const index = this.channelIndex
                 this.$store.commit('deleteChannel', this.fullChannelId())
-                if (index < this.fullChannelIds().length) {
-                    this.$router.push('/session/' + this.sessionId + '/channel/' + this.channelIndex)
-                    this.fetch()
-                } else {
-                    this.$router.push('/session/' + this.sessionId + '/channel/' + (this.fullChannelIds().length - 1))
-                }
+                this.$router.push('/session/' + this.sessionId + '/channel')
+                // if (index < this.fullChannelIds().length) {
+                //     this.$router.push('/session/' + this.sessionId + '/channel/' + this.channelId)
+                //     this.fetch()
+                // } else {
+                //     this.$router.push('/session/' + this.sessionId + '/channel/' + (this.fullChannelIds().length - 1))
+                // }
             },
             toggleEdit() {
                 this.edit = !this.edit
             },
             save() {
-                if (this.isNew)
+                if (this.isNew) {
                     this.$store.commit('deleteChannel', this.originalFullChannelId) // original has been renamed
+                    this.isNew = false
+                    this.toggleEdit()
+                    this.$store.commit('installChannel', cloneDeep(this.channel))
+                    this.$router.push('/session/' + this.channel.testSession + '/channel/' + this.channel.channelId)
+                    return
+                }
                 this.$store.commit('installChannel', cloneDeep(this.channel))
                 this.isNew = false
                 this.toggleEdit()
@@ -134,41 +147,55 @@
                 this.discarding = true
                 this.fetch()
             },
-            isNewChannelId(str) {
-                return str.endsWith('__new')
+            isNewChannelId() {
+                return this.channelId === 'new'
             },
             fetch() {
-                let index = this.channelIndex
-                if (index === this.fullChannelIds().length) {
-                    // happens as part of delete of new channel
-                    this.channel = null
-                    return
-                }
+                // let index = this.channelIndex
+                // if (index === this.fullChannelIds().length) {
+                //     // happens as part of delete of new channel
+                //     this.channel = null
+                //     return
+                // }
                 if (this.fullChannelIds().length === 0)
                     return
-                const channelId = this.fullChannelIds()[index]
-                this.originalFullChannelId = channelId
-                if (this.isNewChannelId(channelId) && !this.discarding) {
+                //const channelId = this.fullChannelIds()[index]
+                this.originalFullChannelId = this.fullChannelId()
+                if (this.isNewChannelId() && !this.discarding) {
                     this.edit = true
                     this.isNew = true
-                    this.channel = cloneDeep(this.$store.state.base.channels[index])
+                    this.channel = this.copyOfChannel()
                     this.discarding = false
                     return
                 }
+                const index = this.channelIndex(this.sessionId, this.channelId)
                 if (this.$store.state.base.channels[index] === null) {
-                    axios.get(`http://localhost:8081/proxy/channel/` + channelId)
+                    axios.get(`http://localhost:8081/proxy/channel/` + this.fullChannelId())
                         .then(response => {
                             this.$store.commit('installChannel', response.data)
-                            this.channel =  cloneDeep(this.$store.state.base.channels[index])
+                            this.channel =  this.copyOfChannel()
                         })
                     // .catch...
                 } else {
-                    this.channel = cloneDeep(this.$store.state.base.channels[index])
+                    this.channel = this.copyOfChannel()
                 }
                 this.discarding = false
             },
             fullChannelIds() {
                 return this.$store.state.base.fullChannelIds
+            },
+            channelIndex(theSession, theChannelId) {
+                const fullId = theSession + '__' + theChannelId
+                return this.$store.state.base.fullChannelIds.findIndex( function(channelId) {
+                    return channelId === fullId
+                })
+            },
+            copyOfChannel() {
+                const index = this.channelIndex(this.sessionId, this.channelId)
+                if (index === -1) {
+                    return null
+                }
+                return cloneDeep(this.$store.state.base.channels[index])
             }
         },
         store: store,

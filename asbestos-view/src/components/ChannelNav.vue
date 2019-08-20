@@ -1,10 +1,10 @@
 <template>
     <div>
         Channels
-        <img @click="pushNewChannelRoute" src="../assets/add-button.png"/>
-        <div v-for="(channelId, index) in fullChannelIds()" :key="channelId">
-            <router-link class="element-nav" v-bind:to="channelLink(index)">
-                {{ channelName(channelId) }}
+        <img @click="pushNewChannelRoute()" src="../assets/add-button.png"/>
+        <div v-for="(channelId) in channelIds()" :key="channelId">
+            <router-link class="element-nav" v-bind:to="channelLink(channelId)">
+                {{ channelId }}
             </router-link>
         </div>
     </div>
@@ -33,15 +33,15 @@
             },
             newChannelRoute() {
                 this.$store.commit('installChannel', newChannel())
-                const newId = this.fullChannelIds().length - 1
-                return '/session/' + this.sessionId + '/channel/' + newId
+                //const newId = this.fullChannelIds().length - 1
+                return '/session/' + this.sessionId + '/channel/new'
             },
             channelName(id) {
                 const sepat = id.indexOf('__')
                 return id.substring(sepat+2)
             },
-            channelLink(index) {
-                return '/session/default/channel/' + index
+            channelLink(channelId) {
+                return '/session/default/channel/' + channelId
             },
             loadChannelNames() {
                 axios.get(`http://localhost:8081/proxy/channel`)
@@ -53,6 +53,9 @@
             },
             fullChannelIds() {
                 return this.$store.state.base.fullChannelIds
+            },
+            channelIds() {
+                return this.fullChannelIds().map(x => this.channelName(x))
             }
         },
         name: "ChannelNav"
