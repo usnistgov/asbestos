@@ -5,18 +5,18 @@
             <div v-if="channel" class="grid-container">
                 <div v-if="edit">
                     <img src="../assets/save.png" @click="save()"/>
-                    <div class="divider"/>
-                    <div class="divider"/>
-                    <div class="divider"/>
+                    <div class="divider"></div>
+                    <div class="divider"></div>
+                    <div class="divider"></div>
                     <img src="../assets/cancel.png" @click="discard()"/>
                 </div>
                 <div v-else>
                     <img src="../assets/pencil-edit-button.png" @click="toggleEdit()"/>
-                    <div class="divider"/>
+                    <div class="divider"></div>
                     <img src="../assets/copy-document.png" @click="copy()"/>
-                    <div class="divider"/>
-                    <div class="divider"/>
-                    <div class="divider"/>
+                    <div class="divider"></div>
+                    <div class="divider"></div>
+                    <div class="divider"></div>
                     <img src="../assets/delete-button.png" @click="deleteChannel()"/>
                 </div>
 
@@ -104,12 +104,15 @@
         created() {
             this.fetch()
         },
-        watch: {
+        watch: {  // when $route changes run fetch()
             '$route': 'fetch'
         },
         methods: {
-            copy() {
-
+            copy() {  // actually duplicate (a channel)
+                let chan = cloneDeep(this.channel)
+                chan.channelId = 'copy'
+                this.$store.commit('installChannel', chan)
+                this.$router.push('/session/' + this.sessionId + '/channel/copy')
             },
             fullChannelId() {
                   return this.sessionId + '__' + this.channelId
@@ -117,12 +120,6 @@
             deleteChannel() {
                 this.$store.commit('deleteChannel', this.fullChannelId())
                 this.$router.push('/session/' + this.sessionId + '/channel')
-                // if (index < this.fullChannelIds().length) {
-                //     this.$router.push('/session/' + this.sessionId + '/channel/' + this.channelId)
-                //     this.fetch()
-                // } else {
-                //     this.$router.push('/session/' + this.sessionId + '/channel/' + (this.fullChannelIds().length - 1))
-                // }
             },
             toggleEdit() {
                 this.edit = !this.edit
@@ -148,7 +145,7 @@
                 this.fetch()
             },
             isNewChannelId() {
-                return this.channelId === 'new'
+                return this.channelId === 'new' || this.channelId === 'copy'
             },
             fetch() {
                 // let index = this.channelIndex

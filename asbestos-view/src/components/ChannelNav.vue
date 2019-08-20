@@ -21,7 +21,8 @@
             }
         },
         props: [
-            'sessionId'
+//            'channelId',
+            'sessionId'  // default value - display testSession only if it does not match
         ],
         components: { },
         mounted() {
@@ -34,14 +35,18 @@
             newChannelRoute() {
                 this.$store.commit('installChannel', newChannel())
                 //const newId = this.fullChannelIds().length - 1
-                return '/session/' + this.sessionId + '/channel/new'
+                return '/session/default/channel/new'
             },
             channelName(id) {
                 const sepat = id.indexOf('__')
                 return id.substring(sepat+2)
             },
+            sessionName(id) {
+                const sepat = id.indexOf('__')
+                return id.substring(0, sepat)
+            },
             channelLink(channelId) {
-                return '/session/default/channel/' + channelId
+                return '/session/' + this.sessionId + '/channel/' + channelId
             },
             loadChannelNames() {
                 axios.get(`http://localhost:8081/proxy/channel`)
@@ -51,8 +56,8 @@
                     })
                 // .catch...
             },
-            fullChannelIds() {
-                return this.$store.state.base.fullChannelIds
+            fullChannelIds() {  // only ones matching current session
+                return this.$store.state.base.fullChannelIds.filter(id => this.sessionName(id) === this.sessionId)
             },
             channelIds() {
                 return this.fullChannelIds().map(x => this.channelName(x))

@@ -43,5 +43,9 @@ in a terminal to start UI in development mode. Do this from the view directory.
     cd asbestos-view
     npm run serve
     
+also, to make sure all packages are up to date
+
+    npm update
+    
 In IntelliJ, choose ECMAScript 6.
 
