@@ -14,18 +14,23 @@
 
                         </div>
                         <div v-else>
-                            <img id="edit-button" src="../assets/pencil-edit-button.png" @click="toggleEdit()"/>
-                            <div class="divider"></div>
-                            <img id="copy-button" src="../assets/copy-document.png" @click="copy()"/>
-                            <div class="divider"></div>
-                            <div class="divider"></div>
-                            <div class="divider"></div>
-                            <img id="delete-button" src="../assets/delete-button.png" @click="deleteChannel()"/>
-                            <div class="divider"></div>
-                            <div class="divider"></div>
+                            <div v-if="ackMode">
+                                Delete?
+                                <button class="ok-button" @click="deleteAcked()">Ok</button>
+                                <button class="cancel-button" @click="deleteCanceled">Cancel</button>
+                            </div>
+                            <div v-else>
+                                <img id="edit-button" src="../assets/pencil-edit-button.png" @click="toggleEdit()"/>
+                                <div class="divider"></div>
+                                <img id="copy-button" src="../assets/copy-document.png" @click="copy()"/>
+                                <div class="divider"></div>
+                                <div class="divider"></div>
+                                <div class="divider"></div>
+                                <img id="delete-button" src="../assets/delete-button.png" @click="requestDelete()"/>
+                                <div class="divider"></div>
+                                <div class="divider"></div>
+                            </div>
 
-                            <button class="ok-button" v-bind:hidden="getHidden()">Ok</button>
-                            <button class="cancel-button" v-bind:hidden="getHidden()">Cancel</button>
                         </div>
 
                         <b-tooltip target="save-button" title="Save"></b-tooltip>
@@ -107,7 +112,7 @@
                 isNew: false,
                 originalFullChannelId: null,   // in case of delete
                 discarding: false,
-                ackHidden: ''
+                ackMode: false
             }
         },
         props: [
@@ -120,9 +125,21 @@
         watch: {  // when $route changes run fetch()
             '$route': 'fetch'
         },
+        computed: {
+        },
         methods: {
+            requestDelete() {
+                this.ackMode = true
+            },
+            deleteAcked() {
+                this.deleteChannel()
+                this.ackMode = false
+            },
+            deleteCanceled() {
+                this.ackMode = false
+            },
             getHidden() {
-                return this.ackHidden
+                return this.ackMode ? null : 'hidden'
             },
             showAck(bool) {
                 if (bool) {
@@ -150,9 +167,9 @@
             save() {
                 if (this.isNew) {
                     this.$store.commit('deleteChannel', this.originalFullChannelId) // original has been renamed
+                    this.$store.commit('installChannel', cloneDeep(this.channel))
                     this.isNew = false
                     this.toggleEdit()
-                    this.$store.commit('installChannel', cloneDeep(this.channel))
                     this.$router.push('/session/' + this.channel.testSession + '/channel/' + this.channel.channelId)
                     return
                 }
@@ -171,15 +188,8 @@
                 return this.channelId === 'new' || this.channelId === 'copy'
             },
             fetch() {
-                // let index = this.channelIndex
-                // if (index === this.fullChannelIds().length) {
-                //     // happens as part of delete of new channel
-                //     this.channel = null
-                //     return
-                // }
                 if (this.fullChannelIds().length === 0)
                     return
-                //const channelId = this.fullChannelIds()[index]
                 this.originalFullChannelId = this.fullChannelId()
                 if (this.isNewChannelId() && !this.discarding) {
                     this.edit = true
@@ -231,7 +241,7 @@
     }
     .grid-container {
         display: grid;
-        grid-template-columns: 15ch auto;
+        grid-template-columns: auto;
         grid-template-rows: auto;
     }
     .grid-name {
@@ -259,9 +269,7 @@
         padding: 0px 0px;
     }
     .button-bar {
-        grid-column-start: 1;
-        grid-column-end: 3;
-    }
-    .block {
+        grid-column: 0 / span 2;
+        alignment: left;
     }
 </style>
