@@ -12,11 +12,13 @@
 </template>
 
 <script>
-    import axios from 'axios'
+    //import axios from 'axios'
     import {newChannel} from '../types/channel'
     import Vue from 'vue'
-    import { TooltipPlugin } from 'bootstrap-vue'
+    import { TooltipPlugin, ToastPlugin } from 'bootstrap-vue'
     Vue.use(TooltipPlugin)
+    import {PROXY} from '../common/http-common'
+    Vue.use(ToastPlugin)
 
     export default {
         data() {
@@ -55,19 +57,31 @@
                 return '/session/' + this.sessionId + '/channel/' + channelId
             },
             loadChannelNames() {
-                axios.get(`http://localhost:8081/proxy/channel`)
+                const that = this
+                PROXY.get('channel')
                     .then(response => {
                         let theResponse = response.data
                         this.$store.commit('installChannelIds', theResponse.sort())
                     })
-                // .catch...
+                    .catch(function (error) {
+                        that.error(error)
+                    })
             },
             fullChannelIds() {  // only ones matching current session
                 return this.$store.state.base.fullChannelIds.filter(id => this.sessionName(id) === this.sessionId)
             },
             channelIds() {
                 return this.fullChannelIds().map(x => this.channelName(x)).sort()
-            }
+            },
+            msg(msg) {
+                console.log(msg)
+                this.$bvToast.toast(msg, {noCloseButton: true})
+            },
+            error(err) {
+                this.$bvToast.toast(err.message, {noCloseButton: true, title: 'Error'})
+                console.log(err)
+            },
+
         },
         name: "ChannelNav"
     }

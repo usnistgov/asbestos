@@ -16,8 +16,9 @@
 
 <script>
     import Vue from 'vue'
-    import { BFormSelect } from 'bootstrap-vue'
+    import { BFormSelect, BToast } from 'bootstrap-vue'
     Vue.component('b-form-select', BFormSelect)
+    Vue.component('b-toast', BToast)
 
     export default {
         data() {

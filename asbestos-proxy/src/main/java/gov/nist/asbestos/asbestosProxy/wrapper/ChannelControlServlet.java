@@ -153,7 +153,7 @@ public class ChannelControlServlet extends HttpServlet {
                 // 0 - empty
                 // 1 - app context
                 // 2 - "channel"
-                // 3 - channelID
+                // 3 - channelID  (testSession__id)
                 String channelId = uriParts.get(3);
 
                 SimId simId = SimId.buildFromRawId(channelId);

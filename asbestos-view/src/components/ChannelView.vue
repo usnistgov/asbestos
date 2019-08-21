@@ -1,6 +1,5 @@
 <template xmlns:v-slot="http://www.w3.org/1999/XSL/Transform">
     <div>
-        <flash-message></flash-message>
         <div class="window">
             <div v-if="channel">
                 <div class="grid-container">
@@ -8,7 +7,7 @@
                         <div v-if="edit">
                             <div v-if="badNameMode">
                                 Cannot save with this name
-                                <button class="cancel-button" @click="badNameCanceled">Cancel</button>
+                                <button class="cancel-button" @click="badNameCanceled">Continue</button>
                             </div>
                             <div v-else>
                                 <img id="save-button" src="../assets/save.png" @click="save()"/>
@@ -97,15 +96,17 @@
 <script>
     import Vue from 'vue'
     import {store} from "../store"
-    import axios from 'axios'
+    import {PROXY} from '../common/http-common'
+    //import axios from 'axios'
     import VueFlashMessage from 'vue-flash-message';
     Vue.use(VueFlashMessage);
     require('vue-flash-message/dist/vue-flash-message.min.css')
     const cloneDeep = require('clone-deep')
-    import { TooltipPlugin, ButtonGroupPlugin, ButtonPlugin } from 'bootstrap-vue'
+    import { TooltipPlugin, ButtonGroupPlugin, ButtonPlugin, ToastPlugin } from 'bootstrap-vue'
     Vue.use(TooltipPlugin)
     Vue.use(ButtonGroupPlugin)
     Vue.use(ButtonPlugin)
+    Vue.use(ToastPlugin)
     //    import { BButtonGroup } from 'bootstrap-vue'
     //Vue.component('b-button-group', BButtonGroup)
 
@@ -134,6 +135,14 @@
         computed: {
         },
         methods: {
+            msg(msg) {
+                console.log(msg)
+                this.$bvToast.toast(msg, {noCloseButton: true})
+            },
+            error(msg) {
+                console.exception(msg)
+                this.$bvToast.toast(msg.message, {noCloseButton: true, title: 'Error'})
+            },
             requestDelete() {
                 this.ackMode = true
             },
@@ -167,6 +176,14 @@
                 return this.sessionId + '__' + this.channelId
             },
             deleteChannel() {
+                const that = this
+                PROXY.delete('channel/' + this.fullChannelId())
+                    .then(function () {
+                        that.msg('Deleted')
+                    })
+                    .catch(function (error) {
+                        that.error(error)
+                    })
                 this.$store.commit('deleteChannel', this.fullChannelId())
                 this.$router.push('/session/' + this.sessionId + '/channel')
             },
@@ -174,6 +191,7 @@
                 this.edit = !this.edit
             },
             save() {
+                const that = this
                 if (this.isNew) {
                     if (this.isCurrentChannelIdNew()) {
                         this.badNameMode = true
@@ -181,12 +199,26 @@
                     }
                     this.$store.commit('deleteChannel', this.originalFullChannelId) // original has been renamed
                     this.$store.commit('installChannel', cloneDeep(this.channel))
+                    PROXY.post('channel', this.channel)
+                        .then(function () {
+                            that.msg('Saved')
+                        })
+                        .catch(function (error) {
+                            that.error(error)
+                        })
                     this.isNew = false
                     this.toggleEdit()
                     this.$router.push('/session/' + this.channel.testSession + '/channel/' + this.channel.channelId)
                     return
                 }
                 this.$store.commit('installChannel', cloneDeep(this.channel))
+                PROXY.post('channel', this.channel)
+                    .then(function () {
+                        that.msg('Saved')
+                    })
+                    .catch(function (error) {
+                        that.error(error)
+                    })
                 this.isNew = false
                 this.toggleEdit()
                 this.fetch()
@@ -219,12 +251,15 @@
                 }
                 const index = this.channelIndex(this.sessionId, this.channelId)
                 if (this.$store.state.base.channels[index] === null) {
-                    axios.get(`http://localhost:8081/proxy/channel/` + this.fullChannelId())
+                    const that = this
+                    PROXY.get('channel/' + this.fullChannelId())
                         .then(response => {
                             this.$store.commit('installChannel', response.data)
                             this.channel =  this.copyOfChannel()
                         })
-                    // .catch...
+                        .catch(e => {
+                            that.error(e)
+                        })
                 } else {
                     this.channel = this.copyOfChannel()
                 }
@@ -280,11 +315,11 @@
         display:inline-block;
     }
     .ok-button {
-        font-size: 10px;
+        font-size: 15px;
         padding: 0px 0px;
     }
     .cancel-button {
-        font-size: 10px;
+        font-size: 15px;
         padding: 0px 0px;
     }
     .button-bar {
