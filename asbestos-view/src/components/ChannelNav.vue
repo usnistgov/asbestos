@@ -66,7 +66,7 @@
                 return this.$store.state.base.fullChannelIds.filter(id => this.sessionName(id) === this.sessionId)
             },
             channelIds() {
-                return this.fullChannelIds().map(x => this.channelName(x))
+                return this.fullChannelIds().map(x => this.channelName(x)).sort()
             }
         },
         name: "ChannelNav"

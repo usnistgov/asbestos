@@ -192,7 +192,9 @@
                 this.fetch()
             },
             discard() {
-                this.deleteChannel()
+                if (this.isNew) {
+                    this.deleteChannel()
+                }
                 this.isNew = false
                 this.toggleEdit()
                 this.discarding = true

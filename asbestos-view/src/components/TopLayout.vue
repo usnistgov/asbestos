@@ -8,7 +8,9 @@
             Test Session:
             <b-form-select v-model="testSession" :options="testSessions"></b-form-select>
         </div>
-        <router-view></router-view>
+        <div class="panel">
+            <router-view></router-view>
+        </div>
     </div>
 </template>
 
@@ -65,5 +67,8 @@
     .right {
         display:inline-block;
         float: right;
+    }
+    .panel {
+        padding: 20px;
     }
 </style>
