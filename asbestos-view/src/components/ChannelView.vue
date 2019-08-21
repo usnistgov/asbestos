@@ -6,12 +6,17 @@
                 <div class="grid-container">
                     <div class="button-bar">
                         <div v-if="edit">
-                            <img id="save-button" src="../assets/save.png" @click="save()"/>
-                            <div class="divider"></div>
-                            <div class="divider"></div>
-                            <div class="divider"></div>
-                            <img id="cancel-edit-button" src="../assets/cancel.png" @click="discard()"/>
-
+                            <div v-if="badNameMode">
+                                Cannot save with this name
+                                <button class="cancel-button" @click="badNameCanceled">Cancel</button>
+                            </div>
+                            <div v-else>
+                                <img id="save-button" src="../assets/save.png" @click="save()"/>
+                                <div class="divider"></div>
+                                <div class="divider"></div>
+                                <div class="divider"></div>
+                                <img id="cancel-edit-button" src="../assets/cancel.png" @click="discard()"/>
+                            </div>
                         </div>
                         <div v-else>
                             <div v-if="ackMode">
@@ -112,7 +117,8 @@
                 isNew: false,
                 originalFullChannelId: null,   // in case of delete
                 discarding: false,
-                ackMode: false
+                ackMode: false,
+                badNameMode: false
             }
         },
         props: [
@@ -137,6 +143,9 @@
             },
             deleteCanceled() {
                 this.ackMode = false
+            },
+            badNameCanceled() {
+                this.badNameMode = false
             },
             getHidden() {
                 return this.ackMode ? null : 'hidden'
@@ -166,6 +175,10 @@
             },
             save() {
                 if (this.isNew) {
+                    if (this.isCurrentChannelIdNew()) {
+                        this.badNameMode = true
+                        return
+                    }
                     this.$store.commit('deleteChannel', this.originalFullChannelId) // original has been renamed
                     this.$store.commit('installChannel', cloneDeep(this.channel))
                     this.isNew = false
@@ -179,10 +192,14 @@
                 this.fetch()
             },
             discard() {
+                this.deleteChannel()
                 this.isNew = false
                 this.toggleEdit()
                 this.discarding = true
                 this.fetch()
+            },
+            isCurrentChannelIdNew() {
+                return this.channel.channelId === 'new' || this.channel.channelId === 'copy'
             },
             isNewChannelId() {
                 return this.channelId === 'new' || this.channelId === 'copy'
