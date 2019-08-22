@@ -48,11 +48,19 @@ public class ProxyLogServlet extends HttpServlet {
         // testSession/channelId/resourcetype/event
         //
         // 6 - event
-        // 5 - resourceType
+        // 5 - resourceType - may be null
         // 4 - channelId
         // 3 - testSession
 
         String[] uriParts = uri.split("/");
+//        if (uriParts.length == 9) { // part
+//            buildJsonListingOfPart(resp, uriParts[3], uriParts[4], uriParts[5], uriParts[6], uriParts[7], uriParts[8]);
+//            return;
+//        }
+//        if (uriParts.length == 8) { // task
+//            buildJsonListingOfTask(resp, uriParts[3], uriParts[4], uriParts[5], uriParts[6], uriParts[7]);
+//            return;
+//        }
         if (uriParts.length == 7) {  // includes event
             if (jsonOk) {
                 buildJsonListingOfEvent(resp, uriParts[3], uriParts[4], uriParts[5], uriParts[6]);
@@ -115,6 +123,7 @@ public class ProxyLogServlet extends HttpServlet {
     }
 
     class Task {
+        String label;
         String description;
         String requestHeader;
         String requestBody;
@@ -136,13 +145,22 @@ public class ProxyLogServlet extends HttpServlet {
         Event(File eventDir) {
             List<String> parts = dirListingAsList(eventDir);
             for (String part : parts) {
-                tasks.add(new Task(eventDir, part));
+                Task task = new Task(eventDir, part);
+                task.label = part;
+                tasks.add(task);
             }
         }
     }
 
     private void buildJsonListingOfEvent(HttpServletResponse resp, String testSession, String channelId, String resourceType, String eventName) {
         File fhir = fhirDir(testSession, channelId);
+        if (resourceType.equals("null")) {
+            resourceType = resourceTypeForEvent(fhir, eventName);
+            if (resourceType == null) {
+                resp.setStatus(resp.SC_NOT_FOUND);
+                return;
+            }
+        }
         File resourceTypeFile = new File(fhir, resourceType);
         File eventDir = new File(resourceTypeFile, eventName);
 
@@ -157,6 +175,23 @@ public class ProxyLogServlet extends HttpServlet {
         }
 
         resp.setStatus(resp.SC_OK);
+    }
+
+    private String resourceTypeForEvent(File fhir, String eventName) {
+        File[] resourceTypeFiles = fhir.listFiles();
+        if (resourceTypeFiles != null) {
+            for (File resourceTypeDir : resourceTypeFiles) {
+                File[] eventFiles = resourceTypeDir.listFiles();
+                if (eventFiles != null) {
+                    for (File eventFile : eventFiles) {
+                        if (eventFile.getName().equals(eventName)) {
+                            return resourceTypeDir.getName();
+                        }
+                    }
+                }
+            }
+        }
+        return null;
     }
 
     private void returnJsonList(HttpServletResponse resp, List<String> theList) {
