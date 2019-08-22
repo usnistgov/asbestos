@@ -1,5 +1,9 @@
 package gov.nist.asbestos.asbestosProxy.wrapper;
 
+import com.google.gson.Gson;
+import gov.nist.asbestos.http.headers.Header;
+import gov.nist.asbestos.http.headers.Headers;
+import gov.nist.asbestos.http.operations.Verb;
 import gov.nist.asbestos.simapi.tk.installation.Installation;
 
 import javax.servlet.ServletConfig;
@@ -10,6 +14,8 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ProxyLogServlet extends HttpServlet {
     private File externalCache = null;
@@ -33,24 +39,148 @@ public class ProxyLogServlet extends HttpServlet {
             return;
         }
         String uri = req.getRequestURI();
+        Headers headers = Common.getRequestHeaders(req, Verb.GET);
+        Header acceptHeader = headers.getAccept();
+        boolean htmlOk = acceptHeader.getValue().contains("text/html");
+        boolean jsonOk = acceptHeader.getValue().contains("json");
 
         // uri should be
-        // environment/testsession/resourcetype/event
+        // testSession/channelId/resourcetype/event
+        //
+        // 6 - event
+        // 5 - resourceType
+        // 4 - channelId
+        // 3 - testSession
 
         String[] uriParts = uri.split("/");
-        if (uriParts.length != 7) {
-            resp.setStatus(resp.SC_BAD_REQUEST);
+        if (uriParts.length == 7) {  // includes event
+            if (jsonOk) {
+                buildJsonListingOfEvent(resp, uriParts[3], uriParts[4], uriParts[5], uriParts[6]);
+                return;
+            } else if (htmlOk) {
+                buildFullHtmlListing(resp, uriParts);
+                return;
+            }
+        }
+        if (uriParts.length == 6 && jsonOk) {  // includes resourceType
+            // JSON listing of events in resourceType
+            buildJsonListingOfEvents(resp, uriParts[3], uriParts[4], uriParts[5]);
             return;
         }
-        String environment = uriParts[3];
-        String testsession = uriParts[4];
+        if (uriParts.length == 5 && jsonOk) {  // includes channelId
+            // JSON listing of resourceTypes in channelId
+            buildJsonListingOfResourceTypes(resp, uriParts[3], uriParts[4]);
+            return;
+        }
+
+        resp.setStatus(resp.SC_BAD_REQUEST);
+    }
+
+    private void buildJsonListingOfResourceTypes(HttpServletResponse resp, String testSession, String channelId) {
+        File fhir = fhirDir(testSession, channelId);
+
+        List<String> resourceTypes = dirListingAsList(fhir);
+        returnJsonList(resp, resourceTypes);
+    }
+
+    private File fhirDir(String testSession, String channelId) {
+        File psimdb = new File(externalCache, "psimdb");
+        File testSessionFile = new File(psimdb, testSession);
+        File channelFile = new File(testSessionFile, channelId);
+        return new File(channelFile, "fhir");
+    }
+
+    private void buildJsonListingOfEvents(HttpServletResponse resp, String testSession, String channelId, String resourceType) {
+        File fhir = fhirDir(testSession, channelId);
+        File resourceTypeFile = new File(fhir, resourceType);
+
+        List<String> events = dirListingAsList(resourceTypeFile);
+        returnJsonList(resp, events);
+    }
+
+    private List<String> dirListingAsList(File dir) {
+        List<String> contents = new ArrayList<>();
+
+        File[] files = dir.listFiles();
+        if (files != null) {
+            for (File file : files) {
+                if (!file.isDirectory()) continue;
+                if (file.getName().startsWith(".")) continue;
+                if (file.getName().startsWith("_")) continue;
+                contents.add(file.getName());
+            }
+        }
+
+        return contents;
+    }
+
+    class Task {
+        String description;
+        String requestHeader;
+        String requestBody;
+        String responseHeader;
+        String responseBody;
+
+        Task(File eventDir, String taskLabel) {
+            description = read(eventDir, taskLabel, "description.txt");
+            requestHeader = read(eventDir, taskLabel, "request_header.txt");
+            requestBody = read(eventDir, taskLabel, "request_body.txt");
+            responseHeader = read(eventDir, taskLabel, "response_header.txt");
+            responseBody = read(eventDir, taskLabel, "response_body.txt");
+        }
+    }
+
+    class Event {
+        List<Task> tasks = new ArrayList<>();
+
+        Event(File eventDir) {
+            List<String> parts = dirListingAsList(eventDir);
+            for (String part : parts) {
+                tasks.add(new Task(eventDir, part));
+            }
+        }
+    }
+
+    private void buildJsonListingOfEvent(HttpServletResponse resp, String testSession, String channelId, String resourceType, String eventName) {
+        File fhir = fhirDir(testSession, channelId);
+        File resourceTypeFile = new File(fhir, resourceType);
+        File eventDir = new File(resourceTypeFile, eventName);
+
+        Event event = new Event(eventDir);
+
+        String json = new Gson().toJson(event);
+        resp.setContentType("application/json");
+        try {
+            resp.getOutputStream().print(json);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        resp.setStatus(resp.SC_OK);
+    }
+
+    private void returnJsonList(HttpServletResponse resp, List<String> theList) {
+        String json = new Gson().toJson(theList);
+        resp.setContentType("application/json");
+        try {
+            resp.getOutputStream().print(json);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        resp.setStatus(resp.SC_OK);
+    }
+
+    private void buildFullHtmlListing(HttpServletResponse resp, String[] uriParts) {
+        String testSession = uriParts[3];
+        String channelId = uriParts[4];
         String resourcetype = uriParts[5];
         String event = uriParts[6];
 
         File psimdb = new File(externalCache, "psimdb");
-        File env = new File(psimdb, environment);
-        File ts = new File(env, testsession);
-        File fhir = new File(ts, "fhir");
+        File testSessionFile = new File(psimdb, testSession);
+        File channelFile = new File(testSessionFile, channelId);
+        File fhir = new File(channelFile, "fhir");
         File resourceType = new File(fhir, resourcetype);
         File theEvent = new File(resourceType, event);
 
@@ -88,16 +218,13 @@ public class ProxyLogServlet extends HttpServlet {
         if (!description.equals("")) {
             b.append("<h4>Description</h4>");
             b.append("<pre>").append(description).append("</pre>");
-//            b.append("<br />");
         }
         b.append("<h3>Request</h3>");
         b.append("<pre>").append(read(theEvent, section, "request_header.txt")).append("</pre>");
-//        b.append("<br />");
         b.append("<pre>").append(read(theEvent, section, "request_body.txt")).append("</pre>");
 
         b.append("<h3>Response</h3>");
         b.append("<pre>").append(read(theEvent, section, "response_header.txt")).append("</pre>");
-//        b.append("<br />");
         b.append("<pre>").append(read(theEvent, section, "response_body.txt")).append("</pre>");
     }
 

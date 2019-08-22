@@ -88,14 +88,14 @@ public class ProxyServlet extends HttpServlet {
         if (length < 6) return null;
         String event = parts[length-1];
         String resource = parts[length-2];
-        String testsession = parts[length-4];
-        String environment = parts[length-5];
+        String channelId = parts[length-4];
+        String testSession = parts[length-5];
 
         String uri = "http://" +
                 hostport +
                 "/proxy/log/" +
-                environment + "/" +
-                testsession + "/" +
+                testSession + "/" +
+                channelId + "/" +
                 resource + "/" +
                 event;
         return new Header("x-proxy-event", uri);
@@ -131,7 +131,7 @@ public class ProxyServlet extends HttpServlet {
         Event event = simStore.newEvent();
         Task clientTask = event.getClientTask();
         clientTask.putDescription("PDB from client");
-        Headers inHeaders = getRequestHeaders(req, Verb.POST);
+        Headers inHeaders = Common.getRequestHeaders(req, Verb.POST);
         String hostport = inHeaders.getValue("host");
         if (hostport == null || hostport.equals(""))
             hostport = "localhost:8080";
@@ -198,7 +198,7 @@ public class ProxyServlet extends HttpServlet {
     }
 
     private void returnOperationOutcome(HttpServletRequest req, HttpServletResponse resp, Task task, Throwable t) throws IOException, ServletException {
-        Headers headers = getRequestHeaders(req, Verb.GET);  // verb not used
+        Headers headers = Common.getRequestHeaders(req, Verb.GET);  // verb not used
         Header acceptHeader = headers.getAccept();
         Headers responseHeaders = new Headers();
 
@@ -216,7 +216,7 @@ public class ProxyServlet extends HttpServlet {
             resp.addHeader("Content-Type", Format.XML.getContentType());
             responseHeaders.add(new Header("Content-Type", Format.XML.getContentType()));
         }
-        Headers inHeaders = getRequestHeaders(req, Verb.POST);
+        Headers inHeaders = Common.getRequestHeaders(req, Verb.POST);
         String hostport = getHostPort(inHeaders);
         String[] eventHeader = addEventHeader(resp, hostport, task);
         if (eventHeader != null)
@@ -259,7 +259,7 @@ public class ProxyServlet extends HttpServlet {
 
         Event event = simStore.newEvent();
         Task clientTask = event.getClientTask();
-        Headers inHeaders = getRequestHeaders(req, verb);
+        Headers inHeaders = Common.getRequestHeaders(req, verb);
         String hostport = inHeaders.getValue("host");
         if (hostport == null || hostport.equals(""))
             hostport = "localhost:8080";
@@ -413,23 +413,6 @@ public class ProxyServlet extends HttpServlet {
         task.putResponseHeader(responseHeaders);
         logResponseBody(task, requestOut);
         log.info("==> " + requestOut.getStatus() + " " + ((requestOut.getResponse() != null) ? requestOut.getResponseContentType() + " " + requestOut.getResponse().length + " bytes" : "NULL"));
-    }
-
-    private static Headers getRequestHeaders(HttpServletRequest req, Verb verb) {
-        List<String> names = Collections.list(req.getHeaderNames());
-        Map<String, List<String>> hdrs = new HashMap<>();
-        for (String name : names) {
-            List<String> values = Collections.list(req.getHeaders(name));
-            hdrs.put(name, values);
-        }
-        Headers headers = new Headers(hdrs);
-        headers.setVerb(verb.toString());
-        try {
-            headers.setPathInfo(Common.buildURI(req));
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-        return headers;
     }
 
     static HttpBase logClientRequestIn(Task task, Headers headers, byte[] body, Verb verb) {
