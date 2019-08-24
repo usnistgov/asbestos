@@ -1,18 +1,21 @@
 <template>
-    <div>
-        Channels
-        <img id="add-button" @click="pushNewChannelRoute()" src="../assets/add-button.png"/>
+    <div class="channel-panel-header">
+        My Channels
+        <div class="tooltip">
+            <img id="add-button" @click="pushNewChannelRoute()" src="../assets/add-button.png"/>
+            <span class="tooltiptext">Add Channel</span>
+        </div>
         <div v-for="(channelId) in channelIds()" :key="channelId">
             <router-link class="element-nav" v-bind:to="channelLink(channelId)">
                 {{ channelId }}
             </router-link>
         </div>
-        <b-tooltip target="add-button" title="Add channel"></b-tooltip>
+<!--        <b-tooltip target="add-button" title="Add channel"></b-tooltip>-->
+        <router-view></router-view>
     </div>
 </template>
 
 <script>
-    //import axios from 'axios'
     import {newChannel} from '../types/channel'
     import Vue from 'vue'
     import { TooltipPlugin, ToastPlugin } from 'bootstrap-vue'
@@ -27,11 +30,11 @@
             }
         },
         props: [
-//            'channelId',
-            'sessionId'  // default value - display testSession only if it does not match
+            'sessionId'
         ],
         components: { },
         mounted() {
+            console.info('ChannelNav mounted')
             this.loadChannelNames()
         },
         methods: {
@@ -94,5 +97,29 @@
     .element-nav {
         position: relative;
         left: 0px;
+    }
+    .tooltip {
+        position: relative;
+        display: inline-block;
+        /*border-bottom: 1px dotted black;*/
+    }
+
+    .tooltip .tooltiptext {
+        visibility: hidden;
+        width: 120px;
+        background-color: blue;
+        color: #fff;
+
+        bottom: 100%;
+        left: 50%;
+        margin-left: -60px;
+
+        /* Position the tooltip */
+        position: absolute;
+        z-index: 1;
+    }
+
+    .tooltip:hover .tooltiptext {
+        visibility: visible;
     }
 </style>

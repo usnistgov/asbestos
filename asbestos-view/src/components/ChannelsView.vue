@@ -1,21 +1,12 @@
 <template>
-    <div class="main">
-        <div>
-            Channels
-        </div>
-        <div class="nav">
-<!--            <channel-nav></channel-nav>-->
-            <div v-if="$route.params.index">
-                <channel-view v-bind:index="$route.params.index"></channel-view>
-            </div>
-        </div>
-        <router-view class="body" name="panel"></router-view>
+    <div class="container">
+        <channel-nav :session-id="sessionId" class="nav"></channel-nav>
+        <channel-view :session-id="sessionId" :channel-id="channelId" class="view"></channel-view>
     </div>
 </template>
 
 <script>
-    import axios from 'axios'
-    // import ChannelNav from "./ChannelNav"
+    import ChannelNav from "./ChannelNav"
     import ChannelView from "./ChannelView"
 
     export default {
@@ -25,25 +16,38 @@
             }
         },
         components: {
-            // ChannelNav,
+            ChannelNav,
             ChannelView
         },
         name: "ChannelsView",
         mounted() {
-           // this.loadChannelNames()
         },
         methods: {
-            loadChannelNames() {
-                axios.get(`http://localhost:8081/proxy/channel`)
-                    .then(response => {
-                        this.$store.commit('installChannelIds', response.data)
-                    })
-                // .catch...
-            }
-        }
+        },
+        props: [
+           'sessionId', 'channelId'
+        ]
     }
 </script>
 
 <style scoped>
+    .container {
+        display: grid;
+        grid-template-columns: auto auto;
+        grid-template-areas: 'nav view';
+        align-content: start;
+    }
+    .nav {
+        grid-area: nav;
+        border: 1px dotted black;
+        text-align: left;
+        width: fit-content;
+    }
+    .view {
+        grid-area: view;
+        text-align: left;
+        width: fit-content;
+        /*border: 1px dotted black;*/
+    }
 
 </style>

@@ -10,11 +10,17 @@
                                 <button class="cancel-button" @click="badNameCanceled">Continue</button>
                             </div>
                             <div v-else>
-                                <img id="save-button" src="../assets/save.png" @click="save()"/>
+                                <div class="tooltip">
+                                    <img id="save-button" src="../assets/save.png" @click="save()"/>
+                                    <span class="tooltiptext">Save</span>
+                                </div>
                                 <div class="divider"></div>
                                 <div class="divider"></div>
                                 <div class="divider"></div>
-                                <img id="cancel-edit-button" src="../assets/cancel.png" @click="discard()"/>
+                                <div class="tooltip">
+                                    <img id="cancel-edit-button" src="../assets/cancel.png" @click="discard()"/>
+                                    <span class="tooltiptext">Discard</span>
+                                </div>
                             </div>
                         </div>
                         <div v-else>
@@ -24,25 +30,28 @@
                                 <button class="cancel-button" @click="deleteCanceled">Cancel</button>
                             </div>
                             <div v-else>
-                                <img id="edit-button" src="../assets/pencil-edit-button.png" @click="toggleEdit()"/>
+                                <div class="tooltip">
+                                    <img id="edit-button" src="../assets/pencil-edit-button.png" @click="toggleEdit()"/>
+                                    <span class="tooltiptext">Edit</span>
+                                </div>
                                 <div class="divider"></div>
-                                <img id="copy-button" src="../assets/copy-document.png" @click="copy()"/>
+                                <div class="tooltip">
+                                    <img id="copy-button" src="../assets/copy-document.png" @click="copy()"/>
+                                    <span class="tooltiptext">Copy</span>
+                                </div>
                                 <div class="divider"></div>
                                 <div class="divider"></div>
                                 <div class="divider"></div>
-                                <img id="delete-button" src="../assets/delete-button.png" @click="requestDelete()"/>
+                                <div class="tooltip">
+                                    <img id="delete-button" src="../assets/delete-button.png" @click="requestDelete()"/>
+                                    <span class="tooltiptext">Delete</span>
+                                </div>
                                 <div class="divider"></div>
                                 <div class="divider"></div>
                             </div>
 
                         </div>
 
-                        <b-tooltip target="save-button" title="Save"></b-tooltip>
-                        <b-tooltip target="cancel-edit-button" title="Discard"></b-tooltip>
-
-                        <b-tooltip target="edit-button" title="Edit"></b-tooltip>
-                        <b-tooltip target="copy-button" title="Duplicate"></b-tooltip>
-                        <b-tooltip target="delete-button" title="Delete"></b-tooltip>
                     </div>
                     <label class="grid-name">Id</label>
                     <div v-if="isNew" class="grid-item">
@@ -97,18 +106,14 @@
     import Vue from 'vue'
     import {store} from "../store"
     import {PROXY} from '../common/http-common'
-    //import axios from 'axios'
     import VueFlashMessage from 'vue-flash-message';
     Vue.use(VueFlashMessage);
     require('vue-flash-message/dist/vue-flash-message.min.css')
     const cloneDeep = require('clone-deep')
-    import { TooltipPlugin, ButtonGroupPlugin, ButtonPlugin, ToastPlugin } from 'bootstrap-vue'
-    Vue.use(TooltipPlugin)
+    import { ButtonGroupPlugin, ButtonPlugin, ToastPlugin } from 'bootstrap-vue'
     Vue.use(ButtonGroupPlugin)
     Vue.use(ButtonPlugin)
     Vue.use(ToastPlugin)
-    //    import { BButtonGroup } from 'bootstrap-vue'
-    //Vue.component('b-button-group', BButtonGroup)
 
     export default {
         data () {
@@ -325,5 +330,29 @@
     .button-bar {
         grid-column: 0 / span 2;
         alignment: left;
+    }
+    .tooltip {
+        position: relative;
+        display: inline-block;
+        /*border-bottom: 1px dotted black;*/
+    }
+
+    .tooltip .tooltiptext {
+        visibility: hidden;
+        width: 120px;
+        background-color: blue;
+        color: #fff;
+
+        bottom: 100%;
+        left: 50%;
+        margin-left: -60px;
+
+        /* Position the tooltip */
+        position: absolute;
+        z-index: 1;
+    }
+
+    .tooltip:hover .tooltiptext {
+        visibility: visible;
     }
 </style>

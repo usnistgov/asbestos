@@ -1,9 +1,9 @@
 <template>
     <div class="panel">
-        <router-link to="/foo">Channels</router-link>
+        <router-link :to="channelsLink">Channels</router-link>
         <div class="divider"></div>
-        <router-link to="/test">Tests</router-link>
-        <div class="divider"></div>
+<!--        <router-link to="/test">Tests</router-link>-->
+<!--        <div class="divider"></div>-->
         <div v-if="$route.params.sessionId" class="right">
             Test Session:
             <b-form-select v-model="testSession" :options="testSessions"></b-form-select>
@@ -37,6 +37,10 @@
             },
             routeToTestSession() {
                 this.$router.push(this.testSession)
+            },
+            testSessionFromRoute(route) {
+                const parts = route.split('/')
+                return parts[2]
             }
         },
         created() {
@@ -49,8 +53,14 @@
                 this.testSession = this.sessionId
             }
         },
+        computed: {
+            channelsLink() {
+                return `/session/${this.testSession}/channel`
+            }
+        },
         beforeRouteUpdate (to, from, next) {
-            this.testSession = to.path.substring(to.path.lastIndexOf('/') + 1)
+            console.log(`Session update to ${to.path}`)
+            this.testSession = this.testSessionFromRoute(to.path)
             next()
         },
         components: {
@@ -60,7 +70,8 @@
             // if sessions changes run updateOptions()
             '$store.state.base.sessions': 'updateTestSessions',
             '$route' (to) {
-                this.testSession = to.path.substring(to.path.lastIndexOf('/') + 1)
+                console.log(`Session route update to ${to.path}`)
+                this.testSession = this.testSessionFromRoute(to.path)
             },
             'testSession': 'routeToTestSession'
         },

@@ -3,7 +3,7 @@ import VueRouter from 'vue-router'
 import TopLayout from "../components/TopLayout";
 // import TestPanel from '@/components/TestPanel.vue'
 // import VariableEdit from '@/components/VariableEdit.vue'
-//import ChannelView from "../components/ChannelView";
+import ChannelsView from "../components/ChannelsView";
 //import ChannelNav from "../components/ChannelNav";
 import SessionView from "../components/SessionView";
 // import EventView from "../components/EventView";
@@ -18,7 +18,19 @@ export const routes = [
             {
                 path: 'session/:sessionId',
                 components: { session: SessionView },
-                props: { session: true }
+                props: { session: true },
+                children: [
+                    {
+                        path: 'channel/:channelId',
+                        components: { default: ChannelsView },
+                        props: { default: true}
+                    },
+                    {
+                        path: 'channel',
+                        components: { default: ChannelsView },
+                        props: { default: true}
+                    }
+                ]
             },
             {
                 path: 'session',
@@ -28,20 +40,9 @@ export const routes = [
                 path: '',
                 components: { session: SessionView },
             },
-
-            // {
-            //     path: 'session/:sessionId/channel/:channelId',
-            //     components: { nav: ChannelNav, detail: ChannelView },
-            //     props: { nav: true, detail: true },
-            // },
-            // {
-            //     path: 'session/:sessionId',
-            //     components: { nav: SessionView },
-            //     props: { nav: true }
-            // }
-
         ]
-    }
+    },
+
 ]
 
 export const router = new VueRouter({
@@ -49,4 +50,3 @@ export const router = new VueRouter({
     routes
 })
 
-//router.push('/session/default')
