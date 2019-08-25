@@ -1,9 +1,7 @@
 <template>
     <div>
-        <h1>Asbestos</h1>
+        <h3>Asbestos</h3>
         <router-view name="session"></router-view>
-<!--        <session-view></session-view>-->
-<!--        <router-view></router-view>-->
     </div>
 </template>
 
@@ -32,7 +30,8 @@
         }
     }
 </script>
-<style scoped>
+// these are shared across the tool
+<style>
     .divider{
         width:5px;
         height:auto;
@@ -44,5 +43,27 @@
     }
     .panel {
         padding: 20px;
+    }
+    .tooltip {
+        position: relative;
+        display: inline-block;
+        /*border-bottom: 1px dotted black;*/
+    }
+    .tooltip .tooltiptext {
+        visibility: hidden;
+        width: 120px;
+        background-color: blue;
+        color: #fff;
+
+        bottom: 100%;
+        left: 50%;
+        margin-left: -60px;
+
+        /* Position the tooltip */
+        position: absolute;
+        z-index: 1;
+    }
+    .tooltip:hover .tooltiptext {
+        visibility: visible;
     }
 </style>

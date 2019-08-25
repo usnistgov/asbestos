@@ -2,8 +2,8 @@
     <div class="panel">
         <router-link :to="channelsLink">Channels</router-link>
         <div class="divider"></div>
-<!--        <router-link to="/test">Tests</router-link>-->
-<!--        <div class="divider"></div>-->
+        <router-link :to="logsLink">Logs</router-link>
+        <div class="divider"></div>
         <div v-if="$route.params.sessionId" class="right">
             Test Session:
             <b-form-select v-model="testSession" :options="testSessions"></b-form-select>
@@ -56,6 +56,9 @@
         computed: {
             channelsLink() {
                 return `/session/${this.testSession}/channel`
+            },
+            logsLink() {
+                return `/session/${this.testSession}/log`
             }
         },
         beforeRouteUpdate (to, from, next) {
@@ -83,19 +86,4 @@
 </script>
 
 <style scoped>
-    /*h2 {*/
-    /*    grid-area: header;*/
-    /*}*/
-    .divider{
-        width:5px;
-        height:auto;
-        display:inline-block;
-    }
-    .right {
-        display:inline-block;
-        float: right;
-    }
-    .panel {
-        padding: 20px;
-    }
 </style>

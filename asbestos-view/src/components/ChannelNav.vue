@@ -98,28 +98,4 @@
         position: relative;
         left: 0px;
     }
-    .tooltip {
-        position: relative;
-        display: inline-block;
-        /*border-bottom: 1px dotted black;*/
-    }
-
-    .tooltip .tooltiptext {
-        visibility: hidden;
-        width: 120px;
-        background-color: blue;
-        color: #fff;
-
-        bottom: 100%;
-        left: 50%;
-        margin-left: -60px;
-
-        /* Position the tooltip */
-        position: absolute;
-        z-index: 1;
-    }
-
-    .tooltip:hover .tooltiptext {
-        visibility: visible;
-    }
 </style>

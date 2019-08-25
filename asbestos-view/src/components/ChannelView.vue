@@ -122,8 +122,8 @@
                 edit: false,
                 isNew: false,
                 originalFullChannelId: null,   // in case of delete
-                discarding: false,
-                ackMode: false,
+                discarding: false,  // for saving edits
+                ackMode: false,  // for deleting
                 badNameMode: false
             }
         },
