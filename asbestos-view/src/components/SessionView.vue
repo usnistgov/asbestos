@@ -1,13 +1,13 @@
 <template>
     <div class="panel">
-        <router-link :to="channelsLink">Channels</router-link>
-        <div class="divider"></div>
-        <router-link :to="logsLink">Logs</router-link>
-        <div class="divider"></div>
-        <div v-if="$route.params.sessionId" class="right">
-            Test Session:
-            <b-form-select v-model="testSession" :options="testSessions"></b-form-select>
-        </div>
+<!--        <router-link :to="channelsLink">Channels</router-link>-->
+<!--        <div class="divider"></div>-->
+<!--        <router-link :to="logsLink">Logs</router-link>-->
+<!--        <div class="divider"></div>-->
+<!--        <div v-if="$route.params.sessionId" class="right">-->
+<!--            Test Session:-->
+<!--            <b-form-select v-model="testSession" :options="testSessions"></b-form-select>-->
+<!--        </div>-->
         <div class="panel">
             <router-view></router-view>
         </div>

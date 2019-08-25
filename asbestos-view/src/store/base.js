@@ -8,6 +8,12 @@ Vue.use(Vuex)
 export const baseStore = {
     state() {
         return {
+            session: 'default',
+            environment: 'default',
+            channel: null,
+            testSession: null,
+
+
             sessions: [
                 'default', 'ts1'
             ],
@@ -30,6 +36,15 @@ export const baseStore = {
         }
     },
     mutations: {
+        setSession(state, theSession) {
+            state.session = theSession
+        },
+        setEnvironment(state, theEnvironment) {
+            state.environment = theEnvironment
+        },
+        setChannel(state, theChannel) {
+            state.channel = theChannel
+        },
         installChannel(state, newChannel) {  // adds to end
             const thisChannelId = newChannel.testSession + '__' + newChannel.channelId
             let channelIndex = state.fullChannelIds.findIndex( function(channelId) {
@@ -48,7 +63,9 @@ export const baseStore = {
             for (let i in channelIds) {
                 const theId = channelIds[i]
                 state.fullChannelIds.push(theId)
-                state.channels.push(null)
+                const parts = theId.split('__')
+                const anId = parts[1]
+                state.channels.push(anId)
             }
         },
         deleteChannel(state, theFullChannelId) {
