@@ -150,7 +150,7 @@
                 this.$bvToast.toast(msg, {noCloseButton: true})
             },
             error(msg) {
-                console.exception(msg)
+                console.log(msg)
                 this.$bvToast.toast(msg.message, {noCloseButton: true, title: 'Error'})
             },
             requestDelete() {
@@ -159,6 +159,9 @@
             deleteAcked() {
                 this.deleteChannel()
                 this.ackMode = false
+                const route = '/session/' + this.channel.testSession + '/channels'
+                this.channel = undefined
+                this.$router.push(route)
             },
             deleteCanceled() {
                 this.ackMode = false
@@ -240,7 +243,9 @@
                 this.isNew = false
                 this.toggleEdit()
                 this.discarding = true
-                this.fetch()
+                const route = '/session/' + this.channel.testSession + '/channels'
+                this.channel = undefined
+                this.$router.push(route)
             },
             isCurrentChannelIdNew() {
                 return this.channel.channelId === 'new' || this.channel.channelId === 'copy'
@@ -249,13 +254,18 @@
                 return this.channelId === 'new' || this.channelId === 'copy'
             },
             fetch() {
+                if (this.channelId === undefined)
+                    return
+                console.info(`ChannelView: fetch - channelId is ${this.channelId}`)
                 if (this.fullChannelIds().length === 0)
                     return
                 this.originalFullChannelId = this.fullChannelId()
-                if (this.isNewChannelId() && !this.discarding) {
+                if (this.isNewChannelId()) {
+                    console.info(`opening...`)
                     this.edit = true
                     this.isNew = true
                     this.channel = this.copyOfChannel()
+                    console.info(`...content is ${this.channel}`)
                     this.discarding = false
                     return
                 }
@@ -267,6 +277,10 @@
                 }
                     console.info(`loading channel ${this.fullChannelId()} details`)
                     const that = this
+                    const parts = this.splitFullChannelId(this.fullChannelId())
+                    if (this.$store.state.base.channel && parts[0] === this.$store.state.base.channel.testSession && parts[1] === this.$store.state.base.channel.channelId) {
+                        return
+                    }
                     PROXY.get('channel/' + this.fullChannelId())
                         .then(response => {
                             this.$store.commit('installChannel', response.data)
@@ -280,18 +294,42 @@
             fullChannelIds() {
                 return this.$store.state.base.fullChannelIds
             },
+            splitFullChannelId(id) {
+                return id.split('__')
+            },
             channelIndex(theSession, theChannelId) {
                 const fullId = theSession + '__' + theChannelId
                 return this.$store.state.base.fullChannelIds.findIndex( function(channelId) {
                     return channelId === fullId
                 })
             },
+            showChannels() {
+                this.$store.state.base.fullChannelIds.forEach(id =>
+                    console.log(`id ${id}`))
+                console.log(`chan ${this.$store.state.base.channel.channelId}`)
+            },
+            getChannel(channelId) {
+                const id  = channelId.includes('__') ? channelId.split('__')[1] : channelId
+                console.log(`getChannel - id is ${id}`)
+                const chan = this.$store.state.base.channel
+                console.log(`getChannel - id=${chan.channelId}`)
+                return chan
+                // for (const channel of this.$store.state.base.channels) {
+                //     console.log(`...channel.id is ${channel.id}`)
+                //     if (channel.id === id)
+                //         return channel
+                // }
+                // return undefined
+            },
             copyOfChannel() {
-                const index = this.channelIndex(this.sessionId, this.channelId)
-                if (index === -1) {
-                    return null
-                }
-                return cloneDeep(this.$store.state.base.channels[index])
+                this.showChannels()
+                // const index = this.channelIndex(this.sessionId, this.channelId)
+                // console.info(`index is ${index} for session ${this.sessionId} channel ${this.channelId}`)
+                // if (index === -1) {
+                //     return null
+                // }
+                const chan = this.getChannel(this.channelId)
+                return cloneDeep(chan)
             },
             select() {
                 if (this.channel.testSession === undefined || this.channel.channelId === undefined) {

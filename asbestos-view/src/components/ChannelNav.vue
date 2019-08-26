@@ -44,7 +44,8 @@
             newChannelRoute() {
                 let chan = newChannel()
                 chan.testSession = this.sessionId
-                this.$store.commit('installChannel', chan)
+                chan.channelId = 'new'
+                this.$store.commit('setChannel', chan)
                 return '/session/' + this.sessionId + '/channels/new'
             },
             channelName(id) {
@@ -58,7 +59,7 @@
             channelsLink(channelId) {
                 return '/session/' + this.sessionId + '/channels/' + channelId
             },
-            loadChannelNames() {
+            loadChannelNames() {  // same function exists in ChannelControlPanel
                 const that = this
                 PROXY.get('channel')
                     .then(response => {

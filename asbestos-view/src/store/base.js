@@ -32,7 +32,8 @@ export const baseStore = {
             // fullChannelId can exist without channel - ChannelView.fetch() will notice this
             // and fetch channel from server
             fullChannelIds: [],  // testSession__channelId
-            channels: []
+            channelIds: [],   // ids only
+//            channels: [],
         }
     },
     mutations: {
@@ -44,6 +45,8 @@ export const baseStore = {
         },
         setChannel(state, theChannel) {
             state.channel = theChannel
+            state.channelIds.push(theChannel.channelId)
+            state.fullChannelIds.push(`${theChannel.testSession}__${theChannel.channelId}`)
         },
         installChannel(state, newChannel) {  // adds to end
             const thisChannelId = newChannel.testSession + '__' + newChannel.channelId
@@ -52,28 +55,31 @@ export const baseStore = {
             })
             if (channelIndex === -1) {
                 state.fullChannelIds.push(thisChannelId)
-                state.channels.push(newChannel)
+                state.channelIds.push(newChannel.channelId)
+                console.log(`install new channel - id=${newChannel.channelId}`)
+                state.channel = newChannel
             } else {
-                state.channels[channelIndex] = newChannel
+                console.log(`install replacement channel - id=${newChannel.channelId}`)
+                state.channel = newChannel
             }
         },
         installChannelIds(state, channelIds) {  // must be pre-sorted
             state.fullChannelIds.length = 0
-            state.channels.length = 0
-            for (let i in channelIds) {
-                const theId = channelIds[i]
+            state.channelIds.length = 0
+            for (const theId of channelIds) {
                 state.fullChannelIds.push(theId)
                 const parts = theId.split('__')
                 const anId = parts[1]
-                state.channels.push(anId)
+                state.channelIds.push(anId)
             }
         },
         deleteChannel(state, theFullChannelId) {
             const channelIndex = state.fullChannelIds.findIndex( function(channelId) {
                 return channelId === theFullChannelId
             })
+            if (channelIndex === undefined)
+                return
             state.fullChannelIds.splice(channelIndex, 1)
-            state.channels.splice(channelIndex, 1)
         },
 
 
