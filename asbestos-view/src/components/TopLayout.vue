@@ -12,8 +12,6 @@
                 <div class="vdivider"></div>
                 <log-control-panel class="solid-boxed"></log-control-panel>
                 <div class="vdivider"></div>
-                <test-session-control-panel class="solid-boxed"></test-session-control-panel>
-                <div class="vdivider"></div>
                 <test-control-panel class="solid-boxed"></test-control-panel>
             </div>
         </div>
@@ -23,7 +21,6 @@
 <script>
     import EnvironmentControlPanel from "./EnvironmentControlPanel"
     import LogControlPanel from "./LogControlPanel"
-    import TestSessionControlPanel from "./TestSessionControlPanel"
     import SessionControlPanel from "./SessionControlPanel"
     import ChannelControlPanel from "./ChannelControlPanel"
     import TestControlPanel from "./TestControlPanel"
@@ -48,7 +45,6 @@
         components: {
             EnvironmentControlPanel,
             LogControlPanel,
-            TestSessionControlPanel,
             SessionControlPanel,
             ChannelControlPanel,
             TestControlPanel

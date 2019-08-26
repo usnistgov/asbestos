@@ -6,7 +6,6 @@ import TopLayout from "../components/TopLayout";
 import ChannelsView from "../components/ChannelsView";
 //import ChannelNav from "../components/ChannelNav";
 import SessionView from "../components/SessionView";
-import TestSessionView from "../components/TestSessionView";
 import GenericView from "../components/GenericView";
 
 
@@ -25,13 +24,6 @@ export const routes = [
                         path: 'channels/:channelId',
                         components: { default: ChannelsView },
                         props: { default: true},
-                        children: [
-                            {
-                                path: 'testSession',
-                                components: { default: TestSessionView },
-                                props: { default: true }
-                            },
-                        ]
                     },
                     {
                         path: 'channels',
@@ -42,13 +34,6 @@ export const routes = [
                         path: 'channel/:channelId',
                         components: { default: GenericView },
                         props: { default: true},
-                        children: [
-                            {
-                                path: 'testSession',
-                                components: { default: TestSessionView },
-                                props: { default: true }
-                            },
-                        ]
                     },
 
                 ]

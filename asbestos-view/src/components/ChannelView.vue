@@ -123,7 +123,7 @@
     export default {
         data () {
             return {
-                channel: null,
+                channel: null,  // channel object
                 edit: false,
                 isNew: false,
                 originalFullChannelId: null,   // in case of delete

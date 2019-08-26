@@ -15,7 +15,7 @@
         data() {
             return {
                 channel: null,
-                channels: []
+                channels: []  // ids
             }
         },
         methods: {
@@ -27,9 +27,14 @@
             update() {
                 console.info(`ChannelControlPanel: update()`)
                 let options = []
-                this.$store.state.base.channelIds.forEach(function(ts) {
-                    let it = { value: ts, text: ts }
-                    options.push(it)
+                const that = this
+                this.$store.state.base.fullChannelIds.forEach(function(ts) {
+                    const session = ts.split('__')[0]
+                    const id = ts.split('__')[1]
+                    if (session === that.$store.state.base.session) {
+                        let it = {value: id, text: id}  // necessary for dropdown list
+                        options.push(it)
+                    }
                 })
                 this.channels = options
             },
@@ -78,7 +83,7 @@
             this.loadChannelNames()
         },
         watch: {
-            '$store.state.base.channelIds': 'update',
+            '$store.state.base.fullChannelIds': 'update',
             '$route' (to) {
                 const newChannel = this.channelFromRoute(to.path)
                 const section = this.sectionFromRoute(to.path)
