@@ -1,12 +1,12 @@
 <template>
     <div class="channel-panel-header">
-        My Channels
+        Channels
         <div class="tooltip">
             <img id="add-button" @click="pushNewChannelRoute()" src="../assets/add-button.png"/>
             <span class="tooltiptext">Add Channel</span>
         </div>
         <div v-for="(channelId) in channelIds()" :key="channelId">
-            <router-link class="element-nav" v-bind:to="channelLink(channelId)">
+            <router-link class="element-nav" v-bind:to="channelsLink(channelId)">
                 {{ channelId }}
             </router-link>
         </div>
@@ -45,8 +45,7 @@
                 let chan = newChannel()
                 chan.testSession = this.sessionId
                 this.$store.commit('installChannel', chan)
-                //const newId = this.fullChannelIds().length - 1
-                return '/session/' + this.sessionId + '/channel/new'
+                return '/session/' + this.sessionId + '/channels/new'
             },
             channelName(id) {
                 const sepat = id.indexOf('__')
@@ -56,8 +55,8 @@
                 const sepat = id.indexOf('__')
                 return id.substring(0, sepat)
             },
-            channelLink(channelId) {
-                return '/session/' + this.sessionId + '/channel/' + channelId
+            channelsLink(channelId) {
+                return '/session/' + this.sessionId + '/channels/' + channelId
             },
             loadChannelNames() {
                 const that = this

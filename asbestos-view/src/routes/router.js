@@ -6,7 +6,8 @@ import TopLayout from "../components/TopLayout";
 import ChannelsView from "../components/ChannelsView";
 //import ChannelNav from "../components/ChannelNav";
 import SessionView from "../components/SessionView";
-// import EventView from "../components/EventView";
+import TestSessionView from "../components/TestSessionView";
+import GenericView from "../components/GenericView";
 
 
 Vue.use( VueRouter )
@@ -21,15 +22,35 @@ export const routes = [
                 props: { session: true },
                 children: [
                     {
-                        path: 'channel/:channelId',
+                        path: 'channels/:channelId',
+                        components: { default: ChannelsView },
+                        props: { default: true},
+                        children: [
+                            {
+                                path: 'testSession',
+                                components: { default: TestSessionView },
+                                props: { default: true }
+                            },
+                        ]
+                    },
+                    {
+                        path: 'channels',
                         components: { default: ChannelsView },
                         props: { default: true}
                     },
                     {
-                        path: 'channel',
-                        components: { default: ChannelsView },
-                        props: { default: true}
-                    }
+                        path: 'channel/:channelId',
+                        components: { default: GenericView },
+                        props: { default: true},
+                        children: [
+                            {
+                                path: 'testSession',
+                                components: { default: TestSessionView },
+                                props: { default: true }
+                            },
+                        ]
+                    },
+
                 ]
             },
             {

@@ -20,13 +20,13 @@
         },
         methods: {
             manage() {
-                this.$router.push(`/session/${this.$store.state.base.session}/channel`)
+                console.info('Manage channels')
+                this.$router.push(`/session/${this.$store.state.base.session}/channels`)
             },
             update() {
                 let options = []
                 this.$store.state.base.channels.forEach(function(ts) {
                     let it = { value: ts, text: ts }
-                    console.debug(`channel config item ${ts}`)
                     options.push(it)
                 })
                 this.channels = options
@@ -34,9 +34,13 @@
             routeTo() {
                 this.$router.push(`/session/${this.$store.state.base.session}/channel/${this.channel}`)
             },
-            fromRoute(route) {
+            channelFromRoute(route) {
                 const parts = route.split('/')
                 return parts[4]
+            },
+            sectionFromRoute(route) {  // this will be channels or channel
+                const parts = route.split('/')
+                return parts[3]
             },
             loadChannelNames() {
                 const that = this
@@ -60,8 +64,12 @@
         watch: {
             '$store.state.base.channels': 'update',
             '$route' (to) {
-                console.info(`Channel route update to ${to.path}`)
-                this.channel = this.fromRoute(to.path)
+                const newChannel = this.channelFromRoute(to.path)
+                const section = this.sectionFromRoute(to.path)
+                if (newChannel !== undefined && section === 'channel') {
+                    console.info(`ChannelControlPanel:Route: to channel ${newChannel}`)
+                    this.channel = newChannel
+                }
             },
             'channel': 'routeTo'
         },

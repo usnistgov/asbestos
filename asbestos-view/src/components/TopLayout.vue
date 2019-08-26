@@ -85,6 +85,7 @@
 <style>
     .control-panel-item-title {
         font-weight: bold;
+        cursor: pointer;
     }
     .divider{
         width:5px;

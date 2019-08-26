@@ -55,7 +55,7 @@
         },
         computed: {
             channelsLink() {
-                return `/session/${this.testSession}/channel`
+                return `/session/${this.testSession}/channels`
             },
             logsLink() {
                 return `/session/${this.testSession}/log`

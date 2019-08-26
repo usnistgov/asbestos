@@ -31,6 +31,11 @@
                             </div>
                             <div v-else>
                                 <div class="tooltip">
+                                    <img id="select-button" src="../assets/select.png" @click="select()"/>
+                                    <span class="tooltiptext">Select</span>
+                                </div>
+                                <div class="divider"></div>
+                                <div class="tooltip">
                                     <img id="edit-button" src="../assets/pencil-edit-button.png" @click="toggleEdit()"/>
                                     <span class="tooltiptext">Edit</span>
                                 </div>
@@ -175,7 +180,7 @@
                 let chan = cloneDeep(this.channel)
                 chan.channelId = 'copy'
                 this.$store.commit('installChannel', chan)
-                this.$router.push('/session/' + this.sessionId + '/channel/copy')
+                this.$router.push('/session/' + this.sessionId + '/channels/copy')
             },
             fullChannelId() {
                 return this.sessionId + '__' + this.channelId
@@ -190,7 +195,7 @@
                         that.error(error)
                     })
                 this.$store.commit('deleteChannel', this.fullChannelId())
-                this.$router.push('/session/' + this.sessionId + '/channel')
+                this.$router.push('/session/' + this.sessionId + '/channels')
             },
             toggleEdit() {
                 this.edit = !this.edit
@@ -213,7 +218,7 @@
                         })
                     this.isNew = false
                     this.toggleEdit()
-                    this.$router.push('/session/' + this.channel.testSession + '/channel/' + this.channel.channelId)
+                    this.$router.push('/session/' + this.channel.testSession + '/channels/' + this.channel.channelId)
                     return
                 }
                 this.$store.commit('installChannel', cloneDeep(this.channel))
@@ -255,7 +260,12 @@
                     return
                 }
                 const index = this.channelIndex(this.sessionId, this.channelId)
-                if (this.$store.state.base.channels[index] === null) {
+                console.info(`ChannelView:channel pre-fetch: session:${this.sessionId} channel:${this.channelId} index => ${index}`)
+                if (index === -1) {
+                    this.channel = null
+                    return
+                }
+                    console.info(`loading channel ${this.fullChannelId()} details`)
                     const that = this
                     PROXY.get('channel/' + this.fullChannelId())
                         .then(response => {
@@ -263,11 +273,8 @@
                             this.channel =  this.copyOfChannel()
                         })
                         .catch(e => {
-                            that.error(e)
+                            that.error('channel/' + this.fullChannelId() + ' ' + e)
                         })
-                } else {
-                    this.channel = this.copyOfChannel()
-                }
                 this.discarding = false
             },
             fullChannelIds() {
@@ -285,6 +292,14 @@
                     return null
                 }
                 return cloneDeep(this.$store.state.base.channels[index])
+            },
+            select() {
+                if (this.channel.testSession === undefined || this.channel.channelId === undefined) {
+                    return
+                }
+                const newRoute =  '/session/' + this.channel.testSession + '/channel/' + this.channel.channelId
+                console.info(`ChannelView:New route is ${newRoute}`)
+                this.$router.push(newRoute)
             }
         },
         store: store,
