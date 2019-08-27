@@ -2,26 +2,11 @@
     <div>
         <div class="tool-title">Logs</div>
         <span v-for="(type, i) in resourceTypes" v-bind:key="i">
-            <span class="selectable" @click="loadType(type)">{{ type }}</span>
+            <span class="selectable" @click="loadEvents(type)">{{ type }}</span>
             <span class="divider"></span>
         </span>
-        <div v-for="event in events" :key="event.type">
-            <div class="event-type-header solid-boxed">
-                <span class="type-label has-cursor" v-if="!event.open">
-                    <img id="closed-button" src="../assets/arrow-right.png" @click="open(event)"/>
-                </span>
-                <span class="type-label has-cursor" v-else>
-                    <img id="opened-button" src="../assets/arrow-down.png" @click="close(event)"/>
-                </span>
-                <span class="type-label">{{ event.type }}</span>
-                <span class="divider"></span>
-                <span>{{ event.events.length }} events</span>
-            </div>
-            <div v-if="event.open">
-                <div v-for="(eventName, i) in event.events" v-bind:key="i">
-                    {{ eventName }}
-                </div>
-            </div>
+        <div v-for="event in events" :key="event.id">
+            {{ event.id }} - {{ event.type }}
         </div>
     </div>
 </template>
@@ -37,7 +22,7 @@
         data() {
             return {
                 resourceTypes: [],
-                events: [], // type => list of events
+                events: [], // list { event: theEvent, id: theId, type: theType }
             }
         },
         methods: {
@@ -47,40 +32,47 @@
             close(event) {
                 event.open = false
             },
-            keys() {
-                var theList = []
-                this.events.forEach(event => {
-                    theList.push(event.type)
-                })
-            },
-            loadType(type) {
+            async loadEvents(type) {
                 console.log(`selected ${type}`)
                 const that = this
                 if (type === 'All') {
+                    let idMap = []
                     this.resourceTypes.forEach(theType => {
-                        if (theType !== 'All')
-                            that.loadEvents(theType)
+                        if (theType !== 'All') {
+                            const ids = that.loadEventIds(theType)
+                            ids.forEach(id => {
+                                const event = this.loadEvent(type, id)
+                                const eventObj = { event: event, id: id, type: theType }
+                                idMap.push(eventObj)
+                            })
+                        }
                     })
-                } else
-                    this.loadEvents(type)
-                console.log(`events are ${this.keys()}`)
+                    this.events = idMap
+                } else {
+                    const ids = await this.loadEventIds(type)  // => this.eventIds
+                    this.events = ids.map(id => {
+                        const thisEvent = this.loadEvent(type, id)  // => this.thisEvent
+                        return { event: thisEvent, id: id, type: type }
+                    })
+                }
             },
-            loadEvents(type) {
-                console.log(`LogsView: loading ${type}...`)
-                this.events.length = 0
-                const that = this
-                LOG.get(`${this.sessionId}/${this.channelId}/${type}`)
-                    .then(response => {
-                        let theResponse = response.data
-                        console.log(`...${theResponse.length} events`)
-                        this.events.push({type: type, open: false, events: theResponse.sort().reverse()})
-                        console.log(`events are ${this.keys()}`)
-                    })
-                    .catch(function (error) {
-                        that.error(error)
-                    })
+            async loadEvent(theType, theId) {
+                console.log(`loadEvent ${this.sessionId}/${this.channelId}/${theType}/${theId}`)
+                try {
+                    return await LOG.get(`${this.sessionId}/${this.channelId}/${theType}/${theId}`)
+                } catch (error) {
+                    this.error(error)
+                }
             },
-            getResourceTypes() {
+            async loadEventIds (type) {
+                console.log(`loadEventIds ${type} ...`)
+                try {
+                    return await LOG.get(`${this.sessionId}/${this.channelId}/${type}`)
+                } catch (error) {
+                    this.error(error)
+                }
+            },
+            loadResourceTypes() {
                 const that = this
                 LOG.get(`${this.sessionId}/${this.channelId}`)
                     .then(response => {
@@ -107,7 +99,7 @@
         },
         mounted() {
             console.log('LogView mounted')
-            this.getResourceTypes()
+            this.loadResourceTypes()
         },
         watch: {
 
@@ -126,5 +118,6 @@
     }
     .event-type-header  {
         padding: 2px;
+        background-color: lightGray;
     }
 </style>

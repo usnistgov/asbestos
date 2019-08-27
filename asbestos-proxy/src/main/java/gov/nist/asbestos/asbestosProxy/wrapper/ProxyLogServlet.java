@@ -140,6 +140,8 @@ public class ProxyLogServlet extends HttpServlet {
     }
 
     class Event {
+        String eventName;
+        String resourceType;
         List<Task> tasks = new ArrayList<>();
 
         Event(File eventDir) {
@@ -165,6 +167,8 @@ public class ProxyLogServlet extends HttpServlet {
         File eventDir = new File(resourceTypeFile, eventName);
 
         Event event = new Event(eventDir);
+        event.eventName = eventName;
+        event.resourceType = resourceType;
 
         String json = new Gson().toJson(event);
         resp.setContentType("application/json");
