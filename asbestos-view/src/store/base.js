@@ -10,7 +10,7 @@ export const baseStore = {
         return {
             session: 'default',
             environment: 'default',
-            channel: null,
+            channel: null,  // private communication between ChannelNav and ChannelView
             testSession: null,
 
 
@@ -43,6 +43,8 @@ export const baseStore = {
         },
         setChannel(state, theChannel) {
             state.channel = theChannel
+            if (theChannel === null)
+                return
             const fullId = `${theChannel.testSession}__${theChannel.channelId}`
             let channelIndex = state.fullChannelIds.findIndex( function(channelId) {
                 return channelId === fullId

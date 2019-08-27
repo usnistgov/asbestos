@@ -47,7 +47,7 @@
         watch: {
             '$store.state.base.sessions': 'update',
             '$route' (to) {
-                console.info(`Session route update to ${to.path}`)
+                console.info(`Session route update (local) to ${to.path}`)
                 this.testSession = this.fromRoute(to.path)
             },
             'testSession': 'routeTo'

@@ -113,8 +113,8 @@
     .tooltip .tooltiptext {
         visibility: hidden;
         width: 120px;
-        background-color: blue;
-        color: #fff;
+        background-color: lightgray;
+        color: black;
 
         bottom: 100%;
         left: 50%;
@@ -126,5 +126,12 @@
     }
     .tooltip:hover .tooltiptext {
         visibility: visible;
+    }
+    .tool-title {
+        font-weight: bold;
+    }
+    .selectable {
+        cursor: pointer;
+        text-decoration: underline;
     }
 </style>

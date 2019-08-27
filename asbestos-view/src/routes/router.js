@@ -7,7 +7,7 @@ import ChannelsView from "../components/ChannelsView";
 //import ChannelNav from "../components/ChannelNav";
 import SessionView from "../components/SessionView";
 import GenericView from "../components/GenericView";
-
+import LogsView from "../components/LogsView"
 
 Vue.use( VueRouter )
 
@@ -34,6 +34,13 @@ export const routes = [
                         path: 'channel/:channelId',
                         components: { default: GenericView },
                         props: { default: true},
+                        children: [
+                            {
+                                path: 'logs',
+                                components: { default: LogsView },
+                                props: { default: true }
+                            }
+                        ]
                     },
 
                 ]
