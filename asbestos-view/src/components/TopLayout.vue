@@ -134,4 +134,7 @@
         cursor: pointer;
         text-decoration: underline;
     }
+    .has-cursor {
+        cursor: pointer;
+    }
 </style>
