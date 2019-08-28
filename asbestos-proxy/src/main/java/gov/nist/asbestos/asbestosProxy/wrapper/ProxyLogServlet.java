@@ -76,6 +76,11 @@ public class ProxyLogServlet extends HttpServlet {
             return;
         }
         if (uriParts.length == 5 && jsonOk) {  // includes channelId
+            String query = req.getQueryString();
+            if (query != null && query.contains("summaries=true")) {
+                buildJsonListingOfEventSummaries(resp, uriParts[3], uriParts[4]);
+                return;
+            }
             // JSON listing of resourceTypes in channelId
             buildJsonListingOfResourceTypes(resp, uriParts[3], uriParts[4]);
             return;
@@ -123,6 +128,7 @@ public class ProxyLogServlet extends HttpServlet {
     }
 
     class Task {
+        int index;
         String label;
         String description;
         String requestHeader;
@@ -139,6 +145,26 @@ public class ProxyLogServlet extends HttpServlet {
         }
     }
 
+    class EventSummary {
+        String eventName;
+        String resourceType;
+        String verb;
+        boolean status;
+
+        EventSummary(File eventFile) {
+            try {
+                String responseHeader = read(eventFile, "task0", "response_header.txt");
+                Headers headers = new Headers(responseHeader);
+                status = headers.getStatus() < 202;
+                String requestHeader = read(eventFile, "task0", "request_header.txt");
+                headers = new Headers(requestHeader);
+                verb = headers.getVerb();
+            } catch (Exception e) {
+                status = false;
+            }
+        }
+    }
+
     class Event {
         String eventName;
         String resourceType;
@@ -146,12 +172,40 @@ public class ProxyLogServlet extends HttpServlet {
 
         Event(File eventDir) {
             List<String> parts = dirListingAsList(eventDir);
+            int i = 0;
             for (String part : parts) {
                 Task task = new Task(eventDir, part);
                 task.label = part;
+                task.index = i++;
                 tasks.add(task);
             }
         }
+    }
+
+    private void buildJsonListingOfEventSummaries(HttpServletResponse resp, String testSession, String channelId) {
+        File fhir = fhirDir(testSession, channelId);
+        List<String> resourceTypes = dirListingAsList(fhir);
+        List<EventSummary> eventSummaries = new ArrayList<>();
+        for (String resourceType : resourceTypes) {
+            File resourceDir = new File(fhir, resourceType);
+            List<String> eventIds = dirListingAsList(resourceDir);
+            for (String eventId : eventIds) {
+                File eventFile = new File(resourceDir, eventId);
+                EventSummary summary = new EventSummary(eventFile);
+                summary.resourceType = resourceType;
+                summary.eventName = eventId;
+                eventSummaries.add(summary);
+            }
+        }
+        String json = new Gson().toJson(eventSummaries);
+        resp.setContentType("application/json");
+        try {
+            resp.getOutputStream().print(json);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        resp.setStatus(resp.SC_OK);
     }
 
     private void buildJsonListingOfEvent(HttpServletResponse resp, String testSession, String channelId, String resourceType, String eventName) {

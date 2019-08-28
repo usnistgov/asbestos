@@ -5,20 +5,57 @@
             <span class="divider"></span>
             <img id="reload" class="selectable" @click="loadEventSummaries()" src="../assets/reload.png"/>
         </div>
-        <span v-for="(type, i) in resourceTypes" v-bind:key="i" v-bind:class="{'active':(type === currentType)}">
-            <span class="selectable" @click="currentType = type">{{ type }}</span>
+
+        <!--  selectable resource type list -->
+        <span v-for="(type, i) in resourceTypes"
+              v-bind:key="i"
+              v-bind:class="{'active':(type === currentType)}">
+            <span class="selectable"
+                  @click="currentType = type">{{ type }}</span>
             <span class="divider"></span>
         </span>
         <div class="vdivider"></div>
         <div class="vdivider"></div>
         <div class="vdivider"></div>
-        <div v-for="(summary, i) in eventSummariesByType" :key="currentType + i">
+
+        <!--  list summaries for currentType      -->
+        <div v-for="(eventSummary, i) in eventSummariesByType"
+             :key="currentType + i">
             <div >
-                <div class="summary-label boxed has-cursor" @click="choose(summary)">
-                    {{ eventAsDate(summary.eventName) }} - {{ summary.verb}} {{ summary.resourceType }} - {{ summary.status ? 'Ok' : 'Error' }}
+                <div class="summary-label boxed has-cursor"
+                     @click="selectSummary(eventSummary)">
+                    {{ eventAsDate(eventSummary.eventName) }} - {{ eventSummary.verb}} {{ eventSummary.resourceType }} - {{ eventSummary.status ? 'Ok' : 'Error' }}
                 </div>
-                <div v-if="selectedEventName === summary.eventName">
-                    Pick Me!
+
+                <!-- list tasks if event summary is selected-->
+                <div v-if="selectedEventName === eventSummary.eventName && selectedEvent">
+                    <span class="selectable"
+                          v-for="(task, i) in selectedEvent.tasks"
+                          :key="'A' + currentType + i"
+                          @click="chooseTask(i)"
+                          v-bind:class="{'active':(task.index === selectedTask)}">
+                        Task{{ i }}
+                    </span>
+                </div>
+                <div v-if="selectedEvent">
+                    <div v-if="selectedEventName === eventSummary.eventName && selectedEvent">
+                        <span class="selectable"
+                        v-for="(reqres, i) in requestOrResponse"
+                        :key="'REQ' + selectedEventName + i"
+                        :@click="chooseRequest(requestOrResponse[i])">
+                            {{ reqres }}
+                        </span>
+                        <div v-if="displayRequest" class="event-details">
+                            <pre>{{ selectedEvent.tasks[selectedTask].requestHeader }}
+                            </pre>
+                            <pre>{{ selectedEvent.tasks[selectedTask].requestBody }}</pre>
+                        </div>
+                        <div v-if="!displayRequest" class="event-details">
+                            <pre>{{ selectedEvent.tasks[selectedTask].responseHeader }}
+                            </pre>
+                            <pre>{{ selectedEvent.tasks[selectedTask].responseBody }}</pre>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -40,14 +77,21 @@
                 eventSummaries: [], // list { eventName: xx, resourceType: yy, verb: GET|POST, status: true|false }
                 currentType: null,
                 eventSummariesByType: [],
+                selectedEvent: null,
                 selectedEventName: null,
+                selectedTask: 0,
+                displayRequest: true,
+                requestOrResponse: [ "Request", "Response" ]
             }
         },
         methods: {
-            updateEventsummariesByType() {
+            chooseRequest(type) {
+                this.displayRequest = type === 'Request'
+            },
+            updateEventSummariesByType() {  // called by watcher when currentType is updated
                 const type = this.currentType
                 const summaries = this.eventSummaries
-                console.log(`updateEventsummariesByType(${type})`)// All is possible value plus anything in resourceTypes
+                console.log(`updateEventSummariesByType(${type})`)// All is possible value plus anything in resourceTypes
                 if (type === 'All') {
                     this.eventSummariesByType = summaries.sort((a, b) => a.eventName > b.eventName ? -1 : 1)
                 } else {
@@ -58,7 +102,7 @@
             },
             eventAsDate(name) {
                 const parts = name.split('_')
-               // const year = parts[0]
+                // const year = parts[0]
                 const month = parts[1]
                 const day = parts[2]
                 const hour = parts[3]
@@ -69,8 +113,30 @@
                 //return name
                 return `${day} ${monthName} ${hour}:${minute}:${second}:${milli}`
             },
-            choose(summary) {
-                this.selectedEventName = summary.eventName === this.selectedEventName ? null : summary.eventName
+            chooseTask(task) {
+                this.selectedTask = task
+            },
+            selectSummary(summary) {
+                // don't reload if it is already the selected event
+                this.selectedEventName = summary.eventName === this.selectedEventName ? null: summary.eventName
+                if (this.selectedEventName !== null) {
+                    this.selectedEvent = null
+                    this.selectedTask = 0
+                    console.log(`GET ${this.sessionId}/${this.channelId}/${summary.resourceType}/${summary.eventName}`)
+                    LOG.get(`${this.sessionId}/${this.channelId}/${summary.resourceType}/${summary.eventName}`)
+                        .then(response => {
+                            try {
+                                this.selectedEvent = response.data
+                            } catch (error) {
+                                this.error(error)
+                                return
+                            }
+                        })
+                        .catch(error => {
+                            console.log('error')
+                            this.error(error)
+                        })
+                }
             },
             loadEventSummaries() {
                 LOG.get(`${this.sessionId}/${this.channelId}`, {
@@ -111,7 +177,7 @@
         mounted() {
         },
         watch: {
-            'currentType': 'updateEventsummariesByType'
+            'currentType': 'updateEventSummariesByType'
         },
         props: [
             'sessionId', 'channelId'
@@ -134,5 +200,12 @@
     .event-type-header  {
         padding: 2px;
         background-color: lightGray;
+    }
+    pre {
+        font-size: .7rem;
+        margin: 0;
+    }
+    .event-details {
+        text-align: left;
     }
 </style>
