@@ -1,12 +1,26 @@
 <template>
     <div>
-        <div class="tool-title">Logs</div>
-        <span v-for="(type, i) in resourceTypes" v-bind:key="i">
-            <span class="selectable" @click="loadEvents(type)">{{ type }}</span>
+        <div>
+            <span class="tool-title">Logs</span>
+            <span class="divider"></span>
+            <img id="reload" class="selectable" @click="loadEventSummaries()" src="../assets/reload.png"/>
+        </div>
+        <span v-for="(type, i) in resourceTypes" v-bind:key="i" v-bind:class="{'active':(type === currentType)}">
+            <span class="selectable" @click="currentType = type">{{ type }}</span>
             <span class="divider"></span>
         </span>
-        <div v-for="event in events" :key="event.id">
-            {{ event.id }} - {{ event.type }}
+        <div class="vdivider"></div>
+        <div class="vdivider"></div>
+        <div class="vdivider"></div>
+        <div v-for="(summary, i) in eventSummariesByType" :key="currentType + i">
+            <div >
+                <div class="summary-label boxed has-cursor" @click="choose(summary)">
+                    {{ eventAsDate(summary.eventName) }} - {{ summary.verb}} {{ summary.resourceType }} - {{ summary.status ? 'Ok' : 'Error' }}
+                </div>
+                <div v-if="selectedEventName === summary.eventName">
+                    Pick Me!
+                </div>
+            </div>
         </div>
     </div>
 </template>
@@ -21,70 +35,64 @@
     export default {
         data() {
             return {
+                monthNames: [ 'Jan', 'Feb', 'Mar', 'April', 'May', 'June', 'July', 'Aug', 'Sept', 'Oct', 'Nov', 'Dec'],
                 resourceTypes: [],
-                events: [], // list { event: theEvent, id: theId, type: theType }
+                eventSummaries: [], // list { eventName: xx, resourceType: yy, verb: GET|POST, status: true|false }
+                currentType: null,
+                eventSummariesByType: [],
+                selectedEventName: null,
             }
         },
         methods: {
-            open(event) {
-                  event.open = true
-            },
-            close(event) {
-                event.open = false
-            },
-            async loadEvents(type) {
-                console.log(`selected ${type}`)
-                const that = this
+            updateEventsummariesByType() {
+                const type = this.currentType
+                const summaries = this.eventSummaries
+                console.log(`updateEventsummariesByType(${type})`)// All is possible value plus anything in resourceTypes
                 if (type === 'All') {
-                    let idMap = []
-                    this.resourceTypes.forEach(theType => {
-                        if (theType !== 'All') {
-                            const ids = that.loadEventIds(theType)
-                            ids.forEach(id => {
-                                const event = this.loadEvent(type, id)
-                                const eventObj = { event: event, id: id, type: theType }
-                                idMap.push(eventObj)
-                            })
-                        }
-                    })
-                    this.events = idMap
+                    this.eventSummariesByType = summaries.sort((a, b) => a.eventName > b.eventName ? -1 : 1)
                 } else {
-                    const ids = await this.loadEventIds(type)  // => this.eventIds
-                    this.events = ids.map(id => {
-                        const thisEvent = this.loadEvent(type, id)  // => this.thisEvent
-                        return { event: thisEvent, id: id, type: type }
-                    })
+                    this.eventSummariesByType =  summaries.filter(item => {
+                        return item.resourceType === type
+                    }).sort((a, b) => a.eventName > b.eventName ? -1 : 1)
                 }
             },
-            async loadEvent(theType, theId) {
-                console.log(`loadEvent ${this.sessionId}/${this.channelId}/${theType}/${theId}`)
-                try {
-                    return await LOG.get(`${this.sessionId}/${this.channelId}/${theType}/${theId}`)
-                } catch (error) {
-                    this.error(error)
-                }
+            eventAsDate(name) {
+                const parts = name.split('_')
+               // const year = parts[0]
+                const month = parts[1]
+                const day = parts[2]
+                const hour = parts[3]
+                const minute = parts[4]
+                const second = parts[5]
+                const milli = parts[6]
+                const monthName = this.monthNames[+month]
+                //return name
+                return `${day} ${monthName} ${hour}:${minute}:${second}:${milli}`
             },
-            async loadEventIds (type) {
-                console.log(`loadEventIds ${type} ...`)
-                try {
-                    return await LOG.get(`${this.sessionId}/${this.channelId}/${type}`)
-                } catch (error) {
-                    this.error(error)
-                }
+            choose(summary) {
+                this.selectedEventName = summary.eventName === this.selectedEventName ? null : summary.eventName
             },
-            loadResourceTypes() {
-                const that = this
-                LOG.get(`${this.sessionId}/${this.channelId}`)
+            loadEventSummaries() {
+                LOG.get(`${this.sessionId}/${this.channelId}`, {
+                    params: {
+                        summaries: 'true'
+                    }
+                })
                     .then(response => {
-                        let theResponse = response.data
-                        theResponse.push('All')
-                        this.resourceTypes =  theResponse.sort()
+                        this.eventSummaries = response.data
+                        let types = []
+                        this.eventSummaries.forEach(summary => {
+                            if (!types.includes(summary.resourceType))
+                                types.push(summary.resourceType)
+                        })
+                        types.push('All')
+                        this.resourceTypes = types.sort()
+                        console.log(`loaded ${response.data.length} summaries and ${types.length} types`)
                     })
-                    .catch(function (error) {
-                        that.error(error)
+                    .catch(error => {
+                        this.error(error)
                     })
             },
-
             msg(msg) {
                 console.log(msg)
                 this.$bvToast.toast(msg, {noCloseButton: true})
@@ -94,15 +102,16 @@
                 console.log(err)
             },
         },
+        computed: {
+
+        },
         created() {
-            console.log('LogView created')
+            this.loadEventSummaries()
         },
         mounted() {
-            console.log('LogView mounted')
-            this.loadResourceTypes()
         },
         watch: {
-
+            'currentType': 'updateEventsummariesByType'
         },
         props: [
             'sessionId', 'channelId'
@@ -112,9 +121,15 @@
 </script>
 
 <style scoped>
-    .type-label {
-        font-weight: bold;
-        float: left;
+    .summary-label {
+        background-color: lightGray;
+        text-align: left;
+    }
+    .active {
+        background-color: lightGray;
+    }
+    .header-area {
+        display: grid;
     }
     .event-type-header  {
         padding: 2px;
