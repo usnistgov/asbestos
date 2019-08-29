@@ -8,6 +8,9 @@ import ChannelsView from "../components/ChannelsView";
 import SessionView from "../components/SessionView";
 import GenericView from "../components/GenericView";
 import LogsView from "../components/LogsView"
+import ChannelLogList from "../components/ChannelLogList"
+import LogList from "../components/LogList"
+import LogItem from "../components/LogItem"
 
 Vue.use( VueRouter )
 
@@ -39,7 +42,23 @@ export const routes = [
                                 path: 'logs',
                                 components: { default: LogsView },
                                 props: { default: true }
-                            }
+                            },
+                            {
+                                path: 'logs2',
+                                components: { default: ChannelLogList },
+                                props: { default: true },
+                            },
+                            {
+                                path: ':resourceType',
+                                component: LogList,
+                                props: true,
+                            },
+                            {
+                                path: 'lognav/:eventId',
+                                component: LogItem,
+                                props: true,
+                            },
+
                         ]
                     },
 

@@ -6,11 +6,11 @@
             <div class="control-panel">
                 <session-control-panel class="solid-boxed"></session-control-panel>
                 <div class="vdivider"></div>
-                <environment-control-panel class="solid-boxed"></environment-control-panel>
-                <div class="vdivider"></div>
                 <channel-control-panel class="solid-boxed"></channel-control-panel>
                 <div class="vdivider"></div>
                 <log-control-panel class="solid-boxed"></log-control-panel>
+                <div class="vdivider"></div>
+                <channel-log-control-panel class="solid-boxed"></channel-log-control-panel>
                 <div class="vdivider"></div>
                 <test-control-panel class="solid-boxed"></test-control-panel>
             </div>
@@ -19,11 +19,11 @@
 </template>
 
 <script>
-    import EnvironmentControlPanel from "./EnvironmentControlPanel"
     import LogControlPanel from "./LogControlPanel"
     import SessionControlPanel from "./SessionControlPanel"
     import ChannelControlPanel from "./ChannelControlPanel"
     import TestControlPanel from "./TestControlPanel"
+    import ChannelLogControlPanel from "./ChannelLogControlPanel"
 
     export default {
         data() {
@@ -43,11 +43,11 @@
         },
         name: 'TopLayout',
         components: {
-            EnvironmentControlPanel,
             LogControlPanel,
             SessionControlPanel,
             ChannelControlPanel,
-            TestControlPanel
+            TestControlPanel,
+            ChannelLogControlPanel,
         }
     }
 </script>

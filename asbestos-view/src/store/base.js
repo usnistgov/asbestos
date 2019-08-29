@@ -10,8 +10,10 @@ export const baseStore = {
         return {
             session: 'default',
             environment: 'default',
-            channel: null,  // private communication between ChannelNav and ChannelView
+            channel: null,  // private communication between ChannelNav and ChannelView????
             testSession: null,
+            eventSummaries: null,
+            currentEventIndex: 0,
 
 
             sessions: [
@@ -40,6 +42,15 @@ export const baseStore = {
         },
         setEnvironment(state, theEnvironment) {
             state.environment = theEnvironment
+        },
+        setCurrentEventIndex(state, index) {
+            state.currentEventIndex = index
+        },
+        updateCurrentEventIndex(state, value) {
+            state.currentEventIndex += value
+        },
+        setEventSummaries(state, summaries) {
+            state.eventSummaries = summaries
         },
         setChannel(state, theChannel) {
             state.channel = theChannel
