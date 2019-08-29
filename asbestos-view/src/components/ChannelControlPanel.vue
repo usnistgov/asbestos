@@ -21,8 +21,8 @@
         methods: {
             manage() {
                 console.info('Manage channels')
-                this.channel = null
-                this.$store.commit('setChannel', null)
+                //this.channel = null
+                //this.$store.commit('setChannel', null)
                 this.$router.push(`/session/${this.$store.state.base.session}/channels`)
             },
             update() {
@@ -45,7 +45,7 @@
                 }
                 const dest = `/session/${this.$store.state.base.session}/channel/${this.channel}`
                 console.info(`ChannelControlPanel: route to ${dest}`)
-                this.$store.commit('setChannel', this.channel)
+                this.$store.commit('setChannelId', this.channel)
                 this.$router.push(dest)
             },
             channelFromRoute(route) {
@@ -91,7 +91,7 @@
                 const section = this.sectionFromRoute(to.path)
                 if (newChannel !== undefined && section === 'channel') {
                     console.info(`ChannelControlPanel:Route: (local) to channel ${newChannel}`)
-                    this.channel = newChannel
+                    //this.channel = newChannel
                 }
             },
             'channel': 'routeTo'

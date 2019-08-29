@@ -1,6 +1,9 @@
 <template>
     <div>
-        <span class="tool-title">Log List for {{ resourceType }}</span>
+        <span class="tool-title">Log List</span>
+        <span class="divider"></span>
+
+        <img id="reload" class="selectable" @click="loadEventSummaries()" src="../assets/reload.png"/>
         <span class="divider"></span>
 
         <div v-for="(eventSummary, i) in eventSummaries"
@@ -32,6 +35,14 @@
         },
         methods: {
             loadEventSummaries() {
+                if (this.sessionId === null) {
+                    this.error('Session not set')
+                    return
+                }
+                if (this.channelId === null) {
+                    this.error('Channel not set')
+                    return
+                }
                 LOG.get(`${this.sessionId}/${this.channelId}`, {
                     params: {
                         summaries: 'true'

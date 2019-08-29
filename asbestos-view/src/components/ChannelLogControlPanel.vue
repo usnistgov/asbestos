@@ -14,18 +14,16 @@
         },
         methods: {
             manage() {
-                if (this.$store.state.base.session === null)
-                    return
-                if (this.$store.state.base.channel === null)
-                    return
-                const route = `/session/${this.$store.state.base.session}/channel/${this.$store.state.base.channel}/logs`
+                if (!this.selectable)
+                    return;
+                const route = `/session/${this.$store.state.base.session}/channel/${this.$store.state.base.channel.channelId}/logs`
                 console.info(`Route to ${route}`)
                 this.$router.push(route)
             },
         },
         computed: {
             selectable() {
-                return this.$store.state.base.session !== null && this.$store.state.base.channel !== null
+                return this.$store.state.base.session !== null && this.$store.state.base.channelId !== null
             }
         },
         created() {

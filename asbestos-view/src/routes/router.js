@@ -8,7 +8,7 @@ import ChannelsView from "../components/ChannelsView";
 import SessionView from "../components/SessionView";
 import GenericView from "../components/GenericView";
 import LogsView from "../components/LogsView"
-import ChannelLogList from "../components/ChannelLogList"
+//import ChannelLogList from "../components/ChannelLogList"
 import LogList from "../components/LogList"
 import LogItem from "../components/LogItem"
 
@@ -45,14 +45,14 @@ export const routes = [
                             },
                             {
                                 path: 'logs',
-                                components: { default: ChannelLogList },
+                                components: { default: LogList },
                                 props: { default: true },
                             },
-                            {
-                                path: ':resourceType',
-                                component: LogList,
-                                props: true,
-                            },
+                            // {
+                            //     path: ':resourceType',
+                            //     component: LogList,
+                            //     props: true,
+                            // },
                             {
                                 path: 'lognav/:eventId',
                                 component: LogItem,

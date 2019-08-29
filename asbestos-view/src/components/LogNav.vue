@@ -76,15 +76,15 @@
         text-align: left;
     }
     .left-arrow-position {
-        position: relative;
-        left: 20px;
+        position: absolute;
+        left: 90px;
     }
     .right-arrow-position {
-        position: relative;
-        left: 40px;
+        position: absolute;
+        left: 130px;
     }
     .item-count-position {
-        position: relative;
-        left: 60px;
+        position: absolute;
+        left: 200px;
     }
 </style>

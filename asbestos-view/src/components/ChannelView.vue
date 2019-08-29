@@ -283,6 +283,7 @@
                     }
                     PROXY.get('channel/' + this.fullChannelId())
                         .then(response => {
+                            console.log(`installing channel ${response.data.channelId}`)
                             this.$store.commit('installChannel', response.data)
                             this.channel =  this.copyOfChannel()
                         })
@@ -308,18 +309,8 @@
                     console.log(`id ${id}`))
                 console.log(`chan ${this.$store.state.base.channel.channelId}`)
             },
-            getChannel(channelId) {
-                const id  = channelId.includes('__') ? channelId.split('__')[1] : channelId
-                console.log(`getChannel - id is ${id}`)
-                const chan = this.$store.state.base.channel
-                console.log(`getChannel - id=${chan.channelId}`)
-                return chan
-                // for (const channel of this.$store.state.base.channels) {
-                //     console.log(`...channel.id is ${channel.id}`)
-                //     if (channel.id === id)
-                //         return channel
-                // }
-                // return undefined
+            getChannel() {
+                return this.$store.state.base.channel
             },
             copyOfChannel() {
                 this.showChannels()
@@ -328,7 +319,7 @@
                 // if (index === -1) {
                 //     return null
                 // }
-                const chan = this.getChannel(this.channelId)
+                const chan = this.getChannel()
                 return cloneDeep(chan)
             },
             select() {

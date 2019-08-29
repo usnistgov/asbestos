@@ -10,8 +10,11 @@ export const baseStore = {
         return {
             session: 'default',
             environment: 'default',
-            channel: null,  // private communication between ChannelNav and ChannelView????
+            channel: null,  // private communication between ChannelNav and ChannelView
             testSession: null,
+            channelId: null,
+
+            // private to the log viewer
             eventSummaries: null,
             currentEventIndex: 0,
 
@@ -51,6 +54,9 @@ export const baseStore = {
         },
         setEventSummaries(state, summaries) {
             state.eventSummaries = summaries
+        },
+        setChannelId(state, channelId) {
+            state.channelId = channelId
         },
         setChannel(state, theChannel) {
             state.channel = theChannel
