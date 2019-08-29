@@ -59,6 +59,7 @@
                 if (type === 'All') {
                     this.eventSummariesByType = summaries.sort((a, b) => a.eventName > b.eventName ? -1 : 1)
                 } else {
+                    console.log(`filter by ${type}`)
                     this.eventSummariesByType =  summaries.filter(item => {
                         return item.resourceType === type
                     }).sort((a, b) => a.eventName > b.eventName ? -1 : 1)
