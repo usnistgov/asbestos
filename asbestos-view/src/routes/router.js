@@ -39,12 +39,12 @@ export const routes = [
                         props: { default: true},
                         children: [
                             {
-                                path: 'logs',
+                                path: 'logsold',
                                 components: { default: LogsView },
                                 props: { default: true }
                             },
                             {
-                                path: 'logs2',
+                                path: 'logs',
                                 components: { default: ChannelLogList },
                                 props: { default: true },
                             },

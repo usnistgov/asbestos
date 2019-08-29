@@ -8,8 +8,8 @@
                 <div class="vdivider"></div>
                 <channel-control-panel class="solid-boxed"></channel-control-panel>
                 <div class="vdivider"></div>
-                <log-control-panel class="solid-boxed"></log-control-panel>
-                <div class="vdivider"></div>
+<!--                <log-control-panel class="solid-boxed"></log-control-panel>-->
+<!--                <div class="vdivider"></div>-->
                 <channel-log-control-panel class="solid-boxed"></channel-log-control-panel>
                 <div class="vdivider"></div>
                 <test-control-panel class="solid-boxed"></test-control-panel>
@@ -19,7 +19,6 @@
 </template>
 
 <script>
-    import LogControlPanel from "./LogControlPanel"
     import SessionControlPanel from "./SessionControlPanel"
     import ChannelControlPanel from "./ChannelControlPanel"
     import TestControlPanel from "./TestControlPanel"
@@ -43,7 +42,6 @@
         },
         name: 'TopLayout',
         components: {
-            LogControlPanel,
             SessionControlPanel,
             ChannelControlPanel,
             TestControlPanel,

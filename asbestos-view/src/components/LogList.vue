@@ -67,26 +67,6 @@
             selectSummary(summary) {
                 this.$store.commit('setEventSummaries', this.eventSummaries)
                 this.$router.push(`/session/${this.sessionId}/channel/${this.channelId}/lognav/${summary.eventName}`)
-                // // don't reload if it is already the selected event
-                // this.selectedEventName = summary.eventName === this.selectedEventName ? null: summary.eventName
-                // if (this.selectedEventName !== null) {
-                //     this.selectedEvent = null
-                //     this.selectedTask = 0
-                //     console.log(`GET ${this.sessionId}/${this.channelId}/${summary.resourceType}/${summary.eventName}`)
-                //     LOG.get(`${this.sessionId}/${this.channelId}/${summary.resourceType}/${summary.eventName}`)
-                //         .then(response => {
-                //             try {
-                //                 this.selectedEvent = response.data
-                //             } catch (error) {
-                //                 this.error(error)
-                //                 return
-                //             }
-                //         })
-                //         .catch(error => {
-                //             console.log('error')
-                //             this.error(error)
-                //         })
-                // }
             },
             eventAsDate(name) {
                 const parts = name.split('_')

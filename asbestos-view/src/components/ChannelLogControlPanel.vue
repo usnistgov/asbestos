@@ -1,6 +1,6 @@
 <template>
     <div>
-        <div class="control-panel-item-title" @click="manage()">Log2</div>
+        <div class="control-panel-item-title" @click="manage()">Log</div>
         <div v-if="!selectable" class="not-available">Select Channel</div>
     </div>
 </template>
@@ -18,7 +18,7 @@
                     return
                 if (this.$store.state.base.channel === null)
                     return
-                const route = `/session/${this.$store.state.base.session}/channel/${this.$store.state.base.channel}/logs2`
+                const route = `/session/${this.$store.state.base.session}/channel/${this.$store.state.base.channel}/logs`
                 console.info(`Route to ${route}`)
                 this.$router.push(route)
             },

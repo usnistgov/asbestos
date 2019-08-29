@@ -1,22 +1,22 @@
 <template>
     <div class="solid-boxed">
-        <div class="tooltip">
-            <img id="return-button" class="selectable" src="../assets/arrow-up.png" @click="up()"/>
-            <span class="tooltiptext">Return</span>
+        <div class="nav-buttons">
+            <div class="tooltip">
+                <img id="return-button" class="selectable" src="../assets/arrow-up.png" @click="up()"/>
+                <span class="tooltiptext">Return</span>
+            </div>
+            <div v-if="moreToTheLeft" class="tooltip left-arrow-position">
+                <img id="left-button" class="selectable" src="../assets/left-arrow.png" @click="left()"/>
+                <span class="tooltiptext">Previous</span>
+            </div>
+            <div v-if="moreToTheRight" class="tooltip right-arrow-position">
+                <img id="right-button" class="selectable" src="../assets/right-arrow.png" @click="right()"/>
+                <span class="tooltiptext">Next</span>
+            </div>
+            <span class="item-count-position">
+                Item {{ index + 1 }} of {{ this.$store.state.base.eventSummaries.length }}
+            </span>
         </div>
-        <div class="divider"></div>
-        <div class="divider"></div>
-        <div class="tooltip">
-            <img id="left-button" class="selectable" src="../assets/left-arrow.png" @click="left()"/>
-            <span class="tooltiptext">Previous</span>
-        </div>
-        <div class="divider"></div>
-        <div class="divider"></div>
-        <div class="tooltip">
-            <img id="right-button" class="selectable" src="../assets/right-arrow.png" @click="right()"/>
-            <span class="tooltiptext">Next</span>
-        </div>
-        Item {{ index + 1 }} of {{ this.$store.state.base.eventSummaries.length }}
     </div>
 </template>
 
@@ -33,13 +33,13 @@
                 this.$router.back()
             },
             left() {
-                if (this.$store.state.base.currentEventIndex > 0) {
+                if (this.moreToTheLeft) {
                     this.$store.commit('updateCurrentEventIndex', -1)
                     this.updateRoute()
                 }
             },
             right() {
-                if (this.$store.state.base.currentEventIndex + 1 < this.$store.state.base.eventSummaries.length) {
+                if (this.moreToTheRight) {
                     this.$store.commit('updateCurrentEventIndex', 1)
                     this.updateRoute()
                 }
@@ -53,6 +53,14 @@
         created() {
             this.$store.commit('setCurrentEventIndex', this.index)
         },
+        computed: {
+            moreToTheLeft() {
+                return this.$store.state.base.currentEventIndex > 0
+            },
+            moreToTheRight() {
+                return this.$store.state.base.currentEventIndex + 1 < this.$store.state.base.eventSummaries.length
+            }
+        },
         props: [
             'index', 'sessionId', 'channelId'
         ],
@@ -64,5 +72,19 @@
 </script>
 
 <style scoped>
-
+    .nav-buttons {
+        text-align: left;
+    }
+    .left-arrow-position {
+        position: relative;
+        left: 20px;
+    }
+    .right-arrow-position {
+        position: relative;
+        left: 40px;
+    }
+    .item-count-position {
+        position: relative;
+        left: 60px;
+    }
 </style>

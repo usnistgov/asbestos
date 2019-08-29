@@ -30,17 +30,6 @@
         methods: {
             typeSelected(type) {
                this.$router.push(`/session/${this.sessionId}/channel/${this.channelId}/${type}`)
-               //  this.$router.push(
-               //      {
-               //          name: `/session/${this.sessionId}/channel/${this.channelId}/resourceType`,
-               //          params: {
-               //              eventSummaries: this.eventSummaries,
-               //              resourceType: type,
-               //              sessionId: this.sessionId,
-               //              channelId: this.channelId,
-               //          }
-               //      }
-               //  )
             },
             loadEventSummaries() {
                 LOG.get(`${this.sessionId}/${this.channelId}`, {
