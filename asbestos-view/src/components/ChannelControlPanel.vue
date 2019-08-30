@@ -23,7 +23,8 @@
                 console.info('Manage channels')
                 //this.channel = null
                 //this.$store.commit('setChannel', null)
-                this.$router.push(`/session/${this.$store.state.base.session}/channels`)
+                this.$router.push(`/session/${this.$store.state.base.session}/channels` +
+                    (this.channel ? `/${this.channel}`: ''))
             },
             update() {
                 console.info(`ChannelControlPanel: update()`)
@@ -68,6 +69,9 @@
                         that.error(error)
                     })
             },
+            loadChannel() {
+                this.channel = this.$store.state.base.channelId
+            },
             msg(msg) {
                 console.log(msg)
                 this.$bvToast.toast(msg, {noCloseButton: true})
@@ -86,6 +90,7 @@
         },
         watch: {
             '$store.state.base.fullChannelIds': 'update',
+            '$store.state.base.channelId': 'loadChannel',
             '$route' (to) {
                 const newChannel = this.channelFromRoute(to.path)
                 const section = this.sectionFromRoute(to.path)

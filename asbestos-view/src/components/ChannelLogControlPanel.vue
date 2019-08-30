@@ -1,6 +1,6 @@
 <template>
     <div>
-        <div class="control-panel-item-title" @click="manage()">Log</div>
+        <div class="control-panel-item-title" @click="manage()">Logs</div>
         <div v-if="!selectable" class="not-available">Select Channel</div>
     </div>
 </template>
@@ -16,8 +16,9 @@
             manage() {
                 if (!this.selectable)
                     return;
-                const route = `/session/${this.$store.state.base.session}/channel/${this.$store.state.base.channel.channelId}/logs`
-                console.info(`Route to ${route}`)
+                console.log('is selectable')
+                const route = `/session/${this.$store.state.base.session}/channel/${this.$store.state.base.channelId}/logs`
+                console.log(`Route to ${route}`)
                 this.$router.push(route)
             },
         },

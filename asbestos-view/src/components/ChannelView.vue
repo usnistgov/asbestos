@@ -277,10 +277,10 @@
                 }
                     console.info(`loading channel ${this.fullChannelId()} details`)
                     const that = this
-                    const parts = this.splitFullChannelId(this.fullChannelId())
-                    if (this.$store.state.base.channel && parts[0] === this.$store.state.base.channel.testSession && parts[1] === this.$store.state.base.channel.channelId) {
-                        return
-                    }
+                    // const parts = this.splitFullChannelId(this.fullChannelId())
+                    // if (this.$store.state.base.channel && parts[0] === this.$store.state.base.channel.testSession && parts[1] === this.$store.state.base.channel.channelId) {
+                    //     return
+                    // }
                     PROXY.get('channel/' + this.fullChannelId())
                         .then(response => {
                             console.log(`installing channel ${response.data.channelId}`)
@@ -313,7 +313,7 @@
                 return this.$store.state.base.channel
             },
             copyOfChannel() {
-                this.showChannels()
+                //this.showChannels()
                 // const index = this.channelIndex(this.sessionId, this.channelId)
                 // console.info(`index is ${index} for session ${this.sessionId} channel ${this.channelId}`)
                 // if (index === -1) {
@@ -328,6 +328,7 @@
                 }
                 const newRoute =  '/session/' + this.channel.testSession + '/channel/' + this.channel.channelId
                 console.info(`ChannelView:New route is ${newRoute}`)
+                this.$store.commit('setChannelId', this.channel.channelId)
                 this.$router.push(newRoute)
             }
         },

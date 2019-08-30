@@ -1,7 +1,7 @@
 <template>
     <div class="container">
         <channel-nav :session-id="sessionId" class="nav"></channel-nav>
-        <channel-view :session-id="sessionId" :channel-id="channelId" class="view"></channel-view>
+        <channel-view :sessionId="sessionId" :channelId="channelId" class="view"></channel-view>
     </div>
 </template>
 
