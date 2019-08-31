@@ -1,12 +1,12 @@
 package gov.nist.asbestos.asbestosProxy.mhdChannel;
 
-import gov.nist.asbestos.asbestosProxy.wrapper.ChannelControlServlet;
+import gov.nist.asbestos.asbestosProxy.servlet.ChannelControlServlet;
 import gov.nist.asbestos.client.events.Event;
 import gov.nist.asbestos.client.events.EventStoreItem;
 import gov.nist.asbestos.client.events.EventStoreSearch;
 import gov.nist.asbestos.client.events.Task;
 import gov.nist.asbestos.client.log.SimStore;
-import gov.nist.asbestos.asbestosProxy.wrapper.ProxyServlet;
+import gov.nist.asbestos.asbestosProxy.servlet.ProxyServlet;
 import gov.nist.asbestos.simapi.simCommon.SimId;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;

@@ -3,7 +3,7 @@ package gov.nist.asbestos.asbestosProxy.channels.mhd;
 import gov.nist.asbestos.asbestosProxy.channel.BaseChannel;
 import gov.nist.asbestos.asbestosProxy.channels.passthrough.PassthroughChannel;
 import gov.nist.asbestos.asbestosProxy.util.XdsActorMapper;
-import gov.nist.asbestos.asbestosProxy.wrapper.TransformException;
+import gov.nist.asbestos.asbestosProxy.servlet.TransformException;
 import gov.nist.asbestos.client.Base.ProxyBase;
 import gov.nist.asbestos.client.client.FhirClient;
 import gov.nist.asbestos.client.client.Format;

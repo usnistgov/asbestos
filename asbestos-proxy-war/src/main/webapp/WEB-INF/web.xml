@@ -3,11 +3,11 @@
  "http://java.sun.com/dtd/web-app_2_3.dtd" >
 
 <web-app>
-  <display-name>Asbestos Proxy</display-name>
+  <display-name>Asbestos</display-name>
 
   <servlet>
     <servlet-name>ProxyService</servlet-name>
-    <servlet-class>gov.nist.asbestos.asbestosProxy.wrapper.ProxyServlet</servlet-class>
+    <servlet-class>gov.nist.asbestos.asbestosProxy.servlet.ProxyServlet</servlet-class>
     <init-param>
       <param-name>ExternalCache</param-name>
       <param-value>/home/bill/ec</param-value>
@@ -17,13 +17,19 @@
 
   <servlet>
     <servlet-name>ChannelControl</servlet-name>
-    <servlet-class>gov.nist.asbestos.asbestosProxy.wrapper.ChannelControlServlet</servlet-class>
+    <servlet-class>gov.nist.asbestos.asbestosProxy.servlet.ChannelControlServlet</servlet-class>
     <load-on-startup>2</load-on-startup>
   </servlet>
 
   <servlet>
     <servlet-name>logViewer</servlet-name>
-    <servlet-class>gov.nist.asbestos.asbestosProxy.wrapper.ProxyLogServlet</servlet-class>
+    <servlet-class>gov.nist.asbestos.asbestosProxy.servlet.ProxyLogServlet</servlet-class>
+  </servlet>
+
+  <servlet>
+    <servlet-name>TestEngine</servlet-name>
+    <servlet-class>gov.nist.asbestos.asbestosProxy.servlet.TestEngineServlet</servlet-class>
+    <load-on-startup>3</load-on-startup> <!-- must be started after ProxyService -->
   </servlet>
 
   <servlet-mapping>
@@ -40,6 +46,13 @@
     <servlet-name>ChannelControl</servlet-name>
     <url-pattern>/channel</url-pattern>
   </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>TestEngine</servlet-name>
+    <url-pattern>/engine/*</url-pattern>
+  </servlet-mapping>
+
+
     <filter>
         <filter-name>CORS</filter-name>
         <filter-class>com.thetransactioncompany.cors.CORSFilter</filter-class>

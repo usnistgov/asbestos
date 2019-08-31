@@ -1,4 +1,4 @@
-package gov.nist.asbestos.testEngine;
+package gov.nist.asbestos.testEngine.engine;
 
 import gov.nist.asbestos.client.client.FhirClient;
 import gov.nist.asbestos.client.client.Format;
@@ -28,7 +28,7 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-class SutTest {
+class VariableAndSourceIdTest {
 
     @Test
     void createPatientAndRead() throws URISyntaxException {
@@ -52,11 +52,10 @@ class SutTest {
         when(fhirClientMock.readResource(new Ref(url), headers)).thenReturn(wrapper);
 
         Val val = new Val();
-        File test1 = Paths.get(getClass().getResource("/sut/createread/TestScript.xml").toURI()).getParent().toFile();
+        File test1 = Paths.get(getClass().getResource("/variable/createread/TestScript.xml").toURI()).getParent().toFile();
         TestEngine testEngine = new TestEngine(test1, new URI(""))
                 .setVal(val)
                 .setFhirClient(fhirClientMock)
-                .setSut(new URI("http://localhost:9999/fhir"))
                 .run();
         System.out.println(testEngine.getTestReportAsJson());
         List<String> errors = testEngine.getErrors();
@@ -91,11 +90,10 @@ class SutTest {
         when(fhirClientMock.readResource(new Ref(url), headers)).thenReturn(wrapper);
 
         Val val = new Val();
-        File test1 = Paths.get(getClass().getResource("/sut/createreadAssertPreviousStep/TestScript.xml").toURI()).getParent().toFile();
+        File test1 = Paths.get(getClass().getResource("/variable/createreadAssertPreviousStep/TestScript.xml").toURI()).getParent().toFile();
         TestEngine testEngine = new TestEngine(test1, new URI(""))
                 .setVal(val)
                 .setFhirClient(fhirClientMock)
-                .setSut(new URI("http://localhost:9999/fhir"))
                 .run();
         System.out.println(testEngine.getTestReportAsJson());
         List<String> errors = testEngine.getErrors();
@@ -130,11 +128,10 @@ class SutTest {
         when(fhirClientMock.readResource(new Ref(url), headers)).thenReturn(wrapper);
 
         Val val = new Val();
-        File test1 = Paths.get(getClass().getResource("/sut/createreadAssertBadPreviousStep/TestScript.xml").toURI()).getParent().toFile();
+        File test1 = Paths.get(getClass().getResource("/variable/createreadAssertBadPreviousStep/TestScript.xml").toURI()).getParent().toFile();
         TestEngine testEngine = new TestEngine(test1, new URI(""))
                 .setVal(val)
                 .setFhirClient(fhirClientMock)
-                .setSut(new URI("http://localhost:9999/fhir"))
                 .run();
         System.out.println(testEngine.getTestReportAsJson());
         List<String> errors = testEngine.getErrors();
@@ -169,11 +166,10 @@ class SutTest {
         when(fhirClientMock.readResource(new Ref(url), headers)).thenReturn(wrapper);
 
         Val val = new Val();
-        File test1 = Paths.get(getClass().getResource("/sut/createreadNumericStatus/TestScript.xml").toURI()).getParent().toFile();
+        File test1 = Paths.get(getClass().getResource("/variable/createreadNumericStatus/TestScript.xml").toURI()).getParent().toFile();
         TestEngine testEngine = new TestEngine(test1, new URI(""))
                 .setVal(val)
                 .setFhirClient(fhirClientMock)
-                .setSut(new URI("http://localhost:9999/fhir"))
                 .run();
         System.out.println(testEngine.getTestReportAsJson());
         List<String> errors = testEngine.getErrors();
@@ -208,11 +204,10 @@ class SutTest {
         when(fhirClientMock.readResource(new Ref(url), headers)).thenReturn(wrapper);
 
         Val val = new Val();
-        File test1 = Paths.get(getClass().getResource("/sut/createreadWrongNumericStatus/TestScript.xml").toURI()).getParent().toFile();
+        File test1 = Paths.get(getClass().getResource("/variable/createreadWrongNumericStatus/TestScript.xml").toURI()).getParent().toFile();
         TestEngine testEngine = new TestEngine(test1, new URI(""))
                 .setVal(val)
                 .setFhirClient(fhirClientMock)
-                .setSut(new URI("http://localhost:9999/fhir"))
                 .run();
         System.out.println(testEngine.getTestReportAsJson());
         List<String> errors = testEngine.getErrors();
@@ -253,11 +248,10 @@ class SutTest {
         when(fhirClientMock.readResource(new Ref(url), headers)).thenReturn(wrapper);
 
         Val val = new Val();
-        File test1 = Paths.get(getClass().getResource("/sut/createreadWrongStatus/TestScript.xml").toURI()).getParent().toFile();
+        File test1 = Paths.get(getClass().getResource("/variable/createreadWrongStatus/TestScript.xml").toURI()).getParent().toFile();
         TestEngine testEngine = new TestEngine(test1, new URI(""))
                 .setVal(val)
                 .setFhirClient(fhirClientMock)
-                .setSut(new URI("http://localhost:9999/fhir"))
                 .run();
         System.out.println(testEngine.getTestReportAsJson());
         List<String> errors = testEngine.getErrors();
@@ -275,5 +269,4 @@ class SutTest {
             return;
         System.out.println("Errors:\n" + errors);
     }
-
 }

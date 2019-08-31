@@ -1,6 +1,6 @@
 package gov.nist.asbestos.proxyWar;
 
-import gov.nist.asbestos.asbestosProxy.wrapper.ProxyServlet;
+import gov.nist.asbestos.asbestosProxy.servlet.ProxyServlet;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 

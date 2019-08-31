@@ -1,4 +1,4 @@
-package gov.nist.asbestos.asbestosProxy.wrapper;
+package gov.nist.asbestos.asbestosProxy.servlet;
 
 
 import gov.nist.asbestos.client.events.EventStoreItem;

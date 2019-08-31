@@ -1,4 +1,4 @@
-package gov.nist.asbestos.asbestosProxy.wrapper;
+package gov.nist.asbestos.asbestosProxy.servlet;
 
 import com.google.gson.Gson;
 import gov.nist.asbestos.client.log.SimStore;

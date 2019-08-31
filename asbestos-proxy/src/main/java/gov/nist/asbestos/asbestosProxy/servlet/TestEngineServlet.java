@@ -1,5 +1,6 @@
-package gov.nist.asbestos.asbestosTestEngineWar;
+package gov.nist.asbestos.asbestosProxy.servlet;
 
+import com.google.gson.Gson;
 import gov.nist.asbestos.http.support.Common;
 import org.apache.log4j.Logger;
 
@@ -9,11 +10,12 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
+import java.io.IOException;
 import java.net.URI;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class TestEngineServlet extends HttpServlet {
     private static Logger log = Logger.getLogger(TestEngineServlet.class);
@@ -26,19 +28,63 @@ public class TestEngineServlet extends HttpServlet {
     @Override
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
-        log.info("TestEngineServlet init");
-        // announce location of ExternalCache to other servlets
         Object ec = config.getServletContext().getAttribute("ExternalCache");
         if (ec != null) {
+            log.info("TestEngineServlet - Got External Cache from ProxyServlet");
             externalCache = new File((String) ec);
             initializeTestCollections();
+        } else {
+            log.fatal("TestEngineServlet - Proxy not started");
         }
     }
 
     @Override
     public void doGet(HttpServletRequest req, HttpServletResponse resp)  {
-        URI uri = Common.buildURI(req);
+        String uri = req.getRequestURI();
         log.info("doGet " + uri);
+
+        List<String> uriParts = Arrays.asList(uri.split("/"));
+
+        //  /appContext/engine/collections
+        // 0    1         2        3
+
+        if (uriParts.size() < 4) {
+            resp.setStatus(resp.SC_NOT_FOUND);
+            return;
+        }
+
+        uriParts.remove(0);
+        uriParts.remove(0);
+        uriParts.remove(0);
+
+        //  collections
+        //      0
+        if (uriParts.size() == 1 && uriParts.get(0).equals("collections")) {
+            // return list of test collection names
+
+            List<String> names = getTestCollectionNames();
+            returnList(resp, names);
+            return;
+        }
+
+
+
+
+        resp.setStatus(resp.SC_NOT_FOUND);
+    }
+
+    private List<String> getTestCollectionNames() {
+        return getTestCollections().stream().map(File::getName).collect(Collectors.toList());
+    }
+
+    private void returnList(HttpServletResponse resp, List<String> values) {
+        String json = new Gson().toJson(values);
+        resp.setContentType("application/json");
+        try {
+            resp.getOutputStream().print(json);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override

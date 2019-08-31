@@ -26,12 +26,12 @@ class SetupActionRead extends GenericSetupAction {
 
         ResourceWrapper wrapper = fhirClient.readResource(targetUrl, requestHeader);
         if (!wrapper.isOk()) {
-            reporter.report(/*wrapper.getRef() +*/ "read (with errors) ", wrapper.logLink());
-//            List<String> errors = wrapper.errorsFromOperationOutcome();
+            reporter.report(/*servlet.getRef() +*/ "read (with errors) ", wrapper.logLink());
+//            List<String> errors = servlet.errorsFromOperationOutcome();
 //            String errs = "";
 //            for (String error : errors)
 //                errs = errs + "\n" + error;
-//            Reporter.reportError(val, opReport, null, type, label, "Errors returned from " + targetUrl + "\n" + errs, wrapper.logLink());
+//            Reporter.reportError(val, opReport, null, type, label, "Errors returned from " + targetUrl + "\n" + errs, servlet.logLink());
 //            return;
         } else {
             reporter.report(wrapper.getRef() + " read", wrapper.logLink());

@@ -105,8 +105,8 @@ class SetupActionDelete extends GenericSetupAction {
         }
 //        String fixtureId = op.hasResponseId() ? op.getResponseId() : FixtureComponent.getNewId();
 //        fixtureComponent =  new FixtureComponent(fixtureId)
-//                .setResource(wrapper)
-//                .setHttpBase(wrapper.getHttpBase());
+//                .setResource(servlet)
+//                .setHttpBase(servlet.getHttpBase());
 //        fixtureMgr.put(fixtureId, fixtureComponent);
     }
 
