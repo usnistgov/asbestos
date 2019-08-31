@@ -3,7 +3,7 @@ package gov.nist.asbestos.proxyWar;
 import ca.uhn.fhir.context.FhirContext;
 import gov.nist.asbestos.client.client.FhirClient;
 import gov.nist.asbestos.simapi.validation.Val;
-import gov.nist.asbestos.testEngine.TestEngine;
+import gov.nist.asbestos.testEngine.engine.TestEngine;
 import org.hl7.fhir.r4.model.TestReport;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;

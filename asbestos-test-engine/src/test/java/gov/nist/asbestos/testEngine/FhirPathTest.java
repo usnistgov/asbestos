@@ -1,10 +1,6 @@
 package gov.nist.asbestos.testEngine;
 
-import ca.uhn.fhir.context.FhirContext;
-import gov.nist.asbestos.client.Base.ProxyBase;
-import org.hl7.fhir.r4.hapi.ctx.HapiWorkerContext;
-import org.hl7.fhir.r4.hapi.ctx.IValidationSupport;
-import org.hl7.fhir.r4.hapi.validation.PrePopulatedValidationSupport;
+import gov.nist.asbestos.testEngine.engine.FhirPathEngineBuilder;
 import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.utils.FHIRPathEngine;
 import org.junit.jupiter.api.BeforeAll;

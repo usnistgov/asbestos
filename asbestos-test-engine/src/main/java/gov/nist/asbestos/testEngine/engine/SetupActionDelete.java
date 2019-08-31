@@ -1,12 +1,10 @@
-package gov.nist.asbestos.testEngine;
+package gov.nist.asbestos.testEngine.engine;
 
 import gov.nist.asbestos.client.client.FhirClient;
-import gov.nist.asbestos.client.client.Format;
 import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import gov.nist.asbestos.http.operations.HttpBase;
 import gov.nist.asbestos.simapi.validation.ValE;
-import org.hl7.fhir.r4.model.BaseResource;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.TestReport;
 import org.hl7.fhir.r4.model.TestScript;

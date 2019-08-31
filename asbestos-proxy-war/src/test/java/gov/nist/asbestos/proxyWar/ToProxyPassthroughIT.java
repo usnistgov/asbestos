@@ -1,15 +1,13 @@
 package gov.nist.asbestos.proxyWar;
 
 import gov.nist.asbestos.client.client.FhirClient;
-import gov.nist.asbestos.http.operations.HttpDelete;
 import gov.nist.asbestos.http.operations.HttpPost;
 import gov.nist.asbestos.sharedObjects.ChannelConfig;
 import gov.nist.asbestos.sharedObjects.ChannelConfigFactory;
 import gov.nist.asbestos.simapi.validation.Val;
-import gov.nist.asbestos.testEngine.TestEngine;
+import gov.nist.asbestos.testEngine.engine.TestEngine;
 import org.hl7.fhir.r4.model.TestReport;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;

@@ -2,6 +2,8 @@ package gov.nist.asbestos.testEngine;
 
 import gov.nist.asbestos.client.Base.ProxyBase;
 import gov.nist.asbestos.simapi.validation.*;
+import gov.nist.asbestos.testEngine.engine.FixtureComponent;
+import gov.nist.asbestos.testEngine.engine.TestEngine;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.TestScript;
@@ -12,7 +14,6 @@ import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Paths;
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 

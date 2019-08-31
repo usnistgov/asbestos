@@ -2,6 +2,7 @@ package gov.nist.asbestos.asbestosProxy.wrapper;
 
 import com.google.gson.Gson;
 import gov.nist.asbestos.client.log.SimStore;
+import gov.nist.asbestos.http.support.Common;
 import gov.nist.asbestos.sharedObjects.ChannelConfig;
 import gov.nist.asbestos.sharedObjects.ChannelConfigFactory;
 import gov.nist.asbestos.simapi.simCommon.SimId;

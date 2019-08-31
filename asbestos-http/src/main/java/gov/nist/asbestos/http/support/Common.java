@@ -1,4 +1,4 @@
-package gov.nist.asbestos.asbestosProxy.wrapper;
+package gov.nist.asbestos.http.support;
 
 import gov.nist.asbestos.http.headers.Headers;
 import gov.nist.asbestos.http.operations.HttpBase;
@@ -10,13 +10,13 @@ import java.util.*;
 
 public class Common {
 
-    static URI buildURI(HttpServletRequest req) {
+    public static URI buildURI(HttpServletRequest req) {
         Map<String, List<String>> parms = req.getParameterMap();
         parms = fixParmMap(parms);
         return HttpBase.buildURI(req.getRequestURI(), parms);
     }
 
-    static Map<String, List<String>> fixParmMap(Map<String, List<String>> parms) {
+    private static Map<String, List<String>> fixParmMap(Map<String, List<String>> parms) {
         Map<String, List<String>> map = new HashMap<>();
         for (String key : parms.keySet()) {
             if (key.contains("=")) {
@@ -32,7 +32,7 @@ public class Common {
         return map;
     }
 
-    static Headers getRequestHeaders(HttpServletRequest req, Verb verb) {
+    public static Headers getRequestHeaders(HttpServletRequest req, Verb verb) {
         List<String> names = Collections.list(req.getHeaderNames());
         Map<String, List<String>> hdrs = new HashMap<>();
         for (String name : names) {
