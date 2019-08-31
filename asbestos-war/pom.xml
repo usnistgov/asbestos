@@ -9,8 +9,8 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>asbestos-proxy-war</artifactId>
-    <name>asbestos-proxy-war</name>
+    <artifactId>asbestos-war</artifactId>
+    <name>asbestos-war</name>
     <packaging>war</packaging>
 
     <dependencies>
@@ -43,7 +43,7 @@
     </dependencies>
 
     <build>
-        <finalName>asbestos-proxy-war</finalName>
+        <finalName>asbestos-war</finalName>
         <plugins>
             <!--
             Surefire is to run Unit Tests *Test.java

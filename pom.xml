@@ -32,7 +32,7 @@
         <module>asbestos-http</module>
         <module>asbestos-shared-objects</module>
         <module>asbestos-proxy</module>
-        <module>asbestos-proxy-war</module>
+        <module>asbestos-war</module>
         <!--<module>asbestos-toolkit-api</module>-->
         <!--<module>asbestos-simapi-extra</module>-->
         <module>asbestos-codes-jaxb</module>

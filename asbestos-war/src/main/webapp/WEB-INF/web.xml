@@ -1,9 +1,39 @@
 <!DOCTYPE web-app PUBLIC
- "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
- "http://java.sun.com/dtd/web-app_2_3.dtd" >
+        "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
+        "http://java.sun.com/dtd/web-app_2_3.dtd" >
 
 <web-app>
   <display-name>Asbestos</display-name>
+
+  <filter>
+    <filter-name>CORS</filter-name>
+    <filter-class>com.thetransactioncompany.cors.CORSFilter</filter-class>
+    <!--      <init-param>-->
+    <!--        <param-name>cors.allowed.headers</param-name>-->
+    <!--        <param-value>Accept,Accept-Encoding,Accept-Language,Access-Control-Request-Method,Access-Control-Request-Headers,Authorization,Connection,Content-Type,Host,Origin,Referer,Token-Id,User-Agent, X-Requested-With</param-value>-->
+    <!--      </init-param>-->
+    <!--      <init-param>-->
+    <!--        <param-name>cors.allowed.origins</param-name>-->
+    <!--        <param-value>*</param-value>-->
+    <!--      </init-param>-->
+    <init-param>
+      <param-name>cors.supportedMethods</param-name>
+      <param-value>GET, POST, PUT, DELETE, OPTIONS, HEAD</param-value>
+    </init-param>
+  </filter>
+  <!--  <filter>-->
+  <!--    <filter-name>CorsFilter</filter-name>-->
+  <!--    <filter-class>org.apache.catalina.filters.CorsFilter</filter-class>-->
+  <!--  </filter>-->
+  <!--  <filter-mapping>-->
+  <!--    <filter-name>CorsFilter</filter-name>-->
+  <!--    <url-pattern> /* </url-pattern>-->
+  <!--  </filter-mapping>-->
+
+  <filter-mapping>
+    <filter-name>CORS</filter-name>
+    <url-pattern>/*</url-pattern>
+  </filter-mapping>
 
   <servlet>
     <servlet-name>ProxyService</servlet-name>
@@ -52,37 +82,9 @@
     <url-pattern>/engine/*</url-pattern>
   </servlet-mapping>
 
-
-    <filter>
-        <filter-name>CORS</filter-name>
-        <filter-class>com.thetransactioncompany.cors.CORSFilter</filter-class>
-<!--      <init-param>-->
-<!--        <param-name>cors.allowed.headers</param-name>-->
-<!--        <param-value>Accept,Accept-Encoding,Accept-Language,Access-Control-Request-Method,Access-Control-Request-Headers,Authorization,Connection,Content-Type,Host,Origin,Referer,Token-Id,User-Agent, X-Requested-With</param-value>-->
-<!--      </init-param>-->
-<!--      <init-param>-->
-<!--        <param-name>cors.allowed.origins</param-name>-->
-<!--        <param-value>*</param-value>-->
-<!--      </init-param>-->
-      <init-param>
-        <param-name>cors.supportedMethods</param-name>
-        <param-value>GET, POST, PUT, DELETE, OPTIONS, HEAD</param-value>
-      </init-param>    </filter>
-    <filter-mapping>
-        <filter-name>CORS</filter-name>
-        <url-pattern>/*</url-pattern>
-    </filter-mapping>
-<!--  <filter>-->
-<!--    <filter-name>CorsFilter</filter-name>-->
-<!--    <filter-class>org.apache.catalina.filters.CorsFilter</filter-class>-->
-<!--  </filter>-->
-<!--  <filter-mapping>-->
-<!--    <filter-name>CorsFilter</filter-name>-->
-<!--    <url-pattern> /* </url-pattern>-->
-<!--  </filter-mapping>-->
-
   <servlet-mapping>
     <servlet-name>logViewer</servlet-name>
     <url-pattern>/log/*</url-pattern>
   </servlet-mapping>
+
 </web-app>
