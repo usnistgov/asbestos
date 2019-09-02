@@ -113,16 +113,14 @@ public class ChannelControlServlet extends HttpServlet {
                 // 2 - "channel"
                 // 3 - channelID
                 String channelId = uriParts.get(3);
+                ChannelConfig channelConfig;
 
-                SimId simId = SimId.buildFromRawId(channelId);
-                SimStore simStore = new SimStore(externalCache, simId);
                 try {
-                    simStore.open();
+                    channelConfig = channelConfigFromChannelId(externalCache, channelId);
                 } catch (Throwable e) {
                     resp.setStatus(resp.SC_NOT_FOUND);
                     return;
                 }
-                ChannelConfig channelConfig = simStore.getChannelConfig();
                 String configString = ChannelConfigFactory.convert(channelConfig);
 
                 resp.setContentType("application/json");
@@ -140,6 +138,13 @@ public class ChannelControlServlet extends HttpServlet {
             log.error(ExceptionUtils.getStackTrace(e));
             resp.setStatus(resp.SC_BAD_REQUEST);
         }
+    }
+
+    static public ChannelConfig channelConfigFromChannelId(File externalCache, String channelId) {
+        SimId simId = SimId.buildFromRawId(channelId);
+        SimStore simStore = new SimStore(externalCache, simId);
+        simStore.open();
+        return simStore.getChannelConfig();
     }
 
     @Override

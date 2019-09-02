@@ -3,10 +3,15 @@ package gov.nist.asbestos.asbestosProxy.servlet;
 import com.google.gson.Gson;
 import gov.nist.asbestos.client.Base.ProxyBase;
 import gov.nist.asbestos.client.client.Format;
+import gov.nist.asbestos.client.log.SimStore;
 import gov.nist.asbestos.http.support.Common;
+import gov.nist.asbestos.sharedObjects.ChannelConfig;
+import gov.nist.asbestos.simapi.simCommon.SimId;
+import gov.nist.asbestos.testEngine.engine.TestEngine;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.hl7.fhir.r4.model.BaseResource;
+import org.hl7.fhir.r4.model.TestReport;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -16,6 +21,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -127,6 +133,11 @@ public class TestEngineServlet extends HttpServlet {
         resp.setStatus(resp.SC_NOT_FOUND);
     }
 
+    private void returnResource(HttpServletResponse resp, BaseResource resource) {
+        String json = ProxyBase.getFhirContext().newJsonParser().setPrettyPrint(true).encodeResourceToString(resource);
+        returnString(resp, json);
+    }
+
     private List<String> getTestsInCollection(String collectionName) {
         return getTests(collectionName).stream().map(File::getName).collect(Collectors.toList());
     }
@@ -152,12 +163,6 @@ public class TestEngineServlet extends HttpServlet {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    @Override
-    public void doPost(HttpServletRequest req, HttpServletResponse resp) {
-        URI uri = Common.buildURI(req);
-        log.info("doPost " + uri);
     }
 
     private void initializeTestCollections() {
@@ -243,4 +248,53 @@ public class TestEngineServlet extends HttpServlet {
         return collections;
     }
 
+    @Override
+    public void doPost(HttpServletRequest req, HttpServletResponse resp) {
+        String uri = req.getRequestURI();
+        log.info("doPost " + uri);
+
+        List<String> uriParts1 = Arrays.asList(uri.split("/"));
+        List<String> uriParts = new ArrayList<>(uriParts1);
+
+        //   /appContext/engine/testrun/channelId/testName
+        //  0     1         2      3       4         5
+
+        uriParts.remove(0);
+        uriParts.remove(0);
+        uriParts.remove(0);
+
+        //   testrun/channelName/testCollection/testName
+        //      0       1         2            3
+        if (uriParts.size() == 4 && uriParts.get(0).equals("testrun")) {
+            String channelId = uriParts.get(1);
+            String testCollection = uriParts.get(2);
+            String testName = uriParts.get(3);
+
+            ChannelConfig channelConfig;
+            try {
+                channelConfig = ChannelControlServlet.channelConfigFromChannelId(externalCache, channelId);
+            } catch (Throwable e) {
+                resp.setStatus(resp.SC_NOT_FOUND);
+                return;
+            }
+            String testSession = channelConfig.getTestSession();
+            String sutStr = channelConfig.getFhirBase();
+            URI sut = null;
+            try {
+                sut = new URI(sutStr);
+            } catch (URISyntaxException e) {
+                throw new RuntimeException(e);
+            }
+            File testDir = getTest(testCollection, testName);
+
+            TestReport report = new TestEngine(testDir, sut)
+                    .setTestSession(testSession)
+                    .setExternalCache(externalCache)
+                    .run()
+                    .getTestReport();
+
+            returnResource(resp, report);
+
+        }
+    }
 }

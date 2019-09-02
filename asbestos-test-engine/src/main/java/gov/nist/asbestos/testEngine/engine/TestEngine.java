@@ -3,6 +3,7 @@ package gov.nist.asbestos.testEngine.engine;
 import ca.uhn.fhir.parser.IParser;
 import gov.nist.asbestos.client.Base.ProxyBase;
 import gov.nist.asbestos.client.client.FhirClient;
+import gov.nist.asbestos.client.client.Format;
 import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.client.resolver.ResourceCacheMgr;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
@@ -14,11 +15,11 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.TestReport;
 import org.hl7.fhir.r4.model.TestScript;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
+import java.io.*;
+import java.net.Proxy;
 import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.*;
 
 /**
@@ -35,6 +36,8 @@ public class TestEngine  {
     private TestReport testReport = new TestReport();
     private List<String> errors;
     private FhirClient fhirClient = null;
+    private String testSession = null;
+    private File externalCache = null;
 
     public static final String LAST_OP = "_LAST_OP_";
 
@@ -50,6 +53,16 @@ public class TestEngine  {
         this.sut = sut;
         ResourceCacheMgr inTestResources = new ResourceCacheMgr(testDef, new Ref(""));
         fhirClientForFixtures = new FhirClient().setResourceCacheMgr(inTestResources);
+    }
+
+    public TestEngine setTestSession(String testSession) {
+        this.testSession = testSession;
+        return this;
+    }
+
+    public TestEngine setExternalCache(File externalCache) {
+        this.externalCache = externalCache;
+        return this;
     }
 
     public TestEngine run() {
@@ -68,6 +81,20 @@ public class TestEngine  {
             comp.setAssert(asComp);
             propagateStatus(testReport);
         }
+        if (testSession != null && externalCache != null) {
+            File logDir = new File(new File(externalCache, testSession), testDef.getName());
+            logDir.mkdirs();
+            TestReport testReport = getTestReport();
+            String json = ProxyBase.encode(testReport, Format.JSON);
+            Path path = new File(logDir, "TestReport.json").toPath();
+            try (BufferedWriter writer = Files.newBufferedWriter(path))
+            {
+                writer.write(json);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+
         return this;
     }
 
