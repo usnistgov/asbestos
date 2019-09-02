@@ -9,10 +9,12 @@ export const baseStore = {
     state() {
         return {
             session: 'default',
-            environment: 'default',
+            // environment: 'default',
             channel: null,  // private communication between ChannelNav and ChannelView
             testSession: null,
             channelId: null,
+            testCollectionNames: [],
+            currentTestCollection: null,
 
             // private to the log viewer
             eventSummaries: null,
@@ -43,8 +45,14 @@ export const baseStore = {
         setSession(state, theSession) {
             state.session = theSession
         },
-        setEnvironment(state, theEnvironment) {
-            state.environment = theEnvironment
+        // setEnvironment(state, theEnvironment) {
+        //     state.environment = theEnvironment
+        // },
+        setTestCollection(state, name) {
+            state.currentTestCollection = name
+        },
+        setTestCollectionNames(state, names) {
+            state.testCollectionNames = names
         },
         setCurrentEventIndex(state, index) {
             state.currentEventIndex = index

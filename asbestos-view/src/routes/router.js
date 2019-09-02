@@ -11,6 +11,8 @@ import LogsView from "../components/LogsView"
 //import ChannelLogList from "../components/ChannelLogList"
 import LogList from "../components/LogList"
 import LogItem from "../components/LogItem"
+import TestList from "../components/TestList"
+import TestRunner from "../components/TestRunner"
 
 Vue.use( VueRouter )
 
@@ -57,6 +59,18 @@ export const routes = [
                                 path: 'lognav/:eventId',
                                 component: LogItem,
                                 props: true,
+                            },
+                            {
+                                path: 'collection/:testCollection',
+                                component: TestList,
+                                props: true,
+                                children: [
+                                    {
+                                        path: 'test/:testId',
+                                        component: TestRunner,
+                                        props: true,
+                                    },
+                                ],
                             },
 
                         ]

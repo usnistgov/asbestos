@@ -2,7 +2,7 @@
     <div>
         <log-nav :index="index" :sessionId="sessionId" :channelId="channelId"></log-nav>
 
-        <div class="event-description">
+        <div v-if="eventSummary" class="event-description">
             {{ eventAsDate(eventSummary.eventName) }} - {{ eventSummary.verb}} {{ eventSummary.resourceType }} - {{ eventSummary.status ? 'Ok' : 'Error' }}
         </div>
         <div class="request-response">
@@ -30,11 +30,12 @@
 <script>
     import LogNav from "./LogNav"
     import {LOG} from '../common/http-common'
+    import eventMixin from '../mixins/eventMixin'
+    import errorHandlerMixin from '../mixins/errorHandlerMixin'
 
     export default {
         data() {
             return {
-                monthNames: [ 'Jan', 'Feb', 'Mar', 'April', 'May', 'June', 'July', 'Aug', 'Sept', 'Oct', 'Nov', 'Dec'],
                 index: 0,
                 selectedEvent: null,
                 selectedTask: 0,
@@ -42,21 +43,10 @@
             }
         },
         methods: {
-            eventAsDate(name) {
-                const parts = name.split('_')
-                // const year = parts[0]
-                const month = parts[1]
-                const day = parts[2]
-                const hour = parts[3]
-                const minute = parts[4]
-                const second = parts[5]
-                const milli = parts[6]
-                const monthName = this.monthNames[+month]
-                //return name
-                return `${day} ${monthName} ${hour}:${minute}:${second}:${milli}`
-            },
             findEventInStore() {
-                return this.$store.state.base.eventSummaries.findIndex(summary => this.eventId === summary.eventName)
+                return (this.$store.state.base.eventSummaries)
+                    ? this.$store.state.base.eventSummaries.findIndex(summary => this.eventId === summary.eventName)
+                    : null
             },
             updateIndex() {
                 this.index = this.findEventInStore()
@@ -91,14 +81,6 @@
                         })
                 }
             },
-            msg(msg) {
-                console.log(msg)
-                this.$bvToast.toast(msg, {noCloseButton: true})
-            },
-            error(err) {
-                this.$bvToast.toast(err.message, {noCloseButton: true, title: 'Error'})
-                console.log(err)
-            },
             limitLines(text) {
                 let lines = text.split('\n')
                 for (let i=0; i<lines.length; i++) {
@@ -124,7 +106,9 @@
             },
             eventSummary() {
                 const index = this.$store.state.base.currentEventIndex
-                return this.$store.state.base.eventSummaries[index]
+                return (index)
+                ? this.$store.state.base.eventSummaries[index]
+                    : null
             },
         },
         created() {
@@ -137,6 +121,7 @@
         props: [
             'eventId', 'sessionId', 'channelId'
         ],
+        mixins: [eventMixin, errorHandlerMixin],
         components: {
             LogNav,
         },
