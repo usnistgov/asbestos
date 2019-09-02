@@ -14,7 +14,8 @@ export const baseStore = {
             testSession: null,
             channelId: null,
             testCollectionNames: [],
-            currentTestCollection: null,
+            currentTestCollectionName: null,
+            testCollectionDetails: [], // { name: xx, script: xx, run: true|false, pass: true|false }
 
             // private to the log viewer
             eventSummaries: null,
@@ -48,8 +49,18 @@ export const baseStore = {
         // setEnvironment(state, theEnvironment) {
         //     state.environment = theEnvironment
         // },
-        setTestCollection(state, name) {
-            state.currentTestCollection = name
+        addTestCollectionDetails(state, oneTestDetails) {
+            const name = oneTestDetails.name
+            const index = state.testCollectionDetails.findIndex( item => {
+                return item.name === name
+            })
+            if (index === -1)
+                state.testCollectionDetails.push(oneTestDetails)
+            else
+                state.testCollectionDetails[index] = oneTestDetails
+        },
+        setTestCollectionName(state, name) {
+            state.currentTestCollectionName = name
         },
         setTestCollectionNames(state, names) {
             state.testCollectionNames = names

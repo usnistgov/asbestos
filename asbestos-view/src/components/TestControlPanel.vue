@@ -2,7 +2,7 @@
     <div>
         <div class="control-panel-item-title" @click="manage()">Tests</div>
         <div v-if="!selectable" class="not-available">Select Channel</div>
-        <b-form-select v-else v-model="testCollection" :options="testCollections"></b-form-select>
+        <b-form-select v-else v-model="testCollectionName" :options="testCollections"></b-form-select>
     </div>
 </template>
 
@@ -11,11 +11,12 @@
     import { BFormSelect } from 'bootstrap-vue'
     Vue.component('b-form-select', BFormSelect)
     import {ENGINE} from '../common/http-common'
+    import errorHandlerMixin from '../mixins/errorHandlerMixin'
 
     export default {
         data() {
             return {
-                testCollection: null,
+                testCollectionName: null,
                 testCollections: [],
             }
         },
@@ -23,7 +24,7 @@
             manage() {
                 if (!this.selectable)
                     return;
-                const route = `/session/${this.$store.state.base.session}/channel/${this.$store.state.base.channelId}/collection/${this.testCollection}`
+                const route = `/session/${this.$store.state.base.session}/channel/${this.$store.state.base.channelId}/collection/${this.testCollectionName}`
                 console.log(`Route to ${route}`)
                 this.$router.push(route)
             },
@@ -31,7 +32,7 @@
                 this.testCollections = this.$store.state.base.testCollectionNames
             },
             saveTestCollectionName() {
-                this.$store.commit('setTestCollection', this.testCollection)
+                this.$store.commit('setTestCollectionName', this.testCollectionName)
             },
             loadTestCollectionNames() {
                 const that = this
@@ -44,14 +45,6 @@
                     .catch(function (error) {
                         that.error(error)
                     })
-            },
-            msg(msg) {
-                console.log(msg)
-                this.$bvToast.toast(msg, {noCloseButton: true})
-            },
-            error(err) {
-                this.$bvToast.toast(err.message, {noCloseButton: true, title: 'Error'})
-                console.log(err)
             },
         },
         computed: {
@@ -70,6 +63,7 @@
             '$store.state.base.testCollectionNames': 'updateTestCollections',
             'testCollection': 'saveTestCollectionName',
         },
+        mixins: [ errorHandlerMixin ],
         name: "TestControlPanel"
     }
 </script>

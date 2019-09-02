@@ -36,7 +36,7 @@
     export default {
         data() {
             return {
-                testScripts: [],
+//                testScripts: [],
                 script: null,
             }
         },
@@ -56,7 +56,7 @@
                 ENGINE.get(`collection/${this.testCollection}/${this.testId}`)
                     .then(response => {
                         console.info(`TestEnginePanel: loaded test script ${this.testCollection}/${this.testId}`)
-                        this.testScripts.push( { name: this.testId, script: response.data })
+                        this.$store.commit('addTestCollectionDetails', { name: this.testId, script: response.data, run: false, pass: true })
                         this.script = response.data
                     })
                     .catch(function (error) {
@@ -77,6 +77,11 @@
             tests() {
                 return this.script.test
             },
+            current() {
+                return this.$store.state.base.testCollectionDetails.find(item => {
+                    return item.name === this.testId
+                })
+            }
         },
         created() {
             this.loadTestScript()

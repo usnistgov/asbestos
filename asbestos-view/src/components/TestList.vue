@@ -9,9 +9,20 @@
         <div v-for="(name, i) in testScriptNames"
              :key="name + i">
             <div >
-                <div class="summary-label boxed has-cursor banner-color"
-                     @click="selectTest(name)">
-                    {{ name }}
+                <div @click="selectTest(name)">
+                    <div v-bind:class="{ pass: isPass, fail: isFail, 'not-run': isNotRun   }">
+                        <span v-if="isPass">
+                            <img src="../assets/checked.png" class="right">
+                        </span>
+                        <span v-if="isFail">
+                            <img src="../assets/error.png" class="right">
+                        </span>
+                        <span v-if="isNotRun">
+                            <img src="../assets/blank-circle.png" class="right">
+                        </span>
+                        <img src="../assets/press-play-button.png" class="right">
+                        {{ name }}
+                    </div>
                 </div>
                 <div v-if="selected === name">
                     <router-view></router-view>
@@ -31,7 +42,7 @@
         data() {
             return {
                 testScriptNames: [],
-                selected: null,
+                selected: null,  // name
             }
         },
         methods: {
@@ -60,9 +71,22 @@
                         that.error(error)
                     })
             },
+            isPass() {
+                return this.current.run === true && this.current.pass === true
+            },
+            isFail() {
+                return this.current.run === true && this.current.pass === false
+            },
+            isNotRun() {
+                return this.current.run === false
+            },
         },
         computed: {
-
+            current() {
+                return this.$store.state.base.testCollectionDetails.find(item => {
+                    return item.name === this.testId
+                })
+            },
         },
         created() {
             this.loadTestScriptNames()
@@ -82,8 +106,29 @@
 </script>
 
 <style scoped>
-.banner-color {
-    background-color: lightgray;
-    text-align: left;
-}
+    .banner-color {
+        background-color: lightgray;
+        text-align: left;
+    }
+    .pass {
+        background-color: lightgreen;
+        text-align: left;
+        border: 1px dotted black;
+        cursor: pointer;
+    }
+    .fail {
+        background-color: indianred;
+        text-align: left;
+        border: 1px dotted black;
+        cursor: pointer;
+    }
+    .not-run {
+        background-color: lightgray;
+        text-align: left;
+        border: 1px dotted black;
+        cursor: pointer;
+    }
+    .right {
+        text-align: right;
+    }
 </style>
