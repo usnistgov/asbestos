@@ -43,7 +43,6 @@
             return {
                 testScriptNames: [],
                 selected: null,  // name
-                reports: [],  // testName => testReport
             }
         },
         methods: {
@@ -53,7 +52,7 @@
                 ENGINE.post(`testrun/${this.sessionId}__${this.channelId}/${this.testCollection}/${testName}`)
                     .then(response => {
                         console.log(`response => ${response.data.result}`)
-                        this.reports[testName] = response.data
+                        this.$store.commit('addTestReport', { name: testName, report: response.data } )
                     })
                     .catch(error => {
                         that.error(error)
@@ -88,34 +87,32 @@
                 const that = this
                 ENGINE.get(`testlog/${this.sessionId}__${this.channelId}/${this.testCollection}`)
                     .then(response => {
-                        let theResponse = response.data
-                        this.reports = theResponse
-                        console.log(`TestEnginePanel: reports: ${this.loadedReports()}`)
+                        this.$store.commit('clearTestReports')
+                        for (let reportName in response.data) {
+                            console.log(`report ${reportName}`)
+                            // if (this.$store.state.base.testReports.hasOwnProperty(reportName)) {
+                                const report = response.data[reportName]
+                            console.log(`result is ${report.result}`)
+                                this.$store.commit('addTestReport', {name: reportName, report: report})
+                            // }
+                        }
                     })
                     .catch(function (error) {
                         that.error(error)
                     })
-            },
-            loadedReports() {
-                let names = []
-                for (let reportName in this.reports) {
-                    if (this.reports.hasOwnProperty(reportName))
-                        names.push(reportName)
-                }
-                return names
             },
             reload() {
                 this.loadTestScriptNames()
                 this.loadReports()
             },
             pass(testName) {
-                return this.reports[testName] !== undefined && this.reports[testName].result === 'pass'
+                return this.$store.state.base.testReports[testName] !== undefined && this.$store.state.base.testReports[testName].result === 'pass'
             },
             fail(testName) {
-                return this.reports[testName] !== undefined && this.reports[testName].result === 'fail'
+                return this.$store.state.base.testReports[testName] !== undefined && this.$store.state.base.testReports[testName].result === 'fail'
             },
             notRun(testName) {
-                return this.reports[testName] === undefined
+                return this.$store.state.base.testReports[testName] === undefined
             },
         },
         computed: {
@@ -123,15 +120,6 @@
                 return this.$store.state.base.testCollectionDetails.find(item => {
                     return item.name === this.testId
                 })
-            },
-            isPass() {
-                return this.current.run === true && this.current.pass === true
-            },
-            isFail() {
-                return this.current.run === true && this.current.pass === false
-            },
-            isNotRun(testName) {
-                return this.reports[testName] === undefined
             },
         },
         created() {

@@ -15,7 +15,8 @@ export const baseStore = {
             channelId: null,
             testCollectionNames: [],
             currentTestCollectionName: null,
-            testCollectionDetails: [], // { name: xx, script: xx, run: true|false, pass: true|false }
+            testCollectionDetails: [], // MAY BE OBSOLETE { name: xx, script: xx, run: true|false, pass: true|false }
+            testReports: [], // testId => TestReport
 
             // private to the log viewer
             eventSummaries: null,
@@ -49,6 +50,13 @@ export const baseStore = {
         // setEnvironment(state, theEnvironment) {
         //     state.environment = theEnvironment
         // },
+        clearTestReports(state) {
+            state.testReports.length = 0
+        },
+        addTestReport(state, reportObject) {
+            // reportObject is { name: testId, report: TestReport }
+            state.testReports[reportObject.testId] = reportObject.report
+        },
         addTestCollectionDetails(state, oneTestDetails) {
             const name = oneTestDetails.name
             const index = state.testCollectionDetails.findIndex( item => {

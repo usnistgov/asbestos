@@ -246,6 +246,7 @@ public class TestEngineServlet extends HttpServlet {
         File testLogs = new File(externalCache, "FhirTestLogs");
         File forTestSession = new File(testLogs, testSession);
         File forCollection = new File(forTestSession, collectionName);
+        forCollection.mkdirs();
         return new File(forCollection, testName + ".json");
     }
 
