@@ -3,24 +3,24 @@
         <span class="tool-title">Tests for Channel {{ testCollection }}</span>
         <span class="divider"></span>
 
-        <img id="reload" class="selectable" @click="loadTestScriptNames()" src="../assets/reload.png"/>
+        <img id="reload" class="selectable" @click="reload()" src="../assets/reload.png"/>
         <span class="divider"></span>
 
         <div v-for="(name, i) in testScriptNames"
              :key="name + i">
             <div >
                 <div @click="selectTest(name)">
-                    <div v-bind:class="{ pass: isPass, fail: isFail, 'not-run': isNotRun   }">
-                        <span v-if="isPass">
+                    <div v-bind:class="{ pass: pass(name), fail: fail(name), 'not-run': notRun(name)   }">
+                        <div v-if="pass(name)">
                             <img src="../assets/checked.png" class="right">
-                        </span>
-                        <span v-if="isFail">
+                        </div>
+                        <div v-else-if="fail(name)">
                             <img src="../assets/error.png" class="right">
-                        </span>
-                        <span v-if="isNotRun">
+                        </div>
+                        <div v-else>
                             <img src="../assets/blank-circle.png" class="right">
-                        </span>
-                        <img src="../assets/press-play-button.png" class="right">
+                        </div>
+                        <img src="../assets/press-play-button.png" class="right" @click.stop="doRun(name)">
                         {{ name }}
                     </div>
                 </div>
@@ -43,9 +43,22 @@
             return {
                 testScriptNames: [],
                 selected: null,  // name
+                reports: [],  // testName => testReport
             }
         },
         methods: {
+            doRun(testName) {
+                console.log(`run ${testName}`)
+                const that = this
+                ENGINE.post(`testrun/${this.sessionId}__${this.channelId}/${this.testCollection}/${testName}`)
+                    .then(response => {
+                        console.log(`response => ${response.data.result}`)
+                        this.reports[testName] = response.data
+                    })
+                    .catch(error => {
+                        that.error(error)
+                    })
+            },
             selectTest(name) {
                 if (this.selected === name) {
                     this.selected = null
@@ -71,14 +84,38 @@
                         that.error(error)
                     })
             },
-            isPass() {
-                return this.current.run === true && this.current.pass === true
+            loadReports() {
+                const that = this
+                ENGINE.get(`testlog/${this.sessionId}__${this.channelId}/${this.testCollection}`)
+                    .then(response => {
+                        let theResponse = response.data
+                        this.reports = theResponse
+                        console.log(`TestEnginePanel: reports: ${this.loadedReports()}`)
+                    })
+                    .catch(function (error) {
+                        that.error(error)
+                    })
             },
-            isFail() {
-                return this.current.run === true && this.current.pass === false
+            loadedReports() {
+                let names = []
+                for (let reportName in this.reports) {
+                    if (this.reports.hasOwnProperty(reportName))
+                        names.push(reportName)
+                }
+                return names
             },
-            isNotRun() {
-                return this.current.run === false
+            reload() {
+                this.loadTestScriptNames()
+                this.loadReports()
+            },
+            pass(testName) {
+                return this.reports[testName] !== undefined && this.reports[testName].result === 'pass'
+            },
+            fail(testName) {
+                return this.reports[testName] !== undefined && this.reports[testName].result === 'fail'
+            },
+            notRun(testName) {
+                return this.reports[testName] === undefined
             },
         },
         computed: {
@@ -87,9 +124,18 @@
                     return item.name === this.testId
                 })
             },
+            isPass() {
+                return this.current.run === true && this.current.pass === true
+            },
+            isFail() {
+                return this.current.run === true && this.current.pass === false
+            },
+            isNotRun(testName) {
+                return this.reports[testName] === undefined
+            },
         },
         created() {
-            this.loadTestScriptNames()
+            this.reload()
         },
         mounted() {
 

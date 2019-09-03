@@ -7,8 +7,10 @@ import gov.nist.asbestos.client.log.SimStore;
 import gov.nist.asbestos.http.support.Common;
 import gov.nist.asbestos.sharedObjects.ChannelConfig;
 import gov.nist.asbestos.simapi.simCommon.SimId;
+import gov.nist.asbestos.simapi.validation.Val;
 import gov.nist.asbestos.testEngine.engine.TestEngine;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.log4j.Logger;
 import org.hl7.fhir.r4.model.BaseResource;
 import org.hl7.fhir.r4.model.TestReport;
@@ -18,11 +20,15 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -130,12 +136,78 @@ public class TestEngineServlet extends HttpServlet {
             }
         }
 
+        //   testlog/channelName/testCollection
+        //      0         1           2
+        if (uriParts.size() == 3 && uriParts.get(0).equals("testlog")) {
+            String channelId = uriParts.get(1);
+            String testCollection = uriParts.get(2);
+
+            ChannelConfig channelConfig = getChannelConfig(resp, channelId);
+            if (channelConfig == null) return;
+            String testSession = channelConfig.getTestSession();
+
+            StringBuilder buf = new StringBuilder();
+            buf.append("{\n");
+            List<File> testLogs = getTestLogs(testSession, testCollection);
+            for (File testLog : testLogs) {
+                String name = testLog.getName();
+                name = name.split("\\.")[0];
+                String json;
+                try {
+                    json = new String(Files.readAllBytes(Paths.get(testLog.toString())));
+                    buf.append("\"").append(name).append("\": ").append(json).append("\n");
+                } catch (IOException e) {
+                    log.error(ExceptionUtils.getStackTrace(e));
+                    throw new RuntimeException(e);
+                }
+            }
+            buf.append("\n}");
+            String theString = buf.toString();
+            returnString(resp, theString);
+            log.info("OK");
+            return;
+        }
+
+        //   testlog/channelName/testCollection/testName
+        //      0         1           2            3
+        if (uriParts.size() == 4 && uriParts.get(0).equals("testlog")) {
+            String channelId = uriParts.get(1);
+            String testCollection = uriParts.get(2);
+            String testName = uriParts.get(3);
+
+            ChannelConfig channelConfig = getChannelConfig(resp, channelId);
+            if (channelConfig == null) return;
+            String testSession = channelConfig.getTestSession();
+
+            File testLog = getTestLog(testSession, testCollection, testName);
+            String json;
+            try {
+                json = new String(Files.readAllBytes(Paths.get(testLog.toString())));
+            } catch (IOException e) {
+                log.error(ExceptionUtils.getStackTrace(e));
+                throw new RuntimeException(e);
+            }
+            returnString(resp, json);
+            log.info("OK");
+            return;
+        }
+
         resp.setStatus(resp.SC_NOT_FOUND);
     }
 
-    private void returnResource(HttpServletResponse resp, BaseResource resource) {
+    private ChannelConfig getChannelConfig(HttpServletResponse resp, String channelId) {
+        try {
+            return ChannelControlServlet.channelConfigFromChannelId(externalCache, channelId);
+        } catch (Throwable e) {
+            resp.setStatus(resp.SC_NOT_FOUND);
+            return null;
+        }
+    }
+
+    private String returnResource(HttpServletResponse resp, BaseResource resource) {
         String json = ProxyBase.getFhirContext().newJsonParser().setPrettyPrint(true).encodeResourceToString(resource);
         returnString(resp, json);
+        return json;
     }
 
     private List<String> getTestsInCollection(String collectionName) {
@@ -168,6 +240,30 @@ public class TestEngineServlet extends HttpServlet {
     private void initializeTestCollections() {
         File collections = new File(externalCache, "TestCollections");
         new File(collections, "default").mkdirs();
+    }
+
+    private File getTestLog(String testSession, String collectionName, String testName) {
+        File testLogs = new File(externalCache, "FhirTestLogs");
+        File forTestSession = new File(testLogs, testSession);
+        File forCollection = new File(forTestSession, collectionName);
+        return new File(forCollection, testName + ".json");
+    }
+
+    private List<File> getTestLogs(String testSession, String collectionName) {
+        File testLogs = new File(externalCache, "FhirTestLogs");
+        File forTestSession = new File(testLogs, testSession);
+        File forCollection = new File(forTestSession, collectionName);
+
+        List<File> testLogList = new ArrayList<>();
+        File[] tests = forCollection.listFiles();
+        if (tests != null) {
+            for (File test : tests) {
+                if (!test.toString().endsWith(".json")) continue;
+                if (test.toString().startsWith(".")) continue;
+                testLogList.add(test);
+            }
+        }
+        return testLogList;
     }
 
     private File getTest(String collectionName, String testName) {
@@ -256,15 +352,16 @@ public class TestEngineServlet extends HttpServlet {
         List<String> uriParts1 = Arrays.asList(uri.split("/"));
         List<String> uriParts = new ArrayList<>(uriParts1);
 
-        //   /appContext/engine/testrun/channelId/testName
-        //  0     1         2      3       4         5
+        //  RUN TEST
+        //   /appContext/engine/testrun
+        //  0     1         2      3
 
         uriParts.remove(0);
         uriParts.remove(0);
         uriParts.remove(0);
 
         //   testrun/channelName/testCollection/testName
-        //      0       1         2            3
+        //      0         1           2            3
         if (uriParts.size() == 4 && uriParts.get(0).equals("testrun")) {
             String channelId = uriParts.get(1);
             String testCollection = uriParts.get(2);
@@ -287,13 +384,27 @@ public class TestEngineServlet extends HttpServlet {
             }
             File testDir = getTest(testCollection, testName);
 
-            TestReport report = new TestEngine(testDir, sut)
-                    .setTestSession(testSession)
-                    .setExternalCache(externalCache)
-                    .run()
-                    .getTestReport();
-
-            returnResource(resp, report);
+            TestReport report;
+            try {
+                report = new TestEngine(testDir, sut)
+                        .setTestSession(testSession)
+                        .setExternalCache(externalCache)
+                        .setVal(new Val())
+                        .run()
+                        .getTestReport();
+            } catch (Throwable t) {
+                log.error(ExceptionUtils.getStackTrace(t));
+                throw t;
+            }
+            String json = returnResource(resp, report);
+            Path path = getTestLog(testSession, testCollection, testName).toPath();
+            try (BufferedWriter writer = Files.newBufferedWriter(path))
+            {
+                writer.write(json);
+            } catch (IOException e) {
+                log.error(ExceptionUtils.getStackTrace(e));
+                throw new RuntimeException(e);
+            }
 
         }
     }
