@@ -1,17 +1,18 @@
 <template>
-    <div v-bind:class="{pass : isPass, fail: isError, 'not-run': isNotRun}">
-        <span v-if="this.script.operation" class="name selectable" @click="displayOperationMessage()">
-            {{ this.operationType(this.script.operation) }}
-        </span>
-        <span v-else @click="displayAssertMessage()">
-            <span class="name selectable">assert: </span>
-            <span>{{ this.assertionDescription() }}</span>
-        </span>
-        <span class="selectable">
-             {{ label }}
-        </span>
-        <div>{{ assertMessage }}</div>
-        <div>{{ operationMessage }}</div>
+    <div>
+        <div v-bind:class="{pass : isPass, fail: isError, 'not-run': isNotRun}"  @click="displayMessage()">
+            <span v-if="this.script.operation" class="name selectable">
+                {{ this.operationType(this.script.operation) }}
+            </span>
+            <span v-else>
+                <span class="name selectable">assert: </span>
+                <span>{{ this.assertionDescription() }}</span>
+            </span>
+            <span class="selectable">
+                {{ label }}
+            </span>
+        </div>
+        <div v-if="message"><pre>{{ message }}</pre></div>
     </div>
 </template>
 
@@ -19,8 +20,7 @@
     export default {
         data() {
             return {
-                operationMessage: null,
-                assertMessage: null,
+                message: null,
             }
         },
         methods: {
@@ -30,17 +30,13 @@
             assertionDescription() {
                 return this.script.assert.description === undefined ? "" : this.script.assert.description
             },
-            displayAssertMessage() {
-                if (this.assertMessage)
-                    this.assertMessage = null
-                else
-                    this.assertMessage = this.report.assert.message.replace('at ', '<br />at')
-            },
-            displayOperationMessage() {
-                if (this.operationMessage)
-                    this.operationMessage = null
-                else
-                    this.operationMessage = this.report.operation.message
+            displayMessage() {
+                if (this.message)
+                    this.message = null
+                else if (this.report)
+                    this.message = this.report.assert
+                        ? this.report.assert.message
+                        : this.report.operation.message
             },
         },
         computed: {
@@ -48,13 +44,13 @@
                 if (!this.report) return false
                 const part = this.report.operation ? this.report.operation : this.report.assert
                 if (!part) return false
-                return part.result !== 'error'
+                return part.result !== 'fail'
             },
             isError() {
                 if (!this.report) return false
                 const part = this.report.operation ? this.report.operation : this.report.assert
                 if (!part) return false
-                return part.result === 'error'
+                return part.result === 'fail'
             },
             isNotRun() {
                 return !this.report
@@ -87,7 +83,7 @@
 </script>
 
 <style scoped>
-.name {
-    font-weight: bold;
-}
+    .name {
+        font-weight: bold;
+    }
 </style>

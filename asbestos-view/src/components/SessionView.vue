@@ -62,7 +62,7 @@
             }
         },
         beforeRouteUpdate (to, from, next) {
-            console.log(`Session update (local) to ${to.path}`)
+//            console.log(`Session update (local) to ${to.path}`)
             this.testSession = this.testSessionFromRoute(to.path)
             next()
         },
@@ -73,7 +73,7 @@
             // if sessions changes run updateOptions()
             '$store.state.base.sessions': 'updateTestSessions',
             '$route' (to) {
-                console.log(`Session route update (local) to ${to.path}`)
+//                console.log(`Session route update (local) to ${to.path}`)
                 this.testSession = this.testSessionFromRoute(to.path)
             },
             'testSession': 'routeToTestSession'

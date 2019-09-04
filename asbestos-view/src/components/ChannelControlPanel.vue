@@ -20,7 +20,7 @@
         },
         methods: {
             manage() {
-                console.info('Manage channels')
+ //               console.info('Manage channels')
                 //this.channel = null
                 //this.$store.commit('setChannel', null)
                 this.$router.push(`/session/${this.$store.state.base.session}/channels` +
@@ -45,7 +45,7 @@
                     return
                 }
                 const dest = `/session/${this.$store.state.base.session}/channel/${this.channel}`
-                console.info(`ChannelControlPanel: route to ${dest}`)
+ //               console.info(`ChannelControlPanel: route to ${dest}`)
                 this.$store.commit('setChannelId', this.channel)
                 this.$router.push(dest)
             },
@@ -62,7 +62,7 @@
                 PROXY.get('channel')
                     .then(response => {
                         let theResponse = response.data
-                        console.info(`ChannelControlPanel: loaded ${theResponse.length} ids`)
+  //                      console.info(`ChannelControlPanel: loaded ${theResponse.length} ids`)
                         this.$store.commit('installChannelIds', theResponse.sort())
                     })
                     .catch(function (error) {
@@ -85,7 +85,7 @@
             this.loadChannelNames()
         },
         mounted() {
-            console.info('ChannelControlPanel mounted')
+//            console.info('ChannelControlPanel mounted')
             this.loadChannelNames()
         },
         watch: {
@@ -95,7 +95,7 @@
                 const newChannel = this.channelFromRoute(to.path)
                 const section = this.sectionFromRoute(to.path)
                 if (newChannel !== undefined && section === 'channel') {
-                    console.info(`ChannelControlPanel:Route: (local) to channel ${newChannel}`)
+ //                   console.info(`ChannelControlPanel:Route: (local) to channel ${newChannel}`)
                     //this.channel = newChannel
                 }
             },

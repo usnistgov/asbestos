@@ -2,6 +2,7 @@ package gov.nist.asbestos.asbestosProxy.servlet;
 
 import com.google.gson.Gson;
 import gov.nist.asbestos.client.Base.ProxyBase;
+import gov.nist.asbestos.client.client.FhirClient;
 import gov.nist.asbestos.client.client.Format;
 import gov.nist.asbestos.client.log.SimStore;
 import gov.nist.asbestos.http.support.Common;
@@ -396,6 +397,7 @@ public class TestEngineServlet extends HttpServlet {
                         .setTestSession(testSession)
                         .setExternalCache(externalCache)
                         .setVal(new Val())
+                        .setFhirClient(new FhirClient())
                         .run()
                         .getTestReport();
             } catch (Throwable t) {

@@ -64,6 +64,8 @@
                         .catch(function (error) {
                             that.error(error)
                         })
+                } else {
+                    this.script = this.$store.state.base.testScripts[this.testId]
                 }
             },
             loadTestReport() {  // loaded by TestList
@@ -123,6 +125,7 @@
 }
 .test-part {
     margin-left: 10px;
+    margin-right: 10px;
 }
     .name {
         font-weight: bold;

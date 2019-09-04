@@ -14,7 +14,7 @@ export default{
             const minute = parts[4]
             const second = parts[5]
             const milli = parts[6]
-            const monthName = this.monthNames[+month]
+            const monthName = this.monthNames[+month - 1]
             //return name
             return `${day} ${monthName} ${hour}:${minute}:${second}:${milli}`
         },

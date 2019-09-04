@@ -47,11 +47,11 @@
         },
         methods: {
             doRun(testName) {
-                console.log(`run ${testName}`)
+ //               console.log(`run ${testName}`)
                 const that = this
                 ENGINE.post(`testrun/${this.sessionId}__${this.channelId}/${this.testCollection}/${testName}`)
                     .then(response => {
-                        console.log(`response => ${response.data.result}`)
+//                        console.log(`response => ${response.data.result}`)
                         this.$store.commit('addTestReport', { name: testName, report: response.data } )
                     })
                     .catch(error => {
@@ -62,13 +62,13 @@
                 if (this.selected === name) {
                     this.selected = null
                     const route = `/session/${this.sessionId}/channel/${this.channelId}/collection/${this.testCollection}`
-                    console.log(`route to ${route}`)
+ //                   console.log(`route to ${route}`)
                     this.$router.push(route)
                     return
                 }
                 this.selected = name
                 const route = `/session/${this.sessionId}/channel/${this.channelId}/collection/${this.testCollection}/test/${name}`
-                console.log(`route to ${route}`)
+//                console.log(`route to ${route}`)
                 this.$router.push(route)
             },
             loadTestScriptNames() {
@@ -76,7 +76,7 @@
                 ENGINE.get(`collection/${this.testCollection}`)
                     .then(response => {
                         let theResponse = response.data
-                        console.info(`TestEnginePanel: loaded ${theResponse.length} test script names`)
+ //                       console.info(`TestEnginePanel: loaded ${theResponse.length} test script names`)
                         this.testScriptNames = theResponse
                     })
                     .catch(function (error) {
@@ -90,7 +90,7 @@
                         this.$store.commit('clearTestReports')
                         for (const reportName of Object.keys(response.data)) {
                             const report = response.data[reportName]
-                            console.log(`${reportName} is ${report.result}`)
+//                            console.log(`${reportName} is ${report.result}`)
                             this.$store.commit('addTestReport', {name: reportName, report: report})
                         }
                     })

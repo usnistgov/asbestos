@@ -27,8 +27,8 @@
     export default {
         data() {
             return {
-                eventSummaries: [],
-                eventSummariesByType: [],   // list { eventName: xx, resourceType: yy, verb: GET|POST, status: true|false }
+                eventSummaries: [],  // list { eventName: xx, resourceType: yy, verb: GET|POST, status: true|false }
+                eventSummariesByType: [],
                 selectedEventName: null,
                 selectedEvent: null,
                 selectedTask: 0,
@@ -36,11 +36,11 @@
         },
         methods: {
             loadEventSummaries() {
-                if (this.sessionId === null) {
+                if (!this.sessionId) {
                     this.error('Session not set')
                     return
                 }
-                if (this.channelId === null) {
+                if (!this.channelId) {
                     this.error('Channel not set')
                     return
                 }
@@ -50,33 +50,36 @@
                     }
                 })
                     .then(response => {
-                        this.eventSummaries = response.data
-                        let types = []
-                        this.eventSummaries.forEach(summary => {
-                            if (!types.includes(summary.resourceType))
-                                types.push(summary.resourceType)
+                        this.eventSummaries = response.data.sort((a, b) => {
+                            if (a.eventName < b.eventName) return 1
+                            return -1
                         })
-                        types.push('All')
-                        this.resourceTypes = types.sort()
-                        console.log(`loaded ${response.data.length} summaries and ${types.length} types`)
+                        // let types = []
+                        // this.eventSummaries.forEach(summary => {
+                        //     if (!types.includes(summary.resourceType))
+                        //         types.push(summary.resourceType)
+                        // })
+                        // types.push('All')
+                        // this.resourceTypes = types.sort()
+                      //  console.log(`loaded ${response.data.length} summaries and ${types.length} types`)
                     })
                     .catch(error => {
                         this.error(error)
                     })
             },
-            updateEventSummariesByType() {  // called by watcher when currentType is updated
-                const type = this.resourceType
-                const summaries = this.eventSummaries
-                console.log(`updateEventSummariesByType(${type})`)// All is possible value plus anything in resourceTypes
-                if (type === 'All') {
-                    this.eventSummariesByType = summaries.sort((a, b) => a.eventName > b.eventName ? -1 : 1)
-                } else {
-                    console.log(`filter by ${type}`)
-                    this.eventSummariesByType =  summaries.filter(item => {
-                        return item.resourceType === type
-                    }).sort((a, b) => a.eventName > b.eventName ? -1 : 1)
-                }
-            },
+            // updateEventSummariesByType() {  // called by watcher when currentType is updated
+            //     const type = this.resourceType
+            //     const summaries = this.eventSummaries
+            //     console.log(`updateEventSummariesByType(${type})`)// All is possible value plus anything in resourceTypes
+            //     if (type === 'All') {
+            //         this.eventSummariesByType = summaries.sort((a, b) => a.eventName > b.eventName ? -1 : 1)
+            //     } else {
+            //         console.log(`filter by ${type}`)
+            //         this.eventSummariesByType =  summaries.filter(item => {
+            //             return item.resourceType === type
+            //         }).sort((a, b) => a.eventName > b.eventName ? -1 : 1)
+            //     }
+            // },
             selectSummary(summary) {
                 this.$store.commit('setEventSummaries', this.eventSummaries)
                 this.$router.push(`/session/${this.sessionId}/channel/${this.channelId}/lognav/${summary.eventName}`)
