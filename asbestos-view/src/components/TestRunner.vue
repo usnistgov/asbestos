@@ -11,20 +11,20 @@
                 <span class="name" >Variable: </span>
                 <span class="value">{{ variable.name }}</span>
             </div>
-            <!--   SETUP   -->
+            <!--   add SETUP   -->
             <div v-for="(test, testi) in tests"
                  :key="'Test' + testi">
-                <span class="name selectable" >Test: </span>
-                <span class="value selectable">{{ test.id }} </span>
-                <span class="value selectable">{{ test.name }}</span>
+                <span class="name" >Test: </span>
+                <span class="value">{{ test.id }} </span>
+                <span class="value">{{ test.name }}</span>
                 <div v-for="(action, actioni) in actions(testi)" class="test-part"
                      :key="'Test' + testi + 'Action' + actioni">
-                    <span class="name selectable" >Action: </span>
-                    <span class="value selectable">{{ operationOrAssertion(testi, actioni) }}{{ action.label }} </span>
+                    <test-report-action :script="scriptAction(testi, actioni)" :report="reportAction(testi, actioni)"></test-report-action>
+<!--                    <span class="name selectable" >Action: </span>-->
+<!--                    <span v-bind:class="{pass : isPass(testi, actioni), fail: isError(testi, actioni), 'not-run': notRun(testi, actioni)}">{{ operationOrAssertion(testi, actioni) }}{{ action.label }} </span>-->
                 </div>
             </div>
-
-            <!-- TEARDOWN -->
+            <!-- add TEARDOWN -->
         </div>
     </div>
 </template>
@@ -32,12 +32,13 @@
 <script>
     import {ENGINE} from '../common/http-common'
     import errorHandlerMixin from '../mixins/errorHandlerMixin'
+    import TestReportAction from './TestReportAction'
 
     export default {
         data() {
             return {
-//                testScripts: [],
                 script: null,
+                report: null,
             }
         },
         methods: {
@@ -52,20 +53,32 @@
                 return assert.description === undefined ? "" : assert.description
             },
             loadTestScript() {
-                const that = this
-                ENGINE.get(`collection/${this.testCollection}/${this.testId}`)
-                    .then(response => {
-                        console.info(`TestEnginePanel: loaded test script ${this.testCollection}/${this.testId}`)
-                        this.$store.commit('addTestCollectionDetails', { name: this.testId, script: response.data, run: false, pass: true })
-                        this.script = response.data
-                    })
-                    .catch(function (error) {
-                        that.error(error)
-                    })
+                if (this.$store.state.base.testScripts[this.testId] === undefined) {
+                    const that = this
+                    ENGINE.get(`collection/${this.testCollection}/${this.testId}`)
+                        .then(response => {
+                            console.info(`TestEnginePanel: loaded test script ${this.testCollection}/${this.testId}`)
+                            this.$store.commit('addTestScript', {name: this.testId, script: response.data})
+                            this.script = response.data
+                        })
+                        .catch(function (error) {
+                            that.error(error)
+                        })
+                }
+            },
+            loadTestReport() {  // loaded by TestList
+                this.report = this.$store.state.base.testReports[this.testId]
             },
             actions(testIndex) {
                 return this.script.test[testIndex].action
             },
+            scriptAction(testi, actioni) {
+                return this.script.test[testi].action[actioni]
+            },
+            reportAction(testi, actioni) {
+                return this.report.test[testi].action[actioni]
+            },
+
         },
         computed: {
             fixtures() {
@@ -81,10 +94,11 @@
                 return this.$store.state.base.testCollectionDetails.find(item => {
                     return item.name === this.testId
                 })
-            }
+            },
         },
         created() {
             this.loadTestScript()
+            this.loadTestReport()
         },
         mounted() {
 
@@ -96,6 +110,9 @@
         props: [
             'sessionId', 'channelId', 'testCollection', 'testId'
         ],
+        components: {
+            TestReportAction
+        },
         name: "TestRunner"
     }
 </script>
@@ -113,4 +130,22 @@
     .value {
 
     }
+.pass {
+    background-color: lightgreen;
+    text-align: left;
+    border: 1px dotted black;
+    cursor: pointer;
+}
+.fail {
+    background-color: indianred;
+    text-align: left;
+    border: 1px dotted black;
+    cursor: pointer;
+}
+.not-run {
+    background-color: lightgray;
+    text-align: left;
+    border: 1px dotted black;
+    cursor: pointer;
+}
 </style>

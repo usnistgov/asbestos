@@ -88,13 +88,10 @@
                 ENGINE.get(`testlog/${this.sessionId}__${this.channelId}/${this.testCollection}`)
                     .then(response => {
                         this.$store.commit('clearTestReports')
-                        for (let reportName in response.data) {
-                            console.log(`report ${reportName}`)
-                            // if (this.$store.state.base.testReports.hasOwnProperty(reportName)) {
-                                const report = response.data[reportName]
-                            console.log(`result is ${report.result}`)
-                                this.$store.commit('addTestReport', {name: reportName, report: report})
-                            // }
+                        for (const reportName of Object.keys(response.data)) {
+                            const report = response.data[reportName]
+                            console.log(`${reportName} is ${report.result}`)
+                            this.$store.commit('addTestReport', {name: reportName, report: report})
                         }
                     })
                     .catch(function (error) {

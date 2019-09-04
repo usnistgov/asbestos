@@ -149,13 +149,18 @@ public class TestEngineServlet extends HttpServlet {
             StringBuilder buf = new StringBuilder();
             buf.append("{\n");
             List<File> testLogs = getTestLogs(testSession, testCollection);
+            boolean first = true;
             for (File testLog : testLogs) {
                 String name = testLog.getName();
                 name = name.split("\\.")[0];
                 String json;
                 try {
+                    if (!first)
+                        buf.append(",\n");
                     json = new String(Files.readAllBytes(Paths.get(testLog.toString())));
-                    buf.append("\"").append(name).append("\": ").append(json).append("\n");
+//                    json = "\"results\"";
+                    buf.append("\"").append(name).append("\": ").append(json);
+                    first = false;
                 } catch (IOException e) {
                     log.error(ExceptionUtils.getStackTrace(e));
                     throw new RuntimeException(e);

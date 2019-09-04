@@ -15,7 +15,7 @@ export const baseStore = {
             channelId: null,
             testCollectionNames: [],
             currentTestCollectionName: null,
-            testCollectionDetails: [], // MAY BE OBSOLETE { name: xx, script: xx, run: true|false, pass: true|false }
+            testScripts: [], // testId => TestScript
             testReports: [], // testId => TestReport
 
             // private to the log viewer
@@ -55,17 +55,11 @@ export const baseStore = {
         },
         addTestReport(state, reportObject) {
             // reportObject is { name: testId, report: TestReport }
-            state.testReports[reportObject.testId] = reportObject.report
+            state.testReports[reportObject.name] = reportObject.report
         },
-        addTestCollectionDetails(state, oneTestDetails) {
-            const name = oneTestDetails.name
-            const index = state.testCollectionDetails.findIndex( item => {
-                return item.name === name
-            })
-            if (index === -1)
-                state.testCollectionDetails.push(oneTestDetails)
-            else
-                state.testCollectionDetails[index] = oneTestDetails
+        addTestScript(state, scriptObject) {
+            // scriptObject is  { name: testId, script: TestScript }
+            state.testScripts[scriptObject.name] = scriptObject.script
         },
         setTestCollectionName(state, name) {
             state.currentTestCollectionName = name
