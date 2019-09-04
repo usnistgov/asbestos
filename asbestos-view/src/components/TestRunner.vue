@@ -15,13 +15,13 @@
             <div v-for="(test, testi) in tests"
                  :key="'Test' + testi">
                 <span class="name" >Test: </span>
-                <span class="value">{{ test.id }} </span>
                 <span class="value">{{ test.name }}</span>
+                <div v-if="test.description" class="test-part">
+                    {{ test.description }}
+                </div>
                 <div v-for="(action, actioni) in actions(testi)" class="test-part"
                      :key="'Test' + testi + 'Action' + actioni">
-                    <test-report-action :script="scriptAction(testi, actioni)" :report="reportAction(testi, actioni)"></test-report-action>
-<!--                    <span class="name selectable" >Action: </span>-->
-<!--                    <span v-bind:class="{pass : isPass(testi, actioni), fail: isError(testi, actioni), 'not-run': notRun(testi, actioni)}">{{ operationOrAssertion(testi, actioni) }}{{ action.label }} </span>-->
+                    <test-report-action :script="action" :report="reportAction(testi, actioni)"></test-report-action>
                 </div>
             </div>
             <!-- add TEARDOWN -->
@@ -130,22 +130,5 @@
     .value {
 
     }
-.pass {
-    background-color: lightgreen;
-    text-align: left;
-    border: 1px dotted black;
-    cursor: pointer;
-}
-.fail {
-    background-color: indianred;
-    text-align: left;
-    border: 1px dotted black;
-    cursor: pointer;
-}
-.not-run {
-    background-color: lightgray;
-    text-align: left;
-    border: 1px dotted black;
-    cursor: pointer;
-}
+
 </style>
