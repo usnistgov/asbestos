@@ -54,32 +54,11 @@
                             if (a.eventName < b.eventName) return 1
                             return -1
                         })
-                        // let types = []
-                        // this.eventSummaries.forEach(summary => {
-                        //     if (!types.includes(summary.resourceType))
-                        //         types.push(summary.resourceType)
-                        // })
-                        // types.push('All')
-                        // this.resourceTypes = types.sort()
-                      //  console.log(`loaded ${response.data.length} summaries and ${types.length} types`)
                     })
                     .catch(error => {
                         this.error(error)
                     })
             },
-            // updateEventSummariesByType() {  // called by watcher when currentType is updated
-            //     const type = this.resourceType
-            //     const summaries = this.eventSummaries
-            //     console.log(`updateEventSummariesByType(${type})`)// All is possible value plus anything in resourceTypes
-            //     if (type === 'All') {
-            //         this.eventSummariesByType = summaries.sort((a, b) => a.eventName > b.eventName ? -1 : 1)
-            //     } else {
-            //         console.log(`filter by ${type}`)
-            //         this.eventSummariesByType =  summaries.filter(item => {
-            //             return item.resourceType === type
-            //         }).sort((a, b) => a.eventName > b.eventName ? -1 : 1)
-            //     }
-            // },
             selectSummary(summary) {
                 this.$store.commit('setEventSummaries', this.eventSummaries)
                 this.$router.push(`/session/${this.sessionId}/channel/${this.channelId}/lognav/${summary.eventName}`)
@@ -88,7 +67,6 @@
         },
         created() {
             this.loadEventSummaries()
-            this.updateEventSummariesByType()
         },
         watch: {
             'resourceType': 'loadEventSummaries'

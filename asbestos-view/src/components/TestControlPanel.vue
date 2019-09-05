@@ -1,8 +1,13 @@
 <template>
     <div>
-        <div class="control-panel-item-title" @click="manage()">Tests</div>
+        <div class="control-panel-item-title" @click="manage()">Test</div>
         <div v-if="!selectable" class="not-available">Select Channel</div>
-        <b-form-select v-else v-model="testCollectionName" :options="testCollections"></b-form-select>
+        <div v-else>
+            <div class="control-panel-item-title" @click="manage()">Collection</div>
+            <b-form-select v-model="testCollectionName" :options="testCollections"></b-form-select>
+            <div class="control-panel-item-title" @click="selectIndividual()">Individual</div>
+            <b-form-select v-model="individual" :options="$store.state.base.testIds"></b-form-select>
+        </div>
     </div>
 </template>
 
@@ -18,6 +23,7 @@
             return {
                 testCollectionName: null,
                 testCollections: [],
+                individual: null,
             }
         },
         methods: {
@@ -27,6 +33,9 @@
                 const route = `/session/${this.$store.state.base.session}/channel/${this.$store.state.base.channelId}/collection/${this.testCollectionName}`
                 console.log(`Route to ${route}`)
                 this.$router.push(route)
+            },
+            selectIndividual() {
+
             },
             updateTestCollections () {
                 this.testCollections = this.$store.state.base.testCollectionNames

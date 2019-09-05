@@ -80,6 +80,7 @@
     .control-panel-item-title {
         font-weight: bold;
         cursor: pointer;
+        text-decoration: underline;
     }
     .divider{
         width:5px;

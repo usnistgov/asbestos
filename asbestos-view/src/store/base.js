@@ -33,6 +33,10 @@ export const baseStore = {
                 'passthrough',
                 'mhd'
             ],
+
+
+
+            // private to test editor
             tests: [],
             testIds: [],
 
