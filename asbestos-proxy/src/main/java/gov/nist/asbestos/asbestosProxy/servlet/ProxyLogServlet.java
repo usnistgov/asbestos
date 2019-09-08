@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class ProxyLogServlet extends HttpServlet {
     private File externalCache = null;
@@ -123,6 +124,7 @@ public class ProxyLogServlet extends HttpServlet {
                 if (file.getName().startsWith("_")) continue;
                 contents.add(file.getName());
             }
+            contents = contents.stream().sorted().collect(Collectors.toList());
         }
 
         return contents;

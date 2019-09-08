@@ -72,7 +72,6 @@
                 return this.selectedEvent
             },
             async loadEvent() {
-                console.log('loadEvent')
                 const index = this.$store.state.log.currentEventIndex
                 const summary = this.$store.state.log.eventSummaries[index]
                 // don't reload if it is already the selected event
@@ -80,12 +79,12 @@
                 if (selectedEventName !== null) {
                     this.selectedEvent = null
                     this.selectedTask = 0
-                    console.log(`GET ${this.sessionId}/${this.channelId}/${summary.resourceType}/${summary.eventName}`)
+//                    console.log(`GET ${this.sessionId}/${this.channelId}/${summary.resourceType}/${summary.eventName}`)
                     await LOG.get(`${this.sessionId}/${this.channelId}/${summary.resourceType}/${summary.eventName}`)
                         .then(response => {
                             try {
                                 this.selectedEvent = response.data
-                                console.log(`loaded ${this.selectedEvent.tasks.length} tasks`)
+  //                              console.log(`loaded ${this.selectedEvent.tasks.length} tasks`)
                             } catch (error) {
                                 this.error(error)
                             }

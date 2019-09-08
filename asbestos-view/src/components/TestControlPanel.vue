@@ -30,6 +30,8 @@
             manage() {
                 if (!this.selectable)
                     return;
+                if (!this.testCollectionName)
+                    return;
                 const route = `/session/${this.$store.state.base.session}/channel/${this.$store.state.base.channelId}/collection/${this.testCollectionName}`
                 console.log(`Route to ${route}`)
                 this.$router.push(route)
