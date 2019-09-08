@@ -30,7 +30,7 @@
 
         },
         mounted() {
-            console.info('LogControlPanel mounted')
+            console.info('ChannelLogControlPanel mounted')
         },
         watch: {
 

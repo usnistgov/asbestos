@@ -10,17 +10,17 @@ export const baseStore = {
         return {
             session: 'default',
             // environment: 'default',
-            channel: null,  // private communication between ChannelNav and ChannelView
+
             testSession: null,
             channelId: null,
+
+
             testCollectionNames: [],
             currentTestCollectionName: null,
             testScripts: [], // testId => TestScript
             testReports: [], // testId => TestReport
 
-            // private to the log viewer
-            eventSummaries: null,
-            currentEventIndex: 0,
+
 
 
             sessions: [
@@ -29,12 +29,9 @@ export const baseStore = {
             environments: [
                 'default', 'e1'
             ],
-            channelTypes: [
-                'passthrough',
-                'mhd'
-            ],
 
-            // these two must be in same order
+
+            // these are loaded before the full channel definitions
             //
             // fullChannelId can exist without channel - ChannelView.fetch() will notice this
             // and fetch channel from server
@@ -65,15 +62,8 @@ export const baseStore = {
         setTestCollectionNames(state, names) {
             state.testCollectionNames = names
         },
-        setCurrentEventIndex(state, index) {
-            state.currentEventIndex = index
-        },
-        updateCurrentEventIndex(state, value) {
-            state.currentEventIndex += value
-        },
-        setEventSummaries(state, summaries) {
-            state.eventSummaries = summaries
-        },
+
+
         setChannelId(state, channelId) {
             state.channelId = channelId
         },

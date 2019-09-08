@@ -83,7 +83,7 @@
                     <label class="grid-name">Channel Type</label>
                     <div v-if="edit" class="grid-item">
                         <select v-model="channel.channelType">
-                            <option v-for="ct in $store.state.base.channelTypes" :key="ct">
+                            <option v-for="ct in $store.state.channel.channelTypes" :key="ct">
                                 {{ct}}
                             </option>
                         </select>
@@ -277,10 +277,6 @@
                 }
                     console.info(`loading channel ${this.fullChannelId()} details`)
                     const that = this
-                    // const parts = this.splitFullChannelId(this.fullChannelId())
-                    // if (this.$store.state.base.channel && parts[0] === this.$store.state.base.channel.testSession && parts[1] === this.$store.state.base.channel.channelId) {
-                    //     return
-                    // }
                     PROXY.get('channel/' + this.fullChannelId())
                         .then(response => {
                             console.log(`installing channel ${response.data.channelId}`)

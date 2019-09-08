@@ -14,7 +14,7 @@
                 <span class="tooltiptext">Next</span>
             </div>
             <span class="item-count-position">
-                Item {{ index + 1 }} of {{ this.$store.state.base.eventSummaries.length }}
+                Item {{ index + 1 }} of {{ this.$store.state.log.eventSummaries.length }}
             </span>
         </div>
     </div>
@@ -45,8 +45,8 @@
                 }
             },
             updateRoute() {
-                const index = this.$store.state.base.currentEventIndex
-                const summary = this.$store.state.base.eventSummaries[index]
+                const index = this.$store.state.log.currentEventIndex
+                const summary = this.$store.state.log.eventSummaries[index]
                 this.$router.replace(`/session/${this.sessionId}/channel/${this.channelId}/lognav/${summary.eventName}`)
             },
         },
@@ -55,10 +55,10 @@
         },
         computed: {
             moreToTheLeft() {
-                return this.$store.state.base.currentEventIndex > 0
+                return this.$store.state.log.currentEventIndex > 0
             },
             moreToTheRight() {
-                return this.$store.state.base.currentEventIndex + 1 < this.$store.state.base.eventSummaries.length
+                return this.$store.state.log.currentEventIndex + 1 < this.$store.state.log.eventSummaries.length
             }
         },
         props: [

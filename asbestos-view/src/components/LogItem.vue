@@ -44,8 +44,8 @@
         },
         methods: {
             findEventInStore() {
-                return (this.$store.state.base.eventSummaries)
-                    ? this.$store.state.base.eventSummaries.findIndex(summary => this.eventId === summary.eventName)
+                return (this.$store.state.log.eventSummaries)
+                    ? this.$store.state.log.eventSummaries.findIndex(summary => this.eventId === summary.eventName)
                     : null
             },
             updateIndex() {
@@ -60,8 +60,8 @@
             },
             async loadEvent() {
                 console.log('loadEvent')
-                const index = this.$store.state.base.currentEventIndex
-                const summary = this.$store.state.base.eventSummaries[index]
+                const index = this.$store.state.log.currentEventIndex
+                const summary = this.$store.state.log.eventSummaries[index]
                 // don't reload if it is already the selected event
                 const selectedEventName = summary.eventName === this.selectedEventName() ? null: summary.eventName
                 if (selectedEventName !== null) {
@@ -105,9 +105,9 @@
                 return this.limitLines(this.selectedEvent.tasks[this.selectedTask].responseBody)
             },
             eventSummary() {
-                const index = this.$store.state.base.currentEventIndex
-                return (index)
-                ? this.$store.state.base.eventSummaries[index]
+                const index = this.$store.state.log.currentEventIndex
+                return (index > -1)
+                ? this.$store.state.log.eventSummaries[index]
                     : null
             },
         },
@@ -116,7 +116,7 @@
         },
         watch: {
             '$route': 'updateIndex',
-            'this.$store.state.base.currentEventIndex': 'loadEvent',
+            'this.$store.state.log.currentEventIndex': 'loadEvent',
         },
         props: [
             'eventId', 'sessionId', 'channelId'

@@ -6,6 +6,11 @@
 </template>
 
 <script>
+
+    // THIS SEEMS UNUSED
+
+
+
     export default {
         data() {
             return {
@@ -24,6 +29,7 @@
         },
         computed: {
             selectable() {
+                console.info('selectable')
                 return this.$store.state.base.session !== null && this.$store.state.base.channelId !== null
             }
         },
