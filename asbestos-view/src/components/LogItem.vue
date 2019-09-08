@@ -6,11 +6,21 @@
             {{ eventAsDate(eventSummary.eventName) }} - {{ eventSummary.verb}} {{ eventSummary.resourceType }} - {{ eventSummary.status ? 'Ok' : 'Error' }}
         </div>
         <div class="request-response">
-        <span class="selectable"
-              @click="displayRequest = true">Request</span>
+           <span v-bind:class="{ selected: displayRequest === true, selectable: displayRequest === false }"
+              @click="displayRequest = true">
+                Request
+           </span>
             <div class="divider"></div>
-            <span class="selectable"
-                  @click="displayRequest = false">Response</span>
+            <span v-bind:class="{ selected: displayRequest === false, selectable: displayRequest === true }"
+                  @click="displayRequest = false">
+                Response
+            </span>
+            <div>
+                <span v-for="taski in taskCount" :key="taski">
+                    <span v-bind:class="{ selected: taski-1 === selectedTask, selectable: taski-1 !== selectedTask }" @click="selectTask(taski-1)">
+                        Task {{ taski-1 }} </span>
+                </span>
+            </div>
         </div>
         <div v-if="getEvent()">
             <div v-if="displayRequest" class="event-details">
@@ -37,12 +47,15 @@
         data() {
             return {
                 index: 0,
-                selectedEvent: null,
+                selectedEvent: null,  // defined in ProxyLogServlet class Event
                 selectedTask: 0,
                 displayRequest: true,
             }
         },
         methods: {
+            selectTask(i) {
+                this.selectedTask = i
+            },
             findEventInStore() {
                 return (this.$store.state.log.eventSummaries)
                     ? this.$store.state.log.eventSummaries.findIndex(summary => this.eventId === summary.eventName)
@@ -72,6 +85,7 @@
                         .then(response => {
                             try {
                                 this.selectedEvent = response.data
+                                console.log(`loaded ${this.selectedEvent.tasks.length} tasks`)
                             } catch (error) {
                                 this.error(error)
                             }
@@ -92,6 +106,9 @@
             }
         },
         computed: {
+            taskCount() {
+                return this.selectedEvent ? this.selectedEvent.tasks.length : 0
+            },
             requestHeader() {
                 return this.selectedEvent.tasks[this.selectedTask].requestHeader
             },
@@ -107,7 +124,7 @@
             eventSummary() {
                 const index = this.$store.state.log.currentEventIndex
                 return (index > -1)
-                ? this.$store.state.log.eventSummaries[index]
+                    ? this.$store.state.log.eventSummaries[index]
                     : null
             },
         },
@@ -144,5 +161,10 @@
         position: relative;
         left: 60px;
         text-align: left;
+    }
+    .selected {
+        font-weight: bold;
+        cursor: pointer;
+        text-decoration: underline;
     }
 </style>
