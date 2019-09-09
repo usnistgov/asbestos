@@ -47,6 +47,7 @@
         methods: {
             doRun(testName) {
  //               console.log(`run ${testName}`)
+                this.$store.commit('setCurrentTest', null)
                 const that = this
                 ENGINE.post(`testrun/${this.sessionId}__${this.channelId}/${this.testCollection}/${testName}`)
                     .then(response => {
@@ -62,20 +63,20 @@
                 if (this.selected === name)  { // unselect
                     this.$store.commit('setCurrentTest', null)
                     const route = `/session/${this.sessionId}/channel/${this.channelId}/collection/${this.testCollection}`
- //                   console.log(`route to ${route}`)
                     this.$router.push(route)
                     return
                 }
                 this.$store.commit('setCurrentTest', name)
                 const route = `/session/${this.sessionId}/channel/${this.channelId}/collection/${this.testCollection}/test/${name}`
-//                console.log(`route to ${route}`)
                 this.$router.push(route)
             },
 
 
             reload() {
                 console.log('TestList reload()')
+                this.$store.commit('setTestCollectionName', this.testCollection)
                 this.$store.dispatch('loadTestScriptNames')
+                this.$store.dispatch('loadReports')
                // this.$store.dispatch('loadReports')
             },
             pass(testName) {
@@ -87,6 +88,9 @@
             notRun(testName) {
                 return this.$store.state.testRunner.testReports[testName] === undefined
             },
+            loadReports() {
+                this.$store.dispatch('loadReports')
+            },
         },
         computed: {
             current() {
@@ -97,11 +101,10 @@
             selected() {
                 return this.$store.state.testRunner.currentTest
             },
-            loadTestScriptNames() {
-                return this.$store.dispatch('loadReports')
-            },
+
             testScriptNames() {
-                return Object.keys(this.$store.state.testRunner.testReports).sort()
+                const reports = this.$store.state.testRunner.testReports
+                return Object.keys(reports).sort()
             }
         },
         created() {
@@ -111,7 +114,7 @@
 
         },
         watch: {
-            'testCollection': 'loadTestScriptNames',
+            'testCollection': 'loadReports',
         },
         mixins: [ errorHandlerMixin ],
         name: "TestList",
@@ -131,18 +134,21 @@
         text-align: left;
         border: 1px dotted black;
         cursor: pointer;
+        font-size: larger;
     }
     .fail {
         background-color: indianred;
         text-align: left;
         border: 1px dotted black;
         cursor: pointer;
+        font-size: larger;
     }
     .not-run {
         background-color: lightgray;
         text-align: left;
         border: 1px dotted black;
         cursor: pointer;
+        font-size: larger;
     }
     .right {
         text-align: right;

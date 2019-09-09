@@ -5,7 +5,7 @@
         <div v-else>
             <div class="control-panel-item-title" @click="openCollection()">Collection</div>
             <b-form-select v-model="collection" :options="collections"></b-form-select>
-            <div class="control-panel-item-title" @click="selectIndividual()">Individual</div>
+            <div class="control-panel-item-title" @click="selectIndividual()">Instance</div>
             <b-form-select v-model="testId" :options="testIds"></b-form-select>
         </div>
     </div>
@@ -97,15 +97,13 @@
 
         },
         created() {
-
+            this.loadTestCollectionNames()
         },
         mounted() {
 
         },
         watch: {
             '$store.state.base.channelId': 'loadTestCollectionNames',
-            // '$store.state.testRunner.testCollectionNames': 'updateTestCollections',
-            // 'testCollection': 'saveTestCollectionName',
         },
         mixins: [ errorHandlerMixin ],
         name: "TestControlPanel"

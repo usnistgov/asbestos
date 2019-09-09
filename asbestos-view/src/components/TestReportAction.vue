@@ -34,14 +34,51 @@
             toggleMessageDisplay() {
                 this.displayMessage = !this.displayMessage
             },
+            nextSpace(str, idx) {
+                for (let i=idx; i<str.length; i++) {
+                    if (str.charAt(i) === ' ')
+                        return i
+                }
+                return null
+            },
+            breakNear(str, pos) {
+                let here = 0
+                while(here !== null && here < pos) {
+                    here = this.nextSpace(str, here)
+                }
+                return here
+            }
         },
         computed: {
             message() {
                 if (!this.report)
                     return null
-                return this.report.assert
+                const rawMessage =  this.report.assert
                     ? this.report.assert.message
                     : this.report.operation.message
+                return rawMessage
+                // const rawMessageLines = rawMessage.split('\n')
+                // let messageLines = []
+                // rawMessageLines.forEach(line => {
+                //     if (line.length < 80) {
+                //         messageLines.push(line)
+                //     } else {
+                //         let buffer = line
+                //         while (buffer !== null && buffer.length !== 0) {
+                //             let brake = this.breakNear(buffer, 80)
+                //             if (brake === null) {
+                //                 messageLines.push(buffer)
+                //                 buffer = null
+                //             } else {
+                //                 messageLines.push(buffer.substring(0, brake))
+                //                 buffer = buffer.substring(brake, buffer.length)
+                //             }
+                //             console.log(`buffer is ${buffer}`)
+                //             break
+                //         }
+                //     }
+                // })
+                // return messageLines.join('\n')
             },
             isPass() {
                 if (!this.report) return false

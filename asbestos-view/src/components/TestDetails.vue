@@ -1,5 +1,3 @@
-<!--Rename to TestDetails?-->
-
 <template>
     <div>
         <div v-if="script" class="script">
@@ -64,7 +62,7 @@
                     const that = this
                     ENGINE.get(`collection/${this.testCollection}/${this.testId}`)
                         .then(response => {
-                            console.info(`TestEnginePanel: loaded test script ${this.testCollection}/${this.testId}`)
+                            console.info(`TestDetails: loaded test script ${this.testCollection}/${this.testId}`)
                             this.$store.commit('addTestScript', {name: this.testId, script: response.data})
                             this.script = response.data
                         })
@@ -87,6 +85,8 @@
                 return this.script.test[testi].action[actioni]
             },
             reportAction(testi, actioni) {
+                if (!this.report)
+                    return null
                 return this.report.test[testi].action[actioni]
             },
 

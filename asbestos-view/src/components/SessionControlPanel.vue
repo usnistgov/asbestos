@@ -39,7 +39,7 @@
             this.testSession = this.sessionId
             if (this.sessionId === undefined || this.session === null) {
                 this.testSession = 'default'
-                this.$router.push('/session/default')
+                //this.$router.push('/session/default')
             } else {
                 this.testSession = this.sessionId
             }

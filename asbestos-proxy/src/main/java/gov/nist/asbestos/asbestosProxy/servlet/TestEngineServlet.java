@@ -38,6 +38,7 @@ import java.util.stream.Collectors;
 public class TestEngineServlet extends HttpServlet {
     private static Logger log = Logger.getLogger(TestEngineServlet.class);
     private File externalCache = null;
+    private String port = "8081";
 
     public TestEngineServlet() {
         super();
@@ -149,7 +150,7 @@ public class TestEngineServlet extends HttpServlet {
 
             StringBuilder buf = new StringBuilder();
             buf.append("{\n");
-            List<File> testLogs = getTestLogs(testSession, testCollection);
+            List<File> testLogs = getTestLogs(channelId, testCollection);
             boolean first = true;
             for (File testLog : testLogs) {
                 String name = testLog.getName();
@@ -185,7 +186,7 @@ public class TestEngineServlet extends HttpServlet {
             if (channelConfig == null) return;
             String testSession = channelConfig.getTestSession();
 
-            File testLog = getTestLog(testSession, testCollection, testName);
+            File testLog = getTestLog(channelId, testCollection, testName);
             String json;
             try {
                 json = new String(Files.readAllBytes(Paths.get(testLog.toString())));
@@ -248,10 +249,10 @@ public class TestEngineServlet extends HttpServlet {
         new File(collections, "default").mkdirs();
     }
 
-    private File getTestLog(String testSession, String collectionName, String testName) {
+    private File getTestLog(String channelId, String collectionName, String testName) {
         File testLogs = new File(externalCache, "FhirTestLogs");
-        File forTestSession = new File(testLogs, testSession);
-        File forCollection = new File(forTestSession, collectionName);
+        File forChannelId = new File(testLogs, channelId);
+        File forCollection = new File(forChannelId, collectionName);
         forCollection.mkdirs();
         return new File(forCollection, testName + ".json");
     }
@@ -382,10 +383,10 @@ public class TestEngineServlet extends HttpServlet {
                 return;
             }
             String testSession = channelConfig.getTestSession();
-            String sutStr = channelConfig.getFhirBase();
-            URI sut = null;
+            String proxyStr = "http://localhost:" + port + "/asbestos/fhir/" + channelId;
+            URI proxy = null;
             try {
-                sut = new URI(sutStr);
+                proxy = new URI(proxyStr);
             } catch (URISyntaxException e) {
                 throw new RuntimeException(e);
             }
@@ -393,7 +394,7 @@ public class TestEngineServlet extends HttpServlet {
 
             TestReport report;
             try {
-                report = new TestEngine(testDir, sut)
+                report = new TestEngine(testDir, proxy)
                         .setTestSession(testSession)
                         .setExternalCache(externalCache)
                         .setVal(new Val())
@@ -405,7 +406,7 @@ public class TestEngineServlet extends HttpServlet {
                 throw t;
             }
             String json = returnResource(resp, report);
-            Path path = getTestLog(testSession, testCollection, testName).toPath();
+            Path path = getTestLog(channelId, testCollection, testName).toPath();
             try (BufferedWriter writer = Files.newBufferedWriter(path))
             {
                 writer.write(json);

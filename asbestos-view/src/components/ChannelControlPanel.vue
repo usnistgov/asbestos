@@ -44,10 +44,10 @@
                 if (this.channel === null) {
                     return
                 }
-                const dest = `/session/${this.$store.state.base.session}/channel/${this.channel}`
+               const dest = `/session/${this.$store.state.base.session}/channel/${this.channel}`
  //               console.info(`ChannelControlPanel: route to ${dest}`)
-                this.$store.commit('setChannelId', this.channel)
-                this.$router.push(dest)
+               this.$store.commit('setChannelId', this.channel)
+               this.$router.push(dest)
             },
             channelFromRoute(route) {
                 const parts = route.split('/')
@@ -71,6 +71,7 @@
             },
             loadChannel() {
                 this.channel = this.$store.state.base.channelId
+                console.log(`channelid ${this.channel} loaded into ChannelControlPanel`)
             },
             msg(msg) {
                 console.log(msg)
@@ -82,6 +83,7 @@
             },
         },
         created() {
+            this.loadChannel()
             this.loadChannelNames()
         },
         mounted() {
@@ -95,8 +97,8 @@
                 const newChannel = this.channelFromRoute(to.path)
                 const section = this.sectionFromRoute(to.path)
                 if (newChannel !== undefined && section === 'channel') {
- //                   console.info(`ChannelControlPanel:Route: (local) to channel ${newChannel}`)
-                    //this.channel = newChannel
+                    console.info(`ChannelControlPanel:Route: (local) to channel ${newChannel}`)
+                    this.channel = newChannel
                 }
             },
             'channel': 'routeTo'

@@ -11,8 +11,8 @@ import LogsView from "../components/LogsView"
 //import ChannelLogList from "../components/ChannelLogList"
 import LogList from "../components/LogList"
 import LogItem from "../components/LogItem"
-import TestList from "../components/TestList"
-import TestRunner from "../components/TestRunner"
+import TestList from "../components/TestCollection"
+import TestRunner from "../components/TestDetails"
 
 Vue.use( VueRouter )
 

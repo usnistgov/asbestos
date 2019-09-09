@@ -39,6 +39,7 @@ export const testRunnerStore = {
             state.currentTestCollectionName = name
         },
         setTestCollectionNames(state, names) {
+            console.log(`state: testCollectionNames are ${names}`)
             state.testCollectionNames = names
         },
     },
@@ -49,10 +50,13 @@ export const testRunnerStore = {
     },
     actions: {
         loadTestScriptNames({commit, state}) {
+            if (state.currentTestCollectionName === null)
+                console.error(`loadTestScriptNames: state.currentTestCollectionName is null`)
             const that = this
             ENGINE.get(`collection/${state.currentTestCollectionName}`)
                 .then(response => {
                     let theResponse = response.data
+                    console.log(`...${theResponse}`)
                     commit('setTestScriptNames', theResponse)
                 })
                 .catch(function (error) {
@@ -65,6 +69,7 @@ export const testRunnerStore = {
                 return
             console.info('load reports')
             const url = `testlog/${rootState.base.session}__${rootState.base.channelId}/${state.currentTestCollectionName}`
+            console.info(`reports url is ${url}`)
             ENGINE.get(url)
                 .then(response => {
                     for (const reportName of Object.keys(response.data)) {

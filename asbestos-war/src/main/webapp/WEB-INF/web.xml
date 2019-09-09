@@ -42,6 +42,10 @@
       <param-name>ExternalCache</param-name>
       <param-value>/home/bill/ec</param-value>
     </init-param>
+    <init-param>
+      <param-name>port</param-name>
+      <param-value>8081</param-value>
+    </init-param>
     <load-on-startup>1</load-on-startup>
   </servlet>
 
