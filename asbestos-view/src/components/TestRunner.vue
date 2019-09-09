@@ -1,3 +1,5 @@
+<!--Rename to TestDetails?-->
+
 <template>
     <div>
         <div v-if="script" class="script">
@@ -11,7 +13,9 @@
                 <span class="name" >Variable: </span>
                 <span class="value">{{ variable.name }}</span>
             </div>
-            <!--   add SETUP   -->
+
+            <!--   add SETUP here  -->
+
             <div v-for="(test, testi) in tests"
                  :key="'Test' + testi">
                 <span class="name" >Test: </span>
@@ -19,12 +23,15 @@
                 <div v-if="test.description" class="test-part">
                     {{ test.description }}
                 </div>
+
                 <div v-for="(action, actioni) in actions(testi)" class="test-part"
                      :key="'Test' + testi + 'Action' + actioni">
                     <test-report-action :script="action" :report="reportAction(testi, actioni)"></test-report-action>
                 </div>
             </div>
-            <!-- add TEARDOWN -->
+
+            <!-- add TEARDOWN here -->
+
         </div>
     </div>
 </template>

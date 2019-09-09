@@ -41,9 +41,7 @@
                 if (!this.testId)
                     return
                 const route = `/session/${this.session}/channel/${this.channelId}/collection/${this.collection}/test/${this.testId}`
-                console.log(`Route to ${route}`)
                 this.$router.push(route)
-
             },
             loadTestCollectionNames() {
                 const that = this

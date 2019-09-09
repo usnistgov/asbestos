@@ -1,6 +1,6 @@
 <template>
     <div>
-        <div v-bind:class="{pass : isPass, fail: isError, 'not-run': isNotRun}"  @click="displayMessage()">
+        <div v-bind:class="{'not-run': isNotRun, pass : isPass, fail: isError}"  @click="displayMessage()">
             <span v-if="this.script.operation" class="name selectable">
                 {{ this.operationType(this.script.operation) }}
             </span>
@@ -44,13 +44,13 @@
                 if (!this.report) return false
                 const part = this.report.operation ? this.report.operation : this.report.assert
                 if (!part) return false
-                return part.result !== 'fail'
+                return part.result !== 'error' && part.result !== 'fail'
             },
             isError() {
                 if (!this.report) return false
                 const part = this.report.operation ? this.report.operation : this.report.assert
                 if (!part) return false
-                return part.result === 'fail'
+                return part.result === 'error' || part.result === 'fail'
             },
             isNotRun() {
                 return !this.report

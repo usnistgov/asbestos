@@ -56,19 +56,19 @@
     }
     .grid-container {
         display: grid;
-        grid-template-areas:
-                'header header header header'
-                'body body body controls';
-        /*grid-template-columns: max-content fit-content(10%);*/
+        /*grid-template-areas:*/
+        /*        'header header header header'*/
+        /*        'body body body controls';*/
+        grid-template-columns: minmax(0, 1fr) 200px;
     }
     .title {
         grid-area: header;
     }
     .main {
-        grid-area: body;
+        /*grid-area: body;*/
     }
     .control-panel {
-        grid-area: controls;
+        /*grid-area: controls;*/
         /*grid-column: 2;*/
         /*grid-row: 2;*/
         position: absolute;
