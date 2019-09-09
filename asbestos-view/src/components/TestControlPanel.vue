@@ -1,12 +1,12 @@
 <template>
     <div>
-        <div class="control-panel-item-title" @click="manage()">Test</div>
+        <div>Test</div>
         <div v-if="!selectable" class="not-available">Select Channel</div>
         <div v-else>
-            <div class="control-panel-item-title" @click="manage()">Collection</div>
-            <b-form-select v-model="testCollectionName" :options="testCollections"></b-form-select>
+            <div class="control-panel-item-title" @click="openCollection()">Collection</div>
+            <b-form-select v-model="collection" :options="collections"></b-form-select>
             <div class="control-panel-item-title" @click="selectIndividual()">Individual</div>
-            <b-form-select v-model="individual" :options="$store.state.base.testIds"></b-form-select>
+            <b-form-select v-model="testId" :options="testIds"></b-form-select>
         </div>
     </div>
 </template>
@@ -21,29 +21,29 @@
     export default {
         data() {
             return {
-                testCollectionName: null,
-                testCollections: [],
-                individual: null,
             }
         },
         methods: {
-            manage() {
+            openCollection() {
                 if (!this.selectable)
                     return;
-                if (!this.testCollectionName)
+                if (!this.collection)
                     return;
-                const route = `/session/${this.$store.state.base.session}/channel/${this.$store.state.base.channelId}/collection/${this.testCollectionName}`
+                const route = `/session/${this.session}/channel/${this.channelId}/collection/${this.collection}`
                 console.log(`Route to ${route}`)
                 this.$router.push(route)
             },
             selectIndividual() {
+                if (!this.selectable)
+                    return
+                if (!this.collection)
+                    return;
+                if (!this.testId)
+                    return
+                const route = `/session/${this.session}/channel/${this.channelId}/collection/${this.collection}/test/${this.testId}`
+                console.log(`Route to ${route}`)
+                this.$router.push(route)
 
-            },
-            updateTestCollections () {
-                this.testCollections = this.$store.state.base.testCollectionNames
-            },
-            saveTestCollectionName() {
-                this.$store.commit('setTestCollectionName', this.testCollectionName)
             },
             loadTestCollectionNames() {
                 const that = this
@@ -51,7 +51,7 @@
                     .then(response => {
                         let theResponse = response.data
                         console.info(`TestEnginePanel: loaded ${theResponse.length} test collections`)
-                        this.$store.commit('setTestCollectionNames', theResponse.sort())
+                        this.collections = theResponse.sort()
                     })
                     .catch(function (error) {
                         that.error(error)
@@ -59,9 +59,44 @@
             },
         },
         computed: {
+            collection: {
+                set(name) {
+                    this.$store.commit('setTestCollectionName', name)
+                    this.openCollection()
+                },
+                get() {
+                    return this.$store.state.testRunner.currentTestCollectionName
+                }
+            },
+            collections: {
+                set(names) {
+                    this.$store.commit('setTestCollectionNames', names)
+                },
+                get() {
+                    return this.$store.state.testRunner.testCollectionNames
+                }
+            },
+            session() {
+                return this.$store.state.base.session
+            },
+            channelId() {
+                return this.$store.state.base.channelId
+            },
             selectable() {
-                return this.$store.state.base.session !== null && this.$store.state.base.channelId !== null
-            }
+                return this.session !== null && this.channelId !== null
+            },
+            testId: {
+                set(name) {
+                    this.$store.commit('setCurrentTest', name)
+                },
+                get() {
+                    return this.$store.state.testRunner.currentTest
+                }
+            },
+            testIds() {
+                return this.$store.state.testRunner.testScriptNames
+            },
+
         },
         created() {
 
@@ -71,8 +106,8 @@
         },
         watch: {
             '$store.state.base.channelId': 'loadTestCollectionNames',
-            '$store.state.base.testCollectionNames': 'updateTestCollections',
-            'testCollection': 'saveTestCollectionName',
+            // '$store.state.testRunner.testCollectionNames': 'updateTestCollections',
+            // 'testCollection': 'saveTestCollectionName',
         },
         mixins: [ errorHandlerMixin ],
         name: "TestControlPanel"

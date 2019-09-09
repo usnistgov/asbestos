@@ -4,6 +4,7 @@ import {baseStore} from "./base";
 import {testEditorStore} from "./testEditor";
 import {channelStore} from "./channel";
 import {logStore} from "./log";
+import {testRunnerStore} from "./testRunner";
 
 Vue.use(Vuex)
 
@@ -14,6 +15,7 @@ export const store = new Vuex.Store(
             testEditor: testEditorStore,
             channel: channelStore,
             log: logStore,
+            testRunner: testRunnerStore,
         }
     }
 )

@@ -41,8 +41,7 @@
 
         data() {
             return {
-                testScriptNames: [],
-                selected: null,  // name
+
             }
         },
         methods: {
@@ -59,30 +58,19 @@
                     })
             },
             selectTest(name) {
-                if (this.selected === name) {
-                    this.selected = null
+                if (this.selected === name)  { // unselect
+                    this.$store.commit('setCurrentTest', null)
                     const route = `/session/${this.sessionId}/channel/${this.channelId}/collection/${this.testCollection}`
  //                   console.log(`route to ${route}`)
                     this.$router.push(route)
                     return
                 }
-                this.selected = name
+                this.$store.commit('setCurrentTest', name)
                 const route = `/session/${this.sessionId}/channel/${this.channelId}/collection/${this.testCollection}/test/${name}`
 //                console.log(`route to ${route}`)
                 this.$router.push(route)
             },
-            loadTestScriptNames() {
-                const that = this
-                ENGINE.get(`collection/${this.testCollection}`)
-                    .then(response => {
-                        let theResponse = response.data
- //                       console.info(`TestEnginePanel: loaded ${theResponse.length} test script names`)
-                        this.testScriptNames = theResponse
-                    })
-                    .catch(function (error) {
-                        that.error(error)
-                    })
-            },
+
             loadReports() {
                 const that = this
                 ENGINE.get(`testlog/${this.sessionId}__${this.channelId}/${this.testCollection}`)
@@ -99,17 +87,17 @@
                     })
             },
             reload() {
-                this.loadTestScriptNames()
+                this.$store.dispatch('loadTestScriptNames')
                 this.loadReports()
             },
             pass(testName) {
-                return this.$store.state.base.testReports[testName] !== undefined && this.$store.state.base.testReports[testName].result === 'pass'
+                return this.$store.state.testRunner.testReports[testName] !== undefined && this.$store.state.testRunner.testReports[testName].result === 'pass'
             },
             fail(testName) {
-                return this.$store.state.base.testReports[testName] !== undefined && this.$store.state.base.testReports[testName].result === 'fail'
+                return this.$store.state.testRunner.testReports[testName] !== undefined && this.$store.state.testRunner.testReports[testName].result === 'fail'
             },
             notRun(testName) {
-                return this.$store.state.base.testReports[testName] === undefined
+                return this.$store.state.testRunner.testReports[testName] === undefined
             },
         },
         computed: {
@@ -118,6 +106,12 @@
                     return item.name === this.testId
                 })
             },
+            selected() {
+                return this.$store.state.testRunner.currentTest
+            },
+            testScriptNames() {
+                return this.$store.state.testRunner.testScriptNames
+            }
         },
         created() {
             this.reload()

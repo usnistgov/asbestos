@@ -53,7 +53,7 @@
                 return assert.description === undefined ? "" : assert.description
             },
             loadTestScript() {
-                if (this.$store.state.base.testScripts[this.testId] === undefined) {
+                if (this.$store.state.testRunner.testScripts[this.testId] === undefined) {
                     const that = this
                     ENGINE.get(`collection/${this.testCollection}/${this.testId}`)
                         .then(response => {
@@ -65,11 +65,11 @@
                             that.error(error)
                         })
                 } else {
-                    this.script = this.$store.state.base.testScripts[this.testId]
+                    this.script = this.$store.state.testRunner.testScripts[this.testId]
                 }
             },
             loadTestReport() {  // loaded by TestList
-                this.report = this.$store.state.base.testReports[this.testId]
+                this.report = this.$store.state.testRunner.testReports[this.testId]
             },
             actions(testIndex) {
                 return this.script.test[testIndex].action

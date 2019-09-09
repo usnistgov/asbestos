@@ -15,10 +15,7 @@ export const baseStore = {
             channelId: null,
 
 
-            testCollectionNames: [],
-            currentTestCollectionName: null,
-            testScripts: [], // testId => TestScript
-            testReports: [], // testId => TestReport
+
 
 
 
@@ -45,23 +42,7 @@ export const baseStore = {
         // setEnvironment(state, theEnvironment) {
         //     state.environment = theEnvironment
         // },
-        clearTestReports(state) {
-            state.testReports.length = 0
-        },
-        addTestReport(state, reportObject) {
-            // reportObject is { name: testId, report: TestReport }
-            state.testReports[reportObject.name] = reportObject.report
-        },
-        addTestScript(state, scriptObject) {
-            // scriptObject is  { name: testId, script: TestScript }
-            state.testScripts[scriptObject.name] = scriptObject.script
-        },
-        setTestCollectionName(state, name) {
-            state.currentTestCollectionName = name
-        },
-        setTestCollectionNames(state, names) {
-            state.testCollectionNames = names
-        },
+
 
 
         setChannelId(state, channelId) {
