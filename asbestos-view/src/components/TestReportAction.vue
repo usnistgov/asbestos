@@ -1,6 +1,6 @@
 <template>
     <div>
-        <div v-bind:class="{'not-run': isNotRun, pass : isPass, fail: isError}"  @click="displayMessage()">
+        <div v-bind:class="{'not-run': isNotRun, pass : isPass, fail: isError}"  @click="toggleMessageDisplay()">
             <span v-if="this.script.operation" class="name selectable">
                 {{ this.operationType(this.script.operation) }}
             </span>
@@ -12,7 +12,7 @@
                 {{ label }}
             </span>
         </div>
-        <div v-if="message"><pre>{{ message }}</pre></div>
+        <div v-if="displayMessage"><pre>{{ message }}</pre></div>
     </div>
 </template>
 
@@ -20,7 +20,8 @@
     export default {
         data() {
             return {
-                message: null,
+                // message: null,
+                displayMessage: false,
             }
         },
         methods: {
@@ -30,16 +31,18 @@
             assertionDescription() {
                 return this.script.assert.description === undefined ? "" : this.script.assert.description
             },
-            displayMessage() {
-                if (this.message)
-                    this.message = null
-                else if (this.report)
-                    this.message = this.report.assert
-                        ? this.report.assert.message
-                        : this.report.operation.message
+            toggleMessageDisplay() {
+                this.displayMessage = !this.displayMessage
             },
         },
         computed: {
+            message() {
+                if (!this.report)
+                    return null
+                return this.report.assert
+                    ? this.report.assert.message
+                    : this.report.operation.message
+            },
             isPass() {
                 if (!this.report) return false
                 const part = this.report.operation ? this.report.operation : this.report.assert

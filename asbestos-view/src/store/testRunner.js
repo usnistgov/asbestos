@@ -27,6 +27,7 @@ export const testRunnerStore = {
         },
         addTestReport(state, reportObject) {
             // reportObject is { name: testId, report: TestReport }
+            console.log(`new report for ${reportObject.name}`)
             state.testReports[reportObject.name] = reportObject.report
         },
         addTestScript(state, scriptObject) {
@@ -41,6 +42,11 @@ export const testRunnerStore = {
             state.testCollectionNames = names
         },
     },
+    getters: {
+        testReportNames(state) {
+            return Object.keys(state.testReports).sort()
+        }
+    },
     actions: {
         loadTestScriptNames({commit, state}) {
             const that = this
@@ -53,5 +59,28 @@ export const testRunnerStore = {
                     that.error(error)
                 })
         },
+        loadReports({dispatch, commit, state, rootState}) {
+            commit('clearTestReports')
+            if (!rootState.base.session || !rootState.base.channelId || !state.currentTestCollectionName)
+                return
+            console.info('load reports')
+            const url = `testlog/${rootState.base.session}__${rootState.base.channelId}/${state.currentTestCollectionName}`
+            ENGINE.get(url)
+                .then(response => {
+                    for (const reportName of Object.keys(response.data)) {
+                        const report = response.data[reportName]
+                        commit('addTestReport', {name: reportName, report: report})
+                    }
+                    console.log(`Reports were ${Object.keys(state.testReports)}`)
+                })
+                .catch(function (error) {
+                    console.error(`${error} - ${url}`)
+                    dispatch('error', error)
+                })
+        },
+        error(err) {
+            console.log(err)
+        },
+
     }
 }

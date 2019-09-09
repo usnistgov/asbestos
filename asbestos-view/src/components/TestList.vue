@@ -1,12 +1,12 @@
 <template>
     <div>
-        <span class="tool-title">Tests for Channel {{ testCollection }}</span>
+        <span class="tool-title">Tests for Collection {{ testCollection }}</span>
         <span class="divider"></span>
 
         <img id="reload" class="selectable" @click="reload()" src="../assets/reload.png"/>
         <span class="divider"></span>
 
-        <div v-for="(name, i) in testScriptNames"
+        <div v-for="(name, i) in $store.state.testRunner.testScriptNames"
              :key="name + i">
             <div >
                 <div @click="selectTest(name)">
@@ -52,6 +52,7 @@
                     .then(response => {
 //                        console.log(`response => ${response.data.result}`)
                         this.$store.commit('addTestReport', { name: testName, report: response.data } )
+                        this.$router.replace(`/session/${this.sessionId}/channel/${this.channelId}/collection/${this.testCollection}/test/${testName}`)
                     })
                     .catch(error => {
                         that.error(error)
@@ -71,24 +72,11 @@
                 this.$router.push(route)
             },
 
-            loadReports() {
-                const that = this
-                ENGINE.get(`testlog/${this.sessionId}__${this.channelId}/${this.testCollection}`)
-                    .then(response => {
-                        this.$store.commit('clearTestReports')
-                        for (const reportName of Object.keys(response.data)) {
-                            const report = response.data[reportName]
-//                            console.log(`${reportName} is ${report.result}`)
-                            this.$store.commit('addTestReport', {name: reportName, report: report})
-                        }
-                    })
-                    .catch(function (error) {
-                        that.error(error)
-                    })
-            },
+
             reload() {
+                console.log('TestList reload()')
                 this.$store.dispatch('loadTestScriptNames')
-                this.loadReports()
+               // this.$store.dispatch('loadReports')
             },
             pass(testName) {
                 return this.$store.state.testRunner.testReports[testName] !== undefined && this.$store.state.testRunner.testReports[testName].result === 'pass'
@@ -109,8 +97,11 @@
             selected() {
                 return this.$store.state.testRunner.currentTest
             },
+            loadTestScriptNames() {
+                return this.$store.dispatch('loadReports')
+            },
             testScriptNames() {
-                return this.$store.state.testRunner.testScriptNames
+                return Object.keys(this.$store.state.testRunner.testReports).sort()
             }
         },
         created() {
@@ -120,7 +111,7 @@
 
         },
         watch: {
-
+            'testCollection': 'loadTestScriptNames',
         },
         mixins: [ errorHandlerMixin ],
         name: "TestList",

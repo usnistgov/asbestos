@@ -76,7 +76,9 @@
                 }
             },
             loadTestReport() {  // loaded by TestList
+                console.log('grab test report')
                 this.report = this.$store.state.testRunner.testReports[this.testId]
+                //this.$router.go()
             },
             actions(testIndex) {
                 return this.script.test[testIndex].action
@@ -113,7 +115,7 @@
 
         },
         watch: {
-
+            'testId': 'loadTestReport'
         },
         mixins: [ errorHandlerMixin ],
         props: [
@@ -131,8 +133,8 @@
     text-align: left;
 }
 .test-part {
-    margin-left: 10px;
-    margin-right: 10px;
+    margin-left: 20px;
+    margin-right: 20px;
 }
     .name {
         font-weight: bold;
