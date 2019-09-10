@@ -3,11 +3,13 @@ import Vuex from 'vuex'
 
 Vue.use(Vuex)
 
+import {LOG} from '../common/http-common'
+
 export const logStore = {
     state() {
         return {
             // private to the log viewer
-            eventSummaries: null,
+            eventSummaries: [],  // list { eventName: xx, resourceType: yy, verb: GET|POST, status: true|false }
             currentEventIndex: 0,
         }
     },
@@ -20,6 +22,33 @@ export const logStore = {
         },
         setCurrentEventIndex(state, index) {
             state.currentEventIndex = index
+        },
+    },
+    actions: {
+        loadEventSummaries({commit, rootState}) {
+            if (!rootState.base.session) {
+                console.error('Session not set')
+                return
+            }
+            if (!rootState.base.channelId) {
+                console.error('Channel not set')
+                return
+            }
+            LOG.get(`${rootState.base.session}/${rootState.base.channelId}`, {
+                params: {
+                    summaries: 'true'
+                }
+            })
+                .then(response => {
+                    const eventSummaries = response.data.sort((a, b) => {
+                        if (a.eventName < b.eventName) return 1
+                        return -1
+                    })
+                    commit('setEventSummaries', eventSummaries)
+                })
+                .catch(error => {
+                    console.error(error)
+                })
         },
     }
 }

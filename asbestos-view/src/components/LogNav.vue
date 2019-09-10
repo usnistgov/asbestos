@@ -45,9 +45,12 @@
                 }
             },
             updateRoute() {
+                if (!this.$store.state.log.eventSummaries)
+                    return
                 const index = this.$store.state.log.currentEventIndex
                 const summary = this.$store.state.log.eventSummaries[index]
-                this.$router.replace(`/session/${this.sessionId}/channel/${this.channelId}/lognav/${summary.eventName}`)
+                if (summary)
+                    this.$router.replace(`/session/${this.sessionId}/channel/${this.channelId}/lognav/${summary.eventName}`)
             },
         },
         created() {

@@ -20,14 +20,13 @@
 </template>
 
 <script>
-    import {LOG} from '../common/http-common'
     import eventMixin from '../mixins/eventMixin'
     import errorHandlerMixin from '../mixins/errorHandlerMixin'
 
     export default {
         data() {
             return {
-                eventSummaries: [],  // list { eventName: xx, resourceType: yy, verb: GET|POST, status: true|false }
+                //eventSummaries: [],  // list { eventName: xx, resourceType: yy, verb: GET|POST, status: true|false }
                 eventSummariesByType: [],
                 selectedEventName: null,
                 selectedEvent: null,
@@ -35,38 +34,21 @@
             }
         },
         methods: {
-            loadEventSummaries() {
-                if (!this.sessionId) {
-                    this.error('Session not set')
-                    return
-                }
-                if (!this.channelId) {
-                    this.error('Channel not set')
-                    return
-                }
-                LOG.get(`${this.sessionId}/${this.channelId}`, {
-                    params: {
-                        summaries: 'true'
-                    }
-                })
-                    .then(response => {
-                        this.eventSummaries = response.data.sort((a, b) => {
-                            if (a.eventName < b.eventName) return 1
-                            return -1
-                        })
-                    })
-                    .catch(error => {
-                        this.error(error)
-                    })
-            },
             selectSummary(summary) {
-                this.$store.commit('setEventSummaries', this.eventSummaries)
+                //this.$store.commit('setEventSummaries', this.eventSummaries)
                 this.$router.push(`/session/${this.sessionId}/channel/${this.channelId}/lognav/${summary.eventName}`)
             },
-
+            loadEventSummaries() {
+                this.$store.dispatch('loadEventSummaries')
+            }
         },
         created() {
             this.loadEventSummaries()
+        },
+        computed: {
+            eventSummaries() {
+                return this.$store.state.log.eventSummaries
+            },
         },
         watch: {
             'resourceType': 'loadEventSummaries'

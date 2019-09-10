@@ -6,6 +6,7 @@ import gov.nist.asbestos.http.headers.Headers;
 import gov.nist.asbestos.http.operations.Verb;
 import gov.nist.asbestos.http.support.Common;
 import gov.nist.asbestos.simapi.tk.installation.Installation;
+import org.apache.log4j.Logger;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -21,6 +22,7 @@ import java.util.stream.Collectors;
 
 public class ProxyLogServlet extends HttpServlet {
     private File externalCache = null;
+    private static Logger log = Logger.getLogger(ProxyLogServlet.class);
 
     @Override
     public void init(ServletConfig config) throws ServletException {
@@ -41,6 +43,8 @@ public class ProxyLogServlet extends HttpServlet {
             return;
         }
         String uri = req.getRequestURI();
+        log.info("doPost " + uri);
+
         Headers headers = Common.getRequestHeaders(req, Verb.GET);
         Header acceptHeader = headers.getAccept();
         boolean htmlOk = acceptHeader.getValue().contains("text/html");

@@ -72,8 +72,12 @@
                 return this.selectedEvent
             },
             async loadEvent() {
+                if (!this.$store.state.log.eventSummaries)
+                    return
                 const index = this.$store.state.log.currentEventIndex
                 const summary = this.$store.state.log.eventSummaries[index]
+                if (!summary)
+                    return
                 // don't reload if it is already the selected event
                 const selectedEventName = summary.eventName === this.selectedEventName() ? null: summary.eventName
                 if (selectedEventName !== null) {
@@ -121,6 +125,8 @@
                 return this.limitLines(this.selectedEvent.tasks[this.selectedTask].responseBody)
             },
             eventSummary() {
+                if (!this.$store.state.log.eventSummaries)
+                    return null
                 const index = this.$store.state.log.currentEventIndex
                 return (index > -1)
                     ? this.$store.state.log.eventSummaries[index]
@@ -128,7 +134,12 @@
             },
         },
         created() {
-            this.index = this.findEventInStore()
+            this.$store.dispatch('loadEventSummaries')
+                .then(response => {
+                    this.index = this.findEventInStore()
+                    return response
+                })
+
         },
         watch: {
             '$route': 'updateIndex',

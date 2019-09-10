@@ -10,7 +10,7 @@
         name: "GenericView",
         methods: {
             setChannelId() {
-                console.log('GenericView: setting channelId')
+                //console.log('GenericView: setting channelId')
                 //if (this.channel === undefined || this.channel === null)
                     this.channel = this.channelId
             },
@@ -29,7 +29,7 @@
             }
         },
         watch: {
-            'channelId': 'setChannelId',
+           'channelId': 'setChannelId',
         },
         props: [ 'channelId']
     }
