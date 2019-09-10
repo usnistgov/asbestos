@@ -9,14 +9,11 @@
     export default {
         name: "GenericView",
         methods: {
-            setChannelId() {
-                //console.log('GenericView: setting channelId')
-                //if (this.channel === undefined || this.channel === null)
-                    this.channel = this.channelId
-            },
+
         },
         created() {
-            this.setChannelId()
+            if (this.channel !== this.channelId)
+                this.channel = this.channelId
         },
         computed: {
             channel: {

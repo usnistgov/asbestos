@@ -13,8 +13,8 @@
     export default {
         data() {
             return {
-                testSession: 'default',
-                testSessions: null
+                testSession: 'default',  // driven by drop down menu
+                testSessions: null,  // drives drop down menu
             }
         },
         methods: {

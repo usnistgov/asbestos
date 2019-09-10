@@ -9,7 +9,7 @@
     import Vue from 'vue'
     import { BFormSelect } from 'bootstrap-vue'
     Vue.component('b-form-select', BFormSelect)
-    import {PROXY} from '../common/http-common'
+
 
     export default {
         data() {
@@ -57,18 +57,7 @@
                 const parts = route.split('/')
                 return parts[3]
             },
-            loadChannelNames() {  //  same function exists in ChannelNav
-                const that = this
-                PROXY.get('channel')
-                    .then(response => {
-                        let theResponse = response.data
-  //                      console.info(`ChannelControlPanel: loaded ${theResponse.length} ids`)
-                        this.$store.commit('installChannelIds', theResponse.sort())
-                    })
-                    .catch(function (error) {
-                        that.error(error)
-                    })
-            },
+
             loadChannel() {
                 this.channel = this.$store.state.base.channelId
                 console.log(`channelid ${this.channel} loaded into ChannelControlPanel`)
@@ -80,6 +69,16 @@
             error(err) {
                 this.$bvToast.toast(err.message, {noCloseButton: true, title: 'Error'})
                 console.log(err)
+            },
+        },
+        computed: {
+            channel: {
+                set(name) {
+                    this.$store.commit('setChannelId', name)
+                },
+                get() {
+                    return this.$store.state.base.channelId
+                }
             },
         },
         created() {

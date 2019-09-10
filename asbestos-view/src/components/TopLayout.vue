@@ -31,8 +31,13 @@
                 testSessions: null
             }
         },
+        beforeRouteEnter(to, from, next) {
+            if (to.path === '/')
+                next('/session/default')
+            else
+                next()
+        },
         created() {
-
         },
         methods: {
         },

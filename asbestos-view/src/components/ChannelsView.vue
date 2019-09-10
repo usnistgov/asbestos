@@ -7,7 +7,7 @@
 
 <script>
     import ChannelNav from "./ChannelNav"
-    import ChannelView from "./ChannelView"
+    import ChannelView from "./ChannelEdit"
 
     export default {
         data() {
