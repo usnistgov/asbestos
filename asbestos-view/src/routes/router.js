@@ -6,7 +6,7 @@ import TopLayout from "../components/TopLayout";
 import ChannelsView from "../components/ChannelsView";
 //import ChannelNav from "../components/ChannelNav";
 import SessionView from "../components/SessionView";
-import GenericView from "../components/GenericView";
+import GenericView from "../components/ChannelView";
 import LogsView from "../components/LogsView"
 //import ChannelLogList from "../components/ChannelLogList"
 import LogList from "../components/LogList"

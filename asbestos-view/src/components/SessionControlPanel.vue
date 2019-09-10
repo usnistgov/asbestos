@@ -14,42 +14,48 @@
         data() {
             return {
                 testSession: 'default',  // driven by drop down menu
-                testSessions: null,  // drives drop down menu
+                testSessions: [],  // drives drop down menu
             }
         },
         methods: {
-            update() {
+            updateSessions() {
                 let options = []
                 this.$store.state.base.sessions.forEach(function(ts) {
                     let it = { value: ts, text: ts }
                     options.push(it)
                 })
                 this.testSessions = options
+                console.log('sessions updated on screen')
+            },
+            updateSession() {
+                this.testSession = this.$store.state.base.session
             },
             routeTo() {
-                this.$router.push(this.testSession)
-            },
-            fromRoute(route) {
-                const parts = route.split('/')
-                return parts[2]
+                this.$router.push(`/session/${this.testSession}`)
             },
         },
         created() {
-            this.update()
-            this.testSession = this.sessionId
-            if (this.sessionId === undefined || this.session === null) {
-                this.testSession = 'default'
-                //this.$router.push('/session/default')
-            } else {
-                this.testSession = this.sessionId
-            }
+            if (this.$store.state.base.sessions.length === 0)
+                this.$store.dispatch('loadSessions')
+            // for startup
+            this.updateSessions()
+            this.updateSession()
+        },
+        mounted() {
+            this.$store.subscribe((mutation) => {
+                console.log(`mutation ${mutation.type}`)
+                switch(mutation.type) {
+                    case 'setSessions':  // to catch changes later
+                        this.updateSessions()
+                        this.updateSession()
+                        break
+                    case 'setSession':
+                        this.updateSession()
+                        break
+                }
+            })
         },
         watch: {
-            '$store.state.base.sessions': 'update',
-            '$route' (to) {
-                console.info(`Session route update (local) to ${to.path}`)
-                this.testSession = this.fromRoute(to.path)
-            },
             'testSession': 'routeTo'
         },
         name: "SessionControlPanel"

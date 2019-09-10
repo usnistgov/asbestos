@@ -16,27 +16,17 @@ export const baseStore = {
             testSession: null,
             channelId: null,
 
-
-
-
-
-
-
             sessions: [],
             environments: [
                 'default', 'e1'
             ],
 
-
-            // these are loaded before the full channel definitions
-            //
-            // fullChannelId can exist without channel - ChannelView.fetch() will notice this
-            // and fetch channel from server
-            fullChannelIds: [],  // testSession__channelId
+            channelIds: [],  // for this session
         }
     },
     mutations: {
         setSession(state, theSession) {
+            console.log(`setSession = ${theSession}`)
             state.session = theSession
         },
         // setEnvironment(state, theEnvironment) {
@@ -44,6 +34,7 @@ export const baseStore = {
         // },
 
         setSessions(state, sessions) {
+            console.log(`setSessions = ${sessions}`)
             state.sessions = sessions
         },
         setChannelId(state, channelId) {
@@ -53,12 +44,11 @@ export const baseStore = {
             state.channel = theChannel
             if (theChannel === null)
                 return
-            const fullId = `${theChannel.testSession}__${theChannel.channelId}`
-            let channelIndex = state.fullChannelIds.findIndex( function(channelId) {
-                return channelId === fullId
+            let channelIndex = state.channelIds.findIndex( function(channelId) {
+                return channelId === theChannel.channelId
             })
             if (channelIndex === -1)
-                state.fullChannelIds.push(fullId)
+                state.channelIds.push(theChannel.channelId)
         },
         installChannel(state, newChannel) {  // adds to end
             const thisChannelId = newChannel.testSession + '__' + newChannel.channelId
@@ -92,10 +82,17 @@ export const baseStore = {
         loadSessions({commit}) {
             commit('setSessions', ['default', 'ts1'])
         },
-        loadChannelNames({commit}) {  //  same function exists in ChannelNav
+        loadChannelNames({commit, state}) {  //  same function exists in ChannelNav
             PROXY.get('channel')
                 .then(response => {
-                    commit('installChannelIds', response.data.sort())
+                    const fullChannelIds = response.data
+                    const theFullChannelIds = fullChannelIds.filter(id => {
+                        return id.startsWith(state.session + '__')
+                    })
+                    const ids = theFullChannelIds.map(fullId => {
+                        return fullId.split('__')[1]
+                    })
+                    commit('installChannelIds', ids)
                 })
                 .catch(function (error) {
                     console.error(error)

@@ -1,7 +1,7 @@
 <template>
     <div>
         <div class="control-panel-item-title" @click="manage()">Channel</div>
-        <b-form-select v-model="channel" :options="channels"></b-form-select>
+        <b-form-select v-model="channelId" :options="channels"></b-form-select>
     </div>
 </template>
 
@@ -10,71 +10,40 @@
     import { BFormSelect } from 'bootstrap-vue'
     Vue.component('b-form-select', BFormSelect)
 
-
     export default {
         data() {
             return {
-                channel: null,
-                channels: []  // ids
+                channelId: null,
+                channels: [],  // ids
             }
         },
         methods: {
-            manage() {
- //               console.info('Manage channels')
-                //this.channel = null
-                //this.$store.commit('setChannel', null)
+            manage() {  // go edit channel definitions
                 this.$router.push(`/session/${this.$store.state.base.session}/channels` +
-                    (this.channel ? `/${this.channel}`: ''))
+                    (this.channelId ? `/${this.channelId}`: ''))
             },
-            update() {
-                console.info(`ChannelControlPanel: update()`)
-                let options = []
-                const that = this
-                this.$store.state.base.fullChannelIds.forEach(function(ts) {
-                    const session = ts.split('__')[0]
-                    const id = ts.split('__')[1]
-                    if (session === that.$store.state.base.session) {
-                        let it = {value: id, text: id}  // necessary for dropdown list
-                        options.push(it)
-                    }
+            updateChannelsFromState() {
+                const channelNames = this.$store.state.base.channelIds.sort()
+                this.channels.length = 0
+                channelNames.forEach(id => {
+                    this.channels.push({ value: id, text: id })
                 })
-                this.channels = options
             },
-            routeTo() {
-                if (this.channel === null) {
-                    return
-                }
-               const dest = `/session/${this.$store.state.base.session}/channel/${this.channel}`
- //               console.info(`ChannelControlPanel: route to ${dest}`)
-               this.$store.commit('setChannelId', this.channel)
-               this.$router.push(dest)
-            },
-            channelFromRoute(route) {
-                const parts = route.split('/')
-                return parts[4]
-            },
-            sectionFromRoute(route) {  // this will be channels or channel
-                const parts = route.split('/')
-                return parts[3]
-            },
-
-            loadChannel() {
+            updateChannelFromState() {
                 this.channel = this.$store.state.base.channelId
-                console.log(`channelid ${this.channel} loaded into ChannelControlPanel`)
+                if (this.channel === null)
+                    return
+                this.$router.push(`/session/${this.$store.state.base.session}/channel/${this.channel}`)
             },
-            msg(msg) {
-                console.log(msg)
-                this.$bvToast.toast(msg, {noCloseButton: true})
-            },
-            error(err) {
-                this.$bvToast.toast(err.message, {noCloseButton: true, title: 'Error'})
-                console.log(err)
+            updateChannelFromUI() {
+                this.channel = this.channelId
             },
         },
         computed: {
             channel: {
                 set(name) {
-                    this.$store.commit('setChannelId', name)
+                    if (name !== this.$store.state.base.channelId)
+                        this.$store.commit('setChannelId', name)
                 },
                 get() {
                     return this.$store.state.base.channelId
@@ -82,25 +51,15 @@
             },
         },
         created() {
-            this.loadChannel()
-            this.loadChannelNames()
+            if (this.$store.state.base.channelIds.length === 0)
+                this.$store.dispatch('loadChannelNames')
         },
         mounted() {
-//            console.info('ChannelControlPanel mounted')
-            this.loadChannelNames()
         },
         watch: {
-            '$store.state.base.fullChannelIds': 'update',
-            '$store.state.base.channelId': 'loadChannel',
-            '$route' (to) {
-                const newChannel = this.channelFromRoute(to.path)
-                const section = this.sectionFromRoute(to.path)
-                if (newChannel !== undefined && section === 'channel') {
-                    console.info(`ChannelControlPanel:Route: (local) to channel ${newChannel}`)
-                    this.channel = newChannel
-                }
-            },
-            'channel': 'routeTo'
+            '$store.state.base.channelIds': 'updateChannelsFromState',
+            '$store.state.base.channelId': 'updateChannelFromState',
+            'channelId': 'updateChannelFromUI'
         },
         name: "ChannelControlPanel"
     }

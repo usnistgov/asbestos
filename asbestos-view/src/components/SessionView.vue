@@ -17,6 +17,7 @@
         },
         created() {
             this.$store.dispatch('loadSessions')
+            this.$store.commit('setSession', this.sessionId)
         },
         computed: {
         },
@@ -24,6 +25,10 @@
 
         },
         watch: {
+            sessionId: function(newVal, oldVal) {
+                if (newVal !== oldVal)
+                    this.$store.commit('setSession', newVal)
+            }
         },
         props: [
             'sessionId'
