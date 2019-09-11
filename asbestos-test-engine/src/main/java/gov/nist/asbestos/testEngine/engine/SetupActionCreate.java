@@ -65,9 +65,9 @@ class SetupActionCreate extends GenericSetupAction {
         }
 
         ResourceWrapper wrapper = getFhirClient().writeResource(resourceToSend, targetUrl, format, requestHeader);
-        if (wrapper.isOk())
+        if (wrapper.isOk()) {
             reporter.report(wrapper.getRef() + " created", wrapper.logLink());
-        else {
+        } else {
             reporter.report("create to " + targetUrl + " failed with status " + wrapper.getHttpBase().getStatus(), wrapper.logLink());
             operationReport.setResult(TestReport.TestReportActionResult.FAIL);
         }

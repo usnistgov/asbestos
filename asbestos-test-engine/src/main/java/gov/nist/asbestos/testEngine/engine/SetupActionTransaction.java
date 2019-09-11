@@ -31,7 +31,8 @@ public class SetupActionTransaction extends GenericSetupAction {
                 reporter.report(wrapper.getRef() + " transaction failed : \n" + issues, wrapper.logLink());
                 operationReport.setResult(TestReport.TestReportActionResult.FAIL);
             } else if (resource instanceof Bundle) {
-                reporter.report(wrapper.getRef() + " transaction - okay", wrapper.logLink());
+                operationReport.setMessage("HTTP " + wrapper.getStatus());
+                //reporter.report(wrapper.getRef() + " transaction - okay", wrapper.logLink());
                 operationReport.setResult(TestReport.TestReportActionResult.PASS);
             } else {
                 reporter.report(wrapper.getRef() + " transaction - no response object - should be Bundle", wrapper.logLink());

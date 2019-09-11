@@ -660,7 +660,7 @@ public class ProxyServlet extends HttpServlet {
 
         if (uriParts.size() >= 4) {
             // /appContext/prox/channelId
-            if (uriParts.get(0).equals("") && uriParts.get(2).equals("fhir")) { // no appContext
+            if (uriParts.get(0).equals("") && uriParts.get(2).equals("proxy")) { // no appContext
                 simId = SimId.buildFromRawId(uriParts.get(3));
                 simStore = new SimStore(externalCache, simId);
                 if (!simStore.exists()) {

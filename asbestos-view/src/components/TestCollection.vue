@@ -21,7 +21,7 @@
                             <img src="../assets/blank-circle.png" class="right">
                         </div>
                         <img src="../assets/press-play-button.png" class="right" @click.stop="doRun(name)">
-                        {{ name }}
+                        {{ name }}  --  {{ time[name] }}
                     </div>
                 </div>
                 <div v-if="selected === name">
@@ -42,6 +42,7 @@
         data() {
             return {
                 status: [],   // testName => undefined, 'pass', 'fail', 'error'
+                time: [],
             }
         },
         methods: {
@@ -80,13 +81,17 @@
             updateReportStatuses() {
                 console.log('TestCollection: UpdateReportStatuses')
                 let status = []
+                let time = []
                 this.allTestScriptNames().forEach(testName => {
                     if (this.testReport(testName) === undefined) {
                         status[testName] = 'undefined'
                     } else {
                         status[testName] = this.testReport(testName).result  // 'pass', 'fail', 'error'
+                        time[testName] = this.testReport(testName).issued
                     }
-                    this.status = status                })
+                    this.status = status
+                    this.time = time
+                })
             },
             loadReports() {
                 this.$store.dispatch('loadReports')
@@ -155,28 +160,28 @@
         text-align: left;
         border: 1px dotted black;
         cursor: pointer;
-        font-size: larger;
+        /*font-size: larger;*/
     }
     .fail {
         background-color: indianred;
         text-align: left;
         border: 1px dotted black;
         cursor: pointer;
-        font-size: larger;
+        /*font-size: larger;*/
     }
     .error {
         background-color: indianred;
         text-align: left;
         border: 1px dotted black;
         cursor: pointer;
-        font-size: larger;
+        /*font-size: larger;*/
     }
     .not-run {
         background-color: lightgray;
         text-align: left;
         border: 1px dotted black;
         cursor: pointer;
-        font-size: larger;
+        /*font-size: larger;*/
     }
     .right {
         text-align: right;

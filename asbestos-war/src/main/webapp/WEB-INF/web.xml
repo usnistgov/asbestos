@@ -68,7 +68,7 @@
 
   <servlet-mapping>
     <servlet-name>ProxyService</servlet-name>
-    <url-pattern>/fhir/*</url-pattern>
+    <url-pattern>/proxy/*</url-pattern>
   </servlet-mapping>
 
   <servlet-mapping>

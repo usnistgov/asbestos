@@ -20,6 +20,8 @@ import java.net.Proxy;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
 
 /**
@@ -102,6 +104,17 @@ public class TestEngine  {
         testScript = loadTestScript();
         testReport.setName(testScript.getName());
         testReport.setTestScript(new Reference(testScript.getId()));
+        testReport.setIssued(new Date());
+        TestReport.TestReportParticipantComponent part = testReport.addParticipant();
+        part.setType(TestReport.TestReportParticipantType.SERVER);
+        part.setUri(sut.toString());
+        part.setDisplay("NIST Asbestos Proxy");
+
+        part = testReport.addParticipant();
+        part.setType(TestReport.TestReportParticipantType.TESTENGINE);
+        part.setUri("https://github.com/usnistgov/asbestos");
+        part.setDisplay("NIST Asbestos TestEngine");
+
         try {
             doPreProcessing();
             if (errorOut()) return;

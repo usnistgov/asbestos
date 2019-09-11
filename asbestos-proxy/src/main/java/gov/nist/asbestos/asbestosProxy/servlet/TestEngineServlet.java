@@ -383,7 +383,7 @@ public class TestEngineServlet extends HttpServlet {
                 return;
             }
             String testSession = channelConfig.getTestSession();
-            String proxyStr = "http://localhost:" + port + "/asbestos/fhir/" + channelId;
+            String proxyStr = "http://localhost:" + port + "/asbestos/proxy/" + channelId;
             URI proxy = null;
             try {
                 proxy = new URI(proxyStr);
