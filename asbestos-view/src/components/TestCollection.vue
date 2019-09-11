@@ -75,14 +75,17 @@
                 this.$store.dispatch('loadTestScriptNames')
                 this.$store.dispatch('loadReports')
             },
+            testReports(testName) {
+                return this.$store.state.testRunner.testReports[testName]
+            },
             pass(testName) {
-                return this.$store.state.testRunner.testReports[testName] !== undefined && this.$store.state.testRunner.testReports[testName].result === 'pass'
+                return this.testReports(testName) !== undefined && this.testReports(testName).result === 'pass'
             },
             fail(testName) {
-                return this.$store.state.testRunner.testReports[testName] !== undefined && this.$store.state.testRunner.testReports[testName].result === 'fail'
+                return this.testReports(testName) !== undefined && this.testReports(testName).result === 'fail'
             },
             notRun(testName) {
-                return this.$store.state.testRunner.testReports[testName] === undefined
+                return this.testReports(testName) === undefined
             },
             loadReports() {
                 this.$store.dispatch('loadReports')
