@@ -20,7 +20,7 @@
     import Vue from 'vue'
     import { TooltipPlugin, ToastPlugin } from 'bootstrap-vue'
     Vue.use(TooltipPlugin)
-    import {PROXY} from '../common/http-common'
+  //  import {PROXY} from '../common/http-common'
     Vue.use(ToastPlugin)
 
     export default {
@@ -34,10 +34,9 @@
         ],
         components: { },
         mounted() {
-            console.info('ChannelNav mounted')
-            this.loadChannelNames()
         },
         methods: {
+            // for create a new channel
             pushNewChannelRoute() {
                 return this.$router.push(this.newChannelRoute())
             },
@@ -48,33 +47,22 @@
                 this.$store.commit('setChannel', chan)
                 return '/session/' + this.sessionId + '/channels/new'
             },
-            channelName(id) {
-                const sepat = id.indexOf('__')
-                return id.substring(sepat+2)
-            },
-            sessionName(id) {
-                const sepat = id.indexOf('__')
-                return id.substring(0, sepat)
-            },
             channelsLink(channelId) {
                 return '/session/' + this.sessionId + '/channels/' + channelId
             },
-            loadChannelNames() {  // same function exists in ChannelControlPanel
-                const that = this
-                PROXY.get('channel')
-                    .then(response => {
-                        let theResponse = response.data
-                        this.$store.commit('installChannelIds', theResponse.sort())
-                    })
-                    .catch(function (error) {
-                        that.error(error)
-                    })
-            },
-            fullChannelIds() {  // only ones matching current session
-                return this.$store.state.base.fullChannelIds.filter(id => this.sessionName(id) === this.sessionId)
-            },
+            // loadChannelNames() {  // same function exists in ChannelControlPanel
+            //     const that = this
+            //     PROXY.get('channel')
+            //         .then(response => {
+            //             let theResponse = response.data
+            //             this.$store.commit('installChannelIds', theResponse.sort())
+            //         })
+            //         .catch(function (error) {
+            //             that.error(error)
+            //         })
+            // },
             channelIds() {
-                return this.fullChannelIds().map(x => this.channelName(x)).sort()
+                return this.$store.state.base.channelIds
             },
             msg(msg) {
                 console.log(msg)

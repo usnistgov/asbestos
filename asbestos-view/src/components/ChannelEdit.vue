@@ -126,7 +126,7 @@
                 channel: null,  // channel object
                 edit: false,
                 isNew: false,
-                originalFullChannelId: null,   // in case of delete
+                originalChannelId: null,   // in case of delete
                 discarding: false,  // for saving edits
                 ackMode: false,  // for deleting
                 badNameMode: false
@@ -143,6 +143,11 @@
             '$route': 'fetch'
         },
         computed: {
+            channelIds: {
+                get() {
+                    return this.$store.state.base.channelIds
+                },
+            },
         },
         methods: {
             msg(msg) {
@@ -185,19 +190,16 @@
                 this.$store.commit('installChannel', chan)
                 this.$router.push('/session/' + this.sessionId + '/channels/copy')
             },
-            fullChannelId() {
-                return this.sessionId + '__' + this.channelId
-            },
             deleteChannel() {
                 const that = this
-                PROXY.delete('channel/' + this.fullChannelId())
+                PROXY.delete('channel/' + this.channelId())
                     .then(function () {
                         that.msg('Deleted')
                     })
                     .catch(function (error) {
                         that.error(error)
                     })
-                this.$store.commit('deleteChannel', this.fullChannelId())
+                this.$store.commit('deleteChannel', this.channelId())
                 this.$router.push('/session/' + this.sessionId + '/channels')
             },
             toggleEdit() {
@@ -210,7 +212,7 @@
                         this.badNameMode = true
                         return
                     }
-                    this.$store.commit('deleteChannel', this.originalFullChannelId) // original has been renamed
+                    this.$store.commit('deleteChannel', this.originalChannelId) // original has been renamed
                     this.$store.commit('installChannel', cloneDeep(this.channel))
                     PROXY.post('channel', this.channel)
                         .then(function () {
@@ -257,9 +259,9 @@
                 if (this.channelId === undefined)
                     return
                 console.info(`ChannelView: fetch - channelId is ${this.channelId}`)
-                if (this.fullChannelIds().length === 0)
+                if (this.channelIds.length === 0)
                     return
-                this.originalFullChannelId = this.fullChannelId()
+                this.originalChannelId = this.channelId
                 if (this.isNewChannelId()) {
                     console.info(`opening...`)
                     this.edit = true
@@ -275,35 +277,24 @@
                     this.channel = null
                     return
                 }
-                    console.info(`loading channel ${this.fullChannelId()} details`)
+                    console.info(`loading channel ${this.channelId} details`)
                     const that = this
-                    PROXY.get('channel/' + this.fullChannelId())
+                    const fullId = `${this.sessionId}__${this.channelId}`
+                    PROXY.get('channel/' + fullId)
                         .then(response => {
                             console.log(`installing channel ${response.data.channelId}`)
                             this.$store.commit('installChannel', response.data)
                             this.channel =  this.copyOfChannel()
                         })
                         .catch(e => {
-                            that.error('channel/' + this.fullChannelId() + ' ' + e)
+                            that.error('channel/' + fullId + ' ' + e)
                         })
                 this.discarding = false
             },
-            fullChannelIds() {
-                return this.$store.state.base.fullChannelIds
-            },
-            splitFullChannelId(id) {
-                return id.split('__')
-            },
             channelIndex(theSession, theChannelId) {
-                const fullId = theSession + '__' + theChannelId
-                return this.$store.state.base.fullChannelIds.findIndex( function(channelId) {
-                    return channelId === fullId
+                return this.$store.state.base.channelIds.findIndex( function(channelId) {
+                    return channelId === theChannelId
                 })
-            },
-            showChannels() {
-                this.$store.state.base.fullChannelIds.forEach(id =>
-                    console.log(`id ${id}`))
-                console.log(`chan ${this.$store.state.base.channel.channelId}`)
             },
             getChannel() {
                 return this.$store.state.base.channel
@@ -329,7 +320,7 @@
             }
         },
         store: store,
-        name: "ChannelView"
+        name: "ChannelEdit"
     }
 </script>
 

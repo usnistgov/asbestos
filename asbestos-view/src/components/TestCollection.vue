@@ -70,14 +70,10 @@
                 const route = `/session/${this.sessionId}/channel/${this.channelId}/collection/${this.testCollection}/test/${name}`
                 this.$router.push(route)
             },
-
-
             reload() {
-                console.log('TestList reload()')
                 this.$store.commit('setTestCollectionName', this.testCollection)
                 this.$store.dispatch('loadTestScriptNames')
                 this.$store.dispatch('loadReports')
-               // this.$store.dispatch('loadReports')
             },
             pass(testName) {
                 return this.$store.state.testRunner.testReports[testName] !== undefined && this.$store.state.testRunner.testReports[testName].result === 'pass'
@@ -105,16 +101,31 @@
             testScriptNames() {
                 const reports = this.$store.state.testRunner.testReports
                 return Object.keys(reports).sort()
-            }
+            },
+            channel: {
+                set(name) {
+                    if (name !== this.$store.state.base.channelId) {
+                        this.$store.commit('setChannelId', name)
+                    }
+                },
+                get() {
+                    return this.$store.state.base.channelId
+                }
+            },
         },
         created() {
             this.reload()
+            this.channel = this.channelId
         },
         mounted() {
 
         },
         watch: {
             'testCollection': 'loadReports',
+            'channelId': function(newVal) {
+                if (this.channel !== newVal)
+                    this.channel = newVal
+            },
         },
         mixins: [ errorHandlerMixin ],
         name: "TestList",

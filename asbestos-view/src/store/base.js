@@ -26,7 +26,7 @@ export const baseStore = {
     },
     mutations: {
         setSession(state, theSession) {
-            console.log(`setSession = ${theSession}`)
+//            console.log(`setSession = ${theSession}`)
             state.session = theSession
         },
         // setEnvironment(state, theEnvironment) {
@@ -34,13 +34,14 @@ export const baseStore = {
         // },
 
         setSessions(state, sessions) {
-            console.log(`setSessions = ${sessions}`)
+//            console.log(`setSessions = ${sessions}`)
             state.sessions = sessions
         },
         setChannelId(state, channelId) {
             state.channelId = channelId
         },
         setChannel(state, theChannel) {
+//            console.log(`mutatation setChannel ${theChannel}`)
             state.channel = theChannel
             if (theChannel === null)
                 return
@@ -51,29 +52,29 @@ export const baseStore = {
                 state.channelIds.push(theChannel.channelId)
         },
         installChannel(state, newChannel) {  // adds to end
-            const thisChannelId = newChannel.testSession + '__' + newChannel.channelId
-            let channelIndex = state.fullChannelIds.findIndex( function(channelId) {
-                return channelId === thisChannelId
+            let channelIndex = state.channelIds.findIndex( function(channelId) {
+                return channelId === newChannel.channelId
             })
             if (channelIndex === -1) {
-                state.fullChannelIds.push(thisChannelId)
-                console.log(`install new channel - id=${newChannel.channelId}`)
-                state.channel = newChannel
+                state.channelIds.push(newChannel.channelId)
+//                console.log(`mutation install new channel - id=${newChannel.channelId}`
             } else {
-                console.log(`install replacement channel - id=${newChannel.channelId}`)
-                state.channel = newChannel
+                console.log(`mutation install replacement channel - id=${newChannel.channelId}`)
+//                state.channel = newChannel
             }
+            state.channel = newChannel
         },
-        deleteChannel(state, theFullChannelId) {
-            const channelIndex = state.fullChannelIds.findIndex( function(channelId) {
-                return channelId === theFullChannelId
+        deleteChannel(state, theChannelId) {
+            const channelIndex = state.channelIds.findIndex( function(channelId) {
+                return channelId === theChannelId
             })
             if (channelIndex === undefined)
                 return
-            state.fullChannelIds.splice(channelIndex, 1)
+            state.channelIds.splice(channelIndex, 1)
         },
-        installChannelIds(state, theFullChannelIds) {
-            state.fullChannelIds = theFullChannelIds
+        installChannelIds(state, channelIds) {
+//            console.log(`mutation installChannelIds ${channelIds}`)
+            state.channelIds = channelIds.sort()
         },
 
 
@@ -92,6 +93,7 @@ export const baseStore = {
                     const ids = theFullChannelIds.map(fullId => {
                         return fullId.split('__')[1]
                     })
+//                    console.log(`action loadChannelNames ${ids}`)
                     commit('installChannelIds', ids)
                 })
                 .catch(function (error) {
