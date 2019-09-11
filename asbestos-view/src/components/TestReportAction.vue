@@ -22,6 +22,7 @@
             return {
                 // message: null,
                 displayMessage: false,
+                status: [],   // testName => undefined, 'pass', 'fail', 'error'
             }
         },
         methods: {

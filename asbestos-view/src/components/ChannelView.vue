@@ -1,6 +1,5 @@
 <template>
     <div>
-        Channel View - {{ channelId }}
         <router-view></router-view>
     </div>
 </template>

@@ -124,7 +124,7 @@
         components: {
             TestReportAction
         },
-        name: "TestRunner"
+        name: "TestDetails"
     }
 </script>
 

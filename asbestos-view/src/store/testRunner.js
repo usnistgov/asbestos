@@ -17,8 +17,7 @@ export const testRunnerStore = {
     },
     mutations: {
         setTestScriptNames(state, names) {
-            state.testScriptNames = names
-            console.log(`mutation: testScriptNames are ${names}`)
+            state.testScriptNames = names.sort()
         },
         setCurrentTest(state, currentTestId) {
             state.currentTest = currentTestId
@@ -34,11 +33,9 @@ export const testRunnerStore = {
             state.testScripts[scriptObject.name] = scriptObject.script
         },
         setTestCollectionName(state, name) {
-            console.log(`setTestCollectionName ${name}`)
             state.currentTestCollectionName = name
         },
         setTestCollectionNames(state, names) {
-            console.log(`state: testCollectionNames are ${names}`)
             state.testCollectionNames = names
         },
     },
@@ -65,9 +62,7 @@ export const testRunnerStore = {
             commit('clearTestReports')
             if (!rootState.base.session || !rootState.base.channelId || !state.currentTestCollectionName)
                 return
-            console.info('action: loadReports')
             const url = `testlog/${rootState.base.session}__${rootState.base.channelId}/${state.currentTestCollectionName}`
-            console.info(`reports url is ${url}`)
             ENGINE.get(url)
                 .then(response => {
                     let reports = []
@@ -76,12 +71,16 @@ export const testRunnerStore = {
                         reports[reportName] = report
                     }
                     commit('setTestReports', reports)
-                    console.log(`action: Reports were ${Object.keys(state.testReports)}`)
                 })
                 .catch(function (error) {
                     console.error(`${error} - ${url}`)
                     dispatch('error', error)
                 })
+        },
+        addTestReport({commit, state}, name, report) {
+            let reports = state.testReports
+            reports[name] = report
+            commit('setTestReports', reports)
         },
         error(err) {
             console.log(err)

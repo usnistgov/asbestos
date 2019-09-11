@@ -50,8 +50,9 @@
                 const that = this
                 ENGINE.post(`testrun/${this.sessionId}__${this.channelId}/${this.testCollection}/${testName}`)
                     .then(response => {
-                        this.$store.commit('addTestReport', { name: testName, report: response.data } )
-                        this.$router.replace(`/session/${this.sessionId}/channel/${this.channelId}/collection/${this.testCollection}/test/${testName}`)
+                        this.$store.dispatch('addTestReport', testName, response.data)
+                        this.$router.replace(`/session/${this.sessionId}/channel/${this.channelId}/collection/${this.testCollection}`)
+                        this.$store.dispatch('loadTestScriptNames')  // force reload of UI
                     })
                     .catch(error => {
                         that.error(error)
@@ -71,11 +72,13 @@
             reload() {
                 this.$store.commit('setTestCollectionName', this.testCollection)
                 this.$store.dispatch('loadTestScriptNames')
+                this.$router.push(`/session/${this.sessionId}/channel/${this.channelId}/collection/${this.testCollection}`)
             },
             testReport(testName) {
                 return this.$store.state.testRunner.testReports[testName]
             },
             updateReportStatuses() {
+                console.log('TestCollection: UpdateReportStatuses')
                 let status = []
                 this.allTestScriptNames().forEach(testName => {
                     if (this.testReport(testName) === undefined) {

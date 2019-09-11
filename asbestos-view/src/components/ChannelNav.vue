@@ -50,17 +50,6 @@
             channelsLink(channelId) {
                 return '/session/' + this.sessionId + '/channels/' + channelId
             },
-            // loadChannelNames() {  // same function exists in ChannelControlPanel
-            //     const that = this
-            //     PROXY.get('channel')
-            //         .then(response => {
-            //             let theResponse = response.data
-            //             this.$store.commit('installChannelIds', theResponse.sort())
-            //         })
-            //         .catch(function (error) {
-            //             that.error(error)
-            //         })
-            // },
             channelIds() {
                 return this.$store.state.base.channelIds
             },
