@@ -18,6 +18,7 @@ export const testRunnerStore = {
     mutations: {
         setTestScriptNames(state, names) {
             state.testScriptNames = names
+            console.log(`mutation: testScriptNames are ${names}`)
         },
         setCurrentTest(state, currentTestId) {
             state.currentTest = currentTestId
@@ -25,10 +26,8 @@ export const testRunnerStore = {
         clearTestReports(state) {
             state.testReports.length = 0
         },
-        addTestReport(state, reportObject) {
-            // reportObject is { name: testId, report: TestReport }
-            console.log(`new report for ${reportObject.name}`)
-            state.testReports[reportObject.name] = reportObject.report
+        setTestReports(state, reports) {
+            state.testReports = reports
         },
         addTestScript(state, scriptObject) {
             // scriptObject is  { name: testId, script: TestScript }
@@ -56,7 +55,6 @@ export const testRunnerStore = {
             ENGINE.get(`collection/${state.currentTestCollectionName}`)
                 .then(response => {
                     let theResponse = response.data
-                    console.log(`...${theResponse}`)
                     commit('setTestScriptNames', theResponse)
                 })
                 .catch(function (error) {
@@ -67,16 +65,18 @@ export const testRunnerStore = {
             commit('clearTestReports')
             if (!rootState.base.session || !rootState.base.channelId || !state.currentTestCollectionName)
                 return
-            console.info('load reports')
+            console.info('action: loadReports')
             const url = `testlog/${rootState.base.session}__${rootState.base.channelId}/${state.currentTestCollectionName}`
             console.info(`reports url is ${url}`)
             ENGINE.get(url)
                 .then(response => {
+                    let reports = []
                     for (const reportName of Object.keys(response.data)) {
                         const report = response.data[reportName]
-                        commit('addTestReport', {name: reportName, report: report})
+                        reports[reportName] = report
                     }
-                    console.log(`Reports were ${Object.keys(state.testReports)}`)
+                    commit('setTestReports', reports)
+                    console.log(`action: Reports were ${Object.keys(state.testReports)}`)
                 })
                 .catch(function (error) {
                     console.error(`${error} - ${url}`)

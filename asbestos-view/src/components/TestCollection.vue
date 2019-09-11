@@ -10,11 +10,11 @@
              :key="name + i">
             <div >
                 <div @click="selectTest(name)">
-                    <div v-bind:class="{ pass: pass(name), fail: fail(name), 'not-run': notRun(name)   }">
-                        <div v-if="pass(name)">
+                    <div v-bind:class="{ pass: status[name] === 'pass', fail: status[name] === 'fail', error: status[name] === 'error', 'not-run': status[name] === 'undefined' }">
+                        <div v-if="status[name] === 'pass'">
                             <img src="../assets/checked.png" class="right">
                         </div>
-                        <div v-else-if="fail(name)">
+                        <div v-else-if="status[name] === 'fail' || status[name] === 'error'">
                             <img src="../assets/error.png" class="right">
                         </div>
                         <div v-else>
@@ -41,17 +41,15 @@
 
         data() {
             return {
-
+                status: [],   // testName => undefined, 'pass', 'fail', 'error'
             }
         },
         methods: {
             doRun(testName) {
- //               console.log(`run ${testName}`)
                 this.$store.commit('setCurrentTest', null)
                 const that = this
                 ENGINE.post(`testrun/${this.sessionId}__${this.channelId}/${this.testCollection}/${testName}`)
                     .then(response => {
-//                        console.log(`response => ${response.data.result}`)
                         this.$store.commit('addTestReport', { name: testName, report: response.data } )
                         this.$router.replace(`/session/${this.sessionId}/channel/${this.channelId}/collection/${this.testCollection}/test/${testName}`)
                     })
@@ -73,22 +71,25 @@
             reload() {
                 this.$store.commit('setTestCollectionName', this.testCollection)
                 this.$store.dispatch('loadTestScriptNames')
-                this.$store.dispatch('loadReports')
             },
-            testReports(testName) {
+            testReport(testName) {
                 return this.$store.state.testRunner.testReports[testName]
             },
-            pass(testName) {
-                return this.testReports(testName) !== undefined && this.testReports(testName).result === 'pass'
-            },
-            fail(testName) {
-                return this.testReports(testName) !== undefined && this.testReports(testName).result === 'fail'
-            },
-            notRun(testName) {
-                return this.testReports(testName) === undefined
+            updateReportStatuses() {
+                let status = []
+                this.allTestScriptNames().forEach(testName => {
+                    if (this.testReport(testName) === undefined) {
+                        status[testName] = 'undefined'
+                    } else {
+                        status[testName] = this.testReport(testName).result  // 'pass', 'fail', 'error'
+                    }
+                    this.status = status                })
             },
             loadReports() {
                 this.$store.dispatch('loadReports')
+            },
+            allTestScriptNames() {
+                return this.$store.state.testRunner.testScriptNames
             },
         },
         computed: {
@@ -101,7 +102,7 @@
                 return this.$store.state.testRunner.currentTest
             },
 
-            testScriptNames() {
+            testScriptNames() {  // just the ones with reports available
                 const reports = this.$store.state.testRunner.testReports
                 return Object.keys(reports).sort()
             },
@@ -115,6 +116,7 @@
                     return this.$store.state.base.channelId
                 }
             },
+
         },
         created() {
             this.reload()
@@ -129,6 +131,8 @@
                 if (this.channel !== newVal)
                     this.channel = newVal
             },
+            '$store.state.testRunner.testScriptNames' : 'loadReports',
+            '$store.state.testRunner.testReports': 'updateReportStatuses',
         },
         mixins: [ errorHandlerMixin ],
         name: "TestList",
@@ -151,6 +155,13 @@
         font-size: larger;
     }
     .fail {
+        background-color: indianred;
+        text-align: left;
+        border: 1px dotted black;
+        cursor: pointer;
+        font-size: larger;
+    }
+    .error {
         background-color: indianred;
         text-align: left;
         border: 1px dotted black;
