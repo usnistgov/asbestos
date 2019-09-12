@@ -319,7 +319,8 @@ public class TestEngine  {
                 for (TestScript.SetupActionComponent action : comp.getAction()) {
                     TestReport.SetupActionComponent actionReportComponent = setupReportComponent.addAction();
                     if (action.hasOperation() && action.hasAssert()) {
-                        Reporter.reportError(fVal, actionReportComponent.getOperation(), "setup", "", "action has both operation and assertion");
+                        Reporter reporter = new Reporter(fVal, actionReportComponent.getOperation(), "", "");
+                        reporter.reportError( "action has both operation and assertion");
                         return;
                     }
                     if (action.hasOperation())
@@ -411,7 +412,8 @@ public class TestEngine  {
                     for (TestScript.TestActionComponent action : testComponent.getAction()) {
                         TestReport.TestActionComponent actionReportComponent = testReportComponent.addAction();
                         if (action.hasOperation() && action.hasAssert()) {
-                            Reporter.reportError(tVal, actionReportComponent.getOperation(), "test.action", testName, "action has both operation and assertion");
+                            Reporter reporter = new Reporter(fVal, actionReportComponent.getOperation(), "", "");
+                            reporter.reportError( "action has both operation and assertion");
                             return;
                         }
                         if (action.hasOperation())

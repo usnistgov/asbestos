@@ -80,8 +80,9 @@ abstract class GenericSetupAction {
 
 
         targetUrl = buildTargetUrl();
-        if (targetUrl == null)
+        if (targetUrl == null) {
             reporter.reportError("cannot generate targetUrl");
+        }
         return targetUrl != null;
     }
 

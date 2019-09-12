@@ -26,7 +26,7 @@ class SetupActionRead extends GenericSetupAction {
 
         ResourceWrapper wrapper = fhirClient.readResource(targetUrl, requestHeader);
         if (!wrapper.isOk()) {
-            reporter.report(/*servlet.getRef() +*/ "read (with errors) ", wrapper.logLink());
+            reporter.report( "read (with errors) ", wrapper);
 //            List<String> errors = servlet.errorsFromOperationOutcome();
 //            String errs = "";
 //            for (String error : errors)
@@ -34,7 +34,7 @@ class SetupActionRead extends GenericSetupAction {
 //            Reporter.reportError(val, opReport, null, type, label, "Errors returned from " + targetUrl + "\n" + errs, servlet.logLink());
 //            return;
         } else {
-            reporter.report(wrapper.getRef() + " read", wrapper.logLink());
+            reporter.report("GET " + wrapper.getRef(), wrapper);
         }
         postExecute(wrapper);
     }
@@ -69,20 +69,20 @@ class SetupActionRead extends GenericSetupAction {
         // for READ this can only be ID
         if (op.hasParams()) {
             if (!op.hasResource()) {
-                Reporter.reportError(val, opReport, null, type, label, "has params but no resource");
+                reporter.reportError( "has params but no resource");
                 return null ;
             }
             SearchParms searchParms = prepParams();
             if (searchParms == null)
                 return null;  // coding issue
             if (searchParms.isSearch() && !isSearchOk()) {
-                Reporter.reportError(val, opReport, null, type, label, "resulting URL is search (contains ?) - use search operation type instead");
+                reporter.reportError( "resulting URL is search (contains ?) - use search operation type instead");
                 return null ;
             }
 
             Ref ref = new Ref(base, op.getResource(), searchParms);
             if (!isSearchOk() && !isReadable(ref)) {
-                Reporter.reportError(val, opReport, null, type, label, "resulting URL is not complete - " + ref.asString());
+                reporter.reportError("resulting URL is not complete - " + ref.asString());
                 return null ;
             }
             return ref;
@@ -90,7 +90,7 @@ class SetupActionRead extends GenericSetupAction {
         if (op.hasTargetId()) {
             Ref ref = refFromTargetId(op.getTargetId(), opReport, label);
             if (!isReadable(ref)) {
-                Reporter.reportError(val, opReport, null, type, label, "resulting URL is not complete - " + ref.asString());
+                reporter.reportError( "resulting URL is not complete - " + ref.asString());
                 return null ;
             }
             return ref;
@@ -99,12 +99,12 @@ class SetupActionRead extends GenericSetupAction {
         if (fixtureMgr.getLastOp() != null) {
             Ref ref = refFromTargetId(fixtureMgr.getLastOp(), opReport, label);
             if (!isReadable(ref)) {
-                Reporter.reportError(val, opReport, null, type, label, "resulting URL is not complete - " + ref.asString());
+                reporter.reportError( "resulting URL is not complete - " + ref.asString());
                 return null ;
             }
             return ref;
         }
-        Reporter.reportError(val, opReport, null, type, label, "Unable to construct URL for operation");
+        reporter.reportError("Unable to construct URL for operation");
         return null;
     }
 
@@ -128,7 +128,7 @@ class SetupActionRead extends GenericSetupAction {
         try {
             searchParms.setParms(rawParms, encodeRequestUrl);
         } catch (UnsupportedEncodingException e) {
-            Reporter.reportError(val, opReport, null, type, label, "Unable to encode URL parameters - " + e.getMessage());
+            reporter.reportError("Unable to encode URL parameters - " + e.getMessage());
             return null;
         }
         return searchParms;
@@ -146,7 +146,7 @@ class SetupActionRead extends GenericSetupAction {
                 location = fixture.getHttpBase().getUri().toString();
             }
             if (location == null) {
-                Reporter.reportError(val, opReport, null, type, label, "targetId does not have id and type");
+                reporter.reportError( "targetId does not have id and type");
                 return null;
             }
             Ref targetRef = new Ref(location);

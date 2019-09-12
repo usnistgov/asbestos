@@ -141,7 +141,7 @@ public class AssertionRunner {
                 Reporter.reportError(val, assertReport, type, label, "expected " + as.getResource() + " found " + sourceFixture.getResponseType());
                 return false;
             }
-            Reporter.reportPass(val, assertReport, type, label, "resource type comparison");
+            Reporter.reportPass(val, assertReport, type, label, "resource type comparison (" + sourceFixture.getResponseType() + ")" );
             return true;
 
         }
@@ -185,7 +185,7 @@ public class AssertionRunner {
             String expected = as.getResponse().toCode();
             if (!compare(val, assertReport, found, expected, operator, warningOnly, type, label))
                 return false;
-            Reporter.reportPass(val, assertReport, type, label, "response comparison");
+            Reporter.reportPass(val, assertReport, type, label, "response comparison completed");
             return true;
         }
 
@@ -198,7 +198,7 @@ public class AssertionRunner {
             String expected = as.getResponseCode();
             if (!compare(val, assertReport, found, expected, operator, warningOnly, type, label))
                 return false;
-            Reporter.reportPass(val, assertReport, type, label, "responseCode comparison");
+            Reporter.reportPass(val, assertReport, type, label, "responseCode comparison completed");
             return true;
         }
 
@@ -215,7 +215,7 @@ public class AssertionRunner {
             String expected = as.getValue();
             if (!compare(val, assertReport, found, expected, operator, warningOnly, type, label))
                 return false;
-            Reporter.reportPass(val, assertReport, type, label, "expression comparison");
+            Reporter.reportPass(val, assertReport, type, label, "expression comparison completed");
             return true;
         }
 
@@ -230,7 +230,7 @@ public class AssertionRunner {
             }
             boolean ok = FhirPathEngineBuilder.evalForBoolean(sourceResource, as.getExpression());
             if (ok) {
-                Reporter.reportPass(val, assertReport, type, label, "expression evaluated");
+                Reporter.reportPass(val, assertReport, type, label, "expression evaluated completed");
                 return true;
             }
             Reporter.reportError(val, assertReport, type, label, "expression " + as.getExpression()  +  " failed");
@@ -274,50 +274,50 @@ public class AssertionRunner {
 
     private boolean compare(ValE val, TestReport.SetupActionAssertComponent assertReport, String found, String expected, String operator, boolean warningOnly, String type, String id) {
         if (found == null)
-            return Reporter.reportFail(val, assertReport, type, operator,"Operator is " + operator + " expected is " + expected + " found is " + found, warningOnly);
+            return Reporter.reportFail(val, assertReport, type, operator,"Operator is " + operator + "\nexpected is " + expected + "\nfound is " + found, warningOnly);
         if (operator.equals("equals"))
-            return Reporter.report(found.equals(expected), val, assertReport, type, operator,"Operator is " + operator + " expected is " + expected + " found is " + found, warningOnly);
+            return Reporter.report(found.equals(expected), val, assertReport, type, operator,"Operator is " + operator + "\nexpected is " + expected + "\nfound is " + found, warningOnly);
         if (operator.equals("notEquals"))
-            return Reporter.report(!found.equals(expected), val, assertReport, type, operator,"Operator is " + operator + " expected is " + expected + " found is " + found, warningOnly);
+            return Reporter.report(!found.equals(expected), val, assertReport, type, operator,"Operator is " + operator + "\nexpected is " + expected + "\nfound is " + found, warningOnly);
         if (operator.equals("in")) {
             String[] values = expected.split(",");
             for (String value : values) {
                 if (value.equals(found))
-                    return Reporter.report(true, val, assertReport, type, operator,"Operator is " + operator + " expected is " + expected + " found is " + found, warningOnly);
+                    return Reporter.report(true, val, assertReport, type, operator,"Operator is " + operator + "\nexpected is " + expected + "\nfound is " + found, warningOnly);
             }
-            return Reporter.report(false, val, assertReport, type, operator,"Operator is " + operator + " expected is " + expected + " found is " + found, warningOnly);
+            return Reporter.report(false, val, assertReport, type, operator,"Operator is " + operator + "\nexpected is " + expected + "\nfound is " + found, warningOnly);
         }
         if (operator.equals("notIn")) {
             String[] values = expected.split(",");
             for (String value : values) {
                 if (value.equals(found))
-                    return Reporter.report(false, val, assertReport, type, operator,"Operator is " + operator + " expected is " + expected + " found is " + found, warningOnly);
+                    return Reporter.report(false, val, assertReport, type, operator,"Operator is " + operator + "\nexpected is " + expected + "\nfound is " + found, warningOnly);
             }
             return Reporter.report(true, val, assertReport, type, operator,"Operator is " + operator, warningOnly);
         }
         if (operator.equals("greaterThan")) {
             int iExpected = Integer.parseInt(expected);
             int iFound = Integer.parseInt(found);
-            return Reporter.report(iFound > iExpected, val, assertReport, type, operator,"Operator is " + operator + " expected is " + expected + " found is " + found, warningOnly);
+            return Reporter.report(iFound > iExpected, val, assertReport, type, operator,"Operator is " + operator + "\nexpected is " + expected + "\nfound is " + found, warningOnly);
         }
         if (operator.equals("lessThan")) {
             int iExpected = Integer.parseInt(expected);
             int iFound = Integer.parseInt(found);
-            return Reporter.report(iFound < iExpected, val, assertReport, type, operator,"Operator is " + operator + " expected is " + expected + " found is " + found, warningOnly);
+            return Reporter.report(iFound < iExpected, val, assertReport, type, operator,"Operator is " + operator + "\nexpected is " + expected + "\nfound is " + found, warningOnly);
         }
         if (operator.equals("empty")) {
-            return Reporter.report("".equals(found), val, assertReport, type, operator,"Operator is " + operator + " expected is " + expected + " found is " + found, warningOnly);
+            return Reporter.report("".equals(found), val, assertReport, type, operator,"Operator is " + operator + "\nexpected is " + expected + "\nfound is " + found, warningOnly);
         }
         if (operator.equals("notEmpty")) {
-            return Reporter.report(!"".equals(found), val, assertReport, type, operator,"Operator is " + operator + " expected is " + expected + " found is " + found, warningOnly);
+            return Reporter.report(!"".equals(found), val, assertReport, type, operator,"Operator is " + operator + "\nexpected is " + expected + "\nfound is " + found, warningOnly);
         }
         if (operator.equals("contains")) {
-            return Reporter.report(found.contains(expected), val, assertReport, type, operator,"Operator is " + operator + " expected is " + expected + " found is " + found, warningOnly);
+            return Reporter.report(found.contains(expected), val, assertReport, type, operator,"Operator is " + operator + "\nexpected is " + expected + "\nfound is " + found, warningOnly);
         }
         if (operator.equals("notContains")) {
-            return Reporter.report(!found.contains(expected), val, assertReport, type, operator, "Operator is " + operator + " expected is " + expected + " found is " + found, warningOnly);
+            return Reporter.report(!found.contains(expected), val, assertReport, type, operator, "Operator is " + operator + "\nexpected is " + expected + "\nfound is " + found, warningOnly);
         }
-        return Reporter.report(false, val, assertReport, type, id, "Do not understand operator " + operator + " expected is " + expected + " found is " + found, warningOnly);
+        return Reporter.report(false, val, assertReport, type, id, "Do not understand operator " + operator + "\nexpected is " + expected + "\nfound is " + found, warningOnly);
     }
 
 

@@ -46,9 +46,9 @@ class SetupActionCreate extends GenericSetupAction {
             return;
         ResourceWrapper wrapper = getFhirClient().writeResource(resourceToSend, targetUrl, Format.XML, requestHeader);
         if (wrapper.isOk())
-            reporter.report(wrapper.getRef() + " created", wrapper.logLink());
+            reporter.report(wrapper.getRef() + " created", wrapper);
         else
-            reporter.reportError(wrapper.getRef() + " not created - " + wrapper.logLink());
+            reporter.reportError(wrapper.getRef() + " not created", wrapper);
         fixtureComponent = new FixtureComponent(fixtureId)
                 .setResource(wrapper)
                 .setHttpBase(wrapper.getHttpBase());
@@ -66,9 +66,9 @@ class SetupActionCreate extends GenericSetupAction {
 
         ResourceWrapper wrapper = getFhirClient().writeResource(resourceToSend, targetUrl, format, requestHeader);
         if (wrapper.isOk()) {
-            reporter.report(wrapper.getRef() + " created", wrapper.logLink());
+            reporter.report(wrapper.getRef() + " created", wrapper);
         } else {
-            reporter.report("create to " + targetUrl + " failed with status " + wrapper.getHttpBase().getStatus(), wrapper.logLink());
+            reporter.report("create to " + targetUrl + " failed with status " + wrapper.getHttpBase().getStatus(), wrapper);
             operationReport.setResult(TestReport.TestReportActionResult.FAIL);
         }
         postExecute(wrapper);

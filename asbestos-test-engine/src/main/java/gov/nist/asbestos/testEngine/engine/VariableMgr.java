@@ -14,7 +14,7 @@ public class VariableMgr {
     private FixtureMgr fixtureMgr;
     private ValE val;
     private TestReport.SetupActionOperationComponent opReport;
-    private TestReport.SetupActionAssertComponent asReport;
+    private Reporter reporter;
 
     VariableMgr(TestScript testScript, FixtureMgr fixtureMgr) {
         Objects.requireNonNull(testScript);
@@ -44,12 +44,13 @@ public class VariableMgr {
 
     String updateReference(String reference) {
         Objects.requireNonNull(reference);
-        assert opReport != null || asReport != null;
+        Objects.requireNonNull(reporter);
         if (!reference.contains(("${")))
             return reference;
         int from = reference.indexOf("${");
         int to = reference.indexOf("}");
         if (to == -1) {
+            reporter.reportError("reference " + reference + " has no closing }");
             throw new Error("reference " + reference + " has no closing }");
         }
         String varName = reference.substring(from+2, to);
@@ -62,25 +63,25 @@ public class VariableMgr {
     private String eval(String variableName) {
         TestScript.TestScriptVariableComponent var = getVariable(variableName);
         if (var == null) {
-            Reporter.reportError(val, opReport, asReport, "variable", variableName, "Variable " + variableName + " is references but not defined");
+            reporter.reportError( "Variable " + variableName + " is references but not defined");
             return null;
         }
         String sourceId = null;
         if (var.hasSourceId()) {
             sourceId = var.getSourceId();
         } else if (!var.hasDefaultValue()){
-            Reporter.reportError(val, opReport, asReport, "variable", variableName, "Variable " + variableName + " does not have a sourceId and does not define a defaultValue");
+            reporter.reportError("Variable " + variableName + " does not have a sourceId and does not define a defaultValue");
             return null;
         }
         if (!fixtureMgr.containsKey(sourceId)) {
-            Reporter.reportError(val, opReport, asReport, "variable", variableName, "Variable " + variableName + " references sourceId " + sourceId + " which does  not exist");
+            reporter.reportError( "Variable " + variableName + " references sourceId " + sourceId + " which does  not exist");
             return null;
         }
         FixtureComponent fixture = fixtureMgr.get(sourceId);
 
         if (var.hasHeaderField()) {
             if (!fixture.hasHttpBase()) {
-                Reporter.reportError(val, opReport, asReport, "variable", variableName, "Variable " + variableName + " sourceId " + sourceId + " does not have a HTTP header behind it");
+                reporter.reportError( "Variable " + variableName + " sourceId " + sourceId + " does not have a HTTP header behind it");
                 return null;
             }
             HttpBase base = fixture.getHttpBase();
@@ -97,10 +98,10 @@ public class VariableMgr {
         } else if (var.hasDefaultValue()) {
             return var.getDefaultValue();
         } else if (var.hasPath()) {
-            Reporter.reportError(val, opReport, asReport, "variable", variableName, "Variable " + variableName + " path not supported");
+            reporter.reportError("Variable " + variableName + " path not supported");
             return null;
         } else {
-            Reporter.reportError(val, opReport, asReport, "variable", variableName, "Variable " + variableName + " does not define one of headerField, expression, path, defaultValue");
+            reporter.reportError( "Variable " + variableName + " does not define one of headerField, expression, path, defaultValue");
             return null;
         }
     }
@@ -110,13 +111,11 @@ public class VariableMgr {
         return this;
     }
 
-    public VariableMgr setOpReport(TestReport.SetupActionOperationComponent opReport) {
+    VariableMgr setOpReport(TestReport.SetupActionOperationComponent opReport) {
+        Objects.requireNonNull(opReport);
         this.opReport = opReport;
+        reporter = new Reporter(val, opReport, "", "");
         return this;
     }
 
-    public VariableMgr setAsReport(TestReport.SetupActionAssertComponent asReport) {
-        this.asReport = asReport;
-        return this;
-    }
 }

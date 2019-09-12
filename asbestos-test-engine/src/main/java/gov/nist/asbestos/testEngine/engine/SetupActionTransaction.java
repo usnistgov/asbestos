@@ -24,23 +24,17 @@ public class SetupActionTransaction extends GenericSetupAction {
         if (wrapper.isOk()) {
             BaseResource resource = wrapper.getResource();
             if ((resource instanceof Bundle) && bundleContainsError((Bundle) resource) ) {
-                reporter.report(wrapper.getRef() + " transaction failed : \n" + getBundleIssues((Bundle) wrapper.getResource()), wrapper.logLink());
-                operationReport.setResult(TestReport.TestReportActionResult.FAIL);
+                reporter.reportFail(wrapper.getRef() + " transaction failed : \n" + getBundleIssues((Bundle) wrapper.getResource()), wrapper);
             } else if ((resource instanceof OperationOutcome && operationOutcomeContainsError((OperationOutcome) resource))) {
                 String issues = getOperationOutcomeIssues((OperationOutcome) resource);
-                reporter.report(wrapper.getRef() + " transaction failed : \n" + issues, wrapper.logLink());
-                operationReport.setResult(TestReport.TestReportActionResult.FAIL);
+                reporter.reportFail(wrapper.getRef() + " transaction failed : \n" + issues, wrapper);
             } else if (resource instanceof Bundle) {
-                operationReport.setMessage("HTTP " + wrapper.getStatus());
-                //reporter.report(wrapper.getRef() + " transaction - okay", wrapper.logLink());
-                operationReport.setResult(TestReport.TestReportActionResult.PASS);
+                reporter.report("HTTP " + wrapper.getStatus(), wrapper);
             } else {
-                reporter.report(wrapper.getRef() + " transaction - no response object - should be Bundle", wrapper.logLink());
-                operationReport.setResult(TestReport.TestReportActionResult.FAIL);
+                reporter.reportFail(wrapper.getRef() + " transaction - no response object - should be Bundle", wrapper);
             }
         } else {
-            reporter.report("transaction to " + targetUrl + " failed with status " + wrapper.getHttpBase().getStatus(), wrapper.logLink());
-            operationReport.setResult(TestReport.TestReportActionResult.FAIL);
+            reporter.reportFail("transaction to " + targetUrl + " failed with status " + wrapper.getHttpBase().getStatus(), wrapper);
         }
         postExecute(wrapper);
     }

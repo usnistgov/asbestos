@@ -19,6 +19,7 @@ public class OperationRunner {
     private FixtureMgr fixtureMgr;
     private TestReport testReport = null;
     private URI sut = null;
+    private Reporter reporter;
 
     OperationRunner(FixtureMgr fixtureMgr) {
         Objects.requireNonNull(fixtureMgr);
@@ -30,6 +31,9 @@ public class OperationRunner {
         Objects.requireNonNull(val);
         Objects.requireNonNull(fhirClient);
         Objects.requireNonNull(testScript);
+        Objects.requireNonNull(operationReport);
+
+        reporter = new Reporter(val, operationReport, "", "");
 
         operationReport.setResult(TestReport.TestReportActionResult.PASS);  // may be overwritten
 
@@ -42,7 +46,7 @@ public class OperationRunner {
         if (op.hasParams()) elementCount++;
         if (op.hasUrl()) elementCount++;
         if (elementCount == 0 && sut == null) {
-            Reporter.reportError(val, operationReport, type, label,"has none of sourceId, targetId, params, url - one is required");
+            reporter.reportError("has none of sourceId, targetId, params, url - one is required");
             return;
         }
         if (elementCount > 1) {
@@ -50,7 +54,7 @@ public class OperationRunner {
             if (op.hasSourceId()) {
                 FixtureComponent fixtureComponent = fixtureMgr.get(op.getSourceId());
                 if (fixtureComponent == null) {
-                    Reporter.reportError(val, operationReport, type, label,"fixture " + op.getSourceId() + " is not defined");
+                    reporter.reportError("fixture " + op.getSourceId() + " is not defined");
                     return;
                 }
                 if (!fixtureComponent.getResourceWrapper().hasHttpBase()) {
@@ -59,17 +63,17 @@ public class OperationRunner {
                 }
             }
             if (!itsOk) {
-                Reporter.reportError(val, operationReport, type, label, "has multiple of sourceId, targetId, params, url - only one is allowed");
+                reporter.reportError( "has multiple of sourceId, targetId, params, url - only one is allowed");
                 return;
             }
         }
         if (!op.hasType()) {
-            Reporter.reportError(val, operationReport, type, label,"has no type");
+            reporter.reportError("has no type");
             return;
         }
 
         if (op.hasDestination()) {
-            Reporter.reportError(val, operationReport, type, label,"destination not supported");
+            reporter.reportError("destination not supported");
             return;
         }
 
@@ -147,7 +151,7 @@ public class OperationRunner {
                             .setOpReport(operationReport));
             setupActionTransaction.run(op, operationReport);
         } else {
-            Reporter.reportError(val, operationReport, type, label,"do not understand code.code of " + code);
+            reporter.reportError("do not understand code.code of " + code);
         }
     }
 
