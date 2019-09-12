@@ -106,7 +106,10 @@
                         lines[i] = line.substring(0, 99) + '...'
                 }
                 return lines.join('\n')
-            }
+            },
+            removeFormatting(msg) {
+                  return msg.replace(/&lt;/g, '<')
+            },
         },
         computed: {
             taskCount() {
@@ -116,13 +119,13 @@
                 return this.selectedEvent.tasks[this.selectedTask].requestHeader
             },
             requestBody() {
-                return this.limitLines(this.selectedEvent.tasks[this.selectedTask].requestBody)
+                return this.removeFormatting(this.limitLines(this.selectedEvent.tasks[this.selectedTask].requestBody))
             },
             responseHeader() {
                 return this.selectedEvent.tasks[this.selectedTask].responseHeader
             },
             responseBody() {
-                return this.limitLines(this.selectedEvent.tasks[this.selectedTask].responseBody)
+                return this.removeFormatting(this.limitLines(this.selectedEvent.tasks[this.selectedTask].responseBody))
             },
             eventSummary() {
                 if (!this.$store.state.log.eventSummaries)
