@@ -17,6 +17,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -67,6 +68,35 @@ public class ProxyLogServlet extends HttpServlet {
 //            buildJsonListingOfTask(resp, uriParts[3], uriParts[4], uriParts[5], uriParts[6], uriParts[7]);
 //            return;
 //        }
+
+        // since event
+        // return next event after this one (wait for it if you must)
+        // wait may time out and return 404
+
+        // 7 - event
+        // 6 - "since"
+        // 5 - resourceType - may be null
+        // 4 - channelId
+        // 3 - testSession
+        if (uriParts.length == 8 && uriParts[6].equals("since")) {
+            List<ResourceId> ids = buildListOfEventIdsByResourceType(uriParts[3], uriParts[4]);
+            ids.sort(Comparator.reverseOrder());
+            List<String> results = new ArrayList<>();
+            String event = uriParts[7];
+            for (String id : ids) {
+                if (id.compareTo(event) > 0)
+                    results.add(id);
+                else
+                    break;
+            }
+            returnJsonList(resp, ids);
+            return;
+        }
+
+        // 6 - event
+        // 5 - resourceType - may be null
+        // 4 - channelId
+        // 3 - testSession
         if (uriParts.length == 7) {  // includes event
             if (jsonOk) {
                 buildJsonListingOfEvent(resp, uriParts[3], uriParts[4], uriParts[5], uriParts[6]);
@@ -98,7 +128,7 @@ public class ProxyLogServlet extends HttpServlet {
     private void buildJsonListingOfResourceTypes(HttpServletResponse resp, String testSession, String channelId) {
         File fhir = fhirDir(testSession, channelId);
 
-        List<String> resourceTypes = dirListingAsList(fhir);
+        List<String> resourceTypes = dirListingAsStringList(fhir);
         returnJsonList(resp, resourceTypes);
     }
 
@@ -109,15 +139,57 @@ public class ProxyLogServlet extends HttpServlet {
         return new File(channelFile, "fhir");
     }
 
+    private class ResourceId {
+        String resourceType;
+        String id;
+
+        ResourceId(String resourceType, String id) {
+            this.resourceType = resourceType;
+            this.id = id;
+        }
+    }
+
+    private List<ResourceId> buildListOfEventIdsByResourceType(String testSession, String channelId) {
+        File fhir = fhirDir(testSession, channelId);
+        List<File> resourceTypes = dirListing(fhir);
+        List<ResourceId> rids = new ArrayList<>();
+
+        for (File resourceType : resourceTypes) {
+            List<String> ids = dirListingAsStringList(resourceType);
+            for (String id : ids) {
+                ResourceId rid = new ResourceId(resourceType.getName(), id);
+                rids.add(rid);
+            }
+        }
+        return rids;
+    }
+
     private void buildJsonListingOfEvents(HttpServletResponse resp, String testSession, String channelId, String resourceType) {
         File fhir = fhirDir(testSession, channelId);
         File resourceTypeFile = new File(fhir, resourceType);
 
-        List<String> events = dirListingAsList(resourceTypeFile);
+        List<String> events = dirListingAsStringList(resourceTypeFile);
         returnJsonList(resp, events);
     }
 
-    private List<String> dirListingAsList(File dir) {
+    private List<File> dirListing(File dir) {
+        List<File> contents = new ArrayList<>();
+
+        File[] files = dir.listFiles();
+        if (files != null) {
+            for (File file : files) {
+                if (!file.isDirectory()) continue;
+                if (file.getName().startsWith(".")) continue;
+                if (file.getName().startsWith("_")) continue;
+                contents.add(file);
+            }
+            contents = contents.stream().sorted().collect(Collectors.toList());
+        }
+
+        return contents;
+    }
+
+    private List<String> dirListingAsStringList(File dir) {
         List<String> contents = new ArrayList<>();
 
         File[] files = dir.listFiles();
@@ -178,7 +250,7 @@ public class ProxyLogServlet extends HttpServlet {
         List<Task> tasks = new ArrayList<>();
 
         Event(File eventDir) {
-            List<String> parts = dirListingAsList(eventDir);
+            List<String> parts = dirListingAsStringList(eventDir);
             int i = 0;
             for (String part : parts) {
                 Task task = new Task(eventDir, part);
@@ -191,11 +263,11 @@ public class ProxyLogServlet extends HttpServlet {
 
     private void buildJsonListingOfEventSummaries(HttpServletResponse resp, String testSession, String channelId) {
         File fhir = fhirDir(testSession, channelId);
-        List<String> resourceTypes = dirListingAsList(fhir);
+        List<String> resourceTypes = dirListingAsStringList(fhir);
         List<EventSummary> eventSummaries = new ArrayList<>();
         for (String resourceType : resourceTypes) {
             File resourceDir = new File(fhir, resourceType);
-            List<String> eventIds = dirListingAsList(resourceDir);
+            List<String> eventIds = dirListingAsStringList(resourceDir);
             for (String eventId : eventIds) {
                 File eventFile = new File(resourceDir, eventId);
                 EventSummary summary = new EventSummary(eventFile);

@@ -17,16 +17,10 @@ import java.util.Objects;
 
 
 public class PassthroughChannel extends BaseChannel /*implements IBaseChannel*/ {
-    private ChannelConfig channelConfig = null;
     private String serverBase;
     private String proxyBase;
 
     public PassthroughChannel() {
-    }
-
-    @Override
-    public void setup(ChannelConfig simConfig) {
-        this.channelConfig = simConfig;
     }
 
     @Override

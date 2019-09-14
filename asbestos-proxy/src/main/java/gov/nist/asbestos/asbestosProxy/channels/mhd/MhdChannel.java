@@ -45,7 +45,6 @@ import java.net.URI;
 import java.util.*;
 
 public class MhdChannel extends BaseChannel /*implements IBaseChannel*/ {
-    private ChannelConfig channelConfig = null;
     private Bundle requestBundle = null;
     private String serverBase;
     private String proxyBase;
@@ -526,11 +525,6 @@ public class MhdChannel extends BaseChannel /*implements IBaseChannel*/ {
     @Override
     public void setProxyBase(String proxyBase) {
         this.proxyBase = proxyBase;
-    }
-
-    @Override
-    public void setup(ChannelConfig simConfig) {
-        this.channelConfig = simConfig;
     }
 
     @Override
