@@ -123,6 +123,10 @@ public class ProxyServlet extends HttpServlet {
             log.error(ExceptionUtils.getStackTrace(e));
             resp.setStatus(resp.SC_INTERNAL_SERVER_ERROR);
             return;
+        } catch (Throwable t) {
+            log.error(ExceptionUtils.getStackTrace(t));
+            resp.setStatus(resp.SC_BAD_REQUEST);
+            return;
         }
 
         Event event = simStore.newEvent();

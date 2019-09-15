@@ -40,11 +40,12 @@
     <servlet-class>gov.nist.asbestos.asbestosProxy.servlet.ProxyServlet</servlet-class>
     <init-param>
       <param-name>ExternalCache</param-name>
-      <param-value>/home/bill/ec</param-value>
+      <param-value>/Users/bill/ec</param-value>
     </init-param>
     <init-param>
       <param-name>port</param-name>
-      <param-value>8081</param-value>
+      <param-value>8080</param-value>
+      <description>Not used yet - see ProxyServlet for details</description>
     </init-param>
     <load-on-startup>1</load-on-startup>
   </servlet>

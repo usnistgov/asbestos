@@ -79,18 +79,18 @@ public class ProxyLogServlet extends HttpServlet {
         // 4 - channelId
         // 3 - testSession
         if (uriParts.length == 8 && uriParts[6].equals("since")) {
-            List<ResourceId> ids = buildListOfEventIdsByResourceType(uriParts[3], uriParts[4]);
-            ids.sort(Comparator.reverseOrder());
-            List<String> results = new ArrayList<>();
-            String event = uriParts[7];
-            for (String id : ids) {
-                if (id.compareTo(event) > 0)
-                    results.add(id);
-                else
-                    break;
-            }
-            returnJsonList(resp, ids);
-            return;
+//            List<ResourceId> ids = buildListOfEventIdsByResourceType(uriParts[3], uriParts[4]);
+//            ids.sort(Comparator.reverseOrder());
+//            List<String> results = new ArrayList<>();
+//            String event = uriParts[7];
+//            for (String id : ids) {
+//                if (id.compareTo(event) > 0)
+//                    results.add(id);
+//                else
+//                    break;
+//            }
+//            returnJsonList(resp, ids);
+//            return;
         }
 
         // 6 - event

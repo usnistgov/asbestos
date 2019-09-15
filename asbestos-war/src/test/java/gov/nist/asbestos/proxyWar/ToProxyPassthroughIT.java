@@ -85,11 +85,11 @@ class ToProxyPassthroughIT {
                 .setFhirBase("http://localhost:" + fhirPort + "/fhir/fhir");
         String json = ChannelConfigFactory.convert(channelConfig);
         HttpPost poster = new HttpPost();
-        poster.postJson(new URI("http://localhost:" + proxyPort + "/proxy/channel"), json);
+        poster.postJson(new URI("http://localhost:" + proxyPort + "/asbestos/channel"), json);
         int status = poster.getStatus();
         if (!(status == 200 || status == 201))
             fail("200 or 201 required - returned " + status);
-        return "http://localhost:" + proxyPort + "/proxy/fhir/" + testSession + "__" + channelId;
+        return "http://localhost:" + proxyPort + "/asbestos/proxy/" + testSession + "__" + channelId;
     }
 
 }

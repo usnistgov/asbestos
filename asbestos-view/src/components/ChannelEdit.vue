@@ -192,14 +192,14 @@
             },
             deleteChannel() {
                 const that = this
-                PROXY.delete('channel/' + this.channelId())
+                PROXY.delete('channel/' + this.sessionId + '__' + this.channelId)
                     .then(function () {
                         that.msg('Deleted')
                     })
                     .catch(function (error) {
                         that.error(error)
                     })
-                this.$store.commit('deleteChannel', this.channelId())
+                this.$store.commit('deleteChannel', this.channelId)
                 this.$router.push('/session/' + this.sessionId + '/channels')
             },
             toggleEdit() {
