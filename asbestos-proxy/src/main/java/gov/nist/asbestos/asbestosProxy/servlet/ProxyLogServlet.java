@@ -1,12 +1,19 @@
 package gov.nist.asbestos.asbestosProxy.servlet;
 
 import com.google.gson.Gson;
+import gov.nist.asbestos.asbestosProxy.channel.ChannelControl;
+import gov.nist.asbestos.asbestosProxy.event.Event;
+import gov.nist.asbestos.asbestosProxy.event.EventSummary;
+import gov.nist.asbestos.asbestosProxy.event.Reader;
 import gov.nist.asbestos.http.headers.Header;
 import gov.nist.asbestos.http.headers.Headers;
 import gov.nist.asbestos.http.operations.Verb;
 import gov.nist.asbestos.http.support.Common;
+import gov.nist.asbestos.sharedObjects.ChannelConfig;
 import gov.nist.asbestos.simapi.tk.installation.Installation;
+import gov.nist.asbestos.testEngine.engine.TestEngine;
 import org.apache.log4j.Logger;
+import org.hl7.fhir.r4.model.TestReport;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -15,9 +22,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -29,7 +36,9 @@ public class ProxyLogServlet extends HttpServlet {
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
         // TODO put EC location in web.xml
-        setExternalCache(new File("/home/bill/ec"));
+        String ec = (String) config.getServletContext().getAttribute("ExternalCache");
+        log.info("EC is " + ec);
+        setExternalCache(new File(ec));
     }
 
     public void setExternalCache(File externalCache) {
@@ -37,8 +46,15 @@ public class ProxyLogServlet extends HttpServlet {
         Installation.instance().setExternalCache(externalCache);
     }
 
+    boolean htmlOk;
+    boolean jsonOk;
+    HttpServletRequest req;
+    HttpServletResponse resp;
+
     @Override
     public void doGet(HttpServletRequest req, HttpServletResponse resp) {
+        this.req = req;
+        this.resp = resp;
         if (externalCache == null) {
             resp.setStatus(resp.SC_INTERNAL_SERVER_ERROR);
             return;
@@ -48,8 +64,8 @@ public class ProxyLogServlet extends HttpServlet {
 
         Headers headers = Common.getRequestHeaders(req, Verb.GET);
         Header acceptHeader = headers.getAccept();
-        boolean htmlOk = acceptHeader.getValue().contains("text/html");
-        boolean jsonOk = acceptHeader.getValue().contains("json");
+        htmlOk = acceptHeader.getValue().contains("text/html");
+        jsonOk = acceptHeader.getValue().contains("json");
 
         // uri should be
         // testSession/channelId/resourcetype/event
@@ -72,39 +88,28 @@ public class ProxyLogServlet extends HttpServlet {
         // since event
         // return next event after this one (wait for it if you must)
         // wait may time out and return 404
+        // when event is in hand eval against testCollectionId/testId
 
         // 7 - event
         // 6 - "since"
         // 5 - resourceType - may be null
         // 4 - channelId
         // 3 - testSession
-        if (uriParts.length == 8 && uriParts[6].equals("since")) {
-//            List<ResourceId> ids = buildListOfEventIdsByResourceType(uriParts[3], uriParts[4]);
-//            ids.sort(Comparator.reverseOrder());
-//            List<String> results = new ArrayList<>();
-//            String event = uriParts[7];
-//            for (String id : ids) {
-//                if (id.compareTo(event) > 0)
-//                    results.add(id);
-//                else
-//                    break;
-//            }
-//            returnJsonList(resp, ids);
-//            return;
+        if ((uriParts.length == 8 || uriParts.length == 7) && uriParts[6].equals("since")) {
+            String eventId = (uriParts.length == 8) ? uriParts[7] : null;
+            String testSession = uriParts[3];
+            String channelId = uriParts[4];
+            waitForEvent(testSession, channelId, eventId);
+            return;
         }
 
         // 6 - event
         // 5 - resourceType - may be null
         // 4 - channelId
         // 3 - testSession
-        if (uriParts.length == 7) {  // includes event
-            if (jsonOk) {
-                buildJsonListingOfEvent(resp, uriParts[3], uriParts[4], uriParts[5], uriParts[6]);
-                return;
-            } else if (htmlOk) {
-                buildFullHtmlListing(resp, uriParts);
-                return;
-            }
+        if (uriParts.length == 7 && jsonOk) {  // includes event
+            getEvent(uriParts[3], uriParts[4], uriParts[5], uriParts[6]);
+            return;
         }
         if (uriParts.length == 6 && jsonOk) {  // includes resourceType
             // JSON listing of events in resourceType
@@ -112,16 +117,94 @@ public class ProxyLogServlet extends HttpServlet {
             return;
         }
         if (uriParts.length == 5 && jsonOk) {  // includes channelId
-            String query = req.getQueryString();
-            if (query != null && query.contains("summaries=true")) {
-                buildJsonListingOfEventSummaries(resp, uriParts[3], uriParts[4]);
-                return;
-            }
-            // JSON listing of resourceTypes in channelId
-            buildJsonListingOfResourceTypes(resp, uriParts[3], uriParts[4]);
+            getEvents(uriParts[3], uriParts[4]);
             return;
         }
+        resp.setStatus(resp.SC_BAD_REQUEST);
+    }
 
+    private Event waitForEvent() {
+
+    }
+
+    class EventAndTestReport {
+        Event event;
+        TestReport testReport;
+    }
+
+    private void waitForEvent(String testSession, String channelId, String eventId, String collectionId, String testId) {
+        ChannelConfig channelConfig = ChannelControl.channelConfigFromChannelId(externalCache, channelId);
+        Event event;
+        if (eventId == null) {
+            event = waitForEvent();
+        } else {
+            // return event after eventId - wait if necessary
+            List<ResourceId> ids = buildListOfEventIdsByResourceType(testSession, channelId);
+            // sort ids - in date order
+            for (ResourceId id : ids) {
+                if (id.id.compareTo(eventId) > 0) {
+                    // first event AFTER eventId timestamp
+                    event = getEvent(testSession, channelId, id.id);
+                    TestReport testReport = null;  // needs to be run
+                    try {
+                        testReport = runEvaluation(testSession, channelId, collectionId, testId, new URI(channelConfig.getFhirBase()));
+                    } catch (URISyntaxException e) {
+                        throw new RuntimeException(e);
+                    }
+                    returnEvent(event, testReport);
+                    return;
+                }
+            }
+            // not found in logs - wait for it
+            event = waitForEvent();
+        }
+        TestReport testReport = runEvaluation(testSession, channelId, collectionId, testId, event.id);  // needs to be run
+        returnEvent(event, testReport);
+    }
+
+    // TestScripts for client testing are called evaluations here
+    private TestReport runEvaluation(String testSesssion, String channelId, String collectionId, String testId) {
+        TestEngine testEngine = new TestEngine(
+                getTestDefinition(testSesssion, channelId, collectionId, testId),
+                sut
+        );
+        testEngine.runTest();
+        return testEngine.getTestReport();
+    }
+
+    private File getTestDefinition(String testSesssion, String channelId, String collectionId, String testId) {
+        String pathTo = String.format("%s/%s/%s", externalCache.toString(), collectionId, testId);
+        return new File(pathTo);
+    }
+
+    private void returnEvent(Event event, TestReport testReport) {
+        EventAndTestReport eAndR = new EventAndTestReport();
+        String json = new Gson().toJson(eAndR);
+        resp.setContentType("application/json");
+        try {
+            resp.getOutputStream().print(json);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        resp.setStatus(resp.SC_OK);
+    }
+
+    private void getEvents(String testSession, String channelId) {
+        String query = req.getQueryString();
+        if (query != null && query.contains("summaries=true")) {
+            buildJsonListingOfEventSummaries(resp, testSession, channelId);
+            return;
+        }
+        // JSON listing of resourceTypes in channelId
+        buildJsonListingOfResourceTypes(resp, testSession, channelId);
+    }
+
+    private void getEvent(String testSession, String channelId, String resourceType, String eventId) {
+        if (jsonOk) {
+            buildJsonListingOfEvent(resp, testSession, channelId, resourceType, eventId);
+        } else if (htmlOk) {
+            buildFullHtmlListing(testSession, channelId, resourceType, eventId);
+        }
         resp.setStatus(resp.SC_BAD_REQUEST);
     }
 
@@ -189,90 +272,19 @@ public class ProxyLogServlet extends HttpServlet {
         return contents;
     }
 
-    private List<String> dirListingAsStringList(File dir) {
-        List<String> contents = new ArrayList<>();
-
-        File[] files = dir.listFiles();
-        if (files != null) {
-            for (File file : files) {
-                if (!file.isDirectory()) continue;
-                if (file.getName().startsWith(".")) continue;
-                if (file.getName().startsWith("_")) continue;
-                contents.add(file.getName());
-            }
-            contents = contents.stream().sorted().collect(Collectors.toList());
-        }
-
-        return contents;
-    }
-
-    class Task {
-        int index;
-        String label;
-        String description;
-        String requestHeader;
-        String requestBody;
-        String responseHeader;
-        String responseBody;
-
-        Task(File eventDir, String taskLabel) {
-            description = read(eventDir, taskLabel, "description.txt");
-            requestHeader = read(eventDir, taskLabel, "request_header.txt");
-            requestBody = read(eventDir, taskLabel, "request_body.txt");
-            responseHeader = read(eventDir, taskLabel, "response_header.txt");
-            responseBody = read(eventDir, taskLabel, "response_body.txt");
-        }
-    }
-
-    class EventSummary {
-        String eventName;
-        String resourceType;
-        String verb;
-        boolean status;
-
-        EventSummary(File eventFile) {
-            try {
-                String responseHeader = read(eventFile, "task0", "response_header.txt");
-                Headers headers = new Headers(responseHeader);
-                status = headers.getStatus() < 202;
-                String requestHeader = read(eventFile, "task0", "request_header.txt");
-                headers = new Headers(requestHeader);
-                verb = headers.getVerb();
-            } catch (Exception e) {
-                status = false;
-            }
-        }
-    }
-
-    class Event {
-        String eventName;
-        String resourceType;
-        List<Task> tasks = new ArrayList<>();
-
-        Event(File eventDir) {
-            List<String> parts = dirListingAsStringList(eventDir);
-            int i = 0;
-            for (String part : parts) {
-                Task task = new Task(eventDir, part);
-                task.label = part;
-                task.index = i++;
-                tasks.add(task);
-            }
-        }
-    }
 
     private void buildJsonListingOfEventSummaries(HttpServletResponse resp, String testSession, String channelId) {
         File fhir = fhirDir(testSession, channelId);
-        List<String> resourceTypes = dirListingAsStringList(fhir);
+        List<String> resourceTypes = Reader.dirListingAsStringList(fhir);
         List<EventSummary> eventSummaries = new ArrayList<>();
         for (String resourceType : resourceTypes) {
             File resourceDir = new File(fhir, resourceType);
-            List<String> eventIds = dirListingAsStringList(resourceDir);
+            List<String> eventIds = Reader.dirListingAsStringList(resourceDir);
             for (String eventId : eventIds) {
                 File eventFile = new File(resourceDir, eventId);
                 EventSummary summary = new EventSummary(eventFile);
-                summary.resourceType = resourceType;
-                summary.eventName = eventId;
+                summary.setResourceType(resourceType);
+                summary.setEventName(eventId);
                 eventSummaries.add(summary);
             }
         }
@@ -285,6 +297,22 @@ public class ProxyLogServlet extends HttpServlet {
         }
 
         resp.setStatus(resp.SC_OK);
+    }
+
+    private Event getEvent(String testSession, String channelId, String eventId) {
+        File fhir = fhirDir(testSession, channelId);
+        String resourceType;
+        resourceType = resourceTypeForEvent(fhir, eventId);
+        if (resourceType == null)
+            return null;
+
+        File resourceTypeFile = new File(fhir, resourceType);
+        File eventDir = new File(resourceTypeFile, eventId);
+
+        Event event = new Event(eventDir);
+        event.setEventName(eventId);
+        event.setResourceType(resourceType);
+        return event;
     }
 
     private void buildJsonListingOfEvent(HttpServletResponse resp, String testSession, String channelId, String resourceType, String eventName) {
@@ -300,8 +328,8 @@ public class ProxyLogServlet extends HttpServlet {
         File eventDir = new File(resourceTypeFile, eventName);
 
         Event event = new Event(eventDir);
-        event.eventName = eventName;
-        event.resourceType = resourceType;
+        event.setEventName(eventName);
+        event.setResourceType(resourceType);
 
         String json = new Gson().toJson(event);
         resp.setContentType("application/json");
@@ -331,7 +359,7 @@ public class ProxyLogServlet extends HttpServlet {
         return null;
     }
 
-    private void returnJsonList(HttpServletResponse resp, List<String> theList) {
+    private void returnJsonList(HttpServletResponse resp, List<?> theList) {
         String json = new Gson().toJson(theList);
         resp.setContentType("application/json");
         try {
@@ -343,12 +371,7 @@ public class ProxyLogServlet extends HttpServlet {
         resp.setStatus(resp.SC_OK);
     }
 
-    private void buildFullHtmlListing(HttpServletResponse resp, String[] uriParts) {
-        String testSession = uriParts[3];
-        String channelId = uriParts[4];
-        String resourcetype = uriParts[5];
-        String event = uriParts[6];
-
+    private void buildFullHtmlListing(String testSession, String channelId, String resourcetype, String event) {
         File psimdb = new File(externalCache, "psimdb");
         File testSessionFile = new File(psimdb, testSession);
         File channelFile = new File(testSessionFile, channelId);
@@ -386,41 +409,19 @@ public class ProxyLogServlet extends HttpServlet {
     private void displayEvent(StringBuilder b, File theEvent, String label) {
         String section = label.toLowerCase();
         b.append("<h2>").append(label).append("</h2>");
-        String description = read(theEvent, section, "description.txt");
+        String description = Reader.read(theEvent, section, "description.txt");
         if (!description.equals("")) {
             b.append("<h4>Description</h4>");
             b.append("<pre>").append(description).append("</pre>");
         }
         b.append("<h3>Request</h3>");
-        b.append("<pre>").append(read(theEvent, section, "request_header.txt")).append("</pre>");
-        b.append("<pre>").append(read(theEvent, section, "request_body.txt")).append("</pre>");
+        b.append("<pre>").append(Reader.read(theEvent, section, "request_header.txt")).append("</pre>");
+        b.append("<pre>").append(Reader.read(theEvent, section, "request_body.txt")).append("</pre>");
 
         b.append("<h3>Response</h3>");
-        b.append("<pre>").append(read(theEvent, section, "response_header.txt")).append("</pre>");
-        b.append("<pre>").append(read(theEvent, section, "response_body.txt")).append("</pre>");
+        b.append("<pre>").append(Reader.read(theEvent, section, "response_header.txt")).append("</pre>");
+        b.append("<pre>").append(Reader.read(theEvent, section, "response_body.txt")).append("</pre>");
     }
 
-    private String read(File theEvent, String theSection, String thePart) {
-        File file = new File(new File(theEvent, theSection), thePart);
-        if (!file.exists() || !file.canRead()) {
-            String fileSt = file.toString();
-            if (fileSt.endsWith(".txt")) {
-                fileSt = fileSt.replace(".txt", ".bin");
-                file = new File(fileSt);
-            }
-            if (!file.exists() || !file.canRead()) {
-                return "";
-            }
-        }
-
-        try {
-            String content = new String(Files.readAllBytes(file.toPath()));
-            content = content.replaceAll("<", "&lt;");
-            return content;
-        } catch (Exception e) {
-            ;
-        }
-        return "";
-    }
 
 }

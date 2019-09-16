@@ -205,7 +205,7 @@ public class SimStore {
     }
 
     public Event newEvent() {
-        return new Event(this, createEventDir());
+        return new Event(createEventDir());
     }
 
     // on some machines this is important to prevent hangs

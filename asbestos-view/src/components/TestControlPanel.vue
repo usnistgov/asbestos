@@ -5,7 +5,7 @@
         <div v-else>
             <div class="control-panel-item-title" @click="openCollection()">Collection</div>
             <b-form-select v-model="collection" :options="collections"></b-form-select>
-            <div class="control-panel-item-title" @click="selectIndividual()">Instance</div>
+            <div class="control-panel-item-title" @click="selectIndividual()">Tests</div>
             <b-form-select v-model="testId" :options="testIds"></b-form-select>
         </div>
     </div>

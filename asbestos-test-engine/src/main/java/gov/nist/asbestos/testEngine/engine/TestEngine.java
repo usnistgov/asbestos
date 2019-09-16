@@ -4,6 +4,7 @@ import ca.uhn.fhir.parser.IParser;
 import gov.nist.asbestos.client.Base.ProxyBase;
 import gov.nist.asbestos.client.client.FhirClient;
 import gov.nist.asbestos.client.client.Format;
+import gov.nist.asbestos.client.events.Event;
 import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.client.resolver.ResourceCacheMgr;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
@@ -30,6 +31,7 @@ import java.util.*;
 public class TestEngine  {
     private File testDef = null;
     private URI sut = null;
+    private Event event = null;
     private TestScript testScript = null;
     private FixtureMgr fixtureMgr = new FixtureMgr();
     private Val val;
@@ -57,6 +59,13 @@ public class TestEngine  {
         fhirClientForFixtures = new FhirClient().setResourceCacheMgr(inTestResources);
     }
 
+    public TestEngine(File testDef, Event event) {
+        Objects.requireNonNull(testDef);
+        Objects.requireNonNull(event);
+        this.testDef = testDef;
+        this.event = event;
+    }
+
     public TestEngine setTestSession(String testSession) {
         this.testSession = testSession;
         return this;
@@ -67,7 +76,11 @@ public class TestEngine  {
         return this;
     }
 
-    public TestEngine run() {
+    public TestEngine runEval() {
+
+    }
+
+    public TestEngine runTest() {
         Objects.requireNonNull(val);
         engineVal = new ValE(val);
         engineVal.setMsg("TestEngine");

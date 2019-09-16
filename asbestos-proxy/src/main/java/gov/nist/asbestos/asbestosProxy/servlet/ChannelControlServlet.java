@@ -1,6 +1,7 @@
 package gov.nist.asbestos.asbestosProxy.servlet;
 
 import com.google.gson.Gson;
+import gov.nist.asbestos.asbestosProxy.channel.ChannelControl;
 import gov.nist.asbestos.client.log.SimStore;
 import gov.nist.asbestos.http.support.Common;
 import gov.nist.asbestos.sharedObjects.ChannelConfig;
@@ -116,7 +117,7 @@ public class ChannelControlServlet extends HttpServlet {
                 ChannelConfig channelConfig;
 
                 try {
-                    channelConfig = channelConfigFromChannelId(externalCache, channelId);
+                    channelConfig = ChannelControl.channelConfigFromChannelId(externalCache, channelId);
                 } catch (Throwable e) {
                     resp.setStatus(resp.SC_NOT_FOUND);
                     return;
@@ -140,12 +141,6 @@ public class ChannelControlServlet extends HttpServlet {
         }
     }
 
-    static public ChannelConfig channelConfigFromChannelId(File externalCache, String channelId) {
-        SimId simId = SimId.buildFromRawId(channelId);
-        SimStore simStore = new SimStore(externalCache, simId);
-        simStore.open();
-        return simStore.getChannelConfig();
-    }
 
     @Override
     public void doDelete(HttpServletRequest req, HttpServletResponse resp) {

@@ -396,7 +396,7 @@ public class TestEngineServlet extends HttpServlet {
                         .setExternalCache(externalCache)
                         .setVal(new Val())
                         .setFhirClient(new FhirClient())
-                        .run()
+                        .runTest()
                         .getTestReport();
 
             } catch (Throwable t) {

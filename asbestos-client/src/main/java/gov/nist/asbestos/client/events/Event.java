@@ -13,14 +13,14 @@ import java.util.List;
  * to satisfy that request.
  */
 public class Event {
-    private SimStore simStore;
+    //private SimStore simStore;
     private File eventDir;
     private List<File> taskFiles = new ArrayList<>();
     private List<Task> tasks = new ArrayList<>();
     public static final int NEWTASK = -1;
 
-    public Event(SimStore simStore, File eventDir) {
-        this.simStore = simStore;
+    public Event(File eventDir) {
+        //this.simStore = simStore;
         this.eventDir = eventDir;
 
         // load task references

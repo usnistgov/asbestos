@@ -7,7 +7,6 @@ import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import gov.nist.asbestos.http.operations.HttpGet;
 import gov.nist.asbestos.http.operations.HttpPost;
 import gov.nist.asbestos.simapi.validation.Val;
-import gov.nist.asbestos.testEngine.engine.TestEngine;
 import org.hl7.fhir.r4.model.BaseResource;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Patient;
@@ -57,7 +56,7 @@ class SutTest {
                 .setVal(val)
                 .setFhirClient(fhirClientMock)
                 .setSut(new URI("http://localhost:9999/fhir"))
-                .run();
+                .runTest();
         System.out.println(testEngine.getTestReportAsJson());
         List<String> errors = testEngine.getErrors();
         printErrors(errors);
@@ -96,7 +95,7 @@ class SutTest {
                 .setVal(val)
                 .setFhirClient(fhirClientMock)
                 .setSut(new URI("http://localhost:9999/fhir"))
-                .run();
+                .runTest();
         System.out.println(testEngine.getTestReportAsJson());
         List<String> errors = testEngine.getErrors();
         printErrors(errors);
@@ -135,7 +134,7 @@ class SutTest {
                 .setVal(val)
                 .setFhirClient(fhirClientMock)
                 .setSut(new URI("http://localhost:9999/fhir"))
-                .run();
+                .runTest();
         System.out.println(testEngine.getTestReportAsJson());
         List<String> errors = testEngine.getErrors();
         printErrors(errors);
@@ -174,7 +173,7 @@ class SutTest {
                 .setVal(val)
                 .setFhirClient(fhirClientMock)
                 .setSut(new URI("http://localhost:9999/fhir"))
-                .run();
+                .runTest();
         System.out.println(testEngine.getTestReportAsJson());
         List<String> errors = testEngine.getErrors();
         printErrors(errors);
@@ -213,7 +212,7 @@ class SutTest {
                 .setVal(val)
                 .setFhirClient(fhirClientMock)
                 .setSut(new URI("http://localhost:9999/fhir"))
-                .run();
+                .runTest();
         System.out.println(testEngine.getTestReportAsJson());
         List<String> errors = testEngine.getErrors();
         printErrors(errors);
@@ -258,7 +257,7 @@ class SutTest {
                 .setVal(val)
                 .setFhirClient(fhirClientMock)
                 .setSut(new URI("http://localhost:9999/fhir"))
-                .run();
+                .runTest();
         System.out.println(testEngine.getTestReportAsJson());
         List<String> errors = testEngine.getErrors();
         printErrors(errors);
