@@ -77,8 +77,8 @@
                     </div>
                     <div v-else class="grid-item">{{ channel.environment }}</div>
 
-                    <label class="grid-name">Actor Type</label>
-                    <div class="grid-item">{{ channel.actorType }}</div>
+<!--                    <label class="grid-name">Actor Type</label>-->
+<!--                    <div class="grid-item">{{ channel.actorType }}</div>-->
 
                     <label class="grid-name">Channel Type</label>
                     <div v-if="edit" class="grid-item">
