@@ -17,7 +17,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -206,7 +205,7 @@ public class ProxyLogServlet extends HttpServlet {
         return contents;
     }
 
-    class Task {
+    class UiTask {
         int index;
         String label;
         String description;
@@ -215,7 +214,7 @@ public class ProxyLogServlet extends HttpServlet {
         String responseHeader;
         String responseBody;
 
-        Task(File eventDir, String taskLabel) {
+        UiTask(File eventDir, String taskLabel) {
             description = read(eventDir, taskLabel, "description.txt");
             requestHeader = read(eventDir, taskLabel, "request_header.txt");
             requestBody = read(eventDir, taskLabel, "request_body.txt");
@@ -244,19 +243,19 @@ public class ProxyLogServlet extends HttpServlet {
         }
     }
 
-    class Event {
+    class UiEvent {
         String eventName;
         String resourceType;
-        List<Task> tasks = new ArrayList<>();
+        List<UiTask> uiTasks = new ArrayList<>();
 
-        Event(File eventDir) {
+        UiEvent(File eventDir) {
             List<String> parts = dirListingAsStringList(eventDir);
             int i = 0;
             for (String part : parts) {
-                Task task = new Task(eventDir, part);
-                task.label = part;
-                task.index = i++;
-                tasks.add(task);
+                UiTask uiTask = new UiTask(eventDir, part);
+                uiTask.label = part;
+                uiTask.index = i++;
+                uiTasks.add(uiTask);
             }
         }
     }
@@ -299,11 +298,11 @@ public class ProxyLogServlet extends HttpServlet {
         File resourceTypeFile = new File(fhir, resourceType);
         File eventDir = new File(resourceTypeFile, eventName);
 
-        Event event = new Event(eventDir);
-        event.eventName = eventName;
-        event.resourceType = resourceType;
+        UiEvent uiEvent = new UiEvent(eventDir);
+        uiEvent.eventName = eventName;
+        uiEvent.resourceType = resourceType;
 
-        String json = new Gson().toJson(event);
+        String json = new Gson().toJson(uiEvent);
         resp.setContentType("application/json");
         try {
             resp.getOutputStream().print(json);
