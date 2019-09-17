@@ -29,7 +29,7 @@ public class ProxyLogServlet extends HttpServlet {
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
         // TODO put EC location in web.xml
-        setExternalCache(new File("/home/bill/ec"));
+        setExternalCache(new File("/Users/bill/ec"));
     }
 
     public void setExternalCache(File externalCache) {
