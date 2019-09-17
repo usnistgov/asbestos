@@ -88,6 +88,12 @@ public class Event {
         return eventDir;
     }
 
+    public String getEventId() {
+        if (eventDir == null)
+            return null;
+        return eventDir.getName();
+    }
+
     public File getRequestHeaderFile(int i) { return new File(taskFiles.get(i), "request_header.txt"); }
      File getRequestBodyFile(int i) { return new File(taskFiles.get(i), "request_body.bin"); }
      File getRequestBodyStringFile(int i) {  return new File(taskFiles.get(i), "request_body.txt"); }

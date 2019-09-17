@@ -2,7 +2,8 @@ package gov.nist.asbestos.asbestosProxy.servlet;
 
 import com.google.gson.Gson;
 import gov.nist.asbestos.asbestosProxy.channel.ChannelControl;
-import gov.nist.asbestos.asbestosProxy.event.Event;
+import gov.nist.asbestos.asbestosProxy.channel.ChannelRelay;
+import gov.nist.asbestos.asbestosProxy.event.UIEvent;
 import gov.nist.asbestos.asbestosProxy.event.EventSummary;
 import gov.nist.asbestos.asbestosProxy.event.Reader;
 import gov.nist.asbestos.http.headers.Header;
@@ -22,8 +23,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -123,20 +122,17 @@ public class ProxyLogServlet extends HttpServlet {
         resp.setStatus(resp.SC_BAD_REQUEST);
     }
 
-    private Event waitForEvent() {
-
-    }
-
     class EventAndTestReport {
-        Event event;
+        UIEvent UIEvent;
         TestReport testReport;
     }
 
     private void waitForEvent(String testSession, String channelId, String eventId, String collectionId, String testId) {
         ChannelConfig channelConfig = ChannelControl.channelConfigFromChannelId(externalCache, channelId);
-        Event event;
+        File eventDir = eventId == null ? null : getEventDir(testSession, channelId, eventId);
+        UIEvent uiEvent;
         if (eventId == null) {
-            event = waitForEvent();
+            eventDir = ChannelRelay.waitForEvent(channelId);
         } else {
             // return event after eventId - wait if necessary
             List<ResourceId> ids = buildListOfEventIdsByResourceType(testSession, channelId);
@@ -144,31 +140,26 @@ public class ProxyLogServlet extends HttpServlet {
             for (ResourceId id : ids) {
                 if (id.id.compareTo(eventId) > 0) {
                     // first event AFTER eventId timestamp
-                    event = getEvent(testSession, channelId, id.id);
-                    TestReport testReport = null;  // needs to be run
-                    try {
-                        testReport = runEvaluation(testSession, channelId, collectionId, testId, new URI(channelConfig.getFhirBase()));
-                    } catch (URISyntaxException e) {
-                        throw new RuntimeException(e);
-                    }
-                    returnEvent(event, testReport);
+                    uiEvent = getEvent(testSession, channelId, id.id);
+                    TestReport testReport = runEvaluation(testSession, channelId, collectionId, testId, eventDir);
+                    returnEvent(uiEvent, testReport);
                     return;
                 }
             }
             // not found in logs - wait for it
-            event = waitForEvent();
+            eventDir = ChannelRelay.waitForEvent(channelId);
         }
-        TestReport testReport = runEvaluation(testSession, channelId, collectionId, testId, event.id);  // needs to be run
-        returnEvent(event, testReport);
+        TestReport testReport = runEvaluation(testSession, channelId, collectionId, testId, eventDir);  // needs to be run
+        returnEvent(uiEvent, testReport);
     }
 
     // TestScripts for client testing are called evaluations here
-    private TestReport runEvaluation(String testSesssion, String channelId, String collectionId, String testId) {
+    private TestReport runEvaluation(String testSesssion, String channelId, String collectionId, String testId, File eventDir) {
         TestEngine testEngine = new TestEngine(
                 getTestDefinition(testSesssion, channelId, collectionId, testId),
-                sut
+                eventDir
         );
-        testEngine.runTest();
+        testEngine.runEval();
         return testEngine.getTestReport();
     }
 
@@ -177,7 +168,7 @@ public class ProxyLogServlet extends HttpServlet {
         return new File(pathTo);
     }
 
-    private void returnEvent(Event event, TestReport testReport) {
+    private void returnEvent(UIEvent UIEvent, TestReport testReport) {
         EventAndTestReport eAndR = new EventAndTestReport();
         String json = new Gson().toJson(eAndR);
         resp.setContentType("application/json");
@@ -299,7 +290,8 @@ public class ProxyLogServlet extends HttpServlet {
         resp.setStatus(resp.SC_OK);
     }
 
-    private Event getEvent(String testSession, String channelId, String eventId) {
+
+    private File getEventDir(String testSession, String channelId, String eventId) {
         File fhir = fhirDir(testSession, channelId);
         String resourceType;
         resourceType = resourceTypeForEvent(fhir, eventId);
@@ -307,12 +299,22 @@ public class ProxyLogServlet extends HttpServlet {
             return null;
 
         File resourceTypeFile = new File(fhir, resourceType);
-        File eventDir = new File(resourceTypeFile, eventId);
+        return new File(resourceTypeFile, eventId);
+    }
 
-        Event event = new Event(eventDir);
-        event.setEventName(eventId);
-        event.setResourceType(resourceType);
-        return event;
+    private UIEvent getEvent(String testSession, String channelId, String eventId) {
+        File fhir = fhirDir(testSession, channelId);
+        String resourceType;
+        resourceType = resourceTypeForEvent(fhir, eventId);
+        if (resourceType == null)
+            return null;
+
+        File eventDir = getEventDir(testSession, channelId, eventId);
+
+        UIEvent UIEvent = new UIEvent(eventDir);
+        UIEvent.setEventName(eventId);
+        UIEvent.setResourceType(resourceType);
+        return UIEvent;
     }
 
     private void buildJsonListingOfEvent(HttpServletResponse resp, String testSession, String channelId, String resourceType, String eventName) {
@@ -327,11 +329,11 @@ public class ProxyLogServlet extends HttpServlet {
         File resourceTypeFile = new File(fhir, resourceType);
         File eventDir = new File(resourceTypeFile, eventName);
 
-        Event event = new Event(eventDir);
-        event.setEventName(eventName);
-        event.setResourceType(resourceType);
+        UIEvent UIEvent = new UIEvent(eventDir);
+        UIEvent.setEventName(eventName);
+        UIEvent.setResourceType(resourceType);
 
-        String json = new Gson().toJson(event);
+        String json = new Gson().toJson(UIEvent);
         resp.setContentType("application/json");
         try {
             resp.getOutputStream().print(json);

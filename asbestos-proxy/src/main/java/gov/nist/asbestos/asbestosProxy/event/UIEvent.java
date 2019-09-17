@@ -1,24 +1,22 @@
 package gov.nist.asbestos.asbestosProxy.event;
 
-import gov.nist.asbestos.asbestosProxy.servlet.ProxyLogServlet;
-
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Event {
-    String eventName;
-    String resourceType;
-    List<Task> tasks = new ArrayList<>();
+public class UIEvent {
+    private String eventName;
+    private String resourceType;
+    private List<UITask> tasks = new ArrayList<>();
 
-    public Event(File eventDir) {
+    public UIEvent(File eventDir) {
         List<String> parts = Reader.dirListingAsStringList(eventDir);
         int i = 0;
         for (String part : parts) {
-            Task task = new Task(eventDir, part);
-            task.setLabel(part);
-            task.setIndex(i++);
-            tasks.add(task);
+            UITask uiTask = new UITask(eventDir, part);
+            uiTask.setLabel(part);
+            uiTask.setIndex(i++);
+            tasks.add(uiTask);
         }
     }
 

@@ -34,6 +34,10 @@ public abstract class BaseChannel implements IBaseChannel {
         this.hostport = hostport;
     }
 
+    public String getChannelId() {
+        return channelConfig.getChannelId();
+    }
+
     @Override
     public void setup(ChannelConfig simConfig) {
         this.channelConfig = simConfig;

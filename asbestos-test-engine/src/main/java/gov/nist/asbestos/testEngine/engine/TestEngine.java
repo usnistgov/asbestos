@@ -17,12 +17,9 @@ import org.hl7.fhir.r4.model.TestReport;
 import org.hl7.fhir.r4.model.TestScript;
 
 import java.io.*;
-import java.net.Proxy;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.*;
 
 /**
@@ -59,11 +56,11 @@ public class TestEngine  {
         fhirClientForFixtures = new FhirClient().setResourceCacheMgr(inTestResources);
     }
 
-    public TestEngine(File testDef, Event event) {
+    public TestEngine(File testDef, File eventFile) {
         Objects.requireNonNull(testDef);
-        Objects.requireNonNull(event);
+        Objects.requireNonNull(eventFile);
         this.testDef = testDef;
-        this.event = event;
+        this.event = new Event(eventFile);
     }
 
     public TestEngine setTestSession(String testSession) {
@@ -77,15 +74,11 @@ public class TestEngine  {
     }
 
     public TestEngine runEval() {
-
-    }
-
-    public TestEngine runTest() {
         Objects.requireNonNull(val);
         engineVal = new ValE(val);
         engineVal.setMsg("TestEngine");
         try {
-            doWorkflow();
+            doEvalWorkflow();
         } catch (Throwable t) {
             String trace = ExceptionUtils.getStackTrace(t);
             TestReport.TestReportSetupComponent setup = testReport.getSetup();
@@ -113,7 +106,40 @@ public class TestEngine  {
         return this;
     }
 
-    private void doWorkflow() {
+    public TestEngine runTest() {
+        Objects.requireNonNull(val);
+        engineVal = new ValE(val);
+        engineVal.setMsg("TestEngine");
+        try {
+            doTestWorkflow();
+        } catch (Throwable t) {
+            String trace = ExceptionUtils.getStackTrace(t);
+            TestReport.TestReportSetupComponent setup = testReport.getSetup();
+            TestReport.SetupActionComponent comp = setup.addAction();
+            TestReport.SetupActionAssertComponent asComp = new TestReport.SetupActionAssertComponent();
+            asComp.setMessage(trace);
+            asComp.setResult(TestReport.TestReportActionResult.ERROR);
+            comp.setAssert(asComp);
+            propagateStatus(testReport);
+        }
+        if (testSession != null && externalCache != null) {
+            File logDir = new File(new File(externalCache, testSession), testDef.getName());
+            logDir.mkdirs();
+            TestReport testReport = getTestReport();
+            String json = ProxyBase.encode(testReport, Format.JSON);
+            Path path = new File(logDir, "TestReport.json").toPath();
+            try (BufferedWriter writer = Files.newBufferedWriter(path))
+            {
+                writer.write(json);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        return this;
+    }
+
+    private void doTestWorkflow() {
         testScript = loadTestScript();
         testReport.setName(testScript.getName());
         testReport.setTestScript(new Reference(testScript.getId()));
@@ -146,6 +172,24 @@ public class TestEngine  {
             doAutoDeletes();
             doPostProcessing();
         }
+    }
+
+    private void doEvalWorkflow() {
+        testScript = loadTestScript();
+        testReport.setName(testScript.getName());
+        testReport.setTestScript(new Reference(testScript.getId()));
+        testReport.setIssued(new Date());
+        TestReport.TestReportParticipantComponent part = testReport.addParticipant();
+        part.setType(TestReport.TestReportParticipantType.SERVER);
+        part.setUri(sut.toString());
+        part.setDisplay("NIST Asbestos Proxy");
+
+        part = testReport.addParticipant();
+        part.setType(TestReport.TestReportParticipantType.TESTENGINE);
+        part.setUri("https://github.com/usnistgov/asbestos");
+        part.setDisplay("NIST Asbestos TestEngine");
+
+        doTest();  // only asserts are enabled since sut is null
     }
 
     private boolean errorOut() {
@@ -375,6 +419,7 @@ public class TestEngine  {
 //    }
 
     private void doOperation(String typePrefix, TestScript.SetupActionOperationComponent operation, TestReport.SetupActionOperationComponent report) {
+        Objects.requireNonNull(sut);
         try {
             OperationRunner runner = new OperationRunner(fixtureMgr)
                     .setVal(new ValE(val).setMsg(typePrefix))

@@ -137,6 +137,8 @@ public class ProxyServlet extends HttpServlet {
         if (hostport == null || hostport.equals(""))
             hostport = "localhost:8080";
 
+        BaseChannel channel = null;
+
         try {
             if (!simStore.isChannel())
                 throw new Error("Proxy - POST of configuration data not allowed on " + uri);
@@ -146,7 +148,7 @@ public class ProxyServlet extends HttpServlet {
             if (channelType == null)
                 throw new Error("Sim " + simStore.getChannelId() + " does not define a Channel Type.");
             IChannelBuilder channelBuilder = proxyMap.get(channelType);
-            BaseChannel channel = channelBuilder.build();
+            channel = channelBuilder.build();
 
             channel.setup(simStore.getChannelConfig());
 
@@ -188,6 +190,9 @@ public class ProxyServlet extends HttpServlet {
         } catch (Throwable t) {
             respondWithError(req, resp, t, inHeaders, clientTask);
             resp.setStatus(resp.SC_OK);
+        } finally {
+            if (channel != null)
+                ChannelRelay.postEvent(channel.getChannelId(), event.getEventDir());
         }
     }
 
