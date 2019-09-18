@@ -2,7 +2,6 @@ package gov.nist.asbestos.testEngine.engine;
 
 import gov.nist.asbestos.client.client.FhirClient;
 import gov.nist.asbestos.simapi.validation.Val;
-import gov.nist.asbestos.testEngine.engine.TestEngine;
 import org.hl7.fhir.r4.model.TestReport;
 import org.hl7.fhir.r4.model.TestScript;
 import org.junit.jupiter.api.Test;
@@ -24,7 +23,7 @@ class AssertFixtureTest {
         File test1 = Paths.get(getClass().getResource("/setup/assertFixture/patientNameGood/TestScript.xml").toURI()).getParent().toFile();
         TestEngine testEngine = new TestEngine(test1, new URI(""))
                 .setVal(val)
-                .run();
+                .runTest();
         TestReport report = testEngine.getTestReport();
         List<String> errors = testEngine.getErrors();
         printErrors(errors);
@@ -43,7 +42,7 @@ class AssertFixtureTest {
         TestEngine testEngine = new TestEngine(test1, new URI(""))
                 .setVal(val)
                 .setFhirClient(new FhirClient())
-                .run();
+                .runTest();
         TestReport report = testEngine.getTestReport();
         List<String> errors = testEngine.getErrors();
         TestReport.TestReportResult result = report.getResult();
@@ -59,7 +58,7 @@ class AssertFixtureTest {
         TestEngine testEngine = new TestEngine(test1, new URI(""))
                 .setVal(val)
                 .setFhirClient(new FhirClient())
-                .run();
+                .runTest();
         TestReport report = testEngine.getTestReport();
         List<String> errors = testEngine.getErrors();
         printErrors(errors);
@@ -75,7 +74,7 @@ class AssertFixtureTest {
         TestEngine testEngine = new TestEngine(test1, new URI(""))
                 .setVal(val)
                 .setFhirClient(new FhirClient())
-                .run();
+                .runTest();
         TestReport report = testEngine.getTestReport();
         List<String> errors = testEngine.getErrors();
         printErrors(errors);
@@ -91,7 +90,7 @@ class AssertFixtureTest {
         TestEngine testEngine = new TestEngine(test1, new URI(""))
                 .setVal(val)
                 .setFhirClient(new FhirClient())
-                .run();
+                .runTest();
         TestReport report = testEngine.getTestReport();
         List<String> errors = testEngine.getErrors();
         printErrors(errors);
@@ -107,7 +106,7 @@ class AssertFixtureTest {
         TestEngine testEngine = new TestEngine(test1, new URI(""))
                 .setVal(val)
                 .setFhirClient(new FhirClient())
-                .run();
+                .runTest();
         TestReport report = testEngine.getTestReport();
         List<String> errors = testEngine.getErrors();
         printErrors(errors);
@@ -123,7 +122,7 @@ class AssertFixtureTest {
         TestEngine testEngine = new TestEngine(test1, new URI(""))
                 .setVal(val)
                 .setFhirClient(new FhirClient())
-                .run();
+                .runTest();
         TestReport report = testEngine.getTestReport();
         List<String> errors = testEngine.getErrors();
         printErrors(errors);

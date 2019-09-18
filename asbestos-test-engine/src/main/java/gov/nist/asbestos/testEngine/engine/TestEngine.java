@@ -11,6 +11,7 @@ import gov.nist.asbestos.simapi.validation.Val;
 import gov.nist.asbestos.simapi.validation.ValE;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.BaseResource;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.TestReport;
 import org.hl7.fhir.r4.model.TestScript;
@@ -57,6 +58,12 @@ public class TestEngine  {
         fhirClientForFixtures = new FhirClient().setResourceCacheMgr(inTestResources);
     }
 
+    // used for evaluation
+    public TestEngine(File testDef) {
+        Objects.requireNonNull(testDef);
+        this.testDef = testDef;
+    }
+
     public TestEngine setTestSession(String testSession) {
         this.testSession = testSession;
         return this;
@@ -67,12 +74,24 @@ public class TestEngine  {
         return this;
     }
 
-    public TestEngine run() {
+    public TestEngine runTest() {
+        return runTest(null);
+    }
+
+    // if inputResource == null then this is a test
+    // if null then this is an evaluation
+    public TestEngine runTest(BaseResource inputResource) {
         Objects.requireNonNull(val);
         engineVal = new ValE(val);
         engineVal.setMsg("TestEngine");
         try {
-            doWorkflow();
+            if (inputResource == null)
+                doWorkflow();
+            else {
+                fixtureMgr.put("request", new FixtureComponent(inputResource));
+                initWorkflow();
+                doTest(); // should only be asserts
+            }
         } catch (Throwable t) {
             String trace = ExceptionUtils.getStackTrace(t);
             TestReport.TestReportSetupComponent setup = testReport.getSetup();
@@ -101,19 +120,7 @@ public class TestEngine  {
     }
 
     private void doWorkflow() {
-        testScript = loadTestScript();
-        testReport.setName(testScript.getName());
-        testReport.setTestScript(new Reference(testScript.getId()));
-        testReport.setIssued(new Date());
-        TestReport.TestReportParticipantComponent part = testReport.addParticipant();
-        part.setType(TestReport.TestReportParticipantType.SERVER);
-        part.setUri(sut.toString());
-        part.setDisplay("NIST Asbestos Proxy");
-
-        part = testReport.addParticipant();
-        part.setType(TestReport.TestReportParticipantType.TESTENGINE);
-        part.setUri("https://github.com/usnistgov/asbestos");
-        part.setDisplay("NIST Asbestos TestEngine");
+        initWorkflow();
 
         try {
             doPreProcessing();
@@ -133,6 +140,22 @@ public class TestEngine  {
             doAutoDeletes();
             doPostProcessing();
         }
+    }
+
+    private void initWorkflow() {
+        testScript = loadTestScript();
+        testReport.setName(testScript.getName());
+        testReport.setTestScript(new Reference(testScript.getId()));
+        testReport.setIssued(new Date());
+        TestReport.TestReportParticipantComponent part = testReport.addParticipant();
+        part.setType(TestReport.TestReportParticipantType.SERVER);
+        part.setUri(sut.toString());
+        part.setDisplay("NIST Asbestos Proxy");
+
+        part = testReport.addParticipant();
+        part.setType(TestReport.TestReportParticipantType.TESTENGINE);
+        part.setUri("https://github.com/usnistgov/asbestos");
+        part.setDisplay("NIST Asbestos TestEngine");
     }
 
     private boolean errorOut() {

@@ -45,7 +45,7 @@ class ToFhirServerIT {
         TestEngine testEngine = new TestEngine(test1, new URI(ITConfig.getFhirBase()))
                 .setVal(val)
                 .setFhirClient(new FhirClient())
-                .run();
+                .runTest();
         System.out.println(testEngine.getTestReportAsJson());
         TestReport report = testEngine.getTestReport();
         TestReport.TestReportResult result = report.getResult();

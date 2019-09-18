@@ -13,15 +13,18 @@ import gov.nist.asbestos.http.headers.Header;
 import gov.nist.asbestos.http.headers.Headers;
 import gov.nist.asbestos.http.operations.*;
 import gov.nist.asbestos.http.support.Common;
+import gov.nist.asbestos.sharedObjects.ChannelConfig;
 import gov.nist.asbestos.sharedObjects.ChannelConfigFactory;
 import gov.nist.asbestos.simapi.simCommon.SimId;
 import gov.nist.asbestos.simapi.tk.installation.Installation;
+import gov.nist.asbestos.testEngine.engine.TestEngine;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.log4j.Logger;
 import org.hl7.fhir.r4.model.BaseResource;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.OperationOutcome;
+import org.hl7.fhir.r4.model.TestReport;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -107,9 +110,9 @@ public class ProxyServlet extends HttpServlet {
 
     // typical URI is
     // for FHIR translation
-    // http://host:port/appContext/prox/simId/actor/transaction
+    // http://host:port/asbestos/prox/simId/actor/transaction
     // for general stuff
-    // http://host:port/appContext/prox/simId
+    // http://host:port/asbestos/proxy/testSession__channelId
     @Override
     public void doPost(HttpServletRequest req, HttpServletResponse resp)  {
         URI uri = Common.buildURI(req);
@@ -142,7 +145,8 @@ public class ProxyServlet extends HttpServlet {
                 throw new Error("Proxy - POST of configuration data not allowed on " + uri);
 
             // these should be redundant given what is done in parseUri()
-            String channelType = simStore.getChannelConfig().getChannelType();
+            ChannelConfig channelConfig = simStore.getChannelConfig();
+            String channelType = channelConfig.getChannelType();
             if (channelType == null)
                 throw new Error("Sim " + simStore.getChannelId() + " does not define a Channel Type.");
             IChannelBuilder channelBuilder = proxyMap.get(channelType);
@@ -180,6 +184,25 @@ public class ProxyServlet extends HttpServlet {
 
             // transform backend service response for client
             HttpBase responseOut = transformResponse(clientTask, requestOut, channel, hostport);
+
+            // detour to TestEngine happens here
+            // responseOut contains OperationOutcome
+            if (channelConfig.isIncludeValidation()) {
+                OperationOutcome operationOutcome = responseOut.getOperationOutcome();
+                Format format = Format.fromContentType(inHeaders.getContentType().getValue());
+                BaseResource inputResource = ProxyBase.parse(inBody, format);
+
+                //
+                // this needs to be done in a task
+                //
+
+//                File testDef = ...; // evaluation
+//                TestEngine testEngine = new TestEngine(testDef);
+//                testEngine.runTest(inputResource);
+//                TestReport testReport = testEngine.getTestReport();
+//
+//                // merge responseOut and testReport
+            }
 
             respond(resp, responseOut, inHeaders, clientTask);
         } catch (TransformException e) {

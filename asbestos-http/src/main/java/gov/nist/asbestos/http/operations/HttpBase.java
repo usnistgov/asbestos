@@ -2,6 +2,7 @@ package gov.nist.asbestos.http.operations;
 
 import gov.nist.asbestos.http.headers.Header;
 import gov.nist.asbestos.http.headers.Headers;
+import org.hl7.fhir.r4.model.OperationOutcome;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -21,6 +22,7 @@ abstract public class HttpBase {
     String _requestText = null;
     byte[] _request;
     URI uri;
+    private OperationOutcome operationOutcome = null;  // used for efficiency between components
 
     public abstract HttpBase run() throws IOException;
     public abstract String getVerb();
@@ -217,5 +219,13 @@ abstract public class HttpBase {
 
     public boolean isSuccess() {
         return status == 200;
+    }
+
+    public OperationOutcome getOperationOutcome() {
+        return operationOutcome;
+    }
+
+    public void setOperationOutcome(OperationOutcome operationOutcome) {
+        this.operationOutcome = operationOutcome;
     }
 }

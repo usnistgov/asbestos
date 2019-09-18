@@ -7,7 +7,6 @@ import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import gov.nist.asbestos.http.operations.HttpGet;
 import gov.nist.asbestos.http.operations.HttpPost;
 import gov.nist.asbestos.simapi.validation.Val;
-import gov.nist.asbestos.testEngine.engine.TestEngine;
 import org.hl7.fhir.r4.model.BaseResource;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Patient;
@@ -56,7 +55,7 @@ class VariableAndSourceIdTest {
         TestEngine testEngine = new TestEngine(test1, new URI(""))
                 .setVal(val)
                 .setFhirClient(fhirClientMock)
-                .run();
+                .runTest(null);
         System.out.println(testEngine.getTestReportAsJson());
         List<String> errors = testEngine.getErrors();
         printErrors(errors);
@@ -94,7 +93,7 @@ class VariableAndSourceIdTest {
         TestEngine testEngine = new TestEngine(test1, new URI(""))
                 .setVal(val)
                 .setFhirClient(fhirClientMock)
-                .run();
+                .runTest(null);
         System.out.println(testEngine.getTestReportAsJson());
         List<String> errors = testEngine.getErrors();
         printErrors(errors);
@@ -132,7 +131,7 @@ class VariableAndSourceIdTest {
         TestEngine testEngine = new TestEngine(test1, new URI(""))
                 .setVal(val)
                 .setFhirClient(fhirClientMock)
-                .run();
+                .runTest(null);
         System.out.println(testEngine.getTestReportAsJson());
         List<String> errors = testEngine.getErrors();
         printErrors(errors);
@@ -170,7 +169,7 @@ class VariableAndSourceIdTest {
         TestEngine testEngine = new TestEngine(test1, new URI(""))
                 .setVal(val)
                 .setFhirClient(fhirClientMock)
-                .run();
+                .runTest(null);
         System.out.println(testEngine.getTestReportAsJson());
         List<String> errors = testEngine.getErrors();
         printErrors(errors);
@@ -208,7 +207,7 @@ class VariableAndSourceIdTest {
         TestEngine testEngine = new TestEngine(test1, new URI(""))
                 .setVal(val)
                 .setFhirClient(fhirClientMock)
-                .run();
+                .runTest(null);
         System.out.println(testEngine.getTestReportAsJson());
         List<String> errors = testEngine.getErrors();
         printErrors(errors);
@@ -252,7 +251,7 @@ class VariableAndSourceIdTest {
         TestEngine testEngine = new TestEngine(test1, new URI(""))
                 .setVal(val)
                 .setFhirClient(fhirClientMock)
-                .run();
+                .runTest(null);
         System.out.println(testEngine.getTestReportAsJson());
         List<String> errors = testEngine.getErrors();
         printErrors(errors);
