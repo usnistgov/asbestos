@@ -60,7 +60,7 @@
                 this.selectedTask = i
             },
             updateIndex() {
-                this.index = this.findEventInStore()
+                this.index = this.findEventInStore
             },
             selectedEventName() {
                 return this.selectedEvent === null ? null : this.selectedEvent.eventName
@@ -146,13 +146,12 @@
         created() {
             this.$store.dispatch('loadEventSummaries')
                 .then(response => {
-                    this.index = this.findEventInStore()
+                    this.index = this.findEventInStore
                     return response
                 })
 
         },
         watch: {
-            // TODO this.$store.state.log.currentEventIndex.currentEventIndex should be a local -
             '$route': 'updateIndex',
             //'this.$store.state.log.currentEventIndex': 'loadEvent',
         },
