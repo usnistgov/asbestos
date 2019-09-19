@@ -43,7 +43,7 @@ public class ProxyLogServlet extends HttpServlet {
             return;
         }
         String uri = req.getRequestURI();
-        log.info("doPost " + uri);
+        log.info("doGet " + uri);
 
         Headers headers = Common.getRequestHeaders(req, Verb.GET);
         Header acceptHeader = headers.getAccept();
@@ -205,7 +205,7 @@ public class ProxyLogServlet extends HttpServlet {
         return contents;
     }
 
-    class UiTask {
+    class Task {
         int index;
         String label;
         String description;
@@ -214,7 +214,7 @@ public class ProxyLogServlet extends HttpServlet {
         String responseHeader;
         String responseBody;
 
-        UiTask(File eventDir, String taskLabel) {
+        Task(File eventDir, String taskLabel) {
             description = read(eventDir, taskLabel, "description.txt");
             requestHeader = read(eventDir, taskLabel, "request_header.txt");
             requestBody = read(eventDir, taskLabel, "request_body.txt");
@@ -246,16 +246,16 @@ public class ProxyLogServlet extends HttpServlet {
     class UiEvent {
         String eventName;
         String resourceType;
-        List<UiTask> uiTasks = new ArrayList<>();
+        List<Task> tasks = new ArrayList<>();
 
         UiEvent(File eventDir) {
             List<String> parts = dirListingAsStringList(eventDir);
             int i = 0;
             for (String part : parts) {
-                UiTask uiTask = new UiTask(eventDir, part);
-                uiTask.label = part;
-                uiTask.index = i++;
-                uiTasks.add(uiTask);
+                Task task = new Task(eventDir, part);
+                task.label = part;
+                task.index = i++;
+                tasks.add(task);
             }
         }
     }
