@@ -108,10 +108,6 @@ public class ProxyServlet extends HttpServlet {
         return hostport;
     }
 
-    // typical URI is
-    // for FHIR translation
-    // http://host:port/asbestos/prox/simId/actor/transaction
-    // for general stuff
     // http://host:port/asbestos/proxy/testSession__channelId
     @Override
     public void doPost(HttpServletRequest req, HttpServletResponse resp)  {
@@ -642,52 +638,6 @@ public class ProxyServlet extends HttpServlet {
         List<String> uriParts = new ArrayList<>(uriParts1);  // so parts are deletable
         SimStore simStore;
 
-        if (uriParts.size() == 3 && uriParts.get(2).equals("prox") && verb != Verb.DELETE) {
-            // CREATE
-            // /appContext/prox
-            // control channel - request to create proxy channel
-            // can be done with GET or POST
-
-            String parmameterString = uri.getQuery();
-
-//            if (verb == Verb.POST) {
-//                String rawRequest = IOUtils.toString(req.getInputStream(), Charset.defaultCharset());   // json
-//                log.debug("CREATESIM " + rawRequest);
-//                ChannelConfig channelConfig = ChannelConfigFactory.convert(rawRequest);
-//                simStore = new SimStore(externalCache,
-//                        new SimId(new TestSession(channelConfig.getTestSession()),
-//                                channelConfig.getChannelId(),
-//                                channelConfig.getActorType(),
-//                                channelConfig.getEnvironment(),
-//                                true));
-//
-//                simStore.create(channelConfig);
-//                log.info("Channel " + simStore.getChannelId().toString() + " created (type " + simStore.getActorType() + ")" );
-//
-//                resp.setContentType("application/json");
-//                resp.getOutputStream().print(rawRequest);
-//
-//
-//                resp.setStatus((simStore.isNewlyCreated() ? resp.SC_CREATED : resp.SC_OK));
-//                log.info("OK");
-//                return null;  // trigger - we are done - exit now
-//            } else  if (parmameterString != null) {  // GET with parameters - also CREATE SIM
-//                Map<String, List<String>> queryMap = HttpBase.mapFromQuery(parmameterString);
-//                String json = new ObjectMapper().writeValueAsString(HttpBase.flattenQueryMap(queryMap));
-//                ChannelConfig channelConfig = ChannelConfigFactory.convert(json);
-//                SimId simId = new SimId(new TestSession(channelConfig.getTestSession()), channelConfig.getChannelId());
-//                simStore = new SimStore(externalCache, simId);
-//
-//                resp.setContentType("application/json");
-//                resp.getOutputStream().print(json);
-//
-//
-//                resp.setStatus((simStore.isNewlyCreated() ? resp.SC_CREATED : resp.SC_OK));
-//                log.info("OK");
-//                return null;
-//            }
-        }
-
         SimId simId = null;
 
         if (uriParts.size() >= 4) {
@@ -703,7 +653,7 @@ public class ProxyServlet extends HttpServlet {
 
                 uriParts.remove(0);  // leading empty string
                 uriParts.remove(0);  // appContext
-                uriParts.remove(0);  // prox
+                uriParts.remove(0);  // proxy
                 uriParts.remove(0);  // channelId
 
                 if (!simStore.exists()) {
@@ -724,26 +674,6 @@ public class ProxyServlet extends HttpServlet {
             return null;
 
         simStore = new SimStore(externalCache, simId);
-
-//        if (verb == Verb.DELETE) {
-//            Ref ref = new Ref(uri);
-//            if (!ref.hasResource()) {
-//                simStore.deleteSim();
-//                return null;  // delete channel
-//            }
-//        }
-
-        //
-        // everything above this is handling control operations
-        // starting with this load of simStore, normal channel operations begin
-        //
-
-
-        // ChannelId has been established - from now all errors result in TaskStore logging
-
-        // the request targets a Channel - maybe a control message or a pass through.
-        // pass through have Channel/ as the next element of the URI
-
 
         if (!uriParts.isEmpty()) {
             simStore.setResource(uriParts.get(0));
