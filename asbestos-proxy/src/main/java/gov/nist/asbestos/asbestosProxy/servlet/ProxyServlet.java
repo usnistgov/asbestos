@@ -190,7 +190,7 @@ public class ProxyServlet extends HttpServlet {
             // detour to TestEngine happens here
             // responseOut contains OperationOutcome
             if (channelConfig.isIncludeValidation()) {
-                OperationOutcome operationOutcome = responseOut.getOperationOutcome();
+                OperationOutcome backendOperationOutcome = responseOut.getOperationOutcome();
                 Format format = Format.fromContentType(inHeaders.getContentType().getValue());
                 BaseResource inputResource = ProxyBase.parse(inBody, format);
 
