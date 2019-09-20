@@ -13,7 +13,7 @@ import java.util.List;
  * to satisfy that request.
  */
 public class Event {
-    //private SimStore simStore;
+    private SimStore simStore;
     private File eventDir;
     private List<File> taskFiles = new ArrayList<>();
     private List<Task> tasks = new ArrayList<>();
@@ -44,6 +44,33 @@ public class Event {
             newTask();  // initialize request
         }
     }
+
+    public Event(SimStore simStore, File eventDir) {
+        this.simStore = simStore;
+        this.eventDir = eventDir;
+
+        // load task references
+        int i = 0;
+        while (true) {
+            File taskFile = getTaskFile(i);
+            if (taskFile.exists()) {
+                if (taskFiles.size() <= i) {
+                    taskFiles.add(taskFile);
+                    tasks.add(new Task(i, this));
+                } else {
+                    taskFiles.set(i, taskFile);
+                    tasks.set(i, new Task(i, this));
+                }
+            }
+            else
+                break;
+            i++;
+        }
+        if (taskFiles.size() == 0) {
+            newTask();  // initialize request
+        }
+    }
+
 
     public Task getClientTask() {
         if (tasks.size() == 0) {

@@ -176,4 +176,12 @@ public class ChannelControlServlet extends HttpServlet {
     public void setExternalCache(File externalCache) {
         this.externalCache = externalCache;
     }
+
+    static public ChannelConfig channelConfigFromChannelId(File externalCache, String channelId) {
+        SimId simId = SimId.buildFromRawId(channelId);
+        SimStore simStore = new SimStore(externalCache, simId);
+        simStore.open();
+        return simStore.getChannelConfig();
+    }
+
 }
