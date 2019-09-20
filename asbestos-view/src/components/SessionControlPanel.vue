@@ -1,6 +1,6 @@
 <template>
     <div>
-        <div class="control-panel-item-title">Session</div>
+        <div class="control-panel-item-title">Test Session</div>
         <b-form-select v-model="testSession" :options="testSessions"></b-form-select>
     </div>
 </template>

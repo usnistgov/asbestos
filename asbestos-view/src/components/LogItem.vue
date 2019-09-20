@@ -15,11 +15,14 @@
                   @click="displayRequest = false">
                 Response
             </span>
-            <div>
-                <span v-for="taski in taskCount" :key="taski">
-                    <span v-bind:class="{ selected: taski-1 === selectedTask, selectable: taski-1 !== selectedTask }" @click="selectTask(taski-1)">
-                        Task {{ taski-1 }} </span>
+            <div v-if="tasks.length > 0">
+                <span v-for="(task, taski) in tasks" :key="taski">
+                    <span v-bind:class="{ selected: taski === selectedTask, selectable: taski !== selectedTask }" @click="selectTask(taski)">
+                        Task {{ taski }} </span>
                 </span>
+            </div>
+            <div v-else>
+                No Tasks
             </div>
         </div>
         <div v-if="getEvent()">
@@ -56,13 +59,8 @@
             selectTask(i) {
                 this.selectedTask = i
             },
-            findEventInStore() {
-                return (this.$store.state.log.eventSummaries)
-                    ? this.$store.state.log.eventSummaries.findIndex(summary => this.eventId === summary.eventName)
-                    : null
-            },
             updateIndex() {
-                this.index = this.findEventInStore()
+                this.index = this.findEventInStore
             },
             selectedEventName() {
                 return this.selectedEvent === null ? null : this.selectedEvent.eventName
@@ -83,12 +81,12 @@
                 if (selectedEventName !== null) {
                     this.selectedEvent = null
                     this.selectedTask = 0
-//                    console.log(`GET ${this.sessionId}/${this.channelId}/${summary.resourceType}/${summary.eventName}`)
+                    // console.log(`GET ${this.sessionId}/${this.channelId}/${summary.resourceType}/${summary.eventName}`)
                     await LOG.get(`${this.sessionId}/${this.channelId}/${summary.resourceType}/${summary.eventName}`)
                         .then(response => {
                             try {
                                 this.selectedEvent = response.data
-  //                              console.log(`loaded ${this.selectedEvent.tasks.length} tasks`)
+                                // console.log(`loaded ${this.selectedEvent.tasks.length} tasks`)
                             } catch (error) {
                                 this.error(error)
                             }
@@ -112,8 +110,16 @@
             },
         },
         computed: {
+            findEventInStore() {
+                return (this.$store.state.log.eventSummaries)
+                    ? this.$store.state.log.eventSummaries.findIndex(summary => this.eventId === summary.eventName)
+                    : null
+            },
+            tasks() {
+                return this.selectedEvent && this.selectedEvent.tasks !== undefined ? this.selectedEvent.tasks : []
+            },
             taskCount() {
-                return this.selectedEvent ? this.selectedEvent.tasks.length : 0
+                return this.selectedEvent && this.selectedEvent.tasks ? this.selectedEvent.tasks.length : 0
             },
             requestHeader() {
                 return this.selectedEvent.tasks[this.selectedTask].requestHeader
@@ -130,7 +136,8 @@
             eventSummary() {
                 if (!this.$store.state.log.eventSummaries)
                     return null
-                const index = this.$store.state.log.currentEventIndex
+                const index = this.findEventInStore
+                console.log(`currentEventIndex is ${index}`)
                 return (index > -1)
                     ? this.$store.state.log.eventSummaries[index]
                     : null
@@ -139,14 +146,14 @@
         created() {
             this.$store.dispatch('loadEventSummaries')
                 .then(response => {
-                    this.index = this.findEventInStore()
+                    this.index = this.findEventInStore
                     return response
                 })
 
         },
         watch: {
             '$route': 'updateIndex',
-            'this.$store.state.log.currentEventIndex': 'loadEvent',
+            //'this.$store.state.log.currentEventIndex': 'loadEvent',
         },
         props: [
             'eventId', 'sessionId', 'channelId'

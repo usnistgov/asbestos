@@ -79,9 +79,17 @@ public class SimStore {
             File[] psimdbFiles = psimdb.listFiles();
             if (psimdbFiles != null) {
                 for (File testSession : psimdbFiles) {
+                    if (testSession.getName().startsWith("."))
+                        continue;
+                    if (testSession.toString().startsWith("_"))
+                        continue;
                     File[] idFiles = testSession.listFiles();
                     if (idFiles != null) {
                         for (File id : idFiles) {
+                            if (id.getName().startsWith("."))
+                                continue;
+                            if (id.getName().startsWith("_"))
+                                continue;
                             results.add(testSession.getName() + "__" + id.getName());
                         }
                     }

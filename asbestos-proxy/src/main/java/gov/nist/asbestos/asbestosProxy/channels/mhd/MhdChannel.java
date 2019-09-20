@@ -491,6 +491,7 @@ public class MhdChannel extends BaseChannel /*implements IBaseChannel*/ {
     }
 
     private void packageResponse(HttpBase responseOut, OperationOutcome oo) {
+        responseOut.setOperationOutcome(oo);
         Bundle response = new Bundle();
         response.setType(Bundle.BundleType.TRANSACTIONRESPONSE);
         boolean first = true;

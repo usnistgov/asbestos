@@ -13,6 +13,7 @@ public class ChannelConfig {
     private String channelId;   // simple id (no testSesssion__ prefix)
     private String actorType;
     private String channelType;
+    private boolean includeValidation;
     private String fhirBase;
     private String xdsSiteName;
 
@@ -107,7 +108,8 @@ public class ChannelConfig {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         ChannelConfig that = (ChannelConfig) o;
-        return Objects.equals(environment, that.environment) &&
+        return includeValidation == that.includeValidation &&
+                Objects.equals(environment, that.environment) &&
                 Objects.equals(testSession, that.testSession) &&
                 Objects.equals(channelId, that.channelId) &&
                 Objects.equals(actorType, that.actorType) &&
@@ -118,7 +120,7 @@ public class ChannelConfig {
 
     @Override
     public int hashCode() {
-        return Objects.hash(environment, testSession, channelId, actorType, channelType, fhirBase, xdsSiteName);
+        return Objects.hash(environment, testSession, channelId, actorType, channelType, includeValidation, fhirBase, xdsSiteName);
     }
 
     public String getXdsSiteName() {
@@ -128,5 +130,13 @@ public class ChannelConfig {
     public ChannelConfig setXdsSiteName(String xdsSiteName) {
         this.xdsSiteName = xdsSiteName;
         return this;
+    }
+
+    public boolean isIncludeValidation() {
+        return includeValidation;
+    }
+
+    public void setIncludeValidation(boolean includeValidation) {
+        this.includeValidation = includeValidation;
     }
 }

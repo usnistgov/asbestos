@@ -309,6 +309,21 @@ public class TestEngineServlet extends HttpServlet {
         return list;
     }
 
+    private List<File> listOfFiles(File root) {
+        List<File> list = new ArrayList<>();
+
+        File[] aList = root.listFiles();
+        if (aList != null) {
+            for (File file : aList) {
+                if (file.getName().startsWith(".")) continue;
+                if (file.getName().startsWith("_")) continue;
+                list.add(file);
+            }
+        }
+
+        return list;
+    }
+
     private File internalTestCollectionBase(String collectionName) {
         URL aUrl = getClass().getResource("/TestCollections/testCollectionRoot.txt");
         String aFile = aUrl.getFile();
@@ -337,14 +352,12 @@ public class TestEngineServlet extends HttpServlet {
         URL aUrl = getClass().getResource("/TestCollections/testCollectionRoot.txt");
         String aFile = aUrl.getFile();
         File internalRoot = new File(aFile).getParentFile();
-        File[] intList = internalRoot.listFiles();
-        if (intList != null)
-            collections.addAll(Arrays.asList(intList));
+        List<File> intList = listOfFiles(internalRoot);
+        collections.addAll(intList);
 
         File externalRoot = new File(externalCache, "TestCollections");
-        File[] extList = externalRoot.listFiles();
-        if (extList != null)
-            collections.addAll(Arrays.asList(extList));
+        List<File> extList = listOfFiles(externalRoot);
+        collections.addAll(extList);
 
         return collections;
     }
