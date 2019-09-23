@@ -34,4 +34,15 @@ public class Returns {
             throw new RuntimeException(e);
         }
     }
+
+    static void returnObject(HttpServletResponse resp, Object o) {
+        String json = new Gson().toJson(o);
+        resp.setContentType("application/json");
+        try {
+            resp.getOutputStream().print(json);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+    }
 }

@@ -1,7 +1,6 @@
 package gov.nist.asbestos.asbestosProxy.requests;
 
 import gov.nist.asbestos.asbestosProxy.servlet.ChannelConnector;
-import gov.nist.asbestos.asbestosProxy.servlet.TestEngineServlet;
 import org.apache.log4j.Logger;
 // 0 - empty
 // 1 - app context
