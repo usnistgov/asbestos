@@ -33,6 +33,7 @@ public class GetTestLogsRequest {
     }
 
     public void run() {
+        log.info("GetTestLogs");
         String channelId = request.uriParts.get(4);
         String testCollection = request.uriParts.get(5);
 

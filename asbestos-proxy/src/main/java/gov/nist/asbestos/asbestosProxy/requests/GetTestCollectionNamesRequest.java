@@ -15,7 +15,7 @@ public class GetTestCollectionNamesRequest {
     private Request request;
 
     public static boolean isRequest(Request request) {
-        return request.uriParts.size() == 4 && "collections".equalsIgnoreCase(request.uriParts.get(2));
+        return request.uriParts.size() == 4 && "collections".equalsIgnoreCase(request.uriParts.get(3));
     }
 
     public GetTestCollectionNamesRequest(Request request) {
@@ -23,6 +23,7 @@ public class GetTestCollectionNamesRequest {
     }
 
     public void run()  {
+        log.info("GetTestCollectionNames");
         List<String> names = request.ec.getTestCollectionNames();
         Returns.returnList(request.resp, names);
         log.info("OK");

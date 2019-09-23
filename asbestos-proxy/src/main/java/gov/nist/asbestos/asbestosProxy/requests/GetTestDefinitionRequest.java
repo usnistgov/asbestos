@@ -31,6 +31,7 @@ public class GetTestDefinitionRequest {
     }
 
     public void run() {
+        log.info("GetTestDefinition");
         String collectionName = request.uriParts.get(4);
         String testName = request.uriParts.get(5);
 

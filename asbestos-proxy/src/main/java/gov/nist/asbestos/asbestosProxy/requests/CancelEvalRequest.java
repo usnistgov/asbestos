@@ -9,8 +9,10 @@ package gov.nist.asbestos.asbestosProxy.requests;
 // payload is ignored
 
 import gov.nist.asbestos.asbestosProxy.servlet.ChannelConnector;
+import org.apache.log4j.Logger;
 
 public class CancelEvalRequest {
+    private static Logger log = Logger.getLogger(CancelEvalRequest.class);
     private Request request;
 
     public static boolean isRequest(Request request) {
@@ -22,6 +24,7 @@ public class CancelEvalRequest {
     }
 
     public void run() {
+        log.info("CancelEval");
         String channelId = request.uriParts.get(3);
         ChannelConnector.connect(request.resp, request.externalCache, channelId); // no exception => channel exists
         request.getSession().removeAttribute(EvalRequest.NEXT_CLIENT_TEST);

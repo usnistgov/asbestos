@@ -1,6 +1,8 @@
 package gov.nist.asbestos.asbestosProxy.requests;
 
 import gov.nist.asbestos.asbestosProxy.servlet.ChannelConnector;
+import gov.nist.asbestos.asbestosProxy.servlet.TestEngineServlet;
+import org.apache.log4j.Logger;
 // 0 - empty
 // 1 - app context
 // 2 - "eval"
@@ -11,6 +13,7 @@ import gov.nist.asbestos.asbestosProxy.servlet.ChannelConnector;
 // payload is ignored
 
 public class EvalRequest {
+    private static Logger log = Logger.getLogger(EvalRequest.class);
     private Request request;
 
     public static String NEXT_CLIENT_TEST = "nextClientTest";
@@ -24,6 +27,7 @@ public class EvalRequest {
     }
 
     public void run() {
+        log.info("EvalRequest");
         String channelId = request.uriParts.get(3);
         ChannelConnector.connect(request.resp, request.externalCache, channelId); // no exception => channel exists
         String testCollectionId = request.uriParts.get(4);

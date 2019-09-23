@@ -28,6 +28,7 @@ public class GetChannelConfigRequest {
     }
 
     public void run() throws IOException {
+        log.info("GetChannelConfig");
         String channelId = request.uriParts.get(3);
         ChannelConfig channelConfig;
 

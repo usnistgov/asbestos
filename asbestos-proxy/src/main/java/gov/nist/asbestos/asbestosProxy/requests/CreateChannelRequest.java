@@ -31,6 +31,7 @@ public class CreateChannelRequest {
     }
 
     public void run() throws IOException {
+        log.info("CreateChannel");
         String rawRequest = IOUtils.toString(request.req.getInputStream(), Charset.defaultCharset());   // json
         log.debug("CREATE Channel " + rawRequest);
         ChannelConfig channelConfig = ChannelConfigFactory.convert(rawRequest);

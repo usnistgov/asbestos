@@ -25,7 +25,8 @@ public class GetTestCollectionRequest {
     }
 
     public void run() {
-        String collectionName = request.uriParts.get(1);
+        log.info("GetTestCollection");
+        String collectionName = request.uriParts.get(4);
         List<String> names = request.ec.getTestsInCollection(collectionName);
 
         Returns.returnList(request.resp, names);

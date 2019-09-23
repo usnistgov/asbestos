@@ -31,6 +31,7 @@ public class GetChannelIdsRequest {
     }
 
     public void run() throws IOException {
+        log.info("GetChannelIds");
         SimStore simStore = new SimStore(request.externalCache);
         List<String> ids = simStore.getChannelIds();
 
