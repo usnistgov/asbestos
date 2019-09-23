@@ -1,9 +1,12 @@
 package gov.nist.asbestos.asbestosProxy.requests;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 import java.util.stream.Collectors;
 
 import static gov.nist.asbestos.asbestosProxy.requests.Dirs.listOfDirectories;
@@ -50,16 +53,31 @@ public class EC {
     }
 
      List<File> getTests(String collectionName) {
-        List<File> files = new ArrayList<>();
+        File root = getTestCollectionBase(collectionName);
+        if (root == null)
+            return new ArrayList<>();
+        return listOfDirectories(root);
+    }
 
-        File root;
-        root = externalTestCollectionBase(collectionName);
-        if (root != null) return listOfDirectories(root);
+    Properties getTestCollectionProperties(String collectionName) {
+        Properties props = new Properties();
+        File root = getTestCollectionBase(collectionName);
+        if (root == null)
+            return props;
+        File file = new File(root, "TestCollection.properties");
+        try {
+            props.load(new FileInputStream(file));
+        } catch (IOException e) {
+            throw new RuntimeException("Cannot load " + file);
+        }
+        return props;
+    }
 
-        root = internalTestCollectionBase(collectionName);
-        if (root != null) return listOfDirectories(root);
-
-        return files;
+    File getTestCollectionBase(String collectionName) {
+        File base = externalTestCollectionBase(collectionName);
+        if (base != null)
+            return base;
+        return internalTestCollectionBase(collectionName);
     }
 
      File externalTestCollectionBase(String collectionName) {

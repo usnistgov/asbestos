@@ -3,7 +3,11 @@
         <div>Test</div>
         <div v-if="!selectable" class="not-available">Select Channel</div>
         <div v-else>
-            <div class="control-panel-item-title" @click="openCollection()">Collection</div>
+            <div>
+                <span class="control-panel-item-title" @click="openCollection()">Collection</span>
+                <span class="divider"></span>
+                <img id="reload" class="selectable" @click="reload()" src="../assets/reload.png"/>
+            </div>
             <b-form-select v-model="collection" :options="collections"></b-form-select>
             <div class="control-panel-item-title" @click="selectIndividual()">Tests</div>
             <b-form-select v-model="testId" :options="testIds"></b-form-select>
@@ -15,7 +19,6 @@
     import Vue from 'vue'
     import { BFormSelect } from 'bootstrap-vue'
     Vue.component('b-form-select', BFormSelect)
-    import {ENGINE} from '../common/http-common'
     import errorHandlerMixin from '../mixins/errorHandlerMixin'
 
     export default {
@@ -24,6 +27,9 @@
             }
         },
         methods: {
+            reload() {
+                this.$store.dispatch('loadTestCollectionNames')
+            },
             openCollection() {
                 if (!this.selectable)
                     return;
@@ -42,18 +48,6 @@
                     return
                 const route = `/session/${this.session}/channel/${this.channelId}/collection/${this.collection}/test/${this.testId}`
                 this.$router.push(route)
-            },
-            loadTestCollectionNames() {
-                const that = this
-                ENGINE.get(`collections`)
-                    .then(response => {
-                        let theResponse = response.data
-                        console.info(`TestEnginePanel: loaded ${theResponse.length} test collections`)
-                        this.collections = theResponse.sort()
-                    })
-                    .catch(function (error) {
-                        that.error(error)
-                    })
             },
         },
         computed: {
@@ -94,16 +88,15 @@
             testIds() {
                 return this.$store.state.testRunner.testScriptNames
             },
-
         },
         created() {
-            this.loadTestCollectionNames()
+            this.reload()
         },
         mounted() {
 
         },
         watch: {
-            '$store.state.base.channelId': 'loadTestCollectionNames',
+            '$store.state.base.channelId': 'reload',
         },
         mixins: [ errorHandlerMixin ],
         name: "TestControlPanel"

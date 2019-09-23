@@ -70,7 +70,7 @@ public class ChannelControlServlet extends HttpServlet {
     @Override
     public void doDelete(HttpServletRequest req, HttpServletResponse resp) {
         Request request = new Request(req, resp, externalCache);
-        log.info("Channel Control DELEE " + request.uri);
+        log.info("Channel Control DELETE " + request.uri);
         try {
 
             if (DeleteChannelRequest.isRequest(request)) new DeleteChannelRequest(request).run();

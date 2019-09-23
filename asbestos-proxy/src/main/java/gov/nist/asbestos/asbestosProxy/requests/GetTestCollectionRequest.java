@@ -3,6 +3,7 @@ package gov.nist.asbestos.asbestosProxy.requests;
 import org.apache.log4j.Logger;
 
 import java.util.List;
+import java.util.Properties;
 
 // 0 - empty
 // 1 - appContext
@@ -10,8 +11,15 @@ import java.util.List;
 // 3 - "collection"
 // 4 - testCollectionId
 // return list of test names in collection
+// and a flag labeling the collection as client or server
 
 public class GetTestCollectionRequest {
+
+    class TestCollection {
+        boolean isServerTest;
+        List<String> testNames;
+    }
+
     private static Logger log = Logger.getLogger(GetTestCollectionRequest.class);
 
     private Request request;
@@ -27,9 +35,14 @@ public class GetTestCollectionRequest {
     public void run() {
         log.info("GetTestCollection");
         String collectionName = request.uriParts.get(4);
-        List<String> names = request.ec.getTestsInCollection(collectionName);
 
-        Returns.returnList(request.resp, names);
+        TestCollection tc = new TestCollection();
+
+        Properties props = request.ec.getTestCollectionProperties(collectionName);
+        tc.isServerTest = !"client".equals(props.getProperty("TestType"));
+        tc.testNames = request.ec.getTestsInCollection(collectionName);
+
+        Returns.returnObject(request.resp, tc);
         log.info("OK");
     }
 }

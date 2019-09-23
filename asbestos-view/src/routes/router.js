@@ -11,7 +11,7 @@ import LogsView from "../components/LogsView"
 //import ChannelLogList from "../components/ChannelLogList"
 import LogList from "../components/LogList"
 import LogItem from "../components/LogItem"
-import TestList from "../components/TestCollection"
+import TestCollection from "../components/TestCollection"
 import TestDetails from "../components/TestDetails"
 
 Vue.use( VueRouter )
@@ -62,7 +62,7 @@ export const routes = [
                             },
                             {
                                 path: 'collection/:testCollection',
-                                component: TestList,
+                                component: TestCollection,
                                 props: true,
                                 children: [
                                     {

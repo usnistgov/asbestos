@@ -134,7 +134,7 @@
 
         },
         watch: {
-            'testCollection': 'loadReports',
+            'testCollection': 'reload',  //'loadReports',
             'channelId': function(newVal) {
                 if (this.channel !== newVal)
                     this.channel = newVal

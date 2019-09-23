@@ -7,6 +7,7 @@ Vue.use(Vuex)
 export const testRunnerStore = {
     state() {
         return {
+            isClientTest: false,
             testCollectionNames: [],
             currentTestCollectionName: null,
             testScriptNames: [],
@@ -16,8 +17,9 @@ export const testRunnerStore = {
         }
     },
     mutations: {
-        setTestScriptNames(state, names) {
+        setTestScriptNames(state, names, isServerTest) {
             state.testScriptNames = names.sort()
+            state.isClientTest = !isServerTest
         },
         setCurrentTest(state, currentTestId) {
             state.currentTest = currentTestId
@@ -45,6 +47,18 @@ export const testRunnerStore = {
         }
     },
     actions: {
+        loadTestCollectionNames({commit}) {
+            const that = this
+            ENGINE.get(`collections`)
+                .then(response => {
+                    let theResponse = response.data
+                    console.info(`TestEnginePanel: loaded ${theResponse.length} test collections`)
+                    commit('setTestCollectionNames', theResponse.sort())
+                })
+                .catch(function (error) {
+                    that.error(error)
+                })
+        },
         loadTestScriptNames({commit, state}) {
             if (state.currentTestCollectionName === null)
                 console.error(`loadTestScriptNames: state.currentTestCollectionName is null`)
@@ -52,7 +66,7 @@ export const testRunnerStore = {
             ENGINE.get(`collection/${state.currentTestCollectionName}`)
                 .then(response => {
                     let theResponse = response.data
-                    commit('setTestScriptNames', theResponse)
+                    commit('setTestScriptNames', theResponse.testNames, theResponse.isServerTest)
                 })
                 .catch(function (error) {
                     that.error(error)
