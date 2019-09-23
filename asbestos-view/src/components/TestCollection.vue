@@ -20,7 +20,21 @@
                         <div v-else>
                             <img src="../assets/blank-circle.png" class="right">
                         </div>
-                        <img src="../assets/press-play-button.png" class="right" @click.stop="doRun(name)">
+                        <div v-if="isClient">
+                            <img src="../assets/hourglass.png" class="right" @click.stop="doWait(name)">
+                            <div v-if="isCurrent(name)">
+                                <img src="../assets/hourglass.png" class="right" @click.stop="stopWait()">
+                                <img src="../assets/hourglass.png" class="right" @click.stop="stopWait()">
+                                <img src="../assets/hourglass.png" class="right" @click.stop="stopWait()">
+                                <img src="../assets/hourglass.png" class="right" @click.stop="stopWait()">
+                                <img src="../assets/hourglass.png" class="right" @click.stop="stopWait()">
+                                <img src="../assets/hourglass.png" class="right" @click.stop="stopWait()">
+                                <img src="../assets/hourglass.png" class="right" @click.stop="stopWait()">
+                            </div>
+                        </div>
+                        <div v-else>
+                            <img src="../assets/press-play-button.png" class="right" @click.stop="doRun(name)">
+                        </div>
                         {{ name }}  --  {{ time[name] }}
                     </div>
                 </div>
@@ -58,6 +72,12 @@
                     .catch(error => {
                         that.error(error)
                     })
+            },
+            doWait(testName) {
+                this.$store.commit('setCurrentTest', testName)
+            },
+            stopWait() {
+                this.$store.commit('setCurrentTest', null)
             },
             selectTest(name) {
                 if (this.selected === name)  { // unselect
@@ -99,8 +119,14 @@
             allTestScriptNames() {
                 return this.$store.state.testRunner.testScriptNames
             },
+            isCurrent(testId) {
+                return testId === this.$store.state.testRunner.currentTest
+            },
         },
         computed: {
+            isClient() {
+                return this.$store.state.testRunner.isClientTest
+            },
             current() {
                 return this.$store.state.base.testCollectionDetails.find(item => {
                     return item.name === this.testId

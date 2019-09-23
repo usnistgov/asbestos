@@ -7,16 +7,22 @@ Vue.use(Vuex)
 export const testRunnerStore = {
     state() {
         return {
-            isClientTest: false,
             testCollectionNames: [],
             currentTestCollectionName: null,
             testScriptNames: [],
+
             currentTest: null,  // testId
+            isClientTest: false,  // applies to entire testCollection
+            waitingOnClient: null, // testId waiting on or null
+
             testScripts: [], // testId => TestScript
             testReports: [], // testId => TestReport
         }
     },
     mutations: {
+        setWaitingOnClient(state, value) {
+            state.waitingOnClient = value   // true or false
+        },
         setTestScriptNames(state, names, isServerTest) {
             state.testScriptNames = names.sort()
             state.isClientTest = !isServerTest
@@ -47,6 +53,9 @@ export const testRunnerStore = {
         }
     },
     actions: {
+        waitOnClient({commit}, testCollectionId, testId) {
+            ENGINE.post(``)
+        },
         loadTestCollectionNames({commit}) {
             const that = this
             ENGINE.get(`collections`)
