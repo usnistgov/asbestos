@@ -20,12 +20,15 @@ export const testRunnerStore = {
         }
     },
     mutations: {
-        setWaitingOnClient(state, value) {
-            state.waitingOnClient = value   // true or false
+        setWaitingOnClient(state, testId) {
+            state.waitingOnClient = testId
         },
-        setTestScriptNames(state, names, isServerTest) {
+        setIsClientTest(state, isClient) {
+            console.log(`client is ${isClient}`)
+            state.isClientTest = isClient
+        },
+        setTestScriptNames(state, names) {
             state.testScriptNames = names.sort()
-            state.isClientTest = !isServerTest
         },
         setCurrentTest(state, currentTestId) {
             state.currentTest = currentTestId
@@ -53,11 +56,16 @@ export const testRunnerStore = {
         }
     },
     actions: {
-        waitOnClient({commit}, testCollectionId, testId) {
-            ENGINE.post(``)
+        waitOnClient({commit, state, rootState}, testId) {
+            ENGINE.post(`eval/${rootState.base.session}__${rootState.base.channelId}/${state.currentTestCollectionName}/${testId}`)
+                .then(response => {
+                    commit('setWaitingOnClient', testId)
+                })
+                .catch(function (error) {
+                    console.error(error)
+                })
         },
         loadTestCollectionNames({commit}) {
-            const that = this
             ENGINE.get(`collections`)
                 .then(response => {
                     let theResponse = response.data
@@ -65,20 +73,22 @@ export const testRunnerStore = {
                     commit('setTestCollectionNames', theResponse.sort())
                 })
                 .catch(function (error) {
-                    that.error(error)
+                    console.error(error)
                 })
         },
         loadTestScriptNames({commit, state}) {
             if (state.currentTestCollectionName === null)
                 console.error(`loadTestScriptNames: state.currentTestCollectionName is null`)
-            const that = this
-            ENGINE.get(`collection/${state.currentTestCollectionName}`)
+            const url = `collection/${state.currentTestCollectionName}`
+            ENGINE.get(url)
                 .then(response => {
                     let theResponse = response.data
-                    commit('setTestScriptNames', theResponse.testNames, theResponse.isServerTest)
+                    commit('setTestScriptNames', theResponse.testNames)
+                    const isClient = !theResponse.isServerTest
+                    commit('setIsClientTest', isClient)
                 })
                 .catch(function (error) {
-                    that.error(error)
+                    console.error(`${error} - ${url} failed`)
                 })
         },
         loadReports({dispatch, commit, state, rootState}) {
@@ -105,9 +115,5 @@ export const testRunnerStore = {
             reports[name] = report
             commit('setTestReports', reports)
         },
-        error(err) {
-            console.log(err)
-        },
-
     }
 }

@@ -1,5 +1,7 @@
 package gov.nist.asbestos.asbestosProxy.requests;
 
+import com.fasterxml.jackson.databind.annotation.JsonAppend;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -59,6 +61,11 @@ public class EC {
         return listOfDirectories(root);
     }
 
+    private static Properties defaultProperties = new Properties();
+    static {
+        defaultProperties.setProperty("TestType", "server");
+    }
+
     Properties getTestCollectionProperties(String collectionName) {
         Properties props = new Properties();
         File root = getTestCollectionBase(collectionName);
@@ -68,7 +75,7 @@ public class EC {
         try {
             props.load(new FileInputStream(file));
         } catch (IOException e) {
-            throw new RuntimeException("Cannot load " + file);
+            return defaultProperties;
         }
         return props;
     }

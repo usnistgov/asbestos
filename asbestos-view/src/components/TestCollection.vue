@@ -2,9 +2,13 @@
     <div>
         <span class="tool-title">Tests for Collection {{ testCollection }}</span>
         <span class="divider"></span>
-
         <img id="reload" class="selectable" @click="reload()" src="../assets/reload.png"/>
         <span class="divider"></span>
+
+        <div class="instruction">
+            <span v-if="$store.state.testRunner.isClientTest">Client tests - click hourglass to wait for client input</span>
+            <span v-else>Server tests - click run button to start test</span>
+        </div>
 
         <div v-for="(name, i) in $store.state.testRunner.testScriptNames"
              :key="name + i">
@@ -21,15 +25,9 @@
                             <img src="../assets/blank-circle.png" class="right">
                         </div>
                         <div v-if="isClient">
-                            <img src="../assets/hourglass.png" class="right" @click.stop="doWait(name)">
-                            <div v-if="isCurrent(name)">
-                                <img src="../assets/hourglass.png" class="right" @click.stop="stopWait()">
-                                <img src="../assets/hourglass.png" class="right" @click.stop="stopWait()">
-                                <img src="../assets/hourglass.png" class="right" @click.stop="stopWait()">
-                                <img src="../assets/hourglass.png" class="right" @click.stop="stopWait()">
-                                <img src="../assets/hourglass.png" class="right" @click.stop="stopWait()">
-                                <img src="../assets/hourglass.png" class="right" @click.stop="stopWait()">
-                                <img src="../assets/hourglass.png" class="right" @click.stop="stopWait()">
+                            <img src="../assets/hourglass.png" class="right" @click.stop="toggleWait(name)">
+                            <div v-if="$store.state.testRunner.waitingOnClient === name">
+                                <span class="right" @click.stop="toggleWait(name)">Waiting...</span>
                             </div>
                         </div>
                         <div v-else>
@@ -73,11 +71,11 @@
                         that.error(error)
                     })
             },
-            doWait(testName) {
-                this.$store.commit('setCurrentTest', testName)
-            },
-            stopWait() {
-                this.$store.commit('setCurrentTest', null)
+            toggleWait(testName) {
+                if (this.waitingOnClient === testName)
+                    this.waitingOnClient = null
+                else
+                    this.waitingOnClient = testName
             },
             selectTest(name) {
                 if (this.selected === name)  { // unselect
@@ -139,6 +137,14 @@
             testScriptNames() {  // just the ones with reports available
                 const reports = this.$store.state.testRunner.testReports
                 return Object.keys(reports).sort()
+            },
+            waitingOnClient: {
+                set(name) {
+                    this.$store.dispatch('waitOnClient', name)
+                },
+                get() {
+                    return this.$store.state.testRunner.waitingOnClient
+                }
             },
             channel: {
                 set(name) {
@@ -211,5 +217,8 @@
     }
     .right {
         text-align: right;
+    }
+    .instruction {
+        text-align: left;
     }
 </style>

@@ -47,12 +47,15 @@ public class TestEngineServlet extends HttpServlet {
             else if (GetTestLogRequest.isRequest(request)) new GetTestLogRequest(request).run();
             else throw new Exception("Invalid request - do not understand URI " + request.uri);
 
-        } catch (IOException e) {
+        } catch (RuntimeException e) {
             log.error(ExceptionUtils.getStackTrace(e));
             resp.setStatus(resp.SC_INTERNAL_SERVER_ERROR);
-        } catch (Throwable e) {
+        } catch (Exception e) {
             log.error(ExceptionUtils.getStackTrace(e));
             resp.setStatus(resp.SC_BAD_REQUEST);
+        } catch (Throwable e) {
+            log.error(ExceptionUtils.getStackTrace(e));
+            resp.setStatus(resp.SC_INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -71,6 +74,7 @@ public class TestEngineServlet extends HttpServlet {
         try {
 
             if (RunTestRequest.isRequest(request)) new RunTestRequest(request).run();
+            else if (EvalRequest.isRequest(request)) new EvalRequest(request).run();
             else throw new Exception("Invalid request - do not understand URI " + request.uri);
 
         } catch (IOException e) {
