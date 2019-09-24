@@ -84,12 +84,6 @@ public class Event {
     }
 
     public Task newTask() {
-//        int i = taskFiles.size();
-//        File taskFile = getTaskFile(i);
-//        taskFile.mkdirs();
-//        taskFiles.add(taskFile);
-//        Task task = new Task(NEWTASK, this);
-//        tasks.add(task);
         return new Task(NEWTASK, this);
     }
 

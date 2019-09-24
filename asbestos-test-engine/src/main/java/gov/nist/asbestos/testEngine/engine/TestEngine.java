@@ -11,10 +11,7 @@ import gov.nist.asbestos.simapi.validation.Val;
 import gov.nist.asbestos.simapi.validation.ValE;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.BaseResource;
-import org.hl7.fhir.r4.model.Reference;
-import org.hl7.fhir.r4.model.TestReport;
-import org.hl7.fhir.r4.model.TestScript;
+import org.hl7.fhir.r4.model.*;
 
 import java.io.*;
 import java.net.Proxy;
@@ -75,48 +72,65 @@ public class TestEngine  {
     }
 
     public TestEngine runTest() {
-        return runTest(null);
+        Objects.requireNonNull(val);
+        Objects.requireNonNull(testSession);
+        Objects.requireNonNull(externalCache);
+        engineVal = new ValE(val);
+        engineVal.setMsg("TestEngine");
+        try {
+            doWorkflow();
+        } catch (Throwable t) {
+            reportException(t);
+        }
+        returnTestReport();
+
+        return this;
     }
 
     // if inputResource == null then this is a test
     // if null then this is an evaluation
-    public TestEngine runTest(BaseResource inputResource) {
+    public TestEngine runEval(BaseResource requestResource, OperationOutcome originalOperationOutcome) {
         Objects.requireNonNull(val);
+        Objects.requireNonNull(testSession);
+        Objects.requireNonNull(externalCache);
         engineVal = new ValE(val);
         engineVal.setMsg("TestEngine");
         try {
-            if (inputResource == null)
-                doWorkflow();
-            else {
-                fixtureMgr.put("request", new FixtureComponent(inputResource));
-                initWorkflow();
-                doTest(); // should only be asserts
-            }
+            fixtureMgr.put("request", new FixtureComponent(requestResource));
+            fixtureMgr.put("outcome", new FixtureComponent(originalOperationOutcome));
+            initWorkflow();
+            doTest(); // should only be asserts
         } catch (Throwable t) {
-            String trace = ExceptionUtils.getStackTrace(t);
-            TestReport.TestReportSetupComponent setup = testReport.getSetup();
-            TestReport.SetupActionComponent comp = setup.addAction();
-            TestReport.SetupActionAssertComponent asComp = new TestReport.SetupActionAssertComponent();
-            asComp.setMessage(trace);
-            asComp.setResult(TestReport.TestReportActionResult.ERROR);
-            comp.setAssert(asComp);
-            propagateStatus(testReport);
+            reportException(t);
         }
-        if (testSession != null && externalCache != null) {
-            File logDir = new File(new File(externalCache, testSession), testDef.getName());
-            logDir.mkdirs();
-            TestReport testReport = getTestReport();
-            String json = ProxyBase.encode(testReport, Format.JSON);
-            Path path = new File(logDir, "TestReport.json").toPath();
-            try (BufferedWriter writer = Files.newBufferedWriter(path))
-            {
-                writer.write(json);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        }
+        returnTestReport();
 
         return this;
+    }
+
+    private void reportException(Throwable t) {
+        String trace = ExceptionUtils.getStackTrace(t);
+        TestReport.TestReportSetupComponent setup = testReport.getSetup();
+        TestReport.SetupActionComponent comp = setup.addAction();
+        TestReport.SetupActionAssertComponent asComp = new TestReport.SetupActionAssertComponent();
+        asComp.setMessage(trace);
+        asComp.setResult(TestReport.TestReportActionResult.ERROR);
+        comp.setAssert(asComp);
+        propagateStatus(testReport);
+    }
+
+    private void returnTestReport() {
+        File logDir = new File(new File(externalCache, testSession), testDef.getName());
+        logDir.mkdirs();
+        TestReport testReport = getTestReport();
+        String json = ProxyBase.encode(testReport, Format.JSON);
+        Path path = new File(logDir, "TestReport.json").toPath();
+        try (BufferedWriter writer = Files.newBufferedWriter(path))
+        {
+            writer.write(json);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private void doWorkflow() {

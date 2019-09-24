@@ -17,7 +17,7 @@ import static gov.nist.asbestos.asbestosProxy.requests.Dirs.listOfFiles;
 public class EC {
     File externalCache;
 
-    EC(File externalCache) {
+    public EC(File externalCache) {
         this.externalCache = externalCache;
     }
 

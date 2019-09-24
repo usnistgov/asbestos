@@ -6,7 +6,7 @@
         <span class="divider"></span>
 
         <div class="instruction">
-            <span v-if="$store.state.testRunner.isClientTest">Client tests - click hourglass to wait for client input</span>
+            <span v-if="$store.state.testRunner.isClientTest">Client tests - click hourglass to listen for client input</span>
             <span v-else>Server tests - click run button to start test</span>
         </div>
 
@@ -27,7 +27,7 @@
                         <div v-if="isClient">
                             <img src="../assets/hourglass.png" class="right" @click.stop="toggleWait(name)">
                             <div v-if="$store.state.testRunner.waitingOnClient === name">
-                                <span class="right" @click.stop="toggleWait(name)">Waiting...</span>
+                                <span class="right" @click.stop="toggleWait(name)">Listening...</span>
                             </div>
                         </div>
                         <div v-else>

@@ -1,6 +1,7 @@
 package gov.nist.asbestos.asbestosProxy.servlet;
 
 import com.google.gson.Gson;
+import gov.nist.asbestos.client.events.Event;
 import gov.nist.asbestos.http.headers.Header;
 import gov.nist.asbestos.http.headers.Headers;
 import gov.nist.asbestos.http.operations.Verb;
@@ -25,6 +26,8 @@ import java.util.stream.Collectors;
 
 public class ProxyLogServlet extends HttpServlet {
     private File externalCache = null;
+    private static String port = "8081";
+    private static String hostname = "localhost";
     private static Logger log = Logger.getLogger(ProxyLogServlet.class);
 
     @Override
@@ -39,6 +42,13 @@ public class ProxyLogServlet extends HttpServlet {
     public void setExternalCache(File externalCache) {
         this.externalCache = externalCache;
         Installation.instance().setExternalCache(externalCache);
+    }
+
+    static String getEventLink(Event event, ChannelConfig channel) {
+        String eventId = event.getEventId();
+        String testSession = channel.getTestSession();
+        String channelId = channel.getChannelId();
+        return String.format("http://%s:%s/asbestos/log/%s/%s/null/%s", hostname, port, testSession, channelId, eventId);
     }
 
     boolean htmlOk;
