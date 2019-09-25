@@ -1,7 +1,10 @@
 package gov.nist.asbestos.asbestosProxy.requests;
 
-import com.fasterxml.jackson.databind.annotation.JsonAppend;
+import com.google.gson.Gson;
+import gov.nist.asbestos.asbestosProxy.servlet.EventSummary;
+import gov.nist.asbestos.asbestosProxy.servlet.UiEvent;
 
+import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -136,4 +139,100 @@ public class EC {
         return testLogList;
     }
 
+    public void buildJsonListingOfEvent(HttpServletResponse resp, String testSession, String channelId, String resourceType, String eventName) {
+        File fhir = fhirDir(testSession, channelId);
+        if (resourceType.equals("null")) {
+            resourceType = resourceTypeForEvent(fhir, eventName);
+            if (resourceType == null) {
+                resp.setStatus(resp.SC_NOT_FOUND);
+                return;
+            }
+        }
+        File resourceTypeFile = new File(fhir, resourceType);
+        File eventDir = new File(resourceTypeFile, eventName);
+
+        UiEvent uiEvent = new UiEvent(eventDir);
+        uiEvent.eventName = eventName;
+        uiEvent.resourceType = resourceType;
+
+        String json = new Gson().toJson(uiEvent);
+        resp.setContentType("application/json");
+        try {
+            resp.getOutputStream().print(json);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        resp.setStatus(resp.SC_OK);
+    }
+
+    public File fhirDir(String testSession, String channelId) {
+        File psimdb = new File(externalCache, "psimdb");
+        File testSessionFile = new File(psimdb, testSession);
+        File channelFile = new File(testSessionFile, channelId);
+        return new File(channelFile, "fhir");
+    }
+
+    public String resourceTypeForEvent(File fhir, String eventName) {
+        File[] resourceTypeFiles = fhir.listFiles();
+        if (resourceTypeFiles != null) {
+            for (File resourceTypeDir : resourceTypeFiles) {
+                File[] eventFiles = resourceTypeDir.listFiles();
+                if (eventFiles != null) {
+                    for (File eventFile : eventFiles) {
+                        if (eventFile.getName().equals(eventName)) {
+                            return resourceTypeDir.getName();
+                        }
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    public void buildJsonListingOfEvents(HttpServletResponse resp, String testSession, String channelId, String resourceType) {
+        File fhir = new EC(externalCache).fhirDir(testSession, channelId);
+        File resourceTypeFile = new File(fhir, resourceType);
+
+        List<String> events = Dirs.dirListingAsStringList(resourceTypeFile);
+        returnJsonList(resp, events);
+    }
+
+    public void returnJsonList(HttpServletResponse resp, List<String> theList) {
+        String json = new Gson().toJson(theList);
+        resp.setContentType("application/json");
+        try {
+            resp.getOutputStream().print(json);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        resp.setStatus(resp.SC_OK);
+    }
+
+    public void buildJsonListingOfEventSummaries(HttpServletResponse resp, String testSession, String channelId) {
+        File fhir = new EC(externalCache).fhirDir(testSession, channelId);
+        List<String> resourceTypes = Dirs.dirListingAsStringList(fhir);
+        List<EventSummary> eventSummaries = new ArrayList<>();
+        for (String resourceType : resourceTypes) {
+            File resourceDir = new File(fhir, resourceType);
+            List<String> eventIds = Dirs.dirListingAsStringList(resourceDir);
+            for (String eventId : eventIds) {
+                File eventFile = new File(resourceDir, eventId);
+                EventSummary summary = new EventSummary(eventFile);
+                summary.resourceType = resourceType;
+                summary.eventName = eventId;
+                eventSummaries.add(summary);
+            }
+        }
+        String json = new Gson().toJson(eventSummaries);
+        resp.setContentType("application/json");
+        try {
+            resp.getOutputStream().print(json);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        resp.setStatus(resp.SC_OK);
+    }
 }

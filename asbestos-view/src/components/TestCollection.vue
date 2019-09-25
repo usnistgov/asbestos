@@ -25,7 +25,7 @@
                             <img src="../assets/blank-circle.png" class="right">
                         </div>
                         <div v-if="isClient">
-                            <img src="../assets/hourglass.png" class="right" @click.stop="toggleWait(name)">
+                            <img src="../assets/validate-search.png" class="right" @click.stop="toggleWait(name)">
                             <div v-if="$store.state.testRunner.waitingOnClient === name">
                                 <span class="right" @click.stop="toggleWait(name)">Listening...</span>
                             </div>
