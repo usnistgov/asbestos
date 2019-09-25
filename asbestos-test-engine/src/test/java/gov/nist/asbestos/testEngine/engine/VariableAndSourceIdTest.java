@@ -55,7 +55,7 @@ class VariableAndSourceIdTest {
         TestEngine testEngine = new TestEngine(test1, new URI(""))
                 .setVal(val)
                 .setFhirClient(fhirClientMock)
-                .runTest(null);
+                .runTest();
         System.out.println(testEngine.getTestReportAsJson());
         List<String> errors = testEngine.getErrors();
         printErrors(errors);
@@ -93,7 +93,7 @@ class VariableAndSourceIdTest {
         TestEngine testEngine = new TestEngine(test1, new URI(""))
                 .setVal(val)
                 .setFhirClient(fhirClientMock)
-                .runTest(null);
+                .runTest();
         System.out.println(testEngine.getTestReportAsJson());
         List<String> errors = testEngine.getErrors();
         printErrors(errors);
@@ -131,7 +131,7 @@ class VariableAndSourceIdTest {
         TestEngine testEngine = new TestEngine(test1, new URI(""))
                 .setVal(val)
                 .setFhirClient(fhirClientMock)
-                .runTest(null);
+                .runTest();
         System.out.println(testEngine.getTestReportAsJson());
         List<String> errors = testEngine.getErrors();
         printErrors(errors);
@@ -169,7 +169,7 @@ class VariableAndSourceIdTest {
         TestEngine testEngine = new TestEngine(test1, new URI(""))
                 .setVal(val)
                 .setFhirClient(fhirClientMock)
-                .runTest(null);
+                .runTest();
         System.out.println(testEngine.getTestReportAsJson());
         List<String> errors = testEngine.getErrors();
         printErrors(errors);
@@ -207,7 +207,7 @@ class VariableAndSourceIdTest {
         TestEngine testEngine = new TestEngine(test1, new URI(""))
                 .setVal(val)
                 .setFhirClient(fhirClientMock)
-                .runTest(null);
+                .runTest();
         System.out.println(testEngine.getTestReportAsJson());
         List<String> errors = testEngine.getErrors();
         printErrors(errors);
@@ -251,7 +251,7 @@ class VariableAndSourceIdTest {
         TestEngine testEngine = new TestEngine(test1, new URI(""))
                 .setVal(val)
                 .setFhirClient(fhirClientMock)
-                .runTest(null);
+                .runTest();
         System.out.println(testEngine.getTestReportAsJson());
         List<String> errors = testEngine.getErrors();
         printErrors(errors);
