@@ -5,8 +5,13 @@
         <img id="reload" class="selectable" @click="reload()" src="../assets/reload.png"/>
         <span class="divider"></span>
 
+        <div class="right">
+            Last Marker: {{ $store.state.testRunner.lastMarker }}
+            <span class="selectable" @click="setMarker()">Set</span>
+        </div>
+
         <div class="instruction">
-            <span v-if="$store.state.testRunner.isClientTest">Client tests - click hourglass to listen for client input</span>
+            <span v-if="$store.state.testRunner.isClientTest">Client tests - click spyglass to evaluate client inputs since last Marker</span>
             <span v-else>Server tests - click run button to start test</span>
         </div>
 
@@ -91,6 +96,7 @@
             reload() {
                 this.$store.commit('setTestCollectionName', this.testCollection)
                 this.$store.dispatch('loadTestScriptNames')
+                this.loadLastMarker()
                 this.$router.push(`/session/${this.sessionId}/channel/${this.channelId}/collection/${this.testCollection}`)
             },
             testReport(testName) {
@@ -119,6 +125,15 @@
             },
             isCurrent(testId) {
                 return testId === this.$store.state.testRunner.currentTest
+            },
+            loadLastMarker() {
+                console.log('loadLastMarker')
+                if (this.$store.state.testRunner.lastMarker === null) {
+                    this.$store.dispatch('loadLastMarker')
+                }
+            },
+            setMarker() {
+                this.$store.dispatch('setMarker')
             },
         },
         computed: {
@@ -170,6 +185,7 @@
             'channelId': function(newVal) {
                 if (this.channel !== newVal)
                     this.channel = newVal
+                this.loadLastMarker()
             },
             '$store.state.testRunner.testScriptNames' : 'loadReports',
             '$store.state.testRunner.testReports': 'updateReportStatuses',

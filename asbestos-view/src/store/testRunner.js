@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
-import {ENGINE} from '../common/http-common'
+import {ENGINE, LOG} from '../common/http-common'
 
 Vue.use(Vuex)
 
@@ -17,9 +17,14 @@ export const testRunnerStore = {
 
             testScripts: [], // testId => TestScript
             testReports: [], // testId => TestReport
+
+            lastMarker: null,
         }
     },
     mutations: {
+        setLastMarker(state, marker) {
+            state.lastMarker = marker
+        },
         setWaitingOnClient(state, testId) {
             state.waitingOnClient = testId
         },
@@ -56,6 +61,26 @@ export const testRunnerStore = {
         }
     },
     actions: {
+        loadLastMarker({commit, rootState}) {
+            LOG.get(`marker/${rootState.base.session}/${rootState.base.channelId}`)
+                .then(response => {
+                    const value = response.data === '' ? 'None' : response.data
+                    commit('setLastMarker', value)
+                })
+                .catch(function (error) {
+                    console.error(error)
+                })
+        },
+        setMarker({commit, rootState}) {
+            LOG.post(`marker/${rootState.base.session}/${rootState.base.channelId}`)
+                .then(response => {
+                    const value = response.data === '' ? 'None' : response.data
+                    commit('setLastMarker', value)
+                })
+                .catch(function (error) {
+                    console.error(error)
+                })
+        },
         waitOnClient({commit, state, rootState}, testId) {
             ENGINE.post(`eval/${rootState.base.session}__${rootState.base.channelId}/${state.currentTestCollectionName}/${testId}`)
                 .then(response => {

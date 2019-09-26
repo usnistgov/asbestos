@@ -164,6 +164,8 @@ public class SimStore {
     }
 
     public String getActorType() {
+        if (channelId.getActorType() == null)
+            return "fhir";
         return channelId.getActorType();
     }
 

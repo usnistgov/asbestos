@@ -53,75 +53,24 @@ public class ProxyLogServlet extends HttpServlet {
         return String.format("http://%s:%s/asbestos/log/%s/%s/null/%s", hostname, port, testSession, channelId, eventId);
     }
 
-    private boolean htmlOk;
-    private boolean jsonOk;
-    private HttpServletRequest req;
-    private HttpServletResponse resp;
 
     @Override
     public void doGet(HttpServletRequest req, HttpServletResponse resp) {
-        this.req = req;
-        this.resp = resp;
+
         if (externalCache == null) {
             resp.setStatus(resp.SC_INTERNAL_SERVER_ERROR);
             return;
         }
-        String uri = req.getRequestURI();
 
         Request request = new Request(req, resp, externalCache);
         log.info("Log GET " + request.uri);
-
-        Headers headers = Common.getRequestHeaders(req, Verb.GET);
-        Header acceptHeader = headers.getAccept();
-        htmlOk = acceptHeader.getValue().contains("text/html");
-        jsonOk = acceptHeader.getValue().contains("json");
-
-        // uri should be
-        // testSession/channelId/resourcetype/event
-        //
-        // 6 - event
-        // 5 - resourceType - may be null
-        // 4 - channelId
-        // 3 - testSession
-
-        String[] uriParts = uri.split("/");
-//        if (uriParts.length == 9) { // part
-//            buildJsonListingOfPart(resp, uriParts[3], uriParts[4], uriParts[5], uriParts[6], uriParts[7], uriParts[8]);
-//            return;
-//        }
-//        if (uriParts.length == 8) { // task
-//            buildJsonListingOfTask(resp, uriParts[3], uriParts[4], uriParts[5], uriParts[6], uriParts[7]);
-//            return;
-//        }
-
-        // since event
-        // return next event after this one (wait for it if you must)
-        // wait may time out and return 404
-
-        // 7 - event
-        // 6 - "since"
-        // 5 - resourceType - may be null
-        // 4 - channelId
-        // 3 - testSession
-        if (uriParts.length == 8 && uriParts[6].equals("since")) {
-//            List<ResourceId> ids = buildListOfEventIdsByResourceType(uriParts[3], uriParts[4]);
-//            ids.sort(Comparator.reverseOrder());
-//            List<String> results = new ArrayList<>();
-//            String event = uriParts[7];
-//            for (String id : ids) {
-//                if (id.compareTo(event) > 0)
-//                    results.add(id);
-//                else
-//                    break;
-//            }
-//            returnJsonList(resp, ids);
-//            return;
-        }
 
         try {
 
             if (GetEventRequest.isRequest(request)) new GetEventRequest(request).run();
             else if (GetEventForResourceTypeRequest.isRequest(request)) new GetEventForResourceTypeRequest(request).run();
+            else if (GetEventsForChannelRequest.isRequest(request)) new GetEventsForChannelRequest(request).run();
+            else if (GetChannelMarkerRequest.isRequest(request)) new GetChannelMarkerRequest(request).run();
             else throw new Exception("Invalid request - do not understand URI " + request.uri);
 
         } catch (RuntimeException e) {
@@ -134,27 +83,36 @@ public class ProxyLogServlet extends HttpServlet {
             log.error(ExceptionUtils.getStackTrace(e));
             resp.setStatus(resp.SC_INTERNAL_SERVER_ERROR);
         }
+    }
 
-        if (uriParts.length == 5 && jsonOk) {  // includes channelId
-            String query = req.getQueryString();
-            if (query != null && query.contains("summaries=true")) {
-                buildJsonListingOfEventSummaries(resp, uriParts[3], uriParts[4]);
-                return;
-            }
-            // JSON listing of resourceTypes in channelId
-            buildJsonListingOfResourceTypes(resp, uriParts[3], uriParts[4]);
+    @Override
+    public void doPost(HttpServletRequest req, HttpServletResponse resp) {
+
+        if (externalCache == null) {
+            resp.setStatus(resp.SC_INTERNAL_SERVER_ERROR);
             return;
         }
 
-        resp.setStatus(resp.SC_BAD_REQUEST);
+        Request request = new Request(req, resp, externalCache);
+        log.info("Log POST " + request.uri);
+
+        try {
+
+            if (CreateChannelMarkerRequest.isRequest(request)) new CreateChannelMarkerRequest(request).run();
+            else throw new Exception("Invalid request - do not understand URI " + request.uri);
+
+        } catch (RuntimeException e) {
+            log.error(ExceptionUtils.getStackTrace(e));
+            resp.setStatus(resp.SC_INTERNAL_SERVER_ERROR);
+        } catch (Exception e) {
+            log.error(ExceptionUtils.getStackTrace(e));
+            resp.setStatus(resp.SC_BAD_REQUEST);
+        } catch (Throwable e) {
+            log.error(ExceptionUtils.getStackTrace(e));
+            resp.setStatus(resp.SC_INTERNAL_SERVER_ERROR);
+        }
     }
 
-    private void buildJsonListingOfResourceTypes(HttpServletResponse resp, String testSession, String channelId) {
-        File fhir = new EC(externalCache).fhirDir(testSession, channelId);
-
-        List<String> resourceTypes = Dirs.dirListingAsStringList(fhir);
-        new EC(externalCache).returnJsonList(resp, resourceTypes);
-    }
 
     private class ResourceId {
         String resourceType;

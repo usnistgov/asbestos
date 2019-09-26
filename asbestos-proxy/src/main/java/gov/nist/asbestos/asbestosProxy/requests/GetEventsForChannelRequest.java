@@ -12,8 +12,8 @@ import org.apache.log4j.Logger;
 // 3 - testSession
 // 4 - channelId
 
-public class GetEventForChannelRequest {
-    private static Logger log = Logger.getLogger(GetEventForChannelRequest.class);
+public class GetEventsForChannelRequest {
+    private static Logger log = Logger.getLogger(GetEventsForChannelRequest.class);
 
     private Request request;
 
@@ -25,19 +25,19 @@ public class GetEventForChannelRequest {
         return request.uriParts.size() == 5 && "log".equalsIgnoreCase(request.uriParts.get(2)) && jsonOk;
     }
 
-    public GetEventForChannelRequest(Request request) {
+    public GetEventsForChannelRequest(Request request) {
         this.request = request;
     }
 
     public void run() {
-        log.info("GetEventForChannelRequest");
-        String query = req.getQueryString();
+        log.info("GetEventsForChannelRequest");
+        String query = request.req.getQueryString();
         if (query != null && query.contains("summaries=true")) {
-            request.ec.buildJsonListingOfEventSummaries(request.resp, request.uriParts[3], request.uriParts[4]);
+            request.ec.buildJsonListingOfEventSummaries(request.resp, request.uriParts.get(3), request.uriParts.get(4));
             return;
         }
         // JSON listing of resourceTypes in channelId
-        buildJsonListingOfResourceTypes(resp, uriParts[3], uriParts[4]);
+        request.ec.buildJsonListingOfResourceTypes(request.resp, request.uriParts.get(3), request.uriParts.get(4));
         return;
     }
 

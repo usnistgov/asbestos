@@ -139,6 +139,11 @@ public class EC {
         return testLogList;
     }
 
+    public File getResourceType(String testSession, String channelId, String resourceType) {
+        File fhir = fhirDir(testSession, channelId);
+        return new File(fhir, resourceType);
+    }
+
     public void buildJsonListingOfEvent(HttpServletResponse resp, String testSession, String channelId, String resourceType, String eventName) {
         File fhir = fhirDir(testSession, channelId);
         if (resourceType.equals("null")) {
@@ -234,5 +239,12 @@ public class EC {
         }
 
         resp.setStatus(resp.SC_OK);
+    }
+
+    public void buildJsonListingOfResourceTypes(HttpServletResponse resp, String testSession, String channelId) {
+        File fhir = new EC(externalCache).fhirDir(testSession, channelId);
+
+        List<String> resourceTypes = Dirs.dirListingAsStringList(fhir);
+        new EC(externalCache).returnJsonList(resp, resourceTypes);
     }
 }
