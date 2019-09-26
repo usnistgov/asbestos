@@ -1,16 +1,10 @@
 package gov.nist.asbestos.asbestosProxy.requests;
 
-import gov.nist.asbestos.asbestosProxy.servlet.Task;
 import gov.nist.asbestos.http.headers.Header;
 import gov.nist.asbestos.http.headers.Headers;
 import gov.nist.asbestos.http.operations.Verb;
 import gov.nist.asbestos.http.support.Common;
 import org.apache.log4j.Logger;
-
-import javax.servlet.http.HttpServletResponse;
-import java.io.File;
-import java.io.IOException;
-import java.util.List;
 
 // 0 - empty
 // 1 - app context  (asbestos)

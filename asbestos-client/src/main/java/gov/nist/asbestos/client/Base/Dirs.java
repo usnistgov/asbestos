@@ -1,4 +1,4 @@
-package gov.nist.asbestos.asbestosProxy.requests;
+package gov.nist.asbestos.client.Base;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -7,7 +7,7 @@ import java.util.stream.Collectors;
 
 public class Dirs {
 
-    static List<File> listOfFiles(File root) {
+    static public List<File> listOfFiles(File root) {
         List<File> list = new ArrayList<>();
 
         File[] aList = root.listFiles();
@@ -22,7 +22,7 @@ public class Dirs {
         return list;
     }
 
-    static List<File> listOfDirectories(File root) {
+    static public List<File> listOfDirectories(File root) {
         List<File> list = new ArrayList<>();
 
         File[] aList = root.listFiles();

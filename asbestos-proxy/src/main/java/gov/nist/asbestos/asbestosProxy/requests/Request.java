@@ -1,5 +1,6 @@
 package gov.nist.asbestos.asbestosProxy.requests;
 
+import gov.nist.asbestos.client.Base.EC;
 import gov.nist.asbestos.http.support.Common;
 
 import javax.servlet.http.HttpServletRequest;
@@ -17,6 +18,8 @@ public class Request {
     public List<String> uriParts;
     public File externalCache;
     public EC ec;
+    public String testSession;
+    public String channelId;
 
     public Request(HttpServletRequest req, HttpServletResponse resp, File externalCache) {
         this.req = req;
@@ -29,6 +32,15 @@ public class Request {
 
     public HttpSession getSession() {
         return req.getSession();
+    }
+
+    public void parseChannelName(int part) {
+        String value = uriParts.get(part);
+        String[] parts = value.split("__");
+        if (parts.length == 2) {
+            testSession = parts[0];
+            channelId = parts[1];
+        }
     }
 
 }

@@ -1,6 +1,7 @@
 package gov.nist.asbestos.client.log;
 
 
+import gov.nist.asbestos.client.Base.Dirs;
 import gov.nist.asbestos.client.events.Event;
 import gov.nist.asbestos.client.events.Task;
 import gov.nist.asbestos.sharedObjects.ChannelConfig;
@@ -203,6 +204,11 @@ public class SimStore {
             _resourceDir = new File(getActorDir(), resource);
         _resourceDir.mkdirs();
         return _resourceDir;
+    }
+
+    public List<File> getResourceTypeDirs() {
+        File resourcesDir = new File(getChannelDir(), getActorType());
+        return Dirs.listOfDirectories(resourcesDir);
     }
 
     private File getEventDir(String eventId) {

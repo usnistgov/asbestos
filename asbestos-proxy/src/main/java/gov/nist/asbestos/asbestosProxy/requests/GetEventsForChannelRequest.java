@@ -38,7 +38,6 @@ public class GetEventsForChannelRequest {
         }
         // JSON listing of resourceTypes in channelId
         request.ec.buildJsonListingOfResourceTypes(request.resp, request.uriParts.get(3), request.uriParts.get(4));
-        return;
     }
 
 }

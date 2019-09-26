@@ -1,13 +1,10 @@
 package gov.nist.asbestos.asbestosProxy.requests;
 
-import gov.nist.asbestos.asbestosProxy.channel.ChannelControl;
-import gov.nist.asbestos.asbestosProxy.servlet.Task;
+import gov.nist.asbestos.client.events.UITask;
 import gov.nist.asbestos.http.headers.Header;
 import gov.nist.asbestos.http.headers.Headers;
 import gov.nist.asbestos.http.operations.Verb;
 import gov.nist.asbestos.http.support.Common;
-import gov.nist.asbestos.sharedObjects.ChannelConfig;
-import gov.nist.asbestos.sharedObjects.ChannelConfigFactory;
 import org.apache.log4j.Logger;
 
 import javax.servlet.http.HttpServletResponse;
@@ -102,17 +99,17 @@ public class GetEventRequest {
     private void displayEvent(StringBuilder b, File theEvent, String label) {
         String section = label.toLowerCase();
         b.append("<h2>").append(label).append("</h2>");
-        String description = Task.read(theEvent, section, "description.txt");
+        String description = UITask.read(theEvent, section, "description.txt");
         if (!description.equals("")) {
             b.append("<h4>Description</h4>");
             b.append("<pre>").append(description).append("</pre>");
         }
         b.append("<h3>Request</h3>");
-        b.append("<pre>").append(Task.read(theEvent, section, "request_header.txt")).append("</pre>");
-        b.append("<pre>").append(Task.read(theEvent, section, "request_body.txt")).append("</pre>");
+        b.append("<pre>").append(UITask.read(theEvent, section, "request_header.txt")).append("</pre>");
+        b.append("<pre>").append(UITask.read(theEvent, section, "request_body.txt")).append("</pre>");
 
         b.append("<h3>Response</h3>");
-        b.append("<pre>").append(Task.read(theEvent, section, "response_header.txt")).append("</pre>");
-        b.append("<pre>").append(Task.read(theEvent, section, "response_body.txt")).append("</pre>");
+        b.append("<pre>").append(UITask.read(theEvent, section, "response_header.txt")).append("</pre>");
+        b.append("<pre>").append(UITask.read(theEvent, section, "response_body.txt")).append("</pre>");
     }
 }

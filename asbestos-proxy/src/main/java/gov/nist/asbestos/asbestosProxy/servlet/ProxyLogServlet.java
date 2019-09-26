@@ -1,18 +1,13 @@
 package gov.nist.asbestos.asbestosProxy.servlet;
 
-import com.google.gson.Gson;
 import gov.nist.asbestos.asbestosProxy.requests.*;
+import gov.nist.asbestos.client.Base.Dirs;
+import gov.nist.asbestos.client.Base.EC;
 import gov.nist.asbestos.client.events.Event;
-import gov.nist.asbestos.http.headers.Header;
-import gov.nist.asbestos.http.headers.Headers;
-import gov.nist.asbestos.http.operations.Verb;
-import gov.nist.asbestos.http.support.Common;
 import gov.nist.asbestos.sharedObjects.ChannelConfig;
 import gov.nist.asbestos.simapi.tk.installation.Installation;
-import gov.nist.asbestos.testEngine.engine.TestEngine;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.log4j.Logger;
-import org.hl7.fhir.r4.model.TestReport;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -20,8 +15,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;

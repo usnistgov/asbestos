@@ -20,8 +20,6 @@ import java.util.List;
 public class GetChannelMarkerRequest {
     private static Logger log = Logger.getLogger(GetChannelMarkerRequest.class);
 
-    static final String MarkerType = "Marker";
-
     private Request request;
 
     public static boolean isRequest(Request request) {
@@ -41,16 +39,11 @@ public class GetChannelMarkerRequest {
 
     public void run() {
         log.info("GetChannelMarkerRequest");
-        File markerDir = request.ec.getResourceType(request.uriParts.get(4), request.uriParts.get(5), MarkerType);
-        List<String> markers = Dirs.dirListingAsStringList(markerDir);
-        if (markers.size() == 0) {
+        String marker = request.ec.getLastMarker(request.uriParts.get(4), request.uriParts.get(5));
+        if (marker == null) {
             request.resp.setStatus(request.resp.SC_NO_CONTENT);
-        } else if (markers.size() == 1) {
-            Returns.returnString(request.resp, markers.get(0));
-        } else {
-            markers.sort(String.CASE_INSENSITIVE_ORDER);
-            String last = markers.get(markers.size() - 1);
-            Returns.returnString(request.resp, last);
+        } else  {
+            Returns.returnString(request.resp, marker);
         }
     }
 

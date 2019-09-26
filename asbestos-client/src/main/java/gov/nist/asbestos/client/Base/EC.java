@@ -1,8 +1,10 @@
-package gov.nist.asbestos.asbestosProxy.requests;
+package gov.nist.asbestos.client.Base;
 
 import com.google.gson.Gson;
-import gov.nist.asbestos.asbestosProxy.servlet.EventSummary;
-import gov.nist.asbestos.asbestosProxy.servlet.UiEvent;
+import gov.nist.asbestos.client.events.EventSummary;
+import gov.nist.asbestos.client.events.UiEvent;
+import gov.nist.asbestos.client.log.SimStore;
+import gov.nist.asbestos.simapi.simCommon.SimId;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
@@ -14,17 +16,19 @@ import java.util.List;
 import java.util.Properties;
 import java.util.stream.Collectors;
 
-import static gov.nist.asbestos.asbestosProxy.requests.Dirs.listOfDirectories;
-import static gov.nist.asbestos.asbestosProxy.requests.Dirs.listOfFiles;
+import static gov.nist.asbestos.client.Base.Dirs.listOfDirectories;
+import static gov.nist.asbestos.client.Base.Dirs.listOfFiles;
 
 public class EC {
-    File externalCache;
+    public File externalCache;
+
+    public static final String MarkerType = "Marker";
 
     public EC(File externalCache) {
         this.externalCache = externalCache;
     }
 
-     List<String> getTestCollectionNames() {
+     public List<String> getTestCollectionNames() {
         return getTestCollections().stream().map(File::getName).collect(Collectors.toList());
     }
 
@@ -44,7 +48,7 @@ public class EC {
         return collections;
     }
 
-     List<String> getTestsInCollection(String collectionName) {
+     public List<String> getTestsInCollection(String collectionName) {
         return getTests(collectionName).stream().map(File::getName).collect(Collectors.toList());
     }
 
@@ -57,7 +61,7 @@ public class EC {
         return null;
     }
 
-     List<File> getTests(String collectionName) {
+     public List<File> getTests(String collectionName) {
         File root = getTestCollectionBase(collectionName);
         if (root == null)
             return new ArrayList<>();
@@ -69,7 +73,7 @@ public class EC {
         defaultProperties.setProperty("TestType", "server");
     }
 
-    Properties getTestCollectionProperties(String collectionName) {
+    public Properties getTestCollectionProperties(String collectionName) {
         Properties props = new Properties();
         File root = getTestCollectionBase(collectionName);
         if (root == null)
@@ -112,7 +116,7 @@ public class EC {
         return null;
     }
 
-     File getTestLog(String channelId, String collectionName, String testName) {
+     public File getTestLog(String channelId, String collectionName, String testName) {
         File testLogs = new File(externalCache, "FhirTestLogs");
         File forChannelId = new File(testLogs, channelId);
         File forCollection = new File(forChannelId, collectionName);
@@ -120,7 +124,7 @@ public class EC {
         return new File(forCollection, testName + ".json");
     }
 
-    List<File> getTestLogs(String testSession, String collectionName) {
+    public List<File> getTestLogs(String testSession, String collectionName) {
         File testLogs = new File(externalCache, "FhirTestLogs");
         File forTestSession = new File(testLogs, testSession);
         File forCollection = new File(forTestSession, collectionName);
@@ -246,5 +250,35 @@ public class EC {
 
         List<String> resourceTypes = Dirs.dirListingAsStringList(fhir);
         new EC(externalCache).returnJsonList(resp, resourceTypes);
+    }
+
+    public String getLastMarker(String testSession, String channelId) {
+        File markerDir = getResourceType(testSession, channelId, MarkerType);
+        List<String> markers = Dirs.dirListingAsStringList(markerDir);
+        if (markers.size() == 0) {
+            return null;
+        } else if (markers.size() == 1) {
+            return markers.get(0);
+        } else {
+            markers.sort(String.CASE_INSENSITIVE_ORDER);
+            return markers.get(markers.size() - 1);
+        }
+    }
+
+    public List<File> getEventsSince(SimId simId, String marker) {
+        List<File> eventsList = new ArrayList<>();
+        SimStore simStore = new SimStore(externalCache, simId);
+        List<File> resourceTypeDirs = simStore.getResourceTypeDirs();
+        for (File resourceTypeDir : resourceTypeDirs) {
+            List<File> events = Dirs.listOfDirectories(resourceTypeDir);
+            for (File event : events) {
+                String eventName = event.getName();
+                if (marker == null)
+                    eventsList.add(event);
+                else if (eventName.compareTo(marker) < 0)
+                    eventsList.add(event);
+            }
+        }
+        return eventsList;
     }
 }

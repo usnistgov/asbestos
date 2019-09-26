@@ -2,7 +2,7 @@ package gov.nist.asbestos.asbestosProxy.servlet;
 
 
 import gov.nist.asbestos.asbestosProxy.channel.*;
-import gov.nist.asbestos.asbestosProxy.requests.EC;
+import gov.nist.asbestos.client.Base.EC;
 import gov.nist.asbestos.asbestosProxy.requests.EvalRequest;
 import gov.nist.asbestos.client.events.Event;
 import gov.nist.asbestos.client.log.SimStore;

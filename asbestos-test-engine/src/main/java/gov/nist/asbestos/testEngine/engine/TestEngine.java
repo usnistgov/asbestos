@@ -61,6 +61,11 @@ public class TestEngine  {
         this.testDef = testDef;
     }
 
+    public TestEngine(File testDef, TestScript testScript) {
+        this.testDef = testDef;
+        this.testScript = testScript;
+    }
+
     public TestEngine setTestSession(String testSession) {
         this.testSession = testSession;
         return this;
@@ -89,7 +94,7 @@ public class TestEngine  {
 
     // if inputResource == null then this is a test
     // if null then this is an evaluation
-    public TestEngine runEval(BaseResource requestResource, OperationOutcome originalOperationOutcome) {
+    public TestEngine runEval(BaseResource requestResource, OperationOutcome originalOperationOutcome, Bundle originalResponse) {
         Objects.requireNonNull(val);
         Objects.requireNonNull(testSession);
         Objects.requireNonNull(externalCache);
@@ -98,6 +103,7 @@ public class TestEngine  {
         try {
             fixtureMgr.put("request", new FixtureComponent(requestResource));
             fixtureMgr.put("outcome", new FixtureComponent(originalOperationOutcome));
+            fixtureMgr.put("response", new FixtureComponent(originalResponse));
             initWorkflow();
             doTest(); // should only be asserts
         } catch (Throwable t) {
@@ -157,7 +163,8 @@ public class TestEngine  {
     }
 
     private void initWorkflow() {
-        testScript = loadTestScript();
+        if (testScript == null)
+            testScript = loadTestScript(testDef);
         testReport.setName(testScript.getName());
         testReport.setTestScript(new Reference(testScript.getId()));
         testReport.setIssued(new Date());
@@ -495,13 +502,13 @@ public class TestEngine  {
 
     }
 
-    private TestScript loadTestScript() {
-        Objects.requireNonNull(testDef);
-        File location = new File(testDef, "TestScript.xml");
+    public static TestScript loadTestScript(File testDefDir) {
+        Objects.requireNonNull(testDefDir);
+        File location = new File(testDefDir, "TestScript.xml");
         if (!location.exists() || !location.canRead() ) {
-            location = new File(testDef, "TestScript.json");
+            location = new File(testDefDir, "TestScript.json");
             if (!location.exists() || !location.canRead() ) {
-                throw new RuntimeException("Cannot load TestScript (.xml or .json) from " + testDef);
+                throw new RuntimeException("Cannot load TestScript (.xml or .json) from " + testDefDir);
             }
         }
         InputStream is;
@@ -667,5 +674,9 @@ public class TestEngine  {
     public TestEngine setSut(URI sut) {
         this.sut = sut;
         return this;
+    }
+
+    public void setTestScript(TestScript testScript) {
+        this.testScript = testScript;
     }
 }

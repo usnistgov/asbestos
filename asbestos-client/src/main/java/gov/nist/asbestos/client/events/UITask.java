@@ -1,9 +1,9 @@
-package gov.nist.asbestos.asbestosProxy.servlet;
+package gov.nist.asbestos.client.events;
 
 import java.io.File;
 import java.nio.file.Files;
 
-public class Task {
+public class UITask {
     int index;
     String label;
     String description;
@@ -12,7 +12,7 @@ public class Task {
     String responseHeader;
     String responseBody;
 
-    public Task(File eventDir, String taskLabel) {
+    public UITask(File eventDir, String taskLabel) {
         description = read(eventDir, taskLabel, "description.txt");
         requestHeader = read(eventDir, taskLabel, "request_header.txt");
         requestBody = read(eventDir, taskLabel, "request_body.txt");

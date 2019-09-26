@@ -12,7 +12,7 @@ import org.apache.log4j.Logger;
 import java.io.File;
 import java.util.List;
 
-import static gov.nist.asbestos.asbestosProxy.requests.GetChannelMarkerRequest.MarkerType;
+import static gov.nist.asbestos.client.Base.EC.MarkerType;
 
 // 0 - empty
 // 1 - app context  (asbestos)
