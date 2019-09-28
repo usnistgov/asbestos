@@ -58,7 +58,9 @@
                 return assert.description === undefined ? "" : assert.description
             },
             loadTestScript() {
+                console.info(`load testscript ${this.testId} - ${this.$store.state.testRunner.testScripts[this.testId]}`)
                 if (this.$store.state.testRunner.testScripts[this.testId] === undefined) {
+                    console.info(`${this.testId} needed loading`)
                     const that = this
                     ENGINE.get(`collection/${this.testCollection}/${this.testId}`)
                         .then(response => {

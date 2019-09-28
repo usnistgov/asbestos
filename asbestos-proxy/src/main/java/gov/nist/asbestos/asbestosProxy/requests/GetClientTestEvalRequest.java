@@ -1,5 +1,6 @@
 package gov.nist.asbestos.asbestosProxy.requests;
 
+import com.google.gson.Gson;
 import gov.nist.asbestos.asbestosProxy.servlet.ChannelConnector;
 import gov.nist.asbestos.client.Base.ProxyBase;
 import gov.nist.asbestos.client.client.Format;
@@ -16,10 +17,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 // 0 - empty
@@ -28,7 +26,8 @@ import java.util.stream.Collectors;
 // 3 - "clienteval"
 // 4 - channelName   testSession__channelId
 // 5 - testCollectionId
-//
+// 6 - testId (optional)
+// Run a client test
 
 public class GetClientTestEvalRequest {
     private static Logger log = Logger.getLogger(GetClientTestEvalRequest.class);
@@ -36,26 +35,33 @@ public class GetClientTestEvalRequest {
     private Request request;
 
     public static boolean isRequest(Request request) {
-        return request.uriParts.size() == 6 && request.uriParts.get(3).equals("clienteval");
+        return  request.uriParts.get(3).equals("clienteval") &&
+                (request.uriParts.size() == 6 || request.uriParts.size() == 7);
     }
 
     public GetClientTestEvalRequest(Request request) {
         this.request = request;
     }
 
-    class EventResult {
-        Map<String, TestReport> reports = new HashMap<>(); // testId -> TestReport
+    class Result {
+        Map<String, EventResult> results = new HashMap<>(); // testId -> EventResult
     }
 
-    class Result {
-        Map<String, EventResult> results = new HashMap<>(); // eventId -> EventResult
+    class EventResult {
+        Map<String, TestReport> reports = new HashMap<>(); // eventId -> TestReport
     }
 
     public void run() {
         log.info("GetClientTestEval");
         request.parseChannelName(4);
         String testCollection = request.uriParts.get(5);
-        List<File> testDirs = request.ec.getTests(testCollection);
+
+        List<File> testDirs;
+        if (request.uriParts.size() == 6)  // no testID specified - do all
+            testDirs = request.ec.getTests(testCollection);
+        else  // testId specified - do one
+            testDirs = Collections.singletonList(request.ec.getTest(testCollection, request.uriParts.get(6)));
+
         Map<String, File> testIds = testDirs.stream().collect(Collectors.toMap(File::getName, x -> x));
         // testId -> testScript
         Map<String, TestScript> testScripts = testDirs.stream().collect(
@@ -64,14 +70,13 @@ public class GetClientTestEvalRequest {
 
         String marker = request.ec.getLastMarker(request.testSession, request.channelId);
         SimId simId = SimId.buildFromRawId(request.uriParts.get(4));
-        SimStore simStore = new SimStore(request.externalCache, simId);
 
         List<File> eventDirsSinceMarker = request.ec.getEventsSince(simId, marker);
         eventDirsSinceMarker.sort(Comparator.comparing(File::getName));
         List<Event> events = eventDirsSinceMarker.stream().map(Event::new).collect(Collectors.toList());
+
         Map<Event, BaseResource> requestResources = new HashMap<>();
         Map<Event, BaseResource> responseResources = new HashMap<>();
-
         for (Event event : events) {
             String requestString = event.getClientTask().getRequestBodyAsString();
             String requestContentType = event.getClientTask().getRequestHeader().getContentType().getValue();
@@ -86,22 +91,20 @@ public class GetClientTestEvalRequest {
             responseResources.put(event, rresource);
         }
 
+        Result result = new Result();
         for (String testId : testIds.keySet()) {
             File testDir = testIds.get(testId);
             TestScript testScript = testScripts.get(testId);
             TestEngine testEngine = new TestEngine(testDir, testScript);
             for (Event event : events) {
-                // response could be OperationOutcome or Bundle (transaction-response)
-                BaseResource resource = responseResources.get(event);
-                OperationOutcome operationOutcome = null;
-                Bundle bundle = null;
-                if (resource instanceof Bundle) {
-                    bundle = (Bundle) resource;
-                } else if (resource instanceof OperationOutcome) {
-                    operationOutcome = (OperationOutcome)  resource;
-                }
-                testEngine.runEval(requestResources.get(event), operationOutcome, bundle);
+                BaseResource responseResource = responseResources.get(event);
+                testEngine.runEval(requestResources.get(event), responseResource);
+                EventResult eventResult = new EventResult();
+                eventResult.reports.put(event.getEventId(), testEngine.getTestReport());
+                result.results.put(testId, eventResult);
             }
         }
+
+        Returns.returnObject(request.resp, result);
     }
 }

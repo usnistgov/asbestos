@@ -39,10 +39,13 @@ export const testRunnerStore = {
             state.currentTest = currentTestId
         },
         clearTestReports(state) {
-            state.testReports.length = 0
+            state.testReports = []
         },
         setTestReports(state, reports) {
             state.testReports = reports
+        },
+        clearTestScripts(state) {
+            state.testScripts = []
         },
         addTestScript(state, scriptObject) {
             // scriptObject is  { name: testId, script: TestScript }
@@ -111,6 +114,7 @@ export const testRunnerStore = {
                     commit('setTestScriptNames', theResponse.testNames)
                     const isClient = !theResponse.isServerTest
                     commit('setIsClientTest', isClient)
+                    commit('clearTestScripts')
                 })
                 .catch(function (error) {
                     console.error(`${error} - ${url} failed`)

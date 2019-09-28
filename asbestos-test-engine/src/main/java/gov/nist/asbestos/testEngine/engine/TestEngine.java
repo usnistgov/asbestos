@@ -94,7 +94,7 @@ public class TestEngine  {
 
     // if inputResource == null then this is a test
     // if null then this is an evaluation
-    public TestEngine runEval(BaseResource requestResource, OperationOutcome originalOperationOutcome, Bundle originalResponse) {
+    public TestEngine runEval(BaseResource requestResource, BaseResource responseResource) {
         Objects.requireNonNull(val);
         Objects.requireNonNull(testSession);
         Objects.requireNonNull(externalCache);
@@ -102,8 +102,7 @@ public class TestEngine  {
         engineVal.setMsg("TestEngine");
         try {
             fixtureMgr.put("request", new FixtureComponent(requestResource));
-            fixtureMgr.put("outcome", new FixtureComponent(originalOperationOutcome));
-            fixtureMgr.put("response", new FixtureComponent(originalResponse));
+            fixtureMgr.put("response", new FixtureComponent(responseResource));
             initWorkflow();
             doTest(); // should only be asserts
         } catch (Throwable t) {
