@@ -12,7 +12,7 @@ import LogsView from "../components/LogsView"
 import LogList from "../components/LogList"
 import LogItem from "../components/LogItem"
 import TestCollection from "../components/TestCollection"
-import TestDetails from "../components/TestDetails"
+import TestOrEvalDetails from "../components/TestOrEvalDetails"
 
 Vue.use( VueRouter )
 
@@ -67,7 +67,7 @@ export const routes = [
                                 children: [
                                     {
                                         path: 'test/:testId',
-                                        component: TestDetails,
+                                        component: TestOrEvalDetails,
                                         props: true,
                                     },
                                 ],

@@ -40,7 +40,7 @@ public class AssertionRunner {
         if (source == null)
             return assertReport;
 
-        if (source.getResponseType().equals("Bundle")) {
+        if ("Bundle".equals(source.getResponseType())) {
             // assertion could be targetting Bundle or a resource in the Bundle (search)
             boolean targetIsBundle = as.hasExpression() && as.getExpression().startsWith("Bundle");
             if (targetIsBundle) {

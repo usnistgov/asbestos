@@ -5,7 +5,7 @@
         <img id="reload" class="selectable" @click="reload()" src="../assets/reload.png"/>
         <span class="divider"></span>
 
-        <div class="right">
+        <div v-if="$store.state.testRunner.isClientTest" class="right">
             Last Marker: {{ $store.state.testRunner.lastMarker }}
             <span class="selectable" @click="setMarker()">Set</span>
         </div>
@@ -30,10 +30,8 @@
                             <img src="../assets/blank-circle.png" class="right">
                         </div>
                         <div v-if="isClient">
-                            <img src="../assets/validate-search.png" class="right" @click.stop="toggleWait(name)">
-                            <div v-if="$store.state.testRunner.waitingOnClient === name">
-                                <span class="right" @click.stop="toggleWait(name)">Listening...</span>
-                            </div>
+                            <img src="../assets/validate-search.png" class="right" @click.stop="doEval(name)">
+
                         </div>
                         <div v-else>
                             <img src="../assets/press-play-button.png" class="right" @click.stop="doRun(name)">
@@ -63,6 +61,29 @@
             }
         },
         methods: {
+            evalStatus() { // see GetClientTestEvalResult
+                this.status = []
+                this.allTestScriptNames().forEach(testId => {
+                    const eventResult = this.$store.state.testRunner.clientTestResult[testId]
+                    if (!eventResult) {
+                        this.status[testId] = 'not-run'
+                    } else {
+                        for (const eventId in eventResult) {
+                            if (eventResult.hasOwnProperty(eventId)) {
+                                const testReport = eventResult[eventId]
+                                if (testReport.result === 'fail') {
+                                    this.status[testId] = 'fail'
+                                }
+                            }
+                        }
+                    }
+                    this.status[testId] = 'pass'
+                })
+            },
+            doEval(testName) {
+                this.$store.dispatch('runEval', testName)
+                this.evalStatus()
+            },
             doRun(testName) {
                 this.$store.commit('setCurrentTest', null)
                 const that = this
@@ -75,12 +96,6 @@
                     .catch(error => {
                         that.error(error)
                     })
-            },
-            toggleWait(testName) {
-                if (this.waitingOnClient === testName)
-                    this.waitingOnClient = null
-                else
-                    this.waitingOnClient = testName
             },
             selectTest(name) {
                 if (this.selected === name)  { // unselect
@@ -116,6 +131,7 @@
                     this.status = status
                     this.time = time
                 })
+
             },
             loadReports() {
                 this.$store.dispatch('loadReports')
@@ -127,10 +143,8 @@
                 return testId === this.$store.state.testRunner.currentTest
             },
             loadLastMarker() {
-                console.log('loadLastMarker')
-                if (this.$store.state.testRunner.lastMarker === null) {
+               if (this.$store.state.testRunner.lastMarker === null)
                     this.$store.dispatch('loadLastMarker')
-                }
             },
             setMarker() {
                 this.$store.dispatch('setMarker')
@@ -191,7 +205,7 @@
             '$store.state.testRunner.testReports': 'updateReportStatuses',
         },
         mixins: [ errorHandlerMixin ],
-        name: "TestList",
+        name: "TestCollection",
         props: [
             'sessionId', 'channelId', 'testCollection',
         ]

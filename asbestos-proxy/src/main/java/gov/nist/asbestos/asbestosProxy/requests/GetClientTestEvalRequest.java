@@ -8,6 +8,7 @@ import gov.nist.asbestos.client.events.Event;
 import gov.nist.asbestos.client.log.SimStore;
 import gov.nist.asbestos.sharedObjects.ChannelConfig;
 import gov.nist.asbestos.simapi.simCommon.SimId;
+import gov.nist.asbestos.simapi.validation.Val;
 import gov.nist.asbestos.testEngine.engine.TestEngine;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.log4j.Logger;
@@ -70,6 +71,7 @@ public class GetClientTestEvalRequest {
 
         String marker = request.ec.getLastMarker(request.testSession, request.channelId);
         SimId simId = SimId.buildFromRawId(request.uriParts.get(4));
+        String testSession = simId.getTestSession().getValue();
 
         List<File> eventDirsSinceMarker = request.ec.getEventsSince(simId, marker);
         eventDirsSinceMarker.sort(Comparator.comparing(File::getName));
@@ -78,25 +80,36 @@ public class GetClientTestEvalRequest {
         Map<Event, BaseResource> requestResources = new HashMap<>();
         Map<Event, BaseResource> responseResources = new HashMap<>();
         for (Event event : events) {
-            String requestString = event.getClientTask().getRequestBodyAsString();
-            String requestContentType = event.getClientTask().getRequestHeader().getContentType().getValue();
-            Format format = Format.fromContentType(requestContentType);
-            BaseResource resource = ProxyBase.parse(requestString, format);
-            requestResources.put(event, resource);
+            try {
+                String requestString = event.getClientTask().getRequestBodyAsString();
+                String requestContentType = event.getClientTask().getRequestHeader().getContentType().getValue();
+                Format format = Format.fromContentType(requestContentType);
+                BaseResource resource = ProxyBase.parse(requestString, format);
+                requestResources.put(event, resource);
+            } catch (Throwable t) {
+                // ignore
+            }
 
-            String responseString = event.getClientTask().getResponseBodyAsString();
-            String responseContentType = event.getClientTask().getResponseHeader().getContentType().getValue();
-            Format rformat = Format.fromContentType(responseContentType);
-            BaseResource rresource = ProxyBase.parse(responseString, rformat);
-            responseResources.put(event, rresource);
+            try {
+                String responseString = event.getClientTask().getResponseBodyAsString();
+                String responseContentType = event.getClientTask().getResponseHeader().getContentType().getValue();
+                Format rformat = Format.fromContentType(responseContentType);
+                BaseResource rresource = ProxyBase.parse(responseString, rformat);
+                responseResources.put(event, rresource);
+            } catch (Throwable t) {
+                // ignore
+            }
         }
 
         Result result = new Result();
         for (String testId : testIds.keySet()) {
             File testDir = testIds.get(testId);
             TestScript testScript = testScripts.get(testId);
-            TestEngine testEngine = new TestEngine(testDir, testScript);
             for (Event event : events) {
+                TestEngine testEngine = new TestEngine(testDir, testScript);
+                testEngine.setVal(new Val());
+                testEngine.setTestSession(testSession);
+                testEngine.setExternalCache(request.externalCache);
                 BaseResource responseResource = responseResources.get(event);
                 testEngine.runEval(requestResources.get(event), responseResource);
                 EventResult eventResult = new EventResult();
@@ -105,6 +118,7 @@ public class GetClientTestEvalRequest {
             }
         }
 
-        Returns.returnObject(request.resp, result);
+        String json = Returns.returnObject(request.resp, result);
+        log.info(json);
     }
 }

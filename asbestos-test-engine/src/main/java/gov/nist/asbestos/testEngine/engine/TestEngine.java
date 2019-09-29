@@ -169,7 +169,8 @@ public class TestEngine  {
         testReport.setIssued(new Date());
         TestReport.TestReportParticipantComponent part = testReport.addParticipant();
         part.setType(TestReport.TestReportParticipantType.SERVER);
-        part.setUri(sut.toString());
+        if (sut != null)
+            part.setUri(sut.toString());
         part.setDisplay("NIST Asbestos Proxy");
 
         part = testReport.addParticipant();

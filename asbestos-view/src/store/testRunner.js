@@ -19,6 +19,7 @@ export const testRunnerStore = {
             testReports: [], // testId => TestReport
 
             lastMarker: null,
+            clientTestResult: [], // see GetClientTestEvalRequest.Result
         }
     },
     mutations: {
@@ -57,6 +58,9 @@ export const testRunnerStore = {
         setTestCollectionNames(state, names) {
             state.testCollectionNames = names
         },
+        setClientTestResult(state, testId, result) {
+            state.clientTestResult[testId] = result
+        }
     },
     getters: {
         testReportNames(state) {
@@ -64,8 +68,23 @@ export const testRunnerStore = {
         }
     },
     actions: {
+        runEval({commit, state, rootState}, testId) {
+            ENGINE.get(`clienteval/${rootState.base.session}__${rootState.base.channelId}/${state.currentTestCollectionName}/${testId}`)
+                .then(response => {
+                    const results = response.data
+                    for (const testId in results) {
+                        if (results.hasOwnProperty(testId))
+                            commit('setClientTestResult', testId, results[testId])
+                    }
+                })
+                .catch(function (error) {
+                    console.error(error)
+                })
+        },
         loadLastMarker({commit, rootState}) {
-            LOG.get(`marker/${rootState.base.session}/${rootState.base.channelId}`)
+            const uri = `marker/${rootState.base.session}/${rootState.base.channelId}`
+            console.log(uri)
+            LOG.get(uri)
                 .then(response => {
                     const value = response.data === '' ? 'None' : response.data
                     commit('setLastMarker', value)
@@ -84,15 +103,15 @@ export const testRunnerStore = {
                     console.error(error)
                 })
         },
-        waitOnClient({commit, state, rootState}, testId) {
-            ENGINE.post(`eval/${rootState.base.session}__${rootState.base.channelId}/${state.currentTestCollectionName}/${testId}`)
-                .then(response => {
-                    commit('setWaitingOnClient', testId)
-                })
-                .catch(function (error) {
-                    console.error(error)
-                })
-        },
+        // waitOnClient({commit, state, rootState}, testId) {
+        //     ENGINE.post(`eval/${rootState.base.session}__${rootState.base.channelId}/${state.currentTestCollectionName}/${testId}`)
+        //         .then(response => {
+        //             commit('setWaitingOnClient', testId)
+        //         })
+        //         .catch(function (error) {
+        //             console.error(error)
+        //         })
+        // },
         loadTestCollectionNames({commit}) {
             ENGINE.get(`collections`)
                 .then(response => {

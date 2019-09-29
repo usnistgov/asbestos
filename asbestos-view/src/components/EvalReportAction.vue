@@ -1,13 +1,8 @@
 <template>
     <div>
         <div v-bind:class="{'not-run': isNotRun, pass : isPass, fail: isError}"  @click="toggleMessageDisplay()">
-            <span v-if="this.script.operation" class="name selectable">
-                {{ this.operationType(this.script.operation) }}
-            </span>
-            <span v-else>
-                <span class="name selectable">assert: </span>
-                <span>{{ this.assertionDescription() }}</span>
-            </span>
+            <span class="name selectable">assert: </span>
+            <span>{{ this.assertionDescription() }}</span>
             <span class="selectable">
                 {{ label }}
             </span>
@@ -23,6 +18,7 @@
                 // message: null,
                 displayMessage: false,
                 status: [],   // testName => undefined, 'pass', 'fail', 'error'
+                eventResult: [],
             }
         },
         methods: {
@@ -48,6 +44,9 @@
                     here = this.nextSpace(str, here)
                 }
                 return here
+            },
+            importEventResult() {
+                this.eventResult = this.$store.state.testRunner.clientTestResult[this.testId]
             }
         },
         computed: {
@@ -83,6 +82,9 @@
             label() {
                 return this.script.operation ? this.script.operation.label : this.script.assert.label
             },
+            testId() {
+                return this.$store.state.testRunner.currentTest
+            },
         },
         created() {
 
@@ -91,13 +93,13 @@
 
         },
         watch: {
-
+            'testId': 'importEventResult'
         },
         props: [
             // parts representing a single action
             'script', 'report',
         ],
-        name: "TestReportAction"
+        name: "EvalReportAction"
     }
 </script>
 
