@@ -73,12 +73,6 @@
             isNotRun() {
                 return !this.report
             },
-            operationOrAssertion() {
-                return this.script.operation
-                    ? `${this.operationType(this.script.operation)}`
-                    : `Assert: ${this.assertionDescription()}`
-            },
-
             label() {
                 return this.script.operation ? this.script.operation.label : this.script.assert.label
             },
@@ -96,10 +90,11 @@
             'testId': 'importEventResult'
         },
         props: [
-            // parts representing a single action
-            'script', 'report',
+            'scriptAction',   // TestScript.test.action
+            'scriptActionIndex',  // index of this action (among actions)
+            'eventResult',    // array: eventId -> full TestReport (must index into actions with scriptActionIndex)
         ],
-        name: "EvalReportAction"
+        name: "EvalReportAssert"
     }
 </script>
 

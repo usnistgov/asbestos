@@ -24,7 +24,10 @@
 
                 <div v-for="(action, actioni) in actions(testi)" class="test-part"
                      :key="'Test' + testi + 'Action' + actioni">
-                    <eval-report-action :script="action" :report="reportAction(testi, actioni)"></eval-report-action>
+                    <eval-report-assert
+                            :script-action="action"
+                            :script-action-index="actioni"
+                            :event-result="$store.state.testRunner.clientTestResult[this.testId]"></eval-report-assert>
                 </div>
             </div>
 
@@ -37,7 +40,7 @@
 <script>
     import {ENGINE} from '../common/http-common'
     import errorHandlerMixin from '../mixins/errorHandlerMixin'
-    import EvalReportAction from './EvalReportAction'
+    import EvalReportAssert from './EvalReportAssert'
 
     export default {
         data() {
@@ -76,9 +79,7 @@
                 }
             },
             loadTestReport() {  // loaded by TestList
-                console.log('grab test report')
                 this.report = this.$store.state.testRunner.testReports[this.testId]
-                //this.$router.go()
             },
             actions(testIndex) {
                 return this.script.test[testIndex].action
@@ -124,7 +125,7 @@
             'sessionId', 'channelId', 'testCollection', 'testId'
         ],
         components: {
-            EvalReportAction
+            EvalReportAssert
         },
         name: "TestDetails"
     }
