@@ -1,13 +1,14 @@
 <template>
+<!--    foreach action/assert in the eval (test)-->
     <div>
-        <div v-bind:class="{'not-run': isNotRun, pass : isPass, fail: isError}"  @click="toggleMessageDisplay()">
+        <div v-bind:class="{'not-run': isNotRun, pass : isPass, fail: isError}"  @click="toggleAssertMessageDisplay()">
             <span class="name selectable">assert: </span>
             <span>{{ this.assertionDescription() }}</span>
             <span class="selectable">
                 {{ label }}
             </span>
         </div>
-        <div v-if="displayMessage"><pre>{{ message }}</pre></div>
+        <div v-if="displayAssertMessage"><pre>{{ message }}</pre></div>
     </div>
 </template>
 
@@ -15,10 +16,8 @@
     export default {
         data() {
             return {
-                // message: null,
-                displayMessage: false,
+                displayAssertMessage: false,
                 status: [],   // testName => undefined, 'pass', 'fail', 'error'
-                eventResult: [],
             }
         },
         methods: {
@@ -26,10 +25,10 @@
                 return operation.type.code
             },
             assertionDescription() {
-                return this.script.assert.description === undefined ? "" : this.script.assert.description
+                return this.assertScript().description === undefined ? "" : this.script.assert.description
             },
-            toggleMessageDisplay() {
-                this.displayMessage = !this.displayMessage
+            toggleAssertMessageDisplay() {  // display of the message returned in the assert
+                this.displayAssertMessage = !this.displayAssertMessage
             },
             nextSpace(str, idx) {
                 for (let i=idx; i<str.length; i++) {
@@ -45,36 +44,37 @@
                 }
                 return here
             },
-            importEventResult() {
-                this.eventResult = this.$store.state.testRunner.clientTestResult[this.testId]
+            assertReport(eventId) {
+                if (!this.eventResult)
+                    return null;
+                const testReport = this.eventResult[eventId]
+                return testReport.test[this.testIndex].action[this.actionIndex].assert
+            },
+            assertScript() {
+                return this.testScript.test[this.testIndex].action[this.actionIndex].assert
             }
         },
         computed: {
             message() {
-                if (!this.report)
+                if (!this.testReport)
                     return null
-                const rawMessage =  this.report.assert
-                    ? this.report.assert.message
-                    : this.report.operation.message
-                return rawMessage
+                return this.testReport.test[this.testIndex].action[this.actionIndex].assert.message
             },
             isPass() {
                 if (!this.report) return false
-                const part = this.report.operation ? this.report.operation : this.report.assert
-                if (!part) return false
-                return part.result !== 'error' && part.result !== 'fail'
+                if (!this.report.assert) return false
+                return this.report.assert.result !== 'error' && this.report.assert.result !== 'fail'
             },
             isError() {
                 if (!this.report) return false
-                const part = this.report.operation ? this.report.operation : this.report.assert
-                if (!part) return false
-                return part.result === 'error' || part.result === 'fail'
+                if (!this.report.assert) return false
+                return this.report.assert.result === 'error' || this.report.assert.result === 'fail'
             },
             isNotRun() {
                 return !this.report
             },
             label() {
-                return this.script.operation ? this.script.operation.label : this.script.assert.label
+                return this.assertScript().label
             },
             testId() {
                 return this.$store.state.testRunner.currentTest
@@ -87,11 +87,12 @@
 
         },
         watch: {
-            'testId': 'importEventResult'
         },
         props: [
-            'scriptAction',   // TestScript.test.action
-            'scriptActionIndex',  // index of this action (among actions)
+            'testScript',     // full TestScript
+            'testReport',     // full TestReport
+            'testIndex',  // index into TestReport.test
+            'actionIndex',  // index into TestReport.test[testIndex].action[actionIndex]
             'eventResult',    // array: eventId -> full TestReport (must index into actions with scriptActionIndex)
         ],
         name: "EvalReportAssert"

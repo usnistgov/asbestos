@@ -25,8 +25,10 @@
                 <div v-for="(action, actioni) in actions(testi)" class="test-part"
                      :key="'Test' + testi + 'Action' + actioni">
                     <eval-report-assert
-                            :script-action="action"
-                            :script-action-index="actioni"
+                            :test-script="script"
+                            :test-report="report"
+                            :test-index="testi"
+                            :action-index="actioni"
                             :event-result="$store.state.testRunner.clientTestResult[this.testId]"></eval-report-assert>
                 </div>
             </div>
@@ -82,7 +84,7 @@
                 this.report = this.$store.state.testRunner.testReports[this.testId]
             },
             actions(testIndex) {
-                return this.script.test[testIndex].action
+                return this.script.test[testIndex].action.assert
             },
             scriptAction(testi, actioni) {
                 return this.script.test[testi].action[actioni]
