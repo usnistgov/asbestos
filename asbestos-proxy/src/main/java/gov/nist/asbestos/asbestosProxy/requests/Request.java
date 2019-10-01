@@ -30,6 +30,8 @@ public class Request {
         ec = new EC(externalCache);
     }
 
+    public String fullChannelId() { return testSession + "__" + channelId; }
+
     public HttpSession getSession() {
         return req.getSession();
     }

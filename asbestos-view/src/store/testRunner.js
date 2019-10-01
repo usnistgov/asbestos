@@ -58,8 +58,11 @@ export const testRunnerStore = {
         setTestCollectionNames(state, names) {
             state.testCollectionNames = names
         },
-        setClientTestResult(state, testId, result) {
-            state.clientTestResult[testId] = result
+        setClientTestResult(state, payload) {  // result is object indexed by eventId
+            // payload is { testId: xxx, reports: reports }
+            // console.log(`testId is ${payload.testId}`)
+            // console.log(`reports are ${Object.getOwnPropertyNames(payload.reports)}`)
+            state.clientTestResult[payload.testId] = payload.reports   // each result is eventId => TestReport
         }
     },
     getters: {
@@ -72,10 +75,18 @@ export const testRunnerStore = {
             ENGINE.get(`clienteval/${rootState.base.session}__${rootState.base.channelId}/${state.currentTestCollectionName}/${testId}`)
                 .then(response => {
                     const results = response.data
-                    for (const testId in results) {
-                        if (results.hasOwnProperty(testId))
-                            commit('setClientTestResult', testId, results[testId])
-                    }
+                    console.log(`results testid = ${Object.getOwnPropertyNames(results)}`)
+                    Object.getOwnPropertyNames(results).forEach(id  => {
+                        console.log(`id is ${id}`)
+                        console.log(`results is ${Object.getOwnPropertyNames(results[id])}`)
+                        const reports = results[id].reports
+                        console.log(`reports are ${Object.getOwnPropertyNames(reports)}`)
+                        commit({
+                            type: 'setClientTestResult',
+                            testId: id,
+                            reports: reports
+                        })
+                    })
                 })
                 .catch(function (error) {
                     console.error(error)

@@ -1,6 +1,9 @@
 <template>
     <div>
         <div v-if="script" class="script">
+            <div v-if="script.description">
+                {{ script.description }}
+            </div>
             <div v-for="(fixture, i) in fixtures"
                  :key="i">
                 <span class="name" >Fixture: </span>
@@ -23,13 +26,13 @@
                 </div>
 
                 <div v-for="(action, actioni) in actions(testi)" class="test-part"
-                     :key="'Test' + testi + 'Action' + actioni">
+                     :key="'Eval' + testi + 'Action' + actioni">
                     <eval-report-assert
                             :test-script="script"
                             :test-report="report"
                             :test-index="testi"
                             :action-index="actioni"
-                            :event-result="$store.state.testRunner.clientTestResult[this.testId]"></eval-report-assert>
+                            :event-result="$store.state.testRunner.clientTestResult[testId]"></eval-report-assert>
                 </div>
             </div>
 
@@ -69,7 +72,7 @@
                     const that = this
                     ENGINE.get(`collection/${this.testCollection}/${this.testId}`)
                         .then(response => {
-                            console.info(`TestDetails: loaded test script ${this.testCollection}/${this.testId}`)
+                            console.info(`EvalDetails: loaded test script ${this.testCollection}/${this.testId}`)
                             this.$store.commit('addTestScript', {name: this.testId, script: response.data})
                             this.script = response.data
                         })
@@ -84,7 +87,8 @@
                 this.report = this.$store.state.testRunner.testReports[this.testId]
             },
             actions(testIndex) {
-                return this.script.test[testIndex].action.assert
+                console.log(`have ${this.script.test[testIndex].action.length} asserts`)
+                return this.script.test[testIndex].action
             },
             scriptAction(testi, actioni) {
                 return this.script.test[testi].action[actioni]
@@ -129,7 +133,7 @@
         components: {
             EvalReportAssert
         },
-        name: "TestDetails"
+        name: "EvalDetails"
     }
 </script>
 

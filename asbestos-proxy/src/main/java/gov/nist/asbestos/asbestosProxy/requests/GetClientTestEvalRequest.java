@@ -118,7 +118,36 @@ public class GetClientTestEvalRequest {
             }
         }
 
-        String json = Returns.returnObject(request.resp, result);
-        log.info(json);
+        StringBuilder buf = new StringBuilder();
+        // for one testId
+        String testId = request.uriParts.get(6);
+        buf.append('{').append('"').append(testId).append('"').append(':').append("\n ");
+        File testLogDir = request.ec.getTestLogDir(request.fullChannelId(), testCollection, testId);
+        EventResult er = result.results.get(testId);
+        if (er.reports.isEmpty())
+            buf.append("null");
+        else {
+            for (String eventId : er.reports.keySet()) {
+                buf.append('{').append('"').append(eventId).append('"').append(":\n  ");
+                TestReport testReport = er.reports.get(eventId);
+                String json = ProxyBase.encode(testReport, Format.JSON);
+                try {
+                    Files.write(Paths.get(new File(testLogDir, eventId + ".json").toString()), json.getBytes());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                buf.append(json);
+                buf.append('}');
+            }
+        }
+        buf.append('}');
+        String myStr = buf.toString();
+        try {
+            Files.write(Paths.get(new File(testLogDir, "total" + ".json").toString()), myStr.getBytes());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        Returns.returnString(request.resp, myStr);
     }
 }

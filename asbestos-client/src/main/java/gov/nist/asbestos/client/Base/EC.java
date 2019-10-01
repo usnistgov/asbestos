@@ -124,6 +124,15 @@ public class EC {
         return new File(forCollection, testName + ".json");
     }
 
+    public File getTestLogDir(String channelId, String collectionName, String testName) {
+        File testLogs = new File(externalCache, "FhirTestLogs");
+        File forChannelId = new File(testLogs, channelId);
+        File forCollection = new File(forChannelId, collectionName);
+        File forTest = new File(forCollection, testName);
+        forTest.mkdirs();
+        return forTest;
+    }
+
     public List<File> getTestLogs(String testSession, String collectionName) {
         File testLogs = new File(externalCache, "FhirTestLogs");
         File forTestSession = new File(testLogs, testSession);
