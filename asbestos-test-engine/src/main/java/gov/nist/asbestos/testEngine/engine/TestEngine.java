@@ -105,6 +105,7 @@ public class TestEngine  {
             fixtureMgr.put("response", new FixtureComponent(responseResource));
             initWorkflow();
             doTest(); // should only be asserts
+            errorOut();
         } catch (Throwable t) {
             reportException(t);
         }

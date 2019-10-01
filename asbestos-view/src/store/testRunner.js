@@ -19,7 +19,7 @@ export const testRunnerStore = {
             testReports: [], // testId => TestReport
 
             lastMarker: null,
-            clientTestResult: [], // see GetClientTestEvalRequest.Result
+            clientTestResult: [], // [ evalId => [ eventId => TestReport ] ]
         }
     },
     mutations: {
@@ -58,11 +58,12 @@ export const testRunnerStore = {
         setTestCollectionNames(state, names) {
             state.testCollectionNames = names
         },
-        setClientTestResult(state, payload) {  // result is object indexed by eventId
-            // payload is { testId: xxx, reports: reports }
-            // console.log(`testId is ${payload.testId}`)
-            // console.log(`reports are ${Object.getOwnPropertyNames(payload.reports)}`)
-            state.clientTestResult[payload.testId] = payload.reports   // each result is eventId => TestReport
+        setClientTestResult(state, payload) {
+            // payload is { evalId: xxx, events: eventId => TestReports }
+            console.log(`installing evalId is ${payload.evalId}`)
+            console.log(`installing eventIds are ${Object.getOwnPropertyNames(payload.events)}`)
+            // each value is eventId => TestReport
+            state.clientTestResult[payload.evalId] = JSON.parse(JSON.stringify(payload.events))
         }
     },
     getters: {
@@ -75,16 +76,16 @@ export const testRunnerStore = {
             ENGINE.get(`clienteval/${rootState.base.session}__${rootState.base.channelId}/${state.currentTestCollectionName}/${testId}`)
                 .then(response => {
                     const results = response.data
-                    console.log(`results testid = ${Object.getOwnPropertyNames(results)}`)
-                    Object.getOwnPropertyNames(results).forEach(id  => {
-                        console.log(`id is ${id}`)
-                        console.log(`results is ${Object.getOwnPropertyNames(results[id])}`)
-                        const reports = results[id].reports
-                        console.log(`reports are ${Object.getOwnPropertyNames(reports)}`)
+                    //console.log(`results testid = ${Object.getOwnPropertyNames(results)}`)
+                    Object.getOwnPropertyNames(results).forEach(evalId  => {
+                        console.log(`called server - evalId is ${evalId}`)
+                        //console.log(`events are ${Object.getOwnPropertyNames(results[evalId])}`)
+                        const events = results[evalId]
+                        //console.log(`eventIds are ${Object.getOwnPropertyNames(events)}`)
                         commit({
                             type: 'setClientTestResult',
-                            testId: id,
-                            reports: reports
+                            evalId: evalId,
+                            events: events,    // eventId => TestReport
                         })
                     })
                 })

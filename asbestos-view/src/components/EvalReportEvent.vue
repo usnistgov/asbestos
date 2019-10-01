@@ -21,8 +21,8 @@
         },
         computed: {
             eventDetail() {
-                // return this.testReport.result
-                return JSON.stringify(this.testReport, null, 4)
+                const theAssert = this.testReport.test[0].action[this.actionIndex].assert
+                return `${theAssert.result} - ${theAssert.message}`
             },
         },
         created() {
@@ -36,6 +36,7 @@
         props: [
             'eventId',
             'testReport',  // TestReport for single eventId
+            'actionIndex', // reporting on a single action/assert in the testReport
         ],
         name: "EvalReportEvent"
     }

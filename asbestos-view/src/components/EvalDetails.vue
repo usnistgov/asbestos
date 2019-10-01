@@ -25,6 +25,7 @@
                     {{ test.description }}
                 </div>
 
+<!--                actions will be asserts only-->
                 <div v-for="(action, actioni) in actions(testi)" class="test-part"
                      :key="'Eval' + testi + 'Action' + actioni">
                     <eval-report-assert
@@ -32,7 +33,7 @@
                             :test-report="report"
                             :test-index="testi"
                             :action-index="actioni"
-                            :event-result="$store.state.testRunner.clientTestResult[testId]"></eval-report-assert>
+                            :eval-id="testId"></eval-report-assert>
                 </div>
             </div>
 
@@ -55,6 +56,10 @@
             }
         },
         methods: {
+            testResults(evalId) {
+                const value = this.$store.state.testRunner.clientTestResult[evalId]
+                return value
+            },
             operationOrAssertion(testi, actioni) {
                 const action = this.script.test[testi].action[actioni]
                 return action.operation ? `Operation: ${this.operationType(action.operation)}` : `Assert: ${this.assertionDescription(action.assert)}`
@@ -87,7 +92,7 @@
                 this.report = this.$store.state.testRunner.testReports[this.testId]
             },
             actions(testIndex) {
-                console.log(`have ${this.script.test[testIndex].action.length} asserts`)
+                //console.log(`have ${this.script.test[testIndex].action.length} asserts`)
                 return this.script.test[testIndex].action
             },
             scriptAction(testi, actioni) {
