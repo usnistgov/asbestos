@@ -12,6 +12,7 @@ export const testRunnerStore = {
             testScriptNames: [],
 
             currentTest: null,  // testId
+            currentEvent: null,  // eventId
             isClientTest: false,  // applies to entire testCollection
             waitingOnClient: null, // testId waiting on or null
 
@@ -38,6 +39,9 @@ export const testRunnerStore = {
         },
         setCurrentTest(state, currentTestId) {
             state.currentTest = currentTestId
+        },
+        setCurrentEvent(state, currentEventId) {
+            state.currentEvent = currentEventId
         },
         clearTestReports(state) {
             state.testReports = []
@@ -72,22 +76,24 @@ export const testRunnerStore = {
         }
     },
     actions: {
-        runEval({commit, state, rootState}, testId) {
+        runEval({state, rootState}, testId) {
             ENGINE.get(`clienteval/${rootState.base.session}__${rootState.base.channelId}/${state.currentTestCollectionName}/${testId}`)
                 .then(response => {
                     const results = response.data
                     //console.log(`results testid = ${Object.getOwnPropertyNames(results)}`)
-                    Object.getOwnPropertyNames(results).forEach(evalId  => {
-                        console.log(`called server - evalId is ${evalId}`)
-                        //console.log(`events are ${Object.getOwnPropertyNames(results[evalId])}`)
-                        const events = results[evalId]
-                        //console.log(`eventIds are ${Object.getOwnPropertyNames(events)}`)
-                        commit({
-                            type: 'setClientTestResult',
-                            evalId: evalId,
-                            events: events,    // eventId => TestReport
-                        })
-                    })
+
+                    console.log(`detail is ${JSON.stringify(results)}`)
+                    // Object.getOwnPropertyNames(results).forEach(evalId  => {
+                    //     console.log(`called server - evalId is ${evalId}`)
+                    //     console.log(`events are ${Object.getOwnPropertyNames(results[evalId])}`)
+                    //     const events = results[evalId]
+                    //     console.log(`eventIds are ${Object.getOwnPropertyNames(events)}`)
+                    //     commit({
+                    //         type: 'setClientTestResult',
+                    //         evalId: evalId,
+                    //         events: events,    // eventId => TestReport
+                    //     })
+                    // })
                 })
                 .catch(function (error) {
                     console.error(error)

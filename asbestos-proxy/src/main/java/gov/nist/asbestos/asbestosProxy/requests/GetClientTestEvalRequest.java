@@ -1,18 +1,15 @@
 package gov.nist.asbestos.asbestosProxy.requests;
 
-import com.google.gson.Gson;
-import gov.nist.asbestos.asbestosProxy.servlet.ChannelConnector;
 import gov.nist.asbestos.client.Base.ProxyBase;
 import gov.nist.asbestos.client.client.Format;
 import gov.nist.asbestos.client.events.Event;
-import gov.nist.asbestos.client.log.SimStore;
-import gov.nist.asbestos.sharedObjects.ChannelConfig;
 import gov.nist.asbestos.simapi.simCommon.SimId;
 import gov.nist.asbestos.simapi.validation.Val;
 import gov.nist.asbestos.testEngine.engine.TestEngine;
-import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.log4j.Logger;
-import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.BaseResource;
+import org.hl7.fhir.r4.model.TestReport;
+import org.hl7.fhir.r4.model.TestScript;
 
 import java.io.File;
 import java.io.IOException;
@@ -74,7 +71,7 @@ public class GetClientTestEvalRequest {
         String testSession = simId.getTestSession().getValue();
 
         List<File> eventDirsSinceMarker = request.ec.getEventsSince(simId, marker);
-        eventDirsSinceMarker.sort(Comparator.comparing(File::getName));
+        eventDirsSinceMarker.sort(Comparator.comparing(File::getName).reversed());
         List<Event> events = eventDirsSinceMarker.stream().map(Event::new).collect(Collectors.toList());
 
         Map<Event, BaseResource> requestResources = new HashMap<>();
@@ -112,7 +109,9 @@ public class GetClientTestEvalRequest {
                 testEngine.setExternalCache(request.externalCache);
                 BaseResource responseResource = responseResources.get(event);
                 testEngine.runEval(requestResources.get(event), responseResource);
-                EventResult eventResult = new EventResult();
+                EventResult eventResult = result.results.get(testId); //new EventResult();
+                if (eventResult == null)
+                    eventResult = new EventResult();
                 eventResult.reports.put(event.getEventId(), testEngine.getTestReport());
                 result.results.put(testId, eventResult);
             }
@@ -127,18 +126,21 @@ public class GetClientTestEvalRequest {
         if (er.reports.isEmpty())
             buf.append("null");
         else {
-            for (String eventId : er.reports.keySet()) {
-                buf.append('{').append('"').append(eventId).append('"').append(":\n  ");
-                TestReport testReport = er.reports.get(eventId);
-                String json = ProxyBase.encode(testReport, Format.JSON);
-                try {
-                    Files.write(Paths.get(new File(testLogDir, eventId + ".json").toString()), json.getBytes());
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                buf.append(json);
-                buf.append('}');
-            }
+            buf.append(" [\n");
+            buf.append("foo, bar");
+//            for (String eventId : er.reports.keySet()) {
+//                buf.append('{').append('"').append(eventId).append('"').append(":\n  ");
+//                TestReport testReport = er.reports.get(eventId);
+//                String json = ProxyBase.encode(testReport, Format.JSON);
+//                try {
+//                    Files.write(Paths.get(new File(testLogDir, eventId + ".json").toString()), json.getBytes());
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                }
+//                buf.append(json);
+//                buf.append("},");
+//            }
+            buf.append("\n  ]\n");
         }
         buf.append('}');
         String myStr = buf.toString();

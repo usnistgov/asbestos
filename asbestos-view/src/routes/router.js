@@ -13,6 +13,7 @@ import LogList from "../components/LogList"
 import LogItem from "../components/LogItem"
 import TestCollection from "../components/TestCollection"
 import TestOrEvalDetails from "../components/TestOrEvalDetails"
+import EvalDetails from "../components/EvalDetails"
 
 Vue.use( VueRouter )
 
@@ -69,6 +70,13 @@ export const routes = [
                                         path: 'test/:testId',
                                         component: TestOrEvalDetails,
                                         props: true,
+                                        children: [
+                                            {
+                                                path: 'event/:eventId',
+                                                component: EvalDetails,
+                                                props: true,
+                                            }
+                                        ]
                                     },
                                 ],
                             },

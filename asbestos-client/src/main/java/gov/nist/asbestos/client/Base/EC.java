@@ -284,7 +284,7 @@ public class EC {
                 String eventName = event.getName();
                 if (marker == null)
                     eventsList.add(event);
-                else if (eventName.compareTo(marker) < 0)
+                else if (eventName.compareTo(marker) > 0)
                     eventsList.add(event);
             }
         }

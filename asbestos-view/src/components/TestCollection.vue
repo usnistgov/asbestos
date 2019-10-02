@@ -31,7 +31,6 @@
                         </div>
                         <div v-if="isClient">
                             <img src="../assets/validate-search.png" class="right" @click.stop="doEval(name)">
-
                         </div>
                         <div v-else>
                             <img src="../assets/press-play-button.png" class="right" @click.stop="doRun(name)">
