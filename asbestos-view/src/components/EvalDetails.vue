@@ -29,17 +29,11 @@
                 <div v-for="(action, actioni) in actions(testi)" class="test-part"
                      :key="'Eval' + testi + 'Action' + actioni">
                     <div @click="selectAssert(actioni)">
-                        Assert: {{ actioni }}
-                        <div v-if="selected === actioni">
-                            <router-view></router-view>
+                        Assert: {{ assertScript(actioni).description }}
+                        <div v-if="selectedAssert === actioni">
+                            Message: {{ assertMessage(actioni) }}
                         </div>
                     </div>
-<!--                    <eval-report-assert-->
-<!--                            :test-script="script"-->
-<!--                            :test-report="report"-->
-<!--                            :test-index="testi"-->
-<!--                            :action-index="actioni"-->
-<!--                            :eval-id="testId"></eval-report-assert>-->
                 </div>
             </div>
 
@@ -59,25 +53,33 @@
             return {
                 script: null,
                 report: null,
+                selectedAssert: null,
             }
         },
         methods: {
+            assertMessage(assertIndex) {
+                console.log(`in assertMessage(${assertIndex})`)
+                return `Hi ${assertIndex}` //this.assertReport(assertIndex).message
+            },
+            assertReport(assertIndex) {
+                return this.testReport.test[0].action[assertIndex].assert
+            },
+            assertScript(assertIndex) {
+                return this.testScript.test[0].action[assertIndex].assert
+            },
             selectAssert(assertIndex) {
                 console.log(`assertIndex is ${assertIndex}`)
-                console.log(`selected is ${this.selected}`)
-                if (this.selected === assertIndex)  { // unselect
-                    this.$store.commit('setCurrentAssertIndex', null)
-                    const route = `/session/${this.sessionId}/channel/${this.channelId}/collection/${this.testCollection}/test/${this.testId}/event/${this.eventId}`
-                    this.$router.push(route)
-                } else {
-                    this.$store.commit('setCurrentAssertIndex', assertIndex)
-                    const route = `/session/${this.sessionId}/channel/${this.channelId}/collection/${this.testCollection}/test/${this.testId}/event/${this.eventId}/assert/${assertIndex}`
-                    this.$router.push(route)
-                }
-            },
-            testResults(evalId) {
-                const value = this.$store.state.testRunner.clientTestResult[evalId]
-                return value
+                console.log(`selectedAssert is ${this.selectedAssert}`)
+                this.selectedAssert = assertIndex
+                // if (this.selected === assertIndex)  { // unselect
+                //     this.$store.commit('setCurrentAssertIndex', null)
+                //     const route = `/session/${this.sessionId}/channel/${this.channelId}/collection/${this.testCollection}/test/${this.testId}/event/${this.eventId}`
+                //     this.$router.push(route)
+                // } else {
+                //     this.$store.commit('setCurrentAssertIndex', assertIndex)
+                //     const route = `/session/${this.sessionId}/channel/${this.channelId}/collection/${this.testCollection}/test/${this.testId}/event/${this.eventId}/assert/${assertIndex}`
+                //     this.$router.push(route)
+                // }
             },
             operationOrAssertion(testi, actioni) {
                 const action = this.script.test[testi].action[actioni]
@@ -125,9 +127,9 @@
 
         },
         computed: {
-            selected() {
-                return this.$store.state.testRunner.currentAssertIndex
-            },
+            // selected() {
+            //     return this.$store.state.testRunner.currentAssertIndex
+            // },
             fixtures() {
                 return this.script.fixture
             },
@@ -142,6 +144,12 @@
                     return item.name === this.testId
                 })
             },
+            testScript() {
+                return this.$store.state.testRunner.testScripts[this.testId]
+            },
+            testReport() {
+                return this.$store.state.testRunner.clientTestResult[this.testId][this.eventId]
+            }
         },
         created() {
             this.loadTestScript()

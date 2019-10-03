@@ -21,7 +21,7 @@ export const testRunnerStore = {
             testReports: [], // testId => TestReport
 
             lastMarker: null,
-            clientTestResult: [], // { evalId: { eventId: TestReport } }
+            clientTestResult: [], // { testId: { eventId: TestReport } }
         }
     },
     mutations: {
