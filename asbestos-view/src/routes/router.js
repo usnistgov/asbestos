@@ -14,6 +14,7 @@ import LogItem from "../components/LogItem"
 import TestCollection from "../components/TestCollection"
 import TestOrEvalDetails from "../components/TestOrEvalDetails"
 import EvalDetails from "../components/EvalDetails"
+import EvalReportAssert from "../components/EvalReportAssert";
 
 Vue.use( VueRouter )
 
@@ -75,6 +76,13 @@ export const routes = [
                                                 path: 'event/:eventId',
                                                 component: EvalDetails,
                                                 props: true,
+                                                children: [
+                                                    {
+                                                        path: 'assert/:assertIndex',
+                                                        component: EvalReportAssert,
+                                                        props: true,
+                                                    }
+                                                ]
                                             }
                                         ]
                                     },

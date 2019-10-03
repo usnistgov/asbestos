@@ -4,7 +4,9 @@
              :key="'Disp' + eventi">
             <div @click="selectEvent(eventId)">
                 Event: {{ eventId }}
-                <router-view></router-view>
+                <div v-if="selected === eventId">
+                    <router-view></router-view>
+                </div>
 <!--                <eval-details :session-id="sessionId"-->
 <!--                              :channel-id="channelId"-->
 <!--                              :test-collection="testCollection"-->
@@ -45,6 +47,9 @@
             isEventPass(eventId) {
                 return this.eventResult[eventId].result === 'pass'
             },
+            selectCurrent() {
+                this.selectEvent(this.selected)
+            },
         },
         computed: {
             selected() {
@@ -55,17 +60,14 @@
                     console.log('no event ids')
                     return null;
                 }
-                console.log(`eventIds: ${Object.getOwnPropertyNames(this.eventResult)}`)
-                return Object.getOwnPropertyNames(this.eventResult)
+                return Object.keys(this.eventResult)
             },
             eventResult() {
-                console.log(`eventResult for evalId ${this.testId}`)
-                console.log(`eventResult => ${this.$store.state.testRunner.clientTestResult[this.testId]}`)
-                console.log(`evalIds are ${Object.getOwnPropertyNames(this.$store.state.testRunner.clientTestResult)}`)
                 return this.$store.state.testRunner.clientTestResult[this.testId]
             },
         },
         watch: {
+            //'eventResult': 'selectCurrent',
         },
         props: [
             'sessionId', 'channelId', 'testCollection', 'testId'

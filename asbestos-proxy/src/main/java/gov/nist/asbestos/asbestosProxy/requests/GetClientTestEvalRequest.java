@@ -117,35 +117,38 @@ public class GetClientTestEvalRequest {
             }
         }
 
-        StringBuilder buf = new StringBuilder();
         // for one testId
         String testId = request.uriParts.get(6);
+
+        StringBuilder buf = new StringBuilder();
         buf.append('{').append('"').append(testId).append('"').append(':').append("\n ");
+
         File testLogDir = request.ec.getTestLogDir(request.fullChannelId(), testCollection, testId);
         EventResult er = result.results.get(testId);
         if (er.reports.isEmpty())
             buf.append("null");
         else {
-            buf.append(" [\n");
-            buf.append("foo, bar");
-//            for (String eventId : er.reports.keySet()) {
-//                buf.append('{').append('"').append(eventId).append('"').append(":\n  ");
-//                TestReport testReport = er.reports.get(eventId);
-//                String json = ProxyBase.encode(testReport, Format.JSON);
-//                try {
-//                    Files.write(Paths.get(new File(testLogDir, eventId + ".json").toString()), json.getBytes());
-//                } catch (IOException e) {
-//                    e.printStackTrace();
-//                }
-//                buf.append(json);
-//                buf.append("},");
-//            }
-            buf.append("\n  ]\n");
+            buf.append(" {\n");
+            boolean first = true;
+            for (String eventId : er.reports.keySet()) {
+                if (first)
+                    first = false;
+                else
+                    buf.append(',');
+
+                buf.append("").append('"').append(eventId).append('"').append(":\n ");
+                TestReport testReport = er.reports.get(eventId);
+                buf.append(ProxyBase.encode(testReport, Format.JSON));
+                buf.append("");
+            }
+            buf.append("\n  }\n");
         }
+
         buf.append('}');
+
         String myStr = buf.toString();
         try {
-            Files.write(Paths.get(new File(testLogDir, "total" + ".json").toString()), myStr.getBytes());
+            Files.write(Paths.get(new File(testLogDir, testId + ".json").toString()), myStr.getBytes());
         } catch (IOException e) {
             e.printStackTrace();
         }

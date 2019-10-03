@@ -20,20 +20,26 @@
             <div v-for="(test, testi) in tests"
                  :key="'Eval' + testi">
                 <span class="name" >Eval: </span>
-                <span class="value">{{ test.name }}</span>
+                <span class="value">Test: {{ test.name }}</span>
                 <div v-if="test.description" class="test-part">
-                    {{ test.description }}
+                    Test: {{ test.description }}
                 </div>
 
 <!--                actions will be asserts only-->
                 <div v-for="(action, actioni) in actions(testi)" class="test-part"
                      :key="'Eval' + testi + 'Action' + actioni">
-                    <eval-report-assert
-                            :test-script="script"
-                            :test-report="report"
-                            :test-index="testi"
-                            :action-index="actioni"
-                            :eval-id="testId"></eval-report-assert>
+                    <div @click="selectAssert(actioni)">
+                        Assert: {{ actioni }}
+                        <div v-if="selected === actioni">
+                            <router-view></router-view>
+                        </div>
+                    </div>
+<!--                    <eval-report-assert-->
+<!--                            :test-script="script"-->
+<!--                            :test-report="report"-->
+<!--                            :test-index="testi"-->
+<!--                            :action-index="actioni"-->
+<!--                            :eval-id="testId"></eval-report-assert>-->
                 </div>
             </div>
 
@@ -46,7 +52,7 @@
 <script>
     import {ENGINE} from '../common/http-common'
     import errorHandlerMixin from '../mixins/errorHandlerMixin'
-    import EvalReportAssert from './EvalReportAssert'
+    //import EvalReportAssert from './EvalReportAssert'
 
     export default {
         data() {
@@ -56,6 +62,19 @@
             }
         },
         methods: {
+            selectAssert(assertIndex) {
+                console.log(`assertIndex is ${assertIndex}`)
+                console.log(`selected is ${this.selected}`)
+                if (this.selected === assertIndex)  { // unselect
+                    this.$store.commit('setCurrentAssertIndex', null)
+                    const route = `/session/${this.sessionId}/channel/${this.channelId}/collection/${this.testCollection}/test/${this.testId}/event/${this.eventId}`
+                    this.$router.push(route)
+                } else {
+                    this.$store.commit('setCurrentAssertIndex', assertIndex)
+                    const route = `/session/${this.sessionId}/channel/${this.channelId}/collection/${this.testCollection}/test/${this.testId}/event/${this.eventId}/assert/${assertIndex}`
+                    this.$router.push(route)
+                }
+            },
             testResults(evalId) {
                 const value = this.$store.state.testRunner.clientTestResult[evalId]
                 return value
@@ -106,6 +125,9 @@
 
         },
         computed: {
+            selected() {
+                return this.$store.state.testRunner.currentAssertIndex
+            },
             fixtures() {
                 return this.script.fixture
             },
@@ -133,10 +155,10 @@
         },
         mixins: [ errorHandlerMixin ],
         props: [
-            'sessionId', 'channelId', 'testCollection', 'testId'
+            'sessionId', 'channelId', 'testCollection', 'testId', 'eventId'
         ],
         components: {
-            EvalReportAssert
+            //EvalReportAssert
         },
         name: "EvalDetails"
     }
