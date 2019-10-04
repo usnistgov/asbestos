@@ -28,10 +28,14 @@
 <!--                actions will be asserts only-->
                 <div v-for="(action, actioni) in actions(testi)" class="test-part"
                      :key="'Eval' + testi + 'Action' + actioni">
-                    <div @click="selectAssert(actioni)">
-                        Assert: {{ assertScript(actioni).description }}
-                        <div v-if="selectedAssert === actioni">
-                            Message: {{ assertMessage(actioni) }}
+                    <div>
+                        <div @click="selectAssert(actioni)">
+                            <div v-bind:class="[assertPass(actioni) ? passClass : failClass, 'assert-part']">
+                                Assert: {{ assertScript(actioni).description }}
+                            </div>
+                            <div v-if="selectedAssertIndex === actioni" class="message-part">
+                                {{ assertMessage(actioni) }}
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -53,13 +57,17 @@
             return {
                 script: null,
                 report: null,
-                selectedAssert: null,
+                selectedAssertIndex: null,
+                passClass: 'pass',
+                failClass: 'fail',
             }
         },
         methods: {
             assertMessage(assertIndex) {
-                console.log(`in assertMessage(${assertIndex})`)
-                return `Hi ${assertIndex}` //this.assertReport(assertIndex).message
+                return this.assertReport(assertIndex).message
+            },
+            assertPass(assertIndex) {
+                return this.assertReport(assertIndex).result === 'pass'
             },
             assertReport(assertIndex) {
                 return this.testReport.test[0].action[assertIndex].assert
@@ -68,18 +76,10 @@
                 return this.testScript.test[0].action[assertIndex].assert
             },
             selectAssert(assertIndex) {
-                console.log(`assertIndex is ${assertIndex}`)
-                console.log(`selectedAssert is ${this.selectedAssert}`)
-                this.selectedAssert = assertIndex
-                // if (this.selected === assertIndex)  { // unselect
-                //     this.$store.commit('setCurrentAssertIndex', null)
-                //     const route = `/session/${this.sessionId}/channel/${this.channelId}/collection/${this.testCollection}/test/${this.testId}/event/${this.eventId}`
-                //     this.$router.push(route)
-                // } else {
-                //     this.$store.commit('setCurrentAssertIndex', assertIndex)
-                //     const route = `/session/${this.sessionId}/channel/${this.channelId}/collection/${this.testCollection}/test/${this.testId}/event/${this.eventId}/assert/${assertIndex}`
-                //     this.$router.push(route)
-                // }
+                if (this.selectedAssertIndex === assertIndex)
+                    this.selectedAssertIndex = null
+                else
+                    this.selectedAssertIndex = assertIndex
             },
             operationOrAssertion(testi, actioni) {
                 const action = this.script.test[testi].action[actioni]
@@ -174,11 +174,24 @@
 
 <style scoped>
 .script {
+    margin-left: 15px;
+    margin-right: 15px;
     text-align: left;
 }
 .test-part {
     margin-left: 20px;
     margin-right: 20px;
+}
+.assert-part {
+    margin-left: 20px;
+    margin-right: 20px;
+    cursor: pointer;
+    text-decoration: underline;
+}
+.message-part {
+    margin-left: 25px;
+    margin-right: 25px;
+    background-color: white;
 }
     .name {
         font-weight: bold;

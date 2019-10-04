@@ -1,21 +1,14 @@
 <template>
     <div>
-        <div v-for="(eventId, eventi) in eventIds" v-bind:class="[isEventPass(eventId) ? passClass : failClass, '']"
+        <div v-for="(eventId, eventi) in eventIds"
              :key="'Disp' + eventi">
-            <div @click="selectEvent(eventId)">
-                Event: {{ eventId }}
+            <div>
+                <div  @click.self="selectEvent(eventId)" v-bind:class="[isEventPass(eventId) ? passClass : failClass, 'event-part']">
+                    Event: {{ eventId }}
+                </div>
                 <div v-if="selected === eventId">
                     <router-view></router-view>
                 </div>
-<!--                <eval-details :session-id="sessionId"-->
-<!--                              :channel-id="channelId"-->
-<!--                              :test-collection="testCollection"-->
-<!--                              :test-id="testId"-->
-<!--                ></eval-details>-->
-<!--                <eval-report-event-->
-<!--                        :event-id="eventId"-->
-<!--                        :test-report="eventResult[eventId]"-->
-<!--                        :action-index="actionIndex"></eval-report-event>-->
             </div>
         </div>
     </div>
@@ -80,5 +73,10 @@
 </script>
 
 <style scoped>
-
+    .event-part {
+        margin-left: 15px;
+        margin-right: 15px;
+        cursor: pointer;
+        text-decoration: underline;
+    }
 </style>
