@@ -128,6 +128,28 @@ public class AssertionRunner {
 //            return;
 //        }
 
+        if (as.hasCompareToSourceId() && as.hasCompareToSourceExpression()) {
+            sourceFixture = fixtureMgr.get(as.getCompareToSourceId());
+            if (sourceFixture == null) {
+                Reporter.reportError(val, assertReport, type, label, "compareToSourceId references " + as.getCompareToSourceId() + " which cannot be found");
+                return false;
+            }
+
+            BaseResource sourceResource = sourceFixture.getResourceResource();
+            if (sourceResource == null) {
+                Reporter.reportError(val, assertReport, type, label,"Fixture referenced " + sourceFixture.getId()  + " has no resource");
+                return false;
+            }
+            String expression = as.getCompareToSourceExpression();
+            String found = FhirPathEngineBuilder.evalForString(sourceResource, expression);
+            if ("true".equals(found)) {
+                Reporter.reportPass(val, assertReport, type, label, "expression comparison completed");
+                return true;
+            }
+            Reporter.reportError(val, assertReport, type, label, "assertion failed");
+            return false;
+        }
+
         // resource type pattern
         // resource type specified sourceId or lastOperation must have returned that resource type
         if (as.hasResource()) {

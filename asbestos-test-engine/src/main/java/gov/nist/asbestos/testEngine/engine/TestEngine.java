@@ -94,7 +94,7 @@ public class TestEngine  {
 
     // if inputResource == null then this is a test
     // if null then this is an evaluation
-    public TestEngine runEval(BaseResource requestResource, BaseResource responseResource) {
+    public TestEngine runEval(ResourceWrapper requestResource, ResourceWrapper responseResource) {
         Objects.requireNonNull(val);
         Objects.requireNonNull(testSession);
         Objects.requireNonNull(externalCache);

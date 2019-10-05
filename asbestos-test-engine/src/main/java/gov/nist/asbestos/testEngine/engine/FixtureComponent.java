@@ -28,6 +28,10 @@ public class FixtureComponent {
         resource = new ResourceWrapper(baseResource);
     }
 
+    FixtureComponent(ResourceWrapper resource) {
+        this.resource = resource;
+    }
+
     FixtureComponent load(ResourceWrapper it) {  //  static loads
         Objects.requireNonNull(it);
         Objects.requireNonNull(it.getRef());

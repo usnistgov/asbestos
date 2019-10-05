@@ -3,6 +3,10 @@ package gov.nist.asbestos.asbestosProxy.requests;
 import gov.nist.asbestos.client.Base.ProxyBase;
 import gov.nist.asbestos.client.client.Format;
 import gov.nist.asbestos.client.events.Event;
+import gov.nist.asbestos.client.events.Task;
+import gov.nist.asbestos.client.resolver.ResourceWrapper;
+import gov.nist.asbestos.http.operations.HttpBase;
+import gov.nist.asbestos.http.operations.HttpGet;
 import gov.nist.asbestos.simapi.simCommon.SimId;
 import gov.nist.asbestos.simapi.validation.Val;
 import gov.nist.asbestos.testEngine.engine.TestEngine;
@@ -74,15 +78,20 @@ public class GetClientTestEvalRequest {
         eventDirsSinceMarker.sort(Comparator.comparing(File::getName).reversed());
         List<Event> events = eventDirsSinceMarker.stream().map(Event::new).collect(Collectors.toList());
 
-        Map<Event, BaseResource> requestResources = new HashMap<>();
-        Map<Event, BaseResource> responseResources = new HashMap<>();
+        Map<Event, ResourceWrapper> requestResources = new HashMap<>();
+        Map<Event, ResourceWrapper> responseResources = new HashMap<>();
         for (Event event : events) {
+            Task task = event.getClientTask();
             try {
-                String requestString = event.getClientTask().getRequestBodyAsString();
+                String requestString = task.getRequestBodyAsString();
                 String requestContentType = event.getClientTask().getRequestHeader().getContentType().getValue();
                 Format format = Format.fromContentType(requestContentType);
                 BaseResource resource = ProxyBase.parse(requestString, format);
-                requestResources.put(event, resource);
+                ResourceWrapper wrapper = new ResourceWrapper(resource);
+                HttpBase base = new HttpGet();
+                task.fromTask(base);
+                wrapper.setHttpBase(base);
+                requestResources.put(event, wrapper);
             } catch (Throwable t) {
                 // ignore
             }
@@ -92,7 +101,11 @@ public class GetClientTestEvalRequest {
                 String responseContentType = event.getClientTask().getResponseHeader().getContentType().getValue();
                 Format rformat = Format.fromContentType(responseContentType);
                 BaseResource rresource = ProxyBase.parse(responseString, rformat);
-                responseResources.put(event, rresource);
+                ResourceWrapper wrapper = new ResourceWrapper(rresource);
+                HttpBase base = new HttpGet();
+                task.fromTask(base);
+                wrapper.setHttpBase(base);
+                responseResources.put(event, wrapper);
             } catch (Throwable t) {
                 // ignore
             }
@@ -107,7 +120,7 @@ public class GetClientTestEvalRequest {
                 testEngine.setVal(new Val());
                 testEngine.setTestSession(testSession);
                 testEngine.setExternalCache(request.externalCache);
-                BaseResource responseResource = responseResources.get(event);
+                ResourceWrapper responseResource = responseResources.get(event);
                 testEngine.runEval(requestResources.get(event), responseResource);
                 EventResult eventResult = result.results.get(testId); //new EventResult();
                 if (eventResult == null)
