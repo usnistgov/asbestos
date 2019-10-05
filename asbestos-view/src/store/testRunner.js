@@ -131,15 +131,21 @@ export const testRunnerStore = {
                     console.error(error)
                 })
         },
-        // waitOnClient({commit, state, rootState}, testId) {
-        //     ENGINE.post(`eval/${rootState.base.session}__${rootState.base.channelId}/${state.currentTestCollectionName}/${testId}`)
-        //         .then(response => {
-        //             commit('setWaitingOnClient', testId)
-        //         })
-        //         .catch(function (error) {
-        //             console.error(error)
-        //         })
-        // },
+        loadTestScript({commit, state}, payload ) {
+            console.info(`load testscript ${payload.testId} - ${state.testScripts[payload.testId]}`)
+            if (state.testScripts[payload.testId] === undefined) {
+                console.info(`${payload.testId} needs loading`)
+                ENGINE.get(`collection/${payload.testCollection}/${payload.testId}`)
+                    .then(response => {
+                        console.info(`EvalDetails: loaded test script ${payload.testCollection}/${payload.testId}`)
+                        commit('addTestScript', {name: payload.testId, script: response.data})
+                        //this.script = response.data
+                    })
+                    .catch(function (error) {
+                        console.error(error)
+                    })
+            }
+        },
         loadTestCollectionNames({commit}) {
             ENGINE.get(`collections`)
                 .then(response => {

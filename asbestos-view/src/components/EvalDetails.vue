@@ -48,7 +48,6 @@
 </template>
 
 <script>
-    import {ENGINE} from '../common/http-common'
     import errorHandlerMixin from '../mixins/errorHandlerMixin'
     //import EvalReportAssert from './EvalReportAssert'
 
@@ -93,21 +92,9 @@
             },
             loadTestScript() {
                 console.info(`load testscript ${this.testId} - ${this.$store.state.testRunner.testScripts[this.testId]}`)
-                if (this.$store.state.testRunner.testScripts[this.testId] === undefined) {
-                    console.info(`${this.testId} needed loading`)
-                    const that = this
-                    ENGINE.get(`collection/${this.testCollection}/${this.testId}`)
-                        .then(response => {
-                            console.info(`EvalDetails: loaded test script ${this.testCollection}/${this.testId}`)
-                            this.$store.commit('addTestScript', {name: this.testId, script: response.data})
-                            this.script = response.data
-                        })
-                        .catch(function (error) {
-                            that.error(error)
-                        })
-                } else {
+                return this.$store.dispatch('loadTestScript', { collection: this.testCollection, testId: this.testId }).then(() => {
                     this.script = this.$store.state.testRunner.testScripts[this.testId]
-                }
+                })
             },
             loadTestReport() {  // loaded by TestList
                 this.report = this.$store.state.testRunner.testReports[this.testId]
