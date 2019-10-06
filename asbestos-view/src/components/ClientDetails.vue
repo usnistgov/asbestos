@@ -1,5 +1,5 @@
 <template>
-    <div v-if="$store.state.testRunner.testScript">
+    <div v-if="testScript">
         {{ testScript.description }}
         <div v-for="(eventId, eventi) in eventIds"
              :key="'Disp' + eventi">
@@ -22,7 +22,6 @@
             return {
                 passClass: 'pass',
                 failClass: 'fail',
-                testScript: null,
             }
         },
         methods: {
@@ -46,13 +45,14 @@
                 this.selectEvent(this.selected)
             },
             loadTest() {
-                console.log(`load test ${this.testId}`)
-                return this.$store.dispatch('loadTestScript', { testCollection: this.testCollection, testId: this.testId }).then(() => {
-                    this.testScript = this.$store.state.testRunner.testScripts[this.testId]
-                })
+                //console.log(`load test ${this.testId}`)
+                this.$store.dispatch('loadTestScript', { testCollection: this.testCollection, testId: this.testId })
             },
         },
         computed: {
+            testScript() {
+                return this.$store.state.testRunner.testScripts[this.testId]
+            },
             selected() {
                 return this.$store.state.testRunner.currentEvent
             },

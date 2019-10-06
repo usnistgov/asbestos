@@ -58,7 +58,10 @@ export const testRunnerStore = {
         },
         addTestScript(state, scriptObject) {
             // scriptObject is  { name: testId, script: TestScript }
-            state.testScripts[scriptObject.name] = scriptObject.script
+            console.log(`setting ${scriptObject.name} to ${scriptObject.script}`)
+            Vue.set(state.testScripts,scriptObject.name, scriptObject.script)
+            //state.testScripts.splice(scriptObject.name, 1, scriptObject.script)
+            //state.testScripts[scriptObject.name] = scriptObject.script
         },
         setTestCollectionName(state, name) {
             state.currentTestCollectionName = name
@@ -132,13 +135,15 @@ export const testRunnerStore = {
                 })
         },
         loadTestScript({commit, state}, payload ) {
-            console.info(`load testscript ${payload.testId} - ${state.testScripts[payload.testId]}`)
-            if (state.testScripts[payload.testId] === undefined) {
-                console.info(`${payload.testId} needs loading`)
-                ENGINE.get(`collection/${payload.testCollection}/${payload.testId}`)
+            const testCollection = payload.testCollection
+            const testId = payload.testId
+            console.info(`load testscript - currently ${testCollection}/${testId} is ${state.testScripts[testId]}`)
+            if (state.testScripts[testId] === undefined) {
+                //console.info(`${payload.testId} needs loading`)
+                ENGINE.get(`collection/${testCollection}/${testId}`)
                     .then(response => {
-                        console.info(`EvalDetails: loaded test script ${payload.testCollection}/${payload.testId}`)
-                        commit('addTestScript', {name: payload.testId, script: response.data})
+                        console.info(`loaded test script ${testCollection}/${testId}`)
+                        commit('addTestScript', {name: testId, script: response.data})
                         //this.script = response.data
                     })
                     .catch(function (error) {

@@ -1,9 +1,9 @@
 <template>
     <div>
         <div v-if="script" class="script">
-            <div v-if="script.description">
-                {{ script.description }}
-            </div>
+<!--            <div v-if="script.description">-->
+<!--                {{ script.description }}-->
+<!--            </div>-->
             <div v-for="(fixture, i) in fixtures"
                  :key="i">
                 <span class="name" >Fixture: </span>
