@@ -134,9 +134,9 @@ export const testRunnerStore = {
             const testCollection = payload.testCollection
             const testId = payload.testId
             console.info(`load testscript - currently ${testCollection}/${testId} is ${state.testScripts[testId]}`)
-            if (state.testScripts[testId] === undefined) {
+//            if (state.testScripts[testId] === undefined) {
                 //console.info(`${payload.testId} needs loading`)
-                ENGINE.get(`collection/${testCollection}/${testId}`)
+                return ENGINE.get(`collection/${testCollection}/${testId}`)
                     .then(response => {
                         //console.info(`loaded test script ${testCollection}/${testId}`)
                         commit('addTestScript', {name: testId, script: response.data})
@@ -145,7 +145,7 @@ export const testRunnerStore = {
                     .catch(function (error) {
                         console.error(error)
                     })
-            }
+  //          }
         },
         loadTestCollectionNames({commit}) {
             ENGINE.get(`collections`)

@@ -242,7 +242,7 @@
         /*font-size: larger;*/
     }
     .error {
-        background-color: indianred;
+        background-color: #0074D9 ;
         text-align: left;
         border: 1px dotted black;
         cursor: pointer;

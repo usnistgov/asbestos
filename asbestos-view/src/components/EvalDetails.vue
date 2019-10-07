@@ -30,7 +30,12 @@
                      :key="'Eval' + testi + 'Action' + actioni">
                     <div>
                         <div @click="selectAssert(actioni)">
-                            <div v-bind:class="[assertPass(actioni) ? passClass : failClass, 'assert-part']">
+<!--                            <div v-bind:class="[assertPass(actioni) ? passClass : failClass, 'assert-part']">-->
+                            <div v-bind:class="{
+                            pass: assertResult(actioni) === 'pass',
+                            fail: assertResult(actioni) === 'fail',
+                            error: assertResult(actioni) === 'error',
+                            'not-run': assertResult(actioni) === 'not-run' }">
                                 Assert: {{ assertScript(actioni).description }}
                             </div>
                             <div v-if="selectedAssertIndex === actioni" class="message-part">
@@ -65,6 +70,9 @@
             assertMessage(assertIndex) {
                 return this.assertReport(assertIndex).message
             },
+            assertResult(assertIndex) {
+                return this.assertReport(assertIndex).result
+            },
             assertPass(assertIndex) {
                 return this.assertReport(assertIndex).result === 'pass'
             },
@@ -96,7 +104,7 @@
                     this.script = this.$store.state.testRunner.testScripts[this.testId]
                 })
             },
-            loadTestReport() {  // loaded by TestList
+            loadTestReport() {
                 this.report = this.$store.state.testRunner.testReports[this.testId]
             },
             actions(testIndex) {
@@ -146,7 +154,10 @@
 
         },
         watch: {
-            'testId': 'loadTestReport'
+            'testId': function() {
+                this.loadTestScript
+                this.loadTestReport()
+            }
         },
         mixins: [ errorHandlerMixin ],
         props: [
@@ -186,5 +197,32 @@
     .value {
 
     }
-
+.pass {
+    background-color: lightgreen;
+    text-align: left;
+    border: 1px dotted black;
+    cursor: pointer;
+    /*font-size: larger;*/
+}
+.fail {
+    background-color: indianred;
+    text-align: left;
+    border: 1px dotted black;
+    cursor: pointer;
+    /*font-size: larger;*/
+}
+.error {
+    background-color: #0074D9 ;
+    text-align: left;
+    border: 1px dotted black;
+    cursor: pointer;
+    /*font-size: larger;*/
+}
+.not-run {
+    background-color: lightgray;
+    text-align: left;
+    border: 1px dotted black;
+    cursor: pointer;
+    /*font-size: larger;*/
+}
 </style>
