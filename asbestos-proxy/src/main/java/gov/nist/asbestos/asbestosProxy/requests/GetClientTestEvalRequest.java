@@ -61,8 +61,14 @@ public class GetClientTestEvalRequest {
         List<File> testDirs;
         if (request.uriParts.size() == 6)  // no testID specified - do all
             testDirs = request.ec.getTests(testCollection);
-        else  // testId specified - do one
-            testDirs = Collections.singletonList(request.ec.getTest(testCollection, request.uriParts.get(6)));
+        else { // testId specified - do one
+            File dir = request.ec.getTest(testCollection, request.uriParts.get(6));
+            if (dir == null) {
+                request.resp.setStatus(request.resp.SC_NOT_FOUND);
+                return;
+            }
+            testDirs = Collections.singletonList(dir);
+        }
 
         Map<String, File> testIds = testDirs.stream().collect(Collectors.toMap(File::getName, x -> x));
         // testId -> testScript
@@ -149,10 +155,9 @@ public class GetClientTestEvalRequest {
                 else
                     buf.append(',');
 
-                buf.append("").append('"').append(eventId).append('"').append(":\n ");
+                buf.append('"').append(eventId).append('"').append(":\n ");
                 TestReport testReport = er.reports.get(eventId);
                 buf.append(ProxyBase.encode(testReport, Format.JSON));
-                buf.append("");
             }
             buf.append("\n  }\n");
         }

@@ -153,6 +153,12 @@
         border: 1px dotted black;
         cursor: pointer;
     }
+    .error {
+        background-color: indianred;
+        text-align: left;
+        border: 1px dotted black;
+        cursor: pointer;
+    }
     .not-run {
         background-color: lightgray;
         text-align: left;

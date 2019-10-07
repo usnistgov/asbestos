@@ -1,6 +1,6 @@
 <template>
     <div>
-      <div v-for="(name, i) in $store.state.testRunner.testScriptNames"
+      <div v-for="(name, i) in $store.state.testRunner.testReportNames"
          :key="name + i">
         <div >
             <div @click="selectTest(name)">
@@ -61,7 +61,7 @@
                 })
             },
             allTestScriptNames() {
-                return this.$store.state.testRunner.testScriptNames
+                return this.$store.state.testRunner.testReportNames
             },
         },
         computed: {

@@ -10,6 +10,7 @@ export const testRunnerStore = {
             testCollectionNames: [],
             currentTestCollectionName: null,
             testScriptNames: [],
+            testReportNames: [],
 
             currentTest: null,  // testId
             currentEvent: null,  // eventId
@@ -32,10 +33,11 @@ export const testRunnerStore = {
             state.waitingOnClient = testId
         },
         setIsClientTest(state, isClient) {
-            console.log(`client is ${isClient}`)
+            //console.log(`client is ${isClient}`)
             state.isClientTest = isClient
         },
         setTestScriptNames(state, names) {
+            console.log(`testScriptNames is ${names}`)
             state.testScriptNames = names.sort()
         },
         setCurrentTest(state, currentTestId) {
@@ -76,13 +78,13 @@ export const testRunnerStore = {
         //     // each value is eventId => TestReport
         //     state.clientTestResult[payload.evalId] = JSON.parse(JSON.stringify(payload.events))
         // },
-        setClientTestResult(state, result) {
-            state.clientTestResult = result
-            // // payload is { evalId: xxx, events: eventId => TestReports }
-            // console.log(`installing evalId is ${payload.evalId}`)
-            // console.log(`installing eventIds are ${Object.getOwnPropertyNames(payload.events)}`)
-            // // each value is eventId => TestReport
-            // state.clientTestResult[payload.evalId] = JSON.parse(JSON.stringify(payload.events))
+        setClientTestResult(state, result) {     // { testId: testId, result: result }
+            //state.clientTestResult.splice(result.testId, 1, result.result)
+            state.clientTestResult[result.testId] = result.result
+
+            // force vue reaction
+            state.clientTestResult.push('foo')
+            state.clientTestResult.splice(-1, 1)
         }
     },
     getters: {
@@ -95,18 +97,12 @@ export const testRunnerStore = {
             ENGINE.get(`clienteval/${rootState.base.session}__${rootState.base.channelId}/${state.currentTestCollectionName}/${testId}`)
                 .then(response => {
                     const results = response.data
-                    console.log(`results testid = ${Object.getOwnPropertyNames(results)}`)
+                    //console.log(`runEval: results testid = ${Object.getOwnPropertyNames(results)}`)
 
-                    Object.getOwnPropertyNames(results).forEach(evalId  => {
-                        console.log(`called server - evalId is ${evalId}`)
-                        console.log(`events are ${Object.getOwnPropertyNames(results[evalId])}`)
-                        commit('setClientTestResult', results)
-                        // commit({
-                        //     type: 'setClientTestResult',
-                        //     evalId: evalId,
-                        //     events: events,    // eventId => TestReport
-                        // })
-                    })
+                    //console.log(`called server - evalId is ${testId}`)
+                    //console.log(`events for ${testId} are ${Object.getOwnPropertyNames(results[testId])}`)
+//                        commit('setClientTestResult', results)
+                    commit('setClientTestResult', { testId: testId, result: results[testId]} )
                 })
                 .catch(function (error) {
                     console.error(error)
@@ -142,7 +138,7 @@ export const testRunnerStore = {
                 //console.info(`${payload.testId} needs loading`)
                 ENGINE.get(`collection/${testCollection}/${testId}`)
                     .then(response => {
-                        console.info(`loaded test script ${testCollection}/${testId}`)
+                        //console.info(`loaded test script ${testCollection}/${testId}`)
                         commit('addTestScript', {name: testId, script: response.data})
                         //this.script = response.data
                     })
@@ -155,7 +151,7 @@ export const testRunnerStore = {
             ENGINE.get(`collections`)
                 .then(response => {
                     let theResponse = response.data
-                    console.info(`TestEnginePanel: loaded ${theResponse.length} test collections`)
+                    //console.info(`TestEnginePanel: loaded ${theResponse.length} test collections`)
                     commit('setTestCollectionNames', theResponse.sort())
                 })
                 .catch(function (error) {
@@ -169,8 +165,10 @@ export const testRunnerStore = {
             ENGINE.get(url)
                 .then(response => {
                     let theResponse = response.data
+                    //console.log(`action: testScriptNames are ${theResponse.testNames}`)
                     commit('setTestScriptNames', theResponse.testNames)
                     const isClient = !theResponse.isServerTest
+                    //console.log(`action: isClient - ${isClient}`)
                     commit('setIsClientTest', isClient)
                     commit('clearTestScripts')
                 })
