@@ -155,7 +155,7 @@
         },
         watch: {
             'testId': function() {
-                this.loadTestScript
+                this.loadTestScript()
                 this.loadTestReport()
             }
         },
