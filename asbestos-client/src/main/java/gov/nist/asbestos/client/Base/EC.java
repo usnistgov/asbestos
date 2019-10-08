@@ -33,13 +33,11 @@ public class EC {
     }
 
      List<File> getTestCollections() {
-        List<File> collections = new ArrayList<>();
-
-        URL aUrl = EC.class.getResource("/TestCollections/testCollectionRoot.txt");
-        String aFile = aUrl.getFile();
-        File internalRoot = new File(aFile).getParentFile();
-        List<File> intList = listOfFiles(internalRoot);
-        collections.addAll(intList);
+//        URL aUrl = EC.class.getClassLoader().getResource("/TestCollections/testCollectionRoot.txt");
+//        String aFile = aUrl.getFile();
+//        File internalRoot = new File(aFile).getParentFile();
+//        List<File> intList = listOfFiles(internalRoot);
+         List<File> collections = new ArrayList<>();
 
         File externalRoot = new File(externalCache, "TestCollections");
         List<File> extList = listOfFiles(externalRoot);
