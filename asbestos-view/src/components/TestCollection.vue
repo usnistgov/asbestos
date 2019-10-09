@@ -91,7 +91,6 @@
                     } else {
                         this.$set(this.status, testId, 'fail')
                     }
-                    //console.log(`${testId} is ${this.status[testId]}`)
                 })
             },
             hasSuccessfulEvent(testId) {
@@ -224,6 +223,7 @@
         created() {
             this.reload()
             this.channel = this.channelId
+            this.setEvalCount()
         },
         mounted() {
 

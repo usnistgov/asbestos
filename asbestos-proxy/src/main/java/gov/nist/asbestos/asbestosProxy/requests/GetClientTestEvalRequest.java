@@ -105,28 +105,32 @@ public class GetClientTestEvalRequest {
             String verb = task.getVerb();
             try {
                 String requestString = task.getRequestBodyAsString();
-                String requestContentType = event.getClientTask().getRequestHeader().getContentType().getValue();
-                Format format = Format.fromContentType(requestContentType);
-                BaseResource resource = ProxyBase.parse(requestString, format);
-                ResourceWrapper wrapper = new ResourceWrapper(resource);
-                HttpBase base = verb.equalsIgnoreCase("post") ? new HttpPost() : new HttpGet();
-                task.fromTask(base);
-                wrapper.setHttpBase(base);
-                requestResources.put(event, wrapper);
+                if (requestString != null) {
+                    String requestContentType = event.getClientTask().getRequestHeader().getContentType().getValue();
+                    Format format = Format.fromContentType(requestContentType);
+                    BaseResource resource = ProxyBase.parse(requestString, format);
+                    ResourceWrapper wrapper = new ResourceWrapper(resource);
+                    HttpBase base = verb.equalsIgnoreCase("post") ? new HttpPost() : new HttpGet();
+                    task.fromTask(base);
+                    wrapper.setHttpBase(base);
+                    requestResources.put(event, wrapper);
+                }
             } catch (Throwable t) {
                 t.printStackTrace();
             }
 
             try {
                 String responseString = event.getClientTask().getResponseBodyAsString();
-                String responseContentType = event.getClientTask().getResponseHeader().getContentType().getValue();
-                Format rformat = Format.fromContentType(responseContentType);
-                BaseResource rresource = ProxyBase.parse(responseString, rformat);
-                ResourceWrapper wrapper = new ResourceWrapper(rresource);
-                HttpBase base = verb.equalsIgnoreCase("post") ? new HttpPost() : new HttpGet();
-                task.fromTask(base);
-                wrapper.setHttpBase(base);
-                responseResources.put(event, wrapper);
+                if (responseString != null) {
+                    String responseContentType = event.getClientTask().getResponseHeader().getContentType().getValue();
+                    Format rformat = Format.fromContentType(responseContentType);
+                    BaseResource rresource = ProxyBase.parse(responseString, rformat);
+                    ResourceWrapper wrapper = new ResourceWrapper(rresource);
+                    HttpBase base = verb.equalsIgnoreCase("post") ? new HttpPost() : new HttpGet();
+                    task.fromTask(base);
+                    wrapper.setHttpBase(base);
+                    responseResources.put(event, wrapper);
+                }
             } catch (Throwable t) {
                 t.printStackTrace();
             }
