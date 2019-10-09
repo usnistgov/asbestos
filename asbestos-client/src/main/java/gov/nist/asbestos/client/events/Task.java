@@ -29,6 +29,11 @@ public class Task {
         this.event = event;
     }
 
+    public String getVerb() {
+        Headers headers = getRequestHeader();
+        return headers.getVerb();
+    }
+
     public Event getEvent() {
         return event;
     }

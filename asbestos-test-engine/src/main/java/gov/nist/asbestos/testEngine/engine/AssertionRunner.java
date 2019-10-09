@@ -146,7 +146,7 @@ public class AssertionRunner {
                 Reporter.reportPass(val, assertReport, type, label, "expression comparison completed");
                 return true;
             }
-            Reporter.reportError(val, assertReport, type, label, "assertion failed");
+            Reporter.reportFail(val, assertReport, type, label, "assertion failed - " + expression, warningOnly);
             return false;
         }
 
@@ -256,6 +256,19 @@ public class AssertionRunner {
                 return true;
             }
             Reporter.reportError(val, assertReport, type, label, "expression " + as.getExpression()  +  " failed");
+            return false;
+        }
+
+        if (as.hasRequestMethod()) {
+            String requestedMethod = as.getRequestMethod().toCode();
+            sourceFixture = getSource(as);
+            if (sourceFixture == null) return false;
+            String method = sourceFixture.getResourceWrapper().getHttpBase().getVerb();
+            if (requestedMethod.equalsIgnoreCase(method)) {
+                Reporter.reportPass(val, assertReport, type, label, "Method " + requestedMethod + " found");
+                return true;
+            }
+            Reporter.reportFail(val, assertReport, type, label, "Expected method " + requestedMethod + " found " + method, warningOnly);
             return false;
         }
 

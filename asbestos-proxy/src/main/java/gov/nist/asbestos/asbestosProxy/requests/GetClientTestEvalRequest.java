@@ -7,6 +7,7 @@ import gov.nist.asbestos.client.events.Task;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import gov.nist.asbestos.http.operations.HttpBase;
 import gov.nist.asbestos.http.operations.HttpGet;
+import gov.nist.asbestos.http.operations.HttpPost;
 import gov.nist.asbestos.simapi.simCommon.SimId;
 import gov.nist.asbestos.simapi.validation.Val;
 import gov.nist.asbestos.testEngine.engine.TestEngine;
@@ -27,8 +28,9 @@ import java.util.stream.Collectors;
 // 2 - "engine"
 // 3 - "clienteval"
 // 4 - channelName   testSession__channelId
-// 5 - testCollectionId
-// 6 - testId (optional)
+// 5 - "marker" or number of events to evaluate
+// 6 - testCollectionId
+// 7 - testId (optional)
 // Run a client test
 
 public class GetClientTestEvalRequest {
@@ -38,7 +40,7 @@ public class GetClientTestEvalRequest {
 
     public static boolean isRequest(Request request) {
         return  request.uriParts.get(3).equals("clienteval") &&
-                (request.uriParts.size() == 6 || request.uriParts.size() == 7);
+                (request.uriParts.size() == 7 || request.uriParts.size() == 8);
     }
 
     public GetClientTestEvalRequest(Request request) {
@@ -56,18 +58,26 @@ public class GetClientTestEvalRequest {
     public void run() {
         log.info("GetClientTestEval");
         request.parseChannelName(4);
-        String testCollection = request.uriParts.get(5);
+        String testCollection = request.uriParts.get(6);
+        boolean useMarker = false;
+        int eventsToEvaluate = 0;
 
-        List<File> testDirs;
-        if (request.uriParts.size() == 6)  // no testID specified - do all
+        if (request.uriParts.get(5).equals("marker"))
+            useMarker = true;
+        else
+            eventsToEvaluate = Integer.parseInt(request.uriParts.get(5));
+
+        List<File> testDirs = new ArrayList<>();
+        if (request.uriParts.size() == 7)  // no testID specified - do all
             testDirs = request.ec.getTests(testCollection);
         else { // testId specified - do one
-            File dir = request.ec.getTest(testCollection, request.uriParts.get(6));
-            if (dir == null) {
-                request.resp.setStatus(request.resp.SC_NOT_FOUND);
-                return;
-            }
-            testDirs = Collections.singletonList(dir);
+            File dir = request.ec.getTest(testCollection, request.uriParts.get(7));
+//            if (dir == null) {
+//                request.resp.setStatus(request.resp.SC_NOT_FOUND);
+//                return;
+//            }
+            if (dir != null)
+                testDirs = Collections.singletonList(dir);
         }
 
         Map<String, File> testIds = testDirs.stream().collect(Collectors.toMap(File::getName, x -> x));
@@ -76,30 +86,35 @@ public class GetClientTestEvalRequest {
                 Collectors.toMap(File::getName, TestEngine::loadTestScript)
         );
 
-        String marker = request.ec.getLastMarker(request.testSession, request.channelId);
+        String marker = useMarker ?
+                request.ec.getLastMarker(request.testSession, request.channelId)
+                : null;
         SimId simId = SimId.buildFromRawId(request.uriParts.get(4));
         String testSession = simId.getTestSession().getValue();
 
         List<File> eventDirsSinceMarker = request.ec.getEventsSince(simId, marker);
         eventDirsSinceMarker.sort(Comparator.comparing(File::getName).reversed());
         List<Event> events = eventDirsSinceMarker.stream().map(Event::new).collect(Collectors.toList());
+        if (!useMarker)
+            events = events.subList(0, eventsToEvaluate);
 
         Map<Event, ResourceWrapper> requestResources = new HashMap<>();
         Map<Event, ResourceWrapper> responseResources = new HashMap<>();
         for (Event event : events) {
             Task task = event.getClientTask();
+            String verb = task.getVerb();
             try {
                 String requestString = task.getRequestBodyAsString();
                 String requestContentType = event.getClientTask().getRequestHeader().getContentType().getValue();
                 Format format = Format.fromContentType(requestContentType);
                 BaseResource resource = ProxyBase.parse(requestString, format);
                 ResourceWrapper wrapper = new ResourceWrapper(resource);
-                HttpBase base = new HttpGet();
+                HttpBase base = verb.equalsIgnoreCase("post") ? new HttpPost() : new HttpGet();
                 task.fromTask(base);
                 wrapper.setHttpBase(base);
                 requestResources.put(event, wrapper);
             } catch (Throwable t) {
-                // ignore
+                t.printStackTrace();
             }
 
             try {
@@ -108,12 +123,12 @@ public class GetClientTestEvalRequest {
                 Format rformat = Format.fromContentType(responseContentType);
                 BaseResource rresource = ProxyBase.parse(responseString, rformat);
                 ResourceWrapper wrapper = new ResourceWrapper(rresource);
-                HttpBase base = new HttpGet();
+                HttpBase base = verb.equalsIgnoreCase("post") ? new HttpPost() : new HttpGet();
                 task.fromTask(base);
                 wrapper.setHttpBase(base);
                 responseResources.put(event, wrapper);
             } catch (Throwable t) {
-                // ignore
+                t.printStackTrace();
             }
         }
 
@@ -137,14 +152,14 @@ public class GetClientTestEvalRequest {
         }
 
         // for one testId
-        String testId = request.uriParts.get(6);
+        String testId = request.uriParts.get(7);
 
         StringBuilder buf = new StringBuilder();
         buf.append('{').append('"').append(testId).append('"').append(':').append("\n ");
 
         File testLogDir = request.ec.getTestLogDir(request.fullChannelId(), testCollection, testId);
         EventResult er = result.results.get(testId);
-        if (er.reports.isEmpty())
+        if (er == null || er.reports == null || er.reports.isEmpty())
             buf.append("null");
         else {
             buf.append(" {\n");

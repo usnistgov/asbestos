@@ -100,7 +100,7 @@
             },
             loadTestScript() {
                 console.info(`load testscript ${this.testId} - ${this.$store.state.testRunner.testScripts[this.testId]}`)
-                return this.$store.dispatch('loadTestScript', { collection: this.testCollection, testId: this.testId }).then(() => {
+                return this.$store.dispatch('loadTestScript', { testCollection: this.testCollection, testId: this.testId }).then(() => {
                     this.script = this.$store.state.testRunner.testScripts[this.testId]
                 })
             },

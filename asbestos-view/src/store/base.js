@@ -22,9 +22,13 @@ export const baseStore = {
             ],
 
             channelIds: [],  // for this session
+            error: null,
         }
     },
     mutations: {
+        setError(state, error) {
+            state.error = error
+        },
         setSession(state, theSession) {
 //            console.log(`setSession = ${theSession}`)
             state.session = theSession

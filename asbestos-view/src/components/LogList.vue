@@ -1,6 +1,6 @@
 <template>
     <div>
-        <span class="tool-title">Logs for Channel {{ channelId }}</span>
+        <span class="tool-title">Events for Channel {{ channelId }}</span>
         <span class="divider"></span>
 
         <img id="reload" class="selectable" @click="loadEventSummaries()" src="../assets/reload.png"/>

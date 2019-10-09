@@ -1,6 +1,6 @@
 <template>
     <div>
-        <div class="control-panel-item-title" @click="manage()">Log</div>
+        <div class="control-panel-item-title" @click="manage()">Events</div>
         <div v-if="!selectable" class="not-available">Select Channel</div>
     </div>
 </template>

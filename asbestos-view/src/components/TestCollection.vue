@@ -1,18 +1,35 @@
 <template>
     <div>
-        <span class="tool-title">Tests for Collection {{ testCollection }}</span>
-        <span class="divider"></span>
-        <img id="reload" class="selectable" @click="reload()" src="../assets/reload.png"/>
-        <span class="divider"></span>
-
-        <div v-if="$store.state.testRunner.isClientTest" class="right">
-            Last Marker: {{ $store.state.testRunner.lastMarker }}
-            <span class="selectable" @click="setMarker()">Set</span>
+        <div class="tool-title">
+            <span>Tests for {{ testCollection }}</span>
+            <span class="divider"></span>
+            <img id="reload" class="selectable" @click="reload()" src="../assets/reload.png"/>
+            <span class="divider"></span>
         </div>
 
+<!--        <div v-if="$store.state.testRunner.isClientTest" class="right">-->
+<!--            Last Marker: {{ $store.state.testRunner.lastMarker }}-->
+<!--            <span class="selectable" @click="setMarker()">Set</span>-->
+<!--        </div>-->
+        <div class="vdivider"></div>
+        <div class="vdivider"></div>
+
         <div class="instruction">
-            <span v-if="$store.state.testRunner.isClientTest">Client tests - click spyglass to evaluate client inputs since last Marker</span>
-            <span v-else>Server tests - click run button to start test</span>
+            <span v-if="$store.state.testRunner.isClientTest"  class="instruction">
+                These are Client tests - click spyglass to evaluate recent client inputs. Send new requests to
+                <div>
+                    <span class="boxed">{{ baseAddress }}</span>
+                </div>
+            </span>
+            <span v-else  class="instruction">
+                Server tests - click run button to start test
+            </span>
+            <span class="divider"></span>
+        </div>
+
+        <div class="second-instruction">
+            Number of most recent events to evaluate:
+            <input v-model="evalCount" placeholder="5">
         </div>
 
         <div v-for="(name, i) in Object.keys(status)"
@@ -35,7 +52,8 @@
                         <div v-else>
                             <img src="../assets/press-play-button.png" class="right" @click.stop="doRun(name)">
                         </div>
-                        {{ name }}  --  {{ time[name] }}
+                        {{ name }}
+                        <span v-if="!$store.state.testRunner.isClientTest"> --  {{ time[name] }}</span>
                     </div>
                 </div>
                 <div v-if="selected === name">
@@ -57,6 +75,7 @@
             return {
                 status: [],   // testId => undefined, 'pass', 'fail', 'error'
                 time: [],
+                evalCount: 5,
             }
         },
         methods: {
@@ -161,8 +180,14 @@
                     })
                 }
             },
+            setEvalCount() {
+                this.$store.commit('setEventEvalCount', this.evalCount)
+            }
         },
         computed: {
+            baseAddress() { // for client tests
+                return `${this.$store.state.testRunner.currentChannelBaseAddr}${this.sessionId}__${this.channelId}`
+            },
             isClient() {
                 return this.$store.state.testRunner.isClientTest
             },
@@ -204,6 +229,7 @@
 
         },
         watch: {
+            'evalCount': 'setEvalCount',
             'testCollection': 'reload',
             'channelId': function(newVal) {
                 if (this.channel !== newVal)
@@ -257,8 +283,5 @@
     }
     .right {
         text-align: right;
-    }
-    .instruction {
-        text-align: left;
     }
 </style>

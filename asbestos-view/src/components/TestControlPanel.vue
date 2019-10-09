@@ -1,16 +1,18 @@
 <template>
     <div>
-        <div>Test</div>
+<!--        <div>Test</div>-->
         <div v-if="!selectable" class="not-available">Select Channel</div>
         <div v-else>
             <div>
-                <span class="control-panel-item-title" @click="openCollection()">Collection</span>
+                <span class="control-panel-item-title" @click="openCollection()">Test Collection</span>
                 <span class="divider"></span>
                 <img id="reload" class="selectable" @click="reload()" src="../assets/reload.png"/>
             </div>
             <b-form-select v-model="collection" :options="collections"></b-form-select>
-            <div class="control-panel-item-title" @click="selectIndividual()">Tests</div>
-            <b-form-select v-model="testId" :options="testIds"></b-form-select>
+            <div v-if="client">(Client Tests)</div>
+            <div v-else>(Server Tests)</div>
+<!--            <div class="control-panel-item-title" @click="selectIndividual()">Tests</div>-->
+<!--            <b-form-select v-model="testId" :options="testIds"></b-form-select>-->
         </div>
     </div>
 </template>
@@ -42,15 +44,18 @@
             selectIndividual() {
                 if (!this.selectable)
                     return
-                if (!this.collection)
+                if (!this.$store.state.testRunner.currentTestCollectionName)
                     return;
-                if (!this.testId)
+                if (!this.$store.state.testRunner.currentTest)
                     return
                 const route = `/session/${this.session}/channel/${this.channelId}/collection/${this.collection}/test/${this.testId}`
                 this.$router.push(route)
             },
         },
         computed: {
+            client() {
+                return this.$store.state.testRunner.isClientTest
+            },
             collection: {
                 set(name) {
                     this.$store.commit('setTestCollectionName', name)
@@ -75,7 +80,7 @@
                 return this.$store.state.base.channelId
             },
             selectable() {
-                return this.session !== null && this.channelId !== null
+                return this.$store.state.base.session !== null && this.$store.state.base.channelId !== null
             },
             testId: {
                 set(name) {
