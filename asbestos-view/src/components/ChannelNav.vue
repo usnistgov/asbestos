@@ -44,6 +44,7 @@
                 let chan = newChannel()
                 chan.testSession = this.sessionId
                 chan.channelId = 'new'
+                chan.channelType = 'fhir'
                 this.$store.commit('setChannel', chan)
                 return '/session/' + this.sessionId + '/channels/new'
             },

@@ -47,7 +47,7 @@ public class ProxyServlet extends HttpServlet {
 
     public ProxyServlet() {
         super();
-        proxyMap.put("passthrough", new PassthroughChannelBuilder());
+        proxyMap.put("fhir", new PassthroughChannelBuilder());
         proxyMap.put("mhd", new MhdChannelBuilder());
     }
 

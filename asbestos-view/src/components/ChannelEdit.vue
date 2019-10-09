@@ -93,12 +93,14 @@
                     <label class="grid-name">Fhir Base</label>
                     <div v-if="edit" class="grid-item">
                         <input v-model="channel.fhirBase">
+                        Only used with Channel Type fhir
                     </div>
                     <div v-else class="grid-item">{{ channel.fhirBase }}</div>
 
                     <label class="grid-name">XDS Site Name</label>
                     <div v-if="edit" class="grid-item">
                         <input v-model="channel.xdsSiteName">
+                        Only used with Channel Type mhd
                     </div>
                     <div v-else class="grid-item">{{ channel.xdsSiteName }}</div>
                 </div>
