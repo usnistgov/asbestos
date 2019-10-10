@@ -34,7 +34,7 @@ public class SimStore {
     private String eventId = null; // within resource
 
     private boolean newlyCreated = false;
-    private static final String PSIMDB = "psimdb";
+    private static final String PSIMDB = "FhirChannels";
     private static final String CHANNEL_CONFIG_FILE = "config.json";
     private Task task;
     //Event eventStore
@@ -55,7 +55,7 @@ public class SimStore {
     // the following must initialized
     // externalCache
     // channelId
-    File getStore(boolean create)  {
+    public File getStore(boolean create)  {
         if (_simStoreLocation == null) {
             _simStoreLocation = testSessionDir(externalCache, channelId);
             if (create) {
@@ -161,7 +161,9 @@ public class SimStore {
     }
 
     public File testSessionDir(File externalCache, SimId simId) {
-        return new File(new File(externalCache, PSIMDB), simId.getTestSession().getValue());
+        File simdb = new File(externalCache, PSIMDB);
+        simdb.mkdirs();
+        return new File(simdb, simId.getTestSession().getValue());
     }
 
     public String getActorType() {

@@ -16,18 +16,20 @@
 
         <div class="instruction">
             <span v-if="$store.state.testRunner.isClientTest"  class="instruction">
-                These are Client tests - click spyglass to evaluate recent client inputs. Send new requests to
+                These are Client tests. Each test evaluates  events received at the URL below against the test requirements.  A test passes when at least one event passes.
+                <br /><br />Click spyglass to evaluate recent events. Send new requests to
                 <div>
                     <span class="boxed">{{ baseAddress }}</span>
                 </div>
             </span>
             <span v-else  class="instruction">
-                Server tests - click run button to start test
+                Server tests - click run button to start test. <br />Requests will be sent to
+                {{ channel.baseAddress  }}
             </span>
             <span class="divider"></span>
         </div>
 
-        <div class="second-instruction">
+        <div v-if="$store.state.testRunner.isClientTest" class="second-instruction">
             Number of most recent events to evaluate:
             <input v-model="evalCount" placeholder="5">
         </div>

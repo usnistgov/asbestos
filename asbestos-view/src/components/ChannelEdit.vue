@@ -6,7 +6,7 @@
                     <div class="button-bar">
                         <div v-if="edit">
                             <div v-if="badNameMode">
-                                Cannot save with this name
+                                Cannot save with this name - {{ badNameModeReason }}
                                 <button class="cancel-button" @click="badNameCanceled">Continue</button>
                             </div>
                             <div v-else>
@@ -131,7 +131,8 @@
                 originalChannelId: null,   // in case of delete
                 discarding: false,  // for saving edits
                 ackMode: false,  // for deleting
-                badNameMode: false
+                badNameMode: false,
+                badNameModeReason: null,
             }
         },
         props: [
@@ -212,6 +213,12 @@
                 if (this.isNew) {
                     if (this.isCurrentChannelIdNew()) {
                         this.badNameMode = true
+                        this.badNameModeReason = `'new' is temporary and not acceptable`
+                        return
+                    }
+                    if (this.isCurrentChannelIdBadPattern()) {
+                        this.badNameMode = true
+                        this.badNameModeReason = `Name may only contain a-z A-Z 0-9 _  (__ not allowed)`
                         return
                     }
                     this.$store.commit('deleteChannel', this.originalChannelId) // original has been renamed
@@ -253,6 +260,14 @@
             },
             isCurrentChannelIdNew() {
                 return this.channel.channelId === 'new' || this.channel.channelId === 'copy'
+            },
+            isCurrentChannelIdBadPattern() {
+                const id = this.channel.channelId
+                const re = RegExp('^([a-zA-Z0-9_]+)$')
+                const match = re.test(id)
+                const re2 = RegExp('.*__.*')
+                const match2 = re2.test(id)
+                return !match || match2
             },
             isNewChannelId() {
                 return this.channelId === 'new' || this.channelId === 'copy'

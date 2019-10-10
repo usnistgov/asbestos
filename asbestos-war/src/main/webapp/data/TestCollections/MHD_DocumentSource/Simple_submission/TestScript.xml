@@ -30,7 +30,7 @@
         <action>
             <assert>
                 <description value="Verb is POST"/>
-		<requestMethod value="post"/>
+		            <requestMethod value="post"/>
                 <warningOnly value="false"/>
             </assert>
         </action>
@@ -63,6 +63,7 @@
                 <description value="PDB returned Bundle"/>
                 <resource value="Bundle"/>
                 <sourceId value="response"/>
+                <warningOnly value="false"/>
             </assert>
         </action>
     </test>

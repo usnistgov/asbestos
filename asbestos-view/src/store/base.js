@@ -14,11 +14,11 @@ export const baseStore = {
             // environment: 'default',
 
             testSession: null,
-            channelId: null,
+            channelId: "default",
 
             sessions: [],
             environments: [
-                'default', 'e1'
+                'default',
             ],
 
             channelIds: [],  // for this session
@@ -85,7 +85,7 @@ export const baseStore = {
     },
     actions: {
         loadSessions({commit}) {
-            commit('setSessions', ['default', 'ts1'])
+            commit('setSessions', ['default'])
         },
         loadChannelNames({commit, state}) {  //  same function exists in ChannelNav
             PROXY.get('channel')

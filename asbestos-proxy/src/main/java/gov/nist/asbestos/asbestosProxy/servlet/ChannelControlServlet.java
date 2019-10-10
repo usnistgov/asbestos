@@ -1,6 +1,10 @@
 package gov.nist.asbestos.asbestosProxy.servlet;
 
 import gov.nist.asbestos.asbestosProxy.requests.*;
+import gov.nist.asbestos.client.log.SimStore;
+import gov.nist.asbestos.sharedObjects.ChannelConfig;
+import gov.nist.asbestos.simapi.simCommon.SimId;
+import gov.nist.asbestos.simapi.simCommon.TestSession;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.log4j.Logger;
 
@@ -23,6 +27,21 @@ public class ChannelControlServlet extends HttpServlet {
         if (externalCache == null) {
             String ec = (String) config.getServletContext().getAttribute("ExternalCache");
             externalCache = new File(ec);
+        }
+        // create default TestSession and default channel if they don't exist
+        SimId channelId = new SimId(new TestSession("default"), "default", "fhir");
+        SimStore simStore = new SimStore(externalCache, channelId);
+        simStore.getStore(true);
+        if (!simStore.exists()) {
+            log.info("Creating default Channel in the default TestSession");
+            ChannelConfig cconfig = new ChannelConfig()
+                    .setEnvironment("default")
+                    .setTestSession("default")
+                    .setChannelId("default")
+                    .setChannelType("fhir")
+                    .setActorType("fhir")
+                    .setFhirBase("http://localhost:8080/fhir/fhir");
+            simStore.create(cconfig);
         }
     }
 

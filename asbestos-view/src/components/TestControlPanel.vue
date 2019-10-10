@@ -9,8 +9,13 @@
                 <img id="reload" class="selectable" @click="reload()" src="../assets/reload.png"/>
             </div>
             <b-form-select v-model="collection" :options="collections"></b-form-select>
+
             <div v-if="client">(Client Tests)</div>
-            <div v-else>(Server Tests)</div>
+            <div v-else>
+                <div v-if="collection">
+                    (Server Tests)
+                </div>
+            </div>
 <!--            <div class="control-panel-item-title" @click="selectIndividual()">Tests</div>-->
 <!--            <b-form-select v-model="testId" :options="testIds"></b-form-select>-->
         </div>

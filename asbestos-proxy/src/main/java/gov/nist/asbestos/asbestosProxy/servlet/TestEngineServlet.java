@@ -1,6 +1,8 @@
 package gov.nist.asbestos.asbestosProxy.servlet;
 
 import gov.nist.asbestos.asbestosProxy.requests.*;
+import gov.nist.asbestos.client.Base.EC;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.log4j.Logger;
 
@@ -11,6 +13,15 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URL;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 public class TestEngineServlet extends HttpServlet {
     private static Logger log = Logger.getLogger(TestEngineServlet.class);
@@ -61,11 +72,30 @@ public class TestEngineServlet extends HttpServlet {
     }
 
     private void initializeTestCollections() {
-        File collections = new File(externalCache, "TestCollections");
-        new File(collections, "default").mkdirs();
+        File externalCollections = new File(externalCache, EC.TEST_COLLECTIONS_DIR);
+        externalCollections.mkdirs();
+
+        File war = warHome();
+        try {
+            FileUtils.copyDirectory(new File(new File(war, "data"), "TestCollections"), externalCollections);
+        } catch (IOException e) {
+            log.error(ExceptionUtils.getStackTrace(e));
+        }
     }
 
+    private File warHome() {
+            File warMarkerFile = null;
+       // String content = null;
+            try {
+                warMarkerFile = Paths.get(getClass().getResource("/war.txt").toURI()).toFile();
+               // content = new String ( Files.readAllBytes( Paths.get(warMarkerFile.toString()) ) );
+            } catch (Throwable t) {
+                log.error(ExceptionUtils.getStackTrace(t));
+            }
 
+            // warMarkerFile is something like /home/bill/develop/asbestos/asbestos-war/target/asbestos-war/WEB-INF/classes/war.txt
+        return warMarkerFile.getParentFile().getParentFile().getParentFile();
+    }
 
     @Override
     public void doPost(HttpServletRequest req, HttpServletResponse resp) {

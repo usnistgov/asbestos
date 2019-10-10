@@ -23,6 +23,8 @@ public class EC {
     public File externalCache;
 
     public static final String MarkerType = "Marker";
+    public static final String TEST_COLLECTIONS_DIR = "FhirTestCollections";
+
 
     public EC(File externalCache) {
         this.externalCache = externalCache;
@@ -39,7 +41,7 @@ public class EC {
 //        List<File> intList = listOfFiles(internalRoot);
          List<File> collections = new ArrayList<>();
 
-        File externalRoot = new File(externalCache, "TestCollections");
+        File externalRoot = new File(externalCache, EC.TEST_COLLECTIONS_DIR);
         List<File> extList = listOfFiles(externalRoot);
         collections.addAll(extList);
 
@@ -86,32 +88,17 @@ public class EC {
     }
 
     File getTestCollectionBase(String collectionName) {
-        File base = externalTestCollectionBase(collectionName);
-        if (base != null)
-            return base;
-        return internalTestCollectionBase(collectionName);
+        return externalTestCollectionBase(collectionName);
     }
 
      File externalTestCollectionBase(String collectionName) {
-        File externalRoot = new File(externalCache, "TestCollections");
+        File externalRoot = new File(externalCache, TEST_COLLECTIONS_DIR);
         if (!externalRoot.exists()) return null;
         if (!externalRoot.isDirectory()) return null;
         File collectionRoot = new File(externalRoot, collectionName);
         if (!collectionRoot.exists()) return null;
         if (!collectionRoot.isDirectory()) return null;
         return collectionRoot;
-    }
-
-     File internalTestCollectionBase(String collectionName) {
-        URL aUrl = getClass().getResource("/TestCollections/testCollectionRoot.txt");
-        String aFile = aUrl.getFile();
-        File internalRoot = new File(aFile).getParentFile();
-
-        File collectionRoot = new File(internalRoot, collectionName);
-        if (collectionRoot.exists() && collectionRoot.isDirectory())
-            return collectionRoot;
-
-        return null;
     }
 
      public File getTestLog(String channelId, String collectionName, String testName) {
