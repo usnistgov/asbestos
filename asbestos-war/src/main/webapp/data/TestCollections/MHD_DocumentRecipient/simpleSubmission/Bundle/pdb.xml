@@ -219,6 +219,9 @@
                 </related>
             </DocumentManifest>
         </resource>
+        <request>
+            <method value="POST"/>
+        </request>
     </entry>
     <entry>
         <fullUrl value="http://localhost:9556/svc/fhir/Binary/1e404af3-077f-4bee-b7a6-a9be97e1ce32"/>
@@ -234,7 +237,6 @@
         </resource>
         <request>
             <method value="POST"/>
-            <ref value="Binary"/>
         </request>
     </entry>
 </Bundle>
