@@ -250,8 +250,8 @@ public class ProxyServlet extends HttpServlet {
             respondWithError(req, resp, t, inHeaders, clientTask);
             resp.setStatus(resp.SC_OK);
         } finally {
-            if (channel != null)
-                ChannelRelay.postEvent(channel.getChannelId(), event.getEventDir());
+//            if (channel != null)
+//                ChannelRelay.postEvent(channel.getChannelId(), event.getEventDir());
         }
     }
 

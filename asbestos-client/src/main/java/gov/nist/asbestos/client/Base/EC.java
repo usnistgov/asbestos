@@ -170,7 +170,7 @@ public class EC {
     }
 
     public File fhirDir(String testSession, String channelId) {
-        File psimdb = new File(externalCache, "psimdb");
+        File psimdb = new File(externalCache, SimStore.PSIMDB);
         File testSessionFile = new File(psimdb, testSession);
         File channelFile = new File(testSessionFile, channelId);
         return new File(channelFile, "fhir");

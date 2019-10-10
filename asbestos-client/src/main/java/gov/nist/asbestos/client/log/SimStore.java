@@ -34,7 +34,7 @@ public class SimStore {
     private String eventId = null; // within resource
 
     private boolean newlyCreated = false;
-    private static final String PSIMDB = "FhirChannels";
+    public static final String PSIMDB = "FhirChannels";
     private static final String CHANNEL_CONFIG_FILE = "config.json";
     private Task task;
     //Event eventStore

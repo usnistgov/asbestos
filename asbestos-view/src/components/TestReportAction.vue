@@ -9,7 +9,7 @@
                 <span>{{ this.assertionDescription() }}</span>
             </span>
             <span class="selectable">
-                {{ label }}
+                {{ description }}
             </span>
         </div>
         <div v-if="displayMessage"><pre>{{ message }}</pre></div>
@@ -79,9 +79,11 @@
                     ? `${this.operationType(this.script.operation)}`
                     : `Assert: ${this.assertionDescription()}`
             },
-
             label() {
                 return this.script.operation ? this.script.operation.label : this.script.assert.label
+            },
+            description() {
+                return this.script.operation ? this.script.operation.description : this.script.assert.description
             },
         },
         created() {

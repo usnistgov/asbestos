@@ -87,7 +87,7 @@ public class SetupActionTransaction extends GenericSetupAction {
         if (bundle.hasEntry()) {
             for (Bundle.BundleEntryComponent component : bundle.getEntry()) {
                 Bundle.BundleEntryResponseComponent response = component.getResponse();
-                if (response.hasStatus() && !response.getStatus().startsWith("200")) {
+                if (response.hasStatus() && !response.getStatus().startsWith("20")) {
                     return true;
                 }
             }

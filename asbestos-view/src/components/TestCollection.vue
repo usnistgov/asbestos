@@ -16,7 +16,8 @@
 
         <div class="instruction">
             <span v-if="$store.state.testRunner.isClientTest"  class="instruction">
-                These are Client tests. Each test evaluates  events received at the URL below against the test requirements.  A test passes when at least one event passes.
+                These are Client tests. Each test evaluates  events received at the URL below against the test requirements.  A test passes when at least one event meets
+                the requirements of the test.
                 <br /><br />Click spyglass to evaluate recent events. Send new requests to
                 <div>
                     <span class="boxed">{{ baseAddress }}</span>
