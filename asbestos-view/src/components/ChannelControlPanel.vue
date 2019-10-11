@@ -1,6 +1,6 @@
 <template>
     <div>
-        <div class="control-panel-item-title" @click="manage()">Channel</div>
+        <div class="control-panel-item-title" @click="manage()">FHIR Server</div>
         <b-form-select v-model="channelId" :options="channels"></b-form-select>
     </div>
 </template>

@@ -1,26 +1,27 @@
 <template>
     <div>
         <div v-if="script" class="script">
-            <div v-for="(fixture, i) in fixtures"
-                 :key="i">
-                <span class="name" >Fixture: </span>
-                <span class="value">{{ fixture.id }}</span>
+            <div v-if="displayDetail">
+                <div v-for="(fixture, i) in fixtures"
+                     :key="i">
+                    <span class="name" >Fixture: </span>
+                    <span class="value">{{ fixture.id }}</span>
+                </div>
+                <div v-for="(variable, i) in variables"
+                     :key="'Var' + i">
+                    <span class="name" >Variable: </span>
+                    <span class="value">{{ variable.name }}</span>
+                </div>
             </div>
-            <div v-for="(variable, i) in variables"
-                 :key="'Var' + i">
-                <span class="name" >Variable: </span>
-                <span class="value">{{ variable.name }}</span>
-            </div>
-
             <!--   add SETUP here  -->
 
             <div v-for="(test, testi) in tests"
                  :key="'Test' + testi">
                 <span class="name" >Test: </span>
-                <span class="value">{{ test.name }}</span>
-                <div v-if="test.description" class="test-part">
+<!--                <span class="value">{{ test.name }}</span>-->
+                <span v-if="test.description" class="test-part">
                     {{ test.description }}
-                </div>
+                </span>
 
                 <div v-for="(action, actioni) in actions(testi)" class="test-part"
                      :key="'Test' + testi + 'Action' + actioni">
@@ -44,6 +45,7 @@
             return {
                 script: null,
                 report: null,
+                displayDetail: false,
             }
         },
         methods: {

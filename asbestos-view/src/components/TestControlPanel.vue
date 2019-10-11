@@ -1,7 +1,7 @@
 <template>
     <div>
 <!--        <div>Test</div>-->
-        <div v-if="!selectable" class="not-available">Select Channel</div>
+        <div v-if="!selectable" class="not-available">Select FHIR Server</div>
         <div v-else>
             <div>
                 <span class="control-panel-item-title" @click="openCollection()">Test Collection</span>

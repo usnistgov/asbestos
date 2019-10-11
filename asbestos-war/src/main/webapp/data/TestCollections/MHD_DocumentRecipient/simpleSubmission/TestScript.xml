@@ -28,6 +28,7 @@
         <sourceId value="read-back"/>
     </variable>
     <test>
+        <description value="Submit Provide Document Bundle and verify. The DocumentReference is not Comprehensive Metadata compliant. It is missing the masterIdentifier."/>
         <action>
             <operation>
                 <!-- references patient from resourceCache in EC -->
@@ -43,14 +44,14 @@
         </action>
         <action>
             <assert>
-                <description value="PDB was successful"/>
+                <description value="... was successful"/>
                 <response value="okay"/>
                 <warningOnly value="false"/>
             </assert>
         </action>
         <action>
             <operation>
-                <description value="read DocumentReference"/>
+                <description value="Read DocumentReference"/>
                 <label value="read-back"/>
                 <type>
                     <code value="read"/>
@@ -61,20 +62,21 @@
         </action>
         <action>
             <assert>
-                <description value="read was successful"/>
+                <description value="... was successful"/>
                 <response value="okay"/>
                 <warningOnly value="false"/>
             </assert>
         </action>
         <action>
             <assert>
+                <description value="... returned DocumentReference"/>
                 <resource value="DocumentReference"/>
                 <warningOnly value="false"/>
             </assert>
         </action>
         <action>
             <assert>
-                <description value="verify Patient reference returned"/>
+                <description value="... Patient reference returned as sent"/>
                 <expression value="DocumentReference.subject.reference"/>
                 <sourceId value="readBackResponse"/>
                 <value value="http://localhost:8080/fhir/Patient/a2"/>

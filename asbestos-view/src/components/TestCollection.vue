@@ -24,7 +24,9 @@
                 </div>
             </span>
             <span v-else  class="instruction">
-                Server tests - click run button to start test. <br />Requests will be sent to
+                Server tests - click
+                <img src="../assets/press-play-button.png">
+                to start test. <br />Requests will be sent to
                 {{ channel.baseAddress  }}
             </span>
             <span class="divider"></span>

@@ -6,7 +6,6 @@
             </span>
             <span v-else>
                 <span class="name selectable">assert: </span>
-                <span>{{ this.assertionDescription() }}</span>
             </span>
             <span class="selectable">
                 {{ description }}

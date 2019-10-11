@@ -67,6 +67,12 @@
     <load-on-startup>3</load-on-startup> <!-- must be started after ProxyService -->
   </servlet>
 
+  <servlet>
+    <servlet-name>TestInstaller</servlet-name>
+    <servlet-class>gov.nist.asbestos.asbestosProxy.servlet.TestInstallerServlet</servlet-class>
+    <load-on-startup>3</load-on-startup> <!-- must be started after ProxyService -->
+  </servlet>
+
   <servlet-mapping>
     <servlet-name>ProxyService</servlet-name>
     <url-pattern>/proxy/*</url-pattern>
@@ -80,6 +86,11 @@
   <servlet-mapping>
     <servlet-name>ChannelControl</servlet-name>
     <url-pattern>/channel</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>TestInstaller</servlet-name>
+    <url-pattern>/testInstall</url-pattern>
   </servlet-mapping>
 
   <servlet-mapping>
