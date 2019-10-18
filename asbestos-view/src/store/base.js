@@ -4,6 +4,7 @@ import Vuex from 'vuex'
 Vue.use(Vuex)
 
 import {PROXY} from '../common/http-common'
+import {CHANNEL} from '../common/http-common'
 
 // TODO add About page and credit <div>Icons made by <a href="https://www.flaticon.com/authors/freepik" title="Freepik">Freepik</a> from <a href="https://www.flaticon.com/"             title="Flaticon">www.flaticon.com</a> is licensed by <a href="http://creativecommons.org/licenses/by/3.0/"             title="Creative Commons BY 3.0" target="_blank">CC 3.0 BY</a></div>
 
@@ -22,12 +23,15 @@ export const baseStore = {
             ],
 
             channelIds: [],  // for this session
-            error: null,
+            errors: [],
         }
     },
     mutations: {
         setError(state, error) {
-            state.error = error
+            state.errors.push(error)
+        },
+        clearError(state) {
+            state.errors = []
         },
         setSession(state, theSession) {
 //            console.log(`setSession = ${theSession}`)
@@ -85,7 +89,15 @@ export const baseStore = {
     },
     actions: {
         loadSessions({commit}) {
-            commit('setSessions', ['default'])
+            CHANNEL.get('sessionNames')
+                .then(response => {
+                    commit('setSessions', response.data)
+                })
+                .catch(function (error) {
+                    this.$store.commit('setError', error)
+                    console.error(error)
+                })
+//            commit('setSessions', ['default'])
         },
         loadChannelNames({commit, state}) {  //  same function exists in ChannelNav
             PROXY.get('channel')
@@ -101,6 +113,7 @@ export const baseStore = {
                     commit('installChannelIds', ids)
                 })
                 .catch(function (error) {
+                    this.$store.commit('setError', error)
                     console.error(error)
                 })
         },

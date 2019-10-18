@@ -30,7 +30,7 @@ public class TestInstallerServlet  extends HttpServlet {
 
         File lockFile = new File(externalCache, "FhirTestCollectionsLock");
         if (!lockFile.exists()) {
-            log.info("Updating Test Definitions");
+            log.info("Updating Test Definitions in External Cache");
 
             initializeTestCollections();
 

@@ -47,6 +47,7 @@ export const logStore = {
                     commit('setEventSummaries', eventSummaries)
                 })
                 .catch(error => {
+                    this.$store.commit('setError', error)
                     console.error(error)
                 })
         },

@@ -73,6 +73,7 @@ public class ChannelControlServlet extends HttpServlet {
         try {
 
             if (GetChannelIdsRequest.isRequest(request))        new GetChannelIdsRequest(request).run();
+            else if (GetSessionNamesRequest.isRequest(request)) new GetSessionNamesRequest(request).run();
             else if (GetChannelConfigRequest.isRequest(request)) new GetChannelConfigRequest(request).run();
             else throw new Exception("Invalid request - do not understand URI " + request.uri);
 

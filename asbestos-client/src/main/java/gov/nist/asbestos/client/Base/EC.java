@@ -118,6 +118,11 @@ public class EC {
         return forTest;
     }
 
+    public List<File> getTestSessions() {
+        File channels = new File(externalCache, "FhirChannels");
+        return Dirs.listOfDirectories(channels);
+    }
+
     public List<File> getTestLogs(String testSession, String collectionName) {
         File testLogs = new File(externalCache, "FhirTestLogs");
         File forTestSession = new File(testLogs, testSession);

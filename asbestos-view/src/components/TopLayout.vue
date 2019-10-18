@@ -1,9 +1,20 @@
 <template>
     <div>
-        <div class="window-title">Asbestos</div>
+        <div class="window-title">Asbestos FHIR Toolkit</div>
         <div class="grid-container">
             <div>
-                <div v-if="$store.state.base.error"> {{   $store.state.base.error }}</div>
+                <div v-if="$store.state.base.errors.length > 0" class="error-grid-container">
+                    <img class="error-grid-close"
+                         src="../assets/cancel.png"
+                         @click="clearErrors()"
+                    >
+                    <div  class="error-grid-contents left soft-boxed">
+                        <div v-for="(err, erri) in $store.state.base.errors"
+                            :key="err+erri">
+                            <img src="../assets/error.png"> {{ err }}
+                        </div>
+                    </div>
+                </div>
                 <router-view name="session" class="main"></router-view>
             </div>
             <div class="control-panel">
@@ -45,8 +56,13 @@
                 next()
         },
         created() {
+            // this.$store.commit('setError', 'Oops')
+            // this.$store.commit('setError', 'Oopsie')
         },
         methods: {
+            clearErrors() {
+                this.$store.commit('clearError')
+            },
         },
         computed: {
         },
@@ -73,10 +89,17 @@
     }
     .grid-container {
         display: grid;
-        /*grid-template-areas:*/
-        /*        'header header header header'*/
-        /*        'body body body controls';*/
         grid-template-columns: minmax(0, 1fr) 200px;
+    }
+    .error-grid-container {
+        display: grid;
+        grid-template-columns: 20px 1fr;
+    }
+    .error-grid-close {
+        grid-column: 1;
+    }
+    .error-grid-contents {
+        grid-column: 2;
     }
     .title {
         grid-area: header;
@@ -119,6 +142,9 @@
     .left {
         text-align: left;
     }
+    .soft-boxed {
+        border: thin solid lightgray;
+    }
     .boxed {
         border: 1px dotted black;
     }
@@ -131,7 +157,6 @@
     .tooltip {
         position: relative;
         display: inline-block;
-        /*border-bottom: 1px dotted black;*/
     }
     .tooltip .tooltiptext {
         visibility: hidden;
