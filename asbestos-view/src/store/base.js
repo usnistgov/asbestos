@@ -117,6 +117,18 @@ export const baseStore = {
                     console.error(error)
                 })
         },
+        loadChannel({commit}, fullId) {
+            return PROXY.get('channel/' + fullId)
+                .then(response => {
+                    console.log(`installing channel ${response.data.channelId}`)
+                    commit('installChannel', response.data)
+                    return response.data
+                })
+                .catch(e => {
+                    this.$store.commit('setError', e)
+                    console.error('channel/' + fullId + ' ' + e)
+                })
+        }
     },
     getters: {
 

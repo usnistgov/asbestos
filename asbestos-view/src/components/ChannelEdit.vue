@@ -77,9 +77,6 @@
                     </div>
                     <div v-else class="grid-item">{{ channel.environment }}</div>
 
-<!--                    <label class="grid-name">Actor Type</label>-->
-<!--                    <div class="grid-item">{{ channel.actorType }}</div>-->
-
                     <label class="grid-name">Channel Type</label>
                     <div v-if="edit" class="grid-item">
                         <select v-model="channel.channelType">
@@ -218,7 +215,7 @@
                     }
                     if (this.isCurrentChannelIdBadPattern()) {
                         this.badNameMode = true
-                        this.badNameModeReason = `Name may only contain a-z A-Z 0-9 _  (__ not allowed)`
+                        this.badNameModeReason = `Name may only contain a-z A-Z 0-9 _  and __ not allowed`
                         return
                     }
                     this.$store.commit('deleteChannel', this.originalChannelId) // original has been renamed
@@ -295,17 +292,14 @@
                     return
                 }
                     console.info(`loading channel ${this.channelId} details`)
-                    const that = this
+                    //const that = this
                     const fullId = `${this.sessionId}__${this.channelId}`
-                    PROXY.get('channel/' + fullId)
-                        .then(response => {
-                            console.log(`installing channel ${response.data.channelId}`)
-                            this.$store.commit('installChannel', response.data)
-                            this.channel =  this.copyOfChannel()
+
+                    this.$store.dispatch('loadChannel', fullId)
+                        .then(channel => {
+                            this.channel = channel
                         })
-                        .catch(e => {
-                            that.error('channel/' + fullId + ' ' + e)
-                        })
+
                 this.discarding = false
             },
             channelIndex(theSession, theChannelId) {
@@ -317,12 +311,6 @@
                 return this.$store.state.base.channel
             },
             copyOfChannel() {
-                //this.showChannels()
-                // const index = this.channelIndex(this.sessionId, this.channelId)
-                // console.info(`index is ${index} for session ${this.sessionId} channel ${this.channelId}`)
-                // if (index === -1) {
-                //     return null
-                // }
                 const chan = this.getChannel()
                 return cloneDeep(chan)
             },
