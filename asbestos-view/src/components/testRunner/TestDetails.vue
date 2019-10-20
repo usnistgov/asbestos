@@ -17,11 +17,11 @@
 
             <div v-for="(test, testi) in tests"
                  :key="'Test' + testi">
-                <span class="name" >Test: </span>
+<!--                <span class="name" >Test: </span>-->
 <!--                <span class="value">{{ test.name }}</span>-->
-                <span v-if="test.description" class="test-part">
+                <template v-if="test.description" class="test-part">
                     {{ test.description }}
-                </span>
+                </template>
 
                 <div v-for="(action, actioni) in actions(testi)" class="test-part"
                      :key="'Test' + testi + 'Action' + actioni">
@@ -36,8 +36,8 @@
 </template>
 
 <script>
-    import {ENGINE} from '../common/http-common'
-    import errorHandlerMixin from '../mixins/errorHandlerMixin'
+    import {ENGINE} from '../../common/http-common'
+    import errorHandlerMixin from '../../mixins/errorHandlerMixin'
     import TestReportAction from './TestReportAction'
 
     export default {

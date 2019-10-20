@@ -3,7 +3,7 @@
         <div class="tool-title">
             <span>Tests for {{ testCollection }}</span>
             <span class="divider"></span>
-            <img id="reload" class="selectable" @click="reload()" src="../assets/reload.png"/>
+            <img id="reload" class="selectable" @click="reload()" src="../../assets/reload.png"/>
             <span class="divider"></span>
         </div>
 
@@ -18,16 +18,16 @@
             <span v-if="$store.state.testRunner.isClientTest"  class="instruction">
                 These are Client tests. Each test evaluates  events received at the URL below against the test requirements.  A test passes when at least one event meets
                 the requirements of the test.
-                <br /><br />Click spyglass to evaluate recent events. Send new requests to
+                <br /><br />Click spyglass to evaluate recent events. Send new requests to (FHIR Server base address)
                 <div>
-                    <span class="boxed">{{ baseAddress }}</span>
+                    <span class="boxed">{{ clientBaseAddress }}</span>
                 </div>
             </span>
             <span v-else  class="instruction">
                 Server tests - click
-                <img src="../assets/press-play-button.png">
+                <img src="../../assets/press-play-button.png">
                 to run test. <br />Requests will be sent to
-                {{ channel.baseAddress  }}
+                <span v-if="channelObj" class="boxed">{{ channelObj.fhirBase }}</span>
             </span>
             <span class="divider"></span>
         </div>
@@ -43,19 +43,19 @@
                 <div @click="selectTest(name)">
                     <div v-bind:class="{ pass: status[name] === 'pass', fail: status[name] === 'fail', error: status[name] === 'error', 'not-run': status[name] === 'not-run' }">
                         <div v-if="status[name] === 'pass'">
-                            <img src="../assets/checked.png" class="right">
+                            <img src="../../assets/checked.png" class="right">
                         </div>
                         <div v-else-if="status[name] === 'fail' || status[name] === 'error'">
-                            <img src="../assets/error.png" class="right">
+                            <img src="../../assets/error.png" class="right">
                         </div>
                         <div v-else>
-                            <img src="../assets/blank-circle.png" class="right">
+                            <img src="../../assets/blank-circle.png" class="right">
                         </div>
                         <div v-if="isClient">
-                            <img src="../assets/validate-search.png" class="right" @click.stop="doEval(name)">
+                            <img src="../../assets/validate-search.png" class="right" @click.stop="doEval(name)">
                         </div>
                         <div v-else>
-                            <img src="../assets/press-play-button.png" class="right" @click.stop="doRun(name)">
+                            <img src="../../assets/press-play-button.png" class="right" @click.stop="doRun(name)">
                         </div>
                         {{ name }}
                         <span v-if="!$store.state.testRunner.isClientTest"> --  {{ time[name] }}</span>
@@ -71,8 +71,8 @@
 </template>
 
 <script>
-    import {ENGINE} from '../common/http-common'
-    import errorHandlerMixin from '../mixins/errorHandlerMixin'
+    import {ENGINE} from '../../common/http-common'
+    import errorHandlerMixin from '../../mixins/errorHandlerMixin'
 
     export default {
 
@@ -81,6 +81,7 @@
                 status: [],   // testId => undefined, 'pass', 'fail', 'error'
                 time: [],
                 evalCount: 5,
+                channelObj: null,  // channel object
             }
         },
         methods: {
@@ -138,10 +139,13 @@
                 this.$router.push(route)
             },
             reload() {
-                console.log(`reload`)
                 this.$store.commit('setTestCollectionName', this.testCollection)
                 this.$store.dispatch('loadTestScriptNames')
                 this.loadLastMarker()
+                this.$store.dispatch('loadChannel', this.fullChannelId)
+                    .then(channel => {
+                        this.channelObj = channel
+                    })
                 this.$router.push(`/session/${this.sessionId}/channel/${this.channelId}/collection/${this.testCollection}`)
             },
             testReport(testName) {
@@ -189,7 +193,7 @@
             }
         },
         computed: {
-            baseAddress() { // for client tests
+            clientBaseAddress() { // for client tests
                 return `${this.$store.state.testRunner.currentChannelBaseAddr}${this.sessionId}__${this.channelId}`
             },
             isClient() {
@@ -223,7 +227,9 @@
                     return this.$store.state.base.channelId
                 }
             },
-
+            fullChannelId() {
+                return `${this.sessionId}__${this.channelId}`
+            },
         },
         created() {
             this.reload()
@@ -263,28 +269,28 @@
         text-align: left;
         border: 1px dotted black;
         cursor: pointer;
-        /*font-size: larger;*/
+        border-radius: 25px;
     }
     .fail {
         background-color: indianred;
         text-align: left;
         border: 1px dotted black;
         cursor: pointer;
-        /*font-size: larger;*/
+        border-radius: 25px;
     }
     .error {
         background-color: #0074D9 ;
         text-align: left;
         border: 1px dotted black;
         cursor: pointer;
-        /*font-size: larger;*/
+        border-radius: 25px;
     }
     .not-run {
         background-color: lightgray;
         text-align: left;
         border: 1px dotted black;
         cursor: pointer;
-        /*font-size: larger;*/
+        border-radius: 25px;
     }
     .right {
         text-align: right;

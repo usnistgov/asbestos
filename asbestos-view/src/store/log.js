@@ -27,10 +27,12 @@ export const logStore = {
     actions: {
         loadEventSummaries({commit, rootState}) {
             if (!rootState.base.session) {
+                this.$store.commit('setError', 'Session not set in logStore.loadEventSummaries')
                 console.error('Session not set')
                 return
             }
             if (!rootState.base.channelId) {
+                this.$store.commit('setError', 'Channel not set in logStore.loadEventSummaries')
                 console.error('Channel not set')
                 return
             }

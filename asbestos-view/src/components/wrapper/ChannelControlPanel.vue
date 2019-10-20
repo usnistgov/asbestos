@@ -1,6 +1,12 @@
 <template>
     <div>
-        <div class="control-panel-item-title" @click="manage()">FHIR Server</div>
+        <div>
+            <span class="control-panel-item-title" @click="manage()">FHIR Server</span>
+            &nbsp;
+            <span class="selectable" @click="showId()">By ID</span>
+            &nbsp;
+            <span class="selectable" @click="showAddr()">By URL</span>
+        </div>
         <b-form-select v-model="channelId" :options="channels"></b-form-select>
     </div>
 </template>
@@ -15,16 +21,22 @@
             return {
                 channelId: null,
                 channels: [],  // ids
+                show: 'id',
             }
         },
         methods: {
+            showId() {
+                this.show = 'id'
+            },
+            showAddr() {
+                this.show = 'addr'
+            },
             manage() {  // go edit channel definitions
                 this.$router.push(`/session/${this.$store.state.base.session}/channels` +
                     (this.channelId ? `/${this.channelId}`: ''))
             },
             updateChannelIdsFromState() {
                 const channelNames = this.$store.state.base.channelIds
-//                console.log(`channelNames are ${channelNames}`)
                 this.channels.length = 0
                 channelNames.forEach(id => {
                     this.channels.push({ value: id, text: id })

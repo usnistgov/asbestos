@@ -2,15 +2,15 @@
     <div class="solid-boxed">
         <div class="nav-buttons">
             <div class="tooltip">
-                <img id="return-button" class="selectable" src="../assets/arrow-up.png" @click="up()"/>
+                <img id="return-button" class="selectable" src="../../assets/arrow-up.png" @click="up()"/>
                 <span class="tooltiptext">Return</span>
             </div>
             <div v-if="moreToTheLeft" class="tooltip left-arrow-position">
-                <img id="left-button" class="selectable" src="../assets/left-arrow.png" @click="left()"/>
+                <img id="left-button" class="selectable" src="../../assets/left-arrow.png" @click="left()"/>
                 <span class="tooltiptext">Previous</span>
             </div>
             <div v-if="moreToTheRight" class="tooltip right-arrow-position">
-                <img id="right-button" class="selectable" src="../assets/right-arrow.png" @click="right()"/>
+                <img id="right-button" class="selectable" src="../../assets/right-arrow.png" @click="right()"/>
                 <span class="tooltiptext">Next</span>
             </div>
             <span class="item-count-position">

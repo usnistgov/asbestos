@@ -5,13 +5,13 @@
             <div>
                 <div v-if="$store.state.base.errors.length > 0" class="error-grid-container">
                     <img class="error-grid-close"
-                         src="../assets/cancel.png"
+                         src="../../assets/close-button.png"
                          @click="clearErrors()"
                     >
                     <div  class="error-grid-contents left soft-boxed">
                         <div v-for="(err, erri) in $store.state.base.errors"
                             :key="err+erri">
-                            <img src="../assets/error.png"> {{ err }}
+                            <img src="../../assets/error.png"> {{ err }}
                         </div>
                     </div>
                 </div>

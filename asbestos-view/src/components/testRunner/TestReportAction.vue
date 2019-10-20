@@ -11,20 +11,44 @@
                 {{ description }}
             </span>
         </div>
-        <div v-if="displayMessage"><pre>{{ message }}</pre></div>
+
+        <div v-if="displayMessage">
+            <div v-for="(line, linei) in translateNL(message)" :key="msgDisp + linei">
+                {{ line }}
+            </div>
+            <div>
+                <span class="selectable" @click="toggleLogDisplayed()">Log</span>
+                <span v-if="logDisplayed">
+                    <img src="../../assets/arrow-down.png" @click="toggleLogDisplayed()">
+                    <log-item :sessionId="$store.state.base.session" :channelId="$store.state.base.channelId" :eventId="$store.state.testRunner.currentEvent" :noNav="true"></log-item>
+                </span>
+                <span v-else>
+                    <img src="../../assets/arrow-right.png" @click="toggleLogDisplayed()">
+                </span>
+            </div>
+        </div>
     </div>
 </template>
 
 <script>
+    import LogItem from "../logViewer/LogItem"
     export default {
         data() {
             return {
                 // message: null,
                 displayMessage: false,
                 status: [],   // testName => undefined, 'pass', 'fail', 'error'
+                eventLogUrl: null,
+                logDisplayed: false,
             }
         },
         methods: {
+            translateNL(string) {
+                return string.split('\n')
+            },
+            toggleLogDisplayed() {
+                this.logDisplayed = !this.logDisplayed
+            },
             operationType(operation) {
                 return operation.type.code
             },
@@ -92,12 +116,19 @@
 
         },
         watch: {
-
+            report: function(action) {
+                  if (action && action.operation && action.operation.detail) {
+                      this.eventLogUrl = action.operation.detail
+                  }
+            },
         },
         props: [
             // parts representing a single action
             'script', 'report',
         ],
+        components: {
+            LogItem
+        },
         name: "TestReportAction"
     }
 </script>
@@ -106,4 +137,33 @@
     .name {
         font-weight: bold;
     }
+    .pass {
+        background-color: lightgreen;
+        text-align: left;
+        border: 1px dotted black;
+        cursor: pointer;
+        border-radius: 25px;
+    }
+    .fail {
+        background-color: indianred;
+        text-align: left;
+        border: 1px dotted black;
+        cursor: pointer;
+        border-radius: 25px;
+    }
+    .error {
+        background-color: indianred;
+        text-align: left;
+        border: 1px dotted black;
+        cursor: pointer;
+        border-radius: 25px;
+    }
+    .not-run {
+        background-color: lightgray;
+        text-align: left;
+        border: 1px dotted black;
+        cursor: pointer;
+        border-radius: 25px;
+    }
+
 </style>

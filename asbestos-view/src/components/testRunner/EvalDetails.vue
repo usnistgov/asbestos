@@ -53,7 +53,7 @@
 </template>
 
 <script>
-    import errorHandlerMixin from '../mixins/errorHandlerMixin'
+    import errorHandlerMixin from '../../mixins/errorHandlerMixin'
     //import EvalReportAssert from './EvalReportAssert'
 
     export default {

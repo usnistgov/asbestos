@@ -11,14 +11,14 @@
                             </div>
                             <div v-else>
                                 <div class="tooltip">
-                                    <img id="save-button" src="../assets/save.png" @click="save()"/>
+                                    <img id="save-button" src="../../assets/save.png" @click="save()"/>
                                     <span class="tooltiptext">Save</span>
                                 </div>
                                 <div class="divider"></div>
                                 <div class="divider"></div>
                                 <div class="divider"></div>
                                 <div class="tooltip">
-                                    <img id="cancel-edit-button" src="../assets/cancel.png" @click="discard()"/>
+                                    <img id="cancel-edit-button" src="../../assets/cancel.png" @click="discard()"/>
                                     <span class="tooltiptext">Discard</span>
                                 </div>
                             </div>
@@ -31,24 +31,24 @@
                             </div>
                             <div v-else>
                                 <div class="tooltip">
-                                    <img id="select-button" src="../assets/select.png" @click="select()"/>
+                                    <img id="select-button" src="../../assets/select.png" @click="select()"/>
                                     <span class="tooltiptext">Select</span>
                                 </div>
                                 <div class="divider"></div>
                                 <div class="tooltip">
-                                    <img id="edit-button" src="../assets/pencil-edit-button.png" @click="toggleEdit()"/>
+                                    <img id="edit-button" src="../../assets/pencil-edit-button.png" @click="toggleEdit()"/>
                                     <span class="tooltiptext">Edit</span>
                                 </div>
                                 <div class="divider"></div>
                                 <div class="tooltip">
-                                    <img id="copy-button" src="../assets/copy-document.png" @click="copy()"/>
+                                    <img id="copy-button" src="../../assets/copy-document.png" @click="copy()"/>
                                     <span class="tooltiptext">Copy</span>
                                 </div>
                                 <div class="divider"></div>
                                 <div class="divider"></div>
                                 <div class="divider"></div>
                                 <div class="tooltip">
-                                    <img id="delete-button" src="../assets/delete-button.png" @click="requestDelete()"/>
+                                    <img id="delete-button" src="../../assets/delete-button.png" @click="requestDelete()"/>
                                     <span class="tooltiptext">Delete</span>
                                 </div>
                                 <div class="divider"></div>
@@ -108,8 +108,8 @@
 
 <script>
     import Vue from 'vue'
-    import {store} from "../store"
-    import {PROXY} from '../common/http-common'
+    import {store} from "../../store"
+    import {PROXY} from '../../common/http-common'
     import VueFlashMessage from 'vue-flash-message';
     Vue.use(VueFlashMessage);
     require('vue-flash-message/dist/vue-flash-message.min.css')

@@ -6,7 +6,7 @@
             <div>
                 <span class="control-panel-item-title" @click="openCollection()">Test Collection</span>
                 <span class="divider"></span>
-                <img id="reload" class="selectable" @click="reload()" src="../assets/reload.png"/>
+                <img id="reload" class="selectable" @click="reload()" src="../../assets/reload.png"/>
             </div>
             <b-form-select v-model="collection" :options="collections"></b-form-select>
 
@@ -26,7 +26,7 @@
     import Vue from 'vue'
     import { BFormSelect } from 'bootstrap-vue'
     Vue.component('b-form-select', BFormSelect)
-    import errorHandlerMixin from '../mixins/errorHandlerMixin'
+    import errorHandlerMixin from '../../mixins/errorHandlerMixin'
 
     export default {
         data() {

@@ -2,7 +2,7 @@
     <div class="channel-panel-header">
         Channels
         <div class="tooltip">
-            <img id="add-button" @click="pushNewChannelRoute()" src="../assets/add-button.png"/>
+            <img id="add-button" @click="pushNewChannelRoute()" src="../../assets/add-button.png"/>
             <span class="tooltiptext">Add Channel</span>
         </div>
         <div v-for="(channelId) in channelIds()" :key="channelId">
@@ -16,7 +16,7 @@
 </template>
 
 <script>
-    import {newChannel} from '../types/channel'
+    import {newChannel} from '../../types/channel'
     import Vue from 'vue'
     import { TooltipPlugin, ToastPlugin } from 'bootstrap-vue'
     Vue.use(TooltipPlugin)

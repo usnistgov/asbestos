@@ -3,7 +3,7 @@
         <span class="tool-title">Events for Channel {{ channelId }}</span>
         <span class="divider"></span>
 
-        <img id="reload" class="selectable" @click="loadEventSummaries()" src="../assets/reload.png"/>
+        <img id="reload" class="selectable" @click="loadEventSummaries()" src="../../assets/reload.png"/>
         <span class="divider"></span>
 
         <div v-for="(eventSummary, i) in eventSummaries"
@@ -20,8 +20,8 @@
 </template>
 
 <script>
-    import eventMixin from '../mixins/eventMixin'
-    import errorHandlerMixin from '../mixins/errorHandlerMixin'
+    import eventMixin from '../../mixins/eventMixin'
+    import errorHandlerMixin from '../../mixins/errorHandlerMixin'
 
     export default {
         data() {

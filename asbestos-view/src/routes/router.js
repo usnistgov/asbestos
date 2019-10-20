@@ -1,20 +1,20 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-import TopLayout from "../components/TopLayout";
+import TopLayout from "../components/wrapper/TopLayout";
 // import TestPanel from '@/components/TestPanel.vue'
 // import VariableEdit from '@/components/VariableEdit.vue'
-import ChannelsView from "../components/ChannelsView";
+import ChannelsView from "../components/channelEditor/ChannelsView";
 //import ChannelNav from "../components/ChannelNav";
 import SessionView from "../components/SessionView";
-import GenericView from "../components/ChannelView";
+import ChannelView from "../components/channelEditor/ChannelView";
 import LogsView from "../components/LogsView"
 //import ChannelLogList from "../components/ChannelLogList"
-import LogList from "../components/LogList"
-import LogItem from "../components/LogItem"
-import TestCollection from "../components/TestCollection"
-import TestOrEvalDetails from "../components/TestOrEvalDetails"
-import EvalDetails from "../components/EvalDetails"
-import EvalReportAssert from "../components/EvalReportAssert";
+import LogList from "../components/logViewer/LogList"
+import LogItem from "../components/logViewer/LogItem"
+import TestCollection from "../components/testRunner/TestCollection"
+import TestOrEvalDetails from "../components/testRunner/TestOrEvalDetails"
+import EvalDetails from "../components/testRunner/EvalDetails"
+import EvalReportAssert from "../components/testRunner/EvalReportAssert";
 
 Vue.use( VueRouter )
 
@@ -39,7 +39,7 @@ export const routes = [
                     },
                     {
                         path: 'channel/:channelId',
-                        components: { default: GenericView },
+                        components: { default: ChannelView },
                         props: { default: true},
                         children: [
                             {

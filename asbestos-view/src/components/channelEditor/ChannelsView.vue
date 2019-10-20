@@ -1,13 +1,13 @@
 <template>
     <div class="container">
         <channel-nav :session-id="sessionId" class="nav"></channel-nav>
-        <channel-view :sessionId="sessionId" :channelId="channelId" class="view"></channel-view>
+        <channel-edit :sessionId="sessionId" :channelId="channelId" class="view"></channel-edit>
     </div>
 </template>
 
 <script>
     import ChannelNav from "./ChannelNav"
-    import ChannelView from "./ChannelEdit"
+    import ChannelEdit from "./ChannelEdit"
 
     export default {
         data() {
@@ -17,7 +17,7 @@
         },
         components: {
             ChannelNav,
-            ChannelView
+            ChannelEdit
         },
         name: "ChannelsView",
         mounted() {

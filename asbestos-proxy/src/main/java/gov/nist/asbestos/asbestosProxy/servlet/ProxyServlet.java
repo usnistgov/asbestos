@@ -95,7 +95,7 @@ public class ProxyServlet extends HttpServlet {
 
         String uri = "http://" +
                 hostport +
-                "/proxy/log/" +
+                "/asbestos/log/" +
                 testSession + "/" +
                 channelId + "/" +
                 resource + "/" +

@@ -1,6 +1,6 @@
 <template>
     <div>
-        <log-nav :index="index" :sessionId="sessionId" :channelId="channelId"></log-nav>
+        <log-nav v-if="!noNav" :index="index" :sessionId="sessionId" :channelId="channelId"></log-nav>
 
         <div v-if="eventSummary" class="event-description">
             {{ eventAsDate(eventSummary.eventName) }} - {{ eventSummary.verb}} {{ eventSummary.resourceType }} - {{ eventSummary.status ? 'Ok' : 'Error' }}
@@ -42,9 +42,9 @@
 
 <script>
     import LogNav from "./LogNav"
-    import {LOG} from '../common/http-common'
-    import eventMixin from '../mixins/eventMixin'
-    import errorHandlerMixin from '../mixins/errorHandlerMixin'
+    import {LOG} from '../../common/http-common'
+    import eventMixin from '../../mixins/eventMixin'
+    import errorHandlerMixin from '../../mixins/errorHandlerMixin'
 
     export default {
         data() {
@@ -81,7 +81,7 @@
                 if (selectedEventName !== null) {
                     this.selectedEvent = null
                     this.selectedTask = 0
-                    // console.log(`GET ${this.sessionId}/${this.channelId}/${summary.resourceType}/${summary.eventName}`)
+                    console.log(`GET ${this.sessionId}/${this.channelId}/${summary.resourceType}/${summary.eventName}`)
                     await LOG.get(`${this.sessionId}/${this.channelId}/${summary.resourceType}/${summary.eventName}`)
                         .then(response => {
                             try {
@@ -156,7 +156,7 @@
             //'this.$store.state.log.currentEventIndex': 'loadEvent',
         },
         props: [
-            'eventId', 'sessionId', 'channelId'
+            'eventId', 'sessionId', 'channelId', 'noNav',
         ],
         mixins: [eventMixin, errorHandlerMixin],
         components: {
