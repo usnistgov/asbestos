@@ -52,6 +52,7 @@ public class ChannelControlServlet extends HttpServlet {
 
         try {
             if (CreateChannelRequest.isRequest(request))        new CreateChannelRequest(request).run();
+            else if (GetChannelIdAndURLRequest.isRequest(request)) new GetChannelIdAndURLRequest(request).run();
             else if (EvalRequest.isRequest(request))            new EvalRequest(request).run();
             else if (CancelEvalRequest.isRequest(request))      new CancelEvalRequest(request).run();
             else throw new Exception("Invalid request - do not understand URI " + request.uri);

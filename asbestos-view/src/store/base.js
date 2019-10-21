@@ -23,6 +23,7 @@ export const baseStore = {
             ],
 
             channelIds: [],  // for this session
+            channelURLs: [], // for this session { id:  ... , url: ... }
             errors: [],
         }
     },
@@ -81,8 +82,10 @@ export const baseStore = {
             state.channelIds.splice(channelIndex, 1)
         },
         installChannelIds(state, channelIds) {
-//            console.log(`mutation installChannelIds ${channelIds}`)
             state.channelIds = channelIds.sort()
+        },
+        installChannelURLs(state, urls) {
+            state.channelURLs = urls
         },
 
 
@@ -99,7 +102,7 @@ export const baseStore = {
                 })
 //            commit('setSessions', ['default'])
         },
-        loadChannelNames({commit, state}) {  //  same function exists in ChannelNav
+        loadChannelNames({commit, state}) {
             PROXY.get('channel')
                 .then(response => {
                     const fullChannelIds = response.data
@@ -117,8 +120,17 @@ export const baseStore = {
                     console.error(error)
                 })
         },
+        loadChannelNamesAndURLs({commit}) {
+            PROXY.get('channels')
+                .then(response => {
+                    commit('installChannelURLs', response.data)
+                })
+                .catch(e => {
+                    this.$store.commit('setError', e)
+                })
+        },
         loadChannel({commit}, fullId) {
-            return PROXY.get('channel/' + fullId)
+            return CHANNEL.get(fullId)
                 .then(response => {
                     console.log(`installing channel ${response.data.channelId}`)
                     commit('installChannel', response.data)
