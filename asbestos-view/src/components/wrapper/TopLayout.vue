@@ -17,7 +17,7 @@
                 </div>
                 <router-view name="session" class="main"></router-view>
             </div>
-            <div class="control-panel">
+            <div class="control-panel control-panel-font">
                 <session-control-panel class="solid-boxed"></session-control-panel>
                 <div class="vdivider"></div>
                 <channel-control-panel class="solid-boxed"></channel-control-panel>
@@ -115,9 +115,13 @@
         right: 4px;
         text-align: left;
     }
+
 </style>
 // these are shared across the tool
 <style>
+    .control-panel-font {
+        font-size: small;
+    }
     .bold {
         font-weight: bold;
     }

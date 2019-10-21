@@ -12,7 +12,9 @@ import java.util.ArrayList;
 import java.util.List;
 // 0 - empty
 // 1 - app context
-// 2 - "channels"
+// 2 - "channel"
+// 3 - "channels"
+// 4 - "all"
 // return channelIds and their URLs
 
 public class GetChannelIdAndURLRequest {
@@ -21,7 +23,9 @@ public class GetChannelIdAndURLRequest {
     private Request request;
 
     public static boolean isRequest(Request request) {
-        return request.uriParts.size() == 3 && "channels".equalsIgnoreCase(request.uriParts.get(2));
+        return request.uriParts.size() == 5
+                && "channels".equalsIgnoreCase(request.uriParts.get(3))
+                && "all".equalsIgnoreCase(request.uriParts.get(4));
     }
 
     public GetChannelIdAndURLRequest(Request request) {

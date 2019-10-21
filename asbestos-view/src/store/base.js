@@ -92,17 +92,19 @@ export const baseStore = {
     },
     actions: {
         loadSessions({commit}) {
+            const url = `CHANNEL/sessionNames`
             CHANNEL.get('sessionNames')
                 .then(response => {
                     commit('setSessions', response.data)
                 })
                 .catch(function (error) {
-                    this.$store.commit('setError', error)
+                    commit('setError', url + ': ' + error)
                     console.error(error)
                 })
 //            commit('setSessions', ['default'])
         },
         loadChannelNames({commit, state}) {
+            const url = `CHANNEL/channel`
             PROXY.get('channel')
                 .then(response => {
                     const fullChannelIds = response.data
@@ -116,20 +118,22 @@ export const baseStore = {
                     commit('installChannelIds', ids)
                 })
                 .catch(function (error) {
-                    this.$store.commit('setError', error)
+                    commit('setError', url + ': ' + error)
                     console.error(error)
                 })
         },
         loadChannelNamesAndURLs({commit}) {
-            PROXY.get('channels')
+            const url = `CHANNEL/channels/all`
+            CHANNEL.get('channels/all')
                 .then(response => {
                     commit('installChannelURLs', response.data)
                 })
                 .catch(e => {
-                    this.$store.commit('setError', e)
+                    commit('setError', url + ': ' + e)
                 })
         },
         loadChannel({commit}, fullId) {
+            const url = `CHANNEL/${fullId}`
             return CHANNEL.get(fullId)
                 .then(response => {
                     console.log(`installing channel ${response.data.channelId}`)
@@ -137,7 +141,7 @@ export const baseStore = {
                     return response.data
                 })
                 .catch(e => {
-                    this.$store.commit('setError', e)
+                    commit('setError', url + ': ' + e)
                     console.error('channel/' + fullId + ' ' + e)
                 })
         }

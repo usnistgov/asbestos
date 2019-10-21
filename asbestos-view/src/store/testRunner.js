@@ -114,7 +114,7 @@ export const testRunnerStore = {
                     commit('setClientTestResult', { testId: testId, result: results[testId]} )
                 })
                 .catch(function (error) {
-                    this.$store.commit('setError', error)
+                    commit('setError', url + ': ' + error)
                     console.error(`${error} - runEval - URL was ${url}`)
                 })
         },
@@ -127,7 +127,7 @@ export const testRunnerStore = {
                     commit('setLastMarker', value)
                 })
                 .catch(function (error) {
-                    this.$store.commit('setError', error)
+                    commit('setError', uri + ': ' + error)
                     console.error(`${error} - loadLastMarker - URL was ${uri}`)
                 })
         },
@@ -139,7 +139,7 @@ export const testRunnerStore = {
                     commit('setLastMarker', value)
                 })
                 .catch(function (error) {
-                    this.$store.commit('setError', error)
+                    commit('setError', url + ': ' + error)
                     console.error(`${error} - setMarker - URL was ${url}`)
                 })
         },
@@ -157,7 +157,7 @@ export const testRunnerStore = {
                         //this.script = response.data
                     })
                     .catch(function (error) {
-                        this.$store.commit('setError', error)
+                        commit('setError', url + ': ' + error)
                         console.error(`${error} - loadTestScript - URL was ${url}`)
                        // throw error
                     })
@@ -172,7 +172,7 @@ export const testRunnerStore = {
                     commit('setTestCollectionNames', theResponse.sort())
                 })
                 .catch(function (error) {
-                    this.$store.commit('setError', error)
+                    this.$store.commit('setError', url + ': ' +  error)
                     console.error(`${error} - loadTestCollectionNames - URL was ${url}`)
                 })
         },
@@ -191,7 +191,7 @@ export const testRunnerStore = {
                     commit('clearTestScripts')
                 })
                 .catch(function (error) {
-                    this.$store.commit('setError', error)
+                    commit('setError', url + ': ' + error)
                     console.error(`${error} - loadTestScriptNames - URL was ${url}`)
                 })
         },
@@ -210,7 +210,7 @@ export const testRunnerStore = {
                     commit('setTestReports', reports)
                 })
                 .catch(function (error) {
-                    this.$store.commit('setError', error)
+                    commit('setError', url + ': ' + error)
                     console.error(`${error} - loadReports - URL was ${url}`)
                 })
         },

@@ -7,7 +7,7 @@
             &nbsp;
             <span class="selectable" @click="showAddr()">By URL</span>
         </div>
-        <b-form-select v-model="channelId" :options="channels"></b-form-select>
+        <b-form-select class="control-panel-font" v-model="channelId" :options="channels"></b-form-select>
     </div>
 </template>
 
@@ -27,20 +27,34 @@
         methods: {
             showId() {
                 this.show = 'id'
+                console.log(`show is ${this.show}`)
             },
             showAddr() {
                 this.show = 'addr'
+                console.log(`show is ${this.show}`)
             },
             manage() {  // go edit channel definitions
                 this.$router.push(`/session/${this.$store.state.base.session}/channels` +
                     (this.channelId ? `/${this.channelId}`: ''))
             },
             updateChannelIdsFromState() {
-                const channelNames = this.$store.state.base.channelIds
+                // const channelNames = this.$store.state.base.channelIds
+                // this.channels.length = 0
+                // channelNames.forEach(id => {
+                //     this.channels.push({ value: id, text: id })
+                // })
+                console.log(`update ids`)
+                const ius = this.$store.state.base.channelURLs   // { id:  ... , url: ... }
                 this.channels.length = 0
-                channelNames.forEach(id => {
-                    this.channels.push({ value: id, text: id })
-                })
+                if (this.show === 'id') {
+                    ius.forEach(iu => {
+                        this.channels.push({value: iu.id, text: iu.id})
+                    })
+                } else {
+                    ius.forEach(iu => {
+                        this.channels.push({value: iu.id, text: iu.url})
+                    })
+                }
             },
             updateChannelIdFromState() {
                 //this.channel = this.$store.state.base.channelId
@@ -74,14 +88,17 @@
             },
         },
         created() {
-            if (this.$store.state.base.channelIds.length === 0)
-                this.$store.dispatch('loadChannelNames')
+            if (this.$store.state.base.channelIds.length === 0) {
+                //this.$store.dispatch('loadChannelNames')   // should go away
+                this.$store.dispatch('loadChannelNamesAndURLs')
+            }
             this.channelId = this.channel
         },
         mounted() {
         },
         watch: {
-            '$store.state.base.channelIds': 'updateChannelIdsFromState',
+            '$store.state.base.channelURLs': 'updateChannelIdsFromState',
+            'show': 'updateChannelIdsFromState',
             '$store.state.base.channelId': 'updateChannelIdFromState',
             'channelId': 'updateChannelFromUI'
         },

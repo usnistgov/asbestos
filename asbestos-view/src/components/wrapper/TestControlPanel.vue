@@ -8,7 +8,7 @@
                 <span class="divider"></span>
                 <img id="reload" class="selectable" @click="reload()" src="../../assets/reload.png"/>
             </div>
-            <b-form-select v-model="collection" :options="collections"></b-form-select>
+            <b-form-select class="control-panel-font" v-model="collection" :options="collections"></b-form-select>
 
             <div v-if="client">(Client Tests)</div>
             <div v-else>
