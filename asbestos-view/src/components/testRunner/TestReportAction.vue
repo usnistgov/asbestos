@@ -17,13 +17,18 @@
                 {{ line }}
             </div>
             <div>
-                <span class="selectable" @click="toggleLogDisplayed()">Log</span>
-                <span v-if="logDisplayed">
-                    <img src="../../assets/arrow-down.png" @click="toggleLogDisplayed()">
-                    <log-item :sessionId="$store.state.base.session" :channelId="$store.state.base.channelId" :eventId="$store.state.testRunner.currentEvent" :noNav="true"></log-item>
+                <span class="selectable" @click="toggleEventDisplayed()">Log</span>
+                <span v-if="eventDisplayed">
+                    <img src="../../assets/arrow-down.png" @click="toggleEventDisplayed()">
+                    <log-item
+                            :sessionId="$store.state.base.session"
+                            :channelId="$store.state.base.channelId"
+                            :eventId="$store.state.testRunner.currentEvent"
+                            :noNav="true">
+                    </log-item>
                 </span>
                 <span v-else>
-                    <img src="../../assets/arrow-right.png" @click="toggleLogDisplayed()">
+                    <img src="../../assets/arrow-right.png" @click="toggleEventDisplayed()">
                 </span>
             </div>
         </div>
@@ -39,15 +44,15 @@
                 displayMessage: false,
                 status: [],   // testName => undefined, 'pass', 'fail', 'error'
                 eventLogUrl: null,
-                logDisplayed: false,
+                eventDisplayed: false,
             }
         },
         methods: {
             translateNL(string) {
                 return string.split('\n')
             },
-            toggleLogDisplayed() {
-                this.logDisplayed = !this.logDisplayed
+            toggleEventDisplayed() {
+                this.eventDisplayed = !this.eventDisplayed
             },
             operationType(operation) {
                 return operation.type.code

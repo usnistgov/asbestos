@@ -106,16 +106,16 @@ export const testRunnerStore = {
             ENGINE.get(url)
                 .then(response => {
                     const results = response.data
-                    //console.log(`runEval: results testid = ${Object.getOwnPropertyNames(results)}`)
+                    console.log(`runEval: results testid = ${Object.getOwnPropertyNames(results)}`)
 
-                    //console.log(`called server - evalId is ${testId}`)
+                    console.log(`called server - evalId is ${testId}`)
                     //console.log(`events for ${testId} are ${Object.getOwnPropertyNames(results[testId])}`)
 //                        commit('setClientTestResult', results)
                     commit('setClientTestResult', { testId: testId, result: results[testId]} )
                 })
                 .catch(function (error) {
                     commit('setError', url + ': ' + error)
-                    console.error(`${error} - runEval - URL was ${url}`)
+                    console.error(`${error} - runEval - URL was engine/${url}`)
                 })
         },
         loadLastMarker({commit, rootState}) {

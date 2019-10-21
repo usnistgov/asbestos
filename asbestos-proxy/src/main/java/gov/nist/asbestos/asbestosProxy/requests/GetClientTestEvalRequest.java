@@ -96,7 +96,7 @@ public class GetClientTestEvalRequest {
         eventDirsSinceMarker.sort(Comparator.comparing(File::getName).reversed());
         List<Event> events = eventDirsSinceMarker.stream().map(Event::new).collect(Collectors.toList());
         if (!useMarker)
-            events = events.subList(0, Math.min(0, eventsToEvaluate));
+            events = events.subList(0, Math.min(events.size(), eventsToEvaluate));
 
         Map<Event, ResourceWrapper> requestResources = new HashMap<>();
         Map<Event, ResourceWrapper> responseResources = new HashMap<>();

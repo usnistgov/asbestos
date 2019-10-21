@@ -1,9 +1,9 @@
 <template>
     <div>
         <div v-if="script" class="script">
-<!--            <div v-if="script.description">-->
-<!--                {{ script.description }}-->
-<!--            </div>-->
+            <!--            <div v-if="script.description">-->
+            <!--                {{ script.description }}-->
+            <!--            </div>-->
             <div v-for="(fixture, i) in fixtures"
                  :key="i">
                 <span class="name" >Fixture: </span>
@@ -25,21 +25,35 @@
                     Test: {{ test.description }}
                 </div>
 
-<!--                actions will be asserts only-->
+                <!--                actions will be asserts only-->
                 <div v-for="(action, actioni) in actions(testi)" class="test-part"
                      :key="'Eval' + testi + 'Action' + actioni">
                     <div>
-                        <div @click="selectAssert(actioni)">
-<!--                            <div v-bind:class="[assertPass(actioni) ? passClass : failClass, 'assert-part']">-->
-                            <div v-bind:class="{
-                            pass: assertResult(actioni) === 'pass',
-                            fail: assertResult(actioni) === 'fail',
-                            error: assertResult(actioni) === 'error',
-                            'not-run': assertResult(actioni) === 'not-run' }">
+                        <div >
+                            <div @click.self="selectAssert(actioni)" v-bind:class="{
+                                    pass: assertResult(actioni) === 'pass',
+                                    fail: assertResult(actioni) === 'fail',
+                                    error: assertResult(actioni) === 'error',
+                                    'not-run': assertResult(actioni) === 'not-run' }">
                                 Assert: {{ assertScript(actioni).description }}
                             </div>
                             <div v-if="selectedAssertIndex === actioni" class="message-part">
                                 {{ assertMessage(actioni) }}
+                                <div>
+                                    <span class="selectable" @click.self="toggleEventDisplayed()">Log</span>
+                                    <span v-if="eventDisplayed">
+                                        <img src="../../assets/arrow-down.png" @click.self="toggleEventDisplayed()">
+                                        <log-item
+                                            :sessionId="sessionId"
+                                            :channelId="channelId"
+                                            :eventId="eventId"
+                                            :noNav="true">
+                                        </log-item>
+                                    </span>
+                                    <span v-else>
+                                        <img src="../../assets/arrow-right.png" @click.self="toggleEventDisplayed()">
+                                    </span>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -55,6 +69,7 @@
 <script>
     import errorHandlerMixin from '../../mixins/errorHandlerMixin'
     //import EvalReportAssert from './EvalReportAssert'
+    import LogItem from "../logViewer/LogItem"
 
     export default {
         data() {
@@ -64,9 +79,13 @@
                 selectedAssertIndex: null,
                 passClass: 'pass',
                 failClass: 'fail',
+                eventDisplayed: false,
             }
         },
         methods: {
+            toggleEventDisplayed() {
+                this.eventDisplayed = !this.eventDisplayed
+            },
             assertMessage(assertIndex) {
                 return this.assertReport(assertIndex).message
             },
@@ -165,64 +184,65 @@
         ],
         components: {
             //EvalReportAssert
+            LogItem
         },
         name: "EvalDetails"
     }
 </script>
 
 <style scoped>
-.script {
-    margin-left: 15px;
-    margin-right: 15px;
-    text-align: left;
-}
-.test-part {
-    margin-left: 20px;
-    margin-right: 20px;
-}
-.assert-part {
-    margin-left: 20px;
-    margin-right: 20px;
-    cursor: pointer;
-    text-decoration: underline;
-}
-.message-part {
-    margin-left: 25px;
-    margin-right: 25px;
-    background-color: white;
-}
+    .script {
+        margin-left: 15px;
+        margin-right: 15px;
+        text-align: left;
+    }
+    .test-part {
+        margin-left: 20px;
+        margin-right: 20px;
+    }
+    .assert-part {
+        margin-left: 20px;
+        margin-right: 20px;
+        cursor: pointer;
+        text-decoration: underline;
+    }
+    .message-part {
+        margin-left: 25px;
+        margin-right: 25px;
+        background-color: white;
+    }
     .name {
         font-weight: bold;
     }
     .value {
 
     }
-.pass {
-    background-color: lightgreen;
-    text-align: left;
-    border: 1px dotted black;
-    cursor: pointer;
-    /*font-size: larger;*/
-}
-.fail {
-    background-color: indianred;
-    text-align: left;
-    border: 1px dotted black;
-    cursor: pointer;
-    /*font-size: larger;*/
-}
-.error {
-    background-color: #0074D9 ;
-    text-align: left;
-    border: 1px dotted black;
-    cursor: pointer;
-    /*font-size: larger;*/
-}
-.not-run {
-    background-color: lightgray;
-    text-align: left;
-    border: 1px dotted black;
-    cursor: pointer;
-    /*font-size: larger;*/
-}
+    .pass {
+        background-color: lightgreen;
+        text-align: left;
+        border: 1px dotted black;
+        cursor: pointer;
+        /*font-size: larger;*/
+    }
+    .fail {
+        background-color: indianred;
+        text-align: left;
+        border: 1px dotted black;
+        cursor: pointer;
+        /*font-size: larger;*/
+    }
+    .error {
+        background-color: #0074D9 ;
+        text-align: left;
+        border: 1px dotted black;
+        cursor: pointer;
+        /*font-size: larger;*/
+    }
+    .not-run {
+        background-color: lightgray;
+        text-align: left;
+        border: 1px dotted black;
+        cursor: pointer;
+        /*font-size: larger;*/
+    }
 </style>
