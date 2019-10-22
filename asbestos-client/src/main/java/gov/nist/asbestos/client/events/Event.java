@@ -12,7 +12,7 @@ import java.util.List;
  * An Event is a request (the trigger) and any number of taskFiles undertaken
  * to satisfy that request.
  */
-public class Event {
+public class Event implements Comparable<Event> {
     private SimStore simStore;
     private File eventDir;
     private List<File> taskFiles = new ArrayList<>();
@@ -126,4 +126,10 @@ public class Event {
      File getDescriptionFile(int i) { return new File(taskFiles.get(i), "description.txt"); }
 
 
+    @Override
+    public int compareTo(Event event) {
+        if (getEventId() == null || event.getEventId() == null)
+            return 0;
+        return getEventId().compareTo(event.getEventId());
+    }
 }

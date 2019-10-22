@@ -94,7 +94,8 @@ public class GetClientTestEvalRequest {
 
         List<File> eventDirsSinceMarker = request.ec.getEventsSince(simId, marker);
         eventDirsSinceMarker.sort(Comparator.comparing(File::getName).reversed());
-        List<Event> events = eventDirsSinceMarker.stream().map(Event::new).collect(Collectors.toList());
+        List<Event> events = eventDirsSinceMarker.stream().map(Event::new).sorted().collect(Collectors.toList());
+        Collections.reverse(events);
         if (!useMarker)
             events = events.subList(0, Math.min(events.size(), eventsToEvaluate));
 

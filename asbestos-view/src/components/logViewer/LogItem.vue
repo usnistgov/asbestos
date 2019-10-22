@@ -147,6 +147,7 @@
             this.$store.dispatch('loadEventSummaries')
                 .then(response => {
                     this.index = this.findEventInStore
+                    this.$store.commit('selectEvent', this.eventId)
                     return response
                 })
 

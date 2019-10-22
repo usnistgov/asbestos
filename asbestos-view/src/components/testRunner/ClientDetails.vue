@@ -68,7 +68,7 @@
                     console.log('no event ids')
                     return null;
                 }
-                return Object.keys(this.eventResult)
+                return Object.keys(this.eventResult).sort().reverse()
             },
             eventResult() {
                 return this.$store.state.testRunner.clientTestResult[this.testId]
