@@ -50,6 +50,7 @@
                                     pass: assertResult(actioni) === 'pass',
                                     fail: assertResult(actioni) === 'fail',
                                     error: assertResult(actioni) === 'error',
+                                    warning: assertResult(actioni) === 'warning',
                                     'not-run': assertResult(actioni) === 'not-run' }">
                                 Assert: {{ assertScript(actioni).description }}
                             </div>
@@ -227,6 +228,13 @@
     }
     .fail {
         background-color: indianred;
+        text-align: left;
+        border: 1px dotted black;
+        cursor: pointer;
+        /*font-size: larger;*/
+    }
+    .warning {
+        background-color: #F6C6CE;
         text-align: left;
         border: 1px dotted black;
         cursor: pointer;

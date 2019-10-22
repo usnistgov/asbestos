@@ -1,7 +1,7 @@
 <TestScript xmlns="http://hl7.org/fhir">
     <id value="singleDoc"/>
     <name value="singleDoc"/>
-    <description value="Send valid Provide Document Bundle transaction. This does not require Comprehensive Metadata."/>
+    <description value="Send valid Provide Document Bundle transaction containing a single DocumentReference. This does not require Comprehensive Metadata."/>
     <!--
       These fixtures will be inserted by the TestEngine:
         request - the input resource
@@ -52,7 +52,7 @@
         </action>
         <action>
             <assert>
-                <description value="PDB is successful"/>
+                <description value="PDB returns 200"/>
                 <sourceId value="response"/>
                 <response value="okay"/>
                 <warningOnly value="false"/>
@@ -60,11 +60,52 @@
         </action>
         <action>
             <assert>
-                <description value="PDB returned Bundle"/>
+                <description value="PDB returns Bundle"/>
                 <resource value="Bundle"/>
                 <sourceId value="response"/>
                 <warningOnly value="false"/>
             </assert>
         </action>
+        <action>
+            <assert>
+                <description value="All resources in Bundle return 201"/>
+                <compareToSourceId value="response"/>
+                <compareToSourceExpression value="Bundle.entry.all(response.status.value.startsWith('201'))"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
+            <assert>
+                <description value="All resources in Bundle return location (warning only)"/>
+                <compareToSourceId value="response"/>
+                <compareToSourceExpression value="Bundle.entry.all(response.location)"/>
+                <warningOnly value="true"/>
+            </assert>
+        </action>
+        <action>
+            <assert>
+                <description value="All resources in Bundle return etag (warning only)"/>
+                <compareToSourceId value="response"/>
+                <compareToSourceExpression value="Bundle.entry.all(response.etag)"/>
+                <warningOnly value="true"/>
+            </assert>
+        </action>
+        <action>
+            <assert>
+                <description value="All resources in Bundle return lastModified (warning only)"/>
+                <compareToSourceId value="response"/>
+                <compareToSourceExpression value="Bundle.entry.all(response.lastModified)"/>
+                <warningOnly value="true"/>
+            </assert>
+        </action>
+        <action>
+            <assert>
+                <description value="No resources in Bundle return OperationOutcome (warning only)"/>
+                <compareToSourceId value="response"/>
+                <compareToSourceExpression value="Bundle.entry.all(response.outcome).not()"/>
+                <warningOnly value="true"/>
+            </assert>
+        </action>
+
     </test>
 </TestScript>
