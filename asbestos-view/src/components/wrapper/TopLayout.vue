@@ -196,24 +196,28 @@
         text-align: left;
         border: 1px dotted black;
         cursor: pointer;
+        border-radius: 25px;
     }
     .fail {
         background-color: indianred;
         text-align: left;
         border: 1px dotted black;
         cursor: pointer;
+        border-radius: 25px;
     }
     .error {
         background-color: indianred;
         text-align: left;
         border: 1px dotted black;
         cursor: pointer;
+        border-radius: 25px;
     }
     .not-run {
         background-color: lightgray;
         text-align: left;
         border: 1px dotted black;
         cursor: pointer;
+        border-radius: 25px;
     }
     .instruction {
         text-align: left;

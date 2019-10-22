@@ -7,7 +7,8 @@ Vue.use(Vuex)
 export const testRunnerStore = {
     state() {
         return {
-            testCollectionNames: [],
+            clientTestCollectionNames: [],
+            serverTestCollectionNames: [],
             currentTestCollectionName: null,
             testScriptNames: [],
             testReportNames: [],
@@ -75,8 +76,11 @@ export const testRunnerStore = {
         setTestCollectionName(state, name) {
             state.currentTestCollectionName = name
         },
-        setTestCollectionNames(state, names) {
-            state.testCollectionNames = names
+        setClientTestCollectionNames(state, names) {
+            state.clientTestCollectionNames = names
+        },
+        setServerTestCollectionNames(state, names) {
+            state.serverTestCollectionNames = names
         },
         // setClientTestResult(state, payload) {
         //     // payload is { evalId: xxx, events: eventId => TestReports }
@@ -167,9 +171,16 @@ export const testRunnerStore = {
             const url = `collections`
             ENGINE.get(url)
                 .then(response => {
-                    let theResponse = response.data
-                    //console.info(`TestEnginePanel: loaded ${theResponse.length} test collections`)
-                    commit('setTestCollectionNames', theResponse.sort())
+                    let clientTestNames = []
+                    let serverTestNames = []
+                    response.data.forEach(collection => {
+                        if (collection.server)
+                            serverTestNames.push(collection.name)
+                        else
+                            clientTestNames.push(collection.name)
+                    })
+                    commit('setClientTestCollectionNames', clientTestNames.sort())
+                    commit('setServerTestCollectionNames', serverTestNames.sort())
                 })
                 .catch(function (error) {
                     this.$store.commit('setError', url + ': ' +  error)
