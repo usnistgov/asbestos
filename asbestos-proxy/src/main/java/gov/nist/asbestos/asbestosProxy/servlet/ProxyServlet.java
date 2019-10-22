@@ -2,6 +2,8 @@ package gov.nist.asbestos.asbestosProxy.servlet;
 
 
 import gov.nist.asbestos.asbestosProxy.channel.*;
+import gov.nist.asbestos.client.Base.EC;
+import gov.nist.asbestos.asbestosProxy.requests.EvalRequest;
 import gov.nist.asbestos.client.events.Event;
 import gov.nist.asbestos.client.log.SimStore;
 import gov.nist.asbestos.client.events.Task;
@@ -45,7 +47,7 @@ public class ProxyServlet extends HttpServlet {
 
     public ProxyServlet() {
         super();
-        proxyMap.put("passthrough", new PassthroughChannelBuilder());
+        proxyMap.put("fhir", new PassthroughChannelBuilder());
         proxyMap.put("mhd", new MhdChannelBuilder());
     }
 
@@ -93,7 +95,7 @@ public class ProxyServlet extends HttpServlet {
 
         String uri = "http://" +
                 hostport +
-                "/proxy/log/" +
+                "/asbestos/log/" +
                 testSession + "/" +
                 channelId + "/" +
                 resource + "/" +
@@ -185,22 +187,60 @@ public class ProxyServlet extends HttpServlet {
 
             // detour to TestEngine happens here
             // responseOut contains OperationOutcome
-            if (channelConfig.isIncludeValidation()) {
-                OperationOutcome backendOperationOutcome = responseOut.getOperationOutcome();
-                Format format = Format.fromContentType(inHeaders.getContentType().getValue());
-                BaseResource inputResource = ProxyBase.parse(inBody, format);
-
-                //
-                // this needs to be done in a task
-                //
-
-//                File testDef = ...; // evaluation
+            // pass inputResource through client validation
+            // if true then this channel not valid without pending NEXT_CLIENT_TEST
+//            if (channelConfig.isIncludeValidation()) {
+//                OperationOutcome outcome = responseOut.getOperationOutcome();
+//                Format format = Format.fromContentType(inHeaders.getContentType().getValue());
+//                BaseResource inputResource = ProxyBase.parse(inBody, format);
+//
+//                //
+//                // this needs to be done in a task
+//                //
+//
+//                EC ec = new EC(externalCache);
+//                //   testSpec is testCollectionId/testId
+//                String testSpec = (String) req.getSession().getAttribute(EvalRequest.NEXT_CLIENT_TEST);
+//                if (testSpec == null || testSpec.equals("")) {
+//                    // no pending NEXT_CLIENT_TEST
+//                    OperationOutcome.OperationOutcomeIssueComponent ic = outcome.addIssue();
+//                    ic.setSeverity(OperationOutcome.IssueSeverity.ERROR);
+//                    ic.setCode(OperationOutcome.IssueType.VALUE);
+//                    ic.setDiagnostics("No pending validation");
+//                    respond(resp, responseOut, inHeaders, clientTask);
+//                    return;
+//                }
+//                List<String> testSpecParts = Arrays.asList(testSpec.split("/"));
+//                File testDef = ec.getTest(testSpecParts.get(0), testSpecParts.get(1));
+//                if (testDef == null || !testDef.isDirectory()) {
+//                    resp.setStatus(resp.SC_BAD_REQUEST);
+//                    return;
+//                }
 //                TestEngine testEngine = new TestEngine(testDef);
-//                testEngine.runTest(inputResource);
+//                testEngine.runEval(inputResource, outcome);
 //                TestReport testReport = testEngine.getTestReport();
 //
-//                // merge responseOut and testReport
-            }
+//                // original output was OperationOutcome
+//                // eval returns TestReport
+//                // file TestReport as output of this Task
+//                // and return a link in the OperationOutcome with good/bad status
+//
+//                Task evalTask = clientTask.newTask();
+//                evalTask.putDescription("Eval " + testSpec);
+//                String encodedTestReport = ProxyBase.encode(testReport, Format.JSON);
+//                evalTask.putResponseBodyText(encodedTestReport);
+//                boolean passEval = testReport.getResult() == TestReport.TestReportResult.PASS;
+//                OperationOutcome.OperationOutcomeIssueComponent ic = outcome.addIssue();
+//                String testReportLink = ProxyLogServlet.getEventLink(evalTask.getEvent(), channelConfig);
+//                if (passEval) {
+//                    ic.setSeverity(OperationOutcome.IssueSeverity.INFORMATION);
+//                    ic.setDiagnostics(testReportLink);
+//                } else {
+//                    ic.setSeverity(OperationOutcome.IssueSeverity.ERROR);
+//                    ic.setCode(OperationOutcome.IssueType.VALUE);
+//                    ic.setDiagnostics(testReportLink);
+//                }
+//            }
 
             respond(resp, responseOut, inHeaders, clientTask);
         } catch (TransformException e) {
@@ -210,8 +250,8 @@ public class ProxyServlet extends HttpServlet {
             respondWithError(req, resp, t, inHeaders, clientTask);
             resp.setStatus(resp.SC_OK);
         } finally {
-            if (channel != null)
-                ChannelRelay.postEvent(channel.getChannelId(), event.getEventDir());
+//            if (channel != null)
+//                ChannelRelay.postEvent(channel.getChannelId(), event.getEventDir());
         }
     }
 

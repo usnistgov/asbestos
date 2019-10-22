@@ -64,7 +64,10 @@ class SetupActionRead extends GenericSetupAction {
             String theUrl = variableMgr.updateReference(op.getUrl());
             if (theUrl == null)
                 return null;
-            return new Ref(theUrl);
+            Ref url = new Ref(theUrl);
+            if (url.isRelative())
+                return url.rebase(new Ref(base));
+            return url;
         }
         // for READ this can only be ID
         if (op.hasParams()) {

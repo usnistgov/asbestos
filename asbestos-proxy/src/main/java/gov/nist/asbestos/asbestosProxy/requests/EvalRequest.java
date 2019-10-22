@@ -40,6 +40,7 @@ public class EvalRequest {
         if ("null".equals(testId)) {
             request.getSession().removeAttribute(NEXT_CLIENT_TEST);
             log.info("Clear client test");
+
         } else {
             request.getSession().setAttribute(NEXT_CLIENT_TEST, test);
             log.info("Client test is " + test);

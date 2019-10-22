@@ -8,7 +8,7 @@ export const channelStore = {
         return {
             channel: null,  // private communication between ChannelNav and ChannelView
             channelTypes: [
-                'passthrough',
+                'fhir',
                 'mhd'
             ],
         }

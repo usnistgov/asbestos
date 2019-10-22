@@ -4,6 +4,7 @@ import Vuex from 'vuex'
 Vue.use(Vuex)
 
 import {PROXY} from '../common/http-common'
+import {CHANNEL} from '../common/http-common'
 
 // TODO add About page and credit <div>Icons made by <a href="https://www.flaticon.com/authors/freepik" title="Freepik">Freepik</a> from <a href="https://www.flaticon.com/"             title="Flaticon">www.flaticon.com</a> is licensed by <a href="http://creativecommons.org/licenses/by/3.0/"             title="Creative Commons BY 3.0" target="_blank">CC 3.0 BY</a></div>
 
@@ -14,17 +15,25 @@ export const baseStore = {
             // environment: 'default',
 
             testSession: null,
-            channelId: null,
+            channelId: "default",
 
             sessions: [],
             environments: [
-                'default', 'e1'
+                'default',
             ],
 
             channelIds: [],  // for this session
+            channelURLs: [], // for this session { id:  ... , url: ... }
+            errors: [],
         }
     },
     mutations: {
+        setError(state, error) {
+            state.errors.push(error)
+        },
+        clearError(state) {
+            state.errors = []
+        },
         setSession(state, theSession) {
 //            console.log(`setSession = ${theSession}`)
             state.session = theSession
@@ -73,17 +82,29 @@ export const baseStore = {
             state.channelIds.splice(channelIndex, 1)
         },
         installChannelIds(state, channelIds) {
-//            console.log(`mutation installChannelIds ${channelIds}`)
             state.channelIds = channelIds.sort()
+        },
+        installChannelURLs(state, urls) {
+            state.channelURLs = urls
         },
 
 
     },
     actions: {
         loadSessions({commit}) {
-            commit('setSessions', ['default', 'ts1'])
+            const url = `CHANNEL/sessionNames`
+            CHANNEL.get('sessionNames')
+                .then(response => {
+                    commit('setSessions', response.data)
+                })
+                .catch(function (error) {
+                    commit('setError', url + ': ' + error)
+                    console.error(error)
+                })
+//            commit('setSessions', ['default'])
         },
-        loadChannelNames({commit, state}) {  //  same function exists in ChannelNav
+        loadChannelNames({commit, state}) {
+            const url = `CHANNEL/channel`
             PROXY.get('channel')
                 .then(response => {
                     const fullChannelIds = response.data
@@ -97,9 +118,33 @@ export const baseStore = {
                     commit('installChannelIds', ids)
                 })
                 .catch(function (error) {
+                    commit('setError', url + ': ' + error)
                     console.error(error)
                 })
         },
+        loadChannelNamesAndURLs({commit}) {
+            const url = `CHANNEL/channels/all`
+            CHANNEL.get('channels/all')
+                .then(response => {
+                    commit('installChannelURLs', response.data)
+                })
+                .catch(e => {
+                    commit('setError', url + ': ' + e)
+                })
+        },
+        loadChannel({commit}, fullId) {
+            const url = `CHANNEL/${fullId}`
+            return CHANNEL.get(fullId)
+                .then(response => {
+                    console.log(`installing channel ${response.data.channelId}`)
+                    commit('installChannel', response.data)
+                    return response.data
+                })
+                .catch(e => {
+                    commit('setError', url + ': ' + e)
+                    console.error('channel/' + fullId + ' ' + e)
+                })
+        }
     },
     getters: {
 

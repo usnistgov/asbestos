@@ -1,0 +1,70 @@
+<TestScript xmlns="http://hl7.org/fhir">
+    <id value="singleDoc"/>
+    <name value="singleDoc"/>
+    <description value="Send valid Provide Document Bundle transaction. This does not require Comprehensive Metadata."/>
+    <!--
+      These fixtures will be inserted by the TestEngine:
+        request - the input resource
+        response - the response resource (could be OperationOutcome)
+    -->
+
+    <test>
+        <name value="Evaluations"/>
+        <description value="The Description"/>
+        <action>
+            <assert>
+                <description value="Request is Bundle"/>
+                <sourceId value="request"/>
+                <resource value="Bundle"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
+            <assert>
+                <description value="Request is transaction"/>
+                <compareToSourceId value="request"/>
+                <compareToSourceExpression value="Bundle.type = 'transaction'"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
+            <assert>
+                <description value="Verb is POST"/>
+		            <requestMethod value="post"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
+            <assert>
+                <description value="Request contains one DocumentManifest"/>
+                <compareToSourceId value="request"/>
+                <compareToSourceExpression value="Bundle.entry.resource.where(is(FHIR.DocumentManifest)).count() = 1"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
+            <assert>
+                <description value="Request includes one DocumentReference"/>
+                <compareToSourceId value="request"/>
+                <compareToSourceExpression value="Bundle.entry.resource.where(is(FHIR.DocumentReference)).count() = 1"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
+            <assert>
+                <description value="PDB is successful"/>
+                <sourceId value="response"/>
+                <response value="okay"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
+            <assert>
+                <description value="PDB returned Bundle"/>
+                <resource value="Bundle"/>
+                <sourceId value="response"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+    </test>
+</TestScript>

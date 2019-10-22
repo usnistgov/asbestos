@@ -40,7 +40,7 @@ public class AssertionRunner {
         if (source == null)
             return assertReport;
 
-        if (source.getResponseType().equals("Bundle")) {
+        if ("Bundle".equals(source.getResponseType())) {
             // assertion could be targetting Bundle or a resource in the Bundle (search)
             boolean targetIsBundle = as.hasExpression() && as.getExpression().startsWith("Bundle");
             if (targetIsBundle) {
@@ -127,6 +127,28 @@ public class AssertionRunner {
 //            Reporter.reportPass(val, assertReport, type, label, "path/value comparison");
 //            return;
 //        }
+
+        if (as.hasCompareToSourceId() && as.hasCompareToSourceExpression()) {
+            sourceFixture = fixtureMgr.get(as.getCompareToSourceId());
+            if (sourceFixture == null) {
+                Reporter.reportError(val, assertReport, type, label, "compareToSourceId references " + as.getCompareToSourceId() + " which cannot be found");
+                return false;
+            }
+
+            BaseResource sourceResource = sourceFixture.getResourceResource();
+            if (sourceResource == null) {
+                Reporter.reportError(val, assertReport, type, label,"Fixture referenced " + sourceFixture.getId()  + " has no resource");
+                return false;
+            }
+            String expression = as.getCompareToSourceExpression();
+            String found = FhirPathEngineBuilder.evalForString(sourceResource, expression);
+            if ("true".equals(found)) {
+                Reporter.reportPass(val, assertReport, type, label, "expression comparison completed");
+                return true;
+            }
+            Reporter.reportFail(val, assertReport, type, label, "assertion failed - " + expression, warningOnly);
+            return false;
+        }
 
         // resource type pattern
         // resource type specified sourceId or lastOperation must have returned that resource type
@@ -234,6 +256,19 @@ public class AssertionRunner {
                 return true;
             }
             Reporter.reportError(val, assertReport, type, label, "expression " + as.getExpression()  +  " failed");
+            return false;
+        }
+
+        if (as.hasRequestMethod()) {
+            String requestedMethod = as.getRequestMethod().toCode();
+            sourceFixture = getSource(as);
+            if (sourceFixture == null) return false;
+            String method = sourceFixture.getResourceWrapper().getHttpBase().getVerb();
+            if (requestedMethod.equalsIgnoreCase(method)) {
+                Reporter.reportPass(val, assertReport, type, label, "Method " + requestedMethod + " found");
+                return true;
+            }
+            Reporter.reportFail(val, assertReport, type, label, "Expected method " + requestedMethod + " found " + method, warningOnly);
             return false;
         }
 

@@ -1,15 +1,17 @@
 package gov.nist.asbestos.testEngine.engine;
 
+import gov.nist.asbestos.client.Base.ProxyBase;
 import gov.nist.asbestos.testEngine.engine.FhirPathEngineBuilder;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.utils.FHIRPathEngine;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
+import java.io.InputStream;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 class FhirPathTest {
     private static FHIRPathEngine fhirPathEngine;
@@ -67,4 +69,34 @@ class FhirPathTest {
         BooleanType bool = (BooleanType) results.get(0);
         return bool.booleanValue();
     }
+
+    private Bundle loadBundle(String path) {
+        InputStream is = FhirPathTest.class.getResourceAsStream(path);
+        IBaseResource resource = ProxyBase.getFhirContext().newXmlParser().parseResource(is);
+        assertTrue(resource instanceof Bundle);
+        return (Bundle) resource;
+    }
+
+    @Test
+    void manifestInBundle() {
+        Bundle bundle = loadBundle("/pdb/request.xml");
+        String match = FhirPathEngineBuilder.evalForString(bundle, "Bundle.entry.resource.where(is(FHIR.DocumentReference)).count() = 1");
+        assertEquals("true", match);
+    }
+
+    @Test
+    void manifestInBundle2() {
+        Bundle bundle = loadBundle("/pdb/request.xml");
+        String match = FhirPathEngineBuilder.evalForString(bundle, "Bundle.entry.where(fullUrl = 'http://localhost:9556/svc/fhir/DocumentReference/45').request.first().method.value = 'POST'");
+        assertEquals("true", match);
+    }
+
+    @Test
+    void manifestInBundle3() {
+        Bundle bundle = loadBundle("/pdb/request.xml");
+        String match = FhirPathEngineBuilder.evalForString(bundle, "Bundle.entry.resource.where(status = 'current')");
+        assertEquals("true", match);
+    }
+
+
 }
