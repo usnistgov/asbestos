@@ -38,7 +38,7 @@
             <assert>
                 <description value="Request contains one DocumentManifest"/>
                 <compareToSourceId value="request"/>
-                <compareToSourceExpression value="Bundle.entry.resource.DocumentManifest.count() = 1"/>
+                <compareToSourceExpression value="Bundle.entry.resource.where(is(FHIR.DocumentManifest)).count() = 1"/>
                 <warningOnly value="false"/>
             </assert>
         </action>
@@ -46,7 +46,7 @@
             <assert>
                 <description value="Request includes one DocumentReference"/>
                 <compareToSourceId value="request"/>
-                <compareToSourceExpression value="Bundle.entry.resource.DocumentReference.count() = 1"/>
+                <compareToSourceExpression value="Bundle.entry.resource.where(is(FHIR.DocumentReference)).count() = 1"/>
                 <warningOnly value="false"/>
             </assert>
         </action>

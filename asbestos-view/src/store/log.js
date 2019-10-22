@@ -23,6 +23,14 @@ export const logStore = {
         setCurrentEventIndex(state, index) {
             state.currentEventIndex = index
         },
+        selectEvent(state, eventName) {
+            const index = state.eventSummaries.findIndex(eventSummary => {
+                return eventSummary.eventName === eventName
+            })
+            if (index !== -1)
+                state.currentEventIndex = index
+            console.log(`new event index is ${index}`)
+        }
     },
     actions: {
         loadEventSummaries({commit, rootState}) {

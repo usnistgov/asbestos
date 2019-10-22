@@ -146,7 +146,7 @@ public class GetClientTestEvalRequest {
                 testEngine.setTestSession(testSession);
                 testEngine.setExternalCache(request.externalCache);
                 ResourceWrapper responseResource = responseResources.get(event);
-                testEngine.runEval(requestResources.get(event), responseResource);
+                testEngine.runEval(requestResources.get(event), responseResources.get(event));
                 EventResult eventResult = result.results.get(testId); //new EventResult();
                 if (eventResult == null)
                     eventResult = new EventResult();

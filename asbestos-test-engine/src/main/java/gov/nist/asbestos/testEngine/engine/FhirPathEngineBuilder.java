@@ -14,10 +14,10 @@ class FhirPathEngineBuilder {
         return new FHIRPathEngine(new HapiWorkerContext(ProxyBase.getFhirContext(), new PrePopulatedValidationSupport()));
     }
 
-    static boolean evalForBoolean(BaseResource resource, String expression) {
+    public static boolean evalForBoolean(BaseResource resource, String expression) {
         List<Base> results;
         try {
-            results = FhirPathEngineBuilder.build().evaluate(resource, expression);
+            results = build().evaluate(resource, expression);
         } catch (Throwable t) {
             throw t;
         }
@@ -31,8 +31,8 @@ class FhirPathEngineBuilder {
         return true;
     }
 
-    static String evalForString(BaseResource resource, String expression) {
-        List<Base> results = FhirPathEngineBuilder.build().evaluate(resource, expression);
+    public static String evalForString(BaseResource resource, String expression) {
+        List<Base> results = build().evaluate(resource, expression);
         if (results.isEmpty())
             return null;
         Base result = results.get(0);

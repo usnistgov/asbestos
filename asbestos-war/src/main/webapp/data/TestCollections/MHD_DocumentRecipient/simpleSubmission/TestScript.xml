@@ -28,11 +28,11 @@
         <sourceId value="read-back"/>
     </variable>
     <test>
-        <description value="Submit Provide Document Bundle and verify. The DocumentReference is not Comprehensive Metadata compliant. It is missing the masterIdentifier."/>
+        <description value="Submit Provide Document Bundle to MHD Document Recipient and verify response. The DocumentReference contained is not Comprehensive Metadata compliant. It is missing the masterIdentifier."/>
         <action>
             <operation>
                 <!-- references patient from resourceCache in EC -->
-                <description value="send PDB to server"/>
+                <description value="send PDB"/>
                 <label value="create"/>
                 <type>
                     <system value="https://github.com/usnistgov/asbestos/wiki/Testscript-Operation-Codes"/>
@@ -51,7 +51,7 @@
         </action>
         <action>
             <operation>
-                <description value="Read DocumentReference"/>
+                <description value="DocumentReference"/>
                 <label value="read-back"/>
                 <type>
                     <code value="read"/>
@@ -69,7 +69,7 @@
         </action>
         <action>
             <assert>
-                <description value="... returned DocumentReference"/>
+                <description value="... returned a DocumentReference"/>
                 <resource value="DocumentReference"/>
                 <warningOnly value="false"/>
             </assert>

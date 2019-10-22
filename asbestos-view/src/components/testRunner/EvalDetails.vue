@@ -25,6 +25,22 @@
                     Test: {{ test.description }}
                 </div>
 
+                <div>
+                    <span class="selectable" @click.self="toggleEventDisplayed()">Log</span>
+                    <span v-if="eventDisplayed">
+                                        <img src="../../assets/arrow-down.png" @click.self="toggleEventDisplayed()">
+                                        <log-item
+                                                :sessionId="sessionId"
+                                                :channelId="channelId"
+                                                :eventId="eventId"
+                                                :noNav="true">
+                                        </log-item>
+                                    </span>
+                    <span v-else>
+                                        <img src="../../assets/arrow-right.png" @click.self="toggleEventDisplayed()">
+                                    </span>
+                </div>
+
                 <!--                actions will be asserts only-->
                 <div v-for="(action, actioni) in actions(testi)" class="test-part"
                      :key="'Eval' + testi + 'Action' + actioni">
@@ -39,21 +55,6 @@
                             </div>
                             <div v-if="selectedAssertIndex === actioni" class="message-part">
                                 {{ assertMessage(actioni) }}
-                                <div>
-                                    <span class="selectable" @click.self="toggleEventDisplayed()">Log</span>
-                                    <span v-if="eventDisplayed">
-                                        <img src="../../assets/arrow-down.png" @click.self="toggleEventDisplayed()">
-                                        <log-item
-                                            :sessionId="sessionId"
-                                            :channelId="channelId"
-                                            :eventId="eventId"
-                                            :noNav="true">
-                                        </log-item>
-                                    </span>
-                                    <span v-else>
-                                        <img src="../../assets/arrow-right.png" @click.self="toggleEventDisplayed()">
-                                    </span>
-                                </div>
                             </div>
                         </div>
                     </div>

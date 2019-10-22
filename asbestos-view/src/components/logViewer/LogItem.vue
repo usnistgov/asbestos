@@ -153,7 +153,13 @@
         },
         watch: {
             '$route': 'updateIndex',
-            //'this.$store.state.log.currentEventIndex': 'loadEvent',
+            eventId(newVal) {
+                if (this.noNav) {
+                    console.log(`eventId updated`)
+                    this.$store.commit('selectEvent', newVal)
+                }
+                this.loadEvent()
+            },
         },
         props: [
             'eventId', 'sessionId', 'channelId', 'noNav',
