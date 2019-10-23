@@ -13,7 +13,7 @@
         </div>
 
         <div v-if="displayMessage">
-            <div v-for="(line, linei) in translateNL(message)" :key="msgDisp + linei">
+            <div v-for="(line, linei) in translateNL(message)" :key="'msgDisp' + linei">
                 {{ line }}
             </div>
             <div>
@@ -23,7 +23,7 @@
                     <log-item
                             :sessionId="$store.state.base.session"
                             :channelId="$store.state.base.channelId"
-                            :eventId="$store.state.testRunner.currentEvent"
+                            :eventId="eventId"
                             :noNav="true">
                     </log-item>
                 </span>
@@ -82,10 +82,23 @@
             message() {
                 if (!this.report)
                     return null
-                const rawMessage =  this.report.assert
+                return this.report.assert
                     ? this.report.assert.message
                     : this.report.operation.message
-                return rawMessage
+            },
+            detail() {
+                if (!this.report)
+                    return null
+                return this.report.assert
+                    ? this.report.assert.detail
+                    : this.report.operation.detail
+            },
+            eventId() {
+                const logUrl = this.detail
+                if (!logUrl)
+                    return null
+                const parts = logUrl.split('/')
+                return parts[parts.length-1]
             },
             isPass() {
                 if (!this.report) return false

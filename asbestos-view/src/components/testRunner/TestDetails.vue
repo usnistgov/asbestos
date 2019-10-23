@@ -25,7 +25,9 @@
 
                 <div v-for="(action, actioni) in actions(testi)" class="test-part"
                      :key="'Test' + testi + 'Action' + actioni">
-                    <test-report-action :script="action" :report="reportAction(testi, actioni)"></test-report-action>
+                    <test-report-action
+                            :script="action"
+                            :report="reportAction(testi, actioni)"></test-report-action>
                 </div>
             </div>
 
