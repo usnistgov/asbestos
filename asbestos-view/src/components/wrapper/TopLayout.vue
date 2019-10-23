@@ -212,6 +212,13 @@
         cursor: pointer;
         border-radius: 25px;
     }
+    .warning {
+        background-color: #F6C6CE;
+        text-align: left;
+        border: 1px dotted black;
+        cursor: pointer;
+        border-radius: 25px;
+    }
     .not-run {
         background-color: lightgray;
         text-align: left;

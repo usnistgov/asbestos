@@ -4,14 +4,14 @@
             {{ testScript.description }}
         </div>
         <div v-if="eventIds === null">
-            No events present on this channel
+            No messages present on this channel
         </div>
         <div v-else>
             <div v-for="(eventId, eventi) in eventIds"
                 :key="'Disp' + eventi">
                 <div>
                     <div  @click.self="selectEvent(eventId)" v-bind:class="[isEventPass(eventId) ? passClass : failClass, 'event-part']">
-                        Event: {{ eventId }}
+                        Message: {{ eventId }}
                     </div>
                     <div v-if="selected === eventId">
                         <router-view></router-view>

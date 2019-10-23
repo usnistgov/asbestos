@@ -6,6 +6,17 @@
             {{ eventAsDate(eventSummary.eventName) }} - {{ eventSummary.verb}} {{ eventSummary.resourceType }} - {{ eventSummary.status ? 'Ok' : 'Error' }}
         </div>
         <div class="request-response">
+            <div v-if="tasks.length > 0">
+                <span v-for="(task, taski) in tasks" :key="taski">
+                    <span v-bind:class="{ selected: taski === selectedTask, selectable: taski !== selectedTask }" @click="selectTask(taski)">
+                        {{ taskLabel(taski) }}
+                        <span class="divider"></span>
+                    </span>
+                </span>
+            </div>
+            <div v-else>
+                No Tasks
+            </div>
            <span v-bind:class="{ selected: displayRequest === true, selectable: displayRequest === false }"
               @click="displayRequest = true">
                 Request
@@ -15,15 +26,6 @@
                   @click="displayRequest = false">
                 Response
             </span>
-            <div v-if="tasks.length > 0">
-                <span v-for="(task, taski) in tasks" :key="taski">
-                    <span v-bind:class="{ selected: taski === selectedTask, selectable: taski !== selectedTask }" @click="selectTask(taski)">
-                        Task {{ taski }} </span>
-                </span>
-            </div>
-            <div v-else>
-                No Tasks
-            </div>
         </div>
         <div v-if="getEvent()">
             <div v-if="displayRequest" class="event-details">
@@ -56,6 +58,13 @@
             }
         },
         methods: {
+            taskLabel(i) {
+                if (i === 0)
+                    return 'From Client'
+                if (i === this.taskCount - 1)
+                    return 'To Server'
+                return i
+            },
             selectTask(i) {
                 this.selectedTask = i
             },

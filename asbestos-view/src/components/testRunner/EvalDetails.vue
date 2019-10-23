@@ -19,14 +19,14 @@
 
             <div v-for="(test, testi) in tests"
                  :key="'Eval' + testi">
-                <span class="name" >Eval: </span>
-                <span class="value">Test: {{ test.name }}</span>
-                <div v-if="test.description" class="test-part">
-                    Test: {{ test.description }}
-                </div>
+<!--                <span class="name" >Eval: </span>-->
+<!--                <span class="value">Test: {{ test.name }}</span>-->
+<!--                <div v-if="test.description" class="test-part">-->
+<!--                    Test: {{ test.description }}-->
+<!--                </div>-->
 
                 <div>
-                    <span class="selectable" @click.self="toggleEventDisplayed()">Log</span>
+                    <span class="selectable" @click.self="toggleEventDisplayed()">Message Log</span>
                     <span v-if="eventDisplayed">
                                         <img src="../../assets/arrow-down.png" @click.self="toggleEventDisplayed()">
                                         <log-item
@@ -52,7 +52,7 @@
                                     error: assertResult(actioni) === 'error',
                                     warning: assertResult(actioni) === 'warning',
                                     'not-run': assertResult(actioni) === 'not-run' }">
-                                Assert: {{ assertScript(actioni).description }}
+                                <span class="selectable">Assert:</span> {{ assertScript(actioni).description }}
                             </div>
                             <div v-if="selectedAssertIndex === actioni" class="message-part">
                                 {{ assertMessage(actioni) }}

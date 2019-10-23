@@ -1,7 +1,7 @@
 <template>
     <div>
         <div class="tool-title">
-            <span>Tests for {{ testCollection }}</span>
+            <span>Tests for {{ clean(testCollection) }}</span>
             <span class="divider"></span>
             <img id="reload" class="selectable" @click="reload()" src="../../assets/reload.png"/>
             <span class="divider"></span>
@@ -16,10 +16,23 @@
 
         <div class="instruction">
             <span v-if="$store.state.testRunner.isClientTest"  class="instruction">
-                These are Client tests. Each test evaluates  events received at the URL below against the test requirements.  A test passes when at least one event meets
-                the requirements of the test.
-                <br /><br />Click spyglass to evaluate recent events. Send new requests to (FHIR Server base address)
+                These are Client tests - the system under test sends messages to the
+                FHIR Server Base Address shown below for evaluation. To run:
+                <br />
+                <ol>
+                    <li>Send messages matching each per-test description.</li>
+                    <li>Response message will reflect evaluation by the FHIR server running in the background
+                        (messages are forwarded as they are received).</li>
+                    <li>Once an adequate collection of messages has been sent to satisfy the tests, evaluate them further by clicking the
+                    spyglass icon to evaluate against a set of assertions specific to each test.
+                    This evaluation will include validating the response from the background FHIR Server.</li>
+                    <li>Only the most recent messages will be evaluated.  Adjust this count below.</li>
+                    <li>A test passes if one or more message evaluates correctly.</li>
+                    <li>Click on a test to see the messages evaluated.  Click on a message to see the result of each
+                        assertion that was evaluated.</li>
+                </ol>
                 <div>
+                    FHIR Server Base Address:
                     <span class="boxed">{{ clientBaseAddress }}</span>
                 </div>
             </span>
@@ -57,7 +70,7 @@
                         <div v-else>
                             <img src="../../assets/press-play-button.png" class="right" @click.stop="doRun(name)">
                         </div>
-                        {{ name }}
+                        Test: {{ clean(name) }}
                         <span v-if="!$store.state.testRunner.isClientTest"> --  {{ time[name] }}</span>
                     </div>
                 </div>
@@ -85,6 +98,9 @@
             }
         },
         methods: {
+            clean(text) {
+                return text.replace(/_/g, ' ')
+            },
             evalStatus() { // see GetClientTestEvalResult
                 this.status.splice(0)
                 this.testScriptNames.forEach(testId => {
