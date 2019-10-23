@@ -157,6 +157,7 @@
                 .then(response => {
                     this.index = this.findEventInStore
                     this.$store.commit('selectEvent', this.eventId)
+                    this.$store.commit('setCurrentEventIndex', this.index)
                     return response
                 })
 
