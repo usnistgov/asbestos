@@ -126,6 +126,11 @@ export const baseStore = {
             const url = `CHANNEL/channels/all`
             CHANNEL.get('channels/all')
                 .then(response => {
+                    let ids = []
+                    response.data.forEach(item => {
+                        ids.push(item.id)
+                    })
+                    commit('installChannelIds', ids)
                     commit('installChannelURLs', response.data)
                 })
                 .catch(e => {

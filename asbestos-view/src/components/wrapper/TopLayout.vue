@@ -94,9 +94,9 @@
 </script>
 <style scoped>
     .window-title-bar {
-        background-color: goldenrod;
-        padding-top: 5px;
-        padding-bottom: 5px;
+        background-color: cornflowerblue;
+        padding-top: 10px;
+        padding-bottom: 10px;
     }
     .window-title {
         font-weight: bold;
