@@ -1,6 +1,7 @@
 package gov.nist.asbestos.testEngine.engine;
 
 import gov.nist.asbestos.client.client.FhirClient;
+import gov.nist.asbestos.client.client.Format;
 import gov.nist.asbestos.simapi.validation.ValE;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.TestReport;
@@ -79,6 +80,8 @@ public class OperationRunner {
 
         Coding typeCoding = op.getType();
         String code = typeCoding.getCode();
+
+        fhirClient.setFormat(op.hasContentType() ? Format.fromContentType(op.getContentType()) : Format.XML);
 
         if ("read".equals(code)) {
             SetupActionRead setupActionRead = new SetupActionRead(fixtureMgr)

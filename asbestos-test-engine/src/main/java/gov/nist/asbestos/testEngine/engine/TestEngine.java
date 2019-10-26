@@ -452,15 +452,71 @@ public class TestEngine  {
                 testCounter++;
                 ValE tVal = new ValE(fVal).setMsg(testName);
                 TestReport.TestReportTestComponent testReportComponent = testReport.addTest();
-                if (testComponent.hasAction()) {
+                boolean testEnabled = true;
+
+                if (testComponent.hasModifierExtension()) {
+                    Extension extension = testComponent.getModifierExtensionFirstRep();
+                    String containedTestScriptId =  "#" + extension.getUrl();
+                    String testLabel = extension.getValue().toString();
+
+                    List<Resource> containedList = testScript.getContained();
+                    Resource contained = null;
+                    for (Resource theContained : containedList) {
+                        if (theContained.getId() != null && theContained.getId().equals(containedTestScriptId)) {
+                            contained = theContained;
+                            break;
+                        }
+                    }
+                    if (contained == null) {
+                        TestReport.TestActionComponent actionReportComponent = testReportComponent.addAction();
+                        Reporter reporter = new Reporter(fVal, actionReportComponent.getOperation(), "", "");
+                        reporter.reportError( "cannot locate contained TestScript " + containedTestScriptId);
+                        return;
+                    }
+
+                    // All Operations must succeed
+                    // An Assert must fail
+                    // ... to enable the test
+
+                    TestScript containedTestScript = (TestScript) contained;
+                    // find test with id of assertLabel
+                    TestScript.TestScriptTestComponent theContainedTest = findTest(containedTestScript, testLabel);
+                    if (theContainedTest == null) {
+                        TestReport.TestActionComponent actionReportComponent = testReportComponent.addAction();
+                        Reporter reporter = new Reporter(fVal, actionReportComponent.getOperation(), "", "");
+                        reporter.reportError( "cannot locate test with label " + testLabel + " in contained TestScript " + containedTestScriptId);
+                        return;
+                    }
+
+                    if (theContainedTest.hasAction()) {
+                        String typePrefix = "contained.action";
+                        for (TestScript.TestActionComponent action : theContainedTest.getAction()) {
+                            TestReport.TestActionComponent actionReportComponent = testReportComponent.addAction();
+                            if (invalidAction(action, actionReportComponent, fVal))
+                                return;
+                            if (action.hasOperation())
+                                doOperation(typePrefix, action.getOperation(), actionReportComponent.getOperation());
+                            if (action.hasAssert()) {
+                                TestReport.SetupActionAssertComponent actionReport = doAssert(typePrefix, action.getAssert());
+                                actionReportComponent.setAssert(actionReport);
+                                if (!"pass".equals(actionReport.getResult().toCode())) {
+                                    testEnabled = false;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+
+
+
+                // real test starts here
+                if (testEnabled && testComponent.hasAction()) {
                     String typePrefix = "test.action";
                     for (TestScript.TestActionComponent action : testComponent.getAction()) {
                         TestReport.TestActionComponent actionReportComponent = testReportComponent.addAction();
-                        if (action.hasOperation() && action.hasAssert()) {
-                            Reporter reporter = new Reporter(fVal, actionReportComponent.getOperation(), "", "");
-                            reporter.reportError( "action has both operation and assertion");
+                        if (invalidAction(action, actionReportComponent, fVal))
                             return;
-                        }
                         if (action.hasOperation())
                             doOperation(typePrefix, action.getOperation(), actionReportComponent.getOperation());
                         if (action.hasAssert()) {
@@ -475,6 +531,23 @@ public class TestEngine  {
 
         }
 
+    }
+
+    private boolean invalidAction(TestScript.TestActionComponent action, TestReport.TestActionComponent actionReportComponent, ValE fVal) {
+        if (action.hasOperation() && action.hasAssert()) {
+            Reporter reporter = new Reporter(fVal, actionReportComponent.getOperation(), "", "");
+            reporter.reportError( "action has both operation and assertion");
+            return true;
+        }
+        return false;
+    }
+
+    private TestScript.TestScriptTestComponent findTest(TestScript testScript, String name) {
+        for (TestScript.TestScriptTestComponent testComponent : testScript.getTest()) {
+            if (name.equals(testComponent.getName()))
+                return testComponent;
+        }
+        return null;
     }
 
     private void doTearDown() {

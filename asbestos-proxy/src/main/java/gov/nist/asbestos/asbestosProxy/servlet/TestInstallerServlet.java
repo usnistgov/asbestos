@@ -28,7 +28,7 @@ public class TestInstallerServlet  extends HttpServlet {
             return;
         }
 
-        File lockFile = new File(externalCache, "FhirTestCollectionsLock");
+        File lockFile = new File(externalCache, "FhirTestCollections.lock");
         if (!lockFile.exists()) {
             log.info("Updating Test Definitions in External Cache");
 
@@ -38,7 +38,7 @@ public class TestInstallerServlet  extends HttpServlet {
             try {
                 lockFile.createNewFile();
             } catch (IOException e) {
-                log.fatal("TestInstallerServlet - Cannot create FhirTestCollectionsLock");
+                log.fatal("TestInstallerServlet - Cannot create FhirTestCollections.lock");
             }
         } else {
             log.info("Not updating Test Definitions - External Cache copy is locked");
