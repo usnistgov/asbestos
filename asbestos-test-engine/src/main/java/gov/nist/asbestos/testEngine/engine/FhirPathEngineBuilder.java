@@ -42,8 +42,12 @@ class FhirPathEngineBuilder {
         if (result instanceof UriType) {
             return ((UriType) result).getValueAsString();
         }
-        if (result instanceof BooleanType)
+        if (result instanceof BooleanType) {
             return ((BooleanType) result).getValueAsString();
+        }
+        if (result instanceof UnsignedIntType) {
+            return ((UnsignedIntType) result).getValueAsString();
+        }
         return null;
     }
 }
