@@ -195,6 +195,12 @@ public class TestEngine  {
     }
 
     private List<String> doReportResult() {
+
+        if (testReport.getStatus() == TestReport.TestReportStatus.ENTEREDINERROR) {
+            // more complicated (TestScript dependency) - trust result
+            return new ArrayList<>();
+        }
+
         List<String> failingComponents = new ArrayList<>();
 
         TestReport.TestReportSetupComponent setup = testReport.getSetup();
@@ -452,7 +458,6 @@ public class TestEngine  {
                 testCounter++;
                 ValE tVal = new ValE(fVal).setMsg(testName);
                 TestReport.TestReportTestComponent testReportComponent = testReport.addTest();
-                boolean testEnabled = true;
 
                 if (testComponent.hasModifierExtension()) {
                     Extension extension = testComponent.getModifierExtensionFirstRep();
@@ -500,8 +505,9 @@ public class TestEngine  {
                                 TestReport.SetupActionAssertComponent actionReport = doAssert(typePrefix, action.getAssert());
                                 actionReportComponent.setAssert(actionReport);
                                 if (!"pass".equals(actionReport.getResult().toCode())) {
-                                    testEnabled = false;
-                                    break;
+                                    testReport.setStatus(TestReport.TestReportStatus.ENTEREDINERROR);
+                                    testReport.setResult(TestReport.TestReportResult.PASS);
+                                    return;
                                 }
                             }
                         }
@@ -509,9 +515,8 @@ public class TestEngine  {
                 }
 
 
-
                 // real test starts here
-                if (testEnabled && testComponent.hasAction()) {
+                if (testComponent.hasAction()) {
                     String typePrefix = "test.action";
                     for (TestScript.TestActionComponent action : testComponent.getAction()) {
                         TestReport.TestActionComponent actionReportComponent = testReportComponent.addAction();

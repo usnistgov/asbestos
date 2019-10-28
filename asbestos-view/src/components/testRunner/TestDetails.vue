@@ -93,6 +93,8 @@
             reportAction(testi, actioni) {
                 if (!this.report)
                     return null
+                if (!this.report.test[testi])
+                    return null
                 return this.report.test[testi].action[actioni]
             },
 

@@ -138,6 +138,7 @@
                         this.$store.dispatch('addTestReport', testName, response.data)
                         this.$router.replace(`/session/${this.sessionId}/channel/${this.channelId}/collection/${this.testCollection}`)
                         this.$store.dispatch('loadTestScriptNames')  // force reload of UI
+                       // this.$store.dispatch('loadTestScript', { testC0llection: this.testC0llection, testId: testName })
                     })
                     .catch(error => {
                         that.error(error)
@@ -183,9 +184,6 @@
                 })
 
             },
-            isCurrent(testId) {
-                return testId === this.$store.state.testRunner.currentTest
-            },
             loadLastMarker() {
                if (this.$store.state.testRunner.lastMarker === null)
                     this.$store.dispatch('loadLastMarker')
@@ -214,11 +212,6 @@
             },
             isClient() {
                 return this.$store.state.testRunner.isClientTest
-            },
-            current() {
-                return this.$store.state.base.testCollectionDetails.find(item => {
-                    return item.name === this.testId
-                })
             },
             selected() {
                 return this.$store.state.testRunner.currentTest
