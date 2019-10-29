@@ -601,7 +601,7 @@ public class TestEngine  {
                 TestReport.SetupActionOperationComponent op = actionResult.getOperation();
                 if (!"pass".equals(op.getResult().toCode()))
                     continue;
-                if (op.getMessage().startsWith("GET")) {
+                if (op.getMessage().startsWith("GET") || op.getMessage().startsWith("CREATE")) {
                     URI uri;
                     try {
                         uri = new URI(op.getDetail());

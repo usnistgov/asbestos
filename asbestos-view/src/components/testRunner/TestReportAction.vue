@@ -49,6 +49,8 @@
         },
         methods: {
             translateNL(string) {
+                if (!string)
+                    return string
                 return string.split('\n')
             },
             toggleEventDisplayed() {
