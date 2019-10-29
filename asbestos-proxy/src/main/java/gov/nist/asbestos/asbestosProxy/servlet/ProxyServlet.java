@@ -3,8 +3,8 @@ package gov.nist.asbestos.asbestosProxy.servlet;
 
 import gov.nist.asbestos.asbestosProxy.channel.*;
 import gov.nist.asbestos.client.Base.EC;
-import gov.nist.asbestos.asbestosProxy.requests.EvalRequest;
 import gov.nist.asbestos.client.events.Event;
+import gov.nist.asbestos.client.events.UIEvent;
 import gov.nist.asbestos.client.log.SimStore;
 import gov.nist.asbestos.client.events.Task;
 import gov.nist.asbestos.asbestosProxy.util.Gzip;
@@ -41,7 +41,7 @@ import java.util.stream.IntStream;
 
 public class ProxyServlet extends HttpServlet {
     private static Logger log = Logger.getLogger(ProxyServlet.class);
-    private File externalCache = null;
+    private static File externalCache = null;
 
     private Map<String, IChannelBuilder> proxyMap = new HashMap<>();
 
@@ -93,14 +93,21 @@ public class ProxyServlet extends HttpServlet {
         String channelId = parts[length-4];
         String testSession = parts[length-5];
 
-        String uri = "http://" +
-                hostport +
-                "/asbestos/log/" +
-                testSession + "/" +
-                channelId + "/" +
-                resource + "/" +
-                event;
-        return new Header("x-proxy-event", uri);
+        UIEvent uiEvent = new UIEvent(new EC(externalCache));
+        uiEvent.setHostPort(hostport);
+        uiEvent.setTestSession(testSession);
+        uiEvent.setChannelId(channelId);
+        uiEvent.setResourceType(resource);
+        uiEvent.setEventName(event);
+
+//        String uri = "http://" +
+//                hostport +
+//                "/asbestos/log/" +
+//                testSession + "/" +
+//                channelId + "/" +
+//                resource + "/" +
+//                event;
+        return new Header("x-proxy-event", uiEvent.getURI().toString());
     }
 
     private static String getHostPort(Headers inHeaders) throws ServletException {

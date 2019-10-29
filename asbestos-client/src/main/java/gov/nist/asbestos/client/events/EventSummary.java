@@ -13,10 +13,11 @@ public class EventSummary {
 
     public EventSummary(File eventFile) {
         try {
-            String responseHeader = UITask.read(eventFile, "task0", "response_header.txt");
+            UITask uiTask = new UITask(eventFile, "task0");
+            String responseHeader = uiTask.getResponseHeader();
             Headers headers = new Headers(responseHeader);
             status = headers.getStatus() < 202;
-            String requestHeader = UITask.read(eventFile, "task0", "request_header.txt");
+            String requestHeader = uiTask.getRequestHeader();
             headers = new Headers(requestHeader);
             verb = headers.getVerb();
         } catch (Exception e) {

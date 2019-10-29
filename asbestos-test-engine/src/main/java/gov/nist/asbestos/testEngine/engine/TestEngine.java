@@ -1,9 +1,11 @@
 package gov.nist.asbestos.testEngine.engine;
 
 import ca.uhn.fhir.parser.IParser;
+import gov.nist.asbestos.client.Base.EC;
 import gov.nist.asbestos.client.Base.ProxyBase;
 import gov.nist.asbestos.client.client.FhirClient;
 import gov.nist.asbestos.client.client.Format;
+import gov.nist.asbestos.client.events.UIEvent;
 import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.client.resolver.ResourceCacheMgr;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
@@ -13,13 +15,12 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.*;
 
+
 import java.io.*;
-import java.net.Proxy;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.*;
 
 /**
@@ -38,6 +39,7 @@ public class TestEngine  {
     private FhirClient fhirClient = null;
     private String testSession = null;
     private File externalCache = null;
+    private String testCollection = null;
 
     public static final String LAST_OP = "_LAST_OP_";
 
@@ -578,7 +580,32 @@ public class TestEngine  {
     }
 
     private void doPostProcessing() {
-
+        if (testCollection == null)
+            return;
+        if (sut == null)
+            return;
+        EC ec = new  EC(externalCache);
+        Properties tcProperties = ec.getTestCollectionProperties(testCollection);
+        if (!tcProperties.getProperty("cache").equals("true"))
+            return;
+        for (TestReport.TestReportTestComponent testComponent : testReport.getTest()) {
+            for (TestReport.TestActionComponent actionResult : testComponent.getAction()) {
+                if (!actionResult.hasOperation())
+                    continue;
+                TestReport.SetupActionOperationComponent op = actionResult.getOperation();
+                if (!"pass".equals(op.getResult().toCode()))
+                    continue;
+                if (op.getMessage().startsWith("GET")) {
+                    URI uri;
+                    try {
+                        uri = new URI(op.getDetail());
+                    } catch (URISyntaxException e) {
+                        throw new Error(e);
+                    }
+                    UIEvent uiEvent = new UIEvent(ec).fromURI(uri);
+                }
+            }
+        }
     }
 
     public static TestScript loadTestScript(File testDefDir) {
@@ -757,5 +784,10 @@ public class TestEngine  {
 
     public void setTestScript(TestScript testScript) {
         this.testScript = testScript;
+    }
+
+    public TestEngine setTestCollection(String testCollection) {
+        this.testCollection = testCollection;
+        return this;
     }
 }

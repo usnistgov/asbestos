@@ -2,7 +2,7 @@ package gov.nist.asbestos.client.Base;
 
 import com.google.gson.Gson;
 import gov.nist.asbestos.client.events.EventSummary;
-import gov.nist.asbestos.client.events.UiEvent;
+import gov.nist.asbestos.client.events.UIEvent;
 import gov.nist.asbestos.client.log.SimStore;
 import gov.nist.asbestos.simapi.simCommon.SimId;
 
@@ -10,7 +10,6 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -148,20 +147,11 @@ public class EC {
     }
 
     public void buildJsonListingOfEvent(HttpServletResponse resp, String testSession, String channelId, String resourceType, String eventName) {
-        File fhir = fhirDir(testSession, channelId);
-        if (resourceType.equals("null")) {
-            resourceType = resourceTypeForEvent(fhir, eventName);
-            if (resourceType == null) {
-                resp.setStatus(resp.SC_NOT_FOUND);
-                return;
-            }
+        UIEvent uiEvent = getEvent(testSession, channelId, resourceType, eventName);
+        if (uiEvent == null) {
+            resp.setStatus(resp.SC_NOT_FOUND);
+            return;
         }
-        File resourceTypeFile = new File(fhir, resourceType);
-        File eventDir = new File(resourceTypeFile, eventName);
-
-        UiEvent uiEvent = new UiEvent(eventDir);
-        uiEvent.eventName = eventName;
-        uiEvent.resourceType = resourceType;
 
         String json = new Gson().toJson(uiEvent);
         resp.setContentType("application/json");
@@ -172,6 +162,23 @@ public class EC {
         }
 
         resp.setStatus(resp.SC_OK);
+    }
+
+    private UIEvent getEvent(String testSession, String channelId, String resourceType, String eventName) {
+        File fhir = fhirDir(testSession, channelId);
+        if (resourceType.equals("null")) {
+            resourceType = resourceTypeForEvent(fhir, eventName);
+            if (resourceType == null) {
+                return null;
+            }
+        }
+        File resourceTypeFile = new File(fhir, resourceType);
+        File eventDir = new File(resourceTypeFile, eventName);
+
+        UIEvent uiEvent = new UIEvent(new EC(externalCache)).fromEventDir(eventDir);
+        uiEvent.setEventName(eventName);
+        uiEvent.setResourceType(resourceType);
+        return uiEvent;
     }
 
     public File fhirDir(String testSession, String channelId) {

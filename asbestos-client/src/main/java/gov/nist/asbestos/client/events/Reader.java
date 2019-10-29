@@ -1,4 +1,4 @@
-package gov.nist.asbestos.asbestosProxy.event;
+package gov.nist.asbestos.client.events;
 
 import java.io.File;
 import java.nio.file.Files;

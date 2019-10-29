@@ -73,6 +73,7 @@ public class RunTestRequest {
                     .setExternalCache(request.externalCache)
                     .setVal(new Val())
                     .setFhirClient(new FhirClient())
+                    .setTestCollection(testCollection)
                     .runTest()
                     .getTestReport();
 
