@@ -70,6 +70,7 @@ public class RunTestRequest {
         try {
             report = new TestEngine(testDir, proxy)
                     .setTestSession(testSession)
+                    .setChannelId(channelId)
                     .setExternalCache(request.externalCache)
                     .setVal(new Val())
                     .setFhirClient(new FhirClient())

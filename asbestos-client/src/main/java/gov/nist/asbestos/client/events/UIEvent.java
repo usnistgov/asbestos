@@ -100,4 +100,8 @@ public class UIEvent {
     public void setChannelId(String channelId) {
         this.channelId = channelId;
     }
+
+    public UITask getClientTask() {
+        return tasks.get(0);
+    }
 }

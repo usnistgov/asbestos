@@ -38,6 +38,7 @@ public class TestEngine  {
     private List<String> errors;
     private FhirClient fhirClient = null;
     private String testSession = null;
+    private String channelId = null;
     private File externalCache = null;
     private String testCollection = null;
 
@@ -73,6 +74,11 @@ public class TestEngine  {
         return this;
     }
 
+    public TestEngine setChannelId(String channelId) {
+        this.channelId = channelId;
+        return this;
+    }
+
     public TestEngine setExternalCache(File externalCache) {
         this.externalCache = externalCache;
         return this;
@@ -89,7 +95,7 @@ public class TestEngine  {
         } catch (Throwable t) {
             reportException(t);
         }
-        returnTestReport();
+        //returnTestReport();
 
         return this;
     }
@@ -111,7 +117,7 @@ public class TestEngine  {
         } catch (Throwable t) {
             reportException(t);
         }
-        returnTestReport();
+        //returnTestReport();
 
         return this;
     }
@@ -603,9 +609,33 @@ public class TestEngine  {
                         throw new Error(e);
                     }
                     UIEvent uiEvent = new UIEvent(ec).fromURI(uri);
+                    if (uiEvent != null) {
+                        // add to cache
+                        File testLogDir = ec.getTestLogDir(channelId, testCollection);
+                        File cacheDir = new File(testLogDir, "cache");
+                        String responseBody = uiEvent.getClientTask().getResponseBody();
+                        BaseResource baseResource = ProxyBase.parse(responseBody, Format.fromContent(responseBody));
+                        if (baseResource instanceof Bundle) {
+                            Bundle bundle = (Bundle) baseResource;
+                            for (Bundle.BundleEntryComponent comp : bundle.getEntry()) {
+                                String fullUrl = comp.getFullUrl();
+                                if (fullUrl != null && !fullUrl.equals(""))
+                                    buildCacheEntry(cacheDir, new Ref(fullUrl), comp.getResource());
+                            }
+                        } else {
+                            buildCacheEntry(cacheDir, new Ref(uri), baseResource);
+                        }
+                    }
                 }
             }
         }
+    }
+
+    private void buildCacheEntry(File cacheDir, Ref ref, BaseResource resource) {
+        String resourceType = ref.getResourceType();
+        File resourceTypeFile = new File(cacheDir, resourceType);
+        resourceTypeFile.mkdirs();
+        ProxyBase.toFile(resource, resourceTypeFile, ref.getId(), Format.JSON);
     }
 
     public static TestScript loadTestScript(File testDefDir) {

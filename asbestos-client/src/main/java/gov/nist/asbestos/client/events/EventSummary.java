@@ -1,6 +1,5 @@
 package gov.nist.asbestos.client.events;
 
-import gov.nist.asbestos.client.events.UITask;
 import gov.nist.asbestos.http.headers.Headers;
 
 import java.io.File;

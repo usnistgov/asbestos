@@ -108,23 +108,19 @@ public class EC {
         return new File(forCollection, testName + ".json");
     }
 
-    public File getTestLogDir(String channelId, String collectionName, String testName) {
+    // channelId is testSession__channel
+    public File getTestLogDir(String channelId, String collectionName) {
         File testLogs = new File(externalCache, "FhirTestLogs");
         File forChannelId = new File(testLogs, channelId);
         File forCollection = new File(forChannelId, collectionName);
-        File forTest = new File(forCollection, testName);
-        forTest.mkdirs();
-        return forTest;
+        forCollection.mkdirs();
+        return forCollection;
     }
 
-    public List<File> getTestSessions() {
-        File channels = new File(externalCache, "FhirChannels");
-        return Dirs.listOfDirectories(channels);
-    }
-
-    public List<File> getTestLogs(String testSession, String collectionName) {
+    // channelId is testSession__channel
+    public List<File> getTestLogs(String channelId, String collectionName) {
         File testLogs = new File(externalCache, "FhirTestLogs");
-        File forTestSession = new File(testLogs, testSession);
+        File forTestSession = new File(testLogs, channelId);
         File forCollection = new File(forTestSession, collectionName);
 
         List<File> testLogList = new ArrayList<>();
