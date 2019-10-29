@@ -139,7 +139,7 @@ public class ProxyServlet extends HttpServlet {
 
         Event event = simStore.newEvent();
         Task clientTask = event.getClientTask();
-        clientTask.putDescription("PDB from client");
+        clientTask.putDescription("POST");
         Headers inHeaders = Common.getRequestHeaders(req, Verb.POST);
         String hostport = inHeaders.getValue("host");
         if (hostport == null || hostport.equals(""))
@@ -164,6 +164,7 @@ public class ProxyServlet extends HttpServlet {
             channel.setReturnFormatType(Format.resultContentType(inHeaders));
 
             byte[] inBody = getRequestBody(req);
+            String inBodyStr = new String(inBody);
 
             HttpPost requestIn = (HttpPost) logClientRequestIn(clientTask, inHeaders, inBody, Verb.POST);
 

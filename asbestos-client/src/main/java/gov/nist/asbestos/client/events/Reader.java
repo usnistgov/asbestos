@@ -23,7 +23,7 @@ public class Reader {
 
         try {
             String content = new String(Files.readAllBytes(file.toPath()));
-            content = content.replaceAll("<", "&lt;");
+           // content = content.replaceAll("<", "&lt;");
             return content;
         } catch (Exception e) {
             ;

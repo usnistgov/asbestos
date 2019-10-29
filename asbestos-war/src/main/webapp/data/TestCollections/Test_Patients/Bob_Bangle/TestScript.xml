@@ -1,24 +1,30 @@
+<!--
+	This TestScript is generic - it will work with any Patient resource 
+	as long as Patient is in Patient/patient.xml and it has a 
+	given and family name that make it unique.
+-->
+
 <TestScript xmlns="http://hl7.org/fhir">
 	<contained>
 		<TestScript>
 			<id value="conditionals"/>
 			<test>
-				<name value="chip_star"/>
+				<name value="hasPatient"/>
 				<action>
 					<operation>
-					<description value="looking for chip star"/>
+					<description value="looking for patient"/>
 						<type>
 							<code value="search"/>
 						</type>
 						<resource value="Patient"></resource>
 						<contentType value="json"></contentType>
-						<params value="?given=Chip&amp;family=Star"></params>
+						<params value="?given=${FirstName}&amp;family=${LastName}"></params>
 						<responseId value="patient1-search"/>
 					</operation>
 				</action>
 				<action>
 					<assert>
-						<description value="chip star not available"/>
+						<description value="needs loading"/>
 						<expression value="Bundle.total"/>
 						<operator value="equals"/>
 						<value value="0"/>
@@ -33,18 +39,28 @@
            This patient comes out of the test definition
         -->
 		<resource>
-			<reference value="Patient/patient1.xml"/>
+			<reference value="Patient/patient.xml"/>
 		</resource>
 	</fixture>
+	<variable>
+		<name value="FirstName"></name>
+		<sourceId value="patient1"></sourceId>
+		<expression value="Patient.name.given"></expression>
+	</variable>
+	<variable>
+		<name value="LastName"></name>
+		<sourceId value="patient1"></sourceId>
+		<expression value="Patient.name.family"></expression>
+	</variable>
 	<test>
 		<description value="Submit Provide Document Bundle to MHD Document Recipient and verify response. The DocumentReference is not Comprehensive Metadata compliant. It is missing the masterIdentifier."/>
 		<modifierExtension url="conditionals">     <!-- the contained TestScript -->
-			<valueString value="chip_star"/>  <!-- the specific test that must "pass" to enable this -->
+			<valueString value="hasPatient"/>  <!-- the specific test that must "pass" to enable this -->
 		</modifierExtension>
 		<action>
 			<operation>
                 <!-- references patient from resourceCache in EC -->
-				<description value="Submit Patient1"/>
+				<description value="submit patient"/>
 				<type>
 					<code value="create"/>
 				</type>

@@ -65,20 +65,6 @@
             toggleMessageDisplay() {
                 this.displayMessage = !this.displayMessage
             },
-            nextSpace(str, idx) {
-                for (let i=idx; i<str.length; i++) {
-                    if (str.charAt(i) === ' ')
-                        return i
-                }
-                return null
-            },
-            breakNear(str, pos) {
-                let here = 0
-                while(here !== null && here < pos) {
-                    here = this.nextSpace(str, here)
-                }
-                return here
-            }
         },
         computed: {
             message() {

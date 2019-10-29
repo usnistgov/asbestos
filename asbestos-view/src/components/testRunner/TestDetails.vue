@@ -79,7 +79,7 @@
                     this.script = this.$store.state.testRunner.testScripts[this.testId]
                 }
             },
-            loadTestReport() {  // loaded by TestList
+            loadTestReport() {
                 console.log('grab test report')
                 this.report = this.$store.state.testRunner.testReports[this.testId]
                 //this.$router.go()
@@ -91,6 +91,7 @@
                 return this.script.test[testi].action[actioni]
             },
             reportAction(testi, actioni) {
+                console.log(`reportAction ${testi}   ${actioni}`)
                 if (!this.report)
                     return null
                 if (!this.report.test[testi])

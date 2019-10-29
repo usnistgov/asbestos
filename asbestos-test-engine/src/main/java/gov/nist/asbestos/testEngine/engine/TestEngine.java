@@ -522,6 +522,7 @@ public class TestEngine  {
                     }
                 }
 
+                testReportComponent = testReport.addTest();
 
                 // real test starts here
                 if (testComponent.hasAction()) {

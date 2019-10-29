@@ -14,8 +14,8 @@
             <active value="true"/>
             <name>
                <use value="official"/>
-               <family value="Star"/>
-               <given value="Chip"/>
+               <family value="Bangle8"/>
+               <given value="Bob"/>
             </name>
             <gender value="male"/>
             <birthDate value="1938-02-23"/>
