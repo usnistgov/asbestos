@@ -186,6 +186,7 @@ public class MhdChannel extends BaseChannel /*implements IBaseChannel*/ {
     @Override
     public void transformRequest(HttpGet requestIn, HttpGet requestOut) {
         Ref ref = new Ref(requestIn.getRequestHeaders().getPathInfo());
+        // TODO: If this is a GET metadata type request, immediately serve the capability statement.
         String resourceType = ref.getResourceType();
         if (resourceType == null)
             throw new Error("Cannot retrieve XDS contents for resource type " + resourceType);
@@ -334,6 +335,7 @@ public class MhdChannel extends BaseChannel /*implements IBaseChannel*/ {
 
     @Override
     public void transformResponse(HttpBase responseIn, HttpBase responseOut, String proxyHostPort) {
+        // TODO: Handle CapabilityStatement
         if (sender != null) {
             // there is a query response to transform
             transformDSResponse(sender, responseOut);
