@@ -7,9 +7,8 @@
 <TestScript xmlns="http://hl7.org/fhir">
 	<contained>
 		<TestScript>
-			<id value="conditionals"/>
+			<id value="patientNeedsLoading"/>
 			<test>
-				<name value="hasPatient"/>
 				<action>
 					<operation>
 					<description value="looking for patient"/>
@@ -53,9 +52,8 @@
 		<expression value="Patient.name.family"></expression>
 	</variable>
 	<test>
-		<description value="Submit Provide Document Bundle to MHD Document Recipient and verify response. The DocumentReference is not Comprehensive Metadata compliant. It is missing the masterIdentifier."/>
-		<modifierExtension url="conditionals">     <!-- the contained TestScript -->
-			<valueString value="hasPatient"/>  <!-- the specific test that must "pass" to enable this -->
+		<modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Conditional">     
+			<valueString value="#patientNeedsLoading"/>  
 		</modifierExtension>
 		<action>
 			<operation>

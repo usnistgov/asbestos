@@ -467,10 +467,16 @@ public class TestEngine  {
                 ValE tVal = new ValE(fVal).setMsg(testName);
                 TestReport.TestReportTestComponent testReportComponent = testReport.addTest();
 
+                // handle condition
                 if (testComponent.hasModifierExtension()) {
                     Extension extension = testComponent.getModifierExtensionFirstRep();
-                    String containedTestScriptId =  "#" + extension.getUrl();
-                    String testLabel = extension.getValue().toString();
+                    if (!extension.hasUrl() || !extension.getUrl().equals("https://github.com/usnistgov/asbestos/wiki/TestScript-Conditional")) {
+                        TestReport.TestActionComponent actionReportComponent = testReportComponent.addAction();
+                        Reporter reporter = new Reporter(fVal, actionReportComponent.getOperation(), "", "");
+                        reporter.reportError( "Do not understand modifierExtension");
+                        return;
+                    }
+                    String containedTestScriptId =  extension.getValue().toString();
 
                     List<Resource> containedList = testScript.getContained();
                     Resource contained = null;
@@ -487,17 +493,13 @@ public class TestEngine  {
                         return;
                     }
 
-                    // All Operations must succeed
-                    // An Assert must fail
-                    // ... to enable the test
 
                     TestScript containedTestScript = (TestScript) contained;
-                    // find test with id of assertLabel
-                    TestScript.TestScriptTestComponent theContainedTest = findTest(containedTestScript, testLabel);
+                    TestScript.TestScriptTestComponent theContainedTest = containedTestScript.getTestFirstRep();
                     if (theContainedTest == null) {
                         TestReport.TestActionComponent actionReportComponent = testReportComponent.addAction();
                         Reporter reporter = new Reporter(fVal, actionReportComponent.getOperation(), "", "");
-                        reporter.reportError( "cannot locate test with label " + testLabel + " in contained TestScript " + containedTestScriptId);
+                        reporter.reportError( "cannot locate test inside contained TestScript " + containedTestScriptId);
                         return;
                     }
 
@@ -524,7 +526,7 @@ public class TestEngine  {
 
                 testReportComponent = testReport.addTest();
 
-                // real test starts here
+                // real test execution starts here
                 if (testComponent.hasAction()) {
                     String typePrefix = "test.action";
                     for (TestScript.TestActionComponent action : testComponent.getAction()) {
@@ -636,7 +638,16 @@ public class TestEngine  {
         String resourceType = ref.getResourceType();
         File resourceTypeFile = new File(cacheDir, resourceType);
         resourceTypeFile.mkdirs();
-        ProxyBase.toFile(resource, resourceTypeFile, ref.getId(), Format.JSON);
+        if (resource instanceof Patient) {
+            Patient patient = (Patient) resource;
+            String given = patient.getNameFirstRep().getGiven().get(0).toString();
+            String family = patient.getNameFirstRep().getFamily();
+            if (given != null &&!given.equals("") && family != null && !family.equals("")) {
+                ProxyBase.toFile(resource, resourceTypeFile, given + "_" + family, Format.JSON);
+            }
+        } else {
+            ProxyBase.toFile(resource, resourceTypeFile, ref.getId(), Format.JSON);
+        }
     }
 
     public static TestScript loadTestScript(File testDefDir) {

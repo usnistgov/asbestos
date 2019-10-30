@@ -69,8 +69,8 @@ public class GetTestDefinitionRequest {
 
             for (  ; index<testComponentCount; ) {
                 TestScript.TestScriptTestComponent test = testComponents.get(index);
-                if (test.hasModifierExtension() && test.getModifierExtension().get(0).hasUrl()) {
-                    TestScript containedTestScript = getContainedTestScript(testScript, test.getModifierExtension().get(0).getUrl());
+                if (test.hasModifierExtension() && test.getModifierExtension().get(0).hasValue()) {
+                    TestScript containedTestScript = getContainedTestScript(testScript, test.getModifierExtension().get(0).getValue().toString());
                     if (containedTestScript != null) {
                         if (containedTestScript.hasTest() && !containedTestScript.getTest().isEmpty()) {
                             TestScript.TestScriptTestComponent containedTestComponent = containedTestScript.getTest().get(0);
@@ -96,7 +96,7 @@ public class GetTestDefinitionRequest {
         for (Resource contained : containeds) {
             if (contained instanceof TestScript) {
                 TestScript containedTestScript = (TestScript) contained;
-                if (contained.hasId() && contained.getId().equals("#" + id)) {
+                if (contained.hasId() && contained.getId().equals(id)) {
                     return containedTestScript;
                 }
             }
