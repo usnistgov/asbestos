@@ -1,0 +1,14 @@
+Utility loader for Patient resources that server tests depend on.
+Each test listed below controls the loading of a single Patient resource.
+Before submitting the Patient to the server, the server is queried and the Patient is only submitted
+if it does not exist in that server.  This query uses the given and family (name) parameters.
+<br />
+<br />
+This framework keeps a cache of all Patients loaded and the server they were loaded on. The
+server used for Patients can be different from the MHD system under test.
+<br />
+<br />
+These Patient resources are not used for client testing (MHD Document Source for example). Test definitions 
+(for servers)
+reference Patients through the cache. If the cache is deleted then this Test Collection can be re-run to reload 
+the cache.

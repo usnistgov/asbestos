@@ -1,7 +1,7 @@
 <template>
     <div>
         <div class="tool-title">
-            <span>Tests for {{ clean(testCollection) }}</span>
+            <span>{{ clean(testCollection) }}</span>
             <span class="divider"></span>
             <img id="reload" class="selectable" @click="reload()" src="../../assets/reload.png"/>
             <span class="divider"></span>
@@ -11,7 +11,7 @@
         <div class="vdivider"></div>
 
         <div class="left">
-                Description: {{  $store.state.testRunner.collectionDescription }}
+            Description: <span v-html="$store.state.testRunner.collectionDescription"></span>
         </div>
 
         <div class="vdivider"></div>
@@ -51,6 +51,10 @@
         <div v-if="$store.state.testRunner.isClientTest" class="second-instruction">
             Number of most recent events to evaluate:
             <input v-model="evalCount" placeholder="5">
+        </div>
+
+        <div class="runallgroup">
+            <button class="runallbutton" @click="doRunAll()">Run All</button>
         </div>
 
         <div v-for="(name, i) in Object.keys(status)"
@@ -133,19 +137,23 @@
                 //console.log(`doEval(${testName})`)
                 this.$store.dispatch('runEval', testName)
             },
-            doRun(testName) {  // server tests
+            doRun: async function(testName) {  // server tests
                 this.$store.commit('setCurrentTest', null)
                 const that = this
-                ENGINE.post(`testrun/${this.sessionId}__${this.channelId}/${this.testCollection}/${testName}`)
+                await ENGINE.post(`testrun/${this.sessionId}__${this.channelId}/${this.testCollection}/${testName}`)
                     .then(response => {
                         this.$store.dispatch('addTestReport', testName, response.data)
                         this.$router.replace(`/session/${this.sessionId}/channel/${this.channelId}/collection/${this.testCollection}`)
                         this.$store.dispatch('loadTestScriptNames')  // force reload of UI
-                       // this.$store.dispatch('loadTestScript', { testC0llection: this.testC0llection, testId: testName })
                     })
                     .catch(error => {
                         that.error(error)
                     })
+            },
+            doRunAll() {
+                Object.keys(this.status).forEach(name => {
+                    this.doRun(name)
+                })
             },
             selectTest(name) {
                 if (this.selected === name)  { // unselect
@@ -306,5 +314,16 @@
     }
     .right {
         text-align: right;
+    }
+    .runallbutton {
+        /*padding-bottom: 5px;*/
+        background-color: cornflowerblue;
+        cursor: pointer;
+        border-radius: 25px;
+        font-weight: bold;
+    }
+    .runallgroup {
+        text-align: right;
+        padding-bottom: 5px;
     }
 </style>
