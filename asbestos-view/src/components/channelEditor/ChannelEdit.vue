@@ -109,7 +109,7 @@
 <script>
     import Vue from 'vue'
     import {store} from "../../store"
-    import {PROXY} from '../../common/http-common'
+    import {PROXY, CHANNEL} from '../../common/http-common'
     import VueFlashMessage from 'vue-flash-message';
     Vue.use(VueFlashMessage);
     require('vue-flash-message/dist/vue-flash-message.min.css')
@@ -218,9 +218,9 @@
                         this.badNameModeReason = `Name may only contain a-z A-Z 0-9 _  and __ not allowed`
                         return
                     }
-                    this.$store.commit('deleteChannel', this.originalChannelId) // original has been renamed
                     this.$store.commit('installChannel', cloneDeep(this.channel))
-                    PROXY.post('channel', this.channel)
+                    this.$store.commit('deleteChannel', this.originalChannelId) // original has been renamed
+                    CHANNEL.post('', this.channel)
                         .then(function () {
                             that.msg('Saved')
                         })
@@ -233,7 +233,7 @@
                     return
                 }
                 this.$store.commit('installChannel', cloneDeep(this.channel))
-                PROXY.post('channel', this.channel)
+                CHANNEL.post('', this.channel)
                     .then(function () {
                         that.msg('Saved')
                     })
