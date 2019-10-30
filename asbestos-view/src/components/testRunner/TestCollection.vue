@@ -7,10 +7,13 @@
             <span class="divider"></span>
         </div>
 
-<!--        <div v-if="$store.state.testRunner.isClientTest" class="right">-->
-<!--            Last Marker: {{ $store.state.testRunner.lastMarker }}-->
-<!--            <span class="selectable" @click="setMarker()">Set</span>-->
-<!--        </div>-->
+        <div class="vdivider"></div>
+        <div class="vdivider"></div>
+
+        <div class="left">
+                Description: {{  $store.state.testRunner.collectionDescription }}
+        </div>
+
         <div class="vdivider"></div>
         <div class="vdivider"></div>
 

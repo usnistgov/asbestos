@@ -10,6 +10,8 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -84,6 +86,20 @@ public class EC {
             return defaultProperties;
         }
         return props;
+    }
+
+    public String getTestCollectionDescription(String collectionName) {
+        File root = getTestCollectionBase(collectionName);
+        if (root == null)
+            throw new Error("Test Collection " + collectionName + " not found");
+        File file = new File(root, "description.txt");
+        if (!file.exists())
+            return null;
+        try {
+            return new String(Files.readAllBytes(file.toPath()));
+        } catch (IOException e) {
+            throw new Error(e);
+        }
     }
 
     File getTestCollectionBase(String collectionName) {

@@ -457,7 +457,8 @@ public class ProxyServlet extends HttpServlet {
     // responseOut is final response to return to client
     private void respond(HttpServletResponse resp, HttpBase responseOut, Headers inHeaders, Task clientTask) {
         try {
-            responseOut.setStatus(200);
+            if (responseOut.getStatus() == 0)
+                responseOut.setStatus(200);
             addEventHeader(responseOut, getHostPort(inHeaders), clientTask);
             logResponse(clientTask, responseOut);
 
@@ -477,6 +478,7 @@ public class ProxyServlet extends HttpServlet {
                 continue;
             resp.setHeader(header.getName(), header.getValue());
         }
+        resp.setStatus(headers.getStatus());
     }
 
     private static void logResponse(Task task, HttpBase requestOut) {

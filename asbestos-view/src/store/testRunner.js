@@ -17,6 +17,7 @@ export const testRunnerStore = {
             currentEvent: null,  // eventId
             currentAssertIndex: null,
             isClientTest: false,  // applies to entire testCollection
+            collectionDescription: null,
             waitingOnClient: null, // testId waiting on or null
 
             testScripts: [], // testId => TestScript
@@ -43,6 +44,9 @@ export const testRunnerStore = {
         setIsClientTest(state, isClient) {
             //console.log(`client is ${isClient}`)
             state.isClientTest = isClient
+        },
+        setCollectionDescription(state, collectionDescription) {
+            state.collectionDescription = collectionDescription
         },
         setTestScriptNames(state, names) {
             console.log(`testScriptNames is ${names}`)
@@ -197,7 +201,8 @@ export const testRunnerStore = {
                     //console.log(`action: testScriptNames are ${theResponse.testNames}`)
                     commit('setTestScriptNames', theResponse.testNames)
                     const isClient = !theResponse.isServerTest
-                    //console.log(`action: isClient - ${isClient}`)
+                    const description = theResponse.description
+                    commit('setCollectionDescription', description)
                     commit('setIsClientTest', isClient)
                     commit('clearTestScripts')
                 })
