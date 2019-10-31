@@ -1,6 +1,6 @@
 <template>
     <div>
-        <log-nav v-if="!noNav" :index="index" :sessionId="sessionId" :channelId="channelId"></log-nav>
+        <log-nav v-if="!noNav" :index="index" :sessionId="sessionId" :channelId="channelId"> </log-nav>
 
         <div v-if="eventSummary" class="event-description">
             {{ eventAsDate(eventSummary.eventName) }} - {{ eventSummary.verb}} {{ eventSummary.resourceType }} - {{ eventSummary.status ? 'Ok' : 'Error' }}
@@ -10,7 +10,7 @@
                 <span v-for="(task, taski) in tasks" :key="taski">
                     <span v-bind:class="{ selected: taski === selectedTask, selectable: taski !== selectedTask }" @click="selectTask(taski)">
                         {{ taskLabel(taski) }}
-                        <span class="divider"></span>
+                        <span class="divider"> </span>
                     </span>
                 </span>
             </div>
@@ -78,20 +78,25 @@
                 this.loadEvent()
                 return this.selectedEvent
             },
-            async loadEvent() {
+            loadEvent() {
+                console.log(`wish to load an event`)
                 if (!this.$store.state.log.eventSummaries)
                     return
                 const index = this.$store.state.log.currentEventIndex
                 const summary = this.$store.state.log.eventSummaries[index]
+                console.log(`index is ${index}`)
+                console.log(`summary is ${summary}`)
                 if (!summary)
                     return
                 // don't reload if it is already the selected event
+                console.log(`selectedEventName is ${this.selectedEventName()}`)
+                console.log(`summary.eventName is ${summary.eventName}`)
                 const selectedEventName = summary.eventName === this.selectedEventName() ? null: summary.eventName
                 if (selectedEventName !== null) {
                     this.selectedEvent = null
                     this.selectedTask = 0
                     console.log(`GET ${this.sessionId}/${this.channelId}/${summary.resourceType}/${summary.eventName}`)
-                    await LOG.get(`${this.sessionId}/${this.channelId}/${summary.resourceType}/${summary.eventName}`)
+                    LOG.get(`${this.sessionId}/${this.channelId}/${summary.resourceType}/${summary.eventName}`)
                         .then(response => {
                             try {
                                 this.selectedEvent = response.data
@@ -158,6 +163,7 @@
                     this.index = this.findEventInStore
                     this.$store.commit('selectEvent', this.eventId)
                     this.$store.commit('setCurrentEventIndex', this.index)
+                    console.log(`summaries loaded`)
                     return response
                 })
 
