@@ -6,7 +6,7 @@
             {{ eventAsDate(eventSummary.eventName) }} - {{ eventSummary.verb}} {{ eventSummary.resourceType }} - {{ eventSummary.status ? 'Ok' : 'Error' }}
         </div>
         <div class="request-response">
-            <div v-if="tasks.length > 0">
+            <div v-if="selectedEvent">
                 <span v-for="(task, taski) in tasks" :key="taski">
                     <span v-bind:class="{ selected: taski === selectedTask, selectable: taski !== selectedTask }" @click="selectTask(taski)">
                         {{ taskLabel(taski) }}
@@ -52,7 +52,7 @@
         data() {
             return {
                 index: 0,
-                selectedEvent: null,  // defined in ProxyLogServlet class Event
+                selectedEvent: null,
                 selectedTask: 0,
                 displayRequest: true,
             }
@@ -79,18 +79,13 @@
                 return this.selectedEvent
             },
             loadEvent() {
-                console.log(`wish to load an event`)
                 if (!this.$store.state.log.eventSummaries)
                     return
                 const index = this.$store.state.log.currentEventIndex
                 const summary = this.$store.state.log.eventSummaries[index]
-                console.log(`index is ${index}`)
-                console.log(`summary is ${summary}`)
                 if (!summary)
                     return
                 // don't reload if it is already the selected event
-                console.log(`selectedEventName is ${this.selectedEventName()}`)
-                console.log(`summary.eventName is ${summary.eventName}`)
                 const selectedEventName = summary.eventName === this.selectedEventName() ? null: summary.eventName
                 if (selectedEventName !== null) {
                     this.selectedEvent = null
@@ -122,6 +117,12 @@
             removeFormatting(msg) {
                   return msg.replace(/&lt;/g, '<')
             },
+            async loadEventSummaries() {
+                await this.$store.dispatch('loadEventSummaries')
+                this.index = this.findEventInStore
+                this.$store.commit('selectEvent', this.eventId)
+                this.$store.commit('setCurrentEventIndex', this.index)
+            },
         },
         computed: {
             findEventInStore() {
@@ -151,30 +152,21 @@
                 if (!this.$store.state.log.eventSummaries)
                     return null
                 const index = this.findEventInStore
-                console.log(`currentEventIndex is ${index}`)
                 return (index > -1)
                     ? this.$store.state.log.eventSummaries[index]
                     : null
             },
         },
         created() {
-            this.$store.dispatch('loadEventSummaries')
-                .then(response => {
-                    this.index = this.findEventInStore
-                    this.$store.commit('selectEvent', this.eventId)
-                    this.$store.commit('setCurrentEventIndex', this.index)
-                    console.log(`summaries loaded`)
-                    return response
-                })
-
+            this.loadEventSummaries()
         },
         watch: {
             '$route': 'updateIndex',
             eventId(newVal) {
                 if (this.noNav) {
                     console.log(`eventId updated`)
-                    this.$store.commit('selectEvent', newVal)
                 }
+                this.$store.commit('selectEvent', newVal)
                 this.loadEvent()
             },
         },
