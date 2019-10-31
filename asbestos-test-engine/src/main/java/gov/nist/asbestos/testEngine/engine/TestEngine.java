@@ -627,8 +627,7 @@ public class TestEngine  {
                     UIEvent uiEvent = new UIEvent(ec).fromURI(uri);
                     if (uiEvent != null) {
                         // add to cache
-                        File testLogDir = ec.getTestLogDir(channelId, testCollection);
-                        File cacheDir = new File(testLogDir, "cache");
+                        File cacheDir = ec.getTestLogCacheDir(channelId, testCollection);
                         String responseBody = uiEvent.getClientTask().getResponseBody();
                         BaseResource baseResource = ProxyBase.parse(responseBody, Format.fromContent(responseBody));
                         if (baseResource instanceof Bundle) {

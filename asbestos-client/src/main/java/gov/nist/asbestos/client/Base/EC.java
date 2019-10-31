@@ -133,6 +133,10 @@ public class EC {
         return forCollection;
     }
 
+    public File getTestLogCacheDir(String channelId, String collectionName) {
+        return new File(getTestLogDir(channelId, collectionName), "../cache");
+    }
+
     // channelId is testSession__channel
     public List<File> getTestLogs(String channelId, String collectionName) {
         File testLogs = new File(externalCache, "FhirTestLogs");
