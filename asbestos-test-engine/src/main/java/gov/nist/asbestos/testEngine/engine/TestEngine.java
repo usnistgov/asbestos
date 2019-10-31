@@ -54,7 +54,10 @@ public class TestEngine  {
         Objects.requireNonNull(sut);
         this.testDef = testDef;
         this.sut = sut;
+        // make test definition dir a temporary resource cache so elements of the TestScript
+        // can be found
         ResourceCacheMgr inTestResources = new ResourceCacheMgr(testDef, new Ref(""));
+      //  ResourceCacheMgr platformCache = new ResourceCacheMgr("", new Ref(""));
         fhirClientForFixtures = new FhirClient().setResourceCacheMgr(inTestResources);
     }
 

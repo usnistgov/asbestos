@@ -89,21 +89,22 @@ public class FileSystemResourceCache implements ResourceCache {
     public List<ResourceWrapper> getAll(Ref base, String type) {
         List<ResourceWrapper> all = new ArrayList<>();
 
-        File dir = new File(cacheDir, type);
-        File[] files = dir.listFiles();
-        if (files != null) {
-            for (File file : files) {
-                String name = file.getName();
-                if (!(name.endsWith(".xml") || name.endsWith(".json")))
-                    continue;
-                ResourceWrapper wrapper = readFile(file);
-                String[] parts = file.getName().split("\\.", 2);
-                String id = parts[0];
-                wrapper.setRef(new Ref(base, type, id, null));
-                all.add(wrapper);
+        for (File cacheDir : cacheDirs) {
+            File dir = new File(cacheDir, type);
+            File[] files = dir.listFiles();
+            if (files != null) {
+                for (File file : files) {
+                    String name = file.getName();
+                    if (!(name.endsWith(".xml") || name.endsWith(".json")))
+                        continue;
+                    ResourceWrapper wrapper = readFile(file);
+                    String[] parts = file.getName().split("\\.", 2);
+                    String id = parts[0];
+                    wrapper.setRef(new Ref(base, type, id, null));
+                    all.add(wrapper);
+                }
             }
         }
-
         return all;
     }
 
@@ -132,7 +133,12 @@ public class FileSystemResourceCache implements ResourceCache {
     private File cacheFile(Ref relativeUrl, String fileType) {
         String type = relativeUrl.getResourceType();
         String id = relativeUrl.getId() + ((fileType != null) ? "." + fileType : "");
-        return new File(new File(cacheDir, type), id);
+        for (File cacheDir : cacheDirs) {
+            File file = new File(new File(cacheDir, type), id);
+            if (file.exists())
+                return file;
+        }
+        return null;
     }
 
     public Ref getBase() {
