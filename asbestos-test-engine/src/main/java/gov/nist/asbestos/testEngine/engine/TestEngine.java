@@ -509,14 +509,26 @@ public class TestEngine  {
                             TestReport.TestActionComponent actionReportComponent = testReportComponent.addAction();
                             if (invalidAction(action, actionReportComponent, fVal))
                                 return;
-                            if (action.hasOperation())
+                            if (action.hasOperation()) {
                                 doOperation(typePrefix, action.getOperation(), actionReportComponent.getOperation());
+                                TestReport.SetupActionOperationComponent opReport = actionReportComponent.getOperation();
+                                if (opReport.getResult() == TestReport.TestReportActionResult.ERROR) {
+                                    testReport.setStatus(TestReport.TestReportStatus.COMPLETED);
+                                    testReport.setResult(TestReport.TestReportResult.FAIL);
+                                    return;
+                                }
+                            }
                             if (action.hasAssert()) {
                                 TestReport.SetupActionAssertComponent actionReport = doAssert(typePrefix, action.getAssert());
                                 actionReportComponent.setAssert(actionReport);
-                                if (!"pass".equals(actionReport.getResult().toCode())) {
+                                if ("fail".equals(actionReport.getResult().toCode())) {
                                     testReport.setStatus(TestReport.TestReportStatus.ENTEREDINERROR);
                                     testReport.setResult(TestReport.TestReportResult.PASS);
+                                    return;
+                                }
+                                if ("error".equals(actionReport.getResult().toCode())) {
+                                    testReport.setStatus(TestReport.TestReportStatus.COMPLETED);
+                                    testReport.setResult(TestReport.TestReportResult.FAIL);
                                     return;
                                 }
                             }
@@ -595,7 +607,8 @@ public class TestEngine  {
             return;
         EC ec = new  EC(externalCache);
         Properties tcProperties = ec.getTestCollectionProperties(testCollection);
-        if (!tcProperties.getProperty("cache").equals("true"))
+        String useCache = tcProperties.getProperty("cache");
+        if (useCache == null || !useCache.equals("true"))
             return;
         for (TestReport.TestReportTestComponent testComponent : testReport.getTest()) {
             for (TestReport.TestActionComponent actionResult : testComponent.getAction()) {
@@ -652,13 +665,7 @@ public class TestEngine  {
 
     public static TestScript loadTestScript(File testDefDir) {
         Objects.requireNonNull(testDefDir);
-        File location = new File(testDefDir, "TestScript.xml");
-        if (!location.exists() || !location.canRead() ) {
-            location = new File(testDefDir, "TestScript.json");
-            if (!location.exists() || !location.canRead() ) {
-                throw new RuntimeException("Cannot load TestScript (.xml or .json) from " + testDefDir);
-            }
-        }
+        File location = findTestScriptFile(testDefDir);
         InputStream is;
         try {
             is = new FileInputStream(location);
@@ -671,6 +678,22 @@ public class TestEngine  {
         TestScript testScript = (TestScript) resource;
         testScript.setName(location.toString());
         return testScript;
+    }
+
+    public static File findTestScriptFile(File testDefDir) {
+        File location = new File(testDefDir, "TestScript.xml");
+        if (location.exists())
+            return location;
+        location = new File(testDefDir, "TestScript.json");
+        if (location.exists())
+            return location;
+        location = new File(testDefDir, "../TestScript.xml");
+        if (location.exists())
+            return location;
+        location = new File(testDefDir, "../TestScript.json");
+        if (location.exists())
+            return location;
+        throw new RuntimeException("Cannot load TestScript (.xml or .json) from " + testDefDir + " or " + testDefDir + "/..");
     }
 
     private boolean isFixtureDefined(String id) {

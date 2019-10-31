@@ -10,6 +10,7 @@ package gov.nist.asbestos.asbestosProxy.requests;
 
 import gov.nist.asbestos.client.Base.ProxyBase;
 import gov.nist.asbestos.client.client.Format;
+import gov.nist.asbestos.testEngine.engine.TestEngine;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.hl7.fhir.r4.model.BaseResource;
@@ -45,11 +46,11 @@ public class GetTestDefinitionRequest {
         }
 
         byte[] bytes;
-        File testFile;
-        testFile = new File(testDef, "TestScript.json");
-        if (!testFile.exists()) {
-            testFile = new File(testDef, "TestScript.xml");
-        }
+        File testFile = TestEngine.findTestScriptFile(testDef);
+//        testFile = new File(testDef, "TestScript.json");
+//        if (!testFile.exists()) {
+//            testFile = new File(testDef, "TestScript.xml");
+//        }
         if (testFile.exists()) {
             try {
                 bytes = FileUtils.readFileToByteArray(testFile);

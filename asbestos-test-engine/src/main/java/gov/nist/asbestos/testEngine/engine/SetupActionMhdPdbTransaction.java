@@ -16,9 +16,10 @@ public class SetupActionMhdPdbTransaction extends SetupActionTransaction {
     }
 
     @Override
-    public void updateResourceToSend(BaseResource baseResource) {
+    public BaseResource updateResourceToSend(BaseResource baseResource) {
+        baseResource = super.updateResourceToSend(baseResource);
         if (! (baseResource instanceof Bundle))
-            return;
+            return baseResource;
         Bundle bundle = (Bundle) baseResource;
         for (Bundle.BundleEntryComponent component : bundle.getEntry()) {
             if (!component.hasResource())
@@ -42,6 +43,7 @@ public class SetupActionMhdPdbTransaction extends SetupActionTransaction {
                 }
             }
         }
+        return baseResource;
     }
 
 }
