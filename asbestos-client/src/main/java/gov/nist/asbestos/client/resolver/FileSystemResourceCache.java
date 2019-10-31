@@ -20,11 +20,11 @@ public class FileSystemResourceCache implements ResourceCache {
     private static final Logger logger = Logger.getLogger(FileSystemResourceCache.class);
     private static FhirContext ctx = FhirContext.forR4();
 
-    private File cacheDir;
+    private List<File> cacheDirs = new ArrayList<>();
     private Ref base;
 
     public FileSystemResourceCache(File cacheDir) {
-        this.cacheDir = cacheDir;
+        this.cacheDirs.add(cacheDir);
         File propFile = new File(cacheDir, "cache.properties");
         if (!propFile.exists())
             throw new RuntimeException(cacheDir + "/cache.properties does not exist");
@@ -50,7 +50,7 @@ public class FileSystemResourceCache implements ResourceCache {
     }
 
     public FileSystemResourceCache(File cacheDir, Ref base) {
-        this.cacheDir = cacheDir;
+        this.cacheDirs.add(cacheDir);
         this.base = base;
     }
 

@@ -17,7 +17,7 @@
 						</type>
 						<resource value="Patient"></resource>
 						<contentType value="json"></contentType>
-						<params value="?given=${FirstName}&amp;family=${LastName}"></params>
+						<params value="?given=${FirstName}&amp;family=${LastName}&amp;birthdate=${birthDate}"></params>
 						<responseId value="patient1-search"/>
 					</operation>
 				</action>
@@ -50,6 +50,11 @@
 		<name value="LastName"></name>
 		<sourceId value="patient1"></sourceId>
 		<expression value="Patient.name.family"></expression>
+	</variable>
+	<variable>
+		<name value="birthDate"></name>
+		<sourceId value="patient1"></sourceId>
+		<expression value="Patient.birthDate"></expression>
 	</variable>
 	<test>
 		<modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Conditional">     
