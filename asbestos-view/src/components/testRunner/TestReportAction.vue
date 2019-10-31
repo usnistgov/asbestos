@@ -1,15 +1,25 @@
 <template>
     <div>
-        <div v-bind:class="{'not-run': isNotRun, pass : isPass, fail: isError}"  @click="toggleMessageDisplay()">
-            <span v-if="this.script.operation" class="name selectable">
-                {{ this.operationType(this.script.operation) }}
-            </span>
-            <span v-else>
-                <span class="name selectable">assert: </span>
-            </span>
-            <span class="selectable">
-                {{ description }}
-            </span>
+        <div v-if="script">
+            <div v-bind:class="{'not-run': isNotRun, pass : isPass, fail: isError}"  @click="toggleMessageDisplay()">
+                <span v-if="this.script.operation" class="name selectable">
+                    {{ this.operationType(this.script.operation) }}
+                </span>
+                <span v-else>
+                    <span class="name selectable">assert: </span>
+                </span>
+                <span class="selectable">
+                    {{ description }}
+                </span>
+            </div>
+        </div>
+        <div v-else>
+            <!--
+                Used to report general errors within the tool
+            -->
+            <div v-if="report[0]">
+                {{ translateNL(report[0].assert.message)}}
+            </div>
         </div>
 
         <div v-if="displayMessage">

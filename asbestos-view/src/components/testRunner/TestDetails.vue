@@ -13,7 +13,21 @@
                     <span class="value">{{ variable.name }}</span>
                 </div>
             </div>
-            <!--   add SETUP here  -->
+            <!--   Setup is used for two things.
+                   1. Actual setup so there is script and report
+                   2. Deep errors and the error is reported in report.setup (with no corresponding script)
+                   -->
+            <div v-if="script.setup && report.setup">
+                <!-- don't need yet -->
+            </div>
+
+            <div v-if="!script.setup && report.setup">
+                <test-report-action
+                        :script="null"
+                        :report="report.setup.action">
+                </test-report-action>
+            </div>
+
 
             <div v-for="(test, testi) in tests"
                  :key="'Test' + testi">
@@ -27,7 +41,7 @@
                      :key="'Test' + testi + 'Action' + actioni">
                     <test-report-action
                             :script="action"
-                            :report="reportAction(testi, actioni)"></test-report-action>
+                            :report="reportAction(testi, actioni)"> </test-report-action>
                 </div>
             </div>
 
