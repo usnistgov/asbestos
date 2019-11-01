@@ -1,32 +1,37 @@
 package gov.nist.asbestos.asbestosProxy.servlet;
 
 
-import gov.nist.asbestos.asbestosProxy.channel.*;
-import gov.nist.asbestos.client.Base.EC;
-import gov.nist.asbestos.asbestosProxy.requests.EvalRequest;
-import gov.nist.asbestos.client.events.Event;
-import gov.nist.asbestos.client.log.SimStore;
-import gov.nist.asbestos.client.events.Task;
+import gov.nist.asbestos.asbestosProxy.channel.BaseChannel;
+import gov.nist.asbestos.asbestosProxy.channel.IBaseChannel;
+import gov.nist.asbestos.asbestosProxy.channel.IChannelBuilder;
+import gov.nist.asbestos.asbestosProxy.channel.MhdChannelBuilder;
+import gov.nist.asbestos.asbestosProxy.channel.PassthroughChannelBuilder;
+import gov.nist.asbestos.asbestosProxy.channels.mhd.capabilitystatement.CapabilityStatement;
 import gov.nist.asbestos.asbestosProxy.util.Gzip;
 import gov.nist.asbestos.client.Base.ProxyBase;
 import gov.nist.asbestos.client.client.Format;
+import gov.nist.asbestos.client.events.Event;
+import gov.nist.asbestos.client.events.Task;
+import gov.nist.asbestos.client.log.SimStore;
 import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.http.headers.Header;
 import gov.nist.asbestos.http.headers.Headers;
-import gov.nist.asbestos.http.operations.*;
+import gov.nist.asbestos.http.operations.HttpBase;
+import gov.nist.asbestos.http.operations.HttpDelete;
+import gov.nist.asbestos.http.operations.HttpGet;
+import gov.nist.asbestos.http.operations.HttpPost;
+import gov.nist.asbestos.http.operations.Verb;
 import gov.nist.asbestos.http.support.Common;
 import gov.nist.asbestos.sharedObjects.ChannelConfig;
 import gov.nist.asbestos.sharedObjects.ChannelConfigFactory;
 import gov.nist.asbestos.simapi.simCommon.SimId;
 import gov.nist.asbestos.simapi.tk.installation.Installation;
-import gov.nist.asbestos.testEngine.engine.TestEngine;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.log4j.Logger;
 import org.hl7.fhir.r4.model.BaseResource;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.OperationOutcome;
-import org.hl7.fhir.r4.model.TestReport;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -36,7 +41,14 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
-import java.util.*;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.regex.Pattern;
 import java.util.stream.IntStream;
 
 public class ProxyServlet extends HttpServlet {
@@ -85,7 +97,7 @@ public class ProxyServlet extends HttpServlet {
         if (hostport == null) return null;
         if (task == null) return null;
         File eventDir = task.getEvent().getEventDir();
-        String[] parts = eventDir.toString().split("/");
+        String[] parts = eventDir.toString().split(Pattern.quote(File.separator));
         int length = parts.length;
         if (length < 6) return null;
         String event = parts[length-1];
@@ -356,8 +368,29 @@ public class ProxyServlet extends HttpServlet {
 
             log.info("=> " + simStore.getEndpoint() + " " + clientTask.getRequestHeader().getAccept());
 
-            Task backSideTask = clientTask.newTask();
+            // For MHD channels only:
+            // begin handle Capability Statement request i.e. http://proxyBase/metadata
+            if ("mhd".equals(channelType)) {
+                Optional<URI> proxyBaseURI = getProxyBase(requestIn);
+                if (proxyBaseURI.isPresent()) {
+                    if (CapabilityStatement.isCapabilityStatementRequest(proxyBaseURI.get(), requestIn.getRequestHeaders().getPathInfo())) {
+                        try {
+                            BaseResource baseResource = CapabilityStatement.getCapabilityStatement(getClass());
+                            respond(resp, baseResource, inHeaders, clientTask);
+                        } catch (Exception ex) {
+                            // This did not work in IntelliJ Jetty runner:
+                             // resp.sendError(500, ex.toString());.
+                            // This worked in Tomcat but not Jetty. Works with the following accept-headers: fhir+xml and fhir+json.
+                            resp.setStatus(500);
+                            respondWithError(req, resp, ex.toString(), inHeaders, clientTask);
+                        }
+                        return; // EXIT
+                    }
+                }
+            }
+            // end
 
+            Task backSideTask = clientTask.newTask();
 
             URI outURI = transformRequestUri(requestIn, channel);
             // transform input request for backend service
@@ -397,6 +430,21 @@ public class ProxyServlet extends HttpServlet {
             respondWithError(req, resp, t, inHeaders, clientTask);
             resp.setStatus(resp.SC_OK);
         }
+    }
+
+    private Optional<URI> getProxyBase(HttpBase requestIn) throws URISyntaxException {
+        // '/proxy' is where the ProxyServlet is mapped to in the web.xml
+        // http://localhost:8081/asbestos/proxy/default__mhdchannel/metadata
+        // proxy base = all segments up to the first occurence of 'proxy' + testsession + '__" + channelId
+        URI proxyBase = null;
+        List<String> pathSegments = Arrays.asList(requestIn.getRequestHeaders().getPathInfo().getPath().split("/"));
+        int proxyIndex = pathSegments.indexOf("proxy");
+        int channelSegmentIndex = proxyIndex + 1;
+        if (proxyIndex > -1 && (pathSegments.size() >= channelSegmentIndex)) {
+           List<String> proxyBaseSegments = pathSegments.subList(0, channelSegmentIndex+1/* +1 because To is exclusive of the provided index number */);
+           proxyBase = new URI(String.join("/", proxyBaseSegments));
+        }
+        return Optional.ofNullable(proxyBase);
     }
 
     private Bundle wrapInBundle(OperationOutcome oo) {
@@ -454,8 +502,9 @@ public class ProxyServlet extends HttpServlet {
             logResponse(clientTask, responseOut);
 
             transferHeaders(responseOut.getResponseHeaders(), resp);
-            if (responseOut.getResponse() != null && responseOut.getResponse().length != 0)
+            if (responseOut.getResponse() != null && responseOut.getResponse().length != 0) {
                 resp.getOutputStream().write(responseOut.getResponse());
+            }
         } catch (Exception e) {
             log.error(ExceptionUtils.getStackTrace(e));
         }

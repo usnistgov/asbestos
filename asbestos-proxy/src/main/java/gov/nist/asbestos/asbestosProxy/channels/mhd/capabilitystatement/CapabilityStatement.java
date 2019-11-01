@@ -1,13 +1,26 @@
 package gov.nist.asbestos.asbestosProxy.channels.mhd.capabilitystatement;
 
+import gov.nist.asbestos.client.Base.ProxyBase;
 import org.apache.log4j.Logger;
+import org.hl7.fhir.r4.model.BaseResource;
 
+import java.io.File;
 import java.net.URI;
+import java.nio.file.Paths;
+import java.util.Objects;
 
 public class CapabilityStatement {
     private static Logger logger = Logger.getLogger(CapabilityStatement.class);
 
+    /**
+     *
+     * @param baseUri Only used for counting path segment parts purposes. Does not look at the actual segment values.
+     * @param requestUri The actual GET Request header path.
+     * @return
+     */
     public static boolean isCapabilityStatementRequest(URI baseUri, URI requestUri) {
+        Objects.requireNonNull(baseUri);
+        Objects.requireNonNull(requestUri);
         try {
             // Ignoring the query string, exclusively check for the only segment right after the base path.
             // Should match: base-path/segment
@@ -15,7 +28,7 @@ public class CapabilityStatement {
             String[] basePath = baseUri.getPath().split("/");
             if (basePath.length > 0) {
                 String[] requestPath = requestUri.getPath().split("/");
-                if (requestPath.length == basePath.length + 1) {
+                if (requestPath.length == basePath.length + 1 /* 1=the last segment that we are interested in */) {
                     if ("metadata".equals(requestPath[basePath.length])) {
                         return true;
                     }
@@ -27,5 +40,16 @@ public class CapabilityStatement {
         return false;
     }
 
+    public static BaseResource getCapabilityStatement(Class clazz) throws Exception {
+        Objects.requireNonNull(clazz);
+        File capabilityStatementFile = Paths.get(clazz.getResource("/").toURI()).resolve("capabilitystatement/capabilitystatement-fhirToolkitDocRecipientDocResponder.xml").toFile();
+
+        if (capabilityStatementFile.exists()) {
+            // Comments in XML are also parsed as part of the BaseResource. As noticed in the JSON Format, XML begin/end comments are not necessarily meaningful when it gets parsed
+            BaseResource baseResource = ProxyBase.parse(capabilityStatementFile);
+           return baseResource;
+        }
+        throw new RuntimeException(String.format("Error: File '%s' was not found.", capabilityStatementFile.toString()));
+    }
 
 }
