@@ -1,0 +1,24 @@
+If the FHIR Client was used to perform a search operation against a channel that has no metadata endpoint, the following errors are observed and the search operation is never executed.
+
+[INFO] Running gov.nist.asbestos.proxyWar.CapabilityStatementIT
+[ERROR] Tests run: 1, Failures: 0, Errors: 1, Skipped: 0, Time elapsed: 2.02 s <<< FAILURE! - in gov.nist.asbestos.proxyWar.CapabilityStatementIT
+[ERROR] searchBogusPatient  Time elapsed: 1.313 s  <<< ERROR!
+ca.uhn.fhir.rest.client.exceptions.FhirClientConnectionException: Failed to retrieve the server metadata statement during client initialization. URL used was http://localhost:8877/asbestos/proxy/default__mhdtest/metadata
+        at gov.nist.asbestos.proxyWar.CapabilityStatementIT.searchBogusPatient(CapabilityStatementIT.java:92)
+Caused by: ca.uhn.fhir.rest.client.exceptions.FhirClientConnectionException: Failed to parse response from server when performing GET to URL http://localhost:8877/asbestos/proxy/default__mhdtest/metadata - ca.uhn.fhir.parser.DataFormatException: DataFormatException at [[row,col {unknown-source}]: [1,1]]: Incorrect resource type found, expected "Capabili
+tyStatement" but found "OperationOutcome"
+        at gov.nist.asbestos.proxyWar.CapabilityStatementIT.searchBogusPatient(CapabilityStatementIT.java:92)
+Caused by: ca.uhn.fhir.parser.DataFormatException: DataFormatException at [[row,col {unknown-source}]: [1,1]]: Incorrect resource type found, expected "CapabilityStatement" but found "OperationOutcome"
+        at gov.nist.asbestos.proxyWar.CapabilityStatementIT.searchBogusPatient(CapabilityStatementIT.java:92)
+Caused by: ca.uhn.fhir.parser.DataFormatException: Incorrect resource type found, expected "CapabilityStatement" but found "OperationOutcome"
+        at gov.nist.asbestos.proxyWar.CapabilityStatementIT.searchBogusPatient(CapabilityStatementIT.java:92)
+
+
+
+--
+Disabling the metadata request:
+
+https://hapifhir.io/doc_rest_client_http_config.html
+
+// Disable server validation (don't pull the server's metadata first)
+ctx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
