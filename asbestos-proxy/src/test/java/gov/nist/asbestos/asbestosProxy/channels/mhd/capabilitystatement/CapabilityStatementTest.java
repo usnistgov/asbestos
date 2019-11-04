@@ -32,6 +32,6 @@ class CapabilityStatementTest {
         BaseResource baseResource = CapabilityStatement.getCapabilityStatement(getClass());
         assert baseResource != null;
 
-        // System.out.println(ProxyBase.encode(baseResource, Format.JSON));
+        // transform to json and back to xml as a test? (ProxyBase.encode(baseResource, Format.JSON));
     }
 }

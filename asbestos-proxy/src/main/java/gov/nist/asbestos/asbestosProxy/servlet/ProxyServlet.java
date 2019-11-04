@@ -378,9 +378,9 @@ public class ProxyServlet extends HttpServlet {
                             BaseResource baseResource = CapabilityStatement.getCapabilityStatement(getClass());
                             respond(resp, baseResource, inHeaders, clientTask);
                         } catch (Exception ex) {
-                            // This did not work in IntelliJ Jetty runner:
+                            // This did not work in IntelliJ Jetty runner without any Jetty XML config:
                              // resp.sendError(500, ex.toString());.
-                            // This worked in Tomcat but not Jetty. Works with the following accept-headers: fhir+xml and fhir+json.
+                            // This worked in Tomcat but not Jetty without any Jetty XML config. Works with the following accept-headers: fhir+xml and fhir+json.
                             resp.setStatus(500);
                             respondWithError(req, resp, ex.toString(), inHeaders, clientTask);
                         }

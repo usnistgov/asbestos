@@ -45,6 +45,8 @@ public class CapabilityStatement {
         File capabilityStatementFile = Paths.get(clazz.getResource("/").toURI()).resolve("capabilitystatement/capabilitystatement-fhirToolkitDocRecipientDocResponder.xml").toFile();
 
         if (capabilityStatementFile.exists()) {
+            // TODO: replace any ${} parameters in the File stream.
+
             // Comments in XML are also parsed as part of the BaseResource. As noticed in the JSON Format, XML begin/end comments are not necessarily meaningful when it gets parsed
             BaseResource baseResource = ProxyBase.parse(capabilityStatementFile);
            return baseResource;
