@@ -63,7 +63,7 @@ public class VariableMgr {
         if (!reference.contains(("${")))
             return reference;
         int from = reference.indexOf("${");
-        int to = reference.indexOf("}");
+        int to = reference.indexOf("}", from);
         if (to == -1) {
             reporter.reportError("reference " + reference + " has no closing }");
             throw new Error("reference " + reference + " has no closing }");

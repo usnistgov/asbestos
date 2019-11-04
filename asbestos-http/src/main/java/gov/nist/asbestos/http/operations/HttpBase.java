@@ -228,4 +228,8 @@ abstract public class HttpBase {
     public void setOperationOutcome(OperationOutcome operationOutcome) {
         this.operationOutcome = operationOutcome;
     }
+
+    public String getContentLocation() {
+        return getResponseHeaders().getHeaderValue("Content-Location");
+    }
 }

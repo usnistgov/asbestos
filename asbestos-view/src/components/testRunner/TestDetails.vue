@@ -31,17 +31,17 @@
 
             <div v-for="(test, testi) in tests"
                  :key="'Test' + testi">
-<!--                <span class="name" >Test: </span>-->
-<!--                <span class="value">{{ test.name }}</span>-->
-                <template v-if="test.description" class="test-part">
-                    {{ test.description }}
-                </template>
+                <div v-if="report.test && report.test.length > testi">
+                    <template v-if="test.description" class="test-part">
+                        {{ test.description }}
+                    </template>
 
-                <div v-for="(action, actioni) in actions(testi)" class="test-part"
-                     :key="'Test' + testi + 'Action' + actioni">
-                    <test-report-action
-                            :script="action"
-                            :report="reportAction(testi, actioni)"> </test-report-action>
+                    <div v-for="(action, actioni) in actions(testi)" class="test-part"
+                         :key="'Test' + testi + 'Action' + actioni">
+                        <test-report-action
+                                :script="action"
+                                :report="reportAction(testi, actioni)"> </test-report-action>
+                    </div>
                 </div>
             </div>
 

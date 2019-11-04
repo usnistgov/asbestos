@@ -61,7 +61,7 @@
             translateNL(string) {
                 if (!string)
                     return string
-                return string.split('\n')
+                return string.replace(/\t/g, "  ").split('\n')
             },
             toggleEventDisplayed() {
                 this.eventDisplayed = !this.eventDisplayed

@@ -1,5 +1,6 @@
 package gov.nist.asbestos.testEngine.engine;
 
+import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.simapi.validation.ValE;
 import org.hl7.fhir.r4.model.*;
 
@@ -14,10 +15,16 @@ public class AssertionRunner {
     private FixtureMgr fixtureMgr;
     private TestReport.SetupActionAssertComponent assertReport;
     private TestReport testReport = null;
+    private VariableMgr variableMgr = null;
 
     AssertionRunner(FixtureMgr fixtureMgr) {
         Objects.requireNonNull(fixtureMgr);
         this.fixtureMgr = fixtureMgr;
+    }
+
+    public AssertionRunner setVariableMgr(VariableMgr variableMgr) {
+        this.variableMgr = variableMgr;
+        return this;
     }
 
     FixtureComponent sourceOverride = null;
@@ -78,6 +85,7 @@ public class AssertionRunner {
 
     // success?
     boolean run2(TestScript.SetupActionAssertComponent as) {
+        Objects.requireNonNull(variableMgr);
         //this.assertReport = assertReport;
 
         assertReport.setResult(TestReport.TestReportActionResult.PASS);  // may be overwritten
@@ -235,8 +243,22 @@ public class AssertionRunner {
                 Reporter.reportError(val, assertReport, type, label,"Fixture referenced " + sourceFixture.getId()  + " has no resource");
                 return false;
             }
-            String found = FhirPathEngineBuilder.evalForString(sourceResource, as.getExpression());
-            String expected = as.getValue();
+            String found = FhirPathEngineBuilder.evalForString(sourceResource, variableMgr.updateReference(as.getExpression()));
+
+
+            Ref foundRef = new Ref(found);
+            if (foundRef.getBase().toString().equals("")) {
+                String contentLocation = sourceFixture.getHttpBase().getContentLocation();
+                if (contentLocation != null && !contentLocation.equals("")) {
+                    Ref locationRef = new Ref(contentLocation);
+                    foundRef = foundRef.rebase(locationRef);
+                    found = foundRef.toString();
+                }
+            }
+
+
+
+            String expected = variableMgr.updateReference(as.getValue());
             if (!compare(val, assertReport, found, expected, operator, warningOnly, type, label))
                 return false;
             Reporter.reportPass(val, assertReport, type, label, "expression comparison completed");

@@ -446,6 +446,7 @@ public class TestEngine  {
             AssertionRunner runner = new AssertionRunner(fixtureMgr)
                     .setVal(new ValE(val).setMsg(typePrefix))
                     .setTypePrefix(typePrefix)
+                    .setVariableMgr(new VariableMgr(testScript, fixtureMgr).setOpReport(testReport.getSetup().addAction().getOperation()))
                     .setTestReport(testReport)
                     .setTestScript(testScript);
             report = runner.run(operation);
@@ -630,18 +631,18 @@ public class TestEngine  {
                     UIEvent uiEvent = new UIEvent(ec).fromURI(uri);
                     if (uiEvent != null) {
                         // add to cache
-                        File cacheDir = ec.getTestLogCacheDir(channelId, testCollection);
+                        File cacheDir = ec.getTestLogCacheDir(channelId);
                         String responseBody = uiEvent.getClientTask().getResponseBody();
                         BaseResource baseResource = ProxyBase.parse(responseBody, Format.fromContent(responseBody));
                         if (baseResource instanceof Bundle) {
                             Bundle bundle = (Bundle) baseResource;
                             for (Bundle.BundleEntryComponent comp : bundle.getEntry()) {
-                                String fullUrl = comp.getFullUrl();
-                                if (fullUrl != null && !fullUrl.equals(""))
-                                    buildCacheEntry(cacheDir, new Ref(fullUrl), comp.getResource());
+                                if (comp.getResource() instanceof Patient) {
+                                    String fullUrl = comp.getFullUrl();
+                                    if (fullUrl != null && !fullUrl.equals("") && bundle.getTotal() == 1)
+                                        buildCacheEntry(cacheDir, bundle, (Patient) comp.getResource());
+                                }
                             }
-                        } else {
-                            buildCacheEntry(cacheDir, new Ref(uri), baseResource);
                         }
                     }
                 }
@@ -649,20 +650,20 @@ public class TestEngine  {
         }
     }
 
-    private void buildCacheEntry(File cacheDir, Ref ref, BaseResource resource) {
-        String resourceType = ref.getResourceType();
-        File resourceTypeFile = new File(cacheDir, resourceType);
+    private void buildCacheEntry(File cacheDir, Bundle bundle, Patient patient) {
+        File resourceTypeFile = new File(cacheDir, "Patient");
         resourceTypeFile.mkdirs();
-        if (resource instanceof Patient) {
-            Patient patient = (Patient) resource;
-            String given = patient.getNameFirstRep().getGiven().get(0).toString();
-            String family = patient.getNameFirstRep().getFamily();
-            if (given != null &&!given.equals("") && family != null && !family.equals("")) {
-                ProxyBase.toFile(resource, resourceTypeFile, given + "_" + family, Format.JSON);
-            }
-        } else {
-            ProxyBase.toFile(resource, resourceTypeFile, ref.getId(), Format.JSON);
+
+        String given = patient.getNameFirstRep().getGiven().get(0).toString();
+        String family = patient.getNameFirstRep().getFamily();
+        if (given != null &&!given.equals("") && family != null && !family.equals("")) {
+            ProxyBase.toFile(bundle, resourceTypeFile, given + "_" + family, Format.JSON);
         }
+    }
+
+    public TestEngine addCache(File cacheDir) {
+        fhirClientForFixtures.getResourceCacheMgr().addCache(cacheDir);
+        return this;
     }
 
     public static TestScript loadTestScript(File testDefDir) {

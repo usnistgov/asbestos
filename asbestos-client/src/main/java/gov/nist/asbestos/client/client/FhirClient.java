@@ -282,6 +282,10 @@ public class FhirClient {
         return this;
     }
 
+    public ResourceCacheMgr getResourceCacheMgr() {
+        return resourceCacheMgr;
+    }
+
     public HttpBase getHttpBase() {
         return httpBase;
     }

@@ -21,7 +21,7 @@ public class FileSystemResourceCache implements ResourceCache {
     private static FhirContext ctx = FhirContext.forR4();
 
     private List<File> cacheDirs = new ArrayList<>();
-    private Ref base;
+    private Ref base = new Ref("");
 
     public FileSystemResourceCache(File cacheDir) {
         this.cacheDirs.add(cacheDir);
@@ -49,23 +49,33 @@ public class FileSystemResourceCache implements ResourceCache {
         logger.info("New Resource cache: " + base + " --> " + cacheDir);
     }
 
-    public FileSystemResourceCache(File cacheDir, Ref base) {
+//    public FileSystemResourceCache(File cacheDir, Ref base) {
+//        this.cacheDirs.add(cacheDir);
+//        this.base = base;
+//    }
+
+    public FileSystemResourceCache() {
+
+    }
+
+    public void addCache(File cacheDir) {
         this.cacheDirs.add(cacheDir);
-        this.base = base;
     }
 
     public ResourceWrapper readResource(Ref url) {
         File file = cacheFile(url, "xml");
-        String id = file.getName();
-        id = id.substring(0, id.indexOf(".xml"));
-        if (file.exists()) {
-            ResourceWrapper wrapper = new ResourceWrapper(ctx.newXmlParser().parseResource(fileToString(file)));
-            wrapper.setRef(url);
-            wrapper.getResource().setId(id);
-            return wrapper;
+        if (file != null) {
+            String id = file.getName();
+            id = id.substring(0, id.indexOf(".xml"));
+            if (file.exists()) {
+                ResourceWrapper wrapper = new ResourceWrapper(ctx.newXmlParser().parseResource(fileToString(file)));
+                wrapper.setRef(url);
+                wrapper.getResource().setId(id);
+                return wrapper;
+            }
         }
         file = cacheFile(url, "json");
-        id = file.getName();
+        String id = file.getName();
         id = id.substring(0, id.indexOf(".json"));
         if (file.exists()) {
             ResourceWrapper wrapper = new ResourceWrapper(ctx.newJsonParser().parseResource(fileToString(file)));

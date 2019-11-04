@@ -36,7 +36,9 @@ public class ResourceCacheMgr {
         }
 
         CacheBundle(File dir, Ref baseUrl) {
-            file = new FileSystemResourceCache(dir, baseUrl);
+//            file = new FileSystemResourceCache(dir, baseUrl);
+            file = new FileSystemResourceCache();
+            file.addCache(dir);
             mem = new MemoryResourceCache();
         }
 
@@ -103,6 +105,10 @@ public class ResourceCacheMgr {
         caches.put(cacheBundle.getBase(), cacheBundle);
     }
 
+    public void addCache(File dir) {
+        caches.get(new Ref("")).file.addCache(dir);
+    }
+
     public List<Ref> getCachedServers() {
         return new ArrayList<>(caches.keySet());
     }
@@ -115,7 +121,8 @@ public class ResourceCacheMgr {
             for (File dir : dirs) {
                 if (dir.isDirectory() && new File(dir, "cache.properties").exists()) {
                     CacheBundle cacheBundle = new CacheBundle(dir);
-                    caches.put(cacheBundle.getBase(), cacheBundle);
+                    Ref base = cacheBundle.getBase();
+                    caches.put(base, cacheBundle);
                 }
             }
         }

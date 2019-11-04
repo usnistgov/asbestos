@@ -128,13 +128,13 @@ public class EC {
     public File getTestLogDir(String channelId, String collectionName) {
         File testLogs = new File(externalCache, "FhirTestLogs");
         File forChannelId = new File(testLogs, channelId);
-        File forCollection = new File(forChannelId, collectionName);
+        File forCollection = (collectionName == null) ? forChannelId : new File(forChannelId, collectionName);
         forCollection.mkdirs();
         return forCollection;
     }
 
-    public File getTestLogCacheDir(String channelId, String collectionName) {
-        return new File(getTestLogDir(channelId, collectionName), "../cache");
+    public File getTestLogCacheDir(String channelId) {
+        return new File(getTestLogDir(channelId, null), "cache");
     }
 
     // channelId is testSession__channel
