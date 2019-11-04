@@ -9,6 +9,13 @@
             <li><a href="https://github.com/usnistgov/asbestos/releases" target="_blank">Downloads</a></li>
         </ul>
 
+        <h2>Value Sets</h2>
+        <b>Assert Response Code Types</b>
+        <p>These codes are used in the test descriptions representing HTTP response codes</p>
+        <ul>
+            <li><a href="http://hl7.org/fhir/valueset-assert-response-code-types.html#expansion" target="_blank">Codes</a></li>
+        </ul>
+
         <h2>NIST Disclaimer</h2>
         This software was developed by employees of the National Institute of
         Standards and Technology (NIST), an agency of the Federal Government and
