@@ -35,11 +35,12 @@ public class Returns {
         }
     }
 
-    static void returnObject(HttpServletResponse resp, Object o) {
+    static String returnObject(HttpServletResponse resp, Object o) {
         String json = new Gson().toJson(o);
         resp.setContentType("application/json");
         try {
             resp.getOutputStream().print(json);
+            return json;
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

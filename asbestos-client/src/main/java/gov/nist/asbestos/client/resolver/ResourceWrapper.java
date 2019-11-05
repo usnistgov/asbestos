@@ -200,6 +200,8 @@ public class ResourceWrapper {
                 return null;
             String contentType = httpBase.getResponseContentType();
             Format format = Format.fromContentType(contentType);
+            if (format == null)
+                return null;
             return ProxyBase.parse(responseBytes, format);
         }
         return null;

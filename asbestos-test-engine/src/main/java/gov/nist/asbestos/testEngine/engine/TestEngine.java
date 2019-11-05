@@ -11,10 +11,7 @@ import gov.nist.asbestos.simapi.validation.Val;
 import gov.nist.asbestos.simapi.validation.ValE;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.BaseResource;
-import org.hl7.fhir.r4.model.Reference;
-import org.hl7.fhir.r4.model.TestReport;
-import org.hl7.fhir.r4.model.TestScript;
+import org.hl7.fhir.r4.model.*;
 
 import java.io.*;
 import java.net.Proxy;
@@ -64,6 +61,11 @@ public class TestEngine  {
         this.testDef = testDef;
     }
 
+    public TestEngine(File testDef, TestScript testScript) {
+        this.testDef = testDef;
+        this.testScript = testScript;
+    }
+
     public TestEngine setTestSession(String testSession) {
         this.testSession = testSession;
         return this;
@@ -75,48 +77,66 @@ public class TestEngine  {
     }
 
     public TestEngine runTest() {
-        return runTest(null);
+        Objects.requireNonNull(val);
+        Objects.requireNonNull(testSession);
+        Objects.requireNonNull(externalCache);
+        engineVal = new ValE(val);
+        engineVal.setMsg("TestEngine");
+        try {
+            doWorkflow();
+        } catch (Throwable t) {
+            reportException(t);
+        }
+        returnTestReport();
+
+        return this;
     }
 
     // if inputResource == null then this is a test
     // if null then this is an evaluation
-    public TestEngine runTest(BaseResource inputResource) {
+    public TestEngine runEval(ResourceWrapper requestResource, ResourceWrapper responseResource) {
         Objects.requireNonNull(val);
+        Objects.requireNonNull(testSession);
+        Objects.requireNonNull(externalCache);
         engineVal = new ValE(val);
         engineVal.setMsg("TestEngine");
         try {
-            if (inputResource == null)
-                doWorkflow();
-            else {
-                fixtureMgr.put("request", new FixtureComponent(inputResource));
-                initWorkflow();
-                doTest(); // should only be asserts
-            }
+            fixtureMgr.put("request", new FixtureComponent(requestResource));
+            fixtureMgr.put("response", new FixtureComponent(responseResource));
+            initWorkflow();
+            doTest(); // should only be asserts
+            errorOut();
         } catch (Throwable t) {
-            String trace = ExceptionUtils.getStackTrace(t);
-            TestReport.TestReportSetupComponent setup = testReport.getSetup();
-            TestReport.SetupActionComponent comp = setup.addAction();
-            TestReport.SetupActionAssertComponent asComp = new TestReport.SetupActionAssertComponent();
-            asComp.setMessage(trace);
-            asComp.setResult(TestReport.TestReportActionResult.ERROR);
-            comp.setAssert(asComp);
-            propagateStatus(testReport);
+            reportException(t);
         }
-        if (testSession != null && externalCache != null) {
-            File logDir = new File(new File(externalCache, testSession), testDef.getName());
-            logDir.mkdirs();
-            TestReport testReport = getTestReport();
-            String json = ProxyBase.encode(testReport, Format.JSON);
-            Path path = new File(logDir, "TestReport.json").toPath();
-            try (BufferedWriter writer = Files.newBufferedWriter(path))
-            {
-                writer.write(json);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        }
+        returnTestReport();
 
         return this;
+    }
+
+    private void reportException(Throwable t) {
+        String trace = ExceptionUtils.getStackTrace(t);
+        TestReport.TestReportSetupComponent setup = testReport.getSetup();
+        TestReport.SetupActionComponent comp = setup.addAction();
+        TestReport.SetupActionAssertComponent asComp = new TestReport.SetupActionAssertComponent();
+        asComp.setMessage(trace);
+        asComp.setResult(TestReport.TestReportActionResult.ERROR);
+        comp.setAssert(asComp);
+        propagateStatus(testReport);
+    }
+
+    private void returnTestReport() {
+        File logDir = new File(new File(externalCache, testSession), testDef.getName());
+        logDir.mkdirs();
+        TestReport testReport = getTestReport();
+        String json = ProxyBase.encode(testReport, Format.JSON);
+        Path path = new File(logDir, "TestReport.json").toPath();
+        try (BufferedWriter writer = Files.newBufferedWriter(path))
+        {
+            writer.write(json);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private void doWorkflow() {
@@ -143,13 +163,15 @@ public class TestEngine  {
     }
 
     private void initWorkflow() {
-        testScript = loadTestScript();
+        if (testScript == null)
+            testScript = loadTestScript(testDef);
         testReport.setName(testScript.getName());
         testReport.setTestScript(new Reference(testScript.getId()));
         testReport.setIssued(new Date());
         TestReport.TestReportParticipantComponent part = testReport.addParticipant();
         part.setType(TestReport.TestReportParticipantType.SERVER);
-        part.setUri(sut.toString());
+        if (sut != null)
+            part.setUri(sut.toString());
         part.setDisplay("NIST Asbestos Proxy");
 
         part = testReport.addParticipant();
@@ -481,13 +503,13 @@ public class TestEngine  {
 
     }
 
-    private TestScript loadTestScript() {
-        Objects.requireNonNull(testDef);
-        File location = new File(testDef, "TestScript.xml");
+    public static TestScript loadTestScript(File testDefDir) {
+        Objects.requireNonNull(testDefDir);
+        File location = new File(testDefDir, "TestScript.xml");
         if (!location.exists() || !location.canRead() ) {
-            location = new File(testDef, "TestScript.json");
+            location = new File(testDefDir, "TestScript.json");
             if (!location.exists() || !location.canRead() ) {
-                throw new RuntimeException("Cannot load TestScript (.xml or .json) from " + testDef);
+                throw new RuntimeException("Cannot load TestScript (.xml or .json) from " + testDefDir);
             }
         }
         InputStream is;
@@ -653,5 +675,9 @@ public class TestEngine  {
     public TestEngine setSut(URI sut) {
         this.sut = sut;
         return this;
+    }
+
+    public void setTestScript(TestScript testScript) {
+        this.testScript = testScript;
     }
 }

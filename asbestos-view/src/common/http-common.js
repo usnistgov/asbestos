@@ -31,3 +31,13 @@ export const ENGINE = axios.create({
         crossdomain: true,
     }
 })
+
+export const CHANNEL = axios.create({
+    baseURL: `http://localhost:${port}/asbestos/channel/`,
+    headers: {
+        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS, PUT, PATCH, DELETE'
+    },
+    params: {
+        crossdomain: true,
+    }
+})

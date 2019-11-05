@@ -23,14 +23,24 @@ export const logStore = {
         setCurrentEventIndex(state, index) {
             state.currentEventIndex = index
         },
+        selectEvent(state, eventName) {
+            const index = state.eventSummaries.findIndex(eventSummary => {
+                return eventSummary.eventName === eventName
+            })
+            if (index !== -1)
+                state.currentEventIndex = index
+            console.log(`new event index is ${index}`)
+        }
     },
     actions: {
         loadEventSummaries({commit, rootState}) {
             if (!rootState.base.session) {
+                this.$store.commit('setError', 'Session not set in logStore.loadEventSummaries')
                 console.error('Session not set')
                 return
             }
             if (!rootState.base.channelId) {
+                this.$store.commit('setError', 'Channel not set in logStore.loadEventSummaries')
                 console.error('Channel not set')
                 return
             }
@@ -47,6 +57,7 @@ export const logStore = {
                     commit('setEventSummaries', eventSummaries)
                 })
                 .catch(error => {
+                    this.$store.commit('setError', error)
                     console.error(error)
                 })
         },

@@ -1,6 +1,8 @@
 package gov.nist.asbestos.asbestosProxy.servlet;
 
 import gov.nist.asbestos.asbestosProxy.requests.*;
+import gov.nist.asbestos.client.Base.EC;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.log4j.Logger;
 
@@ -11,6 +13,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Paths;
 
 public class TestEngineServlet extends HttpServlet {
     private static Logger log = Logger.getLogger(TestEngineServlet.class);
@@ -28,7 +31,7 @@ public class TestEngineServlet extends HttpServlet {
         if (ec != null) {
             log.info("TestEngineServlet - Got External Cache from ProxyServlet");
             externalCache = new File((String) ec);
-            initializeTestCollections();
+            //initializeTestCollections();
         } else {
             log.fatal("TestEngineServlet - Proxy not started");
         }
@@ -45,6 +48,7 @@ public class TestEngineServlet extends HttpServlet {
             else if (GetTestDefinitionRequest.isRequest(request)) new GetTestDefinitionRequest(request).run();
             else if (GetTestLogsRequest.isRequest(request)) new GetTestLogsRequest(request).run();
             else if (GetTestLogRequest.isRequest(request)) new GetTestLogRequest(request).run();
+            else if (GetClientTestEvalRequest.isRequest(request)) new GetClientTestEvalRequest(request).run();
             else throw new Exception("Invalid request - do not understand URI " + request.uri);
 
         } catch (RuntimeException e) {
@@ -58,13 +62,6 @@ public class TestEngineServlet extends HttpServlet {
             resp.setStatus(resp.SC_INTERNAL_SERVER_ERROR);
         }
     }
-
-    private void initializeTestCollections() {
-        File collections = new File(externalCache, "TestCollections");
-        new File(collections, "default").mkdirs();
-    }
-
-
 
     @Override
     public void doPost(HttpServletRequest req, HttpServletResponse resp) {

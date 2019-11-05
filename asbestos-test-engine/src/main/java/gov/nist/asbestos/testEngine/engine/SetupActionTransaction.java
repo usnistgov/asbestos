@@ -1,6 +1,7 @@
 package gov.nist.asbestos.testEngine.engine;
 
 import gov.nist.asbestos.client.client.FhirClient;
+import gov.nist.asbestos.client.client.Op;
 import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import gov.nist.asbestos.simapi.validation.ValE;
@@ -21,8 +22,8 @@ public class SetupActionTransaction extends GenericSetupAction {
             return;
 
         ResourceWrapper wrapper = getFhirClient().writeResource(resourceToSend, targetUrl, format, requestHeader);
+        BaseResource resource = wrapper.getResource();
         if (wrapper.isOk()) {
-            BaseResource resource = wrapper.getResource();
             if ((resource instanceof Bundle) && bundleContainsError((Bundle) resource) ) {
                 reporter.reportFail(wrapper.getRef() + " transaction failed : \n" + getBundleIssues((Bundle) wrapper.getResource()), wrapper);
             } else if ((resource instanceof OperationOutcome && operationOutcomeContainsError((OperationOutcome) resource))) {
@@ -34,7 +35,17 @@ public class SetupActionTransaction extends GenericSetupAction {
                 reporter.reportFail(wrapper.getRef() + " transaction - no response object - should be Bundle", wrapper);
             }
         } else {
-            reporter.reportFail("transaction to " + targetUrl + " failed with status " + wrapper.getHttpBase().getStatus(), wrapper);
+            String msg = "";
+            if (resource instanceof OperationOutcome) {
+                OperationOutcome oo = (OperationOutcome) resource;
+                for (OperationOutcome.OperationOutcomeIssueComponent issue : oo.getIssue()) {
+                    if (issue.getSeverity().equals(OperationOutcome.IssueSeverity.ERROR)) {
+                        String[] lines = issue.getDiagnostics().split("\n");
+                        msg = msg + "\n" + lines[0];
+                    }
+                }
+            }
+            reporter.reportFail("transaction to " + targetUrl + " failed with status " + wrapper.getHttpBase().getStatus() + msg, wrapper);
         }
         postExecute(wrapper);
     }
@@ -87,7 +98,7 @@ public class SetupActionTransaction extends GenericSetupAction {
         if (bundle.hasEntry()) {
             for (Bundle.BundleEntryComponent component : bundle.getEntry()) {
                 Bundle.BundleEntryResponseComponent response = component.getResponse();
-                if (response.hasStatus() && !response.getStatus().startsWith("200")) {
+                if (response.hasStatus() && !response.getStatus().startsWith("20")) {
                     return true;
                 }
             }

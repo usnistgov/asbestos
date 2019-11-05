@@ -19,6 +19,42 @@ public class Ref {
         uri = build(ref);
     }
 
+    public Ref(URI base, String resourceType, SearchParms searchParms) {
+        this(base.toString(), resourceType, searchParms.getParms());
+    }
+
+    public Ref(URI base, String resourceType, String id) {
+        this(base.toString(), resourceType, id);
+    }
+
+    public Ref(String base, String resourceType, String id)  {
+        String theRef;
+        if (id == null || id.equals("") || id.startsWith("?"))
+            theRef = String.join("/", base, resourceType);
+        else
+            theRef = String.join("/", base, resourceType, id);
+        if (id.startsWith("?"))
+            theRef = theRef + id;
+        uri = build(theRef);
+    }
+
+    public Ref(Ref base, String resourceType, String id, String version)  {
+        String theRef;
+        if (id == null || id.equals(""))
+            theRef = String.join("/", base.toString(), resourceType);
+        else if (version == null || version.equals(""))
+            theRef = String.join("/", base.toString(), resourceType, id);
+        else
+            theRef = String.join("/", base.toString(), resourceType, id, "_history", version);
+
+        uri = build(theRef);
+    }
+
+    public Ref(Reference reference) {
+        Objects.requireNonNull(reference);
+        uri = build(reference.getReference());
+    }
+
     public String getParameters() {
         if (uri == null)
             return null;
@@ -98,46 +134,6 @@ public class Ref {
             }
         }
         return this;  // oops
-    }
-
-    public Ref(URI base, String resourceType, SearchParms searchParms) {
-        this(base.toString(), resourceType, searchParms.getParms());
-    }
-
-    public Ref(URI base, String resourceType, String id) {
-        this(base.toString(), resourceType, id);
-    }
-
-    public Ref(String base, String resourceType, String id)  {
-        String theRef;
-        if (id == null || id.equals("") || id.startsWith("?"))
-            theRef = String.join("/", base, resourceType);
-        else
-            theRef = String.join("/", base, resourceType, id);
-        if (id.startsWith("?"))
-            theRef = theRef + id;
-        uri = build(theRef);
-    }
-
-    public Ref(Ref base, String resourceType, String id, String version)  {
-        String theRef;
-        if (id == null || id.equals(""))
-            theRef = String.join("/", base.toString(), resourceType);
-        else if (version == null || version.equals(""))
-            theRef = String.join("/", base.toString(), resourceType, id);
-        else
-            theRef = String.join("/", base.toString(), resourceType, id, "_history", version);
-
-        uri = build(theRef);
-    }
-
-//    Ref(Ref ref) {
-//        this.uri = ref.uri;
-//    }
-
-    public Ref(Reference reference) {
-        Objects.requireNonNull(reference);
-        uri = build(reference.getReference());
     }
 
     boolean isContained() {
@@ -254,14 +250,14 @@ public class Ref {
         return parts[1];
     }
 
-    boolean isAbsolute() {
+    public boolean isAbsolute() {
         if (uri == null) return false;
         if (uri.toString().startsWith("http")) return true;
         if (uri.toString().startsWith("file")) return true;
         return false;
     }
 
-    boolean isRelative() {
+    public boolean isRelative() {
         if (uri == null) return false;
         return !isAbsolute();
     }

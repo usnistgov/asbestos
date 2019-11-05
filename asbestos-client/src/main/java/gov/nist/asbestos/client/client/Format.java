@@ -29,7 +29,9 @@ public enum Format {
     public static Format fromContentType(String contentType) {
         if (contentType != null && contentType.contains("json"))
             return Format.JSON;
-        return Format.XML;
+        if (contentType != null && contentType.contains("xml"))
+            return Format.XML;
+        return null;
     }
 
     public static Format resultContentType(Headers inHeaders) {
