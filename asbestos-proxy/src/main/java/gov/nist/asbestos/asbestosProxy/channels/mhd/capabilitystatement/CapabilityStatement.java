@@ -1,6 +1,8 @@
 package gov.nist.asbestos.asbestosProxy.channels.mhd.capabilitystatement;
 
 import gov.nist.asbestos.client.Base.ProxyBase;
+import gov.nist.asbestos.serviceproperties.ServiceProperties;
+import gov.nist.asbestos.serviceproperties.ServicePropertiesEnum;
 import org.apache.log4j.Logger;
 import org.hl7.fhir.r4.model.BaseResource;
 
@@ -40,15 +42,17 @@ public class CapabilityStatement {
         return false;
     }
 
-    public static BaseResource getCapabilityStatement(Class clazz) throws Exception {
-        Objects.requireNonNull(clazz);
+    public static BaseResource getCapabilityStatement(ServicePropertiesEnum key) throws Exception {
+        Objects.requireNonNull(key);
         String capabilityStatementFileName =
-                "capabilitystatement/capabilitystatement-fhirToolkitDocRecipientDocResponder.xml";
+                ServiceProperties.getInstance().getProperty(key);
+//                "capabilitystatement/capabilitystatement-fhirToolkitDocRecipientDocResponder.xml";
 //                  "capabilitystatement/empty-capabilitystatement-base2.xml";
-        File capabilityStatementFile = Paths.get(clazz.getResource("/").toURI()).resolve(capabilityStatementFileName).toFile();
+
+        File capabilityStatementFile = Paths.get(CapabilityStatement.class.getResource("/").toURI()).resolve(capabilityStatementFileName).toFile();
 
         if (capabilityStatementFile.exists()) {
-            // TODO: replace any ${} parameters in the File stream.
+            // TODO: replace any ${} parameters in the File stream such as the ${ProxyBase}
 
             // Comments in XML are also parsed as part of the BaseResource. As noticed in the JSON Format, XML begin/end comments are not necessarily meaningful when it gets parsed
             BaseResource baseResource = ProxyBase.parse(capabilityStatementFile);

@@ -4,7 +4,6 @@ package gov.nist.asbestos.client.events;
 import gov.nist.asbestos.http.headers.Headers;
 import gov.nist.asbestos.http.operations.HttpBase;
 
-import java.io.File;
 import java.io.FileOutputStream;
 import java.io.PrintWriter;
 import java.nio.file.Files;
@@ -22,6 +21,7 @@ public class Task {
     private String _responseBody = null;
     private String _description = null;
 
+    private boolean enableLogging;
 
     Task(int taskIndex, Event event) {
         this.taskIndex = taskIndex;  // will be overwritten by initTask()
@@ -68,6 +68,9 @@ public class Task {
     }
 
     public void putRequestHeader(Headers headers) {
+        if (! isEnableLogging())
+            return;
+
         _requestHeaders = headers;
         initTask();
         try {
@@ -80,6 +83,9 @@ public class Task {
     }
 
     public void putRequestBody(byte[] body) {
+        if (! isEnableLogging())
+            return;
+
         _requestRawBody = body;
         initTask();
         if (body != null) {
@@ -131,6 +137,9 @@ public class Task {
     }
 
     public void putResponseHeader(Headers headers) {
+        if (! isEnableLogging())
+            return;
+
         _responseHeaders = headers;
         initTask();
         if (headers != null) {
@@ -145,6 +154,9 @@ public class Task {
     }
 
     public void putResponseBody(byte[] body) {
+        if (! isEnableLogging())
+            return;
+
         _responseRawBody = body;
         initTask();
         if (body != null && body.length >  0) {
@@ -159,6 +171,9 @@ public class Task {
     }
 
     public void putResponseBodyText(String body) {
+        if (! isEnableLogging())
+            return;
+
         _responseBody = body;
         initTask();
         try {
@@ -183,6 +198,9 @@ public class Task {
     }
 
     public void putRequestBodyText(String body) {
+        if (! isEnableLogging())
+            return;
+
         initTask();
         try {
             try (PrintWriter out = new PrintWriter(event.getRequestBodyStringFile(taskIndex))) {
@@ -194,6 +212,9 @@ public class Task {
     }
 
     public void putResponseHTMLBody(byte[] body) {
+        if (! isEnableLogging())
+            return;
+
         initTask();
         putResponseBody(body);
         String bodyString = new String(body);
@@ -208,6 +229,9 @@ public class Task {
     }
 
     public void putRequestHTMLBody(byte[] body) {
+        if (! isEnableLogging())
+            return;
+
         initTask();
         putRequestBody(body);
         String bodyString = new String(body);
@@ -263,5 +287,13 @@ public class Task {
     public String getResponseBodyAsString() {
         getResponseBody();
         return _responseBody;
+    }
+
+    public void setEnableLogging(boolean enableLogging) {
+        this.enableLogging = enableLogging;
+    }
+
+    public boolean isEnableLogging() {
+        return enableLogging;
     }
 }

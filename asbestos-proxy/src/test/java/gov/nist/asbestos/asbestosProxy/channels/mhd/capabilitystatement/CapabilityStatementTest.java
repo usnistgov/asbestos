@@ -1,5 +1,6 @@
 package gov.nist.asbestos.asbestosProxy.channels.mhd.capabilitystatement;
 
+import gov.nist.asbestos.serviceproperties.ServicePropertiesEnum;
 import org.hl7.fhir.r4.model.BaseResource;
 import org.junit.jupiter.api.Test;
 
@@ -29,7 +30,7 @@ class CapabilityStatementTest {
 
     @Test
     void getCapabilityStatement() throws Exception {
-        BaseResource baseResource = CapabilityStatement.getCapabilityStatement(getClass());
+        BaseResource baseResource = CapabilityStatement.getCapabilityStatement(ServicePropertiesEnum.MHD_CAPABILITY_STATEMENT_FILE);
         assert baseResource != null;
 
         // transform to json and back to xml as a test? (ProxyBase.encode(baseResource, Format.JSON));

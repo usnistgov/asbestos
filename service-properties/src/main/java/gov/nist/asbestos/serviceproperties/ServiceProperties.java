@@ -10,8 +10,8 @@ import java.nio.file.Paths;
 import java.util.Properties;
 
 /**
- * This class provides properties for the service registry.
- * Only Asbestos is intended to use this class.
+ * This class provides service registry properties.
+ * NOTE: Only FhirToolkit (Asbestos) is intended to use this class.
  */
 public class ServiceProperties {
     private static final Logger logger = Logger.getLogger(ServiceProperties.class);
@@ -50,6 +50,10 @@ public class ServiceProperties {
         return copyOfProperties;
     }
 
+    public String getProperty(ServicePropertiesEnum key) {
+        return getProperty(key.getKey());
+    }
+
     public String getProperty(String key) {
         return properties.getProperty(key);
     }
@@ -68,11 +72,18 @@ public class ServiceProperties {
         }
     }
 
-    public void save() throws IOException {
-        FileOutputStream fos = new FileOutputStream(spFile);
-        properties.store(fos, "");
-        fos.flush();
-        fos.close();
+    public boolean save() throws IOException {
+        if (spFile.exists() && spFile.canWrite()) {
+            FileOutputStream fos = new FileOutputStream(spFile);
+            try {
+                properties.store(fos, "");
+                fos.flush();
+                return true;
+            } finally {
+                fos.close();
+            }
+        }
+        return false;
     }
 
 }

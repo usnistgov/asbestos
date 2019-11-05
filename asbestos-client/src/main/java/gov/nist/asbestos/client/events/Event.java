@@ -1,7 +1,6 @@
 package gov.nist.asbestos.client.events;
 
 
-import com.sun.org.apache.bcel.internal.generic.NEW;
 import gov.nist.asbestos.client.log.SimStore;
 
 import java.io.File;
@@ -70,7 +69,6 @@ public class Event implements Comparable<Event> {
             newTask();  // initialize request
         }
     }
-
 
     public Task getClientTask() {
         if (tasks.size() == 0) {

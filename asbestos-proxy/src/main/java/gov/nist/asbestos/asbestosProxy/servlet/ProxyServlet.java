@@ -22,6 +22,8 @@ import gov.nist.asbestos.http.operations.HttpGet;
 import gov.nist.asbestos.http.operations.HttpPost;
 import gov.nist.asbestos.http.operations.Verb;
 import gov.nist.asbestos.http.support.Common;
+import gov.nist.asbestos.serviceproperties.ServiceProperties;
+import gov.nist.asbestos.serviceproperties.ServicePropertiesEnum;
 import gov.nist.asbestos.sharedObjects.ChannelConfig;
 import gov.nist.asbestos.sharedObjects.ChannelConfigFactory;
 import gov.nist.asbestos.simapi.simCommon.SimId;
@@ -362,20 +364,22 @@ public class ProxyServlet extends HttpServlet {
                 return;
             }
 
-            byte[] inBody = getRequestBody(req);
 
-            HttpBase requestIn = logClientRequestIn(clientTask, inHeaders, inBody, verb);
-
-            log.info("=> " + simStore.getEndpoint() + " " + clientTask.getRequestHeader().getAccept());
+            log.info("ProxyServlet => " + simStore.getEndpoint() + " " + clientTask.getRequestHeader().getAccept());
 
             // For MHD channels only:
             // begin handle Capability Statement request i.e. http://proxyBase/metadata
             if ("mhd".equals(channelType)) {
-                Optional<URI> proxyBaseURI = getProxyBase(requestIn);
+                boolean enableLogging = Boolean.parseBoolean(ServiceProperties.getInstance().getProperty(ServicePropertiesEnum.LOG_CS_METADATA_REQUEST));
+                Optional<URI> proxyBaseURI = getProxyBase(inHeaders.getPathInfo());
                 if (proxyBaseURI.isPresent()) {
-                    if (CapabilityStatement.isCapabilityStatementRequest(proxyBaseURI.get(), requestIn.getRequestHeaders().getPathInfo())) {
+                    if (CapabilityStatement.isCapabilityStatementRequest(proxyBaseURI.get(), inHeaders.getPathInfo())) {
+                        clientTask.setEnableLogging(enableLogging);
+                        byte[] inBody = getRequestBody(req);
+                        HttpBase requestIn = logClientRequestIn(clientTask, inHeaders, inBody, verb);
+
                         try {
-                            BaseResource baseResource = CapabilityStatement.getCapabilityStatement(getClass());
+                            BaseResource baseResource = CapabilityStatement.getCapabilityStatement(ServicePropertiesEnum.MHD_CAPABILITY_STATEMENT_FILE);
                             respond(resp, baseResource, inHeaders, clientTask);
                         } catch (Exception ex) {
                             // This did not work in IntelliJ Jetty runner without any Jetty XML config:
@@ -389,6 +393,10 @@ public class ProxyServlet extends HttpServlet {
                 }
             }
             // end
+
+
+            byte[] inBody = getRequestBody(req);
+            HttpBase requestIn = logClientRequestIn(clientTask, inHeaders, inBody, verb);
 
             Task backSideTask = clientTask.newTask();
 
@@ -432,12 +440,12 @@ public class ProxyServlet extends HttpServlet {
         }
     }
 
-    private Optional<URI> getProxyBase(HttpBase requestIn) throws URISyntaxException {
+    private Optional<URI> getProxyBase(URI pathInfo) throws URISyntaxException {
         // '/proxy' is where the ProxyServlet is mapped to in the web.xml
         // http://localhost:8081/asbestos/proxy/default__mhdchannel/metadata
         // proxy base = all segments up to the first occurence of 'proxy' + testsession + '__" + channelId
         URI proxyBase = null;
-        List<String> pathSegments = Arrays.asList(requestIn.getRequestHeaders().getPathInfo().getPath().split("/"));
+        List<String> pathSegments = Arrays.asList(pathInfo.getPath().split("/"));
         int proxyIndex = pathSegments.indexOf("proxy");
         int channelSegmentIndex = proxyIndex + 1;
         if (proxyIndex > -1 && (pathSegments.size() >= channelSegmentIndex)) {
