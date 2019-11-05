@@ -246,13 +246,15 @@ public class AssertionRunner {
             String found = FhirPathEngineBuilder.evalForString(sourceResource, variableMgr.updateReference(as.getExpression()));
 
 
-            Ref foundRef = new Ref(found);
-            if (foundRef.getBase().toString().equals("")) {
-                String contentLocation = sourceFixture.getHttpBase().getContentLocation();
-                if (contentLocation != null && !contentLocation.equals("")) {
-                    Ref locationRef = new Ref(contentLocation);
-                    foundRef = foundRef.rebase(locationRef);
-                    found = foundRef.toString();
+            if (found != null) {
+                Ref foundRef = new Ref(found);
+                if (foundRef.getBase().toString().equals("")) {
+                    String contentLocation = sourceFixture.getHttpBase().getContentLocation();
+                    if (contentLocation != null && !contentLocation.equals("")) {
+                        Ref locationRef = new Ref(contentLocation);
+                        foundRef = foundRef.rebase(locationRef);
+                        found = foundRef.toString();
+                    }
                 }
             }
 

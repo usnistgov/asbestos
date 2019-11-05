@@ -28,10 +28,15 @@ export const testRunnerStore = {
             eventEvalCount: 0,   // number of most recent events to evaluate
 
             clientTestResult: [], // { testId: { eventId: TestReport } }
-            currentChannelBaseAddr: 'http://locahost:8081/asbestos/'
+            currentChannelBaseAddr: 'http://localhost:8081/asbestos/',
+            testAssertions: null,
         }
     },
     mutations: {
+        setTestAssertions(state, assertions) {
+            console.log(`new Test Assertions`)
+            state.testAssertions = assertions
+        },
         setEventEvalCount(state, count) {
             state.eventEvalCount = count
         },
@@ -108,6 +113,17 @@ export const testRunnerStore = {
         }
     },
     actions: {
+        loadTestAssertions({commit}) {
+            const url = `assertions`
+            ENGINE.get(url)
+                .then(response => {
+                    commit('setTestAssertions', response.data)
+                })
+                .catch(function (error) {
+                    commit('setError', url + ': ' + error)
+                    console.error(`${error} - assertions - URL was engine/${url}`)
+                })
+        },
         runEval({commit, state, rootState}, testId) {
             const eventEval = state.eventEvalCount === 0 ? "marker" : state.eventEvalCount
             const url = `clienteval/${rootState.base.session}__${rootState.base.channelId}/${eventEval}/${state.currentTestCollectionName}/${testId}`

@@ -25,6 +25,8 @@ public class EC {
 
     public static final String MarkerType = "Marker";
     public static final String TEST_COLLECTIONS_DIR = "FhirTestCollections";
+    public static final String TEST_ASSERTIONS_DIR = "FhirTestAssertions";
+    public static final String TEST_ASSERTIONS_FILE = "assertions.json";
 
 
     public EC(File externalCache) {
@@ -100,6 +102,10 @@ public class EC {
         } catch (IOException e) {
             throw new Error(e);
         }
+    }
+
+    public File getTestAssertionsFile() {
+        return new File(new File(externalCache, TEST_ASSERTIONS_DIR), TEST_ASSERTIONS_FILE);
     }
 
     File getTestCollectionBase(String collectionName) {

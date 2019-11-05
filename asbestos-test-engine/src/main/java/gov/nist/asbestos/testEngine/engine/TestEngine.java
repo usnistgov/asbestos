@@ -103,6 +103,8 @@ public class TestEngine  {
         return this;
     }
 
+    // TODO - This interpretation of TestScript does not use assert.direction for client tests.  Instead it uses separate fixtures for request and response. This is reflected in the tests written.
+
     // if inputResource == null then this is a test
     // if null then this is an evaluation
     public TestEngine runEval(ResourceWrapper requestResource, ResourceWrapper responseResource) {

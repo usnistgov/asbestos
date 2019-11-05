@@ -30,20 +30,33 @@ public class TestInstallerServlet  extends HttpServlet {
 
         File lockFile = new File(externalCache, "FhirTestCollections.lock");
         if (!lockFile.exists()) {
-            log.info("Updating Test Definitions in External Cache");
+            log.info("Updating Test Definitions and Assertions in External Cache");
 
             initializeTestCollections();
+            initializeAssertionMap();
 
-            log.info("Locking External Cache copy of Test Definitions");
+            log.info("Locking External Cache copy of Test Definitions and Assertions");
             try {
                 lockFile.createNewFile();
             } catch (IOException e) {
                 log.fatal("TestInstallerServlet - Cannot create FhirTestCollections.lock");
             }
         } else {
-            log.info("Not updating Test Definitions - External Cache copy is locked");
+            log.info("Not updating Test Definitions and Assertions - External Cache copy is locked");
         }
 
+    }
+
+    private void initializeAssertionMap() {
+        File externalAssertions = new File(externalCache, EC.TEST_ASSERTIONS_DIR);
+        externalAssertions.mkdirs();
+
+        File war = warHome();
+        try {
+            FileUtils.copyDirectory(new File(new File(war, "data"), "TestAssertions"), externalAssertions);
+        } catch (IOException e) {
+            log.error(ExceptionUtils.getStackTrace(e));
+        }
     }
 
     private void initializeTestCollections() {

@@ -1,0 +1,18 @@
+{
+  "Profile": "MHD Rev 3.1",
+  "MHDPDBRequestIsBundle" : "ITI-65 - 3.65.4.1.2 Message Semantics Para 1",
+  "MHDPDBRequestIsTransaction": "ITI-65 - 3.65.4.1.2 Message Semantics Para 1",
+  "MHDPDBUsesPost": "ITI-65 - 3.65.4.1.2 Message Semantics Para 1",
+  "MHDPDBOneDocumentManifest": "ITI-65 - 3.65.4.1.2 Message Semantics Para 1",
+  "MHDPDBOnePlusDocumentReference": "ITI-65 - 3.65.4.1.2 Message Semantics Para 1",
+  "MHDPDBMediaType": "ITI-65 - 3.65.4.1.2 Message Semantics Para 1",
+  "MHDPDBMetadataType": "ITI-65 - 3.65.4.1.2.1 Bundle Resources Para 2",
+  "MHDPDBBinaryInBundle": "ITI-65 - 3.65.4.1.2.1 Bundle Resources Para 4",
+  "MHDPDBPatientReference": "ITI-65 - 3.65.4.1.2.2 Patient Identity Para 1",
+  "MHDPDBSourcePatientInfoIsContained": "ITI-65 - 3.65.4.1.2.2 Patient Identity Para 2",
+  "MHDPDBGoodStatus": "ITI-65 - 3.65.4.2.2 Message Semantics Para 2",
+  "MHDPDBReturnsBundle": "ITI-65 - 3.65.4.2.2 Message Semantics Para 1",
+  "MHDPDBEntryReturns201": "ITI-65 - 3.65.4.2.2 Message Semantics Para 2",
+  "MHDPDBReturnLocation": "ITI-65 - 3.65.4.2.2 Message Semantics Para 2",
+  "MHDPDBReturnEtag": "ITI-65 - 3.65.4.2.2 Message Semantics Para 2"
+}

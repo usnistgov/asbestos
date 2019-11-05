@@ -35,7 +35,7 @@ public class HttpGet extends HttpBase {
                     // ok - won't always be available
             }
         } catch (Throwable t) {
-            throw new Error("GET " + uri, t);
+            throw new Error("GET " + uri + "\n" + t.getMessage(), t);
         } finally {
             if (connection != null)
                 connection.disconnect();

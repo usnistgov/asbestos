@@ -52,9 +52,12 @@
                                     error: assertResult(actioni) === 'error',
                                     warning: assertResult(actioni) === 'warning',
                                     'not-run': assertResult(actioni) === 'not-run' }">
-                                <span class="selectable">Assert:</span> {{ assertScript(actioni).description }}
+                                <span class="selectable">Assert:</span> {{ assertDesc(actioni) }}
                             </div>
                             <div v-if="selectedAssertIndex === actioni" class="message-part">
+                                <div v-if="assertRef(actioni)">
+                                    {{ assertRef(actioni) }}
+                                </div>
                                 {{ assertMessage(actioni) }}
                             </div>
                         </div>
@@ -103,6 +106,22 @@
             assertScript(assertIndex) {
                 return this.testScript.test[0].action[assertIndex].assert
             },
+            assertDesc(assertIndex) {
+                const rawDesc = this.assertScript(assertIndex).description
+                if (!rawDesc.includes("|"))
+                    return rawDesc
+                const elements = rawDesc.split("|")
+                const msg = elements[0]
+                return msg
+            },
+            assertRef(assertIndex) {
+                const rawDesc = this.assertScript(assertIndex).description
+                if (!rawDesc.includes("|"))
+                    return ''
+                const elements = rawDesc.split("|")
+                const assertId = elements[1]
+                return `Reference: ${this.assertProfile} - ${this.assertMsg(assertId)}\n`
+            },
             selectAssert(assertIndex) {
                 if (this.selectedAssertIndex === assertIndex)
                     this.selectedAssertIndex = null
@@ -140,9 +159,14 @@
                     return null
                 return this.report.test[testi].action[actioni]
             },
-
+            assertMsg(assertId) {
+                return this.$store.state.testRunner.testAssertions[assertId]
+            },
         },
         computed: {
+            assertProfile() {
+                return this.$store.state.testRunner.testAssertions['Profile']
+            },
             // selected() {
             //     return this.$store.state.testRunner.currentAssertIndex
             // },
