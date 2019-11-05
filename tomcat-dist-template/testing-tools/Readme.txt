@@ -19,7 +19,7 @@ xdstoolkit-base
 		%CATALINA_HOME%\bin\startup.bat 
 
 service.properties
-	This file helps discovery of services and communication among other types of toolkits and related applications.
+FhirToolkit needs a separate service.properties file because we are presenting the user with the option to point to another instance of XdsToolkit effectively ignoring the copy of the XdsToolkit (and its toolkit.properties) which were supplied with the testing-tools distribution package.
 	Hostname=
 	Port=
 	Context path=

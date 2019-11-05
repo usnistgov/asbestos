@@ -1,7 +1,0 @@
-GET /asbestos/proxy/default__mhdtest/metadata
-Accept-Charset:utf-8
-Accept:application/fhir+xml;q=1.0, application/fhir+json;q=1.0, application/xml+fhir;q=0.9, application/json+fhir;q=0.9
-User-Agent:HAPI-FHIR/3.7.0 (FHIR Client; FHIR 4.0.0/R4; apache)
-Connection:keep-alive
-Host:localhost:8877
-Accept-Encoding:gzip

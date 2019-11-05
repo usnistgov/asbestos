@@ -1,3 +1,0 @@
-200 
-Content-Type:application/fhir+xml
-x-proxy-event:http://localhost:8877/asbestos/log/default/mhdtest/metadata/2019_11_04_14_32_19_418
