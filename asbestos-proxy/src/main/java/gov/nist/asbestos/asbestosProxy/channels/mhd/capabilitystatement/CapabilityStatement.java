@@ -42,7 +42,10 @@ public class CapabilityStatement {
 
     public static BaseResource getCapabilityStatement(Class clazz) throws Exception {
         Objects.requireNonNull(clazz);
-        File capabilityStatementFile = Paths.get(clazz.getResource("/").toURI()).resolve("capabilitystatement/capabilitystatement-fhirToolkitDocRecipientDocResponder.xml").toFile();
+        String capabilityStatementFileName =
+                "capabilitystatement/capabilitystatement-fhirToolkitDocRecipientDocResponder.xml";
+//                  "capabilitystatement/empty-capabilitystatement-base2.xml";
+        File capabilityStatementFile = Paths.get(clazz.getResource("/").toURI()).resolve(capabilityStatementFileName).toFile();
 
         if (capabilityStatementFile.exists()) {
             // TODO: replace any ${} parameters in the File stream.
