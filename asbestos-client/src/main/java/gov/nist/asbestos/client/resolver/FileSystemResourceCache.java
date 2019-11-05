@@ -75,6 +75,8 @@ public class FileSystemResourceCache implements ResourceCache {
             }
         }
         file = cacheFile(url, "json");
+        if (file == null)
+            throw new Error("Cache resource " + url + " does not exist");
         String id = file.getName();
         id = id.substring(0, id.indexOf(".json"));
         if (file.exists()) {

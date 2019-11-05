@@ -87,8 +87,6 @@ export const baseStore = {
         installChannelURLs(state, urls) {
             state.channelURLs = urls
         },
-
-
     },
     actions: {
         loadSessions({commit}) {

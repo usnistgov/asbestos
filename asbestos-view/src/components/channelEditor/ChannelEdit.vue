@@ -218,15 +218,9 @@
                         this.badNameModeReason = `Name may only contain a-z A-Z 0-9 _  and __ not allowed`
                         return
                     }
+                    this.saveToServer(this.channel)
                     this.$store.commit('installChannel', cloneDeep(this.channel))
                     this.$store.commit('deleteChannel', this.originalChannelId) // original has been renamed
-                    CHANNEL.post('', this.channel)
-                        .then(function () {
-                            that.msg('Saved')
-                        })
-                        .catch(function (error) {
-                            that.error(error)
-                        })
                     this.isNew = false
                     this.toggleEdit()
                     this.$router.push('/session/' + this.channel.testSession + '/channels/' + this.channel.channelId)
@@ -243,6 +237,14 @@
                 this.isNew = false
                 this.toggleEdit()
                 this.fetch()
+            },
+            async saveToServer(aChannel) {
+                try {
+                    await CHANNEL.post('', aChannel)
+                    this.msg('New Channel Saved')
+                } catch(error) {
+                    this.error(error)
+                }
             },
             discard() {
                 if (this.isNew) {

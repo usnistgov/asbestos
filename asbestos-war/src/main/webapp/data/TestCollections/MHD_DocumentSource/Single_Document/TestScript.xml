@@ -79,7 +79,7 @@
         </action>
         <action>
             <assert>
-                <description value="DocumentReference has attachment (resource.content.attachment.url)"/>
+                <description value="DocumentReference has attachment (resource.content.attachment.url)|MHDPDBDocRefHasAttachment"/>
                 <compareToSourceId value="request"/>
                 <compareToSourceExpression value="Bundle.entry.resource.where(is(FHIR.DocumentReference)).content.attachment.url.empty().not()"/>
                 <warningOnly value="false"/>
