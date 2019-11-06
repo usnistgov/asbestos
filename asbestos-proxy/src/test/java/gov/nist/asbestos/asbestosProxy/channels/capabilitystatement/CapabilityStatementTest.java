@@ -1,4 +1,4 @@
-package gov.nist.asbestos.asbestosProxy.channels.mhd.capabilitystatement;
+package gov.nist.asbestos.asbestosProxy.channels.capabilitystatement;
 
 import gov.nist.asbestos.serviceproperties.ServicePropertiesEnum;
 import org.hl7.fhir.r4.model.BaseResource;

@@ -1,13 +1,12 @@
 package gov.nist.asbestos.asbestosProxy.servlet;
 
 
-import gov.nist.asbestos.asbestosProxy.channels.mhd.capabilitystatement.CapabilityStatement;
+import gov.nist.asbestos.asbestosProxy.channels.capabilitystatement.CapabilityStatement;
 import gov.nist.asbestos.asbestosProxy.channel.*;
 import gov.nist.asbestos.client.Base.EC;
 import gov.nist.asbestos.client.events.Event;
 import gov.nist.asbestos.client.events.UIEvent;
 import gov.nist.asbestos.client.log.SimStore;
-import gov.nist.asbestos.client.events.Task;
 import gov.nist.asbestos.asbestosProxy.util.Gzip;
 import gov.nist.asbestos.client.Base.ProxyBase;
 import gov.nist.asbestos.client.client.Format;

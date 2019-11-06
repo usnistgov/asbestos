@@ -1,4 +1,4 @@
-package gov.nist.asbestos.asbestosProxy.channels.mhd.capabilitystatement;
+package gov.nist.asbestos.asbestosProxy.channels.capabilitystatement;
 
 import gov.nist.asbestos.client.Base.ProxyBase;
 import gov.nist.asbestos.serviceproperties.ServiceProperties;
