@@ -9,6 +9,7 @@
 		<TestScript>
 			<id value="patientNeedsLoading"/>
 			<test>  <!-- basic operation and validation -->
+				<description value="content load"/>
 				<action>
 					<operation>
 					<description value="looking for patient"/>
@@ -39,6 +40,7 @@
 				</action>
 			</test>
 			<test>  <!-- asserts to trigger conditional - one fail and condition is false -->
+				<description value="assertion"/>
 				<action>
 					<assert>
 						<description value="needs loading"/>

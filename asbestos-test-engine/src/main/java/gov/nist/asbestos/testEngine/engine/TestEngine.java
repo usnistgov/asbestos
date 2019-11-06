@@ -474,136 +474,115 @@ public class TestEngine  {
                 TestReport.TestReportTestComponent testReportComponent = testReport.addTest();
 
                 // handle condition
-                if (testComponent.hasModifierExtension()) {
-                    Extension extension = testComponent.getModifierExtensionFirstRep();
-                    if (!extension.hasUrl() || !extension.getUrl().equals("https://github.com/usnistgov/asbestos/wiki/TestScript-Conditional")) {
-                        TestReport.TestActionComponent actionReportComponent = testReportComponent.addAction();
-                        Reporter reporter = new Reporter(fVal, actionReportComponent.getOperation(), "", "");
-                        reporter.reportError( "Do not understand modifierExtension");
-                        return;
-                    }
-                    String containedTestScriptId =  extension.getValue().toString();
-
-                    List<Resource> containedList = testScript.getContained();
-                    Resource contained = null;
-                    for (Resource theContained : containedList) {
-                        if (theContained.getId() != null && theContained.getId().equals(containedTestScriptId)) {
-                            contained = theContained;
-                            break;
-                        }
-                    }
-                    if (contained == null) {
-                        TestReport.TestActionComponent actionReportComponent = testReportComponent.addAction();
-                        Reporter reporter = new Reporter(fVal, actionReportComponent.getOperation(), "", "");
-                        reporter.reportError( "cannot locate contained TestScript " + containedTestScriptId);
-                        return;
-                    }
-
-
-                    TestScript containedTestScript = (TestScript) contained;
+                TestScript containedTestScript = getConditional(testComponent, testReportComponent);
+                if (containedTestScript != null) {
                     List<TestScript.TestScriptTestComponent> tests = containedTestScript.getTest();
                     if (tests.size() != 2) {
-                        TestReport.TestActionComponent actionReportComponent = testReportComponent.addAction();
-                        Reporter reporter = new Reporter(fVal, actionReportComponent.getOperation(), "", "");
-                        reporter.reportError( "test condition must contain two test elements -  TestScript " + containedTestScriptId);
+                        reportParsingError(testReportComponent, "test condition must contain two test elements");
                         return;
                     }
+
+                    TestReport containedTestReport = new TestReport();
+                    testReport.addContained(containedTestReport);
 
                     // basic operation and validation
                     TestScript.TestScriptTestComponent basicOperationTest = tests.get(0);
-                    if (basicOperationTest.hasAction()) {
-                        String typePrefix = "contained.action";
-                        for (TestScript.TestActionComponent action : basicOperationTest.getAction()) {
-                            TestReport.TestActionComponent actionReportComponent = testReportComponent.addAction();
-                            if (invalidAction(action, actionReportComponent, fVal))
-                                return;
-                            if (action.hasOperation()) {
-                                doOperation(typePrefix, action.getOperation(), actionReportComponent.getOperation());
-                                TestReport.SetupActionOperationComponent opReport = actionReportComponent.getOperation();
-                                if (opReport.getResult() == TestReport.TestReportActionResult.ERROR) {
-                                    testReport.setStatus(TestReport.TestReportStatus.COMPLETED);
-                                    testReport.setResult(TestReport.TestReportResult.FAIL);
-                                    return;
-                                }
-                            }
-                            if (action.hasAssert()) {
-                                TestReport.SetupActionAssertComponent actionReport = doAssert(typePrefix, action.getAssert());
-                                actionReportComponent.setAssert(actionReport);
-                                if ("fail".equals(actionReport.getResult().toCode())) {
-                                    testReport.setStatus(TestReport.TestReportStatus.COMPLETED);
-                                    testReport.setResult(TestReport.TestReportResult.FAIL);
-                                    return;
-                                }
-                                if ("error".equals(actionReport.getResult().toCode())) {
-                                    testReport.setStatus(TestReport.TestReportStatus.COMPLETED);
-                                    testReport.setResult(TestReport.TestReportResult.FAIL);
-                                    return;
-                                }
-                            }
-                        }
-                    }
+                    TestReport.TestReportTestComponent containedTestReportComponent = containedTestReport.addTest();
+                    boolean opResult = doTestPart(basicOperationTest, containedTestReportComponent, containedTestReport,false);
 
                     // asserts to trigger conditional
                     TestScript.TestScriptTestComponent conditionalTest = tests.get(1);
-                    testReportComponent = testReport.addTest();
-                    if (conditionalTest.hasAction()) {
-                        String typePrefix = "contained.action";
-                        for (TestScript.TestActionComponent action : conditionalTest.getAction()) {
-                            TestReport.TestActionComponent actionReportComponent = testReportComponent.addAction();
-                            if (invalidAction(action, actionReportComponent, fVal))
-                                return;
-                            if (action.hasOperation()) {
-                                doOperation(typePrefix, action.getOperation(), actionReportComponent.getOperation());
-                                TestReport.SetupActionOperationComponent opReport = actionReportComponent.getOperation();
-                                if (opReport.getResult() == TestReport.TestReportActionResult.ERROR) {
-                                    testReport.setStatus(TestReport.TestReportStatus.COMPLETED);
-                                    testReport.setResult(TestReport.TestReportResult.FAIL);
-                                    return;
-                                }
-                            }
-                            if (action.hasAssert()) {
-                                TestReport.SetupActionAssertComponent actionReport = doAssert(typePrefix, action.getAssert());
-                                actionReportComponent.setAssert(actionReport);
-                                if ("fail".equals(actionReport.getResult().toCode())) {
-                                    testReport.setStatus(TestReport.TestReportStatus.ENTEREDINERROR);
-                                    testReport.setResult(TestReport.TestReportResult.PASS);
-                                    return;
-                                }
-                                if ("error".equals(actionReport.getResult().toCode())) {
-                                    testReport.setStatus(TestReport.TestReportStatus.COMPLETED);
-                                    testReport.setResult(TestReport.TestReportResult.FAIL);
-                                    return;
-                                }
-                            }
-                        }
-                    }
+                    containedTestReportComponent = containedTestReport.addTest();
+                    boolean conditionalResult = doTestPart(conditionalTest, containedTestReportComponent, containedTestReport, true);
 
+                    if (containedTestReport.getResult() == TestReport.TestReportResult.FAIL)
+                        return;
                 }
 
                 testReportComponent = testReport.addTest();
 
-                // real test execution starts here
-                if (testComponent.hasAction()) {
-                    String typePrefix = "test.action";
-                    for (TestScript.TestActionComponent action : testComponent.getAction()) {
-                        TestReport.TestActionComponent actionReportComponent = testReportComponent.addAction();
-                        if (invalidAction(action, actionReportComponent, fVal))
-                            return;
-                        if (action.hasOperation())
-                            doOperation(typePrefix, action.getOperation(), actionReportComponent.getOperation());
-                        if (action.hasAssert()) {
-                            TestReport.SetupActionAssertComponent actionReport = doAssert(typePrefix, action.getAssert());
-                            actionReportComponent.setAssert(actionReport);
-                        }
-                        if (hasError())
-                            return;
-                    }
-                }
+                //doTestPart(testComponent, testReportComponent, testReport, false);
             }
 
         }
-
     }
+
+    private boolean doTestPart(TestScript.TestScriptTestComponent testScriptElement, TestReport.TestReportTestComponent testReportComponent, TestReport testReport, boolean reportAsConditional) {
+        ValE fVal = new ValE(engineVal).setMsg("Test");
+        if (testScriptElement.hasAction()) {
+            String typePrefix = "contained.action";
+            for (TestScript.TestActionComponent action : testScriptElement.getAction()) {
+                TestReport.TestActionComponent actionReportComponent = testReportComponent.addAction();
+                if (invalidAction(action, actionReportComponent, fVal))
+                    return false;
+                if (action.hasOperation()) {
+                    doOperation(typePrefix, action.getOperation(), actionReportComponent.getOperation());
+                    TestReport.SetupActionOperationComponent opReport = actionReportComponent.getOperation();
+                    if (opReport.getResult() == TestReport.TestReportActionResult.ERROR) {
+                        testReport.setStatus(TestReport.TestReportStatus.COMPLETED);
+                        testReport.setResult(TestReport.TestReportResult.FAIL);
+                        return false;
+                    }
+                }
+                if (action.hasAssert()) {
+                    TestReport.SetupActionAssertComponent actionReport = doAssert(typePrefix, action.getAssert());
+                    actionReportComponent.setAssert(actionReport);
+                    if ("fail".equals(actionReport.getResult().toCode())) {
+                        if (reportAsConditional) {
+                            testReport.setStatus(TestReport.TestReportStatus.ENTEREDINERROR);
+                            testReport.setResult(TestReport.TestReportResult.PASS);
+                        } else {
+                            testReport.setStatus(TestReport.TestReportStatus.COMPLETED);
+                            testReport.setResult(TestReport.TestReportResult.FAIL);
+                        }
+                        return false;
+                    }
+                    if ("error".equals(actionReport.getResult().toCode())) {
+                        testReport.setStatus(TestReport.TestReportStatus.COMPLETED);
+                        testReport.setResult(TestReport.TestReportResult.FAIL);
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
+    }
+
+    private TestScript getConditional(TestScript.TestScriptTestComponent testComponent, TestReport.TestReportTestComponent testReportComponent) {
+        if (testComponent.hasModifierExtension()) {
+            Extension extension = testComponent.getModifierExtensionFirstRep();
+            if (!extension.hasUrl() || !extension.getUrl().equals("https://github.com/usnistgov/asbestos/wiki/TestScript-Conditional")) {
+                reportParsingError(testReportComponent, "Do not understand modifierExtension");
+                return null;
+            }
+            String containedTestScriptId = extension.getValue().toString();
+
+            List<Resource> containedList = testScript.getContained();
+            Resource contained = null;
+            for (Resource theContained : containedList) {
+                if (theContained.getId() != null && theContained.getId().equals(containedTestScriptId)) {
+                    contained = theContained;
+                    break;
+                }
+            }
+            if (contained == null) {
+                reportParsingError(testReportComponent, "cannot locate contained TestScript " + containedTestScriptId);
+                return null;
+            }
+
+
+            return (TestScript) contained;
+        }
+        return null;
+    }
+
+        private void reportParsingError(TestReport.TestReportTestComponent testReportComponent, String message) {
+            ValE fVal = new ValE(engineVal).setMsg("Test");
+            TestReport.TestActionComponent actionReportComponent = testReportComponent.addAction();
+            Reporter reporter = new Reporter(fVal, actionReportComponent.getOperation(), "", "");
+            reporter.reportError( message);
+            return;
+        }
 
     private boolean invalidAction(TestScript.TestActionComponent action, TestReport.TestActionComponent actionReportComponent, ValE fVal) {
         if (action.hasOperation() && action.hasAssert()) {
