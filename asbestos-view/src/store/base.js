@@ -66,7 +66,7 @@ export const baseStore = {
             })
             if (channelIndex === -1) {
                 state.channelIds.push(newChannel.channelId)
-//                console.log(`mutation install new channel - id=${newChannel.channelId}`
+               console.log(`mutation install new channel - id=${newChannel.channelId}`)
             } else {
                 console.log(`mutation install replacement channel - id=${newChannel.channelId}`)
 //                state.channel = newChannel

@@ -190,17 +190,16 @@
                 this.$store.commit('installChannel', chan)
                 this.$router.push('/session/' + this.sessionId + '/channels/copy')
             },
-            deleteChannel() {
-                const that = this
-                PROXY.delete('channel/' + this.sessionId + '__' + this.channelId)
-                    .then(function () {
-                        that.msg('Deleted')
-                    })
-                    .catch(function (error) {
-                        that.error(error)
-                    })
-                this.$store.commit('deleteChannel', this.channelId)
-                this.$router.push('/session/' + this.sessionId + '/channels')
+            async deleteChannel() {
+                try {
+                    await PROXY.delete('channel/' + this.sessionId + '__' + this.channelId)
+                    this.msg('Deleted')
+                    this.$store.commit('deleteChannel', this.channelId)
+                    await this.$store.dispatch('loadChannelNamesAndURLs')
+                    this.$router.push('/session/' + this.sessionId + '/channels')
+                } catch (error) {
+                    this.error(error)
+                }
             },
             toggleEdit() {
                 this.edit = !this.edit
@@ -242,6 +241,7 @@
                 try {
                     await CHANNEL.post('', aChannel)
                     this.msg('New Channel Saved')
+                    await this.$store.dispatch('loadChannelNamesAndURLs')
                 } catch(error) {
                     this.error(error)
                 }

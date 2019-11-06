@@ -501,17 +501,54 @@ public class TestEngine  {
 
 
                     TestScript containedTestScript = (TestScript) contained;
-                    TestScript.TestScriptTestComponent theContainedTest = containedTestScript.getTestFirstRep();
-                    if (theContainedTest == null) {
+                    List<TestScript.TestScriptTestComponent> tests = containedTestScript.getTest();
+                    if (tests.size() != 2) {
                         TestReport.TestActionComponent actionReportComponent = testReportComponent.addAction();
                         Reporter reporter = new Reporter(fVal, actionReportComponent.getOperation(), "", "");
-                        reporter.reportError( "cannot locate test inside contained TestScript " + containedTestScriptId);
+                        reporter.reportError( "test condition must contain two test elements -  TestScript " + containedTestScriptId);
                         return;
                     }
 
-                    if (theContainedTest.hasAction()) {
+                    // basic operation and validation
+                    TestScript.TestScriptTestComponent basicOperationTest = tests.get(0);
+                    if (basicOperationTest.hasAction()) {
                         String typePrefix = "contained.action";
-                        for (TestScript.TestActionComponent action : theContainedTest.getAction()) {
+                        for (TestScript.TestActionComponent action : basicOperationTest.getAction()) {
+                            TestReport.TestActionComponent actionReportComponent = testReportComponent.addAction();
+                            if (invalidAction(action, actionReportComponent, fVal))
+                                return;
+                            if (action.hasOperation()) {
+                                doOperation(typePrefix, action.getOperation(), actionReportComponent.getOperation());
+                                TestReport.SetupActionOperationComponent opReport = actionReportComponent.getOperation();
+                                if (opReport.getResult() == TestReport.TestReportActionResult.ERROR) {
+                                    testReport.setStatus(TestReport.TestReportStatus.COMPLETED);
+                                    testReport.setResult(TestReport.TestReportResult.FAIL);
+                                    return;
+                                }
+                            }
+                            if (action.hasAssert()) {
+                                TestReport.SetupActionAssertComponent actionReport = doAssert(typePrefix, action.getAssert());
+                                actionReportComponent.setAssert(actionReport);
+                                if ("fail".equals(actionReport.getResult().toCode())) {
+                                    testReport.setStatus(TestReport.TestReportStatus.COMPLETED);
+                                    testReport.setResult(TestReport.TestReportResult.FAIL);
+                                    return;
+                                }
+                                if ("error".equals(actionReport.getResult().toCode())) {
+                                    testReport.setStatus(TestReport.TestReportStatus.COMPLETED);
+                                    testReport.setResult(TestReport.TestReportResult.FAIL);
+                                    return;
+                                }
+                            }
+                        }
+                    }
+
+                    // asserts to trigger conditional
+                    TestScript.TestScriptTestComponent conditionalTest = tests.get(1);
+                    testReportComponent = testReport.addTest();
+                    if (conditionalTest.hasAction()) {
+                        String typePrefix = "contained.action";
+                        for (TestScript.TestActionComponent action : conditionalTest.getAction()) {
                             TestReport.TestActionComponent actionReportComponent = testReportComponent.addAction();
                             if (invalidAction(action, actionReportComponent, fVal))
                                 return;
@@ -540,6 +577,7 @@ public class TestEngine  {
                             }
                         }
                     }
+
                 }
 
                 testReportComponent = testReport.addTest();

@@ -1,14 +1,14 @@
 <!--
 	This TestScript is generic - it will work with any Patient resource 
 	as long as Patient is in Patient/patient.xml and it has a 
-	given and family name that make it unique.
+	given and family name and dob that make it unique.
 -->
 
 <TestScript xmlns="http://hl7.org/fhir">
 	<contained>
 		<TestScript>
 			<id value="patientNeedsLoading"/>
-			<test>
+			<test>  <!-- basic operation and validation -->
 				<action>
 					<operation>
 					<description value="looking for patient"/>
@@ -21,6 +21,24 @@
 						<responseId value="patient1-search"/>
 					</operation>
 				</action>
+				<action>
+					<assert>
+						<description value="Search has ok status"/>
+						<sourceId value="patient1-search"/>
+						<response value="okay"/>
+						<warningOnly value="false"/>
+					</assert>
+				</action>
+				<action>
+					<assert>
+						<description value="No OperationOutcome"/>
+						<compareToSourceId value="patient1-search"/>
+						<compareToSourceExpression value="Bundle.entry.response.outcome.where(is(FHIR.OperationOutcome)).empty()"/>
+						<warningOnly value="false"/>
+					</assert>
+				</action>
+			</test>
+			<test>  <!-- asserts to trigger conditional - one fail and condition is false -->
 				<action>
 					<assert>
 						<description value="needs loading"/>
