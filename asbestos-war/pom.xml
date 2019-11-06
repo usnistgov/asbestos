@@ -90,7 +90,6 @@
 
                     <testFailureIgnore>false</testFailureIgnore>
                     <excludes>
-                        <exclude>**/MultipartIT.java</exclude>
                         <exclude>**/PassthroughIT.java</exclude>
                         <exclude>**/ToFhirServerIT.java</exclude>
                         <exclude>**/ToProxyMhdIT.java</exclude>
