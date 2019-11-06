@@ -3,7 +3,7 @@ package gov.nist.asbestos.client.log;
 
 import gov.nist.asbestos.client.Base.Dirs;
 import gov.nist.asbestos.client.events.Event;
-import gov.nist.asbestos.client.events.Task;
+import gov.nist.asbestos.client.events.ITask;
 import gov.nist.asbestos.sharedObjects.ChannelConfig;
 import gov.nist.asbestos.sharedObjects.ChannelConfigFactory;
 import gov.nist.asbestos.simapi.simCommon.SimId;
@@ -36,7 +36,7 @@ public class SimStore {
     private boolean newlyCreated = false;
     public static final String PSIMDB = "FhirChannels";
     private static final String CHANNEL_CONFIG_FILE = "config.json";
-    private Task task;
+    private ITask task;
     //Event eventStore
     ChannelConfig channelConfig;
     private boolean channel = true;  // is this a channel to the backend system?
@@ -275,7 +275,10 @@ public class SimStore {
     }
 
     public String getEndpoint() {
-        return channelConfig.getFhirBase() + "/" + resource;
+        if ("passthrough".equals(getChannelConfig().getChannelType()))
+            return channelConfig.getFhirBase() + "/" + resource;
+        else
+            return String.format("<%s:proxyBase>/%s" ,getChannelConfig().getChannelType(), resource);
     }
 
     public SimId getChannelId() {

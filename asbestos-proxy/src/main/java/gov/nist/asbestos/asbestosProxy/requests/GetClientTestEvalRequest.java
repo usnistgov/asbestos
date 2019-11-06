@@ -3,7 +3,7 @@ package gov.nist.asbestos.asbestosProxy.requests;
 import gov.nist.asbestos.client.Base.ProxyBase;
 import gov.nist.asbestos.client.client.Format;
 import gov.nist.asbestos.client.events.Event;
-import gov.nist.asbestos.client.events.Task;
+import gov.nist.asbestos.client.events.ITask;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import gov.nist.asbestos.http.operations.HttpBase;
 import gov.nist.asbestos.http.operations.HttpGet;
@@ -102,7 +102,7 @@ public class GetClientTestEvalRequest {
         Map<Event, ResourceWrapper> requestResources = new HashMap<>();
         Map<Event, ResourceWrapper> responseResources = new HashMap<>();
         for (Event event : events) {
-            Task task = event.getClientTask();
+            ITask task = event.getClientTask();
             String verb = task.getVerb();
             try {
                 String requestString = task.getRequestBodyAsString();

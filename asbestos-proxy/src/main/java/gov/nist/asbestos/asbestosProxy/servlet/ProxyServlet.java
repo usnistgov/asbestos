@@ -11,7 +11,8 @@ import gov.nist.asbestos.asbestosProxy.util.Gzip;
 import gov.nist.asbestos.client.Base.ProxyBase;
 import gov.nist.asbestos.client.client.Format;
 import gov.nist.asbestos.client.events.Event;
-import gov.nist.asbestos.client.events.Task;
+import gov.nist.asbestos.client.events.ITask;
+import gov.nist.asbestos.client.events.NoOpTask;
 import gov.nist.asbestos.client.log.SimStore;
 import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.http.headers.Header;
@@ -76,7 +77,7 @@ public class ProxyServlet extends HttpServlet {
         config.getServletContext().setAttribute("ExternalCache", ec);
     }
 
-    private static String[] addEventHeader(HttpServletResponse resp, String hostport, Task task) {
+    private static String[] addEventHeader(HttpServletResponse resp, String hostport, ITask task) {
         Header header = buildEventHeader(hostport, task);
         resp.setHeader(header.getName(), header.getValue());
         String[] returned = new String[2];
@@ -86,7 +87,7 @@ public class ProxyServlet extends HttpServlet {
     }
 
 
-    public static String[] addEventHeader(HttpBase resp, String hostport, Task task) {
+    public static String[] addEventHeader(HttpBase resp, String hostport, ITask task) {
         Header header = buildEventHeader(hostport, task);
         resp.getResponseHeaders().add(header);
         String[] returned = new String[2];
@@ -95,7 +96,7 @@ public class ProxyServlet extends HttpServlet {
         return returned;
     }
 
-    private static Header buildEventHeader(String hostport, Task task) {
+    private static Header buildEventHeader(String hostport, ITask task) {
         if (hostport == null) return null;
         if (task == null) return null;
         File eventDir = task.getEvent().getEventDir();
@@ -145,7 +146,7 @@ public class ProxyServlet extends HttpServlet {
         }
 
         Event event = simStore.newEvent();
-        Task clientTask = event.getClientTask();
+        ITask clientTask = event.getClientTask();
         clientTask.putDescription("PDB from client");
         Headers inHeaders = Common.getRequestHeaders(req, Verb.POST);
         String hostport = inHeaders.getValue("host");
@@ -177,7 +178,7 @@ public class ProxyServlet extends HttpServlet {
             log.info("=> " + simStore.getEndpoint() + " " + clientTask.getRequestHeader().getContentType());
 
             // interaction between proxy and target service
-            Task backSideTask = clientTask.newTask();
+            ITask backSideTask = clientTask.newTask();
             backSideTask.putDescription("PNR to target");
 
             String proxyBase = new Ref(uri).getBase().withHostPort(hostport).toString();
@@ -276,7 +277,7 @@ public class ProxyServlet extends HttpServlet {
         doGetDelete(req, resp, uri, Verb.DELETE);
     }
 
-    private void returnOperationOutcome(HttpServletRequest req, HttpServletResponse resp, Task task, Throwable t) throws IOException, ServletException {
+    private void returnOperationOutcome(HttpServletRequest req, HttpServletResponse resp, ITask task, Throwable t) throws IOException, ServletException {
         Headers headers = Common.getRequestHeaders(req, Verb.GET);  // verb not used
         Header acceptHeader = headers.getAccept();
         Headers responseHeaders = new Headers();
@@ -317,10 +318,79 @@ public class ProxyServlet extends HttpServlet {
     }
 
     @Override
-    public void doGet(HttpServletRequest req, HttpServletResponse resp)  {
+    public void doGet(HttpServletRequest req, HttpServletResponse resp) {
         URI uri = Common.buildURI(req);
         log.info("doGet " + uri);
+
+        try {
+            Optional<URI> proxyBaseURI = getProxyBase(uri);
+            if (proxyBaseURI.isPresent()) {
+                Verb verb = Verb.GET;
+                Headers inHeaders = Common.getRequestHeaders(req, verb);
+                if (CapabilityStatement.isCapabilityStatementRequest(proxyBaseURI.get(), inHeaders.getPathInfo())) {
+                    doGetCapabilityStatement(req, resp, uri, verb, inHeaders);
+                    return; // EXIT
+                }
+            }
+        } catch (URISyntaxException uriEx) {
+            log.error(ExceptionUtils.getStackTrace(uriEx));
+        }
+
         doGetDelete(req, resp, uri, Verb.GET);
+    }
+
+    private void doGetCapabilityStatement(HttpServletRequest req, HttpServletResponse resp, URI uri, Verb verb, Headers inHeaders) {
+        SimStore simStore;
+        boolean isLoggingEnabled = false;
+        try {
+            isLoggingEnabled = Boolean.parseBoolean(ServiceProperties.getInstance().getProperty(ServicePropertiesEnum.LOG_CS_METADATA_REQUEST));
+            simStore = parseUri(uri, req, resp, verb);
+            if (simStore == null) {
+                return;
+            }
+        } catch (Exception ex) {
+            log.error(ExceptionUtils.getStackTrace(ex));
+            resp.setStatus(resp.SC_INTERNAL_SERVER_ERROR);
+            return;
+        }
+
+        ITask clientTask = (isLoggingEnabled ? simStore.newEvent().getClientTask() : new NoOpTask());
+        try {
+            String hostport = inHeaders.getValue("host");
+            if (hostport == null || hostport.equals(""))
+                hostport = "localhost:8080";
+
+            String channelType = simStore.getChannelConfig().getChannelType();
+            if (channelType == null)
+                throw new Exception("Sim " + simStore.getChannelId() + " does not define a Channel Type.");
+            IChannelBuilder channelBuilder = proxyMap.get(channelType);
+            BaseChannel channel = channelBuilder.build();
+
+            channel.setup(simStore.getChannelConfig());
+            channel.setReturnFormatType(Format.resultContentType(inHeaders));
+            channel.setHostport(hostport);
+            channel.setTask(clientTask);
+
+            log.info("Metadata Request => " + simStore.getEndpoint() + " " + inHeaders.getAccept());
+
+            ServicePropertiesEnum capabilityStatementFile = ServicePropertiesEnum.EMPTY_CAPABILITY_STATEMENT_FILE;
+            switch (channelType) {
+                case "mhd": capabilityStatementFile = ServicePropertiesEnum.MHD_CAPABILITY_STATEMENT_FILE; break;
+            }
+
+            byte[] inBody = getRequestBody(req);
+            HttpBase requestIn = logClientRequestIn(clientTask, inHeaders, inBody, verb);
+            BaseResource baseResource = CapabilityStatement.getCapabilityStatement(capabilityStatementFile);
+            respond(resp, baseResource, inHeaders, clientTask);
+        } catch (Exception ex) {
+            // This did not work in IntelliJ Jetty runner without any Jetty XML config:
+            // resp.sendError(500, ex.toString());.
+            // This worked in Tomcat but not Jetty without any Jetty XML config. Works with the following accept-headers: fhir+xml and fhir+json.
+            log.error(ExceptionUtils.getStackTrace(ex));
+            resp.setStatus(resp.SC_INTERNAL_SERVER_ERROR);
+            respondWithError(req, resp, ex.toString(), inHeaders, clientTask);
+        }
+        return;
     }
 
     private void doGetDelete(HttpServletRequest req, HttpServletResponse resp, URI uri, Verb verb)  {
@@ -337,7 +407,7 @@ public class ProxyServlet extends HttpServlet {
         }
 
         Event event = simStore.newEvent();
-        Task clientTask = event.getClientTask();
+        ITask clientTask = event.getClientTask();
         Headers inHeaders = Common.getRequestHeaders(req, verb);
         String hostport = inHeaders.getValue("host");
         if (hostport == null || hostport.equals(""))
@@ -364,41 +434,12 @@ public class ProxyServlet extends HttpServlet {
                 return;
             }
 
-
             log.info("ProxyServlet => " + simStore.getEndpoint() + " " + clientTask.getRequestHeader().getAccept());
-
-            // For MHD channels only:
-            // begin handle Capability Statement request i.e. http://proxyBase/metadata
-            if ("mhd".equals(channelType)) {
-                boolean enableLogging = Boolean.parseBoolean(ServiceProperties.getInstance().getProperty(ServicePropertiesEnum.LOG_CS_METADATA_REQUEST));
-                Optional<URI> proxyBaseURI = getProxyBase(inHeaders.getPathInfo());
-                if (proxyBaseURI.isPresent()) {
-                    if (CapabilityStatement.isCapabilityStatementRequest(proxyBaseURI.get(), inHeaders.getPathInfo())) {
-                        clientTask.setEnableLogging(enableLogging);
-                        byte[] inBody = getRequestBody(req);
-                        HttpBase requestIn = logClientRequestIn(clientTask, inHeaders, inBody, verb);
-
-                        try {
-                            BaseResource baseResource = CapabilityStatement.getCapabilityStatement(ServicePropertiesEnum.MHD_CAPABILITY_STATEMENT_FILE);
-                            respond(resp, baseResource, inHeaders, clientTask);
-                        } catch (Exception ex) {
-                            // This did not work in IntelliJ Jetty runner without any Jetty XML config:
-                             // resp.sendError(500, ex.toString());.
-                            // This worked in Tomcat but not Jetty without any Jetty XML config. Works with the following accept-headers: fhir+xml and fhir+json.
-                            resp.setStatus(500);
-                            respondWithError(req, resp, ex.toString(), inHeaders, clientTask);
-                        }
-                        return; // EXIT
-                    }
-                }
-            }
-            // end
-
 
             byte[] inBody = getRequestBody(req);
             HttpBase requestIn = logClientRequestIn(clientTask, inHeaders, inBody, verb);
 
-            Task backSideTask = clientTask.newTask();
+            ITask backSideTask = clientTask.newTask();
 
             URI outURI = transformRequestUri(requestIn, channel);
             // transform input request for backend service
@@ -465,7 +506,8 @@ public class ProxyServlet extends HttpServlet {
         return bundle;
     }
 
-    private void respondWithError(HttpServletRequest req, HttpServletResponse resp, Throwable t, Headers inHeaders, Task clientTask) {
+    private void respondWithError(HttpServletRequest req, HttpServletResponse resp, Throwable t, Headers inHeaders, ITask
+        clientTask) {
         log.error(ExceptionUtils.getStackTrace(t));
         if (new Ref(Common.buildURI(req)).isQuery()) {
             Bundle bundle = wrapInBundle(wrapInOutcome(t));
@@ -476,7 +518,8 @@ public class ProxyServlet extends HttpServlet {
         }
     }
 
-    private void respondWithError(HttpServletRequest req, HttpServletResponse resp, String msg, Headers inHeaders, Task clientTask) {
+    private void respondWithError(HttpServletRequest req, HttpServletResponse resp, String msg, Headers inHeaders, ITask
+        clientTask) {
         if (new Ref(Common.buildURI(req)).isQuery()) {
             Bundle bundle = wrapInBundle(wrapInOutcome(msg));
             respond(resp, bundle, inHeaders, clientTask);
@@ -486,14 +529,14 @@ public class ProxyServlet extends HttpServlet {
         }
     }
 
-    private void respond(HttpServletResponse resp, BaseResource resource, Headers inHeaders, Task clientTask) {
+    private void respond(HttpServletResponse resp, BaseResource resource, Headers inHeaders, ITask clientTask) {
         String resourceString = "";
         if (resource != null)
             resourceString = ProxyBase.encode(resource, Format.resultContentType(inHeaders));
         respond(resp, resourceString.getBytes(), inHeaders, clientTask);
     }
 
-    private void respond(HttpServletResponse resp, byte[] content, Headers inHeaders, Task clientTask) {
+    private void respond(HttpServletResponse resp, byte[] content, Headers inHeaders, ITask clientTask) {
         HttpBase responseOut = new HttpGet();
         Format format = Format.resultContentType(inHeaders);
         responseOut.getResponseHeaders().add(new Header("Content-Type", format.getContentType()));
@@ -503,10 +546,11 @@ public class ProxyServlet extends HttpServlet {
     }
 
     // responseOut is final response to return to client
-    private void respond(HttpServletResponse resp, HttpBase responseOut, Headers inHeaders, Task clientTask) {
+    private void respond(HttpServletResponse resp, HttpBase responseOut, Headers inHeaders, ITask clientTask) {
         try {
             responseOut.setStatus(200);
-            addEventHeader(responseOut, getHostPort(inHeaders), clientTask);
+            if (clientTask.getEvent() != null)
+                addEventHeader(responseOut, getHostPort(inHeaders), clientTask);
             logResponse(clientTask, responseOut);
 
             transferHeaders(responseOut.getResponseHeaders(), resp);
@@ -528,7 +572,7 @@ public class ProxyServlet extends HttpServlet {
         }
     }
 
-    private static void logResponse(Task task, HttpBase requestOut) {
+    private static void logResponse(ITask task, HttpBase requestOut) {
         Headers responseHeaders = requestOut.getResponseHeaders();
         if (requestOut.getStatus() != 0)
             responseHeaders.setStatus(requestOut.getStatus());
@@ -537,7 +581,7 @@ public class ProxyServlet extends HttpServlet {
         log.info("==> " + requestOut.getStatus() + " " + ((requestOut.getResponse() != null) ? requestOut.getResponseContentType() + " " + requestOut.getResponse().length + " bytes" : "NULL"));
     }
 
-    static HttpBase logClientRequestIn(Task task, Headers headers, byte[] body, Verb verb) {
+    static HttpBase logClientRequestIn(ITask task, Headers headers, byte[] body, Verb verb) {
         HttpBase base = (verb == Verb.GET) ? new HttpGet() : (verb == Verb.DELETE ? new HttpDelete() : new HttpPost());
         task.putRequestHeader(headers);
         base.setRequestHeaders(headers);
@@ -595,7 +639,7 @@ public class ProxyServlet extends HttpServlet {
         return bytes;
     }
 
-    static void logRequestBody(Task task, Headers headers, HttpBase http, HttpServletRequest req) {
+    static void logRequestBody(ITask task, Headers headers, HttpBase http, HttpServletRequest req) {
         byte[] bytes;
         try {
             bytes = IOUtils.toByteArray(req.getInputStream());
@@ -617,7 +661,7 @@ public class ProxyServlet extends HttpServlet {
         }
     }
 
-    static void logResponseBody(Task task, HttpBase http) {
+    static void logResponseBody(ITask task, HttpBase http) {
         Headers headers = http.getResponseHeaders();
         byte[] bytes = http.getResponse();
         task.putResponseBody(bytes);
@@ -650,7 +694,7 @@ public class ProxyServlet extends HttpServlet {
         }
     }
 
-    static void logRequest(Task task, HttpBase http) {
+    static void logRequest(ITask task, HttpBase http) {
         Headers headers = http.getRequestHeaders();
         task.putRequestHeader(headers);
         byte[] bytes = http.getRequest();
@@ -679,7 +723,7 @@ public class ProxyServlet extends HttpServlet {
         }
     }
 
-    static HttpBase transformRequest(Task task, HttpPost requestIn, URI newURI, IBaseChannel channelTransform) {
+    static HttpBase transformRequest(ITask task, HttpPost requestIn, URI newURI, IBaseChannel channelTransform) {
         HttpPost requestOut = new HttpPost();
         channelTransform.setTask(task);
         channelTransform.transformRequest(requestIn, requestOut);
@@ -692,7 +736,7 @@ public class ProxyServlet extends HttpServlet {
         return requestOut;
     }
 
-    static HttpBase transformRequest(Task task, HttpGet requestIn, URI newURI, IBaseChannel channelTransform) {
+    static HttpBase transformRequest(ITask task, HttpGet requestIn, URI newURI, IBaseChannel channelTransform) {
         HttpGet requestOut = new HttpGet();
 
         channelTransform.transformRequest(requestIn, requestOut);
@@ -705,7 +749,7 @@ public class ProxyServlet extends HttpServlet {
         return requestOut;
     }
 
-    static HttpBase transformRequest(Task task, HttpDelete requestIn, URI newURI, IBaseChannel channelTransform) {
+    static HttpBase transformRequest(ITask task, HttpDelete requestIn, URI newURI, IBaseChannel channelTransform) {
         HttpDelete requestOut = new HttpDelete();
 
         channelTransform.transformRequest(requestIn, requestOut);
@@ -723,7 +767,7 @@ public class ProxyServlet extends HttpServlet {
         return channelTransform.transformRequestUrl(headers.getPathInfo().getPath(), requestIn);
     }
 
-    static HttpBase transformResponse(Task task, HttpBase responseIn, IBaseChannel channelTransform, String proxyHostPort) {
+    static HttpBase transformResponse(ITask task, HttpBase responseIn, IBaseChannel channelTransform, String proxyHostPort) {
         HttpBase responseOut = new HttpGet();  // here GET vs POST does not matter
         channelTransform.transformResponse(responseIn, responseOut, proxyHostPort);
         responseOut.setStatus(responseIn.getStatus());

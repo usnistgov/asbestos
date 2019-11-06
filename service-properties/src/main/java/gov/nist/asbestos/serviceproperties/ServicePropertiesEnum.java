@@ -4,7 +4,8 @@ import java.util.Optional;
 
 public enum ServicePropertiesEnum {
     LOG_CS_METADATA_REQUEST("Log_CS_Metadata_Request"),
-    MHD_CAPABILITY_STATEMENT_FILE("MhdCapabilityStatementFile");
+    MHD_CAPABILITY_STATEMENT_FILE("MhdCapabilityStatementFile"),
+    EMPTY_CAPABILITY_STATEMENT_FILE("EmptyCapabilityStatementFile");
 
 
     private String key;

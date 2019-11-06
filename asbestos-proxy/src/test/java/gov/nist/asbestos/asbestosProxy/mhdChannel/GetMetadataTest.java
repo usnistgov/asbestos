@@ -4,7 +4,7 @@ import gov.nist.asbestos.asbestosProxy.servlet.ChannelControlServlet;
 import gov.nist.asbestos.client.events.Event;
 import gov.nist.asbestos.client.events.EventStoreItem;
 import gov.nist.asbestos.client.events.EventStoreSearch;
-import gov.nist.asbestos.client.events.Task;
+import gov.nist.asbestos.client.events.ITask;
 import gov.nist.asbestos.client.log.SimStore;
 import gov.nist.asbestos.asbestosProxy.servlet.ProxyServlet;
 import gov.nist.asbestos.simapi.simCommon.SimId;
@@ -93,7 +93,7 @@ class GetMetadataTest {
         assertNotNull(event);
         assertEquals(2, event.getTaskCount());
 
-        Task task = event.getClientTask();
+        ITask task = event.getClientTask();
         int taski = 0;
 
         assertTrue(event.getRequestHeaderFile(taski).exists());

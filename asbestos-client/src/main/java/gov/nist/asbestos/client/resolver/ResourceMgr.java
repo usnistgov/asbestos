@@ -5,7 +5,7 @@ import gov.nist.asbestos.client.Base.IVal;
 import gov.nist.asbestos.client.Base.ProxyBase;
 import gov.nist.asbestos.client.client.FhirClient;
 import gov.nist.asbestos.client.client.Format;
-import gov.nist.asbestos.client.events.Task;
+import gov.nist.asbestos.client.events.ITask;
 import gov.nist.asbestos.http.headers.Headers;
 import gov.nist.asbestos.http.operations.HttpBase;
 import gov.nist.asbestos.simapi.validation.Val;
@@ -28,7 +28,7 @@ public class ResourceMgr implements IVal {
     private FhirClient fhirClient = null;
 
     private List<ResourceWrapper> bundleResourceList = new ArrayList<>();
-    private Task theTask = null;
+    private ITask theTask = null;
 
     public ResourceMgr() {
 
@@ -233,12 +233,12 @@ public class ResourceMgr implements IVal {
     private void logResourceWrapper(ResourceWrapper wrapper, String msg) {
         Objects.requireNonNull(theTask);
 
-        Task task = theTask.newTask();
+        ITask task = theTask.newTask();
         task.putDescription(msg);
         logResourceWrapper(wrapper, task);
     }
 
-    private void logResourceWrapper(ResourceWrapper wrapper, Task task) {
+    private void logResourceWrapper(ResourceWrapper wrapper, ITask task) {
         HttpBase base = wrapper.getHttpBase();
         if (base == null) {
             task.putRequestHeader(new Headers().withVerb("GET").withPathInfo(wrapper.getRef().getUri()));
@@ -296,7 +296,7 @@ public class ResourceMgr implements IVal {
         return bundleResourceList;
     }
 
-    public ResourceMgr setTask(Task task) {
+    public ResourceMgr setTask(ITask task) {
         this.theTask = task;
         return this;
     }
