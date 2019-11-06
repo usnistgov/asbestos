@@ -17,6 +17,7 @@ public class GetTestCollectionRequest {
 
     class TestCollection {
         boolean isServerTest;
+        String description;
         List<String> testNames;
     }
 
@@ -37,7 +38,7 @@ public class GetTestCollectionRequest {
         String collectionName = request.uriParts.get(4);
 
         TestCollection tc = new TestCollection();
-
+        tc.description = request.ec.getTestCollectionDescription(collectionName);
         Properties props = request.ec.getTestCollectionProperties(collectionName);
         tc.isServerTest = !"client".equals(props.getProperty("TestType"));
         tc.testNames = request.ec.getTestsInCollection(collectionName);

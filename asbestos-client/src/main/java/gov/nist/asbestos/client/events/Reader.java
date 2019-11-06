@@ -1,4 +1,4 @@
-package gov.nist.asbestos.asbestosProxy.event;
+package gov.nist.asbestos.client.events;
 
 import java.io.File;
 import java.nio.file.Files;
@@ -23,7 +23,7 @@ public class Reader {
 
         try {
             String content = new String(Files.readAllBytes(file.toPath()));
-            content = content.replaceAll("<", "&lt;");
+           // content = content.replaceAll("<", "&lt;");
             return content;
         } catch (Exception e) {
             ;

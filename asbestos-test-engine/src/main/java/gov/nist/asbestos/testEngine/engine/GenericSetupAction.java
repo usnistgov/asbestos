@@ -1,5 +1,6 @@
 package gov.nist.asbestos.testEngine.engine;
 
+import gov.nist.asbestos.client.Base.ProxyBase;
 import gov.nist.asbestos.client.client.FhirClient;
 import gov.nist.asbestos.client.client.Format;
 import gov.nist.asbestos.client.resolver.Ref;
@@ -69,7 +70,7 @@ abstract class GenericSetupAction {
                 return false;
             }
             resourceToSend = sourceFixture.getResourceResource();
-            updateResourceToSend(resourceToSend);
+            resourceToSend = updateResourceToSend(resourceToSend);
         }
         if (op.hasRequestHeader())
             handleRequestHeader(requestHeader, op, variableMgr);
@@ -86,8 +87,10 @@ abstract class GenericSetupAction {
         return targetUrl != null;
     }
 
-    public void updateResourceToSend(BaseResource resource) {
-
+    public BaseResource updateResourceToSend(BaseResource resource) {
+        String resourceString = ProxyBase.encode(resource, Format.JSON);
+        String updatedResourceString = variableMgr.updateReference(resourceString);
+        return ProxyBase.parse(updatedResourceString, Format.JSON);
     }
 
     void postExecute(ResourceWrapper wrapper) {

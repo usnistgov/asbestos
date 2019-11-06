@@ -5,7 +5,7 @@ Vue.config.productionTip = false
 
 Vue.config.errorHandler = function(err, vm, info) {
   console.log(`GOT Vue ERROR`)
-  vm.$store.commit('setError', err + ' ' + info)
+  vm.$store.commit('setError', 'Vue: ' + err + ' : ' + info)
 }
 
 window.onerror = function(message, source, lineno, colno, error) {

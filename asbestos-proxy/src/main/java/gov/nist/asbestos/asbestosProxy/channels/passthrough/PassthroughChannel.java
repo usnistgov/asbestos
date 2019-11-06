@@ -102,6 +102,7 @@ public class PassthroughChannel extends BaseChannel /*implements IBaseChannel*/ 
         }
         responseOut.setResponseHeaders(headers);
         responseOut.setResponse(responseIn.getResponse());
+        responseOut.setStatus(responseIn.getStatus());
     }
 
     @Override

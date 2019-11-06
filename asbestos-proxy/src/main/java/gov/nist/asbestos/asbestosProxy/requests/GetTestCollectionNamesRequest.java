@@ -1,13 +1,17 @@
 package gov.nist.asbestos.asbestosProxy.requests;
 
+import com.google.gson.Gson;
 import org.apache.log4j.Logger;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 // 0 - empty
 // 1 - app context
 // 2 - "engine"
 // 3 - "collections"
-// Return list of channel IDs
+// Return list of test collection names
 
 public class GetTestCollectionNamesRequest {
     private static Logger log = Logger.getLogger(GetTestCollectionNamesRequest.class);
@@ -22,10 +26,28 @@ public class GetTestCollectionNamesRequest {
         this.request = request;
     }
 
-    public void run()  {
+    class Collection {
+        String name;
+        boolean server;
+    }
+
+    public void run() throws IOException {
         log.info("GetTestCollectionNames");
+        List<Collection> collections = new ArrayList<>();
         List<String> names = request.ec.getTestCollectionNames();
-        Returns.returnList(request.resp, names);
+        for (String name : names) {
+            Collection collection = new Collection();
+            Properties props = request.ec.getTestCollectionProperties(name);
+            collection.server = "server".equals(props.getProperty("TestType"));
+            collection.name = name;
+            collections.add(collection);
+        }
+        String json = new Gson().toJson(collections);
+        request.resp.setContentType("application/json");
+        request.resp.getOutputStream().print(json);
+
+        request.resp.setStatus(request.resp.SC_OK);
+
         log.info("OK");
     }
 }

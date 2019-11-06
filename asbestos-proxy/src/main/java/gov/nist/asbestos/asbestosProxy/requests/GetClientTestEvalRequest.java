@@ -162,7 +162,7 @@ public class GetClientTestEvalRequest {
         StringBuilder buf = new StringBuilder();
         buf.append('{').append('"').append(testId).append('"').append(':').append("\n ");
 
-        File testLogDir = request.ec.getTestLogDir(request.fullChannelId(), testCollection, testId);
+        File testLogDir = request.ec.getTestLogDir(request.fullChannelId(), testCollection);
         EventResult er = result.results.get(testId);
         if (er == null || er.reports == null || er.reports.isEmpty())
             buf.append("null");

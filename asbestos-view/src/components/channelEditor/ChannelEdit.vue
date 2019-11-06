@@ -109,7 +109,7 @@
 <script>
     import Vue from 'vue'
     import {store} from "../../store"
-    import {PROXY} from '../../common/http-common'
+    import {PROXY, CHANNEL} from '../../common/http-common'
     import VueFlashMessage from 'vue-flash-message';
     Vue.use(VueFlashMessage);
     require('vue-flash-message/dist/vue-flash-message.min.css')
@@ -190,17 +190,16 @@
                 this.$store.commit('installChannel', chan)
                 this.$router.push('/session/' + this.sessionId + '/channels/copy')
             },
-            deleteChannel() {
-                const that = this
-                PROXY.delete('channel/' + this.sessionId + '__' + this.channelId)
-                    .then(function () {
-                        that.msg('Deleted')
-                    })
-                    .catch(function (error) {
-                        that.error(error)
-                    })
-                this.$store.commit('deleteChannel', this.channelId)
-                this.$router.push('/session/' + this.sessionId + '/channels')
+            async deleteChannel() {
+                try {
+                    await PROXY.delete('channel/' + this.sessionId + '__' + this.channelId)
+                    this.msg('Deleted')
+                    this.$store.commit('deleteChannel', this.channelId)
+                    await this.$store.dispatch('loadChannelNamesAndURLs')
+                    this.$router.push('/session/' + this.sessionId + '/channels')
+                } catch (error) {
+                    this.error(error)
+                }
             },
             toggleEdit() {
                 this.edit = !this.edit
@@ -218,22 +217,16 @@
                         this.badNameModeReason = `Name may only contain a-z A-Z 0-9 _  and __ not allowed`
                         return
                     }
-                    this.$store.commit('deleteChannel', this.originalChannelId) // original has been renamed
+                    this.saveToServer(this.channel)
                     this.$store.commit('installChannel', cloneDeep(this.channel))
-                    PROXY.post('channel', this.channel)
-                        .then(function () {
-                            that.msg('Saved')
-                        })
-                        .catch(function (error) {
-                            that.error(error)
-                        })
+                    this.$store.commit('deleteChannel', this.originalChannelId) // original has been renamed
                     this.isNew = false
                     this.toggleEdit()
                     this.$router.push('/session/' + this.channel.testSession + '/channels/' + this.channel.channelId)
                     return
                 }
                 this.$store.commit('installChannel', cloneDeep(this.channel))
-                PROXY.post('channel', this.channel)
+                CHANNEL.post('', this.channel)
                     .then(function () {
                         that.msg('Saved')
                     })
@@ -243,6 +236,15 @@
                 this.isNew = false
                 this.toggleEdit()
                 this.fetch()
+            },
+            async saveToServer(aChannel) {
+                try {
+                    await CHANNEL.post('', aChannel)
+                    this.msg('New Channel Saved')
+                    await this.$store.dispatch('loadChannelNamesAndURLs')
+                } catch(error) {
+                    this.error(error)
+                }
             },
             discard() {
                 if (this.isNew) {

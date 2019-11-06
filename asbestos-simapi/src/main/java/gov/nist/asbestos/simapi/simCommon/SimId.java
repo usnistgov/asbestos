@@ -136,7 +136,11 @@ public class SimId {
         return buf.toString();
     }
 
-    public static String cleanId(String id) { return id.replaceAll("\\.", "_").toLowerCase(); }
+    public static String cleanId(String id) {
+        return id.replaceAll("\\.", "_")
+//                .toLowerCase()
+                ;
+    }
 
      public String getActorType() {
         return actorType;

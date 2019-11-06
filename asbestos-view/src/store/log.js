@@ -33,33 +33,33 @@ export const logStore = {
         }
     },
     actions: {
-        loadEventSummaries({commit, rootState}) {
+        async loadEventSummaries({commit, rootState}) {
             if (!rootState.base.session) {
-                this.$store.commit('setError', 'Session not set in logStore.loadEventSummaries')
+                commit('setError', 'Session not set in logStore.loadEventSummaries')
                 console.error('Session not set')
                 return
             }
             if (!rootState.base.channelId) {
-                this.$store.commit('setError', 'Channel not set in logStore.loadEventSummaries')
+                commit('setError', 'Channel not set in logStore.loadEventSummaries')
                 console.error('Channel not set')
                 return
             }
-            LOG.get(`${rootState.base.session}/${rootState.base.channelId}`, {
-                params: {
-                    summaries: 'true'
-                }
-            })
-                .then(response => {
-                    const eventSummaries = response.data.sort((a, b) => {
-                        if (a.eventName < b.eventName) return 1
-                        return -1
-                    })
-                    commit('setEventSummaries', eventSummaries)
+            try {
+                const rawSummaries = await LOG.get(`${rootState.base.session}/${rootState.base.channelId}`, {
+                    params: {
+                        summaries: 'true'
+                    }
                 })
-                .catch(error => {
-                    this.$store.commit('setError', error)
-                    console.error(error)
+
+                const eventSummaries = rawSummaries.data.sort((a, b) => {
+                    if (a.eventName < b.eventName) return 1
+                    return -1
                 })
+                commit('setEventSummaries', eventSummaries)
+            } catch (error) {
+                commit('setError', error)
+                console.error(error)
+            }
         },
     }
 }

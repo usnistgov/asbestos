@@ -4,20 +4,18 @@
         <div v-if="!selectable" class="not-available">Select FHIR Server</div>
         <div v-else>
             <div>
-                <span class="control-panel-item-title" @click="openCollection()">Test Collection</span>
+                <span class="control-panel-item-title" @click="openCollection()">Test Collections</span>
                 <span class="divider"></span>
                 <img id="reload" class="selectable" @click="reload()" src="../../assets/reload.png"/>
+                <br />
+
+                <input type="radio" id="client" value="Client" v-model="testType">
+                <label for="client">Client</label>
+                <input type="radio" id="server" value="Server" v-model="testType">
+                <label for="server">Server</label>
             </div>
             <b-form-select class="control-panel-font" v-model="collection" :options="collections"></b-form-select>
 
-            <div v-if="client">(Client Tests)</div>
-            <div v-else>
-                <div v-if="collection">
-                    (Server Tests)
-                </div>
-            </div>
-<!--            <div class="control-panel-item-title" @click="selectIndividual()">Tests</div>-->
-<!--            <b-form-select v-model="testId" :options="testIds"></b-form-select>-->
         </div>
     </div>
 </template>
@@ -31,6 +29,7 @@
     export default {
         data() {
             return {
+                testType: "Server", // Client or Server
             }
         },
         methods: {
@@ -59,7 +58,7 @@
         },
         computed: {
             client() {
-                return this.$store.state.testRunner.isClientTest
+                return this.testType === 'Client'
             },
             collection: {
                 set(name) {
@@ -71,11 +70,10 @@
                 }
             },
             collections: {
-                set(names) {
-                    this.$store.commit('setTestCollectionNames', names)
-                },
                 get() {
-                    return this.$store.state.testRunner.testCollectionNames
+                    return (this.client)
+                    ? this.$store.state.testRunner.clientTestCollectionNames
+                        : this.$store.state.testRunner.serverTestCollectionNames
                 }
             },
             session() {
