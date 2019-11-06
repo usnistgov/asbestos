@@ -5,9 +5,11 @@ import gov.nist.asbestos.client.client.Format;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.BaseResource;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 
 
 public class ProxyBase {
@@ -26,6 +28,18 @@ public class ProxyBase {
             return getFhirContext().newXmlParser().setPrettyPrint(true).encodeResourceToString(resource);
         }
     }
+
+    public static void toFile(BaseResource resource, File dir, String id, Format format) {
+        String content = encode(resource, format);
+        Path path = new File(dir, id + "." + Format.fileExtensionFromContent(content)).toPath();
+        try (BufferedWriter writer = Files.newBufferedWriter(path))
+        {
+            writer.write(content);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 
     public static BaseResource parse(byte[] resource, Format format) {
         String resourceString = new String(resource);

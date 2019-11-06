@@ -1,5 +1,6 @@
 package gov.nist.asbestos.asbestosProxy.event;
 
+import gov.nist.asbestos.client.events.Reader;
 import gov.nist.asbestos.http.headers.Headers;
 
 import java.io.File;

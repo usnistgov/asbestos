@@ -20,11 +20,11 @@ public class FileSystemResourceCache implements ResourceCache {
     private static final Logger logger = Logger.getLogger(FileSystemResourceCache.class);
     private static FhirContext ctx = FhirContext.forR4();
 
-    private File cacheDir;
-    private Ref base;
+    private List<File> cacheDirs = new ArrayList<>();
+    private Ref base = new Ref("");
 
     public FileSystemResourceCache(File cacheDir) {
-        this.cacheDir = cacheDir;
+        this.cacheDirs.add(cacheDir);
         File propFile = new File(cacheDir, "cache.properties");
         if (!propFile.exists())
             throw new RuntimeException(cacheDir + "/cache.properties does not exist");
@@ -49,23 +49,35 @@ public class FileSystemResourceCache implements ResourceCache {
         logger.info("New Resource cache: " + base + " --> " + cacheDir);
     }
 
-    public FileSystemResourceCache(File cacheDir, Ref base) {
-        this.cacheDir = cacheDir;
-        this.base = base;
+//    public FileSystemResourceCache(File cacheDir, Ref base) {
+//        this.cacheDirs.add(cacheDir);
+//        this.base = base;
+//    }
+
+    public FileSystemResourceCache() {
+
+    }
+
+    public void addCache(File cacheDir) {
+        this.cacheDirs.add(cacheDir);
     }
 
     public ResourceWrapper readResource(Ref url) {
         File file = cacheFile(url, "xml");
-        String id = file.getName();
-        id = id.substring(0, id.indexOf(".xml"));
-        if (file.exists()) {
-            ResourceWrapper wrapper = new ResourceWrapper(ctx.newXmlParser().parseResource(fileToString(file)));
-            wrapper.setRef(url);
-            wrapper.getResource().setId(id);
-            return wrapper;
+        if (file != null) {
+            String id = file.getName();
+            id = id.substring(0, id.indexOf(".xml"));
+            if (file.exists()) {
+                ResourceWrapper wrapper = new ResourceWrapper(ctx.newXmlParser().parseResource(fileToString(file)));
+                wrapper.setRef(url);
+                wrapper.getResource().setId(id);
+                return wrapper;
+            }
         }
         file = cacheFile(url, "json");
-        id = file.getName();
+        if (file == null)
+            throw new Error("Cache resource " + url + " does not exist");
+        String id = file.getName();
         id = id.substring(0, id.indexOf(".json"));
         if (file.exists()) {
             ResourceWrapper wrapper = new ResourceWrapper(ctx.newJsonParser().parseResource(fileToString(file)));
@@ -89,21 +101,22 @@ public class FileSystemResourceCache implements ResourceCache {
     public List<ResourceWrapper> getAll(Ref base, String type) {
         List<ResourceWrapper> all = new ArrayList<>();
 
-        File dir = new File(cacheDir, type);
-        File[] files = dir.listFiles();
-        if (files != null) {
-            for (File file : files) {
-                String name = file.getName();
-                if (!(name.endsWith(".xml") || name.endsWith(".json")))
-                    continue;
-                ResourceWrapper wrapper = readFile(file);
-                String[] parts = file.getName().split("\\.", 2);
-                String id = parts[0];
-                wrapper.setRef(new Ref(base, type, id, null));
-                all.add(wrapper);
+        for (File cacheDir : cacheDirs) {
+            File dir = new File(cacheDir, type);
+            File[] files = dir.listFiles();
+            if (files != null) {
+                for (File file : files) {
+                    String name = file.getName();
+                    if (!(name.endsWith(".xml") || name.endsWith(".json")))
+                        continue;
+                    ResourceWrapper wrapper = readFile(file);
+                    String[] parts = file.getName().split("\\.", 2);
+                    String id = parts[0];
+                    wrapper.setRef(new Ref(base, type, id, null));
+                    all.add(wrapper);
+                }
             }
         }
-
         return all;
     }
 
@@ -132,7 +145,12 @@ public class FileSystemResourceCache implements ResourceCache {
     private File cacheFile(Ref relativeUrl, String fileType) {
         String type = relativeUrl.getResourceType();
         String id = relativeUrl.getId() + ((fileType != null) ? "." + fileType : "");
-        return new File(new File(cacheDir, type), id);
+        for (File cacheDir : cacheDirs) {
+            File file = new File(new File(cacheDir, type), id);
+            if (file.exists())
+                return file;
+        }
+        return null;
     }
 
     public Ref getBase() {

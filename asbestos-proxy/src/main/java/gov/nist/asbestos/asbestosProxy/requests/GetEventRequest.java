@@ -99,17 +99,18 @@ public class GetEventRequest {
     private void displayEvent(StringBuilder b, File theEvent, String label) {
         String section = label.toLowerCase();
         b.append("<h2>").append(label).append("</h2>");
-        String description = UITask.read(theEvent, section, "description.txt");
+        UITask uiTask = new UITask(theEvent, section);
+        String description = uiTask.getDescription();
         if (!description.equals("")) {
             b.append("<h4>Description</h4>");
             b.append("<pre>").append(description).append("</pre>");
         }
         b.append("<h3>Request</h3>");
-        b.append("<pre>").append(UITask.read(theEvent, section, "request_header.txt")).append("</pre>");
-        b.append("<pre>").append(UITask.read(theEvent, section, "request_body.txt")).append("</pre>");
+        b.append("<pre>").append(uiTask.getRequestHeader()).append("</pre>");
+        b.append("<pre>").append(uiTask.getRequestBody()).append("</pre>");
 
         b.append("<h3>Response</h3>");
-        b.append("<pre>").append(UITask.read(theEvent, section, "response_header.txt")).append("</pre>");
-        b.append("<pre>").append(UITask.read(theEvent, section, "response_body.txt")).append("</pre>");
+        b.append("<pre>").append(uiTask.getResponseHeader()).append("</pre>");
+        b.append("<pre>").append(uiTask.getResponseBody()).append("</pre>");
     }
 }

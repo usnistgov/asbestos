@@ -15,6 +15,7 @@ import TestCollection from "../components/testRunner/TestCollection"
 import TestOrEvalDetails from "../components/testRunner/TestOrEvalDetails"
 import EvalDetails from "../components/testRunner/EvalDetails"
 import EvalReportAssert from "../components/testRunner/EvalReportAssert";
+import About from "../components/top/About"
 
 Vue.use( VueRouter )
 
@@ -22,6 +23,10 @@ export const routes = [
     {
         path: '/', component: TopLayout,
         children: [
+            {
+                path: 'about',
+                components: { default: About },
+            },
             {
                 path: 'session/:sessionId',
                 components: { session: SessionView },

@@ -1,46 +1,59 @@
 package gov.nist.asbestos.client.events;
 
+import gov.nist.asbestos.client.events.Reader;
+
 import java.io.File;
-import java.nio.file.Files;
 
 public class UITask {
-    int index;
-    String label;
-    String description;
-    String requestHeader;
-    String requestBody;
-    String responseHeader;
-    String responseBody;
+    private int index;
+    private String label;
+    private String description;
+    private String requestHeader;
+    private String requestBody;
+    private String responseHeader;
+    private String responseBody;
 
     public UITask(File eventDir, String taskLabel) {
-        description = read(eventDir, taskLabel, "description.txt");
-        requestHeader = read(eventDir, taskLabel, "request_header.txt");
-        requestBody = read(eventDir, taskLabel, "request_body.txt");
-        responseHeader = read(eventDir, taskLabel, "response_header.txt");
-        responseBody = read(eventDir, taskLabel, "response_body.txt");
+        description = Reader.read(eventDir, taskLabel, "description.txt");
+        requestHeader = Reader.read(eventDir, taskLabel, "request_header.txt");
+        requestBody = Reader.read(eventDir, taskLabel, "request_body.txt");
+        responseHeader = Reader.read(eventDir, taskLabel, "response_header.txt");
+        responseBody = Reader.read(eventDir, taskLabel, "response_body.txt");
     }
 
-    public static String read(File theEvent, String theSection, String thePart) {
-        File file = new File(new File(theEvent, theSection), thePart);
-        if (!file.exists() || !file.canRead()) {
-            String fileSt = file.toString();
-            if (fileSt.endsWith(".txt")) {
-                fileSt = fileSt.replace(".txt", ".bin");
-                file = new File(fileSt);
-            }
-            if (!file.exists() || !file.canRead()) {
-                return "";
-            }
-        }
-
-        try {
-            String content = new String(Files.readAllBytes(file.toPath()));
-            content = content.replaceAll("<", "&lt;");
-            return content;
-        } catch (Exception e) {
-            ;
-        }
-        return "";
+    public int getIndex() {
+        return index;
     }
 
+    public String getLabel() {
+        return label;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public String getRequestHeader() {
+        return requestHeader;
+    }
+
+    public String getRequestBody() {
+        return requestBody;
+    }
+
+    public String getResponseHeader() {
+        return responseHeader;
+    }
+
+    public String getResponseBody() {
+        return responseBody;
+    }
+
+    public void setIndex(int index) {
+        this.index = index;
+    }
+
+    public void setLabel(String label) {
+        this.label = label;
+    }
 }

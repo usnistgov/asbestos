@@ -19,6 +19,10 @@
         components: {
             TestDetails, ClientDetails
         },
+        mounted() {
+            if (this.$store.state.testRunner.testAssertions === null)
+                this.$store.dispatch('loadTestAssertions')
+        },
         name: "TestOrEvalDetails"
     }
 </script>

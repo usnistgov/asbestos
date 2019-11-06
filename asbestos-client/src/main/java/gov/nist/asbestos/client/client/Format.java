@@ -41,4 +41,13 @@ public enum Format {
             format = Format.JSON;
         return format;
     }
+
+    public static String fileExtensionFromContent(String content) {
+        return content.trim().startsWith("<") ? "xml" : "json";
+    }
+
+    public static Format fromContent(String content) {
+        return content.trim().startsWith("<") ? XML : JSON;
+    }
+
 }

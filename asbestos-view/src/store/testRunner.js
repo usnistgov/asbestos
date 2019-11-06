@@ -7,7 +7,8 @@ Vue.use(Vuex)
 export const testRunnerStore = {
     state() {
         return {
-            testCollectionNames: [],
+            clientTestCollectionNames: [],
+            serverTestCollectionNames: [],
             currentTestCollectionName: null,
             testScriptNames: [],
             testReportNames: [],
@@ -16,6 +17,7 @@ export const testRunnerStore = {
             currentEvent: null,  // eventId
             currentAssertIndex: null,
             isClientTest: false,  // applies to entire testCollection
+            collectionDescription: null,
             waitingOnClient: null, // testId waiting on or null
 
             testScripts: [], // testId => TestScript
@@ -26,10 +28,15 @@ export const testRunnerStore = {
             eventEvalCount: 0,   // number of most recent events to evaluate
 
             clientTestResult: [], // { testId: { eventId: TestReport } }
-            currentChannelBaseAddr: 'http://locahost:8081/asbestos/'
+            currentChannelBaseAddr: 'http://localhost:8081/asbestos/',
+            testAssertions: null,
         }
     },
     mutations: {
+        setTestAssertions(state, assertions) {
+            console.log(`new Test Assertions`)
+            state.testAssertions = assertions
+        },
         setEventEvalCount(state, count) {
             state.eventEvalCount = count
         },
@@ -42,6 +49,9 @@ export const testRunnerStore = {
         setIsClientTest(state, isClient) {
             //console.log(`client is ${isClient}`)
             state.isClientTest = isClient
+        },
+        setCollectionDescription(state, collectionDescription) {
+            state.collectionDescription = collectionDescription
         },
         setTestScriptNames(state, names) {
             console.log(`testScriptNames is ${names}`)
@@ -75,8 +85,11 @@ export const testRunnerStore = {
         setTestCollectionName(state, name) {
             state.currentTestCollectionName = name
         },
-        setTestCollectionNames(state, names) {
-            state.testCollectionNames = names
+        setClientTestCollectionNames(state, names) {
+            state.clientTestCollectionNames = names
+        },
+        setServerTestCollectionNames(state, names) {
+            state.serverTestCollectionNames = names
         },
         // setClientTestResult(state, payload) {
         //     // payload is { evalId: xxx, events: eventId => TestReports }
@@ -100,6 +113,17 @@ export const testRunnerStore = {
         }
     },
     actions: {
+        loadTestAssertions({commit}) {
+            const url = `assertions`
+            ENGINE.get(url)
+                .then(response => {
+                    commit('setTestAssertions', response.data)
+                })
+                .catch(function (error) {
+                    commit('setError', url + ': ' + error)
+                    console.error(`${error} - assertions - URL was engine/${url}`)
+                })
+        },
         runEval({commit, state, rootState}, testId) {
             const eventEval = state.eventEvalCount === 0 ? "marker" : state.eventEvalCount
             const url = `clienteval/${rootState.base.session}__${rootState.base.channelId}/${eventEval}/${state.currentTestCollectionName}/${testId}`
@@ -167,9 +191,16 @@ export const testRunnerStore = {
             const url = `collections`
             ENGINE.get(url)
                 .then(response => {
-                    let theResponse = response.data
-                    //console.info(`TestEnginePanel: loaded ${theResponse.length} test collections`)
-                    commit('setTestCollectionNames', theResponse.sort())
+                    let clientTestNames = []
+                    let serverTestNames = []
+                    response.data.forEach(collection => {
+                        if (collection.server)
+                            serverTestNames.push(collection.name)
+                        else
+                            clientTestNames.push(collection.name)
+                    })
+                    commit('setClientTestCollectionNames', clientTestNames.sort())
+                    commit('setServerTestCollectionNames', serverTestNames.sort())
                 })
                 .catch(function (error) {
                     this.$store.commit('setError', url + ': ' +  error)
@@ -186,7 +217,8 @@ export const testRunnerStore = {
                     //console.log(`action: testScriptNames are ${theResponse.testNames}`)
                     commit('setTestScriptNames', theResponse.testNames)
                     const isClient = !theResponse.isServerTest
-                    //console.log(`action: isClient - ${isClient}`)
+                    const description = theResponse.description
+                    commit('setCollectionDescription', description)
                     commit('setIsClientTest', isClient)
                     commit('clearTestScripts')
                 })

@@ -16,7 +16,12 @@ public class HttpGet extends HttpBase {
     void get(URI uri, Map<String, String> headers) {
         HttpURLConnection connection = null;
         try {
-            URL url  = uri.toURL();
+//            if (!uri.isAbsolute()) {
+//                String query = uri.getQuery();
+//                URI newUri = new URI(uri.getScheme(), uri.getAuthority(), uri.getPath(), null, uri.getFragment());
+//                connection = (HttpURLConnection) newUri.toURL().openConnection();
+//
+//            }
             connection = (HttpURLConnection) uri.toURL().openConnection();
             connection.setRequestMethod("GET");
             if (headers != null)
@@ -35,7 +40,7 @@ public class HttpGet extends HttpBase {
                     // ok - won't always be available
             }
         } catch (Throwable t) {
-            throw new Error("GET " + uri, t);
+            throw new Error("GET " + uri + "\n" + t.getMessage(), t);
         } finally {
             if (connection != null)
                 connection.disconnect();

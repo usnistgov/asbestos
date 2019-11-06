@@ -66,13 +66,18 @@ public class RunTestRequest {
 
         File testDir = request.ec.getTest(testCollection, testName);
 
+        File patientCacheDir = request.ec.getTestLogCacheDir(channelId);
+
         TestReport report;
         try {
             report = new TestEngine(testDir, proxy)
                     .setTestSession(testSession)
+                    .setChannelId(channelId)
                     .setExternalCache(request.externalCache)
                     .setVal(new Val())
                     .setFhirClient(new FhirClient())
+                    .setTestCollection(testCollection)
+                    .addCache(patientCacheDir)
                     .runTest()
                     .getTestReport();
 

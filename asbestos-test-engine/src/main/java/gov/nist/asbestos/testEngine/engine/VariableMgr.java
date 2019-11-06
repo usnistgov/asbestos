@@ -42,13 +42,28 @@ public class VariableMgr {
 
     }
 
+    private boolean containsVariable(String reference) {
+        if (reference == null)
+            return false;
+        return reference.contains("${");
+    }
+
     String updateReference(String reference) {
+        for (int i=0; i<50; i++) {
+            if (!containsVariable(reference))
+                return reference;
+            reference = updateReference1(reference);
+        }
+        return null;
+    }
+
+    private String updateReference1(String reference) {
         Objects.requireNonNull(reference);
         Objects.requireNonNull(reporter);
         if (!reference.contains(("${")))
             return reference;
         int from = reference.indexOf("${");
-        int to = reference.indexOf("}");
+        int to = reference.indexOf("}", from);
         if (to == -1) {
             reporter.reportError("reference " + reference + " has no closing }");
             throw new Error("reference " + reference + " has no closing }");

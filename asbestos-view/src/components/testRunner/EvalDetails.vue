@@ -19,14 +19,14 @@
 
             <div v-for="(test, testi) in tests"
                  :key="'Eval' + testi">
-                <span class="name" >Eval: </span>
-                <span class="value">Test: {{ test.name }}</span>
-                <div v-if="test.description" class="test-part">
-                    Test: {{ test.description }}
-                </div>
+<!--                <span class="name" >Eval: </span>-->
+<!--                <span class="value">Test: {{ test.name }}</span>-->
+<!--                <div v-if="test.description" class="test-part">-->
+<!--                    Test: {{ test.description }}-->
+<!--                </div>-->
 
                 <div>
-                    <span class="selectable" @click.self="toggleEventDisplayed()">Log</span>
+                    <span class="selectable" @click.self="toggleEventDisplayed()">Message Log</span>
                     <span v-if="eventDisplayed">
                                         <img src="../../assets/arrow-down.png" @click.self="toggleEventDisplayed()">
                                         <log-item
@@ -50,10 +50,14 @@
                                     pass: assertResult(actioni) === 'pass',
                                     fail: assertResult(actioni) === 'fail',
                                     error: assertResult(actioni) === 'error',
+                                    warning: assertResult(actioni) === 'warning',
                                     'not-run': assertResult(actioni) === 'not-run' }">
-                                Assert: {{ assertScript(actioni).description }}
+                                <span class="selectable">Assert:</span> {{ assertDesc(actioni) }}
                             </div>
                             <div v-if="selectedAssertIndex === actioni" class="message-part">
+                                <div v-if="assertRef(actioni)">
+                                    {{ assertRef(actioni) }}
+                                </div>
                                 {{ assertMessage(actioni) }}
                             </div>
                         </div>
@@ -102,6 +106,22 @@
             assertScript(assertIndex) {
                 return this.testScript.test[0].action[assertIndex].assert
             },
+            assertDesc(assertIndex) {
+                const rawDesc = this.assertScript(assertIndex).description
+                if (!rawDesc.includes("|"))
+                    return rawDesc
+                const elements = rawDesc.split("|")
+                const msg = elements[0]
+                return msg
+            },
+            assertRef(assertIndex) {
+                const rawDesc = this.assertScript(assertIndex).description
+                if (!rawDesc.includes("|"))
+                    return ''
+                const elements = rawDesc.split("|")
+                const assertId = elements[1]
+                return `Reference: ${this.assertProfile} - ${this.assertMsg(assertId)}\n`
+            },
             selectAssert(assertIndex) {
                 if (this.selectedAssertIndex === assertIndex)
                     this.selectedAssertIndex = null
@@ -139,9 +159,14 @@
                     return null
                 return this.report.test[testi].action[actioni]
             },
-
+            assertMsg(assertId) {
+                return this.$store.state.testRunner.testAssertions[assertId]
+            },
         },
         computed: {
+            assertProfile() {
+                return this.$store.state.testRunner.testAssertions['Profile']
+            },
             // selected() {
             //     return this.$store.state.testRunner.currentAssertIndex
             // },
@@ -227,6 +252,13 @@
     }
     .fail {
         background-color: indianred;
+        text-align: left;
+        border: 1px dotted black;
+        cursor: pointer;
+        /*font-size: larger;*/
+    }
+    .warning {
+        background-color: #F6C6CE;
         text-align: left;
         border: 1px dotted black;
         cursor: pointer;

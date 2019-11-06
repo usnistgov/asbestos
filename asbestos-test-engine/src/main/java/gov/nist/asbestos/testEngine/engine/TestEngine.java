@@ -1,9 +1,11 @@
 package gov.nist.asbestos.testEngine.engine;
 
 import ca.uhn.fhir.parser.IParser;
+import gov.nist.asbestos.client.Base.EC;
 import gov.nist.asbestos.client.Base.ProxyBase;
 import gov.nist.asbestos.client.client.FhirClient;
 import gov.nist.asbestos.client.client.Format;
+import gov.nist.asbestos.client.events.UIEvent;
 import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.client.resolver.ResourceCacheMgr;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
@@ -13,13 +15,12 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.*;
 
+
 import java.io.*;
-import java.net.Proxy;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.*;
 
 /**
@@ -37,7 +38,9 @@ public class TestEngine  {
     private List<String> errors;
     private FhirClient fhirClient = null;
     private String testSession = null;
+    private String channelId = null;
     private File externalCache = null;
+    private String testCollection = null;
 
     public static final String LAST_OP = "_LAST_OP_";
 
@@ -51,7 +54,10 @@ public class TestEngine  {
         Objects.requireNonNull(sut);
         this.testDef = testDef;
         this.sut = sut;
+        // make test definition dir a temporary resource cache so elements of the TestScript
+        // can be found
         ResourceCacheMgr inTestResources = new ResourceCacheMgr(testDef, new Ref(""));
+      //  ResourceCacheMgr platformCache = new ResourceCacheMgr("", new Ref(""));
         fhirClientForFixtures = new FhirClient().setResourceCacheMgr(inTestResources);
     }
 
@@ -71,6 +77,11 @@ public class TestEngine  {
         return this;
     }
 
+    public TestEngine setChannelId(String channelId) {
+        this.channelId = channelId;
+        return this;
+    }
+
     public TestEngine setExternalCache(File externalCache) {
         this.externalCache = externalCache;
         return this;
@@ -87,10 +98,12 @@ public class TestEngine  {
         } catch (Throwable t) {
             reportException(t);
         }
-        returnTestReport();
+        //returnTestReport();
 
         return this;
     }
+
+    // TODO - This interpretation of TestScript does not use assert.direction for client tests.  Instead it uses separate fixtures for request and response. This is reflected in the tests written.
 
     // if inputResource == null then this is a test
     // if null then this is an evaluation
@@ -109,7 +122,7 @@ public class TestEngine  {
         } catch (Throwable t) {
             reportException(t);
         }
-        returnTestReport();
+        //returnTestReport();
 
         return this;
     }
@@ -195,6 +208,12 @@ public class TestEngine  {
     }
 
     private List<String> doReportResult() {
+
+        if (testReport.getStatus() == TestReport.TestReportStatus.ENTEREDINERROR) {
+            // more complicated (TestScript dependency) - trust result
+            return new ArrayList<>();
+        }
+
         List<String> failingComponents = new ArrayList<>();
 
         TestReport.TestReportSetupComponent setup = testReport.getSetup();
@@ -429,6 +448,7 @@ public class TestEngine  {
             AssertionRunner runner = new AssertionRunner(fixtureMgr)
                     .setVal(new ValE(val).setMsg(typePrefix))
                     .setTypePrefix(typePrefix)
+                    .setVariableMgr(new VariableMgr(testScript, fixtureMgr).setOpReport(testReport.getSetup().addAction().getOperation()))
                     .setTestReport(testReport)
                     .setTestScript(testScript);
             report = runner.run(operation);
@@ -452,15 +472,123 @@ public class TestEngine  {
                 testCounter++;
                 ValE tVal = new ValE(fVal).setMsg(testName);
                 TestReport.TestReportTestComponent testReportComponent = testReport.addTest();
+
+                // handle condition
+                if (testComponent.hasModifierExtension()) {
+                    Extension extension = testComponent.getModifierExtensionFirstRep();
+                    if (!extension.hasUrl() || !extension.getUrl().equals("https://github.com/usnistgov/asbestos/wiki/TestScript-Conditional")) {
+                        TestReport.TestActionComponent actionReportComponent = testReportComponent.addAction();
+                        Reporter reporter = new Reporter(fVal, actionReportComponent.getOperation(), "", "");
+                        reporter.reportError( "Do not understand modifierExtension");
+                        return;
+                    }
+                    String containedTestScriptId =  extension.getValue().toString();
+
+                    List<Resource> containedList = testScript.getContained();
+                    Resource contained = null;
+                    for (Resource theContained : containedList) {
+                        if (theContained.getId() != null && theContained.getId().equals(containedTestScriptId)) {
+                            contained = theContained;
+                            break;
+                        }
+                    }
+                    if (contained == null) {
+                        TestReport.TestActionComponent actionReportComponent = testReportComponent.addAction();
+                        Reporter reporter = new Reporter(fVal, actionReportComponent.getOperation(), "", "");
+                        reporter.reportError( "cannot locate contained TestScript " + containedTestScriptId);
+                        return;
+                    }
+
+
+                    TestScript containedTestScript = (TestScript) contained;
+                    List<TestScript.TestScriptTestComponent> tests = containedTestScript.getTest();
+                    if (tests.size() != 2) {
+                        TestReport.TestActionComponent actionReportComponent = testReportComponent.addAction();
+                        Reporter reporter = new Reporter(fVal, actionReportComponent.getOperation(), "", "");
+                        reporter.reportError( "test condition must contain two test elements -  TestScript " + containedTestScriptId);
+                        return;
+                    }
+
+                    // basic operation and validation
+                    TestScript.TestScriptTestComponent basicOperationTest = tests.get(0);
+                    if (basicOperationTest.hasAction()) {
+                        String typePrefix = "contained.action";
+                        for (TestScript.TestActionComponent action : basicOperationTest.getAction()) {
+                            TestReport.TestActionComponent actionReportComponent = testReportComponent.addAction();
+                            if (invalidAction(action, actionReportComponent, fVal))
+                                return;
+                            if (action.hasOperation()) {
+                                doOperation(typePrefix, action.getOperation(), actionReportComponent.getOperation());
+                                TestReport.SetupActionOperationComponent opReport = actionReportComponent.getOperation();
+                                if (opReport.getResult() == TestReport.TestReportActionResult.ERROR) {
+                                    testReport.setStatus(TestReport.TestReportStatus.COMPLETED);
+                                    testReport.setResult(TestReport.TestReportResult.FAIL);
+                                    return;
+                                }
+                            }
+                            if (action.hasAssert()) {
+                                TestReport.SetupActionAssertComponent actionReport = doAssert(typePrefix, action.getAssert());
+                                actionReportComponent.setAssert(actionReport);
+                                if ("fail".equals(actionReport.getResult().toCode())) {
+                                    testReport.setStatus(TestReport.TestReportStatus.COMPLETED);
+                                    testReport.setResult(TestReport.TestReportResult.FAIL);
+                                    return;
+                                }
+                                if ("error".equals(actionReport.getResult().toCode())) {
+                                    testReport.setStatus(TestReport.TestReportStatus.COMPLETED);
+                                    testReport.setResult(TestReport.TestReportResult.FAIL);
+                                    return;
+                                }
+                            }
+                        }
+                    }
+
+                    // asserts to trigger conditional
+                    TestScript.TestScriptTestComponent conditionalTest = tests.get(1);
+                    testReportComponent = testReport.addTest();
+                    if (conditionalTest.hasAction()) {
+                        String typePrefix = "contained.action";
+                        for (TestScript.TestActionComponent action : conditionalTest.getAction()) {
+                            TestReport.TestActionComponent actionReportComponent = testReportComponent.addAction();
+                            if (invalidAction(action, actionReportComponent, fVal))
+                                return;
+                            if (action.hasOperation()) {
+                                doOperation(typePrefix, action.getOperation(), actionReportComponent.getOperation());
+                                TestReport.SetupActionOperationComponent opReport = actionReportComponent.getOperation();
+                                if (opReport.getResult() == TestReport.TestReportActionResult.ERROR) {
+                                    testReport.setStatus(TestReport.TestReportStatus.COMPLETED);
+                                    testReport.setResult(TestReport.TestReportResult.FAIL);
+                                    return;
+                                }
+                            }
+                            if (action.hasAssert()) {
+                                TestReport.SetupActionAssertComponent actionReport = doAssert(typePrefix, action.getAssert());
+                                actionReportComponent.setAssert(actionReport);
+                                if ("fail".equals(actionReport.getResult().toCode())) {
+                                    testReport.setStatus(TestReport.TestReportStatus.ENTEREDINERROR);
+                                    testReport.setResult(TestReport.TestReportResult.PASS);
+                                    return;
+                                }
+                                if ("error".equals(actionReport.getResult().toCode())) {
+                                    testReport.setStatus(TestReport.TestReportStatus.COMPLETED);
+                                    testReport.setResult(TestReport.TestReportResult.FAIL);
+                                    return;
+                                }
+                            }
+                        }
+                    }
+
+                }
+
+                testReportComponent = testReport.addTest();
+
+                // real test execution starts here
                 if (testComponent.hasAction()) {
                     String typePrefix = "test.action";
                     for (TestScript.TestActionComponent action : testComponent.getAction()) {
                         TestReport.TestActionComponent actionReportComponent = testReportComponent.addAction();
-                        if (action.hasOperation() && action.hasAssert()) {
-                            Reporter reporter = new Reporter(fVal, actionReportComponent.getOperation(), "", "");
-                            reporter.reportError( "action has both operation and assertion");
+                        if (invalidAction(action, actionReportComponent, fVal))
                             return;
-                        }
                         if (action.hasOperation())
                             doOperation(typePrefix, action.getOperation(), actionReportComponent.getOperation());
                         if (action.hasAssert()) {
@@ -475,6 +603,23 @@ public class TestEngine  {
 
         }
 
+    }
+
+    private boolean invalidAction(TestScript.TestActionComponent action, TestReport.TestActionComponent actionReportComponent, ValE fVal) {
+        if (action.hasOperation() && action.hasAssert()) {
+            Reporter reporter = new Reporter(fVal, actionReportComponent.getOperation(), "", "");
+            reporter.reportError( "action has both operation and assertion");
+            return true;
+        }
+        return false;
+    }
+
+    private TestScript.TestScriptTestComponent findTest(TestScript testScript, String name) {
+        for (TestScript.TestScriptTestComponent testComponent : testScript.getTest()) {
+            if (name.equals(testComponent.getName()))
+                return testComponent;
+        }
+        return null;
     }
 
     private void doTearDown() {
@@ -500,18 +645,70 @@ public class TestEngine  {
     }
 
     private void doPostProcessing() {
+        if (testCollection == null)
+            return;
+        if (sut == null)
+            return;
+        EC ec = new  EC(externalCache);
+        Properties tcProperties = ec.getTestCollectionProperties(testCollection);
+        String useCache = tcProperties.getProperty("cache");
+        if (useCache == null || !useCache.equals("true"))
+            return;
+        for (TestReport.TestReportTestComponent testComponent : testReport.getTest()) {
+            for (TestReport.TestActionComponent actionResult : testComponent.getAction()) {
+                if (!actionResult.hasOperation())
+                    continue;
+                TestReport.SetupActionOperationComponent op = actionResult.getOperation();
+                if (!"pass".equals(op.getResult().toCode()))
+                    continue;
+                if (op.getMessage().startsWith("GET") || op.getMessage().startsWith("CREATE")) {
+                    URI uri;
+                    try {
+                        uri = new URI(op.getDetail());
+                    } catch (URISyntaxException e) {
+                        throw new Error(e);
+                    }
+                    UIEvent uiEvent = new UIEvent(ec).fromURI(uri);
+                    if (uiEvent != null) {
+                        // add to cache
+                        File cacheDir = ec.getTestLogCacheDir(channelId);
+                        String responseBody = uiEvent.getClientTask().getResponseBody();
+                        BaseResource baseResource = ProxyBase.parse(responseBody, Format.fromContent(responseBody));
+                        if (baseResource instanceof Bundle) {
+                            Bundle bundle = (Bundle) baseResource;
+                            for (Bundle.BundleEntryComponent comp : bundle.getEntry()) {
+                                if (comp.getResource() instanceof Patient) {
+                                    String fullUrl = comp.getFullUrl();
+                                    if (fullUrl != null && !fullUrl.equals("") && bundle.getTotal() == 1)
+                                        buildCacheEntry(cacheDir, bundle, (Patient) comp.getResource());
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
 
+    private void buildCacheEntry(File cacheDir, Bundle bundle, Patient patient) {
+        File resourceTypeFile = new File(cacheDir, "Patient");
+        resourceTypeFile.mkdirs();
+
+        String given = patient.getNameFirstRep().getGiven().get(0).toString();
+        String family = patient.getNameFirstRep().getFamily();
+        if (given != null &&!given.equals("") && family != null && !family.equals("")) {
+            ProxyBase.toFile(bundle, resourceTypeFile, given + "_" + family, Format.JSON);
+        }
+    }
+
+    public TestEngine addCache(File cacheDir) {
+        fhirClientForFixtures.getResourceCacheMgr().addCache(cacheDir);
+        return this;
     }
 
     public static TestScript loadTestScript(File testDefDir) {
         Objects.requireNonNull(testDefDir);
-        File location = new File(testDefDir, "TestScript.xml");
-        if (!location.exists() || !location.canRead() ) {
-            location = new File(testDefDir, "TestScript.json");
-            if (!location.exists() || !location.canRead() ) {
-                throw new RuntimeException("Cannot load TestScript (.xml or .json) from " + testDefDir);
-            }
-        }
+        File location = findTestScriptFile(testDefDir);
         InputStream is;
         try {
             is = new FileInputStream(location);
@@ -524,6 +721,22 @@ public class TestEngine  {
         TestScript testScript = (TestScript) resource;
         testScript.setName(location.toString());
         return testScript;
+    }
+
+    public static File findTestScriptFile(File testDefDir) {
+        File location = new File(testDefDir, "TestScript.xml");
+        if (location.exists())
+            return location;
+        location = new File(testDefDir, "TestScript.json");
+        if (location.exists())
+            return location;
+        location = new File(testDefDir, "../TestScript.xml");
+        if (location.exists())
+            return location;
+        location = new File(testDefDir, "../TestScript.json");
+        if (location.exists())
+            return location;
+        throw new RuntimeException("Cannot load TestScript (.xml or .json) from " + testDefDir + " or " + testDefDir + "/..");
     }
 
     private boolean isFixtureDefined(String id) {
@@ -679,5 +892,10 @@ public class TestEngine  {
 
     public void setTestScript(TestScript testScript) {
         this.testScript = testScript;
+    }
+
+    public TestEngine setTestCollection(String testCollection) {
+        this.testCollection = testCollection;
+        return this;
     }
 }

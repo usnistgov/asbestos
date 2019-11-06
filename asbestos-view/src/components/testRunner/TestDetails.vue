@@ -13,19 +13,35 @@
                     <span class="value">{{ variable.name }}</span>
                 </div>
             </div>
-            <!--   add SETUP here  -->
+            <!--   Setup is used for two things.
+                   1. Actual setup so there is script and report
+                   2. Deep errors and the error is reported in report.setup (with no corresponding script)
+                   -->
+            <div v-if="script.setup && report.setup">
+                <!-- don't need yet -->
+            </div>
+
+            <div v-if="!script.setup && report.setup">
+                <test-report-action
+                        :script="null"
+                        :report="report.setup.action">
+                </test-report-action>
+            </div>
+
 
             <div v-for="(test, testi) in tests"
                  :key="'Test' + testi">
-<!--                <span class="name" >Test: </span>-->
-<!--                <span class="value">{{ test.name }}</span>-->
-                <template v-if="test.description" class="test-part">
-                    {{ test.description }}
-                </template>
+                <div v-if="report.test && report.test.length > testi">
+                    <template v-if="test.description" class="test-part">
+                        {{ test.description }}
+                    </template>
 
-                <div v-for="(action, actioni) in actions(testi)" class="test-part"
-                     :key="'Test' + testi + 'Action' + actioni">
-                    <test-report-action :script="action" :report="reportAction(testi, actioni)"></test-report-action>
+                    <div v-for="(action, actioni) in actions(testi)" class="test-part"
+                         :key="'Test' + testi + 'Action' + actioni">
+                        <test-report-action
+                                :script="action"
+                                :report="reportAction(testi, actioni)"> </test-report-action>
+                    </div>
                 </div>
             </div>
 
@@ -77,7 +93,7 @@
                     this.script = this.$store.state.testRunner.testScripts[this.testId]
                 }
             },
-            loadTestReport() {  // loaded by TestList
+            loadTestReport() {
                 console.log('grab test report')
                 this.report = this.$store.state.testRunner.testReports[this.testId]
                 //this.$router.go()
@@ -89,7 +105,10 @@
                 return this.script.test[testi].action[actioni]
             },
             reportAction(testi, actioni) {
+                console.log(`reportAction ${testi}   ${actioni}`)
                 if (!this.report)
+                    return null
+                if (!this.report.test[testi])
                     return null
                 return this.report.test[testi].action[actioni]
             },

@@ -1,25 +1,41 @@
 <template>
     <div>
         <div class="tool-title">
-            <span>Tests for {{ testCollection }}</span>
+            <span>{{ clean(testCollection) }}</span>
             <span class="divider"></span>
             <img id="reload" class="selectable" @click="reload()" src="../../assets/reload.png"/>
             <span class="divider"></span>
         </div>
 
-<!--        <div v-if="$store.state.testRunner.isClientTest" class="right">-->
-<!--            Last Marker: {{ $store.state.testRunner.lastMarker }}-->
-<!--            <span class="selectable" @click="setMarker()">Set</span>-->
-<!--        </div>-->
+        <div class="vdivider"></div>
+        <div class="vdivider"></div>
+
+        <div class="left">
+            Description: <span v-html="$store.state.testRunner.collectionDescription"></span>
+        </div>
+
         <div class="vdivider"></div>
         <div class="vdivider"></div>
 
         <div class="instruction">
             <span v-if="$store.state.testRunner.isClientTest"  class="instruction">
-                These are Client tests. Each test evaluates  events received at the URL below against the test requirements.  A test passes when at least one event meets
-                the requirements of the test.
-                <br /><br />Click spyglass to evaluate recent events. Send new requests to (FHIR Server base address)
+                These are Client tests - the system under test sends messages to the
+                FHIR Server Base Address shown below for evaluation. To run:
+                <br />
+                <ol>
+                    <li>Send messages matching each per-test description.</li>
+                    <li>Response message will reflect evaluation by the FHIR server running in the background
+                        (messages are forwarded as they are received).</li>
+                    <li>Once an adequate collection of messages has been sent to satisfy the tests, evaluate them further by clicking the
+                    spyglass icon to evaluate against a set of assertions specific to each test.
+                    This evaluation will include validating the response from the background FHIR Server.</li>
+                    <li>Only the most recent messages will be evaluated.  Adjust this count below.</li>
+                    <li>A test passes if one or more message evaluates correctly.</li>
+                    <li>Click on a test to see the messages evaluated.  Click on a message to see the result of each
+                        assertion that was evaluated.</li>
+                </ol>
                 <div>
+                    FHIR Server Base Address:
                     <span class="boxed">{{ clientBaseAddress }}</span>
                 </div>
             </span>
@@ -35,6 +51,10 @@
         <div v-if="$store.state.testRunner.isClientTest" class="second-instruction">
             Number of most recent events to evaluate:
             <input v-model="evalCount" placeholder="5">
+        </div>
+
+        <div class="runallgroup">
+            <button class="runallbutton" @click="doRunAll()">Run All</button>
         </div>
 
         <div v-for="(name, i) in Object.keys(status)"
@@ -57,7 +77,7 @@
                         <div v-else>
                             <img src="../../assets/press-play-button.png" class="right" @click.stop="doRun(name)">
                         </div>
-                        {{ name }}
+                        Test: {{ clean(name) }}
                         <span v-if="!$store.state.testRunner.isClientTest"> --  {{ time[name] }}</span>
                     </div>
                 </div>
@@ -85,6 +105,9 @@
             }
         },
         methods: {
+            clean(text) {
+                return text.replace(/_/g, ' ')
+            },
             evalStatus() { // see GetClientTestEvalResult
                 this.status.splice(0)
                 this.testScriptNames.forEach(testId => {
@@ -114,10 +137,10 @@
                 //console.log(`doEval(${testName})`)
                 this.$store.dispatch('runEval', testName)
             },
-            doRun(testName) {  // server tests
+            doRun: async function(testName) {  // server tests
                 this.$store.commit('setCurrentTest', null)
                 const that = this
-                ENGINE.post(`testrun/${this.sessionId}__${this.channelId}/${this.testCollection}/${testName}`)
+                await ENGINE.post(`testrun/${this.sessionId}__${this.channelId}/${this.testCollection}/${testName}`)
                     .then(response => {
                         this.$store.dispatch('addTestReport', testName, response.data)
                         this.$router.replace(`/session/${this.sessionId}/channel/${this.channelId}/collection/${this.testCollection}`)
@@ -126,6 +149,11 @@
                     .catch(error => {
                         that.error(error)
                     })
+            },
+            doRunAll() {
+                Object.keys(this.status).forEach(name => {
+                    this.doRun(name)
+                })
             },
             selectTest(name) {
                 if (this.selected === name)  { // unselect
@@ -167,9 +195,6 @@
                 })
 
             },
-            isCurrent(testId) {
-                return testId === this.$store.state.testRunner.currentTest
-            },
             loadLastMarker() {
                if (this.$store.state.testRunner.lastMarker === null)
                     this.$store.dispatch('loadLastMarker')
@@ -198,11 +223,6 @@
             },
             isClient() {
                 return this.$store.state.testRunner.isClientTest
-            },
-            current() {
-                return this.$store.state.base.testCollectionDetails.find(item => {
-                    return item.name === this.testId
-                })
             },
             selected() {
                 return this.$store.state.testRunner.currentTest
@@ -294,5 +314,16 @@
     }
     .right {
         text-align: right;
+    }
+    .runallbutton {
+        /*padding-bottom: 5px;*/
+        background-color: cornflowerblue;
+        cursor: pointer;
+        border-radius: 25px;
+        font-weight: bold;
+    }
+    .runallgroup {
+        text-align: right;
+        padding-bottom: 5px;
     }
 </style>

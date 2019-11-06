@@ -183,8 +183,9 @@ public class FhirClient {
         wrapper.setHttpBase(getter);
         getter.setUri(ref.getUri());
         Headers headers = new Headers(requestHeader);
+        String contentType = format == null ? Format.XML.getContentType() : format.getContentType();
         if (headers.getHeaderValue("accept") == null)
-            headers.add(new Header("accept", Format.XML.getContentType()));
+            headers.add(new Header("accept", contentType));
         getter.setRequestHeaders(headers);
         getter.get();
         ResourceWrapper theWrapper = gobbleGetResponse(getter, wrapper, asResponseFormat(headers));
@@ -279,6 +280,10 @@ public class FhirClient {
         this.resourceCacheMgr = resourceCacheMgr;
         resourceCacheMgr.setFhirClient(this);
         return this;
+    }
+
+    public ResourceCacheMgr getResourceCacheMgr() {
+        return resourceCacheMgr;
     }
 
     public HttpBase getHttpBase() {

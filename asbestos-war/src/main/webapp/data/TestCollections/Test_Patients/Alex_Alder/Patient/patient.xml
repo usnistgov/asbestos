@@ -1,0 +1,30 @@
+<Patient xmlns="http://hl7.org/fhir">
+            <identifier>
+               <system value="urn:oid:1.3.6.1.4.1.21367.13.20.1000"/>
+               <value value="TEST-1000-1"/>
+            </identifier>
+            <identifier>
+               <system value="urn:oid:1.3.6.1.4.1.21367.13.20.2000"/>
+               <value value="TEST-2000-1"/>
+            </identifier>
+            <identifier>
+               <system value="urn:oid:1.3.6.1.4.1.21367.13.20.3000"/>
+               <value value="TEST-3000-1"/>
+            </identifier>
+            <active value="true"/>
+            <name>
+               <use value="official"/>
+               <family value="Alder"/>
+               <given value="Alex"/>
+            </name>
+            <gender value="male"/>
+            <birthDate value="1950-02-23"/>
+            <address>
+               <use value="home"/>
+               <line value="10 OAKTREE"/>
+               <city value="WOOSTER"/>
+               <state value="MO"/>
+               <postalCode value="63119"/>
+               <country value="USA"/>
+            </address>
+         </Patient>

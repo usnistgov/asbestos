@@ -1,6 +1,12 @@
 <template>
     <div>
-        <div class="window-title">Asbestos FHIR Toolkit</div>
+        <div>
+        <div class="left window-title-bar">
+            <span class="window-title">NIST FHIR<img src="../../assets/copyright.png"> Toolkit</span>
+            <span class="title-divider"> </span>
+            <span class="selectable" @click="go('/about')">About</span>
+        </div>
+        </div>
         <div class="grid-container">
             <div>
                 <div v-if="$store.state.base.errors.length > 0" class="error-grid-container">
@@ -15,18 +21,19 @@
                         </div>
                     </div>
                 </div>
-                <router-view name="session" class="main"></router-view>
+                <router-view> </router-view>  <!--  for menu content   -->
+                <router-view name="session" class="main"> </router-view>
             </div>
             <div class="control-panel control-panel-font">
-                <session-control-panel class="solid-boxed"></session-control-panel>
+                <session-control-panel class="solid-boxed"> </session-control-panel>
                 <div class="vdivider"></div>
-                <channel-control-panel class="solid-boxed"></channel-control-panel>
+                <channel-control-panel class="solid-boxed"> </channel-control-panel>
                 <div class="vdivider"></div>
 <!--                <log-control-panel class="solid-boxed"></log-control-panel>-->
 <!--                <div class="vdivider"></div>-->
-                <channel-log-control-panel class="solid-boxed"></channel-log-control-panel>
+                <channel-log-control-panel class="solid-boxed"> </channel-log-control-panel>
                 <div class="vdivider"></div>
-                <test-control-panel class="solid-boxed"></test-control-panel>
+                <test-control-panel class="solid-boxed"> </test-control-panel>
                 <div class="vdivider"></div>
 <!--                <debug-control-panel class="solid-boxed"></debug-control-panel>-->
             </div>
@@ -60,6 +67,9 @@
             // this.$store.commit('setError', 'Oopsie')
         },
         methods: {
+            go(there) {
+                this.$router.push(there)
+            },
             clearErrors() {
                 this.$store.commit('clearError')
             },
@@ -83,8 +93,22 @@
 
 </script>
 <style scoped>
+    .window-title-bar {
+        background-color: cornflowerblue;
+        padding-top: 10px;
+        padding-bottom: 10px;
+    }
     .window-title {
         font-weight: bold;
+        font-size: larger;
+        text-align: left;
+    }
+    .title-divider{
+        width:20px;
+        height:auto;
+        display:inline-block;
+    }
+    .larger {
         font-size: larger;
     }
     .grid-container {
@@ -196,24 +220,35 @@
         text-align: left;
         border: 1px dotted black;
         cursor: pointer;
+        border-radius: 25px;
     }
     .fail {
         background-color: indianred;
         text-align: left;
         border: 1px dotted black;
         cursor: pointer;
+        border-radius: 25px;
     }
     .error {
         background-color: indianred;
         text-align: left;
         border: 1px dotted black;
         cursor: pointer;
+        border-radius: 25px;
+    }
+    .warning {
+        background-color: #F6C6CE;
+        text-align: left;
+        border: 1px dotted black;
+        cursor: pointer;
+        border-radius: 25px;
     }
     .not-run {
         background-color: lightgray;
         text-align: left;
         border: 1px dotted black;
         cursor: pointer;
+        border-radius: 25px;
     }
     .instruction {
         text-align: left;

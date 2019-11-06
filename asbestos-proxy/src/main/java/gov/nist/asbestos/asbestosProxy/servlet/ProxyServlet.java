@@ -3,8 +3,8 @@ package gov.nist.asbestos.asbestosProxy.servlet;
 
 import gov.nist.asbestos.asbestosProxy.channel.*;
 import gov.nist.asbestos.client.Base.EC;
-import gov.nist.asbestos.asbestosProxy.requests.EvalRequest;
 import gov.nist.asbestos.client.events.Event;
+import gov.nist.asbestos.client.events.UIEvent;
 import gov.nist.asbestos.client.log.SimStore;
 import gov.nist.asbestos.client.events.Task;
 import gov.nist.asbestos.asbestosProxy.util.Gzip;
@@ -41,7 +41,7 @@ import java.util.stream.IntStream;
 
 public class ProxyServlet extends HttpServlet {
     private static Logger log = Logger.getLogger(ProxyServlet.class);
-    private File externalCache = null;
+    private static File externalCache = null;
 
     private Map<String, IChannelBuilder> proxyMap = new HashMap<>();
 
@@ -93,14 +93,21 @@ public class ProxyServlet extends HttpServlet {
         String channelId = parts[length-4];
         String testSession = parts[length-5];
 
-        String uri = "http://" +
-                hostport +
-                "/asbestos/log/" +
-                testSession + "/" +
-                channelId + "/" +
-                resource + "/" +
-                event;
-        return new Header("x-proxy-event", uri);
+        UIEvent uiEvent = new UIEvent(new EC(externalCache));
+        uiEvent.setHostPort(hostport);
+        uiEvent.setTestSession(testSession);
+        uiEvent.setChannelId(channelId);
+        uiEvent.setResourceType(resource);
+        uiEvent.setEventName(event);
+
+//        String uri = "http://" +
+//                hostport +
+//                "/asbestos/log/" +
+//                testSession + "/" +
+//                channelId + "/" +
+//                resource + "/" +
+//                event;
+        return new Header("x-proxy-event", uiEvent.getURI().toString());
     }
 
     private static String getHostPort(Headers inHeaders) throws ServletException {
@@ -132,7 +139,7 @@ public class ProxyServlet extends HttpServlet {
 
         Event event = simStore.newEvent();
         Task clientTask = event.getClientTask();
-        clientTask.putDescription("PDB from client");
+        clientTask.putDescription("POST");
         Headers inHeaders = Common.getRequestHeaders(req, Verb.POST);
         String hostport = inHeaders.getValue("host");
         if (hostport == null || hostport.equals(""))
@@ -157,6 +164,7 @@ public class ProxyServlet extends HttpServlet {
             channel.setReturnFormatType(Format.resultContentType(inHeaders));
 
             byte[] inBody = getRequestBody(req);
+            String inBodyStr = new String(inBody);
 
             HttpPost requestIn = (HttpPost) logClientRequestIn(clientTask, inHeaders, inBody, Verb.POST);
 
@@ -449,7 +457,8 @@ public class ProxyServlet extends HttpServlet {
     // responseOut is final response to return to client
     private void respond(HttpServletResponse resp, HttpBase responseOut, Headers inHeaders, Task clientTask) {
         try {
-            responseOut.setStatus(200);
+            if (responseOut.getStatus() == 0)
+                responseOut.setStatus(200);
             addEventHeader(responseOut, getHostPort(inHeaders), clientTask);
             logResponse(clientTask, responseOut);
 
@@ -469,6 +478,7 @@ public class ProxyServlet extends HttpServlet {
                 continue;
             resp.setHeader(header.getName(), header.getValue());
         }
+        resp.setStatus(headers.getStatus());
     }
 
     private static void logResponse(Task task, HttpBase requestOut) {

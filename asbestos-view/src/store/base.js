@@ -66,7 +66,7 @@ export const baseStore = {
             })
             if (channelIndex === -1) {
                 state.channelIds.push(newChannel.channelId)
-//                console.log(`mutation install new channel - id=${newChannel.channelId}`
+               console.log(`mutation install new channel - id=${newChannel.channelId}`)
             } else {
                 console.log(`mutation install replacement channel - id=${newChannel.channelId}`)
 //                state.channel = newChannel
@@ -87,8 +87,6 @@ export const baseStore = {
         installChannelURLs(state, urls) {
             state.channelURLs = urls
         },
-
-
     },
     actions: {
         loadSessions({commit}) {
@@ -126,6 +124,11 @@ export const baseStore = {
             const url = `CHANNEL/channels/all`
             CHANNEL.get('channels/all')
                 .then(response => {
+                    let ids = []
+                    response.data.forEach(item => {
+                        ids.push(item.id)
+                    })
+                    commit('installChannelIds', ids)
                     commit('installChannelURLs', response.data)
                 })
                 .catch(e => {

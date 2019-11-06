@@ -2,7 +2,7 @@ package gov.nist.asbestos.client.Base;
 
 import com.google.gson.Gson;
 import gov.nist.asbestos.client.events.EventSummary;
-import gov.nist.asbestos.client.events.UiEvent;
+import gov.nist.asbestos.client.events.UIEvent;
 import gov.nist.asbestos.client.log.SimStore;
 import gov.nist.asbestos.simapi.simCommon.SimId;
 
@@ -10,7 +10,8 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -24,6 +25,8 @@ public class EC {
 
     public static final String MarkerType = "Marker";
     public static final String TEST_COLLECTIONS_DIR = "FhirTestCollections";
+    public static final String TEST_ASSERTIONS_DIR = "FhirTestAssertions";
+    public static final String TEST_ASSERTIONS_FILE = "assertions.json";
 
 
     public EC(File externalCache) {
@@ -87,6 +90,24 @@ public class EC {
         return props;
     }
 
+    public String getTestCollectionDescription(String collectionName) {
+        File root = getTestCollectionBase(collectionName);
+        if (root == null)
+            throw new Error("Test Collection " + collectionName + " not found");
+        File file = new File(root, "description.txt");
+        if (!file.exists())
+            return null;
+        try {
+            return new String(Files.readAllBytes(file.toPath()));
+        } catch (IOException e) {
+            throw new Error(e);
+        }
+    }
+
+    public File getTestAssertionsFile() {
+        return new File(new File(externalCache, TEST_ASSERTIONS_DIR), TEST_ASSERTIONS_FILE);
+    }
+
     File getTestCollectionBase(String collectionName) {
         return externalTestCollectionBase(collectionName);
     }
@@ -109,23 +130,23 @@ public class EC {
         return new File(forCollection, testName + ".json");
     }
 
-    public File getTestLogDir(String channelId, String collectionName, String testName) {
+    // channelId is testSession__channel
+    public File getTestLogDir(String channelId, String collectionName) {
         File testLogs = new File(externalCache, "FhirTestLogs");
         File forChannelId = new File(testLogs, channelId);
-        File forCollection = new File(forChannelId, collectionName);
-        File forTest = new File(forCollection, testName);
-        forTest.mkdirs();
-        return forTest;
+        File forCollection = (collectionName == null) ? forChannelId : new File(forChannelId, collectionName);
+        forCollection.mkdirs();
+        return forCollection;
     }
 
-    public List<File> getTestSessions() {
-        File channels = new File(externalCache, "FhirChannels");
-        return Dirs.listOfDirectories(channels);
+    public File getTestLogCacheDir(String channelId) {
+        return new File(getTestLogDir(channelId, null), "cache");
     }
 
-    public List<File> getTestLogs(String testSession, String collectionName) {
+    // channelId is testSession__channel
+    public List<File> getTestLogs(String channelId, String collectionName) {
         File testLogs = new File(externalCache, "FhirTestLogs");
-        File forTestSession = new File(testLogs, testSession);
+        File forTestSession = new File(testLogs, channelId);
         File forCollection = new File(forTestSession, collectionName);
 
         List<File> testLogList = new ArrayList<>();
@@ -148,20 +169,11 @@ public class EC {
     }
 
     public void buildJsonListingOfEvent(HttpServletResponse resp, String testSession, String channelId, String resourceType, String eventName) {
-        File fhir = fhirDir(testSession, channelId);
-        if (resourceType.equals("null")) {
-            resourceType = resourceTypeForEvent(fhir, eventName);
-            if (resourceType == null) {
-                resp.setStatus(resp.SC_NOT_FOUND);
-                return;
-            }
+        UIEvent uiEvent = getEvent(testSession, channelId, resourceType, eventName);
+        if (uiEvent == null) {
+            resp.setStatus(resp.SC_NOT_FOUND);
+            return;
         }
-        File resourceTypeFile = new File(fhir, resourceType);
-        File eventDir = new File(resourceTypeFile, eventName);
-
-        UiEvent uiEvent = new UiEvent(eventDir);
-        uiEvent.eventName = eventName;
-        uiEvent.resourceType = resourceType;
 
         String json = new Gson().toJson(uiEvent);
         resp.setContentType("application/json");
@@ -172,6 +184,23 @@ public class EC {
         }
 
         resp.setStatus(resp.SC_OK);
+    }
+
+    private UIEvent getEvent(String testSession, String channelId, String resourceType, String eventName) {
+        File fhir = fhirDir(testSession, channelId);
+        if (resourceType.equals("null")) {
+            resourceType = resourceTypeForEvent(fhir, eventName);
+            if (resourceType == null) {
+                return null;
+            }
+        }
+        File resourceTypeFile = new File(fhir, resourceType);
+        File eventDir = new File(resourceTypeFile, eventName);
+
+        UIEvent uiEvent = new UIEvent(new EC(externalCache)).fromEventDir(eventDir);
+        uiEvent.setEventName(eventName);
+        uiEvent.setResourceType(resourceType);
+        return uiEvent;
     }
 
     public File fhirDir(String testSession, String channelId) {
