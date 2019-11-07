@@ -280,7 +280,9 @@ public class ProxyServlet extends HttpServlet {
     public void doDelete(HttpServletRequest req, HttpServletResponse resp)  {
         URI uri = Common.buildURI(req);
         log.info("doDelete  " + uri);
-        doGetDelete(req, resp, uri, Verb.DELETE);
+        Verb verb = Verb.DELETE;
+        SimStore simStore = getSimStore(req, resp, uri, verb);
+        doGetDelete(req, resp, simStore, uri, verb);
     }
 
     private void returnOperationOutcome(HttpServletRequest req, HttpServletResponse resp, ITask task, Throwable t) throws IOException, ServletException {
@@ -328,32 +330,37 @@ public class ProxyServlet extends HttpServlet {
         URI uri = Common.buildURI(req);
         log.info("doGet " + uri);
 
-        try {
-            Optional<URI> proxyBaseURI = getProxyBase(uri);
-            if (proxyBaseURI.isPresent()) {
-                Verb verb = Verb.GET;
-                Headers inHeaders = Common.getRequestHeaders(req, verb);
-                if (CapabilityStatement.isCapabilityStatementRequest(proxyBaseURI.get(), inHeaders.getPathInfo())) {
-                    doGetCapabilityStatement(req, resp, uri, verb, inHeaders);
-                    return; // EXIT
+        Verb verb = Verb.GET;
+        SimStore simStore = getSimStore(req, resp, uri, verb);
+        String channelType = simStore.getChannelConfig().getChannelType();
+
+        // Only the MHD capability statement
+        if ("mhd".equals(channelType)) {
+            try {
+                Optional<URI> proxyBaseURI = getProxyBase(uri);
+                 if (proxyBaseURI.isPresent()) {
+                     Headers inHeaders = Common.getRequestHeaders(req, verb);
+                    if (CapabilityStatement.isCapabilityStatementRequest(proxyBaseURI.get(), inHeaders.getPathInfo())) {
+                        ServicePropertiesEnum capabilityStatementFile = ServicePropertiesEnum.MHD_CAPABILITY_STATEMENT_FILE;
+                        doGetCapabilityStatement(req, resp, simStore, uri, verb, inHeaders, capabilityStatementFile);
+                        return; // EXIT
+                    }
                 }
+            } catch (URISyntaxException uriEx) {
+                 log.error(ExceptionUtils.getStackTrace(uriEx));
             }
-        } catch (URISyntaxException uriEx) {
-            log.error(ExceptionUtils.getStackTrace(uriEx));
         }
 
-        doGetDelete(req, resp, uri, Verb.GET);
+        // All other requests including passthrough channel's capability statement, and other MHD requests
+        doGetDelete(req, resp, simStore, uri, Verb.GET);
     }
 
-    private void doGetCapabilityStatement(HttpServletRequest req, HttpServletResponse resp, URI uri, Verb verb, Headers inHeaders) {
-        SimStore simStore;
+    private void doGetCapabilityStatement(HttpServletRequest req, HttpServletResponse resp, SimStore simStore, URI uri, Verb verb, Headers inHeaders, ServicePropertiesEnum capabilityStatementFile) {
+        if (simStore == null) return;
+
         boolean isLoggingEnabled = false;
         try {
             isLoggingEnabled = Boolean.parseBoolean(ServiceProperties.getInstance().getProperty(ServicePropertiesEnum.LOG_CS_METADATA_REQUEST));
-            simStore = parseUri(uri, req, resp, verb);
-            if (simStore == null) {
-                return;
-            }
         } catch (Exception ex) {
             log.error(ExceptionUtils.getStackTrace(ex));
             resp.setStatus(resp.SC_INTERNAL_SERVER_ERROR);
@@ -369,20 +376,8 @@ public class ProxyServlet extends HttpServlet {
             String channelType = simStore.getChannelConfig().getChannelType();
             if (channelType == null)
                 throw new Exception("Sim " + simStore.getChannelId() + " does not define a Channel Type.");
-            IChannelBuilder channelBuilder = proxyMap.get(channelType);
-            BaseChannel channel = channelBuilder.build();
-
-            channel.setup(simStore.getChannelConfig());
-            channel.setReturnFormatType(Format.resultContentType(inHeaders));
-            channel.setHostport(hostport);
-            channel.setTask(clientTask);
 
             log.info("Metadata Request => " + simStore.getEndpoint() + " " + inHeaders.getAccept());
-
-            ServicePropertiesEnum capabilityStatementFile = ServicePropertiesEnum.EMPTY_CAPABILITY_STATEMENT_FILE;
-            switch (channelType) {
-                case "mhd": capabilityStatementFile = ServicePropertiesEnum.MHD_CAPABILITY_STATEMENT_FILE; break;
-            }
 
             byte[] inBody = getRequestBody(req);
             HttpBase requestIn = logClientRequestIn(clientTask, inHeaders, inBody, verb);
@@ -399,18 +394,8 @@ public class ProxyServlet extends HttpServlet {
         return;
     }
 
-    private void doGetDelete(HttpServletRequest req, HttpServletResponse resp, URI uri, Verb verb)  {
-        SimStore simStore;
-        try {
-            simStore = parseUri(uri, req, resp, verb);
-            if (simStore == null) {
-                return;
-            }
-        } catch (IOException e) {
-            log.error(ExceptionUtils.getStackTrace(e));
-            resp.setStatus(resp.SC_INTERNAL_SERVER_ERROR);
-            return;
-        }
+    private void doGetDelete(HttpServletRequest req, HttpServletResponse resp, SimStore simStore, URI uri, Verb verb)  {
+        if (simStore == null) return;
 
         Event event = simStore.newEvent();
         ITask clientTask = event.getClientTask();
@@ -485,6 +470,21 @@ public class ProxyServlet extends HttpServlet {
             respondWithError(req, resp, t, inHeaders, clientTask);
             resp.setStatus(resp.SC_OK);
         }
+    }
+
+    private SimStore getSimStore(HttpServletRequest req, HttpServletResponse resp, URI uri, Verb verb) {
+        SimStore simStore;
+        try {
+            simStore = parseUri(uri, req, resp, verb);
+            if (simStore == null) {
+                return null;
+            }
+        } catch (IOException e) {
+            log.error(ExceptionUtils.getStackTrace(e));
+            resp.setStatus(resp.SC_INTERNAL_SERVER_ERROR);
+            return null;
+        }
+        return simStore;
     }
 
     private Optional<URI> getProxyBase(URI pathInfo) throws URISyntaxException {
