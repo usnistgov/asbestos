@@ -31,11 +31,12 @@
 
             <div v-for="(test, testi) in tests"
                  :key="'Test' + testi">
-                <div v-if="report.test && report.test.length > testi">
+                <div v-if="report.test">
                     <template v-if="test.description" class="test-part">
-                        {{ test.description }}
+                        SubTest: {{ test.description }}
                     </template>
-
+                    Ref: {{ containedTests(testi) }}
+                    Contained: {{ findContained(script, containedTests(testi)) }}
                     <div v-for="(action, actioni) in actions(testi)" class="test-part"
                          :key="'Test' + testi + 'Action' + actioni">
                         <test-report-action
@@ -65,6 +66,32 @@
             }
         },
         methods: {
+            containedTests(testi) {
+                const mainTest = this.script.test[testi]
+                if (mainTest)
+                    console.log(`got mainTest`)
+                const ref = this.containedTestReference(mainTest)
+                return ref
+            },
+            containedTestReference(test) {
+                if (!test.modifierExtension)
+                    return null
+                const ref = test.modifierExtension[0].valueReference.reference
+                return ref.substring(1)
+            },
+            findContained(obj, id) {
+                console.log(`findContained ${id}`)
+                if (!obj.contained) {
+                    console.log(`no contained`)
+                    return
+                }
+                console.log(`has contained`)
+                const cont = obj.contained[id]
+                console.log(`cont is ${cont}`)
+                console.log(`keys are ${Object.keys(obj.contained)}`)
+                console.log(`key is ${obj.contained[0].id}`)
+                return obj.contained[0]
+            },
             operationOrAssertion(testi, actioni) {
                 const action = this.script.test[testi].action[actioni]
                 return action.operation ? `Operation: ${this.operationType(action.operation)}` : `Assert: ${this.assertionDescription(action.assert)}`

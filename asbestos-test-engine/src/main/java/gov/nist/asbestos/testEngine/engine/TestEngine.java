@@ -475,6 +475,8 @@ public class TestEngine  {
 
                 // handle condition
                 TestScript containedTestScript = getConditional(testComponent, testReportComponent);
+                testReportComponent = testReport.addTest();
+                boolean conditionalResult = true;
                 if (containedTestScript != null) {
                     List<TestScript.TestScriptTestComponent> tests = containedTestScript.getTest();
                     if (tests.size() != 2) {
@@ -483,7 +485,12 @@ public class TestEngine  {
                     }
 
                     TestReport containedTestReport = new TestReport();
-                    testReport.addContained(containedTestReport);
+
+                    Extension extension = new Extension("https://github.com/usnistgov/asbestos/wiki/TestScript-Conditional",
+                            new Reference(containedTestReport));
+                    testReportComponent.addModifierExtension(extension);
+
+//                    testReport.addContained(containedTestReport);
 
                     // basic operation and validation
                     TestScript.TestScriptTestComponent basicOperationTest = tests.get(0);
@@ -492,16 +499,23 @@ public class TestEngine  {
 
                     // asserts to trigger conditional
                     TestScript.TestScriptTestComponent conditionalTest = tests.get(1);
+
                     containedTestReportComponent = containedTestReport.addTest();
-                    boolean conditionalResult = doTestPart(conditionalTest, containedTestReportComponent, containedTestReport, true);
+                    conditionalResult = doTestPart(conditionalTest, containedTestReportComponent, containedTestReport, true);
 
                     if (containedTestReport.getResult() == TestReport.TestReportResult.FAIL)
                         return;
                 }
 
-                testReportComponent = testReport.addTest();
 
-                //doTestPart(testComponent, testReportComponent, testReport, false);
+                if (conditionalResult) {
+                    //doTestPart(testComponent, testReportComponent, testReport, false);
+                } else {
+                    TestReport.TestActionComponent testActionComponent = testReportComponent.addAction();
+                    TestReport.SetupActionOperationComponent setupActionOperationComponent = testActionComponent.getOperation();
+                    setupActionOperationComponent.setResult(TestReport.TestReportActionResult.SKIP);
+                    setupActionOperationComponent.setMessage("condition failed");
+                }
             }
 
         }
@@ -555,23 +569,29 @@ public class TestEngine  {
                 reportParsingError(testReportComponent, "Do not understand modifierExtension");
                 return null;
             }
-            String containedTestScriptId = extension.getValue().toString();
-
-            List<Resource> containedList = testScript.getContained();
-            Resource contained = null;
-            for (Resource theContained : containedList) {
-                if (theContained.getId() != null && theContained.getId().equals(containedTestScriptId)) {
-                    contained = theContained;
-                    break;
+            if (extension.getValue() instanceof Reference) {
+                Reference ref = (Reference) extension.getValue();
+                if (ref.getResource() instanceof TestScript) {
+                    return (TestScript) ref.getResource();
                 }
             }
-            if (contained == null) {
-                reportParsingError(testReportComponent, "cannot locate contained TestScript " + containedTestScriptId);
-                return null;
-            }
-
-
-            return (TestScript) contained;
+//            String containedTestScriptId = extension.getValue().toString();
+//
+//            List<Resource> containedList = testScript.getContained();
+//            Resource contained = null;
+//            for (Resource theContained : containedList) {
+//                if (theContained.getId() != null && theContained.getId().equals(containedTestScriptId)) {
+//                    contained = theContained;
+//                    break;
+//                }
+//            }
+//            if (contained == null) {
+//                reportParsingError(testReportComponent, "cannot locate contained TestScript " + containedTestScriptId);
+//                return null;
+//            }
+//
+//
+//            return (TestScript) contained;
         }
         return null;
     }

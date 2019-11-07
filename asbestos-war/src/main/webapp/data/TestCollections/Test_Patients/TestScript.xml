@@ -1,24 +1,25 @@
 <!--
-	This TestScript is generic - it will work with any Patient resource 
-	as long as Patient is in Patient/patient.xml and it has a 
+	This TestScript is generic - it will work with any Patient resource
+	as long as Patient is in Patient/patient.xml and it has a
 	given and family name and dob that make it unique.
 -->
 
 <TestScript xmlns="http://hl7.org/fhir">
+	<id value="333"/>
 	<contained>
 		<TestScript>
-			<id value="patientNeedsLoading"/>
+			<id value="1"/>
 			<test>  <!-- basic operation and validation -->
-				<description value="content load"/>
+				<description value="conditional"/>
 				<action>
 					<operation>
-					<description value="looking for patient"/>
+						<description value="looking for patient"/>
 						<type>
 							<code value="search"/>
 						</type>
-						<resource value="Patient"></resource>
-						<contentType value="json"></contentType>
-						<params value="?given=${FirstName}&amp;family=${LastName}&amp;birthdate=${birthDate}"></params>
+						<resource value="Patient"> </resource>
+						<contentType value="json"> </contentType>
+						<params value="?given=${FirstName}&amp;family=${LastName}&amp;birthdate=${birthDate}"> </params>
 						<responseId value="patient1-search"/>
 					</operation>
 				</action>
@@ -53,6 +54,7 @@
 			</test>
 		</TestScript>
 	</contained>
+
 	<fixture id="patient1">
         <!--
            This patient comes out of the test definition
@@ -77,8 +79,11 @@
 		<expression value="Patient.birthDate"></expression>
 	</variable>
 	<test>
-		<modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Conditional">     
-			<valueString value="#patientNeedsLoading"/>  
+		<modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Conditional">
+			<valueReference>
+				<reference value="#1"/>
+			</valueReference>
+<!--			<valueString value="#patientNeedsLoading"/>-->
 		</modifierExtension>
 		<action>
 			<operation>
