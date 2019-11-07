@@ -1,7 +1,7 @@
 package gov.nist.asbestos.asbestosProxy.servlet;
 
 
-import gov.nist.asbestos.asbestosProxy.channels.capabilitystatement.CapabilityStatement;
+import gov.nist.asbestos.asbestosProxy.channels.capabilitystatement.FhirToolkitCapabilityStatement;
 import gov.nist.asbestos.asbestosProxy.channel.*;
 import gov.nist.asbestos.client.Base.EC;
 import gov.nist.asbestos.client.events.Event;
@@ -32,6 +32,7 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.log4j.Logger;
 import org.hl7.fhir.r4.model.BaseResource;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.CapabilityStatement;
 import org.hl7.fhir.r4.model.OperationOutcome;
 
 import javax.servlet.ServletConfig;
@@ -340,7 +341,7 @@ public class ProxyServlet extends HttpServlet {
                 Optional<URI> proxyBaseURI = getProxyBase(uri);
                  if (proxyBaseURI.isPresent()) {
                      Headers inHeaders = Common.getRequestHeaders(req, verb);
-                    if (CapabilityStatement.isCapabilityStatementRequest(proxyBaseURI.get(), inHeaders.getPathInfo())) {
+                    if (FhirToolkitCapabilityStatement.isCapabilityStatementRequest(proxyBaseURI.get(), inHeaders.getPathInfo())) {
                         ServicePropertiesEnum capabilityStatementFile = ServicePropertiesEnum.MHD_CAPABILITY_STATEMENT_FILE;
                         doGetCapabilityStatement(req, resp, simStore, uri, verb, inHeaders, capabilityStatementFile);
                         return; // EXIT
@@ -352,7 +353,7 @@ public class ProxyServlet extends HttpServlet {
         }
 
         // All other requests including passthrough channel's capability statement, and other MHD requests
-        doGetDelete(req, resp, simStore, uri, Verb.GET);
+        doGetDelete(req, resp, simStore, uri, verb);
     }
 
     private void doGetCapabilityStatement(HttpServletRequest req, HttpServletResponse resp, SimStore simStore, URI uri, Verb verb, Headers inHeaders, ServicePropertiesEnum capabilityStatementFile) {
@@ -381,7 +382,9 @@ public class ProxyServlet extends HttpServlet {
 
             byte[] inBody = getRequestBody(req);
             HttpBase requestIn = logClientRequestIn(clientTask, inHeaders, inBody, verb);
-            BaseResource baseResource = CapabilityStatement.getCapabilityStatement(capabilityStatementFile);
+            BaseResource baseResource = FhirToolkitCapabilityStatement.getCapabilityStatement(capabilityStatementFile);
+            String versionId = ((CapabilityStatement)baseResource).getVersion();
+            resp.addHeader("ETag", String.format("W/\"%s\"", versionId.hashCode()));
             respond(resp, baseResource, inHeaders, clientTask);
         } catch (Exception ex) {
             // This did not work in IntelliJ Jetty runner without any Jetty XML config:
@@ -490,7 +493,7 @@ public class ProxyServlet extends HttpServlet {
     private Optional<URI> getProxyBase(URI pathInfo) throws URISyntaxException {
         // '/proxy' is where the ProxyServlet is mapped to in the web.xml
         // http://localhost:8081/asbestos/proxy/default__mhdchannel/metadata
-        // proxy base = all segments up to the first occurence of 'proxy' + testsession + '__" + channelId
+        // proxy base = all segments up to the first occurrence of 'proxy' + testsession + '__" + channelId
         URI proxyBase = null;
         List<String> pathSegments = Arrays.asList(pathInfo.getPath().split("/"));
         int proxyIndex = pathSegments.indexOf("proxy");

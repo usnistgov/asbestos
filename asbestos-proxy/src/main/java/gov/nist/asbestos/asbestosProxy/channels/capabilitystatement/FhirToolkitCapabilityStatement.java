@@ -11,8 +11,8 @@ import java.net.URI;
 import java.nio.file.Paths;
 import java.util.Objects;
 
-public class CapabilityStatement {
-    private static Logger logger = Logger.getLogger(CapabilityStatement.class);
+public class FhirToolkitCapabilityStatement {
+    private static Logger logger = Logger.getLogger(FhirToolkitCapabilityStatement.class);
 
     /**
      *
@@ -46,10 +46,8 @@ public class CapabilityStatement {
         Objects.requireNonNull(key);
         String capabilityStatementFileName =
                 ServiceProperties.getInstance().getProperty(key);
-//                "capabilitystatement/capabilitystatement-fhirToolkitDocRecipientDocResponder.xml";
-//                  "capabilitystatement/empty-capabilitystatement-base2.xml";
 
-        File capabilityStatementFile = Paths.get(CapabilityStatement.class.getResource("/").toURI()).resolve(capabilityStatementFileName).toFile();
+        File capabilityStatementFile = Paths.get(FhirToolkitCapabilityStatement.class.getResource("/").toURI()).resolve(capabilityStatementFileName).toFile();
 
         if (capabilityStatementFile.exists()) {
             // TODO: replace any ${} parameters in the File stream such as the ${ProxyBase}

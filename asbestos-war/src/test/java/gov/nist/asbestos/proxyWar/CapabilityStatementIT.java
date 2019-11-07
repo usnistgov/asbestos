@@ -24,14 +24,11 @@ public class CapabilityStatementIT {
     private static FhirContext ctx;
     private static IGenericClient client;
     private static String proxyPort;
+    private static final String channelId = "mhdtest";
 
     @BeforeAll
     static void beforeAll() throws URISyntaxException, IOException {
-        // NOTE:
-        // NOTE:
-        // NOTE:
-        // This baseUri assumes this MHD type channel already exists in the EC dir
-        URI baseUri = new URI("/asbestos/proxy/default__mhdtest");
+        URI baseUri = new URI("/asbestos/proxy/default__" + channelId);
         ctx = FhirContext.forR4();
         proxyPort = ITConfig.getProxyPort();
         String proxyBase = String.format("http://localhost:%s%s", proxyPort, baseUri.toString());
@@ -46,7 +43,7 @@ public class CapabilityStatementIT {
         // create
         ChannelConfig channelConfig = new ChannelConfig()
                 .setTestSession("default")
-                .setChannelId("mhdtest")
+                .setChannelId(channelId)
                 .setEnvironment("default")
                 .setActorType("fhir")
                 .setChannelType("mhd")
@@ -55,13 +52,13 @@ public class CapabilityStatementIT {
         // delete
         String json = ChannelConfigFactory.convert(channelConfig);
         HttpDelete deleter = new HttpDelete();
-        deleter.run(new URI("http://localhost:"+ proxyPort + "/asbestos/channel/default__mhdtest"));
+        deleter.run(new URI("http://localhost:"+ proxyPort + "/asbestos/channel/default__" + channelId));
         // could be 200 or 404
         //assertEquals(200, deleter.getStatus(), deleter.getResponseHeaders().toString());
 
         // verify
         HttpGet getter = new HttpGet();
-        getter.getJson(new URI("http://localhost:"+ proxyPort + "/asbestos/channel/default__mhdtest"));
+        getter.getJson(new URI("http://localhost:"+ proxyPort + "/asbestos/channel/default__" + channelId));
         assertEquals(404, getter.getStatus());
 
         // create - must return 201 (didn't exist)

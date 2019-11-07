@@ -13,7 +13,6 @@ public class Installation {
     String servletContextName = "http";
     private PropertyServiceManager propertyServiceManager = new PropertyServiceManager();
     private File defaultEnvironmentFile;
-    String toolkitBaseUrl = "http://localhost:8080/xdstools";
 
     public File externalCache()  {
         Objects.requireNonNull(externalCache);

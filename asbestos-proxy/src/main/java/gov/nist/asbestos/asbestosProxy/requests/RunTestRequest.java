@@ -2,6 +2,8 @@ package gov.nist.asbestos.asbestosProxy.requests;
 
 import gov.nist.asbestos.asbestosProxy.servlet.ChannelConnector;
 import gov.nist.asbestos.client.client.FhirClient;
+import gov.nist.asbestos.serviceproperties.ServiceProperties;
+import gov.nist.asbestos.serviceproperties.ServicePropertiesEnum;
 import gov.nist.asbestos.sharedObjects.ChannelConfig;
 import gov.nist.asbestos.simapi.validation.Val;
 import gov.nist.asbestos.testEngine.engine.TestEngine;
@@ -26,7 +28,6 @@ import java.nio.file.Path;
 
 public class RunTestRequest {
     private static Logger log = Logger.getLogger(RunTestRequest.class);
-    private String port = "8081";
 
     private Request request;
 
@@ -56,7 +57,14 @@ public class RunTestRequest {
             return;
         }
         String testSession = channelConfig.getTestSession();
-        String proxyStr = "http://localhost:" + port + "/asbestos/proxy/" + channelId;
+        String proxyStr = "http://localhost:8081/asbestos";
+        ServicePropertiesEnum key = ServicePropertiesEnum.FHIR_TOOLKIT_BASE;
+        try {
+            proxyStr = ServiceProperties.getInstance().getProperty(key);
+        } catch (Exception ex) {
+            log.warn(String.format("Failed to get %s from service.properties. Using default value.", key));
+        }
+        proxyStr += "/proxy/" + channelId;
         URI proxy = null;
         try {
             proxy = new URI(proxyStr);

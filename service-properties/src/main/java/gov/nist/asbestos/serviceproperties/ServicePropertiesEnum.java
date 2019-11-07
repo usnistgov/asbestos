@@ -3,9 +3,12 @@ package gov.nist.asbestos.serviceproperties;
 import java.util.Optional;
 
 public enum ServicePropertiesEnum {
-    LOG_CS_METADATA_REQUEST("Log_CS_Metadata_Request"),
+    LOG_CS_METADATA_REQUEST("LogCsMetadataRequest"),
     MHD_CAPABILITY_STATEMENT_FILE("MhdCapabilityStatementFile"),
-    EMPTY_CAPABILITY_STATEMENT_FILE("EmptyCapabilityStatementFile");
+    EMPTY_CAPABILITY_STATEMENT_FILE("EmptyCapabilityStatementFile"),
+    XDS_TOOLKIT_BASE("XdsToolkitBase"),
+    FHIR_TOOLKIT_BASE("FhirToolkitBase"),
+    HAPI_FHIR_BASE("HapiFhirBase");
 
 
     private String key;
