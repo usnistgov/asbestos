@@ -33,15 +33,30 @@
                  :key="'Test' + testi">
                 <div v-if="report.test">
                     <template v-if="test.description" class="test-part">
-                        SubTest: {{ test.description }}
+                        {{ test.description }}
                     </template>
-                    Ref: {{ containedTests(testi) }}
-                    Contained: {{ findContained(script, containedTests(testi)) }}
+<!--                    Contained: {{ findContained(script, containedTests(testi)) }}-->
+                        <div v-for="(test2, test2i) in containedTests(findContained(script, containedTestsRef(script, testi)))"
+                             :key="'Test2' + test2i">
+                            <template v-if="test2.description" class="test-part">
+                                {{ test2.description }}
+                            </template>
+                            <div v-for="(action, actioni) in test2.action" class="test-part"
+                                 :key="'Test' + testi + 'Action' + actioni">
+                                <test-report-action
+                                        :script="action"
+                                        :report="findContained(report, containedTestsRef(report, testi)).test[test2i].action[actioni]"> </test-report-action>
+<!--                                Report: {{ report.test[testi].modifierExtension[0].valueReference.reference }}-->
+<!--                                containedTestsRef: {{ findContained(report, containedTestsRef(report, testi))  }}-->
+<!--                                {{ containedTests(findContained(report, )) }}-->
+                            </div>
+                        </div>
+                    main
                     <div v-for="(action, actioni) in actions(testi)" class="test-part"
                          :key="'Test' + testi + 'Action' + actioni">
                         <test-report-action
                                 :script="action"
-                                :report="reportAction(testi, actioni)"> </test-report-action>
+                                :report="reportAction(report, testi, actioni)"> </test-report-action>
                     </div>
                 </div>
             </div>
@@ -66,12 +81,11 @@
             }
         },
         methods: {
-            containedTests(testi) {
-                const mainTest = this.script.test[testi]
+            containedTestsRef(script_or_report, testi) {  // script or report
+                const mainTest = script_or_report.test[testi]
                 if (mainTest)
-                    console.log(`got mainTest`)
-                const ref = this.containedTestReference(mainTest)
-                return ref
+                    console.log(`mainTest is ${mainTest}`)
+                return this.containedTestReference(mainTest)
             },
             containedTestReference(test) {
                 if (!test.modifierExtension)
@@ -83,7 +97,7 @@
                 console.log(`findContained ${id}`)
                 if (!obj.contained) {
                     console.log(`no contained`)
-                    return
+                    return null
                 }
                 console.log(`has contained`)
                 const cont = obj.contained[id]
@@ -91,6 +105,11 @@
                 console.log(`keys are ${Object.keys(obj.contained)}`)
                 console.log(`key is ${obj.contained[0].id}`)
                 return obj.contained[0]
+            },
+            containedTests(script) {  // or report
+                if (script)
+                    return script.test
+                return null
             },
             operationOrAssertion(testi, actioni) {
                 const action = this.script.test[testi].action[actioni]
@@ -128,16 +147,19 @@
             actions(testIndex) {
                 return this.script.test[testIndex].action
             },
+            subActions(test, testIndex) {
+                return test[testIndex].action
+            },
             scriptAction(testi, actioni) {
                 return this.script.test[testi].action[actioni]
             },
-            reportAction(testi, actioni) {
+            reportAction(report, testi, actioni) {
                 console.log(`reportAction ${testi}   ${actioni}`)
-                if (!this.report)
+                if (!report)
                     return null
-                if (!this.report.test[testi])
+                if (!report.test[testi])
                     return null
-                return this.report.test[testi].action[actioni]
+                return report.test[testi].action[actioni]
             },
 
         },
