@@ -40,7 +40,14 @@ public class ServiceProperties {
 
     private void loadProperties() throws IOException {
         logger.info(String.format("*** Loading service.properties from: %s", spFile.toString()));
-        properties.load(new FileInputStream(spFile));
+        FileInputStream fis = null;
+        try {
+            fis = new FileInputStream(spFile);
+            properties.load(fis);
+        } finally {
+            if (fis != null)
+                fis.close();
+        }
         spFileLastModified = spFile.lastModified();
     }
 

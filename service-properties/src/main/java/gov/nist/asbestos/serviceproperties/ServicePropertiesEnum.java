@@ -8,6 +8,7 @@ public enum ServicePropertiesEnum {
     EMPTY_CAPABILITY_STATEMENT_FILE("EmptyCapabilityStatementFile"),
     XDS_TOOLKIT_BASE("XdsToolkitBase"),
     FHIR_TOOLKIT_BASE("FhirToolkitBase"),
+    FHIR_TOOLKIT_VERSION("FhirToolkitVersion"),
     HAPI_FHIR_BASE("HapiFhirBase");
 
 

@@ -105,6 +105,30 @@ public class CapabilityStatementIT {
         }
     }
 
+    /**
+     * NOTE
+     * NOTE
+     * NOTE
+     * This logging tests will only run when executed in Maven\Jetty IT test run mode because the service.properties lies in the server which hosts Asbestos. The JUNIT test-classess service.properties does not exist if it tired to read/write to it, hence an update to the actual property file is required through the Java system variable.
+     * @throws Exception
+     */
+    private static void resetServiceProperties() throws Exception {
+        String spFileString = ServiceProperties.getLocalSpFile(CapabilityStatementIT.class).toString();
+        String targetString = "test-classes";
+        String replaceString = "asbestos-war" + File.separator + "WEB-INF" + File.separator + "classes";
+
+        if (spFileString.contains(targetString)) {
+            File spFile = new File(spFileString.replace(targetString, replaceString));
+
+            assert  spFile.exists();
+
+            System.setProperty("SERVICE_PROPERTIES", spFile.toString());
+        } else {
+            throw new Exception("Unrecognized file path: " + spFileString);
+        }
+
+    }
+
     @Test
     void getCapabilityStatementWithoutLoggingEvent() throws Exception {
         ServiceProperties.getInstance().setProperty(ServicePropertiesEnum.LOG_CS_METADATA_REQUEST.getKey(), "false");
@@ -126,29 +150,9 @@ public class CapabilityStatementIT {
         assertEquals(200, getter.getStatus());
         String xProxyEvent = getter.getResponseHeaders().getHeaderValue("x-proxy-event");
         assert xProxyEvent != null;
-        assert xProxyEvent.length() > 0 && xProxyEvent.contains("/asbestos/log/default/mhdtest/metadata");
+        assert xProxyEvent.length() > 0 && xProxyEvent.contains("/asbestos/log/default/"+ channelId +"/metadata");
     }
 
 
-    /**
-     * This test will only run when executed in Maven\Jetty IT test run mode because the service.properties lies in the server which hosts Asbestos. The JUNIT test-classess service.properties does not exist if it tired to read/write to it, hence an update to the actual property file is required through the Java system variable.
-     * @throws Exception
-     */
-    private static void resetServiceProperties() throws Exception {
-        String spFileString = ServiceProperties.getLocalSpFile(CapabilityStatementIT.class).toString();
-        String targetString = "test-classes";
-        String replaceString = "asbestos-war" + File.separator + "WEB-INF" + File.separator + "classes";
-
-        if (spFileString.contains(targetString)) {
-            File spFile = new File(spFileString.replace(targetString, replaceString));
-
-            assert  spFile.exists();
-
-            System.setProperty("SERVICE_PROPERTIES", spFile.toString());
-        } else {
-            throw new Exception("Unrecognized file path: " + spFileString);
-        }
-
-    }
 
 }
