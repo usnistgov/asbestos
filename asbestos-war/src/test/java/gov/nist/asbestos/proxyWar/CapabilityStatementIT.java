@@ -5,6 +5,8 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 import gov.nist.asbestos.http.operations.HttpDelete;
 import gov.nist.asbestos.http.operations.HttpGet;
 import gov.nist.asbestos.http.operations.HttpPost;
+import gov.nist.asbestos.serviceproperties.ServiceProperties;
+import gov.nist.asbestos.serviceproperties.ServicePropertiesEnum;
 import gov.nist.asbestos.sharedObjects.ChannelConfig;
 import gov.nist.asbestos.sharedObjects.ChannelConfigFactory;
 import org.hl7.fhir.r4.model.Bundle;
@@ -14,6 +16,7 @@ import org.hl7.fhir.r4.model.Resource;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -36,6 +39,8 @@ public class CapabilityStatementIT {
         client = ctx.newRestfulGenericClient(proxyBase);
 
         deleteAndRecreateMhdTestChannel();
+
+        resetServiceProperties();
     }
 
 
@@ -78,6 +83,7 @@ public class CapabilityStatementIT {
     @Test
     void searchBogusPatient() {
         // Perform a search
+        // FHIR Client 3.7.0 silently executes a GET metadata request
         Bundle results = client
                 .search()
                 .forResource(Patient.class)
@@ -96,6 +102,49 @@ public class CapabilityStatementIT {
            if (outcome.hasIssue()) {
                System.out.println(outcome.getIssueFirstRep().getSeverity().toString());
            }
+        }
+    }
+
+    @Test
+    void getCapabilityStatementWithoutLoggingEvent() throws Exception {
+        ServiceProperties.getInstance().setProperty(ServicePropertiesEnum.LOG_CS_METADATA_REQUEST.getKey(), "false");
+        ServiceProperties.getInstance().save();
+
+        HttpGet getter = new HttpGet();
+        getter.getJson(new URI("http://localhost:"+ proxyPort + "/asbestos/proxy/default__" + channelId + "/metadata"));
+        assertEquals(200, getter.getStatus());
+        assert getter.getResponseHeaders().getHeaderValue("x-proxy-event") == null;
+    }
+
+    @Test
+    void getCapabilityStatementWithLoggingEvent() throws Exception {
+        ServiceProperties.getInstance().setProperty(ServicePropertiesEnum.LOG_CS_METADATA_REQUEST.getKey(), "true");
+        ServiceProperties.getInstance().save();
+
+        HttpGet getter = new HttpGet();
+        getter.getJson(new URI("http://localhost:"+ proxyPort + "/asbestos/proxy/default__" + channelId + "/metadata"));
+        assertEquals(200, getter.getStatus());
+        String xProxyEvent = getter.getResponseHeaders().getHeaderValue("x-proxy-event");
+        assert xProxyEvent != null;
+        assert xProxyEvent.length() > 0 && xProxyEvent.contains("/asbestos/log/default/mhdtest/metadata");
+    }
+
+
+    /**
+     * This test will only run when executed in Maven\Jetty IT test run mode because the service.properties lies in the server which hosts Asbestos. The JUNIT test-classess service.properties does not exist if it tired to read/write to it, hence an update to the actual property file is required through the Java system variable.
+     * @throws Exception
+     */
+    private static void resetServiceProperties() throws URISyntaxException {
+        String spFileString = ServiceProperties.getLocalSpFile(CapabilityStatementIT.class).toString();
+        String targetString = "test-classes";
+        String replaceString = "asbestos-war" + File.separator + "WEB-INF" + File.separator + "classes";
+
+        if (spFileString.contains(targetString)) {
+            File spFile = new File(spFileString.replace(targetString, replaceString));
+
+            assert  spFile.exists();
+
+            System.setProperty("SERVICE_PROPERTIES", spFile.toString());
         }
     }
 
