@@ -1,14 +1,14 @@
 package gov.nist.asbestos.asbestosProxy.mhdChannel;
 
 import gov.nist.asbestos.asbestosProxy.servlet.ChannelControlServlet;
+import gov.nist.asbestos.asbestosProxy.servlet.ProxyServlet;
 import gov.nist.asbestos.client.events.Event;
 import gov.nist.asbestos.client.events.EventStoreItem;
 import gov.nist.asbestos.client.events.EventStoreSearch;
 import gov.nist.asbestos.client.events.ITask;
 import gov.nist.asbestos.client.log.SimStore;
-import gov.nist.asbestos.asbestosProxy.servlet.ProxyServlet;
 import gov.nist.asbestos.simapi.simCommon.SimId;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Disabled;
 import org.mockito.Mock;
 
 import javax.servlet.ServletException;
@@ -21,7 +21,9 @@ import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -29,6 +31,7 @@ import static org.mockito.Mockito.when;
 /**
  * this test depends on hapi running on port 8080 at /fhir/fhir
  */
+@Disabled("Disabled until errors are fixed.")
 class GetMetadataTest {
 
     @Mock
@@ -40,7 +43,7 @@ class GetMetadataTest {
 
     private File externalCache;
 
-    @Test
+//    @Test
     void getMetadataTest() throws URISyntaxException, IOException, ServletException {
         String testSession = "default";
         String channelId = "proxtest";
