@@ -30,7 +30,7 @@ public class CapabilityStatementIT {
     private static final String channelId = "mhdtest";
 
     @BeforeAll
-    static void beforeAll() throws URISyntaxException, IOException {
+    static void beforeAll() throws Exception {
         URI baseUri = new URI("/asbestos/proxy/default__" + channelId);
         ctx = FhirContext.forR4();
         proxyPort = ITConfig.getProxyPort();
@@ -134,7 +134,7 @@ public class CapabilityStatementIT {
      * This test will only run when executed in Maven\Jetty IT test run mode because the service.properties lies in the server which hosts Asbestos. The JUNIT test-classess service.properties does not exist if it tired to read/write to it, hence an update to the actual property file is required through the Java system variable.
      * @throws Exception
      */
-    private static void resetServiceProperties() throws URISyntaxException {
+    private static void resetServiceProperties() throws Exception {
         String spFileString = ServiceProperties.getLocalSpFile(CapabilityStatementIT.class).toString();
         String targetString = "test-classes";
         String replaceString = "asbestos-war" + File.separator + "WEB-INF" + File.separator + "classes";
@@ -145,7 +145,10 @@ public class CapabilityStatementIT {
             assert  spFile.exists();
 
             System.setProperty("SERVICE_PROPERTIES", spFile.toString());
+        } else {
+            throw new Exception("Unrecognized file path: " + spFileString);
         }
+
     }
 
 }
