@@ -39,6 +39,15 @@
 						<warningOnly value="false"/>
 					</assert>
 				</action>
+				<action>
+  				<assert>
+	  			  <description value="check for multiple copies on the server"/>
+						<expression value="Bundle.total"/>
+						<operator value="lessThan"/>
+						<value value="2"/>
+						<warningOnly value="false"/>
+					</assert>
+				</action>
 			</test>
 			<test>  <!-- asserts to trigger conditional - one fail and condition is false -->
 				<description value="assertion"/>

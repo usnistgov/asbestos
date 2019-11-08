@@ -46,9 +46,6 @@
                                 <test-report-action
                                         :script="action"
                                         :report="findContained(report, containedTestsRef(report, testi)).test[test2i].action[actioni]"> </test-report-action>
-<!--                                Report: {{ report.test[testi].modifierExtension[0].valueReference.reference }}-->
-<!--                                containedTestsRef: {{ findContained(report, containedTestsRef(report, testi))  }}-->
-<!--                                {{ containedTests(findContained(report, )) }}-->
                             </div>
                         </div>
                     main

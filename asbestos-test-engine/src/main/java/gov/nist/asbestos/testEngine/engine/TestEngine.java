@@ -30,6 +30,7 @@ public class TestEngine  {
     private File testDef = null;
     private URI sut = null;
     private TestScript testScript = null;
+    private boolean failOverride = false;
     private FixtureMgr fixtureMgr = new FixtureMgr();
     private Val val;
     private ValE engineVal;
@@ -172,6 +173,8 @@ public class TestEngine  {
         } finally {
             doAutoDeletes();
             doPostProcessing();
+            if (failOverride)
+                testReport.setResult(TestReport.TestReportResult.FAIL);
         }
     }
 
@@ -490,13 +493,19 @@ public class TestEngine  {
                             new Reference(containedTestReport));
                     testReportComponent.addModifierExtension(extension);
 
-//                    testReport.addContained(containedTestReport);
-
                     // basic operation and validation
                     TestScript.TestScriptTestComponent basicOperationTest = tests.get(0);
                     TestReport.TestReportTestComponent containedTestReportComponent = containedTestReport.addTest();
                     boolean opResult = doTestPart(basicOperationTest, containedTestReportComponent, containedTestReport,false);
 
+                    if (!opResult) {
+                        failOverride = true;
+//                        testReport.setResult(TestReport.TestReportResult.FAIL);
+                        containedTestReportComponent = containedTestReport.addTest();
+                        reportSkip(containedTestReportComponent);
+                        reportSkip(testReportComponent);
+                        return;
+                    }
                     // asserts to trigger conditional
                     TestScript.TestScriptTestComponent conditionalTest = tests.get(1);
 
@@ -509,16 +518,24 @@ public class TestEngine  {
 
 
                 if (conditionalResult) {
-                    //doTestPart(testComponent, testReportComponent, testReport, false);
+                    doTestPart(testComponent, testReportComponent, testReport, false);
                 } else {
-                    TestReport.TestActionComponent testActionComponent = testReportComponent.addAction();
-                    TestReport.SetupActionOperationComponent setupActionOperationComponent = testActionComponent.getOperation();
-                    setupActionOperationComponent.setResult(TestReport.TestReportActionResult.SKIP);
-                    setupActionOperationComponent.setMessage("condition failed");
+                    reportSkip(testReportComponent);
+//                    TestReport.TestActionComponent testActionComponent = testReportComponent.addAction();
+//                    TestReport.SetupActionOperationComponent setupActionOperationComponent = testActionComponent.getOperation();
+//                    setupActionOperationComponent.setResult(TestReport.TestReportActionResult.SKIP);
+//                    setupActionOperationComponent.setMessage("condition failed");
                 }
             }
 
         }
+    }
+
+    private void reportSkip(TestReport.TestReportTestComponent reportComponent) {
+        TestReport.TestActionComponent testActionComponent = reportComponent.addAction();
+        TestReport.SetupActionOperationComponent setupActionOperationComponent = testActionComponent.getOperation();
+        setupActionOperationComponent.setResult(TestReport.TestReportActionResult.SKIP);
+        setupActionOperationComponent.setMessage("skipped");
     }
 
     private boolean doTestPart(TestScript.TestScriptTestComponent testScriptElement, TestReport.TestReportTestComponent testReportComponent, TestReport testReport, boolean reportAsConditional) {
