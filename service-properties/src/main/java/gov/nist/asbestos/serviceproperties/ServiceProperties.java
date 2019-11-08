@@ -6,7 +6,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.nio.file.Paths;
+import java.util.Objects;
 import java.util.Properties;
 
 /**
@@ -16,6 +18,7 @@ import java.util.Properties;
 public class ServiceProperties {
     private static final Logger logger = Logger.getLogger(ServiceProperties.class);
     private static File spFile;
+    private long spFileLastModified;
     private static Properties properties;
     private static ServiceProperties spClass;
 
@@ -23,14 +26,22 @@ public class ServiceProperties {
         String spString = System.getProperty("SERVICE_PROPERTIES");
         if (spString == null) {
             try {
-                spFile = Paths.get(getClass().getResource("/").toURI()).resolve("service.properties").toFile();
-                properties = new Properties();
-                properties.load(new FileInputStream(spFile));
+                spFile = getLocalSpFile(getClass());
             } catch (Exception ex) {
                 logger.error("Could not locate the service.properties file: " + ex.toString());
                 throw ex;
             }
+        } else {
+            spFile = new File(spString);
         }
+        properties = new Properties();
+        loadProperties();
+    }
+
+    private void loadProperties() throws IOException {
+        logger.info(String.format("*** Loading service.properties from: %s", spFile.toString()));
+        properties.load(new FileInputStream(spFile));
+        spFileLastModified = spFile.lastModified();
     }
 
     public static ServiceProperties getInstance() throws Exception {
@@ -38,6 +49,22 @@ public class ServiceProperties {
             spClass = new ServiceProperties();
         }
         return spClass;
+    }
+
+    private void reloadIfModified() {
+        long lastModified = spFile.lastModified();
+        if (lastModified > spFileLastModified) {
+            try {
+                loadProperties();
+            } catch (IOException ioEx) {
+                logger.warn("reloadIfModified failed: " + ioEx.toString());
+            }
+        }
+    }
+
+    public static File getLocalSpFile(Class clazz) throws URISyntaxException  {
+        Objects.requireNonNull(clazz);
+        return Paths.get(clazz.getResource("/").toURI()).resolve("service.properties").toFile();
     }
 
     /**
@@ -55,6 +82,7 @@ public class ServiceProperties {
     }
 
     public String getProperty(String key) {
+        reloadIfModified();
         return properties.getProperty(key);
     }
 
@@ -78,6 +106,7 @@ public class ServiceProperties {
             try {
                 properties.store(fos, "");
                 fos.flush();
+                spFileLastModified = spFile.lastModified();
                 return true;
             } finally {
                 fos.close();
