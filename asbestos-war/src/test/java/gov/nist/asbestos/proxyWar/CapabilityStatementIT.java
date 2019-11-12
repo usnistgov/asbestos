@@ -2,6 +2,7 @@ package gov.nist.asbestos.proxyWar;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import gov.nist.asbestos.http.headers.Header;
 import gov.nist.asbestos.http.operations.HttpDelete;
 import gov.nist.asbestos.http.operations.HttpGet;
 import gov.nist.asbestos.http.operations.HttpPost;
@@ -22,6 +23,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class CapabilityStatementIT {
     private static FhirContext ctx;
@@ -151,6 +153,21 @@ public class CapabilityStatementIT {
         String xProxyEvent = getter.getResponseHeaders().getHeaderValue("x-proxy-event");
         assert xProxyEvent != null;
         assert xProxyEvent.length() > 0 && xProxyEvent.contains("/asbestos/log/default/"+ channelId +"/metadata");
+
+        getter.getJson(new URI(xProxyEvent));
+        assertEquals(200, getter.getStatus());
+        assertNotNull(getter.getResponseText());
+        String contentType = getter.getResponseHeaders().getHeaderValue("content-type");
+        assertNotNull(contentType);
+        assert "application/json".equals(contentType);
+
+        getter.getRequestHeaders().set(new Header("accept", "text/html"));
+        getter.get(xProxyEvent);
+        assertEquals(200, getter.getStatus());
+        assertNotNull(getter.getResponseText());
+        contentType = getter.getResponseHeaders().getHeaderValue("content-type");
+        assertNotNull(contentType);
+        assert "text/html".equals(contentType);
     }
 
 
