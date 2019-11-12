@@ -31,6 +31,22 @@
                     </li>
                 </div>
             </ul>
+            <div>
+                <span class="selectable" @click="toggleScriptDisplayed()">Raw Report</span>
+                <span v-if="displayScript">
+                    <img src="../../assets/arrow-down.png" @click="toggleScriptDisplayed()">
+                    <script-display
+                            :script="script"
+                            :report="report">
+                    </script-display>
+                </span>
+                <span v-else>
+                    <span v-if="eventId">
+                        <img src="../../assets/arrow-right.png" @click="toggleScriptDisplayed()">
+                    </span>
+                </span>
+            </div>
+
             <div v-if="this.script.operation">
                 <span v-if="eventId" class="selectable" @click="toggleEventDisplayed()">Message Log</span>
                 <span v-if="eventDisplayed && eventId">
@@ -54,11 +70,13 @@
 
 <script>
     import LogItem from "../logViewer/LogItem"
+    import ScriptDisplay from "./ScriptDisplay"
     export default {
         data() {
             return {
                 // message: null,
                 displayMessage: false,
+                displayScript: false,
                 status: [],   // testName => undefined, 'pass', 'fail', 'error'
                 eventLogUrl: null,
                 eventDisplayed: false,
@@ -72,6 +90,9 @@
             },
             toggleEventDisplayed() {
                 this.eventDisplayed = !this.eventDisplayed
+            },
+            toggleScriptDisplayed() {
+                this.displayScript = !this.displayScript
             },
             operationType(operation) {
                 return operation.type.code
@@ -160,7 +181,8 @@
             'script', 'report',
         ],
         components: {
-            LogItem
+            ScriptDisplay,
+            LogItem,
         },
         name: "TestReportAction"
     }
