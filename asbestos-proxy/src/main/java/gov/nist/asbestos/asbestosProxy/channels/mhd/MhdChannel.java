@@ -4,6 +4,7 @@ import gov.nist.asbestos.asbestosProxy.channel.BaseChannel;
 import gov.nist.asbestos.asbestosProxy.channels.passthrough.PassthroughChannel;
 import gov.nist.asbestos.asbestosProxy.util.XdsActorMapper;
 import gov.nist.asbestos.asbestosProxy.servlet.TransformException;
+import gov.nist.asbestos.client.Base.EC;
 import gov.nist.asbestos.client.Base.ProxyBase;
 import gov.nist.asbestos.client.client.FhirClient;
 import gov.nist.asbestos.client.client.Format;
@@ -56,9 +57,17 @@ public class MhdChannel extends BaseChannel /*implements IBaseChannel*/ {
     private String transformPDBToPNR(Bundle bundle, URI toAddr, Task task) {
         Objects.requireNonNull(task);
         Val val = new Val();
+
         FhirClient fhirClient = new FhirClient();
         ResourceCacheMgr resourceCacheMgr = new ResourceCacheMgr(getExternalCache());
         fhirClient.setResourceCacheMgr(resourceCacheMgr);
+
+//        String channelId = channelConfig.getTestSession() + "__" + channelConfig.getChannelId();
+//        EC ec = new EC(getExternalCache());
+//        File patientCacheDir = ec.getTestLogCacheDir(channelId);
+//        File alternatePatientCacheDir = ec.getTestLogCacheDir("default__default");
+//        resourceCacheMgr.addCache(patientCacheDir);
+//        resourceCacheMgr.addCache(alternatePatientCacheDir);
 
         ResourceMgr rMgr = new ResourceMgr();
         rMgr.setVal(val);

@@ -179,6 +179,8 @@ public class ProxyServlet extends HttpServlet {
             channel.setProxyBase(proxyBase);
             channel.setServerBase(fhirBase);
 
+
+
             URI outURI = transformRequestUri(requestIn, channel);
             // transform input request for backend service
             HttpBase requestOut = transformRequest(backSideTask, requestIn, outURI, channel);

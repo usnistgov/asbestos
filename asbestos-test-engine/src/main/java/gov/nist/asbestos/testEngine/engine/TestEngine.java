@@ -301,6 +301,8 @@ public class TestEngine  {
 //                    throw new Error("fixture.autodelete is a required field");
                 Ref ref = new Ref(comp.getResource().getReference());
                 Optional<ResourceWrapper> optWrapper = fhirClientForFixtures.readCachedResource(ref);
+
+                // never happens - Throwable thrown if not found
                 if (!optWrapper.isPresent())
                     throw new Error("Static Fixture " + ref + " cannot be loaded");
                 ResourceWrapper wrapper = optWrapper.get();
@@ -448,10 +450,13 @@ public class TestEngine  {
     private TestReport.SetupActionAssertComponent doAssert(String typePrefix, TestScript.SetupActionAssertComponent operation) {
         TestReport.SetupActionAssertComponent report;
         try {
+            ValE vale = new ValE(val);
             AssertionRunner runner = new AssertionRunner(fixtureMgr)
-                    .setVal(new ValE(val).setMsg(typePrefix))
+                    .setVal(vale.setMsg(typePrefix))
                     .setTypePrefix(typePrefix)
-                    .setVariableMgr(new VariableMgr(testScript, fixtureMgr).setOpReport(testReport.getSetup().addAction().getOperation()))
+                    .setVariableMgr(new VariableMgr(testScript, fixtureMgr)
+                            .setVal(vale)
+                            .setOpReport(testReport.getSetup().addAction().getOperation()))
                     .setTestReport(testReport)
                     .setTestScript(testScript);
             report = runner.run(operation);
@@ -675,31 +680,58 @@ public class TestEngine  {
                 if (!actionResult.hasOperation())
                     continue;
                 TestReport.SetupActionOperationComponent op = actionResult.getOperation();
-                if (!"pass".equals(op.getResult().toCode()))
-                    continue;
-                if (op.getMessage().startsWith("GET") || op.getMessage().startsWith("CREATE")) {
-                    URI uri;
-                    try {
-                        uri = new URI(op.getDetail());
-                    } catch (URISyntaxException e) {
-                        throw new Error(e);
-                    }
-                    UIEvent uiEvent = new UIEvent(ec).fromURI(uri);
-                    if (uiEvent != null) {
-                        // add to cache
-                        File cacheDir = ec.getTestLogCacheDir(channelId);
-                        String responseBody = uiEvent.getClientTask().getResponseBody();
-                        BaseResource baseResource = ProxyBase.parse(responseBody, Format.fromContent(responseBody));
-                        if (baseResource instanceof Bundle) {
-                            Bundle bundle = (Bundle) baseResource;
-                            for (Bundle.BundleEntryComponent comp : bundle.getEntry()) {
-                                if (comp.getResource() instanceof Patient) {
-                                    String fullUrl = comp.getFullUrl();
-                                    if (fullUrl != null && !fullUrl.equals("") && bundle.getTotal() == 1)
-                                        buildCacheEntry(cacheDir, bundle, (Patient) comp.getResource());
+                buildCacheEntry(op, ec);
+            }
+            if (testComponent.hasModifierExtension()) {
+                Extension extension = testComponent.getModifierExtensionFirstRep();
+                if (extension.getUrl().equals("https://github.com/usnistgov/asbestos/wiki/TestScript-Conditional")) {
+                    if (extension.getValue() instanceof Reference) {
+                        Reference reference = (Reference) extension.getValue();
+                        if (reference.getResource() instanceof TestReport) {
+                            TestReport containedTestReport = (TestReport) reference.getResource();
+                            for (TestReport.TestReportTestComponent containedTestComponent : containedTestReport.getTest()) {
+                                for (TestReport.TestActionComponent actionResult : containedTestComponent.getAction()) {
+                                    if (actionResult.hasOperation()) {
+                                        TestReport.SetupActionOperationComponent op = actionResult.getOperation();
+                                        buildCacheEntry(op, ec);
+                                    }
                                 }
                             }
                         }
+                    }
+                }
+            }
+        }
+    }
+
+    private void buildCacheEntry(TestReport.SetupActionOperationComponent op, EC ec) {
+        if ("pass".equals(op.getResult().toCode())) {
+            if (op.getMessage().startsWith("GET") || op.getMessage().startsWith("CREATE")) {
+                URI uri;
+                try {
+                    uri = new URI(op.getDetail());
+                } catch (URISyntaxException e) {
+                    throw new Error(e);
+                }
+                UIEvent uiEvent = new UIEvent(ec).fromURI(uri);
+                buildCacheEntry(uiEvent, ec);
+            }
+        }
+    }
+
+    private void buildCacheEntry(UIEvent uiEvent, EC ec) {
+        if (uiEvent != null) {
+            // add to cache
+            File cacheDir = ec.getTestLogCacheDir(channelId);
+            String responseBody = uiEvent.getClientTask().getResponseBody();
+            BaseResource baseResource = ProxyBase.parse(responseBody, Format.fromContent(responseBody));
+            if (baseResource instanceof Bundle) {
+                Bundle bundle = (Bundle) baseResource;
+                for (Bundle.BundleEntryComponent comp : bundle.getEntry()) {
+                    if (comp.getResource() instanceof Patient) {
+                        String fullUrl = comp.getFullUrl();
+                        if (fullUrl != null && !fullUrl.equals("") && bundle.getTotal() == 1)
+                            buildCacheEntry(cacheDir, bundle, (Patient) comp.getResource());
                     }
                 }
             }

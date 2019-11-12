@@ -4,6 +4,8 @@ import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import gov.nist.asbestos.simapi.validation.ValE;
 import org.hl7.fhir.r4.model.TestReport;
 
+import java.util.Objects;
+
 class Reporter {
 
 
@@ -14,6 +16,7 @@ class Reporter {
     private static boolean debug = false;
 
     Reporter(ValE val, TestReport.SetupActionOperationComponent opReport, String type, String label) {
+        Objects.requireNonNull(val);
         this.val = val;
         this.opReport = opReport;
         this.type = type;

@@ -49,19 +49,33 @@ public class VariableMgr {
     }
 
     String updateReference(String reference) {
+        if (reference == null)
+            return null;
         for (int i=0; i<50; i++) {
             if (!containsVariable(reference))
                 return reference;
             reference = updateReference1(reference);
         }
+        Variable var = getNextVariable(reference);
+        if (var != null) {
+            reporter.reportError("variable " + var.name + " cannot be resolved");
+            throw new Error("variable " + var.name + " cannot be resolved");
+        }
         return null;
     }
 
-    private String updateReference1(String reference) {
-        Objects.requireNonNull(reference);
-        Objects.requireNonNull(reporter);
+    class Variable {
+        String name;
+        int from;
+        int to;
+        String reference;
+    }
+
+    private Variable getNextVariable(String reference) {
+        if (reference == null)
+            return null;
         if (!reference.contains(("${")))
-            return reference;
+            return null;
         int from = reference.indexOf("${");
         int to = reference.indexOf("}", from);
         if (to == -1) {
@@ -69,16 +83,36 @@ public class VariableMgr {
             throw new Error("reference " + reference + " has no closing }");
         }
         String varName = reference.substring(from+2, to);
-        String update = eval(varName);
+        Variable var = new Variable();
+        var.name = varName;
+        var.from = from;
+        var.to = to;
+        var.reference = reference;
+        return var;
+    }
+
+    private String updateReference1(String reference) {
+        Objects.requireNonNull(reference);
+        Objects.requireNonNull(reporter);
+        if (!reference.contains(("${")))
+            return reference;
+//        int from = reference.indexOf("${");
+//        int to = reference.indexOf("}", from);
+//        if (to == -1) {
+//            reporter.reportError("reference " + reference + " has no closing }");
+//            throw new Error("reference " + reference + " has no closing }");
+//        }
+        Variable var  = getNextVariable(reference); //reference.substring(from+2, to);
+        String update = eval(var.name);
         if (update == null)
-            return null;
-        return reference.substring(0, from) + update + reference.substring(to+1);
+            return reference;
+        return reference.substring(0, var.from) + update + reference.substring(var.to+1);
     }
 
     private String eval(String variableName) {
         TestScript.TestScriptVariableComponent var = getVariable(variableName);
         if (var == null) {
-            reporter.reportError( "Variable " + variableName + " is references but not defined");
+            reporter.reportError( "Variable " + variableName + " is referenced but not defined");
             return null;
         }
         String sourceId = null;
@@ -128,6 +162,7 @@ public class VariableMgr {
 
     VariableMgr setOpReport(TestReport.SetupActionOperationComponent opReport) {
         Objects.requireNonNull(opReport);
+        Objects.requireNonNull(val);
         this.opReport = opReport;
         reporter = new Reporter(val, opReport, "", "");
         return this;

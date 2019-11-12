@@ -8,6 +8,8 @@ import gov.nist.asbestos.simapi.validation.ValE;
 import org.hl7.fhir.r4.model.*;
 
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 public class SetupActionTransaction extends GenericSetupAction {
@@ -25,10 +27,14 @@ public class SetupActionTransaction extends GenericSetupAction {
         BaseResource resource = wrapper.getResource();
         if (wrapper.isOk()) {
             if ((resource instanceof Bundle) && bundleContainsError((Bundle) resource) ) {
-                reporter.reportFail(wrapper.getRef() + " transaction failed : \n" + getBundleIssues((Bundle) wrapper.getResource()), wrapper);
+                reporter.reportFail((wrapper.getRef() == null ? "" : wrapper.getRef())  +
+                        " transaction failed : \n" + getBundleIssues((Bundle) wrapper.getResource()),
+                        wrapper);
             } else if ((resource instanceof OperationOutcome && operationOutcomeContainsError((OperationOutcome) resource))) {
-                String issues = getOperationOutcomeIssues((OperationOutcome) resource);
-                reporter.reportFail(wrapper.getRef() + " transaction failed : \n" + issues, wrapper);
+                List<String> issues = getOperationOutcomeIssues((OperationOutcome) resource);
+                reporter.reportFail((wrapper.getRef() == null ? "" : wrapper.getRef()) +
+                        " transaction failed : \n" + issues,
+                        wrapper);
             } else if (resource instanceof Bundle) {
                 reporter.report("HTTP " + wrapper.getStatus(), wrapper);
             } else {
@@ -69,29 +75,34 @@ public class SetupActionTransaction extends GenericSetupAction {
             Resource outcome = responseComponent.getOutcome();
             if (outcome instanceof OperationOutcome) {
                 OperationOutcome oo = (OperationOutcome) outcome;
-                buf.append(getOperationOutcomeIssues(oo));
+                if (!first)
+                    buf.append("\n");
+                first = false;
+                boolean firstIssue = true;
+                for (String issue : getOperationOutcomeIssues(oo)) {
+                    if (!firstIssue)
+                        buf.append("\n");
+                    buf.append(issue);
+                    firstIssue = false;
+                }
+//                buf.append(getOperationOutcomeIssues(oo));
             }
         }
 
         return buf.toString();
     }
 
-    private String getOperationOutcomeIssues(OperationOutcome oo) {
-        StringBuilder buf = new StringBuilder();
-        boolean first = true;
+    private List<String> getOperationOutcomeIssues(OperationOutcome oo) {
+        List<String> issues = new ArrayList<>();
 
         for (OperationOutcome.OperationOutcomeIssueComponent issueComponent : oo.getIssue()) {
             if (issueComponent.getSeverity() == OperationOutcome.IssueSeverity.ERROR ) {
                 String details = issueComponent.getDiagnostics();
-                if (first)
-                    first = false;
-                else
-                    buf.append("\n");
-                buf.append(details);
+                issues.add(details);
             }
         }
 
-        return buf.toString();
+        return issues;
     }
 
     private boolean bundleContainsError(Bundle bundle) {

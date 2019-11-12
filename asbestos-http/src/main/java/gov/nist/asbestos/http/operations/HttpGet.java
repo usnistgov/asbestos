@@ -14,6 +14,7 @@ import java.util.Objects;
 public class HttpGet extends HttpBase {
     // TODO GET parameters in the body
     void get(URI uri, Map<String, String> headers) {
+        this.uri = uri;
         HttpURLConnection connection = null;
         try {
 //            if (!uri.isAbsolute()) {

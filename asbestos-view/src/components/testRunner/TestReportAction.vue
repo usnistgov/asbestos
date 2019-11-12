@@ -2,7 +2,7 @@
     <div>
 <!--        Report: {{ report }}-->
         <div v-if="script">
-            <div v-bind:class="{'not-run': isNotRun, pass : isPass, fail: isError, fail: isFail}"  @click="toggleMessageDisplay()">
+            <div v-bind:class="{'not-run': isNotRun, pass : isPass, error: isError, fail: isFail}"  @click="toggleMessageDisplay()">
                 <span v-if="this.script.operation" class="name selectable">
                     {{ this.operationType(this.script.operation) }}
                 </span>
@@ -24,9 +24,13 @@
         </div>
 
         <div v-if="displayMessage">
-            <div v-for="(line, linei) in translateNL(message)" :key="'msgDisp' + linei">
-                {{ line }}
-            </div>
+            <ul>
+                <div v-for="(line, linei) in translateNL(message)" :key="'msgDisp' + linei">
+                    <li>
+                        {{ line }}
+                    </li>
+                </div>
+            </ul>
             <div v-if="this.script.operation">
                 <span v-if="eventId" class="selectable" @click="toggleEventDisplayed()">Message Log</span>
                 <span v-if="eventDisplayed && eventId">
@@ -108,6 +112,7 @@
                 return part.result === 'pass'
             },
             isError() {
+                console.log(`error?`)
                 if (!this.report) return false
                 const part = this.report.operation ? this.report.operation : this.report.assert
                 if (!part) return false
@@ -180,7 +185,7 @@
         border-radius: 25px;
     }
     .error {
-        background-color: indianred;
+        background-color: #0074D9;
         text-align: left;
         border: 1px dotted black;
         cursor: pointer;
