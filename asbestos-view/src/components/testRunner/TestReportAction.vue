@@ -41,9 +41,8 @@
                     </script-display>
                 </span>
                 <span v-else>
-                    <span v-if="eventId">
-                        <img src="../../assets/arrow-right.png" @click="toggleScriptDisplayed()">
-                    </span>
+
+                    <img src="../../assets/arrow-right.png" @click="toggleScriptDisplayed()">
                 </span>
             </div>
 

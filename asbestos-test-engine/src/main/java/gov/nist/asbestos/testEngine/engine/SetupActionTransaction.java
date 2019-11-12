@@ -24,35 +24,36 @@ public class SetupActionTransaction extends GenericSetupAction {
             return;
 
         ResourceWrapper wrapper = getFhirClient().writeResource(resourceToSend, targetUrl, format, requestHeader);
-        BaseResource resource = wrapper.getResource();
-        if (wrapper.isOk()) {
-            if ((resource instanceof Bundle) && bundleContainsError((Bundle) resource) ) {
-                reporter.reportFail((wrapper.getRef() == null ? "" : wrapper.getRef())  +
-                        " transaction failed : \n" + getBundleIssues((Bundle) wrapper.getResource()),
-                        wrapper);
-            } else if ((resource instanceof OperationOutcome && operationOutcomeContainsError((OperationOutcome) resource))) {
-                List<String> issues = getOperationOutcomeIssues((OperationOutcome) resource);
-                reporter.reportFail((wrapper.getRef() == null ? "" : wrapper.getRef()) +
-                        " transaction failed : \n" + issues,
-                        wrapper);
-            } else if (resource instanceof Bundle) {
-                reporter.report("HTTP " + wrapper.getStatus(), wrapper);
-            } else {
-                reporter.reportFail(wrapper.getRef() + " transaction - no response object - should be Bundle", wrapper);
-            }
-        } else {
-            String msg = "";
-            if (resource instanceof OperationOutcome) {
-                OperationOutcome oo = (OperationOutcome) resource;
-                for (OperationOutcome.OperationOutcomeIssueComponent issue : oo.getIssue()) {
-                    if (issue.getSeverity().equals(OperationOutcome.IssueSeverity.ERROR)) {
-                        String[] lines = issue.getDiagnostics().split("\n");
-                        msg = msg + "\n" + lines[0];
-                    }
-                }
-            }
-            reporter.reportFail("transaction to " + targetUrl + " failed with status " + wrapper.getHttpBase().getStatus() + msg, wrapper);
-        }
+        reporter.report("No evaluation", wrapper);
+//        BaseResource resource = wrapper.getResource();
+//        if (wrapper.isOk()) {
+//            if ((resource instanceof Bundle) && bundleContainsError((Bundle) resource) ) {
+//                reporter.reportFail((wrapper.getRef() == null ? "" : wrapper.getRef())  +
+//                        " transaction failed : \n" + getBundleIssues((Bundle) wrapper.getResource()),
+//                        wrapper);
+//            } else if ((resource instanceof OperationOutcome && operationOutcomeContainsError((OperationOutcome) resource))) {
+//                List<String> issues = getOperationOutcomeIssues((OperationOutcome) resource);
+//                reporter.reportFail((wrapper.getRef() == null ? "" : wrapper.getRef()) +
+//                        " transaction failed : \n" + issues,
+//                        wrapper);
+//            } else if (resource instanceof Bundle) {
+//                reporter.report("HTTP " + wrapper.getStatus(), wrapper);
+//            } else {
+//                reporter.reportFail(wrapper.getRef() + " transaction - no response object - should be Bundle", wrapper);
+//            }
+//        } else {
+//            String msg = "";
+//            if (resource instanceof OperationOutcome) {
+//                OperationOutcome oo = (OperationOutcome) resource;
+//                for (OperationOutcome.OperationOutcomeIssueComponent issue : oo.getIssue()) {
+//                    if (issue.getSeverity().equals(OperationOutcome.IssueSeverity.ERROR)) {
+//                        String[] lines = issue.getDiagnostics().split("\n");
+//                        msg = msg + "\n" + lines[0];
+//                    }
+//                }
+//            }
+//            reporter.reportFail("transaction to " + targetUrl + " failed with status " + wrapper.getHttpBase().getStatus() + msg, wrapper);
+//        }
         postExecute(wrapper);
     }
 
