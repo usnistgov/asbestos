@@ -38,11 +38,11 @@
   <servlet>
     <servlet-name>ProxyService</servlet-name>
     <servlet-class>gov.nist.asbestos.asbestosProxy.servlet.ProxyServlet</servlet-class>
-    <init-param>
-      <param-name>ExternalCache</param-name>
+<!--    <init-param>-->
+<!--      <param-name>ExternalCache</param-name>-->
 <!--      <param-value>/Users/bill/ec</param-value>-->
-        <param-value>/C:/Users/skb1/ec/dev</param-value>
-    </init-param>
+<!--      <param-value>/C:/Users/skb1/ec/dev</param-value>-->
+<!--    </init-param>-->
     <init-param>
       <param-name>port</param-name>
       <param-value>8080</param-value>

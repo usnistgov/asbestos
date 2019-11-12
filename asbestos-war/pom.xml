@@ -154,6 +154,11 @@
                             <name>jetty.logs</name>
                             <value>${basedir}/target</value>
                         </systemProperty>
+                        <systemProperty>
+                            <name>EXTERNAL_CACHE</name>
+                            <value>/Users/bill/ec</value>
+<!--                            <value>/C:/Users/skb1/ec/dev</value>-->
+                        </systemProperty>
                     </systemProperties>
                 </configuration>
                 <executions>

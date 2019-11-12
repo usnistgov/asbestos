@@ -70,7 +70,11 @@ public class ProxyServlet extends HttpServlet {
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
         log.info("ProxyServlet init");
-        String ec = config.getInitParameter("ExternalCache");
+//        String ec = config.getInitParameter("ExternalCache");
+        String ec = System.getProperty("EXTERNAL_CACHE");
+        if (ec == null) {
+            throw new RuntimeException("Missing EXTERNAL_CACHE system property.");
+        }
         setExternalCache(new File(ec));
 
         // announce location of ExternalCache to other servlets
