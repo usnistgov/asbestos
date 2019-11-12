@@ -1,7 +1,8 @@
 <template>
     <div>
+<!--        Report: {{ report }}-->
         <div v-if="script">
-            <div v-bind:class="{'not-run': isNotRun, pass : isPass, fail: isError}"  @click="toggleMessageDisplay()">
+            <div v-bind:class="{'not-run': isNotRun, pass : isPass, error: isError, fail: isFail}"  @click="toggleMessageDisplay()">
                 <span v-if="this.script.operation" class="name selectable">
                     {{ this.operationType(this.script.operation) }}
                 </span>
@@ -23,12 +24,17 @@
         </div>
 
         <div v-if="displayMessage">
-            <div v-for="(line, linei) in translateNL(message)" :key="'msgDisp' + linei">
-                {{ line }}
-            </div>
-            <div>
-                <span class="selectable" @click="toggleEventDisplayed()">Message Log</span>
-                <span v-if="eventDisplayed">
+            <ul>
+                <div v-for="(line, linei) in translateNL(message)" :key="'msgDisp' + linei">
+                    <li>
+                        {{ line }}
+                    </li>
+                </div>
+            </ul>
+
+            <div v-if="this.script.operation">
+                <span v-if="eventId" class="selectable" @click="toggleEventDisplayed()">Message Log</span>
+                <span v-if="eventDisplayed && eventId">
                     <img src="../../assets/arrow-down.png" @click="toggleEventDisplayed()">
                     <log-item
                             :sessionId="$store.state.base.session"
@@ -38,7 +44,24 @@
                     </log-item>
                 </span>
                 <span v-else>
-                    <img src="../../assets/arrow-right.png" @click="toggleEventDisplayed()">
+                    <span v-if="eventId">
+                        <img src="../../assets/arrow-right.png" @click="toggleEventDisplayed()">
+                    </span>
+                </span>
+            </div>
+
+            <div>
+                <span class="selectable" @click="toggleScriptDisplayed()">Raw Report</span>
+                <span v-if="displayScript">
+                    <img src="../../assets/arrow-down.png" @click="toggleScriptDisplayed()">
+                    <script-display
+                            :script="script"
+                            :report="report">
+                    </script-display>
+                </span>
+                <span v-else>
+
+                    <img src="../../assets/arrow-right.png" @click="toggleScriptDisplayed()">
                 </span>
             </div>
         </div>
@@ -47,11 +70,13 @@
 
 <script>
     import LogItem from "../logViewer/LogItem"
+    import ScriptDisplay from "./ScriptDisplay"
     export default {
         data() {
             return {
                 // message: null,
                 displayMessage: false,
+                displayScript: false,
                 status: [],   // testName => undefined, 'pass', 'fail', 'error'
                 eventLogUrl: null,
                 eventDisplayed: false,
@@ -65,6 +90,9 @@
             },
             toggleEventDisplayed() {
                 this.eventDisplayed = !this.eventDisplayed
+            },
+            toggleScriptDisplayed() {
+                this.displayScript = !this.displayScript
             },
             operationType(operation) {
                 return operation.type.code
@@ -102,16 +130,26 @@
                 if (!this.report) return false
                 const part = this.report.operation ? this.report.operation : this.report.assert
                 if (!part) return false
-                return part.result !== 'error' && part.result !== 'fail'
+                return part.result === 'pass'
             },
             isError() {
+                console.log(`error?`)
                 if (!this.report) return false
                 const part = this.report.operation ? this.report.operation : this.report.assert
                 if (!part) return false
-                return part.result === 'error' || part.result === 'fail'
+                return part.result === 'error'
+            },
+            isFail() {
+                if (!this.report) return false
+                const part = this.report.operation ? this.report.operation : this.report.assert
+                if (!part) return false
+                return part.result === 'fail'
             },
             isNotRun() {
-                return !this.report
+                if (!this.report) return true
+                const part = this.report.operation ? this.report.operation : this.report.assert
+                if (!part) return true
+                return part.result === 'skip'
             },
             operationOrAssertion() {
                 return this.script.operation
@@ -143,7 +181,8 @@
             'script', 'report',
         ],
         components: {
-            LogItem
+            ScriptDisplay,
+            LogItem,
         },
         name: "TestReportAction"
     }
@@ -168,7 +207,7 @@
         border-radius: 25px;
     }
     .error {
-        background-color: indianred;
+        background-color: #0074D9;
         text-align: left;
         border: 1px dotted black;
         cursor: pointer;

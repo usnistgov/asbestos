@@ -49,8 +49,16 @@
         </action>
         <action>
             <assert>
-                <description value="... was successful"/>
+                <description value="... was successful transaction"/>
                 <response value="okay"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
+            <assert>
+                <description value="... all parts of transaction successful"/>
+                <expression value="Bundle.entry.response.status"/>
+                <value value="201"/>
                 <warningOnly value="false"/>
             </assert>
         </action>

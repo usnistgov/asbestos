@@ -3,7 +3,7 @@ package gov.nist.asbestos.asbestosProxy.channels.mhd;
 import gov.nist.asbestos.asbestosProxy.channel.BaseChannel;
 import gov.nist.asbestos.asbestosProxy.channels.passthrough.PassthroughChannel;
 import gov.nist.asbestos.asbestosProxy.util.XdsActorMapper;
-import gov.nist.asbestos.asbestosProxy.servlet.TransformException;
+import gov.nist.asbestos.mhd.exceptions.TransformException;
 import gov.nist.asbestos.client.Base.ProxyBase;
 import gov.nist.asbestos.client.client.FhirClient;
 import gov.nist.asbestos.client.client.Format;
@@ -16,7 +16,6 @@ import gov.nist.asbestos.client.resolver.ResourceMgr;
 import gov.nist.asbestos.http.headers.Header;
 import gov.nist.asbestos.http.headers.Headers;
 import gov.nist.asbestos.http.operations.*;
-import gov.nist.asbestos.mhd.SubmittedObject;
 import gov.nist.asbestos.mhd.transactionSupport.*;
 import gov.nist.asbestos.mhd.transforms.BundleToRegistryObjectList;
 import gov.nist.asbestos.mhd.transforms.DocumentEntryToDocumentReference;
@@ -56,9 +55,17 @@ public class MhdChannel extends BaseChannel /*implements IBaseChannel*/ {
     private String transformPDBToPNR(Bundle bundle, URI toAddr, Task task) {
         Objects.requireNonNull(task);
         Val val = new Val();
+
         FhirClient fhirClient = new FhirClient();
         ResourceCacheMgr resourceCacheMgr = new ResourceCacheMgr(getExternalCache());
         fhirClient.setResourceCacheMgr(resourceCacheMgr);
+
+//        String channelId = channelConfig.getTestSession() + "__" + channelConfig.getChannelId();
+//        EC ec = new EC(getExternalCache());
+//        File patientCacheDir = ec.getTestLogCacheDir(channelId);
+//        File alternatePatientCacheDir = ec.getTestLogCacheDir("default__default");
+//        resourceCacheMgr.addCache(patientCacheDir);
+//        resourceCacheMgr.addCache(alternatePatientCacheDir);
 
         ResourceMgr rMgr = new ResourceMgr();
         rMgr.setVal(val);
@@ -275,8 +282,8 @@ public class MhdChannel extends BaseChannel /*implements IBaseChannel*/ {
         return null;
     }
 
-    private void transformError(String msg, Throwable t, HttpBase responseOut) {
-        transformError(msg + "\n" + ExceptionUtils.getStackTrace(t), responseOut);
+    private void returnErrorInOperationOutcome(String msg, Throwable t, HttpBase responseOut) {
+        returnErrorInOperationOutcome(msg + "\n" + ExceptionUtils.getStackTrace(t), responseOut);
     }
 
     private OperationOutcome wrapErrorInOperationOutcome(String msg) {
@@ -293,7 +300,7 @@ public class MhdChannel extends BaseChannel /*implements IBaseChannel*/ {
         return oo;
     }
 
-    private void transformError(String message, HttpBase responseOut) {
+    private void returnErrorInOperationOutcome(String message, HttpBase responseOut) {
         OperationOutcome oo = wrapErrorInOperationOutcome(message);
         packageResponse(responseOut, oo);
     }
@@ -350,26 +357,26 @@ public class MhdChannel extends BaseChannel /*implements IBaseChannel*/ {
             String registryResponse = "";
             try {
                 if (responsePart == null || responsePart.equals("")) {
-                    transformError("Empty response from XDS.ProvideAndRegister", responseOut);
+                    returnErrorInOperationOutcome("Empty response from XDS.ProvideAndRegister", responseOut);
                     return;
                 }
                 String envelope = FaultParser.unwrapPart(responsePart);
                 if (envelope == null || envelope.equals("")) {
-                    transformError("Empty SOAP Envelope from XDS.ProvideAndRegister", responseOut);
+                    returnErrorInOperationOutcome("Empty SOAP Envelope from XDS.ProvideAndRegister", responseOut);
                     return;
                 }
                 String faultMsg = FaultParser.parse(envelope);
                 if (faultMsg != null && !faultMsg.equals("")) {
-                    transformError(faultMsg, responseOut);
+                    returnErrorInOperationOutcome(faultMsg, responseOut);
                     return;
                 }
                 registryResponse = FaultParser.extractRegistryResponse(envelope);
                 if (registryResponse == null || registryResponse.equals("")) {
-                    transformError("No RegistryResponse returned from XDS.ProvideAndRegister", responseOut);
+                    returnErrorInOperationOutcome("No RegistryResponse returned from XDS.ProvideAndRegister", responseOut);
                     return;
                 }
             } catch (Throwable e) {
-                transformError("Error processing RegistryResponse:\n" + responsePart + "\n", e, responseOut);
+                returnErrorInOperationOutcome("Error processing RegistryResponse:\n" + responsePart + "\n", e, responseOut);
                 return;
             }
 
@@ -377,7 +384,7 @@ public class MhdChannel extends BaseChannel /*implements IBaseChannel*/ {
             try {
                 rrt = new RegistryResponseBuilder().fromInputStream(new ByteArrayInputStream(registryResponse.getBytes()));
             } catch (Exception e) {
-                transformError(ExceptionUtils.getStackTrace(e), responseOut);
+                returnErrorInOperationOutcome(ExceptionUtils.getStackTrace(e), responseOut);
                 return;
             }
             RegErrorList regErrorList = RegistryResponseBuilder.asErrorList(rrt);
@@ -492,29 +499,29 @@ public class MhdChannel extends BaseChannel /*implements IBaseChannel*/ {
 
     private void packageResponse(HttpBase responseOut, OperationOutcome oo) {
         responseOut.setOperationOutcome(oo);
-        Bundle response = new Bundle();
-        response.setType(Bundle.BundleType.TRANSACTIONRESPONSE);
-        boolean first = true;
-        for (Bundle.BundleEntryComponent componentIn : requestBundle.getEntry()) {
-            BaseResource resource = componentIn.getResource();
-            SubmittedObject submittedObject = bundleToRegistryObjectList.findSubmittedObject(resource);
-            Bundle.BundleEntryComponent componentOut = response.addEntry();
-            Bundle.BundleEntryResponseComponent responseComponent = componentOut.getResponse();
-            if (first && oo != null) {
-                responseComponent.setStatus("400");
-                responseComponent.setOutcome(oo);
-            } else {
-                responseComponent.setStatus("200");
-                if (submittedObject != null) {
-                    String url = proxyBase + "/" + resource.getClass().getSimpleName() + "/" + submittedObject.getUid();
-                    responseComponent.setLocation(url);
-                }
-            }
-            first = false;
-        }
+//        Bundle response = new Bundle();
+//        response.setType(Bundle.BundleType.TRANSACTIONRESPONSE);
+//        boolean first = true;
+//        for (Bundle.BundleEntryComponent componentIn : requestBundle.getEntry()) {
+//            BaseResource resource = componentIn.getResource();
+//            SubmittedObject submittedObject = bundleToRegistryObjectList.findSubmittedObject(resource);
+//            Bundle.BundleEntryComponent componentOut = response.addEntry();
+//            Bundle.BundleEntryResponseComponent responseComponent = componentOut.getResponse();
+//            if (first && oo != null) {
+//                responseComponent.setStatus("400");
+//                responseComponent.setOutcome(oo);
+//            } else {
+//                responseComponent.setStatus("200");
+//                if (submittedObject != null) {
+//                    String url = proxyBase + "/" + resource.getClass().getSimpleName() + "/" + submittedObject.getUid();
+//                    responseComponent.setLocation(url);
+//                }
+//            }
+//            first = false;
+//        }
         if (returnFormatType == null)
             returnFormatType = Format.XML;
-        responseOut.setResponseText(ProxyBase.encode(response, returnFormatType));
+        responseOut.setResponseText(ProxyBase.encode(oo, returnFormatType));
         responseOut.setResponseContentType(returnFormatType.getContentType());
     }
 

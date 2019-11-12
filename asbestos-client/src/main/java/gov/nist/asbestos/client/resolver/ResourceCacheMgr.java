@@ -3,7 +3,6 @@ package gov.nist.asbestos.client.resolver;
 import gov.nist.asbestos.client.client.FhirClient;
 import org.apache.log4j.Logger;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Patient;
 
@@ -22,54 +21,6 @@ import java.util.stream.Stream;
  */
 public class ResourceCacheMgr {
     private static final Logger logger = Logger.getLogger(ResourceCacheMgr.class);
-
-    class CacheBundle {
-        MemoryResourceCache mem = null;
-        FileSystemResourceCache file = null;
-
-        CacheBundle() {
-
-        }
-
-        CacheBundle(MemoryResourceCache mcache) {
-            mem = mcache;
-        }
-
-        CacheBundle(File dir, Ref baseUrl) {
-//            file = new FileSystemResourceCache(dir, baseUrl);
-            file = new FileSystemResourceCache();
-            file.addCache(dir);
-            mem = new MemoryResourceCache();
-        }
-
-        CacheBundle(File cacheDir) {
-            if (cacheDir.exists() && cacheDir.isDirectory()  && new File(cacheDir, "cache.properties").exists()) {
-                logger.info("Scanning Resource Cache directory " + cacheDir);
-                CacheBundle bundle = new ResourceCacheMgr.CacheBundle();
-                file = new FileSystemResourceCache(cacheDir);
-                mem = new MemoryResourceCache();
-            }
-        }
-
-        Ref getBase() {
-            if (file == null)
-                return null;
-            return file.getBase();
-        }
-
-        ResourceWrapper getResource(Ref fullUrl) {
-            if (mem.hasResource(fullUrl))
-                return mem.readResource(fullUrl);
-            return file.readResource(fullUrl);
-        }
-
-        List<ResourceWrapper> getAll(Ref base, String resourceType) {
-            List<ResourceWrapper> result = new ArrayList<>();
-            result.addAll(mem.getAll(base, resourceType));
-            result.addAll(file.getAll(base, resourceType));
-            return result;
-        }
-    }
 
     private Map<Ref, CacheBundle> caches = new HashMap<>();  // baseUrl -> cache
     private List<Ref> knownPatientServers = new ArrayList<>();
@@ -106,6 +57,8 @@ public class ResourceCacheMgr {
     }
 
     public void addCache(File dir) {
+        //if (caches.get(new Ref("")) == null)
+
         caches.get(new Ref("")).file.addCache(dir);
     }
 

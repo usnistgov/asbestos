@@ -15,18 +15,17 @@ import gov.nist.asbestos.http.headers.Header;
 import gov.nist.asbestos.http.headers.Headers;
 import gov.nist.asbestos.http.operations.*;
 import gov.nist.asbestos.http.support.Common;
+import gov.nist.asbestos.mhd.exceptions.TransformException;
 import gov.nist.asbestos.sharedObjects.ChannelConfig;
 import gov.nist.asbestos.sharedObjects.ChannelConfigFactory;
 import gov.nist.asbestos.simapi.simCommon.SimId;
 import gov.nist.asbestos.simapi.tk.installation.Installation;
-import gov.nist.asbestos.testEngine.engine.TestEngine;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.log4j.Logger;
 import org.hl7.fhir.r4.model.BaseResource;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.OperationOutcome;
-import org.hl7.fhir.r4.model.TestReport;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -178,6 +177,8 @@ public class ProxyServlet extends HttpServlet {
             String fhirBase = new Ref(requestIn.getRequestHeaders().getPathInfo()).getBase().toString();
             channel.setProxyBase(proxyBase);
             channel.setServerBase(fhirBase);
+
+
 
             URI outURI = transformRequestUri(requestIn, channel);
             // transform input request for backend service
