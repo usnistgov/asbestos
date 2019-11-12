@@ -30,6 +30,7 @@ public class TestEngine  {
     private File testDef = null;
     private URI sut = null;
     private TestScript testScript = null;
+    private boolean failOverride = false;
     private FixtureMgr fixtureMgr = new FixtureMgr();
     private Val val;
     private ValE engineVal;
@@ -172,6 +173,8 @@ public class TestEngine  {
         } finally {
             doAutoDeletes();
             doPostProcessing();
+            if (failOverride)
+                testReport.setResult(TestReport.TestReportResult.FAIL);
         }
     }
 
@@ -298,6 +301,8 @@ public class TestEngine  {
 //                    throw new Error("fixture.autodelete is a required field");
                 Ref ref = new Ref(comp.getResource().getReference());
                 Optional<ResourceWrapper> optWrapper = fhirClientForFixtures.readCachedResource(ref);
+
+                // never happens - Throwable thrown if not found
                 if (!optWrapper.isPresent())
                     throw new Error("Static Fixture " + ref + " cannot be loaded");
                 ResourceWrapper wrapper = optWrapper.get();
@@ -445,10 +450,13 @@ public class TestEngine  {
     private TestReport.SetupActionAssertComponent doAssert(String typePrefix, TestScript.SetupActionAssertComponent operation) {
         TestReport.SetupActionAssertComponent report;
         try {
+            ValE vale = new ValE(val);
             AssertionRunner runner = new AssertionRunner(fixtureMgr)
-                    .setVal(new ValE(val).setMsg(typePrefix))
+                    .setVal(vale.setMsg(typePrefix))
                     .setTypePrefix(typePrefix)
-                    .setVariableMgr(new VariableMgr(testScript, fixtureMgr).setOpReport(testReport.getSetup().addAction().getOperation()))
+                    .setVariableMgr(new VariableMgr(testScript, fixtureMgr)
+                            .setVal(vale)
+                            .setOpReport(testReport.getSetup().addAction().getOperation()))
                     .setTestReport(testReport)
                     .setTestScript(testScript);
             report = runner.run(operation);
@@ -474,136 +482,149 @@ public class TestEngine  {
                 TestReport.TestReportTestComponent testReportComponent = testReport.addTest();
 
                 // handle condition
-                if (testComponent.hasModifierExtension()) {
-                    Extension extension = testComponent.getModifierExtensionFirstRep();
-                    if (!extension.hasUrl() || !extension.getUrl().equals("https://github.com/usnistgov/asbestos/wiki/TestScript-Conditional")) {
-                        TestReport.TestActionComponent actionReportComponent = testReportComponent.addAction();
-                        Reporter reporter = new Reporter(fVal, actionReportComponent.getOperation(), "", "");
-                        reporter.reportError( "Do not understand modifierExtension");
-                        return;
-                    }
-                    String containedTestScriptId =  extension.getValue().toString();
-
-                    List<Resource> containedList = testScript.getContained();
-                    Resource contained = null;
-                    for (Resource theContained : containedList) {
-                        if (theContained.getId() != null && theContained.getId().equals(containedTestScriptId)) {
-                            contained = theContained;
-                            break;
-                        }
-                    }
-                    if (contained == null) {
-                        TestReport.TestActionComponent actionReportComponent = testReportComponent.addAction();
-                        Reporter reporter = new Reporter(fVal, actionReportComponent.getOperation(), "", "");
-                        reporter.reportError( "cannot locate contained TestScript " + containedTestScriptId);
-                        return;
-                    }
-
-
-                    TestScript containedTestScript = (TestScript) contained;
+                TestScript containedTestScript = getConditional(testComponent, testReportComponent);
+                testReportComponent = testReport.addTest();
+                boolean conditionalResult = true;
+                if (containedTestScript != null) {
                     List<TestScript.TestScriptTestComponent> tests = containedTestScript.getTest();
                     if (tests.size() != 2) {
-                        TestReport.TestActionComponent actionReportComponent = testReportComponent.addAction();
-                        Reporter reporter = new Reporter(fVal, actionReportComponent.getOperation(), "", "");
-                        reporter.reportError( "test condition must contain two test elements -  TestScript " + containedTestScriptId);
+                        reportParsingError(testReportComponent, "test condition must contain two test elements");
                         return;
                     }
+
+                    TestReport containedTestReport = new TestReport();
+
+                    Extension extension = new Extension("https://github.com/usnistgov/asbestos/wiki/TestScript-Conditional",
+                            new Reference(containedTestReport));
+                    testReportComponent.addModifierExtension(extension);
 
                     // basic operation and validation
                     TestScript.TestScriptTestComponent basicOperationTest = tests.get(0);
-                    if (basicOperationTest.hasAction()) {
-                        String typePrefix = "contained.action";
-                        for (TestScript.TestActionComponent action : basicOperationTest.getAction()) {
-                            TestReport.TestActionComponent actionReportComponent = testReportComponent.addAction();
-                            if (invalidAction(action, actionReportComponent, fVal))
-                                return;
-                            if (action.hasOperation()) {
-                                doOperation(typePrefix, action.getOperation(), actionReportComponent.getOperation());
-                                TestReport.SetupActionOperationComponent opReport = actionReportComponent.getOperation();
-                                if (opReport.getResult() == TestReport.TestReportActionResult.ERROR) {
-                                    testReport.setStatus(TestReport.TestReportStatus.COMPLETED);
-                                    testReport.setResult(TestReport.TestReportResult.FAIL);
-                                    return;
-                                }
-                            }
-                            if (action.hasAssert()) {
-                                TestReport.SetupActionAssertComponent actionReport = doAssert(typePrefix, action.getAssert());
-                                actionReportComponent.setAssert(actionReport);
-                                if ("fail".equals(actionReport.getResult().toCode())) {
-                                    testReport.setStatus(TestReport.TestReportStatus.COMPLETED);
-                                    testReport.setResult(TestReport.TestReportResult.FAIL);
-                                    return;
-                                }
-                                if ("error".equals(actionReport.getResult().toCode())) {
-                                    testReport.setStatus(TestReport.TestReportStatus.COMPLETED);
-                                    testReport.setResult(TestReport.TestReportResult.FAIL);
-                                    return;
-                                }
-                            }
-                        }
-                    }
+                    TestReport.TestReportTestComponent containedTestReportComponent = containedTestReport.addTest();
+                    boolean opResult = doTestPart(basicOperationTest, containedTestReportComponent, containedTestReport,false);
 
+                    if (!opResult) {
+                        failOverride = true;
+//                        testReport.setResult(TestReport.TestReportResult.FAIL);
+                        containedTestReportComponent = containedTestReport.addTest();
+                        reportSkip(containedTestReportComponent);
+                        reportSkip(testReportComponent);
+                        return;
+                    }
                     // asserts to trigger conditional
                     TestScript.TestScriptTestComponent conditionalTest = tests.get(1);
-                    testReportComponent = testReport.addTest();
-                    if (conditionalTest.hasAction()) {
-                        String typePrefix = "contained.action";
-                        for (TestScript.TestActionComponent action : conditionalTest.getAction()) {
-                            TestReport.TestActionComponent actionReportComponent = testReportComponent.addAction();
-                            if (invalidAction(action, actionReportComponent, fVal))
-                                return;
-                            if (action.hasOperation()) {
-                                doOperation(typePrefix, action.getOperation(), actionReportComponent.getOperation());
-                                TestReport.SetupActionOperationComponent opReport = actionReportComponent.getOperation();
-                                if (opReport.getResult() == TestReport.TestReportActionResult.ERROR) {
-                                    testReport.setStatus(TestReport.TestReportStatus.COMPLETED);
-                                    testReport.setResult(TestReport.TestReportResult.FAIL);
-                                    return;
-                                }
-                            }
-                            if (action.hasAssert()) {
-                                TestReport.SetupActionAssertComponent actionReport = doAssert(typePrefix, action.getAssert());
-                                actionReportComponent.setAssert(actionReport);
-                                if ("fail".equals(actionReport.getResult().toCode())) {
-                                    testReport.setStatus(TestReport.TestReportStatus.ENTEREDINERROR);
-                                    testReport.setResult(TestReport.TestReportResult.PASS);
-                                    return;
-                                }
-                                if ("error".equals(actionReport.getResult().toCode())) {
-                                    testReport.setStatus(TestReport.TestReportStatus.COMPLETED);
-                                    testReport.setResult(TestReport.TestReportResult.FAIL);
-                                    return;
-                                }
-                            }
-                        }
-                    }
 
+                    containedTestReportComponent = containedTestReport.addTest();
+                    conditionalResult = doTestPart(conditionalTest, containedTestReportComponent, containedTestReport, true);
+
+                    if (containedTestReport.getResult() == TestReport.TestReportResult.FAIL)
+                        return;
                 }
 
-                testReportComponent = testReport.addTest();
 
-                // real test execution starts here
-                if (testComponent.hasAction()) {
-                    String typePrefix = "test.action";
-                    for (TestScript.TestActionComponent action : testComponent.getAction()) {
-                        TestReport.TestActionComponent actionReportComponent = testReportComponent.addAction();
-                        if (invalidAction(action, actionReportComponent, fVal))
-                            return;
-                        if (action.hasOperation())
-                            doOperation(typePrefix, action.getOperation(), actionReportComponent.getOperation());
-                        if (action.hasAssert()) {
-                            TestReport.SetupActionAssertComponent actionReport = doAssert(typePrefix, action.getAssert());
-                            actionReportComponent.setAssert(actionReport);
-                        }
-                        if (hasError())
-                            return;
-                    }
+                if (conditionalResult) {
+                    doTestPart(testComponent, testReportComponent, testReport, false);
+                } else {
+                    reportSkip(testReportComponent);
+//                    TestReport.TestActionComponent testActionComponent = testReportComponent.addAction();
+//                    TestReport.SetupActionOperationComponent setupActionOperationComponent = testActionComponent.getOperation();
+//                    setupActionOperationComponent.setResult(TestReport.TestReportActionResult.SKIP);
+//                    setupActionOperationComponent.setMessage("condition failed");
                 }
             }
 
         }
-
     }
+
+    private void reportSkip(TestReport.TestReportTestComponent reportComponent) {
+        TestReport.TestActionComponent testActionComponent = reportComponent.addAction();
+        TestReport.SetupActionOperationComponent setupActionOperationComponent = testActionComponent.getOperation();
+        setupActionOperationComponent.setResult(TestReport.TestReportActionResult.SKIP);
+        setupActionOperationComponent.setMessage("skipped");
+    }
+
+    private boolean doTestPart(TestScript.TestScriptTestComponent testScriptElement, TestReport.TestReportTestComponent testReportComponent, TestReport testReport, boolean reportAsConditional) {
+        ValE fVal = new ValE(engineVal).setMsg("Test");
+        if (testScriptElement.hasAction()) {
+            String typePrefix = "contained.action";
+            for (TestScript.TestActionComponent action : testScriptElement.getAction()) {
+                TestReport.TestActionComponent actionReportComponent = testReportComponent.addAction();
+                if (invalidAction(action, actionReportComponent, fVal))
+                    return false;
+                if (action.hasOperation()) {
+                    doOperation(typePrefix, action.getOperation(), actionReportComponent.getOperation());
+                    TestReport.SetupActionOperationComponent opReport = actionReportComponent.getOperation();
+                    if (opReport.getResult() == TestReport.TestReportActionResult.ERROR) {
+                        testReport.setStatus(TestReport.TestReportStatus.COMPLETED);
+                        testReport.setResult(TestReport.TestReportResult.FAIL);
+                        return false;
+                    }
+                }
+                if (action.hasAssert()) {
+                    TestReport.SetupActionAssertComponent actionReport = doAssert(typePrefix, action.getAssert());
+                    actionReportComponent.setAssert(actionReport);
+                    if ("fail".equals(actionReport.getResult().toCode())) {
+                        if (reportAsConditional) {
+                            testReport.setStatus(TestReport.TestReportStatus.ENTEREDINERROR);
+                            testReport.setResult(TestReport.TestReportResult.PASS);
+                        } else {
+                            testReport.setStatus(TestReport.TestReportStatus.COMPLETED);
+                            testReport.setResult(TestReport.TestReportResult.FAIL);
+                        }
+                        return false;
+                    }
+                    if ("error".equals(actionReport.getResult().toCode())) {
+                        testReport.setStatus(TestReport.TestReportStatus.COMPLETED);
+                        testReport.setResult(TestReport.TestReportResult.FAIL);
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
+    }
+
+    private TestScript getConditional(TestScript.TestScriptTestComponent testComponent, TestReport.TestReportTestComponent testReportComponent) {
+        if (testComponent.hasModifierExtension()) {
+            Extension extension = testComponent.getModifierExtensionFirstRep();
+            if (!extension.hasUrl() || !extension.getUrl().equals("https://github.com/usnistgov/asbestos/wiki/TestScript-Conditional")) {
+                reportParsingError(testReportComponent, "Do not understand modifierExtension");
+                return null;
+            }
+            if (extension.getValue() instanceof Reference) {
+                Reference ref = (Reference) extension.getValue();
+                if (ref.getResource() instanceof TestScript) {
+                    return (TestScript) ref.getResource();
+                }
+            }
+//            String containedTestScriptId = extension.getValue().toString();
+//
+//            List<Resource> containedList = testScript.getContained();
+//            Resource contained = null;
+//            for (Resource theContained : containedList) {
+//                if (theContained.getId() != null && theContained.getId().equals(containedTestScriptId)) {
+//                    contained = theContained;
+//                    break;
+//                }
+//            }
+//            if (contained == null) {
+//                reportParsingError(testReportComponent, "cannot locate contained TestScript " + containedTestScriptId);
+//                return null;
+//            }
+//
+//
+//            return (TestScript) contained;
+        }
+        return null;
+    }
+
+        private void reportParsingError(TestReport.TestReportTestComponent testReportComponent, String message) {
+            ValE fVal = new ValE(engineVal).setMsg("Test");
+            TestReport.TestActionComponent actionReportComponent = testReportComponent.addAction();
+            Reporter reporter = new Reporter(fVal, actionReportComponent.getOperation(), "", "");
+            reporter.reportError( message);
+            return;
+        }
 
     private boolean invalidAction(TestScript.TestActionComponent action, TestReport.TestActionComponent actionReportComponent, ValE fVal) {
         if (action.hasOperation() && action.hasAssert()) {
@@ -659,31 +680,58 @@ public class TestEngine  {
                 if (!actionResult.hasOperation())
                     continue;
                 TestReport.SetupActionOperationComponent op = actionResult.getOperation();
-                if (!"pass".equals(op.getResult().toCode()))
-                    continue;
-                if (op.getMessage().startsWith("GET") || op.getMessage().startsWith("CREATE")) {
-                    URI uri;
-                    try {
-                        uri = new URI(op.getDetail());
-                    } catch (URISyntaxException e) {
-                        throw new Error(e);
-                    }
-                    UIEvent uiEvent = new UIEvent(ec).fromURI(uri);
-                    if (uiEvent != null) {
-                        // add to cache
-                        File cacheDir = ec.getTestLogCacheDir(channelId);
-                        String responseBody = uiEvent.getClientTask().getResponseBody();
-                        BaseResource baseResource = ProxyBase.parse(responseBody, Format.fromContent(responseBody));
-                        if (baseResource instanceof Bundle) {
-                            Bundle bundle = (Bundle) baseResource;
-                            for (Bundle.BundleEntryComponent comp : bundle.getEntry()) {
-                                if (comp.getResource() instanceof Patient) {
-                                    String fullUrl = comp.getFullUrl();
-                                    if (fullUrl != null && !fullUrl.equals("") && bundle.getTotal() == 1)
-                                        buildCacheEntry(cacheDir, bundle, (Patient) comp.getResource());
+                buildCacheEntry(op, ec);
+            }
+            if (testComponent.hasModifierExtension()) {
+                Extension extension = testComponent.getModifierExtensionFirstRep();
+                if (extension.getUrl().equals("https://github.com/usnistgov/asbestos/wiki/TestScript-Conditional")) {
+                    if (extension.getValue() instanceof Reference) {
+                        Reference reference = (Reference) extension.getValue();
+                        if (reference.getResource() instanceof TestReport) {
+                            TestReport containedTestReport = (TestReport) reference.getResource();
+                            for (TestReport.TestReportTestComponent containedTestComponent : containedTestReport.getTest()) {
+                                for (TestReport.TestActionComponent actionResult : containedTestComponent.getAction()) {
+                                    if (actionResult.hasOperation()) {
+                                        TestReport.SetupActionOperationComponent op = actionResult.getOperation();
+                                        buildCacheEntry(op, ec);
+                                    }
                                 }
                             }
                         }
+                    }
+                }
+            }
+        }
+    }
+
+    private void buildCacheEntry(TestReport.SetupActionOperationComponent op, EC ec) {
+        if ("pass".equals(op.getResult().toCode())) {
+            if (op.getMessage().startsWith("GET") || op.getMessage().startsWith("CREATE")) {
+                URI uri;
+                try {
+                    uri = new URI(op.getDetail());
+                } catch (URISyntaxException e) {
+                    throw new Error(e);
+                }
+                UIEvent uiEvent = new UIEvent(ec).fromURI(uri);
+                buildCacheEntry(uiEvent, ec);
+            }
+        }
+    }
+
+    private void buildCacheEntry(UIEvent uiEvent, EC ec) {
+        if (uiEvent != null) {
+            // add to cache
+            File cacheDir = ec.getTestLogCacheDir(channelId);
+            String responseBody = uiEvent.getClientTask().getResponseBody();
+            BaseResource baseResource = ProxyBase.parse(responseBody, Format.fromContent(responseBody));
+            if (baseResource instanceof Bundle) {
+                Bundle bundle = (Bundle) baseResource;
+                for (Bundle.BundleEntryComponent comp : bundle.getEntry()) {
+                    if (comp.getResource() instanceof Patient) {
+                        String fullUrl = comp.getFullUrl();
+                        if (fullUrl != null && !fullUrl.equals("") && bundle.getTotal() == 1)
+                            buildCacheEntry(cacheDir, bundle, (Patient) comp.getResource());
                     }
                 }
             }

@@ -8,6 +8,7 @@ import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.client.resolver.ResolverConfig;
 import gov.nist.asbestos.client.resolver.ResourceMgr;
 import gov.nist.asbestos.mhd.SubmittedObject;
+import gov.nist.asbestos.mhd.exceptions.TransformException;
 import gov.nist.asbestos.mhd.transactionSupport.AssigningAuthorities;
 import gov.nist.asbestos.mhd.transactionSupport.CodeTranslator;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
@@ -24,6 +25,7 @@ import org.hl7.fhir.r4.model.*;
 import javax.xml.bind.DatatypeConverter;
 import javax.xml.bind.JAXBElement;
 import javax.xml.namespace.QName;
+import javax.xml.transform.TransformerException;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -142,7 +144,8 @@ public class BundleToRegistryObjectList implements IVal {
             } else {
                 vale.add(new ValE("Ignoring resource of type " + resource.getClass().getSimpleName()));
             }
-            responseHasError |= valeToResponseComponent(vale, responseComponent, errorsOnly);
+            throwTransformExceptionIfError(vale);
+//            responseHasError |= valeToResponseComponent(vale, responseComponent, errorsOnly);
         }
 
         if (ss != null) {
@@ -153,6 +156,22 @@ public class BundleToRegistryObjectList implements IVal {
         }
 
         return rol;
+    }
+
+    // if error is found in vale, throw TransformException with OperationOutcome
+    private void throwTransformExceptionIfError(ValE vale) {
+        OperationOutcome oo = null;
+        boolean returnError = false;
+        if (vale.hasErrors()) {
+            oo = new OperationOutcome();
+            for (ValE e : vale.getErrors()) {
+                OperationOutcome.OperationOutcomeIssueComponent issue = oo.addIssue();
+                issue.setSeverity(OperationOutcome.IssueSeverity.ERROR);
+                issue.setCode(OperationOutcome.IssueType.UNKNOWN);
+                issue.setDiagnostics(e.getMsg());
+            }
+            throw new TransformException(oo);
+        }
     }
 
     private boolean valeToResponseComponent(ValE vale, Bundle.BundleEntryResponseComponent responseComponent, boolean errorsOnly) {

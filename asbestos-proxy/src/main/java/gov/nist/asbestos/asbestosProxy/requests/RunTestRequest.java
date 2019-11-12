@@ -75,6 +75,7 @@ public class RunTestRequest {
         File testDir = request.ec.getTest(testCollection, testName);
 
         File patientCacheDir = request.ec.getTestLogCacheDir(channelId);
+        File alternatePatientCacheDir = request.ec.getTestLogCacheDir("default__default");
 
         TestReport report;
         try {
@@ -86,6 +87,7 @@ public class RunTestRequest {
                     .setFhirClient(new FhirClient())
                     .setTestCollection(testCollection)
                     .addCache(patientCacheDir)
+                    .addCache(alternatePatientCacheDir)
                     .runTest()
                     .getTestReport();
 

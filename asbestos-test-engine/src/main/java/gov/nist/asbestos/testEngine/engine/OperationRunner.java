@@ -91,8 +91,9 @@ public class OperationRunner {
                     .setType(type + ".read")
                     .setTestReport(testReport);
             setupActionRead.setVariableMgr(new VariableMgr(testScript, fixtureMgr)
-                    .setOpReport(operationReport)
-                    .setVal(val));
+                            .setVal(val)
+                        .setOpReport(operationReport)
+                        );
             setupActionRead.run(op, operationReport);
         } else if ("search".equals(code)) {
                 SetupActionSearch setupActionSearch = new SetupActionSearch(fixtureMgr)

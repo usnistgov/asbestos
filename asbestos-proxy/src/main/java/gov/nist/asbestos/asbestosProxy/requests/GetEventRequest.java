@@ -62,7 +62,7 @@ public class GetEventRequest {
         String resourcetype = uriParts.get(5);
         String event = uriParts.get(6);
 
-        File psimdb = new File(request.externalCache, "psimdb");
+        File psimdb = new File(request.externalCache, "FhirChannels");
         File testSessionFile = new File(psimdb, testSession);
         File channelFile = new File(testSessionFile, channelId);
         File fhir = new File(channelFile, "fhir");

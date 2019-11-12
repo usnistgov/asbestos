@@ -23,6 +23,7 @@ import gov.nist.asbestos.http.operations.Verb;
 import gov.nist.asbestos.http.support.Common;
 import gov.nist.asbestos.serviceproperties.ServiceProperties;
 import gov.nist.asbestos.serviceproperties.ServicePropertiesEnum;
+import gov.nist.asbestos.mhd.exceptions.TransformException;
 import gov.nist.asbestos.sharedObjects.ChannelConfig;
 import gov.nist.asbestos.sharedObjects.ChannelConfigFactory;
 import gov.nist.asbestos.simapi.simCommon.SimId;
@@ -192,6 +193,8 @@ public class ProxyServlet extends HttpServlet {
             String fhirBase = new Ref(requestIn.getRequestHeaders().getPathInfo()).getBase().toString();
             channel.setProxyBase(proxyBase);
             channel.setServerBase(fhirBase);
+
+
 
             URI outURI = transformRequestUri(requestIn, channel);
             // transform input request for backend service
