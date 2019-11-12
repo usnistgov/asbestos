@@ -225,6 +225,7 @@ public class ResourceMgr implements IVal {
         }
         ResourceWrapper wrapper = fhirClient.readResource(resource.getRef());
         String msg = wrapper.getRef().isRelative() ? "loaded from test definition" : "";
+        wrapper.getHttpBase().getRequestHeaders().setVerb("GET").setPathInfo(wrapper.getHttpBase().getUri());
         logResourceWrapper(wrapper, msg);
         resource.setResource(wrapper.getResource());
         return resource;

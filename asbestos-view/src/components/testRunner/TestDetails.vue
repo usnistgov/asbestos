@@ -17,11 +17,11 @@
                    1. Actual setup so there is script and report
                    2. Deep errors and the error is reported in report.setup (with no corresponding script)
                    -->
-            <div v-if="script.setup && report.setup">
+            <div v-if="script.setup && report && report.setup">
                 <!-- don't need yet -->
             </div>
 
-            <div v-if="!script.setup && report.setup">
+            <div v-if="!script.setup && report && report.setup">
                 <test-report-action
                         :script="null"
                         :report="report.setup.action">
@@ -31,10 +31,10 @@
 
             <div v-for="(test, testi) in tests"
                  :key="'Test' + testi">
-                <div v-if="report.test">
                     <template v-if="test.description" class="test-part">
                         {{ test.description }}
                     </template>
+                <div v-if="report">
 <!--                    Contained: {{ findContained(script, containedTests(testi)) }}-->
                         <div v-for="(test2, test2i) in containedTests(findContained(script, containedTestsRef(script, testi)))"
                              :key="'Test2' + test2i">

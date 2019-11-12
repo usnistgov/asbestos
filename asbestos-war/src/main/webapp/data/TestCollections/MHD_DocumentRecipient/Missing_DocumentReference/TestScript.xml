@@ -49,51 +49,11 @@
         </action>
         <action>
             <assert>
-                <description value="... was successful transaction"/>
-                <response value="okay"/>
+                <description value="... fails"/>
+                <response value="bad"/>
                 <warningOnly value="false"/>
             </assert>
         </action>
-        <action>
-            <assert>
-                <description value="... all parts of transaction successful"/>
-                <expression value="Bundle.entry.response.all(status.startsWith(201))"/>
-                <warningOnly value="false"/>
-            </assert>
-        </action>
-        <action>
-            <operation>
-                <description value="DocumentReference"/>
-                <label value="read-back"/>
-                <type>
-                    <code value="read"/>
-                </type>
-                <url value="${DocRefUrl}"/>
-                <responseId value="readBackResponse"/>
-            </operation>
-        </action>
-        <action>
-            <assert>
-                <description value="... was successful"/>
-                <response value="okay"/>
-                <warningOnly value="false"/>
-            </assert>
-        </action>
-        <action>
-            <assert>
-                <description value="... returned a DocumentReference"/>
-                <resource value="DocumentReference"/>
-                <warningOnly value="false"/>
-            </assert>
-        </action>
-        <action>
-            <assert>
-                <description value="... Patient reference returned as sent"/>
-                <expression value="DocumentReference.subject.reference"/>
-                <sourceId value="readBackResponse"/>
-                <value value="${patientResourceId}"/>
-                <warningOnly value="false"/>
-            </assert>
-        </action>
+
     </test>
 </TestScript>

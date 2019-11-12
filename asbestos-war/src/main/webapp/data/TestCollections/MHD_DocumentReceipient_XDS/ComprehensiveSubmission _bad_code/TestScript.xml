@@ -9,7 +9,7 @@
            This patient comes out of the test Patient cache
         -->
         <resource>
-            <reference value="Patient/Alex_Alder.json"/>
+            <reference value="Patient/Alex_Alder"/>
         </resource>
     </fixture>
     <variable>
@@ -33,7 +33,10 @@
         <sourceId value="read-back"/>
     </variable>
     <test>
-        <description value="Submit Provide Document Bundle to MHD Document Recipient and verify response."/>
+        <description value="Submit Provide Document Bundle to MHD Document Recipient and verify response. The content contains a bad code so the transaction must fail."/>
+        <!--
+            Actions generic to all PDB transactions
+        -->
         <action>
             <operation>
                 <!-- references patient from resourceCache in EC -->
@@ -49,49 +52,31 @@
         </action>
         <action>
             <assert>
-                <description value="... was successful transaction"/>
+                <description value="... transaction was successful"/>
                 <response value="okay"/>
                 <warningOnly value="false"/>
             </assert>
         </action>
         <action>
             <assert>
-                <description value="... all parts of transaction successful"/>
-                <expression value="Bundle.entry.response.all(status.startsWith(201))"/>
+                <description value="... Bundle may not contain OperationOutcome"/>
+                <compareToSourceId value="pdb-response"/>
+                <compareToSourceExpression value="Bundle.entry.response.outcome.where(OperationOutcome).exists().not()"/>
                 <warningOnly value="false"/>
             </assert>
         </action>
         <action>
-            <operation>
-                <description value="DocumentReference"/>
-                <label value="read-back"/>
-                <type>
-                    <code value="read"/>
-                </type>
-                <url value="${DocRefUrl}"/>
-                <responseId value="readBackResponse"/>
-            </operation>
+            <assert>
+                <description value="... return OperationOutcome"/>
+                <compareToSourceId value="pdb-response"/>
+                <compareToSourceExpression value="where(OperationOutcome).exists()"/>
+                <warningOnly value="false"/>
+            </assert>
         </action>
         <action>
             <assert>
-                <description value="... was successful"/>
+                <description value="... with success response code"/>
                 <response value="okay"/>
-                <warningOnly value="false"/>
-            </assert>
-        </action>
-        <action>
-            <assert>
-                <description value="... returned a DocumentReference"/>
-                <resource value="DocumentReference"/>
-                <warningOnly value="false"/>
-            </assert>
-        </action>
-        <action>
-            <assert>
-                <description value="... Patient reference returned as sent"/>
-                <expression value="DocumentReference.subject.reference"/>
-                <sourceId value="readBackResponse"/>
-                <value value="${patientResourceId}"/>
                 <warningOnly value="false"/>
             </assert>
         </action>

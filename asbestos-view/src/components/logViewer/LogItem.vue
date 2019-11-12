@@ -61,7 +61,7 @@
             taskLabel(i) {
                 if (i === 0)
                     return 'From Client'
-                if (i === this.taskCount - 1)
+                if (i === 1)
                     return 'To Server'
                 return i
             },
