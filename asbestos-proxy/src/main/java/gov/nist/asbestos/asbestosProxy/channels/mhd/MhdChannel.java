@@ -3,6 +3,7 @@ package gov.nist.asbestos.asbestosProxy.channels.mhd;
 import gov.nist.asbestos.asbestosProxy.channel.BaseChannel;
 import gov.nist.asbestos.asbestosProxy.channels.passthrough.PassthroughChannel;
 import gov.nist.asbestos.asbestosProxy.util.XdsActorMapper;
+import gov.nist.asbestos.mhd.SubmittedObject;
 import gov.nist.asbestos.mhd.exceptions.TransformException;
 import gov.nist.asbestos.client.Base.ProxyBase;
 import gov.nist.asbestos.client.client.FhirClient;
@@ -434,6 +435,7 @@ public class MhdChannel extends BaseChannel /*implements IBaseChannel*/ {
                         .setContainedIdAllocator(new ContainedIdAllocator())
                         .setResourceCacheMgr(resourceCacheMgr)
                         .setCodeTranslator(codeTranslator)
+                        .setFhirClient(fhirClient)
                         .setVal(val);
                 DocumentReference dr = trans.getDocumentReference((ExtrinsicObjectType) sender.getContents().get(0));
 
@@ -499,29 +501,29 @@ public class MhdChannel extends BaseChannel /*implements IBaseChannel*/ {
 
     private void packageResponse(HttpBase responseOut, OperationOutcome oo) {
         responseOut.setOperationOutcome(oo);
-//        Bundle response = new Bundle();
-//        response.setType(Bundle.BundleType.TRANSACTIONRESPONSE);
-//        boolean first = true;
-//        for (Bundle.BundleEntryComponent componentIn : requestBundle.getEntry()) {
-//            BaseResource resource = componentIn.getResource();
-//            SubmittedObject submittedObject = bundleToRegistryObjectList.findSubmittedObject(resource);
-//            Bundle.BundleEntryComponent componentOut = response.addEntry();
-//            Bundle.BundleEntryResponseComponent responseComponent = componentOut.getResponse();
-//            if (first && oo != null) {
-//                responseComponent.setStatus("400");
-//                responseComponent.setOutcome(oo);
-//            } else {
-//                responseComponent.setStatus("200");
-//                if (submittedObject != null) {
-//                    String url = proxyBase + "/" + resource.getClass().getSimpleName() + "/" + submittedObject.getUid();
-//                    responseComponent.setLocation(url);
-//                }
-//            }
-//            first = false;
-//        }
+        Bundle response = new Bundle();
+        response.setType(Bundle.BundleType.TRANSACTIONRESPONSE);
+        boolean first = true;
+        for (Bundle.BundleEntryComponent componentIn : requestBundle.getEntry()) {
+            BaseResource resource = componentIn.getResource();
+            SubmittedObject submittedObject = bundleToRegistryObjectList.findSubmittedObject(resource);
+            Bundle.BundleEntryComponent componentOut = response.addEntry();
+            Bundle.BundleEntryResponseComponent responseComponent = componentOut.getResponse();
+            if (first && oo != null) {
+                responseComponent.setStatus("400");
+                responseComponent.setOutcome(oo);
+            } else {
+                responseComponent.setStatus("201");
+                if (submittedObject != null) {
+                    String url = proxyBase + "/" + resource.getClass().getSimpleName() + "/" + submittedObject.getUid();
+                    responseComponent.setLocation(url);
+                }
+            }
+            first = false;
+        }
         if (returnFormatType == null)
             returnFormatType = Format.XML;
-        responseOut.setResponseText(ProxyBase.encode(oo, returnFormatType));
+        responseOut.setResponseText(ProxyBase.encode(response, returnFormatType));
         responseOut.setResponseContentType(returnFormatType.getContentType());
     }
 

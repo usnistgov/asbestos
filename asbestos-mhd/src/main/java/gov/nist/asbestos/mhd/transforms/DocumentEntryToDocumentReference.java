@@ -1,6 +1,7 @@
 package gov.nist.asbestos.mhd.transforms;
 
 import gov.nist.asbestos.client.Base.IVal;
+import gov.nist.asbestos.client.client.FhirClient;
 import gov.nist.asbestos.client.resolver.ResourceCacheMgr;
 import gov.nist.asbestos.mhd.exceptions.MetadataAttributeTranslationException;
 import gov.nist.asbestos.client.resolver.ResourceMgr;
@@ -24,9 +25,11 @@ public class DocumentEntryToDocumentReference implements IVal {
     private CodeTranslator codeTranslator;
     private ResourceCacheMgr resourceCacheMgr = null;
     private ContainedIdAllocator containedIdAllocator = null;
+    FhirClient fhirClient = null;
 
     public DocumentReference getDocumentReference(ExtrinsicObjectType eo) {
         Objects.requireNonNull(eo);
+        Objects.requireNonNull(fhirClient);
         Objects.requireNonNull(containedIdAllocator);
         DocumentReference dr = new DocumentReference();
 
@@ -63,6 +66,7 @@ public class DocumentEntryToDocumentReference implements IVal {
                 // PatientID
                 PatientId patientId = new PatientId()
                         .setPatientid(ei.getValue())
+                        .setFhirClient(fhirClient)
                         .setResourceCacheMgr(resourceCacheMgr);
                 patientId.setVal(val);
                 Optional<Reference> reference = patientId.getFhirReference();
@@ -262,5 +266,10 @@ public class DocumentEntryToDocumentReference implements IVal {
     public DocumentEntryToDocumentReference setContainedIdAllocator(ContainedIdAllocator containedIdAllocator) {
         this.containedIdAllocator = containedIdAllocator;
         return this;
+    }
+
+    public DocumentEntryToDocumentReference setFhirClient(FhirClient fhirClient) {
+        this.fhirClient = fhirClient;
+        return  this;
     }
 }

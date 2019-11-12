@@ -228,8 +228,9 @@ public class Headers {
         return verb;
     }
 
-    public void setVerb(String verb) {
+    public Headers setVerb(String verb) {
         this.verb = verb;
+        return this;
     }
 
     public URI getPathInfo() {
