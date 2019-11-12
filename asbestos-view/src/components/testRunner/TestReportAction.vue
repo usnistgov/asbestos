@@ -31,20 +31,6 @@
                     </li>
                 </div>
             </ul>
-            <div>
-                <span class="selectable" @click="toggleScriptDisplayed()">Raw Report</span>
-                <span v-if="displayScript">
-                    <img src="../../assets/arrow-down.png" @click="toggleScriptDisplayed()">
-                    <script-display
-                            :script="script"
-                            :report="report">
-                    </script-display>
-                </span>
-                <span v-else>
-
-                    <img src="../../assets/arrow-right.png" @click="toggleScriptDisplayed()">
-                </span>
-            </div>
 
             <div v-if="this.script.operation">
                 <span v-if="eventId" class="selectable" @click="toggleEventDisplayed()">Message Log</span>
@@ -61,6 +47,21 @@
                     <span v-if="eventId">
                         <img src="../../assets/arrow-right.png" @click="toggleEventDisplayed()">
                     </span>
+                </span>
+            </div>
+
+            <div>
+                <span class="selectable" @click="toggleScriptDisplayed()">Raw Report</span>
+                <span v-if="displayScript">
+                    <img src="../../assets/arrow-down.png" @click="toggleScriptDisplayed()">
+                    <script-display
+                            :script="script"
+                            :report="report">
+                    </script-display>
+                </span>
+                <span v-else>
+
+                    <img src="../../assets/arrow-right.png" @click="toggleScriptDisplayed()">
                 </span>
             </div>
         </div>
