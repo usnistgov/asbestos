@@ -435,6 +435,7 @@ public class MhdChannel extends BaseChannel /*implements IBaseChannel*/ {
                         .setContainedIdAllocator(new ContainedIdAllocator())
                         .setResourceCacheMgr(resourceCacheMgr)
                         .setCodeTranslator(codeTranslator)
+                        .setFhirClient(fhirClient)
                         .setVal(val);
                 DocumentReference dr = trans.getDocumentReference((ExtrinsicObjectType) sender.getContents().get(0));
 

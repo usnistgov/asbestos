@@ -1,6 +1,8 @@
 package gov.nist.asbestos.mhd.translation.attribute;
 
 import gov.nist.asbestos.client.Base.IVal;
+import gov.nist.asbestos.client.client.FhirClient;
+import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.client.resolver.ResourceCacheMgr;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import gov.nist.asbestos.simapi.validation.Val;
@@ -19,6 +21,7 @@ public class PatientId implements IVal {
     private String id = "";
     private ResourceCacheMgr resourceCacheMgr = null;
     private Val val;
+    private FhirClient fhirClient = null;
 
     public PatientId setPatientid(String patientid) {
         this.patientid = patientid;
@@ -44,14 +47,20 @@ public class PatientId implements IVal {
         return id;
     }
 
+    Ref patientServer = new Ref("http://localhost:8080/fhir/fhir");
+
+
     public Optional<Reference> getFhirReference() {
         Objects.requireNonNull(resourceCacheMgr);
         Objects.requireNonNull(val);
+        Objects.requireNonNull(fhirClient);
         String system = "urn:oid:" + getAa();
         String id = getId();
         List<String> searchParams = new ArrayList<>();
         searchParams.add("identifier=" + system + "|" + id);
-        List<ResourceWrapper> results = resourceCacheMgr.search(null, Patient.class, searchParams, true);
+        List<ResourceWrapper> results = fhirClient.search(patientServer, Patient.class, searchParams, true, false);
+
+        //List<ResourceWrapper> results = resourceCacheMgr.search(null, Patient.class, searchParams, true);
         if (results.isEmpty()) {
             val.add(new ValE("DocumentEntryToDocumentReference: cannot find Patient resource for " + system + "|" + id).asError());
             return Optional.empty();
@@ -66,5 +75,10 @@ public class PatientId implements IVal {
 
     public void setVal(Val val) {
         this.val = val;
+    }
+
+    public PatientId setFhirClient(FhirClient fhirClient) {
+        this.fhirClient = fhirClient;
+        return this;
     }
 }
