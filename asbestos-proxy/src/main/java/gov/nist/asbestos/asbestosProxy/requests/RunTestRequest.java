@@ -57,12 +57,15 @@ public class RunTestRequest {
             return;
         }
         String testSession = channelConfig.getTestSession();
-        String proxyStr = "http://localhost:8081/asbestos";
+        String proxyStr = null;
         ServicePropertiesEnum key = ServicePropertiesEnum.FHIR_TOOLKIT_BASE;
         try {
             proxyStr = ServiceProperties.getInstance().getProperty(key);
         } catch (Exception ex) {
-            log.warn(String.format("Failed to get %s from service.properties. Using default value.", key));
+            throw new RuntimeException(String.format("Failed to get %s from service.properties.", key));
+        }
+        if (proxyStr == null) {
+            throw new RuntimeException(String.format("%s does not exist in service.properties", key));
         }
         proxyStr += "/proxy/" + channelId;
         URI proxy = null;

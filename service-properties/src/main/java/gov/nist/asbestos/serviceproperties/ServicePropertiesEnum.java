@@ -7,10 +7,10 @@ public enum ServicePropertiesEnum {
     MHD_CAPABILITY_STATEMENT_FILE("MhdCapabilityStatementFile"),
     EMPTY_CAPABILITY_STATEMENT_FILE("EmptyCapabilityStatementFile"),
     XDS_TOOLKIT_BASE("XdsToolkitBase"),
+    TLS_XDS_TOOLKIT_BASE("TlsXdsToolkitBase"),
     FHIR_TOOLKIT_BASE("FhirToolkitBase"),
     FHIR_TOOLKIT_VERSION("FhirToolkitVersion"),
     HAPI_FHIR_BASE("HapiFhirBase");
-
 
     private String key;
 

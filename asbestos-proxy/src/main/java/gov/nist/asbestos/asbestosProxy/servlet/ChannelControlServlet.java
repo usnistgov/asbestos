@@ -36,12 +36,15 @@ public class ChannelControlServlet extends HttpServlet {
         simStore.getStore(true);
         if (!simStore.exists()) {
             log.info("Creating default Channel in the default TestSession");
-            String hapiFhirBase = "http://localhost:8080/fhir/fhir";
+            String hapiFhirBase = null;
             ServicePropertiesEnum key = ServicePropertiesEnum.HAPI_FHIR_BASE;
             try {
                 hapiFhirBase = ServiceProperties.getInstance().getProperty(key);
             } catch (Exception ex) {
-                log.warn(String.format("Failed to get %s from service.properties. Using default value.", key));
+                throw new RuntimeException(String.format("Failed to get %s from service.properties.", key));
+            }
+            if (hapiFhirBase == null) {
+                throw new RuntimeException(String.format("%s does not exist in service.properties", key));
             }
             ChannelConfig cconfig = new ChannelConfig()
                     .setEnvironment("default")
