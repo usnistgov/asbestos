@@ -11,11 +11,16 @@ export const logStore = {
             // private to the log viewer
             eventSummaries: [],  // list { eventName: xx, resourceType: yy, verb: GET|POST, status: true|false }
             currentEventIndex: 0,
+            loaded: false,
         }
     },
     mutations: {
+        resetLogLoaded(state) {
+            state.loaded = false
+        },
         setEventSummaries(state, summaries) {
             state.eventSummaries = summaries
+            state.loaded = true
         },
         updateCurrentEventIndex(state, value) {
             state.currentEventIndex += value

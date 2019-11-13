@@ -30,9 +30,16 @@ export const testRunnerStore = {
             clientTestResult: [], // { testId: { eventId: TestReport } }
             currentChannelBaseAddr: 'http://localhost:8081/asbestos/',
             testAssertions: null,
+            testCollectionsLoaded: false,
         }
     },
     mutations: {
+        resetTestCollectionsLoaded(state) {
+            state.testCollectionsLoaded = false
+        },
+        testCollectionsLoaded(state) {
+            state.testCollectionsLoaded = true
+        },
         setTestAssertions(state, assertions) {
             console.log(`new Test Assertions`)
             state.testAssertions = assertions
@@ -191,6 +198,7 @@ export const testRunnerStore = {
             const url = `collections`
             ENGINE.get(url)
                 .then(response => {
+                    commit('testCollectionsLoaded')
                     let clientTestNames = []
                     let serverTestNames = []
                     response.data.forEach(collection => {

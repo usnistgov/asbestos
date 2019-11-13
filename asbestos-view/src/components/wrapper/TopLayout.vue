@@ -6,6 +6,8 @@
             <span class="title-divider"> </span>
             <span class="selectable" @click="go('/home')">Home</span>
             <div class="divider"></div>
+            <span class="selectable" @click="go('/mhdtesting')">MHD Testing</span>
+            <div class="divider"></div>
             <span class="selectable" @click="go('/about')">About</span>
         </div>
         </div>
