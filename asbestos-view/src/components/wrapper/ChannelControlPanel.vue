@@ -2,7 +2,7 @@
     <div>
         <div class="control-panel-item-title" @click="manage()">Channels</div>
         <div>
-            <span class="selectable" @click="manage()">Edit</span>
+            <span class="selectable" @click="manage()">Show</span>
             &nbsp;
             <span class="selectable" @click="showId()">List by ID</span>
             &nbsp;

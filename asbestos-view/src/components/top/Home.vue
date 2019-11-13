@@ -1,8 +1,8 @@
 <template>
     <div class="left">
-        <h2>NIST FHIR Toolkit</h2>
+        <h1>NIST FHIR Toolkit</h1>
 
-        <h3>Self Test</h3>
+        <h2>Self Test</h2>
         <div class="selectable" @click="selfTest()">Run</div>
         <div v-if="$store.state.log.loaded">
             Proxy responding
@@ -17,9 +17,9 @@
             Test Engine not responding
         </div>
 
-        <h3>Major Components</h3>
+        <h2>Major Components</h2>
 
-        <h3>Controls</h3>
+        <h2>Controls</h2>
         The <span class="bold"> Control panel</span> is on the right side of the screen:<br /><br />
 
         <span class="bold">Test Session</span>
@@ -56,7 +56,7 @@ kinds of channels: FHIR - data passed without modification and MHD - translation
             <li>Click Run All</li>
         </ol>
 
-        <h3>Predefined Channels</h3>
+        <h2>Predefined Channels</h2>
         A collection of Channels comes pre-configured with the toolkit:<br /><br />
 
         <span class="bold">default</span>
@@ -127,6 +127,9 @@ kinds of channels: FHIR - data passed without modification and MHD - translation
             testHapi() {
 
             },
+        },
+        created() {
+            this.selfTest()
         },
         name: "Home"
     }
