@@ -4,6 +4,8 @@
         <div class="left window-title-bar">
             <span class="window-title">NIST FHIR<img src="../../assets/copyright.png"> Toolkit</span>
             <span class="title-divider"> </span>
+            <span class="selectable" @click="go('/home')">Home</span>
+            <div class="divider"></div>
             <span class="selectable" @click="go('/about')">About</span>
         </div>
         </div>
@@ -58,7 +60,7 @@
         },
         beforeRouteEnter(to, from, next) {
             if (to.path === '/')
-                next('/session/default')
+                next('/home')
             else
                 next()
         },
@@ -151,8 +153,8 @@
     }
     .control-panel-item-title {
         font-weight: bold;
-        cursor: pointer;
-        text-decoration: underline;
+        /*cursor: pointer;*/
+        /*text-decoration: underline;*/
     }
     .divider{
         width:5px;

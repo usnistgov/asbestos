@@ -1,11 +1,12 @@
 <template>
     <div>
+        <div class="control-panel-item-title" @click="manage()">Channels</div>
         <div>
-            <span class="control-panel-item-title" @click="manage()">FHIR Server</span>
+            <span class="selectable" @click="manage()">Edit</span>
             &nbsp;
-            <span class="selectable" @click="showId()">By ID</span>
+            <span class="selectable" @click="showId()">List by ID</span>
             &nbsp;
-            <span class="selectable" @click="showAddr()">By URL</span>
+            <span class="selectable" @click="showAddr()">List by URL</span>
         </div>
         <b-form-select class="control-panel-font" v-model="channelId" :options="channels"></b-form-select>
     </div>

@@ -1,0 +1,10 @@
+{
+  "environment" : "default",
+  "testSession" : "default",
+  "channelId" : "default",
+  "actorType" : "fhir",
+  "channelType" : "fhir",
+  "includeValidation" : false,
+  "fhirBase" : "http://localhost:8080/fhir/fhir",
+  "xdsSiteName" : null
+}

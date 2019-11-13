@@ -1,6 +1,7 @@
 <template>
     <div>
-        <div class="control-panel-item-title" @click="manage()">Events</div>
+        <div class="control-panel-item-title" @click="manage()">Events on this channel</div>
+        <div class="selectable" @click="manage()">View</div>
         <div v-if="!selectable" class="not-available">Select FHIR Server</div>
     </div>
 </template>
