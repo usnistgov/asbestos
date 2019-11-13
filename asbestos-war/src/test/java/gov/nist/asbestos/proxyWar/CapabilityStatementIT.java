@@ -84,7 +84,11 @@ public class CapabilityStatementIT {
     @Test
     void searchBogusPatient() {
         // Perform a search
-        // FHIR Client 3.7.0 silently executes a GET metadata request
+        // FHIR Client 3.7.0 silently executes a GET metadata request.
+        // To disable this:
+        // Disable server validation (don't pull the server's metadata first)
+        // ctx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
+        // For more details see https://hapifhir.io/doc_rest_client_http_config.html
         Bundle results = client
                 .search()
                 .forResource(Patient.class)
