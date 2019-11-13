@@ -59,14 +59,7 @@ public class RunTestRequest {
         String testSession = channelConfig.getTestSession();
         String proxyStr = null;
         ServicePropertiesEnum key = ServicePropertiesEnum.FHIR_TOOLKIT_BASE;
-        try {
-            proxyStr = ServiceProperties.getInstance().getProperty(key);
-        } catch (Exception ex) {
-            throw new RuntimeException(String.format("Failed to get %s from service.properties.", key));
-        }
-        if (proxyStr == null) {
-            throw new RuntimeException(String.format("%s does not exist in service.properties", key));
-        }
+        proxyStr = ServiceProperties.getInstance().getPropertyOrStop(key);
         proxyStr += "/proxy/" + channelId;
         URI proxy = null;
         try {

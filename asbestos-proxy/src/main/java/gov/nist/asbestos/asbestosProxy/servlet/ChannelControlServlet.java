@@ -38,14 +38,7 @@ public class ChannelControlServlet extends HttpServlet {
             log.info("Creating default Channel in the default TestSession");
             String hapiFhirBase = null;
             ServicePropertiesEnum key = ServicePropertiesEnum.HAPI_FHIR_BASE;
-            try {
-                hapiFhirBase = ServiceProperties.getInstance().getProperty(key);
-            } catch (Exception ex) {
-                throw new RuntimeException(String.format("Failed to get %s from service.properties.", key));
-            }
-            if (hapiFhirBase == null) {
-                throw new RuntimeException(String.format("%s does not exist in service.properties", key));
-            }
+            hapiFhirBase = ServiceProperties.getInstance().getPropertyOrStop(key);
             ChannelConfig cconfig = new ChannelConfig()
                     .setEnvironment("default")
                     .setTestSession("default")

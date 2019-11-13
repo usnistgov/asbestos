@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Paths;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Properties;
 
 /**
@@ -51,9 +52,20 @@ public class ServiceProperties {
         spFileLastModified = spFile.lastModified();
     }
 
-    public static ServiceProperties getInstance() throws Exception {
+    public static ServiceProperties init() throws Exception {
         if (spClass == null) {
             spClass = new ServiceProperties();
+        }
+        return spClass;
+    }
+
+    public static ServiceProperties getInstance() {
+        if (spClass == null) {
+            try {
+                spClass = init();
+            } catch (Exception ex) {
+               throw new RuntimeException("getInstance failed: Initialization error: " + ex.toString());
+            }
         }
         return spClass;
     }
@@ -84,14 +96,24 @@ public class ServiceProperties {
         return copyOfProperties;
     }
 
-    public String getProperty(ServicePropertiesEnum key) {
-        return getProperty(key.getKey());
+    public Optional<String> getProperty(ServicePropertiesEnum key) {
+        String value = getProperty(key.getKey());
+        return Optional.ofNullable(value);
+    }
+
+    public String getPropertyOrStop(ServicePropertiesEnum key) {
+        String value = getProperty(key.getKey());
+        if (value == null)
+            throw new RuntimeException(String.format("No value found for %s", key));
+        return value;
     }
 
     public String getProperty(String key) {
+        Objects.requireNonNull(key);
         reloadIfModified();
         return properties.getProperty(key);
     }
+
 
     public void setProperty(String key, String value)  {
         properties.setProperty(key, value);

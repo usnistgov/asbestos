@@ -70,6 +70,13 @@ public class ProxyServlet extends HttpServlet {
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
         log.info("ProxyServlet init");
+
+        try {
+            ServiceProperties.init();
+        } catch (Exception ex) {
+            throw new RuntimeException(String.format("ServiceProperties.init() Failed: %s.", ex.toString()));
+        }
+
 //        String ec = config.getInitParameter("ExternalCache");
         String ec = System.getProperty("EXTERNAL_CACHE");
         if (ec == null) {
@@ -366,14 +373,7 @@ public class ProxyServlet extends HttpServlet {
     private void doGetCapabilityStatement(HttpServletRequest req, HttpServletResponse resp, SimStore simStore, URI uri, Verb verb, Headers inHeaders, ServicePropertiesEnum capabilityStatementFile) {
         if (simStore == null) return;
 
-        boolean isLoggingEnabled = false;
-        try {
-            isLoggingEnabled = Boolean.parseBoolean(ServiceProperties.getInstance().getProperty(ServicePropertiesEnum.LOG_CS_METADATA_REQUEST));
-        } catch (Exception ex) {
-            log.error(ExceptionUtils.getStackTrace(ex));
-            resp.setStatus(resp.SC_INTERNAL_SERVER_ERROR);
-            return;
-        }
+        boolean isLoggingEnabled = Boolean.parseBoolean(ServiceProperties.getInstance().getProperty(ServicePropertiesEnum.LOG_CS_METADATA_REQUEST.getKey()));
 
         ITask clientTask = (isLoggingEnabled ? simStore.newEvent().getClientTask() : new NoOpTask());
         try {

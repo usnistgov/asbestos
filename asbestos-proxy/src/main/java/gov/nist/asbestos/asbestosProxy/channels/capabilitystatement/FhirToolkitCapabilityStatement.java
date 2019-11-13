@@ -12,6 +12,7 @@ import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.regex.Pattern;
 
 public class FhirToolkitCapabilityStatement {
@@ -47,8 +48,7 @@ public class FhirToolkitCapabilityStatement {
 
     public static BaseResource getCapabilityStatement(ServicePropertiesEnum key) throws Exception {
         Objects.requireNonNull(key);
-        String capabilityStatementFileName =
-                ServiceProperties.getInstance().getProperty(key);
+        String capabilityStatementFileName = ServiceProperties.getInstance().getPropertyOrStop(key);
 
         File capabilityStatementFile = Paths.get(FhirToolkitCapabilityStatement.class.getResource("/").toURI()).resolve(capabilityStatementFileName).toFile();
 
@@ -58,9 +58,9 @@ public class FhirToolkitCapabilityStatement {
                 for (ServicePropertiesEnum paramKey: ServicePropertiesEnum.values()) {
                     String param = String.format("${%s}", paramKey.getKey());
                     if (statementContent.contains(param)) {
-                        String paramValue = ServiceProperties.getInstance().getProperty(paramKey);
-                        if (paramValue != null) {
-                            statementContent = statementContent.replaceAll(Pattern.quote(param),  paramValue);
+                        Optional<String> paramValue = ServiceProperties.getInstance().getProperty(paramKey);
+                        if (paramValue.isPresent()) {
+                            statementContent = statementContent.replaceAll(Pattern.quote(param),  paramValue.get());
                         } else {
                             logger.warn("No service property value found for key: " + paramKey);
                         }
