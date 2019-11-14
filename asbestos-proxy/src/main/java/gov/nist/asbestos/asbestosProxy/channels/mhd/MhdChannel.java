@@ -354,6 +354,10 @@ public class MhdChannel extends BaseChannel /*implements IBaseChannel*/ {
             responseOut.setResponseContentType(responseIn.getResponseContentType());
         } else {
             OperationOutcome oo = new OperationOutcome();
+            if (responseIn.getStatus() >= 400) {
+                returnErrorInOperationOutcome("XDS.ProvideAndRegister returned status " + responseIn.getStatus(), responseOut);
+                return;
+            }
             String responsePart = responseIn.getResponseText();
             String registryResponse = "";
             try {

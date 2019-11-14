@@ -9,7 +9,7 @@
            This patient comes out of the test Patient cache
         -->
         <resource>
-            <reference value="Patient/Alex_Alder.json"/>
+            <reference value="Patient/Alex_Alder"/>
         </resource>
     </fixture>
     <variable>
@@ -33,7 +33,10 @@
         <sourceId value="read-back"/>
     </variable>
     <test>
-        <description value="Submit Provide Document Bundle to MHD Document Recipient and verify response."/>
+        <description value="Submit Provide Document Bundle to MHD Document Recipient and verify response. The DocumentReference is not Comprehensive Metadata compliant. It is missing the masterIdentifier."/>
+        <!--
+            Actions generic to all PDB transactions
+        -->
         <action>
             <operation>
                 <!-- references patient from resourceCache in EC -->
@@ -49,22 +52,58 @@
         </action>
         <action>
             <assert>
-                <description value="... was successful transaction"/>
+                <description value="... transaction was successful"/>
                 <response value="okay"/>
                 <warningOnly value="false"/>
             </assert>
         </action>
+<!--        <action>-->
+<!--            <assert>-->
+<!--                <description value="... return Bundle"/>-->
+<!--                <compareToSourceId value="pdb-response"/>-->
+<!--                <compareToSourceExpression value="where(Bundle).exists()"/>-->
+<!--                <warningOnly value="false"/>-->
+<!--            </assert>-->
+<!--        </action>-->
         <action>
             <assert>
-                <description value="... Bundle was returned"/>
-                <expression value="Bundle.exists()"/>
+                <description value="... Bundle may not contain OperationOutcome"/>
+                <compareToSourceId value="pdb-response"/>
+                <compareToSourceExpression value="Bundle.entry.response.outcome.where(OperationOutcome).exists().not()"/>
                 <warningOnly value="false"/>
             </assert>
         </action>
         <action>
             <assert>
+                <description value="... return OperationOutcome"/>
+                <compareToSourceId value="pdb-response"/>
+                <compareToSourceExpression value="where(OperationOutcome)"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
+            <assert>
+                <description value="... was error"/>
+                <response value="bad"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+
+
+        <action>
+            <assert>
+                <description value="... "/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+
+
+
+        <action>
+            <assert>
                 <description value="... all parts of transaction successful"/>
-                <expression value="Bundle.entry.response.all(status.startsWith(201))"/>
+                <expression value="Bundle.entry.response.status"/>
+                <value value="201"/>
                 <warningOnly value="false"/>
             </assert>
         </action>
@@ -98,7 +137,7 @@
                 <description value="... Patient reference returned as sent"/>
                 <expression value="DocumentReference.subject.reference"/>
                 <sourceId value="readBackResponse"/>
-                <value value="${patientResourceId}"/>
+                <value value="http://localhost:8080/fhir/Patient/a2"/>
                 <warningOnly value="false"/>
             </assert>
         </action>

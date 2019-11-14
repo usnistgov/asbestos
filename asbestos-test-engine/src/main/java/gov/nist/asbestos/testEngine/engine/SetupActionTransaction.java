@@ -27,7 +27,7 @@ public class SetupActionTransaction extends GenericSetupAction {
         reporter.report("No evaluation", wrapper);
 //        BaseResource resource = wrapper.getResource();
 //        if (wrapper.isOk()) {
-//            if ((resource instanceof Bundle) && bundleContainsError((Bundle) resource) ) {
+//            if ((resourced instanceof Bundle) && bundleContainsError((Bundle) resource) ) {
 //                reporter.reportFail((wrapper.getRef() == null ? "" : wrapper.getRef())  +
 //                        " transaction failed : \n" + getBundleIssues((Bundle) wrapper.getResource()),
 //                        wrapper);
