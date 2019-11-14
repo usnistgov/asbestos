@@ -30,12 +30,25 @@
     export default {
         data() {
             return {
+                collection: null,
                 testType: "Server", // Client or Server
             }
         },
         methods: {
             reload() {
                 this.$store.dispatch('loadTestCollectionNames')
+            },
+            vuexCollectionUpdated() {
+                if (this.collection !== this.$store.state.testRunner.currentTestCollectionName) {
+                    this.collection = this.$store.state.testRunner.currentTestCollectionName
+                    this.openCollection()
+                }
+            },
+            localCollectionUpdated() {
+                if (this.collection !== this.$store.state.testRunner.currentTestCollectionName) {
+                    this.$store.commit('setTestCollectionName', this.collection)
+                    this.openCollection()
+                }
             },
             openCollection() {
                 if (!this.selectable)
@@ -61,15 +74,15 @@
             client() {
                 return this.testType === 'Client'
             },
-            collection: {
-                set(name) {
-                    this.$store.commit('setTestCollectionName', name)
-                    this.openCollection()
-                },
-                get() {
-                    return this.$store.state.testRunner.currentTestCollectionName
-                }
-            },
+            // collection: {
+            //     set(name) {
+            //         this.$store.commit('setTestCollectionName', name)
+            //         this.openCollection()
+            //     },
+            //     get() {
+            //         return this.$store.state.testRunner.currentTestCollectionName
+            //     }
+            // },
             collections: {
                 get() {
                     return (this.client)
@@ -106,6 +119,8 @@
         },
         watch: {
             '$store.state.base.channelId': 'reload',
+            '$store.state.testRunner.currentTestCollectionName': 'vuexCollectionUpdated',
+            'collection': 'localCollectionUpdated',
         },
         mixins: [ errorHandlerMixin ],
         name: "TestControlPanel"

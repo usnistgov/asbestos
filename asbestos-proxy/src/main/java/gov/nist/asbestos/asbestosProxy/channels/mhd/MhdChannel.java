@@ -501,30 +501,31 @@ public class MhdChannel extends BaseChannel /*implements IBaseChannel*/ {
 
     private void packageResponse(HttpBase responseOut, OperationOutcome oo) {
         responseOut.setOperationOutcome(oo);
-        Bundle response = new Bundle();
-        response.setType(Bundle.BundleType.TRANSACTIONRESPONSE);
-        boolean first = true;
-        for (Bundle.BundleEntryComponent componentIn : requestBundle.getEntry()) {
-            BaseResource resource = componentIn.getResource();
-            SubmittedObject submittedObject = bundleToRegistryObjectList.findSubmittedObject(resource);
-            Bundle.BundleEntryComponent componentOut = response.addEntry();
-            Bundle.BundleEntryResponseComponent responseComponent = componentOut.getResponse();
-            if (first && oo != null) {
-                responseComponent.setStatus("400");
-                responseComponent.setOutcome(oo);
-            } else {
-                responseComponent.setStatus("201");
-                if (submittedObject != null) {
-                    String url = proxyBase + "/" + resource.getClass().getSimpleName() + "/" + submittedObject.getUid();
-                    responseComponent.setLocation(url);
-                }
-            }
-            first = false;
-        }
+//        Bundle response = new Bundle();
+//        response.setType(Bundle.BundleType.TRANSACTIONRESPONSE);
+//        boolean first = true;
+//        for (Bundle.BundleEntryComponent componentIn : requestBundle.getEntry()) {
+//            BaseResource resource = componentIn.getResource();
+//            SubmittedObject submittedObject = bundleToRegistryObjectList.findSubmittedObject(resource);
+//            Bundle.BundleEntryComponent componentOut = response.addEntry();
+//            Bundle.BundleEntryResponseComponent responseComponent = componentOut.getResponse();
+//            if (first && oo != null) {
+//                responseComponent.setStatus("400");
+//                responseComponent.setOutcome(oo);
+//            } else {
+//                responseComponent.setStatus("201");
+//                if (submittedObject != null) {
+//                    String url = proxyBase + "/" + resource.getClass().getSimpleName() + "/" + submittedObject.getUid();
+//                    responseComponent.setLocation(url);
+//                }
+//            }
+//            first = false;
+//        }
         if (returnFormatType == null)
             returnFormatType = Format.XML;
-        responseOut.setResponseText(ProxyBase.encode(response, returnFormatType));
+        responseOut.setResponseText(ProxyBase.encode(oo, returnFormatType));
         responseOut.setResponseContentType(returnFormatType.getContentType());
+        responseOut.setStatus(400);
     }
 
     @Override

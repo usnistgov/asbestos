@@ -41,7 +41,7 @@ kinds of channels: FHIR - data passed without modification and MHD - translation
         Document Recipient. Each Test Collection targets a particular actor. Once a Test Collection is selected it can be returned to
         by clicking on "View Selected".
 
-        <h3>Patient Management</h3>
+        <h2>Patient Management</h2>
         All Document Sharing tests depend on a reference to a Patient resource. There is a Test Collection named Test Patients
         that can be used to load a small collection of Patient resources into a FHIR server. This must be done before any testing
         can be performed.  We suggest loading them into the default channel which points to the integrated HAPI FHIR server.

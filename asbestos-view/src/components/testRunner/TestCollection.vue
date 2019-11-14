@@ -44,7 +44,7 @@
                 <img src="../../assets/press-play-button.png">
                 to run test. <br />Requests will be sent to
                 <span v-if="channelObj" class="boxed">{{ channelObj.fhirBase }}</span>
-                (Channel {{ channelObj.channelId }})
+                <span v-if="channelObj">(Channel {{ channelObj.channelId }})</span>
             </span>
             <span class="divider"></span>
         </div>

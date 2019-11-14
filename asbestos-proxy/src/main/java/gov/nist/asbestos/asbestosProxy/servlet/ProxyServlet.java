@@ -680,7 +680,7 @@ public class ProxyServlet extends HttpServlet {
     static HttpBase transformResponse(Task task, HttpBase responseIn, IBaseChannel channelTransform, String proxyHostPort) {
         HttpBase responseOut = new HttpGet();  // here GET vs POST does not matter
         channelTransform.transformResponse(responseIn, responseOut, proxyHostPort);
-        responseOut.setStatus(responseIn.getStatus());
+        //responseOut.setStatus(responseIn.getStatus());
         return responseOut;
     }
 

@@ -28,17 +28,17 @@
                 <div>
                     <span class="selectable" @click.self="toggleEventDisplayed()">Message Log</span>
                     <span v-if="eventDisplayed">
-                                        <img src="../../assets/arrow-down.png" @click.self="toggleEventDisplayed()">
-                                        <log-item
-                                                :sessionId="sessionId"
-                                                :channelId="channelId"
-                                                :eventId="eventId"
-                                                :noNav="true">
-                                        </log-item>
-                                    </span>
+                        <img src="../../assets/arrow-down.png" @click.self="toggleEventDisplayed()">
+                        <log-item
+                                :sessionId="sessionId"
+                                :channelId="channelId"
+                                :eventId="eventId"
+                                :noNav="true">
+                        </log-item>
+                    </span>
                     <span v-else>
-                                        <img src="../../assets/arrow-right.png" @click.self="toggleEventDisplayed()">
-                                    </span>
+                        <img src="../../assets/arrow-right.png" @click.self="toggleEventDisplayed()">
+                    </span>
                 </div>
 
                 <!--                actions will be asserts only-->
@@ -47,11 +47,11 @@
                     <div>
                         <div >
                             <div @click.self="selectAssert(actioni)" v-bind:class="{
-                                    pass: assertResult(actioni) === 'pass',
-                                    fail: assertResult(actioni) === 'fail',
-                                    error: assertResult(actioni) === 'error',
-                                    warning: assertResult(actioni) === 'warning',
-                                    'not-run': assertResult(actioni) === 'not-run' }">
+                                    pass: assertResult(testi, actioni) === 'pass',
+                                    fail: assertResult(testi, actioni) === 'fail',
+                                    error: assertResult(testi, actioni) === 'error',
+                                    warning: assertResult(testi, actioni) === 'warning',
+                                    'not-run': assertResult(testi, actioni) === 'not-run' }">
                                 <span class="selectable">Assert:</span> {{ assertDesc(actioni) }}
                             </div>
                             <div v-if="selectedAssertIndex === actioni" class="message-part">
@@ -91,14 +91,15 @@
             toggleEventDisplayed() {
                 this.eventDisplayed = !this.eventDisplayed
             },
-            assertMessage(assertIndex) {
-                return this.assertReport(assertIndex).message
+            assertMessage(testIndex, actionIndex) {
+                if (actionIndex < this.testReport.test[testIndex].action.length)
+                    return this.testReport.test[testIndex].action[actionIndex].assert.message
+                return null
             },
-            assertResult(assertIndex) {
-                return this.assertReport(assertIndex).result
-            },
-            assertPass(assertIndex) {
-                return this.assertReport(assertIndex).result === 'pass'
+            assertResult(testIndex, actionIndex) {
+                if (actionIndex < this.testReport.test[testIndex].action.length)
+                    return this.testReport.test[testIndex].action[actionIndex].assert.result
+                return 'not-run'
             },
             assertReport(assertIndex) {
                 return this.testReport.test[0].action[assertIndex].assert
@@ -200,6 +201,10 @@
         },
         watch: {
             'testId': function() {
+                this.loadTestScript()
+                this.loadTestReport()
+            },
+            'eventId': function() {
                 this.loadTestScript()
                 this.loadTestReport()
             }
