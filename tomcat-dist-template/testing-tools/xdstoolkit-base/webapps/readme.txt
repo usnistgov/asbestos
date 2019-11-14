@@ -1,0 +1,1 @@
+Place the XDS Toolkit WAR file in this directory.

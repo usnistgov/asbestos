@@ -41,6 +41,7 @@
         <module>asbestos-client</module>
         <module>asbestos-utilities</module>
         <module>asbestos-test-engine</module>
+        <module>service-properties</module>
     </modules>
 
     <dependencyManagement>

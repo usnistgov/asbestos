@@ -3,7 +3,7 @@ package gov.nist.asbestos.mhd.translation.test;
 import gov.nist.asbestos.client.Base.ProxyBase;
 import gov.nist.asbestos.client.client.FhirClient;
 import gov.nist.asbestos.client.events.Event;
-import gov.nist.asbestos.client.events.Task;
+import gov.nist.asbestos.client.events.ITask;
 import gov.nist.asbestos.client.log.SimStore;
 import gov.nist.asbestos.client.resolver.ResourceCacheMgr;
 import gov.nist.asbestos.client.resolver.ResourceMgr;
@@ -73,7 +73,7 @@ class BuildRegistryObjectListTest {
         simStore.create(channelConfig);
         simStore.setResource("Bundle");
         Event event = simStore.newEvent();
-        Task task = event.newTask();
+        ITask task = event.newTask();
         rMgr.setTask(task);
         bundleMgr = new ResourceMgr();
         bundleMgr.setVal(val);

@@ -1,6 +1,6 @@
 package gov.nist.asbestos.mhd.transactionSupport;
 
-import gov.nist.asbestos.client.events.Task;
+import gov.nist.asbestos.client.events.ITask;
 import gov.nist.asbestos.http.headers.Header;
 import gov.nist.asbestos.http.headers.Headers;
 import gov.nist.asbestos.http.operations.HttpPost;
@@ -25,9 +25,9 @@ public class AhqrSender {
     private String requestBody = null;
     private Headers requestHeaders = new Headers();
     private String responseText = null;
-    private Task task;
+    private ITask task;
 
-    public void send(AdhocQueryRequest adhocQueryRequest, URI toAddr, Task task) {
+    public void send(AdhocQueryRequest adhocQueryRequest, URI toAddr, ITask task) {
         ByteArrayOutputStream queryStream = new ByteArrayOutputStream();
         new AdhocQueryBuilder().toOutputStream(adhocQueryRequest, queryStream);
 
@@ -37,7 +37,7 @@ public class AhqrSender {
         send(soapString, toAddr.toString(), task);
     }
 
-    public void send(String body, String toAddr, Task task) {
+    public void send(String body, String toAddr, ITask task) {
         this.requestBody = body;
         this.task = task;
         try {

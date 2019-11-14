@@ -8,7 +8,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import gov.nist.asbestos.client.Base.ProxyBase;
 import gov.nist.asbestos.client.client.FhirClient;
 import gov.nist.asbestos.client.events.Event;
-import gov.nist.asbestos.client.events.Task;
+import gov.nist.asbestos.client.events.ITask;
 import gov.nist.asbestos.client.log.SimStore;
 import gov.nist.asbestos.client.resolver.ResourceCacheMgr;
 import gov.nist.asbestos.client.resolver.ResourceMgr;
@@ -103,7 +103,7 @@ class DocumentEntryTest {
         rMgr = new ResourceMgr();
         rMgr.setVal(val);
         rMgr.setFhirClient(fhirClient);
-        Task task = event.newTask();
+        ITask task = event.newTask();
         rMgr.setTask(task);
 
         BundleToRegistryObjectList bundleToRegistryObjectList = new BundleToRegistryObjectList();

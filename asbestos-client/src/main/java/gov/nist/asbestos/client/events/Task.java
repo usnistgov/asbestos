@@ -4,12 +4,11 @@ package gov.nist.asbestos.client.events;
 import gov.nist.asbestos.http.headers.Headers;
 import gov.nist.asbestos.http.operations.HttpBase;
 
-import java.io.File;
 import java.io.FileOutputStream;
 import java.io.PrintWriter;
 import java.nio.file.Files;
 
-public class Task {
+public class Task implements ITask {
     private Event event;
     private int taskIndex;
 
@@ -22,23 +21,25 @@ public class Task {
     private String _responseBody = null;
     private String _description = null;
 
-
     Task(int taskIndex, Event event) {
         this.taskIndex = taskIndex;  // will be overwritten by initTask()
         // this allows tasks to be allocated but not used - initialization happens on first use
         this.event = event;
     }
 
+    @Override
     public String getVerb() {
         Headers headers = getRequestHeader();
         return headers.getVerb();
     }
 
+    @Override
     public Event getEvent() {
         return event;
     }
 
-    public Task newTask() {
+    @Override
+    public ITask newTask() {
         return event.newTask();
     }
 
@@ -47,6 +48,7 @@ public class Task {
             taskIndex = event.initTask(this);
     }
 
+    @Override
     public boolean hasRun() {
         if (taskIndex == Event.NEWTASK)
             return false;
@@ -57,6 +59,7 @@ public class Task {
         return false;
     }
 
+    @Override
     public void fromTask(HttpBase base) {
         base.setRequestHeaders(getRequestHeader());
         base.setRequest(getRequestBody());
@@ -67,6 +70,7 @@ public class Task {
         base.setRequestText(getResponseBodyAsString());
     }
 
+    @Override
     public void putRequestHeader(Headers headers) {
         _requestHeaders = headers;
         initTask();
@@ -79,6 +83,7 @@ public class Task {
         }
     }
 
+    @Override
     public void putRequestBody(byte[] body) {
         _requestRawBody = body;
         initTask();
@@ -96,6 +101,7 @@ public class Task {
         }
     }
 
+    @Override
     public byte[] getRequestBody() {
         if (_requestRawBody == null) {
             if (_requestBody != null) {
@@ -112,6 +118,7 @@ public class Task {
         return _requestRawBody;
     }
 
+    @Override
     public Headers getRequestHeader() {
         if (_requestHeaders == null) {
             String headerString;
@@ -125,11 +132,13 @@ public class Task {
         return _requestHeaders;
     }
 
+    @Override
     public String getRequestBodyAsString() {
         getRequestBody();
         return _requestBody;
     }
 
+    @Override
     public void putResponseHeader(Headers headers) {
         _responseHeaders = headers;
         initTask();
@@ -144,6 +153,7 @@ public class Task {
         }
     }
 
+    @Override
     public void putResponseBody(byte[] body) {
         _responseRawBody = body;
         initTask();
@@ -158,6 +168,7 @@ public class Task {
         }
     }
 
+    @Override
     public void putResponseBodyText(String body) {
         _responseBody = body;
         initTask();
@@ -170,6 +181,7 @@ public class Task {
         }
     }
 
+    @Override
     public void putDescription(String description) {
         _description = description;
         initTask();
@@ -182,6 +194,7 @@ public class Task {
         }
     }
 
+    @Override
     public void putRequestBodyText(String body) {
         initTask();
         try {
@@ -193,6 +206,7 @@ public class Task {
         }
     }
 
+    @Override
     public void putResponseHTMLBody(byte[] body) {
         initTask();
         putResponseBody(body);
@@ -207,6 +221,7 @@ public class Task {
         }
     }
 
+    @Override
     public void putRequestHTMLBody(byte[] body) {
         initTask();
         putRequestBody(body);
@@ -221,6 +236,7 @@ public class Task {
         }
     }
 
+    @Override
     public Headers getResponseHeader() {
         if (_responseHeaders == null) {
             try {
@@ -233,6 +249,7 @@ public class Task {
         return _responseHeaders;
     }
 
+    @Override
     public byte[] getResponseBody() {
         if (_responseRawBody == null) {
             if (_responseBody != null) {
@@ -249,6 +266,7 @@ public class Task {
         return _responseRawBody;
     }
 
+    @Override
     public String getDescription() {
         if (_description == null) {
             try {
@@ -260,8 +278,10 @@ public class Task {
         return _description;
     }
 
+    @Override
     public String getResponseBodyAsString() {
         getResponseBody();
         return _responseBody;
     }
+
 }

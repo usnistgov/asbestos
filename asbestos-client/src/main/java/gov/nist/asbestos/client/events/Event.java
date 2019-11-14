@@ -1,7 +1,6 @@
 package gov.nist.asbestos.client.events;
 
 
-import com.sun.org.apache.bcel.internal.generic.NEW;
 import gov.nist.asbestos.client.log.SimStore;
 
 import java.io.File;
@@ -16,7 +15,7 @@ public class Event implements Comparable<Event> {
     private SimStore simStore;
     private File eventDir;
     private List<File> taskFiles = new ArrayList<>();
-    private List<Task> tasks = new ArrayList<>();
+    private List<ITask> tasks = new ArrayList<>();
     public static final int NEWTASK = -1;
 
     public Event(File eventDir) {
@@ -71,8 +70,7 @@ public class Event implements Comparable<Event> {
         }
     }
 
-
-    public Task getClientTask() {
+    public ITask getClientTask() {
         if (tasks.size() == 0) {
             initTask(new Task(0, this));
         }
@@ -83,11 +81,11 @@ public class Event implements Comparable<Event> {
         return "Event: " + tasks.size() + " tasks";
     }
 
-    public Task newTask() {
+    public ITask newTask() {
         return new Task(NEWTASK, this);
     }
 
-    int initTask(Task task) {
+    int initTask(ITask task) {
         int i = taskFiles.size();
         File taskFile = getTaskFile(i);
         taskFile.mkdirs();

@@ -9,7 +9,7 @@ import gov.nist.asbestos.client.Base.ProxyBase;
 import gov.nist.asbestos.client.client.FhirClient;
 import gov.nist.asbestos.client.client.Format;
 import gov.nist.asbestos.client.events.Event;
-import gov.nist.asbestos.client.events.Task;
+import gov.nist.asbestos.client.events.ITask;
 import gov.nist.asbestos.client.resolver.IdBuilder;
 import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.client.resolver.ResourceCacheMgr;
@@ -53,7 +53,7 @@ public class MhdChannel extends BaseChannel /*implements IBaseChannel*/ {
 
     public MhdChannel() {}
 
-    private String transformPDBToPNR(Bundle bundle, URI toAddr, Task task) {
+    private String transformPDBToPNR(Bundle bundle, URI toAddr, ITask task) {
         Objects.requireNonNull(task);
         Val val = new Val();
 
@@ -123,7 +123,7 @@ public class MhdChannel extends BaseChannel /*implements IBaseChannel*/ {
     }
 
 
-    private AhqrSender documentEntryByUidQuery(String uid, URI toAddr, Task task)  {
+    private AhqrSender documentEntryByUidQuery(String uid, URI toAddr, ITask task)  {
         Map<String, List<String>> model = new HashMap<>();
         model.put("$XDSDocumentEntryUniqueId", Collections.singletonList(uid));
         return FhirSq.run(model, "urn:uuid:5c4f972b-d56b-40ac-a5fc-c8ca9b40b9d4", toAddr, true, task);

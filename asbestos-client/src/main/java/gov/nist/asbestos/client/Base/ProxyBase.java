@@ -67,7 +67,11 @@ public class ProxyBase {
         } catch (IOException e) {
             throw new RuntimeException("Error reading " + resourceFile.toString(), e);
         }
-        return parse(fileContent, resourceFile.toString().endsWith("json") ? Format.JSON : Format.XML);
+        return parse(fileContent, getFormat(resourceFile));
+    }
+
+    public static Format getFormat(File resourceFile) {
+        return resourceFile.toString().endsWith("json") ? Format.JSON : Format.XML;
     }
 
 //    private static hexChars = ('0'..'9') + ('a'..'f')

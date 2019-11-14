@@ -2,6 +2,8 @@ package gov.nist.asbestos.asbestosProxy.servlet;
 
 import gov.nist.asbestos.asbestosProxy.requests.*;
 import gov.nist.asbestos.client.log.SimStore;
+import gov.nist.asbestos.serviceproperties.ServiceProperties;
+import gov.nist.asbestos.serviceproperties.ServicePropertiesEnum;
 import gov.nist.asbestos.sharedObjects.ChannelConfig;
 import gov.nist.asbestos.simapi.simCommon.SimId;
 import gov.nist.asbestos.simapi.simCommon.TestSession;
@@ -34,13 +36,16 @@ public class ChannelControlServlet extends HttpServlet {
         simStore.getStore(true);
         if (!simStore.exists()) {
             log.info("Creating default Channel in the default TestSession");
+            String hapiFhirBase = null;
+            ServicePropertiesEnum key = ServicePropertiesEnum.HAPI_FHIR_BASE;
+            hapiFhirBase = ServiceProperties.getInstance().getPropertyOrStop(key);
             ChannelConfig cconfig = new ChannelConfig()
                     .setEnvironment("default")
                     .setTestSession("default")
                     .setChannelId("default")
                     .setChannelType("fhir")
                     .setActorType("fhir")
-                    .setFhirBase("http://localhost:8080/fhir/fhir");
+                    .setFhirBase(hapiFhirBase);
             simStore.create(cconfig);
         }
     }

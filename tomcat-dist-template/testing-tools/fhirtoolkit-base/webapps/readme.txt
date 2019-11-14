@@ -1,0 +1,1 @@
+Place the Asbestos WAR file in this directory.

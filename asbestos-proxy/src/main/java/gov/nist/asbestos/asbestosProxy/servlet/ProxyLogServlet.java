@@ -28,7 +28,6 @@ public class ProxyLogServlet extends HttpServlet {
     @Override
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
-        // TODO put EC location in web.xml
         String ec = (String) config.getServletContext().getAttribute("ExternalCache");
         log.info("EC is " + ec);
         setExternalCache(new File(ec));

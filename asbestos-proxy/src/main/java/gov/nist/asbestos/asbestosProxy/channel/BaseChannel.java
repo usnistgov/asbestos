@@ -1,13 +1,13 @@
 package gov.nist.asbestos.asbestosProxy.channel;
 
-import gov.nist.asbestos.client.events.Task;
+import gov.nist.asbestos.client.events.ITask;
 import gov.nist.asbestos.client.client.Format;
 import gov.nist.asbestos.sharedObjects.ChannelConfig;
 
 public abstract class BaseChannel implements IBaseChannel {
     protected ChannelConfig channelConfig = null;
     protected Format returnFormatType = null;
-    protected Task task = null;
+    protected ITask task = null;
     private String hostport = null;
 
     public void setReturnFormatType(Format returnFormatType) {
@@ -18,11 +18,11 @@ public abstract class BaseChannel implements IBaseChannel {
         return returnFormatType;
     }
 
-    public Task getTask() {
+    public ITask getTask() {
         return task;
     }
 
-    public void setTask(Task task) {
+    public void setTask(ITask task) {
         this.task = task;
     }
 
