@@ -36,6 +36,7 @@ import oasis.names.tc.ebxml_regrep.xsd.rs._3.RegistryResponseType;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.Attachment;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -191,6 +192,8 @@ public class MhdChannel extends BaseChannel /*implements IBaseChannel*/ {
         return Installation.instance().externalCache();
     }
 
+    // TODO - expand support for search
+    // TODO - add RetrieveDocument
     @Override
     public void transformRequest(HttpGet requestIn, HttpGet requestOut) {
         Ref ref = new Ref(requestIn.getRequestHeaders().getPathInfo());
@@ -516,7 +519,17 @@ public class MhdChannel extends BaseChannel /*implements IBaseChannel*/ {
                 Bundle.BundleEntryComponent componentOut = response.addEntry();
                 Bundle.BundleEntryResponseComponent responseComponent = componentOut.getResponse();
                 responseComponent.setStatus("201");
-                if (submittedObject != null) {
+                if (submittedObject == null) {
+                    if (resource instanceof Binary) {
+                        Binary binary = (Binary) resource;
+                        DocumentReference docRef = findAttached(requestBundle, binary);
+                        if (docRef != null) {
+                            SubmittedObject submittedObject2 = bundleToRegistryObjectList.findSubmittedObject(docRef);
+                            String url = proxyBase + "/Binary/" + submittedObject2.getUid();
+                            responseComponent.setLocation(url);
+                        }
+                    }
+                } else {
                     String url = proxyBase + "/" + resource.getClass().getSimpleName() + "/" + submittedObject.getUid();
                     responseComponent.setLocation(url);
                 }
@@ -530,6 +543,40 @@ public class MhdChannel extends BaseChannel /*implements IBaseChannel*/ {
             responseOut.setStatus(200);
         else
             responseOut.setStatus(400);
+    }
+
+    // return DocumentReference this binary is attached to
+    private DocumentReference findAttached(Bundle bundle, Binary binary) {
+        for (Bundle.BundleEntryComponent componentIn : requestBundle.getEntry()) {
+            BaseResource resource = componentIn.getResource();
+            if (resource instanceof DocumentReference) {
+                DocumentReference docRef = (DocumentReference) resource;
+                for (DocumentReference.DocumentReferenceContentComponent contentComponent : docRef.getContent()) {
+                    if (contentComponent.hasAttachment()) {
+                        Attachment attachement = contentComponent.getAttachment();
+                        String url = attachement.getUrl();
+                        if (url != null) {
+                            Resource res = findResourceInBundle(bundle, url);
+                            if (res instanceof Binary) {
+                                Binary foundBinary = (Binary) res;
+                                if (binary.equals(foundBinary))
+                                    return docRef;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    private Resource findResourceInBundle(Bundle bundle, String fullUrl) {
+        for (Bundle.BundleEntryComponent componentIn : requestBundle.getEntry()) {
+            if (fullUrl.equals(componentIn.getFullUrl())) {
+                return componentIn.getResource();
+            }
+        }
+        return null;
     }
 
     @Override

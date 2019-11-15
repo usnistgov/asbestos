@@ -81,8 +81,8 @@
             loadEvent() {
                 if (!this.$store.state.log.eventSummaries)
                     return
-                const index = this.$store.state.log.currentEventIndex
-                const summary = this.$store.state.log.eventSummaries[index]
+                //const index = this.$store.state.log.currentEventIndex
+                const summary = this.$store.state.log.eventSummaries[this.index]
                 if (!summary)
                     return
                 // don't reload if it is already the selected event
@@ -114,8 +114,8 @@
             async loadEventSummaries() {
                 await this.$store.dispatch('loadEventSummaries')
                 this.index = this.findEventInStore
-                this.$store.commit('selectEvent', this.eventId)
-                this.$store.commit('setCurrentEventIndex', this.index)
+                //this.$store.commit('selectEvent', this.eventId)
+                //this.$store.commit('setCurrentEventIndex', this.index)
             },
         },
         computed: {
@@ -156,10 +156,10 @@
         },
         watch: {
             '$route': 'updateIndex',
-            eventId(newVal) {
+            eventId() {
                 if (this.noNav)
                     return
-                this.$store.commit('selectEvent', newVal)
+                //this.$store.commit('selectEvent', newVal)
                 this.loadEvent()
             },
         },
