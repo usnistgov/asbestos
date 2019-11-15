@@ -19,12 +19,6 @@
 
             <div v-for="(test, testi) in tests"
                  :key="'Eval' + testi">
-<!--                <span class="name" >Eval: </span>-->
-<!--                <span class="value">Test: {{ test.name }}</span>-->
-<!--                <div v-if="test.description" class="test-part">-->
-<!--                    Test: {{ test.description }}-->
-<!--                </div>-->
-
                 <div>
                     <span class="selectable" @click.self="toggleEventDisplayed()">Message Log</span>
                     <span v-if="eventDisplayed">
@@ -41,7 +35,7 @@
                     </span>
                 </div>
 
-                <!--                actions will be asserts only-->
+                <!-- actions will be asserts only-->
                 <div v-for="(action, actioni) in actions(testi)" class="test-part"
                      :key="'Eval' + testi + 'Action' + actioni">
                     <div>
@@ -52,13 +46,13 @@
                                     error: assertResult(testi, actioni) === 'error',
                                     warning: assertResult(testi, actioni) === 'warning',
                                     'not-run': assertResult(testi, actioni) === 'not-run' }">
-                                <span class="selectable">Assert:</span> {{ assertDesc(actioni) }}
+                                <span class="selectable">Assert:</span> {{ assertDesc(testi, actioni) }}
                             </div>
                             <div v-if="selectedAssertIndex === actioni" class="message-part">
-                                <div v-if="assertRef(actioni)">
-                                    {{ assertRef(actioni) }}
+                                <div v-if="assertRef(testi, actioni)">
+                                    {{ assertRef(testi, actioni) }}
                                 </div>
-                                {{ assertMessage(actioni) }}
+                                {{ assertMessage(testi, actioni) }}
                             </div>
                         </div>
                     </div>
@@ -101,22 +95,22 @@
                     return this.testReport.test[testIndex].action[actionIndex].assert.result
                 return 'not-run'
             },
-            assertReport(assertIndex) {
-                return this.testReport.test[0].action[assertIndex].assert
+            assertReport(testIndex, actionIndex) {
+                return this.testReport.test[testIndex].action[actionIndex].assert
             },
-            assertScript(assertIndex) {
-                return this.testScript.test[0].action[assertIndex].assert
+            assertScript(testIndex, actionIndex) {
+                return this.testScript.test[testIndex].action[actionIndex].assert
             },
-            assertDesc(assertIndex) {
-                const rawDesc = this.assertScript(assertIndex).description
+            assertDesc(testIndex, actionIndex) {
+                const rawDesc = this.assertScript(testIndex, actionIndex).description
                 if (!rawDesc.includes("|"))
                     return rawDesc
                 const elements = rawDesc.split("|")
                 const msg = elements[0]
                 return msg
             },
-            assertRef(assertIndex) {
-                const rawDesc = this.assertScript(assertIndex).description
+            assertRef(testIndex, actionIndex) {
+                const rawDesc = this.assertScript(testIndex, actionIndex).description
                 if (!rawDesc.includes("|"))
                     return ''
                 const elements = rawDesc.split("|")

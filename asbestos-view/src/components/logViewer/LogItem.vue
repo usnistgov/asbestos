@@ -107,13 +107,6 @@
             },
             limitLines(text) {
                 return text
-                // let lines = text.split('\n')
-                // for (let i=0; i<lines.length; i++) {
-                //     let line = lines[i]
-                //     if (line.length > 100)
-                //         lines[i] = line.substring(0, 99) + '...'
-                // }
-                // return lines.join('\n')
             },
             removeFormatting(msg) {
                   return msg.replace(/&lt;/g, '<').replace(/&#xa;/g, '\n').replace(/&#x9;/g, '\t')
@@ -164,9 +157,8 @@
         watch: {
             '$route': 'updateIndex',
             eventId(newVal) {
-                if (this.noNav) {
-                    console.log(`eventId updated`)
-                }
+                if (this.noNav)
+                    return
                 this.$store.commit('selectEvent', newVal)
                 this.loadEvent()
             },
