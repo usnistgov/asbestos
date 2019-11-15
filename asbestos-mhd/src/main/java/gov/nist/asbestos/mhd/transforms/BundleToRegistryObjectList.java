@@ -148,6 +148,12 @@ public class BundleToRegistryObjectList implements IVal {
 //            responseHasError |= valeToResponseComponent(vale, responseComponent, errorsOnly);
         }
 
+        if (eos.isEmpty()) {
+            ValE vale = new ValE(val);
+            vale.add(new ValE("Found no DocumentReferences - one ore more required").asError());
+            throwTransformExceptionIfError(vale);
+        }
+
         if (ss != null) {
             for (ExtrinsicObjectType eo : eos) {
                 AssociationType1 a = createSSDEAssociation(ss, eo, ssVale);

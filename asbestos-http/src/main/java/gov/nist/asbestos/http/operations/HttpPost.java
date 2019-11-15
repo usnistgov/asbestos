@@ -32,7 +32,11 @@ public class HttpPost  extends HttpBase {
             status = connection.getResponseCode();
             try {
                 setResponseHeadersList(connection.getHeaderFields());
-                InputStream is = connection.getInputStream();
+                InputStream is;
+                if (status >= 400)
+                    is = connection.getErrorStream();
+                else
+                    is = connection.getInputStream();
                 setResponse(IOUtils.toByteArray(is));
             } catch (Throwable t) {
                 // ok - won't always be available
@@ -41,8 +45,8 @@ public class HttpPost  extends HttpBase {
 //                //connection.getHeaderFields()
 //                setResponseHeadersList(connection.getHeaderFields());
 //            }
-            if (status >= 400)
-                return;
+//            if (status >= 400)
+//                return;
 //            byte[] bb = IOUtils.toByteArray(connection.getInputStream());
 //            setResponse(bb);
         } finally {

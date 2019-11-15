@@ -9,7 +9,7 @@
         Validation happens in three parts:
 
         <ol>
-            <li>Upon receipt at the Limited Channel, the Bundle is evaluated and errors are returned in the response message.</li>
+            <li>Upon receipt at the Limited Channel, the Bundle structure is evaluated and errors are returned in the response message.</li>
             <li>Metadata is translated into XDS format and forwarded to XDS Toolkit for evaluation. Outcome is relayed in
             the response message.</li>
             <li>Test specific evaluations are run from the Toolkit UI.  These are reported on screen and are not included in
@@ -22,10 +22,42 @@
         </ol>
 
         <h4>Comprehensive</h4>
+        Document Source (SUT) sends Provide Document Bundle transactions to FHIRBase specified in the XDS Channel.
+        Validation happens in three parts:
 
+        <ol>
+            <li>Upon receipt at the XDS Channel, the Bundle is evaluated and errors are returned in the response message.</li>
+            <li>Metadata is translated into XDS format and forwarded to XDS Toolkit for evaluation. Outcome is relayed in
+                the response message.</li>
+            <li>Test specific evaluations are run from the Toolkit UI.  These are reported on screen and are not included in
+                the response message.</li>
+        </ol>
+
+        To run:
+        <ol>
+            <li><div class="selectable" @click="configureComprehensiveDocumentSource()">Configure the tool and go to the tests</div></li>
+        </ol>
         <h3>MHD Document Recipient</h3>
+        FHIR Toolkit sends Provide Document Bundle transactions to the FHIRBase specified in the SUT Channel.
+        The response is validated.
+
+
+        <h4>Minimal</h4>
+
+        To run:
+        <ol>
+            <li><div class="selectable" @click="configureMinimalDocumentRecipient()">Configure the tool and go to the tests</div></li>
+        </ol>
+
+        <h4>Comprehensive</h4>
+
+        To run:
+        <ol>
+            <li><div class="selectable" @click="configureComprehensiveDocumentRecipient()">Configure the tool and go to the tests</div></li>
+        </ol>
 
         <h3>MHD Document Consumer</h3>
+
 
         <h3>MHD Document Responder</h3>
     </div>
@@ -35,8 +67,23 @@
     export default {
         methods: {
             configureMinimalDocumentSource() {
-                const collection = 'MHD_DocumentSource'
+                const collection = 'MHD_DocumentSource_minimal'
                 const channelId = 'limited'
+                this.go(collection, channelId)
+            },
+            configureComprehensiveDocumentSource() {
+                const collection = 'MHD_DocumentSource_comprehensive'
+                const channelId = 'xds'
+                this.go(collection, channelId)
+            },
+            configureMinimalDocumentRecipient() {
+                const collection = 'MHD_DocumentRecipient_minimal'
+                const channelId = 'limited'
+                this.go(collection, channelId)
+            },
+            configureComprehensiveDocumentRecipient() {
+                const collection = 'MHD_DocumentRecipient_comprehensive'
+                const channelId = 'xds'
                 this.go(collection, channelId)
             },
             go(collection, channelId) {

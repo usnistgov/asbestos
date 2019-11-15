@@ -57,14 +57,14 @@
                 <warningOnly value="false"/>
             </assert>
         </action>
-<!--        <action>-->
-<!--            <assert>-->
-<!--                <description value="... return Bundle"/>-->
-<!--                <compareToSourceId value="pdb-response"/>-->
-<!--                <compareToSourceExpression value="where(Bundle).exists()"/>-->
-<!--                <warningOnly value="false"/>-->
-<!--            </assert>-->
-<!--        </action>-->
+        <action>
+            <assert>
+                <description value="... return Bundle"/>
+                <compareToSourceId value="pdb-response"/>
+                <compareToSourceExpression value="where(Bundle).exists()"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
         <action>
             <assert>
                 <description value="... Bundle may not contain OperationOutcome"/>
@@ -73,32 +73,6 @@
                 <warningOnly value="false"/>
             </assert>
         </action>
-        <action>
-            <assert>
-                <description value="... return OperationOutcome"/>
-                <compareToSourceId value="pdb-response"/>
-                <compareToSourceExpression value="where(OperationOutcome)"/>
-                <warningOnly value="false"/>
-            </assert>
-        </action>
-        <action>
-            <assert>
-                <description value="... was error"/>
-                <response value="bad"/>
-                <warningOnly value="false"/>
-            </assert>
-        </action>
-
-
-        <action>
-            <assert>
-                <description value="... "/>
-                <warningOnly value="false"/>
-            </assert>
-        </action>
-
-
-
         <action>
             <assert>
                 <description value="... all parts of transaction successful"/>
@@ -137,7 +111,7 @@
                 <description value="... Patient reference returned as sent"/>
                 <expression value="DocumentReference.subject.reference"/>
                 <sourceId value="readBackResponse"/>
-                <value value="http://localhost:8080/fhir/Patient/a2"/>
+                <value value="${patientResourceId}"/>
                 <warningOnly value="false"/>
             </assert>
         </action>

@@ -159,10 +159,10 @@
         </action>
         <action>
             <assert>
-                <description value="No resources in Bundle return OperationOutcome (warning only)"/>
+                <description value="No resources in Bundle return OperationOutcome"/>
                 <compareToSourceId value="response"/>
                 <compareToSourceExpression value="Bundle.entry.all(response.outcome).not()"/>
-                <warningOnly value="true"/>
+                <warningOnly value="false"/>
             </assert>
         </action>
 
