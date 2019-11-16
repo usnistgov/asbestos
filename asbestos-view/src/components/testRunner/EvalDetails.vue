@@ -52,7 +52,11 @@
                                 <div v-if="assertRef(testi, actioni)">
                                     {{ assertRef(testi, actioni) }}
                                 </div>
-                                {{ assertMessage(testi, actioni) }}
+                                <ul>
+                                    <li v-for="(item, itemi) in assertMessage(testi, actioni)" :key="'AM' + itemi">
+                                        {{ item }}
+                                    </li>
+                                </ul>
                             </div>
                         </div>
                     </div>
@@ -86,8 +90,9 @@
                 this.eventDisplayed = !this.eventDisplayed
             },
             assertMessage(testIndex, actionIndex) {
-                if (actionIndex < this.testReport.test[testIndex].action.length)
-                    return this.testReport.test[testIndex].action[actionIndex].assert.message
+                if (actionIndex < this.testReport.test[testIndex].action.length) {
+                    return this.testReport.test[testIndex].action[actionIndex].assert.message.split("\n")
+                }
                 return null
             },
             assertResult(testIndex, actionIndex) {

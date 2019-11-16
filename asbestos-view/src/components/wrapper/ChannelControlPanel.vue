@@ -8,7 +8,15 @@
             &nbsp;
             <span class="selectable" @click="showAddr()">List by URL</span>
         </div>
-        <b-form-select class="control-panel-font" v-model="channelId" :options="channels"></b-form-select>
+        <select v-model="channel" size="6" class="control-panel-font">
+            <option v-for="(chann, channeli) in channels"
+                    v-bind:value="chann.value"
+                    :key="chann + channeli"
+                    >
+                {{ chann.text }}
+            </option>
+        </select>
+<!--        <b-form-select class="control-panel-font" v-model="channelId" :options="channels"></b-form-select>-->
     </div>
 </template>
 
@@ -28,11 +36,9 @@
         methods: {
             showId() {
                 this.show = 'id'
-                console.log(`show is ${this.show}`)
             },
             showAddr() {
                 this.show = 'addr'
-                console.log(`show is ${this.show}`)
             },
             manage() {  // go edit channel definitions
                 this.$router.push(`/session/${this.$store.state.base.session}/channels` +
@@ -44,7 +50,6 @@
                 // channelNames.forEach(id => {
                 //     this.channels.push({ value: id, text: id })
                 // })
-                console.log(`update ids`)
                 const ius = this.$store.state.base.channelURLs   // { id:  ... , url: ... }
                 this.channels.length = 0
                 if (this.show === 'id') {
@@ -74,7 +79,6 @@
         computed: {
             channel: {
                 set(name) {
-                    console.log(`change channel to ${name}`)
                     if (name !== this.$store.state.base.channelId)
                         this.$store.commit('setChannelId', name)
                 },

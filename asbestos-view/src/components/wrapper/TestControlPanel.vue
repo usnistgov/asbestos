@@ -10,13 +10,28 @@
                 <img id="reload" class="selectable" @click="reload()" src="../../assets/reload.png"/>
                 <br />
 
-                <input type="radio" id="client" value="Client" v-model="testType">
-                <label for="client">Client</label>
-                <input type="radio" id="server" value="Server" v-model="testType">
-                <label for="server">Server</label>
+<!--                <input type="radio" id="client" value="Client" v-model="testType">-->
+<!--                <label for="client">Client</label>-->
+<!--                <input type="radio" id="server" value="Server" v-model="testType">-->
+<!--                <label for="server">Server</label>-->
             </div>
-            <b-form-select class="control-panel-font" v-model="collection" :options="collections"></b-form-select>
-
+            <select v-model="collection" size="10" class="control-panel-font">
+                <option disabled>Client:</option>
+                <option v-for="(coll, collectioni) in clientCollections"
+                        v-bind:value="coll"
+                        :key="coll + collectioni"
+                >
+                    {{ coll }}
+                </option>
+                <option disabled>Server:</option>
+                <option v-for="(coll, collectioni) in serverCollections"
+                        v-bind:value="coll"
+                        :key="coll + collectioni"
+                >
+                    {{ coll }}
+                </option>
+            </select>
+            <!--            <b-form-select class="control-panel-font" v-model="collection" :options="collections"></b-form-select>-->
         </div>
     </div>
 </template>
@@ -89,6 +104,12 @@
                     ? this.$store.state.testRunner.clientTestCollectionNames
                         : this.$store.state.testRunner.serverTestCollectionNames
                 }
+            },
+            clientCollections() {
+                return this.$store.state.testRunner.clientTestCollectionNames
+            },
+            serverCollections() {
+                return this.$store.state.testRunner.serverTestCollectionNames
             },
             session() {
                 return this.$store.state.base.session

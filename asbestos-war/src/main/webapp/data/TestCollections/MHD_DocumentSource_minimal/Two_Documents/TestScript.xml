@@ -1,0 +1,188 @@
+<TestScript xmlns="http://hl7.org/fhir">
+    <id value="singleDoc"/>
+    <name value="singleDoc"/>
+    <description value="Send valid Provide Document Bundle transaction containing a single DocumentReference. This does not require Comprehensive Metadata."/>
+    <!--
+      These fixtures will be inserted by the TestEngine:
+        request - the input resource
+        response - the response resource (could be OperationOutcome)
+    -->
+
+    <variable>
+        <name value="DocRefFullUrl"/>
+        <expression value="Bundle.entry.resource.where(is(FHIR.DocumentReference)).item(0)"/>
+        <sourceId value="request"/>
+    </variable>
+    <variable>
+        <name value="DocRefFullUrl2"/>
+        <expression value="Bundle.entry.resource.where(is(FHIR.DocumentReference)).item(1)"/>
+        <sourceId value="request"/>
+    </variable>
+    <test>
+        <name value="Evaluations"/>
+        <description value="The Description"/>
+        <action>
+            <assert>
+                <description value="Request is Bundle|MHDPDBRequestIsBundle"/>
+                <sourceId value="request"/>
+                <resource value="Bundle"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
+            <assert>
+                <description value="Request is transaction|MHDPDBRequestIsTransaction"/>
+                <compareToSourceId value="request"/>
+                <compareToSourceExpression value="Bundle.type = 'transaction'"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+<!--
+        No way to assert that content type must be XX or YY - do later
+-->
+        <action>
+            <assert>
+                <description value="Verb is POST|MHDPDBUsesPost"/>
+		            <requestMethod value="post"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
+            <assert>
+                <description value="Request contains one DocumentManifest|MHDPDBOneDocumentManifest"/>
+                <compareToSourceId value="request"/>
+                <compareToSourceExpression value="Bundle.entry.resource.where(is(FHIR.DocumentManifest)).count() = 1"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
+            <assert>
+                <description value="Request includes multiple DocumentReferences|MHDPDBOnePlusDocumentReference"/>
+                <compareToSourceId value="request"/>
+                <compareToSourceExpression value="Bundle.entry.where(resource.is(FHIR.DocumentReference)).count() > 1"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
+            <assert>
+                <description value="Comprehensive or Minimal metadata|MHDPDBMetadataType"/>
+                <compareToSourceId value="request"/>
+                <compareToSourceExpression value="Bundle.meta.profile = 'http://ihe.net/fhir/StructureDefinition/IHE_MHD_Provide_Comprehensive_DocumentBundle' or Bundle.meta.profile='http://ihe.net/fhir/StructureDefinition/IHE_MHD_Provide_Minimal_DocumentBundle'"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
+            <assert>    <!--       Bundle.entry.where(resource.is(FHIR.DocumentReference)).fullUrl =       -->
+                <description value="DocumentManifest links to DocumentReferences"/>
+                <compareToSourceId value="request"/>
+                <compareToSourceExpression value="Bundle.entry.resource.where(is(FHIR.DocumentManifest)).content.reference.count() = 2"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
+            <assert>
+                <description value="First linked DocumentReference is in Bundle"/>
+                <compareToSourceId value="request"/>
+                <compareToSourceExpression value="Bundle.entry.resource.where(is(FHIR.DocumentManifest)).content.reference.item(0) = ${DocRefFullUrl} or Bundle.entry.resource.where(is(FHIR.DocumentManifest)).content.reference.item(0) = ${DocRefFullUrl2}"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
+            <assert>
+                <description value="Request includes multiple Binary"/>
+                <compareToSourceId value="request"/>
+                <compareToSourceExpression value="Bundle.entry.resource.where(is(FHIR.Binary)).count() > 1"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
+            <assert>
+                <description value="DocumentReference has attachment (resource.content.attachment.url)|MHDPDBDocRefHasAttachment"/>
+                <compareToSourceId value="request"/>
+                <compareToSourceExpression value="Bundle.entry.resource.where(is(FHIR.DocumentReference)).content.attachment.url.empty().not()"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
+            <assert>
+                <description value="DocumentReference links to Binary through content.attachment.url|MHDPDBBinaryInBundle"/>
+                <compareToSourceId value="request"/>
+                <compareToSourceExpression value="Bundle.entry.where(resource.is(FHIR.Binary)).fullUrl = Bundle.entry.where(resource.is(FHIR.DocumentReference)).resource.content.attachment.url"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
+            <assert>
+                <description value="Link to Patient is absolute external reference|MHDPDBPatientReference"/>
+                <compareToSourceId value="request"/>
+                <compareToSourceExpression value="Bundle.entry.resource.where(is(FHIR.DocumentReference)).subject.reference.value.startsWith('http')"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
+            <assert>
+                <description value="sourcePatientInfo is a reference to a contained Patient Resource|MHDPDBSourcePatientInfoIsContained"/>
+                <compareToSourceId value="request"/>
+                <compareToSourceExpression value="Bundle.entry.resource.DocumentReference.context.sourcePatientInfo.reference = Bundle.entry.resource.DocumentReference.contained.Patient.id"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
+            <assert>
+                <description value="PDB returns 200|MHDPDBGoodStatus"/>
+                <sourceId value="response"/>
+                <response value="okay"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
+            <assert>
+                <description value="PDB returns Bundle|MHDPDBReturnsBundle"/>
+                <resource value="Bundle"/>
+                <sourceId value="response"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
+            <assert>
+                <description value="All resources in Bundle return 201|MHDPDBEntryReturns201"/>
+                <compareToSourceId value="response"/>
+                <compareToSourceExpression value="Bundle.entry.all(response.status.value.startsWith('201'))"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
+            <assert>
+                <description value="All resources in Bundle return location|MHDPDBReturnLocation"/>
+                <compareToSourceId value="response"/>
+                <compareToSourceExpression value="Bundle.entry.all(response.location)"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
+            <assert>
+                <description value="All resources in Bundle return etag (warning only)|MHDPDBReturnEtag"/>
+                <compareToSourceId value="response"/>
+                <compareToSourceExpression value="Bundle.entry.all(response.etag)"/>
+                <warningOnly value="true"/>
+            </assert>
+        </action>
+        <action>
+            <assert>
+                <description value="All resources in Bundle return lastModified (warning only)"/>
+                <compareToSourceId value="response"/>
+                <compareToSourceExpression value="Bundle.entry.all(response.lastModified)"/>
+                <warningOnly value="true"/>
+            </assert>
+        </action>
+        <action>
+            <assert>
+                <description value="No resources in Bundle return OperationOutcome"/>
+                <compareToSourceId value="response"/>
+                <compareToSourceExpression value="Bundle.entry.all(response.outcome).not()"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+
+    </test>
+</TestScript>
