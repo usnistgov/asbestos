@@ -16,12 +16,10 @@
             the response message.</li>
         </ol>
 
-        To run:
-        <ol>
-            <li><div class="selectable" @click="configureMinimalDocumentSource()">Configure the tool and go to the tests</div></li>
-        </ol>
+        <div class="selectable" @click="configureMinimalDocumentSource()">Configure the tool and go to the tests</div>
 
-        <h4>Comprehensive</h4>
+
+        <h4>Comprehensive (Option)</h4>
         Document Source (SUT) sends Provide Document Bundle transactions to FHIRBase specified in the XDS Channel.
         Validation happens in three parts:
 
@@ -33,10 +31,8 @@
                 the response message.</li>
         </ol>
 
-        To run:
-        <ol>
-            <li><div class="selectable" @click="configureComprehensiveDocumentSource()">Configure the tool and go to the tests</div></li>
-        </ol>
+        <div class="selectable" @click="configureComprehensiveDocumentSource()">Configure the tool and go to the tests</div>
+
         <h3>MHD Document Recipient</h3>
         FHIR Toolkit sends Provide Document Bundle transactions to the FHIRBase specified in the SUT Channel.
         The response is validated.
@@ -44,17 +40,13 @@
 
         <h4>Minimal</h4>
 
-        To run:
-        <ol>
-            <li><div class="selectable" @click="configureMinimalDocumentRecipient()">Configure the tool and go to the tests</div></li>
-        </ol>
+        <div class="selectable" @click="configureMinimalDocumentRecipient()">Configure the tool and go to the tests</div>
 
-        <h4>Comprehensive</h4>
 
-        To run:
-        <ol>
-            <li><div class="selectable" @click="configureComprehensiveDocumentRecipient()">Configure the tool and go to the tests</div></li>
-        </ol>
+        <h4>Comprehensive (Option)</h4>
+
+        <div class="selectable" @click="configureComprehensiveDocumentRecipient()">Configure the tool and go to the tests</div>
+
 
         <h3>MHD Document Consumer</h3>
 
