@@ -6,5 +6,5 @@
   "channelType" : "fhir",
   "includeValidation" : false,
   "fhirBase" : "",
-  "xdsSiteName" : null
+  "xdsSiteName" : ""
 }

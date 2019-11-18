@@ -21,7 +21,7 @@ export const baseStore = {
             ],
 
             channelIds: [],  // for this session
-            channelURLs: [], // for this session { id:  ... , url: ... }
+            channelURLs: [], // for this session { id:  ... , url: ... , site: ....}
             errors: [],
         }
     },

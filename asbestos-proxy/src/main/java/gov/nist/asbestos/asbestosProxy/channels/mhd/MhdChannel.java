@@ -96,6 +96,10 @@ public class MhdChannel extends BaseChannel /*implements IBaseChannel*/ {
             throw new TransformException(bundleToRegistryObjectList.getResponseBundle());
         }
 
+        if (val.hasErrors()) {
+            throw new TransformException(val.getErrorsAsOperationOutcome());
+        }
+
         ProvideAndRegisterDocumentSetRequestType pnr = new ProvideAndRegisterDocumentSetRequestType();
         SubmitObjectsRequest sor = new SubmitObjectsRequest();
         sor.setRegistryObjectList(registryObjectListType);

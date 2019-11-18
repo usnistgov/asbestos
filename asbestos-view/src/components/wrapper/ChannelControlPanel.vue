@@ -2,7 +2,7 @@
     <div>
         <div class="control-panel-item-title" @click="manage()">Channels</div>
         <div>
-            <span class="selectable" @click="manage()">Show</span>
+            <span class="selectable" @click="manage()">Config</span>
             &nbsp;
             <span class="selectable" @click="showId()">List by ID</span>
             &nbsp;
@@ -58,7 +58,7 @@
                     })
                 } else {
                     ius.forEach(iu => {
-                        this.channels.push({value: iu.id, text: iu.url})
+                        this.channels.push({value: iu.id, text: iu.url ? iu.url : iu.site })
                     })
                 }
             },

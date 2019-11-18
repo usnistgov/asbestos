@@ -139,18 +139,17 @@
             },
             doRun: async function(testName) {  // server tests
                 this.$store.commit('setCurrentTest', null)
-                const that = this
-                await ENGINE.post(`testrun/${this.sessionId}__${this.channelId}/${this.testCollection}/${testName}`)
-                    .then(response => {
-                        this.$store.dispatch('addTestReport', testName, response.data)
-                        this.$router.replace(`/session/${this.sessionId}/channel/${this.channelId}/collection/${this.testCollection}`)
-                        this.$store.dispatch('loadTestScriptNames')  // force reload of UI
-                    })
-                    .catch(error => {
-                        that.error(error)
-                    })
+                try {
+                    const response = await ENGINE.post(`testrun/${this.sessionId}__${this.channelId}/${this.testCollection}/${testName}`)
+                    this.$store.commit('setTestReport', { testName: testName, testReport: response.data })
+                    //this.$router.push(`/session/${this.sessionId}/channel/${this.channelId}/collection/${this.testCollection}`)
+                    this.$store.dispatch('loadTestScriptNames')  // force reload of UI
+                } catch (error) {
+                    this.error(error)
+                }
             },
             doRunAll() {
+                this.status.length = 0
                 Object.keys(this.status).forEach(name => {
                     this.doRun(name)
                 })

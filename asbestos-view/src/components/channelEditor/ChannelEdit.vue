@@ -108,6 +108,20 @@
                         <div class="vdivider"></div>
                         Warning: FhirBase or XDS Site Name must be present
                     </div>
+                    <div v-if="!edit && channel.channelType === 'fhir' && !channel.fhirBase" class="channelError">
+                        <div class="vdivider"></div>
+                        <div class="vdivider"></div>
+                        <div class="vdivider"></div>
+                        <div class="vdivider"></div>
+                        Warning: FHIR type is selected but no FHIR Base is configured
+                    </div>
+                    <div v-if="!edit && channel.channelType === 'mhd' && !channel.xdsSiteName" class="channelError">
+                        <div class="vdivider"></div>
+                        <div class="vdivider"></div>
+                        <div class="vdivider"></div>
+                        <div class="vdivider"></div>
+                        Warning: MHD type is selected but no XDS Site Name is configured
+                    </div>
                 </div>
             </div>
         </div>

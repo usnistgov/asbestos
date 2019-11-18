@@ -61,7 +61,6 @@ export const testRunnerStore = {
             state.collectionDescription = collectionDescription
         },
         setTestScriptNames(state, names) {
-            console.log(`testScriptNames is ${names}`)
             state.testScriptNames = names.sort()
         },
         setCurrentTest(state, currentTestId) {
@@ -78,13 +77,19 @@ export const testRunnerStore = {
         },
         setTestReports(state, reports) {
             state.testReports = reports
+            console.log(`mutation report count is ${reports.length}`)
+        },
+        setTestReport(state, data) {
+            console.log(`set testName ${data.testName} to ${data.testReport}`)
+            state.testReports[data.testName] = data.testReport
+            console.log(`report status is ${data.testReport.result}`)
+            console.log(`mutation report count is ${Object.keys(state.testReports).length}`)
         },
         clearTestScripts(state) {
             state.testScripts = []
         },
         addTestScript(state, scriptObject) {
             // scriptObject is  { name: testId, script: TestScript }
-            console.log(`setting ${scriptObject.name} to ${scriptObject.script}`)
             Vue.set(state.testScripts,scriptObject.name, scriptObject.script)
             //state.testScripts.splice(scriptObject.name, 1, scriptObject.script)
             //state.testScripts[scriptObject.name] = scriptObject.script
@@ -221,7 +226,7 @@ export const testRunnerStore = {
             const url = `collection/${state.currentTestCollectionName}`
             ENGINE.get(url)
                 .then(response => {
-                    let theResponse = response.data
+                    const theResponse = response.data
                     //console.log(`action: testScriptNames are ${theResponse.testNames}`)
                     commit('setTestScriptNames', theResponse.testNames)
                     const isClient = !theResponse.isServerTest
@@ -244,8 +249,7 @@ export const testRunnerStore = {
                 .then(response => {
                     let reports = []
                     for (const reportName of Object.keys(response.data)) {
-                        const report = response.data[reportName]
-                        reports[reportName] = report
+                        reports[reportName] = response.data[reportName]
                     }
                     commit('setTestReports', reports)
                 })
@@ -254,10 +258,11 @@ export const testRunnerStore = {
                     console.error(`${error} - loadReports - URL was ${url}`)
                 })
         },
-        addTestReport({commit, state}, name, report) {
+        addTestReport({commit, state}, data) {
+            console.log(`action: name is ${data.testName} report is ${data.testReport}`)
             let reports = state.testReports
-            reports[name] = report
-            commit('setTestReports', reports)
+            reports[data.testName] = data.testReport
+            commit('setTestReport', data)
         },
     }
 }

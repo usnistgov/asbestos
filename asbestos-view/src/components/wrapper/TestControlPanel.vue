@@ -61,13 +61,13 @@
             },
             localCollectionUpdated() {
                 if (this.collection !== this.$store.state.testRunner.currentTestCollectionName) {
-                    this.$store.commit('setTestCollectionName', this.collection)
                     this.openCollection()
                 }
             },
             openCollection() {
                 if (!this.selectable)
                     return;
+                this.$store.commit('setTestCollectionName', this.collection)
                 if (!this.collection)
                     return;
                 const route = `/session/${this.session}/channel/${this.channelId}/collection/${this.collection}`

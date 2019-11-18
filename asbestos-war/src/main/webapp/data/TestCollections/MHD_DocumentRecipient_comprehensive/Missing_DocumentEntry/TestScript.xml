@@ -54,6 +54,13 @@
                 <warningOnly value="false"/>
             </assert>
         </action>
-
+        <action>
+            <assert>
+                <description value="... return OperationOutcome"/>
+                <compareToSourceId value="pdb-response"/>
+                <compareToSourceExpression value="where(OperationOutcome).exists()"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
     </test>
 </TestScript>

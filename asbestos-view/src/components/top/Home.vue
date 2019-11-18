@@ -51,8 +51,7 @@ kinds of channels: FHIR - data passed without modification and MHD - translation
         To load:
         <ol>
             <li>Select the default channel</li>
-            <li>Select Server Test Collections</li>
-            <li>Select Test Patients from the Test Collections dropdown - the appropiate tests will display in the center</li>
+            <li>Select Test Patients from Test Collections - the appropriate tests will display in the center</li>
             <li>Click Run All</li>
         </ol>
 
@@ -67,7 +66,7 @@ kinds of channels: FHIR - data passed without modification and MHD - translation
         - a placeholder for your System Under Test.
 
         <ul>
-        <li>Use the Channel Editor (Edit in the Channels Control panel) to
+        <li>Use the Channel Editor (Config in the Channels Control panel) to
             configure the FHIR Base Address before using.</li>
         </ul>
         <br />
@@ -85,7 +84,7 @@ kinds of channels: FHIR - data passed without modification and MHD - translation
         <br /><br />
 
         <span class="bold">limited</span>
-        - lead to a Repository/Registry simulator in XDS Toolkit.  Within the Channel Configuration, the XDS Site Name
+        - leads to a Repository/Registry simulator in XDS Toolkit.  Within the Channel Configuration, the XDS Site Name
         must be configured. On my system it is default__limited which is the default Test Session and the simulator limited.
 
         <ul>

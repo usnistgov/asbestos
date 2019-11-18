@@ -67,6 +67,14 @@
         </action>
         <action>
             <assert>
+                <description value="... Bundle is type transaction-response"/>
+                <compareToSourceId value="pdb-response"/>
+                <compareToSourceExpression value="Bundle.type = 'transaction-response'"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
+            <assert>
                 <description value="... Bundle may not contain OperationOutcome"/>
                 <compareToSourceId value="pdb-response"/>
                 <compareToSourceExpression value="Bundle.entry.response.outcome.where(OperationOutcome).exists().not()"/>

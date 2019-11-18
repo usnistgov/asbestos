@@ -1,6 +1,8 @@
 package gov.nist.asbestos.simapi.validation;
 
 
+import org.hl7.fhir.r4.model.OperationOutcome;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -61,6 +63,23 @@ public class Val {
         }
         return errors;
     }
+
+    public OperationOutcome getErrorsAsOperationOutcome() {
+        OperationOutcome oo = new OperationOutcome();
+        for (ValE vale : getErrors()) {
+            addErrorToOperationOutcome(oo, vale.getMsg());
+        }
+        return oo;
+    }
+
+    private OperationOutcome addErrorToOperationOutcome(OperationOutcome oo, String msg) {
+        OperationOutcome.OperationOutcomeIssueComponent issue = oo.addIssue();
+        issue.setCode(OperationOutcome.IssueType.UNKNOWN);
+        issue.setSeverity(OperationOutcome.IssueSeverity.ERROR);
+        issue.setDiagnostics(msg);
+        return oo;
+    }
+
 
     public boolean hasWarnings() {
         for (ValE e : elements) {

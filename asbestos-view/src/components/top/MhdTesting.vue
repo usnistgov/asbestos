@@ -1,6 +1,7 @@
 <template>
     <div class="left">
         <h2>MHD Testing</h2>
+        Instructions for testing key MHD actors.
 
         <h3>MHD Document Source</h3>
 
@@ -70,12 +71,12 @@
             },
             configureMinimalDocumentRecipient() {
                 const collection = 'MHD_DocumentRecipient_minimal'
-                const channelId = 'limited'
+                const channelId = 'sut'
                 this.go(collection, channelId)
             },
             configureComprehensiveDocumentRecipient() {
                 const collection = 'MHD_DocumentRecipient_comprehensive'
-                const channelId = 'xds'
+                const channelId = 'sut'
                 this.go(collection, channelId)
             },
             go(collection, channelId) {

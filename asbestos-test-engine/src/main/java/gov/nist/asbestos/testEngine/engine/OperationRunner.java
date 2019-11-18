@@ -102,9 +102,12 @@ public class OperationRunner {
                         .setSut(sut)
                         .setType(type + ".search")
                         .setTestReport(testReport);
-                setupActionSearch.setVariableMgr(new VariableMgr(testScript, fixtureMgr)
-                        .setOpReport(operationReport)
-                        .setVal(val));
+                setupActionSearch
+                        .setVal(val)
+                        .setVariableMgr(
+                                new VariableMgr(testScript, fixtureMgr)
+                                        .setVal(val)
+                                        .setOpReport(operationReport));
                 setupActionSearch.run(op, operationReport);
         } else if ("create".equals(code)) {
             SetupActionCreate setupActionCreate =
