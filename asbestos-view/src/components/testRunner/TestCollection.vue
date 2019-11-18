@@ -43,6 +43,7 @@
                 <img src="../../assets/press-play-button.png">
                 to run test. <br />Requests will be sent to
                 <span v-if="channelObj" class="boxed">{{ channelObj.fhirBase }}</span>
+                <div class="divider"></div>
                 <span v-if="channelObj">(Channel {{ channelObj.channelId }})</span>
             </span>
             <span class="divider"></span>
@@ -165,15 +166,17 @@
                 const route = `/session/${this.sessionId}/channel/${this.channelId}/collection/${this.testCollection}/test/${name}`
                 this.$router.push(route)
             },
-            reload() {
+            async reload() {
+                console.log(`TestCollection.reload()`)
                 this.$store.commit('setTestCollectionName', this.testCollection)
-                this.$store.dispatch('loadTestScriptNames')
-                this.loadLastMarker()
-                this.$store.dispatch('loadChannel', this.fullChannelId)
-                    .then(channel => {
-                        this.channelObj = channel
-                    })
-                this.$router.push(`/session/${this.sessionId}/channel/${this.channelId}/collection/${this.testCollection}`)
+                await this.$store.dispatch('loadTestScriptNames')
+                const requiredChannel = this.$store.state.testRunner.requiredChannel
+                console.log(`requiredChannel for ${this.testCollection} is ${requiredChannel}`)
+                if (requiredChannel)
+                    this.$store.commit('setChannelId', requiredChannel)
+//                this.loadLastMarker()
+                this.channelObj = await this.$store.dispatch('loadChannel', this.fullChannelId)
+                this.$router.push(`/session/${this.sessionId}/channel/${this.$store.state.base.channelId}/collection/${this.testCollection}`)
             },
             testReport(testName) {
                 return this.$store.state.testRunner.testReports[testName]

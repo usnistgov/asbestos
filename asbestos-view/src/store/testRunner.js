@@ -17,6 +17,7 @@ export const testRunnerStore = {
             currentEvent: null,  // eventId
             currentAssertIndex: null,
             isClientTest: false,  // applies to entire testCollection
+            requiredChannel: null,   // applies to entire testCollection
             collectionDescription: null,
             waitingOnClient: null, // testId waiting on or null
 
@@ -34,6 +35,9 @@ export const testRunnerStore = {
         }
     },
     mutations: {
+        setRequiredChannel(state, channel) {
+            state.requiredChannel = channel
+        },
         resetTestCollectionsLoaded(state) {
             state.testCollectionsLoaded = false
         },
@@ -220,25 +224,42 @@ export const testRunnerStore = {
                     console.error(`${error} - loadTestCollectionNames - URL was ${url}`)
                 })
         },
-        loadTestScriptNames({commit, state}) {
+        async loadTestScriptNames({commit, state}) {
             if (state.currentTestCollectionName === null)
                 console.error(`loadTestScriptNames: state.currentTestCollectionName is null`)
             const url = `collection/${state.currentTestCollectionName}`
-            ENGINE.get(url)
-                .then(response => {
-                    const theResponse = response.data
-                    //console.log(`action: testScriptNames are ${theResponse.testNames}`)
-                    commit('setTestScriptNames', theResponse.testNames)
-                    const isClient = !theResponse.isServerTest
-                    const description = theResponse.description
-                    commit('setCollectionDescription', description)
-                    commit('setIsClientTest', isClient)
-                    commit('clearTestScripts')
-                })
-                .catch(function (error) {
-                    commit('setError', url + ': ' + error)
-                    console.error(`${error} - loadTestScriptNames - URL was ${url}`)
-                })
+            try {
+                const response = await ENGINE.get(url)
+                const theResponse = response.data
+                //console.log(`action: testScriptNames are ${theResponse.testNames}`)
+                commit('setTestScriptNames', theResponse.testNames)
+                const isClient = !theResponse.isServerTest
+                commit('setRequiredChannel', theResponse.requiredChannel)
+                console.log(`requiredChannel for ${state.currentTestCollectionName} loaded as ${theResponse.requiredChannel}`)
+                const description = theResponse.description
+                commit('setCollectionDescription', description)
+                commit('setIsClientTest', isClient)
+                commit('clearTestScripts')
+            } catch (error) {
+                commit('setError', url + ': ' + error)
+                console.error(`${error} - loadTestScriptNames - URL was ${url}`)
+            }
+            // ENGINE.get(url)
+            //     .then(response => {
+            //         const theResponse = response.data
+            //         //console.log(`action: testScriptNames are ${theResponse.testNames}`)
+            //         commit('setTestScriptNames', theResponse.testNames)
+            //         const isClient = !theResponse.isServerTest
+            //         commit('setRequiredChannel', theResponse.requiredChannel)
+            //         console.log(`requiredChannel for ${state.currentTestCollectionName} loaded as ${theResponse.requiredChannel}`)
+            //         const description = theResponse.description
+            //         commit('setCollectionDescription', description)
+            //         commit('setIsClientTest', isClient)
+            //         commit('clearTestScripts')
+            //     })
+            //     .catch(function (error) {
+            //
+            //     })
         },
         loadReports({commit, state, rootState}) {
             commit('clearTestReports')

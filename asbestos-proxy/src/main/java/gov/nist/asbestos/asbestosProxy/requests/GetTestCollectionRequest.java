@@ -17,6 +17,7 @@ public class GetTestCollectionRequest {
 
     class TestCollection {
         boolean isServerTest;
+        String requiredChannel = null;
         String description;
         List<String> testNames;
     }
@@ -42,6 +43,7 @@ public class GetTestCollectionRequest {
         Properties props = request.ec.getTestCollectionProperties(collectionName);
         tc.isServerTest = !"client".equals(props.getProperty("TestType"));
         tc.testNames = request.ec.getTestsInCollection(collectionName);
+        tc.requiredChannel = props.getProperty("Channel");
 
         Returns.returnObject(request.resp, tc);
         log.info("OK");

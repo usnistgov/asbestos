@@ -45,6 +45,7 @@ export const baseStore = {
             state.sessions = sessions
         },
         setChannelId(state, channelId) {
+            console.log(`channelId to ${channelId}`)
             state.channelId = channelId
         },
         setChannel(state, theChannel) {

@@ -15,7 +15,7 @@
 <!--                <input type="radio" id="server" value="Server" v-model="testType">-->
 <!--                <label for="server">Server</label>-->
             </div>
-            <select v-model="collection" size="10" class="control-panel-font">
+            <select v-model="collection" v-bind:size="collectionDisplaySize" class="control-panel-font">
                 <option disabled>Client:</option>
                 <option v-for="(coll, collectioni) in clientCollections"
                         v-bind:value="coll"
@@ -60,9 +60,8 @@
                 }
             },
             localCollectionUpdated() {
-                if (this.collection !== this.$store.state.testRunner.currentTestCollectionName) {
+//                if (this.collection !== this.$store.state.testRunner.currentTestCollectionName)
                     this.openCollection()
-                }
             },
             openCollection() {
                 if (!this.selectable)
@@ -86,6 +85,9 @@
             },
         },
         computed: {
+            collectionDisplaySize() {
+                return this.clientCollections.length + this.serverCollections.length + 2
+            },
             client() {
                 return this.testType === 'Client'
             },
