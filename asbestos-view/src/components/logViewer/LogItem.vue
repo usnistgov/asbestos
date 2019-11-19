@@ -36,7 +36,7 @@
             <div v-if="!displayRequest" class="event-details">
                             <pre>{{ responseHeader }}
                             </pre>
-                <pre>{{ responseBody }}</pre>
+                <pre>{{responseBody}}</pre>
             </div>
         </div>
     </div>
@@ -108,6 +108,9 @@
             limitLines(text) {
                 return text
             },
+            translateNewLines(text) {
+                return text.replace(/\n/g, '<br />')
+            },
             removeFormatting(msg) {
                   return msg.replace(/&lt;/g, '<').replace(/&#xa;/g, '\n').replace(/&#x9;/g, '\t')
             },
@@ -140,7 +143,10 @@
                 return this.selectedEvent.tasks[this.selectedTask].responseHeader
             },
             responseBody() {
-                return this.removeFormatting(this.limitLines(this.selectedEvent.tasks[this.selectedTask].responseBody))
+                let body = this.removeFormatting(this.limitLines(this.selectedEvent.tasks[this.selectedTask].responseBody))
+                let json = JSON.parse(body)
+                console.log(`resourceType is ${json.resourceType}`)
+                return body
             },
             eventSummary() {
                 if (!this.$store.state.log.eventSummaries)

@@ -79,6 +79,8 @@
         },
         methods: {
             containedTestsRef(script_or_report, testi) {  // script or report
+                if (!script_or_report.test)
+                    return null
                 const mainTest = script_or_report.test[testi]
                 if (mainTest)
                     console.log(`mainTest is ${mainTest}`)
@@ -153,6 +155,8 @@
             reportAction(report, testi, actioni) {
                 console.log(`reportAction ${testi}   ${actioni}`)
                 if (!report)
+                    return null
+                if (!report.test)
                     return null
                 if (!report.test[testi])
                     return null

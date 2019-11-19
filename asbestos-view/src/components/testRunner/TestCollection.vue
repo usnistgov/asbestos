@@ -55,6 +55,9 @@
         </div>
 
         <div class="runallgroup">
+            <span v-if="running" class="running">Running</span>
+            <div class="divider"></div>
+            <div class="divider"></div>
             <button v-bind:class="{'button-selected': useJson, 'button-not-selected': !useJson}" @click="doJson()">JSON</button>
             <button v-bind:class="{'button-selected': !useJson, 'button-not-selected': useJson}" @click="doXml()">XML</button>
             <div class="divider"></div>
@@ -108,6 +111,7 @@
                 evalCount: 5,
                 channelObj: null,  // channel object
                 useJson: true,
+                running: false,
             }
         },
         methods: {
@@ -150,6 +154,7 @@
                 this.$store.dispatch('runEval', testName)
             },
             doRun: async function(testName) {  // server tests
+                this.running = true
                 this.$store.commit('setCurrentTest', null)
                 try {
                     const response = await ENGINE.post(`testrun/${this.sessionId}__${this.channelId}/${this.testCollection}/${testName}?_format=${this.useJson ? 'json' : 'xml'}`)
@@ -158,6 +163,8 @@
                     this.$store.dispatch('loadTestScriptNames')  // force reload of UI
                 } catch (error) {
                     this.error(error)
+                } finally {
+                    this.running = false
                 }
             },
             doRunAll() {
@@ -303,6 +310,9 @@
         border: 1px dotted black;
         cursor: pointer;
         border-radius: 25px;
+    }
+    .running {
+        background-color: lightgreen;
     }
     .fail {
         background-color: indianred;
