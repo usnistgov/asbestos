@@ -42,7 +42,7 @@ public class FhirClient {
             headers.put("content-type", contentType);
         Headers theHeaders = new Headers(headers);
         if (theHeaders.getHeaderValue("accept") == null)
-            theHeaders.add(new Header("accept", Format.XML.getContentType()));
+            theHeaders.add(new Header("accept", contentType));
 
         HttpPost post = new HttpPost();
         post.setRequestHeaders(theHeaders);
@@ -58,7 +58,7 @@ public class FhirClient {
 
         if (post.getLocationHeader() != null)
             response.setRef(new Ref(post.getLocationHeader().getValue()));
-        boolean isXml = post.getRequestContentType().contains("xml");
+        boolean isXml = post.getResponseContentType().contains("xml");
         String returnedResourceText = post.getResponseText();
         if (returnedResourceText != null && !returnedResourceText.equals("")) {
             if (!returnedResourceText.startsWith("{") && !returnedResourceText.startsWith("<"))

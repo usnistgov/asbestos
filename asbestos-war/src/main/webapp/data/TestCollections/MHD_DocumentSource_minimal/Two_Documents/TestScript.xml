@@ -72,7 +72,7 @@
             </assert>
         </action>
         <action>
-            <assert>    <!--       Bundle.entry.where(resource.is(FHIR.DocumentReference)).fullUrl =       -->
+            <assert>
                 <description value="DocumentManifest links to DocumentReferences"/>
                 <compareToSourceId value="request"/>
                 <compareToSourceExpression value="Bundle.entry.resource.where(is(FHIR.DocumentManifest)).content.reference.count() = 2"/>
@@ -124,6 +124,14 @@
                 <description value="sourcePatientInfo is a reference to a contained Patient Resource|MHDPDBSourcePatientInfoIsContained"/>
                 <compareToSourceId value="request"/>
                 <compareToSourceExpression value="Bundle.entry.resource.DocumentReference.context.sourcePatientInfo.reference = Bundle.entry.resource.DocumentReference.contained.Patient.id"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
+            <assert>
+                <description value="FullUrl must be unique in Bundle|MHDPDBFullUrlUniqueInBundle"/>
+                <compareToSourceId value="request"/>
+                <compareToSourceExpression value="Bundle.entry.where(fullUrl.exists()).select(fullUrl&amp;resource.meta.versionId).isDistinct()"/>
                 <warningOnly value="false"/>
             </assert>
         </action>

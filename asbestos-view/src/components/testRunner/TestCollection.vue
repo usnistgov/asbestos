@@ -55,6 +55,10 @@
         </div>
 
         <div class="runallgroup">
+            <button v-bind:class="{'button-selected': useJson, 'button-not-selected': !useJson}" @click="doJson()">JSON</button>
+            <button v-bind:class="{'button-selected': !useJson, 'button-not-selected': useJson}" @click="doXml()">XML</button>
+            <div class="divider"></div>
+            <div class="divider"></div>
             <button class="runallbutton" @click="doRunAll()">Run All</button>
         </div>
 
@@ -103,9 +107,16 @@
                 time: [],
                 evalCount: 5,
                 channelObj: null,  // channel object
+                useJson: true,
             }
         },
         methods: {
+            doJson() {
+                this.useJson = true
+            },
+            doXml() {
+                this.useJson = false
+            },
             clean(text) {
                 return text.replace(/_/g, ' ')
             },
@@ -141,7 +152,7 @@
             doRun: async function(testName) {  // server tests
                 this.$store.commit('setCurrentTest', null)
                 try {
-                    const response = await ENGINE.post(`testrun/${this.sessionId}__${this.channelId}/${this.testCollection}/${testName}`)
+                    const response = await ENGINE.post(`testrun/${this.sessionId}__${this.channelId}/${this.testCollection}/${testName}?_format=${this.useJson ? 'json' : 'xml'}`)
                     this.$store.commit('setTestReport', { testName: testName, testReport: response.data })
                     //this.$router.push(`/session/${this.sessionId}/channel/${this.channelId}/collection/${this.testCollection}`)
                     this.$store.dispatch('loadTestScriptNames')  // force reload of UI
@@ -313,6 +324,15 @@
         border: 1px dotted black;
         cursor: pointer;
         border-radius: 25px;
+    }
+    .button-selected {
+        border: 1px solid black;
+        background-color: lightgray;
+        cursor: pointer;
+    }
+    .button-not-selected {
+        border: 1px solid black;
+        cursor: pointer;
     }
     .right {
         text-align: right;

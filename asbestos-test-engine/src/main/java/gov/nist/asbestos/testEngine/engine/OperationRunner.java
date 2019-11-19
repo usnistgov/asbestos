@@ -81,7 +81,9 @@ public class OperationRunner {
         Coding typeCoding = op.getType();
         String code = typeCoding.getCode();
 
-        fhirClient.setFormat(op.hasContentType() ? Format.fromContentType(op.getContentType()) : Format.XML);
+        fhirClient.setFormat(op.hasContentType() ? Format.fromContentType(op.getContentType()) : fhirClient.getFormat());
+        if (fhirClient.getFormat() == null)
+            fhirClient.setFormat(Format.JSON);
 
         if ("read".equals(code)) {
             SetupActionRead setupActionRead = new SetupActionRead(fixtureMgr)

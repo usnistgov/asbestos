@@ -45,6 +45,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.*;
 
+// TODO - honor the Prefer header - http://hl7.org/fhir/http.html#ops
 public class MhdChannel extends BaseChannel /*implements IBaseChannel*/ {
     private Bundle requestBundle = null;
     private String serverBase;

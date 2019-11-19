@@ -32,6 +32,11 @@
         <expression value="Patient.identifier.value"/>
         <sourceId value="read-back"/>
     </variable>
+    <variable>
+        <name value="requestEntryCount"/>
+        <expression value="Bundle.entry.count()"/>
+        <sourceId value="pdb-bundle"/>
+    </variable>
     <test>
         <description value="Submit Provide Document Bundle to MHD Document Recipient and verify response."/>
         <action>
@@ -65,6 +70,14 @@
             <assert>
                 <description value="... all parts of transaction successful"/>
                 <expression value="Bundle.entry.response.all(status.startsWith(201))"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
+            <assert>
+                <description value="... response contains one entry for each entry in request"/>
+                <expression value="Bundle.entry.count()"/>
+                <value value="${requestEntryCount}"/>
                 <warningOnly value="false"/>
             </assert>
         </action>
