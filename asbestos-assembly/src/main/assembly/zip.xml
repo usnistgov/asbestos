@@ -1,0 +1,46 @@
+<assembly xmlns="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2 http://maven.apache.org/xsd/assembly-1.1.2.xsd">
+    <id>zip</id>
+
+    <!-- If true, this adds an extra Asbestos folder on top of the Tomcat folder -->
+    <includeBaseDirectory>false</includeBaseDirectory>
+
+    <formats>
+        <format>zip</format>
+    </formats>
+
+    <fileSets>
+        <!-- Copy the bundled Tomcat folder with pre-configured conf\server.xml, ExternalCache, and the application base directory -->
+        <fileSet>
+            <useDefaultExcludes>false</useDefaultExcludes>
+            <directory>${basedir}/bundled-tomcat-9.0.26</directory>
+            <outputDirectory>${bundledTomcatDir}</outputDirectory>
+        </fileSet>
+        <!-- Copy the Asbestos-view dist folder. This is the front-end static content code. -->
+        <fileSet>
+            <useDefaultExcludes>false</useDefaultExcludes>
+            <directory>${basedir}/../asbestos-view/dist</directory>
+            <!-- The json file contains tokens which need a filter. See the Apply Service Properties section below -->
+            <excludes>
+                <exclude>serviceProperties.json</exclude>
+            </excludes>
+            <outputDirectory>${bundledTomcatDir}/Toolkits/FhirToolkit/webapps/ROOT</outputDirectory>
+        </fileSet>
+        <!-- Copy the Asbestos-war folder. This is the back-end code. -->
+        <fileSet>
+            <useDefaultExcludes>false</useDefaultExcludes>
+            <directory>${basedir}/../asbestos-war/target/asbestos-war</directory>
+            <outputDirectory>${bundledTomcatDir}/Toolkits/FhirToolkit/webapps/asbestos</outputDirectory>
+        </fileSet>
+    </fileSets>
+   <files>
+       <!-- Apply the Service Properties filter -->
+       <file>
+        <source>../asbestos-view/dist/serviceProperties.json</source>
+        <outputDirectory>${bundledTomcatDir}/Toolkits/FhirToolkit/webapps/ROOT</outputDirectory>
+        <filtered>true</filtered>
+    </file>
+   </files>
+
+</assembly>

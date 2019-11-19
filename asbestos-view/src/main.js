@@ -1,5 +1,6 @@
 import Vue from 'vue'
 import App from './App.vue'
+import ServiceProperties from "./plugins/serviceProperties";
 
 Vue.config.productionTip = false
 
@@ -12,6 +13,8 @@ window.onerror = function(message, source, lineno, colno, error) {
   console.log(`GOT window ERROR`)
   Vue.$store.commit('setError', message + ' ' + error)
 }
+
+Vue.use(ServiceProperties)
 
 new Vue({
   render: h => h(App)

@@ -28,7 +28,7 @@ export const testRunnerStore = {
             eventEvalCount: 0,   // number of most recent events to evaluate
 
             clientTestResult: [], // { testId: { eventId: TestReport } }
-            currentChannelBaseAddr: 'http://localhost:8081/asbestos/',
+            currentChannelBaseAddr: `${Vue.prototype.$fhirToolkitBase}/`,
             testAssertions: null,
         }
     },

@@ -1,9 +1,11 @@
+import Vue from 'vue';
 import axios from 'axios';
 
-const port = '8081'
+const fhirToolkitBase = Vue.prototype.$fhirToolkitBase
+    //Vue.$fhirToolkitBase
 
 export const PROXY = axios.create({
-    baseURL: `http://localhost:${port}/asbestos/`,
+    baseURL: `${fhirToolkitBase}/`,
     headers: {
         'Access-Control-Allow-Methods': 'GET, POST, OPTIONS, PUT, PATCH, DELETE'
     },
@@ -13,7 +15,7 @@ export const PROXY = axios.create({
 })
 
 export const LOG = axios.create({
-    baseURL: `http://localhost:${port}/asbestos/log/`,
+    baseURL: `${fhirToolkitBase}/log/`,
     headers: {
         'Access-Control-Allow-Methods': 'GET, POST, OPTIONS, PUT, PATCH, DELETE'
     },
@@ -23,7 +25,7 @@ export const LOG = axios.create({
 })
 
 export const ENGINE = axios.create({
-    baseURL: `http://localhost:${port}/asbestos/engine/`,
+    baseURL: `${fhirToolkitBase}/engine/`,
     headers: {
         'Access-Control-Allow-Methods': 'GET, POST, OPTIONS, PUT, PATCH, DELETE'
     },
@@ -33,7 +35,7 @@ export const ENGINE = axios.create({
 })
 
 export const CHANNEL = axios.create({
-    baseURL: `http://localhost:${port}/asbestos/channel/`,
+    baseURL: `${fhirToolkitBase}/channel/`,
     headers: {
         'Access-Control-Allow-Methods': 'GET, POST, OPTIONS, PUT, PATCH, DELETE'
     },
