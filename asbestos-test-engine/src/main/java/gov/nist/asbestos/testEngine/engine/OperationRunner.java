@@ -81,7 +81,9 @@ public class OperationRunner {
         Coding typeCoding = op.getType();
         String code = typeCoding.getCode();
 
-        fhirClient.setFormat(op.hasContentType() ? Format.fromContentType(op.getContentType()) : Format.XML);
+        fhirClient.setFormat(op.hasContentType() ? Format.fromContentType(op.getContentType()) : fhirClient.getFormat());
+        if (fhirClient.getFormat() == null)
+            fhirClient.setFormat(Format.JSON);
 
         if ("read".equals(code)) {
             SetupActionRead setupActionRead = new SetupActionRead(fixtureMgr)
@@ -102,9 +104,12 @@ public class OperationRunner {
                         .setSut(sut)
                         .setType(type + ".search")
                         .setTestReport(testReport);
-                setupActionSearch.setVariableMgr(new VariableMgr(testScript, fixtureMgr)
-                        .setOpReport(operationReport)
-                        .setVal(val));
+                setupActionSearch
+                        .setVal(val)
+                        .setVariableMgr(
+                                new VariableMgr(testScript, fixtureMgr)
+                                        .setVal(val)
+                                        .setOpReport(operationReport));
                 setupActionSearch.run(op, operationReport);
         } else if ("create".equals(code)) {
             SetupActionCreate setupActionCreate =

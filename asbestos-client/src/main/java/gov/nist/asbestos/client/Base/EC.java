@@ -27,6 +27,7 @@ public class EC {
     public static final String TEST_COLLECTIONS_DIR = "FhirTestCollections";
     public static final String TEST_ASSERTIONS_DIR = "FhirTestAssertions";
     public static final String TEST_ASSERTIONS_FILE = "assertions.json";
+    public static final String CHANNELS_DIR = "FhirChannels";
 
 
     public EC(File externalCache) {

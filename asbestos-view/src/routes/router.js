@@ -16,6 +16,8 @@ import TestOrEvalDetails from "../components/testRunner/TestOrEvalDetails"
 import EvalDetails from "../components/testRunner/EvalDetails"
 import EvalReportAssert from "../components/testRunner/EvalReportAssert";
 import About from "../components/top/About"
+import Home from "../components/top/Home"
+import MhdTesting from "../components/top/MhdTesting"
 
 Vue.use( VueRouter )
 
@@ -26,6 +28,16 @@ export const routes = [
             {
                 path: 'about',
                 components: { default: About },
+            },
+            {
+                path: 'mhdtesting',
+                components: { default: MhdTesting },
+            },
+            {
+                path: 'home',
+                components: {
+                    default: Home
+                }
             },
             {
                 path: 'session/:sessionId',
@@ -102,11 +114,7 @@ export const routes = [
             {
                 path: 'session',
                 components: { session: SessionView },
-            },
-            {
-                path: '',
-                components: { session: SessionView },
-            },
+            }
         ]
     },
 

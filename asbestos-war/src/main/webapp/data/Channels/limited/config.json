@@ -1,0 +1,10 @@
+{
+  "environment" : "default",
+  "testSession" : "default",
+  "channelId" : "limited",
+  "actorType" : "fhir",
+  "channelType" : "mhd",
+  "includeValidation" : false,
+  "fhirBase" : "",
+  "xdsSiteName" : "default__limited"
+}

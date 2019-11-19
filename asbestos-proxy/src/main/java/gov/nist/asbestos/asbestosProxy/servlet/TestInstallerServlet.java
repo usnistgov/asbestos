@@ -44,7 +44,30 @@ public class TestInstallerServlet  extends HttpServlet {
         } else {
             log.info("Not updating Test Definitions and Assertions - External Cache copy is locked");
         }
+        log.info("Updating Channels");
+        initializeChannels();
+    }
 
+    private void initializeChannels() {
+        File externalChannels = new File(new File(externalCache, EC.CHANNELS_DIR), "default");
+        externalChannels.mkdirs();
+        File war = warHome();
+        File internalChannels = new File(new File(war, "data"), "Channels");
+
+        try {
+            File[] channels = internalChannels.listFiles();
+            if (channels != null) {
+                for (File channel : channels) {
+                    String name = channel.getName();
+                    File target = new File(externalChannels, name);
+                    if (!target.exists()) {
+                        FileUtils.copyDirectoryToDirectory(channel, externalChannels);
+                    }
+                }
+            }
+        } catch (IOException e) {
+            log.error(ExceptionUtils.getStackTrace(e));
+        }
     }
 
     private void initializeAssertionMap() {

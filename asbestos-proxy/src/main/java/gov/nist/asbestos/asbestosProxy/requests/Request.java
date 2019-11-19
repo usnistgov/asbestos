@@ -9,7 +9,9 @@ import javax.servlet.http.HttpSession;
 import java.io.File;
 import java.net.URI;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Request {
     public HttpServletRequest req;
@@ -20,10 +22,13 @@ public class Request {
     public EC ec;
     public String testSession;
     public String channelId;
+    public boolean isJson = true;
 
     public Request(HttpServletRequest req, HttpServletResponse resp, File externalCache) {
         this.req = req;
         this.resp = resp;
+        String qstring = req.getQueryString();
+        isJson = "_format=json".equals(qstring);
         this.externalCache = externalCache;
         uri = Common.buildURI(req);
         uriParts = Arrays.asList(uri.getPath().split("/"));

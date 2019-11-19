@@ -17,7 +17,7 @@ import java.util.List;
 // 3 - "testlog"
 // 4 - channelName   testSession__channelId
 // 5 - testCollectionId
-// return list of test logs
+// return list of test logs (TestReport resources)
 
 public class GetTestLogsRequest {
     private static Logger log = Logger.getLogger(GetTestLogsRequest.class);

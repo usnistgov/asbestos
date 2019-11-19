@@ -11,7 +11,7 @@
                 :key="'Disp' + eventi">
                 <div>
                     <div  @click.self="selectEvent(eventId)" v-bind:class="[isEventPass(eventId) ? passClass : failClass, 'event-part']">
-                        Message: {{ eventId }}
+                        Message: {{ eventId }} - {{ eventDetail(eventId) }}
                     </div>
                     <div v-if="selected === eventId">
                         <router-view></router-view>
@@ -44,7 +44,15 @@
                     this.$router.push(route)
                 }
             },
-
+            eventDetail(eventId) {
+                  if (this.$store.state.log.eventSummaries) {
+                      const summary = this.$store.state.log.eventSummaries.find(it =>
+                          it.eventName === eventId)
+                      if (summary)
+                          return `${summary.verb} ${summary.resourceType}`
+                  }
+                  return null
+            },
             isEventPass(eventId) {
                 return this.eventResult[eventId].result === 'pass'
             },

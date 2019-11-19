@@ -1,0 +1,8 @@
+Self tests for internal proxy.
+<br /><br />
+Each test submission contains a specific flaw the MHD translator in the proxy should catch.  Each
+submission return an OperationOutcome to show the flaw was caught. 
+<br /><br />
+These tests verify some aspects of the MHD translator and document assertions run on every Provide Document Bundle transaction.
+<br /><br />
+These tests should be run against the XDS channel.

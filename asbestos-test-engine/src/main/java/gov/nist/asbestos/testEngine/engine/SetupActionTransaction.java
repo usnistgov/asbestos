@@ -23,11 +23,11 @@ public class SetupActionTransaction extends GenericSetupAction {
         if (!preExecute(op, operationReport))
             return;
 
-        ResourceWrapper wrapper = getFhirClient().writeResource(resourceToSend, targetUrl, format, requestHeader);
+        ResourceWrapper wrapper = getFhirClient().writeResource(resourceToSend, targetUrl, fhirClient.getFormat(), requestHeader);
         reporter.report("No evaluation", wrapper);
 //        BaseResource resource = wrapper.getResource();
 //        if (wrapper.isOk()) {
-//            if ((resource instanceof Bundle) && bundleContainsError((Bundle) resource) ) {
+//            if ((resourced instanceof Bundle) && bundleContainsError((Bundle) resource) ) {
 //                reporter.reportFail((wrapper.getRef() == null ? "" : wrapper.getRef())  +
 //                        " transaction failed : \n" + getBundleIssues((Bundle) wrapper.getResource()),
 //                        wrapper);

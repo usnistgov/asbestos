@@ -148,6 +148,12 @@ public class BundleToRegistryObjectList implements IVal {
 //            responseHasError |= valeToResponseComponent(vale, responseComponent, errorsOnly);
         }
 
+        if (eos.isEmpty()) {
+            ValE vale = new ValE(val);
+            vale.add(new ValE("Found no DocumentReferences - one ore more required").asError());
+            throwTransformExceptionIfError(vale);
+        }
+
         if (ss != null) {
             for (ExtrinsicObjectType eo : eos) {
                 AssociationType1 a = createSSDEAssociation(ss, eo, ssVale);
@@ -326,6 +332,11 @@ public class BundleToRegistryObjectList implements IVal {
     private RegistryPackageType createSubmissionSet(ResourceWrapper resource, ValE vale) {
         DocumentManifest dm = (DocumentManifest) resource.getResource();
 
+        if (dm.hasIdentifier()) {
+            if (dm.getIdentifier().stream().anyMatch(i -> i.hasValue() && i.getValue().startsWith("urn:uuid:")))
+                vale.add(new ValE("DocumentManifest has Identifier (entryUUID)").asError());
+        }
+
         RegistryPackageType ss = new RegistryPackageType();
 
         ValE tr;
@@ -366,6 +377,11 @@ public class BundleToRegistryObjectList implements IVal {
         eo.setObjectType("urn:uuid:7edca82f-054d-47f2-a032-9b2a5b5186c1");
 
         DocumentReference dr = (DocumentReference) resource.getResource();
+
+        if (dr.hasIdentifier()) {
+            vale.add(new ValE("DocumentManifest has Identifier (entryUUID)").asError());
+        }
+
         vale.add(new ValE("Content section is [1..1]").addIheRequirement(DRTable));
         if (dr.getContent() == null || dr.getContent().isEmpty()) {
             vale.add(new ValE("DocumentReference has no content section").asError());
@@ -831,10 +847,25 @@ public class BundleToRegistryObjectList implements IVal {
         if (bundle.getMeta().getProfile().size() != 1)
             val.add(new ValE("No profile declaration present in bundle").asError()
                     .add(new ValE("3.65.4.1.2.1 Bundle Resources").asDoc()));
-        CanonicalType bundleProfile = bundle.getMeta().getProfile().get(0);
-        if (!profiles.contains(bundleProfile.asStringValue()))
-            val.add(new ValE("Do not understand profile declared in bundle - " + bundleProfile).asError()
+        try {
+            CanonicalType bundleProfile = bundle.getMeta().getProfile().get(0);
+            if (!profiles.contains(bundleProfile.asStringValue()))
+                val.add(new ValE("Do not understand profile declared in bundle - " + bundleProfile).asError()
+                        .add(new ValE("3.65.4.1.2.1 Bundle Resources").asDoc()));
+        } catch (Throwable e) {
+            val.add(new ValE("Bundle.meta.profile missing").asError()
                     .add(new ValE("3.65.4.1.2.1 Bundle Resources").asDoc()));
+        }
+
+        try {
+            if (!bundle.getType().toCode().equals("transaction")) {
+                val.add(new ValE("Bundle.type missing").asError()
+                        .add(new ValE("http://hl7.org/fhir/http.html#transaction").asDoc()));
+            }
+        } catch (Throwable t) {
+            val.add(new ValE("Bundle.type missing").asError()
+                    .add(new ValE("http://hl7.org/fhir/http.html#transaction").asDoc()));
+        }
 
         for (ResourceWrapper res : rMgr.getBundleResources()) {
             if (!acceptableResourceTypes.contains(res.getResource().getClass()))
@@ -842,6 +873,57 @@ public class BundleToRegistryObjectList implements IVal {
                         .add(new ValE(mhdProfileRef).asDoc()));
         }
 
+        String patientUrl = null;
+        for (ResourceWrapper res : rMgr.getBundleResources()) {
+            if (res.getResource() instanceof DocumentManifest) {
+                DocumentManifest dm = (DocumentManifest) res.getResource();
+                if (patientUrl == null) {
+                    patientUrl = dm.getSubject().getReference();
+                } else {
+                    if (!dm.getSubject().getReference().equals(patientUrl)) {
+                        val.add(new ValE("Multiple patients reference in Bundle").asError()
+                                .add(new ValE("3.65.4.1.2.2 Patient Identity").asDoc()));
+                        break;
+                    }
+                }
+            }
+            else if (res.getResource() instanceof DocumentReference) {
+                DocumentReference dm = (DocumentReference) res.getResource();
+                if (patientUrl == null) {
+                    patientUrl = dm.getSubject().getReference();
+                } else {
+                    if (!dm.getSubject().getReference().equals(patientUrl)) {
+                        val.add(new ValE("Multiple patients reference in Bundle").asError()
+                                .add(new ValE("3.65.4.1.2.2 Patient Identity").asDoc()));
+                        break;
+                    }
+                }
+            }
+        }
+
+        for (ResourceWrapper wrapper : rMgr.getBundleResources()) {
+            if (wrapper.getResource() instanceof DocumentReference) {
+                DocumentReference documentReference = (DocumentReference) wrapper.getResource();
+                List<DocumentReference.DocumentReferenceContentComponent> ccs = documentReference.getContent();
+                for (DocumentReference.DocumentReferenceContentComponent cc : ccs) {
+                    Attachment a = cc.getAttachment();
+                    String url = a.getUrl();
+                    if (!bundleContains(bundle, url)) {
+                        val.add(new ValE("DocumentReference references Binary outside of Bundle").asError()
+                                .add(new ValE("3.65.4.1.2.1 Bundle Resources").asDoc()));
+                    }
+                }
+            }
+        }
+    }
+
+    private boolean bundleContains(Bundle bundle, String fullUrl) {
+        for (Bundle.BundleEntryComponent comp : bundle.getEntry()) {
+            String aFullUrl = comp.getFullUrl();
+            if (fullUrl.equals(aFullUrl))
+                return true;
+        }
+        return false;
     }
 
     @Override

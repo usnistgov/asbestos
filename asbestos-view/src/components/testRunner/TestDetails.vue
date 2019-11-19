@@ -34,7 +34,7 @@
                     <template v-if="test.description" class="test-part">
                         {{ test.description }}
                     </template>
-                <div v-if="report">
+                <div>
 <!--                    Contained: {{ findContained(script, containedTests(testi)) }}-->
                         <div v-for="(test2, test2i) in containedTests(findContained(script, containedTestsRef(script, testi)))"
                              :key="'Test2' + test2i">

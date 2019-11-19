@@ -48,6 +48,9 @@ class FhirPathEngineBuilder {
         if (result instanceof UnsignedIntType) {
             return ((UnsignedIntType) result).getValueAsString();
         }
+        if (result instanceof IntegerType) {
+            return ((IntegerType) result).getValueAsString();
+        }
         if (result instanceof DateType) {
             return ((DateType) result).getValueAsString();
         }

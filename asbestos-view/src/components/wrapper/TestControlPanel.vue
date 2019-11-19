@@ -4,18 +4,34 @@
         <div v-if="!selectable" class="not-available">Select FHIR Server</div>
         <div v-else>
             <div>
-                <span class="control-panel-item-title" @click="openCollection()">Test Collections</span>
+                <div class="control-panel-item-title" @click="openCollection()">Test Collections</div>
+                <span class="selectable" @click="openCollection()">View Selected</span>
                 <span class="divider"></span>
                 <img id="reload" class="selectable" @click="reload()" src="../../assets/reload.png"/>
                 <br />
 
-                <input type="radio" id="client" value="Client" v-model="testType">
-                <label for="client">Client</label>
-                <input type="radio" id="server" value="Server" v-model="testType">
-                <label for="server">Server</label>
+<!--                <input type="radio" id="client" value="Client" v-model="testType">-->
+<!--                <label for="client">Client</label>-->
+<!--                <input type="radio" id="server" value="Server" v-model="testType">-->
+<!--                <label for="server">Server</label>-->
             </div>
-            <b-form-select class="control-panel-font" v-model="collection" :options="collections"></b-form-select>
-
+            <select v-model="collection" v-bind:size="collectionDisplaySize" class="control-panel-font">
+                <option disabled>Client:</option>
+                <option v-for="(coll, collectioni) in clientCollections"
+                        v-bind:value="coll"
+                        :key="coll + collectioni"
+                >
+                    {{ coll }}
+                </option>
+                <option disabled>Server:</option>
+                <option v-for="(coll, collectioni) in serverCollections"
+                        v-bind:value="coll"
+                        :key="coll + collectioni"
+                >
+                    {{ coll }}
+                </option>
+            </select>
+            <!--            <b-form-select class="control-panel-font" v-model="collection" :options="collections"></b-form-select>-->
         </div>
     </div>
 </template>
@@ -29,6 +45,7 @@
     export default {
         data() {
             return {
+                collection: null,
                 testType: "Server", // Client or Server
             }
         },
@@ -36,9 +53,20 @@
             reload() {
                 this.$store.dispatch('loadTestCollectionNames')
             },
+            vuexCollectionUpdated() {
+                if (this.collection !== this.$store.state.testRunner.currentTestCollectionName) {
+                    this.collection = this.$store.state.testRunner.currentTestCollectionName
+                    this.openCollection()
+                }
+            },
+            localCollectionUpdated() {
+//                if (this.collection !== this.$store.state.testRunner.currentTestCollectionName)
+                    this.openCollection()
+            },
             openCollection() {
                 if (!this.selectable)
                     return;
+                this.$store.commit('setTestCollectionName', this.collection)
                 if (!this.collection)
                     return;
                 const route = `/session/${this.session}/channel/${this.channelId}/collection/${this.collection}`
@@ -57,24 +85,33 @@
             },
         },
         computed: {
+            collectionDisplaySize() {
+                return this.clientCollections.length + this.serverCollections.length + 2
+            },
             client() {
                 return this.testType === 'Client'
             },
-            collection: {
-                set(name) {
-                    this.$store.commit('setTestCollectionName', name)
-                    this.openCollection()
-                },
-                get() {
-                    return this.$store.state.testRunner.currentTestCollectionName
-                }
-            },
+            // collection: {
+            //     set(name) {
+            //         this.$store.commit('setTestCollectionName', name)
+            //         this.openCollection()
+            //     },
+            //     get() {
+            //         return this.$store.state.testRunner.currentTestCollectionName
+            //     }
+            // },
             collections: {
                 get() {
                     return (this.client)
                     ? this.$store.state.testRunner.clientTestCollectionNames
                         : this.$store.state.testRunner.serverTestCollectionNames
                 }
+            },
+            clientCollections() {
+                return this.$store.state.testRunner.clientTestCollectionNames
+            },
+            serverCollections() {
+                return this.$store.state.testRunner.serverTestCollectionNames
             },
             session() {
                 return this.$store.state.base.session
@@ -105,6 +142,8 @@
         },
         watch: {
             '$store.state.base.channelId': 'reload',
+            '$store.state.testRunner.currentTestCollectionName': 'vuexCollectionUpdated',
+            'collection': 'localCollectionUpdated',
         },
         mixins: [ errorHandlerMixin ],
         name: "TestControlPanel"

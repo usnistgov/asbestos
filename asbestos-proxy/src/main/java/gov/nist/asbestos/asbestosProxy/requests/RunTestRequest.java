@@ -2,6 +2,7 @@ package gov.nist.asbestos.asbestosProxy.requests;
 
 import gov.nist.asbestos.asbestosProxy.servlet.ChannelConnector;
 import gov.nist.asbestos.client.client.FhirClient;
+import gov.nist.asbestos.client.client.Format;
 import gov.nist.asbestos.serviceproperties.ServiceProperties;
 import gov.nist.asbestos.serviceproperties.ServicePropertiesEnum;
 import gov.nist.asbestos.sharedObjects.ChannelConfig;
@@ -80,7 +81,7 @@ public class RunTestRequest {
                     .setChannelId(channelId)
                     .setExternalCache(request.externalCache)
                     .setVal(new Val())
-                    .setFhirClient(new FhirClient())
+                    .setFhirClient(new FhirClient().setFormat(request.isJson ? Format.JSON : Format.XML))
                     .setTestCollection(testCollection)
                     .addCache(patientCacheDir)
                     .addCache(alternatePatientCacheDir)

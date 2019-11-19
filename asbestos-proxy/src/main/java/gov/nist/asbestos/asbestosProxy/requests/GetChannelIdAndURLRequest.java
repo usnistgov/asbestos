@@ -35,6 +35,7 @@ public class GetChannelIdAndURLRequest {
     private class IdandURL {
         String id;
         String url;
+        String site;
     }
 
     public void run() throws IOException {
@@ -49,6 +50,7 @@ public class GetChannelIdAndURLRequest {
                 IdandURL idu = new IdandURL();
                 idu.id = channelConfig.getChannelId();
                 idu.url = channelConfig.getFhirBase();
+                idu.site = channelConfig.getXdsSiteName();
                 idsAndUrls.add(idu);
             } catch (Throwable e) {
                 request.resp.setStatus(request.resp.SC_NOT_FOUND);

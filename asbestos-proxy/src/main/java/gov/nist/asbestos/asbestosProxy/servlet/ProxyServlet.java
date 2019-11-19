@@ -221,73 +221,15 @@ public class ProxyServlet extends HttpServlet {
             // transform backend service response for client
             HttpBase responseOut = transformResponse(clientTask, requestOut, channel, hostport);
 
-            // detour to TestEngine happens here
-            // responseOut contains OperationOutcome
-            // pass inputResource through client validation
-            // if true then this channel not valid without pending NEXT_CLIENT_TEST
-//            if (channelConfig.isIncludeValidation()) {
-//                OperationOutcome outcome = responseOut.getOperationOutcome();
-//                Format format = Format.fromContentType(inHeaders.getContentType().getValue());
-//                BaseResource inputResource = ProxyBase.parse(inBody, format);
-//
-//                //
-//                // this needs to be done in a task
-//                //
-//
-//                EC ec = new EC(externalCache);
-//                //   testSpec is testCollectionId/testId
-//                String testSpec = (String) req.getSession().getAttribute(EvalRequest.NEXT_CLIENT_TEST);
-//                if (testSpec == null || testSpec.equals("")) {
-//                    // no pending NEXT_CLIENT_TEST
-//                    OperationOutcome.OperationOutcomeIssueComponent ic = outcome.addIssue();
-//                    ic.setSeverity(OperationOutcome.IssueSeverity.ERROR);
-//                    ic.setCode(OperationOutcome.IssueType.VALUE);
-//                    ic.setDiagnostics("No pending validation");
-//                    respond(resp, responseOut, inHeaders, clientTask);
-//                    return;
-//                }
-//                List<String> testSpecParts = Arrays.asList(testSpec.split("/"));
-//                File testDef = ec.getTest(testSpecParts.get(0), testSpecParts.get(1));
-//                if (testDef == null || !testDef.isDirectory()) {
-//                    resp.setStatus(resp.SC_BAD_REQUEST);
-//                    return;
-//                }
-//                TestEngine testEngine = new TestEngine(testDef);
-//                testEngine.runEval(inputResource, outcome);
-//                TestReport testReport = testEngine.getTestReport();
-//
-//                // original output was OperationOutcome
-//                // eval returns TestReport
-//                // file TestReport as output of this Task
-//                // and return a link in the OperationOutcome with good/bad status
-//
-//                Task evalTask = clientTask.newTask();
-//                evalTask.putDescription("Eval " + testSpec);
-//                String encodedTestReport = ProxyBase.encode(testReport, Format.JSON);
-//                evalTask.putResponseBodyText(encodedTestReport);
-//                boolean passEval = testReport.getResult() == TestReport.TestReportResult.PASS;
-//                OperationOutcome.OperationOutcomeIssueComponent ic = outcome.addIssue();
-//                String testReportLink = ProxyLogServlet.getEventLink(evalTask.getEvent(), channelConfig);
-//                if (passEval) {
-//                    ic.setSeverity(OperationOutcome.IssueSeverity.INFORMATION);
-//                    ic.setDiagnostics(testReportLink);
-//                } else {
-//                    ic.setSeverity(OperationOutcome.IssueSeverity.ERROR);
-//                    ic.setCode(OperationOutcome.IssueType.VALUE);
-//                    ic.setDiagnostics(testReportLink);
-//                }
-//            }
 
-            respond(resp, responseOut, inHeaders, clientTask);
+            respond(resp, responseOut, inHeaders, clientTask, responseOut.getStatus());
         } catch (TransformException e) {
-            respond(resp, e.getResponse(), inHeaders, clientTask);
-            resp.setStatus(resp.SC_OK);
+            respond(resp, e.getResponse(), inHeaders, clientTask, 400);
+            //resp.setStatus(resp.SC_OK);
         } catch (Throwable t) {
             respondWithError(req, resp, t, inHeaders, clientTask);
-            resp.setStatus(resp.SC_OK);
+            //resp.setStatus(resp.SC_OK);
         } finally {
-//            if (channel != null)
-//                ChannelRelay.postEvent(channel.getChannelId(), event.getEventDir());
         }
     }
 
@@ -392,7 +334,7 @@ public class ProxyServlet extends HttpServlet {
             BaseResource baseResource = FhirToolkitCapabilityStatement.getCapabilityStatement(capabilityStatementFile);
             String versionId = ((CapabilityStatement)baseResource).getVersion();
             resp.addHeader("ETag", String.format("W/\"%s\"", versionId.hashCode()));
-            respond(resp, baseResource, inHeaders, clientTask);
+            respond(resp, baseResource, inHeaders, clientTask, 200);
         } catch (Exception ex) {
             // This did not work in IntelliJ Jetty runner without any Jetty XML config:
             // resp.sendError(500, ex.toString());.
@@ -468,13 +410,13 @@ public class ProxyServlet extends HttpServlet {
             // transform backend service response for client
             if (requestOut.isSuccess()) {
                 HttpBase responseOut = transformResponse(backSideTask, requestOut, channel, hostport);
-                respond(resp, responseOut, inHeaders, clientTask);
+                respond(resp, responseOut, inHeaders, clientTask, 200);
             } else {
                 respondWithError(req, resp, "backend call failed", inHeaders, clientTask);
             }
             resp.setStatus(resp.SC_OK);
         } catch (TransformException e) {
-            respond(resp, e.getResponse(), inHeaders, clientTask);
+            respond(resp, e.getResponse(), inHeaders, clientTask, 400);
             resp.setStatus(resp.SC_OK);
         } catch (Throwable t) {
             respondWithError(req, resp, t, inHeaders, clientTask);
@@ -527,10 +469,10 @@ public class ProxyServlet extends HttpServlet {
         log.error(ExceptionUtils.getStackTrace(t));
         if (new Ref(Common.buildURI(req)).isQuery()) {
             Bundle bundle = wrapInBundle(wrapInOutcome(t));
-            respond(resp, bundle, inHeaders, clientTask);
+            respond(resp, bundle, inHeaders, clientTask, 200);
         } else {
             OperationOutcome oo = wrapInOutcome(t);
-            respond(resp, oo, inHeaders, clientTask);
+            respond(resp, oo, inHeaders, clientTask, 400);
         }
     }
 
@@ -538,34 +480,34 @@ public class ProxyServlet extends HttpServlet {
         clientTask) {
         if (new Ref(Common.buildURI(req)).isQuery()) {
             Bundle bundle = wrapInBundle(wrapInOutcome(msg));
-            respond(resp, bundle, inHeaders, clientTask);
+            respond(resp, bundle, inHeaders, clientTask, 200);
         } else {
             OperationOutcome oo = wrapInOutcome(msg);
-            respond(resp, oo, inHeaders, clientTask);
+            respond(resp, oo, inHeaders, clientTask, 400);
         }
     }
 
-    private void respond(HttpServletResponse resp, BaseResource resource, Headers inHeaders, ITask clientTask) {
+    private void respond(HttpServletResponse resp, BaseResource resource, Headers inHeaders, ITask clientTask, int status) {
         String resourceString = "";
         if (resource != null)
             resourceString = ProxyBase.encode(resource, Format.resultContentType(inHeaders));
-        respond(resp, resourceString.getBytes(), inHeaders, clientTask);
+        respond(resp, resourceString.getBytes(), inHeaders, clientTask, status);
     }
 
-    private void respond(HttpServletResponse resp, byte[] content, Headers inHeaders, ITask clientTask) {
+    private void respond(HttpServletResponse resp, byte[] content, Headers inHeaders, ITask clientTask, int status) {
         HttpBase responseOut = new HttpGet();
         Format format = Format.resultContentType(inHeaders);
         responseOut.getResponseHeaders().add(new Header("Content-Type", format.getContentType()));
         responseOut.setResponse(content);
 
-        respond(resp, responseOut, inHeaders, clientTask);
+        respond(resp, responseOut, inHeaders, clientTask, status);
     }
 
     // responseOut is final response to return to client
-    private void respond(HttpServletResponse resp, HttpBase responseOut, Headers inHeaders, ITask clientTask) {
+    private void respond(HttpServletResponse resp, HttpBase responseOut, Headers inHeaders, ITask clientTask, int status) {
         try {
-            if (responseOut.getStatus() == 0)
-                responseOut.setStatus(200);
+//            if (responseOut.getStatus() == 0)
+                responseOut.setStatus(status);
             if (clientTask.getEvent() != null)
                 addEventHeader(responseOut, getHostPort(inHeaders), clientTask);
             logResponse(clientTask, responseOut);
@@ -692,21 +634,27 @@ public class ProxyServlet extends HttpServlet {
             if (encodings.isEmpty()) {
                 String contentType = headers.getContentType().getAllValues().get(0);
                 if (isStringType(contentType)) {
-                    String txt = new String(bytes);
-                    http.setResponseText(txt);
-                    task.putResponseBodyText(txt);
+                    if (bytes != null) {
+                        String txt = new String(bytes);
+                        http.setResponseText(txt);
+                        task.putResponseBodyText(txt);
+                    }
                 }
             } else {
                 String encoding = encodings.get(0);
                 if (encoding != null && encoding.equalsIgnoreCase("gzip")) {
-                    String txt = Gzip.decompressGZIP(bytes);
-                    task.putResponseBodyText(txt);
-                    http.setResponseText(txt);
+                    if (bytes != null) {
+                        String txt = Gzip.decompressGZIP(bytes);
+                        task.putResponseBodyText(txt);
+                        http.setResponseText(txt);
+                    }
                 } else if (headers.getContentType().getAllValues().get(0).equalsIgnoreCase("text/html")) {
                     task.putResponseHTMLBody(bytes);
-                    http.setResponseText(new String(bytes));
+                    if (bytes != null)
+                        http.setResponseText(new String(bytes));
                 } else if (isStringType(headers.getContentType().getAllValues().get(0))) {
-                    http.setResponseText(new String(bytes));
+                    if (bytes != null)
+                        http.setResponseText(new String(bytes));
                 }
             }
         }
@@ -788,7 +736,7 @@ public class ProxyServlet extends HttpServlet {
     static HttpBase transformResponse(ITask task, HttpBase responseIn, IBaseChannel channelTransform, String proxyHostPort) {
         HttpBase responseOut = new HttpGet();  // here GET vs POST does not matter
         channelTransform.transformResponse(responseIn, responseOut, proxyHostPort);
-        responseOut.setStatus(responseIn.getStatus());
+        //responseOut.setStatus(responseIn.getStatus());
         return responseOut;
     }
 

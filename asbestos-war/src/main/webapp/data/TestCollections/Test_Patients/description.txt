@@ -13,3 +13,7 @@ These Patient resources are not used for client testing (MHD Document Source for
 (for servers)
 reference Patients through the cache. If the cache is deleted then this Test Collection can be re-run to reload 
 the cache.
+<br />
+<br />
+Patients should be loaded using the default channel.  Other channels know to look there for the cached
+resources.

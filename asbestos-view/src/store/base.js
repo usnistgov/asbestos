@@ -6,8 +6,6 @@ Vue.use(Vuex)
 import {PROXY} from '../common/http-common'
 import {CHANNEL} from '../common/http-common'
 
-// TODO add About page and credit <div>Icons made by <a href="https://www.flaticon.com/authors/freepik" title="Freepik">Freepik</a> from <a href="https://www.flaticon.com/"             title="Flaticon">www.flaticon.com</a> is licensed by <a href="http://creativecommons.org/licenses/by/3.0/"             title="Creative Commons BY 3.0" target="_blank">CC 3.0 BY</a></div>
-
 export const baseStore = {
     state() {
         return {
@@ -23,7 +21,7 @@ export const baseStore = {
             ],
 
             channelIds: [],  // for this session
-            channelURLs: [], // for this session { id:  ... , url: ... }
+            channelURLs: [], // for this session { id:  ... , url: ... , site: ....}
             errors: [],
         }
     },
@@ -47,6 +45,7 @@ export const baseStore = {
             state.sessions = sessions
         },
         setChannelId(state, channelId) {
+            console.log(`channelId to ${channelId}`)
             state.channelId = channelId
         },
         setChannel(state, theChannel) {

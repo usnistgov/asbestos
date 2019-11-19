@@ -100,6 +100,28 @@
                         Only used with Channel Type mhd
                     </div>
                     <div v-else class="grid-item">{{ channel.xdsSiteName }}</div>
+
+                    <div v-if="!edit && !channel.fhirBase && !channel.xdsSiteName" class="channelError">
+                        <div class="vdivider"></div>
+                        <div class="vdivider"></div>
+                        <div class="vdivider"></div>
+                        <div class="vdivider"></div>
+                        Warning: FhirBase or XDS Site Name must be present
+                    </div>
+                    <div v-if="!edit && channel.channelType === 'fhir' && !channel.fhirBase" class="channelError">
+                        <div class="vdivider"></div>
+                        <div class="vdivider"></div>
+                        <div class="vdivider"></div>
+                        <div class="vdivider"></div>
+                        Warning: FHIR type is selected but no FHIR Base is configured
+                    </div>
+                    <div v-if="!edit && channel.channelType === 'mhd' && !channel.xdsSiteName" class="channelError">
+                        <div class="vdivider"></div>
+                        <div class="vdivider"></div>
+                        <div class="vdivider"></div>
+                        <div class="vdivider"></div>
+                        Warning: MHD type is selected but no XDS Site Name is configured
+                    </div>
                 </div>
             </div>
         </div>
@@ -341,6 +363,7 @@
         display: grid;
         grid-template-columns: auto;
         grid-template-rows: auto;
+        grid-column-gap: 10px;
     }
     .grid-name {
         /*font-weight: bold;*/
@@ -393,5 +416,11 @@
 
     .tooltip:hover .tooltiptext {
         visibility: visible;
+    }
+    .channelError {
+        background-color: indianred;
+        text-align: left;
+        border: 1px dotted black;
+        grid-column: 1 / span 2;
     }
 </style>

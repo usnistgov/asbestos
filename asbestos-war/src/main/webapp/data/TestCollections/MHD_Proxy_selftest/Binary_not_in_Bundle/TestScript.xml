@@ -1,0 +1,64 @@
+<TestScript xmlns="http://hl7.org/fhir">
+    <fixture id="pdb-bundle">
+        <resource>
+            <reference value="Bundle/pdb.xml"/>
+        </resource>
+    </fixture>
+    <fixture id="patient_bundle">
+        <!--
+           This patient comes out of the test Patient cache
+        -->
+        <resource>
+            <reference value="Patient/Alex_Alder"/>
+        </resource>
+    </fixture>
+    <fixture id="patient_bundle2">
+        <!--
+           This patient comes out of the test Patient cache
+        -->
+        <resource>
+            <reference value="Patient/Chip_Carr"/>
+        </resource>
+    </fixture>
+    <variable>
+        <name value="patientResourceId"/>
+        <expression value="Bundle.entry.fullUrl"/>
+        <sourceId value="patient_bundle"/>
+    </variable>
+    <variable>
+        <name value="patientResourceId2"/>
+        <expression value="Bundle.entry.fullUrl"/>
+        <sourceId value="patient_bundle2"/>
+    </variable>
+    <test>
+        <description value="Binary referenced by DocumentReference is outside the Bundle"/>
+        <action>
+            <operation>
+                <!-- references patient from resourceCache in EC -->
+                <description value="send PDB"/>
+                <label value="create"/>
+                <type>
+                    <system value="https://github.com/usnistgov/asbestos/wiki/Testscript-Operation-Codes"/>
+                    <code value="mhd-pdb-transaction"/>
+                </type>
+                <sourceId value="pdb-bundle"/>
+                <responseId value="pdb-response"/>
+            </operation>
+        </action>
+        <action>
+            <assert>
+                <description value="... transaction failed"/>
+                <response value="bad"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
+            <assert>
+                <description value="... return OperationOutcome"/>
+                <compareToSourceId value="pdb-response"/>
+                <compareToSourceExpression value="where(OperationOutcome).exists()"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+    </test>
+</TestScript>

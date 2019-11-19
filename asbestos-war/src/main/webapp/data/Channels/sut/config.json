@@ -1,0 +1,10 @@
+{
+  "environment" : "default",
+  "testSession" : "default",
+  "channelId" : "sut",
+  "actorType" : "fhir",
+  "channelType" : "fhir",
+  "includeValidation" : false,
+  "fhirBase" : "",
+  "xdsSiteName" : ""
+}

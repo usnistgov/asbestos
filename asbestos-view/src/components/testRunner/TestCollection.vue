@@ -24,12 +24,11 @@
                 <br />
                 <ol>
                     <li>Send messages matching each per-test description.</li>
-                    <li>Response message will reflect evaluation by the FHIR server running in the background
-                        (messages are forwarded as they are received).</li>
+                    <li>Response message will reflect evaluation by the FHIR server (or XDS server for MHD tests) running in the background.</li>
                     <li>Once an adequate collection of messages has been sent to satisfy the tests, evaluate them further by clicking the
                     spyglass icon to evaluate against a set of assertions specific to each test.
-                    This evaluation will include validating the response from the background FHIR Server.</li>
-                    <li>Only the most recent messages will be evaluated.  Adjust this count below.</li>
+                    This evaluation will include validating the response from the background server.</li>
+                    <li>Only the most recent messages will be evaluated.  Adjust the count below.</li>
                     <li>A test passes if one or more message evaluates correctly.</li>
                     <li>Click on a test to see the messages evaluated.  Click on a message to see the result of each
                         assertion that was evaluated.</li>
@@ -44,6 +43,8 @@
                 <img src="../../assets/press-play-button.png">
                 to run test. <br />Requests will be sent to
                 <span v-if="channelObj" class="boxed">{{ channelObj.fhirBase }}</span>
+                <div class="divider"></div>
+                <span v-if="channelObj">(Channel {{ channelObj.channelId }})</span>
             </span>
             <span class="divider"></span>
         </div>
@@ -54,6 +55,10 @@
         </div>
 
         <div class="runallgroup">
+            <button v-bind:class="{'button-selected': useJson, 'button-not-selected': !useJson}" @click="doJson()">JSON</button>
+            <button v-bind:class="{'button-selected': !useJson, 'button-not-selected': useJson}" @click="doXml()">XML</button>
+            <div class="divider"></div>
+            <div class="divider"></div>
             <button class="runallbutton" @click="doRunAll()">Run All</button>
         </div>
 
@@ -102,9 +107,16 @@
                 time: [],
                 evalCount: 5,
                 channelObj: null,  // channel object
+                useJson: true,
             }
         },
         methods: {
+            doJson() {
+                this.useJson = true
+            },
+            doXml() {
+                this.useJson = false
+            },
             clean(text) {
                 return text.replace(/_/g, ' ')
             },
@@ -139,18 +151,17 @@
             },
             doRun: async function(testName) {  // server tests
                 this.$store.commit('setCurrentTest', null)
-                const that = this
-                await ENGINE.post(`testrun/${this.sessionId}__${this.channelId}/${this.testCollection}/${testName}`)
-                    .then(response => {
-                        this.$store.dispatch('addTestReport', testName, response.data)
-                        this.$router.replace(`/session/${this.sessionId}/channel/${this.channelId}/collection/${this.testCollection}`)
-                        this.$store.dispatch('loadTestScriptNames')  // force reload of UI
-                    })
-                    .catch(error => {
-                        that.error(error)
-                    })
+                try {
+                    const response = await ENGINE.post(`testrun/${this.sessionId}__${this.channelId}/${this.testCollection}/${testName}?_format=${this.useJson ? 'json' : 'xml'}`)
+                    this.$store.commit('setTestReport', { testName: testName, testReport: response.data })
+                    //this.$router.push(`/session/${this.sessionId}/channel/${this.channelId}/collection/${this.testCollection}`)
+                    this.$store.dispatch('loadTestScriptNames')  // force reload of UI
+                } catch (error) {
+                    this.error(error)
+                }
             },
             doRunAll() {
+                this.status.length = 0
                 Object.keys(this.status).forEach(name => {
                     this.doRun(name)
                 })
@@ -166,15 +177,17 @@
                 const route = `/session/${this.sessionId}/channel/${this.channelId}/collection/${this.testCollection}/test/${name}`
                 this.$router.push(route)
             },
-            reload() {
+            async reload() {
+                console.log(`TestCollection.reload()`)
                 this.$store.commit('setTestCollectionName', this.testCollection)
-                this.$store.dispatch('loadTestScriptNames')
-                this.loadLastMarker()
-                this.$store.dispatch('loadChannel', this.fullChannelId)
-                    .then(channel => {
-                        this.channelObj = channel
-                    })
-                this.$router.push(`/session/${this.sessionId}/channel/${this.channelId}/collection/${this.testCollection}`)
+                await this.$store.dispatch('loadTestScriptNames')
+                const requiredChannel = this.$store.state.testRunner.requiredChannel
+                console.log(`requiredChannel for ${this.testCollection} is ${requiredChannel}`)
+                if (requiredChannel)
+                    this.$store.commit('setChannelId', requiredChannel)
+//                this.loadLastMarker()
+                this.channelObj = await this.$store.dispatch('loadChannel', this.fullChannelId)
+                this.$router.push(`/session/${this.sessionId}/channel/${this.$store.state.base.channelId}/collection/${this.testCollection}`)
             },
             testReport(testName) {
                 return this.$store.state.testRunner.testReports[testName]
@@ -311,6 +324,15 @@
         border: 1px dotted black;
         cursor: pointer;
         border-radius: 25px;
+    }
+    .button-selected {
+        border: 1px solid black;
+        background-color: lightgray;
+        cursor: pointer;
+    }
+    .button-not-selected {
+        border: 1px solid black;
+        cursor: pointer;
     }
     .right {
         text-align: right;

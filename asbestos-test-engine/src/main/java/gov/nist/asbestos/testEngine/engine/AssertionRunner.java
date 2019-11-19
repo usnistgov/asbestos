@@ -151,9 +151,15 @@ public class AssertionRunner {
                 return false;
             }
             String expression = as.getCompareToSourceExpression();
-            String found = FhirPathEngineBuilder.evalForString(sourceResource, expression);
+            String found;
+            try {
+                found = FhirPathEngineBuilder.evalForString(sourceResource, expression);
+            } catch (Throwable e) {
+                Reporter.reportError(val, assertReport, type, label,"Error evaluating expression: " + expression + "\n" + e.getMessage());
+                return false;
+            }
             if ("true".equals(found)) {
-                Reporter.reportPass(val, assertReport, type, label, "expression comparison completed");
+                Reporter.reportPass(val, assertReport, type, label, expression);
                 return true;
             }
             Reporter.reportFail(val, assertReport, type, label, "assertion failed - " + expression, warningOnly);
@@ -187,7 +193,7 @@ public class AssertionRunner {
                 Reporter.reportError(val, assertReport, type, label, "expecting " + as.getContentType() + " found " + sourceFixture.getResponseType());
                 return false;
             }
-            Reporter.reportPass(val, assertReport, type, label, "content type comparison");
+            Reporter.reportPass(val, assertReport, type, label, as.getContentType() + " = " + sourceFixture.getResponseType());
             return true;
         }
 
@@ -204,7 +210,7 @@ public class AssertionRunner {
                 return false;
 
             }
-            Reporter.reportPass(val, assertReport, type, label, "headerType/value comparison");
+            Reporter.reportPass(val, assertReport, type, label, sourceHeaderFieldValue + " = " + as.getValue());
             return true;
         }
 
@@ -217,7 +223,7 @@ public class AssertionRunner {
             String expected = as.getResponse().toCode();
             if (!compare(val, assertReport, found, expected, operator, warningOnly, type, label))
                 return false;
-            Reporter.reportPass(val, assertReport, type, label, "response comparison completed");
+            Reporter.reportPass(val, assertReport, type, label, found + " " + operator + " " + expected);
             return true;
         }
 
@@ -230,7 +236,7 @@ public class AssertionRunner {
             String expected = as.getResponseCode();
             if (!compare(val, assertReport, found, expected, operator, warningOnly, type, label))
                 return false;
-            Reporter.reportPass(val, assertReport, type, label, "responseCode comparison completed");
+            Reporter.reportPass(val, assertReport, type, label, found + " " + operator + " " + expected);
             return true;
         }
 
@@ -243,8 +249,14 @@ public class AssertionRunner {
                 Reporter.reportError(val, assertReport, type, label,"Fixture referenced " + sourceFixture.getId()  + " has no resource");
                 return false;
             }
-            String found = FhirPathEngineBuilder.evalForString(sourceResource, variableMgr.updateReference(as.getExpression()));
-
+            String expression = variableMgr.updateReference(as.getExpression());
+            String found;
+            try {
+                found = FhirPathEngineBuilder.evalForString(sourceResource, expression);
+            } catch (Throwable e) {
+                Reporter.reportError(val, assertReport, type, label,"Error evaluating expression: " + expression + "\n" + e.getMessage());
+                return false;
+            }
 
             if (found != null && found.contains("/")) {
                 Ref foundRef = new Ref(found);
@@ -263,7 +275,7 @@ public class AssertionRunner {
             String expected = variableMgr.updateReference(as.getValue());
             if (!compare(val, assertReport, found, expected, operator, warningOnly, type, label))
                 return false;
-            Reporter.reportPass(val, assertReport, type, label, "expression comparison completed");
+            Reporter.reportPass(val, assertReport, type, label, expression);
             return true;
         }
 
@@ -276,9 +288,16 @@ public class AssertionRunner {
                 Reporter.reportError(val, assertReport, type, label,"Fixture referenced " + sourceFixture.getId()  + " has no resource");
                 return false;
             }
-            boolean ok = FhirPathEngineBuilder.evalForBoolean(sourceResource, as.getExpression());
+            String expression = as.getExpression();
+            boolean ok;
+            try {
+                ok = FhirPathEngineBuilder.evalForBoolean(sourceResource, expression);
+            } catch (Throwable e) {
+                Reporter.reportError(val, assertReport, type, label,"Error evaluating expression: " + expression + "\n" + e.getMessage());
+                return false;
+            }
             if (ok) {
-                Reporter.reportPass(val, assertReport, type, label, "expression evaluated completed");
+                Reporter.reportPass(val, assertReport, type, label, expression);
                 return true;
             }
             Reporter.reportError(val, assertReport, type, label, "expression " + as.getExpression()  +  " failed");

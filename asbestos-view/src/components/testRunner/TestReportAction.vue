@@ -33,7 +33,7 @@
             </ul>
 
             <div v-if="this.script.operation">
-                <span v-if="eventId" class="selectable" @click="toggleEventDisplayed()">Message Log</span>
+                <span v-if="eventId" class="selectable" @click="toggleEventDisplayed()">Messages</span>
                 <span v-if="eventDisplayed && eventId">
                     <img src="../../assets/arrow-down.png" @click="toggleEventDisplayed()">
                     <log-item
@@ -51,7 +51,7 @@
             </div>
 
             <div>
-                <span class="selectable" @click="toggleScriptDisplayed()">Raw Report</span>
+                <span class="selectable" @click="toggleScriptDisplayed()">Test Report</span>
                 <span v-if="displayScript">
                     <img src="../../assets/arrow-down.png" @click="toggleScriptDisplayed()">
                     <script-display

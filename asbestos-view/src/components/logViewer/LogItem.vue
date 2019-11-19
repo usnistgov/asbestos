@@ -81,8 +81,8 @@
             loadEvent() {
                 if (!this.$store.state.log.eventSummaries)
                     return
-                const index = this.$store.state.log.currentEventIndex
-                const summary = this.$store.state.log.eventSummaries[index]
+                //const index = this.$store.state.log.currentEventIndex
+                const summary = this.$store.state.log.eventSummaries[this.index]
                 if (!summary)
                     return
                 // don't reload if it is already the selected event
@@ -107,13 +107,6 @@
             },
             limitLines(text) {
                 return text
-                // let lines = text.split('\n')
-                // for (let i=0; i<lines.length; i++) {
-                //     let line = lines[i]
-                //     if (line.length > 100)
-                //         lines[i] = line.substring(0, 99) + '...'
-                // }
-                // return lines.join('\n')
             },
             removeFormatting(msg) {
                   return msg.replace(/&lt;/g, '<').replace(/&#xa;/g, '\n').replace(/&#x9;/g, '\t')
@@ -121,8 +114,8 @@
             async loadEventSummaries() {
                 await this.$store.dispatch('loadEventSummaries')
                 this.index = this.findEventInStore
-                this.$store.commit('selectEvent', this.eventId)
-                this.$store.commit('setCurrentEventIndex', this.index)
+                //this.$store.commit('selectEvent', this.eventId)
+                //this.$store.commit('setCurrentEventIndex', this.index)
             },
         },
         computed: {
@@ -163,11 +156,10 @@
         },
         watch: {
             '$route': 'updateIndex',
-            eventId(newVal) {
-                if (this.noNav) {
-                    console.log(`eventId updated`)
-                }
-                this.$store.commit('selectEvent', newVal)
+            eventId() {
+                if (this.noNav)
+                    return
+                //this.$store.commit('selectEvent', newVal)
                 this.loadEvent()
             },
         },

@@ -19,46 +19,44 @@
 
             <div v-for="(test, testi) in tests"
                  :key="'Eval' + testi">
-<!--                <span class="name" >Eval: </span>-->
-<!--                <span class="value">Test: {{ test.name }}</span>-->
-<!--                <div v-if="test.description" class="test-part">-->
-<!--                    Test: {{ test.description }}-->
-<!--                </div>-->
-
                 <div>
                     <span class="selectable" @click.self="toggleEventDisplayed()">Message Log</span>
                     <span v-if="eventDisplayed">
-                                        <img src="../../assets/arrow-down.png" @click.self="toggleEventDisplayed()">
-                                        <log-item
-                                                :sessionId="sessionId"
-                                                :channelId="channelId"
-                                                :eventId="eventId"
-                                                :noNav="true">
-                                        </log-item>
-                                    </span>
+                        <img src="../../assets/arrow-down.png" @click.self="toggleEventDisplayed()">
+                        <log-item
+                                :sessionId="sessionId"
+                                :channelId="channelId"
+                                :eventId="eventId"
+                                :noNav="true">
+                        </log-item>
+                    </span>
                     <span v-else>
-                                        <img src="../../assets/arrow-right.png" @click.self="toggleEventDisplayed()">
-                                    </span>
+                        <img src="../../assets/arrow-right.png" @click.self="toggleEventDisplayed()">
+                    </span>
                 </div>
 
-                <!--                actions will be asserts only-->
+                <!-- actions will be asserts only-->
                 <div v-for="(action, actioni) in actions(testi)" class="test-part"
                      :key="'Eval' + testi + 'Action' + actioni">
                     <div>
                         <div >
                             <div @click.self="selectAssert(actioni)" v-bind:class="{
-                                    pass: assertResult(actioni) === 'pass',
-                                    fail: assertResult(actioni) === 'fail',
-                                    error: assertResult(actioni) === 'error',
-                                    warning: assertResult(actioni) === 'warning',
-                                    'not-run': assertResult(actioni) === 'not-run' }">
-                                <span class="selectable">Assert:</span> {{ assertDesc(actioni) }}
+                                    pass: assertResult(testi, actioni) === 'pass',
+                                    fail: assertResult(testi, actioni) === 'fail',
+                                    error: assertResult(testi, actioni) === 'error',
+                                    warning: assertResult(testi, actioni) === 'warning',
+                                    'not-run': assertResult(testi, actioni) === 'not-run' }">
+                                <span class="selectable">Assert:</span> {{ assertDesc(testi, actioni) }}
                             </div>
                             <div v-if="selectedAssertIndex === actioni" class="message-part">
-                                <div v-if="assertRef(actioni)">
-                                    {{ assertRef(actioni) }}
+                                <div v-if="assertRef(testi, actioni)">
+                                    {{ assertRef(testi, actioni) }}
                                 </div>
-                                {{ assertMessage(actioni) }}
+                                <ul>
+                                    <li v-for="(item, itemi) in assertMessage(testi, actioni)" :key="'AM' + itemi">
+                                        {{ item }}
+                                    </li>
+                                </ul>
                             </div>
                         </div>
                     </div>
@@ -91,31 +89,33 @@
             toggleEventDisplayed() {
                 this.eventDisplayed = !this.eventDisplayed
             },
-            assertMessage(assertIndex) {
-                return this.assertReport(assertIndex).message
+            assertMessage(testIndex, actionIndex) {
+                if (actionIndex < this.testReport.test[testIndex].action.length) {
+                    return this.testReport.test[testIndex].action[actionIndex].assert.message.split("\n")
+                }
+                return null
             },
-            assertResult(assertIndex) {
-                return this.assertReport(assertIndex).result
+            assertResult(testIndex, actionIndex) {
+                if (actionIndex < this.testReport.test[testIndex].action.length)
+                    return this.testReport.test[testIndex].action[actionIndex].assert.result
+                return 'not-run'
             },
-            assertPass(assertIndex) {
-                return this.assertReport(assertIndex).result === 'pass'
+            assertReport(testIndex, actionIndex) {
+                return this.testReport.test[testIndex].action[actionIndex].assert
             },
-            assertReport(assertIndex) {
-                return this.testReport.test[0].action[assertIndex].assert
+            assertScript(testIndex, actionIndex) {
+                return this.testScript.test[testIndex].action[actionIndex].assert
             },
-            assertScript(assertIndex) {
-                return this.testScript.test[0].action[assertIndex].assert
-            },
-            assertDesc(assertIndex) {
-                const rawDesc = this.assertScript(assertIndex).description
+            assertDesc(testIndex, actionIndex) {
+                const rawDesc = this.assertScript(testIndex, actionIndex).description
                 if (!rawDesc.includes("|"))
                     return rawDesc
                 const elements = rawDesc.split("|")
                 const msg = elements[0]
                 return msg
             },
-            assertRef(assertIndex) {
-                const rawDesc = this.assertScript(assertIndex).description
+            assertRef(testIndex, actionIndex) {
+                const rawDesc = this.assertScript(testIndex, actionIndex).description
                 if (!rawDesc.includes("|"))
                     return ''
                 const elements = rawDesc.split("|")
@@ -200,6 +200,10 @@
         },
         watch: {
             'testId': function() {
+                this.loadTestScript()
+                this.loadTestReport()
+            },
+            'eventId': function() {
                 this.loadTestScript()
                 this.loadTestReport()
             }
