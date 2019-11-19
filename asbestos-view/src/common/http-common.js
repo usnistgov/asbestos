@@ -1,8 +1,10 @@
 import Vue from 'vue';
 import axios from 'axios';
+import ServiceProperties from "../plugins/serviceProperties";
+
+Vue.use(ServiceProperties)
 
 const fhirToolkitBase = Vue.prototype.$fhirToolkitBase
-    //Vue.$fhirToolkitBase
 
 export const PROXY = axios.create({
     baseURL: `${fhirToolkitBase}/`,
