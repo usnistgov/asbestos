@@ -5,7 +5,7 @@
         <div v-else>
             <div>
                 <div class="control-panel-item-title" @click="openCollection()">Test Collections</div>
-                <span class="selectable" @click="openCollection()">View Selected</span>
+                <span class="selectable" @click="openCollection()">View</span>
                 <span class="divider"></span>
                 <img id="reload" class="selectable" @click="reload()" src="../../assets/reload.png"/>
                 <br />

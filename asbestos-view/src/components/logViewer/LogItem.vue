@@ -143,10 +143,7 @@
                 return this.selectedEvent.tasks[this.selectedTask].responseHeader
             },
             responseBody() {
-                let body = this.removeFormatting(this.limitLines(this.selectedEvent.tasks[this.selectedTask].responseBody))
-                let json = JSON.parse(body)
-                console.log(`resourceType is ${json.resourceType}`)
-                return body
+                return this.removeFormatting(this.limitLines(this.selectedEvent.tasks[this.selectedTask].responseBody))
             },
             eventSummary() {
                 if (!this.$store.state.log.eventSummaries)
