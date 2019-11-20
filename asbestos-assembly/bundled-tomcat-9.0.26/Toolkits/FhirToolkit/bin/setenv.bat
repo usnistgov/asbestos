@@ -7,5 +7,5 @@ REM The default copy of the service properties is inside the FhirToolkit\webapps
 
 REM External Cache
 REM If an alternate External Cache is desired, please use update the -DEXTERNAL_CACHE Java System Property below.
-SET "CATALINA_OPTS=%CATALINA_OPTS% -DEXTERNAL_CACHE=%TOOLKITS_DIR%\external_cache"
+SET "CATALINA_OPTS=%CATALINA_OPTS% -DEXTERNAL_CACHE=%TOOLKITS_DIR%\ExternalCache"
 

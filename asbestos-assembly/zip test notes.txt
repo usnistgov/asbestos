@@ -1,0 +1,46 @@
+check asbestos-war/src/main/resource/service.properties
+	port number = 9760
+
+For production, this port number must match the bundled-tomat application base's conf\server.xml
+
+need not check asbestos-war/pom.xml 
+	for ec_dir because it will use the default ExternalCache directory
+rename
+	DocumentEntry[Test].java
+	BuildRegistryObjectList[Test].java
+
+\asbestos
+mvn clean install
+
+cd asbestos-assembly
+
+mvn clean package
+
+C:\>@call \Users\skb1\myprojects\env.bat
+	
+unzip -qq C:\Users\skb1\myprojects\asbestos\asbestos-assembly\target\asbestos.zip -d C:\Users\skb1\myprojects\asbestos\asbestos-assembly\target\asbestos
+
+set CATALINA_HOME=C:\Users\skb1\myprojects\asbestos\asbestos-assembly\target\asbestos\tomcat-9.0.26
+
+set CATALINA_BASE=%CATALINA_HOME%\Toolkits\FhirToolkit
+
+cd C:\Users\skb1\myprojects\asbestos\asbestos-assembly\target\asbestos\tomcat-9.0.26\bin
+
+C:\Users\skb1\myprojects\asbestos\asbestos-assembly\target\asbestos\tomcat-9.0.26\bin>startup
+
+
+Problem ports if another tomcat is already running:
+
+port 8005 => 9705
+port 8009 => 9709
+port 8443 => 9743
+
+
+
+/*
+
+{
+  "fhirToolkitBase":"${FhirToolkitBase}"
+}
+
+*/

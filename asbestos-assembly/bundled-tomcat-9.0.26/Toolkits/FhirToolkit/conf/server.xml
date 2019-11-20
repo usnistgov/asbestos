@@ -19,7 +19,7 @@
      define subcomponents such as "Valves" at this level.
      Documentation at /docs/config/server.html
  -->
-<Server port="8005" shutdown="SHUTDOWN">
+<Server port="9705" shutdown="SHUTDOWN">
   <Listener className="org.apache.catalina.startup.VersionLoggerListener" />
   <!-- Security listener. Documentation at /docs/config/listeners.html
   <Listener className="org.apache.catalina.security.SecurityListener" />
@@ -68,7 +68,7 @@
     -->
     <Connector port="9760" protocol="HTTP/1.1"
                connectionTimeout="20000"
-               redirectPort="8443" />
+               redirectPort="9743" />
     <!-- A "Connector" using the shared thread pool on port 8080 -->
     <!--
     <Connector executor="tomcatThreadPool"
@@ -112,8 +112,8 @@
     </Connector>
     -->
 
-    <!-- Define an AJP 1.3 Connector on port 8009 -->
-    <Connector port="8009" protocol="AJP/1.3" redirectPort="8443" />
+    <!-- Define an AJP 1.3 Connector on port 9709 -->
+    <Connector port="9709" protocol="AJP/1.3" redirectPort="9743" />
 
 
     <!-- An Engine represents the entry point (within Catalina) that processes

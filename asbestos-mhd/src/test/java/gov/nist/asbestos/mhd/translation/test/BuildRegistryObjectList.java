@@ -33,7 +33,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class BuildRegistryObjectListTest {
+class BuildRegistryObjectList {
     private static Bundle bundle;
     private static Val val;
     private ResourceMgr rMgr;
@@ -45,7 +45,7 @@ class BuildRegistryObjectListTest {
 
     @BeforeAll
     static void beforeAll() throws URISyntaxException {
-        externalCache = Paths.get(BuildRegistryObjectListTest.class.getResource("/external_cache/findme.txt").toURI()).getParent().toFile();
+        externalCache = Paths.get(BuildRegistryObjectList.class.getResource("/external_cache/findme.txt").toURI()).getParent().toFile();
         InputStream is = ResourceMgrContainedTest.class.getResourceAsStream("/gov/nist/asbestos/mhd/translation/shared/bundle.xml");
         IBaseResource resource = ProxyBase.getFhirContext().newXmlParser().parseResource(is);
         assertTrue(resource instanceof Bundle);

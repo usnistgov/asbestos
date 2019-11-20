@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import App from './App.vue'
-import ServiceProperties from "./plugins/serviceProperties";
+import {initServiceProperties} from "./common/http-common";
 
 Vue.config.productionTip = false
 
@@ -14,8 +14,14 @@ window.onerror = function(message, source, lineno, colno, error) {
   Vue.$store.commit('setError', message + ' ' + error)
 }
 
-Vue.use(ServiceProperties)
 
-new Vue({
-  render: h => h(App)
-}).$mount('#app')
+initServiceProperties().then(p => {
+    if (p === true) {
+        new Vue({
+            render: h => h(App)
+        }).$mount('#app')
+    } else {
+       console.log('ServiceProperties could not be initialized');
+    }
+})
+
