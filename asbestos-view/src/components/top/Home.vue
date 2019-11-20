@@ -18,7 +18,10 @@
         </div>
 
         <h2>Major Components</h2>
-
+        <p>Client testing (MHD Document Source)</p>
+        <img src="../../assets/Client_workflow.png">
+        <p>Server testing (MHD Document Responder)</p>
+        <img src="../../assets/Server_workflow.png">
         <h2>Controls</h2>
         The <span class="bold"> Control panel</span> is on the right side of the screen:<br /><br />
 
