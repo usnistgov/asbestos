@@ -10,7 +10,13 @@
         </ul>
 
         <h2>Value Sets</h2>
-        <b>Assert Response Code Types</b>
+
+        <h3>codes.xml</h3>
+
+        <p>This file is traditionally used by XDS Toolkit to hold the value sets use by XDS in the
+        configuration of the Affinity Domain.  It also holds the translations between FHIR coding and XDS
+        coding. It can be found in the XDS Toolkit External Cache under environment/default/codes.xml.</p>
+        <h3>Assert Response Code Types</h3>
         <p>These codes are used in the test descriptions representing HTTP response codes</p>
         <ul>
             <li><a href="http://hl7.org/fhir/valueset-assert-response-code-types.html#expansion" target="_blank">Codes</a></li>

@@ -3,12 +3,19 @@
         <div>
         <div class="left window-title-bar">
             <span class="window-title">NIST FHIR<img src="../../assets/copyright.png"> Toolkit</span>
+
             <span class="title-divider"> </span>
             <span class="selectable" @click="go('/home')">Home</span>
+
+            <div class="divider"></div>
+            <span class="selectable" @click="go('/configurations')">Configurations</span>
+
             <div class="divider"></div>
             <span class="selectable" @click="go('/mhdtesting')">MHD Testing</span>
+
             <div class="divider"></div>
             <span class="selectable" @click="go('/about')">About</span>
+
         </div>
         </div>
         <div class="grid-container">

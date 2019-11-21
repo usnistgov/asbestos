@@ -35,7 +35,7 @@
                 </ol>
                 <div>
                     FHIR Server Base Address:
-                    <span class="boxed">{{ clientBaseAddress }}</span>
+                    <span class="boxed">{{ clientBaseAddress }}</span>  based on the Channel selection.
                 </div>
             </span>
             <span v-else  class="instruction">
@@ -44,7 +44,7 @@
                 to run test. <br />Requests will be sent to
                 <span v-if="channelObj" class="boxed">{{ channelObj.fhirBase }}</span>
                 <div class="divider"></div>
-                <span v-if="channelObj">(Channel {{ channelObj.channelId }})</span>
+                <span v-if="channelObj">(Channel {{ channelObj.channelId }}) based on the Channel selection.</span>
             </span>
             <span class="divider"></span>
         </div>

@@ -18,6 +18,7 @@ import EvalReportAssert from "../components/testRunner/EvalReportAssert";
 import About from "../components/top/About"
 import Home from "../components/top/Home"
 import MhdTesting from "../components/top/MhdTesting"
+import Configurations from "../components/top/Configurations"
 
 Vue.use( VueRouter )
 
@@ -37,6 +38,12 @@ export const routes = [
                 path: 'home',
                 components: {
                     default: Home
+                }
+            },
+            {
+                path: 'configurations',
+                components: {
+                    default: Configurations
                 }
             },
             {
