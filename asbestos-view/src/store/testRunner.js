@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 import {ENGINE, LOG} from '../common/http-common'
+import {FHIRTOOLKITBASEURL} from "../common/http-common";
 
 Vue.use(Vuex)
 
@@ -29,7 +30,7 @@ export const testRunnerStore = {
             eventEvalCount: 0,   // number of most recent events to evaluate
 
             clientTestResult: [], // { testId: { eventId: TestReport } }
-            currentChannelBaseAddr: 'http://localhost:8081/asbestos/',
+            currentChannelBaseAddr: `${FHIRTOOLKITBASEURL}/`,
             testAssertions: null,
             testCollectionsLoaded: false,
         }

@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <parent>
+        <artifactId>asbestos</artifactId>
+        <groupId>gov.nist.asbestos</groupId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>asbestos-assembly</artifactId>
+
+    <!--
+    NOTE:
+    NOTE: This project assumes that asbestos-view and asbestos-war projects were already built successfully since it will only copy the project's output/target.
+    NOTE:
+    -->
+
+    <properties>
+        <!-- The preconfigured Tomcat distribution with the "Toolkits" application base and HTTP port number -->
+        <bundledTomcatDir>tomcat-9.0.26</bundledTomcatDir>
+    </properties>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                        <configuration>
+                            <appendAssemblyId>false</appendAssemblyId>
+                            <filters>
+                                <filter>${basedir}/../asbestos-war/src/main/resources/service.properties</filter>
+                            </filters>
+                            <descriptors>
+                                <!-- The main configuration of this project is in the zip.xml descriptor file -->
+                                <descriptor>src/main/assembly/zip.xml</descriptor>
+                            </descriptors>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

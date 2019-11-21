@@ -40,11 +40,11 @@
 
     <software>
         <name value="FHIRToolkit"/>
-        <version value="${FhirToolkitVersion}"/>
+        <version value="${fhirToolkitVersion}"/>
     </software>
     <implementation>
         <description value="MHD DocumentResponder and MHD DocumentRecipient"/>
-        <url value="${FhirToolkitBase}"/>
+        <url value="${fhirToolkitBase}"/>
     </implementation>
 
     <fhirVersion value="4.0.0"/>
