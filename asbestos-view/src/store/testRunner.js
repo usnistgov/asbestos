@@ -32,9 +32,13 @@ export const testRunnerStore = {
             currentChannelBaseAddr: 'http://localhost:8081/asbestos/',
             testAssertions: null,
             testCollectionsLoaded: false,
+            hapiIsAlive: false,
         }
     },
     mutations: {
+        setHapiIsAlive(state, value) {
+            state.hapiIsAlive = value
+        },
         setRequiredChannel(state, channel) {
             state.requiredChannel = channel
         },
@@ -285,5 +289,15 @@ export const testRunnerStore = {
             reports[data.testName] = data.testReport
             commit('setTestReport', data)
         },
+        hapiHeartbeat({commit}) {
+            const url = `hapiheartbeat`
+            ENGINE.get(url)
+                .then(response => {
+                    commit('setHapiIsAlive', true)
+                })
+                .catch (error => {
+                    commit('setHapiIsAlive', false)
+                })
+        }
     }
 }

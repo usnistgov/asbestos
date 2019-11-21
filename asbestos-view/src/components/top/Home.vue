@@ -4,7 +4,7 @@
         <h2>Self Test</h2>
         <p>Verify that all back-end services are responding.</p>
 
-        <div class="selectable" @click="selfTest()">Re-Run</div>
+        <div class="selectable" @click="selfTest()">Run</div>
         <div v-if="$store.state.log.loaded">
             Proxy responding
         </div>
@@ -16,6 +16,12 @@
         </div>
         <div v-else>
             Test Engine not responding
+        </div>
+        <div v-if="$store.state.testRunner.hapiIsAlive">
+            HAPI responding
+        </div>
+        <div v-else>
+            HAPI not responding
         </div>
 
         <h2>FHIR Toolkit structure</h2>
@@ -120,8 +126,10 @@ kinds of channels: FHIR - data passed without modification and MHD - translation
             selfTest() {
                 this.$store.commit('resetLogLoaded')
                 this.$store.commit('resetTestCollectionsLoaded')
+                this.$store.commit('setHapiIsAlive', false)
                 this.testTestEngine()
                 this.testProxy()
+                this.testHapi()
             },
             testTestEngine() {
                 this.$store.dispatch('loadTestCollectionNames')
@@ -133,7 +141,7 @@ kinds of channels: FHIR - data passed without modification and MHD - translation
 
             },
             testHapi() {
-
+                this.$store.dispatch('hapiHeartbeat')
             },
         },
         created() {

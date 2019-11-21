@@ -54,8 +54,33 @@
             window (see top menu banner) has links that configure FHIR Toolkit for a particular testing challenge.
 
         <h2>Server testing configuration</h2>
+
+        <p>In this mode, FHIR Toolkit initiates messages to a server-style actor such as the MHD Document Recipient and validates
+        the response.</p>
         <img src="../../assets/Server_workflow.png">
 
+        <h3>Processing</h3>
+
+        <ol>
+            <li>Server testing uses the SUT channel in the Proxy. Before a test can be run the SUT channel
+            configuration must be edited and the correct FHIRBase for the SUT inserted.</li>
+            <li>Tool is put in server testing mode by selecting a Server test collection.</li>
+            <li>The list applicable tests are displayed and individually run or run as a group.</li>
+            <li>Initiating a test from the user interface instructs the Test Engine to contact the SUT,
+            sending messages through the Proxy. In this mode a FHIR Channel in the Proxy is used so the messages
+            pass through unchanged except for addressing-related headers.</li>
+            <li>The response from the SUT returns through the Proxy.</li>
+            <li>The response is graded by the Test Engine which can evaluate the response and also issue
+            secondary requests such as queries to validate the content of the server.</li>
+        </ol>
+
+        <h3>Validation</h3>
+        <p>All validation is done by evaluating the response message or by sending secondary requests such as
+        queries to validate the content of the server.</p>
+
+        <h3>Configuring FHIR Toolkit for this testing</h3>
+        <p>Server testing uses the SUT channel in the Proxy. Before a test can be run the SUT channel
+            configuration must be edited and the correct FHIRBase for the SUT inserted.</p>
     </div>
 </template>
 

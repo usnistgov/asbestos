@@ -146,7 +146,7 @@ export const baseStore = {
                     commit('setError', url + ': ' + e)
                     console.error('channel/' + fullId + ' ' + e)
                 })
-        }
+        },
     },
     getters: {
 

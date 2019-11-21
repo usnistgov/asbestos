@@ -8,10 +8,10 @@
             <span class="selectable" @click="go('/home')">Home</span>
 
             <div class="divider"></div>
-            <span class="selectable" @click="go('/configurations')">Configurations</span>
+            <span class="selectable" @click="go('/mhdtesting')">MHD Testing</span>
 
             <div class="divider"></div>
-            <span class="selectable" @click="go('/mhdtesting')">MHD Testing</span>
+            <span class="selectable" @click="go('/configurations')">Configurations</span>
 
             <div class="divider"></div>
             <span class="selectable" @click="go('/about')">About</span>
