@@ -156,8 +156,8 @@
                         </systemProperty>
                         <systemProperty>
                             <name>EXTERNAL_CACHE</name>
-<!--                            <value>/Users/bill/ec</value>-->
-                            <value>/C:/Users/skb1/ec/dev</value>
+                            <value>/Users/bill/ec</value>
+<!--                            <value>/C:/Users/skb1/ec/dev</value>-->
                         </systemProperty>
                     </systemProperties>
                 </configuration>

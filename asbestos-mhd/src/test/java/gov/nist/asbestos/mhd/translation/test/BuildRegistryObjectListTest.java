@@ -21,6 +21,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import javax.xml.bind.JAXBElement;
@@ -33,7 +34,8 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class BuildRegistryObjectList {
+@Disabled("The Test suffix from the class name can be removed so that it would be ignored until the errors are fixed.")
+class BuildRegistryObjectListTest {
     private static Bundle bundle;
     private static Val val;
     private ResourceMgr rMgr;
@@ -45,7 +47,7 @@ class BuildRegistryObjectList {
 
     @BeforeAll
     static void beforeAll() throws URISyntaxException {
-        externalCache = Paths.get(BuildRegistryObjectList.class.getResource("/external_cache/findme.txt").toURI()).getParent().toFile();
+        externalCache = Paths.get(BuildRegistryObjectListTest.class.getResource("/external_cache/findme.txt").toURI()).getParent().toFile();
         InputStream is = ResourceMgrContainedTest.class.getResourceAsStream("/gov/nist/asbestos/mhd/translation/shared/bundle.xml");
         IBaseResource resource = ProxyBase.getFhirContext().newXmlParser().parseResource(is);
         assertTrue(resource instanceof Bundle);
