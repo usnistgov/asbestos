@@ -14,7 +14,19 @@
         <!-- Copy the bundled Tomcat folder with pre-configured conf\server.xml, ExternalCache, and the application base directory -->
         <fileSet>
             <useDefaultExcludes>false</useDefaultExcludes>
-            <directory>${basedir}/bundled-tomcat-9.0.26</directory>
+            <directory>${baseTomcatDir}</directory>
+            <excludes>
+                <exclude>bin/*.sh</exclude>
+            </excludes>
+            <outputDirectory>${bundledTomcatDir}</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <useDefaultExcludes>false</useDefaultExcludes>
+            <directory>${baseTomcatDir}</directory>
+            <includes>
+                <include>bin/*.sh</include>
+            </includes>
+            <fileMode>755</fileMode>
             <outputDirectory>${bundledTomcatDir}</outputDirectory>
         </fileSet>
         <!-- Copy the Asbestos-view dist folder. This is the front-end static content code. -->
