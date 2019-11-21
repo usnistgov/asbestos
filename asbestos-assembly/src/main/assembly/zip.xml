@@ -27,20 +27,30 @@
             </excludes>
             <outputDirectory>${bundledTomcatDir}/Toolkits/FhirToolkit/webapps/ROOT</outputDirectory>
         </fileSet>
-        <!-- Copy the Asbestos-war folder. This is the back-end code. -->
+        <!-- Copy the HOW-TO files -->
         <fileSet>
             <useDefaultExcludes>false</useDefaultExcludes>
-            <directory>${basedir}/../asbestos-war/target/asbestos-war</directory>
-            <outputDirectory>${bundledTomcatDir}/Toolkits/FhirToolkit/webapps/asbestos</outputDirectory>
+            <directory>${basedir}/HOW-TO</directory>
+            <outputDirectory>./HOW-TO</outputDirectory>
         </fileSet>
     </fileSets>
    <files>
        <!-- Apply the Service Properties filter -->
+        <file>
+          <source>../asbestos-view/dist/serviceProperties.json</source>
+          <outputDirectory>${bundledTomcatDir}/Toolkits/FhirToolkit/webapps/ROOT</outputDirectory>
+          <filtered>true</filtered>
+        </file>
+       <!-- Copy the Asbestos-war file. This is the back-end code. Do not copy the asbestos-war folder since the service.properties file will be changed for it-tests.  -->
        <file>
-        <source>../asbestos-view/dist/serviceProperties.json</source>
-        <outputDirectory>${bundledTomcatDir}/Toolkits/FhirToolkit/webapps/ROOT</outputDirectory>
-        <filtered>true</filtered>
-    </file>
+           <source>${basedir}/../asbestos-war/target/asbestos-war.war</source>
+           <destName>asbestos.war</destName>
+           <outputDirectory>${bundledTomcatDir}/Toolkits/FhirToolkit/webapps</outputDirectory>
+       </file>
+       <!-- Copy the README.txt file -->
+       <file>
+           <source>${basedir}/README.txt</source>
+           <outputDirectory>./</outputDirectory>
+       </file>
    </files>
-
 </assembly>
