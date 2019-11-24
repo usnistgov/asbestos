@@ -1,0 +1,1 @@
+A placeholder for the ExternalCache directory.

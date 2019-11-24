@@ -1,0 +1,2 @@
+Changing ExternalCache
+The External Cache directory is specified by the -DEXTERNAL_CACHE Java System Property in the <installation-directory>\tomcat\Toolkits\FhirToolkit\bin\setenv.bat (or setenv.sh). If an alternate External Cache location is desired, please update the -DEXTERNAL_CACHE Java System Property in the "setenv" batch file/script.

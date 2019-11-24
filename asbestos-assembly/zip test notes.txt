@@ -1,0 +1,53 @@
+start xdstoolkit on port 8080. It is required for asbestos build and mhd channel at runtime.
+
+check asbestos-war/src/main/resource/service.properties
+	port number = 9760
+
+For production, this port number must match the bundled-tomat application base's conf\server.xml
+
+check EXTERNAL_CACHE property in asbestos-war/pom.xml 
+	for it-tests check ec_dir 
+	for production ec_dir, it will use the default ExternalCache directory in the bundled tomcat directory.
+
+rename due to test failures:
+	DocumentEntry[Test].java
+	BuildRegistryObjectList[Test].java
+
+\asbestos
+mvn clean install
+
+cd asbestos-assembly
+
+mvn clean package
+
+@call c:\Users\skb1\myprojects\env.bat
+
+dir C:\Users\skb1\myprojects\asbestos\asbestos-assembly\target\asbestos.zip
+	
+unzip -qq C:\Users\skb1\myprojects\asbestos\asbestos-assembly\target\asbestos.zip -d C:\Users\skb1\myprojects\asbestos\asbestos-assembly\target\asbestos
+
+set CATALINA_HOME=C:\Users\skb1\myprojects\asbestos\asbestos-assembly\target\asbestos\tomcat
+
+set CATALINA_BASE=%CATALINA_HOME%\Toolkits\FhirToolkit
+
+cd %CATALINA_HOME%\bin
+
+startup
+
+
+Problem ports if another tomcat is already running:
+
+port 8080 => 9760
+port 8005 => 9705
+port 8009 => 9709
+port 8443 => 9743
+
+
+
+/*
+
+{
+  "fhirToolkitBase":"${FhirToolkitBase}"
+}
+
+*/

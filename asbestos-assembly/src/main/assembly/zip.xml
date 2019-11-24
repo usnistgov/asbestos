@@ -1,0 +1,68 @@
+<assembly xmlns="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2 http://maven.apache.org/xsd/assembly-1.1.2.xsd">
+    <id>zip</id>
+
+    <!-- If true, this adds an extra Asbestos folder on top of the Tomcat folder -->
+    <includeBaseDirectory>false</includeBaseDirectory>
+
+    <formats>
+        <format>zip</format>
+    </formats>
+
+    <fileSets>
+        <!-- Copy the bundled Tomcat folder with pre-configured conf\server.xml, ExternalCache, and the application base directory -->
+        <fileSet>
+            <useDefaultExcludes>false</useDefaultExcludes>
+            <directory>${baseTomcatDir}</directory>
+            <excludes>
+                <exclude>bin/*.sh</exclude>
+            </excludes>
+            <outputDirectory>${bundledTomcatDir}</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <useDefaultExcludes>false</useDefaultExcludes>
+            <directory>${baseTomcatDir}</directory>
+            <includes>
+                <include>bin/*.sh</include>
+            </includes>
+            <fileMode>755</fileMode>
+            <outputDirectory>${bundledTomcatDir}</outputDirectory>
+        </fileSet>
+        <!-- Copy the Asbestos-view dist folder. This is the front-end static content code. -->
+        <fileSet>
+            <useDefaultExcludes>false</useDefaultExcludes>
+            <directory>${basedir}/../asbestos-view/dist</directory>
+            <!-- The json file contains tokens which need a filter. See the Apply Service Properties section below -->
+            <excludes>
+                <exclude>serviceProperties.json</exclude>
+            </excludes>
+            <outputDirectory>${bundledTomcatDir}/Toolkits/FhirToolkit/webapps/ROOT</outputDirectory>
+        </fileSet>
+        <!-- Copy the HOW-TO files -->
+        <fileSet>
+            <useDefaultExcludes>false</useDefaultExcludes>
+            <directory>${basedir}/HOW-TO</directory>
+            <outputDirectory>./HOW-TO</outputDirectory>
+        </fileSet>
+    </fileSets>
+   <files>
+       <!-- Apply the Service Properties filter -->
+        <file>
+          <source>../asbestos-view/dist/serviceProperties.json</source>
+          <outputDirectory>${bundledTomcatDir}/Toolkits/FhirToolkit/webapps/ROOT</outputDirectory>
+          <filtered>true</filtered>
+        </file>
+       <!-- Copy the Asbestos-war file. This is the back-end code. Do not copy the asbestos-war folder since the service.properties file will be changed for it-tests.  -->
+       <file>
+           <source>${basedir}/../asbestos-war/target/asbestos-war.war</source>
+           <destName>asbestos.war</destName>
+           <outputDirectory>${bundledTomcatDir}/Toolkits/FhirToolkit/webapps</outputDirectory>
+       </file>
+       <!-- Copy the README.txt file -->
+       <file>
+           <source>${basedir}/README.txt</source>
+           <outputDirectory>./</outputDirectory>
+       </file>
+   </files>
+</assembly>

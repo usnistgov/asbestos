@@ -1,0 +1,5 @@
+Changing host name
+The default host name used by the FhirToolkit is "localhost". This value is reflected in the FhirToolkit Capability Statement and also used by the backend API calls. If you wish to change the host name, please update the following:
+a. Update the relevant part of the fhirToolkitBase property in <installation-directory>\tomcat\Toolkits\FhirToolkit\webapps\ROOT\serviceProperties.json
+
+b. Update the relevant part of the fhirToolkitBase property in <installation-directory>\tomcat\Toolkits\FhirToolkit\webapps\asbestos\WEB-INF\classes\service.properties
