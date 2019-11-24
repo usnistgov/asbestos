@@ -150,28 +150,30 @@
                 return false
             },
             doEval(testName) {  // client tests
-                //console.log(`doEval(${testName})`)
                 this.$store.dispatch('runEval', testName)
             },
-            doRun: async function(testName) {  // server tests
-                this.running = true
+            async runner(testName) {
                 this.$store.commit('setCurrentTest', null)
                 try {
                     const response = await ENGINE.post(`testrun/${this.sessionId}__${this.channelId}/${this.testCollection}/${testName}?_format=${this.useJson ? 'json' : 'xml'}`)
                     this.$store.commit('setTestReport', { testName: testName, testReport: response.data })
-                    //this.$router.push(`/session/${this.sessionId}/channel/${this.channelId}/collection/${this.testCollection}`)
-                    this.$store.dispatch('loadTestScriptNames')  // force reload of UI
                 } catch (error) {
                     this.error(error)
-                } finally {
-                    this.running = false
                 }
             },
-            doRunAll() {
-                this.status.length = 0
-                Object.keys(this.status).forEach(name => {
-                    this.doRun(name)
-                })
+            async doRun(testName) {  // server tests
+                this.running = true
+                await this.runner(testName)
+                this.running = false
+                this.$store.dispatch('loadTestScriptNames')  // force reload of UI
+            },
+            async doRunAll()  {
+                this.running = true
+                for (const name of Object.keys(this.status)) {
+                    await this.runner(name)
+                }
+                this.running = false
+                this.$store.dispatch('loadTestScriptNames')  // force reload of UI
             },
             selectTest(name) {
                 if (this.selected === name)  { // unselect

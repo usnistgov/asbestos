@@ -36,7 +36,7 @@
             <li>All aspects of the Provide and Register  are validated including presence of required attributes, object
                 linking, coding, etc.</li>
             <li>Metadata and documents are saved (this is not important for validation, just a side-effect.</li>
-            <li></li>
+
         </ul>
 
         The results of these two phases of validation are returned to the client SUT.  Final validation is done from the

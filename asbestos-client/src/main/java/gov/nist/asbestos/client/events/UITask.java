@@ -1,6 +1,8 @@
 package gov.nist.asbestos.client.events;
 
 import gov.nist.asbestos.client.events.Reader;
+import gov.nist.asbestos.http.headers.Header;
+import gov.nist.asbestos.http.headers.Headers;
 
 import java.io.File;
 
@@ -19,6 +21,11 @@ public class UITask {
         requestBody = Reader.read(eventDir, taskLabel, "request_body.txt");
         responseHeader = Reader.read(eventDir, taskLabel, "response_header.txt");
         responseBody = Reader.read(eventDir, taskLabel, "response_body.txt");
+    }
+
+    public boolean isHTMLResponse() {
+        Headers headers = new Headers(responseHeader);
+        return headers.getContentType().getValue().contains("html");
     }
 
     public int getIndex() {
