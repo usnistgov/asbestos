@@ -9,6 +9,7 @@ public class EventSummary {
     public String resourceType;
     String verb;
     boolean status;
+    String ipAddr;
 
     public EventSummary(File eventFile) {
         try {
@@ -19,6 +20,7 @@ public class EventSummary {
             String requestHeader = uiTask.getRequestHeader();
             headers = new Headers(requestHeader);
             verb = headers.getVerb();
+            ipAddr = headers.getHeaderValue("x-client-addr");
         } catch (Exception e) {
             status = false;
         }

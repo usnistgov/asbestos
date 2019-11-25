@@ -53,7 +53,7 @@
                     const summary = this.$store.state.log.eventSummaries.find(it =>
                         it.eventName === eventId)
                     if (summary)
-                        return `${summary.verb} ${summary.resourceType}`
+                        return `${summary.verb} ${summary.resourceType} from ${summary.ipAddr}`
                 }
                 return null
             },
