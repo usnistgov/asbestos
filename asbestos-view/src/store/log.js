@@ -36,7 +36,6 @@ export const logStore = {
             const session = parms.session
             commit('setLogChannel', channel)
             commit('setLogSession', session)
-            console.log(`loadEventSummaries ${rootState.base.session} ${rootState.base.channelId}`)
             if (!rootState.base.session) {
                 commit('setError', 'Session not set in logStore.loadEventSummaries')
                 console.error('Session not set')
@@ -53,8 +52,6 @@ export const logStore = {
                         summaries: 'true'
                     }
                 })
-                console.log(`loadEventSummaries done`)
-
                 const eventSummaries = rawSummaries.data.sort((a, b) => {
                     if (a.eventName < b.eventName) return 1
                     return -1

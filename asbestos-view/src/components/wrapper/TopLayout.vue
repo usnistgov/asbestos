@@ -3,6 +3,9 @@
         <div>
         <div class="left window-title-bar">
             <span class="window-title">NIST FHIR<img src="../../assets/copyright.png"> Toolkit</span>
+            <span class="title-divider"> </span>
+
+            <span>{{ projectVersion }}</span>
 
             <span class="title-divider"> </span>
             <span class="selectable" @click="go('/home')">Home</span>
@@ -58,6 +61,7 @@
     import TestControlPanel from "./TestControlPanel"
     import ChannelLogControlPanel from "./ChannelLogControlPanel"
     // import DebugControlPanel from "./DebugControlPanel"
+    import {PROJECTVERSION} from "../../common/http-common";
 
     export default {
         data() {
@@ -86,6 +90,9 @@
             },
         },
         computed: {
+            projectVersion() {
+                return PROJECTVERSION
+            }
         },
         watch: {
         },

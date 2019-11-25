@@ -1,3 +1,4 @@
 {
-  "fhirToolkitBase":"${fhirToolkitBase}"
+  "fhirToolkitBase":"${fhirToolkitBase}",
+  "projectVersion": "${project.version}"
 }
