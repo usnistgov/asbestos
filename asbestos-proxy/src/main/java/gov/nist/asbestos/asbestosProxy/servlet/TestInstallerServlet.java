@@ -48,6 +48,10 @@ public class TestInstallerServlet  extends HttpServlet {
         initializeChannels();
     }
 
+    private void verifyCodesXml() {
+
+    }
+
     private void initializeChannels() {
         File externalChannels = new File(new File(externalCache, EC.CHANNELS_DIR), "default");
         externalChannels.mkdirs();

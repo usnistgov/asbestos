@@ -10,7 +10,7 @@ import java.util.*;
 public class Installation {
     private static Installation me = null;
     private File externalCache;
-    String servletContextName = "http";
+    private String servletContextName = "http";
     private PropertyServiceManager propertyServiceManager = new PropertyServiceManager();
     private File defaultEnvironmentFile;
 
@@ -52,12 +52,6 @@ public class Installation {
         return buf.toString();
     }
 
-    public File fsimDbFile()  {
-        File f = new File(externalCache(), "fsimDb");
-        f.mkdirs();
-        return f;
-    }
-
     public static Installation instance() {
         if (me == null) {
             me = new Installation();
@@ -68,10 +62,6 @@ public class Installation {
     private Installation() {
     }
 
-    public PropertyServiceManager propertyServiceManager() {
-        return propertyServiceManager;
-    }
-
     public String toString() {
       return "External Cache is " + externalCache().toString();
     }
@@ -80,30 +70,9 @@ public class Installation {
         return new File(new File(new File(externalCache, "environment"), environmentName), "codes.xml");
     }
 
-    public File fhirSimDbFile(TestSession testSession) {
-        return simDbFile(testSession);
-    }
-
-    public File simDbFile(TestSession testSession) {
-        Objects.requireNonNull(testSession);
-        return new File(simDbFile(), testSession.getValue());
-    }
-
-    public File simDbFile()  {
-        return new File(externalCache(), "fsimdb");
-    }
-
-    public File environmentDbFile()  {
-        return new File(externalCache(), "environment");
-    }
-
-    public File environmentFile(String environment)  {
-        return new File(environmentDbFile(), environment);
-    }
-
-    public boolean environmentExists(String environment)  {
-        return environmentFile(environment).exists();
-    }
+//    private File simDbFile()  {
+//        return new File(externalCache(), "fsimdb");
+//    }
 
     public static String dateAsIdentifier(Date date, String prefix, String connector) {
         Calendar c  = Calendar.getInstance();
@@ -153,52 +122,9 @@ public class Installation {
 
     public static String asFilenameBase(Date date) {
         return dateAsIdentifier(date, "", "_");
-//        Calendar c  = Calendar.getInstance();
-//        c.setTime(date);
-//
-//        String year = Integer.toString(c.get(Calendar.YEAR));
-//        String month = Integer.toString(c.get(Calendar.MONTH) + 1);
-//        if (month.length() == 1)
-//            month = "0" + month;
-//        String day = Integer.toString(c.get(Calendar.DAY_OF_MONTH));
-//        if (day.length() == 1 )
-//            day = "0" + day;
-//        String hour = Integer.toString(c.get(Calendar.HOUR_OF_DAY));
-//        if (hour.length() == 1)
-//            hour = "0" + hour;
-//        String minute = Integer.toString(c.get(Calendar.MINUTE));
-//        if (minute.length() == 1)
-//            minute = "0" + minute;
-//        String second = Integer.toString(c.get(Calendar.SECOND));
-//        if (second.length() == 1)
-//            second = "0" + second;
-//        String mili = Integer.toString(c.get(Calendar.MILLISECOND));
-//        if (mili.length() == 2)
-//            mili = "0" + mili;
-//        else if (mili.length() == 1)
-//            mili = "00" + mili;
-//
-//        String dot = "_";
-//
-//        String val =
-//                year +
-//                        dot +
-//                        month +
-//                        dot +
-//                        day +
-//                        dot +
-//                        hour +
-//                        dot +
-//                        minute +
-//                        dot +
-//                        second +
-//                        dot +
-//                        mili
-//        ;
-//        return val;
     }
 
-    public File actorsDir() {
+    private File actorsDir() {
         return new File(externalCache(), File.separator + "actors");
     }
 
@@ -209,14 +135,14 @@ public class Installation {
         return f;
     }
 
-    public List<TestSession> getTestSessions() {
-        Set<TestSession> ts = new HashSet<>();
-
-        ts.addAll(findTestSessions(simDbFile()));
-        ts.addAll(findTestSessions(actorsDir()));
-
-        return new ArrayList<>(ts);
-    }
+//    private List<TestSession> getTestSessions() {
+//        Set<TestSession> ts = new HashSet<>();
+//
+//        ts.addAll(findTestSessions(simDbFile()));
+//        ts.addAll(findTestSessions(actorsDir()));
+//
+//        return new ArrayList<>(ts);
+//    }
 
     private List<TestSession> findTestSessions(File dir) {
         List<TestSession> ts = new ArrayList<>();
@@ -229,9 +155,9 @@ public class Installation {
         return ts;
     }
 
-    public boolean testSessionExists(TestSession testSession) {
-        return getTestSessions().contains(testSession);
-    }
+//    public boolean testSessionExists(TestSession testSession) {
+//        return getTestSessions().contains(testSession);
+//    }
 
     public String getServletContextName() {
         return servletContextName;
