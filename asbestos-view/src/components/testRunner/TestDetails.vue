@@ -91,7 +91,8 @@
                 return ref.substring(1)
             },
             findContained(obj, id) {
-                console.log(`findContained ${id}`)
+                if (id && id === 'foo')
+                    return 'foo'  // just to preserve parm id
                 if (!obj.contained) {
                     return null
                 }

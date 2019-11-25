@@ -127,7 +127,6 @@
             evalStatus() { // see GetClientTestEvalResult
                 this.status.splice(0)
                 this.testScriptNames.forEach(testId => {
-                    //console.log(`evalStatus ${testId}`)
                     const eventResult = this.$store.state.testRunner.clientTestResult[testId]
                     if (!eventResult) {
                         this.$set(this.status, testId, 'not-run')
@@ -187,11 +186,9 @@
                 this.$router.push(route)
             },
             async reload() {
-                console.log(`TestCollection.reload()`)
                 this.$store.commit('setTestCollectionName', this.testCollection)
                 await this.$store.dispatch('loadTestScriptNames')
                 const requiredChannel = this.$store.state.testRunner.requiredChannel
-                console.log(`requiredChannel for ${this.testCollection} is ${requiredChannel}`)
                 if (requiredChannel)
                     this.$store.commit('setChannelId', requiredChannel)
 //                this.loadLastMarker()
@@ -202,7 +199,6 @@
                 return this.$store.state.testRunner.testReports[testName]
             },
             updateReportStatuses() {   // for server tests
-                //console.log('TestCollection: UpdateReportStatuses')
                 let status = []
                 let time = []
                 this.testScriptNames.forEach(testName => {
@@ -226,11 +222,8 @@
             },
             testScriptNamesUpdated() {
                 this.$store.dispatch('loadReports')
-                //console.log(`client is ${this.isClient}`)
                 if (this.isClient) {
-                    //console.log(`its a client - names are ${this.$store.state.testRunner.testScriptNames}`)
                     return this.$store.state.testRunner.testScriptNames.forEach(name => {
-                        //console.log(`Loading eval for ${name}`)
                         this.doEval(name)
                     })
                 }
@@ -252,7 +245,6 @@
             testScriptNames() {
                 const scripts = this.$store.state.testRunner.testScriptNames
                 const names = scripts.sort()
-                //console.log(`script names = ${names}`)
                 return names
             },
             testReportNames() {  // just the ones with reports available

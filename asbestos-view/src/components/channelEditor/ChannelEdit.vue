@@ -296,26 +296,21 @@
             fetch() {
                 if (this.channelId === undefined)
                     return
-                console.info(`ChannelView: fetch - channelId is ${this.channelId}`)
                 if (this.channelIds.length === 0)
                     return
                 this.originalChannelId = this.channelId
                 if (this.isNewChannelId()) {
-                    console.info(`opening...`)
                     this.edit = true
                     this.isNew = true
                     this.channel = this.copyOfChannel()
-                    console.info(`...content is ${this.channel}`)
                     this.discarding = false
                     return
                 }
                 const index = this.channelIndex(this.sessionId, this.channelId)
-                console.info(`ChannelView:channel pre-fetch: session:${this.sessionId} channel:${this.channelId} index => ${index}`)
                 if (index === -1) {
                     this.channel = null
                     return
                 }
-                    console.info(`loading channel ${this.channelId} details`)
                     //const that = this
                     const fullId = `${this.sessionId}__${this.channelId}`
 
@@ -343,7 +338,6 @@
                     return
                 }
                 const newRoute =  '/session/' + this.channel.testSession + '/channel/' + this.channel.channelId
-                console.info(`ChannelView:New route is ${newRoute}`)
                 this.$store.commit('setChannelId', this.channel.channelId)
                 this.$router.push(newRoute)
             }

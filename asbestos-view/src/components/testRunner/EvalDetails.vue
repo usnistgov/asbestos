@@ -139,7 +139,6 @@
                 return assert.description === undefined ? "" : assert.description
             },
             loadTestScript() {
-                console.info(`load testscript ${this.testId} - ${this.$store.state.testRunner.testScripts[this.testId]}`)
                 return this.$store.dispatch('loadTestScript', { testCollection: this.testCollection, testId: this.testId }).then(() => {
                     this.script = this.$store.state.testRunner.testScripts[this.testId]
                 })
@@ -148,7 +147,6 @@
                 this.report = this.$store.state.testRunner.testReports[this.testId]
             },
             actions(testIndex) {
-                //console.log(`have ${this.script.test[testIndex].action.length} asserts`)
                 return this.script.test[testIndex].action
             },
             scriptAction(testi, actioni) {

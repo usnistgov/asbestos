@@ -133,7 +133,6 @@
                 return part.result === 'pass'
             },
             isError() {
-                console.log(`error?`)
                 if (!this.report) return false
                 const part = this.report.operation ? this.report.operation : this.report.assert
                 if (!part) return false

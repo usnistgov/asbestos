@@ -10,7 +10,8 @@ export const logStore = {
         return {
             // private to the log viewer
             eventSummaries: [],  // list { eventName: xx, resourceType: yy, verb: GET|POST, status: true|false }
-            currentEventIndex: 0,
+            session: null,
+            channel: null,
             loaded: false,
         }
     },
@@ -22,23 +23,20 @@ export const logStore = {
             state.eventSummaries = summaries
             state.loaded = true
         },
-        updateCurrentEventIndex(state, value) {
-            state.currentEventIndex += value
+        setLogSession(state, session) {
+            state.session = session
         },
-        setCurrentEventIndex(state, index) {
-            state.currentEventIndex = index
-        },
-        selectEvent(state, eventName) {
-            const index = state.eventSummaries.findIndex(eventSummary => {
-                return eventSummary.eventName === eventName
-            })
-            if (index !== -1)
-                state.currentEventIndex = index
-            console.log(`new event index is ${index}`)
+        setLogChannel(state, channel) {
+            state.channel = channel
         }
     },
     actions: {
-        async loadEventSummaries({commit, rootState}) {
+        async loadEventSummaries({commit, rootState}, parms) {
+            const channel = parms.channel
+            const session = parms.session
+            commit('setLogChannel', channel)
+            commit('setLogSession', session)
+            console.log(`loadEventSummaries ${rootState.base.session} ${rootState.base.channelId}`)
             if (!rootState.base.session) {
                 commit('setError', 'Session not set in logStore.loadEventSummaries')
                 console.error('Session not set')
@@ -55,6 +53,7 @@ export const logStore = {
                         summaries: 'true'
                     }
                 })
+                console.log(`loadEventSummaries done`)
 
                 const eventSummaries = rawSummaries.data.sort((a, b) => {
                     if (a.eventName < b.eventName) return 1

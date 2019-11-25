@@ -91,7 +91,6 @@
             updateEventSummariesByType() {  // called by watcher when currentType is updated
                 const type = this.currentType
                 const summaries = this.eventSummaries
-                console.log(`updateEventSummariesByType(${type})`)// All is possible value plus anything in resourceTypes
                 if (type === 'All') {
                     this.eventSummariesByType = summaries.sort((a, b) => a.eventName > b.eventName ? -1 : 1)
                 } else {
@@ -122,7 +121,6 @@
                 if (this.selectedEventName !== null) {
                     this.selectedEvent = null
                     this.selectedTask = 0
-                    console.log(`GET ${this.sessionId}/${this.channelId}/${summary.resourceType}/${summary.eventName}`)
                     LOG.get(`${this.sessionId}/${this.channelId}/${summary.resourceType}/${summary.eventName}`)
                         .then(response => {
                             try {

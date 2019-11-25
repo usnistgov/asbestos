@@ -25,7 +25,6 @@
                     options.push(it)
                 })
                 this.testSessions = options
-//                console.log('sessions updated on screen')
             },
             updateSession() {
                 this.testSession = this.$store.state.base.session
@@ -43,7 +42,6 @@
         },
         mounted() {
             this.$store.subscribe((mutation) => {
-                //console.log(`mutation ${mutation.type}`)
                 switch(mutation.type) {
                     case 'setSessions':  // to catch changes later
                         this.updateSessions()

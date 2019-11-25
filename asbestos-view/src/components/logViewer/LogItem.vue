@@ -51,7 +51,6 @@
     export default {
         data() {
             return {
-                index: 0,
                 selectedEvent: null,
                 selectedTask: 0,
                 displayRequest: true,
@@ -68,9 +67,6 @@
             selectTask(i) {
                 this.selectedTask = i
             },
-            updateIndex() {
-                this.index = this.findEventInStore
-            },
             selectedEventName() {
                 return this.selectedEvent === null ? null : this.selectedEvent.eventName
             },
@@ -81,7 +77,6 @@
             loadEvent() {
                 if (!this.$store.state.log.eventSummaries)
                     return
-                //const index = this.$store.state.log.currentEventIndex
                 const summary = this.$store.state.log.eventSummaries[this.index]
                 if (!summary)
                     return
@@ -90,12 +85,10 @@
                 if (selectedEventName !== null) {
                     this.selectedEvent = null
                     this.selectedTask = 0
-                    console.log(`GET ${this.sessionId}/${this.channelId}/${summary.resourceType}/${summary.eventName}`)
                     LOG.get(`${this.sessionId}/${this.channelId}/${summary.resourceType}/${summary.eventName}`)
                         .then(response => {
                             try {
                                 this.selectedEvent = response.data
-                                // console.log(`loaded ${this.selectedEvent.tasks.length} tasks`)
                             } catch (error) {
                                 this.error(error)
                             }
@@ -115,14 +108,11 @@
                   return msg.replace(/&lt;/g, '<').replace(/&#xa;/g, '\n').replace(/&#x9;/g, '\t')
             },
             async loadEventSummaries() {
-                await this.$store.dispatch('loadEventSummaries')
-                this.index = this.findEventInStore
-                //this.$store.commit('selectEvent', this.eventId)
-                //this.$store.commit('setCurrentEventIndex', this.index)
+                await this.$store.dispatch('loadEventSummaries', {session: this.sessionId, channel: this.channelId})
             },
         },
         computed: {
-            findEventInStore() {
+            index() {  // of eventId
                 return (this.$store.state.log.eventSummaries)
                     ? this.$store.state.log.eventSummaries.findIndex(summary => this.eventId === summary.eventName)
                     : null
@@ -148,9 +138,8 @@
             eventSummary() {
                 if (!this.$store.state.log.eventSummaries)
                     return null
-                const index = this.findEventInStore
-                return (index > -1)
-                    ? this.$store.state.log.eventSummaries[index]
+                return (this.index > -1)
+                    ? this.$store.state.log.eventSummaries[this.index]
                     : null
             },
         },
@@ -158,11 +147,9 @@
             this.loadEventSummaries()
         },
         watch: {
-            '$route': 'updateIndex',
             eventId() {
                 if (this.noNav)
                     return
-                //this.$store.commit('selectEvent', newVal)
                 this.loadEvent()
             },
         },

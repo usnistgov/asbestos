@@ -46,7 +46,6 @@
                 this.$router.push(route)
             },
             updateReportStatuses() {  // this needs rework
-                console.log('TestList: UpdateReportStatuses')
                 let status = []
                 let time = []
                 this.allTestScriptNames().forEach(testName => {

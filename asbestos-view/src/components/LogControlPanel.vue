@@ -19,13 +19,11 @@
                 if (this.$store.state.base.channelId === null)
                     return
                 const route = `/session/${this.$store.state.base.session}/channel/${this.$store.state.base.channelId}/logs`
-                console.info(`Route to ${route}`)
                 this.$router.push(route)
             },
         },
         computed: {
             selectable() {
-                console.info('selectable')
                 return this.$store.state.base.session !== null && this.$store.state.base.channelId !== null
             }
         },
@@ -33,7 +31,6 @@
 
         },
         mounted() {
-            console.info('LogControlPanel mounted')
         },
         watch: {
 

@@ -33,7 +33,6 @@
         },
         methods: {
             selectEvent(name) {
-                console.log(`selectEvent name = ${name}  selected = ${this.selected}`)
                 if (this.selected === name)  { // unselect
                     this.$store.commit('setCurrentEvent', null)
                     const route = `/session/${this.sessionId}/channel/${this.channelId}/collection/${this.testCollection}/test/${this.testId}`
@@ -45,13 +44,18 @@
                 }
             },
             eventDetail(eventId) {
-                  if (this.$store.state.log.eventSummaries) {
-                      const summary = this.$store.state.log.eventSummaries.find(it =>
-                          it.eventName === eventId)
-                      if (summary)
-                          return `${summary.verb} ${summary.resourceType}`
-                  }
-                  return null
+                if (this.logSummariesNeedLoading) {
+                    console.log(`calling loadEventSummaries`)
+                    this.$store.dispatch('loadEventSummaries', {session: this.sessionId, channel: this.channelId})
+                    console.log(`loadEventSummaries returned`)
+                }
+                if (this.$store.state.log.eventSummaries) {
+                    const summary = this.$store.state.log.eventSummaries.find(it =>
+                        it.eventName === eventId)
+                    if (summary)
+                        return `${summary.verb} ${summary.resourceType}`
+                }
+                return null
             },
             isEventPass(eventId) {
                 return this.eventResult[eventId].result === 'pass'
@@ -60,11 +64,15 @@
                 this.selectEvent(this.selected)
             },
             loadTest() {
-                //console.log(`load test ${this.testId}`)
                 this.$store.dispatch('loadTestScript', { testCollection: this.testCollection, testId: this.testId })
             },
         },
         computed: {
+            logSummariesNeedLoading() {
+                return !this.$store.state.log.eventSummaries ||
+                    this.sessionId !== this.$store.state.log.session ||
+                        this.channelId !== this.$store.state.log.channel
+            },
             testScript() {
                 return this.$store.state.testRunner.testScripts[this.testId]
             },
@@ -73,7 +81,6 @@
             },
             eventIds() {
                 if (!this.eventResult) {
-                    console.log('no event ids')
                     return null;
                 }
                 return Object.keys(this.eventResult).sort().reverse()

@@ -33,7 +33,6 @@ export const baseStore = {
             state.errors = []
         },
         setSession(state, theSession) {
-//            console.log(`setSession = ${theSession}`)
             state.session = theSession
         },
         // setEnvironment(state, theEnvironment) {
@@ -41,15 +40,12 @@ export const baseStore = {
         // },
 
         setSessions(state, sessions) {
-//            console.log(`setSessions = ${sessions}`)
             state.sessions = sessions
         },
         setChannelId(state, channelId) {
-            console.log(`channelId to ${channelId}`)
             state.channelId = channelId
         },
         setChannel(state, theChannel) {
-//            console.log(`mutatation setChannel ${theChannel}`)
             state.channel = theChannel
             if (theChannel === null)
                 return
@@ -65,9 +61,7 @@ export const baseStore = {
             })
             if (channelIndex === -1) {
                 state.channelIds.push(newChannel.channelId)
-               console.log(`mutation install new channel - id=${newChannel.channelId}`)
             } else {
-                console.log(`mutation install replacement channel - id=${newChannel.channelId}`)
 //                state.channel = newChannel
             }
             state.channel = newChannel
@@ -111,7 +105,6 @@ export const baseStore = {
                     const ids = theFullChannelIds.map(fullId => {
                         return fullId.split('__')[1]
                     })
-//                    console.log(`action loadChannelNames ${ids}`)
                     commit('installChannelIds', ids)
                 })
                 .catch(function (error) {
@@ -138,7 +131,6 @@ export const baseStore = {
             const url = `CHANNEL/${fullId}`
             return CHANNEL.get(fullId)
                 .then(response => {
-                    console.log(`installing channel ${response.data.channelId}`)
                     commit('installChannel', response.data)
                     return response.data
                 })

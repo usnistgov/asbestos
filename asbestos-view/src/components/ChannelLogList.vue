@@ -46,7 +46,6 @@
                         })
                         types.push('All')
                         this.resourceTypes = types.sort()
-                        console.log(`loaded ${response.data.length} summaries and ${types.length} types`)
                     })
                     .catch(error => {
                         this.error(error)

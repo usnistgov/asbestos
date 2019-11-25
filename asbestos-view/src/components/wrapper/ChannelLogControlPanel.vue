@@ -18,7 +18,6 @@
                 if (!this.selectable)
                     return;
                 const route = `/session/${this.$store.state.base.session}/channel/${this.$store.state.base.channelId}/logs`
-                console.log(`Route to ${route}`)
                 this.$router.push(route)
             },
         },
@@ -31,7 +30,6 @@
 
         },
         mounted() {
-            console.info('ChannelLogControlPanel mounted')
         },
         watch: {
 
