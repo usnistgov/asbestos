@@ -13,6 +13,7 @@ NOTE: The zip file does NOT include XDS Toolkit or the HL7 HAPI FHIR distributio
 For information on installing them if you do not already have them on your system, please see:
  XDS Toolkit Wiki Page: https://github.com/usnistgov/iheos-toolkit2/wiki/installing
  HL7 HAPI FHIR: https://hapifhir.io/
+ The version of HAPI FHIR that was used to test FHIR Toolkit can be found here: https://github.com/usnistgov/asbestos/releases/tag/0.1
 
 ExternalCache
 The default location for the FHIR Toolkit ExternalCache is <installation-directory>/tomcat/Toolkits/ExternalCache
