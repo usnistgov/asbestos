@@ -34,7 +34,7 @@
                         assertion that was evaluated.</li>
                 </ol>
                 <div>
-                    FHIR Server Base Address:
+                    Send to:
                     <span class="boxed">{{ clientBaseAddress }}</span>  based on the Channel selection.
                 </div>
             </span>
@@ -44,7 +44,7 @@
                 to run test. <br />Requests will be sent to
                 <span v-if="channelObj" class="boxed">{{ channelObj.fhirBase }}</span>
                 <div class="divider"></div>
-                <span v-if="channelObj">(Channel {{ channelObj.channelId }}) based on the Channel selection.</span>
+                <span v-if="channelObj">(through the Proxy on Channel {{ channelObj.channelId }}) based on the Channel selection.</span>
             </span>
             <span class="divider"></span>
         </div>
@@ -234,7 +234,15 @@
         },
         computed: {
             clientBaseAddress() { // for client tests
-                return `${this.$store.state.testRunner.currentChannelBaseAddr}${this.sessionId}__${this.channelId}`
+                return `${this.$store.state.base.proxyBase}/${this.sessionId}__${this.channelId}`
+                // const channelId = this.$store.state.base.channelId
+                // const channelIndex = this.$store.state.base.channelURLs.findIndex(chanURL => {
+                //     return chanURL.id === channelId
+                // })
+                // const channelURL = this.$store.state.base.channelURLs[channelIndex]
+                // const xdsSite = channelURL.site
+                // const fhirURL = channelURL.url
+                // return xdsSite ? `XDS ${xdsSite} sim` : fhirURL
             },
             isClient() {
                 return this.$store.state.testRunner.isClientTest

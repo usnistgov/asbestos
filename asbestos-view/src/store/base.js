@@ -3,7 +3,7 @@ import Vuex from 'vuex'
 
 Vue.use(Vuex)
 
-import {PROXY} from '../common/http-common'
+import {LOG, PROXY} from '../common/http-common'
 import {CHANNEL} from '../common/http-common'
 
 export const baseStore = {
@@ -23,9 +23,14 @@ export const baseStore = {
             channelIds: [],  // for this session
             channelURLs: [], // for this session { id:  ... , url: ... , site: ....}
             errors: [],
+
+            proxyBase: null,
         }
     },
     mutations: {
+        setProxyBase(state, value) {
+            state.proxyBase = value
+        },
         setError(state, error) {
             state.errors.push(error)
         },
@@ -139,6 +144,19 @@ export const baseStore = {
                     console.error('channel/' + fullId + ' ' + e)
                 })
         },
+        loadProxyBase({commit, state}) {
+            if (state.proxyBase)
+                return
+            const url = `ProxyBase`
+            LOG.get(url)
+                .then(response => {
+                    commit('setProxyBase', response.data)
+                })
+                .catch (e => {
+                    commit('setError', url + ': ' + e)
+                    console.error('ProxyBase' + ' ' + e)
+                })
+        }
     },
     getters: {
 

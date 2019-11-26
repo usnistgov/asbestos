@@ -78,8 +78,7 @@
                 next()
         },
         created() {
-            // this.$store.commit('setError', 'Oops')
-            // this.$store.commit('setError', 'Oopsie')
+            this.$store.dispatch('loadProxyBase')
         },
         methods: {
             go(there) {

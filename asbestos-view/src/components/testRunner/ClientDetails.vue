@@ -44,7 +44,7 @@
                 }
             },
             eventDetail(eventId) {
-                if (this.logSummariesNeedLoading) {
+                if (this.logSummariesNeedLoading || this.logSummariesNeedLoading2) {
                     console.log(`calling loadEventSummaries`)
                     this.$store.dispatch('loadEventSummaries', {session: this.sessionId, channel: this.channelId})
                     console.log(`loadEventSummaries returned`)
@@ -68,10 +68,17 @@
             },
         },
         computed: {
-            logSummariesNeedLoading() {
+            logSummariesNeedLoading() {  // because of channel change
                 return !this.$store.state.log.eventSummaries ||
                     this.sessionId !== this.$store.state.log.session ||
                         this.channelId !== this.$store.state.log.channel
+            },
+            logSummariesNeedLoading2() {  // because there are eventIds not present in summaries
+                if (!this.eventIds) return false
+                const lastEventId = this.eventIds[0]
+                if (!this.$store.state.log.eventSummaries) return true
+                const lastSummaryId = this.$store.state.log.eventSummaries[0].eventName
+                return lastEventId > lastSummaryId
             },
             testScript() {
                 return this.$store.state.testRunner.testScripts[this.testId]
