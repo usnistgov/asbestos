@@ -13,6 +13,7 @@ NOTE: The zip file does NOT include XdsToolkit or the HL7 HAPI FHIR distribution
 For information on installing them if you do not already have them on your system, please see:
  XdsToolkit Wiki Page: https://github.com/usnistgov/iheos-toolkit2/wiki/installing
  HL7 HAPI FHIR: https://hapifhir.io/
+ The version of HAPI FHIR that was used to test FHIR Toolkit can be found here: https://github.com/usnistgov/asbestos/releases/tag/0.1
 
 How to Setup\Install
 Unzip the contents to a folder of your choice. The full path of this folder will be referred to as "<installation-directory>" hereon. In the examples below, you will have to replace the <installation-directory> token with the directory location of the folder where the zip file was extracted.
