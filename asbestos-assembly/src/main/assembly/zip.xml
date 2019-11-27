@@ -47,7 +47,7 @@
         </fileSet>
     </fileSets>
    <files>
-       <!-- Apply the Service Properties filter -->
+       <!-- Apply the Service Properties filter using the service.properties file specified in the pom.xml -->
         <file>
           <source>../asbestos-view/dist/serviceProperties.json</source>
           <outputDirectory>${bundledTomcatDir}/Toolkits/FhirToolkit/webapps/ROOT</outputDirectory>

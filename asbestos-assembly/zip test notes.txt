@@ -1,17 +1,20 @@
-start xdstoolkit on port 8080. It is required for asbestos build and mhd channel at runtime.
+Start xdstoolkit on port 8080. It is required for asbestos build and mhd channel at runtime.
 
-check asbestos-war/src/main/resource/service.properties
-	port number = 9760
+Check asbestos-war/src/main/resource/service.properties
+	Port number should be 9760 in fhirToolkitBase
+	Network errors will be displayed in the Vue front end if the fhirToolkitBase is not configured properly
 
 For production, this port number must match the bundled-tomat application base's conf\server.xml
 
-check EXTERNAL_CACHE property in asbestos-war/pom.xml 
-	for it-tests check ec_dir 
-	for production ec_dir, it will use the default ExternalCache directory in the bundled tomcat directory.
+Before building Asbestos:
+    1. Check EXTERNAL_CACHE property in asbestos-war/pom.xml
+	    for it-tests check the property
+	    Build will fail without properly setting the property
+	    for production ec_dir, it will use the default ExternalCache directory in the bundled tomcat directory.
 
-rename due to test failures:
-	DocumentEntry[Test].java
-	BuildRegistryObjectList[Test].java
+    2. Rename due to test failures:
+	    DocumentEntry[Test].java
+	    BuildRegistryObjectList[Test].java
 
 \asbestos
 mvn clean install
@@ -30,6 +33,9 @@ set CATALINA_HOME=C:\Users\skb1\myprojects\asbestos\asbestos-assembly\target\asb
 
 set CATALINA_BASE=%CATALINA_HOME%\Toolkits\FhirToolkit
 
+If using XDS Toolkit, using same external cache is recommended. So update %CATALINA_BASE%\bin\setenv.bat
+    SET "CATALINA_OPTS=%CATALINA_OPTS% -DEXTERNAL_CACHE=/C:/Users/skb1/ec/xds729"
+
 cd %CATALINA_HOME%\bin
 
 startup
@@ -42,12 +48,3 @@ port 8005 => 9705
 port 8009 => 9709
 port 8443 => 9743
 
-
-
-/*
-
-{
-  "fhirToolkitBase":"${FhirToolkitBase}"
-}
-
-*/
