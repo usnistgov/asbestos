@@ -8,10 +8,10 @@ import java.io.FileOutputStream;
 public class ChannelConfigFactory {
 
     public static ChannelConfig load(File file) {
-        ObjectMapper objectMapper = new ObjectMapper();
         try {
+            ObjectMapper objectMapper = new ObjectMapper();
             return objectMapper.readValue(file, ChannelConfig.class);
-        } catch (Exception e ) {
+        } catch (Throwable e ) {
             throw new RuntimeException(e);
         }
     }
