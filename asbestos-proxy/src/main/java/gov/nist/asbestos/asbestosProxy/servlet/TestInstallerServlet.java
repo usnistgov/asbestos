@@ -103,7 +103,7 @@ public class TestInstallerServlet  extends HttpServlet {
                 for (File channel : channels) {
                     String name = channel.getName();
                     File target = new File(externalChannels, name);
-                    if (!target.exists()) {
+                    //if (!target.exists()) {
                         FileUtils.copyDirectoryToDirectory(channel, externalChannels);
                         switch (name) {
                             case "default": {
@@ -117,7 +117,7 @@ public class TestInstallerServlet  extends HttpServlet {
                             }
                             /* next-case-label */
                         }
-                    }
+                    //}
                 }
             }
         } catch (IOException e) {
