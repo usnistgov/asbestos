@@ -24,6 +24,7 @@ For information on installing them if you do not already have them on your syste
 
  HL7 HAPI FHIR: https://hapifhir.io/
  The version of HAPI FHIR that was used to test FHIR Toolkit can be found here: https://github.com/usnistgov/asbestos/releases/download/0.1/fhir.zip
+ The fhir.zip file can be extracted to <installation-directory>/tomcat/Toolkits/XdsToolkit/webapps
 
 ExternalCache
 The default ExternalCache location for all Toolkit CATALINA_BASEs is <installation-directory>/tomcat/Toolkits/ExternalCache
