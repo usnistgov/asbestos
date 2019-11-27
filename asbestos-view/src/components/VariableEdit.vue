@@ -107,11 +107,6 @@ export default {
       delVariable: 'delTestVariable'
     }),
     clearErrors () {
-      // if (!this.currentId) {
-      //   return
-      // }
-      // console.log('current is ' + this.currentIndex)
-      // let variable = this.$store.state.testEditor.variables[this.currentIndex]
       this.nameErr = null
       this.expressionErr = null
       this.validates = true

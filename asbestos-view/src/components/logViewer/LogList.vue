@@ -39,7 +39,7 @@
                 this.$router.push(`/session/${this.sessionId}/channel/${this.channelId}/lognav/${summary.eventName}`)
             },
             loadEventSummaries() {
-                this.$store.dispatch('loadEventSummaries')
+                this.$store.dispatch('loadEventSummaries', {session: this.sessionId, channel: this.channelId})
             }
         },
         created() {

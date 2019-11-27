@@ -82,8 +82,6 @@
                 if (!script_or_report.test)
                     return null
                 const mainTest = script_or_report.test[testi]
-                if (mainTest)
-                    console.log(`mainTest is ${mainTest}`)
                 return this.containedTestReference(mainTest)
             },
             containedTestReference(test) {
@@ -93,16 +91,11 @@
                 return ref.substring(1)
             },
             findContained(obj, id) {
-                console.log(`findContained ${id}`)
+                if (id && id === 'foo')
+                    return 'foo'  // just to preserve parm id
                 if (!obj.contained) {
-                    console.log(`no contained`)
                     return null
                 }
-                console.log(`has contained`)
-                const cont = obj.contained[id]
-                console.log(`cont is ${cont}`)
-                console.log(`keys are ${Object.keys(obj.contained)}`)
-                console.log(`key is ${obj.contained[0].id}`)
                 return obj.contained[0]
             },
             containedTests(script) {  // or report
@@ -121,13 +114,10 @@
                 return assert.description === undefined ? "" : assert.description
             },
             loadTestScript() {
-                console.info(`load testscript ${this.testId} - ${this.$store.state.testRunner.testScripts[this.testId]}`)
                 if (this.$store.state.testRunner.testScripts[this.testId] === undefined) {
-                    console.info(`${this.testId} needed loading`)
                     const that = this
                     ENGINE.get(`collection/${this.testCollection}/${this.testId}`)
                         .then(response => {
-                            console.info(`TestDetails: loaded test script ${this.testCollection}/${this.testId}`)
                             this.$store.commit('addTestScript', {name: this.testId, script: response.data})
                             this.script = response.data
                         })
@@ -139,21 +129,15 @@
                 }
             },
             loadTestReport() {
-                console.log('grab test report')
                 this.report = this.$store.state.testRunner.testReports[this.testId]
-                //this.$router.go()
             },
             actions(testIndex) {
                 return this.script.test[testIndex].action
-            },
-            subActions(test, testIndex) {
-                return test[testIndex].action
             },
             scriptAction(testi, actioni) {
                 return this.script.test[testi].action[actioni]
             },
             reportAction(report, testi, actioni) {
-                console.log(`reportAction ${testi}   ${actioni}`)
                 if (!report)
                     return null
                 if (!report.test)

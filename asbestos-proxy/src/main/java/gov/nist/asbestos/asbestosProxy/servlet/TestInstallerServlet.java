@@ -1,6 +1,10 @@
 package gov.nist.asbestos.asbestosProxy.servlet;
 
 import gov.nist.asbestos.client.Base.EC;
+import gov.nist.asbestos.http.operations.HttpGet;
+import gov.nist.asbestos.serviceproperties.ServiceProperties;
+import gov.nist.asbestos.serviceproperties.ServicePropertiesEnum;
+import gov.nist.asbestos.simapi.tk.installation.Installation;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.log4j.Logger;
@@ -10,6 +14,9 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.nio.file.Files;
 import java.nio.file.Paths;
 
 public class TestInstallerServlet  extends HttpServlet {
@@ -46,6 +53,29 @@ public class TestInstallerServlet  extends HttpServlet {
         }
         log.info("Updating Channels");
         initializeChannels();
+
+
+        try {
+            verifyCodesXml();
+        } catch (Exception e) {
+            log.fatal("TestInstallerServlet - codes verification failed - " + e.getMessage());
+        }
+    }
+
+    private void verifyCodesXml() throws URISyntaxException, IOException {
+        String url = ServiceProperties.getInstance().getProperty(ServicePropertiesEnum.XDS_TOOLKIT_BASE.toString()) + "/sim/codes/default";
+        HttpGet getter = new HttpGet();
+        getter.get(new URI(url), "text/xml");
+        String xdsCodes = getter.getResponseText();
+
+        File codesFile = Installation.instance().getCodesFile("default");
+        String fhirCodes = new String(Files.readAllBytes(Paths.get(codesFile.toString())));
+
+        if (xdsCodes.equals(fhirCodes)) {
+            log.info("TestInstallerServlet - codex.xml checked - FHIR and XDS reference same version");
+        } else {
+            log.fatal("TestInstallerServlet - codes.xml checked - FHIR and XDS reference different versions");
+        }
     }
 
     private void initializeChannels() {

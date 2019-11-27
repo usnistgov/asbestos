@@ -5,6 +5,7 @@ export var ENGINE = null
 export var LOG = null
 export var CHANNEL = null
 export var FHIRTOOLKITBASEURL = null
+export var PROJECTVERSION = null
 
 async function getServiceProperties() {
     if (process.env.NODE_ENV === 'production') {
@@ -15,9 +16,22 @@ async function getServiceProperties() {
     }
 }
 
+async function getProjectVersion() {
+    if (process.env.NODE_ENV === 'production') {
+        return await axios
+            .get('/serviceProperties.json')
+    } else {
+        return 'development'
+    }
+}
+
+
 export async function initServiceProperties() {
     if (FHIRTOOLKITBASEURL === null) {
         try {
+            await getProjectVersion().then(response => {
+                PROJECTVERSION = typeof response === 'string' ? response : `v${response.data.projectVersion}`
+            })
             await getServiceProperties().then(response => {
                     const constFhirToolkitBaseUrl = typeof response === 'string' ? response : response.data.fhirToolkitBase
                     FHIRTOOLKITBASEURL = constFhirToolkitBaseUrl

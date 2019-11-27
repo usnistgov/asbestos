@@ -70,7 +70,6 @@
                 if (!this.collection)
                     return;
                 const route = `/session/${this.session}/channel/${this.channelId}/collection/${this.collection}`
-                console.log(`Route to ${route}`)
                 this.$router.push(route)
             },
             selectIndividual() {

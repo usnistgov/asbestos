@@ -34,21 +34,18 @@
             },
             left() {
                 if (this.moreToTheLeft) {
-                    this.$store.commit('updateCurrentEventIndex', -1)
-                    this.updateRoute()
+                    this.updateRoute(this.index - 1)
                 }
             },
             right() {
                 if (this.moreToTheRight) {
-                    this.$store.commit('updateCurrentEventIndex', 1)
-                    this.updateRoute()
+                    this.updateRoute(this.index + 1)
                 }
             },
-            updateRoute() {
+            updateRoute(newIndex) {
                 if (!this.$store.state.log.eventSummaries)
                     return
-                const index = this.$store.state.log.currentEventIndex
-                const summary = this.$store.state.log.eventSummaries[index]
+                const summary = this.$store.state.log.eventSummaries[newIndex]
                 if (summary)
                     this.$router.replace(`/session/${this.sessionId}/channel/${this.channelId}/lognav/${summary.eventName}`)
             },
@@ -58,10 +55,10 @@
         },
         computed: {
             moreToTheLeft() {
-                return this.$store.state.log.currentEventIndex > 0
+                return this.index > 0
             },
             moreToTheRight() {
-                return this.$store.state.log.currentEventIndex + 1 < this.$store.state.log.eventSummaries.length
+                return this.index + 1 < this.$store.state.log.eventSummaries.length
             }
         },
         props: [

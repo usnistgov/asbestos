@@ -33,9 +33,13 @@ export const testRunnerStore = {
             currentChannelBaseAddr: `${FHIRTOOLKITBASEURL}/`,
             testAssertions: null,
             testCollectionsLoaded: false,
+            hapiIsAlive: false,
         }
     },
     mutations: {
+        setHapiIsAlive(state, value) {
+            state.hapiIsAlive = value
+        },
         setRequiredChannel(state, channel) {
             state.requiredChannel = channel
         },
@@ -46,7 +50,6 @@ export const testRunnerStore = {
             state.testCollectionsLoaded = true
         },
         setTestAssertions(state, assertions) {
-            console.log(`new Test Assertions`)
             state.testAssertions = assertions
         },
         setEventEvalCount(state, count) {
@@ -59,7 +62,6 @@ export const testRunnerStore = {
             state.waitingOnClient = testId
         },
         setIsClientTest(state, isClient) {
-            //console.log(`client is ${isClient}`)
             state.isClientTest = isClient
         },
         setCollectionDescription(state, collectionDescription) {
@@ -82,13 +84,9 @@ export const testRunnerStore = {
         },
         setTestReports(state, reports) {
             state.testReports = reports
-            console.log(`mutation report count is ${reports.length}`)
         },
         setTestReport(state, data) {
-            console.log(`set testName ${data.testName} to ${data.testReport}`)
             state.testReports[data.testName] = data.testReport
-            console.log(`report status is ${data.testReport.result}`)
-            console.log(`mutation report count is ${Object.keys(state.testReports).length}`)
         },
         clearTestScripts(state) {
             state.testScripts = []
@@ -108,13 +106,6 @@ export const testRunnerStore = {
         setServerTestCollectionNames(state, names) {
             state.serverTestCollectionNames = names
         },
-        // setClientTestResult(state, payload) {
-        //     // payload is { evalId: xxx, events: eventId => TestReports }
-        //     console.log(`installing evalId is ${payload.evalId}`)
-        //     console.log(`installing eventIds are ${Object.getOwnPropertyNames(payload.events)}`)
-        //     // each value is eventId => TestReport
-        //     state.clientTestResult[payload.evalId] = JSON.parse(JSON.stringify(payload.events))
-        // },
         setClientTestResult(state, result) {     // { testId: testId, result: result }
             //state.clientTestResult.splice(result.testId, 1, result.result)
             state.clientTestResult[result.testId] = result.result
@@ -138,7 +129,6 @@ export const testRunnerStore = {
                 })
                 .catch(function (error) {
                     commit('setError', url + ': ' + error)
-                    console.error(`${error} - assertions - URL was engine/${url}`)
                 })
         },
         runEval({commit, state, rootState}, testId) {
@@ -147,21 +137,15 @@ export const testRunnerStore = {
             ENGINE.get(url)
                 .then(response => {
                     const results = response.data
-                    console.log(`runEval: results testid = ${Object.getOwnPropertyNames(results)}`)
 
-                    console.log(`called server - evalId is ${testId}`)
-                    //console.log(`events for ${testId} are ${Object.getOwnPropertyNames(results[testId])}`)
-//                        commit('setClientTestResult', results)
                     commit('setClientTestResult', { testId: testId, result: results[testId]} )
                 })
                 .catch(function (error) {
                     commit('setError', url + ': ' + error)
-                    console.error(`${error} - runEval - URL was engine/${url}`)
                 })
         },
         loadLastMarker({commit, rootState}) {
             const uri = `marker/${rootState.base.session}/${rootState.base.channelId}`
-            console.log(uri)
             LOG.get(uri)
                 .then(response => {
                     const value = response.data === '' ? 'None' : response.data
@@ -169,7 +153,6 @@ export const testRunnerStore = {
                 })
                 .catch(function (error) {
                     commit('setError', uri + ': ' + error)
-                    console.error(`${error} - loadLastMarker - URL was ${uri}`)
                 })
         },
         setMarker({commit, rootState}) {
@@ -181,28 +164,19 @@ export const testRunnerStore = {
                 })
                 .catch(function (error) {
                     commit('setError', url + ': ' + error)
-                    console.error(`${error} - setMarker - URL was ${url}`)
                 })
         },
-        loadTestScript({commit, state}, payload ) {
+        loadTestScript({commit}, payload ) {
             const testCollection = payload.testCollection
             const testId = payload.testId
             const url = `collection/${testCollection}/${testId}`
-            console.info(`load testscript - currently ${testCollection}/${testId} is ${state.testScripts[testId]}`)
-//            if (state.testScripts[testId] === undefined) {
-                //console.info(`${payload.testId} needs loading`)
                 return ENGINE.get(url)
                     .then(response => {
-                        //console.info(`loaded test script ${testCollection}/${testId}`)
                         commit('addTestScript', {name: testId, script: response.data})
-                        //this.script = response.data
                     })
                     .catch(function (error) {
                         commit('setError', url + ': ' + error)
-                        console.error(`${error} - loadTestScript - URL was ${url}`)
-                       // throw error
                     })
-  //          }
         },
         loadTestCollectionNames({commit}) {
             const url = `collections`
@@ -222,45 +196,23 @@ export const testRunnerStore = {
                 })
                 .catch(function (error) {
                     this.$store.commit('setError', url + ': ' +  error)
-                    console.error(`${error} - loadTestCollectionNames - URL was ${url}`)
                 })
         },
         async loadTestScriptNames({commit, state}) {
-            if (state.currentTestCollectionName === null)
-                console.error(`loadTestScriptNames: state.currentTestCollectionName is null`)
             const url = `collection/${state.currentTestCollectionName}`
             try {
                 const response = await ENGINE.get(url)
                 const theResponse = response.data
-                //console.log(`action: testScriptNames are ${theResponse.testNames}`)
                 commit('setTestScriptNames', theResponse.testNames)
                 const isClient = !theResponse.isServerTest
                 commit('setRequiredChannel', theResponse.requiredChannel)
-                console.log(`requiredChannel for ${state.currentTestCollectionName} loaded as ${theResponse.requiredChannel}`)
                 const description = theResponse.description
                 commit('setCollectionDescription', description)
                 commit('setIsClientTest', isClient)
                 commit('clearTestScripts')
             } catch (error) {
                 commit('setError', url + ': ' + error)
-                console.error(`${error} - loadTestScriptNames - URL was ${url}`)
             }
-            // ENGINE.get(url)
-            //     .then(response => {
-            //         const theResponse = response.data
-            //         //console.log(`action: testScriptNames are ${theResponse.testNames}`)
-            //         commit('setTestScriptNames', theResponse.testNames)
-            //         const isClient = !theResponse.isServerTest
-            //         commit('setRequiredChannel', theResponse.requiredChannel)
-            //         console.log(`requiredChannel for ${state.currentTestCollectionName} loaded as ${theResponse.requiredChannel}`)
-            //         const description = theResponse.description
-            //         commit('setCollectionDescription', description)
-            //         commit('setIsClientTest', isClient)
-            //         commit('clearTestScripts')
-            //     })
-            //     .catch(function (error) {
-            //
-            //     })
         },
         loadReports({commit, state, rootState}) {
             commit('clearTestReports')
@@ -277,14 +229,17 @@ export const testRunnerStore = {
                 })
                 .catch(function (error) {
                     commit('setError', url + ': ' + error)
-                    console.error(`${error} - loadReports - URL was ${url}`)
                 })
         },
-        addTestReport({commit, state}, data) {
-            console.log(`action: name is ${data.testName} report is ${data.testReport}`)
-            let reports = state.testReports
-            reports[data.testName] = data.testReport
-            commit('setTestReport', data)
-        },
+        hapiHeartbeat({commit}) {
+            const url = `hapiheartbeat`
+            ENGINE.get(url)
+                .then(() => {
+                    commit('setHapiIsAlive', true)
+                })
+                .catch (() => {
+                    commit('setHapiIsAlive', false)
+                })
+        }
     }
 }

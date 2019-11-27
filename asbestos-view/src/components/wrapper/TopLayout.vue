@@ -3,15 +3,18 @@
         <div>
         <div class="left window-title-bar">
             <span class="window-title">NIST FHIR<img src="../../assets/copyright.png"> Toolkit</span>
+            <span class="title-divider"> </span>
+
+            <span>{{ projectVersion }}</span>
 
             <span class="title-divider"> </span>
             <span class="selectable" @click="go('/home')">Home</span>
 
             <div class="divider"></div>
-            <span class="selectable" @click="go('/configurations')">Configurations</span>
+            <span class="selectable" @click="go('/mhdtesting')">MHD Testing</span>
 
             <div class="divider"></div>
-            <span class="selectable" @click="go('/mhdtesting')">MHD Testing</span>
+            <span class="selectable" @click="go('/configurations')">Configurations</span>
 
             <div class="divider"></div>
             <span class="selectable" @click="go('/about')">About</span>
@@ -58,6 +61,7 @@
     import TestControlPanel from "./TestControlPanel"
     import ChannelLogControlPanel from "./ChannelLogControlPanel"
     // import DebugControlPanel from "./DebugControlPanel"
+    import {PROJECTVERSION} from "../../common/http-common";
 
     export default {
         data() {
@@ -74,8 +78,7 @@
                 next()
         },
         created() {
-            // this.$store.commit('setError', 'Oops')
-            // this.$store.commit('setError', 'Oopsie')
+            this.$store.dispatch('loadProxyBase')
         },
         methods: {
             go(there) {
@@ -86,6 +89,9 @@
             },
         },
         computed: {
+            projectVersion() {
+                return PROJECTVERSION
+            }
         },
         watch: {
         },

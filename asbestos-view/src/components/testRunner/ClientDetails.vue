@@ -33,7 +33,6 @@
         },
         methods: {
             selectEvent(name) {
-                console.log(`selectEvent name = ${name}  selected = ${this.selected}`)
                 if (this.selected === name)  { // unselect
                     this.$store.commit('setCurrentEvent', null)
                     const route = `/session/${this.sessionId}/channel/${this.channelId}/collection/${this.testCollection}/test/${this.testId}`
@@ -45,13 +44,18 @@
                 }
             },
             eventDetail(eventId) {
-                  if (this.$store.state.log.eventSummaries) {
-                      const summary = this.$store.state.log.eventSummaries.find(it =>
-                          it.eventName === eventId)
-                      if (summary)
-                          return `${summary.verb} ${summary.resourceType}`
-                  }
-                  return null
+                if (this.logSummariesNeedLoading || this.logSummariesNeedLoading2) {
+                    console.log(`calling loadEventSummaries`)
+                    this.$store.dispatch('loadEventSummaries', {session: this.sessionId, channel: this.channelId})
+                    console.log(`loadEventSummaries returned`)
+                }
+                if (this.$store.state.log.eventSummaries) {
+                    const summary = this.$store.state.log.eventSummaries.find(it =>
+                        it.eventName === eventId)
+                    if (summary)
+                        return `${summary.verb} ${summary.resourceType} from ${summary.ipAddr}`
+                }
+                return null
             },
             isEventPass(eventId) {
                 return this.eventResult[eventId].result === 'pass'
@@ -60,11 +64,22 @@
                 this.selectEvent(this.selected)
             },
             loadTest() {
-                //console.log(`load test ${this.testId}`)
                 this.$store.dispatch('loadTestScript', { testCollection: this.testCollection, testId: this.testId })
             },
         },
         computed: {
+            logSummariesNeedLoading() {  // because of channel change
+                return !this.$store.state.log.eventSummaries ||
+                    this.sessionId !== this.$store.state.log.session ||
+                        this.channelId !== this.$store.state.log.channel
+            },
+            logSummariesNeedLoading2() {  // because there are eventIds not present in summaries
+                if (!this.eventIds) return false
+                const lastEventId = this.eventIds[0]
+                if (!this.$store.state.log.eventSummaries) return true
+                const lastSummaryId = this.$store.state.log.eventSummaries[0].eventName
+                return lastEventId > lastSummaryId
+            },
             testScript() {
                 return this.$store.state.testRunner.testScripts[this.testId]
             },
@@ -73,7 +88,6 @@
             },
             eventIds() {
                 if (!this.eventResult) {
-                    console.log('no event ids')
                     return null;
                 }
                 return Object.keys(this.eventResult).sort().reverse()

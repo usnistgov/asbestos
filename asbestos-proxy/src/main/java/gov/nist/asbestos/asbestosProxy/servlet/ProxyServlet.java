@@ -171,6 +171,8 @@ public class ProxyServlet extends HttpServlet {
         if (hostport == null || hostport.equals(""))
             hostport = "localhost:8080";
 
+        inHeaders.add(new Header("x-client-addr", req.getRemoteAddr()));
+
         BaseChannel channel = null;
 
         try {
@@ -355,6 +357,8 @@ public class ProxyServlet extends HttpServlet {
         String hostport = inHeaders.getValue("host");
         if (hostport == null || hostport.equals(""))
             hostport = "localhost:8080";
+
+        inHeaders.add(new Header("x-client-addr", req.getRemoteAddr()));
 
         try {
 

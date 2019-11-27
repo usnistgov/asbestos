@@ -34,7 +34,7 @@
                         assertion that was evaluated.</li>
                 </ol>
                 <div>
-                    FHIR Server Base Address:
+                    Send to:
                     <span class="boxed">{{ clientBaseAddress }}</span>  based on the Channel selection.
                 </div>
             </span>
@@ -44,7 +44,7 @@
                 to run test. <br />Requests will be sent to
                 <span v-if="channelObj" class="boxed">{{ channelObj.fhirBase }}</span>
                 <div class="divider"></div>
-                <span v-if="channelObj">(Channel {{ channelObj.channelId }}) based on the Channel selection.</span>
+                <span v-if="channelObj">(through the Proxy on Channel {{ channelObj.channelId }}) based on the Channel selection.</span>
             </span>
             <span class="divider"></span>
         </div>
@@ -127,7 +127,6 @@
             evalStatus() { // see GetClientTestEvalResult
                 this.status.splice(0)
                 this.testScriptNames.forEach(testId => {
-                    //console.log(`evalStatus ${testId}`)
                     const eventResult = this.$store.state.testRunner.clientTestResult[testId]
                     if (!eventResult) {
                         this.$set(this.status, testId, 'not-run')
@@ -150,28 +149,30 @@
                 return false
             },
             doEval(testName) {  // client tests
-                //console.log(`doEval(${testName})`)
                 this.$store.dispatch('runEval', testName)
             },
-            doRun: async function(testName) {  // server tests
-                this.running = true
+            async runner(testName) {
                 this.$store.commit('setCurrentTest', null)
                 try {
                     const response = await ENGINE.post(`testrun/${this.sessionId}__${this.channelId}/${this.testCollection}/${testName}?_format=${this.useJson ? 'json' : 'xml'}`)
                     this.$store.commit('setTestReport', { testName: testName, testReport: response.data })
-                    //this.$router.push(`/session/${this.sessionId}/channel/${this.channelId}/collection/${this.testCollection}`)
-                    this.$store.dispatch('loadTestScriptNames')  // force reload of UI
                 } catch (error) {
                     this.error(error)
-                } finally {
-                    this.running = false
                 }
             },
-            doRunAll() {
-                this.status.length = 0
-                Object.keys(this.status).forEach(name => {
-                    this.doRun(name)
-                })
+            async doRun(testName) {  // server tests
+                this.running = true
+                await this.runner(testName)
+                this.running = false
+                this.$store.dispatch('loadTestScriptNames')  // force reload of UI
+            },
+            async doRunAll()  {
+                this.running = true
+                for (const name of Object.keys(this.status)) {
+                    await this.runner(name)
+                }
+                this.running = false
+                this.$store.dispatch('loadTestScriptNames')  // force reload of UI
             },
             selectTest(name) {
                 if (this.selected === name)  { // unselect
@@ -185,11 +186,9 @@
                 this.$router.push(route)
             },
             async reload() {
-                console.log(`TestCollection.reload()`)
                 this.$store.commit('setTestCollectionName', this.testCollection)
                 await this.$store.dispatch('loadTestScriptNames')
                 const requiredChannel = this.$store.state.testRunner.requiredChannel
-                console.log(`requiredChannel for ${this.testCollection} is ${requiredChannel}`)
                 if (requiredChannel)
                     this.$store.commit('setChannelId', requiredChannel)
 //                this.loadLastMarker()
@@ -200,7 +199,6 @@
                 return this.$store.state.testRunner.testReports[testName]
             },
             updateReportStatuses() {   // for server tests
-                //console.log('TestCollection: UpdateReportStatuses')
                 let status = []
                 let time = []
                 this.testScriptNames.forEach(testName => {
@@ -224,11 +222,8 @@
             },
             testScriptNamesUpdated() {
                 this.$store.dispatch('loadReports')
-                //console.log(`client is ${this.isClient}`)
                 if (this.isClient) {
-                    //console.log(`its a client - names are ${this.$store.state.testRunner.testScriptNames}`)
                     return this.$store.state.testRunner.testScriptNames.forEach(name => {
-                        //console.log(`Loading eval for ${name}`)
                         this.doEval(name)
                     })
                 }
@@ -239,7 +234,15 @@
         },
         computed: {
             clientBaseAddress() { // for client tests
-                return `${this.$store.state.testRunner.currentChannelBaseAddr}${this.sessionId}__${this.channelId}`
+                return `${this.$store.state.base.proxyBase}/${this.sessionId}__${this.channelId}`
+                // const channelId = this.$store.state.base.channelId
+                // const channelIndex = this.$store.state.base.channelURLs.findIndex(chanURL => {
+                //     return chanURL.id === channelId
+                // })
+                // const channelURL = this.$store.state.base.channelURLs[channelIndex]
+                // const xdsSite = channelURL.site
+                // const fhirURL = channelURL.url
+                // return xdsSite ? `XDS ${xdsSite} sim` : fhirURL
             },
             isClient() {
                 return this.$store.state.testRunner.isClientTest
@@ -250,7 +253,6 @@
             testScriptNames() {
                 const scripts = this.$store.state.testRunner.testScriptNames
                 const names = scripts.sort()
-                //console.log(`script names = ${names}`)
                 return names
             },
             testReportNames() {  // just the ones with reports available

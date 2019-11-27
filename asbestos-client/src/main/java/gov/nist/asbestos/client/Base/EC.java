@@ -179,7 +179,7 @@ public class EC {
         String json = new Gson().toJson(uiEvent);
         resp.setContentType("application/json");
         try {
-            resp.getOutputStream().print(json);
+            resp.getOutputStream().write(json.getBytes());
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
