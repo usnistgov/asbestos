@@ -67,7 +67,7 @@
        <!-- Copy the NIST-LICENSE.txt file -->
        <file>
            <source>${basedir}/NIST-LICENSE.txt</source>
-           <outputDirectory>./</outputDirectory>
+           <outputDirectory>${bundledTomcatDir}/Toolkits/</outputDirectory>
        </file>
    </files>
 </assembly>
