@@ -64,5 +64,11 @@
            <source>${basedir}/README.txt</source>
            <outputDirectory>./</outputDirectory>
        </file>
+       <!-- Copy the NIST-LICENSE.txt file -->
+       <file>
+           <source>${basedir}/NIST-LICENSE.txt</source>
+           <outputDirectory>./</outputDirectory>
+       </file>
    </files>
 </assembly>
+

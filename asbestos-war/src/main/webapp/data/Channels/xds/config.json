@@ -6,5 +6,5 @@
   "channelType" : "mhd",
   "includeValidation" : false,
   "fhirBase" : "",
-  "xdsSiteName" : "default__rr"
+  "xdsSiteName" : "default__asbtsrr"
 }
