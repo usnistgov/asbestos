@@ -180,50 +180,50 @@ public class BundleToRegistryObjectList implements IVal {
         }
     }
 
-    private boolean valeToResponseComponent(ValE vale, Bundle.BundleEntryResponseComponent responseComponent, boolean errorsOnly) {
-        OperationOutcome oo = null;
-        boolean returnError = false;
-        if (vale.hasErrors()) {
-            returnError = true;
-            responseComponent.setStatus("400");
-            oo = new OperationOutcome();
-            responseComponent.setOutcome(oo);
-            for (ValE e : vale.getErrors()) {
-                OperationOutcome.OperationOutcomeIssueComponent issue = oo.addIssue();
-                issue.setSeverity(OperationOutcome.IssueSeverity.ERROR);
-                issue.setCode(OperationOutcome.IssueType.UNKNOWN);
-                issue.setDiagnostics(e.getMsg());
-            }
-        }
-        if (vale.hasWarnings()) {
-            if (oo == null) {
-                oo = new OperationOutcome();
-                responseComponent.setOutcome(oo);
-            }
-            for (ValE e : vale.getWarnings()) {
-                OperationOutcome.OperationOutcomeIssueComponent issue = oo.addIssue();
-                issue.setSeverity(OperationOutcome.IssueSeverity.WARNING);
-                issue.setCode(OperationOutcome.IssueType.UNKNOWN);
-                issue.setDiagnostics(e.getMsg());
-            }
-        }
-        if (!errorsOnly && vale.hasInfo()) {
-            if (oo == null) {
-                oo = new OperationOutcome();
-                responseComponent.setOutcome(oo);
-            }
-            for (ValE e : vale.infos()) {
-                OperationOutcome.OperationOutcomeIssueComponent issue = oo.addIssue();
-                issue.setSeverity(OperationOutcome.IssueSeverity.INFORMATION);
-                issue.setCode(OperationOutcome.IssueType.UNKNOWN);
-                issue.setDiagnostics(e.getMsg());
-            }
-        }
-
-        if (oo != null)
-            responseComponent.setOutcome(oo);
-        return returnError;
-    }
+//    private boolean valeToResponseComponent(ValE vale, Bundle.BundleEntryResponseComponent responseComponent, boolean errorsOnly) {
+//        OperationOutcome oo = null;
+//        boolean returnError = false;
+//        if (vale.hasErrors()) {
+//            returnError = true;
+//            responseComponent.setStatus("400");
+//            oo = new OperationOutcome();
+//            responseComponent.setOutcome(oo);
+//            for (ValE e : vale.getErrors()) {
+//                OperationOutcome.OperationOutcomeIssueComponent issue = oo.addIssue();
+//                issue.setSeverity(OperationOutcome.IssueSeverity.ERROR);
+//                issue.setCode(OperationOutcome.IssueType.UNKNOWN);
+//                issue.setDiagnostics(e.getMsg());
+//            }
+//        }
+//        if (vale.hasWarnings()) {
+//            if (oo == null) {
+//                oo = new OperationOutcome();
+//                responseComponent.setOutcome(oo);
+//            }
+//            for (ValE e : vale.getWarnings()) {
+//                OperationOutcome.OperationOutcomeIssueComponent issue = oo.addIssue();
+//                issue.setSeverity(OperationOutcome.IssueSeverity.WARNING);
+//                issue.setCode(OperationOutcome.IssueType.UNKNOWN);
+//                issue.setDiagnostics(e.getMsg());
+//            }
+//        }
+//        if (!errorsOnly && vale.hasInfo()) {
+//            if (oo == null) {
+//                oo = new OperationOutcome();
+//                responseComponent.setOutcome(oo);
+//            }
+//            for (ValE e : vale.infos()) {
+//                OperationOutcome.OperationOutcomeIssueComponent issue = oo.addIssue();
+//                issue.setSeverity(OperationOutcome.IssueSeverity.INFORMATION);
+//                issue.setCode(OperationOutcome.IssueType.UNKNOWN);
+//                issue.setDiagnostics(e.getMsg());
+//            }
+//        }
+//
+//        if (oo != null)
+//            responseComponent.setOutcome(oo);
+//        return returnError;
+//    }
 
 
 //    private void buildSubmission() {
@@ -379,7 +379,8 @@ public class BundleToRegistryObjectList implements IVal {
         DocumentReference dr = (DocumentReference) resource.getResource();
 
         if (dr.hasIdentifier()) {
-            vale.add(new ValE("DocumentManifest has Identifier (entryUUID)").asError());
+            if (dr.getIdentifier().stream().anyMatch(i -> i.hasValue() && i.getValue().startsWith("urn:uuid:")))
+                vale.add(new ValE("DocumentReference has Identifier (entryUUID)").asError());
         }
 
         vale.add(new ValE("Content section is [1..1]").addIheRequirement(DRTable));

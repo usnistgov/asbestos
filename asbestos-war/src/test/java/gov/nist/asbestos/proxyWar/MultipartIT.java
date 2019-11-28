@@ -71,7 +71,7 @@ class MultipartIT {
         ByteArrayOutputStream pnrStream = new ByteArrayOutputStream();
         new ProvideAndRegisterBuilder().toOutputStream(pnr, pnrStream);
 
-        String toAddr = "http://localhost:8080/xdstools/sim/default__rr/rep/prb";
+        String toAddr = "http://localhost:8080/xdstools/sim/default__asbtsrr/rep/prb";
 
         String pnrString = deleteXMLInstruction(new String(pnrStream.toByteArray()));
         String soapString = PnrWrapper.wrap(toAddr, pnrString);

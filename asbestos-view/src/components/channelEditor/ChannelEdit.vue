@@ -412,9 +412,9 @@
         visibility: visible;
     }
     .channelError {
-        background-color: indianred;
+        color: red;
         text-align: left;
-        border: 1px dotted black;
+        /*border: 1px dotted black;*/
         grid-column: 1 / span 2;
     }
 </style>

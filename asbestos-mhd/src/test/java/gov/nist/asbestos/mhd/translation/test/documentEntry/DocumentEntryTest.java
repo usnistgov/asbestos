@@ -124,6 +124,7 @@ class DocumentEntryTest {
 
         DocumentEntryToDocumentReference documentEntryToDocumentReference = new DocumentEntryToDocumentReference();
         documentEntryToDocumentReference.setVal(val);
+        documentEntryToDocumentReference.setFhirClient(new FhirClient());
         documentEntryToDocumentReference.setResourceCacheMgr(resourceCacheMgr);
         documentEntryToDocumentReference.setCodeTranslator(codeTranslator);
 
@@ -257,29 +258,31 @@ class DocumentEntryTest {
         // Unofficial entryUUID - should be marked Official
         idr = new Identifier();
         idr.setSystem("urn:ietf:rfc:3986");
-        idr.setValue("58a6f841-87b3-4a3e-92fd-a8ffeff98590");
-        idr.setUse(Identifier.IdentifierUse.OFFICIAL);
+//        idr.setValue("58a6f841-87b3-4a3e-92fd-a8ffeff98590");
+        idr.setValue("ID1");
+        //idr.setUse(Identifier.IdentifierUse.OFFICIAL);
         documentReference.getIdentifier().add(idr);
 
         return documentReference;
     }
 
-    @Test
-    void officialEntryUUID() throws IOException, JAXBException {
-        DocumentReference documentReference = withOfficialEntryUUID();
-        DocumentReference expected = withOfficialEntryUUID();
-        expected.getIdentifier().remove(0);  // ID1 not appropriate (was placeholder for ID)
-
-        run(documentReference, expected, false);
-
-        if (!val.ignore("subject not present or has no reference"))
-            fail("Error did not occur");
-
-        if (val.hasErrors())
-            fail(ValFactory.toJson(new ValErrors(val)));
-
-        System.out.println(ValFactory.toJson(val));
-    }
+//    // Not legal behavior by profile (cannot contain entryUUID
+//    @Test
+//    void officialEntryUUID() throws IOException, JAXBException {
+//        DocumentReference documentReference = withOfficialEntryUUID();
+//        DocumentReference expected = withOfficialEntryUUID();
+//        expected.getIdentifier().remove(0);  // ID1 not appropriate (was placeholder for ID)
+//
+//        run(documentReference, expected, false);
+//
+//        if (!val.ignore("subject not present or has no reference"))
+//            fail("Error did not occur");
+//
+//        if (val.hasErrors())
+//            fail(ValFactory.toJson(new ValErrors(val)));
+//
+//        System.out.println(ValFactory.toJson(val));
+//    }
 
 
     private DocumentReference withStatus() {
@@ -450,14 +453,14 @@ class DocumentEntryTest {
         return x;
     }
 
-    @Test
-    void patient() throws IOException, JAXBException {
-        List<DocumentReference> x = withPatientAndExpected();
-        DocumentReference documentReference = x.get(0);
-        DocumentReference expected = x.get(1);
-
-        run(documentReference, expected, true);
-    }
+//    @Test
+//    void patient() throws IOException, JAXBException {
+//        List<DocumentReference> x = withPatientAndExpected();
+//        DocumentReference documentReference = x.get(0);
+//        DocumentReference expected = x.get(1);
+//
+//        run(documentReference, expected, true);
+//    }
 
     private DocumentReference withLegalAuthenticator() {
         DocumentReference documentReference = withOfficialEntryUUID();

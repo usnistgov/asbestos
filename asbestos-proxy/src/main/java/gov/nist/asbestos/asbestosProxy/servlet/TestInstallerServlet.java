@@ -103,7 +103,8 @@ public class TestInstallerServlet  extends HttpServlet {
                 for (File channel : channels) {
                     String name = channel.getName();
                     File target = new File(externalChannels, name);
-                    //if (!target.exists()) {
+                    if (!target.exists()) {
+                        log.info(target + " does not exist - building it");
                         FileUtils.copyDirectoryToDirectory(channel, externalChannels);
                         switch (name) {
                             case "default": {
@@ -117,7 +118,8 @@ public class TestInstallerServlet  extends HttpServlet {
                             }
                             /* next-case-label */
                         }
-                    //}
+                    } else
+                        log.info(target + " exists - not updating");
                 }
             }
         } catch (IOException e) {
@@ -191,6 +193,7 @@ public class TestInstallerServlet  extends HttpServlet {
                         }
                     }
                     if (needsUpdate) {
+                        log.info("Updating channel " + name);
                         try {
                             xdsSimApi.update(simConfig);
                         } catch (ToolkitServiceException updateEx) {
@@ -204,6 +207,7 @@ public class TestInstallerServlet  extends HttpServlet {
     }
 
     private void configureDefaultChannel(File externalChannels, String name) {
+        log.info("Configure " + name + " channel");
         Optional<String> hapFhirBase = ServiceProperties.getInstance().getProperty(ServicePropertiesEnum.HAPI_FHIR_BASE);
         if (hapFhirBase.isPresent()) {
             File configFile = getChannelConfigFile(externalChannels, name);

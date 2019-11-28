@@ -64,7 +64,7 @@ public class Val {
         return errors;
     }
 
-    public OperationOutcome getErrorsAsOperationOutcome() {
+    public OperationOutcome errorsAsOperationOutcome() {
         OperationOutcome oo = new OperationOutcome();
         for (ValE vale : getErrors()) {
             addErrorToOperationOutcome(oo, vale.getMsg());

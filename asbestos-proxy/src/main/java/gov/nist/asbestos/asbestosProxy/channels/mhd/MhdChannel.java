@@ -98,7 +98,7 @@ public class MhdChannel extends BaseChannel /*implements IBaseChannel*/ {
         }
 
         if (val.hasErrors()) {
-            throw new TransformException(val.getErrorsAsOperationOutcome());
+            throw new TransformException(val.errorsAsOperationOutcome());
         }
 
         ProvideAndRegisterDocumentSetRequestType pnr = new ProvideAndRegisterDocumentSetRequestType();
