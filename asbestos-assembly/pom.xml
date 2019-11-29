@@ -39,7 +39,7 @@
                         <configuration>
                             <appendAssemblyId>false</appendAssemblyId>
                             <filters>
-                                <filter>${basedir}/../asbestos-war/src/main/resources/service.properties</filter>
+                                <filter>${basedir}/../asbestos-war/target/classes/service.properties</filter>
                             </filters>
                             <descriptors>
                                 <!-- The main configuration of this project is in the zip.xml descriptor file -->

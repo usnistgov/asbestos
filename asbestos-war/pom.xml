@@ -44,6 +44,18 @@
 
     <build>
         <finalName>asbestos-war</finalName>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+                <includes>
+                    <include>service.properties</include>
+                </includes>
+            </resource>
+            <resource>
+                <directory>src/main/resources</directory>
+            </resource>
+        </resources>
         <plugins>
             <!--
             Surefire is to run Unit Tests *Test.java
@@ -157,7 +169,7 @@
                         <systemProperty>
                             <name>EXTERNAL_CACHE</name>
                             <value>/Users/bill/ec</value>
-<!--                            <value>/C:/Users/skb1/ec/dev</value>-->
+<!--                            <value>/C:/Users/skb1/ec/asbts-it-tests</value>-->
                         </systemProperty>
                     </systemProperties>
                 </configuration>

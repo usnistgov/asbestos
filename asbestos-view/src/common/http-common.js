@@ -12,28 +12,22 @@ async function getServiceProperties() {
         return await axios
             .get('/serviceProperties.json')
     } else {
-        return process.env.VUE_APP_FHIR_TOOLKIT_BASE
+        return {
+            data : {
+                fhirToolkitBase : process.env.VUE_APP_FHIR_TOOLKIT_BASE,
+                projectVersion : "Development"
+            }
+        };
     }
 }
-
-async function getProjectVersion() {
-    if (process.env.NODE_ENV === 'production') {
-        return await axios
-            .get('/serviceProperties.json')
-    } else {
-        return 'development'
-    }
-}
-
 
 export async function initServiceProperties() {
     if (FHIRTOOLKITBASEURL === null) {
         try {
-            await getProjectVersion().then(response => {
-                PROJECTVERSION = typeof response === 'string' ? response : `v${response.data.projectVersion}`
-            })
             await getServiceProperties().then(response => {
-                    const constFhirToolkitBaseUrl = typeof response === 'string' ? response : response.data.fhirToolkitBase
+                    PROJECTVERSION = `v${response.data.projectVersion}`
+                    const constFhirToolkitBaseUrl = response.data.fhirToolkitBase
+
                     FHIRTOOLKITBASEURL = constFhirToolkitBaseUrl
                     console.log('fhirToolkitBaseUrl is: ' + constFhirToolkitBaseUrl)
 
