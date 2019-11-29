@@ -45,7 +45,7 @@ public class XdsToolkitConnection {
             try {
                 SimConfig simConfig = xdsSimApi.get(simIdResource);
                 return Optional.ofNullable(simConfig);
-            } catch (ToolkitServiceException e) {
+            } catch (Exception e) {
                 return Optional.empty();
             }
         } else {

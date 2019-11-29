@@ -52,6 +52,7 @@ public class XdsHeartbeat {
                 msg("XDS Toolkit: xds sim responds on " + conn.getXdsToolkitBase());
             } else {
                 msg("XDS Toolkit: xds sim does not respond on " + conn.getXdsToolkitBase());
+                request.resp.setStatus(request.resp.SC_SERVICE_UNAVAILABLE);
             }
         } catch (IOException e) {
             msg(e.getMessage());
