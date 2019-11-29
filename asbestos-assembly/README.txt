@@ -13,26 +13,73 @@ Contents
 The zip file contains a Tomcat Application Server bundled with the FHIR Toolkit web application. It is configured to run on HTTP port 9760.
 
 NOTE: The zip file does NOT include XDS Toolkit or the HL7 HAPI FHIR distributions.
-For information on installing them if you do not already have them on your system, please see the following:
+For information on installing them if you do not already have them on your system, please see below:
 
- XDS Toolkit Wiki Page: https://github.com/usnistgov/iheos-toolkit2/wiki/installing
- A CATALINA_BASE shell is provided to host the XDS Toolkit. It can be be found in the Toolkits/XdsToolkit folder.
-    Please Note:
-     The WAR file must be placed in <installation-directory>/tomcat/Toolkits/XdsToolkit/webapps
-     The TLS and non-TLS ports from the toolkit.properties file must match the <installation-directory>/tomcat/Toolkits/XdsToolkit/conf/server.xml.
+ General XDS Toolkit Installation instructions can be found at: https://github.com/usnistgov/iheos-toolkit2/wiki/installing
+ The following instructions demonstrate how to install an XDS Toolkit release in to the provided Toolkit Catalina base shell. A Catalina base shell is only the configuration to start Tomcat but without the XDS Toolkit Java Web Application Archive (WAR) file.
+ The XDS Toolkit Catalina base shell is located in the <installation-directory>/tomcat/Toolkits/XdsToolkit folder.
+     Download an XDS Toolkit release (WAR file) from the Releases Page: https://github.com/usnistgov/iheos-toolkit2/releases
+     Rename the downloaded war file to "xdstools.war". This will simplify the web application context reference.
+     Place the downloaded xdstools.war into the <installation-directory>/tomcat/Toolkits/XdsToolkit/webapps folder
+     Start Tomcat for XdsToolkit
+
+     On Windows
+     REM Set CATALINA_HOME to the Tomcat directory
+     SET CATALINA_HOME=<installation-directory>\tomcat
+     REM Set the XDS Toolkit Catalina Base
+     SET CATALINA_BASE=%CATALINA_HOME%\Toolkits\XdsToolkit
+
+     REM Start Tomcat
+     %CATALINA_HOME%\bin\startup.bat
+
+     REM Uncomment the following to shutdown Tomcat
+     REM %CATALINA_HOME%\bin\shutdown.bat
+
+     On *nix
+     # Set CATALINA_HOME to the Tomcat directory
+     export CATALINA_HOME=<installation-directory>/tomcat
+     # Set the XDS Toolkit Catalina Base
+     export CATALINA_BASE=$CATALINA_HOME/Toolkits/XdsToolkit
+
+     # Start Tomcat
+     $CATALINA_HOME/bin/startup.sh
+     # Uncomment the following to shutdown Tomcat
+     # $CATALINA_HOME/bin/shutdown.sh
+
+     Open a web browser to http://localhost:9770/xdstools and dismiss any alerts or pop-ups related to External Cache.
+
+     At the top left of the window is a link labeled Toolkit Configuration. Open it. It will challenge you for a password. It is easy.
+     If the Toolkit Properties are not displayed and you get another error dialog box instead then there is a problem you need to report.
+     Update the External Cache to (On Windows) /C:/<installation-directory>/tomcat/Toolkits/ExternalCache
+        (On *nix) External Cache can be specified as <installation-directory>/tomcat/Toolkits/ExternalCache
+     Update Toolkit Port to 9770
+     Update Toolkit TLS Port to 9773
+     Note other port numbers with default values:
+        Proxy Port is 7297
+        PIF Listener Port Range is 5000-5020
+     Click Save
+    Shutdown Tomcat and re-start.
+    Open a web browser to http://localhost:9770/xdstools
+    XDS Toolkit should start without errors.
+
+    XDS Toolkit Keystore (TLS)
+     The TLS ports from the toolkit.properties should be updated to match Tomcat configuration <installation-directory>/tomcat/Toolkits/XdsToolkit/conf/server.xml.
      The Toolkit environment certificate must use the same copy as <installation-directory>/tomcat/Toolkits/XdsToolkit/connectathon-certificate/keystore.
+     You may copy the provided XdsToolkit/connectathon-certificate/keystore to ExternalCache/environment/default/keystore file. This is used for all outbound-TLS connections in the Default Toolkit environment.
+     The keystore makes use of the European Gazelle Security Suite (GSS) CA issued certificate (Id 3129). Certificate details can be viewed from: https://gazelle.ihe.net/gss/certificate/view.seam?id=3129
 
  HL7 HAPI FHIR: https://hapifhir.io/
  The version of HAPI FHIR that was used to test FHIR Toolkit can be found here: https://github.com/usnistgov/asbestos/releases/download/0.1/fhir.zip
  The fhir.zip file can be extracted to <installation-directory>/tomcat/Toolkits/XdsToolkit/webapps
+ You may need to update the FHIR Toolkit service.properties file to reflect the FHIR Base URL that is in use.
 
 ExternalCache
 The default ExternalCache location for all Toolkit CATALINA_BASEs is <installation-directory>/tomcat/Toolkits/ExternalCache
 
-Service Properties
+FHIR Toolkit Service Properties
 All of the backend API related URLs (XDS Toolkit, HAPI FHIR) are configured in the following file: <installation-directory>/tomcat/Toolkits/FhirToolkit/webapps/asbestos/WEB-INF/classes/service.properties
 
-Running
+Running FHIR Toolkit
 If you are using XDS Toolkit for MHD Document Source Testing, XDS Toolkit must be started before FHIR Toolkit. The FHIR Toolkit initialization will setup the required simulators on the backend using the XDS Toolkit Simulator API.
 
 If you are NOT using XDS Toolkit, you should comment off the xdsToolkitBase property in your service.properties file so that the FHIR Toolkit will not attempt to create the required XDS simulators.
@@ -52,8 +99,8 @@ Now, Tomcat should be up and running on HTTP port 9760.
 
 To access FHIR Toolkit, open browser to http://localhost:9760/
 
-REM Shutdown Tomcat
-%CATALINA_HOME%\bin\shutdown.bat
+REM Uncomment the following to shutdown Tomcat
+REM %CATALINA_HOME%\bin\shutdown.bat
 
 On *nix
 # Set CATALINA_HOME to the Tomcat directory
@@ -68,8 +115,8 @@ Now, Tomcat should be up and running on HTTP port 9760.
 
 To access FHIR Toolkit, open browser to http://localhost:9760/
 
-# Shutdown Tomcat
-$CATALINA_HOME/bin/shutdown.sh
+# Uncomment the following to shutdown Tomcat
+# $CATALINA_HOME/bin/shutdown.sh
 
 Other Topics
 For help with other topics, see the HOW-TO folder.
