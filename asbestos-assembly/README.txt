@@ -58,7 +58,7 @@ For information on installing them if you do not already have them on your syste
      9773 TLS
      9770 HTTP
      7297 Proxy Port
-     5000-5020 PIF Listener port range
+     5000-5015 PIF Listener port range
 
      Open a web browser to http://localhost:9770/xdstools and dismiss any alerts or pop-ups related to External Cache.
 
@@ -72,9 +72,8 @@ For information on installing them if you do not already have them on your syste
         Proxy Port is 7297
         PIF Listener Port Range is 5000-5020
      Click Save
-    Shutdown Tomcat and re-start.
-    Open a web browser to http://localhost:9770/xdstools
-    XDS Toolkit should start without errors.
+    Refresh (Ctrl+F5) browser for settings to take effect.
+    XDS Toolkit should load without errors.
 
     XDS Toolkit Keystore (TLS)
      The TLS ports from the toolkit.properties should be updated to match Tomcat configuration <installation-directory>/tomcat/Toolkits/XdsToolkit/conf/server.xml.
@@ -93,8 +92,18 @@ The default ExternalCache location for all Toolkit CATALINA_BASEs is <installati
 FHIR Toolkit Service Properties
 All of the backend API related URLs (XDS Toolkit, HAPI FHIR) are configured in the following file: <installation-directory>/tomcat/Toolkits/FhirToolkit/webapps/asbestos/WEB-INF/classes/service.properties
 
+For XDS Toolkit, the default base URL value is:
+xdsToolkitBase=http://localhost:8080/xdstools
+
+If XDS Toolkit is running on 9770, update the port number part of the xdsToolkitBase:
+xdsToolkitBase=http://localhost:9770/xdstools
+
+For HAPI FHIR, the default value is:
+hapiFhirBase=http://localhost:8080/fhir/fhir
+
+
 Running FHIR Toolkit
-If you are using XDS Toolkit for MHD Document Source Testing, XDS Toolkit must be started before FHIR Toolkit. The FHIR Toolkit initialization will setup the required simulators on the backend using the XDS Toolkit Simulator API.
+If you are using XDS Toolkit for MHD Document Source Testing, XDS Toolkit must be started BEFORE FHIR Toolkit. The FHIR Toolkit initialization will setup the required simulators on the backend using the XDS Toolkit Simulator API.
 
 If you are NOT using XDS Toolkit, you should comment off the xdsToolkitBase property in your service.properties file so that the FHIR Toolkit will not attempt to create the required XDS simulators.
 
