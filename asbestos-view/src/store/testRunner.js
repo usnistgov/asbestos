@@ -34,11 +34,23 @@ export const testRunnerStore = {
             testAssertions: null,
             testCollectionsLoaded: false,
             hapiIsAlive: false,
+            hapiDetails: null,
+            xdsIsAlive: false,
+            xdsDetails: null,
         }
     },
     mutations: {
         setHapiIsAlive(state, value) {
             state.hapiIsAlive = value
+        },
+        setHapiDetails(state, value) {
+            state.hapiDetails = value
+        },
+        setXdsIsAlive(state, value) {
+            state.xdsIsAlive = value
+        },
+        setXdsDetails(state, value) {
+            state.xdsDetails = value
         },
         setRequiredChannel(state, channel) {
             state.requiredChannel = channel
@@ -234,12 +246,26 @@ export const testRunnerStore = {
         hapiHeartbeat({commit}) {
             const url = `hapiheartbeat`
             ENGINE.get(url)
-                .then(() => {
+                .then(response => {
                     commit('setHapiIsAlive', true)
+                    commit('setHapiDetails', response.data)
                 })
                 .catch (() => {
                     commit('setHapiIsAlive', false)
                 })
+        },
+        xdsHeartbeat({commit}) {
+            const url = `xdsheartbeat`
+            ENGINE.get(url)
+                .then(response => {
+                    commit('setXdsIsAlive', true)
+                    commit('setXdsDetails', response.data)
+                })
+                .catch (() => {
+                    commit('setXdsIsAlive', false)
+                })
         }
+
     }
+
 }

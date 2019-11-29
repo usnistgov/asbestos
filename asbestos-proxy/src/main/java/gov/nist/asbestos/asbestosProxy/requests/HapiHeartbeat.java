@@ -41,12 +41,13 @@ public class HapiHeartbeat {
         if (channelConfig == null) throw new Error("Channel does not exist");
 
         try {
+            request.resp.getOutputStream().write(("BaseAddress: " + channelConfig.getFhirBase()).getBytes());
             URI uri = new URI(channelConfig.getFhirBase() + "/metadata");
             HttpGet getter = new HttpGet();
             getter.get(uri, Format.JSON.getContentType());
-            if (getter.isSuccess())
+            if (getter.isSuccess()) {
                 request.resp.setStatus(request.resp.SC_OK);
-            else
+            } else
                 request.resp.setStatus(request.resp.SC_SERVICE_UNAVAILABLE);
         } catch (Throwable e) {
             request.resp.setStatus(request.resp.SC_SERVICE_UNAVAILABLE);

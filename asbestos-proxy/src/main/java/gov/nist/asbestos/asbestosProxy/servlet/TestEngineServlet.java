@@ -47,6 +47,7 @@ public class TestEngineServlet extends HttpServlet {
             else if (GetTestLogRequest.isRequest(request)) new GetTestLogRequest(request).run();
             else if (GetClientTestEvalRequest.isRequest(request)) new GetClientTestEvalRequest(request).run();
             else if (HapiHeartbeat.isRequest(request)) new HapiHeartbeat(request).run();
+            else if (XdsHeartbeat.isRequest(request)) new XdsHeartbeat(request).run();
             else throw new Exception("Invalid request - do not understand URI " + request.uri);
 
         } catch (RuntimeException e) {

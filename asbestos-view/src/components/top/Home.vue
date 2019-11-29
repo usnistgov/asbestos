@@ -18,11 +18,18 @@
             Test Engine not responding
         </div>
         <div v-if="$store.state.testRunner.hapiIsAlive">
-            HAPI responding
+            HAPI responding - {{$store.state.testRunner.hapiDetails}}
         </div>
         <div v-else>
-            HAPI not responding
+            HAPI not responding - {{$store.state.testRunner.hapiDetails}}
         </div>
+        <div v-if="$store.state.testRunner.xdsIsAlive">
+            XDS responding - {{$store.state.testRunner.xdsDetails}}
+        </div>
+        <div v-else>
+            XDS not responding - {{$store.state.testRunner.xdsDetails}}
+        </div>
+
 
         <h2>FHIR Toolkit structure</h2>
 
@@ -127,9 +134,11 @@ kinds of channels: FHIR - data passed without modification and MHD - translation
                 this.$store.commit('resetLogLoaded')
                 this.$store.commit('resetTestCollectionsLoaded')
                 this.$store.commit('setHapiIsAlive', false)
+                this.$store.commit('setXdsIsAlive', false)
                 this.testTestEngine()
                 this.testProxy()
                 this.testHapi()
+                this.testXdsToolkit()
             },
             testTestEngine() {
                 this.$store.dispatch('loadTestCollectionNames')
@@ -138,7 +147,7 @@ kinds of channels: FHIR - data passed without modification and MHD - translation
                 this.$store.dispatch('loadEventSummaries',{session: 'default', channel: 'default'})
             },
             testXdsToolkit() {
-
+                this.$store.dispatch('xdsHeartbeat')
             },
             testHapi() {
                 this.$store.dispatch('hapiHeartbeat')
