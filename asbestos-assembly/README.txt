@@ -92,13 +92,12 @@ The default ExternalCache location for all Toolkit CATALINA_BASEs is <installati
 FHIR Toolkit Service Properties
 All of the backend API related URLs (XDS Toolkit, HAPI FHIR) are configured in the following file: <installation-directory>/tomcat/Toolkits/FhirToolkit/webapps/asbestos/WEB-INF/classes/service.properties
 
-For XDS Toolkit, the default base URL value is:
-xdsToolkitBase=http://localhost:8080/xdstools
-
-If XDS Toolkit is running on 9770, update the port number part of the xdsToolkitBase:
+For XDS Toolkit, the default base URL is:
 xdsToolkitBase=http://localhost:9770/xdstools
 
-For HAPI FHIR, the default value is:
+If XDS Toolkit is running on port other than 9770, update the port number part of the xdsToolkitBase.
+
+For HAPI FHIR, the default base URL is:
 hapiFhirBase=http://localhost:8080/fhir/fhir
 
 
