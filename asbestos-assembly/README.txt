@@ -4,7 +4,12 @@ NIST FHIR(R) Toolkit
 November 2019 Release
 
 Requirements
-The instructions assume your system is capable of running Apache Tomcat Server Version 9.0.26. This means Java 8 should already be installed and accessible through your system environment. It also assumes the following system ports 9705, 9709, 9743, and 9760 are all available and free to be used by the FHIR Toolkit's Tomcat CATALINA_BASE. The CATALINA_BASE environment variable specifies location of the root directory of the "active configuration" of Tomcat. See <installation-directory>/tomcat/RUNNING.txt for more details on CATALINA_BASE. Each type of Toolkit (FHIR, XDS) makes use of a dedicated CATALINA_BASE.
+The instructions assume your system is capable of running Apache Tomcat Server Version 9.0.26. This means Java 8 should already be installed and accessible through your system environment. It also assumes the following system ports
+9705 Tomcat Shutdown port
+9709 AJP
+9743 TLS (reserved for future)
+9760 HTTP
+are all available and free to be used by the FHIR Toolkit's Tomcat CATALINA_BASE. The CATALINA_BASE environment variable specifies location of the root directory of the "active configuration" of Tomcat. See <installation-directory>/tomcat/RUNNING.txt for more details on CATALINA_BASE. Each type of Toolkit (FHIR, XDS) makes use of a dedicated CATALINA_BASE.
 
 How to Setup\Install
 Unzip the contents to a folder of your choice. The full path of this folder will be referred to as "<installation-directory>". In the examples below, you will have to replace the <installation-directory> token with the directory location of the folder where the zip file was extracted.
@@ -43,8 +48,17 @@ For information on installing them if you do not already have them on your syste
 
      # Start Tomcat
      $CATALINA_HOME/bin/startup.sh
+
      # Uncomment the following to shutdown Tomcat
      # $CATALINA_HOME/bin/shutdown.sh
+
+     If there are any port conflicts, check to see if these ports are free and available to be used by XDS Toolkit:
+     9775 Tomcat Shutdown port
+     9779 AJP
+     9773 TLS
+     9770 HTTP
+     7297 Proxy Port
+     5000-5020 PIF Listener port range
 
      Open a web browser to http://localhost:9770/xdstools and dismiss any alerts or pop-ups related to External Cache.
 
