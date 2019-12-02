@@ -63,7 +63,7 @@
         <dependency>
             <groupId>gov.nist.toolkit</groupId>
             <artifactId>toolkit-api</artifactId>
-            <version>7.3.0</version>
+            <version>${toolkitApiVersion}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
