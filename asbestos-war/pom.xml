@@ -42,6 +42,15 @@
 <!--        </dependency>-->
     </dependencies>
 
+    <properties>
+        <fhirUI>http://localhost:8082/</fhirUI> <!-- This property is not referenced in code for Development. It is more of a documentation purpose. -->
+        <fhirToolkitBase>http://localhost:8081/asbestos</fhirToolkitBase>
+        <hapiFhirBase>http://localhost:8080/fhir/fhir</hapiFhirBase>
+        <xdsToolkitBase>http://localhost:8080/xdstools</xdsToolkitBase>
+        <tlsXdsToolkitBase>http://localhost:8443/xdstools</tlsXdsToolkitBase>
+    </properties>
+
+
     <build>
         <finalName>asbestos-war</finalName>
         <resources>
@@ -168,8 +177,7 @@
                         </systemProperty>
                         <systemProperty>
                             <name>EXTERNAL_CACHE</name>
-                            <value>/Users/bill/ec</value>
-<!--                            <value>/C:/Users/skb1/ec/asbts-it-tests</value>-->
+                            <value>${itTestsExternalCache}</value>
                         </systemProperty>
                     </systemProperties>
                 </configuration>

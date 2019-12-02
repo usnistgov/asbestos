@@ -17,6 +17,9 @@
             <directory>${baseTomcatDir}</directory>
             <excludes>
                 <exclude>bin/*.sh</exclude>
+                <!-- server.xml is excluded because HTTP and TLS ports are parameterized -->
+                <exclude>Toolkits/FhirToolkit/conf/server.xml</exclude>
+                <exclude>Toolkits/XdsToolkit/conf/server.xml</exclude>
             </excludes>
             <outputDirectory>${bundledTomcatDir}</outputDirectory>
         </fileSet>
@@ -45,30 +48,64 @@
             <directory>${basedir}/HOW-TO</directory>
             <outputDirectory>./HOW-TO</outputDirectory>
         </fileSet>
+        <fileSet>
+            <useDefaultExcludes>false</useDefaultExcludes>
+            <directory>${basedir}/target/unpacked-war</directory>
+            <excludes>
+                <exclude>WEB-INF/classes/service.properties</exclude>
+            </excludes>
+            <outputDirectory>${bundledTomcatDir}/Toolkits/FhirToolkit/webapps/asbestos</outputDirectory>
+        </fileSet>
     </fileSets>
    <files>
-       <!-- Apply the Service Properties filter using the service.properties file specified in the pom.xml -->
+       <!-- begin Tomcat server.xml port filters -->
+       <file>
+           <source>${baseTomcatDir}/Toolkits/FhirToolkit/conf/server.xml</source>
+           <outputDirectory>${bundledTomcatDir}/Toolkits/FhirToolkit/conf/</outputDirectory>
+           <filtered>true</filtered>
+       </file>
+       <file>
+           <source>${baseTomcatDir}/Toolkits/XdsToolkit/conf/server.xml</source>
+           <outputDirectory>${bundledTomcatDir}/Toolkits/XdsToolkit/conf/</outputDirectory>
+           <filtered>true</filtered>
+       </file>
+       <!-- end Tomcat server.xml port filters -->
+
+       <!-- begin Apply Service Properties filter using the service.properties file specified in the pom.xml -->
         <file>
           <source>../asbestos-view/dist/serviceProperties.json</source>
           <outputDirectory>${bundledTomcatDir}/Toolkits/FhirToolkit/webapps/ROOT</outputDirectory>
           <filtered>true</filtered>
         </file>
        <!-- Copy the Asbestos-war file. This is the back-end code. Do not copy the asbestos-war folder since the service.properties file will be changed for it-tests.  -->
+<!--       <file>-->
+<!--           <source>${basedir}/../asbestos-war/target/asbestos-war.war</source>-->
+<!--           <destName>asbestos.war</destName>-->
+<!--           <outputDirectory>${bundledTomcatDir}/Toolkits/FhirToolkit/webapps</outputDirectory>-->
+<!--       </file>-->
+       <!-- Apply Production properties -->
        <file>
-           <source>${basedir}/../asbestos-war/target/asbestos-war.war</source>
-           <destName>asbestos.war</destName>
-           <outputDirectory>${bundledTomcatDir}/Toolkits/FhirToolkit/webapps</outputDirectory>
+           <source>../asbestos-war/src/main/resources/service.properties</source>
+           <outputDirectory>${bundledTomcatDir}/Toolkits/FhirToolkit/webapps/asbestos/WEB-INF/classes/</outputDirectory>
+           <filtered>true</filtered>
        </file>
-       <!-- Copy the README.txt file -->
+       <!-- end service properties -->
+
+       <!-- begin Copy the README.txt file -->
        <file>
            <source>${basedir}/README.txt</source>
            <outputDirectory>./</outputDirectory>
+           <filtered>true</filtered>
        </file>
-       <!-- Copy the NIST-LICENSE.txt file -->
+       <!-- end Copy the README.txt file -->
+
+       <!-- begin Copy the NIST-LICENSE.txt file -->
        <file>
            <source>${basedir}/NIST-LICENSE.txt</source>
            <outputDirectory>${bundledTomcatDir}/Toolkits/</outputDirectory>
        </file>
+       <!-- end Copy the NIST-LICENSE.txt file -->
+
    </files>
 </assembly>
 

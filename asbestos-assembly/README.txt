@@ -7,15 +7,15 @@ Requirements
 The instructions assume your system is capable of running Apache Tomcat Server Version 9.0.26. This means Java 8 should already be installed and accessible through your system environment. It also assumes the following system ports
 9705 Tomcat Shutdown port
 9709 AJP
-9743 TLS (reserved for future)
-9760 HTTP
+${fhirToolkitTlsPort} TLS (reserved for future)
+${fhirToolkitHttpPort} HTTP
 are all available and free to be used by the FHIR Toolkit's Tomcat CATALINA_BASE. The CATALINA_BASE environment variable specifies location of the root directory of the "active configuration" of Tomcat. See <installation-directory>/tomcat/RUNNING.txt for more details on CATALINA_BASE. Each type of Toolkit (FHIR, XDS) makes use of a dedicated CATALINA_BASE.
 
 How to Setup\Install
 Unzip the contents to a folder of your choice. The full path of this folder will be referred to as "<installation-directory>". In the examples below, you will have to replace the <installation-directory> token with the directory location of the folder where the zip file was extracted.
 
 Contents
-The zip file contains a Tomcat Application Server bundled with the FHIR Toolkit web application. It is configured to run on HTTP port 9760.
+The zip file contains a Tomcat Application Server bundled with the FHIR Toolkit web application. It is configured to run on HTTP port ${fhirToolkitHttpPort}.
 
 NOTE: The zip file does NOT include XDS Toolkit or the HL7 HAPI FHIR distributions.
 For information on installing them if you do not already have them on your system, please see below:
@@ -55,19 +55,19 @@ For information on installing them if you do not already have them on your syste
      If there are any port conflicts, check to see if these ports are free and available to be used by XDS Toolkit:
      9775 Tomcat Shutdown port
      9779 AJP
-     9773 TLS
-     9770 HTTP
+     ${xdsToolkitTlsPort} TLS
+     ${xdsToolkitHttpPort} HTTP
      7297 Proxy Port
      5000-5015 PIF Listener port range
 
-     Open a web browser to http://localhost:9770/xdstools and dismiss any alerts or pop-ups related to External Cache.
+     Open a web browser to ${xdsToolkitBase} and dismiss any alerts or pop-ups related to External Cache.
 
      At the top left of the window is a link labeled Toolkit Configuration. Open it. It will challenge you for a password. It is easy.
      If the Toolkit Properties are not displayed and you get another error dialog box instead then there is a problem you need to report.
      Update the External Cache to (On Windows) /C:/<installation-directory>/tomcat/Toolkits/ExternalCache
         (On *nix) External Cache can be specified as <installation-directory>/tomcat/Toolkits/ExternalCache
-     Update Toolkit Port to 9770
-     Update Toolkit TLS Port to 9773
+     Update Toolkit Port to ${xdsToolkitHttpPort}
+     Update Toolkit TLS Port to ${xdsToolkitTlsPort}
      Note other port numbers with default values:
         Proxy Port is 7297
         PIF Listener Port Range is 5000-5020
@@ -93,12 +93,12 @@ FHIR Toolkit Service Properties
 All of the backend API related URLs (XDS Toolkit, HAPI FHIR) are configured in the following file: <installation-directory>/tomcat/Toolkits/FhirToolkit/webapps/asbestos/WEB-INF/classes/service.properties
 
 For XDS Toolkit, the default base URL is:
-xdsToolkitBase=http://localhost:9770/xdstools
+xdsToolkitBase=${xdsToolkitBase}
 
-If XDS Toolkit is running on port other than 9770, update the port number part of the xdsToolkitBase.
+If XDS Toolkit is running on port other than ${xdsToolkitHttpPort}, update the port number part of the xdsToolkitBase.
 
 For HAPI FHIR, the default base URL is:
-hapiFhirBase=http://localhost:8080/fhir/fhir
+hapiFhirBase=${hapiFhirBase}
 
 
 Running FHIR Toolkit
@@ -117,9 +117,9 @@ SET CATALINA_BASE=%CATALINA_HOME%\Toolkits\FhirToolkit
 REM Start Tomcat
 %CATALINA_HOME%\bin\startup.bat
 
-Now, Tomcat should be up and running on HTTP port 9760.
+Now, Tomcat should be up and running on HTTP port ${fhirToolkitHttpPort}.
 
-To access FHIR Toolkit, open browser to http://localhost:9760/
+To access FHIR Toolkit, open browser to ${fhirUI}
 
 REM Uncomment the following to shutdown Tomcat
 REM %CATALINA_HOME%\bin\shutdown.bat
@@ -133,9 +133,9 @@ export CATALINA_BASE=$CATALINA_HOME/Toolkits/FhirToolkit
 # Start Tomcat
 $CATALINA_HOME/bin/startup.sh
 
-Now, Tomcat should be up and running on HTTP port 9760.
+Now, Tomcat should be up and running on HTTP port ${fhirToolkitHttpPort}.
 
-To access FHIR Toolkit, open browser to http://localhost:9760/
+To access FHIR Toolkit, open browser to ${fhirUI}
 
 # Uncomment the following to shutdown Tomcat
 # $CATALINA_HOME/bin/shutdown.sh

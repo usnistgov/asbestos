@@ -64,11 +64,11 @@
          Java HTTP Connector: /docs/config/http.html
          Java AJP  Connector: /docs/config/ajp.html
          APR (HTTP/AJP) Connector: /docs/apr.html
-         Define a non-SSL/TLS HTTP/1.1 Connector on port 9770
+         Define a non-SSL/TLS HTTP/1.1 Connector on port ${xdsToolkitHttpPort}
     -->
-    <Connector port="9770" protocol="HTTP/1.1"
+    <Connector port="${xdsToolkitHttpPort}" protocol="HTTP/1.1"
                connectionTimeout="20000"
-               redirectPort="9773" />
+               redirectPort="${xdsToolkitTlsPort}" />
     <!-- A "Connector" using the shared thread pool-->
     <!--
     <Connector executor="tomcatThreadPool"
@@ -76,7 +76,7 @@
                connectionTimeout="20000"
                redirectPort="8443" />
     -->
-    <!-- Define an SSL/TLS HTTP/1.1 Connector on port 9773
+    <!-- Define an SSL/TLS HTTP/1.1 Connector on port ${xdsToolkitTlsPort}
          This connector uses the NIO implementation. The default
          SSLImplementation will depend on the presence of the APR/native
          library and the useOpenSSL attribute of the
@@ -85,7 +85,7 @@
          the SSLImplementation selected. JSSE style configuration is used below.
     -->
     <Connector 
-        port="9773"
+        port="${xdsToolkitTlsPort}"
         protocol="org.apache.coyote.http11.Http11NioProtocol"
         maxThreads="150" 
         SSLEnabled="true"
@@ -119,7 +119,7 @@
     -->
 
     <!-- Define an AJP 1.3 Connector on port 8009 -->
-    <Connector port="9779" protocol="AJP/1.3" redirectPort="9773" />
+    <Connector port="9779" protocol="AJP/1.3" redirectPort="${xdsToolkitTlsPort}" />
 
 
     <!-- An Engine represents the entry point (within Catalina) that processes

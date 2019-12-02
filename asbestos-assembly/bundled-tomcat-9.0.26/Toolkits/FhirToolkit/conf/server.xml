@@ -64,11 +64,11 @@
          Java HTTP Connector: /docs/config/http.html
          Java AJP  Connector: /docs/config/ajp.html
          APR (HTTP/AJP) Connector: /docs/apr.html
-         Define a non-SSL/TLS HTTP/1.1 Connector on port 9760
+         Define a non-SSL/TLS HTTP/1.1 Connector on port ${fhirToolkitHttpPort}
     -->
-    <Connector port="9760" protocol="HTTP/1.1"
+    <Connector port="${fhirToolkitHttpPort}" protocol="HTTP/1.1"
                connectionTimeout="20000"
-               redirectPort="9743" />
+               redirectPort="${fhirToolkitTlsPort}" />
     <!-- A "Connector" using the shared thread pool on port 8080 -->
     <!--
     <Connector executor="tomcatThreadPool"
@@ -113,7 +113,7 @@
     -->
 
     <!-- Define an AJP 1.3 Connector on port 9709 -->
-    <Connector port="9709" protocol="AJP/1.3" redirectPort="9743" />
+    <Connector port="9709" protocol="AJP/1.3" redirectPort="${fhirToolkitTlsPort}" />
 
 
     <!-- An Engine represents the entry point (within Catalina) that processes
