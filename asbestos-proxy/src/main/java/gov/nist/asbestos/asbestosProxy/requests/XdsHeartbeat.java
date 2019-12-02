@@ -44,14 +44,13 @@ public class XdsHeartbeat {
     public void run() {
         log.info("xdsheartbeat");
 
-
         try {
             XdsToolkitConnection conn = new XdsToolkitConnection(request.externalCache, "default");
             Optional<SimConfig> simConfigOptional = conn.get("xds");
             if (simConfigOptional.isPresent()) {
-                msg("XDS Toolkit: xds sim responds on " + conn.getXdsToolkitBase());
+                msg("XDS Toolkit: xds sim exists on " + conn.getXdsToolkitBase());
             } else {
-                msg("XDS Toolkit: xds sim does not respond on " + conn.getXdsToolkitBase());
+                msg("XDS Toolkit: xds sim does not exist on " + conn.getXdsToolkitBase());
                 request.resp.setStatus(request.resp.SC_SERVICE_UNAVAILABLE);
             }
         } catch (IOException e) {
