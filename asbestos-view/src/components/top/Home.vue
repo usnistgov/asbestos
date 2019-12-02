@@ -90,12 +90,13 @@ kinds of channels: FHIR - data passed without modification and MHD - translation
 
         <ul>
         <li>Use the Channel Editor (Config in the Channels Control panel) to
-            configure the FHIR Base Address before using.</li>
+            configure the FHIR Base Address of your System Under Test before using.</li>
         </ul>
 
         <span class="bold">xds</span>
-        - leads to a Repository/Registry simulator in XDS Toolkit. Within the Channel Configuration, the XDS Site Name
-        must be configured. On my system it is default__rr which is the default Test Session and the simulator rr.
+        - leads to a Repository/Registry simulator in XDS Toolkit. The Channel Configuration contains the XDS Site Name.
+        This is configured at system start up to point to the default__asbtsrr simulator in XDS Toolkit. The location of
+        XDS Toolkit is identified in the Service Properties file.
 
         <ul>
         <li>This simulator must have <span class="bold">Validate Against Patient Identity Feed</span> unchecked as we do not
@@ -107,7 +108,7 @@ kinds of channels: FHIR - data passed without modification and MHD - translation
 
         <span class="bold">limited</span>
         - leads to a Repository/Registry simulator in XDS Toolkit.  Within the Channel Configuration, the XDS Site Name
-        must be configured. On my system it is default__limited which is the default Test Session and the simulator limited.
+        is configured. On my system it is default__limited which is the default Test Session and the simulator limited.
 
         <ul>
         <li>This simulator must have <span class="bold">Validate Against Patient Identity Feed</span> unchecked as we do not
@@ -118,6 +119,9 @@ kinds of channels: FHIR - data passed without modification and MHD - translation
 
 
         This Channel is used for validating MHD Minimal metadeata.
+
+        <h2>FHIR Toolkit Configuration</h2>
+        For details about configuration look in the <a href="https://github.com/usnistgov/asbestos/wiki/Configuration" target="_blank">wiki</a>.
 
     </div>
 </template>
