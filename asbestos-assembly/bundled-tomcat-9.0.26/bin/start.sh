@@ -16,13 +16,14 @@ XDSWEBAPPS=$XDSTOOLKIT/webapps
 export CATALINA_HOME=..
 echo "CATALINA_HOME is `pwd`/$CATALINA_HOME"
 
-# this count includes parent dir so count of 1 means no sub-directories
 echo "Looking at $XDSWEBAPPS"
-WEBAPPSCOUNT=`find $XDSWEBAPPS -maxdepth 1 -type d -printf x | wc -c`
+WEBAPPSCOUNT=`find $XDSWEBAPPS -maxdepth 1 \( -type d -o -name *.war \) -printf x | wc -c`
 
 # start XdsToolkit base if its webapps dir is not empty
 echo "count is $WEBAPPSCOUNT"
+exit
 
+# account for webapps.txt file that allows this to be checked in to git
 if [ $WEBAPPSCOUNT -gt 1 ]
 then
 	echo "XdsToolkit should be started"
