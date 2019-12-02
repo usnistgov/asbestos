@@ -40,7 +40,7 @@ IF %WEBAPPSCOUNT% EQU 0 (
 REM start XdsToolkit base if its webapps dir is not empty
 
 ECHO count is %WEBAPPSCOUNT%
-IF %WEBAPPSCOUNT% GEQ 1 (
+IF %WEBAPPSCOUNT% GTR 0 (
     ECHO XdsToolkit should be started
     MKDIR %XDSTOOLKIT%\logs
     SET CATALINA_BASE=%XDSTOOLKIT%

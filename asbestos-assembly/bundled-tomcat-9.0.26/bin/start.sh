@@ -24,7 +24,7 @@ echo "count is $WEBAPPSCOUNT"
 exit
 
 # account for webapps.txt file that allows this to be checked in to git
-if [ $WEBAPPSCOUNT -gt 1 ]
+if [ $WEBAPPSCOUNT -gt 0 ]
 then
 	echo "XdsToolkit should be started"
 	mkdir $XDSTOOLKIT/logs
