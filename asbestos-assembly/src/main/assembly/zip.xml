@@ -86,7 +86,9 @@
        <!-- Apply Production properties -->
        <file>
            <source>../asbestos-war/src/main/resources/service.properties</source>
-           <outputDirectory>${bundledTomcatDir}/Toolkits/FhirToolkit/webapps/asbestos/WEB-INF/classes/</outputDirectory>
+           <!-- to be loaded by the Java system property -->
+           <outputDirectory>${bundledTomcatDir}/Toolkits/FhirToolkit/conf/</outputDirectory>
+           <!--  <outputDirectory>${bundledTomcatDir}/Toolkits/FhirToolkit/webapps/asbestos/WEB-INF/classes/</outputDirectory>-->
            <filtered>true</filtered>
        </file>
        <!-- end service properties -->
