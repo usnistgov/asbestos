@@ -1,15 +1,13 @@
 package gov.nist.asbestos.asbestosProxy.servlet;
 
 import gov.nist.asbestos.client.Base.EC;
-import gov.nist.asbestos.http.operations.HttpGet;
-import gov.nist.asbestos.serviceproperties.ServiceProperties;
-import gov.nist.asbestos.serviceproperties.ServicePropertiesEnum;
-import gov.nist.asbestos.simapi.tk.installation.Installation;
 import gov.nist.asbestos.client.log.SimStore;
+import gov.nist.asbestos.http.operations.HttpGet;
 import gov.nist.asbestos.serviceproperties.ServiceProperties;
 import gov.nist.asbestos.serviceproperties.ServicePropertiesEnum;
 import gov.nist.asbestos.sharedObjects.ChannelConfig;
 import gov.nist.asbestos.sharedObjects.ChannelConfigFactory;
+import gov.nist.asbestos.simapi.tk.installation.Installation;
 import gov.nist.toolkit.configDatatypes.server.SimulatorProperties;
 import gov.nist.toolkit.toolkitApi.DocumentRegRep;
 import gov.nist.toolkit.toolkitApi.SimulatorBuilder;
@@ -103,10 +101,14 @@ public class TestInstallerServlet  extends HttpServlet {
                 for (File channel : channels) {
                     String name = channel.getName();
                     File target = new File(externalChannels, name);
-                    if (!target.exists()) {
+                    if (! target.exists()) {
                         log.info(target + " does not exist - building it");
                         FileUtils.copyDirectoryToDirectory(channel, externalChannels);
-                        switch (name) {
+                    } else {
+                        log.info(target + " exists.");
+                    }
+                    log.info(String.format("Refreshing channel %s", name));
+                    switch (name) {
                             case "default": {
                                 configureDefaultChannel(externalChannels, name);
                                 break;
@@ -116,10 +118,7 @@ public class TestInstallerServlet  extends HttpServlet {
                                 configureXdsChannels(externalChannels, name);
                                 break;
                             }
-                            /* next-case-label */
                         }
-                    } else
-                        log.info(target + " exists - not updating");
                 }
             }
         } catch (IOException e) {
@@ -200,6 +199,8 @@ public class TestInstallerServlet  extends HttpServlet {
                             log.error(updateEx.toString());
                             log.error(String.format("Error: %s SimConfig could not be updated!", xdsSiteName));
                         }
+                    } else {
+                        log.info("Already up to date.");
                     }
                 }
             }
@@ -213,8 +214,11 @@ public class TestInstallerServlet  extends HttpServlet {
             File configFile = getChannelConfigFile(externalChannels, name);
             ChannelConfig channelConfig = ChannelConfigFactory.load(configFile);
             if (! hapFhirBase.get().equals(channelConfig.getFhirBase())) {
+                log.info("Updating " + name + " channel.");
                 channelConfig.setFhirBase(hapFhirBase.get());
                 ChannelConfigFactory.store(channelConfig, configFile);
+            } else {
+                log.info("Already up to date.");
             }
         }
     }
