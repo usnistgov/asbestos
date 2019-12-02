@@ -67,6 +67,7 @@ fabric.properties
 # Package Files #
 *.jar
 !/asbestos-assembly/bundled-tomcat-9.0.26/lib/*.jar
+!/asbestos-assembly/bundled-tomcat-9.0.26/bin/*.jar
 *.war
 *.ear
 
