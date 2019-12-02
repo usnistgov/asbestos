@@ -66,7 +66,9 @@ fabric.properties
 
 # Package Files #
 *.jar
+!/asbestos-assembly/bundled-tomcat-9.0.26/lib/*.jar
 *.war
+*.ear
 
 # gwt caches and compiled units #
 war/gwt_bree/
@@ -121,11 +123,6 @@ Temporary Items
 
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/
-
-# Package Files #
-*.jar
-*.war
-*.ear
 
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
