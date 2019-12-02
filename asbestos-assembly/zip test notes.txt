@@ -17,17 +17,19 @@ Before building Asbestos:
 	    BuildRegistryObjectList[Test].java
 
 \asbestos
-mvn clean install
+mvn clean install -P Sunil
 
 cd asbestos-assembly
 
 mvn clean package
 
-@call c:\Users\skb1\myprojects\env.bat
+@call c:\Users\skb1\myprojects\env.bat cd
 
 dir C:\Users\skb1\myprojects\asbestos\asbestos-assembly\target\asbestos.zip
 	
 unzip -qq C:\Users\skb1\myprojects\asbestos\asbestos-assembly\target\asbestos.zip -d C:\Users\skb1\myprojects\asbestos\asbestos-assembly\target\asbestos
+
+cd C:\Users\skb1\myprojects\asbestos\asbestos-assembly\target\asbestos
 
 set CATALINA_HOME=C:\Users\skb1\myprojects\asbestos\asbestos-assembly\target\asbestos\tomcat
 
