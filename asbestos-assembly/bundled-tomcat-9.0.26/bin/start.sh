@@ -26,7 +26,7 @@ echo "count is $WEBAPPSCOUNT"
 if [ $WEBAPPSCOUNT -gt 1 ]
 then
 	echo "XdsToolkit should be started"
-	mkdir $XDSTOOLS/logs
+	mkdir $XDSTOOLKIT/logs
 	export CATALINA_BASE=$XDSTOOLKIT
 	./startup.sh
 else
