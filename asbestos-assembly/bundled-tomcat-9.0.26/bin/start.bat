@@ -11,13 +11,23 @@ REM NOTE: HAPI FHIR and XDS Toolkit must be started before FhirToolkit.
 REM Start with clean ERRORLEVEL.
 TYPE NUL>NUL
 
-SET TOOLKITS=..\Toolkits
+SET "CATALINA_HOME="
+SET "TOOLKITS="
+
+REM Resolve full path
+FOR /F %%I IN ("..\") DO SET CATALINA_HOME=%%~FI
+
+REM Remove the trailing slash off the full path
+IF "%CATALINA_HOME:~-1%"=="\" SET CATALINA_HOME=%CATALINA_HOME:~0,-1%
+
+SET TOOLKITS=%CATALINA_HOME%\Toolkits
+
 SET FHIRTOOLKIT=%TOOLKITS%\FhirToolkit
 SET XDSTOOLKIT=%TOOLKITS%\XdsToolkit
 SET XDSWEBAPPS=%XDSTOOLKIT%\webapps
 
-SET CATALINA_HOME=..
-ECHO CATALINA_HOME is %CD%\%CATALINA_HOME%
+
+ECHO CATALINA_HOME is %CATALINA_HOME%
 
 REM this count includes parent dir so count of 1 means no sub-directories
 ECHO Looking at %XDSWEBAPPS%
@@ -47,7 +57,7 @@ IF %WEBAPPSCOUNT% GTR 0 (
     @CALL .\startup.bat
     REM Wait (in seconds) for XdsToolkit (and maybe HAPI FHIR) to startup
     ECHO Waiting for XdsToolkit to startup
-    TIMEOUT /T 15
+    TIMEOUT /T 60
  )
 ) ELSE (
 	ECHO XdsToolkit should not be started
