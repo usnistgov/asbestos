@@ -83,7 +83,7 @@ public class TestInstallerServlet  extends HttpServlet {
         String fhirCodes = new String(Files.readAllBytes(Paths.get(codesFile.toString())));
 
         if (xdsCodes.equals(fhirCodes)) {
-            log.info("TestInstallerServlet - codex.xml checked - FHIR and XDS reference same version");
+            log.info("TestInstallerServlet - codes.xml checked - FHIR and XDS reference same version");
         } else {
             log.fatal("TestInstallerServlet - codes.xml checked - FHIR and XDS reference different versions");
         }

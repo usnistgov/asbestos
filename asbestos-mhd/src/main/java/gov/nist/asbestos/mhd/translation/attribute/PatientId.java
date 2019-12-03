@@ -5,6 +5,8 @@ import gov.nist.asbestos.client.client.FhirClient;
 import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.client.resolver.ResourceCacheMgr;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
+import gov.nist.asbestos.serviceproperties.ServiceProperties;
+import gov.nist.asbestos.serviceproperties.ServicePropertiesEnum;
 import gov.nist.asbestos.simapi.validation.Val;
 import gov.nist.asbestos.simapi.validation.ValE;
 import org.hl7.fhir.r4.model.Patient;
@@ -47,7 +49,8 @@ public class PatientId implements IVal {
         return id;
     }
 
-    Ref patientServer = new Ref("http://localhost:8080/fhir/fhir");
+//    Ref patientServer = new Ref("http://localhost:8080/fhir/fhir");
+    Ref patientServer = new Ref(ServiceProperties.getInstance().getPropertyOrStop(ServicePropertiesEnum.HAPI_FHIR_BASE));
 
 
     public Optional<Reference> getFhirReference() {

@@ -100,6 +100,12 @@ If XDS Toolkit is running on port other than ${xdsToolkitHttpPort}, update the p
 For HAPI FHIR, the default base URL is:
 hapiFhirBase=${hapiFhirBase}
 
+Running FHIR Toolkit the easy way
+We have installed two custom scripts in tomcat/bin
+  start.sh   -- to start both the XDSToolkit base and the FhirToolkit base (in that order)
+  stop.sh    -- to stop both
+
+
 
 Running FHIR Toolkit
 If you are using XDS Toolkit for MHD Document Source Testing, XDS Toolkit must be started BEFORE FHIR Toolkit. The FHIR Toolkit initialization will setup the required simulators on the backend using the XDS Toolkit Simulator API.

@@ -28,7 +28,7 @@
         <build.profile.id>Production</build.profile.id>
         <fhirUI>http://localhost:9760/</fhirUI>
         <fhirToolkitBase>http://localhost:9760/asbestos</fhirToolkitBase>
-        <hapiFhirBase>http://localhost:8080/fhir/fhir</hapiFhirBase>
+        <hapiFhirBase>http://localhost:9770/fhir/fhir</hapiFhirBase>
         <xdsToolkitBase>http://localhost:9770/xdstools</xdsToolkitBase>
         <tlsXdsToolkitBase>http://localhost:9773/xdstools</tlsXdsToolkitBase>
         <!-- README.txt and Tomcat server.xml use these properties -->
