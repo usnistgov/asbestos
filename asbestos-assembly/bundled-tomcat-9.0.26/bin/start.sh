@@ -8,27 +8,33 @@
 
 # NOTE: HAPI FHIR and XDS Toolkit must be started before FhirToolkit.
 
-TOOLKITS=../Toolkits
+# directory this script resides in
+# most references are relative to this
+SCRIPT=$(readlink -f "$0")
+BASEDIR=$(dirname "$SCRIPT")
+echo "BASEDIR is $BASEDIR"
+
+TOOLKITS=$BASEDIR/../Toolkits
 FHIRTOOLKIT=$TOOLKITS/FhirToolkit
 XDSTOOLKIT=$TOOLKITS/XdsToolkit
 XDSWEBAPPS=$XDSTOOLKIT/webapps
 
-export CATALINA_HOME=..
-echo "CATALINA_HOME is `pwd`/$CATALINA_HOME"
+export CATALINA_HOME=$BASEDIR/..
+echo "CATALINA_HOME is $CATALINA_HOME"
 
 echo "Looking at $XDSWEBAPPS"
 WEBAPPSCOUNT=`find $XDSWEBAPPS -maxdepth 1 \( -type d -o -name *.war \) -printf x | wc -c`
 
 # start XdsToolkit base if its webapps dir is not empty
 echo "count is $WEBAPPSCOUNT"
-exit
 
-# account for webapps.txt file that allows this to be checked in to git
-if [ $WEBAPPSCOUNT -gt 0 ]
+# account for find counting base directory
+if [ $WEBAPPSCOUNT -gt 1 ]
 then
 	echo "XdsToolkit should be started"
 	mkdir $XDSTOOLKIT/logs
 	export CATALINA_BASE=$XDSTOOLKIT
+	echo "CATALINA_BASE=$CATALINA_BASE"
 	./startup.sh
 else
 	echo "XdsToolkit should not be started"
@@ -39,4 +45,5 @@ fi
 echo "Starting FhirToolkit"
 mkdir $FHIRTOOLKIT/logs
 export CATALINA_BASE=$FHIRTOOLKIT
+echo "CATALINA_BASE=$CATALINA_BASE"
 ./startup.sh
