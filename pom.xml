@@ -82,7 +82,7 @@
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
             <!-- NOTE: Needs to match XDS Toolkit "jackson.version" maven property since introducing the SimulatorBuilder API into Asbestos. Otherwise, fasterxml errors will be thrown due to mismatch libraries. -->
-            <version>2.6.3</version>
+            <version>2.9.10.1</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-annotations -->
 
