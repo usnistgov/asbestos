@@ -42,12 +42,13 @@
             </excludes>
             <outputDirectory>${bundledTomcatDir}/Toolkits/FhirToolkit/webapps/ROOT</outputDirectory>
         </fileSet>
-        <!-- Copy the HOW-TO files -->
-        <fileSet>
-            <useDefaultExcludes>false</useDefaultExcludes>
-            <directory>${basedir}/HOW-TO</directory>
-            <outputDirectory>./HOW-TO</outputDirectory>
-        </fileSet>
+        <!-- begin Copy the HOW-TO files -->
+<!--        <fileSet>-->
+<!--            <useDefaultExcludes>false</useDefaultExcludes>-->
+<!--            <directory>${basedir}/HOW-TO</directory>-->
+<!--            <outputDirectory>./HOW-TO</outputDirectory>-->
+<!--        </fileSet>-->
+        <!-- end Copy the HOW-TO files -->
         <fileSet>
             <useDefaultExcludes>false</useDefaultExcludes>
             <directory>${basedir}/target/unpacked-war</directory>
@@ -93,13 +94,13 @@
        </file>
        <!-- end service properties -->
 
-       <!-- begin Copy the README.txt file -->
+       <!-- begin Copy the README.html file -->
        <file>
-           <source>${basedir}/README.txt</source>
+           <source>${basedir}/README.html</source>
            <outputDirectory>./</outputDirectory>
-           <filtered>true</filtered>
+<!--           <filtered>true</filtered>-->
        </file>
-       <!-- end Copy the README.txt file -->
+       <!-- end Copy the README.html file -->
 
        <!-- begin Copy the NIST-LICENSE.txt file -->
        <file>
