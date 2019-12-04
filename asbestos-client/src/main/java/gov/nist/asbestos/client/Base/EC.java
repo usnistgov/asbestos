@@ -5,6 +5,7 @@ import gov.nist.asbestos.client.events.EventSummary;
 import gov.nist.asbestos.client.events.UIEvent;
 import gov.nist.asbestos.client.log.SimStore;
 import gov.nist.asbestos.simapi.simCommon.SimId;
+import org.apache.log4j.Logger;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
@@ -21,6 +22,7 @@ import static gov.nist.asbestos.client.Base.Dirs.listOfDirectories;
 import static gov.nist.asbestos.client.Base.Dirs.listOfFiles;
 
 public class EC {
+    private static Logger log = Logger.getLogger(EC.class);
     public File externalCache;
 
     public static final String MarkerType = "Marker";
@@ -161,6 +163,7 @@ public class EC {
                 testLogList.add(test);
             }
         }
+        log.info("got " + testLogList.size() + " test logs from " + testLogs.toString());
         return testLogList;
     }
 

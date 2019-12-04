@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # Startup script for FHIR Toolkit
 # There are two CATALINA_BASE directories: Toolkits/XdsToolkit and Toolkits/FhirToolkit.
@@ -8,32 +8,59 @@
 
 # NOTE: HAPI FHIR and XDS Toolkit must be started before FhirToolkit.
 
-# directory this script resides in
-# most references are relative to this
-SCRIPT=$(readlink -f "$0")
-BASEDIR=$(dirname "$SCRIPT")
+unameOut="$(uname -s)"
+case "${unameOut}" in
+    Linux*)     machine=Linux;;
+    Darwin*)    machine=Mac;;
+    CYGWIN*)    machine=Cygwin;;
+    MINGW*)     machine=MinGw;;
+    *)          machine="UNKNOWN:${unameOut}"
+esac
+
+if [[ ${machine} = 'Mac' ]]
+then
+	echo "Running on a MAC"
+fi
+
+BASEDIR=$(dirname "$0")
+if [[ ${BASEDIR} = '.' ]]
+then
+	BASEDIR=`pwd`
+fi
 echo "BASEDIR is $BASEDIR"
 
-TOOLKITS=$BASEDIR/../Toolkits
-FHIRTOOLKIT=$TOOLKITS/FhirToolkit
-XDSTOOLKIT=$TOOLKITS/XdsToolkit
-XDSWEBAPPS=$XDSTOOLKIT/webapps
+TOOLKITS=${BASEDIR}/../Toolkits
+FHIRTOOLKIT=${TOOLKITS}/FhirToolkit
+XDSTOOLKIT=${TOOLKITS}/XdsToolkit
+XDSWEBAPPS=${XDSTOOLKIT}/webapps
 
-export CATALINA_HOME=$BASEDIR/..
+export CATALINA_HOME=${BASEDIR}/..
 echo "CATALINA_HOME is $CATALINA_HOME"
 
 echo "Looking at $XDSWEBAPPS"
-WEBAPPSCOUNT=`find $XDSWEBAPPS -maxdepth 1 \( -type d -o -name *.war \) -printf x | wc -c`
+# find works different on a MAC vs LINUX
+if [[ ${machine} == 'Mac' ]]
+then
+	WEBAPPSCOUNT=`find ${XDSWEBAPPS} -maxdepth 1 \( -type d -or -name *.war \) -print | wc -c`
+else
+	WEBAPPSCOUNT=`find ${XDSWEBAPPS} -maxdepth 1 \( -type d -o -name *.war \) -printf x | wc -c`
+fi
 
 # start XdsToolkit base if its webapps dir is not empty
 echo "count is $WEBAPPSCOUNT"
+if [[ ${machine} == 'Mac' ]]
+then
+	MINCOUNT=2
+else
+	MINCOUNT=1
+fi
 
 # account for find counting base directory
-if [ $WEBAPPSCOUNT -gt 1 ]
+if [[ ${WEBAPPSCOUNT} -gt ${MINCOUNT} ]]
 then
-	echo "XdsToolkit should be started"
-	mkdir $XDSTOOLKIT/logs
-	export CATALINA_BASE=$XDSTOOLKIT
+	echo "Starting XdsToolkit"
+	mkdir ${XDSTOOLKIT}/logs
+	export CATALINA_BASE=${XDSTOOLKIT}
 	echo "CATALINA_BASE=$CATALINA_BASE"
 	./startup.sh
 else
@@ -43,7 +70,7 @@ fi
 # start FhirToolkit
 
 echo "Starting FhirToolkit"
-mkdir $FHIRTOOLKIT/logs
-export CATALINA_BASE=$FHIRTOOLKIT
+mkdir ${FHIRTOOLKIT}/logs
+export CATALINA_BASE=${FHIRTOOLKIT}
 echo "CATALINA_BASE=$CATALINA_BASE"
 ./startup.sh
