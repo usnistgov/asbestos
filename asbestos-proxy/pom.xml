@@ -68,7 +68,7 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-compress</artifactId>
-            <version>1.14</version>
+            <version>1.19</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/javax.servlet/servlet-api -->
         <!-- https://mvnrepository.com/artifact/javax.xml/jaxp-api -->
