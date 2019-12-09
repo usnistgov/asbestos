@@ -1,0 +1,21 @@
+<TestScript xmlns="http://hl7.org/fhir">
+    <fixture id="patient">
+        <resource>
+            <reference value="Patient/patient-example2.xml"/>
+        </resource>
+    </fixture>
+    <fixture id="docRef">
+        <resource>
+            <reference value="DocumentReference/DocRef.xml"/>
+        </resource>
+    </fixture>
+    <test>
+        <action>
+            <assert>
+                <minimumId value="patient"/>
+                <sourceId value="docRef"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+    </test>
+</TestScript>

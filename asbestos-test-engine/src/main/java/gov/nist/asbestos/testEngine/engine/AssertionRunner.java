@@ -4,6 +4,7 @@ import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.simapi.validation.ValE;
 import org.hl7.fhir.r4.model.*;
 
+import java.lang.reflect.Method;
 import java.util.Objects;
 
 public class AssertionRunner {
@@ -115,28 +116,49 @@ public class AssertionRunner {
         String operator = as.hasOperator() ? as.getOperator().toCode() : "equals";
         FixtureComponent sourceFixture;
 
-//        // path and value pattern
-//        // source specified by sourceId or lastOperation
-//        if (as.hasPath() && as.hasValue()) {
-//            sourceFixture = getSource(as);
-//            if (sourceFixture == null) return;
-//            String pathValue = sourceFixture.applyPath(as.getPath());
-//            if (pathValue == null) {
-//                Reporter.reportError(val, assertReport, type, label, "value extracted by path is null");
-//                return;
-//            }
-//            String found = pathValue;
-//            String expected = as.getValue();
-//            if (!compare(val, assertReport, found, expected, operator, warningOnly, type, label))
-//                return;
-//
-//            if (!pathValue.equals(as.getValue())) {
-//                Reporter.reportError(val, assertReport, type, label, "comparison fails: pathValue=" + pathValue + " value=" + as.getValue());
-//                return;
-//            }
-//            Reporter.reportPass(val, assertReport, type, label, "path/value comparison");
-//            return;
-//        }
+        if (as.hasMinimumId()) {
+            sourceFixture = getSource(as);
+            if (sourceFixture == null) return false;
+
+            FixtureComponent minFixture  = fixtureMgr.get(as.getMinimumId());
+            if (minFixture == null) {
+                Reporter.reportError(val, assertReport, type, label, "minimumId references " + as.getMinimumId() + " which cannot be found");
+                return false;
+            }
+
+            BaseResource miniR = minFixture.getResourceResource();
+            BaseResource sourceR = sourceFixture.getResourceResource();
+
+            Class<?> miniClass = miniR.getClass();
+            Class<?> sourceClass = sourceR.getClass();
+
+            if (!miniClass.equals(sourceClass)) {
+                Reporter.reportError(val, assertReport, type, label, "minimumId: cannot compare " + miniClass.getName() + " and " + sourceClass.getName());
+                return false;
+            }
+
+            Method[] methods = miniClass.getMethods();
+            for (Method method : methods) {
+                String name = method.getName();
+                if (!name.startsWith("has"))
+                    continue;
+                boolean miniHas;
+                boolean sourceHas;
+                try {
+                    miniHas = (boolean) method.invoke(miniR);
+                    sourceHas = (boolean) method.invoke(sourceR);
+
+                    if (miniHas && !sourceHas) {
+                        String attName = name.substring(3);
+                        Reporter.reportError(val, assertReport, type, label, "minimumId: attribute " + attName + " not found");
+                    }
+                } catch (Exception e) {
+//                    Reporter.reportError(val, assertReport, type, label, "minimumId: cannot invoke method " + name + " on " + miniClass.getName());
+//                    return false;
+                }
+            }
+            return true;
+        }
 
         if (as.hasCompareToSourceId() && as.hasCompareToSourceExpression()) {
             sourceFixture = fixtureMgr.get(as.getCompareToSourceId());

@@ -290,6 +290,7 @@ public class TestEngine  {
         if (testScript.hasFixture()) {
             ValE fVal = new ValE(engineVal).setMsg("Fixtures");
 
+            try {
             for (TestScript.TestScriptFixtureComponent comp : testScript.getFixture()) {
                 String id = comp.getId();
                 if (id == null || id.equals("")) {
@@ -315,6 +316,10 @@ public class TestEngine  {
                     throw new Error(e);
                 }
             }
+            } catch (Throwable t) {
+                reportParsingError(testReport.addTest(), t.getMessage());
+            }
+
         }
     }
 
@@ -472,65 +477,69 @@ public class TestEngine  {
         if (testScript.hasTest()) {
             ValE fVal = new ValE(engineVal).setMsg("Test");
 
-            int testCounter = 1;
-            for (TestScript.TestScriptTestComponent testComponent : testScript.getTest()) {
-                String testName = testComponent.getName();
-                if (testName == null || testName.equals(""))
-                    testName = "Test" + testCounter;
-                testCounter++;
-                ValE tVal = new ValE(fVal).setMsg(testName);
-                TestReport.TestReportTestComponent testReportComponent = testReport.addTest();
+            try {
+                int testCounter = 1;
+                for (TestScript.TestScriptTestComponent testComponent : testScript.getTest()) {
+                    String testName = testComponent.getName();
+                    if (testName == null || testName.equals(""))
+                        testName = "Test" + testCounter;
+                    testCounter++;
+                    ValE tVal = new ValE(fVal).setMsg(testName);
+                    TestReport.TestReportTestComponent testReportComponent = testReport.addTest();
 
-                // handle condition
-                TestScript containedTestScript = getConditional(testComponent, testReportComponent);
-                testReportComponent = testReport.addTest();
-                boolean conditionalResult = true;
-                if (containedTestScript != null) {
-                    List<TestScript.TestScriptTestComponent> tests = containedTestScript.getTest();
-                    if (tests.size() != 2) {
-                        reportParsingError(testReportComponent, "test condition must contain two test elements");
-                        return;
-                    }
+                    // handle condition
+                    TestScript containedTestScript = getConditional(testComponent, testReportComponent);
+                    testReportComponent = testReport.addTest();
+                    boolean conditionalResult = true;
+                    if (containedTestScript != null) {
+                        List<TestScript.TestScriptTestComponent> tests = containedTestScript.getTest();
+                        if (tests.size() != 2) {
+                            reportParsingError(testReportComponent, "test condition must contain two test elements");
+                            return;
+                        }
 
-                    TestReport containedTestReport = new TestReport();
+                        TestReport containedTestReport = new TestReport();
 
-                    Extension extension = new Extension("https://github.com/usnistgov/asbestos/wiki/TestScript-Conditional",
-                            new Reference(containedTestReport));
-                    testReportComponent.addModifierExtension(extension);
+                        Extension extension = new Extension("https://github.com/usnistgov/asbestos/wiki/TestScript-Conditional",
+                                new Reference(containedTestReport));
+                        testReportComponent.addModifierExtension(extension);
 
-                    // basic operation and validation
-                    TestScript.TestScriptTestComponent basicOperationTest = tests.get(0);
-                    TestReport.TestReportTestComponent containedTestReportComponent = containedTestReport.addTest();
-                    boolean opResult = doTestPart(basicOperationTest, containedTestReportComponent, containedTestReport,false);
+                        // basic operation and validation
+                        TestScript.TestScriptTestComponent basicOperationTest = tests.get(0);
+                        TestReport.TestReportTestComponent containedTestReportComponent = containedTestReport.addTest();
+                        boolean opResult = doTestPart(basicOperationTest, containedTestReportComponent, containedTestReport, false);
 
-                    if (!opResult) {
-                        failOverride = true;
+                        if (!opResult) {
+                            failOverride = true;
 //                        testReport.setResult(TestReport.TestReportResult.FAIL);
+                            containedTestReportComponent = containedTestReport.addTest();
+                            reportSkip(containedTestReportComponent);
+                            reportSkip(testReportComponent);
+                            return;
+                        }
+                        // asserts to trigger conditional
+                        TestScript.TestScriptTestComponent conditionalTest = tests.get(1);
+
                         containedTestReportComponent = containedTestReport.addTest();
-                        reportSkip(containedTestReportComponent);
-                        reportSkip(testReportComponent);
-                        return;
+                        conditionalResult = doTestPart(conditionalTest, containedTestReportComponent, containedTestReport, true);
+
+                        if (containedTestReport.getResult() == TestReport.TestReportResult.FAIL)
+                            return;
                     }
-                    // asserts to trigger conditional
-                    TestScript.TestScriptTestComponent conditionalTest = tests.get(1);
-
-                    containedTestReportComponent = containedTestReport.addTest();
-                    conditionalResult = doTestPart(conditionalTest, containedTestReportComponent, containedTestReport, true);
-
-                    if (containedTestReport.getResult() == TestReport.TestReportResult.FAIL)
-                        return;
-                }
 
 
-                if (conditionalResult) {
-                    doTestPart(testComponent, testReportComponent, testReport, false);
-                } else {
-                    reportSkip(testReportComponent);
+                    if (conditionalResult) {
+                        doTestPart(testComponent, testReportComponent, testReport, false);
+                    } else {
+                        reportSkip(testReportComponent);
 //                    TestReport.TestActionComponent testActionComponent = testReportComponent.addAction();
 //                    TestReport.SetupActionOperationComponent setupActionOperationComponent = testActionComponent.getOperation();
 //                    setupActionOperationComponent.setResult(TestReport.TestReportActionResult.SKIP);
 //                    setupActionOperationComponent.setMessage("condition failed");
+                    }
                 }
+            } catch (Throwable t) {
+                reportParsingError(testReport.addTest(), t.getMessage());
             }
 
         }
