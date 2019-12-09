@@ -229,6 +229,9 @@
         cursor: pointer;
         text-decoration: underline;
     }
+    .pointer-cursor {
+        cursor: pointer;
+    }
     .has-cursor {
         cursor: pointer;
     }

@@ -13,6 +13,10 @@
                         <span class="divider"> </span>
                     </span>
                 </span>
+
+                <span class="link-position solid-boxed pointer-cursor" @click.stop.prevent="copyToClipboard">Get Event Link</span>
+                <input type="hidden" id="the-link" :value="eventLink">
+
             </div>
             <div v-else>
                 No Tasks
@@ -44,7 +48,7 @@
 
 <script>
     import LogNav from "./LogNav"
-    import {LOG} from '../../common/http-common'
+    import {FHIRTOOLKITBASEURL, LOG} from '../../common/http-common'
     import eventMixin from '../../mixins/eventMixin'
     import errorHandlerMixin from '../../mixins/errorHandlerMixin'
 
@@ -54,9 +58,28 @@
                 selectedEvent: null,
                 selectedTask: 0,
                 displayRequest: true,
+                linkToCopy: null,
             }
         },
         methods: {
+            copyToClipboard() {
+                this.linkToCopy = document.querySelector('#the-link')
+                console.log(`link is ${this.linkToCopy}`)
+                this.linkToCopy.setAttribute('type', 'text')    // 不是 hidden 才能複製
+                this.linkToCopy.select()
+
+                try {
+                    let successful = document.execCommand('copy');
+                    let msg = successful ? 'successful' : 'unsuccessful';
+                    alert('Link was copied ' + msg);
+                } catch (err) {
+                    alert('Oops, unable to copy');
+                }
+
+                /* unselect the range */
+                this.linkToCopy.setAttribute('type', 'hidden')
+                window.getSelection().removeAllRanges()
+            },
             taskLabel(i) {
                 if (i === 0)
                     return 'From Client'
@@ -142,6 +165,10 @@
                     ? this.$store.state.log.eventSummaries[this.index]
                     : null
             },
+            eventLink() {
+                console.log(`link is ${FHIRTOOLKITBASEURL}${this.$router.currentRoute.fullPath}`)
+                return `${FHIRTOOLKITBASEURL}${this.$router.currentRoute.fullPath}`
+            },
         },
         created() {
             this.loadEventSummaries()
@@ -184,5 +211,12 @@
         font-weight: bold;
         cursor: pointer;
         text-decoration: underline;
+    }
+    .right {
+        text-align: right;
+    }
+    .link-position {
+        position: absolute;
+        left: 350px;
     }
 </style>

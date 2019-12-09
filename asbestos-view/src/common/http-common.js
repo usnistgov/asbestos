@@ -7,7 +7,7 @@ export var CHANNEL = null
 export var FHIRTOOLKITBASEURL = null
 export var PROJECTVERSION = null
 
-async function getServiceProperties() {
+export async function getServiceProperties() {
     if (process.env.NODE_ENV === 'production') {
         return await axios
             .get('/serviceProperties.json')
