@@ -14,7 +14,7 @@
                     </span>
                 </span>
 
-                <span class="link-position solid-boxed pointer-cursor" @click.stop.prevent="copyToClipboard">Get Event Link</span>
+                <span class="link-position solid-boxed pointer-cursor" @click.stop.prevent="copyToClipboard">Copy Event Link</span>
                 <input type="hidden" id="the-link" :value="eventLink">
 
             </div>
@@ -48,7 +48,7 @@
 
 <script>
     import LogNav from "./LogNav"
-    import {FHIRTOOLKITBASEURL, LOG, UIBASE} from '../../common/http-common'
+    import {LOG} from '../../common/http-common'
     import eventMixin from '../../mixins/eventMixin'
     import errorHandlerMixin from '../../mixins/errorHandlerMixin'
 
@@ -64,17 +64,11 @@
         methods: {
             copyToClipboard() {
                 this.linkToCopy = document.querySelector('#the-link')
-                console.log(`link is ${this.linkToCopy}`)
-                this.linkToCopy.setAttribute('type', 'text')    // 不是 hidden 才能複製
+                //console.log(`link is ${this.linkToCopy}`)
+                this.linkToCopy.setAttribute('type', 'text')
                 this.linkToCopy.select()
 
-                try {
-                    let successful = document.execCommand('copy');
-                    let msg = successful ? 'successful' : 'unsuccessful';
-                    alert('Link was copied ' + msg);
-                } catch (err) {
-                    alert('Oops, unable to copy');
-                }
+                this.msg('Copied!')
 
                 /* unselect the range */
                 this.linkToCopy.setAttribute('type', 'hidden')
