@@ -48,7 +48,7 @@
 
 <script>
     import LogNav from "./LogNav"
-    import {FHIRTOOLKITBASEURL, LOG} from '../../common/http-common'
+    import {FHIRTOOLKITBASEURL, LOG, UIBASE} from '../../common/http-common'
     import eventMixin from '../../mixins/eventMixin'
     import errorHandlerMixin from '../../mixins/errorHandlerMixin'
 
@@ -166,8 +166,7 @@
                     : null
             },
             eventLink() {
-                console.log(`link is ${FHIRTOOLKITBASEURL}${this.$router.currentRoute.fullPath}`)
-                return `${FHIRTOOLKITBASEURL}${this.$router.currentRoute.fullPath}`
+                return window.location.href
             },
         },
         created() {
