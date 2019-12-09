@@ -16,7 +16,6 @@
                 {{ chann.text }}
             </option>
         </select>
-<!--        <b-form-select class="control-panel-font" v-model="channelId" :options="channels"></b-form-select>-->
     </div>
 </template>
 

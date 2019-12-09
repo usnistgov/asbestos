@@ -9,7 +9,7 @@ export const logStore = {
     state() {
         return {
             // private to the log viewer
-            eventSummaries: [],  // list { eventName: xx, resourceType: yy, verb: GET|POST, status: true|false }
+            eventSummaries: [],  // list { eventName: xx, resourceType: yy, verb: GET|POST, status: true|false, ipAddr: addr }
             session: null,
             channel: null,
             loaded: false,
@@ -28,6 +28,16 @@ export const logStore = {
         },
         setLogChannel(state, channel) {
             state.channel = channel
+        }
+    },
+    getters: {
+        ipAddresses: state => {
+            const holder =  state.eventSummaries.map(x => {
+                return x.ipAddr
+            })
+            return holder.filter((item, index) => {
+                return holder.indexOf(item) === index
+            })
         }
     },
     actions: {
