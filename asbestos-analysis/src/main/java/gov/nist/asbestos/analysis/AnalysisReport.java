@@ -13,6 +13,7 @@ import java.util.Objects;
 
 public class AnalysisReport {
     private static Logger log = Logger.getLogger(AnalysisReport.class);
+    private Ref fhirBase = null;
     private Ref baseRef = null;
     private ResourceWrapper baseObj = null;
     private List<ResourceWrapper> related = new ArrayList<>();
@@ -22,19 +23,55 @@ public class AnalysisReport {
     private List<String> generalErrors = new ArrayList<>();
     private FhirClient fhirClient = new FhirClient();
 
+    public class Report {
+        List<String> objects = new ArrayList<>();
+        List<String> errors;
+    }
+
+
+    private Report buildReport() {
+        Report report = new Report();
+        report.errors = new ArrayList<>(generalErrors);
+
+        for (ResourceWrapper wrapper : related) {
+            BaseResource resource = wrapper.getResource();
+            if (resource != null)
+                report.objects.add(resource.getClass().getSimpleName());
+        }
+
+        return report;
+    }
+
     public AnalysisReport(Ref baseRef) {
         this.baseRef = baseRef;
     }
 
-    public void run() {
-        loadBase();
-        buildRelated();
+    public Report run() {
+        try {
+            loadBase();
+            if (!generalErrors.isEmpty())
+                return buildReport();
+            buildRelated();
+            return buildReport();
+        } catch (Throwable t) {
+            generalErrors.add(t.getMessage());
+            return buildReport();
+        }
     }
 
     private void loadBase() {
         Objects.requireNonNull(baseRef);
 
         baseObj = fhirClient.readResource(baseRef);
+        if (baseObj.getStatus() != 200) {
+            generalErrors.add("Status " + baseObj.getStatus());
+        } else if (baseObj.getResource() instanceof OperationOutcome) {
+            OperationOutcome oo = (OperationOutcome) baseObj.getResource();
+            generalErrors.add(oo.getIssueFirstRep().getDiagnostics());
+        } else {
+            related.add(baseObj);
+            fhirBase = baseRef.getBase();
+        }
     }
 
     private void buildRelated() {
@@ -70,11 +107,11 @@ public class AnalysisReport {
             }
         }
         // related
-        if (documentManifest.hasRelated()) {
+        if (documentManifest.hasContent()) {
             boolean hasDocRef = false;
-            for (DocumentManifest.DocumentManifestRelatedComponent component : documentManifest.getRelated()) {
-                ResourceWrapper wrapper = load(new Ref(component.getRef()));
-                if (wrapper.hasResource() && wrapper.isOk() && wrapper.getResource() instanceof DocumentReference)
+            for (Reference reference : documentManifest.getContent()) {
+                ResourceWrapper wrapper = load(new Ref(reference));
+                if (wrapper != null && wrapper.hasResource() && wrapper.isOk() && wrapper.getResource() instanceof DocumentReference)
                     hasDocRef = true;
             }
             if (!hasDocRef)
@@ -124,7 +161,6 @@ public class AnalysisReport {
 
     private void buildRelated(Patient patient) {
         log.info("buildRelated Patient");
-
     }
 
     private void buildRelated(ListResource list) {
@@ -151,11 +187,19 @@ public class AnalysisReport {
     }
 
     private void buildRelated(BaseResource baseResource) {
-        log.error("buildRelated BaseResource - should not be called");
+        if (baseResource instanceof DocumentManifest) buildRelated((DocumentManifest) baseResource);
+        else if (baseResource instanceof DocumentReference) buildRelated((DocumentReference) baseResource);
+        else if (baseResource instanceof ListResource) buildRelated((ListResource) baseResource);
+        else if (baseResource instanceof Binary) buildRelated((Binary) baseResource);
+        else if (baseResource instanceof Patient) buildRelated((Patient) baseResource);
+        else
+            generalErrors.add("Do not understand resource type " + baseResource.getClass().getSimpleName());
     }
 
     private ResourceWrapper getFromRelated(Ref ref) {
         Objects.requireNonNull(ref);
+        if (ref.isRelative())
+            ref.rebase(fhirBase);
         for (ResourceWrapper wrapper : related) {
             if (ref.equals(wrapper.getRef()))
                 return wrapper;
@@ -179,6 +223,8 @@ public class AnalysisReport {
     private ResourceWrapper load(Ref ref) {
         ResourceWrapper wrapper = getFromRelated(ref);
         if (wrapper == null) {
+            if (ref.isRelative())
+                ref = ref.rebase(fhirBase);
             wrapper = fhirClient.readResource(ref);
             if (fhirClient.getStatus() == 200) {
                 related.add(wrapper);
@@ -214,4 +260,7 @@ public class AnalysisReport {
         }
     }
 
+    public List<String> getGeneralErrors() {
+        return generalErrors;
+    }
 }

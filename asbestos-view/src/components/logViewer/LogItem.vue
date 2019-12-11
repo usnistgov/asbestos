@@ -22,16 +22,26 @@
                 No Tasks
             </div>
            <span v-bind:class="{ selected: displayRequest === true, selectable: displayRequest === false }"
-              @click="displayRequest = true">
+              @click="displayRequest = true; displayAnalysis = false">
                 Request
            </span>
             <div class="divider"></div>
             <span v-bind:class="{ selected: displayRequest === false, selectable: displayRequest === true }"
-                  @click="displayRequest = false">
+                  @click="displayRequest = false; displayAnalysis = false">
                 Response
             </span>
+            <div class="selectable" @click="doDisplayAnalysis()">
+                Analysis
+            </div>
+            <div v-if="displayAnalysis">
+                <log-analysis-report
+                    :session-id="sessionId"
+                    :channel-id="channelId"
+                    :event-id="eventId"></log-analysis-report>
+            </div>
         </div>
-        <div v-if="getEvent()">
+
+        <div v-if="!displayAnalysis && getEvent()">
             <div v-if="displayRequest" class="event-details">
                             <pre>{{ requestHeader }}
                             </pre>
@@ -48,6 +58,7 @@
 
 <script>
     import LogNav from "./LogNav"
+    import LogAnalysisReport from "./LogAnalysisReport"
     import {LOG} from '../../common/http-common'
     import eventMixin from '../../mixins/eventMixin'
     import errorHandlerMixin from '../../mixins/errorHandlerMixin'
@@ -58,10 +69,15 @@
                 selectedEvent: null,
                 selectedTask: 0,
                 displayRequest: true,
+                displayAnalysis: false,
                 linkToCopy: null,
             }
         },
         methods: {
+            doDisplayAnalysis() {
+                this.displayAnalysis = true;
+//                this.$store.dispatch('getLogEventAnalysis', {channel: this.channelId, session: this.sessionId, eventId: this.eventId})
+            },
             copyToClipboard() {
                 this.linkToCopy = document.querySelector('#the-link')
                 //console.log(`link is ${this.linkToCopy}`)
@@ -178,7 +194,7 @@
         ],
         mixins: [eventMixin, errorHandlerMixin],
         components: {
-            LogNav,
+            LogNav, LogAnalysisReport
         },
         name: "LogItem"
     }

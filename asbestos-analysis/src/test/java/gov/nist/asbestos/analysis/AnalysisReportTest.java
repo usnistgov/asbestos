@@ -3,13 +3,16 @@ package gov.nist.asbestos.analysis;
 import gov.nist.asbestos.client.resolver.Ref;
 import org.junit.jupiter.api.Test;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 class AnalysisReportTest {
 
     @Test
     void simple() {
-        String fullUrl = "http://localhost:8081/asbestos/proxy/default__limited/DocumentManifest/1.2.129.6.59.189.2019.12.10.14.49.37.975.2";
-        Ref ref = new Ref(fullUrl);
+        Ref ref = new Ref("http://localhost:8080/fhir/fhir/DocumentManifest/45203");
         AnalysisReport ar = new AnalysisReport(ref);
         ar.run();
+        assertEquals(0, ar.getGeneralErrors().size());
     }
 }

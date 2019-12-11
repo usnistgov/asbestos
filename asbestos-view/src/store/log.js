@@ -13,9 +13,17 @@ export const logStore = {
             session: null,
             channel: null,
             loaded: false,
+            analysis: null,
+            eventIdOfAnalysis: null,
         }
     },
     mutations: {
+        setAnalysis(state, data) {
+            const analysis = data.analysis
+            const eventId = data.eventId
+            state.analysis = analysis
+            state.eventIdOfAnalysis = eventId
+        },
         resetLogLoaded(state) {
             state.loaded = false
         },
@@ -67,6 +75,25 @@ export const logStore = {
                     return -1
                 })
                 commit('setEventSummaries', eventSummaries)
+            } catch (error) {
+                commit('setError', error)
+                console.error(error)
+            }
+        },
+        async getLogEventAnalysis({state, commit}, parms) {
+            const channel = parms.channel
+            const session = parms.session
+            const eventId = parms.eventId
+
+            //if (eventId === state.eventIdOfAnalysis)
+            //    return
+
+            try {
+                const url = `analysis/${session}/${channel}/${eventId}`
+                console.log(`LOG ${url}`)
+                const result = await LOG.get(url)
+                const data = {analysis: result.data, eventId: eventId}
+                commit('setAnalysis', data)
             } catch (error) {
                 commit('setError', error)
                 console.error(error)

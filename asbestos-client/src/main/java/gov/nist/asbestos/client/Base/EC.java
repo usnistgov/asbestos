@@ -190,7 +190,7 @@ public class EC {
         resp.setStatus(resp.SC_OK);
     }
 
-    private UIEvent getEvent(String testSession, String channelId, String resourceType, String eventName) {
+    public UIEvent getEvent(String testSession, String channelId, String resourceType, String eventName) {
         File fhir = fhirDir(testSession, channelId);
         if (resourceType.equals("null")) {
             resourceType = resourceTypeForEvent(fhir, eventName);
