@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div v-if="report">
         <div class="vdivider"></div>
         <div v-if="report.errors.length > 0">
             <span class="caption">Errors:</span>
@@ -13,6 +13,7 @@
         </div>
         <div class="vdivider"></div>
         <span class="caption">Contents:</span>
+        <span v-if="report.source">{{ report.source }}</span>
         <div class="vdivider"></div>
         <div class="grid-container">
             <span v-for="(resource, resourcei) in report.objects"
@@ -23,11 +24,15 @@
                         ref: resource === 'DocumentReference',
                         patient: resource === 'Patient'
                     }
-                    ">
+                    " @click="selectedResourceIndex = resourcei">
                         {{ resource }}
                     </span>
                 </div>
             </span>
+        </div>
+        <div v-if="selectedResourceIndex >= 0">
+            <div class="vdivider"></div>
+            <div class="caption">{{ report.objects[selectedResourceIndex] }}</div>
         </div>
     </div>
 </template>
@@ -36,7 +41,7 @@
     export default {
         data() {
             return {
-
+                selectedResourceIndex: null,
             }
         },
         methods: {

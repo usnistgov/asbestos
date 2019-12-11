@@ -22,15 +22,25 @@ public class AnalysisReport {
     private List<String> codingErrors = new ArrayList<>();
     private List<String> generalErrors = new ArrayList<>();
     private FhirClient fhirClient = new FhirClient();
+    private String source;
 
-    public class Report {
+    public static class Report {
+        String source = null;
         List<String> objects = new ArrayList<>();
         List<String> errors;
+
+        public Report() {}
+
+        public Report(String error) {
+            errors = Collections.singletonList(error);
+        }
     }
 
 
     private Report buildReport() {
         Report report = new Report();
+
+        report.source = source;
         report.errors = new ArrayList<>(generalErrors);
 
         for (ResourceWrapper wrapper : related) {
@@ -42,8 +52,9 @@ public class AnalysisReport {
         return report;
     }
 
-    public AnalysisReport(Ref baseRef) {
+    public AnalysisReport(Ref baseRef, String source) {
         this.baseRef = baseRef;
+        this.source = source;
     }
 
     public Report run() {

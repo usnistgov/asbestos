@@ -80,7 +80,7 @@ export const logStore = {
                 console.error(error)
             }
         },
-        async getLogEventAnalysis({state, commit}, parms) {
+        async getLogEventAnalysis({commit}, parms) {
             const channel = parms.channel
             const session = parms.session
             const eventId = parms.eventId

@@ -56,24 +56,32 @@ public class GetLogEventAnalysis {
         if (baseResource instanceof Bundle) {
             Bundle bundle = (Bundle) baseResource;
             String manifestReference = getManifestLocation(bundle);
-            if (manifestReference == null) {
-                request.resp.setStatus(request.resp.SC_NO_CONTENT);
-                return;
-            }
-            AnalysisReport analysisReport = new AnalysisReport(new Ref(manifestReference));
-            AnalysisReport.Report report = analysisReport.run();
-            String json = new Gson().toJson(report);
-            request.resp.setContentType("application/json");
-            try {
-                request.resp.getOutputStream().print(json);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-            request.resp.setStatus(request.resp.SC_OK);
-            return;
-        }
+            if (manifestReference != null)
+                runAndReturnReport(new Ref(manifestReference), "taken from transaction response links");
 
-        request.resp.setStatus(request.resp.SC_BAD_REQUEST);
+        } else if (responseHeaders.hasHeader("Content-Location")) {
+            Ref ref = new Ref(responseHeaders.get("Content-Location").getValue());
+            runAndReturnReport(ref, "taken from Content-location header");
+        } else {
+            returnReport(new AnalysisReport.Report("Do not understand event"));
+        }
+    }
+
+    private void returnReport(AnalysisReport.Report report) {
+        String json = new Gson().toJson(report);
+        request.resp.setContentType("application/json");
+        try {
+            request.resp.getOutputStream().print(json);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        request.resp.setStatus(request.resp.SC_OK);
+    }
+
+    private void runAndReturnReport(Ref ref, String source) {
+        AnalysisReport analysisReport = new AnalysisReport(ref, source);
+        AnalysisReport.Report report = analysisReport.run();
+        returnReport(report);
     }
 
     // from response bundle
