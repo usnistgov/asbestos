@@ -1,5 +1,7 @@
 <template>
     <div v-if="report">
+
+        <!--    ERRORS    -->
         <div class="vdivider"></div>
         <div v-if="report.errors.length > 0">
             <span class="caption">Errors:</span>
@@ -12,27 +14,51 @@
             </div>
         </div>
         <div class="vdivider"></div>
-        <span class="caption">Contents:</span>
-        <span v-if="report.source">{{ report.source }}</span>
+
+        <!--  BASE OBJECT     -->
+        <div>
+            <span class="caption">Base Object:</span>
+            <span v-if="report.source">{{ report.source }}</span>
+            <div class="vdivider"></div>
+            <div class="grid-container">
+                <span v-if="report.base">
+                    <div class="grid-item">
+                        <span v-bind:class="objectDisplayClass(report.base)" @click="selectedResourceIndex = -1">
+                            {{ report.base.name }}
+                        </span>
+                    </div>
+                </span>
+            </div>
+        </div>
+
+        <!--  RELATED     -->
+        <div class="vdivider"></div>
+        <span class="caption">Related:</span>
         <div class="vdivider"></div>
         <div class="grid-container">
             <span v-for="(resource, resourcei) in report.objects"
                 :key="resource + resourcei">
                 <div class="grid-item">
-                    <span v-bind:class="{
-                        manifest: resource === 'DocumentManifest',
-                        ref: resource === 'DocumentReference',
-                        patient: resource === 'Patient'
-                    }
-                    " @click="selectedResourceIndex = resourcei">
-                        {{ resource }}
+                    <span v-bind:class="objectDisplayClass(resource)" @click="selectedResourceIndex = resourcei">
+                        {{ resource.name }} ({{ resource.relation }})
                     </span>
                 </div>
             </span>
         </div>
-        <div v-if="selectedResourceIndex >= 0">
+
+        <!--  SELECTED      -->
+        <div v-if="selectedResourceIndex === null"></div>
+        <div v-else-if="selectedResourceIndex === -1">
             <div class="vdivider"></div>
-            <div class="caption">{{ report.objects[selectedResourceIndex] }}</div>
+            <div class="caption">{{ report.base.name }}</div>
+            <div v-if="report.base.relation">
+                {{ report.base.name }}
+            </div>
+        </div>
+        <div v-else-if="selectedResourceIndex > -1">
+            <div class="vdivider"></div>
+            <div class="caption">{{ report.objects[selectedResourceIndex].name }}</div>
+            <div>Relation: {{ report.objects[selectedResourceIndex].relation }}</div>
         </div>
     </div>
 </template>
@@ -45,16 +71,30 @@
             }
         },
         methods: {
-
+            loadAnalysis() {
+                this.$store.dispatch('getLogEventAnalysis', {channel: this.channelId, session: this.sessionId, eventId: this.eventId})
+                this.selectedResourceIndex = null
+            },
+            objectDisplayClass: function (resource) {
+                return {
+                    manifest: resource.name === 'DocumentManifest',
+                    ref: resource.name === 'DocumentReference',
+                    patient: resource.name === 'Patient'
+                }
+            },
         },
         computed: {
             report() {
                 // content from gov.nist.asbestos.analysis.AnalysisReport.Report
                 return this.$store.state.log.analysis
             },
+
         },
         created() {
-            this.$store.dispatch('getLogEventAnalysis', {channel: this.channelId, session: this.sessionId, eventId: this.eventId})
+            this.loadAnalysis()
+        },
+        watch: {
+            'eventId': 'loadAnalysis'
         },
         props: [
             'sessionId', 'channelId', 'eventId'

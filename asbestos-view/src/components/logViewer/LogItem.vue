@@ -31,7 +31,7 @@
                 Response
             </span>
             <div class="selectable" @click="doDisplayAnalysis()">
-                Analysis
+                Inspect
             </div>
             <div v-if="displayAnalysis">
                 <log-analysis-report

@@ -16,7 +16,7 @@ public class AnalysisReport {
     private Ref fhirBase = null;
     private Ref baseRef = null;
     private ResourceWrapper baseObj = null;
-    private List<ResourceWrapper> related = new ArrayList<>();
+    private List<Related> related = new ArrayList<>();
     private List<String> minimalErrors = new ArrayList<>();
     private List<String> comprehensiveErrors = new ArrayList<>();
     private List<String> codingErrors = new ArrayList<>();
@@ -24,9 +24,30 @@ public class AnalysisReport {
     private FhirClient fhirClient = new FhirClient();
     private String source;
 
+    class Related {
+        ResourceWrapper wrapper;
+        String howRelated;
+
+        Related(ResourceWrapper wrapper, String howRelated) {
+            this.wrapper = wrapper;
+            this.howRelated = howRelated;
+        }
+    }
+
+    public static class RelatedReport {
+        String name;
+        String relation;
+
+        RelatedReport(String name, String relation) {
+            this.name = name;
+            this.relation = relation;
+        }
+    }
+
     public static class Report {
         String source = null;
-        List<String> objects = new ArrayList<>();
+        RelatedReport base = null;
+        List<RelatedReport> objects = new ArrayList<>();
         List<String> errors;
 
         public Report() {}
@@ -43,10 +64,15 @@ public class AnalysisReport {
         report.source = source;
         report.errors = new ArrayList<>(generalErrors);
 
-        for (ResourceWrapper wrapper : related) {
+        if (baseObj != null && baseObj.getResource() != null)
+            report.base = new RelatedReport(baseObj.getResource().getClass().getSimpleName(), "");
+
+        for (Related rel : related) {
+            ResourceWrapper wrapper = rel.wrapper;
             BaseResource resource = wrapper.getResource();
-            if (resource != null)
-                report.objects.add(resource.getClass().getSimpleName());
+            if (resource != null) {
+                report.objects.add(new RelatedReport(resource.getClass().getSimpleName(), rel.howRelated));
+            }
         }
 
         return report;
@@ -80,7 +106,7 @@ public class AnalysisReport {
             OperationOutcome oo = (OperationOutcome) baseObj.getResource();
             generalErrors.add(oo.getIssueFirstRep().getDiagnostics());
         } else {
-            related.add(baseObj);
+            //related.add(baseObj);
             fhirBase = baseRef.getBase();
         }
     }
@@ -103,7 +129,7 @@ public class AnalysisReport {
         log.info("buildRelated DocumentManifest");
         // subject
         if (documentManifest.hasSubject()) {
-            load(new Ref(documentManifest.getSubject()));
+            load(new Ref(documentManifest.getSubject()), "subject");
         } else {
             generalErrors.add("DocumentManifest has no subject");
         }
@@ -114,15 +140,15 @@ public class AnalysisReport {
         // recipient
         if (documentManifest.hasRecipient()) {
             for (Reference reference : documentManifest.getRecipient()) {
-                load(new Ref(reference));
+                load(new Ref(reference), "recipient");
             }
         }
         // related
         if (documentManifest.hasContent()) {
             boolean hasDocRef = false;
             for (Reference reference : documentManifest.getContent()) {
-                ResourceWrapper wrapper = load(new Ref(reference));
-                if (wrapper != null && wrapper.hasResource() && wrapper.isOk() && wrapper.getResource() instanceof DocumentReference)
+                Related rel = load(new Ref(reference), "content");
+                if (rel.wrapper != null && rel.wrapper.hasResource() && rel.wrapper.isOk() && rel.wrapper.getResource() instanceof DocumentReference)
                     hasDocRef = true;
             }
             if (!hasDocRef)
@@ -140,7 +166,7 @@ public class AnalysisReport {
         }
         // subject
         if (documentReference.hasSubject()) {
-            load(new Ref(documentReference.getSubject()));
+            load(new Ref(documentReference.getSubject()), "subject");
         } else {
             generalErrors.add("DocumentReference has no subject");
         }
@@ -152,7 +178,7 @@ public class AnalysisReport {
         // relatesTo
         if (documentReference.hasRelatesTo()) {
             for (DocumentReference.DocumentReferenceRelatesToComponent component : documentReference.getRelatesTo()) {
-                load(new Ref(component.getTarget()));
+                load(new Ref(component.getTarget()), "relatesTo");
             }
         }
         if (documentReference.hasContext()) {
@@ -163,7 +189,7 @@ public class AnalysisReport {
             // context/related
             if (documentReference.getContext().hasRelated()) {
                 for (Reference reference : documentReference.getContext().getRelated()) {
-                    load(new Ref(reference));
+                    load(new Ref(reference), "context/related");
                 }
             }
         }
@@ -178,7 +204,7 @@ public class AnalysisReport {
         log.info("buildRelated List");
         // subject
         if (list.hasSubject()) {
-            load(new Ref(list.getSubject()));
+            load(new Ref(list.getSubject()), "subject");
         } else {
             generalErrors.add("List has no subject");
         }
@@ -207,45 +233,46 @@ public class AnalysisReport {
             generalErrors.add("Do not understand resource type " + baseResource.getClass().getSimpleName());
     }
 
-    private ResourceWrapper getFromRelated(Ref ref) {
+    private Related getFromRelated(Ref ref) {
         Objects.requireNonNull(ref);
         if (ref.isRelative())
             ref.rebase(fhirBase);
-        for (ResourceWrapper wrapper : related) {
-            if (ref.equals(wrapper.getRef()))
-                return wrapper;
+        for (Related rel : related) {
+            if (ref.equals(rel.wrapper.getRef()))
+                return rel;
         }
         return null;
     }
 
-    private ResourceWrapper load(Ref ref, List<Class> types) {
+    private Related load(Ref ref, List<Class> types) {
         List<String> names = new ArrayList<>();
         for (Class c : types)
             names.add(c.getSimpleName());
-        ResourceWrapper wrapper = load(ref);
-        if (wrapper != null && wrapper.hasResource()) {
-            Class theClass = wrapper.getResource().getClass();
+        Related rel = load(ref, "");
+        if (rel.wrapper != null && rel.wrapper.hasResource()) {
+            Class theClass = rel.wrapper.getResource().getClass();
             if (!types.contains(theClass))
                 generalErrors.add("Trying to load one of " + names + " but got a " + theClass.getSimpleName());
         }
-        return wrapper;
+        return rel;
     }
 
-    private ResourceWrapper load(Ref ref) {
-        ResourceWrapper wrapper = getFromRelated(ref);
-        if (wrapper == null) {
+    private Related load(Ref ref, String howRelated) {
+        Related rel = getFromRelated(ref);
+        if (rel == null) {
             if (ref.isRelative())
                 ref = ref.rebase(fhirBase);
-            wrapper = fhirClient.readResource(ref);
+            ResourceWrapper wrapper = fhirClient.readResource(ref);
             if (fhirClient.getStatus() == 200) {
-                related.add(wrapper);
-                return wrapper;
+                Related rel2 = new Related(wrapper, howRelated);
+                related.add(rel2);
+                return rel2;
             } else {
                 generalErrors.add("Cannot load " + ref + " status was " + fhirClient.getStatus());
                 return null;
             }
         }
-        return wrapper;
+        return rel;
     }
 
     private Resource getContained(DomainResource resource, Reference reference) {
@@ -263,10 +290,10 @@ public class AnalysisReport {
         for (Reference reference : references) {
             Resource resource = getContained(parentResource, reference);
             if (resource == null) {
-                load(new Ref(reference));
+                load(new Ref(reference), "contained");
                 generalErrors.add(parentResource.getClass().getSimpleName() + ": external " + containedType + " referenced - shall be contained.");
             } else {
-                related.add(new ResourceWrapper(resource));
+                related.add(new Related(new ResourceWrapper(resource), "contained"));
             }
         }
     }

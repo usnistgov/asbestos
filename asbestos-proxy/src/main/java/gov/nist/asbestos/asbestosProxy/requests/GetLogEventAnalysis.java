@@ -15,6 +15,8 @@ import org.hl7.fhir.r4.model.BaseResource;
 import org.hl7.fhir.r4.model.Bundle;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 // 0 - empty
 // 1 - app context  (asbestos)
@@ -56,12 +58,23 @@ public class GetLogEventAnalysis {
         if (baseResource instanceof Bundle) {
             Bundle bundle = (Bundle) baseResource;
             String manifestReference = getManifestLocation(bundle);
+            boolean isSearchSet = bundle.hasType() && bundle.getType() == Bundle.BundleType.SEARCHSET;
             if (manifestReference != null)
-                runAndReturnReport(new Ref(manifestReference), "taken from transaction response links");
-
+                runAndReturnReport(new Ref(manifestReference), "link for Manifest taken from transaction response");
+            else if (isSearchSet) {
+                List<Ref> refs = new ArrayList<>();
+                for (Bundle.BundleEntryComponent component : bundle.getEntry()) {
+                    String url = component.getFullUrl();
+                    if (url != null && !url.equals(""))
+                        refs.add(new Ref(url));
+                }
+                returnReport(new AnalysisReport.Report("Do not understand event"));
+            }
+            else
+                returnReport(new AnalysisReport.Report("Do not understand event"));
         } else if (responseHeaders.hasHeader("Content-Location")) {
             Ref ref = new Ref(responseHeaders.get("Content-Location").getValue());
-            runAndReturnReport(ref, "taken from Content-location header");
+            runAndReturnReport(ref, "link taken from response Content-location header");
         } else {
             returnReport(new AnalysisReport.Report("Do not understand event"));
         }
