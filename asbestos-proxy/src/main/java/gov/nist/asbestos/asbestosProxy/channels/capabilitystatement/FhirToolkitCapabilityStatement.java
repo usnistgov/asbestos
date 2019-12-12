@@ -52,7 +52,7 @@ public class FhirToolkitCapabilityStatement {
 
         File capabilityStatementFile = Paths.get(FhirToolkitCapabilityStatement.class.getResource("/").toURI()).resolve(capabilityStatementFileName).toFile();
 
-        if (capabilityStatementFile.exists()) {
+        if (capabilityStatementFile != null && capabilityStatementFile.exists()) {
             // Replace any ${} parameters in the File stream such as the ${ProxyBase}
                 String statementContent = new String(Files.readAllBytes(capabilityStatementFile.toPath()));
                 for (ServicePropertiesEnum paramKey: ServicePropertiesEnum.values()) {
