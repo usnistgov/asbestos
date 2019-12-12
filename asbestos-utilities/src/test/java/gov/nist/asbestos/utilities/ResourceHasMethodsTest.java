@@ -71,7 +71,9 @@ class ResourceHasMethodsTest {
         // https://www.ihe.net/uploadedFiles/Documents/ITI/IHE_ITI_Suppl_MHD.pdf
         // Table 4.5.1.1-1: FHIR DocumentReference mapping to DocumentEntry
         List<String> keyList = Arrays.asList("masterIdentifier","identifier","status","docStatus","type","category","subject","date","author","authenticator","relatesTo","description","securityLabel","content","context");
-        parseTestFile(keyList, "documentReferenceExample.json");
+        String jsonString = parseTestFile("documentReferenceExample.json");
+        checkKeys(keyList, jsonString);
+
     }
 
     @Test
@@ -81,7 +83,8 @@ class ResourceHasMethodsTest {
         // https://www.ihe.net/uploadedFiles/Documents/ITI/IHE_ITI_Suppl_MHD.pdf
         // Table 4.5.1.1-1: FHIR DocumentReference mapping to DocumentEntry
         List<String> keyList = Arrays.asList(/* not found: authenticator */ "masterIdentifier","identifier","status","type","category","subject","date","author","description","securityLabel","content","context");
-        parseTestFile(keyList, "documentReferenceXdsExample.json");
+        String jsonString = parseTestFile("documentReferenceXdsExample.json");
+        checkKeys(keyList, jsonString);
     }
 
     @Test
@@ -90,17 +93,19 @@ class ResourceHasMethodsTest {
         // https://www.ihe.net/uploadedFiles/Documents/ITI/IHE_ITI_Suppl_MHD.pdf
         // Table 4.5.1.2-1: FHIR DocumentManifest mapping to SubmissionSet
         List<String> keyList = Arrays.asList(/* not found: "meta",*/ "text","masterIdentifier","identifier","status","type","subject","created","author","recipient","source","description");
-        parseTestFile(keyList, "documentManifestXdsExample.json");
+        String jsonString = parseTestFile("documentManifestXdsExample.json");
+        checkKeys(keyList, jsonString);
     }
 
     @Test
     void parseTestDocumentManifestFmAttachmentExample() throws Exception {
         // Check keys
         List<String> keyList = Arrays.asList("contained","identifier","status","created","recipient","content","related");
-        parseTestFile(keyList, "documentManifestFinancialManagementAttachmentExample.json");
+        String jsonString = parseTestFile("documentManifestFinancialManagementAttachmentExample.json");
+        checkKeys(keyList, jsonString);
     }
 
-    private void parseTestFile(List<String> keyList, String fileName) throws Exception {
+    private String parseTestFile(String fileName) throws Exception {
 
        // Load resource
         BaseResource baseResource = null;
@@ -117,9 +122,8 @@ class ResourceHasMethodsTest {
 
         assert  jsonString != null;
 
-        checkKeys(keyList, jsonString);
+        return jsonString;
     }
-
 
     @Test
     void parseTestPatient() {
