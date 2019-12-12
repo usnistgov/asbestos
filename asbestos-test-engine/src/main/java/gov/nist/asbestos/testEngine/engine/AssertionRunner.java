@@ -292,6 +292,14 @@ public class AssertionRunner {
                 }
             }
 
+            // remove semantic name from status for comparison
+            if (expression.endsWith("response.status")) {
+                String[] parts = found.split(" ");
+                if (parts.length > 1) {
+                    found = parts[0];
+                }
+            }
+
 
 
             String expected = variableMgr.updateReference(as.getValue());
