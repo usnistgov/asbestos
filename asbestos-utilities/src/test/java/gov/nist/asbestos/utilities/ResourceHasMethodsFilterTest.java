@@ -16,7 +16,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
-class ResourceHasMethodsTest {
+class ResourceHasMethodsFilterTest {
 
     @BeforeAll
     static protected void setUp()  {
@@ -41,7 +41,7 @@ class ResourceHasMethodsTest {
 
     private void checkKeys(List<String> keyList, String jsonString) {
         // Enable this to see the jsonString in the Console
-        // System.out.println(jsonString);
+//         System.out.println(jsonString);
         keyList.forEach(s -> {
 //            System.out.println(String.format("Checking %s", s));
             assert jsonString.contains(String.format("\"%s\"", s));
@@ -59,7 +59,7 @@ class ResourceHasMethodsTest {
 
         testAtts(dr);
 
-        String jsonString = ResourceHasMethods.toJson(dr);
+        String jsonString = ResourceHasMethodsFilter.toJson(dr);
         List<String> keyList = Arrays.asList("status", "author");
         checkKeys(keyList, jsonString);
     }
@@ -92,7 +92,7 @@ class ResourceHasMethodsTest {
         // Check keys
         // https://www.ihe.net/uploadedFiles/Documents/ITI/IHE_ITI_Suppl_MHD.pdf
         // Table 4.5.1.2-1: FHIR DocumentManifest mapping to SubmissionSet
-        List<String> keyList = Arrays.asList(/* not found: "meta",*/ "text","masterIdentifier","identifier","status","type","subject","created","author","recipient","source","description");
+        List<String> keyList = Arrays.asList(/* not found: "meta",*/ "masterIdentifier","identifier","status","type","subject","created","author","recipient","source","description");
         String jsonString = parseTestFile("documentManifestXdsExample.json");
         checkKeys(keyList, jsonString);
     }
@@ -109,7 +109,7 @@ class ResourceHasMethodsTest {
 
        // Load resource
         BaseResource baseResource = null;
-       File file = Paths.get(ResourceHasMethodsTest.class.getResource("/").toURI()).resolve(fileName).toFile();
+       File file = Paths.get(ResourceHasMethodsFilterTest.class.getResource("/").toURI()).resolve(fileName).toFile();
        if (file != null && file.exists()) {
            // Parse resource to model using FHIR Parser
             baseResource = ProxyBase.parse(file);
@@ -118,7 +118,7 @@ class ResourceHasMethodsTest {
        assert  baseResource != null;
 
         // Parse using HasResourceMethods
-        String jsonString = ResourceHasMethods.toJson(baseResource);
+        String jsonString = ResourceHasMethodsFilter.toJson(baseResource);
 
         assert  jsonString != null;
 
@@ -137,7 +137,7 @@ class ResourceHasMethodsTest {
         patient1.setBirthDate(new Date(28, 0, 1));
         patient1.setId("PATIENT1_1928_MM");
 
-        String jsonString = ResourceHasMethods.toJson(patient1);
+        String jsonString = ResourceHasMethodsFilter.toJson(patient1);
         List<String> keyList = Arrays.asList("id","name","given","family", "birthDate");
         checkKeys(keyList, jsonString);
     }

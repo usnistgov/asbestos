@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 
 import static gov.nist.asbestos.client.Base.ProxyBase.getFhirContext;
 
-public class ResourceHasMethods {
+public class ResourceHasMethodsFilter {
 
     private static class CaseInsensitiveString {
         private String string;
@@ -88,6 +88,9 @@ public class ResourceHasMethods {
               myMap.remove(ciString.string);
            }
        }
+
+       // Remove keys that we don't want
+        myMap.remove("text");
 
        // Return map as JSON
         String json = new Gson().toJson(myMap);
