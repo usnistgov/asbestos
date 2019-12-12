@@ -1,7 +1,7 @@
 package gov.nist.asbestos.utilities;
 
 import com.google.gson.Gson;
-import org.hl7.fhir.r4.model.Resource;
+import org.hl7.fhir.r4.model.BaseResource;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -45,27 +45,27 @@ public class ResourceHasMethods {
     }
 
 
-    public static <T extends Resource> String toJson(T resourceObj) {
+    public static <T extends BaseResource> String toJson(T baseResourceObj) {
 
-        Objects.requireNonNull(resourceObj);
+        Objects.requireNonNull(baseResourceObj);
 
         List<Method> methodList = new ArrayList<>();
 
         // Add super class methods to catch methods like hasId
-        Class parent = resourceObj.getClass().getSuperclass();
+        Class parent = baseResourceObj.getClass().getSuperclass();
         while (parent != null) {
             methodList.addAll(Arrays.asList(parent.getDeclaredMethods()));
             parent = parent.getSuperclass();
         }
 
-        methodList.addAll(Arrays.asList(resourceObj.getClass().getDeclaredMethods()));
+        methodList.addAll(Arrays.asList(baseResourceObj.getClass().getDeclaredMethods()));
 
         // For each resourceObj method name starting with "has", if resourceObj.has(M) is True, collect M into a Set
          Set<CaseInsensitiveString> hasMethodSet = methodList.stream()
                  .filter(m -> m.getName().startsWith("has"))
                  .filter((m) -> {
                      try {
-                        return (boolean)m.invoke(resourceObj, null);
+                        return (boolean)m.invoke(baseResourceObj, null);
                         } catch (Throwable t) {}
                             return false;
                     })
@@ -73,7 +73,7 @@ public class ResourceHasMethods {
                  .map(s -> new CaseInsensitiveString(s.substring(3)))
                  .collect(Collectors.toSet());
 
-        String jsonFullResource = getFhirContext().newJsonParser().setPrettyPrint(false).encodeResourceToString(resourceObj);
+        String jsonFullResource = getFhirContext().newJsonParser().setPrettyPrint(false).encodeResourceToString(baseResourceObj);
         Map<String, List<String>> myMap = new Gson().fromJson(jsonFullResource, Map.class);
 
        // Store keys as insensitive case

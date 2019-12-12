@@ -1,5 +1,7 @@
 package gov.nist.asbestos.utilities;
 
+import gov.nist.asbestos.client.Base.ProxyBase;
+import org.hl7.fhir.r4.model.BaseResource;
 import org.hl7.fhir.r4.model.DocumentReference;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.HumanName;
@@ -8,6 +10,8 @@ import org.hl7.fhir.r4.model.Reference;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
+import java.io.File;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -36,12 +40,17 @@ class ResourceHasMethodsTest {
     }
 
     private void checkKeys(List<String> keyList, String jsonString) {
-        System.out.println(jsonString);
-        keyList.forEach(s -> {assert jsonString.contains(String.format("\"%s\"", s));});
+        // Enable this to see the jsonString in the Console
+        // System.out.println(jsonString);
+        keyList.forEach(s -> {
+//            System.out.println(String.format("Checking %s", s));
+            assert jsonString.contains(String.format("\"%s\"", s));
+        });
+//        System.out.println("ok.");
     }
 
     @Test
-    void parseTestDocumentReference() {
+    void parseTestDocumentReference1() {
 
         DocumentReference dr;
         dr = new DocumentReference();
@@ -54,6 +63,63 @@ class ResourceHasMethodsTest {
         List<String> keyList = Arrays.asList("status", "author");
         checkKeys(keyList, jsonString);
     }
+
+
+    @Test
+    void parseTestDocumentReferenceExample() throws Exception {
+        // Check keys
+        // https://www.ihe.net/uploadedFiles/Documents/ITI/IHE_ITI_Suppl_MHD.pdf
+        // Table 4.5.1.1-1: FHIR DocumentReference mapping to DocumentEntry
+        List<String> keyList = Arrays.asList("masterIdentifier","identifier","status","docStatus","type","category","subject","date","author","authenticator","relatesTo","description","securityLabel","content","context");
+        parseTestFile(keyList, "documentReferenceExample.json");
+    }
+
+    @Test
+    void parseTestDocumentReferenceXdsExample() throws Exception {
+
+        // Check keys
+        // https://www.ihe.net/uploadedFiles/Documents/ITI/IHE_ITI_Suppl_MHD.pdf
+        // Table 4.5.1.1-1: FHIR DocumentReference mapping to DocumentEntry
+        List<String> keyList = Arrays.asList(/* not found: authenticator */ "masterIdentifier","identifier","status","type","category","subject","date","author","description","securityLabel","content","context");
+        parseTestFile(keyList, "documentReferenceXdsExample.json");
+    }
+
+    @Test
+    void parseTestDocumentManifestXdsExample() throws Exception {
+        // Check keys
+        // https://www.ihe.net/uploadedFiles/Documents/ITI/IHE_ITI_Suppl_MHD.pdf
+        // Table 4.5.1.2-1: FHIR DocumentManifest mapping to SubmissionSet
+        List<String> keyList = Arrays.asList(/* not found: "meta",*/ "text","masterIdentifier","identifier","status","type","subject","created","author","recipient","source","description");
+        parseTestFile(keyList, "documentManifestXdsExample.json");
+    }
+
+    @Test
+    void parseTestDocumentManifestFmAttachmentExample() throws Exception {
+        // Check keys
+        List<String> keyList = Arrays.asList("contained","identifier","status","created","recipient","content","related");
+        parseTestFile(keyList, "documentManifestFinancialManagementAttachmentExample.json");
+    }
+
+    private void parseTestFile(List<String> keyList, String fileName) throws Exception {
+
+       // Load resource
+        BaseResource baseResource = null;
+       File file = Paths.get(ResourceHasMethodsTest.class.getResource("/").toURI()).resolve(fileName).toFile();
+       if (file != null && file.exists()) {
+           // Parse resource to model using FHIR Parser
+            baseResource = ProxyBase.parse(file);
+       }
+
+       assert  baseResource != null;
+
+        // Parse using HasResourceMethods
+        String jsonString = ResourceHasMethods.toJson(baseResource);
+
+        assert  jsonString != null;
+
+        checkKeys(keyList, jsonString);
+    }
+
 
     @Test
     void parseTestPatient() {
