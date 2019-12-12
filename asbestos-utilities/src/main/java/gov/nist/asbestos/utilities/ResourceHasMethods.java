@@ -51,6 +51,7 @@ public class ResourceHasMethods {
 
         List<Method> methodList = new ArrayList<>();
 
+        // Add super class methods to catch methods like hasId
         Class parent = resourceObj.getClass().getSuperclass();
         while (parent != null) {
             methodList.addAll(Arrays.asList(parent.getDeclaredMethods()));
