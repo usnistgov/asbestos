@@ -37,10 +37,12 @@ public class AnalysisReport {
     public static class RelatedReport {
         String name;
         String relation;
+        String url;
 
-        RelatedReport(String name, String relation) {
-            this.name = name;
+        RelatedReport(ResourceWrapper wrapper, String relation) {
+            this.name = wrapper.getResource().getClass().getSimpleName();
             this.relation = relation;
+            this.url = wrapper.getRef().toString();
         }
     }
 
@@ -65,13 +67,13 @@ public class AnalysisReport {
         report.errors = new ArrayList<>(generalErrors);
 
         if (baseObj != null && baseObj.getResource() != null)
-            report.base = new RelatedReport(baseObj.getResource().getClass().getSimpleName(), "");
+            report.base = new RelatedReport(baseObj, "");
 
         for (Related rel : related) {
             ResourceWrapper wrapper = rel.wrapper;
             BaseResource resource = wrapper.getResource();
             if (resource != null) {
-                report.objects.add(new RelatedReport(resource.getClass().getSimpleName(), rel.howRelated));
+                report.objects.add(new RelatedReport(wrapper, rel.howRelated));
             }
         }
 

@@ -58,7 +58,6 @@ public class TestEngine  {
         // make test definition dir a temporary resource cache so elements of the TestScript
         // can be found
         ResourceCacheMgr inTestResources = new ResourceCacheMgr(testDef, new Ref(""));
-      //  ResourceCacheMgr platformCache = new ResourceCacheMgr("", new Ref(""));
         fhirClientForFixtures = new FhirClient().setResourceCacheMgr(inTestResources);
     }
 
@@ -71,6 +70,8 @@ public class TestEngine  {
     public TestEngine(File testDef, TestScript testScript) {
         this.testDef = testDef;
         this.testScript = testScript;
+        ResourceCacheMgr inTestResources = new ResourceCacheMgr(testDef, new Ref(""));
+        fhirClientForFixtures = new FhirClient().setResourceCacheMgr(inTestResources);
     }
 
     public TestEngine setTestSession(String testSession) {
@@ -115,9 +116,10 @@ public class TestEngine  {
         engineVal = new ValE(val);
         engineVal.setMsg("TestEngine");
         try {
+            initWorkflow();
+            doLoadFixtures();
             fixtureMgr.put("request", new FixtureComponent(requestResource));
             fixtureMgr.put("response", new FixtureComponent(responseResource));
-            initWorkflow();
             doTest(); // should only be asserts
             errorOut();
         } catch (Throwable t) {
@@ -462,7 +464,7 @@ public class TestEngine  {
                     .setVariableMgr(new VariableMgr(testScript, fixtureMgr)
                             .setVal(vale)
                             .setOpReport(testReport.getSetup().addAction().getOperation()))
-                    .setTestReport(testReport)
+//                    .setTestReport(testReport)
                     .setTestScript(testScript);
             report = runner.run(operation);
         } catch (Throwable t) {

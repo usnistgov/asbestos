@@ -15,6 +15,9 @@
         </div>
         <div class="vdivider"></div>
 
+        <div>All objects shown as retrieved from server</div>
+        <div class="vdivider"></div>
+
         <!--  BASE OBJECT     -->
         <div>
             <span class="caption">Base Object:</span>
@@ -50,15 +53,24 @@
         <div v-if="selectedResourceIndex === null"></div>
         <div v-else-if="selectedResourceIndex === -1">
             <div class="vdivider"></div>
-            <div class="caption">{{ report.base.name }}</div>
+            <div class="main-caption">{{ report.base.name }}</div>
             <div v-if="report.base.relation">
                 {{ report.base.name }}
+            </div>
+            <div v-if="report.base.url">
+                Ref: {{ report.base.url }}
             </div>
         </div>
         <div v-else-if="selectedResourceIndex > -1">
             <div class="vdivider"></div>
-            <div class="caption">{{ report.objects[selectedResourceIndex].name }}</div>
-            <div>Relation: {{ report.objects[selectedResourceIndex].relation }}</div>
+            <div class="main-caption">{{ report.objects[selectedResourceIndex].name }}</div>
+            <div>
+                <span class="caption">Relation:</span>
+                {{ report.objects[selectedResourceIndex].relation }}</div>
+            <div v-if="report.objects[selectedResourceIndex].url">
+                <span class="caption">Ref:</span>
+                {{ report.objects[selectedResourceIndex].url }}
+            </div>
         </div>
     </div>
 </template>
@@ -148,4 +160,8 @@
     .caption {
         font-weight: bold;
     }
+.main-caption {
+    font-weight: bold;
+    font-size: larger;
+}
 </style>
