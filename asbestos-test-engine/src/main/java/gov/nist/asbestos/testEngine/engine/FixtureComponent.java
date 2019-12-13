@@ -118,4 +118,8 @@ public class FixtureComponent {
     public boolean isStatic() {
         return is_static;
     }
+
+    public void setId(String id) {
+        this.id = id;
+    }
 }

@@ -48,6 +48,7 @@
                 </div>
             </span>
         </div>
+        <div class="vdivider"></div>
 
         <!--  SELECTED      -->
         <div v-if="selectedResourceIndex === null"></div>

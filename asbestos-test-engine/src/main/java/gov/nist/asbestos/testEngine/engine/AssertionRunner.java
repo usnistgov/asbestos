@@ -1,6 +1,7 @@
 package gov.nist.asbestos.testEngine.engine;
 
 import gov.nist.asbestos.client.resolver.Ref;
+import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import gov.nist.asbestos.simapi.validation.ValE;
 import org.hl7.fhir.r4.model.*;
 import org.jaxen.expr.ProcessingInstructionNodeStep;
@@ -79,17 +80,35 @@ public class AssertionRunner {
                     run2(as);
                     return assertReport;
                 }
-            } else if (as.hasExtension("https://github.com/usnistgov/asbestos/wiki/TestScript-OncePerType")) {
-                String resourceType = as.getExtensionString("https://github.com/usnistgov/asbestos/wiki/TestScript-OncePerType");
+            } else if (as.hasModifierExtension()) {
+                Extension extension = as.getModifierExtension().isEmpty() ? null : as.getModifierExtension().get(0);
+                if (extension == null) {
+                    assertReport = new TestReport.SetupActionAssertComponent();
+                    Reporter.reportError(val, assertReport, type, label, "Found no stringValue in modifierExtension");
+                    return assertReport;
+                }
+                String resourceType = extension.getValue().toString(); // extension.getExtensionString("https://github.com/usnistgov/asbestos/wiki/TestScript-OncePerType");
                 BaseResource sourceResource = source.getResourceResource();
+                assertReport = null;
                 Bundle bundle = (Bundle) sourceResource;
+                int i=0;
                 for (Bundle.BundleEntryComponent component : bundle.getEntry()) {
                     Resource resource = component.getResource();
                     if (resource.getClass().getSimpleName().equals(resourceType)) {
-
+                        assertReport = new TestReport.SetupActionAssertComponent();
+                        source.setResource(new ResourceWrapper(resource));  // so it applies to the in-bundle resource
+                        source.setId(resourceType + " #" + i);
+                        boolean success = run2(as);
+                        if (!success)
+                            break;
+                        //assertReport = null;
                     }
                 }
-
+                if (assertReport != null)
+                    return assertReport;
+                assertReport = new TestReport.SetupActionAssertComponent();
+                Reporter.reportError(val, assertReport, type, label, "Found no " + resourceType + " resources in Bundle");
+                return assertReport;
             }
         }
 
@@ -226,7 +245,7 @@ public class AssertionRunner {
                 if (miniHas && !sourceHas) {
                     fail = true;
                     String attName = name.substring(3);
-                    Reporter.reportFail(val, assertReport, type, label, "minimumId: attribute " + attName + " not found", warningOnly);
+                    Reporter.reportFail(val, assertReport, type, label, "minimumId: attribute " + attName + " not found in " + sourceFixture.getId(), warningOnly);
                 }
             } catch (Exception e) {
 //                    Reporter.reportError(val, assertReport, type, label, "minimumId: cannot invoke method " + name + " on " + miniClass.getName());
