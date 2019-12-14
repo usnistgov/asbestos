@@ -493,6 +493,8 @@ public class TestEngine  {
                     TestScript containedTestScript = getConditional(testComponent, testReportComponent);
                     testReportComponent = testReport.addTest();
                     boolean conditionalResult = true;
+
+
                     if (containedTestScript != null) {
                         List<TestScript.TestScriptTestComponent> tests = containedTestScript.getTest();
                         if (tests.size() != 2) {
@@ -534,10 +536,6 @@ public class TestEngine  {
                         doTestPart(testComponent, testReportComponent, testReport, false);
                     } else {
                         reportSkip(testReportComponent);
-//                    TestReport.TestActionComponent testActionComponent = testReportComponent.addAction();
-//                    TestReport.SetupActionOperationComponent setupActionOperationComponent = testActionComponent.getOperation();
-//                    setupActionOperationComponent.setResult(TestReport.TestReportActionResult.SKIP);
-//                    setupActionOperationComponent.setMessage("condition failed");
                     }
                 }
             } catch (Throwable t) {
@@ -556,6 +554,7 @@ public class TestEngine  {
 
     private boolean doTestPart(TestScript.TestScriptTestComponent testScriptElement, TestReport.TestReportTestComponent testReportComponent, TestReport testReport, boolean reportAsConditional) {
         ValE fVal = new ValE(engineVal).setMsg("Test");
+        boolean result = true;
         if (testScriptElement.hasAction()) {
             String typePrefix = "contained.action";
             for (TestScript.TestActionComponent action : testScriptElement.getAction()) {
@@ -582,7 +581,8 @@ public class TestEngine  {
                             testReport.setStatus(TestReport.TestReportStatus.COMPLETED);
                             testReport.setResult(TestReport.TestReportResult.FAIL);
                         }
-                        return false;
+                        result = false;
+                        //return false;  // don't jump ship on first assertion failure
                     }
                     if ("error".equals(actionReport.getResult().toCode())) {
                         testReport.setStatus(TestReport.TestReportStatus.COMPLETED);
@@ -592,7 +592,7 @@ public class TestEngine  {
                 }
             }
         }
-        return true;
+        return result;
     }
 
     private TestScript getConditional(TestScript.TestScriptTestComponent testComponent, TestReport.TestReportTestComponent testReportComponent) {

@@ -60,7 +60,7 @@ public class GetLogEventAnalysis {
             String manifestReference = getManifestLocation(bundle);
             boolean isSearchSet = bundle.hasType() && bundle.getType() == Bundle.BundleType.SEARCHSET;
             if (manifestReference != null)
-                runAndReturnReport(new Ref(manifestReference), "link for Manifest taken from transaction response");
+                runAndReturnReport(new Ref(manifestReference), "reference for Manifest taken from transaction response");
             else if (isSearchSet) {
                 List<Ref> refs = new ArrayList<>();
                 for (Bundle.BundleEntryComponent component : bundle.getEntry()) {
