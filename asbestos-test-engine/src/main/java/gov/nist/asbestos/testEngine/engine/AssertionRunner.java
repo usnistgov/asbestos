@@ -96,9 +96,11 @@ public class AssertionRunner {
                     Resource resource = component.getResource();
                     if (resource.getClass().getSimpleName().equals(resourceType)) {
                         assertReport = new TestReport.SetupActionAssertComponent();
+                        ResourceWrapper savedSource = source.getResourceWrapper();  // new value (from Bundle) for FixtureComponent
                         source.setResource(new ResourceWrapper(resource));  // so it applies to the in-bundle resource
                         source.setId(resourceType + " #" + i);
                         boolean success = run2(as);
+                        source.setResource(savedSource);  // restore FixtureComponent
                         if (!success)
                             break;
                         //assertReport = null;
