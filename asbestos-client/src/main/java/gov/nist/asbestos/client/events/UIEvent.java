@@ -104,4 +104,10 @@ public class UIEvent {
     public UITask getClientTask() {
         return tasks.get(0);
     }
+
+    public UITask getTask(int i) {
+        return tasks.get(i);
+    }
+
+    public int getTaskCount() { return tasks.size(); }
 }

@@ -1,0 +1,53 @@
+{
+  "resourceType": "Bundle",
+  "id": "9b86541d-d217-4afe-a938-27bd209af823",
+  "type": "transaction-response",
+  "link": [
+    {
+      "relation": "self",
+      "url": "http://localhost:8080/fhir/fhir"
+    }
+  ],
+  "entry": [
+    {
+      "response": {
+        "status": "201 Created",
+        "location": "DocumentReference/50211/_history/1",
+        "etag": "1",
+        "lastModified": "2019-12-14T06:10:45.155-05:00"
+      }
+    },
+    {
+      "response": {
+        "status": "201 Created",
+        "location": "DocumentReference/50212/_history/1",
+        "etag": "1",
+        "lastModified": "2019-12-14T06:10:45.155-05:00"
+      }
+    },
+    {
+      "response": {
+        "status": "201 Created",
+        "location": "DocumentManifest/50213/_history/1",
+        "etag": "1",
+        "lastModified": "2019-12-14T06:10:45.155-05:00"
+      }
+    },
+    {
+      "response": {
+        "status": "201 Created",
+        "location": "Binary/50214/_history/1",
+        "etag": "1",
+        "lastModified": "2019-12-14T06:10:45.155-05:00"
+      }
+    },
+    {
+      "response": {
+        "status": "201 Created",
+        "location": "Binary/50215/_history/1",
+        "etag": "1",
+        "lastModified": "2019-12-14T06:10:45.155-05:00"
+      }
+    }
+  ]
+}

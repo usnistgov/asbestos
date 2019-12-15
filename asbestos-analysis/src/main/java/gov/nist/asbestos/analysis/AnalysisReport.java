@@ -1,11 +1,15 @@
 package gov.nist.asbestos.analysis;
 
+import gov.nist.asbestos.client.Base.EC;
 import gov.nist.asbestos.client.client.FhirClient;
 import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
+import gov.nist.asbestos.simapi.validation.Val;
+import gov.nist.asbestos.testEngine.engine.TestEngine;
 import org.apache.log4j.Logger;
 import org.hl7.fhir.r4.model.*;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -18,15 +22,18 @@ public class AnalysisReport {
     private ResourceWrapper baseObj = null;
     private List<Related> related = new ArrayList<>();
     private List<String> minimalErrors = new ArrayList<>();
-    private List<String> comprehensiveErrors = new ArrayList<>();
+    private List<String> comprehensiveErrors;
     private List<String> codingErrors = new ArrayList<>();
     private List<String> generalErrors = new ArrayList<>();
     private FhirClient fhirClient = new FhirClient();
     private String source;
+    private EC ec;
 
     class Related {
         ResourceWrapper wrapper;
         String howRelated;
+        private List<String> minimalErrors;
+        private List<String> comprehensiveErrors;
 
         Related(ResourceWrapper wrapper, String howRelated) {
             this.wrapper = wrapper;
@@ -38,6 +45,10 @@ public class AnalysisReport {
         String name;
         String relation;
         String url;
+        boolean isMinimal;
+        boolean isComprehensive;
+        List<String> minimalErrors;
+        List<String> comprehensiveErrors;
 
         RelatedReport(ResourceWrapper wrapper, String relation) {
             this.name = wrapper.getResource().getClass().getSimpleName();
@@ -66,23 +77,30 @@ public class AnalysisReport {
         report.source = source;
         report.errors = new ArrayList<>(generalErrors);
 
-        if (baseObj != null && baseObj.getResource() != null)
+        if (baseObj != null && baseObj.getResource() != null) {
             report.base = new RelatedReport(baseObj, "");
+            report.base.comprehensiveErrors = comprehensiveErrors;
+            report.base.isComprehensive = comprehensiveErrors.isEmpty();
+        }
 
         for (Related rel : related) {
             ResourceWrapper wrapper = rel.wrapper;
             BaseResource resource = wrapper.getResource();
             if (resource != null) {
-                report.objects.add(new RelatedReport(wrapper, rel.howRelated));
+                RelatedReport relatedReport = new RelatedReport(wrapper, rel.howRelated);
+                relatedReport.comprehensiveErrors = rel.comprehensiveErrors;
+                relatedReport.isComprehensive = rel.comprehensiveErrors.isEmpty();
+                report.objects.add(relatedReport);
             }
         }
 
         return report;
     }
 
-    public AnalysisReport(Ref baseRef, String source) {
+    public AnalysisReport(Ref baseRef, String source, EC ec) {
         this.baseRef = baseRef;
         this.source = source;
+        this.ec = ec;
     }
 
     public Report run() {
@@ -91,11 +109,30 @@ public class AnalysisReport {
             if (!generalErrors.isEmpty())
                 return buildReport();
             buildRelated();
+            comprehensiveEval();
             return buildReport();
         } catch (Throwable t) {
             generalErrors.add(t.getMessage());
             return buildReport();
         }
+    }
+
+    private void comprehensiveEval() {
+        comprehensiveErrors = comprehensiveEval(baseObj);
+        for (Related rel : related) {
+            rel.comprehensiveErrors = comprehensiveEval(rel.wrapper);
+        }
+    }
+
+    private List<String> comprehensiveEval(ResourceWrapper wrapper) {
+        File testDef = new File(new File(new File(ec.externalCache, "FhirTestCollections"), "Internal"), "Comprehensive");
+        List<String> errors = new TestEngine(testDef)
+                .setVal(new Val())
+                .setTestSession("default")
+                .setExternalCache(ec.externalCache)
+                .runEval(wrapper, null)
+                .getTestReportErrors();
+        return errors;
     }
 
     private void loadBase() {

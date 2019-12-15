@@ -52,6 +52,8 @@
 
         <!--  SELECTED      -->
         <div v-if="selectedResourceIndex === null"></div>
+
+        <!--  BASE OBJECT DETAILS -->
         <div v-else-if="selectedResourceIndex === -1">
             <div class="vdivider"></div>
             <div class="main-caption">{{ report.base.name }}</div>
@@ -59,9 +61,27 @@
                 {{ report.base.name }}
             </div>
             <div v-if="report.base.url">
-                Ref: {{ report.base.url }}
+                <span class="caption"> Ref:</span>
+                {{ report.base.url }}
+            </div>
+
+            <div>
+                <span>Comprehensive Metadata </span>
+                <span v-if="report.base.isComprehensive"><img src="../../assets/check.png"></span>
+                <span v-else><img src="../../assets/cross.png"></span>
+                <div class="divider"></div>
+                <log-error-list :errorList="report.base.comprehensiveErrors"> </log-error-list>
+            </div>
+            <div>
+                <span>Minimal Metadata </span>
+                <span v-if="report.base.isMinimal"><img src="../../assets/check.png"></span>
+                <span v-else><img src="../../assets/cross.png"></span>
+                <div class="divider"></div>
+                <log-error-list :errorList="report.base.minimalErrors"> </log-error-list>
             </div>
         </div>
+
+        <!--  RELATED OBJECT DETAILS -->
         <div v-else-if="selectedResourceIndex > -1">
             <div class="vdivider"></div>
             <div class="main-caption">{{ report.objects[selectedResourceIndex].name }}</div>
@@ -72,11 +92,27 @@
                 <span class="caption">Ref:</span>
                 {{ report.objects[selectedResourceIndex].url }}
             </div>
+            <div>
+                <span>Comprehensive Metadata </span>
+                <span v-if="report.objects[selectedResourceIndex].isComprehensive"><img src="../../assets/check.png"></span>
+                <span v-else><img src="../../assets/cross.png"></span>
+                <div class="divider"></div>
+                <log-error-list :errorList="report.objects[selectedResourceIndex].comprehensiveErrors"> </log-error-list>
+            </div>
+            <div>
+                <span>Minimal Metadata </span>
+                <span v-if="report.objects[selectedResourceIndex].isMinimal"><img src="../../assets/check.png"></span>
+                <span v-else><img src="../../assets/cross.png"></span>
+                <div class="divider"></div>
+                <log-error-list :errorList="report.objects[selectedResourceIndex].minimalErrors"> </log-error-list>
+            </div>
         </div>
     </div>
 </template>
 
 <script>
+    import LogErrorList from "./LogErrorList"
+
     export default {
         data() {
             return {
@@ -112,6 +148,7 @@
         props: [
             'sessionId', 'channelId', 'eventId'
         ],
+        components: { LogErrorList },
         name: "LogAnalysisReport"
     }
 </script>

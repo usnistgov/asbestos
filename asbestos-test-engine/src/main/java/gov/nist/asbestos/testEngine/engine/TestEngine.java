@@ -65,6 +65,8 @@ public class TestEngine  {
     public TestEngine(File testDef) {
         Objects.requireNonNull(testDef);
         this.testDef = testDef;
+        ResourceCacheMgr inTestResources = new ResourceCacheMgr(testDef, new Ref(""));
+        fhirClientForFixtures = new FhirClient().setResourceCacheMgr(inTestResources);
     }
 
     public TestEngine(File testDef, TestScript testScript) {
@@ -118,8 +120,10 @@ public class TestEngine  {
         try {
             initWorkflow();
             doLoadFixtures();
-            fixtureMgr.put("request", new FixtureComponent(requestResource));
-            fixtureMgr.put("response", new FixtureComponent(responseResource));
+            if (requestResource != null)
+                fixtureMgr.put("request", new FixtureComponent(requestResource));
+            if (responseResource != null)
+                fixtureMgr.put("response", new FixtureComponent(responseResource));
             doTest(); // should only be asserts
             errorOut();
         } catch (Throwable t) {
@@ -128,6 +132,37 @@ public class TestEngine  {
         //returnTestReport();
 
         return this;
+    }
+
+    public List<String> getTestReportErrors() {
+        List<String> errors = new ArrayList<>();
+        TestReport.TestReportSetupComponent testComponent = testReport.getSetup();
+            for (TestReport.SetupActionComponent actionComponent : testComponent.getAction()) {
+                if (actionComponent.hasAssert()) {
+                    TestReport.SetupActionAssertComponent assertComponent = actionComponent.getAssert();
+                    if (assertComponent.hasResult()) {
+                        TestReport.TestReportActionResult actionResult = assertComponent.getResult();
+                        if (actionResult.equals(TestReport.TestReportActionResult.ERROR) ||
+                            actionResult.equals(TestReport.TestReportActionResult.FAIL))
+                        errors.add(assertComponent.getMessage());
+                    }
+                }
+            }
+
+        for (TestReport.TestReportTestComponent testComponent1 : testReport.getTest()) {
+            for (TestReport.TestActionComponent actionComponent : testComponent1.getAction()) {
+                if (actionComponent.hasAssert()) {
+                    TestReport.SetupActionAssertComponent assertComponent = actionComponent.getAssert();
+                    if (assertComponent.hasResult()) {
+                        TestReport.TestReportActionResult actionResult = assertComponent.getResult();
+                        if (actionResult.equals(TestReport.TestReportActionResult.ERROR) ||
+                                actionResult.equals(TestReport.TestReportActionResult.FAIL))
+                            errors.add(assertComponent.getMessage());
+                    }
+                }
+            }
+        }
+        return errors;
     }
 
     private void reportException(Throwable t) {
@@ -288,7 +323,7 @@ public class TestEngine  {
 
 
     private void doLoadFixtures() {
-
+        Objects.requireNonNull(fhirClientForFixtures);
         if (testScript.hasFixture()) {
             ValE fVal = new ValE(engineVal).setMsg("Fixtures");
 
@@ -608,23 +643,6 @@ public class TestEngine  {
                     return (TestScript) ref.getResource();
                 }
             }
-//            String containedTestScriptId = extension.getValue().toString();
-//
-//            List<Resource> containedList = testScript.getContained();
-//            Resource contained = null;
-//            for (Resource theContained : containedList) {
-//                if (theContained.getId() != null && theContained.getId().equals(containedTestScriptId)) {
-//                    contained = theContained;
-//                    break;
-//                }
-//            }
-//            if (contained == null) {
-//                reportParsingError(testReportComponent, "cannot locate contained TestScript " + containedTestScriptId);
-//                return null;
-//            }
-//
-//
-//            return (TestScript) contained;
         }
         return null;
     }

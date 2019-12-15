@@ -92,7 +92,7 @@ public class GetLogEventAnalysis {
     }
 
     private void runAndReturnReport(Ref ref, String source) {
-        AnalysisReport analysisReport = new AnalysisReport(ref, source);
+        AnalysisReport analysisReport = new AnalysisReport(ref, source, request.ec);
         AnalysisReport.Report report = analysisReport.run();
         returnReport(report);
     }
