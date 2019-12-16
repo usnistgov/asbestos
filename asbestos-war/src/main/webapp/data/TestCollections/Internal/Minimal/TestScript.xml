@@ -30,6 +30,8 @@
                 <warningOnly value="false"/>
             </assert>
         </action>
+    </test>
+    <test>
         <action>
             <assert>
                 <label value="DocumentManifest"/>
@@ -41,6 +43,6 @@
                 <minimumId value="referenceDocumentManifest"/>
                 <warningOnly value="false"/>
             </assert>
-        </action>    
-        </test>
+        </action>
+    </test>
 </TestScript>

@@ -8,10 +8,30 @@
             <span v-else><img src="../../assets/arrow-right.png"  @click.stop="open = !open"></span>
         </span>
         <div v-if="open">
-            <div v-for="(error, errori) in errorList"
-                :key="error + errori">
-                <div class="divider"></div>
-                {{ error }}
+            <div v-if="errorList.length > 0">
+                <div v-for="(error, errori) in errorList"
+                    :key="error + errori">
+                    <div class="divider"></div>
+                    {{ error }}
+                </div>
+            </div>
+            <div v-else>
+                    <div class="divider"></div>
+                No Errors
+            </div>
+
+            <div>
+                <div class="has-cursor" @click.stop="listOpen = !listOpen">
+                    <div class="divider"></div>
+                    Required Attributes
+                    <span v-if="listOpen"><img src="../../assets/arrow-down.png"></span>
+                    <span v-else><img src="../../assets/arrow-right.png"></span>
+                </div>
+                <div v-if="listOpen">
+                    <div class="divider"></div>
+                    <div class="divider"></div>
+                    {{ attList }}
+                </div>
             </div>
         </div>
     </span>
@@ -22,10 +42,11 @@
         data() {
             return {
                 open: false,
+                listOpen: false,
             }
         },
         props: [
-            'errorList'
+            'errorList', 'attList'
         ],
         name: "LogErrorList"
     }

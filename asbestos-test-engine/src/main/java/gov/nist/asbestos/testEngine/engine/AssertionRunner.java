@@ -8,8 +8,10 @@ import org.jaxen.expr.ProcessingInstructionNodeStep;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 public class AssertionRunner {
     private String label;
@@ -211,28 +213,32 @@ public class AssertionRunner {
         return Reporter.reportFail(val, assertReport, type, label, "assertion failed - " + expression, warningOnly);
     }
 
+    static private List<String> hide = Arrays.asList("Description", "DocStatus", "Id", "Meta", "ImplicitRules", "FormatComment", "PrimitiveValue",
+            "Extension", "ModifierExtension", "RelatesTo", "Author", "Identifier", "Custodian", "Authenticator", "Contained");
+
     private boolean instMinimumId(TestScript.SetupActionAssertComponent as, boolean warningOnly) {
         FixtureComponent sourceFixture = getSource(as);
         if (sourceFixture == null) return false;
 
-        FixtureComponent minFixture  = fixtureMgr.get(as.getMinimumId());
-        if (minFixture == null) {
+        FixtureComponent miniFixture  = fixtureMgr.get(as.getMinimumId());
+        if (miniFixture == null) {
             Reporter.reportError(val, assertReport, type, label, "minimumId references " + as.getMinimumId() + " which cannot be found");
             return false;
         }
 
-        BaseResource miniR = minFixture.getResourceResource();
+        BaseResource miniR = miniFixture.getResourceResource();
         BaseResource sourceR = sourceFixture.getResourceResource();
 
         Class<?> miniClass = miniR.getClass();
         Class<?> sourceClass = sourceR.getClass();
 
         if (!miniClass.equals(sourceClass)) {
-            Reporter.reportError(val, assertReport, type, label, "minimumId: cannot compare " + miniClass.getName() + " and " + sourceClass.getName());
+         //   Reporter.reportError(val, assertReport, type, label, "minimumId: cannot compare " + miniClass.getName() + " and " + sourceClass.getName());
             return false;
         }
 
-        boolean fail = false;
+        List<String> checkedAttNames = new ArrayList<>();
+        List<String> missingAttNames = new ArrayList<>();
         Method[] methods = miniClass.getMethods();
         for (Method method : methods) {
             String name = method.getName();
@@ -243,20 +249,35 @@ public class AssertionRunner {
             try {
                 miniHas = (boolean) method.invoke(miniR);
                 sourceHas = (boolean) method.invoke(sourceR);
+                String attName = name.substring(3);
 
-                if (miniHas && !sourceHas) {
-                    fail = true;
-                    String attName = name.substring(3);
-                    Reporter.reportFail(val, assertReport, type, label, "minimumId: attribute " + attName + " not found in " + sourceFixture.getId(), warningOnly);
+                if (!attName.endsWith("Element") && !hide.contains(attName)) {
+                    checkedAttNames.add(attName);
+                    if (miniHas && !sourceHas) {
+                        missingAttNames.add(attName);
+                    }
                 }
             } catch (Exception e) {
 //                    Reporter.reportError(val, assertReport, type, label, "minimumId: cannot invoke method " + name + " on " + miniClass.getName());
 //                    return false;
             }
         }
-        if (!fail)
-            Reporter.reportPass(val, assertReport, type, label, "pass" );
-        return fail;
+//        String checked = checkedAttNames.stream()
+//                .collect(Collectors.joining(", "));
+        assertReport.setDetail(
+                 "[" +
+                    checkedAttNames.stream()
+                            .collect(Collectors.joining(", "))
+                + "]");
+        if (missingAttNames.isEmpty()) {
+            Reporter.reportPass(val, assertReport, type, label, "pass");
+            return true;
+        } else {
+            String atts = missingAttNames.stream()
+                    .collect(Collectors.joining(", "));
+            Reporter.reportFail(val, assertReport, type, label, "minimumId: attributes [" + atts + "] not found ", warningOnly);
+            return false;
+        }
     }
 
     private boolean instResource(TestScript.SetupActionAssertComponent as, boolean warningOnly) {

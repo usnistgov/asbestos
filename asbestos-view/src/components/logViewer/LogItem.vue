@@ -8,7 +8,7 @@
         <div class="request-response">
             <div v-if="selectedEvent">
                 <span v-for="(task, taski) in tasks" :key="taski">
-                    <span v-bind:class="{ selected: taski === selectedTask, selectable: taski !== selectedTask }" @click="selectTask(taski)">
+                    <span v-bind:class="[{ selected: taski === selectedTask, selectable: taski !== selectedTask }, cursor-pointer]" @click="selectTask(taski)">
                         {{ taskLabel(taski) }}
                         <span class="divider"> </span>
                     </span>
@@ -21,16 +21,25 @@
             <div v-else>
                 No Tasks
             </div>
-           <span v-bind:class="{ selected: displayRequest === true, selectable: displayRequest === false }"
-              @click="displayRequest = true; displayAnalysis = false">
+           <span v-bind:class="{
+                selected: displayRequest,
+                'not-selected': !displayRequest
+              }"
+              @click="displayRequest = true; displayResponse = false; displayAnalysis = false">
                 Request
            </span>
             <div class="divider"></div>
-            <span v-bind:class="{ selected: displayRequest === false, selectable: displayRequest === true }"
-                  @click="displayRequest = false; displayAnalysis = false">
+            <span v-bind:class="{
+                   selected: displayResponse,
+                'not-selected': !displayResponse
+               }"
+                  @click="displayRequest = false; displayResponse = true; displayAnalysis = false">
                 Response
             </span>
-            <div class="selectable" @click="doDisplayAnalysis()">
+            <div v-bind:class="{
+                   selected: displayAnalysis,
+                   'not-selected': !displayAnalysis
+               }" @click="displayRequest = false; displayResponse = false; displayAnalysis = true">
                 Inspect
             </div>
             <div v-if="displayAnalysis">
@@ -69,6 +78,7 @@
                 selectedEvent: null,
                 selectedTask: 0,
                 displayRequest: true,
+                displayResponse: false,
                 displayAnalysis: false,
                 linkToCopy: null,
             }
@@ -76,6 +86,7 @@
         methods: {
             doDisplayAnalysis() {
                 this.displayAnalysis = true;
+                this.displayRequest = false
 //                this.$store.dispatch('getLogEventAnalysis', {channel: this.channelId, session: this.sessionId, eventId: this.eventId})
             },
             copyToClipboard() {
@@ -227,5 +238,9 @@
     .link-position {
         position: absolute;
         left: 350px;
+    }
+    .not-selected {
+        cursor: pointer;
+        text-decoration: underline;
     }
 </style>

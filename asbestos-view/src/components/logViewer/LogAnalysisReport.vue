@@ -1,5 +1,5 @@
 <template>
-    <div v-if="report">
+    <div v-if="report" class="boxed">
 
         <!--    ERRORS    -->
         <div class="vdivider"></div>
@@ -15,7 +15,8 @@
         </div>
         <div class="vdivider"></div>
 
-        <div>All objects shown as retrieved from server</div>
+        <div>Resource IDs are extracted from the Response message. Content shown comes directly from the server
+            via separate retrieves.</div>
         <div class="vdivider"></div>
 
         <!--  BASE OBJECT     -->
@@ -70,14 +71,14 @@
                 <span v-if="report.base.isComprehensive"><img src="../../assets/check.png"></span>
                 <span v-else><img src="../../assets/cross.png"></span>
                 <div class="divider"></div>
-                <log-error-list :errorList="report.base.comprehensiveErrors"> </log-error-list>
+                <log-error-list :errorList="report.base.comprehensiveErrors" :attList="report.base.comprehensiveChecked"> </log-error-list>
             </div>
             <div>
                 <span>Minimal Metadata </span>
                 <span v-if="report.base.isMinimal"><img src="../../assets/check.png"></span>
                 <span v-else><img src="../../assets/cross.png"></span>
                 <div class="divider"></div>
-                <log-error-list :errorList="report.base.minimalErrors"> </log-error-list>
+                <log-error-list :errorList="report.base.minimalErrors" :attList="report.base.minimalChecked"> </log-error-list>
             </div>
         </div>
 
@@ -92,19 +93,21 @@
                 <span class="caption">Ref:</span>
                 {{ report.objects[selectedResourceIndex].url }}
             </div>
-            <div>
-                <span>Comprehensive Metadata </span>
-                <span v-if="report.objects[selectedResourceIndex].isComprehensive"><img src="../../assets/check.png"></span>
-                <span v-else><img src="../../assets/cross.png"></span>
-                <div class="divider"></div>
-                <log-error-list :errorList="report.objects[selectedResourceIndex].comprehensiveErrors"> </log-error-list>
-            </div>
-            <div>
-                <span>Minimal Metadata </span>
-                <span v-if="report.objects[selectedResourceIndex].isMinimal"><img src="../../assets/check.png"></span>
-                <span v-else><img src="../../assets/cross.png"></span>
-                <div class="divider"></div>
-                <log-error-list :errorList="report.objects[selectedResourceIndex].minimalErrors"> </log-error-list>
+            <div v-if="report.objects[selectedResourceIndex].name === 'DocumentManifest' || report.objects[selectedResourceIndex].name === 'DocumentReference'">
+                <div>
+                    <span class="caption">Comprehensive Metadata </span>
+                    <span v-if="report.objects[selectedResourceIndex].isComprehensive"><img src="../../assets/check.png"></span>
+                    <span v-else><img src="../../assets/cross.png"></span>
+                    <div class="divider"></div>
+                    <log-error-list :errorList="report.objects[selectedResourceIndex].comprehensiveErrors" :attList="report.objects[selectedResourceIndex].comprehensiveChecked"> </log-error-list>
+                </div>
+                <div>
+                    <span class="caption">Minimal Metadata </span>
+                    <span v-if="report.objects[selectedResourceIndex].isMinimal"><img src="../../assets/check.png"></span>
+                    <span v-else><img src="../../assets/cross.png"></span>
+                    <div class="divider"></div>
+                    <log-error-list :errorList="report.objects[selectedResourceIndex].minimalErrors" :attList="report.objects[selectedResourceIndex].minimalChecked"> </log-error-list>
+                </div>
             </div>
         </div>
     </div>
@@ -202,4 +205,9 @@
     font-weight: bold;
     font-size: larger;
 }
+    .boxed {
+        border: 1px solid rgba(0, 0, 0, 0.8);
+        position: relative;
+        left: -60px;
+    }
 </style>

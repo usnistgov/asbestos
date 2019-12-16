@@ -22,7 +22,9 @@ public class AnalysisReport {
     private ResourceWrapper baseObj = null;
     private List<Related> related = new ArrayList<>();
     private List<String> minimalErrors = new ArrayList<>();
+    private String minimalChecked;
     private List<String> comprehensiveErrors;
+    private String comprehensiveChecked;
     private List<String> codingErrors = new ArrayList<>();
     private List<String> generalErrors = new ArrayList<>();
     private FhirClient fhirClient = new FhirClient();
@@ -34,6 +36,8 @@ public class AnalysisReport {
         String howRelated;
         private List<String> minimalErrors;
         private List<String> comprehensiveErrors;
+        String comprehensiveChecked;
+        String minimalChecked;
 
         Related(ResourceWrapper wrapper, String howRelated) {
             this.wrapper = wrapper;
@@ -49,6 +53,8 @@ public class AnalysisReport {
         boolean isComprehensive;
         List<String> minimalErrors;
         List<String> comprehensiveErrors;
+        String minimalChecked;
+        String comprehensiveChecked;
 
         RelatedReport(ResourceWrapper wrapper, String relation) {
             this.name = wrapper.getResource().getClass().getSimpleName();
@@ -81,6 +87,10 @@ public class AnalysisReport {
             report.base = new RelatedReport(baseObj, "");
             report.base.comprehensiveErrors = comprehensiveErrors;
             report.base.isComprehensive = comprehensiveErrors.isEmpty();
+            report.base.minimalErrors = minimalErrors;
+            report.base.isMinimal = minimalErrors.isEmpty();
+            report.base.minimalChecked = minimalChecked;
+            report.base.comprehensiveChecked = comprehensiveChecked;
         }
 
         for (Related rel : related) {
@@ -90,6 +100,10 @@ public class AnalysisReport {
                 RelatedReport relatedReport = new RelatedReport(wrapper, rel.howRelated);
                 relatedReport.comprehensiveErrors = rel.comprehensiveErrors;
                 relatedReport.isComprehensive = rel.comprehensiveErrors.isEmpty();
+                relatedReport.minimalErrors = rel.minimalErrors;
+                relatedReport.isMinimal = rel.minimalErrors.isEmpty();
+                relatedReport.comprehensiveChecked = rel.comprehensiveChecked;
+                relatedReport.minimalChecked = rel.minimalChecked;
                 report.objects.add(relatedReport);
             }
         }
@@ -110,6 +124,7 @@ public class AnalysisReport {
                 return buildReport();
             buildRelated();
             comprehensiveEval();
+            minimalEval();
             return buildReport();
         } catch (Throwable t) {
             generalErrors.add(t.getMessage());
@@ -118,21 +133,62 @@ public class AnalysisReport {
     }
 
     private void comprehensiveEval() {
-        comprehensiveErrors = comprehensiveEval(baseObj);
+        TestEngine testEngine = comprehensiveEval(baseObj);
+        comprehensiveErrors = testEngine.getTestReportErrors();
+        comprehensiveChecked = getFirstAssertDetails(testEngine.getTestReport());
         for (Related rel : related) {
-            rel.comprehensiveErrors = comprehensiveEval(rel.wrapper);
+            testEngine = comprehensiveEval(rel.wrapper);
+            rel.comprehensiveChecked = getFirstAssertDetails(testEngine.getTestReport());
+            rel.comprehensiveErrors = testEngine.getTestReportErrors();
         }
     }
 
-    private List<String> comprehensiveEval(ResourceWrapper wrapper) {
+    private void minimalEval() {
+        TestEngine testEngine  = minimalEval(baseObj);
+        minimalErrors = testEngine.getTestReportErrors();
+        minimalChecked = getFirstAssertDetails(testEngine.getTestReport());
+        for (Related rel : related) {
+            testEngine = minimalEval(rel.wrapper);
+            rel.minimalChecked = getFirstAssertDetails(testEngine.getTestReport());
+            rel.minimalErrors = testEngine.getTestReportErrors();
+        }
+    }
+
+    private TestEngine comprehensiveEval(ResourceWrapper wrapper) {
         File testDef = new File(new File(new File(ec.externalCache, "FhirTestCollections"), "Internal"), "Comprehensive");
-        List<String> errors = new TestEngine(testDef)
+        TestEngine testEngine = new TestEngine(testDef)
                 .setVal(new Val())
                 .setTestSession("default")
                 .setExternalCache(ec.externalCache)
-                .runEval(wrapper, null)
-                .getTestReportErrors();
-        return errors;
+                .runEval(wrapper, null);
+        return testEngine;
+//        List<String> errors = testEngine.getTestReportErrors();
+//        return errors;
+    }
+
+    private String getFirstAssertDetails(TestReport testReport) {
+        if (testReport == null) return "";
+        for (TestReport.TestReportTestComponent testComponent : testReport.getTest()) {
+            for (TestReport.TestActionComponent actionComponent : testComponent.getAction()) {
+                TestReport.SetupActionAssertComponent assertComponent = actionComponent.getAssert();
+                if (assertComponent != null) {
+                    String detail = assertComponent.getDetail();
+                    if (detail != null && !detail.equals(""))
+                        return detail;
+                }
+            }
+        }
+        return "";
+    }
+
+    private TestEngine minimalEval(ResourceWrapper wrapper) {
+        File testDef = new File(new File(new File(ec.externalCache, "FhirTestCollections"), "Internal"), "Minimal");
+        TestEngine testEngine = new TestEngine(testDef)
+                .setVal(new Val())
+                .setTestSession("default")
+                .setExternalCache(ec.externalCache)
+                .runEval(wrapper, null);
+        return testEngine;
     }
 
     private void loadBase() {
