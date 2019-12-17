@@ -1,6 +1,6 @@
 <TestScript xmlns="http://hl7.org/fhir">
-    <id value="comp"/>
-    <name value="comp"/>
+    <id value="comprehensive"/>
+    <name value="comprehensive"/>
     <description value="Evaluate input for Comprehensive Metadata compliance."/>
     <!--
       These fixtures will be inserted by the TestEngine:
@@ -20,7 +20,7 @@
     <test>
         <action>
             <assert>
-                <label value="DocumentReference"/>
+                <label value="Comprehensive DocumentReference"/>
                 <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-OncePerType">
                     <valueString value="DocumentReference"/>
                 </modifierExtension>
@@ -32,7 +32,7 @@
         </action>
         <action>
             <assert>
-                <label value="DocumentManifest"/>
+                <label value="Comprehensive DocumentManifest"/>
                 <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-OncePerType">
                     <valueString value="DocumentManifest"/>
                 </modifierExtension>

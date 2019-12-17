@@ -22,9 +22,9 @@ public class AnalysisReport {
     private ResourceWrapper baseObj = null;
     private List<Related> related = new ArrayList<>();
     private List<String> minimalErrors = new ArrayList<>();
-    private String minimalChecked;
+    private Checked minimalChecked;
     private List<String> comprehensiveErrors;
-    private String comprehensiveChecked;
+    private Checked comprehensiveChecked;
     private List<String> codingErrors = new ArrayList<>();
     private List<String> generalErrors = new ArrayList<>();
     private FhirClient fhirClient = new FhirClient();
@@ -36,8 +36,8 @@ public class AnalysisReport {
         String howRelated;
         private List<String> minimalErrors;
         private List<String> comprehensiveErrors;
-        String comprehensiveChecked;
-        String minimalChecked;
+        Checked comprehensiveChecked;
+        Checked minimalChecked;
 
         Related(ResourceWrapper wrapper, String howRelated) {
             this.wrapper = wrapper;
@@ -89,8 +89,8 @@ public class AnalysisReport {
             report.base.isComprehensive = comprehensiveErrors.isEmpty();
             report.base.minimalErrors = minimalErrors;
             report.base.isMinimal = minimalErrors.isEmpty();
-            report.base.minimalChecked = minimalChecked;
-            report.base.comprehensiveChecked = comprehensiveChecked;
+            report.base.minimalChecked = minimalChecked.attsChecked;
+            report.base.comprehensiveChecked = comprehensiveChecked.attsChecked;
         }
 
         for (Related rel : related) {
@@ -102,8 +102,8 @@ public class AnalysisReport {
                 relatedReport.isComprehensive = rel.comprehensiveErrors.isEmpty();
                 relatedReport.minimalErrors = rel.minimalErrors;
                 relatedReport.isMinimal = rel.minimalErrors.isEmpty();
-                relatedReport.comprehensiveChecked = rel.comprehensiveChecked;
-                relatedReport.minimalChecked = rel.minimalChecked;
+                relatedReport.comprehensiveChecked = rel.comprehensiveChecked.attsChecked;
+                relatedReport.minimalChecked = rel.minimalChecked.attsChecked;
                 report.objects.add(relatedReport);
             }
         }
@@ -129,6 +129,22 @@ public class AnalysisReport {
         } catch (Throwable t) {
             generalErrors.add(t.getMessage());
             return buildReport();
+        }
+    }
+
+    public class Checked {
+        String className;
+        String attsChecked;
+        String script;
+
+        Checked(String className, String attsChecked, String script) {
+            this.className = className;
+            this.attsChecked = attsChecked;
+            this.script = script;
+        }
+
+        public String toString() {
+            return "Checked: " + className + " Script: " + script + " Atts: " + attsChecked;
         }
     }
 
@@ -166,19 +182,19 @@ public class AnalysisReport {
 //        return errors;
     }
 
-    private String getFirstAssertDetails(TestReport testReport) {
-        if (testReport == null) return "";
+    private Checked getFirstAssertDetails(TestReport testReport) {
+        if (testReport == null) return new Checked("", "", "");
         for (TestReport.TestReportTestComponent testComponent : testReport.getTest()) {
             for (TestReport.TestActionComponent actionComponent : testComponent.getAction()) {
                 TestReport.SetupActionAssertComponent assertComponent = actionComponent.getAssert();
                 if (assertComponent != null) {
                     String detail = assertComponent.getDetail();
                     if (detail != null && !detail.equals(""))
-                        return detail;
+                        return new Checked((String)assertComponent.getUserData("Evaluating type"), detail, (String)assertComponent.getUserData("Script"));
                 }
             }
         }
-        return "";
+        return new Checked("", "", "");
     }
 
     private TestEngine minimalEval(ResourceWrapper wrapper) {

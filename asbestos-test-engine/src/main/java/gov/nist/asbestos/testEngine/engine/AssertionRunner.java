@@ -213,8 +213,7 @@ public class AssertionRunner {
         return Reporter.reportFail(val, assertReport, type, label, "assertion failed - " + expression, warningOnly);
     }
 
-    static private List<String> hide = Arrays.asList("Description", "DocStatus", "Id", "Meta", "ImplicitRules", "FormatComment", "PrimitiveValue",
-            "Extension", "ModifierExtension", "RelatesTo", "Author", "Identifier", "Custodian", "Authenticator", "Contained");
+    static private List<String> hide = Arrays.asList("Description", "Id", "Meta", "Text");
 
     private boolean instMinimumId(TestScript.SetupActionAssertComponent as, boolean warningOnly) {
         FixtureComponent sourceFixture = getSource(as);
@@ -232,10 +231,16 @@ public class AssertionRunner {
         Class<?> miniClass = miniR.getClass();
         Class<?> sourceClass = sourceR.getClass();
 
+        assertReport.setUserData("Evaluating type", sourceClass.getSimpleName());
+        assertReport.setUserData("Script", as.getLabel());
+
         if (!miniClass.equals(sourceClass)) {
+            assertReport.setUserData("No Comparison", "minimumId: cannot compare " + miniClass.getName() + " and " + sourceClass.getName());
+            assertReport.setResult(TestReport.TestReportActionResult.SKIP);
          //   Reporter.reportError(val, assertReport, type, label, "minimumId: cannot compare " + miniClass.getName() + " and " + sourceClass.getName());
             return false;
         }
+
 
         List<String> checkedAttNames = new ArrayList<>();
         List<String> missingAttNames = new ArrayList<>();
@@ -251,8 +256,13 @@ public class AssertionRunner {
                 sourceHas = (boolean) method.invoke(sourceR);
                 String attName = name.substring(3);
 
+                if (attName.equals("Category")) {
+                    System.out.println("Category");
+                }
+
                 if (!attName.endsWith("Element") && !hide.contains(attName)) {
-                    checkedAttNames.add(attName);
+                    if (miniHas)
+                        checkedAttNames.add(attName);
                     if (miniHas && !sourceHas) {
                         missingAttNames.add(attName);
                     }
