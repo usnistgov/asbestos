@@ -313,4 +313,8 @@ public class EC {
         }
         return eventsList;
     }
+
+    public File getCodesFile(String environment) {
+        return new File(new File(new File(externalCache, "environment"), environment), "codes.xml");
+    }
 }

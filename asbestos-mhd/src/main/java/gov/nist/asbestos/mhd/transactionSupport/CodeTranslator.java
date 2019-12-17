@@ -26,6 +26,7 @@ public class CodeTranslator {
     }
 
     public Optional<Code> findCodeBySystem(String theName, String theSystem, String theCode) {
+        Objects.requireNonNull(codes);
         Objects.requireNonNull(theName);
         Objects.requireNonNull(theSystem);
         Objects.requireNonNull(theCode);
@@ -38,6 +39,7 @@ public class CodeTranslator {
     }
 
     public Optional<Code> findCodeByClassificationAndSystem(String theClassification, String theSystem, String theCode) {
+        Objects.requireNonNull(codes);
         Objects.requireNonNull(theClassification);
         Objects.requireNonNull(theSystem);
         Objects.requireNonNull(theCode);
@@ -50,6 +52,7 @@ public class CodeTranslator {
     }
 
     public Optional<CodeType> findCodeTypeForScheme(String scheme) {
+        Objects.requireNonNull(codes);
         Objects.requireNonNull(scheme);
         return codes.getCodeType().stream()
                 .filter(codetype -> scheme.equals(codetype.getClassScheme()))
@@ -57,6 +60,7 @@ public class CodeTranslator {
     }
 
     public Optional<Code> findCodeForCodeAndScheme(String theClassification, String theCode, String theCodingScheme) {
+        Objects.requireNonNull(codes);
         Objects.requireNonNull(theClassification);
         Objects.requireNonNull(theCode);
         Objects.requireNonNull(theCodingScheme);

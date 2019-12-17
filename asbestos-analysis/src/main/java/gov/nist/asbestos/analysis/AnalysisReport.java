@@ -30,12 +30,14 @@ public class AnalysisReport {
     private FhirClient fhirClient = new FhirClient();
     private String source;
     private EC ec;
+    private CodesValidation codesValidation;
 
     class Related {
         ResourceWrapper wrapper;
         String howRelated;
         private List<String> minimalErrors;
         private List<String> comprehensiveErrors;
+        private List<String> codingErrors = new ArrayList<>();
         Checked comprehensiveChecked;
         Checked minimalChecked;
 
@@ -53,6 +55,7 @@ public class AnalysisReport {
         boolean isComprehensive;
         List<String> minimalErrors;
         List<String> comprehensiveErrors;
+        List<String> codingErrors;
         String minimalChecked;
         String comprehensiveChecked;
 
@@ -91,6 +94,7 @@ public class AnalysisReport {
             report.base.isMinimal = minimalErrors.isEmpty();
             report.base.minimalChecked = minimalChecked.attsChecked;
             report.base.comprehensiveChecked = comprehensiveChecked.attsChecked;
+            report.base.codingErrors = codingErrors;
         }
 
         for (Related rel : related) {
@@ -104,6 +108,7 @@ public class AnalysisReport {
                 relatedReport.isMinimal = rel.minimalErrors.isEmpty();
                 relatedReport.comprehensiveChecked = rel.comprehensiveChecked.attsChecked;
                 relatedReport.minimalChecked = rel.minimalChecked.attsChecked;
+                relatedReport.codingErrors = rel.codingErrors;
                 report.objects.add(relatedReport);
             }
         }
@@ -115,6 +120,7 @@ public class AnalysisReport {
         this.baseRef = baseRef;
         this.source = source;
         this.ec = ec;
+        this.codesValidation = new CodesValidation(ec);
     }
 
     public Report run() {
@@ -125,6 +131,7 @@ public class AnalysisReport {
             buildRelated();
             comprehensiveEval();
             minimalEval();
+            codingEval();
             return buildReport();
         } catch (Throwable t) {
             generalErrors.add(t.getMessage());
@@ -145,6 +152,13 @@ public class AnalysisReport {
 
         public String toString() {
             return "Checked: " + className + " Script: " + script + " Atts: " + attsChecked;
+        }
+    }
+
+    private void codingEval() {
+        codingErrors.addAll(codesValidation.validate(baseObj.getResource()));
+        for (Related rel : related) {
+            rel.codingErrors.addAll(codesValidation.validate(rel.wrapper.getResource()));
         }
     }
 

@@ -23,6 +23,12 @@
             <artifactId>asbestos-test-engine</artifactId>
             <version>1.1.0-SNAPSHOT</version>
         </dependency>
+
+        <dependency>
+            <groupId>gov.nist.asbestos</groupId>
+            <artifactId>asbestos-mhd</artifactId>
+            <version>1.1.0-SNAPSHOT</version>
+        </dependency>
     </dependencies>
 
 </project>
