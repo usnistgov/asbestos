@@ -20,10 +20,10 @@
                 No Errors
             </div>
 
-            <div>
+            <div v-if="attListName">
                 <div class="has-cursor" @click.stop="listOpen = !listOpen">
                     <div class="divider"></div>
-                    Required Attributes
+                    {{ attListName }}
                     <span v-if="listOpen"><img src="../../assets/arrow-down.png"></span>
                     <span v-else><img src="../../assets/arrow-right.png"></span>
                 </div>
@@ -46,7 +46,7 @@
             }
         },
         props: [
-            'errorList', 'attList'
+            'errorList', 'attList', 'attListName'
         ],
         name: "LogErrorList"
     }

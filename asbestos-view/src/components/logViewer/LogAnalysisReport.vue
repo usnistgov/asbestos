@@ -71,14 +71,20 @@
                 <span v-if="report.base.isComprehensive"><img src="../../assets/check.png"></span>
                 <span v-else><img src="../../assets/cross.png"></span>
                 <div class="divider"></div>
-                <log-error-list :errorList="report.base.comprehensiveErrors" :attList="report.base.comprehensiveChecked"> </log-error-list>
+                <log-error-list :errorList="report.base.comprehensiveErrors" :attList="report.base.comprehensiveChecked" :att-list-name="'Required Attributes'"> </log-error-list>
             </div>
             <div>
                 <span>Minimal Metadata </span>
                 <span v-if="report.base.isMinimal"><img src="../../assets/check.png"></span>
                 <span v-else><img src="../../assets/cross.png"></span>
                 <div class="divider"></div>
-                <log-error-list :errorList="report.base.minimalErrors" :attList="report.base.minimalChecked"> </log-error-list>
+                <log-error-list :errorList="report.base.minimalErrors" :attList="report.base.minimalChecked" :att-list-name="'Required Attributes'"> </log-error-list>
+            </div>
+            <div>
+                <span class="caption">Coding</span>
+                <span v-if="report.base.codingErrors.length === 0"><img src="../../assets/check.png"></span>
+                <span v-else><img src="../../assets/cross.png"></span>
+                <log-error-list :errorList="report.base.codingErrors"> </log-error-list>
             </div>
         </div>
 
@@ -99,16 +105,23 @@
                     <span v-if="report.objects[selectedResourceIndex].isComprehensive"><img src="../../assets/check.png"></span>
                     <span v-else><img src="../../assets/cross.png"></span>
                     <div class="divider"></div>
-                    <log-error-list :errorList="report.objects[selectedResourceIndex].comprehensiveErrors" :attList="report.objects[selectedResourceIndex].comprehensiveChecked"> </log-error-list>
+                    <log-error-list :errorList="report.objects[selectedResourceIndex].comprehensiveErrors" :attList="report.objects[selectedResourceIndex].comprehensiveChecked" :att-list-name="'Required Attributes'"> </log-error-list>
                 </div>
                 <div>
                     <span class="caption">Minimal Metadata </span>
                     <span v-if="report.objects[selectedResourceIndex].isMinimal"><img src="../../assets/check.png"></span>
                     <span v-else><img src="../../assets/cross.png"></span>
                     <div class="divider"></div>
-                    <log-error-list :errorList="report.objects[selectedResourceIndex].minimalErrors" :attList="report.objects[selectedResourceIndex].minimalChecked"> </log-error-list>
+                    <log-error-list :errorList="report.objects[selectedResourceIndex].minimalErrors" :attList="report.objects[selectedResourceIndex].minimalChecked" :att-list-name="'Required Attributes'"> </log-error-list>
                 </div>
             </div>
+            <div>
+                <span class="caption">Coding</span>
+                <span v-if="report.objects[selectedResourceIndex].codingErrors.length === 0"><img src="../../assets/check.png"></span>
+                <span v-else><img src="../../assets/cross.png"></span>
+                <log-error-list :errorList="report.objects[selectedResourceIndex].codingErrors"> </log-error-list>
+            </div>
+
         </div>
     </div>
 </template>
