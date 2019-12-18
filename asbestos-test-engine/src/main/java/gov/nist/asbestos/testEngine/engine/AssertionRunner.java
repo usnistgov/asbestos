@@ -256,10 +256,6 @@ public class AssertionRunner {
                 sourceHas = (boolean) method.invoke(sourceR);
                 String attName = name.substring(3);
 
-                if (attName.equals("Category")) {
-                    System.out.println("Category");
-                }
-
                 if (!attName.endsWith("Element") && !hide.contains(attName)) {
                     if (miniHas)
                         checkedAttNames.add(attName);

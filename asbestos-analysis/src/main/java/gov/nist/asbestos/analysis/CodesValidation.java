@@ -66,6 +66,17 @@ public class CodesValidation {
     private void check(Coding coding, String fhirCodeName, String xdsCodeName, List<String> errors) {
         if (coding == null)
             return;
+        boolean error = false;
+        if (coding.getSystem() == null) {
+            error = true;
+            errors.add(fhirCodeName + ": " + " has no system component");
+        }
+        if (coding.getCode() == null) {
+            error = true;
+            errors.add(fhirCodeName + ": " + " has no code component");
+        }
+        if (error)
+            return;
         Optional<Code> code = codeTranslator.findCodeBySystem(xdsCodeName, coding.getSystem(), coding.getCode());
         if (!code.isPresent())
             errors.add(fhirCodeName + ": " + coding.getSystem() + "|" + coding.getCode() + " cannot be translated");

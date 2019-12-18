@@ -3,7 +3,7 @@
 
         <!--    ERRORS    -->
         <div class="vdivider"></div>
-        <div v-if="report.errors.length > 0">
+        <div v-if="report.errors.length > 0 && report.errors[0] !== null">  <!--  don't know why the null check is needed but it is  -->
             <span class="caption">Errors:</span>
             <div class="vdivider"></div>
             <div v-for="(err, erri) in report.errors"
@@ -114,13 +114,14 @@
                     <div class="divider"></div>
                     <log-error-list :errorList="report.objects[selectedResourceIndex].minimalErrors" :attList="report.objects[selectedResourceIndex].minimalChecked" :att-list-name="'Required Attributes'"> </log-error-list>
                 </div>
+                <div>
+                    <span class="caption">Coding</span>
+                    <span v-if="report.objects[selectedResourceIndex].codingErrors.length === 0"><img src="../../assets/check.png"></span>
+                    <span v-else><img src="../../assets/cross.png"></span>
+                    <log-error-list :errorList="report.objects[selectedResourceIndex].codingErrors"> </log-error-list>
+                </div>
             </div>
-            <div>
-                <span class="caption">Coding</span>
-                <span v-if="report.objects[selectedResourceIndex].codingErrors.length === 0"><img src="../../assets/check.png"></span>
-                <span v-else><img src="../../assets/cross.png"></span>
-                <log-error-list :errorList="report.objects[selectedResourceIndex].codingErrors"> </log-error-list>
-            </div>
+
 
         </div>
     </div>

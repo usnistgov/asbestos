@@ -6,14 +6,13 @@ import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import gov.nist.asbestos.simapi.validation.Val;
 import gov.nist.asbestos.testEngine.engine.TestEngine;
+import gov.nist.asbestos.utilities.ResourceHasMethodsFilter;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.log4j.Logger;
 import org.hl7.fhir.r4.model.*;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 public class AnalysisReport {
     private static Logger log = Logger.getLogger(AnalysisReport.class);
@@ -31,6 +30,7 @@ public class AnalysisReport {
     private String source;
     private EC ec;
     private CodesValidation codesValidation;
+    private Map<String, List<String>> atts;
 
     class Related {
         ResourceWrapper wrapper;
@@ -40,6 +40,7 @@ public class AnalysisReport {
         private List<String> codingErrors = new ArrayList<>();
         Checked comprehensiveChecked;
         Checked minimalChecked;
+        Map<String, List<String>> atts;
 
         Related(ResourceWrapper wrapper, String howRelated) {
             this.wrapper = wrapper;
@@ -58,6 +59,7 @@ public class AnalysisReport {
         List<String> codingErrors;
         String minimalChecked;
         String comprehensiveChecked;
+        Map<String, List<String>> atts;
 
         RelatedReport(ResourceWrapper wrapper, String relation) {
             this.name = wrapper.getResource().getClass().getSimpleName();
@@ -95,6 +97,7 @@ public class AnalysisReport {
             report.base.minimalChecked = minimalChecked.attsChecked;
             report.base.comprehensiveChecked = comprehensiveChecked.attsChecked;
             report.base.codingErrors = codingErrors;
+            report.base.atts = atts;
         }
 
         for (Related rel : related) {
@@ -109,6 +112,7 @@ public class AnalysisReport {
                 relatedReport.comprehensiveChecked = rel.comprehensiveChecked.attsChecked;
                 relatedReport.minimalChecked = rel.minimalChecked.attsChecked;
                 relatedReport.codingErrors = rel.codingErrors;
+                relatedReport.atts = rel.atts;
                 report.objects.add(relatedReport);
             }
         }
@@ -132,9 +136,10 @@ public class AnalysisReport {
             comprehensiveEval();
             minimalEval();
             codingEval();
+            buildAtts();
             return buildReport();
         } catch (Throwable t) {
-            generalErrors.add(t.getMessage());
+            generalErrors.add(ExceptionUtils.getStackTrace(t));
             return buildReport();
         }
     }
@@ -153,6 +158,34 @@ public class AnalysisReport {
         public String toString() {
             return "Checked: " + className + " Script: " + script + " Atts: " + attsChecked;
         }
+    }
+
+    private void buildAtts() {
+        atts = clean(ResourceHasMethodsFilter.toMap(baseObj.getResource()));
+        //atts = new HashMap<String, List<String>>();
+        //atts.put("Foo", Collections.singletonList("Bar"));
+        for (Related rel : related) {
+            rel.atts = clean(ResourceHasMethodsFilter.toMap(rel.wrapper.getResource()));
+        }
+    }
+
+    private Map<String, List<String>> clean(Map<String, List<String>> in) {
+//        in.remove("id");
+//        in.remove("meta");
+//        in.remove("masterIdentifier");
+//        in.remove("subject");
+//        in.remove("securityLabel");
+//        in.remove("content");
+//        in.remove("created");
+//        in.remove("source");
+//        in.remove("description");
+//        in.remove("identifier");
+//        in.remove("active");
+//        in.remove("name");
+//        in.remove("gender");
+//        in.remove("birthDate");
+//        in.remove("address");
+        return in;
     }
 
     private void codingEval() {
