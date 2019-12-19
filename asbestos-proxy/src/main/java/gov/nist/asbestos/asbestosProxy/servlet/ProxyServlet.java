@@ -300,8 +300,7 @@ public class ProxyServlet extends HttpServlet {
                  if (proxyBaseURI.isPresent()) {
                      Headers inHeaders = Common.getRequestHeaders(req, verb);
                     if (FhirToolkitCapabilityStatement.isCapabilityStatementRequest(proxyBaseURI.get(), inHeaders.getPathInfo())) {
-                        ServicePropertiesEnum capabilityStatementFile = ServicePropertiesEnum.MHD_CAPABILITY_STATEMENT_FILE;
-                        doGetCapabilityStatement(req, resp, simStore, uri, verb, inHeaders, capabilityStatementFile);
+                        doGetCapabilityStatement(req, resp, simStore, uri, verb, inHeaders, simStore.getChannelConfig().getChannelId());
                         return; // EXIT
                     }
                 }
@@ -314,7 +313,7 @@ public class ProxyServlet extends HttpServlet {
         doGetDelete(req, resp, simStore, uri, verb);
     }
 
-    private void doGetCapabilityStatement(HttpServletRequest req, HttpServletResponse resp, SimStore simStore, URI uri, Verb verb, Headers inHeaders, ServicePropertiesEnum capabilityStatementFile) {
+    private void doGetCapabilityStatement(HttpServletRequest req, HttpServletResponse resp, SimStore simStore, URI uri, Verb verb, Headers inHeaders, String channelId) {
         if (simStore == null) return;
 
         boolean isLoggingEnabled = Boolean.parseBoolean(ServiceProperties.getInstance().getProperty(ServicePropertiesEnum.LOG_CS_METADATA_REQUEST.getKey()));
@@ -333,7 +332,15 @@ public class ProxyServlet extends HttpServlet {
 
             byte[] inBody = getRequestBody(req);
             HttpBase requestIn = logClientRequestIn(clientTask, inHeaders, inBody, verb);
-            BaseResource baseResource = FhirToolkitCapabilityStatement.getCapabilityStatement(capabilityStatementFile);
+            String enumFindKey = String.format("%sChannelCapabilityStatementFile", channelId);
+            Optional<ServicePropertiesEnum> spEnum = ServicePropertiesEnum.find(enumFindKey);
+            ServicePropertiesEnum capabilityStatementFile;
+            if (! spEnum.isPresent()) {
+                capabilityStatementFile = ServicePropertiesEnum.EMPTY_CAPABILITY_STATEMENT_FILE;
+            } else {
+                capabilityStatementFile = spEnum.get();
+            }
+            BaseResource baseResource = FhirToolkitCapabilityStatement.getCapabilityStatement(capabilityStatementFile, channelId);
             String versionId = ((CapabilityStatement)baseResource).getVersion();
             resp.addHeader("ETag", String.format("W/\"%s\"", versionId.hashCode()));
             respond(resp, baseResource, inHeaders, clientTask, 200);
@@ -345,7 +352,6 @@ public class ProxyServlet extends HttpServlet {
             resp.setStatus(resp.SC_INTERNAL_SERVER_ERROR);
             respondWithError(req, resp, ex.toString(), inHeaders, clientTask);
         }
-        return;
     }
 
     private void doGetDelete(HttpServletRequest req, HttpServletResponse resp, SimStore simStore, URI uri, Verb verb)  {

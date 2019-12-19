@@ -46,7 +46,7 @@ public class FhirToolkitCapabilityStatement {
         return false;
     }
 
-    public static BaseResource getCapabilityStatement(ServicePropertiesEnum key) throws Exception {
+    public static BaseResource getCapabilityStatement(ServicePropertiesEnum key, String channelId) throws Exception {
         Objects.requireNonNull(key);
         String capabilityStatementFileName = ServiceProperties.getInstance().getPropertyOrStop(key);
 
@@ -54,8 +54,9 @@ public class FhirToolkitCapabilityStatement {
 
         if (capabilityStatementFile != null && capabilityStatementFile.exists()) {
             // Replace any ${} parameters in the File stream such as the ${ProxyBase}
-                String statementContent = new String(Files.readAllBytes(capabilityStatementFile.toPath()));
-                for (ServicePropertiesEnum paramKey: ServicePropertiesEnum.values()) {
+            String statementContent = new String(Files.readAllBytes(capabilityStatementFile.toPath()));
+            statementContent = statementContent.replaceAll(Pattern.quote("${channelId}"), channelId);
+            for (ServicePropertiesEnum paramKey: ServicePropertiesEnum.values()) {
                     String param = String.format("${%s}", paramKey.getKey());
                     if (statementContent.contains(param)) {
                         Optional<String> paramValue = ServiceProperties.getInstance().getProperty(paramKey);

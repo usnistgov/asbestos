@@ -10,7 +10,9 @@ public enum ServicePropertiesEnum {
     TLS_XDS_TOOLKIT_BASE("tlsXdsToolkitBase"),
     FHIR_TOOLKIT_BASE("fhirToolkitBase"),
     FHIR_TOOLKIT_VERSION("fhirToolkitVersion"),
-    HAPI_FHIR_BASE("hapiFhirBase");
+    HAPI_FHIR_BASE("hapiFhirBase"),
+    LIMITED_CHANNEL_CAPABILITY_STATMENT_FILE("limitedChannelCapabilityStatementFile"),
+    XDS_CHANNEL_CAPABILITY_STATEMENT_FILE("xdsChannelCapabilityStatementFile");
 
     private String key;
 
