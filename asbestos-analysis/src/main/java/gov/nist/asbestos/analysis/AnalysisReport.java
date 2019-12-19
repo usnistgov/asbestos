@@ -1,5 +1,6 @@
 package gov.nist.asbestos.analysis;
 
+import com.google.gson.Gson;
 import gov.nist.asbestos.client.Base.EC;
 import gov.nist.asbestos.client.client.FhirClient;
 import gov.nist.asbestos.client.resolver.Ref;
@@ -30,7 +31,7 @@ public class AnalysisReport {
     private String source;
     private EC ec;
     private CodesValidation codesValidation;
-    private Map<String, List<String>> atts;
+    private Map atts;
 
     class Related {
         ResourceWrapper wrapper;
@@ -40,7 +41,7 @@ public class AnalysisReport {
         private List<String> codingErrors = new ArrayList<>();
         Checked comprehensiveChecked;
         Checked minimalChecked;
-        Map<String, List<String>> atts;
+        Map atts;
 
         Related(ResourceWrapper wrapper, String howRelated) {
             this.wrapper = wrapper;
@@ -59,7 +60,7 @@ public class AnalysisReport {
         List<String> codingErrors;
         String minimalChecked;
         String comprehensiveChecked;
-        Map<String, List<String>> atts;
+        Map atts;
 
         RelatedReport(ResourceWrapper wrapper, String relation) {
             this.name = wrapper.getResource().getClass().getSimpleName();
@@ -161,32 +162,12 @@ public class AnalysisReport {
     }
 
     private void buildAtts() {
-        atts = clean(ResourceHasMethodsFilter.toMap(baseObj.getResource()));
-        //atts = new HashMap<String, List<String>>();
-        //atts.put("Foo", Collections.singletonList("Bar"));
+        atts = ResourceHasMethodsFilter.toMap(baseObj.getResource());
         for (Related rel : related) {
-            rel.atts = clean(ResourceHasMethodsFilter.toMap(rel.wrapper.getResource()));
+            rel.atts = ResourceHasMethodsFilter.toMap(rel.wrapper.getResource());
         }
     }
 
-    private Map<String, List<String>> clean(Map<String, List<String>> in) {
-//        in.remove("id");
-//        in.remove("meta");
-//        in.remove("masterIdentifier");
-//        in.remove("subject");
-//        in.remove("securityLabel");
-//        in.remove("content");
-//        in.remove("created");
-//        in.remove("source");
-//        in.remove("description");
-//        in.remove("identifier");
-//        in.remove("active");
-//        in.remove("name");
-//        in.remove("gender");
-//        in.remove("birthDate");
-//        in.remove("address");
-        return in;
-    }
 
     private void codingEval() {
         codingErrors.addAll(codesValidation.validate(baseObj.getResource()));

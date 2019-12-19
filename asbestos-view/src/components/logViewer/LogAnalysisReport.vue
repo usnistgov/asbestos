@@ -86,6 +86,7 @@
                 <span v-else><img src="../../assets/cross.png"></span>
                 <log-error-list :errorList="report.base.codingErrors"> </log-error-list>
             </div>
+            <log-atts :attMap="report.base.atts"> </log-atts>
         </div>
 
         <!--  RELATED OBJECT DETAILS -->
@@ -120,15 +121,15 @@
                     <span v-else><img src="../../assets/cross.png"></span>
                     <log-error-list :errorList="report.objects[selectedResourceIndex].codingErrors"> </log-error-list>
                 </div>
+                <log-atts :attMap="report.objects[selectedResourceIndex].atts"> </log-atts>
             </div>
-
-
         </div>
     </div>
 </template>
 
 <script>
     import LogErrorList from "./LogErrorList"
+    import LogAtts from "./LogAtts"
 
     export default {
         data() {
@@ -165,7 +166,7 @@
         props: [
             'sessionId', 'channelId', 'eventId'
         ],
-        components: { LogErrorList },
+        components: { LogErrorList, LogAtts },
         name: "LogAnalysisReport"
     }
 </script>
