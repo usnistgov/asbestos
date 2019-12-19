@@ -12,6 +12,7 @@
                     {{ report.errors[erri]}}
                 </div>
             </div>
+            <hr />
         </div>
         <div class="vdivider"></div>
 
