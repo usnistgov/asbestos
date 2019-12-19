@@ -273,18 +273,41 @@ public class AnalysisReport {
         }
     }
 
+    static private List<String> authorTypes = Arrays.asList("Practitioner", "PractitionerRole", "Organization", "Device", "Patient", "Related", "Person");
+
+    private boolean validAuthorType(BaseResource resource) {
+        return authorTypes.contains(resource.getClass().getSimpleName());
+    }
+
+    static private List<String> authenticatorTypes = Arrays.asList("Practitioner", "PractitionerRole", "Organization");
+
+
+    private boolean validAuthenticatorType(BaseResource resource) {
+        return authenticatorTypes.contains(resource.getClass().getSimpleName());
+    }
+
+
     private void buildRelated(DocumentManifest documentManifest) {
         log.info("buildRelated DocumentManifest");
         // subject
         if (documentManifest.hasSubject()) {
-            Related related = load(new Ref(documentManifest.getSubject()), "subject", documentManifest);if (related.contained)
+            Related related = load(new Ref(documentManifest.getSubject()), "subject", documentManifest);
+            if (related != null && related.contained)
                 generalErrors.add("DocumentManifest.subject is contained");
         } else {
             generalErrors.add("DocumentManifest has no subject");
         }
         // author - contained only
         if (documentManifest.hasAuthor()) {
-            loadContained(documentManifest, "Author", documentManifest.getAuthor());
+            for (Reference reference : documentManifest.getAuthor()) {
+                Related related = load(new Ref(reference), "author", documentManifest);
+                if (related != null && !related.contained)
+                    generalErrors.add("DocumentManifest.author must be contained");
+                if (related != null && related.wrapper.hasResource()) {
+                    if (!validAuthorType(related.wrapper.getResource()))
+                        generalErrors.add("DocumentManifest: " + related.wrapper.getResource().getClass().getSimpleName() + " is not a valid Author resource");
+                }
+            }
         }
         // recipient
         if (documentManifest.hasRecipient()) {
@@ -292,18 +315,18 @@ public class AnalysisReport {
                 load(new Ref(reference), "recipient", documentManifest);
             }
         }
-        // related
+        // content
         if (documentManifest.hasContent()) {
             boolean hasDocRef = false;
             for (Reference reference : documentManifest.getContent()) {
                 Related rel = load(new Ref(reference), "content", documentManifest);
-                if (rel.wrapper != null && rel.wrapper.hasResource() && rel.wrapper.isOk() && rel.wrapper.getResource() instanceof DocumentReference)
+                if (rel != null && rel.wrapper != null && rel.wrapper.hasResource() && rel.wrapper.isOk() && rel.wrapper.getResource() instanceof DocumentReference)
                     hasDocRef = true;
             }
             if (!hasDocRef)
                 generalErrors.add("DocumentManifest has no related DocumentReferences");
         } else {
-            generalErrors.add("DocumentManifest has no related resources - shall have DocumentReference");
+            generalErrors.add("DocumentManifest has no content resources - shall have DocumentReference");
         }
     }
 
@@ -311,7 +334,15 @@ public class AnalysisReport {
         log.info("buildRelated DocumentReference");
         // author - contained only
         if (documentReference.hasAuthor()) {
-            loadContained(documentReference, "Author", documentReference.getAuthor());
+            for (Reference reference : documentReference.getAuthor()) {
+                Related related = load(new Ref(reference), "author", documentReference);
+                if (related != null && !related.contained)
+                    generalErrors.add("DocumentReference.author must be contained");
+                if (related != null && related.wrapper.hasResource()) {
+                    if (!validAuthorType(related.wrapper.getResource()))
+                        generalErrors.add("DocumentReference: " + related.wrapper.getResource().getClass().getSimpleName() + " is not a valid Author resource");
+                }
+            }
         }
         // subject
         if (documentReference.hasSubject()) {
@@ -323,7 +354,13 @@ public class AnalysisReport {
         }
         // authenticator - contained only
         if (documentReference.hasAuthenticator()) {
-            loadContained(documentReference, "Authenticator", Collections.singletonList(documentReference.getAuthenticator()));
+            Related related = load(new Ref(documentReference.getAuthenticator()), "Authenticator", documentReference);
+            if (related != null && !related.contained)
+                generalErrors.add("DocumentReference.authenticator must be contained");
+            if (related != null && related.wrapper.hasResource()) {
+                if (!validAuthenticatorType(related.wrapper.getResource()))
+                    generalErrors.add("DocumentReference: " + related.wrapper.getResource().getClass().getSimpleName() + " is not a valid Authenticator resource");
+            }
         }
         // custodian - not defined
         // relatesTo
