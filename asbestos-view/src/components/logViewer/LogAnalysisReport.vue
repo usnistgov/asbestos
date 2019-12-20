@@ -32,7 +32,7 @@
                     <span class="tooltiptext">Next</span>
                 </div>
             </div>
-            <div >Navigate History</div>
+            <div class="details">Navigate History</div>
             <div class="vdivider"></div>
 
         </div>
@@ -311,5 +311,8 @@
 .right-arrow-position {
     position: absolute;
     left: 200px;
+}
+.details {
+    font-size: smaller;
 }
 </style>

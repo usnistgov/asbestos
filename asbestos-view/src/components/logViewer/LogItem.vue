@@ -8,14 +8,14 @@
         <div class="request-response">
             <div v-if="selectedEvent">
                 <span v-for="(task, taski) in tasks" :key="taski">
-                    <span v-bind:class="[{ selected: taski === selectedTask, selectable: taski !== selectedTask }, cursor-pointer]" @click="selectTask(taski)">
+                    <span v-bind:class="[{ selected: taski === selectedTask, selectable: taski !== selectedTask }, 'cursor-pointer']" @click="selectTask(taski)">
                         {{ taskLabel(taski) }}
                         <span class="divider"> </span>
                     </span>
                 </span>
 
-                <span class="link-position solid-boxed pointer-cursor" @click.stop.prevent="copyToClipboard">Copy Event Link</span>
-                <input type="hidden" id="the-link" :value="eventLink">
+<!--                <span class="link-position solid-boxed pointer-cursor" @click.stop.prevent="copyToClipboard">Copy Event Link</span>-->
+<!--                <input type="hidden" id="the-link" :value="eventLink">-->
 
             </div>
             <div v-else>

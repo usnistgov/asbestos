@@ -51,7 +51,7 @@
             },
         },
         created() {
-            this.$store.commit('setCurrentEventIndex', this.index)
+            //this.$store.commit('setCurrentEventIndex', this.index)
         },
         computed: {
             moreToTheLeft() {

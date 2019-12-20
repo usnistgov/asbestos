@@ -90,7 +90,7 @@ export const logStore = {
                 const result = await LOG.get(url)
                 //const data = {analysis: result.data, eventId: eventId}
                 commit('setAnalysis', result.data)
-                console.log(`analysis available`)
+                //console.log(`analysis available`)
             } catch (error) {
                 commit('setError', error)
                 console.error(error)
