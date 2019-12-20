@@ -17,18 +17,36 @@
         <div class="vdivider"></div>
 
         <div>Resource IDs are extracted from the Response message. Content shown comes directly from the server
-            via separate retrieves.</div>
+            via separate GETs.</div>
         <div class="vdivider"></div>
+
+        <!--   history navigation   -->
+        <div v-if="history.length > 1" class="solid-boxed">
+            <div class="nav-buttons">
+                <div v-if="moreToTheLeft" class="tooltip left-arrow-position">
+                    <img id="left-button" class="selectable" src="../../assets/left-arrow.png" @click="left()"/>
+                    <span class="tooltiptext">Previous</span>
+                </div>
+                <div v-if="moreToTheRight" class="tooltip right-arrow-position">
+                    <img id="right-button" class="selectable" src="../../assets/right-arrow.png" @click="right()"/>
+                    <span class="tooltiptext">Next</span>
+                </div>
+            </div>
+            <div >Navigate History</div>
+            <div class="vdivider"></div>
+
+        </div>
 
         <!--  BASE OBJECT     -->
         <div>
-            <span class="caption">Base Object:</span>
-            <span v-if="report.source">{{ report.source }}</span>
+            <span class="caption">Focus Object:</span>
+<!--            <span v-if="report.source">{{ report.source }}</span>-->
             <div class="vdivider"></div>
             <div class="grid-container">
                 <span v-if="report.base">
                     <div class="grid-item">
-                        <span v-bind:class="objectDisplayClass(report.base)" @click="selectedResourceIndex = -1">
+                        <span v-bind:class="objectDisplayClass(report.base)"
+                              @click="selectedResourceIndex = -1">
                             {{ report.base.name }}
                         </span>
                     </div>
@@ -44,9 +62,15 @@
             <span v-for="(resource, resourcei) in report.objects"
                 :key="resource + resourcei">
                 <div class="grid-item">
-                    <span v-bind:class="objectDisplayClass(resource)" @click="selectedResourceIndex = resourcei">
+                    <span v-bind:class="objectDisplayClass(resource)"
+                          @click="selectedResourceIndex = resourcei">
                         {{ resource.name }} ({{ resource.relation }})
+                        <span class="tooltip">
+                            <img id="focus" class="selectable" src="../../assets/focus.png" @click.stop="loadAnalysisForObjectAndAddHistory(report.objects[resourcei].url)">
+                            <span class="tooltiptext">Focus</span>
+                        </span>
                     </span>
+
                 </div>
             </span>
         </div>
@@ -135,19 +159,58 @@
     export default {
         data() {
             return {
-                selectedResourceIndex: null,
+                selectedResourceIndex: null,  // -1 is focus object.  0 or greater is a related object.
+                history: [],   // report.base.url
+                index: 0,      // in history
             }
         },
         methods: {
-            loadAnalysis() {
-                this.$store.dispatch('getLogEventAnalysis', {channel: this.channelId, session: this.sessionId, eventId: this.eventId})
-                this.selectedResourceIndex = null
+            left() {
+                if (this.index > 0) {
+                    this.index = this.index - 1
+                    this.loadAnalysisForObject(this.history[this.index])
+                }
+            },
+            right() {
+                if (this.index + 1 < this.history.length) {
+                    this.index = this.index + 1
+                    this.loadAnalysisForObject(this.history[this.index])
+                }
+            },
+            historyPush(url) {
+                this.history.push(url)
+            },
+            historyPeek() {
+                if (this.history.length === 0)
+                    return null
+                return this.history[this.history.length - 1]
+            },
+            async  loadAnalysis() {
+                await this.loadAnalysis2()
+                this.selectedResourceIndex = -1
+                this.history.length = 0
+                //console.log(`using analysis`)
+                this.history.push(this.report.base.url)
+            },
+            async loadAnalysis2() {
+                await this.$store.dispatch('getLogEventAnalysis', {channel: this.channelId, session: this.sessionId, eventId: this.eventId})
+            },
+            loadAnalysisForObject(resourceUrl) {
+                //console.log(`loadForObject ${resourceUrl}`)
+                this.$store.dispatch('getLogEventAnalysisForObject', resourceUrl)
+                this.selectedResourceIndex = -1
+            },
+            loadAnalysisForObjectAndAddHistory(resourceUrl) {
+                this.loadAnalysisForObject(resourceUrl)
+                this.historyPush(resourceUrl)
+                this.index = this.history.length - 1
             },
             objectDisplayClass: function (resource) {
                 return {
                     manifest: resource.name === 'DocumentManifest',
                     ref: resource.name === 'DocumentReference',
-                    patient: resource.name === 'Patient'
+                    patient: resource.name === 'Patient',
+                    binary: resource.name === 'Binary'
                 }
             },
         },
@@ -156,7 +219,12 @@
                 // content from gov.nist.asbestos.analysis.AnalysisReport.Report
                 return this.$store.state.log.analysis
             },
-
+            moreToTheLeft() {
+                return this.index > 0
+            },
+            moreToTheRight() {
+                return this.index + 1 < this.history.length
+            }
         },
         created() {
             this.loadAnalysis()
@@ -203,6 +271,13 @@
         cursor: pointer;
         padding: 5px;
     }
+.binary {
+    background-color: greenyellow;
+    border: 1px solid rgba(0, 0, 0, 0.8);
+    text-align: center;
+    cursor: pointer;
+    padding: 5px;
+}
     .patient {
         background-color: #999988;
         border: 1px solid rgba(0, 0, 0, 0.8);
@@ -226,4 +301,15 @@
         position: relative;
         left: -60px;
     }
+.nav-buttons {
+    text-align: left;
+}
+.left-arrow-position {
+    position: absolute;
+    left: 160px;
+}
+.right-arrow-position {
+    position: absolute;
+    left: 200px;
+}
 </style>

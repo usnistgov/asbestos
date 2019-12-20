@@ -14,15 +14,15 @@ export const logStore = {
             channel: null,
             loaded: false,
             analysis: null,
-            eventIdOfAnalysis: null,
+//            eventIdOfAnalysis: null,
         }
     },
     mutations: {
-        setAnalysis(state, data) {
-            const analysis = data.analysis
-            const eventId = data.eventId
+        setAnalysis(state, analysis) {
+//            const analysis = data.analysis
+//            const eventId = data.eventId
             state.analysis = analysis
-            state.eventIdOfAnalysis = eventId
+//            state.eventIdOfAnalysis = eventId
         },
         resetLogLoaded(state) {
             state.loaded = false
@@ -85,15 +85,23 @@ export const logStore = {
             const session = parms.session
             const eventId = parms.eventId
 
-            //if (eventId === state.eventIdOfAnalysis)
-            //    return
-
             try {
-                const url = `analysis/${session}/${channel}/${eventId}`
-                console.log(`LOG ${url}`)
+                const url = `analysis/event/${session}/${channel}/${eventId}`
                 const result = await LOG.get(url)
-                const data = {analysis: result.data, eventId: eventId}
-                commit('setAnalysis', data)
+                //const data = {analysis: result.data, eventId: eventId}
+                commit('setAnalysis', result.data)
+                console.log(`analysis available`)
+            } catch (error) {
+                commit('setError', error)
+                console.error(error)
+            }
+        },
+        async getLogEventAnalysisForObject({commit}, resourceUrl) {
+            try {
+                const url = `analysis/url?url=${resourceUrl}`
+                const result = await LOG.get(url)
+                //const data = {analysis: result.data, eventId: eventId}
+                commit('setAnalysis', result.data)
             } catch (error) {
                 commit('setError', error)
                 console.error(error)

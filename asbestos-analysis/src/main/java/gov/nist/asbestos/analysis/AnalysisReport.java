@@ -268,6 +268,12 @@ public class AnalysisReport {
             } catch (Throwable t) {
                 generalErrors.add("Do not know how to load DomainResource " + domainResource.getClass().getName());
             }
+        }  else if (baseResource instanceof Binary) {
+            try {
+                buildRelated(baseResource);
+            } catch (Throwable t) {
+                generalErrors.add("Do not know how to load DomainResource " + baseResource.getClass().getName());
+            }
         } else {
             generalErrors.add("Do not know how to load BaseResource " + baseResource.getClass().getName());
         }
@@ -372,12 +378,31 @@ public class AnalysisReport {
         if (documentReference.hasContext()) {
             // sourcePatientInfo - contained only
             if (documentReference.getContext().hasSourcePatientInfo()) {
-                loadContained(documentReference, "Patient", Collections.singletonList(documentReference.getContext().getSourcePatientInfo()));
+                Related related = load(new Ref(documentReference.getContext().getSourcePatientInfo()), "SourcePatientInfo", documentReference);
+                if (related != null && !related.contained)
+                    generalErrors.add("DocumentReference.context.sourcePatientInfo must be contained");
+                if (related != null && related.wrapper.hasResource()) {
+                    if (!related.wrapper.getResource().getClass().getSimpleName().equals("Patient"))
+                        generalErrors.add("DocumentReference: " + related.wrapper.getResource().getClass().getSimpleName() + " is not a valid context/sourcePatientInfo resource");
+                }
             }
             // context/related
             if (documentReference.getContext().hasRelated()) {
                 for (Reference reference : documentReference.getContext().getRelated()) {
-                    load(new Ref(reference), "context/related", documentReference);
+                    Related related = load(new Ref(reference), "context/related", documentReference);
+                    if (related != null && related.wrapper.hasResource()) {
+                        if (!related.wrapper.getResource().getClass().getSimpleName().equals("DocumentReference"))
+                            generalErrors.add("DocumentReference: " + related.wrapper.getResource().getClass().getSimpleName() + " is not a valid context/related resource");
+                    }
+                }
+            }
+        }
+        if (documentReference.hasContent()) {
+            for (DocumentReference.DocumentReferenceContentComponent component : documentReference.getContent()) {
+                Related related = load(new Ref(component.getAttachment().getUrl()), "content/attachment", documentReference);
+                if (related != null && related.wrapper.hasResource()) {
+                    if (!related.wrapper.getResource().getClass().getSimpleName().equals("Binary"))
+                        generalErrors.add("DocumentReference: " + related.wrapper.getResource().getClass().getSimpleName() + " is not a valid content/attachment resource");
                 }
             }
         }
