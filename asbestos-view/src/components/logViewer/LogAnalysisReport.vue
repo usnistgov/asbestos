@@ -1,8 +1,8 @@
 <template>
     <div v-if="report" class="boxed">
-
-        <!--    ERRORS    -->
         <div class="vdivider"></div>
+        <div class="main-caption">Inspector</div>
+        <!--    ERRORS    -->
         <div v-if="report.errors.length > 0 && report.errors[0] !== null">  <!--  don't know why the null check is needed but it is  -->
             <span class="caption">Errors:</span>
             <div class="vdivider"></div>
@@ -111,6 +111,9 @@
                 <span v-else><img src="../../assets/cross.png"></span>
                 <log-error-list :errorList="report.base.codingErrors"> </log-error-list>
             </div>
+            <div v-if="report.base.name === 'Binary'">
+                <span>Contents: <a v-bind:href="report.base.binaryUrl" target="_blank">open</a> (in new browser tab) </span>
+            </div>
             <log-atts :attMap="report.base.atts"> </log-atts>
         </div>
 
@@ -146,8 +149,11 @@
                     <span v-else><img src="../../assets/cross.png"></span>
                     <log-error-list :errorList="report.objects[selectedResourceIndex].codingErrors"> </log-error-list>
                 </div>
-                <log-atts :attMap="report.objects[selectedResourceIndex].atts"> </log-atts>
             </div>
+            <div v-if="report.objects[selectedResourceIndex].name === 'Binary'">
+                <span>Contents: <a v-bind:href="report.objects[selectedResourceIndex].binaryUrl" target="_blank">open</a> (in new browser tab) </span>
+            </div>
+            <log-atts :attMap="report.objects[selectedResourceIndex].atts"> </log-atts>
         </div>
     </div>
 </template>

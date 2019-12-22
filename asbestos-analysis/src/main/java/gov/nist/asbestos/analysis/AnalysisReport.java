@@ -1,10 +1,13 @@
 package gov.nist.asbestos.analysis;
 
 import com.google.gson.Gson;
+import gov.nist.asbestos.client.Base.DocumentCache;
 import gov.nist.asbestos.client.Base.EC;
 import gov.nist.asbestos.client.client.FhirClient;
 import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
+import gov.nist.asbestos.serviceproperties.ServiceProperties;
+import gov.nist.asbestos.serviceproperties.ServicePropertiesEnum;
 import gov.nist.asbestos.simapi.validation.Val;
 import gov.nist.asbestos.testEngine.engine.TestEngine;
 import gov.nist.asbestos.utilities.ResourceHasMethodsFilter;
@@ -32,6 +35,7 @@ public class AnalysisReport {
     private EC ec;
     private CodesValidation codesValidation;
     private Map atts;
+    private String binaryUrl;
 
     class Related {
         ResourceWrapper wrapper;
@@ -43,6 +47,7 @@ public class AnalysisReport {
         Checked minimalChecked;
         Map atts;
         boolean contained = false;
+        String binaryUrl;
 
         Related(ResourceWrapper wrapper, String howRelated) {
             this.wrapper = wrapper;
@@ -67,6 +72,7 @@ public class AnalysisReport {
         String minimalChecked;
         String comprehensiveChecked;
         Map atts;
+        String binaryUrl;
 
         RelatedReport(ResourceWrapper wrapper, String relation) {
             this.name = wrapper.getResource().getClass().getSimpleName();
@@ -108,6 +114,7 @@ public class AnalysisReport {
             report.base.comprehensiveChecked = comprehensiveChecked.attsChecked;
             report.base.codingErrors = codingErrors;
             report.base.atts = atts;
+            report.base.binaryUrl = binaryUrl;
         }
 
         for (Related rel : related) {
@@ -123,6 +130,8 @@ public class AnalysisReport {
                 relatedReport.minimalChecked = rel.minimalChecked.attsChecked;
                 relatedReport.codingErrors = rel.codingErrors;
                 relatedReport.atts = rel.atts;
+                relatedReport.binaryUrl = rel.binaryUrl;
+
                 report.objects.add(relatedReport);
             }
         }
@@ -147,6 +156,7 @@ public class AnalysisReport {
             minimalEval();
             codingEval();
             buildAtts();
+            binaryEval();
             return buildReport();
         } catch (Throwable t) {
             generalErrors.add(ExceptionUtils.getStackTrace(t));
@@ -174,6 +184,16 @@ public class AnalysisReport {
         atts = ResourceHasMethodsFilter.toMap(baseObj.getResource());
         for (Related rel : related) {
             rel.atts = ResourceHasMethodsFilter.toMap(rel.wrapper.getResource());
+        }
+    }
+
+    private void binaryEval() {
+        if (baseObj.getResource().getClass().getSimpleName().equals("Binary")) {
+            binaryUrl = extractDocument((Binary) baseObj.getResource());
+        }
+        for (Related rel : related) {
+            if (rel.wrapper.getResource() instanceof Binary)
+                rel.binaryUrl = extractDocument((Binary) rel.wrapper.getResource());
         }
     }
 
@@ -403,6 +423,7 @@ public class AnalysisReport {
                 if (related != null && related.wrapper.hasResource()) {
                     if (!related.wrapper.getResource().getClass().getSimpleName().equals("Binary"))
                         generalErrors.add("DocumentReference: " + related.wrapper.getResource().getClass().getSimpleName() + " is not a valid content/attachment resource");
+                    buildRelated((Binary) related.wrapper.getResource());
                 }
             }
         }
@@ -435,14 +456,25 @@ public class AnalysisReport {
 
     private void buildRelated(Binary binary) {
         log.info("buildRelated Binary");
+    }
 
+    private String extractDocument(Binary binary) {
+        String contentType = binary.getContentType();
+        byte[] data = binary.getData();
+        String id = new DocumentCache(ec).putDocumentCache(data, contentType);
+        // this must match what is in GetDocumentRequest
+        ServiceProperties serviceProperties = ServiceProperties.getInstance();
+        String url = serviceProperties.getPropertyOrStop(ServicePropertiesEnum.FHIR_TOOLKIT_BASE) +
+                "/log/document/" +
+                id;
+        return url;
     }
 
     private void buildRelated(BaseResource baseResource) {
         if (baseResource instanceof DocumentManifest) buildRelated((DocumentManifest) baseResource);
         else if (baseResource instanceof DocumentReference) buildRelated((DocumentReference) baseResource);
         else if (baseResource instanceof ListResource) buildRelated((ListResource) baseResource);
-        else if (baseResource instanceof Binary) buildRelated((Binary) baseResource);
+//        else if (baseResource instanceof Binary) buildRelated((Binary) baseResource);
         else if (baseResource instanceof Patient) buildRelated((Patient) baseResource);
         else
             generalErrors.add("Do not understand resource type " + baseResource.getClass().getSimpleName());
