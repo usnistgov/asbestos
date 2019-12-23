@@ -2,6 +2,7 @@
     <div v-if="report" class="boxed">
         <div class="vdivider"></div>
         <div class="main-caption">Inspector</div>
+        
         <!--    ERRORS    -->
         <div v-if="report.errors.length > 0 && report.errors[0] !== null">  <!--  don't know why the null check is needed but it is  -->
             <span class="caption">Errors:</span>
@@ -81,87 +82,17 @@
 
         <!--  BASE OBJECT DETAILS -->
         <div v-else-if="selectedResourceIndex === -1">
-            <div class="vdivider"></div>
-            <div class="main-caption">{{ report.base.name }}</div>
-            <div v-if="report.base.relation">
-                {{ report.base.name }}
-            </div>
-            <div v-if="report.base.url">
-                <span class="caption"> Ref:</span>
-                {{ report.base.url }}
-            </div>
-
-            <div>
-                <span>Comprehensive Metadata </span>
-                <span v-if="report.base.isComprehensive"><img src="../../assets/check.png"></span>
-                <span v-else><img src="../../assets/cross.png"></span>
-                <div class="divider"></div>
-                <log-error-list :errorList="report.base.comprehensiveErrors" :attList="report.base.comprehensiveChecked" :att-list-name="'Required Attributes'"> </log-error-list>
-            </div>
-            <div>
-                <span>Minimal Metadata </span>
-                <span v-if="report.base.isMinimal"><img src="../../assets/check.png"></span>
-                <span v-else><img src="../../assets/cross.png"></span>
-                <div class="divider"></div>
-                <log-error-list :errorList="report.base.minimalErrors" :attList="report.base.minimalChecked" :att-list-name="'Required Attributes'"> </log-error-list>
-            </div>
-            <div>
-                <span class="caption">Coding</span>
-                <span v-if="report.base.codingErrors.length === 0"><img src="../../assets/check.png"></span>
-                <span v-else><img src="../../assets/cross.png"></span>
-                <log-error-list :errorList="report.base.codingErrors"> </log-error-list>
-            </div>
-            <div v-if="report.base.name === 'Binary'">
-                <div>Contents: <a v-bind:href="report.base.binaryUrl" target="_blank">open</a> (in new browser tab) </div>
-                <div>Contents direct from server: <a v-bind:href="report.base.url" target="_blank">open</a> (in new browser tab) </div>
-            </div>
-            <log-atts :attMap="report.base.atts"> </log-atts>
+            <log-object-display :report="report.base"> </log-object-display>
         </div>
 
         <!--  RELATED OBJECT DETAILS -->
         <div v-else-if="selectedResourceIndex > -1">
-            <div class="vdivider"></div>
-            <div class="main-caption">{{ report.objects[selectedResourceIndex].name }}</div>
-            <div>
-                <span class="caption">Relation:</span>
-                {{ report.objects[selectedResourceIndex].relation }}</div>
-            <div v-if="report.objects[selectedResourceIndex].url">
-                <span class="caption">Ref:</span>
-                {{ report.objects[selectedResourceIndex].url }}
-            </div>
-            <div v-if="report.objects[selectedResourceIndex].name === 'DocumentManifest' || report.objects[selectedResourceIndex].name === 'DocumentReference'">
-                <div>
-                    <span class="caption">Comprehensive Metadata </span>
-                    <span v-if="report.objects[selectedResourceIndex].isComprehensive"><img src="../../assets/check.png"></span>
-                    <span v-else><img src="../../assets/cross.png"></span>
-                    <div class="divider"></div>
-                    <log-error-list :errorList="report.objects[selectedResourceIndex].comprehensiveErrors" :attList="report.objects[selectedResourceIndex].comprehensiveChecked" :att-list-name="'Required Attributes'"> </log-error-list>
-                </div>
-                <div>
-                    <span class="caption">Minimal Metadata </span>
-                    <span v-if="report.objects[selectedResourceIndex].isMinimal"><img src="../../assets/check.png"></span>
-                    <span v-else><img src="../../assets/cross.png"></span>
-                    <div class="divider"></div>
-                    <log-error-list :errorList="report.objects[selectedResourceIndex].minimalErrors" :attList="report.objects[selectedResourceIndex].minimalChecked" :att-list-name="'Required Attributes'"> </log-error-list>
-                </div>
-                <div>
-                    <span class="caption">Coding</span>
-                    <span v-if="report.objects[selectedResourceIndex].codingErrors.length === 0"><img src="../../assets/check.png"></span>
-                    <span v-else><img src="../../assets/cross.png"></span>
-                    <log-error-list :errorList="report.objects[selectedResourceIndex].codingErrors"> </log-error-list>
-                </div>
-            </div>
-            <div v-if="report.objects[selectedResourceIndex].name === 'Binary'">
-                <span>Contents: <a v-bind:href="report.objects[selectedResourceIndex].binaryUrl" target="_blank">open</a> (in new browser tab) </span>
-            </div>
-            <log-atts :attMap="report.objects[selectedResourceIndex].atts"> </log-atts>
+            <log-object-display :report="report.objects[selectedResourceIndex]"> </log-object-display>
         </div>
     </div>
 </template>
 
 <script>
-    import LogErrorList from "./LogErrorList"
-    import LogAtts from "./LogAtts"
     import LogObjectDisplay from "./LogObjectDisplay"
 
     export default {
@@ -243,7 +174,7 @@
         props: [
             'sessionId', 'channelId', 'eventId'
         ],
-        components: { LogErrorList, LogAtts, LogObjectDisplay },
+        components: { LogObjectDisplay },
         name: "LogAnalysisReport"
     }
 </script>
