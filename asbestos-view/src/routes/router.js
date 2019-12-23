@@ -25,6 +25,9 @@ Vue.use( VueRouter )
 export const routes = [
     {
         path: '/', component: TopLayout,
+        meta: {
+            title: 'FHIR Toolkit'
+        },
         children: [
             {
                 path: 'about',
@@ -126,6 +129,8 @@ export const routes = [
     },
 
 ]
+
+document.title = "FHIR Toolkit"
 
 export const router = new VueRouter({
     mode: 'history',
