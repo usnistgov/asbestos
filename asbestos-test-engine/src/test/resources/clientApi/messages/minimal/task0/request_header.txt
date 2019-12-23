@@ -1,0 +1,11 @@
+POST /asbestos/proxy/default__default
+content-length:2864
+host:localhost:8081
+content-type:application/fhir+json
+connection:keep-alive
+cache-control:no-cache
+pragma:no-cache
+accept:application/fhir+json
+accept-charset:utf-8
+user-agent:Java/1.8.0_222
+x-client-addr:127.0.0.1

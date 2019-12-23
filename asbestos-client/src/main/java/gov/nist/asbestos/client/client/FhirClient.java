@@ -101,6 +101,7 @@ public class FhirClient {
 
     private ResourceWrapper readResource(Ref ref, Format format) {
         HttpGet getter = new HttpGet();
+        httpBase = getter;
         ResourceWrapper wrapper = new ResourceWrapper();
         wrapper.setRef(ref);
         wrapper.setHttpBase(getter);

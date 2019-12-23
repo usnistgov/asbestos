@@ -1,0 +1,5 @@
+POST http://localhost:8080/fhir/fhir/
+content-length:2864
+content-type:application/fhir+json
+accept:application/fhir+json
+accept-charset:utf-8

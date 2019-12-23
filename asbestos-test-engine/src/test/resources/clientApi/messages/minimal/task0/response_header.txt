@@ -1,0 +1,8 @@
+200 
+Transfer-Encoding:chunked
+Content-Location:http://localhost:8081/asbestos/proxy/default__default/Bundle/9b86541d-d217-4afe-a938-27bd209af823
+Date:Sat, 14 Dec 2019 11:10:45 GMT
+Content-Type:application/fhir+json;charset=UTF-8
+Location:http://localhost:8081/asbestos/proxy/default__default/Bundle/9b86541d-d217-4afe-a938-27bd209af823
+X-Powered-By:HAPI FHIR 3.7.0 REST Server (FHIR Server; FHIR 4.0.0/R4)
+x-proxy-event:http://localhost:8081/asbestos/log/default/default/Bundle/2019_12_14_06_10_45_138

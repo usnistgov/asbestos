@@ -9,6 +9,10 @@ class FixtureMgr {
     private Map<String, FixtureComponent> fixtures = new HashMap<>();
     private String lastOp = null;  // last operation that created a fixture
 
+    FixtureMgr() {
+
+    }
+
     void put(String name, FixtureComponent component) {
         fixtures.put(name, component);
         lastOp = name;

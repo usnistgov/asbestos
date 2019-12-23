@@ -96,12 +96,6 @@ public class VariableMgr {
         Objects.requireNonNull(reporter);
         if (!reference.contains(("${")))
             return reference;
-//        int from = reference.indexOf("${");
-//        int to = reference.indexOf("}", from);
-//        if (to == -1) {
-//            reporter.reportError("reference " + reference + " has no closing }");
-//            throw new Error("reference " + reference + " has no closing }");
-//        }
         Variable var  = getNextVariable(reference); //reference.substring(from+2, to);
         String update = eval(var.name);
         if (update == null)
@@ -109,7 +103,7 @@ public class VariableMgr {
         return reference.substring(0, var.from) + update + reference.substring(var.to+1);
     }
 
-    private String eval(String variableName) {
+    String eval(String variableName) {
         TestScript.TestScriptVariableComponent var = getVariable(variableName);
         if (var == null) {
             reporter.reportError( "Variable " + variableName + " is referenced but not defined");

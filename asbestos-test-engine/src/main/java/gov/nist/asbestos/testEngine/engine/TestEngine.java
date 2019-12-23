@@ -58,7 +58,6 @@ public class TestEngine  {
         // make test definition dir a temporary resource cache so elements of the TestScript
         // can be found
         ResourceCacheMgr inTestResources = new ResourceCacheMgr(testDef, new Ref(""));
-      //  ResourceCacheMgr platformCache = new ResourceCacheMgr("", new Ref(""));
         fhirClientForFixtures = new FhirClient().setResourceCacheMgr(inTestResources);
     }
 
@@ -66,11 +65,15 @@ public class TestEngine  {
     public TestEngine(File testDef) {
         Objects.requireNonNull(testDef);
         this.testDef = testDef;
+        ResourceCacheMgr inTestResources = new ResourceCacheMgr(testDef, new Ref(""));
+        fhirClientForFixtures = new FhirClient().setResourceCacheMgr(inTestResources);
     }
 
     public TestEngine(File testDef, TestScript testScript) {
         this.testDef = testDef;
         this.testScript = testScript;
+        ResourceCacheMgr inTestResources = new ResourceCacheMgr(testDef, new Ref(""));
+        fhirClientForFixtures = new FhirClient().setResourceCacheMgr(inTestResources);
     }
 
     public TestEngine setTestSession(String testSession) {
@@ -115,9 +118,12 @@ public class TestEngine  {
         engineVal = new ValE(val);
         engineVal.setMsg("TestEngine");
         try {
-            fixtureMgr.put("request", new FixtureComponent(requestResource));
-            fixtureMgr.put("response", new FixtureComponent(responseResource));
             initWorkflow();
+            doLoadFixtures();
+            if (requestResource != null)
+                fixtureMgr.put("request", new FixtureComponent(requestResource));
+            if (responseResource != null)
+                fixtureMgr.put("response", new FixtureComponent(responseResource));
             doTest(); // should only be asserts
             errorOut();
         } catch (Throwable t) {
@@ -126,6 +132,37 @@ public class TestEngine  {
         //returnTestReport();
 
         return this;
+    }
+
+    public List<String> getTestReportErrors() {
+        List<String> errors = new ArrayList<>();
+        TestReport.TestReportSetupComponent testComponent = testReport.getSetup();
+            for (TestReport.SetupActionComponent actionComponent : testComponent.getAction()) {
+                if (actionComponent.hasAssert()) {
+                    TestReport.SetupActionAssertComponent assertComponent = actionComponent.getAssert();
+                    if (assertComponent.hasResult()) {
+                        TestReport.TestReportActionResult actionResult = assertComponent.getResult();
+                        if (actionResult.equals(TestReport.TestReportActionResult.ERROR) ||
+                            actionResult.equals(TestReport.TestReportActionResult.FAIL))
+                        errors.add(assertComponent.getMessage());
+                    }
+                }
+            }
+
+        for (TestReport.TestReportTestComponent testComponent1 : testReport.getTest()) {
+            for (TestReport.TestActionComponent actionComponent : testComponent1.getAction()) {
+                if (actionComponent.hasAssert()) {
+                    TestReport.SetupActionAssertComponent assertComponent = actionComponent.getAssert();
+                    if (assertComponent.hasResult()) {
+                        TestReport.TestReportActionResult actionResult = assertComponent.getResult();
+                        if (actionResult.equals(TestReport.TestReportActionResult.ERROR) ||
+                                actionResult.equals(TestReport.TestReportActionResult.FAIL))
+                            errors.add(assertComponent.getMessage());
+                    }
+                }
+            }
+        }
+        return errors;
     }
 
     private void reportException(Throwable t) {
@@ -286,7 +323,7 @@ public class TestEngine  {
 
 
     private void doLoadFixtures() {
-
+        Objects.requireNonNull(fhirClientForFixtures);
         if (testScript.hasFixture()) {
             ValE fVal = new ValE(engineVal).setMsg("Fixtures");
 
@@ -462,7 +499,7 @@ public class TestEngine  {
                     .setVariableMgr(new VariableMgr(testScript, fixtureMgr)
                             .setVal(vale)
                             .setOpReport(testReport.getSetup().addAction().getOperation()))
-                    .setTestReport(testReport)
+//                    .setTestReport(testReport)
                     .setTestScript(testScript);
             report = runner.run(operation);
         } catch (Throwable t) {
@@ -491,6 +528,8 @@ public class TestEngine  {
                     TestScript containedTestScript = getConditional(testComponent, testReportComponent);
                     testReportComponent = testReport.addTest();
                     boolean conditionalResult = true;
+
+
                     if (containedTestScript != null) {
                         List<TestScript.TestScriptTestComponent> tests = containedTestScript.getTest();
                         if (tests.size() != 2) {
@@ -532,10 +571,6 @@ public class TestEngine  {
                         doTestPart(testComponent, testReportComponent, testReport, false);
                     } else {
                         reportSkip(testReportComponent);
-//                    TestReport.TestActionComponent testActionComponent = testReportComponent.addAction();
-//                    TestReport.SetupActionOperationComponent setupActionOperationComponent = testActionComponent.getOperation();
-//                    setupActionOperationComponent.setResult(TestReport.TestReportActionResult.SKIP);
-//                    setupActionOperationComponent.setMessage("condition failed");
                     }
                 }
             } catch (Throwable t) {
@@ -554,6 +589,7 @@ public class TestEngine  {
 
     private boolean doTestPart(TestScript.TestScriptTestComponent testScriptElement, TestReport.TestReportTestComponent testReportComponent, TestReport testReport, boolean reportAsConditional) {
         ValE fVal = new ValE(engineVal).setMsg("Test");
+        boolean result = true;
         if (testScriptElement.hasAction()) {
             String typePrefix = "contained.action";
             for (TestScript.TestActionComponent action : testScriptElement.getAction()) {
@@ -580,7 +616,8 @@ public class TestEngine  {
                             testReport.setStatus(TestReport.TestReportStatus.COMPLETED);
                             testReport.setResult(TestReport.TestReportResult.FAIL);
                         }
-                        return false;
+                        result = false;
+                        //return false;  // don't jump ship on first assertion failure
                     }
                     if ("error".equals(actionReport.getResult().toCode())) {
                         testReport.setStatus(TestReport.TestReportStatus.COMPLETED);
@@ -590,7 +627,7 @@ public class TestEngine  {
                 }
             }
         }
-        return true;
+        return result;
     }
 
     private TestScript getConditional(TestScript.TestScriptTestComponent testComponent, TestReport.TestReportTestComponent testReportComponent) {
@@ -606,23 +643,6 @@ public class TestEngine  {
                     return (TestScript) ref.getResource();
                 }
             }
-//            String containedTestScriptId = extension.getValue().toString();
-//
-//            List<Resource> containedList = testScript.getContained();
-//            Resource contained = null;
-//            for (Resource theContained : containedList) {
-//                if (theContained.getId() != null && theContained.getId().equals(containedTestScriptId)) {
-//                    contained = theContained;
-//                    break;
-//                }
-//            }
-//            if (contained == null) {
-//                reportParsingError(testReportComponent, "cannot locate contained TestScript " + containedTestScriptId);
-//                return null;
-//            }
-//
-//
-//            return (TestScript) contained;
         }
         return null;
     }

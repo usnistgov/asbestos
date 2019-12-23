@@ -1,0 +1,149 @@
+{
+  "resourceType": "Bundle",
+  "id": "pdb",
+  "meta": {
+    "lastUpdated": "2013-07-01T13:11:33Z",
+    "profile": [
+      "http://ihe.net/fhir/StructureDefinition/IHE_MHD_Provide_Minimal_DocumentBundle"
+    ]
+  },
+  "type": "transaction",
+  "entry": [
+    {
+      "fullUrl": "urn:uuid:1e404af3-077f-4bee-b7a6-a9be97e1ce01",
+      "resource": {
+        "resourceType": "DocumentReference",
+        "masterIdentifier": {
+          "system": "urn:ietf:rfc:3986",
+          "value": "1.2.10.0.0.5.2019.12.14.06.10.45.129.1"
+        },
+        "subject": {
+          "reference": "http://localhost:8080/fhir/fhir/Patient/30610"
+        },
+        "securityLabel": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/v3-Confidentiality",
+                "code": "N",
+                "display": "normal"
+              }
+            ]
+          }
+        ],
+        "content": [
+          {
+            "attachment": {
+              "contentType": "text/plain",
+              "url": "urn:uuid:3fdc72f4-a11d-4a9d-9260-a9f745779e03"
+            }
+          }
+        ]
+      },
+      "request": {
+        "method": "POST",
+        "url": "urn:uuid:1e404af3-077f-4bee-b7a6-a9be97e1ce01"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:1e404af3-077f-4bee-b7a6-a9be97e1ce31",
+      "resource": {
+        "resourceType": "DocumentReference",
+        "masterIdentifier": {
+          "system": "urn:ietf:rfc:3986",
+          "value": "1.2.10.0.0.5.2019.12.14.06.10.45.130.2"
+        },
+        "subject": {
+          "reference": "http://localhost:8080/fhir/fhir/Patient/30610"
+        },
+        "securityLabel": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/v3-Confidentiality",
+                "code": "N",
+                "display": "normal"
+              }
+            ]
+          }
+        ],
+        "content": [
+          {
+            "attachment": {
+              "contentType": "text/plain",
+              "url": "urn:uuid:3fdc72f4-a11d-4a9d-9260-a9f745779e17"
+            }
+          }
+        ]
+      },
+      "request": {
+        "method": "POST",
+        "url": "urn:uuid:1e404af3-077f-4bee-b7a6-a9be97e1ce31"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:3fdc72f4-a11d-4a9d-9260-a9f745779e02",
+      "resource": {
+        "resourceType": "DocumentManifest",
+        "text": {
+          "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">Comment</div>"
+        },
+        "masterIdentifier": {
+          "fhir_comments": [
+            "   Many XDS systems do not track any id for the author. When systems don't do this,\n                  the only option is for the author information to be contained in the Document Reference\n                   "
+          ],
+          "system": "urn:ietf:rfc:3986",
+          "value": "1.2.10.0.0.5.2019.12.14.06.10.45.130.3"
+        },
+        "subject": {
+          "reference": "http://localhost:8080/fhir/fhir/Patient/30610"
+        },
+        "created": "2004-12-25T23:50:50-05:00",
+        "source": "urn:oid:1.3.6.1.4.1.21367.2009.1.2.1",
+        "description": "Physical",
+        "content": [
+          {
+            "reference": "urn:uuid:1e404af3-077f-4bee-b7a6-a9be97e1ce01"
+          },
+          {
+            "reference": "urn:uuid:1e404af3-077f-4bee-b7a6-a9be97e1ce31"
+          }
+        ]
+      },
+      "request": {
+        "method": "POST",
+        "url": "urn:uuid:3fdc72f4-a11d-4a9d-9260-a9f745779e02"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:3fdc72f4-a11d-4a9d-9260-a9f745779e03",
+      "resource": {
+        "resourceType": "Binary",
+        "meta": {
+          "lastUpdated": "2013-07-01T13:11:33Z"
+        },
+        "contentType": "text/plain",
+        "data": "Zm9vYmFy"
+      },
+      "request": {
+        "method": "POST",
+        "url": "urn:uuid:3fdc72f4-a11d-4a9d-9260-a9f745779e02"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:3fdc72f4-a11d-4a9d-9260-a9f745779e17",
+      "resource": {
+        "resourceType": "Binary",
+        "meta": {
+          "lastUpdated": "2013-07-01T13:11:33Z"
+        },
+        "contentType": "text/plain",
+        "data": "Zm9vYmFy"
+      },
+      "request": {
+        "method": "POST",
+        "url": "urn:uuid:3fdc72f4-a11d-4a9d-9260-a9f745779e17"
+      }
+    }
+  ]
+}

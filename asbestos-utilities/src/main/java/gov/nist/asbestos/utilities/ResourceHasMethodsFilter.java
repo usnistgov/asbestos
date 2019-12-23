@@ -47,6 +47,14 @@ public class ResourceHasMethodsFilter {
 
     public static <T extends BaseResource> String toJson(T baseResourceObj) {
 
+        Map<String, List<String>> myMap = toMap(baseResourceObj);
+
+        // Return map as JSON
+        String json = new Gson().toJson(myMap);
+        return json;
+    }
+
+    public static <T extends BaseResource> Map<String, List<String>> toMap(T baseResourceObj) {
         Objects.requireNonNull(baseResourceObj);
 
         List<Method> methodList = new ArrayList<>();
@@ -61,40 +69,38 @@ public class ResourceHasMethodsFilter {
         methodList.addAll(Arrays.asList(baseResourceObj.getClass().getDeclaredMethods()));
 
         // For each resourceObj method name starting with "has", if resourceObj.has(M) is True, collect M into a Set
-         Set<CaseInsensitiveString> hasMethodSet = methodList.stream()
-                 .filter(m -> m.getName().startsWith("has"))
-                 .filter((m) -> {
-                     try {
-                        return (boolean)m.invoke(baseResourceObj, null);
-                        } catch (Throwable t) {}
-                            return false;
-                    })
-                 .map(Method::getName)
-                 .map(s -> new CaseInsensitiveString(s.substring(3)))
-                 .collect(Collectors.toSet());
+        Set<CaseInsensitiveString> hasMethodSet = methodList.stream()
+                .filter(m -> m.getName().startsWith("has"))
+                .filter((m) -> {
+                    try {
+                       return (boolean)m.invoke(baseResourceObj, null);
+                       } catch (Throwable t) {}
+                           return false;
+                   })
+                .map(Method::getName)
+                .map(s -> new CaseInsensitiveString(s.substring(3)))
+                .collect(Collectors.toSet());
 
         String jsonFullResource = getFhirContext().newJsonParser().setPrettyPrint(false).encodeResourceToString(baseResourceObj);
         Map<String, List<String>> myMap = new Gson().fromJson(jsonFullResource, Map.class);
 
-       // Store keys as insensitive case
-       // This is to address the case where methods hasStatus and hasStatusElement both refer to the same contextual base resource element but we should only pick the keys that exist in the output from the Fhir-JSON parser
-       List<CaseInsensitiveString> ciStringList = myMap.entrySet().stream()
-               .map(e -> new CaseInsensitiveString(e.getKey()))
-               .collect(Collectors.toList());
+        // Store keys as insensitive case
+        // This is to address the case where methods hasStatus and hasStatusElement both refer to the same contextual base resource element but we should only pick the keys that exist in the output from the Fhir-JSON parser
+        List<CaseInsensitiveString> ciStringList = myMap.entrySet().stream()
+                .map(e -> new CaseInsensitiveString(e.getKey()))
+                .collect(Collectors.toList());
 
         // Remove keys from the map that don't exist in hasMethodSet
-       for (CaseInsensitiveString ciString : ciStringList) {
-           if (! hasMethodSet.contains(ciString)) {
-              myMap.remove(ciString.string);
-           }
-       }
+        for (CaseInsensitiveString ciString : ciStringList) {
+            if (! hasMethodSet.contains(ciString)) {
+               myMap.remove(ciString.string);
+            }
+        }
 
-       // Remove keys that we don't want
+        // Remove keys that we don't want
         myMap.remove("text");
-
-       // Return map as JSON
-        String json = new Gson().toJson(myMap);
-        return json;
+        myMap.remove("data");
+        return myMap;
     }
 }
 

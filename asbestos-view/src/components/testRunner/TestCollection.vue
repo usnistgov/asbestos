@@ -166,13 +166,17 @@
                 this.running = false
                 this.$store.dispatch('loadTestScriptNames')  // force reload of UI
             },
-            async doRunAll()  {
+            doRunAll()  {
                 this.running = true
                 for (const name of Object.keys(this.status)) {
-                    await this.runner(name)
+                    if (this.isClient)
+                        this.doEval(name)
+                    else
+                        this.doRun(name)
+                    //await this.runner(name)
                 }
                 this.running = false
-                this.$store.dispatch('loadTestScriptNames')  // force reload of UI
+                //this.$store.dispatch('loadTestScriptNames')  // force reload of UI
             },
             selectTest(name) {
                 if (this.selected === name)  { // unselect
