@@ -112,7 +112,8 @@
                 <log-error-list :errorList="report.base.codingErrors"> </log-error-list>
             </div>
             <div v-if="report.base.name === 'Binary'">
-                <span>Contents: <a v-bind:href="report.base.binaryUrl" target="_blank">open</a> (in new browser tab) </span>
+                <div>Contents: <a v-bind:href="report.base.binaryUrl" target="_blank">open</a> (in new browser tab) </div>
+                <div>Contents direct from server: <a v-bind:href="report.base.url" target="_blank">open</a> (in new browser tab) </div>
             </div>
             <log-atts :attMap="report.base.atts"> </log-atts>
         </div>
@@ -161,6 +162,7 @@
 <script>
     import LogErrorList from "./LogErrorList"
     import LogAtts from "./LogAtts"
+    import LogObjectDisplay from "./LogObjectDisplay"
 
     export default {
         data() {
@@ -241,7 +243,7 @@
         props: [
             'sessionId', 'channelId', 'eventId'
         ],
-        components: { LogErrorList, LogAtts },
+        components: { LogErrorList, LogAtts, LogObjectDisplay },
         name: "LogAnalysisReport"
     }
 </script>
