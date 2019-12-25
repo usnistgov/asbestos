@@ -125,7 +125,7 @@ export const baseStore = {
                     response.data.forEach(item => {
                         ids.push(item.id)
                     })
-                    commit('installChannelIds', ids)
+                    commit('installChannelIds', ids.sort())
                     commit('installChannelURLs', response.data)
                 })
                 .catch(e => {
