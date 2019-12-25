@@ -123,6 +123,10 @@
                         Warning: MHD type is selected but no XDS Site Name is configured
                     </div>
                 </div>
+                <div v-if="!edit">
+                    <span class="caption">Channel Base Address: </span>
+                    <span>{{channel.channelBase}}</span>
+                </div>
             </div>
         </div>
     </div>
@@ -160,6 +164,7 @@
         created() {
             this.fetch()
             this.showAck(true)
+            // this.loadChannelBaseAddr()
         },
         watch: {  // when $route changes run fetch()
             '$route': 'fetch'
@@ -416,5 +421,9 @@
         text-align: left;
         /*border: 1px dotted black;*/
         grid-column: 1 / span 2;
+    }
+    .caption {
+        font-weight: bold;
+        font-size: larger;
     }
 </style>

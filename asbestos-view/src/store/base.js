@@ -134,6 +134,7 @@ export const baseStore = {
         },
         loadChannel({commit}, fullId) {
             const url = `CHANNEL/${fullId}`
+            console.log(`load channel from ${url}`)
             return CHANNEL.get(fullId)
                 .then(response => {
                     commit('installChannel', response.data)

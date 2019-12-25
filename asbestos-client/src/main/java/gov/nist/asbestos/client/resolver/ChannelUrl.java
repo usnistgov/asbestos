@@ -19,7 +19,7 @@ public class ChannelUrl {
         this.externalCache = externalCache;
     }
 
-    public SimStore getSimStore(URI proxyUri) {
+    private SimStore getSimStore(URI proxyUri) {
         SimId simId = getSimId(proxyUri);
         if (simId == null)
             return null;
@@ -41,7 +41,7 @@ public class ChannelUrl {
         }
     }
 
-    public static boolean isProxyUri(URI uri) {
+    private static boolean isProxyUri(URI uri) {
         List<String> uriParts = uriParts(uri);
         return uriParts.size() > 2 && uriParts.get(2).equals("proxy");
     }
