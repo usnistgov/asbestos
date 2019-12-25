@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import gov.nist.asbestos.client.Base.DocumentCache;
 import gov.nist.asbestos.client.Base.EC;
 import gov.nist.asbestos.client.client.FhirClient;
+import gov.nist.asbestos.client.resolver.ChannelUrl;
 import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import gov.nist.asbestos.serviceproperties.ServiceProperties;
@@ -16,6 +17,8 @@ import org.apache.log4j.Logger;
 import org.hl7.fhir.r4.model.*;
 
 import java.io.File;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.*;
 
 public class AnalysisReport {
@@ -266,16 +269,22 @@ public class AnalysisReport {
 
     private void loadBase() {
         Objects.requireNonNull(baseRef);
+        Ref baseRefRelative = baseRef.getRelative();
+        //URI fhirBase;
+        try {
+            fhirBase = new Ref(new ChannelUrl(ec.externalCache).getFhirBase(baseRef.getUri()));
+        } catch (URISyntaxException e) {
+            generalErrors.add("Error translating FHIRBASE - " + e.getMessage());
+            return;
+        }
+        Ref resourceRef = baseRefRelative.rebase(fhirBase);
 
-        baseObj = fhirClient.readResource(baseRef);
+        baseObj = fhirClient.readResource(resourceRef);
         if (baseObj.getStatus() != 200) {
             generalErrors.add("Status " + baseObj.getStatus());
         } else if (baseObj.getResource() instanceof OperationOutcome) {
             OperationOutcome oo = (OperationOutcome) baseObj.getResource();
             generalErrors.add(oo.getIssueFirstRep().getDiagnostics());
-        } else {
-            //related.add(baseObj);
-            fhirBase = baseRef.getBase();
         }
     }
 

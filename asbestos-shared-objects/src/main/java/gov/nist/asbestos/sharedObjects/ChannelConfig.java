@@ -1,7 +1,11 @@
 package gov.nist.asbestos.sharedObjects;
 
+import gov.nist.asbestos.serviceproperties.ServiceProperties;
+import gov.nist.asbestos.serviceproperties.ServicePropertiesEnum;
+
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -43,6 +47,10 @@ public class ChannelConfig {
         String uriString = fhirBase + "/" +  String.join("/", parts) + (query == null || query.equals("") ? "" : "?" + query);
         URI uri = new URI(uriString);
         return uri;
+    }
+
+    public String getChannelBase() {
+        return ServiceProperties.getInstance().getPropertyOrStop(ServicePropertiesEnum.FHIR_TOOLKIT_BASE) + "/proxy/" + asFullId();
     }
 
     public String getEnvironment() {

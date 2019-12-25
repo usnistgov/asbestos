@@ -1,15 +1,21 @@
 package gov.nist.asbestos.asbestosProxy.channels.passthrough;
 
 import gov.nist.asbestos.asbestosProxy.channel.BaseChannel;
+import gov.nist.asbestos.client.Base.ProxyBase;
+import gov.nist.asbestos.client.client.Format;
 import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.http.headers.Header;
 import gov.nist.asbestos.http.operations.HttpDelete;
+import gov.nist.asbestos.serviceproperties.ServiceProperties;
+import gov.nist.asbestos.serviceproperties.ServicePropertiesEnum;
 import gov.nist.asbestos.sharedObjects.ChannelConfig;
 import gov.nist.asbestos.client.events.Event;
 import gov.nist.asbestos.http.headers.Headers;
 import gov.nist.asbestos.http.operations.HttpBase;
 import gov.nist.asbestos.http.operations.HttpGet;
 import gov.nist.asbestos.http.operations.HttpPost;
+import org.hl7.fhir.r4.model.BaseResource;
+import org.hl7.fhir.r4.model.Bundle;
 
 import java.net.URI;
 import java.util.Arrays;
@@ -79,6 +85,53 @@ public class PassthroughChannel extends BaseChannel /*implements IBaseChannel*/ 
 
     @Override
     public void transformResponse(HttpBase responseIn, HttpBase responseOut, String proxyHostPort) {
+        transformResponseLocationHeader(responseIn, responseOut, proxyHostPort);
+        // responseOut.setResponse(responseIn.getResponse());
+        transformResponseBody(responseIn, responseOut);
+        responseOut.setStatus(responseIn.getStatus());
+    }
+
+    private void transformResponseBody(HttpBase responseIn, HttpBase responseOut) {
+        String oldBase = null;
+        String newBase = null;
+        byte[] rawResponse = responseIn.getResponse();
+        Format format = Format.fromContentType(responseIn.getResponseHeaders().getContentType().getValue());
+        BaseResource resource = ProxyBase.parse(rawResponse, format);
+        if (resource instanceof Bundle) {
+            boolean updated = false;
+            Bundle bundle = (Bundle) resource;
+            if (bundle.hasLink()) {
+                Bundle.BundleLinkComponent linkComponent = bundle.getLink("self");
+                if (linkComponent != null) {
+                    if (linkComponent.hasUrl()) {
+                        oldBase = linkComponent.getUrl();
+                        newBase = channelConfig.getChannelBase();
+                        linkComponent.setUrl(newBase);
+                        updated = true;
+                    }
+                }
+            }
+            for (Bundle.BundleEntryComponent component : bundle.getEntry()) {
+                if (component.hasResponse()) {
+                    Bundle.BundleEntryResponseComponent responseComponent = component.getResponse();
+                    if (responseComponent.hasLocation()) {
+                        String location = responseComponent.getLocation();
+                        Ref locRef = new Ref(location);
+                        if (!locRef.isRelative()) {
+                            locRef.rebase(newBase);
+                            responseComponent.setLocation(locRef.toString());
+                            updated = true;
+                        }
+                    }
+                }
+            }
+            if (updated)
+                rawResponse = ProxyBase.encode(bundle, format).getBytes();
+        }
+        responseOut.setResponse(rawResponse);
+    }
+
+    private void transformResponseLocationHeader(HttpBase responseIn, HttpBase responseOut, String proxyHostPort) {
         Headers headers = responseIn.getResponseHeaders();
         Header loc = headers.get("Content-Location");
         Header loc2 = headers.get("Location");
@@ -101,8 +154,6 @@ public class PassthroughChannel extends BaseChannel /*implements IBaseChannel*/ 
             }
         }
         responseOut.setResponseHeaders(headers);
-        responseOut.setResponse(responseIn.getResponse());
-        responseOut.setStatus(responseIn.getStatus());
     }
 
     @Override
