@@ -38,7 +38,7 @@
             <div>Contents: <a v-bind:href="report.binaryUrl" target="_blank">open</a> (in new browser tab) </div>
             <div>Contents direct from server: <a v-bind:href="report.url" target="_blank">open</a> (in new browser tab) </div>
         </div>
-        <log-atts :attMap="report.atts"> </log-atts>
+        <log-atts v-if="report.atts" :attMap="report.atts"> </log-atts>
 
     </div>
 </template>

@@ -33,6 +33,7 @@ public class AnalysisReport {
     private Checked comprehensiveChecked;
     private List<String> codingErrors = new ArrayList<>();
     private List<String> generalErrors = new ArrayList<>();
+    private List<String> generalWarnings = new ArrayList<>();
     private FhirClient fhirClient = new FhirClient();
     private String source;
     private EC ec;
@@ -92,6 +93,7 @@ public class AnalysisReport {
         RelatedReport base = null;
         List<RelatedReport> objects = new ArrayList<>();
         List<String> errors;
+        List<String> warnings;
 
         public Report() {}
 
@@ -106,15 +108,16 @@ public class AnalysisReport {
 
         report.source = source;
         report.errors = new ArrayList<>(generalErrors);
+        report.warnings = new ArrayList<>(generalWarnings);
 
         if (baseObj != null && baseObj.getResource() != null) {
             report.base = new RelatedReport(baseObj, "");
             report.base.comprehensiveErrors = comprehensiveErrors;
-            report.base.isComprehensive = comprehensiveErrors.isEmpty();
+            report.base.isComprehensive = comprehensiveErrors != null && comprehensiveErrors.isEmpty();
             report.base.minimalErrors = minimalErrors;
-            report.base.isMinimal = minimalErrors.isEmpty();
-            report.base.minimalChecked = minimalChecked.attsChecked;
-            report.base.comprehensiveChecked = comprehensiveChecked.attsChecked;
+            report.base.isMinimal = minimalErrors!= null && minimalErrors.isEmpty();
+            report.base.minimalChecked = minimalChecked == null ? "" : minimalChecked.attsChecked;
+            report.base.comprehensiveChecked = comprehensiveChecked == null ? "" : comprehensiveChecked.attsChecked;
             report.base.codingErrors = codingErrors;
             report.base.atts = atts;
             report.base.binaryUrl = binaryUrl;
@@ -126,11 +129,11 @@ public class AnalysisReport {
             if (resource != null) {
                 RelatedReport relatedReport = new RelatedReport(wrapper, rel.howRelated);
                 relatedReport.comprehensiveErrors = rel.comprehensiveErrors;
-                relatedReport.isComprehensive = rel.comprehensiveErrors.isEmpty();
+                relatedReport.isComprehensive = rel.comprehensiveErrors != null && rel.comprehensiveErrors.isEmpty();
                 relatedReport.minimalErrors = rel.minimalErrors;
-                relatedReport.isMinimal = rel.minimalErrors.isEmpty();
-                relatedReport.comprehensiveChecked = rel.comprehensiveChecked.attsChecked;
-                relatedReport.minimalChecked = rel.minimalChecked.attsChecked;
+                relatedReport.isMinimal = rel.minimalErrors!= null && rel.minimalErrors.isEmpty();
+                relatedReport.comprehensiveChecked = rel.comprehensiveChecked == null ? "" : rel.comprehensiveChecked.attsChecked;
+                relatedReport.minimalChecked = rel.minimalChecked == null ? "" : rel.minimalChecked.attsChecked;
                 relatedReport.codingErrors = rel.codingErrors;
                 relatedReport.atts = rel.atts;
                 relatedReport.binaryUrl = rel.binaryUrl;
@@ -269,15 +272,21 @@ public class AnalysisReport {
 
     private void loadBase() {
         Objects.requireNonNull(baseRef);
+        Ref resourceRef;
         Ref baseRefRelative = baseRef.getRelative();
-        //URI fhirBase;
         try {
             fhirBase = new Ref(new ChannelUrl(ec.externalCache).getFhirBase(baseRef.getUri()));
+            if (fhirBase.toString().equals("")) {
+                generalWarnings.add("No FHIRBASE registered for this channel. This may be an MHD channel. Directing queries to channel.");
+                resourceRef = baseRef;
+            } else {
+                resourceRef = baseRefRelative.rebase(fhirBase);
+            }
+
         } catch (URISyntaxException e) {
-            generalErrors.add("Error translating FHIRBASE - " + e.getMessage());
+            generalErrors.add("Error extracting FHIRBASE - " + e.getMessage());
             return;
         }
-        Ref resourceRef = baseRefRelative.rebase(fhirBase);
 
         baseObj = fhirClient.readResource(resourceRef);
         if (baseObj.getStatus() != 200) {

@@ -2,15 +2,29 @@
     <div v-if="report" class="boxed">
         <div class="vdivider"></div>
         <div class="main-caption">Inspector</div>
-        
+
         <!--    ERRORS    -->
-        <div v-if="report.errors.length > 0 && report.errors[0] !== null">  <!--  don't know why the null check is needed but it is  -->
+        <div v-if="report.errors && report.errors.length > 0 && report.errors[0] !== null">  <!--  don't know why the null check is needed but it is  -->
             <span class="caption">Errors:</span>
             <div class="vdivider"></div>
             <div v-for="(err, erri) in report.errors"
                 :key="err + erri">
                 <div>
                     {{ report.errors[erri]}}
+                </div>
+            </div>
+            <hr />
+        </div>
+        <div class="vdivider"></div>
+
+        <!--    WARNINGS    -->
+        <div v-if="report.warnings && report.warnings.length > 0 && report.warnings[0] !== null">  <!--  don't know why the null check is needed but it is  -->
+            <span class="caption">Warnings:</span>
+            <div class="vdivider"></div>
+            <div v-for="(err, erri) in report.warnings"
+                 :key="err + erri">
+                <div>
+                    {{ report.warnings[erri]}}
                 </div>
             </div>
             <hr />
@@ -81,7 +95,7 @@
         <div v-if="selectedResourceIndex === null"></div>
 
         <!--  BASE OBJECT DETAILS -->
-        <div v-else-if="selectedResourceIndex === -1">
+        <div v-else-if="selectedResourceIndex === -1 && report.base">
             <log-object-display :report="report.base"> </log-object-display>
         </div>
 
