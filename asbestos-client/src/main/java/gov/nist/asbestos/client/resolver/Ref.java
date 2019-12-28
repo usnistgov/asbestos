@@ -49,6 +49,8 @@ public class Ref {
         else
             theRef = String.join("/", base.toString(), resourceType, id, "_history", version);
 
+        if (theRef.endsWith("/"))
+            theRef = theRef.substring(0, theRef.length() - 1);
         uri = build(theRef);
     }
 

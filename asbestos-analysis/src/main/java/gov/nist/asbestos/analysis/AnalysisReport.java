@@ -1,6 +1,5 @@
 package gov.nist.asbestos.analysis;
 
-import com.google.gson.Gson;
 import gov.nist.asbestos.client.Base.DocumentCache;
 import gov.nist.asbestos.client.Base.EC;
 import gov.nist.asbestos.client.client.FhirClient;
@@ -17,7 +16,6 @@ import org.apache.log4j.Logger;
 import org.hl7.fhir.r4.model.*;
 
 import java.io.File;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
 
@@ -25,7 +23,9 @@ public class AnalysisReport {
     private static Logger log = Logger.getLogger(AnalysisReport.class);
     private Ref fhirBase = null;
     private Ref baseRef = null;
+    private List<Ref> relatedRefs = new ArrayList<>();
     private ResourceWrapper baseObj = null;
+    private List<ResourceWrapper> relatedObjs = new ArrayList<>();
     private List<Related> related = new ArrayList<>();
     private List<String> minimalErrors = new ArrayList<>();
     private Checked minimalChecked;
@@ -40,67 +40,6 @@ public class AnalysisReport {
     private CodesValidation codesValidation;
     private Map atts;
     private String binaryUrl;
-
-    class Related {
-        ResourceWrapper wrapper;
-        String howRelated;
-        private List<String> minimalErrors;
-        private List<String> comprehensiveErrors;
-        private List<String> codingErrors = new ArrayList<>();
-        Checked comprehensiveChecked;
-        Checked minimalChecked;
-        Map atts;
-        boolean contained = false;
-        String binaryUrl;
-
-        Related(ResourceWrapper wrapper, String howRelated) {
-            this.wrapper = wrapper;
-            this.howRelated = howRelated;
-        }
-
-        Related contained() {
-            contained = true;
-            return this;
-        }
-    }
-
-    public static class RelatedReport {
-        String name;
-        String relation;
-        String url;
-        boolean isMinimal;
-        boolean isComprehensive;
-        List<String> minimalErrors;
-        List<String> comprehensiveErrors;
-        List<String> codingErrors;
-        String minimalChecked;
-        String comprehensiveChecked;
-        Map atts;
-        String binaryUrl;
-
-        RelatedReport(ResourceWrapper wrapper, String relation) {
-            this.name = wrapper.getResource().getClass().getSimpleName();
-            this.relation = relation;
-            if (wrapper.getRef() == null)
-                this.url = "Contained";
-            else
-                this.url = wrapper.getRef().toString();
-        }
-    }
-
-    public static class Report {
-        String source = null;
-        RelatedReport base = null;
-        List<RelatedReport> objects = new ArrayList<>();
-        List<String> errors;
-        List<String> warnings;
-
-        public Report() {}
-
-        public Report(String error) {
-            errors = Collections.singletonList(error);
-        }
-    }
 
 
     private Report buildReport() {
@@ -126,8 +65,8 @@ public class AnalysisReport {
         for (Related rel : related) {
             ResourceWrapper wrapper = rel.wrapper;
             BaseResource resource = wrapper.getResource();
+            RelatedReport relatedReport = new RelatedReport(wrapper, rel.howRelated);
             if (resource != null) {
-                RelatedReport relatedReport = new RelatedReport(wrapper, rel.howRelated);
                 relatedReport.comprehensiveErrors = rel.comprehensiveErrors;
                 relatedReport.isComprehensive = rel.comprehensiveErrors != null && rel.comprehensiveErrors.isEmpty();
                 relatedReport.minimalErrors = rel.minimalErrors;
@@ -137,9 +76,8 @@ public class AnalysisReport {
                 relatedReport.codingErrors = rel.codingErrors;
                 relatedReport.atts = rel.atts;
                 relatedReport.binaryUrl = rel.binaryUrl;
-
-                report.objects.add(relatedReport);
             }
+            report.objects.add(relatedReport);
         }
 
         return report;
@@ -152,11 +90,39 @@ public class AnalysisReport {
         this.codesValidation = new CodesValidation(ec);
     }
 
+    public AnalysisReport(Bundle bundle, String source, EC ec) {
+        this.baseObj = new ResourceWrapper(bundle);
+        this.source = source;
+        this.ec = ec;
+        this.codesValidation = new CodesValidation(ec);
+    }
+
+
+//    public AnalysisReport(List<Ref> baseRefs, String source, EC ec) {
+//        this.relatedRefs.addAll(baseRefs);
+//        this.source = source;
+//        this.ec = ec;
+//        this.codesValidation = new CodesValidation(ec);
+//    }
+
+//    private Report runRelateOnly() {
+//        try {
+//            loadRelated();
+//            if (!generalErrors.isEmpty())
+//                return buildReport();
+//        } catch (Throwable t) {
+//            generalErrors.add(ExceptionUtils.getStackTrace(t));
+//            return buildReport();
+//        }
+//    }
+
     public Report run() {
         try {
-            loadBase();
-            if (!generalErrors.isEmpty())
-                return buildReport();
+            if (baseRef != null && baseObj == null) {
+                loadBase();
+                if (!generalErrors.isEmpty())
+                    return buildReport();
+            }
             buildRelated();
             comprehensiveEval();
             minimalEval();
@@ -189,7 +155,8 @@ public class AnalysisReport {
     private void buildAtts() {
         atts = ResourceHasMethodsFilter.toMap(baseObj.getResource());
         for (Related rel : related) {
-            rel.atts = ResourceHasMethodsFilter.toMap(rel.wrapper.getResource());
+            if (rel.wrapper.hasResource())
+                rel.atts = ResourceHasMethodsFilter.toMap(rel.wrapper.getResource());
         }
     }
 
@@ -270,23 +237,44 @@ public class AnalysisReport {
         return testEngine;
     }
 
-    private void loadBase() {
-        Objects.requireNonNull(baseRef);
+    private Ref translateToProxyServerSide(Ref theRef) {
         Ref resourceRef;
-        Ref baseRefRelative = baseRef.getRelative();
+        Ref baseRefRelative = theRef.getRelative();
         try {
-            fhirBase = new Ref(new ChannelUrl(ec.externalCache).getFhirBase(baseRef.getUri()));
+            fhirBase = new Ref(new ChannelUrl(ec.externalCache).getFhirBase(theRef.getUri()));
             if (fhirBase.toString().equals("")) {
                 generalWarnings.add("No FHIRBASE registered for this channel. This may be an MHD channel. Directing queries to channel.");
-                resourceRef = baseRef;
+                resourceRef = theRef;
             } else {
                 resourceRef = baseRefRelative.rebase(fhirBase);
             }
 
         } catch (URISyntaxException e) {
             generalErrors.add("Error extracting FHIRBASE - " + e.getMessage());
-            return;
+            return null;
         }
+        return resourceRef;
+    }
+
+    private void loadBase() {
+        Objects.requireNonNull(baseRef);
+        Ref resourceRef = translateToProxyServerSide(baseRef);
+        if (resourceRef == null)
+            return;
+//        Ref baseRefRelative = baseRef.getRelative();
+//        try {
+//            fhirBase = new Ref(new ChannelUrl(ec.externalCache).getFhirBase(baseRef.getUri()));
+//            if (fhirBase.toString().equals("")) {
+//                generalWarnings.add("No FHIRBASE registered for this channel. This may be an MHD channel. Directing queries to channel.");
+//                resourceRef = baseRef;
+//            } else {
+//                resourceRef = baseRefRelative.rebase(fhirBase);
+//            }
+//
+//        } catch (URISyntaxException e) {
+//            generalErrors.add("Error extracting FHIRBASE - " + e.getMessage());
+//            return;
+//        }
 
         baseObj = fhirClient.readResource(resourceRef);
         if (baseObj.getStatus() != 200) {
@@ -297,6 +285,23 @@ public class AnalysisReport {
         }
     }
 
+    private void loadRelated() {
+        for (Ref ref : relatedRefs) {
+            Ref resourceRef = translateToProxyServerSide(ref);
+            if (resourceRef == null)
+                return;
+
+            ResourceWrapper thisObj = fhirClient.readResource(resourceRef);
+            relatedObjs.add(thisObj);
+            if (thisObj.getStatus() != 200) {
+                generalErrors.add("Status " + thisObj.getStatus());
+            } else if (thisObj.getResource() instanceof OperationOutcome) {
+                OperationOutcome oo = (OperationOutcome) thisObj.getResource();
+                generalErrors.add(oo.getIssueFirstRep().getDiagnostics());
+            }
+        }
+    }
+
     private void buildRelated() {
         BaseResource baseResource = baseObj.getResource();
         if (baseResource instanceof DomainResource) {
@@ -304,14 +309,16 @@ public class AnalysisReport {
             try {
                 buildRelated(domainResource);
             } catch (Throwable t) {
-                generalErrors.add("Do not know how to load DomainResource " + domainResource.getClass().getName());
+                generalErrors.add("Do not know how to load DomainResource " + domainResource.getClass().getName() + " - " + t.getMessage());
             }
         }  else if (baseResource instanceof Binary) {
             try {
                 buildRelated(baseResource);
             } catch (Throwable t) {
-                generalErrors.add("Do not know how to load DomainResource " + baseResource.getClass().getName());
+                generalErrors.add("Do not know how to load BaseResource " + baseResource.getClass().getName());
             }
+        } else if (baseResource instanceof Bundle) {
+            buildRelated(baseResource);
         } else {
             generalErrors.add("Do not know how to load BaseResource " + baseResource.getClass().getName());
         }
@@ -330,6 +337,38 @@ public class AnalysisReport {
         return authenticatorTypes.contains(resource.getClass().getSimpleName());
     }
 
+    private void buildRelated(Bundle bundle) {
+//        Ref base = null;
+        if (bundle.hasLink()) {
+            Bundle.BundleLinkComponent bundleLinkComponent = bundle.getLink("self");
+            if (bundleLinkComponent.hasUrl()) {
+                fhirBase = new Ref(bundleLinkComponent.getUrl());
+            }
+        }
+
+        fhirBase = translateToProxyServerSide(fhirBase);
+
+        for (Bundle.BundleEntryComponent entryComponent : bundle.getEntry()) {
+            if (entryComponent.hasResponse()) {
+                Bundle.BundleEntryResponseComponent responseComponent = entryComponent.getResponse();
+                if (responseComponent.hasLocation()) {
+                    String rawLocation = responseComponent.getLocation();
+//                    Ref entryRef;
+//                    Ref rawRef = new Ref(rawLocation);
+//                    if (rawRef.isRelative()) {
+//                        if (base == null) {
+//                            generalErrors.add("response.location is " + rawLocation + " and no self link is present");
+//                            continue;
+//                        }
+//                        entryRef = rawRef.rebase(base);
+//                    } else {
+//                        entryRef = rawRef;
+//                    }
+                    load(new Ref(rawLocation), "component", bundle);
+                }
+            }
+        }
+    }
 
     private void buildRelated(DocumentManifest documentManifest) {
         log.info("buildRelated DocumentManifest");
@@ -492,8 +531,9 @@ public class AnalysisReport {
         if (baseResource instanceof DocumentManifest) buildRelated((DocumentManifest) baseResource);
         else if (baseResource instanceof DocumentReference) buildRelated((DocumentReference) baseResource);
         else if (baseResource instanceof ListResource) buildRelated((ListResource) baseResource);
-//        else if (baseResource instanceof Binary) buildRelated((Binary) baseResource);
+        else if (baseResource instanceof Binary) buildRelated((Binary) baseResource);
         else if (baseResource instanceof Patient) buildRelated((Patient) baseResource);
+        else if (baseResource instanceof Bundle) buildRelated((Bundle) baseResource);
         else
             generalErrors.add("Do not understand resource type " + baseResource.getClass().getSimpleName());
     }
@@ -522,17 +562,26 @@ public class AnalysisReport {
         return rel;
     }
 
-    private Related load(Ref ref, String howRelated, DomainResource parent) {
+    private Related load(Ref ref, String howRelated, BaseResource parent) {
         Related rel = getFromRelated(ref);
         if (rel == null) {
-            if (ref.isContained() && parent != null) {
-                Related rel2 = new Related(new ResourceWrapper(ref.getContained(parent)), howRelated + "/contained").contained();
+            if (ref.isContained() && (parent instanceof DomainResource)) {
+                Related rel2 = new Related(new ResourceWrapper(ref.getContained((DomainResource) parent)), howRelated + "/contained").contained();
                 related.add(rel2);
                 return rel2;
             }
             if (ref.isRelative())
                 ref = ref.rebase(fhirBase);
-            ResourceWrapper wrapper = fhirClient.readResource(ref);
+            ResourceWrapper wrapper;
+            try {
+                wrapper = fhirClient.readResource(ref);
+            } catch (Throwable e) {
+                generalErrors.add(e.getMessage());
+                wrapper = new ResourceWrapper(ref);
+                Related rel2 = new Related(wrapper, howRelated);
+                related.add(rel2);
+                return rel2;
+            }
             if (fhirClient.getStatus() == 200) {
                 Related rel2 = new Related(wrapper, howRelated);
                 related.add(rel2);

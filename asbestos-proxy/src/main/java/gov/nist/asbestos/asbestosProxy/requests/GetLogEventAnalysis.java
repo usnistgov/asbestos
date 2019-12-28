@@ -2,12 +2,11 @@ package gov.nist.asbestos.asbestosProxy.requests;
 
 import com.google.gson.Gson;
 import gov.nist.asbestos.analysis.AnalysisReport;
+import gov.nist.asbestos.analysis.Report;
 import gov.nist.asbestos.client.Base.ProxyBase;
-import gov.nist.asbestos.client.client.FhirClient;
 import gov.nist.asbestos.client.client.Format;
 import gov.nist.asbestos.client.events.UIEvent;
 import gov.nist.asbestos.client.resolver.Ref;
-import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import gov.nist.asbestos.http.headers.Header;
 import gov.nist.asbestos.http.headers.Headers;
 import gov.nist.asbestos.http.operations.Verb;
@@ -93,14 +92,17 @@ public class GetLogEventAnalysis {
                         if (url != null && !url.equals(""))
                             refs.add(new Ref(url));
                     }
-                    returnReport(new AnalysisReport.Report("Do not understand event"));
-                } else
-                    returnReport(new AnalysisReport.Report("Do not understand event"));
+                    runAndReturnReport(bundle, "A Bundle");
+                    //returnReport(new Report("Do not understand event"));
+                } else {
+                    runAndReturnReport(bundle, "A Bundle");
+                    //returnReport(new Report("Do not understand event"));
+                }
             } else if (responseHeaders.hasHeader("Content-Location")) {
                 Ref ref = new Ref(responseHeaders.get("Content-Location").getValue());
                 runAndReturnReport(ref, "link taken from response Content-location header");
             } else {
-                returnReport(new AnalysisReport.Report("Do not understand event"));
+                returnReport(new Report("Do not understand event"));
             }
         } else {
             String query = request.req.getQueryString();
@@ -113,7 +115,7 @@ public class GetLogEventAnalysis {
         }
     }
 
-    private void returnReport(AnalysisReport.Report report) {
+    private void returnReport(Report report) {
         String json = new Gson().toJson(report);
         request.resp.setContentType("application/json");
         try {
@@ -126,7 +128,13 @@ public class GetLogEventAnalysis {
 
     private void runAndReturnReport(Ref ref, String source) {
         AnalysisReport analysisReport = new AnalysisReport(ref, source, request.ec);
-        AnalysisReport.Report report = analysisReport.run();
+        Report report = analysisReport.run();
+        returnReport(report);
+    }
+
+    private void runAndReturnReport(Bundle bundle, String source) {
+        AnalysisReport analysisReport = new AnalysisReport(bundle, source, request.ec);
+        Report report = analysisReport.run();
         returnReport(report);
     }
 
