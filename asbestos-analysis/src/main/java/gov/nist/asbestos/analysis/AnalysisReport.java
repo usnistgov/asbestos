@@ -9,7 +9,9 @@ import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import gov.nist.asbestos.serviceproperties.ServiceProperties;
 import gov.nist.asbestos.serviceproperties.ServicePropertiesEnum;
 import gov.nist.asbestos.simapi.validation.Val;
+import gov.nist.asbestos.testEngine.engine.AssertionRunner;
 import gov.nist.asbestos.testEngine.engine.TestEngine;
+import gov.nist.asbestos.testEngine.engine.assertion.MinimumId;
 import gov.nist.asbestos.utilities.ResourceHasMethodsFilter;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.log4j.Logger;
@@ -55,8 +57,8 @@ public class AnalysisReport {
             report.base.isComprehensive = comprehensiveErrors != null && comprehensiveErrors.isEmpty();
             report.base.minimalErrors = minimalErrors;
             report.base.isMinimal = minimalErrors!= null && minimalErrors.isEmpty();
-            report.base.minimalChecked = minimalChecked == null ? "" : minimalChecked.attsChecked;
-            report.base.comprehensiveChecked = comprehensiveChecked == null ? "" : comprehensiveChecked.attsChecked;
+            report.base.minimalChecked = minimalChecked == null ? new ArrayList<>() : minimalChecked.report.expected;
+            report.base.comprehensiveChecked = comprehensiveChecked == null ? new ArrayList<>() : comprehensiveChecked.report.expected;
             report.base.codingErrors = codingErrors;
             report.base.atts = atts;
             report.base.binaryUrl = binaryUrl;
@@ -71,8 +73,8 @@ public class AnalysisReport {
                 relatedReport.isComprehensive = rel.comprehensiveErrors != null && rel.comprehensiveErrors.isEmpty();
                 relatedReport.minimalErrors = rel.minimalErrors;
                 relatedReport.isMinimal = rel.minimalErrors!= null && rel.minimalErrors.isEmpty();
-                relatedReport.comprehensiveChecked = rel.comprehensiveChecked == null ? "" : rel.comprehensiveChecked.attsChecked;
-                relatedReport.minimalChecked = rel.minimalChecked == null ? "" : rel.minimalChecked.attsChecked;
+                relatedReport.comprehensiveChecked = rel.comprehensiveChecked == null ? new ArrayList<>() : rel.comprehensiveChecked.report.expected;
+                relatedReport.minimalChecked = rel.minimalChecked == null ? new ArrayList<>() : rel.minimalChecked.report.expected;
                 relatedReport.codingErrors = rel.codingErrors;
                 relatedReport.atts = rel.atts;
                 relatedReport.binaryUrl = rel.binaryUrl;
@@ -124,7 +126,7 @@ public class AnalysisReport {
                     return buildReport();
             }
             buildRelated();
-   //         comprehensiveEval();
+            comprehensiveEval();
             minimalEval();
             codingEval();
             buildAtts();
@@ -138,17 +140,23 @@ public class AnalysisReport {
 
     public class Checked {
         String className;
-        String attsChecked;
+        MinimumId.Report report;
         String script;
 
-        Checked(String className, String attsChecked, String script) {
+        Checked(String className, MinimumId.Report report, String script) {
             this.className = className;
-            this.attsChecked = attsChecked;
+            this.report = report;
             this.script = script;
         }
 
+        Checked(MinimumId.Report report) {
+            this.className = "";
+            this.script = "";
+            this.report = report;
+        }
+
         public String toString() {
-            return "Checked: " + className + " Script: " + script + " Atts: " + attsChecked;
+            return "Checked: " + className + " Script: " + script + " Atts: " + report.expected;
         }
     }
 
@@ -181,10 +189,10 @@ public class AnalysisReport {
     private void comprehensiveEval() {
         TestEngine testEngine = comprehensiveEval(baseObj);
         comprehensiveErrors = testEngine.getTestReportErrors();
-        comprehensiveChecked = getFirstAssertDetails(testEngine.getTestReport());
+        comprehensiveChecked = getMinimumIdReport(testEngine.getTestReport());
         for (Related rel : related) {
             testEngine = comprehensiveEval(rel.wrapper);
-            rel.comprehensiveChecked = getFirstAssertDetails(testEngine.getTestReport());
+            rel.comprehensiveChecked = getMinimumIdReport(testEngine.getTestReport());
             rel.comprehensiveErrors = testEngine.getTestReportErrors();
         }
     }
@@ -192,10 +200,10 @@ public class AnalysisReport {
     private void minimalEval() {
         TestEngine testEngine  = minimalEval(baseObj);
         minimalErrors = testEngine.getTestReportErrors();
-        minimalChecked = getFirstAssertDetails(testEngine.getTestReport());
+        minimalChecked = getMinimumIdReport(testEngine.getTestReport());
         for (Related rel : related) {
             testEngine = minimalEval(rel.wrapper);
-            rel.minimalChecked = getFirstAssertDetails(testEngine.getTestReport());
+            rel.minimalChecked = getMinimumIdReport(testEngine.getTestReport());
             rel.minimalErrors = testEngine.getTestReportErrors();
         }
     }
@@ -212,19 +220,18 @@ public class AnalysisReport {
 //        return errors;
     }
 
-    private Checked getFirstAssertDetails(TestReport testReport) {
-        if (testReport == null) return new Checked("", "", "");
+    private Checked getMinimumIdReport(TestReport testReport) {
+        if (testReport == null) return new Checked("", new MinimumId.Report(), "");
         for (TestReport.TestReportTestComponent testComponent : testReport.getTest()) {
             for (TestReport.TestActionComponent actionComponent : testComponent.getAction()) {
                 TestReport.SetupActionAssertComponent assertComponent = actionComponent.getAssert();
                 if (assertComponent != null) {
-                    String detail = assertComponent.getDetail();
-                    if (detail != null && !detail.equals(""))
-                        return new Checked((String)assertComponent.getUserData("Evaluating type"), detail, (String)assertComponent.getUserData("Script"));
+                    if (assertComponent.getUserData(AssertionRunner.RAW_REPORT) != null && assertComponent.getUserData(AssertionRunner.RAW_REPORT) instanceof MinimumId.Report)
+                        return new Checked((MinimumId.Report) assertComponent.getUserData(AssertionRunner.RAW_REPORT));
                 }
             }
         }
-        return new Checked("", "", "");
+        return new Checked(new MinimumId.Report());
     }
 
     private TestEngine minimalEval(ResourceWrapper wrapper) {

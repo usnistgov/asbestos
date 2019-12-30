@@ -28,9 +28,15 @@
                     <span v-else><img src="../../assets/arrow-right.png"></span>
                 </div>
                 <div v-if="listOpen">
-                    <div class="divider"></div>
-                    <div class="divider"></div>
-                    {{ attList }}
+                    <div v-if="Array.isArray(attList)">
+                        <div v-for="(att, atti) in attList"
+                             :key="att + atti">
+                            {{ att }}
+                        </div>
+                    </div>
+                    <div v-else>
+                        {{ attList }}
+                    </div>
                 </div>
             </div>
         </div>

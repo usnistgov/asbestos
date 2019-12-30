@@ -14,8 +14,8 @@ public class RelatedReport {
     List<String> minimalErrors;
     List<String> comprehensiveErrors;
     List<String> codingErrors;
-    String minimalChecked;
-    String comprehensiveChecked;
+    List<String> minimalChecked;
+    List<String> comprehensiveChecked;
     Map atts;
     String binaryUrl;
 

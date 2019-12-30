@@ -81,7 +81,7 @@
                           @click="selectedResourceIndex = resourcei">
                         {{ resource.name }} ({{ resource.relation }})
                         <span class="tooltip">
-                            <img id="focus" class="selectable" src="../../assets/focus.png" @click.stop="loadAnalysisForObjectAndAddHistory(report.objects[resourcei].url)">
+                            <img id="focus" class="selectable" src="../../assets/focus.png" @click.stop="loadAnalysisForObjectAndAddHistory(report.objects[resourcei].url, resourcei)">
                             <span class="tooltiptext">Focus</span>
                         </span>
                     </span>
@@ -130,13 +130,12 @@
                     this.loadAnalysisForObject(this.history[this.index])
                 }
             },
-            historyPush(url) {
-                this.history.push(url)
+            historyClean() {  // remove everything past index
+                this.history.length = this.index + 1
             },
-            historyPeek() {
-                if (this.history.length === 0)
-                    return null
-                return this.history[this.history.length - 1]
+            historyPush(url) {
+                this.historyClean()
+                this.history.push(url)
             },
             async  loadAnalysis() {
                 await this.loadAnalysis2()
@@ -153,8 +152,17 @@
                 this.$store.dispatch('getLogEventAnalysisForObject', resourceUrl)
                 this.selectedResourceIndex = -1
             },
-            loadAnalysisForObjectAndAddHistory(resourceUrl) {
-                this.loadAnalysisForObject(resourceUrl)
+            loadAnalysisForObjectAndAddHistory(resourceUrl, index) {
+                console.log(`resourceUrl is ${resourceUrl}`)
+                console.log(`index is ${index}`)
+                if (this.report.objects[index].url === 'Contained') {
+                    let subReport = {}
+                    subReport.base = this.report.objects[index]
+                        //this.report.objects[index]
+                    this.$store.commit('setAnalysis', subReport)
+                } else {
+                    this.loadAnalysisForObject(resourceUrl)
+                }
                 this.historyPush(resourceUrl)
                 this.index = this.history.length - 1
             },

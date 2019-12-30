@@ -12,7 +12,7 @@ public class MinimumId {
         public List<String> expected = new ArrayList<>();
         public List<String> errors = new ArrayList<>();
 
-        Report() {
+        public Report() {
 
         }
 

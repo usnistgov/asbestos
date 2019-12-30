@@ -216,6 +216,10 @@ public class AssertionRunner {
 
     static private List<String> hide = Arrays.asList("Description", "Id", "Meta", "Text");
 
+    static public final String EVALUATING_TYPE = "Evaluating type";
+    static public final String SCRIPT = "Script";
+    static public final String RAW_REPORT = "Raw Report";
+
     private boolean instMinimumId(TestScript.SetupActionAssertComponent as, boolean warningOnly) {
         FixtureComponent sourceFixture = getSource(as);
         if (sourceFixture == null) return false;
@@ -232,8 +236,8 @@ public class AssertionRunner {
 //        Class<?> miniClass = miniR.getClass();
         Class<?> sourceClass = sourceR.getClass();
 
-//        assertReport.setUserData("Evaluating type", sourceClass.getSimpleName());
-//        assertReport.setUserData("Script", as.getLabel());
+        assertReport.setUserData(EVALUATING_TYPE, sourceClass.getSimpleName());   // resource type being evaluated
+        assertReport.setUserData(SCRIPT, as.getLabel());   // assert label (documentation only - nothing computed)
 
 //        if (!miniClass.equals(sourceClass)) {
 //            assertReport.setUserData("No Comparison", "minimumId: cannot compare " + miniClass.getName() + " and " + sourceClass.getName());
@@ -247,6 +251,10 @@ public class AssertionRunner {
             assertReport.setResult(TestReport.TestReportActionResult.SKIP);
             return false;
         }
+
+        // This UserData is a properties style list for private transport between components
+        // It is used here to pass back the raw MinimumId.Report to the caller which might be AnalysisReport.java
+        assertReport.setUserData(RAW_REPORT, report);
 
         assertReport.setDetail(
                 "[" +
