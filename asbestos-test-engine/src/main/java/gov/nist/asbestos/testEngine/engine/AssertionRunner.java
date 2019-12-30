@@ -232,8 +232,8 @@ public class AssertionRunner {
 //        Class<?> miniClass = miniR.getClass();
         Class<?> sourceClass = sourceR.getClass();
 
-        assertReport.setUserData("Evaluating type", sourceClass.getSimpleName());
-        assertReport.setUserData("Script", as.getLabel());
+//        assertReport.setUserData("Evaluating type", sourceClass.getSimpleName());
+//        assertReport.setUserData("Script", as.getLabel());
 
 //        if (!miniClass.equals(sourceClass)) {
 //            assertReport.setUserData("No Comparison", "minimumId: cannot compare " + miniClass.getName() + " and " + sourceClass.getName());

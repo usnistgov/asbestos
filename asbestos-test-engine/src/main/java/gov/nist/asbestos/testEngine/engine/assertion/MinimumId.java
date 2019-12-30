@@ -2,7 +2,6 @@ package gov.nist.asbestos.testEngine.engine.assertion;
 
 import gov.nist.asbestos.utilities.ResourceHasMethodsFilter;
 import org.hl7.fhir.r4.model.BaseResource;
-import org.hl7.fhir.r4.model.TestReport;
 
 import java.util.*;
 
