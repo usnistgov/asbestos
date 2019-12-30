@@ -1,0 +1,9 @@
+<DocumentReference>
+    <securityLabel>
+        <coding>
+            <system value="http://terminology.hl7.org/CodeSystem/v3-Confidentiality"/>
+            <code value="N"/>
+            <display value="normal"/>
+        </coding>
+    </securityLabel>
+</DocumentReference>

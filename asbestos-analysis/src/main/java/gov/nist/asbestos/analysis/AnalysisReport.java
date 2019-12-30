@@ -124,7 +124,7 @@ public class AnalysisReport {
                     return buildReport();
             }
             buildRelated();
-            comprehensiveEval();
+   //         comprehensiveEval();
             minimalEval();
             codingEval();
             buildAtts();
