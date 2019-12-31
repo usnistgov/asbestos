@@ -226,7 +226,7 @@
             toggleEdit() {
                 this.edit = !this.edit
             },
-            save() {
+            async save() {
                 const that = this
                 if (this.isNew) {
                     if (this.isCurrentChannelIdNew()) {
@@ -239,13 +239,13 @@
                         this.badNameModeReason = `Name may only contain a-z A-Z 0-9 _  and __ not allowed`
                         return
                     }
-                    this.saveToServer(this.channel)
-                    this.$store.commit('installChannel', cloneDeep(this.channel))
-                    this.$store.commit('deleteChannel', this.originalChannelId) // original has been renamed
-                    this.isNew = false
-                    this.toggleEdit()
-                    this.$router.push('/session/' + this.channel.testSession + '/channels/' + this.channel.channelId)
-                    return
+                    await this.saveToServer(this.channel).then (response => {
+                        this.$store.commit('installChannel', cloneDeep(this.channel))
+                        this.$store.commit('deleteChannel', this.originalChannelId) // original has been renamed
+                        this.isNew = false
+                        this.toggleEdit()
+                        this.$router.push('/session/' + this.channel.testSession + '/channels/' + this.channel.channelId)
+                    })
                 }
                 this.$store.commit('installChannel', cloneDeep(this.channel))
                 CHANNEL.post('', this.channel)
