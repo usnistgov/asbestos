@@ -33,7 +33,7 @@
         <sourceId value="read-back"/>
     </variable>
     <test>
-        <description value="Submit Provide Document Bundle to MHD Document Recipient and verify response."/>
+        <description value="Submit Provide Document Bundle to MHD Document Recipient and verify response. The DocumentReference is missing so the transaction must fail (400)."/>
         <action>
             <operation>
                 <!-- references patient from resourceCache in EC -->
@@ -49,14 +49,14 @@
         </action>
         <action>
             <assert>
-                <description value="... fails"/>
+                <description value="... transaction fails with status 400"/>
                 <response value="bad"/>
                 <warningOnly value="false"/>
             </assert>
         </action>
         <action>
             <assert>
-                <description value="... return OperationOutcome"/>
+                <description value="... transaction returns OperationOutcome"/>
                 <compareToSourceId value="pdb-response"/>
                 <compareToSourceExpression value="where(OperationOutcome).exists()"/>
                 <warningOnly value="false"/>

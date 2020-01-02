@@ -33,7 +33,7 @@
         <sourceId value="read-back"/>
     </variable>
     <test>
-        <description value="Submit Provide Document Bundle to MHD Document Recipient and verify response. The DocumentReference is not Comprehensive Metadata compliant. It is missing the masterIdentifier."/>
+        <description value="Submit Provide Document Bundle to MHD Document Recipient and verify response. The DocumentReference is not Comprehensive Metadata compliant. It is missing the masterIdentifier. The transaction must fail with status 400."/>
         <!--
             Actions generic to all PDB transactions
         -->
@@ -52,14 +52,14 @@
         </action>
         <action>
             <assert>
-                <description value="... transaction fails"/>
+                <description value="... transaction fails with status 400."/>
                 <response value="bad"/>
                 <warningOnly value="false"/>
             </assert>
         </action>
         <action>
             <assert>
-                <description value="... return OperationOutcome"/>
+                <description value="... verify transaction returns OperationOutcome"/>
                 <compareToSourceId value="pdb-response"/>
                 <compareToSourceExpression value="where(OperationOutcome).exists()"/>
                 <warningOnly value="false"/>

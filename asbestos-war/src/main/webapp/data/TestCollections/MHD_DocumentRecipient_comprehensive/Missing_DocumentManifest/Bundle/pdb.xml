@@ -139,8 +139,8 @@
                     <facilityType>
                         <coding>
                             <system value="http://snomed.info/sct"/>
-                            <code value="35971002"/>
-                            <display value="Ambulatory care site"/>
+                            <code value="264372000"/>
+                            <display value="Pharmacy"/>
                         </coding>
                     </facilityType>
                 </context>

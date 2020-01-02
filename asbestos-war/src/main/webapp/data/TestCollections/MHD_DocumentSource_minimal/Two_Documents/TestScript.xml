@@ -9,13 +9,14 @@
     -->
 
     <variable>
-        <name value="DocRefFullUrl"/>
-        <expression value="Bundle.entry.resource.where(is(FHIR.DocumentReference)).item(0)"/>
+        <name value="DocRefFullUrl1"/>
+        <description value="Bundle.entry.fullUrl of first DocumentReference"/>
+        <expression value="Bundle.entry.where(resource is DocumentReference).fullUrl.item(0)"/>
         <sourceId value="request"/>
     </variable>
     <variable>
         <name value="DocRefFullUrl2"/>
-        <expression value="Bundle.entry.resource.where(is(FHIR.DocumentReference)).item(1)"/>
+        <expression value="Bundle.entry.where(resource is DocumentReference).fullUrl.item(1)"/>
         <sourceId value="request"/>
     </variable>
     <test>
@@ -37,9 +38,7 @@
                 <warningOnly value="false"/>
             </assert>
         </action>
-<!--
-        No way to assert that content type must be XX or YY - do later
--->
+
         <action>
             <assert>
                 <description value="Verb is POST|MHDPDBUsesPost"/>
@@ -57,15 +56,15 @@
         </action>
         <action>
             <assert>
-                <description value="Request includes multiple DocumentReferences|MHDPDBOnePlusDocumentReference"/>
+                <description value="Request includes two DocumentReferences|MHDPDBOnePlusDocumentReference"/>
                 <compareToSourceId value="request"/>
-                <compareToSourceExpression value="Bundle.entry.where(resource.is(FHIR.DocumentReference)).count() > 1"/>
+                <compareToSourceExpression value="Bundle.entry.where(resource.is(FHIR.DocumentReference)).count() = 2"/>
                 <warningOnly value="false"/>
             </assert>
         </action>
         <action>
             <assert>
-                <description value="Comprehensive or Minimal metadata|MHDPDBMetadataType"/>
+                <description value="Comprehensive or Minimal metadata identified in profile|MHDPDBMetadataType"/>
                 <compareToSourceId value="request"/>
                 <compareToSourceExpression value="Bundle.meta.profile = 'http://ihe.net/fhir/StructureDefinition/IHE_MHD_Provide_Comprehensive_DocumentBundle' or Bundle.meta.profile='http://ihe.net/fhir/StructureDefinition/IHE_MHD_Provide_Minimal_DocumentBundle'"/>
                 <warningOnly value="false"/>
@@ -83,7 +82,15 @@
             <assert>
                 <description value="First linked DocumentReference is in Bundle"/>
                 <compareToSourceId value="request"/>
-                <compareToSourceExpression value="Bundle.entry.resource.where(is(FHIR.DocumentManifest)).content.reference.item(0) = ${DocRefFullUrl} or Bundle.entry.resource.where(is(FHIR.DocumentManifest)).content.reference.item(0) = ${DocRefFullUrl2}"/>
+                <compareToSourceExpression value="Bundle.entry.select(resource is DocumentManifest).content.reference.item(0) = ${DocRefFullUrl1} or Bundle.entry.select(resource is DocumentManifest).content.reference.item(0) = ${DocRefFullUrl2}"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
+            <assert>
+                <description value="Second linked DocumentReference is in Bundle"/>
+                <compareToSourceId value="request"/>
+                <compareToSourceExpression value="Bundle.entry.select(resource is DocumentManifest).content.reference.item(1) = ${DocRefFullUrl1} or Bundle.entry.select(resource is DocumentManifest).content.reference.item(1) = ${DocRefFullUrl2}"/>
                 <warningOnly value="false"/>
             </assert>
         </action>
@@ -115,7 +122,7 @@
             <assert>
                 <description value="Link to Patient is absolute external reference|MHDPDBPatientReference"/>
                 <compareToSourceId value="request"/>
-                <compareToSourceExpression value="Bundle.entry.resource.where(is(FHIR.DocumentReference)).subject.reference.value.startsWith('http')"/>
+                <compareToSourceExpression value="Bundle.entry.resource.where(is(FHIR.DocumentReference)).subject.reference.value"/>
                 <warningOnly value="false"/>
             </assert>
         </action>

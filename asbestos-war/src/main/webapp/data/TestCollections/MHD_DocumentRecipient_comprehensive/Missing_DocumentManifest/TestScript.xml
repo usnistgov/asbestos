@@ -49,14 +49,14 @@
         </action>
         <action>
             <assert>
-                <description value="... fails"/>
+                <description value="... transaction fails with status 400"/>
                 <response value="bad"/>
                 <warningOnly value="false"/>
             </assert>
         </action>
         <action>
             <assert>
-                <description value="... return OperationOutcome"/>
+                <description value="... transaction returns OperationOutcome"/>
                 <compareToSourceId value="pdb-response"/>
                 <compareToSourceExpression value="where(OperationOutcome).exists()"/>
                 <warningOnly value="false"/>
