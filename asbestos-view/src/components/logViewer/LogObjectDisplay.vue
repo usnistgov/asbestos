@@ -8,30 +8,30 @@
             </span>
         </div>
         <div v-if="report.url">
-            <span class="caption"> Ref:</span>
+            <span class="caption"> Url:</span>
             {{ report.url }}
         </div>
 
         <div v-if="report.name === 'DocumentManifest' || report.name === 'DocumentReference'">
             <div>
-                <span>Comprehensive Metadata </span>
+                <span class="caption">Comprehensive Metadata </span>
                 <span v-if="report.isComprehensive"><img src="../../assets/check.png"></span>
                 <span v-else><img src="../../assets/cross.png"></span>
                 <div class="divider"></div>
-                <log-error-list :errorList="report.comprehensiveErrors" :attList="report.comprehensiveChecked" :att-list-name="'Required Attributes'"> </log-error-list>
+                <log-error-list :errorList="report.comprehensiveErrors" :attList="report.comprehensiveChecked" :att-list-name="'Required'" :start-open="true"> </log-error-list>
             </div>
             <div>
-                <span>Minimal Metadata </span>
+                <span class="caption">Minimal Metadata </span>
                 <span v-if="report.isMinimal"><img src="../../assets/check.png"></span>
                 <span v-else><img src="../../assets/cross.png"></span>
                 <div class="divider"></div>
-                <log-error-list :errorList="report.minimalErrors" :attList="report.minimalChecked" :att-list-name="'Required Attributes'"> </log-error-list>
+                <log-error-list :errorList="report.minimalErrors" :attList="report.minimalChecked" :att-list-name="'Required'" :start-open="true"> </log-error-list>
             </div>
             <div>
                 <span class="caption">Coding</span>
                 <span v-if="report.codingErrors.length === 0"><img src="../../assets/check.png"></span>
                 <span v-else><img src="../../assets/cross.png"></span>
-                <log-error-list :errorList="report.codingErrors"> </log-error-list>
+                <log-error-list :att-list="report.codingErrors" :att-list-name="'Coding Errors'" :start-open="true"> </log-error-list>
             </div>
         </div>
         <div v-if="report.name === 'Binary'">

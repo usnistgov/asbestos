@@ -8,38 +8,23 @@
             <span v-else><img src="../../assets/arrow-right.png"  @click.stop="open = !open"></span>
         </span>
         <div v-if="open">
-            <div v-if="errorList.length > 0">
-                <div v-for="(error, errori) in errorList"
-                    :key="error + errori">
-                    <div class="divider"></div>
-                    {{ error }}
-                </div>
-            </div>
-            <div v-else>
-                    <div class="divider"></div>
-                No Errors
-            </div>
-
-            <div v-if="attListName">
-                <div class="has-cursor" @click.stop="listOpen = !listOpen">
+                <div v-if="attListName" class="has-cursor" @click.stop="listOpen = !listOpen">
                     <div class="divider"></div>
                     {{ attListName }}
                     <span v-if="listOpen"><img src="../../assets/arrow-down.png"></span>
                     <span v-else><img src="../../assets/arrow-right.png"></span>
                 </div>
-                <div v-if="listOpen">
-                    <div v-if="Array.isArray(attList)">
-                        <div v-for="(att, atti) in attList"
-                             :key="att + atti">
-                            {{ att }}
-                        </div>
-                    </div>
-                    <div v-else>
-                        {{ attList }}
+                <div v-if="listOpen || !attListName">
+                    <div v-for="(att, atti) in attList"
+                         :key="att + atti">
+                        <div class="divider"></div>
+                        <div class="divider"></div>
+                        <div class="divider"></div>
+                        {{ att }}
+                        <span v-if="errorList && errorList.indexOf(att) >= 0" class="red">Missing</span>
                     </div>
                 </div>
             </div>
-        </div>
     </span>
 </template>
 
@@ -51,8 +36,13 @@
                 listOpen: false,
             }
         },
+        created() {
+            if (this.startOpen) {
+                this.listOpen = true
+            }
+        },
         props: [
-            'errorList', 'attList', 'attListName'
+            'errorList', 'attList', 'attListName', 'startOpen'
         ],
         name: "LogErrorList"
     }
@@ -62,6 +52,9 @@
     .details {
         font-size: smaller;
         /*border: 1px solid rgba(0, 0, 0, 0.8);*/
+    }
+    .red {
+        color: red;
     }
 
 </style>

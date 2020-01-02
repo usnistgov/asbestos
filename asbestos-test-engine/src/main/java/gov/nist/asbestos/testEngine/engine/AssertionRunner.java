@@ -200,7 +200,7 @@ public class AssertionRunner {
             Reporter.reportError(val, assertReport, type, label,"Fixture referenced " + sourceFixture.getId()  + " has no resource");
             return false;
         }
-        String expression = as.getCompareToSourceExpression();
+        String expression = variableMgr.updateReference(as.getCompareToSourceExpression());
         String found;
         try {
             found = FhirPathEngineBuilder.evalForString(sourceResource, expression);
@@ -219,6 +219,7 @@ public class AssertionRunner {
     static public final String EVALUATING_TYPE = "Evaluating type";
     static public final String SCRIPT = "Script";
     static public final String RAW_REPORT = "Raw Report";
+//    static public final String ATTS_NOT_FOUND = "Atts Not Found";
 
     private boolean instMinimumId(TestScript.SetupActionAssertComponent as, boolean warningOnly) {
         FixtureComponent sourceFixture = getSource(as);
@@ -270,44 +271,6 @@ public class AssertionRunner {
             return false;
         }
 
-//        List<String> checkedAttNames = new ArrayList<>();
-//        List<String> missingAttNames = new ArrayList<>();
-//        Method[] methods = miniClass.getMethods();
-//        for (Method method : methods) {
-//            String name = method.getName();
-//            if (!name.startsWith("has"))
-//                continue;
-//            boolean miniHas;
-//            boolean sourceHas;
-//            try {
-//                miniHas = (boolean) method.invoke(miniR);
-//                sourceHas = (boolean) method.invoke(sourceR);
-//                String attName = name.substring(3);
-//
-//                if (!attName.endsWith("Element") && !hide.contains(attName)) {
-//                    if (miniHas)
-//                        checkedAttNames.add(attName);
-//                    if (miniHas && !sourceHas) {
-//                        missingAttNames.add(attName);
-//                    }
-//                }
-//            } catch (Exception e) {
-//            }
-//        }
-//        assertReport.setDetail(
-//                 "[" +
-//                    checkedAttNames.stream()
-//                            .collect(Collectors.joining(", "))
-//                + "]");
-//        if (missingAttNames.isEmpty()) {
-//            Reporter.reportPass(val, assertReport, type, label, "pass");
-//            return true;
-//        } else {
-//            String atts = missingAttNames.stream()
-//                    .collect(Collectors.joining(", "));
-//            Reporter.reportFail(val, assertReport, type, label, "minimumId: attributes [" + atts + "] not found ", warningOnly);
-//            return false;
-//        }
     }
 
     private boolean instResource(TestScript.SetupActionAssertComponent as, boolean warningOnly) {

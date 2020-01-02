@@ -56,14 +56,14 @@ public class CodesValidation {
         }
         if (documentReference.hasContext()) {
             check(documentReference.getContext().getEvent(), "event", "eventCodeList", errors);
-            check(documentReference.getContext().getFacilityType(), "facilityType", "healthcareFacilityType", errors);
+            check(documentReference.getContext().getFacilityType(), "facilityType", "healthcareFacilityTypeCode", errors);
             check(documentReference.getContext().getPracticeSetting(), "practiceSetting", "practiceSettingCode", errors);
         }
 
         return errors;
     }
 
-    private void check(Coding coding, String fhirCodeName, String xdsCodeName, List<String> errors) {
+    public void check(Coding coding, String fhirCodeName, String xdsCodeName, List<String> errors) {
         if (coding == null)
             return;
         boolean error = false;
@@ -79,7 +79,7 @@ public class CodesValidation {
             return;
         Optional<Code> code = codeTranslator.findCodeBySystem(xdsCodeName, coding.getSystem(), coding.getCode());
         if (!code.isPresent())
-            errors.add(fhirCodeName + ": " + coding.getSystem() + "|" + coding.getCode() + " cannot be translated");
+            errors.add(fhirCodeName + ": " + coding.getSystem() + "|" + coding.getCode() + " is not registered");
     }
 
     private void check(List<CodeableConcept> codeableConcepts, String fhirCodeName, String xdsCodeName, List<String> errors) {

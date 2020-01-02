@@ -48,13 +48,32 @@ public class VariableMgr {
         return reference.contains("${");
     }
 
+    private int variableCount(String reference) {
+        if (reference == null)
+            return 0;
+        int count = 0;
+        int pos = 0;
+        while (pos != -1) {
+            pos = reference.indexOf("${", pos);
+            if (pos != -1) {
+                count++;
+                pos += 2;
+            }
+        }
+        return count;
+    }
+
     String updateReference(String reference) {
         if (reference == null)
             return null;
+        int variableCount = variableCount(reference);
         for (int i=0; i<50; i++) {
             if (!containsVariable(reference))
                 return reference;
             reference = updateReference1(reference);
+            int variableCount2 = variableCount(reference);
+            if (variableCount2 == variableCount) // stuck
+                break;
         }
         Variable var = getNextVariable(reference);
         if (var != null) {

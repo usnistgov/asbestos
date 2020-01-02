@@ -53,10 +53,10 @@ public class AnalysisReport {
 
         if (baseObj != null && baseObj.getResource() != null) {
             report.base = new RelatedReport(baseObj, "");
-            report.base.comprehensiveErrors = comprehensiveErrors;
-            report.base.isComprehensive = comprehensiveErrors != null && comprehensiveErrors.isEmpty();
-            report.base.minimalErrors = minimalErrors;
-            report.base.isMinimal = minimalErrors!= null && minimalErrors.isEmpty();
+            report.base.comprehensiveErrors = comprehensiveChecked == null ? new ArrayList<>() : comprehensiveChecked.report.missing; //comprehensiveErrors;
+            report.base.isComprehensive = report.base.comprehensiveErrors.isEmpty(); // comprehensiveErrors != null && comprehensiveErrors.isEmpty();
+            report.base.minimalErrors = minimalChecked == null ? new ArrayList<>() : minimalChecked.report.missing; //minimalErrors;
+            report.base.isMinimal = report.base.minimalErrors.isEmpty(); //minimalErrors!= null && minimalErrors.isEmpty();
             report.base.minimalChecked = minimalChecked == null ? new ArrayList<>() : minimalChecked.report.expected;
             report.base.comprehensiveChecked = comprehensiveChecked == null ? new ArrayList<>() : comprehensiveChecked.report.expected;
             report.base.codingErrors = codingErrors;
@@ -69,10 +69,10 @@ public class AnalysisReport {
             BaseResource resource = wrapper.getResource();
             RelatedReport relatedReport = new RelatedReport(wrapper, rel.howRelated);
             if (resource != null) {
-                relatedReport.comprehensiveErrors = rel.comprehensiveErrors;
-                relatedReport.isComprehensive = rel.comprehensiveErrors != null && rel.comprehensiveErrors.isEmpty();
-                relatedReport.minimalErrors = rel.minimalErrors;
-                relatedReport.isMinimal = rel.minimalErrors!= null && rel.minimalErrors.isEmpty();
+                relatedReport.comprehensiveErrors = rel.comprehensiveChecked == null ? new ArrayList<>() : rel.comprehensiveChecked.report.missing;
+                relatedReport.isComprehensive = relatedReport.comprehensiveErrors.isEmpty(); //rel.comprehensiveErrors != null && rel.comprehensiveErrors.isEmpty();
+                relatedReport.minimalErrors = rel.minimalChecked == null ? new ArrayList<>() : rel.minimalChecked.report.missing;
+                relatedReport.isMinimal = relatedReport.minimalErrors.isEmpty();  //rel.minimalErrors!= null && rel.minimalErrors.isEmpty();
                 relatedReport.comprehensiveChecked = rel.comprehensiveChecked == null ? new ArrayList<>() : rel.comprehensiveChecked.report.expected;
                 relatedReport.minimalChecked = rel.minimalChecked == null ? new ArrayList<>() : rel.minimalChecked.report.expected;
                 relatedReport.codingErrors = rel.codingErrors;
@@ -188,8 +188,9 @@ public class AnalysisReport {
 
     private void comprehensiveEval() {
         TestEngine testEngine = comprehensiveEval(baseObj);
+        Checked checked = getMinimumIdReport(testEngine.getTestReport());
         comprehensiveErrors = testEngine.getTestReportErrors();
-        comprehensiveChecked = getMinimumIdReport(testEngine.getTestReport());
+        comprehensiveChecked = checked;
         for (Related rel : related) {
             testEngine = comprehensiveEval(rel.wrapper);
             rel.comprehensiveChecked = getMinimumIdReport(testEngine.getTestReport());

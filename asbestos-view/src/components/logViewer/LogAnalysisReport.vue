@@ -167,11 +167,13 @@
                 this.index = this.history.length - 1
             },
             objectDisplayClass: function (resource) {
+                const defined = ['DocumentManifest', 'DocumentReference', 'Patient', 'Binary']
                 return {
                     manifest: resource.name === 'DocumentManifest',
                     ref: resource.name === 'DocumentReference',
                     patient: resource.name === 'Patient',
-                    binary: resource.name === 'Binary'
+                    binary: resource.name === 'Binary',
+                    other: defined.indexOf(resource.name) < 0
                 }
             },
         },
@@ -241,6 +243,13 @@
 }
     .patient {
         background-color: #999988;
+        border: 1px solid rgba(0, 0, 0, 0.8);
+        text-align: center;
+        cursor: pointer;
+        padding: 5px;
+    }
+    .other {
+        background-color: bisque;
         border: 1px solid rgba(0, 0, 0, 0.8);
         text-align: center;
         cursor: pointer;

@@ -35,6 +35,20 @@ class FhirPathEngineBuilder {
         List<Base> results = build().evaluate(resource, expression);
         if (results.isEmpty())
             return null;
+        if (results.size() > 1) {
+            StringBuilder buf = new StringBuilder();
+            buf.append("[");
+            boolean first = true;
+            for (Base base : results) {
+                if (first)
+                    first = false;
+                else
+                    buf.append(", ");
+                buf.append(base.getClass().getSimpleName());
+            }
+            buf.append("]");
+            return buf.toString();
+        }
         Base result = results.get(0);
         if (result instanceof StringType) {
             return ((StringType) result).getValueAsString();
@@ -54,6 +68,7 @@ class FhirPathEngineBuilder {
         if (result instanceof DateType) {
             return ((DateType) result).getValueAsString();
         }
-        return null;
+        //return null;
+        return result.getClass().getSimpleName();
     }
 }
