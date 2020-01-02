@@ -16,7 +16,8 @@
         <jdk.version>1.8</jdk.version>
         <mavenCompilerPluginVersion>3.3</mavenCompilerPluginVersion>
         <mavenWarPluginVersion>3.2.2</mavenWarPluginVersion>
-        <hapi.version>3.7.0</hapi.version>
+        <hapi.version>4.1.0</hapi.version>
+<!--        <hapi.version>3.7.0</hapi.version>-->
         <jackson.version>2.6.3</jackson.version>
         <jersey.version>2.22.1</jersey.version>
     </properties>
@@ -65,6 +66,7 @@
         <module>asbestos-test-engine</module>
         <module>service-properties</module>
         <module>asbestos-analysis</module>
+        <module>fhirPathBug</module>
     </modules>
 
     <dependencyManagement>

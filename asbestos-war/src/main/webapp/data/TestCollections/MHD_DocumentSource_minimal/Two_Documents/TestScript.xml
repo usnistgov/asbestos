@@ -22,6 +22,7 @@
     <test>
         <name value="Evaluations"/>
         <description value="The Description"/>
+        <!--
         <action>
             <assert>
                 <description value="Request is Bundle|MHDPDBRequestIsBundle"/>
@@ -78,11 +79,12 @@
                 <warningOnly value="false"/>
             </assert>
         </action>
+        -->
         <action>
             <assert>
                 <description value="First linked DocumentReference is in Bundle"/>
                 <compareToSourceId value="request"/>
-                <compareToSourceExpression value="Bundle.entry.select(resource is DocumentManifest).content.reference.item(0) = ${DocRefFullUrl1} or Bundle.entry.select(resource is DocumentManifest).content.reference.item(0) = ${DocRefFullUrl2}"/>
+                <compareToSourceExpression value="Bundle.entry.resource.where(is(FHIR.DocumentManifest)).content.reference.item(0) = '${DocRefFullUrl1}' or Bundle.entry.resource.where(is(FHIR.DocumentManifest)).content.reference.item(1) = '${DocRefFullUrl1}'"/>
                 <warningOnly value="false"/>
             </assert>
         </action>
@@ -90,7 +92,7 @@
             <assert>
                 <description value="Second linked DocumentReference is in Bundle"/>
                 <compareToSourceId value="request"/>
-                <compareToSourceExpression value="Bundle.entry.select(resource is DocumentManifest).content.reference.item(1) = ${DocRefFullUrl1} or Bundle.entry.select(resource is DocumentManifest).content.reference.item(1) = ${DocRefFullUrl2}"/>
+                <compareToSourceExpression value="Bundle.entry.resource.where(is(FHIR.DocumentManifest)).content.reference.item(0) = '${DocRefFullUrl2}' or Bundle.entry.resource.where(is(FHIR.DocumentManifest)).content.reference.item(1) = '${DocRefFullUrl2}'"/>
                 <warningOnly value="false"/>
             </assert>
         </action>

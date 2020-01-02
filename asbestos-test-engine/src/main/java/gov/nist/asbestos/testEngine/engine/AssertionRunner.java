@@ -211,7 +211,7 @@ public class AssertionRunner {
         if ("true".equals(found))
             return Reporter.reportPass(val, assertReport, type, label, expression);
 
-        return Reporter.reportFail(val, assertReport, type, label, "assertion failed - " + expression, warningOnly);
+        return Reporter.reportFail(val, assertReport, type, label, "assertion failed - " + expression + " ==> " + found, warningOnly);
     }
 
     static private List<String> hide = Arrays.asList("Description", "Id", "Meta", "Text");
