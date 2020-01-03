@@ -53,9 +53,17 @@
         </action>
         <action>
             <assert>
-                <description value="PDB: DocumentManifest links to DocumentReferences in bundle"/>
+                <description value="PDB: All DocumentReferences in Bundle are linked to DocumentManifest"/>
                 <compareToSourceId value="request"/>
-                <compareToSourceExpression value="Bundle.entry.where(resource.is(FHIR.DocumentReference)).fullUrl = Bundle.entry.resource.where(is(FHIR.DocumentManifest)).content.reference"/>
+                <compareToSourceExpression value="Bundle.entry.where(resource.is(FHIR.DocumentReference)).fullUrl in Bundle.entry.resource.where(is(FHIR.DocumentManifest)).content.reference"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
+            <assert>
+                <description value="PDB: DocumentManifest links to only DocumentReferences that are in Bundle"/>
+                <compareToSourceId value="request"/>
+                <compareToSourceExpression value="Bundle.entry.resource.where(is(FHIR.DocumentManifest)).content.reference in Bundle.entry.where(resource.is(FHIR.DocumentReference)).fullUrl"/>
                 <warningOnly value="false"/>
             </assert>
         </action>
@@ -69,12 +77,23 @@
         </action>
         <action>
             <assert>
-                <description value="PDB: if DocumentReference.identifier carries the entryUUID then it shall be labeled official"/>
+                <description value="PDB: {DocumentReference, DocumentManifest}.subject.reference must reference same Patient resource"/>
                 <compareToSourceId value="request"/>
-                <compareToSourceExpression value="Bundle.entry.resource.(is(FHIR.DocumentReference) and identifier.use = 'official' implies identifier.value.startsWith('urn:uuid:'))"/>
+                <compareToSourceExpression value="Bundle.entry.resource.where(is(FHIR.DocumentManifest)).subject.reference = Bundle.entry.resource.where(is(FHIR.DocumentReference)).subject.reference"/>
                 <warningOnly value="false"/>
             </assert>
         </action>
+        <action>
+            <assert>
+                <description value="PDB: if DocumentReference.identifier carries the entryUUID then it shall be labeled official"/>
+                <compareToSourceId value="request"/>
+                <compareToSourceExpression value="Bundle.entry.resource.where(is(FHIR.DocumentReference) and identifier.use = 'official')"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <!--
+        .identifier.value.startsWith('urn:uuid:')
+        -->
         <action>
             <assert>
                 <description value="Transaction: Request is Bundle|MHDPDBRequestIsBundle"/>

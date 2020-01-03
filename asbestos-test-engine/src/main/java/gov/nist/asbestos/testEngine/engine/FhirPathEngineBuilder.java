@@ -44,7 +44,11 @@ class FhirPathEngineBuilder {
                     first = false;
                 else
                     buf.append(", ");
-                buf.append(base.getClass().getSimpleName());
+                String simpleName = base.getClass().getSimpleName();
+                if (simpleName.equals("StringType")) {
+                    buf.append(simpleName).append("[").append(base.toString()).append("]");
+                } else
+                    buf.append(simpleName);
             }
             buf.append("]");
             return buf.toString();
