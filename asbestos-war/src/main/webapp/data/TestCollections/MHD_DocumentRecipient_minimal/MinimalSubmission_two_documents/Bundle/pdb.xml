@@ -28,7 +28,7 @@
                 <content>
                     <attachment>
                         <contentType value="text/plain"/>
-                        <url value="binary1"/>
+                        <url value="urn:uuid:1.2.129.6.58.922.88336.4"/>
                     </attachment>
                     <format>
                         <system value="urn:oid:1.3.6.1.4.1.19376.1.2.3"/>
@@ -43,7 +43,7 @@
         </request>
     </entry>
     <entry>
-        <fullUrl value="docref2"/>
+        <fullUrl value="urn:uuid:1.2.129.6.58.922.88336.2"/>
         <resource>
             <DocumentReference>
                 <masterIdentifier>
@@ -65,7 +65,7 @@
                 <content>
                     <attachment>
                         <contentType value="text/plain"/>
-                        <url value="binary2"/>
+                        <url value="urn:uuid:1.2.129.6.58.922.88336.5"/>
                     </attachment>
                     <format>
                         <system value="urn:oid:1.3.6.1.4.1.19376.1.2.3"/>
@@ -76,11 +76,11 @@
         </resource>
         <request>
             <method value="POST"/>
-            <url value="docref2"/>
+            <url value="urn:uuid:1.2.129.6.58.922.88336.2"/>
         </request>
     </entry>
     <entry>
-        <fullUrl value="manifest"/>
+        <fullUrl value="urn:uuid:1.2.129.6.58.922.88336.3"/>
         <resource>
             <DocumentManifest xmlns="http://hl7.org/fhir">
                 <text>
@@ -100,17 +100,17 @@
                     <reference value="urn:uuid:1.2.129.6.58.922.88336.1"/>
                 </content>
                 <content>
-                    <reference value="docref2"/>
+                    <reference value="urn:uuid:1.2.129.6.58.922.88336.2"/>
                 </content>
             </DocumentManifest>
         </resource>
         <request>
             <method value="POST"/>
-            <url value="manifest"/>
+            <url value="urn:uuid:1.2.129.6.58.922.88336.3"/>
         </request>
     </entry>
     <entry>
-        <fullUrl value="binary1"/>
+        <fullUrl value="urn:uuid:1.2.129.6.58.922.88336.4"/>
         <resource>
             <Binary>
                 <meta>
@@ -122,11 +122,11 @@
         </resource>
         <request>
             <method value="POST"/>
-            <url value="binary1"/>
+            <url value="urn:uuid:1.2.129.6.58.922.88336.4"/>
         </request>
     </entry>
     <entry>
-        <fullUrl value="binary2"/>
+        <fullUrl value="urn:uuid:1.2.129.6.58.922.88336.5"/>
         <resource>
             <Binary>
                 <meta>
@@ -138,7 +138,7 @@
         </resource>
         <request>
             <method value="POST"/>
-            <url value="binary2"/>
+            <url value="urn:uuid:1.2.129.6.58.922.88336.5"/>
         </request>
     </entry>
 </Bundle>

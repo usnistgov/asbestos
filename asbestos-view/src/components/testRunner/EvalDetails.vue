@@ -267,7 +267,7 @@
         /*font-size: larger;*/
     }
     .error {
-        background-color: #0074D9 ;
+        background-color: cornflowerblue ;
         text-align: left;
         border: 1px dotted black;
         cursor: pointer;
