@@ -4,16 +4,16 @@
             <!--            <div v-if="script.description">-->
             <!--                {{ script.description }}-->
             <!--            </div>-->
-            <div v-for="(fixture, i) in fixtures"
-                 :key="i">
-                <span class="name" >Fixture: </span>
-                <span class="value">{{ fixture.id }}</span>
-            </div>
-            <div v-for="(variable, i) in variables"
-                 :key="'Var' + i">
-                <span class="name" >Variable: </span>
-                <span class="value">{{ variable.name }}</span>
-            </div>
+<!--            <div v-for="(fixture, i) in fixtures"-->
+<!--                 :key="i">-->
+<!--                <span class="name" >Fixture: </span>-->
+<!--                <span class="value">{{ fixture.id }}</span>-->
+<!--            </div>-->
+<!--            <div v-for="(variable, i) in variables"-->
+<!--                 :key="'Var' + i">-->
+<!--                <span class="name" >Variable: </span>-->
+<!--                <span class="value">{{ variable.name }}</span>-->
+<!--            </div>-->
 
             <!--   add SETUP here  -->
 
@@ -190,6 +190,9 @@
             }
         },
         created() {
+            if (this.runEval) {
+                this.$store.dispatch('runEval', this.testId)
+            }
             this.loadTestScript()
             this.loadTestReport()
         },
@@ -208,7 +211,7 @@
         },
         mixins: [ errorHandlerMixin ],
         props: [
-            'sessionId', 'channelId', 'testCollection', 'testId', 'eventId'
+            'sessionId', 'channelId', 'testCollection', 'testId', 'eventId', 'runEval'
         ],
         components: {
             //EvalReportAssert

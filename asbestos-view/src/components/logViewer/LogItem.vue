@@ -2,10 +2,14 @@
     <div>
         <log-nav v-if="!noNav" :index="index" :sessionId="sessionId" :channelId="channelId"> </log-nav>
 
+        <!-- Event Header -->
         <div v-if="eventSummary" class="event-description">
             {{ eventAsDate(eventSummary.eventName) }} - {{ eventSummary.verb}} {{ eventSummary.resourceType }} - {{ eventSummary.status ? 'Ok' : 'Error' }}
         </div>
+
         <div class="request-response">
+
+            <!-- From Client To Server -->
             <div v-if="selectedEvent">
                 <span v-for="(task, taski) in tasks" :key="taski">
                     <span v-bind:class="[{ selected: taski === selectedTask, selectable: taski !== selectedTask }, 'cursor-pointer']" @click="selectTask(taski)">
@@ -14,18 +18,20 @@
                     </span>
                 </span>
 
-<!--                <span class="link-position solid-boxed pointer-cursor" @click.stop.prevent="copyToClipboard">Copy Event Link</span>-->
-<!--                <input type="hidden" id="the-link" :value="eventLink">-->
+                <span class="link-position solid-boxed pointer-cursor" @click.stop.prevent="copyToClipboard">Copy Event Link</span>
+                <input type="hidden" id="the-link" :value="eventLink">
 
             </div>
             <div v-else>
                 No Tasks
             </div>
-           <span v-bind:class="{
+
+            <!-- Request/Response line -->
+            <span v-bind:class="{
                 selected: displayRequest,
                 'not-selected': !displayRequest
               }"
-              @click="displayRequest = true; displayResponse = false; displayAnalysis = false">
+                  @click="displayRequest = true; displayResponse = false; displayInspector = false; displayValidations = false">
                 Request
            </span>
             <div class="divider"></div>
@@ -33,24 +39,31 @@
                    selected: displayResponse,
                 'not-selected': !displayResponse
                }"
-                  @click="displayRequest = false; displayResponse = true; displayAnalysis = false">
+                  @click="displayRequest = false; displayResponse = true; displayInspector = false; displayValidations = false">
                 Response
             </span>
-            <div v-bind:class="{
-                   selected: displayAnalysis,
-                   'not-selected': !displayAnalysis
-               }" @click="displayRequest = false; displayResponse = false; displayAnalysis = true">
-                Inspect
-            </div>
-            <div v-if="displayAnalysis">
-                <log-analysis-report
-                    :session-id="sessionId"
-                    :channel-id="channelId"
-                    :event-id="eventId"></log-analysis-report>
+
+            <!-- Inspect Validations -->
+            <div class="vdivider"></div>
+            <div>
+                <span v-bind:class="{
+                        selected: displayInspector,
+                        'not-selected': !displayInspector
+                        }"
+                      @click="displayRequest = false; displayResponse = false; displayInspector = true; displayValidations = false">
+                    Inspect
+                </span>
+
+                <span v-bind:class="{
+                    selected: displayValidations,
+                    'not-selected': !displayValidations
+                    }" @click="displayRequest = false; displayResponse = false; displayInspector = false; displayValidations = true">
+                    Validations
+                </span>
             </div>
         </div>
 
-        <div v-if="!displayAnalysis && getEvent()">
+        <div v-if="!displayInspector && !displayValidations && getEvent()">
             <div v-if="displayRequest" class="event-details">
                             <pre>{{ requestHeader }}
                             </pre>
@@ -62,12 +75,28 @@
                 <pre>{{responseBody}}</pre>
             </div>
         </div>
+        <div v-if="displayInspector" class="request-response">
+                    <log-analysis-report
+                            :session-id="sessionId"
+                            :channel-id="channelId"
+                            :event-id="eventId"></log-analysis-report>
+        </div>
+        <div v-if="displayValidations" class="request-response">
+            <eval-details
+                :session-id="sessionId"
+                :channel-id="channelId"
+                :event-id="eventId"
+                :test-id="'bundle_eval'"
+                :test-collection="'Internal'"
+                :run-eval="true"></eval-details>
+        </div>
     </div>
 </template>
 
 <script>
     import LogNav from "./LogNav"
     import LogAnalysisReport from "./LogAnalysisReport"
+    import EvalDetails from "../testRunner/EvalDetails"
     import {LOG} from '../../common/http-common'
     import eventMixin from '../../mixins/eventMixin'
     import errorHandlerMixin from '../../mixins/errorHandlerMixin'
@@ -79,13 +108,14 @@
                 selectedTask: 0,
                 displayRequest: true,
                 displayResponse: false,
-                displayAnalysis: false,
+                displayInspector: false,
+                displayValidations: false,
                 linkToCopy: null,
             }
         },
         methods: {
             doDisplayAnalysis() {
-                this.displayAnalysis = true;
+                this.displayInspector = true;
                 this.displayRequest = false
 //                this.$store.dispatch('getLogEventAnalysis', {channel: this.channelId, session: this.sessionId, eventId: this.eventId})
             },
@@ -149,7 +179,7 @@
                 return text.replace(/\n/g, '<br />')
             },
             removeFormatting(msg) {
-                  return msg.replace(/&lt;/g, '<').replace(/&#xa;/g, '\n').replace(/&#x9;/g, '\t')
+                return msg.replace(/&lt;/g, '<').replace(/&#xa;/g, '\n').replace(/&#x9;/g, '\t')
             },
             async loadEventSummaries() {
                 await this.$store.dispatch('loadEventSummaries', {session: this.sessionId, channel: this.channelId})
@@ -205,7 +235,7 @@
         ],
         mixins: [eventMixin, errorHandlerMixin],
         components: {
-            LogNav, LogAnalysisReport
+            LogNav, LogAnalysisReport, EvalDetails
         },
         name: "LogItem"
     }

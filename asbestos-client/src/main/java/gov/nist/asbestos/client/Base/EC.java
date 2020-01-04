@@ -314,6 +314,20 @@ public class EC {
         return eventsList;
     }
 
+    public File getEvent(SimId simId, String eventId) {
+        SimStore simStore = new SimStore(externalCache, simId);
+        List<File> resourceTypeDirs = simStore.getResourceTypeDirs();
+        for (File resourceTypeDir : resourceTypeDirs) {
+            List<File> events = Dirs.listOfDirectories(resourceTypeDir);
+            for (File event : events) {
+                String eventName = event.getName();
+                if (eventName.equals(eventId))
+                    return event;
+            }
+        }
+        return null;
+    }
+
     public File getDocumentCache() {
         return new File(externalCache, DOCUMENT_CACHE);
     }
