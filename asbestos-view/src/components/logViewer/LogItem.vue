@@ -110,7 +110,6 @@
                 displayResponse: false,
                 displayInspector: false,
                 displayValidations: false,
-                linkToCopy: null,
             }
         },
         methods: {
@@ -120,15 +119,20 @@
 //                this.$store.dispatch('getLogEventAnalysis', {channel: this.channelId, session: this.sessionId, eventId: this.eventId})
             },
             copyToClipboard() {
-                this.linkToCopy = document.querySelector('#the-link')
-                //console.log(`link is ${this.linkToCopy}`)
-                this.linkToCopy.setAttribute('type', 'text')
-                this.linkToCopy.select()
+                let linkToCopy = document.querySelector('#the-link')
+                linkToCopy.setAttribute('type', 'text')
+                linkToCopy.select()
 
-                this.msg('Copied!')
+                try {
+                    document.execCommand('copy')
+                    this.msg('Copied')
+                } catch (error) {
+                    this.msg('Cannot copy')
+                }
+
 
                 /* unselect the range */
-                this.linkToCopy.setAttribute('type', 'hidden')
+                linkToCopy.setAttribute('type', 'hidden')
                 window.getSelection().removeAllRanges()
             },
             taskLabel(i) {

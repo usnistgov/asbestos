@@ -70,7 +70,7 @@
             <assert>
                 <description value="PDB: {DocumentReference, DocumentManifest}.subject.reference must reference same Patient resource"/>
                 <compareToSourceId value="request"/>
-                <compareToSourceExpression value="Bundle.entry.resource.all(is(FHIR.DocumentManifest)).subject.reference = Bundle.entry.resource.all(is(FHIR.DocumentReference)).subject.reference"/>
+                <compareToSourceExpression value="Bundle.entry.resource.where(is(FHIR.DocumentReference) or is(FHIR.DocumentManifest) or is(FHIR.List)).select(subject.reference).distinct().count() = 1"/>
                 <warningOnly value="false"/>
             </assert>
         </action>
@@ -78,13 +78,10 @@
             <assert>
                 <description value="PDB: if DocumentReference.identifier carries the entryUUID then it shall be labeled official"/>
                 <compareToSourceId value="request"/>
-                <compareToSourceExpression value="Bundle.entry.resource.all(is(FHIR.DocumentReference) and identifier.use = 'official') implies identifier.value.startsWith('urn:uuid:')"/>
+                <compareToSourceExpression value="Bundle.entry.select((resource as DocumentReference).identifier).select(use = 'official').exists() implies value.startsWith('urn:uuid:')"/>
                 <warningOnly value="false"/>
             </assert>
         </action>
-        <!--
-        .identifier.value.startsWith('urn:uuid:')
-        -->
         <action>
             <assert>
                 <description value="Transaction: Request is Bundle|MHDPDBRequestIsBundle"/>
@@ -177,7 +174,7 @@
             <assert>
                 <description value="DocumentReference: DocumentReference has single content element"/>
                 <compareToSourceId value="request"/>
-                <compareToSourceExpression value="Bundle.entry.resource.(is(FHIR.DocumentReference) implies content.count() = 1)"/>
+                <compareToSourceExpression value="Bundle.entry.resource.where(is(FHIR.DocumentReference)).content.count() = 1"/>
                 <warningOnly value="false"/>
             </assert>
         </action>
@@ -185,7 +182,7 @@
             <assert>
                 <description value="DocumentReference: DocumentReference has content.attachment.url|MHDPDBDocRefHasAttachment"/>
                 <compareToSourceId value="request"/>
-                <compareToSourceExpression value="Bundle.entry.resource.all(is(FHIR.DocumentReference)) implies content.attachment.url.exists()"/>
+                <compareToSourceExpression value="Bundle.entry.resource.where(is(FHIR.DocumentReference)).content.attachment.url.exists()"/>
                 <warningOnly value="false"/>
             </assert>
         </action>
