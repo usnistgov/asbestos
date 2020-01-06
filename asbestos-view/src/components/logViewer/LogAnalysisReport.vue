@@ -5,11 +5,11 @@
 
         <!--    ERRORS    -->
         <div v-if="report.errors && report.errors.length > 0 && report.errors[0] !== null">  <!--  don't know why the null check is needed but it is  -->
-            <span class="caption">Errors:</span>
+            <span class="caption inspector-error">Errors:</span>
             <div class="vdivider"></div>
             <div v-for="(err, erri) in report.errors"
                 :key="err + erri">
-                <div>
+                <div class="inspector-error">
                     {{ report.errors[erri]}}
                 </div>
             </div>
@@ -261,6 +261,9 @@
 }
     .caption {
         font-weight: bold;
+    }
+    .inspector-error {
+        color: indianred;
     }
 .main-caption {
     font-weight: bold;
