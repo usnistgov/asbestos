@@ -11,17 +11,16 @@ package gov.nist.asbestos.asbestosProxy.requests;
 // 7 - eventId
 // Run a client eval against single event
 
+import gov.nist.asbestos.client.events.Event;
 import gov.nist.asbestos.simapi.simCommon.SimId;
-import gov.nist.asbestos.testEngine.engine.TestEngine;
 import org.apache.log4j.Logger;
-import org.hl7.fhir.r4.model.TestScript;
 
 import java.io.File;
-import java.util.ArrayList;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 public class GetClientEventEvalRequest {
     private static Logger log = Logger.getLogger(GetClientEventEvalRequest.class);
@@ -47,15 +46,31 @@ public class GetClientEventEvalRequest {
         File testDir = request.ec.getTest(testCollection, testId);
         List<File> testDirs = Collections.singletonList(testDir);
 
-        Map<String, File> testIds = testDirs.stream().collect(Collectors.toMap(File::getName, x -> x));
-        // testId -> testScript
-        Map<String, TestScript> testScripts = testDirs.stream().collect(
-                Collectors.toMap(File::getName, TestEngine::loadTestScript)
-        );
+//        Map<String, File> testIds = testDirs.stream().collect(Collectors.toMap(File::getName, x -> x));
+//        // testId -> testScript
+//        Map<String, TestScript> testScripts = testDirs.stream().collect(
+//                Collectors.toMap(File::getName, TestEngine::loadTestScript)
+//        );
 
         SimId simId = SimId.buildFromRawId(channelName);
         String testSession = simId.getTestSession().getValue();
-        File event = request.ec.getEvent(simId, eventId);
+        File eventFile = request.ec.getEvent(simId, eventId);
+        Event event = new Event(eventFile);
+
+        GetClientTestEvalRequest getClientTestEvalRequest = new GetClientTestEvalRequest(request);
+
+        StringBuilder buf = getClientTestEvalRequest.evalClientTest(testDirs, testSession, Collections.singletonList(event));
+
+        String myStr = buf.toString();
+
+        File testLogDir = request.ec.getTestLogDir(request.fullChannelId(), testCollection);
+        try {
+            Files.write(Paths.get(new File(testLogDir, testId + ".json").toString()), myStr.getBytes());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        Returns.returnString(request.resp, myStr);
 
     }
 }

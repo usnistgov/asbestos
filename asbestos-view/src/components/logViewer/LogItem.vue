@@ -58,7 +58,7 @@
                     selected: displayValidations,
                     'not-selected': !displayValidations
                     }" @click="displayRequest = false; displayResponse = false; displayInspector = false; displayValidations = true">
-                    Validations
+                    PDB Validations
                 </span>
             </div>
         </div>

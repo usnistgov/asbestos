@@ -30,7 +30,7 @@ import java.util.stream.Collectors;
 // 4 - channelName   testSession__channelId
 // 5 - "marker" or number of events to evaluate
 // 6 - testCollectionId
-// 7 - testId (optional)
+// 7 - testId
 // Run a client test
 
 public class GetClientTestEvalRequest {
@@ -80,11 +80,6 @@ public class GetClientTestEvalRequest {
                 testDirs = Collections.singletonList(dir);
         }
 
-        Map<String, File> testIds = testDirs.stream().collect(Collectors.toMap(File::getName, x -> x));
-        // testId -> testScript
-        Map<String, TestScript> testScripts = testDirs.stream().collect(
-                Collectors.toMap(File::getName, TestEngine::loadTestScript)
-        );
 
         String marker = useMarker ?
                 request.ec.getLastMarker(request.testSession, request.channelId)
@@ -98,6 +93,35 @@ public class GetClientTestEvalRequest {
         Collections.reverse(events);
         if (!useMarker)
             events = events.subList(0, Math.min(events.size(), eventsToEvaluate));
+
+        File testLogDir = request.ec.getTestLogDir(request.fullChannelId(), testCollection);
+
+        // for one testId
+        String testId = request.uriParts.get(7);
+
+
+        StringBuilder buf = evalClientTest(testDirs, testSession, events);
+
+        String myStr = buf.toString();
+        try {
+            Files.write(Paths.get(new File(testLogDir, testId + ".json").toString()), myStr.getBytes());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        Returns.returnString(request.resp, myStr);
+    }
+
+    // testDirs always has single entry
+    // returns JSON response to client
+    public StringBuilder evalClientTest(List<File> testDirs, String testSession, List<Event> events) {
+        Map<String, File> testIds = testDirs.stream().collect(Collectors.toMap(File::getName, x -> x));
+        String testId = testDirs.get(0).getName();
+
+        // testId -> testScript
+        Map<String, TestScript> testScripts = testDirs.stream().collect(
+                Collectors.toMap(File::getName, TestEngine::loadTestScript)
+        );
 
         Map<Event, ResourceWrapper> requestResources = new HashMap<>();
         Map<Event, ResourceWrapper> responseResources = new HashMap<>();
@@ -138,9 +162,9 @@ public class GetClientTestEvalRequest {
         }
 
         Result result = new Result();
-        for (String testId : testIds.keySet()) {
-            File testDir = testIds.get(testId);
-            TestScript testScript = testScripts.get(testId);
+        for (String theTestId : testIds.keySet()) {
+            File testDir = testIds.get(theTestId);
+            TestScript testScript = testScripts.get(theTestId);
             for (Event event : events) {
                 TestEngine testEngine = new TestEngine(testDir, testScript);
                 testEngine.setVal(new Val());
@@ -148,21 +172,18 @@ public class GetClientTestEvalRequest {
                 testEngine.setExternalCache(request.externalCache);
                 ResourceWrapper responseResource = responseResources.get(event);
                 testEngine.runEval(requestResources.get(event), responseResources.get(event));
-                EventResult eventResult = result.results.get(testId); //new EventResult();
+                EventResult eventResult = result.results.get(theTestId); //new EventResult();
                 if (eventResult == null)
                     eventResult = new EventResult();
                 eventResult.reports.put(event.getEventId(), testEngine.getTestReport());
-                result.results.put(testId, eventResult);
+                result.results.put(theTestId, eventResult);
             }
         }
 
-        // for one testId
-        String testId = request.uriParts.get(7);
 
         StringBuilder buf = new StringBuilder();
         buf.append('{').append('"').append(testId).append('"').append(':').append("\n ");
 
-        File testLogDir = request.ec.getTestLogDir(request.fullChannelId(), testCollection);
         EventResult er = result.results.get(testId);
         if (er == null || er.reports == null || er.reports.isEmpty())
             buf.append("null");
@@ -183,14 +204,6 @@ public class GetClientTestEvalRequest {
         }
 
         buf.append('}');
-
-        String myStr = buf.toString();
-        try {
-            Files.write(Paths.get(new File(testLogDir, testId + ".json").toString()), myStr.getBytes());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        Returns.returnString(request.resp, myStr);
+        return buf;
     }
 }

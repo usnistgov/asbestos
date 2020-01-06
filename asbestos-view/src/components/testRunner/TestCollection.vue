@@ -225,7 +225,7 @@
                 this.$store.dispatch('setMarker')
             },
             testScriptNamesUpdated() {
-                this.$store.dispatch('loadReports')
+                this.$store.dispatch('loadReports', this.$store.state.testRunner.currentTestCollectionName)
                 if (this.isClient) {
                     return this.$store.state.testRunner.testScriptNames.forEach(name => {
                         this.doEval(name)

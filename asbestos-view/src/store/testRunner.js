@@ -98,7 +98,7 @@ export const testRunnerStore = {
             state.testReports = reports
         },
         setTestReport(state, data) {
-            state.testReports[data.testName] = data.testReport
+            Vue.set(state.testReports, data.testName, data.testReport)
         },
         clearTestScripts(state) {
             state.testScripts = []
@@ -106,8 +106,6 @@ export const testRunnerStore = {
         addTestScript(state, scriptObject) {
             // scriptObject is  { name: testId, script: TestScript }
             Vue.set(state.testScripts,scriptObject.name, scriptObject.script)
-            //state.testScripts.splice(scriptObject.name, 1, scriptObject.script)
-            //state.testScripts[scriptObject.name] = scriptObject.script
         },
         setTestCollectionName(state, name) {
             state.currentTestCollectionName = name
@@ -119,12 +117,7 @@ export const testRunnerStore = {
             state.serverTestCollectionNames = names
         },
         setClientTestResult(state, result) {     // { testId: testId, result: result }
-            //state.clientTestResult.splice(result.testId, 1, result.result)
-            state.clientTestResult[result.testId] = result.result
-
-            // force vue reaction
-            state.clientTestResult.push('foo')
-            state.clientTestResult.splice(-1, 1)
+            Vue.set(state.clientTestResult, result.testId, result.result)
         }
     },
     getters: {
@@ -151,6 +144,21 @@ export const testRunnerStore = {
                     const results = response.data
 
                     commit('setClientTestResult', { testId: testId, result: results[testId]} )
+                })
+                .catch(function (error) {
+                    commit('setError', url + ': ' + error)
+                })
+        },
+        runSingleEventEval({commit, rootState}, parms) {
+            const testId = parms.testId
+            const eventId = parms.eventId
+            const testCollectionName = parms.testCollectionName
+            const url = `clienteventeval/${rootState.base.session}__${rootState.base.channelId}/${testCollectionName}/${testId}/${eventId}`
+            ENGINE.get(url)
+                .then(response => {
+                    const results = response.data
+                    commit('setClientTestResult', { testId: testId, result: results[testId] } )
+                    commit('setTestReport', { testName: testId, testReport: results[testId][eventId] } )
                 })
                 .catch(function (error) {
                     commit('setError', url + ': ' + error)
@@ -226,11 +234,11 @@ export const testRunnerStore = {
                 commit('setError', url + ': ' + error)
             }
         },
-        loadReports({commit, state, rootState}) {
+        loadReports({commit, rootState}, testCollectionName) {
             commit('clearTestReports')
-            if (!rootState.base.session || !rootState.base.channelId || !state.currentTestCollectionName)
+            if (!rootState.base.session || !rootState.base.channelId || !testCollectionName)
                 return
-            const url = `testlog/${rootState.base.session}__${rootState.base.channelId}/${state.currentTestCollectionName}`
+            const url = `testlog/${rootState.base.session}__${rootState.base.channelId}/${testCollectionName}`
             ENGINE.get(url)
                 .then(response => {
                     let reports = []

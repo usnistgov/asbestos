@@ -1,6 +1,6 @@
 <template>
     <div>
-        <div v-if="script" class="script">
+        <div v-if="script && report" class="script">
             <!--            <div v-if="script.description">-->
             <!--                {{ script.description }}-->
             <!--            </div>-->
@@ -160,6 +160,27 @@
             assertMsg(assertId) {
                 return this.$store.state.testRunner.testAssertions[assertId]
             },
+            loadReports() {
+                return this.$store.dispatch('loadReports', this.testCollection)
+            },
+            runSingleEventEval() {
+                this.$store.dispatch('runSingleEventEval',
+                    {
+                        testId: this.testId,
+                        eventId: this.eventId,
+                        testCollectionName: this.testCollection
+                    })
+            },
+            async testOrEventUpdated() {
+                if (this.runEval) {
+                    if (!this.$store.state.testRunner.testAssertions)
+                        this.$store.dispatch('loadTestAssertions')
+                    await this.runSingleEventEval()
+                }
+                // await this.loadReports()
+                this.loadTestScript()
+                this.loadTestReport()
+            }
         },
         computed: {
             assertProfile() {
@@ -190,24 +211,14 @@
             }
         },
         created() {
-            if (this.runEval) {
-                this.$store.dispatch('runEval', this.testId)
-            }
-            this.loadTestScript()
-            this.loadTestReport()
+            this.testOrEventUpdated()
         },
         mounted() {
 
         },
         watch: {
-            'testId': function() {
-                this.loadTestScript()
-                this.loadTestReport()
-            },
-            'eventId': function() {
-                this.loadTestScript()
-                this.loadTestReport()
-            }
+            'testId': 'testOrEventUpdated',
+            'eventId': 'testOrEventUpdated'
         },
         mixins: [ errorHandlerMixin ],
         props: [
