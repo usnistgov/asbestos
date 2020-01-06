@@ -50,6 +50,7 @@ also, to make sure all packages are up to date
 In IntelliJ, choose ECMAScript 6.
 
 To build Run/Debug Configuration in IntelliJ
+
     Create configuration based on Tomcat Server/Local
     Select Application Server already on system
     Unselect Open Browser after launch
