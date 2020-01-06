@@ -49,3 +49,11 @@ also, to make sure all packages are up to date
     
 In IntelliJ, choose ECMAScript 6.
 
+To build Run/Debug Configuration in IntelliJ
+    Create configuration based on Tomcat Server/Local
+    Select Application Server already on system
+    Unselect Open Browser after launch
+    URL should be http://localhost:8081/asbestos/
+    VM options: -DEXTERNAL_CACHE=/home/bill/ec  (your milage will vary here)
+    On the Deployment tab - select asbestos-war:war exploded and set Application context to /asbestos
+    
