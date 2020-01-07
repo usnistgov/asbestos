@@ -158,6 +158,7 @@ export const testRunnerStore = {
                 .then(response => {
                     const results = response.data
                     commit('setClientTestResult', { testId: testId, result: results[testId] } )
+                    console.log(`setTestReport ${testId}`)
                     commit('setTestReport', { testName: testId, testReport: results[testId][eventId] } )
                 })
                 .catch(function (error) {

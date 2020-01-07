@@ -144,6 +144,7 @@
                 })
             },
             loadTestReport() {
+                console.log('using test report')
                 this.report = this.$store.state.testRunner.testReports[this.testId]
             },
             actions(testIndex) {
@@ -179,7 +180,7 @@
                 }
                 // await this.loadReports()
                 this.loadTestScript()
-                this.loadTestReport()
+                //this.loadTestReport()
             }
         },
         computed: {
@@ -208,6 +209,9 @@
             },
             testReport() {
                 return this.$store.state.testRunner.clientTestResult[this.testId][this.eventId]
+            },
+            testReports() {  // see watch
+                return this.$store.state.testRunner.testReports[this.testId]
             }
         },
         created() {
@@ -218,7 +222,10 @@
         },
         watch: {
             'testId': 'testOrEventUpdated',
-            'eventId': 'testOrEventUpdated'
+            'eventId': 'testOrEventUpdated',
+            testReports() {  // this has same name as computed - see https://stackoverflow.com/questions/43270159/vuejs-2-how-to-watch-store-values-from-vuex
+                this.loadTestReport()
+            }
         },
         mixins: [ errorHandlerMixin ],
         props: [
