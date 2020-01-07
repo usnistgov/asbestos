@@ -72,7 +72,20 @@ class FhirPathEngineBuilder {
         if (result instanceof DateType) {
             return ((DateType) result).getValueAsString();
         }
-        //return null;
-        return result.getClass().getSimpleName();
+        String className = result.getClass().getSimpleName();
+        if (className.endsWith("Info")) {
+            StringBuilder buf = new StringBuilder();
+            buf.append("[");
+            buf.append("Class").append(": ").append(className).append("\n");
+            Base base = (Base) result;
+            buf.append("Name").append(": ").append(base.getUserString("name")).append("\n");
+            for (Property property : base.children()) {
+                buf.append(property.getName()).append(": ").append(property.toString()).append("\n");
+            }
+            buf.append("]");
+            return buf.toString();
+        }
+
+        return className;
     }
 }

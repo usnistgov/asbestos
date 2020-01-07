@@ -68,7 +68,19 @@
         </action>
         <action>
             <assert>
-                <description value="PDB: {DocumentReference, DocumentManifest}.subject.reference must reference same Patient resource"/>
+                <description value="PDB: subject resource must be one of Patient, Practitioner, Group, Device"/>
+                <compareToSourceId value="request"/>
+                <compareToSourceExpression value="Bundle.entry.resource.where(is(FHIR.DocumentReference) or is(FHIR.DocumentManifest) or is(FHIR.List)).subject.reference.select(matches('.*Patient.*')).all(true)"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <!--
+        .matches('.*Patient.*')
+        select(subject.reference).(matches('.*Patient.*') or matches('.*Practitioner.*') or matches('.*Group.*') or matches('.*Device.*'))
+        -->
+        <action>
+            <assert>
+                <description value="PDB: {DocumentReference, DocumentManifest}.subject.reference must reference same subject resource"/>
                 <compareToSourceId value="request"/>
                 <compareToSourceExpression value="Bundle.entry.resource.where(is(FHIR.DocumentReference) or is(FHIR.DocumentManifest) or is(FHIR.List)).select(subject.reference).distinct().count() = 1"/>
                 <warningOnly value="false"/>
@@ -174,10 +186,13 @@
             <assert>
                 <description value="DocumentReference: DocumentReference has single content element"/>
                 <compareToSourceId value="request"/>
-                <compareToSourceExpression value="Bundle.entry.resource.where(is(FHIR.DocumentReference)).content.count() = 1"/>
+                <compareToSourceExpression value="Bundle.entry.resource.select(is(FHIR.DocumentReference).content).all(count() = 1)"/>
                 <warningOnly value="false"/>
             </assert>
         </action>
+        <!--
+        Bundle.entry.resource.where(is(FHIR.DocumentReference)).content.count() = 1
+        -->
         <action>
             <assert>
                 <description value="DocumentReference: DocumentReference has content.attachment.url|MHDPDBDocRefHasAttachment"/>
@@ -186,6 +201,8 @@
                 <warningOnly value="false"/>
             </assert>
         </action>
+        <!--
+        -->
         <action>
             <assert>
                 <description value="DocumentReference: DocumentReference.content.attachment has contentType"/>

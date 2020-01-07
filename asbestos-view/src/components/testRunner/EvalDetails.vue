@@ -90,18 +90,18 @@
                 this.eventDisplayed = !this.eventDisplayed
             },
             assertMessage(testIndex, actionIndex) {
-                if (actionIndex < this.testReport.test[testIndex].action.length) {
+                if (this.testReport && actionIndex < this.testReport.test[testIndex].action.length) {
                     return this.testReport.test[testIndex].action[actionIndex].assert.message.split("\n")
                 }
                 return null
             },
             assertResult(testIndex, actionIndex) {
-                if (actionIndex < this.testReport.test[testIndex].action.length)
+                if (this.testReport && actionIndex < this.testReport.test[testIndex].action.length)
                     return this.testReport.test[testIndex].action[actionIndex].assert.result
                 return 'not-run'
             },
             assertReport(testIndex, actionIndex) {
-                return this.testReport.test[testIndex].action[actionIndex].assert
+                return this.testReport ? this.testReport.test[testIndex].action[actionIndex].assert : null
             },
             assertScript(testIndex, actionIndex) {
                 return this.testScript.test[testIndex].action[actionIndex].assert
@@ -144,7 +144,6 @@
                 })
             },
             loadTestReport() {
-                console.log('using test report')
                 this.report = this.$store.state.testRunner.testReports[this.testId]
             },
             actions(testIndex) {

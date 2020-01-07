@@ -53,7 +53,7 @@
                       @click="displayRequest = false; displayResponse = false; displayInspector = true; displayValidations = false">
                     Inspect
                 </span>
-
+                <div class="divider"></div>
                 <span v-bind:class="{
                     selected: displayValidations,
                     'not-selected': !displayValidations
