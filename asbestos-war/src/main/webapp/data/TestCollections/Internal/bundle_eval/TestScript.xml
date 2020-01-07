@@ -253,6 +253,29 @@
                 <warningOnly value="false"/>
             </assert>
         </action>
-
+        <action>
+            <assert>
+                <description value="DocumentReference: masterIdentifier is required"/>
+                <compareToSourceId value="request"/>
+                <compareToSourceExpression value="Bundle.entry.resource.where(is(FHIR.DocumentReference)).masterIdentifier.exists()"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
+            <assert>
+                <description value="DocumentReference: securityLabel is required"/>
+                <compareToSourceId value="request"/>
+                <compareToSourceExpression value="Bundle.entry.resource.where(is(FHIR.DocumentReference)).securityLabel.exists()"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
+            <assert>
+                <description value="DocumentManifest: masterIdentifier is required"/>
+                <compareToSourceId value="request"/>
+                <compareToSourceExpression value="Bundle.entry.resource.where(is(FHIR.DocumentManifest)).masterIdentifier.exists()"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
     </test>
 </TestScript>
