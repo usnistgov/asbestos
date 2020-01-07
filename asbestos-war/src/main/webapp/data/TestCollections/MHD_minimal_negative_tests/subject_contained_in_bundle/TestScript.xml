@@ -54,30 +54,8 @@
         </action>
         <action>
             <assert>
-                <description value="... was successful transaction"/>
-                <response value="okay"/>
-                <warningOnly value="false"/>
-            </assert>
-        </action>
-        <action>
-            <assert>
-                <description value="... Bundle was returned"/>
-                <expression value="Bundle.exists()"/>
-                <warningOnly value="false"/>
-            </assert>
-        </action>
-        <action>
-            <assert>
-                <description value="... all parts of transaction successful"/>
-                <expression value="Bundle.entry.response.all(status.startsWith(201))"/>
-                <warningOnly value="false"/>
-            </assert>
-        </action>
-        <action>
-            <assert>
-                <description value="... response contains one entry for each entry in request"/>
-                <expression value="Bundle.entry.count()"/>
-                <value value="${requestEntryCount}"/>
+                <description value="... transaction shall fail"/>
+                <response value="bad"/>
                 <warningOnly value="false"/>
             </assert>
         </action>
