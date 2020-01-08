@@ -47,6 +47,8 @@ public class MinimumId {
         Report report = new Report();
         report.expected = refAtts;
         report.expected.remove("description");  // don't know why this shows up but it is wrong
+        report.expected.remove("id");
+        report.expected.remove("created");
         report.missing = diff;
 
         return report;
