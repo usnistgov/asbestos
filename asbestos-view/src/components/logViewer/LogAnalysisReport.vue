@@ -145,7 +145,8 @@
                 this.history.push(this.report.base.url)
             },
             async loadAnalysis2() {
-                await this.$store.dispatch('getLogEventAnalysis', {channel: this.channelId, session: this.sessionId, eventId: this.eventId})
+                if (this.eventId)
+                    await this.$store.dispatch('getLogEventAnalysis', {channel: this.channelId, session: this.sessionId, eventId: this.eventId})
             },
             loadAnalysisForObject(resourceUrl) {
                 //console.log(`loadForObject ${resourceUrl}`)
@@ -176,6 +177,9 @@
                     other: defined.indexOf(resource.name) < 0
                 }
             },
+            urlAnalysis() {
+                this.loadAnalysisForObject(this.theUrl)
+            }
         },
         computed: {
             report() {
@@ -193,10 +197,11 @@
             this.loadAnalysis()
         },
         watch: {
-            'eventId': 'loadAnalysis'
+            'eventId': 'loadAnalysis',
+            'theUrl': 'urlAnalysis'
         },
-        props: [
-            'sessionId', 'channelId', 'eventId'
+        props: [  // pass eventId OR theUrl
+            'sessionId', 'channelId', 'eventId', 'theUrl'
         ],
         components: { LogObjectDisplay },
         name: "LogAnalysisReport"
