@@ -173,6 +173,10 @@
                     <stopPort>9099</stopPort>
                     <systemProperties>
                         <systemProperty>
+                            <name>jetty.realmProperties</name>
+                            <value>${basedir}/src/test/etc/realm.properties</value>
+                        </systemProperty>
+                        <systemProperty>
                             <name>jetty.logs</name>
                             <value>${basedir}/target</value>
                         </systemProperty>

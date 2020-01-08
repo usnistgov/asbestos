@@ -61,6 +61,16 @@
       </Arg>
     </Call>
 
+    <Call name="addBean">
+        <Arg>
+            <New class="org.eclipse.jetty.security.HashLoginService">
+                <Set name="name">TestRealm</Set>
+                <Set name="config"><SystemProperty name="jetty.realmProperties" default="."/></Set>
+                <Set name="refreshInterval">0</Set>
+            </New>
+        </Arg>
+    </Call>
+
     <!-- =========================================================== -->
     <!-- Http Configuration.                                         -->
     <!-- This is a common configuration instance used by all         -->

@@ -16,6 +16,7 @@ public class ChannelConfig {
     private boolean includeValidation;
     private String fhirBase;
     private String xdsSiteName;
+    private boolean writeLocked;
 
     public String toString() {
         return new StringBuilder().append("Channel ").append(testSession).append("__").append(channelId)
@@ -138,5 +139,13 @@ public class ChannelConfig {
 
     public void setIncludeValidation(boolean includeValidation) {
         this.includeValidation = includeValidation;
+    }
+
+    public boolean isWriteLocked() {
+        return writeLocked;
+    }
+
+    public void setWriteLocked(boolean writeLocked) {
+        this.writeLocked = writeLocked;
     }
 }

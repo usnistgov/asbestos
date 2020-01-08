@@ -19,6 +19,13 @@
             <div class="divider"></div>
             <span class="selectable" @click="go('/about')">About</span>
 
+            <div class="divider"></div>
+            <span v-if="! this.asbts_UserProps.signedIn" class="selectable" @click="go('/admin')">Admin</span>
+
+            <div class="divider"></div>
+            <span v-if="this.asbts_UserProps.signedIn" class="selectable" @click="signOut">Sign Out</span>
+
+
         </div>
         </div>
         <div class="grid-container">
@@ -61,7 +68,7 @@
     import TestControlPanel from "./TestControlPanel"
     import ChannelLogControlPanel from "./ChannelLogControlPanel"
     // import DebugControlPanel from "./DebugControlPanel"
-    import {PROJECTVERSION} from "../../common/http-common";
+    import {PROJECTVERSION, ASBTS_USERPROPS} from "../../common/http-common";
 
     export default {
         data() {
@@ -69,6 +76,7 @@
                 testSession: 'default',
                 testSessions: null,
                 error: null,
+                asbts_UserProps: ASBTS_USERPROPS
             }
         },
         beforeRouteEnter(to, from, next) {
@@ -87,6 +95,11 @@
             clearErrors() {
                 this.$store.commit('clearError')
             },
+            signOut() {
+                this.asbts_UserProps.signedIn = false
+                this.asbts_UserProps.bauser = ""
+                this.asbts_UserProps.bapw = ""
+            }
         },
         computed: {
             projectVersion() {
@@ -156,7 +169,6 @@
         right: 4px;
         text-align: left;
     }
-
 </style>
 // these are shared across the tool
 <style>

@@ -41,4 +41,8 @@
   <user username="both" password="<must-be-changed>" roles="tomcat,role1"/>
   <user username="role1" password="<must-be-changed>" roles="role1"/>
 -->
+  <!-- begin FhirToolkit Channel Configuration editor authorization -->
+  <role rolename="editRole"/>
+  <user username="admin" password="easy" roles="editRole" />
+  <!-- end FhirToolkit -->
 </tomcat-users>

@@ -71,6 +71,7 @@ public class ProxyServlet extends HttpServlet {
         super.init(config);
         log.info("ProxyServlet init");
 
+        /*
         try {
             ServiceProperties.init();
         } catch (Exception ex) {
@@ -86,6 +87,14 @@ public class ProxyServlet extends HttpServlet {
 
         // announce location of ExternalCache to other servlets
         config.getServletContext().setAttribute("ExternalCache", ec);
+
+         */
+
+        if (externalCache == null) {
+            String ec = (String) config.getServletContext().getAttribute("ExternalCache");
+            externalCache = new File(ec);
+        }
+
     }
 
     private static String[] addEventHeader(HttpServletResponse resp, String hostport, ITask task) {

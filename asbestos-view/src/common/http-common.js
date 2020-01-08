@@ -6,6 +6,11 @@ export var LOG = null
 export var CHANNEL = null
 export var FHIRTOOLKITBASEURL = null
 export var PROJECTVERSION = null
+export var ASBTS_USERPROPS =  {
+    signedIn : false,
+    bauser : "",
+    bapw : ""
+};
 
 export async function getServiceProperties() {
     if (process.env.NODE_ENV === 'production') {
