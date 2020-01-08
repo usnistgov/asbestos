@@ -163,8 +163,9 @@ public class AnalysisReport {
     private void buildAtts() {
         atts = ResourceHasMethodsFilter.toMap(baseObj.getResource());
         for (Related rel : related) {
-            if (rel.wrapper.hasResource())
+            if (rel.wrapper.hasResource()) {
                 rel.atts = ResourceHasMethodsFilter.toMap(rel.wrapper.getResource());
+            }
         }
     }
 

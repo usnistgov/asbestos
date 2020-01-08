@@ -46,6 +46,7 @@ public class MinimumId {
         Collections.sort(refAtts);
         Report report = new Report();
         report.expected = refAtts;
+        report.expected.remove("description");  // don't know why this shows up but it is wrong
         report.missing = diff;
 
         return report;
