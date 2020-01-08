@@ -43,6 +43,8 @@
                 <div class="vdivider"></div>
                 <channel-control-panel class="solid-boxed"> </channel-control-panel>
                 <div class="vdivider"></div>
+                <getter-control-panel class="solid-boxed"> </getter-control-panel>
+                <div class="vdivider"></div>
 <!--                <log-control-panel class="solid-boxed"></log-control-panel>-->
 <!--                <div class="vdivider"></div>-->
                 <channel-log-control-panel class="solid-boxed"> </channel-log-control-panel>
@@ -60,6 +62,7 @@
     import ChannelControlPanel from "./ChannelControlPanel"
     import TestControlPanel from "./TestControlPanel"
     import ChannelLogControlPanel from "./ChannelLogControlPanel"
+    import GetterControlPanel from "./GetterControlPanel";
     // import DebugControlPanel from "./DebugControlPanel"
     import {PROJECTVERSION} from "../../common/http-common";
 
@@ -101,6 +104,7 @@
             ChannelControlPanel,
             TestControlPanel,
             ChannelLogControlPanel,
+            GetterControlPanel
             // DebugControlPanel,
         }
     }

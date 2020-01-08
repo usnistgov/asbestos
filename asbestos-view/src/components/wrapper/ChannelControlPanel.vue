@@ -8,7 +8,7 @@
             &nbsp;
             <span class="selectable" @click="showAddr()">List by URL</span>
         </div>
-        <select v-model="channel" size="6" class="control-panel-font">
+        <select v-model="channel" size="10" class="control-panel-font">
             <option v-for="(chann, channeli) in channelIds"
                     v-bind:value="getChannelIdByText(chann)"
                     :key="chann + channeli"

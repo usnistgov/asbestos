@@ -19,6 +19,7 @@ import About from "../components/top/About"
 import Home from "../components/top/Home"
 import MhdTesting from "../components/top/MhdTesting"
 import Configurations from "../components/top/Configurations"
+import Getter from "../components/getter/Getter"
 
 Vue.use( VueRouter )
 
@@ -77,6 +78,11 @@ export const routes = [
                             {
                                 path: 'logs',
                                 components: { default: LogList },
+                                props: { default: true },
+                            },
+                            {
+                                path: 'getter',
+                                components: { default: Getter },
                                 props: { default: true },
                             },
                             // {
