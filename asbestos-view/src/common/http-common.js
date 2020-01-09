@@ -1,5 +1,6 @@
 import axios from 'axios';
 
+export var TLS_UI_PROXY = null
 export var PROXY = null
 export var ENGINE = null
 export var LOG = null
@@ -8,8 +9,8 @@ export var FHIRTOOLKITBASEURL = null
 export var PROJECTVERSION = null
 export var ASBTS_USERPROPS =  {
     signedIn : false,
-    bauser : "",
-    bapw : ""
+    bauser : "", /* Basic authentication username */
+    bapw : "" /* Basic authentication password */
 };
 
 export async function getServiceProperties() {
@@ -36,6 +37,15 @@ export async function initServiceProperties() {
                     FHIRTOOLKITBASEURL = constFhirToolkitBaseUrl
                     console.log('fhirToolkitBaseUrl is: ' + constFhirToolkitBaseUrl)
 
+                    TLS_UI_PROXY = axios.create({
+                        baseURL: response.data.httpsFhirToolkitUIBase + '/',
+                        headers: {
+                            'Access-Control-Allow-Methods': 'GET, POST, OPTIONS, PUT, PATCH, DELETE'
+                        },
+                        params: {
+                            crossdomain: true,
+                        }
+                    })
                     PROXY = axios.create({
                         baseURL: constFhirToolkitBaseUrl + '/',
                         headers: {

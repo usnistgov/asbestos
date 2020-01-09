@@ -37,7 +37,7 @@
     import VueFlashMessage from 'vue-flash-message';
     Vue.use(VueFlashMessage);
 
-    import {PROXY} from "../common/http-common";
+    import {TLS_UI_PROXY} from "../common/http-common";
 
 
 
@@ -96,7 +96,7 @@
             async defaultSignIn() {
                 let signedIn = false
                 const that = this
-                await PROXY.get('signIn',  { auth: {username: this.usernameTxt, password: this.passwordTxt}})
+                await TLS_UI_PROXY.get('signIn',  { auth: {username: this.usernameTxt, password: this.passwordTxt}})
                     .then(function () {
                         that.userProps.bauser = that.usernameTxt
                         that.userProps.bapw = that.passwordTxt

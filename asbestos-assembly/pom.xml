@@ -26,7 +26,7 @@
         <!-- Production port number must match the bundled-tomcat application base's conf\server.xml Connector port -->
         <!-- Base path should not end with a slash -->
         <build.profile.id>Production</build.profile.id>
-        <fhirUI>http://localhost:9760/</fhirUI>
+        <httpsFhirToolkitUIBase>https://fhirtoolkit.test:9743/asbestos</httpsFhirToolkitUIBase>
         <fhirToolkitBase>http://localhost:9760/asbestos</fhirToolkitBase>
         <hapiFhirBase>http://localhost:9770/fhir/fhir</hapiFhirBase>
         <xdsToolkitBase>http://localhost:9770/xdstools</xdsToolkitBase>

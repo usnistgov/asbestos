@@ -142,7 +142,7 @@
 <script>
     import Vue from 'vue'
     import {store} from "../../store"
-    import {PROXY, CHANNEL, ASBTS_USERPROPS} from '../../common/http-common'
+    import {TLS_UI_PROXY, PROXY, CHANNEL, ASBTS_USERPROPS} from '../../common/http-common'
     import VueFlashMessage from 'vue-flash-message';
     Vue.use(VueFlashMessage);
     require('vue-flash-message/dist/vue-flash-message.min.css')
@@ -236,7 +236,7 @@
                     if (! this.channel.writeLocked) {
                         await PROXY.delete('channel/' + this.sessionId + '__' + this.channelId)
                     } else if (this.editUserProps.bapw != "") {
-                        await PROXY.delete('channelGuard/' + this.sessionId + '__' + this.channelId, { auth: {username: this.editUserProps.bauser, password: this.editUserProps.bapw}})
+                        await TLS_UI_PROXY.delete('channelGuard/' + this.sessionId + '__' + this.channelId, { auth: {username: this.editUserProps.bauser, password: this.editUserProps.bapw}})
                     }
                     this.msg('Deleted')
                     this.$store.commit('deleteChannel', this.channelId)
@@ -252,7 +252,7 @@
                 const that = this
                 let chan = cloneDeep(this.channel)
                 chan.writeLocked = bool
-                await PROXY.post('channelLock', chan, { auth: {username: this.editUserProps.bauser, password: this.editUserProps.bapw}})
+                await TLS_UI_PROXY.post('channelLock', chan, { auth: {username: this.editUserProps.bauser, password: this.editUserProps.bapw}})
                     .then(function () {
                         that.channel.writeLocked = bool
                         that.msg('Channel configuration is ' + ((bool)?'locked':'unlocked'))
@@ -305,7 +305,7 @@
                             that.edit = false
                         })
                 } else {
-                    PROXY.post('/channelGuard', this.channel, { auth: {username: this.editUserProps.bauser, password: this.editUserProps.bapw}})
+                    TLS_UI_PROXY.post('/channelGuard', this.channel, { auth: {username: this.editUserProps.bauser, password: this.editUserProps.bapw}})
                         .then(function () {
                             that.msg('Saved')
                             that.isNew = false
