@@ -7,6 +7,12 @@ export var CHANNEL = null
 export var FHIRTOOLKITBASEURL = null
 export var PROJECTVERSION = null
 
+export const UtilFunctions = {
+    getChannelBase :function(channel) {
+        return FHIRTOOLKITBASEURL + "/proxy/" + channel.testSession + "__" + channel.channelId
+    }
+}
+
 export async function getServiceProperties() {
     if (process.env.NODE_ENV === 'production') {
         return await axios

@@ -124,8 +124,8 @@
                     </div>
                 </div>
                 <div v-if="!edit">
-                    <span class="caption">Channel Base Address: </span>
-                    <span>{{channel.channelBase}}</span>
+                    <p class="caption">Channel Base Address: </p>
+                    <span>{{getChannelBase(channel)}}</span>
                 </div>
             </div>
         </div>
@@ -135,7 +135,7 @@
 <script>
     import Vue from 'vue'
     import {store} from "../../store"
-    import {PROXY, CHANNEL} from '../../common/http-common'
+    import {UtilFunctions, PROXY, CHANNEL} from '../../common/http-common'
     import VueFlashMessage from 'vue-flash-message';
     Vue.use(VueFlashMessage);
     require('vue-flash-message/dist/vue-flash-message.min.css')
@@ -345,6 +345,9 @@
                 const newRoute =  '/session/' + this.channel.testSession + '/channel/' + this.channel.channelId
                 this.$store.commit('setChannelId', this.channel.channelId)
                 this.$router.push(newRoute)
+            },
+            getChannelBase(channel) {
+                return UtilFunctions.getChannelBase(channel)
             }
         },
         store: store,

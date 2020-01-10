@@ -105,7 +105,7 @@ public class PassthroughChannel extends BaseChannel /*implements IBaseChannel*/ 
                 if (linkComponent != null) {
                     if (linkComponent.hasUrl()) {
                         oldBase = linkComponent.getUrl();
-                        newBase = channelConfig.getChannelBase();
+                        newBase = ServiceProperties.getInstance().getPropertyOrStop(ServicePropertiesEnum.FHIR_TOOLKIT_BASE) + "/proxy/" + channelConfig.asFullId();
                         linkComponent.setUrl(newBase);
                         updated = true;
                     }
