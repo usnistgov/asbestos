@@ -21,6 +21,7 @@ export async function getServiceProperties() {
         return {
             data : {
                 fhirToolkitBase : process.env.VUE_APP_FHIR_TOOLKIT_BASE,
+                httpsFhirToolkitUIBase : process.env.VUE_APP_HTTPS_FHIR_TOOLKIT_UI_BASE,
                 projectVersion : "Development"
             }
         };
@@ -40,7 +41,7 @@ export async function initServiceProperties() {
                     TLS_UI_PROXY = axios.create({
                         baseURL: response.data.httpsFhirToolkitUIBase + '/',
                         headers: {
-                            'Access-Control-Allow-Methods': 'GET, POST, OPTIONS, PUT, PATCH, DELETE'
+                            'Access-Control-Allow-Methods': 'GET, POST, OPTIONS, PUT, PATCH, DELETE',
                         },
                         params: {
                             crossdomain: true,

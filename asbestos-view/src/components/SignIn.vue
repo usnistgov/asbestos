@@ -84,11 +84,16 @@
             },
             onOkClick() {
                 if (this.doDefaultSignIn) {
-                    this.userProps.signedIn = this.defaultSignIn()
+                     this.defaultSignIn().then(response => {
+                         if (typeof response === 'boolean') {
+                             this.userProps.signedIn = response
+                         }
+                         this.$emit('onOkClick')
+                    })
                 } else {
                    this.userProps.signedIn = false
+                   this.$emit('onOkClick')
                 }
-                this.$emit('onOkClick')
             },
             onCancelClick() {
                 this.$emit('onCancelClick')

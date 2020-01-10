@@ -51,7 +51,7 @@
                                 <div class="divider"></div>
                                 <div class="divider"></div>
                                 <div class="tooltip">
-                                    <img id="delete-button" src="../../assets/delete-button.png" @click="guardedFn('Delete',requestDelete)" /> <!-- @click="requestDelete()" -->
+                                    <img id="delete-button" src="../../assets/delete-button.png" @click="guardedFn('Delete',requestDelete)" />
                                     <span class="tooltiptext">Delete</span>
                                 </div>
                                 <div class="divider"></div>
@@ -228,6 +228,7 @@
             copy() {  // actually duplicate (a channel)
                 let chan = cloneDeep(this.channel)
                 chan.channelId = 'copy'
+                chan.writeLocked = false
                 this.$store.commit('installChannel', chan)
                 this.$router.push('/session/' + this.sessionId + '/channels/copy')
             },
@@ -247,22 +248,7 @@
                     this.error(error)
                 }
             },
-            async lockChannel(boolIn) {
-                const bool = boolIn
-                const that = this
-                let chan = cloneDeep(this.channel)
-                chan.writeLocked = bool
-                await TLS_UI_PROXY.post('channelLock', chan, { auth: {username: this.editUserProps.bauser, password: this.editUserProps.bapw}})
-                    .then(function () {
-                        that.channel.writeLocked = bool
-                        that.msg('Channel configuration is ' + ((bool)?'locked':'unlocked'))
-                    })
-                    .catch(function (error) {
-                        let msg = ((error) ? error.message: '' )
-                        msg += ((error && error.response && error.response.status && error.response.statusText) ? (error.response.status +  ': ' + error.response.statusText) : "")
-                        that.error({message: msg})
-                    })
-            },
+
             toggleEdit() {
                 this.edit = !this.edit
             },
@@ -287,41 +273,46 @@
                         this.edit = false
                         this.$router.push('/session/' + this.channel.testSession + '/channels/' + this.channel.channelId)
                     })
-                }
-                this.$store.commit('installChannel', cloneDeep(this.channel))
-                if (! this.channel.writeLocked) {
-                    CHANNEL.post('', this.channel)
-                        .then(function () {
-                            that.msg('Saved')
-                            that.isNew = false
-                            that.edit = false
-                            that.lockAckMode = ""
-                            that.fetch()
-
-                        })
-                        .catch(function (error) {
-                            that.error(error)
-                            that.isNew = false
-                            that.edit = false
-                        })
                 } else {
-                    TLS_UI_PROXY.post('/channelGuard', this.channel, { auth: {username: this.editUserProps.bauser, password: this.editUserProps.bapw}})
-                        .then(function () {
-                            that.msg('Saved')
-                            that.isNew = false
-                            that.edit = false
-                            that.lockAckMode = ""
-                            that.fetch()
+                    this.$store.commit('installChannel', cloneDeep(this.channel))
+                    if (! this.channel.writeLocked) {
+                        CHANNEL.post('', this.channel)
+                            .then(function () {
+                                that.msg('Saved')
+                                that.isNew = false
+                                that.edit = false
+                                that.lockAckMode = ""
+                                that.fetch()
 
+                            })
+                            .catch(function (error) {
+                                that.error(error)
+                                that.isNew = false
+                                that.edit = false
+                            })
+                    } else {
+                        TLS_UI_PROXY.post('/channelGuard', this.channel, {
+                            auth: {
+                                username: this.editUserProps.bauser,
+                                password: this.editUserProps.bapw
+                            }
                         })
-                        .catch(function (error) {
-                            that.error(error)
-                            that.isNew = false
-                            that.edit = false
-                            that.lockAckMode = ""
-                        })
+                            .then(function () {
+                                that.msg('Saved')
+                                that.isNew = false
+                                that.edit = false
+                                that.lockAckMode = ""
+                                that.fetch()
+
+                            })
+                            .catch(function (error) {
+                                that.error(error)
+                                that.isNew = false
+                                that.edit = false
+                                that.lockAckMode = ""
+                            })
+                    }
                 }
-
 
             },
             async saveToServer(aChannel) {
@@ -429,14 +420,34 @@
                 this.lockAcked = null
                 this.edit = false
             },
+            async lockChannel(boolIn) {
+                const bool = boolIn
+                const that = this
+                let chan = cloneDeep(this.channel)
+                chan.writeLocked = bool
+                await TLS_UI_PROXY.post('channelLock', chan, { auth: {username: this.editUserProps.bauser, password: this.editUserProps.bapw}})
+                    .then(function () {
+                        that.channel.writeLocked = bool
+                        that.msg('Channel configuration is ' + ((bool)?'locked':'unlocked'))
+                    })
+                    .catch(function (error) {
+                        let msg = ((error) ? error.message: '' )
+                        msg += ((error && error.response && error.response.status && error.response.statusText) ? (error.response.status +  ': ' + error.response.statusText) : "")
+                        that.error({message: msg})
+                    })
+            },
             guardedFn(str, fn) {
                 if (typeof fn === 'function') {
-                    if (this.editUserProps.signedIn) {
-                       fn.call()
+                    if (this.channel.writeLocked) {
+                        if (this.editUserProps.signedIn) {
+                            fn.call()
+                        } else {
+                            this.lockAcked = fn
+                            this.lockAckMode = str + ": "
+                        }
                     } else {
-                        this.lockAckMode = str + ": "
+                        fn.call()
                     }
-                    this.lockAcked = fn
                 }
             }
         },

@@ -20,11 +20,10 @@
             <span class="selectable" @click="go('/about')">About</span>
 
             <div class="divider"></div>
-            <span v-if="! this.asbts_UserProps.signedIn" class="selectable" @click="go('/admin')">Admin</span>
+            <span v-if="this.asbts_UserProps.signedIn === false" class="selectable" @click="go('/admin')">Admin</span>
 
             <div class="divider"></div>
-            <span v-if="this.asbts_UserProps.signedIn" class="selectable" @click="signOut">Sign Out</span>
-
+            <span v-if="this.asbts_UserProps.signedIn === true" class="selectable" @click="signOut">Sign Out</span>
 
         </div>
         </div>
