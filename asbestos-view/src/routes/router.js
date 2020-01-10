@@ -20,6 +20,7 @@ import Home from "../components/top/Home"
 import MhdTesting from "../components/top/MhdTesting"
 import Configurations from "../components/top/Configurations"
 import Getter from "../components/getter/Getter"
+import Admin from "../components/wrapper/Admin";
 
 Vue.use( VueRouter )
 
@@ -48,6 +49,12 @@ export const routes = [
                 path: 'configurations',
                 components: {
                     default: Configurations
+                }
+            },
+            {
+                path: 'admin',
+                components: {
+                    default: Admin
                 }
             },
             {

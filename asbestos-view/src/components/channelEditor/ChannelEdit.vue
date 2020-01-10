@@ -11,7 +11,7 @@
                             </div>
                             <div v-else>
                                 <div class="tooltip">
-                                    <img id="save-button" src="../../assets/save.png" @click="save()"/>
+                                    <img id="save-button" src="../../assets/save.png" @click="save"/>
                                     <span class="tooltiptext">Save</span>
                                 </div>
                                 <div class="divider"></div>
@@ -29,6 +29,9 @@
                                 <button class="ok-button" @click="deleteAcked()">Ok</button>
                                 <button class="cancel-button" @click="deleteCanceled">Cancel</button>
                             </div>
+                            <div v-else-if="lockAckMode">
+                                <sign-in :banner="lockAckMode" :userProps="editUserProps" :doDefaultSignIn="true" :showCancelButton="true" @onOkClick="lockAcked" @onCancelClick="lockCanceled" />
+                            </div>
                             <div v-else>
                                 <div class="tooltip">
                                     <img id="select-button" src="../../assets/select.png" @click="select()"/>
@@ -36,7 +39,7 @@
                                 </div>
                                 <div class="divider"></div>
                                 <div class="tooltip">
-                                    <img id="edit-button" src="../../assets/pencil-edit-button.png" @click="toggleEdit()"/>
+                                    <img id="edit-button" src="../../assets/pencil-edit-button.png" @click="guardedFn('Edit',toggleEdit)"/>
                                     <span class="tooltiptext">Edit</span>
                                 </div>
                                 <div class="divider"></div>
@@ -48,11 +51,19 @@
                                 <div class="divider"></div>
                                 <div class="divider"></div>
                                 <div class="tooltip">
-                                    <img id="delete-button" src="../../assets/delete-button.png" @click="requestDelete()"/>
+                                    <img id="delete-button" src="../../assets/delete-button.png" @click="guardedFn('Delete',requestDelete)" />
                                     <span class="tooltiptext">Delete</span>
                                 </div>
                                 <div class="divider"></div>
                                 <div class="divider"></div>
+                                <div v-if="channel.writeLocked" class="tooltip">
+                                    <img id="unlock-button" src="../../assets/lock-icon.png" @click="requestLock(false)"/>
+                                    <span class="tooltiptext">Configuration is locked.</span>
+                                </div>
+                                <div v-else class="tooltip">
+                                    <img id="lock-button" src="../../assets/unlock-icon.png" @click="requestLock(true)"/>
+                                    <span class="tooltiptext">Configuration is unlocked.</span>
+                                </div>
                             </div>
 
                         </div>
@@ -101,21 +112,21 @@
                     </div>
                     <div v-else class="grid-item">{{ channel.xdsSiteName }}</div>
 
-                    <div v-if="!edit && !channel.fhirBase && !channel.xdsSiteName" class="channelError">
+                    <div v-if="!lockAckMode && !edit && !channel.fhirBase && !channel.xdsSiteName" class="channelError">
                         <div class="vdivider"></div>
                         <div class="vdivider"></div>
                         <div class="vdivider"></div>
                         <div class="vdivider"></div>
                         Warning: FhirBase or XDS Site Name must be present
                     </div>
-                    <div v-if="!edit && channel.channelType === 'fhir' && !channel.fhirBase" class="channelError">
+                    <div v-if="!lockAckMode && !edit && channel.channelType === 'fhir' && !channel.fhirBase" class="channelError">
                         <div class="vdivider"></div>
                         <div class="vdivider"></div>
                         <div class="vdivider"></div>
                         <div class="vdivider"></div>
                         Warning: FHIR type is selected but no FHIR Base is configured
                     </div>
-                    <div v-if="!edit && channel.channelType === 'mhd' && !channel.xdsSiteName" class="channelError">
+                    <div v-if="!lockAckMode && !edit && channel.channelType === 'mhd' && !channel.xdsSiteName" class="channelError">
                         <div class="vdivider"></div>
                         <div class="vdivider"></div>
                         <div class="vdivider"></div>
@@ -135,7 +146,7 @@
 <script>
     import Vue from 'vue'
     import {store} from "../../store"
-    import {UtilFunctions, PROXY, CHANNEL} from '../../common/http-common'
+    import {UtilFunctions, TLS_UI_PROXY, PROXY, CHANNEL, ASBTS_USERPROPS} from '../../common/http-common'
     import VueFlashMessage from 'vue-flash-message';
     Vue.use(VueFlashMessage);
     require('vue-flash-message/dist/vue-flash-message.min.css')
@@ -144,6 +155,7 @@
     Vue.use(ButtonGroupPlugin)
     Vue.use(ButtonPlugin)
     Vue.use(ToastPlugin)
+    import SignIn from "../SignIn";
 
     export default {
         data () {
@@ -154,8 +166,10 @@
                 originalChannelId: null,   // in case of delete
                 discarding: false,  // for saving edits
                 ackMode: false,  // for deleting
+                lockAckMode: "", // for locking configuration to prevent unauthorized edits
                 badNameMode: false,
                 badNameModeReason: null,
+                editUserProps: ASBTS_USERPROPS
             }
         },
         props: [
@@ -175,6 +189,11 @@
                     return this.$store.state.base.channelIds
                 },
             },
+        },
+        mounted() {
+        },
+        components: {
+            SignIn
         },
         methods: {
             msg(msg) {
@@ -214,24 +233,31 @@
             copy() {  // actually duplicate (a channel)
                 let chan = cloneDeep(this.channel)
                 chan.channelId = 'copy'
+                chan.writeLocked = false
                 this.$store.commit('installChannel', chan)
                 this.$router.push('/session/' + this.sessionId + '/channels/copy')
             },
             async deleteChannel() {
                 try {
-                    await PROXY.delete('channel/' + this.sessionId + '__' + this.channelId)
+                    if (! this.channel.writeLocked) {
+                        await PROXY.delete('channel/' + this.sessionId + '__' + this.channelId)
+                    } else if (this.editUserProps.bapw != "") {
+                        await TLS_UI_PROXY.delete('channelGuard/' + this.sessionId + '__' + this.channelId, { auth: {username: this.editUserProps.bauser, password: this.editUserProps.bapw}})
+                    }
                     this.msg('Deleted')
                     this.$store.commit('deleteChannel', this.channelId)
                     await this.$store.dispatch('loadChannelNamesAndURLs')
                     this.$router.push('/session/' + this.sessionId + '/channels')
                 } catch (error) {
+                    this.lockAckMode = ""
                     this.error(error)
                 }
             },
+
             toggleEdit() {
                 this.edit = !this.edit
             },
-            save() {
+            async save() {
                 const that = this
                 if (this.isNew) {
                     if (this.isCurrentChannelIdNew()) {
@@ -244,25 +270,55 @@
                         this.badNameModeReason = `Name may only contain a-z A-Z 0-9 _  and __ not allowed`
                         return
                     }
-                    this.saveToServer(this.channel)
+                    await this.saveToServer(this.channel).then (response => {
+                        if (response) {console.log(response)}
+                        this.$store.commit('installChannel', cloneDeep(this.channel))
+                        this.$store.commit('deleteChannel', this.originalChannelId) // original has been renamed
+                        this.isNew = false
+                        this.edit = false
+                        this.$router.push('/session/' + this.channel.testSession + '/channels/' + this.channel.channelId)
+                    })
+                } else {
                     this.$store.commit('installChannel', cloneDeep(this.channel))
-                    this.$store.commit('deleteChannel', this.originalChannelId) // original has been renamed
-                    this.isNew = false
-                    this.toggleEdit()
-                    this.$router.push('/session/' + this.channel.testSession + '/channels/' + this.channel.channelId)
-                    return
+                    if (! this.channel.writeLocked) {
+                        CHANNEL.post('', this.channel)
+                            .then(function () {
+                                that.msg('Saved')
+                                that.isNew = false
+                                that.edit = false
+                                that.lockAckMode = ""
+                                that.fetch()
+
+                            })
+                            .catch(function (error) {
+                                that.error(error)
+                                that.isNew = false
+                                that.edit = false
+                            })
+                    } else {
+                        TLS_UI_PROXY.post('/channelGuard', this.channel, {
+                            auth: {
+                                username: this.editUserProps.bauser,
+                                password: this.editUserProps.bapw
+                            }
+                        })
+                            .then(function () {
+                                that.msg('Saved')
+                                that.isNew = false
+                                that.edit = false
+                                that.lockAckMode = ""
+                                that.fetch()
+
+                            })
+                            .catch(function (error) {
+                                that.error(error)
+                                that.isNew = false
+                                that.edit = false
+                                that.lockAckMode = ""
+                            })
+                    }
                 }
-                this.$store.commit('installChannel', cloneDeep(this.channel))
-                CHANNEL.post('', this.channel)
-                    .then(function () {
-                        that.msg('Saved')
-                    })
-                    .catch(function (error) {
-                        that.error(error)
-                    })
-                this.isNew = false
-                this.toggleEdit()
-                this.fetch()
+
             },
             async saveToServer(aChannel) {
                 try {
@@ -348,6 +404,59 @@
             },
             getChannelBase(channel) {
                 return UtilFunctions.getChannelBase(channel)
+            },
+            requestLock(boolIn) {
+                const bool = boolIn
+                const that = this
+                this.lockAcked = function() {
+                    that.lockChannel(boolIn).then (response => {
+                        if (response) {console.log(response)}
+                        that.lockAckMode = ""
+                    })
+                }
+                // If signedIn, directly run the method
+                if (this.editUserProps.signedIn) {
+                    this.lockAcked()
+                } else {
+                // If not signed In, show the signIn component
+                    this.lockAckMode = (bool?"Lock":"Unlock") + " Configuration:";
+                }
+            },
+            lockAcked() {},
+            lockCanceled() {
+                this.lockAckMode = ""
+                this.lockAcked = null
+                this.edit = false
+            },
+            async lockChannel(boolIn) {
+                const bool = boolIn
+                const that = this
+                let chan = cloneDeep(this.channel)
+                chan.writeLocked = bool
+                await TLS_UI_PROXY.post('channelLock', chan, { auth: {username: this.editUserProps.bauser, password: this.editUserProps.bapw}})
+                    .then(function () {
+                        that.channel.writeLocked = bool
+                        that.msg('Channel configuration is ' + ((bool)?'locked':'unlocked'))
+                    })
+                    .catch(function (error) {
+                        let msg = ((error) ? error.message: '' )
+                        msg += ((error && error.response && error.response.status && error.response.statusText) ? (error.response.status +  ': ' + error.response.statusText) : "")
+                        that.error({message: msg})
+                    })
+            },
+            guardedFn(str, fn) {
+                if (typeof fn === 'function') {
+                    if (this.channel.writeLocked) {
+                        if (this.editUserProps.signedIn) {
+                            fn.call()
+                        } else {
+                            this.lockAcked = fn
+                            this.lockAckMode = str + ": "
+                        }
+                    } else {
+                        fn.call()
+                    }
+                }
             }
         },
         store: store,

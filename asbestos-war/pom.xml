@@ -14,7 +14,7 @@
     <packaging>war</packaging>
 
     <properties>
-        <fhirUI>http://localhost:8082/</fhirUI> <!-- This property is not referenced in code for Development. It is more of a documentation purpose. -->
+        <httpsFhirToolkitUIBase>https://fhirtoolkit.test:9743/asbestos</httpsFhirToolkitUIBase>
         <fhirToolkitBase>http://localhost:8081/asbestos</fhirToolkitBase>
         <hapiFhirBase>http://localhost:8080/fhir/fhir</hapiFhirBase>
         <xdsToolkitBase>http://localhost:8080/xdstools</xdsToolkitBase>
@@ -172,6 +172,10 @@
                     <stopKey>alpha</stopKey>
                     <stopPort>9099</stopPort>
                     <systemProperties>
+                        <systemProperty>
+                            <name>jetty.realmProperties</name>
+                            <value>${basedir}/src/test/etc/realm.properties</value>
+                        </systemProperty>
                         <systemProperty>
                             <name>jetty.logs</name>
                             <value>${basedir}/target</value>

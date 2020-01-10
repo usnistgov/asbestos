@@ -60,6 +60,7 @@ public class ChannelControlServlet extends HttpServlet {
             else if (GetChannelIdAndURLRequest.isRequest(request)) new GetChannelIdAndURLRequest(request).run();
             else if (EvalRequest.isRequest(request))            new EvalRequest(request).run();
             else if (CancelEvalRequest.isRequest(request))      new CancelEvalRequest(request).run();
+            else if (LockChannelRequest.isRequest(request))      new LockChannelRequest(request).run();
             else throw new Exception("Invalid request - do not understand URI " + request.uri);
 
         } catch (IOException e) {
@@ -82,6 +83,7 @@ public class ChannelControlServlet extends HttpServlet {
             else if (GetChannelIdAndURLRequest.isRequest(request)) new GetChannelIdAndURLRequest(request).run();
             else if (GetSessionNamesRequest.isRequest(request)) new GetSessionNamesRequest(request).run();
             else if (GetChannelConfigRequest.isRequest(request)) new GetChannelConfigRequest(request).run();
+            else if (GetSignInRequest.isRequest(request)) new GetSignInRequest(request).run();
             else throw new Exception("Invalid request - do not understand URI " + request.uri);
 
         } catch (IOException e) {
