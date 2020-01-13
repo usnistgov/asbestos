@@ -38,7 +38,7 @@
                         <url value="urn:uuid:3fdc72f4-a11d-4a9d-9260-a9f745779e03"/>
                     </attachment>
                     <format>
-                        <system value="urn:oid:1.3.6.1.4.1.19376.1.2.3"/>
+                        <system value="http://ihe.net/fhir/ValueSet/IHE.FormatCode.codsystem"/>
                         <code value="urn:ihe:pcc:cm:2008"/>
                     </format>
                 </content>
@@ -82,7 +82,7 @@
                         <url value="urn:uuid:3fdc72f4-a11d-4a9d-9260-a9f745779e17"/>
                     </attachment>
                     <format>
-                        <system value="urn:oid:1.3.6.1.4.1.19376.1.2.3"/>
+                        <system value="http://ihe.net/fhir/ValueSet/IHE.FormatCode.codsystem"/>
                         <code value="urn:ihe:pcc:cm:2008"/>
                     </format>
                 </content>
