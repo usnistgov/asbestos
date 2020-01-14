@@ -65,7 +65,7 @@
   </text>
   <url value="http://hl7.org/fhir/CapabilityStatement/base2"/>
   <version value="4.0.1"/>
-  <name value="Base FHIR Capability Statement (Empty)"/>
+  <name value="BaseFHIRCapabilityStatement_Empty"/>
   <status value="draft"/>
   <experimental value="true"/>
   <date value="2019-11-01T09:29:23+11:00"/>
