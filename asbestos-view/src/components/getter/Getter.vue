@@ -46,6 +46,7 @@
                    this.run()
             },
             run() {
+                console.log(`getter url is ${this.url}`)
                 this.theUrl = this.url
             }
         },

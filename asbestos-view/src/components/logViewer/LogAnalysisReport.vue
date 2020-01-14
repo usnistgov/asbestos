@@ -178,6 +178,7 @@
                 }
             },
             urlAnalysis() {
+                console.log(`LogAnalysisReport url is ${this.theUrl}`)
                 this.loadAnalysisForObject(this.theUrl)
             }
         },
@@ -194,7 +195,10 @@
             }
         },
         created() {
-            this.loadAnalysis()
+            if (this.theUrl)
+                this.urlAnalysis()
+            else
+                this.loadAnalysis()
         },
         watch: {
             'eventId': 'loadAnalysis',
