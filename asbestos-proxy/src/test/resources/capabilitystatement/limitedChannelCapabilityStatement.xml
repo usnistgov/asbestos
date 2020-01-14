@@ -9,7 +9,7 @@
     </text>
     <url value="mhd:fhirtoolkit.test/channel/metadata|0.0.1"/>
     <version value="0.0.1"/>
-    <name value="FHIRToolkit IHE_MHD_DocumentRecipient"/>
+    <name value="FHIRToolkit_IHE_MHD_DocumentRecipient"/>
     <title value="FHIRToolkit IHE ITI Mobile access to Health Documents (MHD) - Document Recipient (server)"/>
     <status value="active" />
     <experimental value="false"/>
