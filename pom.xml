@@ -4,7 +4,7 @@
 
     <groupId>gov.nist.asbestos</groupId>
     <artifactId>asbestos</artifactId>
-    <version>1.0.0</version>
+    <version>1.1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>Asbestos</name>
@@ -16,7 +16,8 @@
         <jdk.version>1.8</jdk.version>
         <mavenCompilerPluginVersion>3.3</mavenCompilerPluginVersion>
         <mavenWarPluginVersion>3.2.2</mavenWarPluginVersion>
-        <hapi.version>3.7.0</hapi.version>
+        <hapi.version>4.1.0</hapi.version>
+<!--        <hapi.version>3.7.0</hapi.version>-->
         <jackson.version>2.6.3</jackson.version>
         <jersey.version>2.22.1</jersey.version>
     </properties>
@@ -64,6 +65,8 @@
         <module>asbestos-utilities</module>
         <module>asbestos-test-engine</module>
         <module>service-properties</module>
+        <module>asbestos-analysis</module>
+        <module>fhirPathBug</module>
     </modules>
 
     <dependencyManagement>

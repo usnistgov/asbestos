@@ -4,3 +4,10 @@ module.exports = {
     filenameHashing: false
 }
 */
+/*
+module.exports = {
+    devServer: {
+        disableHostCheck: true
+    }
+}
+ */

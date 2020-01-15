@@ -7,6 +7,8 @@ package gov.nist.asbestos.asbestosProxy.requests;
 // 3 - "ProxyBase"
 
 
+import gov.nist.asbestos.serviceproperties.ServiceProperties;
+import gov.nist.asbestos.serviceproperties.ServicePropertiesEnum;
 import org.apache.log4j.Logger;
 
 import java.io.IOException;
@@ -26,7 +28,7 @@ public class GetProxyBaseRequest {
 
     public void run() {
         log.info("GetProxyBaseRequest");
-        String base = "http://" + request.req.getHeader("host") + "/asbestos/proxy";
+        String base = ServiceProperties.getInstance().getPropertyOrStop(ServicePropertiesEnum.FHIR_TOOLKIT_BASE) + "/proxy";
         try {
             request.resp.getOutputStream().write(base.getBytes());
             request.resp.setStatus(request.resp.SC_OK);

@@ -169,7 +169,11 @@
             async doRunAll()  {
                 this.running = true
                 for (const name of Object.keys(this.status)) {
-                    await this.runner(name)
+                    if (this.isClient)
+                        this.doEval(name)
+                    else
+                        await this.runner(name)
+                    //await this.runner(name)
                 }
                 this.running = false
                 this.$store.dispatch('loadTestScriptNames')  // force reload of UI
@@ -221,7 +225,7 @@
                 this.$store.dispatch('setMarker')
             },
             testScriptNamesUpdated() {
-                this.$store.dispatch('loadReports')
+                this.$store.dispatch('loadReports', this.$store.state.testRunner.currentTestCollectionName)
                 if (this.isClient) {
                     return this.$store.state.testRunner.testScriptNames.forEach(name => {
                         this.doEval(name)
@@ -324,7 +328,7 @@
         border-radius: 25px;
     }
     .error {
-        background-color: #0074D9 ;
+        background-color: cornflowerblue;
         text-align: left;
         border: 1px dotted black;
         cursor: pointer;

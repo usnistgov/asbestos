@@ -5,7 +5,7 @@
     <parent>
         <artifactId>asbestos</artifactId>
         <groupId>gov.nist.asbestos</groupId>
-        <version>1.0.0</version>
+        <version>1.1.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -13,22 +13,33 @@
 
     <dependencies>
         <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <version>5.2.0-M1</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>gov.nist.asbestos</groupId>
             <artifactId>asbestos-xds-jaxb</artifactId>
-            <version>1.0.0</version>
+            <version>1.1.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>gov.nist.asbestos</groupId>
             <artifactId>asbestos-http</artifactId>
-            <version>1.0.0</version>
+            <version>1.1.0-SNAPSHOT</version>
         </dependency>
-    <!-- https://mvnrepository.com/artifact/org.apache.httpcomponents/httpmime -->
-    <dependency>
-        <groupId>org.apache.httpcomponents</groupId>
-        <artifactId>httpmime</artifactId>
-        <version>4.3.1</version>
-    </dependency>
-
+        <dependency>
+            <groupId>gov.nist.asbestos</groupId>
+            <artifactId>asbestos-proxy-support</artifactId>
+            <version>1.1.0-SNAPSHOT</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.apache.httpcomponents/httpmime -->
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpmime</artifactId>
+            <version>4.3.1</version>
+        </dependency>
     </dependencies>
+
 
 </project>

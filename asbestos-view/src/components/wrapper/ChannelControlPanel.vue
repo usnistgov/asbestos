@@ -8,15 +8,14 @@
             &nbsp;
             <span class="selectable" @click="showAddr()">List by URL</span>
         </div>
-        <select v-model="channel" size="6" class="control-panel-font">
-            <option v-for="(chann, channeli) in channels"
-                    v-bind:value="chann.value"
+        <select v-model="channel" size="10" class="control-panel-font">
+            <option v-for="(chann, channeli) in channelIds"
+                    v-bind:value="getChannelIdByText(chann)"
                     :key="chann + channeli"
                     >
-                {{ chann.text }}
+                {{ chann }}
             </option>
         </select>
-<!--        <b-form-select class="control-panel-font" v-model="channelId" :options="channels"></b-form-select>-->
     </div>
 </template>
 
@@ -61,6 +60,7 @@
                         this.channels.push({value: iu.id, text: iu.url ? iu.url : iu.site })
                     })
                 }
+//                this.channels.sort()
             },
             updateChannelIdFromState() {
                 //this.channel = this.$store.state.base.channelId
@@ -75,8 +75,21 @@
                 if (this.channelId !== this.channel)
                     this.$router.push(`/session/${this.session}/channel/${this.channelId}`)
             },
+            getChannelIdByText(text) {
+                let found = this.channels.find(function (element) {
+                    return element.text === text
+                })
+                return found.value
+            }
         },
         computed: {
+            channelIds() {
+                let ids = []
+                this.channels.forEach(item => {
+                    ids.push(item.text)
+                })
+                return ids.sort()
+            },
             channel: {
                 set(name) {
                     if (name !== this.$store.state.base.channelId)

@@ -6,6 +6,7 @@ export function newChannel () {
         actorType: 'fhir',
         channelType: 'passthrough',
         fhirBase: '',
-        xdsSiteName: ''
+        xdsSiteName: '',
+        writeLocked: false
     }
 }

@@ -1,0 +1,7 @@
+200 
+Transfer-Encoding:chunked
+Content-Location:http://localhost:8080/fhir/fhir/Bundle/bc909fee-358d-448f-b368-adecbab0fb54
+Date:Thu, 12 Dec 2019 12:40:02 GMT
+Content-Type:application/fhir+json;charset=UTF-8
+Location:http://localhost:8080/fhir/fhir/Bundle/bc909fee-358d-448f-b368-adecbab0fb54
+X-Powered-By:HAPI FHIR 3.7.0 REST Server (FHIR Server; FHIR 4.0.0/R4)

@@ -12,7 +12,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -30,6 +29,7 @@ public class EC {
     public static final String TEST_ASSERTIONS_DIR = "FhirTestAssertions";
     public static final String TEST_ASSERTIONS_FILE = "assertions.json";
     public static final String CHANNELS_DIR = "FhirChannels";
+    public static final String DOCUMENT_CACHE = "FhirDocCache";
 
 
     public EC(File externalCache) {
@@ -190,7 +190,7 @@ public class EC {
         resp.setStatus(resp.SC_OK);
     }
 
-    private UIEvent getEvent(String testSession, String channelId, String resourceType, String eventName) {
+    public UIEvent getEvent(String testSession, String channelId, String resourceType, String eventName) {
         File fhir = fhirDir(testSession, channelId);
         if (resourceType.equals("null")) {
             resourceType = resourceTypeForEvent(fhir, eventName);
@@ -312,5 +312,28 @@ public class EC {
             }
         }
         return eventsList;
+    }
+
+    public File getEvent(SimId simId, String eventId) {
+        SimStore simStore = new SimStore(externalCache, simId);
+        List<File> resourceTypeDirs = simStore.getResourceTypeDirs();
+        for (File resourceTypeDir : resourceTypeDirs) {
+            List<File> events = Dirs.listOfDirectories(resourceTypeDir);
+            for (File event : events) {
+                String eventName = event.getName();
+                if (eventName.equals(eventId))
+                    return event;
+            }
+        }
+        return null;
+    }
+
+    public File getDocumentCache() {
+        return new File(externalCache, DOCUMENT_CACHE);
+    }
+
+
+    public File getCodesFile(String environment) {
+        return new File(new File(new File(externalCache, "environment"), environment), "codes.xml");
     }
 }

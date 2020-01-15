@@ -73,6 +73,8 @@ public class RunTestRequest {
 
         File patientCacheDir = request.ec.getTestLogCacheDir(channelId);
         File alternatePatientCacheDir = request.ec.getTestLogCacheDir("default__default");
+        patientCacheDir.mkdirs();
+        alternatePatientCacheDir.mkdirs();
 
         TestReport report;
         try {

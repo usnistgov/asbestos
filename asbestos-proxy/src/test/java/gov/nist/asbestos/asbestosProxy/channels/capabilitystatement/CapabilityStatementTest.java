@@ -32,8 +32,13 @@ class CapabilityStatementTest {
     }
 
     @Test
-    void getCapabilityStatement() throws Exception {
-        BaseResource baseResource = FhirToolkitCapabilityStatement.getCapabilityStatement(ServicePropertiesEnum.MHD_CAPABILITY_STATEMENT_FILE);
+    void testCapabilityStatements() throws Exception {
+        getCapabilityStatement(ServicePropertiesEnum.LIMITED_CHANNEL_CAPABILITY_STATMENT_FILE, "limited");
+        getCapabilityStatement(ServicePropertiesEnum.XDS_CHANNEL_CAPABILITY_STATEMENT_FILE, "xds");
+    }
+
+    private void getCapabilityStatement(ServicePropertiesEnum spEnum, String channelId) throws Exception {
+        BaseResource baseResource = FhirToolkitCapabilityStatement.getCapabilityStatement(spEnum, channelId);
         assert baseResource != null;
         assert baseResource instanceof CapabilityStatement;
 

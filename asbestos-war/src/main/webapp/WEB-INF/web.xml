@@ -30,9 +30,24 @@
   <!--    <url-pattern> /* </url-pattern>-->
   <!--  </filter-mapping>-->
 
+  <filter>
+    <filter-name>ChannelControlGuardFilter</filter-name>
+    <filter-class>gov.nist.asbestos.asbestosProxy.filter.ChannelControlGuardFilter</filter-class>
+  </filter>
+
   <filter-mapping>
     <filter-name>CORS</filter-name>
     <url-pattern>/*</url-pattern>
+  </filter-mapping>
+
+  <filter-mapping>
+    <filter-name>ChannelControlGuardFilter</filter-name>
+    <url-pattern>/channel</url-pattern>
+  </filter-mapping>
+
+  <filter-mapping>
+    <filter-name>ChannelControlGuardFilter</filter-name>
+    <url-pattern>/channel/*</url-pattern>
   </filter-mapping>
 
   <servlet>
@@ -98,5 +113,89 @@
     <servlet-name>logViewer</servlet-name>
     <url-pattern>/log/*</url-pattern>
   </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>ChannelControl</servlet-name>
+    <url-pattern>/channelGuard/*</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+      <servlet-name>ChannelControl</servlet-name>
+      <url-pattern>/channelGuard</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>ChannelControl</servlet-name>
+    <url-pattern>/channelLock</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>ChannelControl</servlet-name>
+    <url-pattern>/signIn</url-pattern>
+  </servlet-mapping>
+
+  <security-constraint>
+    <web-resource-collection>
+      <web-resource-name>ChannelEditor</web-resource-name>
+      <url-pattern>/channelGuard/*</url-pattern>
+      <http-method>DELETE</http-method>
+    </web-resource-collection>
+    <auth-constraint>
+      <role-name>editRole</role-name>
+    </auth-constraint>
+    <user-data-constraint>
+      <transport-guarantee>CONFIDENTIAL</transport-guarantee>
+    </user-data-constraint>
+  </security-constraint>
+
+  <security-constraint>
+    <web-resource-collection>
+      <web-resource-name>ChannelEditor</web-resource-name>
+      <url-pattern>/channelGuard</url-pattern>
+      <http-method>POST</http-method>
+    </web-resource-collection>
+    <auth-constraint>
+      <role-name>editRole</role-name>
+    </auth-constraint>
+    <user-data-constraint>
+      <transport-guarantee>CONFIDENTIAL</transport-guarantee>
+    </user-data-constraint>
+  </security-constraint>
+
+  <security-constraint>
+    <web-resource-collection>
+      <web-resource-name>ChannelEditor</web-resource-name>
+      <url-pattern>/channelLock</url-pattern>
+      <http-method>POST</http-method>
+    </web-resource-collection>
+    <auth-constraint>
+      <role-name>editRole</role-name>
+    </auth-constraint>
+    <user-data-constraint>
+      <transport-guarantee>CONFIDENTIAL</transport-guarantee>
+    </user-data-constraint>
+  </security-constraint>
+
+  <security-constraint>
+    <web-resource-collection>
+      <web-resource-name>SignIn</web-resource-name>
+      <url-pattern>/signIn</url-pattern>
+      <http-method>GET</http-method>
+    </web-resource-collection>
+    <auth-constraint>
+      <role-name>editRole</role-name>
+    </auth-constraint>
+    <user-data-constraint>
+      <transport-guarantee>CONFIDENTIAL</transport-guarantee>
+    </user-data-constraint>
+  </security-constraint>
+
+  <login-config>
+    <auth-method>BASIC</auth-method>
+    <realm-name>TestRealm</realm-name>
+  </login-config>
+  <security-role>
+    <role-name>editRole</role-name>
+  </security-role>
 
 </web-app>

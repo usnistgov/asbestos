@@ -1,15 +1,10 @@
 package gov.nist.asbestos.asbestosProxy.requests;
 
 import gov.nist.asbestos.client.log.SimStore;
-import gov.nist.asbestos.sharedObjects.ChannelConfig;
-import gov.nist.asbestos.sharedObjects.ChannelConfigFactory;
 import gov.nist.asbestos.simapi.simCommon.SimId;
-import gov.nist.asbestos.simapi.simCommon.TestSession;
-import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 
 import java.io.IOException;
-import java.nio.charset.Charset;
 // 0 - empty
 // 1 - app context
 // 2 - "channel"
@@ -21,7 +16,11 @@ public class DeleteChannelRequest {
     private Request request;
 
     public static boolean isRequest(Request request) {
-        return request.uriParts.size() == 4 && request.uriParts.get(2).equals("channel");
+        if (request.uriParts.size() == 4) {
+            String uriPart2 = request.uriParts.get(2);
+            return "channel".equals(uriPart2) || "channelGuard".equals(uriPart2);
+        }
+        return false;
     }
 
     public DeleteChannelRequest(Request request) {

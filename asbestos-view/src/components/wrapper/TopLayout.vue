@@ -19,6 +19,12 @@
             <div class="divider"></div>
             <span class="selectable" @click="go('/about')">About</span>
 
+            <div class="divider"></div>
+            <span v-if="this.asbts_UserProps.signedIn === false" class="selectable" @click="go('/admin')">Admin</span>
+
+            <div class="divider"></div>
+            <span v-if="this.asbts_UserProps.signedIn === true" class="selectable" @click="signOut">Sign Out</span>
+
         </div>
         </div>
         <div class="grid-container">
@@ -43,6 +49,8 @@
                 <div class="vdivider"></div>
                 <channel-control-panel class="solid-boxed"> </channel-control-panel>
                 <div class="vdivider"></div>
+                <getter-control-panel class="solid-boxed"> </getter-control-panel>
+                <div class="vdivider"></div>
 <!--                <log-control-panel class="solid-boxed"></log-control-panel>-->
 <!--                <div class="vdivider"></div>-->
                 <channel-log-control-panel class="solid-boxed"> </channel-log-control-panel>
@@ -60,8 +68,9 @@
     import ChannelControlPanel from "./ChannelControlPanel"
     import TestControlPanel from "./TestControlPanel"
     import ChannelLogControlPanel from "./ChannelLogControlPanel"
+    import GetterControlPanel from "./GetterControlPanel";
     // import DebugControlPanel from "./DebugControlPanel"
-    import {PROJECTVERSION} from "../../common/http-common";
+    import {PROJECTVERSION, ASBTS_USERPROPS} from "../../common/http-common";
 
     export default {
         data() {
@@ -69,6 +78,7 @@
                 testSession: 'default',
                 testSessions: null,
                 error: null,
+                asbts_UserProps: ASBTS_USERPROPS
             }
         },
         beforeRouteEnter(to, from, next) {
@@ -87,6 +97,11 @@
             clearErrors() {
                 this.$store.commit('clearError')
             },
+            signOut() {
+                this.asbts_UserProps.signedIn = false
+                this.asbts_UserProps.bauser = ""
+                this.asbts_UserProps.bapw = ""
+            }
         },
         computed: {
             projectVersion() {
@@ -101,6 +116,7 @@
             ChannelControlPanel,
             TestControlPanel,
             ChannelLogControlPanel,
+            GetterControlPanel
             // DebugControlPanel,
         }
     }
@@ -156,7 +172,6 @@
         right: 4px;
         text-align: left;
     }
-
 </style>
 // these are shared across the tool
 <style>
@@ -228,6 +243,9 @@
     .selectable {
         cursor: pointer;
         text-decoration: underline;
+    }
+    .pointer-cursor {
+        cursor: pointer;
     }
     .has-cursor {
         cursor: pointer;

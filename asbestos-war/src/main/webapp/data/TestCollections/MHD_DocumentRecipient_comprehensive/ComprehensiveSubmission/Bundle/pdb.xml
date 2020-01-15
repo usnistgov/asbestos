@@ -37,6 +37,10 @@
                         <contentType value="text/plain"/>
                         <url value="urn:uuid:3fdc72f4-a11d-4a9d-9260-a9f745779e03"/>
                     </attachment>
+                    <format>
+                        <system value="http://ihe.net/fhir/ValueSet/IHE.FormatCode.codsystem"/>
+                        <code value="urn:ihe:pcc:cm:2008"/>
+                    </format>
                 </content>
             </DocumentReference>
         </resource>

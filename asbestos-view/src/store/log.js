@@ -9,13 +9,21 @@ export const logStore = {
     state() {
         return {
             // private to the log viewer
-            eventSummaries: [],  // list { eventName: xx, resourceType: yy, verb: GET|POST, status: true|false }
+            eventSummaries: [],  // list { eventName: xx, resourceType: yy, verb: GET|POST, status: true|false, ipAddr: addr }
             session: null,
             channel: null,
             loaded: false,
+            analysis: null,
+//            eventIdOfAnalysis: null,
         }
     },
     mutations: {
+        setAnalysis(state, analysis) {
+//            const analysis = data.analysis
+//            const eventId = data.eventId
+            state.analysis = analysis
+//            state.eventIdOfAnalysis = eventId
+        },
         resetLogLoaded(state) {
             state.loaded = false
         },
@@ -28,6 +36,16 @@ export const logStore = {
         },
         setLogChannel(state, channel) {
             state.channel = channel
+        }
+    },
+    getters: {
+        ipAddresses: state => {
+            const holder =  state.eventSummaries.map(x => {
+                return x.ipAddr
+            })
+            return holder.filter((item, index) => {
+                return holder.indexOf(item) === index
+            })
         }
     },
     actions: {
@@ -57,6 +75,33 @@ export const logStore = {
                     return -1
                 })
                 commit('setEventSummaries', eventSummaries)
+            } catch (error) {
+                commit('setError', error)
+                console.error(error)
+            }
+        },
+        async getLogEventAnalysis({commit}, parms) {
+            const channel = parms.channel
+            const session = parms.session
+            const eventId = parms.eventId
+
+            try {
+                const url = `analysis/event/${session}/${channel}/${eventId}`
+                const result = await LOG.get(url)
+                //const data = {analysis: result.data, eventId: eventId}
+                commit('setAnalysis', result.data)
+                //console.log(`analysis available`)
+            } catch (error) {
+                commit('setError', error)
+                console.error(error)
+            }
+        },
+        async getLogEventAnalysisForObject({commit}, resourceUrl) {
+            try {
+                const url = `analysis/url?url=${resourceUrl}`
+                const result = await LOG.get(url)
+                //const data = {analysis: result.data, eventId: eventId}
+                commit('setAnalysis', result.data)
             } catch (error) {
                 commit('setError', error)
                 console.error(error)

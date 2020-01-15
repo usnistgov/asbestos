@@ -1,17 +1,32 @@
 <template>
     <div>
-        <span class="tool-title">Events for Channel {{ channelId }}</span>
-        <span class="divider"></span>
+        <div>
+            <span class="tool-title">Events for Channel {{ channelId }}</span>
+            <span class="divider"></span>
 
-        <img id="reload" class="selectable" @click="loadEventSummaries()" src="../../assets/reload.png"/>
-        <span class="divider"></span>
+            <img id="reload" class="selectable" @click="loadEventSummaries()" src="../../assets/reload.png"/>
+            <div class="divider"></div>
+        </div>
+
+        <div>
+            Source IP addr filter:
+            <select v-model="selectedIP" v-bind:size="1">
+                <option v-for="(coll, colli) in ipAddresses"
+                        v-bind:value="coll"
+                        :key="coll + colli"
+                        >
+                    {{ coll }}
+                </option>
+            </select>
+        </div>
+        <div class="vdivider"></div>
 
         <div v-for="(eventSummary, i) in eventSummaries"
              :key="eventSummary.eventName + i">
-            <div >
-                <div class="summary-label boxed has-cursor"
+            <div v-if="selectedIP === 'all' || eventSummary.ipAddr === selectedIP">
+                <div class="summary-label boxed has-cursor left"
                      @click="selectSummary(eventSummary)">
-                    {{ eventAsDate(eventSummary.eventName) }} - {{ eventSummary.verb}} {{ eventSummary.resourceType }} - {{ eventSummary.status ? 'Ok' : 'Error' }}
+                    {{ eventAsDate(eventSummary.eventName) }} - {{ eventSummary.ipAddr }} - {{ eventSummary.verb}} {{ eventSummary.resourceType }} - {{ eventSummary.status ? 'Ok' : 'Error' }}
                 </div>
 
             </div>
@@ -31,6 +46,7 @@
                 selectedEventName: null,
                 selectedEvent: null,
                 selectedTask: 0,
+                selectedIP: "all",
             }
         },
         methods: {
@@ -48,6 +64,11 @@
         computed: {
             eventSummaries() {
                 return this.$store.state.log.eventSummaries
+            },
+            ipAddresses() {
+                let addrs = this.$store.getters.ipAddresses
+                addrs.push("all")
+                return addrs
             },
         },
         watch: {

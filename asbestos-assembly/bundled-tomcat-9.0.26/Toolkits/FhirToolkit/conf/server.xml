@@ -112,6 +112,20 @@
     </Connector>
     -->
 
+    <Connector
+            port="${fhirToolkitTlsPort}"
+            protocol="org.apache.coyote.http11.Http11NioProtocol"
+            maxThreads="150"
+            SSLEnabled="true"
+            clientAuth="false"
+            sslProtocol="TLS"
+            keystoreFile="fhirtoolkitui-certificate/keystore.jks"
+            keystorePass="changeit"
+            SSLVerifyClient="false"
+            SSLProtocol="TLSv1.2"
+            SSLCipherSuite="TLS_RSA_WITH_AES_128_CBC_SHA"
+    />
+
     <!-- Define an AJP 1.3 Connector on port 9709 -->
     <Connector port="9709" protocol="AJP/1.3" redirectPort="${fhirToolkitTlsPort}" />
 

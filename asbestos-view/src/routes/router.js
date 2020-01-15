@@ -19,12 +19,17 @@ import About from "../components/top/About"
 import Home from "../components/top/Home"
 import MhdTesting from "../components/top/MhdTesting"
 import Configurations from "../components/top/Configurations"
+import Getter from "../components/getter/Getter"
+import Admin from "../components/wrapper/Admin";
 
 Vue.use( VueRouter )
 
 export const routes = [
     {
         path: '/', component: TopLayout,
+        meta: {
+            title: 'FHIR Toolkit'
+        },
         children: [
             {
                 path: 'about',
@@ -44,6 +49,12 @@ export const routes = [
                 path: 'configurations',
                 components: {
                     default: Configurations
+                }
+            },
+            {
+                path: 'admin',
+                components: {
+                    default: Admin
                 }
             },
             {
@@ -74,6 +85,11 @@ export const routes = [
                             {
                                 path: 'logs',
                                 components: { default: LogList },
+                                props: { default: true },
+                            },
+                            {
+                                path: 'getter',
+                                components: { default: Getter },
                                 props: { default: true },
                             },
                             // {
@@ -126,6 +142,8 @@ export const routes = [
     },
 
 ]
+
+document.title = "FHIR Toolkit"
 
 export const router = new VueRouter({
     mode: 'history',

@@ -1,13 +1,25 @@
 import axios from 'axios';
 
+export var TLS_UI_PROXY = null
 export var PROXY = null
 export var ENGINE = null
 export var LOG = null
 export var CHANNEL = null
 export var FHIRTOOLKITBASEURL = null
 export var PROJECTVERSION = null
+export var ASBTS_USERPROPS =  {
+    signedIn : false,
+    bauser : "", /* Basic authentication username */
+    bapw : "" /* Basic authentication password */
+};
 
-async function getServiceProperties() {
+export const UtilFunctions = {
+    getChannelBase :function(channel) {
+        return FHIRTOOLKITBASEURL + "/proxy/" + channel.testSession + "__" + channel.channelId
+    }
+}
+
+export async function getServiceProperties() {
     if (process.env.NODE_ENV === 'production') {
         return await axios
             .get('/serviceProperties.json')
@@ -15,6 +27,7 @@ async function getServiceProperties() {
         return {
             data : {
                 fhirToolkitBase : process.env.VUE_APP_FHIR_TOOLKIT_BASE,
+                httpsFhirToolkitUIBase : process.env.VUE_APP_HTTPS_FHIR_TOOLKIT_UI_BASE,
                 projectVersion : "Development"
             }
         };
@@ -31,6 +44,15 @@ export async function initServiceProperties() {
                     FHIRTOOLKITBASEURL = constFhirToolkitBaseUrl
                     console.log('fhirToolkitBaseUrl is: ' + constFhirToolkitBaseUrl)
 
+                    TLS_UI_PROXY = axios.create({
+                        baseURL: response.data.httpsFhirToolkitUIBase + '/',
+                        headers: {
+                            'Access-Control-Allow-Methods': 'GET, POST, OPTIONS, PUT, PATCH, DELETE',
+                        },
+                        params: {
+                            crossdomain: true,
+                        }
+                    })
                     PROXY = axios.create({
                         baseURL: constFhirToolkitBaseUrl + '/',
                         headers: {

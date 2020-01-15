@@ -12,6 +12,7 @@ import gov.nist.asbestos.client.Base.ProxyBase;
 import gov.nist.asbestos.client.client.Format;
 import gov.nist.asbestos.client.events.ITask;
 import gov.nist.asbestos.client.events.NoOpTask;
+import gov.nist.asbestos.client.resolver.ChannelUrl;
 import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.http.headers.Header;
 import gov.nist.asbestos.http.headers.Headers;
@@ -45,7 +46,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -71,6 +71,7 @@ public class ProxyServlet extends HttpServlet {
         super.init(config);
         log.info("ProxyServlet init");
 
+        /*
         try {
             ServiceProperties.init();
         } catch (Exception ex) {
@@ -86,6 +87,14 @@ public class ProxyServlet extends HttpServlet {
 
         // announce location of ExternalCache to other servlets
         config.getServletContext().setAttribute("ExternalCache", ec);
+
+         */
+
+        if (externalCache == null) {
+            String ec = (String) config.getServletContext().getAttribute("ExternalCache");
+            externalCache = new File(ec);
+        }
+
     }
 
     private static String[] addEventHeader(HttpServletResponse resp, String hostport, ITask task) {
@@ -300,8 +309,7 @@ public class ProxyServlet extends HttpServlet {
                  if (proxyBaseURI.isPresent()) {
                      Headers inHeaders = Common.getRequestHeaders(req, verb);
                     if (FhirToolkitCapabilityStatement.isCapabilityStatementRequest(proxyBaseURI.get(), inHeaders.getPathInfo())) {
-                        ServicePropertiesEnum capabilityStatementFile = ServicePropertiesEnum.MHD_CAPABILITY_STATEMENT_FILE;
-                        doGetCapabilityStatement(req, resp, simStore, uri, verb, inHeaders, capabilityStatementFile);
+                        doGetCapabilityStatement(req, resp, simStore, uri, verb, inHeaders, simStore.getChannelConfig().getChannelId());
                         return; // EXIT
                     }
                 }
@@ -314,7 +322,7 @@ public class ProxyServlet extends HttpServlet {
         doGetDelete(req, resp, simStore, uri, verb);
     }
 
-    private void doGetCapabilityStatement(HttpServletRequest req, HttpServletResponse resp, SimStore simStore, URI uri, Verb verb, Headers inHeaders, ServicePropertiesEnum capabilityStatementFile) {
+    private void doGetCapabilityStatement(HttpServletRequest req, HttpServletResponse resp, SimStore simStore, URI uri, Verb verb, Headers inHeaders, String channelId) {
         if (simStore == null) return;
 
         boolean isLoggingEnabled = Boolean.parseBoolean(ServiceProperties.getInstance().getProperty(ServicePropertiesEnum.LOG_CS_METADATA_REQUEST.getKey()));
@@ -333,7 +341,15 @@ public class ProxyServlet extends HttpServlet {
 
             byte[] inBody = getRequestBody(req);
             HttpBase requestIn = logClientRequestIn(clientTask, inHeaders, inBody, verb);
-            BaseResource baseResource = FhirToolkitCapabilityStatement.getCapabilityStatement(capabilityStatementFile);
+            String enumFindKey = String.format("%sChannelCapabilityStatementFile", channelId);
+            Optional<ServicePropertiesEnum> spEnum = ServicePropertiesEnum.find(enumFindKey);
+            ServicePropertiesEnum capabilityStatementFile;
+            if (! spEnum.isPresent()) {
+                capabilityStatementFile = ServicePropertiesEnum.EMPTY_CAPABILITY_STATEMENT_FILE;
+            } else {
+                capabilityStatementFile = spEnum.get();
+            }
+            BaseResource baseResource = FhirToolkitCapabilityStatement.getCapabilityStatement(capabilityStatementFile, channelId);
             String versionId = ((CapabilityStatement)baseResource).getVersion();
             resp.addHeader("ETag", String.format("W/\"%s\"", versionId.hashCode()));
             respond(resp, baseResource, inHeaders, clientTask, 200);
@@ -345,7 +361,6 @@ public class ProxyServlet extends HttpServlet {
             resp.setStatus(resp.SC_INTERNAL_SERVER_ERROR);
             respondWithError(req, resp, ex.toString(), inHeaders, clientTask);
         }
-        return;
     }
 
     private void doGetDelete(HttpServletRequest req, HttpServletResponse resp, SimStore simStore, URI uri, Verb verb)  {
@@ -744,17 +759,17 @@ public class ProxyServlet extends HttpServlet {
         return responseOut;
     }
 
+    // format of Channel URI is also found in class ChannelUrl
     SimStore parseUri(URI uri, HttpServletRequest req, HttpServletResponse resp, Verb verb) throws IOException {
-        List<String> uriParts1 = Arrays.asList(uri.getPath().split("/"));
-        List<String> uriParts = new ArrayList<>(uriParts1);  // so parts are deletable
+        List<String> uriParts = ChannelUrl.uriParts(uri);  // so parts are deletable
         SimStore simStore;
 
         SimId simId = null;
 
         if (uriParts.size() >= 4) {
-            // /appContext/prox/channelId
-            if (uriParts.get(0).equals("") && uriParts.get(2).equals("proxy")) { // no appContext
-                simId = SimId.buildFromRawId(uriParts.get(3));
+            // /appContext/proxy/channelId
+            if (uriParts.get(0).equals("") && uriParts.get(2).equals("proxy")) {
+                simId = ChannelUrl.getSimId(uri);    //  SimId.buildFromRawId(uriParts.get(3));
                 simStore = new SimStore(externalCache, simId);
                 if (!simStore.exists()) {
                     resp.setStatus(resp.SC_NOT_FOUND);

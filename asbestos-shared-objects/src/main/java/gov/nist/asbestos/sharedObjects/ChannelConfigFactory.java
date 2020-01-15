@@ -1,5 +1,6 @@
 package gov.nist.asbestos.sharedObjects;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.File;
@@ -9,7 +10,8 @@ public class ChannelConfigFactory {
 
     public static ChannelConfig load(File file) {
         try {
-            ObjectMapper objectMapper = new ObjectMapper();
+            ObjectMapper objectMapper = new ObjectMapper()
+                    .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)    ;
             return objectMapper.readValue(file, ChannelConfig.class);
         } catch (Throwable e ) {
             throw new RuntimeException(e);

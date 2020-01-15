@@ -1,6 +1,8 @@
 package gov.nist.asbestos.client.resolver;
 
+import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.Resource;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -47,6 +49,8 @@ public class Ref {
         else
             theRef = String.join("/", base.toString(), resourceType, id, "_history", version);
 
+        if (theRef.endsWith("/"))
+            theRef = theRef.substring(0, theRef.length() - 1);
         uri = build(theRef);
     }
 
@@ -136,8 +140,19 @@ public class Ref {
         return this;  // oops
     }
 
-    boolean isContained() {
+    public boolean isContained() {
         return uri.toString().startsWith("#");
+    }
+
+    public Resource getContained(DomainResource domainResource) {
+        if (!isContained())
+            return null;
+        String id = uri.toString();
+        for (Resource resource1 : domainResource.getContained()) {
+            if (id.equals(resource1.getId()))
+                return resource1;
+        }
+        return null;
     }
 
     public String getId() {
@@ -441,6 +456,7 @@ public class Ref {
             "MedicinalProductUndesirableEffect 0",
             "SubstancePolymer",
             "SubstanceReferenceInformation",
-            "SubstanceSpecification"
+            "SubstanceSpecification",
+            "metadata"
     );
 }

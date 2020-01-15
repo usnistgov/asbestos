@@ -1,0 +1,31 @@
+<TestScript xmlns="http://hl7.org/fhir">
+    <id value="singleDoc"/>
+    <name value="singleDoc"/>
+    <description value="Send valid Provide Document Bundle transaction containing a single DocumentReference. This does not require Comprehensive Metadata."/>
+    <!--
+      These fixtures will be inserted by the TestEngine:
+        request - the input resource
+        response - the response resource (could be OperationOutcome)
+    -->
+
+    <test>
+        <name value="Evaluations"/>
+        <description value="The Description"/>
+        <action>
+            <assert>
+                <description value="DocumentReference: category is required"/>
+                <compareToSourceId value="request"/>
+                <compareToSourceExpression value="Bundle.entry.resource.where(is(FHIR.DocumentReference)).category.exists()"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
+            <assert>
+                <description value="DocumentManifest: type is required"/>
+                <compareToSourceId value="request"/>
+                <compareToSourceExpression value="Bundle.entry.resource.where(is(FHIR.DocumentReference)).type.exists()"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+    </test>
+</TestScript>

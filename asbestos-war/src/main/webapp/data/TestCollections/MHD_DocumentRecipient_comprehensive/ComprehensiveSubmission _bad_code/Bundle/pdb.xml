@@ -11,15 +11,8 @@
             <DocumentReference>
                 <masterIdentifier>
                     <system value="urn:ietf:rfc:3986"/>
-                    <value value="urn:oid:1.2.129.6.58.92.88336.4"/>
+                    <value value="urn:oid:1.2.129.6.58.92.88337.4"/>
                 </masterIdentifier>
-                <category>
-                    <coding>
-                        <system value="urn:oid:1.3.6.1.4.1.19376.1.2.6.1"/>
-                        <code value="REPORTS"/>
-                        <display value="Reports"/>
-                    </coding>
-                </category>
                 <subject>
                     <reference value="${patientResourceId}"/>
                 </subject>
@@ -37,6 +30,10 @@
                         <contentType value="text/plain"/>
                         <url value="urn:uuid:3fdc72f4-a11d-4a9d-9260-a9f745779e03"/>
                     </attachment>
+                    <format>
+                        <system value="urn:oid:1.3.6.1.4.1.19376.1.2.3"/>
+                        <code value="urn:ihe:pcc:cm:2008"/>
+                    </format>
                 </content>
             </DocumentReference>
         </resource>
@@ -62,9 +59,9 @@
                 </masterIdentifier>
                 <type>
                     <coding>
-                        <system value="http://loinc.org"/>
-                        <code value="11369-6"/>
-                        <display value="Immunization"/>
+                        <system value="http://snomed.info/sct"/>
+                        <code value="225728007"/>
+                        <display value="Accident and Emergency department"/>
                     </coding>
                 </type>
                 <subject>

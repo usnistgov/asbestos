@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CapabilityStatement xmlns="http://hl7.org/fhir">
+    <text>
+        <status value="additional" />
+        <div xmlns="http://www.w3.org/1999/xhtml">
+            This CapabilityStatement describes the MHD Document Recipient actor with Comprehensive Metadata PDB as supported by the FHIRToolkit. For general information on the IHE MHD actors, please see
+            IHE <a href="http://wiki.ihe.net/index.php/Mobile_access_to_Health_Documents_(MHD)">Mobile access to Health Documents (MHD) Rev. 3.1</a> Profile.
+        </div>
+    </text>
+    <url value="mhd:fhirtoolkit.test/channel/metadata|0.0.1"/>
+    <version value="0.0.1"/>
+    <name value="FHIRToolkit_IHE_MHD_DocumentRecipient"/>
+    <title value="FHIRToolkit IHE ITI Mobile access to Health Documents (MHD) - Document Recipient (server)"/>
+    <status value="active" />
+    <experimental value="false"/>
+    <date value="2019-12-19" />
+    <publisher value="NIST/ITL/SSD"/>
+    <contact>
+        <name value="NIST"/>
+        <telecom>
+            <system value="url"/>
+            <value value="http://ihexds.nist.gov"/>
+        </telecom>
+    </contact>
+    <contact>
+        <name value="Bill Majurski" />
+        <telecom>
+            <system value="email" />
+            <value value="bmajur@gmail.com" />
+        </telecom>
+    </contact>
+    <description value="This CapabilityStatement describes the MHD Document Recipient actor as supported by the FHIRToolkit." />
+
+    <kind value="instance"/>
+
+    <software>
+        <name value="FHIRToolkit"/>
+        <version value="${fhirToolkitVersion}"/>
+    </software>
+    <implementation>
+        <description value="MHD DocumentRecipient Comprehensive Metadata"/>
+        <url value="${fhirToolkitBase}/proxy/${channelId}"/>
+    </implementation>
+
+    <fhirVersion value="4.0.0"/>
+    <format value="application/fhir+xml"/>
+    <format value="application/fhir+json"/>
+    <rest>
+        <mode value="server"/>
+        <interaction>
+            <code value="transaction"/>
+            <documentation value="http://ihe.net/fhir/StructureDefinition/IHE_MHD_Provide_Comprehensive_DocumentBundle"/>
+        </interaction>
+    </rest>
+</CapabilityStatement>

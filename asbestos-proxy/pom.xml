@@ -5,7 +5,7 @@
     <parent>
         <artifactId>asbestos</artifactId>
         <groupId>gov.nist.asbestos</groupId>
-        <version>1.0.0</version>
+        <version>1.1.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -22,43 +22,48 @@
         <dependency>
             <groupId>gov.nist.asbestos</groupId>
             <artifactId>asbestos-test-engine</artifactId>
-            <version>1.0.0</version>
+            <version>1.1.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>gov.nist.asbestos</groupId>
             <artifactId>asbestos-mhd</artifactId>
-            <version>1.0.0</version>
+            <version>1.1.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>gov.nist.asbestos</groupId>
             <artifactId>asbestos-shared-objects</artifactId>
-            <version>1.0.0</version>
+            <version>1.1.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>gov.nist.asbestos</groupId>
             <artifactId>asbestos-http</artifactId>
-            <version>1.0.0</version>
+            <version>1.1.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>gov.nist.asbestos</groupId>
             <artifactId>asbestos-adapter</artifactId>
-            <version>1.0.0</version>
+            <version>1.1.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>gov.nist.asbestos</groupId>
+            <artifactId>asbestos-analysis</artifactId>
+            <version>1.1.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>gov.nist.asbestos</groupId>
             <artifactId>simapi</artifactId>
-            <version>1.0.0</version>
+            <version>1.1.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>gov.nist.asbestos</groupId>
             <artifactId>asbestos-test-engine</artifactId>
-            <version>1.0.0</version>
+            <version>1.1.0-SNAPSHOT</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>gov.nist.asbestos</groupId>
             <artifactId>service-properties</artifactId>
-            <version>1.0.0</version>
+            <version>1.1.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>gov.nist.toolkit</groupId>

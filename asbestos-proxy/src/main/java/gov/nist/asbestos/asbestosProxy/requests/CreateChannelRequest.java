@@ -1,7 +1,5 @@
 package gov.nist.asbestos.asbestosProxy.requests;
 
-import gov.nist.asbestos.asbestosProxy.servlet.ChannelConnector;
-import gov.nist.asbestos.asbestosProxy.servlet.ChannelControlServlet;
 import gov.nist.asbestos.client.log.SimStore;
 import gov.nist.asbestos.sharedObjects.ChannelConfig;
 import gov.nist.asbestos.sharedObjects.ChannelConfigFactory;
@@ -23,7 +21,11 @@ public class CreateChannelRequest {
     private Request request;
 
     public static boolean isRequest(Request request) {
-        return request.uriParts.size() == 3 && request.uriParts.get(2).equals("channel");
+        if (request.uriParts.size() == 3) {
+            String uriPart2 = request.uriParts.get(2);
+            return "channel".equals(uriPart2) || "channelGuard".equals(uriPart2);
+        }
+        return false;
     }
 
     public CreateChannelRequest(Request request) {

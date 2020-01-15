@@ -29,7 +29,20 @@ dir C:\Users\skb1\myprojects\asbestos\asbestos-assembly\target\asbestos.zip
 	
 unzip -qq C:\Users\skb1\myprojects\asbestos\asbestos-assembly\target\asbestos.zip -d C:\Users\skb1\myprojects\asbestos\asbestos-assembly\target\asbestos
 
+copy C:\Users\skb1\myprojects\fhirtoolkit-cert\XdsToolkit\webapps\fhir to C:\Users\skb1\myprojects\asbestos\asbestos-assembly\target\asbestos\tomcat\Toolkits\XdsToolkit\webapps
+copy C:\Users\skb1\myprojects\fhirtoolkit-cert\XdsToolkit\webapps\xdstools to C:\Users\skb1\myprojects\asbestos\asbestos-assembly\target\asbestos\tomcat\Toolkits\XdsToolkit\webapps
+
 cd C:\Users\skb1\myprojects\asbestos\asbestos-assembly\target\asbestos
+
+cd tomcat\bin
+.\start
+
+Open
+http://localhost:9760/
+
+end.
+
+Manual base startup:
 
 set CATALINA_HOME=C:\Users\skb1\myprojects\asbestos\asbestos-assembly\target\asbestos\tomcat
 

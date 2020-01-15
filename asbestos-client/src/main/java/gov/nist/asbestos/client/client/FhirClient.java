@@ -101,6 +101,7 @@ public class FhirClient {
 
     private ResourceWrapper readResource(Ref ref, Format format) {
         HttpGet getter = new HttpGet();
+        httpBase = getter;
         ResourceWrapper wrapper = new ResourceWrapper();
         wrapper.setRef(ref);
         wrapper.setHttpBase(getter);
@@ -158,8 +159,10 @@ public class FhirClient {
             String returnedResourceType = resource.getClass().getSimpleName();
             if (expectedResourceType != null && !expectedResourceType.equals("")) {
                 if (!returnedResourceType.equals("OperationOutcome")) {
-                    if (!returnedResourceType.equals(expectedResourceType)) {
-                        throw new Error("Read must return " + expectedResourceType + " - received " + resource.getClass().getSimpleName() + " instead");
+                    if (!expectedResourceType.equals("metadata") && !returnedResourceType.equals("CapabilityStatement")) {
+                        if (!returnedResourceType.equals(expectedResourceType)) {
+                            throw new Error("Read must return " + expectedResourceType + " - received " + resource.getClass().getSimpleName() + " instead");
+                        }
                     }
                 }
             }

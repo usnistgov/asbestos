@@ -1,19 +1,19 @@
 <template>
     <div>
-        <div v-if="script" class="script">
+        <div v-if="script && report" class="script">
             <!--            <div v-if="script.description">-->
             <!--                {{ script.description }}-->
             <!--            </div>-->
-            <div v-for="(fixture, i) in fixtures"
-                 :key="i">
-                <span class="name" >Fixture: </span>
-                <span class="value">{{ fixture.id }}</span>
-            </div>
-            <div v-for="(variable, i) in variables"
-                 :key="'Var' + i">
-                <span class="name" >Variable: </span>
-                <span class="value">{{ variable.name }}</span>
-            </div>
+<!--            <div v-for="(fixture, i) in fixtures"-->
+<!--                 :key="i">-->
+<!--                <span class="name" >Fixture: </span>-->
+<!--                <span class="value">{{ fixture.id }}</span>-->
+<!--            </div>-->
+<!--            <div v-for="(variable, i) in variables"-->
+<!--                 :key="'Var' + i">-->
+<!--                <span class="name" >Variable: </span>-->
+<!--                <span class="value">{{ variable.name }}</span>-->
+<!--            </div>-->
 
             <!--   add SETUP here  -->
 
@@ -90,18 +90,18 @@
                 this.eventDisplayed = !this.eventDisplayed
             },
             assertMessage(testIndex, actionIndex) {
-                if (actionIndex < this.testReport.test[testIndex].action.length) {
+                if (this.testReport && actionIndex < this.testReport.test[testIndex].action.length) {
                     return this.testReport.test[testIndex].action[actionIndex].assert.message.split("\n")
                 }
                 return null
             },
             assertResult(testIndex, actionIndex) {
-                if (actionIndex < this.testReport.test[testIndex].action.length)
+                if (this.testReport && actionIndex < this.testReport.test[testIndex].action.length)
                     return this.testReport.test[testIndex].action[actionIndex].assert.result
                 return 'not-run'
             },
             assertReport(testIndex, actionIndex) {
-                return this.testReport.test[testIndex].action[actionIndex].assert
+                return this.testReport ? this.testReport.test[testIndex].action[actionIndex].assert : null
             },
             assertScript(testIndex, actionIndex) {
                 return this.testScript.test[testIndex].action[actionIndex].assert
@@ -160,6 +160,27 @@
             assertMsg(assertId) {
                 return this.$store.state.testRunner.testAssertions[assertId]
             },
+            loadReports() {
+                return this.$store.dispatch('loadReports', this.testCollection)
+            },
+            runSingleEventEval() {
+                this.$store.dispatch('runSingleEventEval',
+                    {
+                        testId: this.testId,
+                        eventId: this.eventId,
+                        testCollectionName: this.testCollection
+                    })
+            },
+            async testOrEventUpdated() {
+                if (this.runEval) {
+                    if (!this.$store.state.testRunner.testAssertions)
+                        this.$store.dispatch('loadTestAssertions')
+                    await this.runSingleEventEval()
+                }
+                // await this.loadReports()
+                this.loadTestScript()
+                //this.loadTestReport()
+            }
         },
         computed: {
             assertProfile() {
@@ -187,28 +208,27 @@
             },
             testReport() {
                 return this.$store.state.testRunner.clientTestResult[this.testId][this.eventId]
+            },
+            testReports() {  // see watch
+                return this.$store.state.testRunner.testReports[this.testId]
             }
         },
         created() {
-            this.loadTestScript()
-            this.loadTestReport()
+            this.testOrEventUpdated()
         },
         mounted() {
 
         },
         watch: {
-            'testId': function() {
-                this.loadTestScript()
-                this.loadTestReport()
-            },
-            'eventId': function() {
-                this.loadTestScript()
+            'testId': 'testOrEventUpdated',
+            'eventId': 'testOrEventUpdated',
+            testReports() {  // this has same name as computed - see https://stackoverflow.com/questions/43270159/vuejs-2-how-to-watch-store-values-from-vuex
                 this.loadTestReport()
             }
         },
         mixins: [ errorHandlerMixin ],
         props: [
-            'sessionId', 'channelId', 'testCollection', 'testId', 'eventId'
+            'sessionId', 'channelId', 'testCollection', 'testId', 'eventId', 'runEval'
         ],
         components: {
             //EvalReportAssert
@@ -267,7 +287,7 @@
         /*font-size: larger;*/
     }
     .error {
-        background-color: #0074D9 ;
+        background-color: cornflowerblue ;
         text-align: left;
         border: 1px dotted black;
         cursor: pointer;

@@ -48,13 +48,32 @@ public class VariableMgr {
         return reference.contains("${");
     }
 
+    private int variableCount(String reference) {
+        if (reference == null)
+            return 0;
+        int count = 0;
+        int pos = 0;
+        while (pos != -1) {
+            pos = reference.indexOf("${", pos);
+            if (pos != -1) {
+                count++;
+                pos += 2;
+            }
+        }
+        return count;
+    }
+
     String updateReference(String reference) {
         if (reference == null)
             return null;
+        int variableCount = variableCount(reference);
         for (int i=0; i<50; i++) {
             if (!containsVariable(reference))
                 return reference;
             reference = updateReference1(reference);
+            int variableCount2 = variableCount(reference);
+            if (variableCount2 == variableCount) // stuck
+                break;
         }
         Variable var = getNextVariable(reference);
         if (var != null) {
@@ -96,12 +115,6 @@ public class VariableMgr {
         Objects.requireNonNull(reporter);
         if (!reference.contains(("${")))
             return reference;
-//        int from = reference.indexOf("${");
-//        int to = reference.indexOf("}", from);
-//        if (to == -1) {
-//            reporter.reportError("reference " + reference + " has no closing }");
-//            throw new Error("reference " + reference + " has no closing }");
-//        }
         Variable var  = getNextVariable(reference); //reference.substring(from+2, to);
         String update = eval(var.name);
         if (update == null)
@@ -109,7 +122,7 @@ public class VariableMgr {
         return reference.substring(0, var.from) + update + reference.substring(var.to+1);
     }
 
-    private String eval(String variableName) {
+    String eval(String variableName) {
         TestScript.TestScriptVariableComponent var = getVariable(variableName);
         if (var == null) {
             reporter.reportError( "Variable " + variableName + " is referenced but not defined");
