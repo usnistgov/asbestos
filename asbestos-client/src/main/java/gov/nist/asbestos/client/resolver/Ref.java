@@ -456,6 +456,7 @@ public class Ref {
             "MedicinalProductUndesirableEffect 0",
             "SubstancePolymer",
             "SubstanceReferenceInformation",
-            "SubstanceSpecification"
+            "SubstanceSpecification",
+            "metadata"
     );
 }
