@@ -176,10 +176,11 @@
                     if (!this.$store.state.testRunner.testAssertions)
                         this.$store.dispatch('loadTestAssertions')
                     await this.runSingleEventEval()
+                } else {
+                    await this.loadReports()
+                    this.loadTestScript()
+                    //this.loadTestReport()
                 }
-                // await this.loadReports()
-                this.loadTestScript()
-                //this.loadTestReport()
             }
         },
         computed: {
