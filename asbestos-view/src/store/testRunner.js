@@ -95,9 +95,11 @@ export const testRunnerStore = {
             state.testReports = []
         },
         setTestReports(state, reports) {
+            console.log(`setTestReports ${Object.keys(reports)}`)
             state.testReports = reports
         },
         setTestReport(state, data) {
+            console.log(`setTestReport ${data.testName}`)
             Vue.set(state.testReports, data.testName, data.testReport)
         },
         clearTestScripts(state) {
@@ -142,6 +144,13 @@ export const testRunnerStore = {
             ENGINE.get(url)
                 .then(response => {
                     const results = response.data
+                    const resultMap = results[testId]
+                    console.log(`Test ${testId}: ${resultMap}`)
+                    const events = Object.keys(resultMap)
+                    for (const eventId of events) {
+                        const report = resultMap[eventId]
+                        console.log(`${eventId}==>${report.result}`)
+                    }
 
                     commit('setClientTestResult', { testId: testId, result: results[testId]} )
                 })
@@ -219,8 +228,10 @@ export const testRunnerStore = {
                 })
         },
         async loadTestScriptNames({commit, state}) {
+            console.log(`loadTestScriptNames`)
             const url = `collection/${state.currentTestCollectionName}`
             try {
+                commit('clearTestScripts')
                 const response = await ENGINE.get(url)
                 const theResponse = response.data
                 commit('setTestScriptNames', theResponse.testNames)
@@ -229,13 +240,12 @@ export const testRunnerStore = {
                 const description = theResponse.description
                 commit('setCollectionDescription', description)
                 commit('setIsClientTest', isClient)
-                commit('clearTestScripts')
             } catch (error) {
                 commit('setError', url + ': ' + error)
             }
         },
         loadReports({commit, rootState}, testCollectionName) {
-            commit('clearTestReports')
+            //commit('clearTestReports')
             if (!rootState.base.session || !rootState.base.channelId || !testCollectionName)
                 return
             const url = `testlog/${rootState.base.session}__${rootState.base.channelId}/${testCollectionName}`

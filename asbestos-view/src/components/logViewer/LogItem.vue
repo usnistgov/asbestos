@@ -96,7 +96,7 @@
 <script>
     import LogNav from "./LogNav"
     import LogAnalysisReport from "./LogAnalysisReport"
-    import EvalDetails from "../testRunner/EvalDetails"
+ //   import EvalDetails from "../testRunner/EvalDetails"
     import {LOG} from '../../common/http-common'
     import eventMixin from '../../mixins/eventMixin'
     import errorHandlerMixin from '../../mixins/errorHandlerMixin'
@@ -239,7 +239,9 @@
         ],
         mixins: [eventMixin, errorHandlerMixin],
         components: {
-            LogNav, LogAnalysisReport, EvalDetails
+            LogNav,
+            LogAnalysisReport,
+            EvalDetails: () => import ('../testRunner/EvalDetails.vue')
         },
         name: "LogItem"
     }
