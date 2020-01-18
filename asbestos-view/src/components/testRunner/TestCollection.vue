@@ -65,32 +65,36 @@
             <button class="runallbutton" @click="doRunAll()">Run All</button>
         </div>
 
-        <div v-for="(name, i) in Object.keys(status)"
-             :key="name + i">
-            <div >
-                <div @click="selectTest(name)">
-                    <div v-bind:class="{ pass: status[name] === 'pass', fail: status[name] === 'fail', error: status[name] === 'error', 'not-run': status[name] === 'not-run' }">
-                        <div v-if="status[name] === 'pass'">
-                            <img src="../../assets/checked.png" class="right">
+        <div v-if="status">
+            <div v-for="(name, i) in Object.keys(status)"
+                 :key="name + i">
+                <div >
+                    <div @click="selectTest(name)">
+                        <div v-bind:class="{ pass: status[name] === 'pass', fail: status[name] === 'fail', error: status[name] === 'error', 'not-run': status[name] === 'not-run' }">
+                            <div v-if="status[name] === 'pass'">
+                                <img src="../../assets/checked.png" class="right">
+                            </div>
+                            <div v-else-if="status[name] === 'fail' || status[name] === 'error'">
+                                <img src="../../assets/error.png" class="right">
+                            </div>
+                            <div v-else>
+                                <img src="../../assets/blank-circle.png" class="right">
+                            </div>
+
+                            <div v-if="isClient">
+                                <img src="../../assets/validate-search.png" class="right" @click.stop="doEval(name)">
+                            </div>
+                            <div v-else>
+                                <img src="../../assets/press-play-button.png" class="right" @click.stop="doRun(name)">
+                            </div>
+
+                            Test: {{ clean(name) }}
+                            <span v-if="!$store.state.testRunner.isClientTest"> --  {{ time[name] }}</span>
                         </div>
-                        <div v-else-if="status[name] === 'fail' || status[name] === 'error'">
-                            <img src="../../assets/error.png" class="right">
-                        </div>
-                        <div v-else>
-                            <img src="../../assets/blank-circle.png" class="right">
-                        </div>
-                        <div v-if="isClient">
-                            <img src="../../assets/validate-search.png" class="right" @click.stop="doEval(name)">
-                        </div>
-                        <div v-else>
-                            <img src="../../assets/press-play-button.png" class="right" @click.stop="doRun(name)">
-                        </div>
-                        Test: {{ clean(name) }}
-                        <span v-if="!$store.state.testRunner.isClientTest"> --  {{ time[name] }}</span>
                     </div>
-                </div>
-                <div v-if="selected === name">
-                    <router-view></router-view>
+                    <div v-if="selected === name">
+                        <router-view></router-view>
+                    </div>
                 </div>
             </div>
         </div>
@@ -122,22 +126,13 @@
                 this.useJson = false
             },
             clean(text) {
-                return text.replace(/_/g, ' ')
-            },
-            evalStatus() { // see GetClientTestEvalResult
-                this.status.splice(0)
-                this.testScriptNames.forEach(testId => {
-                    const eventResult = this.$store.state.testRunner.clientTestResult[testId]
-                    if (!eventResult) {
-                        this.$set(this.status, testId, 'not-run')
-                    } else if (this.hasSuccessfulEvent(testId)) {
-                        this.$set(this.status, testId, 'pass')
-                    } else {
-                        this.$set(this.status, testId, 'fail')
-                    }
-                })
+                if (text)
+                    return text.replace(/_/g, ' ')
+                return ''
             },
             hasSuccessfulEvent(testId) {
+                if (testId === null)
+                    return false
                 const eventResult = this.$store.state.testRunner.clientTestResult[testId]
                 for (const eventId in eventResult) {
                     if (eventResult.hasOwnProperty(eventId)) {
@@ -148,10 +143,15 @@
                 }
                 return false
             },
-            doEval(testName) {  // client tests
-                this.$store.dispatch('runEval', testName)
+            async doEval(testName) {  // client tests
+                if (testName)
+                    await this.$store.dispatch('runEval', testName)
+                // ==> commits clientTestResult
+                //    ==> calls evalStatus
             },
             async runner(testName) {
+                if (!testName)
+                    return
                 this.$store.commit('setCurrentTest', null)
                 try {
                     const response = await ENGINE.post(`testrun/${this.sessionId}__${this.channelId}/${this.testCollection}/${testName}?_format=${this.useJson ? 'json' : 'xml'}`)
@@ -161,24 +161,31 @@
                 }
             },
             async doRun(testName) {  // server tests
+                if (!testName)
+                    return
                 this.running = true
                 await this.runner(testName)
                 this.running = false
-                this.$store.dispatch('loadTestScriptNames')  // force reload of UI
+                await this.$store.dispatch('loadTestScriptNames')  // force reload of UI
             },
             async doRunAll()  {
+                if (!this.status)
+                    return
                 this.running = true
-                for (const name of Object.keys(this.status)) {
+                //for (const name of Object.keys(this.status)) {
+                for (const name of Object.keys(this.$store.state.testRunner.testScriptNames)) {
                     if (this.isClient)
-                        this.doEval(name)
+                        await this.doEval(name)
                     else
                         await this.runner(name)
                     //await this.runner(name)
                 }
                 this.running = false
-                this.$store.dispatch('loadTestScriptNames')  // force reload of UI
+                await this.$store.dispatch('loadTestScriptNames')  // force reload of UI
             },
             selectTest(name) {
+                if (!name)
+                    return
                 if (this.selected === name)  { // unselect
                     this.$store.commit('setCurrentTest', null)
                     const route = `/session/${this.sessionId}/channel/${this.channelId}/collection/${this.testCollection}`
@@ -190,19 +197,83 @@
                 this.$router.push(route)
             },
             async reload() {
-                this.$store.commit('setTestCollectionName', this.testCollection)
+                console.log(`reload ${this.testCollection}`)
+               this.$store.commit('setTestCollectionName', this.testCollection)
                 await this.$store.dispatch('loadTestScriptNames')
+                this.testScriptNamesUpdated()
                 const requiredChannel = this.$store.state.testRunner.requiredChannel
-                if (requiredChannel)
+                if (requiredChannel) {
                     this.$store.commit('setChannelId', requiredChannel)
-//                this.loadLastMarker()
-                this.channelObj = await this.$store.dispatch('loadChannel', this.fullChannelId)
-                this.$router.push(`/session/${this.sessionId}/channel/${this.$store.state.base.channelId}/collection/${this.testCollection}`)
+                }
+                // console.log(`loading ${this.fullChannelId}`)
+                // this.channelObj = await this.$store.dispatch('loadChannel', this.fullChannelId)
+                //this.$router.push(`/session/${this.sessionId}/channel/${this.$store.state.base.channelId}/collection/${this.testCollection}`)
+                if (this.isClient)
+                    this.evalStatus()
+                else
+                    this.updateReportStatuses()
+                console.log(`reload done`)
             },
             testReport(testName) {
+                if (!testName)
+                    return null
                 return this.$store.state.testRunner.testReports[testName]
             },
-            updateReportStatuses() {   // for server tests
+            importStatus() {
+                if (this.isClient)
+                    this.importStatusClientTests()
+                else
+                    this.importStatusServerTests()
+            },
+            importStatusServerTests() {
+                let status = []
+                let time = []
+                this.testScriptNames.forEach(testId => {
+                    const testReport = this.$store.state.testRunner.testReports[testId]
+                    if (this.testReport(testId) === undefined) {
+                        status[testName] = 'not-run'
+                    } else {
+                        status[testId] = this.testReport(testId).result  // 'pass', 'fail', 'error'
+                        time[testId] = this.testReport(testId).issued
+                    }
+                })
+                this.status = status
+                this.time = time
+            },
+            importStatusClientTests() {
+                let status=[]
+                this.testScriptNames.forEach(testId => {
+                    const eventResult = this.$store.state.testRunner.clientTestResult[testId]
+                    if (!eventResult) {
+                        status[testId] = 'not-run'
+                    } else {
+                        status[testId] = this.hasSuccessfulEvent(testId) ? 'pass' : 'fail'
+                    }
+                })
+                this.status = status
+                this.time  = []
+            },
+            evalStatus() {
+                console.log(`running evalStatus`)
+                if (!this.isClient)
+                    return
+                let status=[]
+                this.testScriptNames.forEach(testId => {
+                    const eventResult = this.$store.state.testRunner.clientTestResult[testId]
+                    if (!eventResult) {
+                        status[testId] = 'not-run'
+                    } else {
+                        status[testId] = this.hasSuccessfulEvent(testId) ? 'pass' : 'fail'
+                    }
+                })
+                this.status = status
+                this.time  = []
+                console.log(`eval status done`)
+            },
+            updateReportStatuses() {   // for server tests (and client tests too?)
+                if (this.isClient)
+                    return
+                console.log(`updateReportStatues`)
                 let status = []
                 let time = []
                 this.testScriptNames.forEach(testName => {
@@ -212,22 +283,18 @@
                         status[testName] = this.testReport(testName).result  // 'pass', 'fail', 'error'
                         time[testName] = this.testReport(testName).issued
                     }
-                    this.status = status
-                    this.time = time
                 })
+                this.status = status
+                this.time = time
+            },
+            async testScriptNamesUpdated() {
+                console.log(`test names updated`)
+                await this.$store.dispatch('loadReports', this.$store.state.testRunner.currentTestCollectionName)
+                console.log(`reports loaded`)
 
-            },
-            loadLastMarker() {
-               if (this.$store.state.testRunner.lastMarker === null)
-                    this.$store.dispatch('loadLastMarker')
-            },
-            setMarker() {
-                this.$store.dispatch('setMarker')
-            },
-            testScriptNamesUpdated() {
-                this.$store.dispatch('loadReports', this.$store.state.testRunner.currentTestCollectionName)
                 if (this.isClient) {
                     return this.$store.state.testRunner.testScriptNames.forEach(name => {
+                        console.log(`eval ${name}`)
                         this.doEval(name)
                     })
                 }
@@ -256,11 +323,15 @@
             },
             testScriptNames() {
                 const scripts = this.$store.state.testRunner.testScriptNames
+                if (!scripts)
+                    return null
                 const names = scripts.sort()
                 return names
             },
             testReportNames() {  // just the ones with reports available
                 const reports = this.$store.state.testRunner.testReports
+                if (!reports)
+                    return null
                 return Object.keys(reports).sort()
             },
             channel: {
@@ -291,11 +362,10 @@
             'channelId': function(newVal) {
                 if (this.channel !== newVal)
                     this.channel = newVal
-                this.loadLastMarker()
             },
-            '$store.state.testRunner.testScriptNames' : 'testScriptNamesUpdated',
-            '$store.state.testRunner.testReports': 'updateReportStatuses',
-            '$store.state.testRunner.clientTestResult':'evalStatus'
+           '$store.state.testRunner.testScriptNames' : 'testScriptNamesUpdated',
+           '$store.state.testRunner.testReports': 'updateReportStatuses',
+           '$store.state.testRunner.clientTestResult':'evalStatus'
         },
         mixins: [ errorHandlerMixin ],
         name: "TestCollection",
