@@ -15,7 +15,7 @@
             <assert>
                 <description value="Test: Request includes one DocumentReference|MHDPDBOnePlusDocumentReference"/>
                 <compareToSourceId value="request"/>
-                <compareToSourceExpression value="Bundle.entry.where(resource.is(FHIR.DocumentReference)).count() = 1"/>
+                <compareToSourceExpression value="Bundle.entry.where(resource.is(FHIR.DocumentReference)).count() >= 1"/>
                 <warningOnly value="false"/>
             </assert>
         </action>
@@ -87,7 +87,7 @@
             <assert>
                 <description value="PDB: if DocumentReference.identifier carries the entryUUID then it shall be labeled official"/>
                 <compareToSourceId value="request"/>
-                <compareToSourceExpression value="Bundle.entry.resource.where(is(FHIR.DocumentReference) and identifier.use = 'official')"/>
+                <compareToSourceExpression value="Bundle.entry.select((resource as DocumentReference).identifier).select(use = 'official').exists() implies value.startsWith('urn:uuid:')"/>
                 <warningOnly value="false"/>
             </assert>
         </action>

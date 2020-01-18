@@ -225,11 +225,11 @@
                 let time = []
                 this.testScriptNames.forEach(testId => {
                     const testReport = this.$store.state.testRunner.testReports[testId]
-                    if (this.testReport(testId) === undefined) {
+                    if (testReport === undefined) {
                         status[testId] = 'not-run'
                     } else {
-                        status[testId] = this.testReport(testId).result  // 'pass', 'fail', 'error'
-                        time[testId] = this.testReport(testId).issued
+                        status[testId] = testReport.result  // 'pass', 'fail', 'error'
+                        time[testId] = testReport.issued
                     }
                 })
                 this.time = time

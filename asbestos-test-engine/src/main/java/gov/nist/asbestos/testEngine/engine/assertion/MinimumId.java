@@ -49,6 +49,11 @@ public class MinimumId {
         report.expected.remove("description");  // don't know why this shows up but it is wrong
         report.expected.remove("id");
         report.expected.remove("created");
+        List<String> copy = new ArrayList<>(report.expected);
+        for (String s : copy) {
+            if (s.endsWith(".coding.display"))
+                report.expected.remove(s);
+        }
         report.missing = diff;
 
         return report;
