@@ -110,7 +110,7 @@
 
         data() {
             return {
-                status: [],   // testId => undefined, 'pass', 'fail', 'error'
+                //status: [],   // testId => undefined, 'pass', 'fail', 'error'
                 time: [],
                 evalCount: 5,
                 channelObj: null,  // channel object
@@ -173,7 +173,8 @@
                     return
                 this.running = true
                 //for (const name of Object.keys(this.status)) {
-                for (const name of Object.keys(this.$store.state.testRunner.testScriptNames)) {
+                for (const name of this.$store.state.testRunner.testScriptNames) {
+//                    console.log(`runAll test ${name}`)
                     if (this.isClient)
                         await this.doEval(name)
                     else
@@ -197,7 +198,7 @@
                 this.$router.push(route)
             },
             async reload() {
-                console.log(`reload ${this.testCollection}`)
+//                console.log(`reload ${this.testCollection}`)
                this.$store.commit('setTestCollectionName', this.testCollection)
                 await this.$store.dispatch('loadTestScriptNames')
                 this.testScriptNamesUpdated()
@@ -212,18 +213,12 @@
                     this.evalStatus()
                 else
                     this.updateReportStatuses()
-                console.log(`reload done`)
+//                console.log(`reload done`)
             },
             testReport(testName) {
                 if (!testName)
                     return null
                 return this.$store.state.testRunner.testReports[testName]
-            },
-            importStatus() {
-                if (this.isClient)
-                    this.importStatusClientTests()
-                else
-                    this.importStatusServerTests()
             },
             importStatusServerTests() {
                 let status = []
@@ -231,14 +226,14 @@
                 this.testScriptNames.forEach(testId => {
                     const testReport = this.$store.state.testRunner.testReports[testId]
                     if (this.testReport(testId) === undefined) {
-                        status[testName] = 'not-run'
+                        status[testId] = 'not-run'
                     } else {
                         status[testId] = this.testReport(testId).result  // 'pass', 'fail', 'error'
                         time[testId] = this.testReport(testId).issued
                     }
                 })
-                this.status = status
                 this.time = time
+                return status
             },
             importStatusClientTests() {
                 let status=[]
@@ -250,51 +245,51 @@
                         status[testId] = this.hasSuccessfulEvent(testId) ? 'pass' : 'fail'
                     }
                 })
-                this.status = status
                 this.time  = []
+                return status
             },
             evalStatus() {
-                console.log(`running evalStatus`)
-                if (!this.isClient)
-                    return
-                let status=[]
-                this.testScriptNames.forEach(testId => {
-                    const eventResult = this.$store.state.testRunner.clientTestResult[testId]
-                    if (!eventResult) {
-                        status[testId] = 'not-run'
-                    } else {
-                        status[testId] = this.hasSuccessfulEvent(testId) ? 'pass' : 'fail'
-                    }
-                })
-                this.status = status
-                this.time  = []
-                console.log(`eval status done`)
+                // console.log(`running evalStatus`)
+                // if (!this.isClient)
+                //     return
+                // let status=[]
+                // this.testScriptNames.forEach(testId => {
+                //     const eventResult = this.$store.state.testRunner.clientTestResult[testId]
+                //     if (!eventResult) {
+                //         status[testId] = 'not-run'
+                //     } else {
+                //         status[testId] = this.hasSuccessfulEvent(testId) ? 'pass' : 'fail'
+                //     }
+                // })
+                // this.status = status
+                // this.time  = []
+                // console.log(`eval status done`)
             },
             updateReportStatuses() {   // for server tests (and client tests too?)
-                if (this.isClient)
-                    return
-                console.log(`updateReportStatues`)
-                let status = []
-                let time = []
-                this.testScriptNames.forEach(testName => {
-                    if (this.testReport(testName) === undefined) {
-                        status[testName] = 'not-run'
-                    } else {
-                        status[testName] = this.testReport(testName).result  // 'pass', 'fail', 'error'
-                        time[testName] = this.testReport(testName).issued
-                    }
-                })
-                this.status = status
-                this.time = time
+                // if (this.isClient)
+                //     return
+                // console.log(`updateReportStatues`)
+                // let status = []
+                // let time = []
+                // this.testScriptNames.forEach(testName => {
+                //     if (this.testReport(testName) === undefined) {
+                //         status[testName] = 'not-run'
+                //     } else {
+                //         status[testName] = this.testReport(testName).result  // 'pass', 'fail', 'error'
+                //         time[testName] = this.testReport(testName).issued
+                //     }
+                // })
+                // this.status = status
+                // this.time = time
             },
             async testScriptNamesUpdated() {
-                console.log(`test names updated`)
+//                console.log(`test names updated`)
                 await this.$store.dispatch('loadReports', this.$store.state.testRunner.currentTestCollectionName)
-                console.log(`reports loaded`)
+//                console.log(`reports loaded`)
 
                 if (this.isClient) {
                     return this.$store.state.testRunner.testScriptNames.forEach(name => {
-                        console.log(`eval ${name}`)
+//                        console.log(`eval ${name}`)
                         this.doEval(name)
                     })
                 }
@@ -304,6 +299,12 @@
             }
         },
         computed: {
+            status() {
+                if (this.isClient)
+                    return this.importStatusClientTests()
+                else
+                    return this.importStatusServerTests()
+            },
             clientBaseAddress() { // for client tests
                 return `${this.$store.state.base.proxyBase}/${this.sessionId}__${this.channelId}`
                 // const channelId = this.$store.state.base.channelId

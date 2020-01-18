@@ -45,9 +45,9 @@
             },
             eventDetail(eventId) {
                 if (this.logSummariesNeedLoading || this.logSummariesNeedLoading2) {
-                    console.log(`calling loadEventSummaries`)
+                    //console.log(`calling loadEventSummaries`)
                     this.$store.dispatch('loadEventSummaries', {session: this.sessionId, channel: this.channelId})
-                    console.log(`loadEventSummaries returned`)
+                    //console.log(`loadEventSummaries returned`)
                 }
                 if (this.$store.state.log.eventSummaries) {
                     const summary = this.$store.state.log.eventSummaries.find(it =>

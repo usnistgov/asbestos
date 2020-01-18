@@ -95,11 +95,11 @@ export const testRunnerStore = {
             state.testReports = []
         },
         setTestReports(state, reports) {
-            console.log(`setTestReports ${Object.keys(reports)}`)
+//            console.log(`setTestReports ${Object.keys(reports)}`)
             state.testReports = reports
         },
         setTestReport(state, data) {
-            console.log(`setTestReport ${data.testName}`)
+//            console.log(`setTestReport ${data.testName}`)
             Vue.set(state.testReports, data.testName, data.testReport)
         },
         clearTestScripts(state) {
@@ -144,13 +144,13 @@ export const testRunnerStore = {
             ENGINE.get(url)
                 .then(response => {
                     const results = response.data
-                    const resultMap = results[testId]
-                    console.log(`Test ${testId}: ${resultMap}`)
-                    const events = Object.keys(resultMap)
-                    for (const eventId of events) {
-                        const report = resultMap[eventId]
-                        console.log(`${eventId}==>${report.result}`)
-                    }
+                    // const resultMap = results[testId]
+                    // console.log(`Test ${testId}: ${resultMap}`)
+                    // const events = Object.keys(resultMap)
+                    // for (const eventId of events) {
+                    //     const report = resultMap[eventId]
+                    //     console.log(`${eventId}==>${report.result}`)
+                    // }
 
                     commit('setClientTestResult', { testId: testId, result: results[testId]} )
                 })
@@ -228,7 +228,7 @@ export const testRunnerStore = {
                 })
         },
         async loadTestScriptNames({commit, state}) {
-            console.log(`loadTestScriptNames`)
+//            console.log(`loadTestScriptNames`)
             const url = `collection/${state.currentTestCollectionName}`
             try {
                 commit('clearTestScripts')
