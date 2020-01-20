@@ -5,7 +5,7 @@
     <parent>
         <artifactId>asbestos</artifactId>
         <groupId>gov.nist.asbestos</groupId>
-        <version>1.1.0</version>
+        <version>1.1.1</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -21,17 +21,17 @@
         <dependency>
             <groupId>gov.nist.asbestos</groupId>
             <artifactId>asbestos-xds-jaxb</artifactId>
-            <version>1.1.0</version>
+            <version>1.1.1</version>
         </dependency>
         <dependency>
             <groupId>gov.nist.asbestos</groupId>
             <artifactId>asbestos-http</artifactId>
-            <version>1.1.0</version>
+            <version>1.1.1</version>
         </dependency>
         <dependency>
             <groupId>gov.nist.asbestos</groupId>
             <artifactId>asbestos-proxy-support</artifactId>
-            <version>1.1.0</version>
+            <version>1.1.1</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.apache.httpcomponents/httpmime -->
         <dependency>

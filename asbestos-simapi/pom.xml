@@ -7,11 +7,11 @@
     <parent>
         <groupId>gov.nist.asbestos</groupId>
         <artifactId>asbestos</artifactId>
-        <version>1.1.0</version>
+        <version>1.1.1</version>
     </parent>
 
     <artifactId>simapi</artifactId>
-    <version>1.1.0</version>
+    <version>1.1.1</version>
     <packaging>jar</packaging>
 
     <dependencies>
@@ -61,7 +61,7 @@
         <dependency>
             <groupId>gov.nist.asbestos</groupId>
             <artifactId>asbestos-adapter</artifactId>
-            <version>1.1.0</version>
+            <version>1.1.1</version>
         </dependency>
 
         <dependency>
