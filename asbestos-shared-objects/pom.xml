@@ -5,7 +5,7 @@
     <parent>
         <groupId>gov.nist.asbestos</groupId>
         <artifactId>asbestos</artifactId>
-        <version>1.1.0-SNAPSHOT</version>
+        <version>1.2.0-SHAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -19,7 +19,7 @@
         <dependency>
             <groupId>gov.nist.asbestos</groupId>
             <artifactId>service-properties</artifactId>
-            <version>1.1.0-SNAPSHOT</version>
+            <version>1.2.0-SHAPSHOT</version>
         </dependency>
     </dependencies>
 
