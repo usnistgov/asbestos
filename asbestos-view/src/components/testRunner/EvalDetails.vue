@@ -138,10 +138,9 @@
             assertionDescription(assert) {
                 return assert.description === undefined ? "" : assert.description
             },
-            loadTestScript() {
-                return this.$store.dispatch('loadTestScript', { testCollection: this.testCollection, testId: this.testId }).then(() => {
-                    this.script = this.$store.state.testRunner.testScripts[this.testId]
-                })
+            async loadTestScript() {
+                await this.$store.dispatch('loadTestScript', { testCollection: this.testCollection, testId: this.testId })
+                this.script = this.$store.state.testRunner.testScripts[this.testId]
             },
             loadTestReport() {
                 this.report = this.$store.state.testRunner.testReports[this.testId]
@@ -160,8 +159,9 @@
             assertMsg(assertId) {
                 return this.$store.state.testRunner.testAssertions[assertId]
             },
-            loadReports() {
-                return this.$store.dispatch('loadReports', this.testCollection)
+            async loadReports() {
+                await this.$store.dispatch('loadReports', this.testCollection)
+                await this.loadTestScript()
             },
             runSingleEventEval() {
                 this.$store.dispatch('runSingleEventEval',
@@ -176,10 +176,12 @@
                     if (!this.$store.state.testRunner.testAssertions)
                         this.$store.dispatch('loadTestAssertions')
                     await this.runSingleEventEval()
+                    await this.loadTestScript()
+                } else {
+                    await this.loadReports()
+                    this.loadTestScript()
+                    //this.loadTestReport()
                 }
-                // await this.loadReports()
-                this.loadTestScript()
-                //this.loadTestReport()
             }
         },
         computed: {

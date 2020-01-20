@@ -18,6 +18,10 @@ public class ChannelConfig {
     private String xdsSiteName;
     private boolean writeLocked;
 
+    public String getChannelBase() {
+        return fhirBase;
+    }
+
     public String toString() {
         return new StringBuilder().append("Channel ").append(testSession).append("__").append(channelId)
                 .append(" of ").append(actorType).append(" in ").append(environment)

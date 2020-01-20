@@ -1,0 +1,8 @@
+Negative tests for MHD Document Recipient.
+<br /><br />
+Tests for a collection of conditions that should cause the DocumentRecipient to reject a
+ProvideDocumentBundle with a 400 status.
+<br /><br />
+
+Tests labeled "comprehensive metadata" are expected to fail on Document Recipients that implement the
+Comprehensive Metadata option only and pass on others.

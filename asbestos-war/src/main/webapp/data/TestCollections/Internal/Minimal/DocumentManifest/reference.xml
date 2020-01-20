@@ -1,4 +1,5 @@
 <DocumentManifest xmlns="http://hl7.org/fhir">
+    <status value="current"/>
                 <text>
                     <div xmlns="http://www.w3.org/1999/xhtml">Comment</div>
                 </text>

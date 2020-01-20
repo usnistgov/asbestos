@@ -25,7 +25,7 @@
 
         <action>
             <assert>
-                <description value="Test: Request includes two DocumentReferences|MHDPDBOnePlusDocumentReference"/>
+                <description value="Test: Request includes two DocumentReferences"/>
                 <compareToSourceId value="request"/>
                 <compareToSourceExpression value="Bundle.entry.where(resource.is(FHIR.DocumentReference)).count() = 2"/>
                 <warningOnly value="false"/>
