@@ -12,7 +12,7 @@
                 Client:
             </div>
             <div v-for="(coll, collectioni) in clientCollections"
-                 :key="coll + collectioni">
+                 :key="coll + collectioni" class="selectable">
                 <span v-bind:class="{active: coll === collection}" @click="openTheCollection(coll)">{{ coll }}</span>
             </div>
 
@@ -20,7 +20,7 @@
                 Server:
             </div>
             <div v-for="(coll, collectioni) in serverCollections"
-                 :key="coll + collectioni">
+                 :key="coll + collectioni" class="selectable">
                 <span v-bind:class="{active: coll === collection}" @click="openTheCollection(coll)">{{ coll }}</span>
             </div>
 
