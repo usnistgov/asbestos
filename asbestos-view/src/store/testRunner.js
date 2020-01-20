@@ -215,10 +215,12 @@ export const testRunnerStore = {
                     let clientTestNames = []
                     let serverTestNames = []
                     response.data.forEach(collection => {
-                        if (collection.server)
-                            serverTestNames.push(collection.name)
-                        else
-                            clientTestNames.push(collection.name)
+                        if (!collection.hidden) {
+                            if (collection.server)
+                                serverTestNames.push(collection.name)
+                            else
+                                clientTestNames.push(collection.name)
+                        }
                     })
                     commit('setClientTestCollectionNames', clientTestNames.sort())
                     commit('setServerTestCollectionNames', serverTestNames.sort())
