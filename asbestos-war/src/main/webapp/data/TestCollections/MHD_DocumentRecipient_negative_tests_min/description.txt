@@ -1,0 +1,8 @@
+Negative tests for MHD Document Recipient/Minimal Metadata.
+<br /><br />
+Tests for a collection of conditions that should cause the DocumentRecipient to reject a
+ProvideDocumentBundle with a 400 status.
+<br /><br />
+A test that is labeled Successful (green) means the 400 status was returned.
+
+
