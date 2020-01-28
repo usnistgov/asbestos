@@ -66,7 +66,6 @@
         <module>asbestos-test-engine</module>
         <module>service-properties</module>
         <module>asbestos-analysis</module>
-        <module>fhirPathBug</module>
     </modules>
 
     <dependencyManagement>
