@@ -5,6 +5,11 @@
         <!-- Event Header -->
         <div v-if="eventSummary" class="event-description">
             {{ eventAsDate(eventSummary.eventName) }} - {{ eventSummary.verb}} {{ eventSummary.resourceType }} - {{ eventSummary.status ? 'Ok' : 'Error' }}
+
+            <span class="client-server-position">
+                <span class="bolded">Client:</span>  {{clientIP}}
+                <span class="bolded">Server:</span>  {{channelId}}
+            </span>
         </div>
 
         <div class="request-response">
@@ -190,6 +195,10 @@
             },
         },
         computed: {
+            clientIP() {
+                const idx = this.index
+                return idx ? this.$store.state.log.eventSummaries[idx].ipAddr : null
+            },
             index() {  // of eventId
                 return (this.$store.state.log.eventSummaries)
                     ? this.$store.state.log.eventSummaries.findIndex(summary => this.eventId === summary.eventName)
@@ -248,6 +257,14 @@
 </script>
 
 <style scoped>
+    .bolded {
+        font-weight: bold;
+    }
+    .client-server-position {
+        font-weight: normal;
+        position: absolute;
+        left: 600px;
+    }
     .event-details {
         text-align: left;
         overflow: scroll;
