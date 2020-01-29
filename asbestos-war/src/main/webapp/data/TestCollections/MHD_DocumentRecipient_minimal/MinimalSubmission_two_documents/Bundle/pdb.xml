@@ -13,6 +13,7 @@
                     <system value="urn:ietf:rfc:3986"/>
                     <value value="urn:oid:1.2.129.6.58.92.88336.4"/>
                 </masterIdentifier>
+                <status value="current"/>
                 <subject>
                     <reference value="${patientResourceId}"/>
                 </subject>
@@ -50,6 +51,7 @@
                     <system value="urn:ietf:rfc:3986"/>
                     <value value="urn:oid:1.2.129.6.58.92.88336.4"/>
                 </masterIdentifier>
+                <status value="current"/>
                 <subject>
                     <reference value="${patientResourceId}"/>
                 </subject>

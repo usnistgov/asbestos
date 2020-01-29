@@ -18,6 +18,7 @@
                     <value value="abce1"/>
                     <use value="official"/>
                 </identifier>
+                <status value="current"/>
                 <subject>
                     <reference value="${patientResourceId}"/>
                 </subject>

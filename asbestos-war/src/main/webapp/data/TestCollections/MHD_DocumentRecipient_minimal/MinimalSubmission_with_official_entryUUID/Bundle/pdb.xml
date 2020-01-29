@@ -18,6 +18,7 @@
                     <value value="urn:uuid:1e404af3-077f-4bee-b7a6-a9be97e1ce01"/>
                     <use value="official"/>
                 </identifier>
+                <status value="current"/>
                 <subject>
                     <reference value="${patientResourceId}"/>
                 </subject>
