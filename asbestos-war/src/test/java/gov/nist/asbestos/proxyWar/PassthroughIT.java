@@ -102,7 +102,7 @@ class PassthroughIT {
                 .setChannelId(channelId)
                 .setEnvironment("default")
                 .setActorType("fhir")
-                .setChannelType("passthrough")
+                .setChannelType("fhir")
                 .setFhirBase("http://localhost:" + fhirPort + "/fhir/fhir");
         String json = ChannelConfigFactory.convert(channelConfig);
         HttpPost poster = new HttpPost();

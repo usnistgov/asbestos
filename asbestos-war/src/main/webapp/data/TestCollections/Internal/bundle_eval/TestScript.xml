@@ -271,6 +271,14 @@
         </action>
         <action>
             <assert>
+                <description value="DocumentReference: status is one of current, superseded, entered-in-error"/>
+                <compareToSourceId value="request"/>
+                <compareToSourceExpression value="Bundle.entry.resource.where(is(FHIR.DocumentReference)).status in ('current' | 'superseded' | 'entered-in-error')"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
+            <assert>
                 <description value="DocumentManifest: masterIdentifier is required"/>
                 <compareToSourceId value="request"/>
                 <compareToSourceExpression value="Bundle.entry.resource.where(is(FHIR.DocumentManifest)).masterIdentifier.exists()"/>
