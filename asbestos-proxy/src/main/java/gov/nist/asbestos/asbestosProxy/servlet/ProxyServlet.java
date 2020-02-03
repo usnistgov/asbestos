@@ -71,25 +71,6 @@ public class ProxyServlet extends HttpServlet {
         super.init(config);
         log.info("ProxyServlet init");
 
-        /*
-        try {
-            ServiceProperties.init();
-        } catch (Exception ex) {
-            throw new RuntimeException(String.format("ServiceProperties.init() Failed: %s.", ex.toString()));
-        }
-
-//        String ec = config.getInitParameter("ExternalCache");
-        String ec = System.getProperty("EXTERNAL_CACHE");
-        if (ec == null) {
-            throw new RuntimeException("Missing EXTERNAL_CACHE system property.");
-        }
-        setExternalCache(new File(ec));
-
-        // announce location of ExternalCache to other servlets
-        config.getServletContext().setAttribute("ExternalCache", ec);
-
-         */
-
         if (externalCache == null) {
             String ec = (String) config.getServletContext().getAttribute("ExternalCache");
             externalCache = new File(ec);
