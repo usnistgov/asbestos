@@ -29,6 +29,8 @@ public class GetTestCollectionNamesRequest {
     class Collection {
         String name;
         boolean server;
+        String channel;
+        boolean hidden;
     }
 
     public void run() throws IOException {
@@ -40,6 +42,8 @@ public class GetTestCollectionNamesRequest {
             Properties props = request.ec.getTestCollectionProperties(name);
             collection.server = "server".equals(props.getProperty("TestType"));
             collection.name = name;
+            collection.channel = props.getProperty("channel");
+            collection.hidden = "true".equals(props.getProperty("hidden"));
             collections.add(collection);
         }
         String json = new Gson().toJson(collections);

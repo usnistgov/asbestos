@@ -154,8 +154,8 @@
                 this.selectedResourceIndex = -1
             },
             loadAnalysisForObjectAndAddHistory(resourceUrl, index) {
-                console.log(`resourceUrl is ${resourceUrl}`)
-                console.log(`index is ${index}`)
+                // console.log(`resourceUrl is ${resourceUrl}`)
+                // console.log(`index is ${index}`)
                 if (this.report.objects[index].url === 'Contained') {
                     let subReport = {}
                     subReport.base = this.report.objects[index]
@@ -178,7 +178,7 @@
                 }
             },
             urlAnalysis() {
-                console.log(`LogAnalysisReport url is ${this.theUrl}`)
+                // console.log(`LogAnalysisReport url is ${this.theUrl}`)
                 this.loadAnalysisForObject(this.theUrl)
             }
         },

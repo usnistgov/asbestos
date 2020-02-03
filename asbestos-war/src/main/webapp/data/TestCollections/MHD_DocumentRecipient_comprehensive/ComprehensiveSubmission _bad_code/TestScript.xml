@@ -61,7 +61,7 @@
             <assert>
                 <description value="... verify transaction returns OperationOutcome"/>
                 <compareToSourceId value="pdb-response"/>
-                <compareToSourceExpression value="where(OperationOutcome).exists()"/>
+                <compareToSourceExpression value="OperationOutcome.exists()"/>
                 <warningOnly value="false"/>
             </assert>
         </action>

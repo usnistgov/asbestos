@@ -4,30 +4,41 @@
         <h2>Self Test</h2>
         <p>Verify that all back-end services are responding.</p>
 
+        <p>For problems with Proxy or Test Engine status look in
+            &lt;asbestos>/tomcat/Toolkits/FhirToolkit/webapps/ROOT/serviceProperties.json.
+        Property fhirToolkitBase is likely the problem.
+            Changes to serviceProperties.json require toolkit restart (Tomcat).</p>
+
+        <p>For problems with HAPI and XDS look in
+            &lt;asbestos>/tomcat/Toolkits/FhirToolkit/conf/service.properties.  Link to HAPI is hapiFhirBase.
+            Link to XDS is xdsToolkitBase. Changes to service.properties require toolkit restart (Tomcat).</p>
+
+        <p>XDS Toolkit is only required for testing XDSonFHIR option.</p>
+
         <div class="selectable" @click="selfTest()">Run</div>
         <div v-if="$store.state.log.loaded">
-            Proxy responding
+            Proxy is responding
         </div>
         <div v-else>
-            Proxy not responding
+            Proxy is not responding
         </div>
         <div v-if="$store.state.testRunner.testCollectionsLoaded">
-            Test Engine responding
+            Test Engine is responding
         </div>
         <div v-else>
-            Test Engine not responding
+            Test Engine is not responding
         </div>
         <div v-if="$store.state.testRunner.hapiIsAlive">
-            HAPI responding - {{$store.state.testRunner.hapiDetails}}
+            HAPI server is responding - {{$store.state.testRunner.hapiDetails}}
         </div>
         <div v-else>
-            HAPI not responding - {{$store.state.testRunner.hapiDetails}}
+            HAPI server is not responding - {{$store.state.testRunner.hapiDetails}}
         </div>
         <div v-if="$store.state.testRunner.xdsIsAlive">
-            XDS responding - {{$store.state.testRunner.xdsDetails}}
+            XDS Toolkit responding - {{$store.state.testRunner.xdsDetails}}
         </div>
         <div v-else>
-            XDS not responding - {{$store.state.testRunner.xdsDetails}}
+            XDS Toolkit not responding - {{$store.state.testRunner.xdsDetails}}
         </div>
 
 

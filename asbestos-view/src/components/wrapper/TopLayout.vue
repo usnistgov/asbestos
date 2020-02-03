@@ -55,7 +55,11 @@
 <!--                <div class="vdivider"></div>-->
                 <channel-log-control-panel class="solid-boxed"> </channel-log-control-panel>
                 <div class="vdivider"></div>
-                <test-control-panel class="solid-boxed"> </test-control-panel>
+<!--                <test-control-panel class="solid-boxed"> </test-control-panel>-->
+<!--                <div class="vdivider"></div>-->
+<!--                <test-control-panel class="solid-boxed"> </test-control-panel>-->
+<!--                <div class="vdivider"></div>-->
+                <test-control-panel2 class="solid-boxed"> </test-control-panel2>
                 <div class="vdivider"></div>
 <!--                <debug-control-panel class="solid-boxed"></debug-control-panel>-->
             </div>
@@ -66,7 +70,8 @@
 <script>
     import SessionControlPanel from "./SessionControlPanel"
     import ChannelControlPanel from "./ChannelControlPanel"
-    import TestControlPanel from "./TestControlPanel"
+    // import TestControlPanel from "./TestControlPanel"
+    import TestControlPanel2 from "./TestControlPanel2"
     import ChannelLogControlPanel from "./ChannelLogControlPanel"
     import GetterControlPanel from "./GetterControlPanel";
     // import DebugControlPanel from "./DebugControlPanel"
@@ -114,7 +119,8 @@
         components: {
             SessionControlPanel,
             ChannelControlPanel,
-            TestControlPanel,
+            // TestControlPanel,
+            TestControlPanel2,
             ChannelLogControlPanel,
             GetterControlPanel
             // DebugControlPanel,

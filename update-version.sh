@@ -13,3 +13,5 @@ cd tk-deps
 mvn -X versions:set -DnewVersion=$1 -DallowSnapshots=true
 
 cd ..
+
+echo "REMEMBER TO UPDATE asbestos-assembly ALSO."

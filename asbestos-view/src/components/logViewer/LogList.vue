@@ -41,7 +41,6 @@
     export default {
         data() {
             return {
-                //eventSummaries: [],  // list { eventName: xx, resourceType: yy, verb: GET|POST, status: true|false }
                 eventSummariesByType: [],
                 selectedEventName: null,
                 selectedEvent: null,
@@ -52,7 +51,7 @@
         methods: {
             selectSummary(summary) {
                 //this.$store.commit('setEventSummaries', this.eventSummaries)
-                this.$router.push(`/session/${this.sessionId}/channel/${this.channelId}/lognav/${summary.eventName}`)
+                this.$router.push(`/session/${this.sessionId}/channel/${this.channelId}/lognav/${summary.eventName}?clientIP=${summary.ipAddr}`)
             },
             loadEventSummaries() {
                 this.$store.dispatch('loadEventSummaries', {session: this.sessionId, channel: this.channelId})
@@ -62,7 +61,7 @@
             this.loadEventSummaries()
         },
         computed: {
-            eventSummaries() {
+            eventSummaries() {   // list { eventName: xx, resourceType: yy, verb: GET|POST, status: true|false }
                 return this.$store.state.log.eventSummaries
             },
             ipAddresses() {

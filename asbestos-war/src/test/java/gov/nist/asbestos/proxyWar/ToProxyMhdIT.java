@@ -43,6 +43,8 @@ class ToProxyMhdIT {
         TestEngine testEngine = new TestEngine(test1, base)
                 .setVal(val)
                 .setFhirClient(new FhirClient())
+                .setTestSession("default")
+                .setExternalCache(new ExternalCache().getExternalCache())
                 .runTest();
         System.out.println(testEngine.getTestReportAsJson());
         TestReport report = testEngine.getTestReport();

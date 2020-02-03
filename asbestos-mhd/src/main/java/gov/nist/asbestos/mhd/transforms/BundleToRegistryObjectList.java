@@ -378,11 +378,6 @@ public class BundleToRegistryObjectList implements IVal {
 
         DocumentReference dr = (DocumentReference) resource.getResource();
 
-        if (dr.hasIdentifier()) {
-            if (dr.getIdentifier().stream().anyMatch(i -> i.hasValue() && i.getValue().startsWith("urn:uuid:")))
-                vale.add(new ValE("DocumentReference has Identifier (entryUUID)").asError());
-        }
-
         vale.add(new ValE("Content section is [1..1]").addIheRequirement(DRTable));
         if (dr.getContent() == null || dr.getContent().isEmpty()) {
             vale.add(new ValE("DocumentReference has no content section").asError());
@@ -402,7 +397,11 @@ public class BundleToRegistryObjectList implements IVal {
         DocumentReference.DocumentReferenceContentComponent content = dr.getContent().get(0);
         Attachment attachment = content.getAttachment();
 
-        new EntryUuid().setVal(vale).setrMgr(rMgr).setResource(resource).assignId(dr.getIdentifier());
+        new EntryUuid()
+                .setVal(vale)
+                .setrMgr(rMgr)
+                .setResource(resource)
+                .assignId(dr.getIdentifier());
 
         eo.setId(resource.getAssignedId());
         eo.setObjectType("urn:uuid:7edca82f-054d-47f2-a032-9b2a5b5186c1");

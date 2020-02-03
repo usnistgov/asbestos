@@ -5,6 +5,11 @@
         <!-- Event Header -->
         <div v-if="eventSummary" class="event-description">
             {{ eventAsDate(eventSummary.eventName) }} - {{ eventSummary.verb}} {{ eventSummary.resourceType }} - {{ eventSummary.status ? 'Ok' : 'Error' }}
+
+            <span class="client-server-position">
+                <span class="bolded">Client:</span>  {{clientIP}}
+                <span class="bolded">Server:</span>  {{channelId}}
+            </span>
         </div>
 
         <div class="request-response">
@@ -96,7 +101,7 @@
 <script>
     import LogNav from "./LogNav"
     import LogAnalysisReport from "./LogAnalysisReport"
-    import EvalDetails from "../testRunner/EvalDetails"
+ //   import EvalDetails from "../testRunner/EvalDetails"
     import {LOG} from '../../common/http-common'
     import eventMixin from '../../mixins/eventMixin'
     import errorHandlerMixin from '../../mixins/errorHandlerMixin'
@@ -190,6 +195,10 @@
             },
         },
         computed: {
+            clientIP() {
+                const idx = this.index
+                return idx ? this.$store.state.log.eventSummaries[idx].ipAddr : null
+            },
             index() {  // of eventId
                 return (this.$store.state.log.eventSummaries)
                     ? this.$store.state.log.eventSummaries.findIndex(summary => this.eventId === summary.eventName)
@@ -239,13 +248,23 @@
         ],
         mixins: [eventMixin, errorHandlerMixin],
         components: {
-            LogNav, LogAnalysisReport, EvalDetails
+            LogNav,
+            LogAnalysisReport,
+            EvalDetails: () => import ('../testRunner/EvalDetails.vue')
         },
         name: "LogItem"
     }
 </script>
 
 <style scoped>
+    .bolded {
+        font-weight: bold;
+    }
+    .client-server-position {
+        font-weight: normal;
+        position: absolute;
+        left: 600px;
+    }
     .event-details {
         text-align: left;
         overflow: scroll;

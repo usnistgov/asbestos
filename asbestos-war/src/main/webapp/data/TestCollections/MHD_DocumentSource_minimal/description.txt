@@ -1,0 +1,2 @@
+Tests for MHD Document Recipients that accept Minimal Metadata.  Each test in this collection
+sends a MHD Provide and Document Bundle that contains an error that a MHD DocumentRecipient_Minimal should detect.  All tests must return 400 status to pass.

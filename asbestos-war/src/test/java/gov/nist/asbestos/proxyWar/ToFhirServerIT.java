@@ -45,6 +45,8 @@ class ToFhirServerIT {
         TestEngine testEngine = new TestEngine(test1, new URI(ITConfig.getFhirBase()))
                 .setVal(val)
                 .setFhirClient(new FhirClient())
+                .setTestSession("default")
+                .setExternalCache(new ExternalCache().getExternalCache())
                 .runTest();
         System.out.println(testEngine.getTestReportAsJson());
         TestReport report = testEngine.getTestReport();
