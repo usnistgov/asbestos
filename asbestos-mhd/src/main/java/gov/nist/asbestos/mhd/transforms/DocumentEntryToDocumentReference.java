@@ -9,6 +9,7 @@ import gov.nist.asbestos.mhd.transactionSupport.CodeTranslator;
 import gov.nist.asbestos.mhd.translation.ContainedIdAllocator;
 import gov.nist.asbestos.mhd.translation.attribute.*;
 import gov.nist.asbestos.mhd.translation.attribute.Slot;
+import gov.nist.asbestos.sharedObjects.ChannelConfig;
 import gov.nist.asbestos.simapi.validation.Val;
 import gov.nist.asbestos.simapi.validation.ValE;
 import oasis.names.tc.ebxml_regrep.xsd.rim._3.*;
@@ -27,7 +28,7 @@ public class DocumentEntryToDocumentReference implements IVal {
     private ContainedIdAllocator containedIdAllocator = null;
     FhirClient fhirClient = null;
 
-    public DocumentReference getDocumentReference(ExtrinsicObjectType eo) {
+    public DocumentReference getDocumentReference(ExtrinsicObjectType eo, ChannelConfig channelConfig) {
         Objects.requireNonNull(eo);
         Objects.requireNonNull(fhirClient);
         Objects.requireNonNull(containedIdAllocator);
@@ -46,6 +47,14 @@ public class DocumentEntryToDocumentReference implements IVal {
         Attachment attachment = new Attachment();
         dr.addContent(content);
         attachment.setContentType(eo.getMimeType());
+
+        String uid = null;
+        for (ExternalIdentifierType ei : eo.getExternalIdentifier()) {
+            if (ei.getIdentificationScheme().equals("urn:uuid:2e82c1f6-a085-4c72-9da3-8640a32e42ab"))
+                uid = ei.getValue();
+        }
+
+        attachment.setUrl(channelConfig.getFhirBase() + "/Binary/" + uid);
         dr.getContent().get(0).setAttachment(attachment);
         DocumentReference.DocumentReferenceContextComponent context = new DocumentReference.DocumentReferenceContextComponent();
         dr.setContext(context);

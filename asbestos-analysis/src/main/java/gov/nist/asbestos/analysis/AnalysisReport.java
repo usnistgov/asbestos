@@ -527,6 +527,8 @@ public class AnalysisReport {
     private String extractDocument(Binary binary) {
         String contentType = binary.getContentType();
         byte[] data = binary.getData();
+        String strData = new String(data);
+        byte[] byteData = strData.getBytes();
         String id = new DocumentCache(ec).putDocumentCache(data, contentType);
         // this must match what is in GetDocumentRequest
         ServiceProperties serviceProperties = ServiceProperties.getInstance();

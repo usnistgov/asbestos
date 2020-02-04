@@ -10,11 +10,7 @@ package ihe.iti.xds_b._2007;
 
 import java.util.ArrayList;
 import java.util.List;
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlSeeAlso;
-import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.*;
 
 
 /**
@@ -55,6 +51,7 @@ import javax.xml.bind.annotation.XmlType;
 @XmlSeeAlso({
     ihe.rad.xdsi_b._2009.RetrieveImagingDocumentSetRequestType.StudyRequest.SeriesRequest.class
 })
+@XmlRootElement(name="RetrieveDocumentSetRequest")
 public class RetrieveDocumentSetRequestType {
 
     @XmlElement(name = "DocumentRequest", required = true)

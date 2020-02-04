@@ -130,7 +130,7 @@ class DocumentEntryTest {
 
         containedIdAllocator = new ContainedIdAllocator();
         documentEntryToDocumentReference.setContainedIdAllocator(containedIdAllocator);
-        DocumentReference documentReference1 = documentEntryToDocumentReference.getDocumentReference(extrinsicObjectType);
+        DocumentReference documentReference1 = documentEntryToDocumentReference.getDocumentReference(extrinsicObjectType, channelConfig);
 
         String json2 = fhirContext.newJsonParser().encodeResourceToString(documentReference1);
         JsonParser jsonParser2 = jsonFactory.createParser(json2);

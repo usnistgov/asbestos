@@ -19,6 +19,8 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.nio.CharBuffer;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 public class FaultParser {
@@ -146,6 +148,54 @@ public class FaultParser {
                 break;
         }
         return trim(output);
+    }
+
+    public static List<String> unwrapParts(String part) {
+        List<String> results = new ArrayList<>();
+        String contentType = null;
+        part = part.trim();
+        if (!part.startsWith("--"))
+            return results;
+        State state = State.BOUNDARY;
+        String output = "";
+        Scanner scanner = new Scanner(part);
+        while (scanner.hasNextLine()) {
+            String line = scanner.nextLine().trim();
+            if (state == State.BOUNDARY && line.startsWith("--")) {
+                state = State.HEADER;
+                continue;
+            }
+            if (state == State.HEADER && line.equals("")) {
+                state = State.BODY;
+            }
+            if (state == State.HEADER ) {
+                if (line.toLowerCase().startsWith("content-type")) {
+                    String[] parts = line.split(":");
+                    if (parts.length == 2) {
+                        contentType = parts[1].trim();
+                    }
+                }
+            }
+            if (state == State.BODY && line.startsWith("--") && line.endsWith("--")) {
+                state = State.ENDBOUNDARY;
+            }
+            if (state == State.BODY && line.startsWith("--")) {
+                results.add(trim(output));
+                output = "";
+                state = State.HEADER;
+                continue;
+            }
+            if (state == State.BODY) {
+                output += "\n" + line;
+            }
+            if (state == State.ENDBOUNDARY)
+                break;
+        }
+        if (!output.equals(""))
+            results.add(trim(output));
+        results.add(contentType);
+
+        return results;
     }
 
     static private String trimable = " \n";

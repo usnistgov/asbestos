@@ -1,15 +1,19 @@
 package gov.nist.asbestos.mhd.transforms;
 
 import gov.nist.asbestos.client.Base.IVal;
+import gov.nist.asbestos.client.client.FhirClient;
 import gov.nist.asbestos.client.resolver.ResourceCacheMgr;
 import gov.nist.asbestos.mhd.transactionSupport.CodeTranslator;
+import gov.nist.asbestos.mhd.translation.ContainedIdAllocator;
 import gov.nist.asbestos.mhd.translation.attribute.PatientId;
 import gov.nist.asbestos.mhd.translation.attribute.Slot;
+import gov.nist.asbestos.sharedObjects.ChannelConfig;
 import gov.nist.asbestos.simapi.validation.Val;
 import gov.nist.asbestos.simapi.validation.ValE;
 import oasis.names.tc.ebxml_regrep.xsd.rim._3.*;
 import org.hl7.fhir.r4.model.*;
 
+import java.util.List;
 import java.util.Optional;
 
 
@@ -19,14 +23,20 @@ public class SubmissionSetToDocumentManifest implements IVal {
     private Val val = null;
     private CodeTranslator codeTranslator = null;
     private ResourceCacheMgr resourceCacheMgr = null;
+    private ContainedIdAllocator containedIdAllocator = null;
+    FhirClient fhirClient = null;
 
-    public DocumentManifest getDocumentManifest(RegistryPackageType ss) {
+    public DocumentManifest getDocumentManifest(RegistryPackageType ss, List<AssociationType1> assocs, ChannelConfig channelConfig) {
         DocumentManifest dm = new DocumentManifest();
 
+        String id = null;
         if (ss.getId() != null) {
+            id = ss.getId();
+            dm.setId(stripUrnPrefix(ss.getId()));
             Identifier idr = new Identifier();
             idr.setSystem("urn:ietf:rfc:3986");
-            idr.setValue(stripUrnPrefix(ss.getId()));
+            idr.setValue(ss.getId());
+            idr.setUse(Identifier.IdentifierUse.OFFICIAL);
             dm.getIdentifier().add(idr);
         }
         for (ExternalIdentifierType ei : ss.getExternalIdentifier()) {
@@ -35,7 +45,8 @@ public class SubmissionSetToDocumentManifest implements IVal {
                 // Patient ID
                 PatientId patientId = new PatientId()
                         .setPatientid(ei.getValue())
-                        .setResourceCacheMgr(resourceCacheMgr);
+                        .setResourceCacheMgr(resourceCacheMgr)
+                        .setFhirClient(fhirClient);
                 patientId.setVal(val);
                 Optional<Reference> reference = patientId.getFhirReference();
                 reference.ifPresent(dm::setSubject);
@@ -62,14 +73,24 @@ public class SubmissionSetToDocumentManifest implements IVal {
                         .setClassificationType(c);
                 xdsCode.setVal(val);
                 dm.setType(xdsCode.asCodeableConcept());
-            } else {
-                val.add(new ValE("SubmissionSetToDocumentManifest: Do not understand Classification scheme " + scheme).asError());
             }
+//            else {
+//                val.add(new ValE("SubmissionSetToDocumentManifest: Do not understand Classification scheme " + scheme).asError());
+//            }
         }
         if (ss.getName() != null)
             dm.setDescription(Slot.getValue(ss.getName()));
         if (ss.getStatus().endsWith("Approved"))
             dm.setStatus(Enumerations.DocumentReferenceStatus.CURRENT);
+
+        for (AssociationType1 assoc : assocs) {
+            if (assoc.getAssociationType().endsWith("HasMember") && assoc.getSourceObject().equals(id)) {
+                String reference = channelConfig.getFhirBase() +
+                        "/DocumentReference/" +
+                        stripUrnPrefix(assoc.getTargetObject());
+                dm.addContent(new Reference(reference));
+            }
+        }
 
         return dm;
     }
@@ -86,12 +107,28 @@ public class SubmissionSetToDocumentManifest implements IVal {
         this.val = val;
     }
 
-    public void setCodeTranslator(CodeTranslator codeTranslator) {
+    public SubmissionSetToDocumentManifest setCodeTranslator(CodeTranslator codeTranslator) {
         this.codeTranslator = codeTranslator;
+        return this;
     }
 
     public SubmissionSetToDocumentManifest setResourceMgr(ResourceCacheMgr resourceCacheMgr) {
         this.resourceCacheMgr = resourceCacheMgr;
         return this;
+    }
+
+    public SubmissionSetToDocumentManifest setContainedIdAllocator(ContainedIdAllocator containedIdAllocator) {
+        this.containedIdAllocator = containedIdAllocator;
+        return this;
+    }
+
+    public SubmissionSetToDocumentManifest setResourceCacheMgr(ResourceCacheMgr resourceCacheMgr) {
+        this.resourceCacheMgr = resourceCacheMgr;
+        return this;
+    }
+
+    public SubmissionSetToDocumentManifest setFhirClient(FhirClient fhirClient) {
+        this.fhirClient = fhirClient;
+        return  this;
     }
 }
