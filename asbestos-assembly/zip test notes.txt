@@ -21,13 +21,23 @@ mvn clean install -P Sunil
 
 cd asbestos-assembly
 
-mvn clean package
+Without using a profile, assembly makes use of the default XdsToolkit port setting at 9770.
+mvn clean package -P Sunil
 
 @call c:\Users\skb1\myprojects\env.bat cd
 
 dir C:\Users\skb1\myprojects\asbestos\asbestos-assembly\target\asbestos.zip
-	
-unzip -qq C:\Users\skb1\myprojects\asbestos\asbestos-assembly\target\asbestos.zip -d C:\Users\skb1\myprojects\asbestos\asbestos-assembly\target\asbestos
+
+Normal path
+    unzip -qq C:\Users\skb1\myprojects\asbestos\asbestos-assembly\target\asbestos.zip -d C:\Users\skb1\myprojects\asbestos\asbestos-assembly\target\asbestos
+
+    --OR--
+
+Short directory paths
+    del /f /s /q c:\temp\asbestos\*.*
+    rmdir /q /s c:\temp\asbestos
+    unzip -qq C:\Users\skb1\myprojects\asbestos\asbestos-assembly\target\asbestos.zip -d C:\temp\asbestos
+    cd c:\temp\asbestos\tomcat\bin
 
 copy C:\Users\skb1\myprojects\fhirtoolkit-cert\XdsToolkit\webapps\fhir to C:\Users\skb1\myprojects\asbestos\asbestos-assembly\target\asbestos\tomcat\Toolkits\XdsToolkit\webapps
 copy C:\Users\skb1\myprojects\fhirtoolkit-cert\XdsToolkit\webapps\xdstools to C:\Users\skb1\myprojects\asbestos\asbestos-assembly\target\asbestos\tomcat\Toolkits\XdsToolkit\webapps

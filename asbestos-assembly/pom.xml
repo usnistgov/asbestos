@@ -6,7 +6,7 @@
     <parent>
         <artifactId>asbestos</artifactId>
         <groupId>gov.nist.asbestos</groupId>
-        <version>1.2.0-SNAPSHOT</version>
+        <version>1.2.0-SHAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -31,12 +31,38 @@
         <hapiFhirBase>http://localhost:9770/fhir/fhir</hapiFhirBase>
         <xdsToolkitBase>http://localhost:9770/xdstools</xdsToolkitBase>
         <tlsXdsToolkitBase>http://localhost:9773/xdstools</tlsXdsToolkitBase>
-        <!-- README.txt and Tomcat server.xml use these properties -->
+        <!--
+        README.txt and Tomcat server.xml use the properties below.
+        If only the xdsToolkitBase property shown above is used to point to an existing toolkit outside of the Asbestos installation directory, the XdsToolkit\webapps should be empty to prevent
+        it from starting up a Tomcat which would potentially take up the port as defined by the xdsToolkitHttpPort. In other words, if Tomcat does not start in XdsToolkit then the xdsToolkitHttpPort is not used.
+        -->
         <fhirToolkitHttpPort>9760</fhirToolkitHttpPort>
         <fhirToolkitTlsPort>9743</fhirToolkitTlsPort>
         <xdsToolkitHttpPort>9770</xdsToolkitHttpPort>
         <xdsToolkitTlsPort>9773</xdsToolkitTlsPort>
     </properties>
+
+
+    <profiles>
+        <profile>
+            <id>Bill</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <properties>
+                <build.profile.id>Bill</build.profile.id>
+            </properties>
+        </profile>
+        <profile>
+            <id>Sunil</id>
+            <properties>
+                <build.profile.id>Sunil</build.profile.id>
+                <!-- Make use of the existing XDS Toolkit that should already be running in the background. -->
+                <hapiFhirBase>http://localhost:8080/fhir/fhir</hapiFhirBase>
+                <xdsToolkitBase>http://localhost:8080/xdstools</xdsToolkitBase>
+            </properties>
+        </profile>
+    </profiles>
 
     <build>
         <plugins>
