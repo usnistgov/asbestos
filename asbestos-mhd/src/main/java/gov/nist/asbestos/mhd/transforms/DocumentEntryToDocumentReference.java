@@ -54,7 +54,9 @@ public class DocumentEntryToDocumentReference implements IVal {
                 uid = ei.getValue();
         }
 
-        attachment.setUrl(channelConfig.getFhirBase() + "/Binary/" + uid);
+        if (uid != null) {
+            attachment.setUrl(channelConfig.getFhirBase() + "/Binary/" + uid);
+        }
         dr.getContent().get(0).setAttachment(attachment);
         DocumentReference.DocumentReferenceContextComponent context = new DocumentReference.DocumentReferenceContextComponent();
         dr.setContext(context);
