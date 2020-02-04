@@ -49,6 +49,9 @@
         OTHERWISE, AND WHETHER OR NOT LOSS WAS SUSTAINED FROM, OR AROSE OUT OF
         THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED HEREUNDER.
 
+        <h2>FHIR(R) Trademark</h2>
+        <div>HL7(R), HEALTH LEVEL SEVEN(R), FHIR(R) and the FHIR Logo (R) are trademarks owned by Health Level Seven International, registered with the United States Patent and Trademark Office.</div>
+
         <h2>Icons</h2>
         <div>Icons made by <a href="https://www.flaticon.com/authors/freepik" title="Freepik" target="_blank">Freepik</a> from <a href="https://www.flaticon.com/"             title="Flaticon" target="_blank">www.flaticon.com</a></div>
     </div>
