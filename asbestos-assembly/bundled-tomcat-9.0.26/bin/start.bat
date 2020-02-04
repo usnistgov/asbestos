@@ -32,12 +32,13 @@ ECHO CATALINA_HOME is %CATALINA_HOME%
 REM this count includes parent dir so count of 1 means no sub-directories
 ECHO Looking at %XDSWEBAPPS%
 
-SET /A WEBAPPSCOUNT=0
-REM Any directory
+SET /A "WEBAPPSCOUNT=0"
+
+
 FOR /D %%G IN ("%XDSWEBAPPS%\*") DO (
-    REM IF /I NOT "%%G"=="..\Toolkits\XdsToolkit\webapps\ROOT" (
-        SET /A WEBAPPSCOUNT=WEBAPPSCOUNT+1
-    REM )
+    SET FLDR_NAME=%%G
+    SET "FLDR_NAME_PART=%FLDR_NAME:~-4%"
+    IF /I NOT %FLDR_NAME_PART%==ROOT SET /A "WEBAPPSCOUNT=WEBAPPSCOUNT+1"
 )
 
 IF %WEBAPPSCOUNT% EQU 0 (
@@ -49,7 +50,8 @@ IF %WEBAPPSCOUNT% EQU 0 (
 
 REM start XdsToolkit base if its webapps dir is not empty
 
-ECHO count is %WEBAPPSCOUNT%
+ECHO Count is %WEBAPPSCOUNT%
+
 IF %WEBAPPSCOUNT% GTR 0 (
     ECHO XdsToolkit should be started
     MKDIR %XDSTOOLKIT%\logs
