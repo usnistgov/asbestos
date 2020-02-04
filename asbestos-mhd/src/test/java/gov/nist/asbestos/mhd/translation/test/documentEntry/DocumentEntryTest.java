@@ -82,6 +82,7 @@ class DocumentEntryTest {
         if (expected == null)
             expected = documentReference;
 
+
         CodeTranslator codeTranslator = new CodeTranslator(getCodesFile());
 
         String json = fhirContext.newJsonParser().encodeResourceToString(expected);
@@ -131,6 +132,14 @@ class DocumentEntryTest {
         containedIdAllocator = new ContainedIdAllocator();
         documentEntryToDocumentReference.setContainedIdAllocator(containedIdAllocator);
         DocumentReference documentReference1 = documentEntryToDocumentReference.getDocumentReference(extrinsicObjectType, channelConfig);
+
+
+        // translation automatically adds URL - would require IT (not unit) test to validate if left in
+        if (documentReference1.hasContent()) {
+            if (documentReference1.getContent().get(0).hasAttachment()) {
+                documentReference1.getContent().get(0).getAttachment().setUrl(null);
+            }
+        }
 
         String json2 = fhirContext.newJsonParser().encodeResourceToString(documentReference1);
         JsonParser jsonParser2 = jsonFactory.createParser(json2);
