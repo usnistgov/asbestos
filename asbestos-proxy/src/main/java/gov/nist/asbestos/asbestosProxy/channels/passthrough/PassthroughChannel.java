@@ -84,7 +84,7 @@ public class PassthroughChannel extends BaseChannel /*implements IBaseChannel*/ 
     }
 
     @Override
-    public void transformResponse(HttpBase responseIn, HttpBase responseOut, String proxyHostPort) {
+    public void transformResponse(HttpBase responseIn, HttpBase responseOut, String proxyHostPort, String requestedType) {
         transformResponseLocationHeader(responseIn, responseOut, proxyHostPort);
         // responseOut.setResponse(responseIn.getResponse());
         transformResponseBody(responseIn, responseOut);

@@ -20,6 +20,7 @@ import gov.nist.asbestos.http.operations.*;
 import gov.nist.asbestos.mhd.transactionSupport.*;
 import gov.nist.asbestos.mhd.transforms.BundleToRegistryObjectList;
 import gov.nist.asbestos.mhd.transforms.DocumentEntryToDocumentReference;
+import gov.nist.asbestos.mhd.transforms.SubmissionSetToDocumentManifest;
 import gov.nist.asbestos.mhd.translation.ContainedIdAllocator;
 import gov.nist.asbestos.mhd.translation.search.FhirSq;
 import gov.nist.asbestos.sharedObjects.ChannelConfig;
@@ -28,11 +29,12 @@ import gov.nist.asbestos.simapi.validation.Val;
 import gov.nist.asbestos.simapi.validation.ValE;
 import gov.nist.asbestos.utilities.*;
 import ihe.iti.xds_b._2007.ProvideAndRegisterDocumentSetRequestType;
+import ihe.iti.xds_b._2007.RetrieveDocumentSetRequestType;
+import ihe.iti.xds_b._2007.RetrieveDocumentSetResponseType;
 import oasis.names.tc.ebxml_regrep.xsd.lcm._3.SubmitObjectsRequest;
-import oasis.names.tc.ebxml_regrep.xsd.rim._3.ExtrinsicObjectType;
-import oasis.names.tc.ebxml_regrep.xsd.rim._3.IdentifiableType;
-import oasis.names.tc.ebxml_regrep.xsd.rim._3.RegistryObjectListType;
+import oasis.names.tc.ebxml_regrep.xsd.rim._3.*;
 import oasis.names.tc.ebxml_regrep.xsd.rs._3.RegistryResponseType;
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.*;
@@ -46,14 +48,15 @@ import java.net.URI;
 import java.util.*;
 
 // TODO - honor the Prefer header - http://hl7.org/fhir/http.html#ops
-public class MhdChannel extends BaseChannel /*implements IBaseChannel*/ {
+public class XdsOnFhirChannel extends BaseChannel /*implements IBaseChannel*/ {
     private Bundle requestBundle = null;
     private String serverBase;
     private String proxyBase;
     private BundleToRegistryObjectList bundleToRegistryObjectList = new BundleToRegistryObjectList();
     private AhqrSender sender = null;
+    private Binary binary = null;
 
-    public MhdChannel() {}
+    public XdsOnFhirChannel() {}
 
     private String transformPDBToPNR(Bundle bundle, URI toAddr, ITask task) {
         Objects.requireNonNull(task);
@@ -62,13 +65,6 @@ public class MhdChannel extends BaseChannel /*implements IBaseChannel*/ {
         FhirClient fhirClient = new FhirClient();
         ResourceCacheMgr resourceCacheMgr = new ResourceCacheMgr(getExternalCache());
         fhirClient.setResourceCacheMgr(resourceCacheMgr);
-
-//        String channelId = channelConfig.getTestSession() + "__" + channelConfig.getChannelId();
-//        EC ec = new EC(getExternalCache());
-//        File patientCacheDir = ec.getTestLogCacheDir(channelId);
-//        File alternatePatientCacheDir = ec.getTestLogCacheDir("default__default");
-//        resourceCacheMgr.addCache(patientCacheDir);
-//        resourceCacheMgr.addCache(alternatePatientCacheDir);
 
         ResourceMgr rMgr = new ResourceMgr();
         rMgr.setVal(val);
@@ -108,6 +104,10 @@ public class MhdChannel extends BaseChannel /*implements IBaseChannel*/ {
 
         for (String id : bundleToRegistryObjectList.getDocumentContents().keySet()) {
             byte[] contents = bundleToRegistryObjectList.getDocumentContents(id);
+            lastDocument = contents;
+            String contentsAsString = new String(contents);
+            lastDocumentStr = contentsAsString;
+            String strContents = Base64.encodeBase64String(contents);
             ProvideAndRegisterDocumentSetRequestType.Document document1 = new ProvideAndRegisterDocumentSetRequestType.Document();
             document1.setValue(contents);
             document1.setId(id);
@@ -128,11 +128,63 @@ public class MhdChannel extends BaseChannel /*implements IBaseChannel*/ {
         return os.toString();
     }
 
+    public static byte[] lastDocument;
+    public static String lastDocumentStr;
+
+//    private String transformBinaryQueryToRetrieve(String docUid, String repUid, URI toAddr, ITask task) {
+//        Objects.requireNonNull(task);
+//
+//        RetrieveDocumentSetRequestType ret = new RetrieveDocumentSetRequestType();
+//        RetrieveDocumentSetRequestType.DocumentRequest docReq = new RetrieveDocumentSetRequestType.DocumentRequest();
+//        docReq.setDocumentUniqueId(docUid);
+//        docReq.setRepositoryUniqueId(repUid);
+//        ret.getDocumentRequest().add(docReq);
+//
+//        ByteArrayOutputStream retStream = new ByteArrayOutputStream();
+//        new RetrieveBuilder().toOutputStream(ret, retStream);
+//
+//        String retString = XmlTools.deleteXMLInstruction(new String(retStream.toByteArray()));
+//        String soapString = RetWrapper.wrap(toAddr.toString(), retString);
+//        ByteArrayOutputStream os = new ByteArrayOutputStream();
+//        try {
+//            MultipartSender.getMultipartEntity(soapString).writeTo(os);
+//        } catch (IOException e) {
+//            //
+//        }
+//        return os.toString();
+//    }
+
 
     private AhqrSender documentEntryByUidQuery(String uid, URI toAddr, ITask task)  {
         Map<String, List<String>> model = new HashMap<>();
         model.put("$XDSDocumentEntryUniqueId", Collections.singletonList(uid));
         return FhirSq.run(model, "urn:uuid:5c4f972b-d56b-40ac-a5fc-c8ca9b40b9d4", toAddr, true, task);
+    }
+
+    private AhqrSender documentEntryByUUIDQuery(String uuid, URI toAddr, ITask task)  {
+        Map<String, List<String>> model = new HashMap<>();
+        model.put("$XDSDocumentEntryEntryUUID", Collections.singletonList(uuid));
+        return FhirSq.run(model, "urn:uuid:5c4f972b-d56b-40ac-a5fc-c8ca9b40b9d4", toAddr, true, task);
+    }
+
+    private RetrieveContent binaryByUidRetrieve(String docUid, String repUid, URI toAddr, ITask task)  {
+        RetrieveDocumentSetRequestType request = new RetrieveDocumentSetRequestType();
+        RetrieveDocumentSetRequestType.DocumentRequest docRequest = new RetrieveDocumentSetRequestType.DocumentRequest();
+        docRequest.setRepositoryUniqueId(repUid);
+        docRequest.setDocumentUniqueId(docUid);
+        request.getDocumentRequest().add(docRequest);
+
+        return new RetrieveSender().send(request, toAddr, task);
+    }
+
+    private AhqrSender submissionSetByUidQuery(String uid, URI toAddr, ITask task)  {
+        Map<String, List<String>> model = new HashMap<>();
+        model.put("$XDSSubmissionSetUniqueId", Collections.singletonList(uid));
+        AhqrSender sender = FhirSq.run(model, "urn:uuid:e8e3cb2c-e39c-46b9-99e4-c12f57260b83", toAddr, true, task);
+
+        // query returns more than what we want - prune results
+
+        return sender;
     }
 
     private OperationOutcome regErrorListAsOperationOutcome(RegErrorList regErrorList) {
@@ -222,13 +274,51 @@ public class MhdChannel extends BaseChannel /*implements IBaseChannel*/ {
             }
         } else {
             // GET
-            if (resourceType.equals("DocumentReference")) {
+            if (resourceType.equals("DocumentReference") && uid.contains(".")) {
+                // by UID
                 sender = documentEntryByUidQuery(uid, toAddr, task);
                 returnAhqrResults(requestOut);
+            } else if (resourceType.equals("DocumentReference") && uid.contains("-")) {
+                // by UUID
+                sender = documentEntryByUUIDQuery("urn:uuid:" + uid, toAddr, task);
+                returnAhqrResults(requestOut);
+            } else if (resourceType.equals("DocumentManifest")  && uid.contains(".")) {
+                sender = submissionSetByUidQuery(uid, toAddr, task);
+                returnAhqrResults(requestOut);
+            } else if (resourceType.equalsIgnoreCase("Binary") && uid.contains(".")) {
+                // by UUID
+                String repUid = "1.1.1";
+                RetrieveContent retrieveContent = binaryByUidRetrieve(uid, repUid, toAddr, task);
+                String retrieveContentStr = new String(retrieveContent.getContent());
+                binary = new Binary();
+                binary.setId(uid);
+//                RetrieveDocumentSetResponseType.DocumentResponse doc = response.getDocumentResponse().get(0);
+                binary.setContentType(retrieveContent.getContentType());
+                String lastDocumentAsStringLocal = lastDocumentStr;
+                String asString = new String(retrieveContent.getContent());
+                binary.setData(retrieveContent.getContent());
+                String j;
+                if (lastDocument != null)
+                    compare(lastDocument,retrieveContent.getContent());
+                j = "";
+                //binary.setData(lastDocument);
             } else {
                 throw new RuntimeException("GET " + resourceType + " not supported");
             }
         }
+    }
+
+    private int compare(byte[] send, byte[] retrieve) {
+        int sendSize = send.length;
+        int retSize = retrieve.length;
+        int size = Math.min(sendSize, retSize);
+        int i = 0;
+        while (i < size) {
+            if (send[i] !=  retrieve[i])
+                break;
+            i++;
+        }
+        return i;
     }
 
     private void returnAhqrResults(HttpGet requestOut) {
@@ -349,11 +439,19 @@ public class MhdChannel extends BaseChannel /*implements IBaseChannel*/ {
     }
 
     @Override
-    public void transformResponse(HttpBase responseIn, HttpBase responseOut, String proxyHostPort) {
+    public void transformResponse(HttpBase responseIn, HttpBase responseOut, String proxyHostPort, String requestedType) {
         if (sender != null) {
             // there is a query response to transform
-            transformDSResponse(sender, responseOut);
+            transformDSResponse(sender, responseOut, requestedType);
             return;
+        }
+        if (requestedType != null && requestedType.equals("Binary")) {
+            if (binary != null) {
+                responseOut.setStatus(200);;
+                responseOut.setResponseContentType(returnFormatType.getContentType());
+                responseOut.setResponse(ProxyBase.encode(binary, returnFormatType).getBytes());
+                return;
+            }
         }
         transferHeadersFromResponse(responseIn, responseOut);
         if (requestBundle == null) {
@@ -426,12 +524,12 @@ public class MhdChannel extends BaseChannel /*implements IBaseChannel*/ {
         }
     }
 
-    private void transformDSResponse(AhqrSender sender, HttpBase responseOut) {
+    private void transformDSResponse(AhqrSender sender, HttpBase responseOut, String requestedType) {
         if (responseOut.getVerb().equals(Verb.GET.toString())) {  // FHIR READ
             if (sender.hasErrors()) {
                 OperationOutcome oo = regErrorListAsOperationOutcome(sender.getErrorList());
                 returnOperationOutcome(responseOut, oo);
-            } else if (sender.getContents().size() == 1) {
+            } else if (sender.getContents().size() == 1 || requestedType != null) {
                 Val val = new Val();
                 CodeTranslator codeTranslator;
                 try {
@@ -442,26 +540,73 @@ public class MhdChannel extends BaseChannel /*implements IBaseChannel*/ {
                 ResourceCacheMgr resourceCacheMgr = new ResourceCacheMgr(getExternalCache());
                 FhirClient fhirClient = new FhirClient()
                         .setResourceCacheMgr(resourceCacheMgr);
-                DocumentEntryToDocumentReference trans = new DocumentEntryToDocumentReference();
-                trans
-                        .setContainedIdAllocator(new ContainedIdAllocator())
-                        .setResourceCacheMgr(resourceCacheMgr)
-                        .setCodeTranslator(codeTranslator)
-                        .setFhirClient(fhirClient)
-                        .setVal(val);
-                DocumentReference dr = trans.getDocumentReference((ExtrinsicObjectType) sender.getContents().get(0));
+                if (requestedType.equals("DocumentReference")) {
+                    DocumentEntryToDocumentReference trans = new DocumentEntryToDocumentReference();
+                    trans
+                            .setContainedIdAllocator(new ContainedIdAllocator())
+                            .setResourceCacheMgr(resourceCacheMgr)
+                            .setCodeTranslator(codeTranslator)
+                            .setFhirClient(fhirClient)
+                            .setVal(val);
 
-                if (val.hasErrors()) {
-                    OperationOutcome oo = new OperationOutcome();
-                    for (ValE err: val.getErrors())
-                        addErrorToOperationOutcome(oo, err.getMsg());
-                    returnOperationOutcome(responseOut, oo);
-                    return;
+                    DocumentReference dr = trans.getDocumentReference((ExtrinsicObjectType) sender.getContents().get(0), channelConfig);
+
+                    if (val.hasErrors()) {
+                        OperationOutcome oo = new OperationOutcome();
+                        for (ValE err : val.getErrors())
+                            addErrorToOperationOutcome(oo, err.getMsg());
+                        returnOperationOutcome(responseOut, oo);
+                        return;
+                    }
+
+
+                    responseOut.setResponseText(ProxyBase.encode(dr, returnFormatType));
+                    responseOut.setResponseContentType(returnFormatType.getContentType());
+                } else if (requestedType.equals("DocumentManifest")) {
+                    SubmissionSetToDocumentManifest trans = new SubmissionSetToDocumentManifest();
+                    trans
+                            .setContainedIdAllocator(new ContainedIdAllocator())
+                            .setResourceCacheMgr(resourceCacheMgr)
+                            .setCodeTranslator(codeTranslator)
+                            .setFhirClient(fhirClient)
+                            .setVal(val);
+
+                    RegistryPackageType ss = null;
+                    List<AssociationType1> assocs = new ArrayList<>();
+                    for (IdentifiableType identifiableType : sender.getContents()) {
+                        if (identifiableType instanceof RegistryPackageType) {
+                            RegistryPackageType rpt = (RegistryPackageType) identifiableType;
+                            for (ClassificationType classificationType : rpt.getClassification()) {
+                                if ("urn:uuid:a54d6aa5-d40d-43f9-88c5-b4633d873bdd".equals(classificationType.getClassificationNode()) ) {
+                                    ss = rpt;
+                                }
+                            }
+                        } else if (identifiableType instanceof AssociationType1) {
+                            assocs.add((AssociationType1) identifiableType);
+                        }
+                    }
+
+                    DocumentManifest dm = null;
+
+                    if (ss == null) {
+                        val.add(new ValE("No SubmissionSet in query response.").asError());
+                    } else {
+                        dm = trans.getDocumentManifest(ss, assocs, channelConfig);
+                    }
+
+                    if (val.hasErrors()) {
+                        OperationOutcome oo = new OperationOutcome();
+                        for (ValE err : val.getErrors())
+                            addErrorToOperationOutcome(oo, err.getMsg());
+                        returnOperationOutcome(responseOut, oo);
+                        return;
+                    }
+
+
+                    responseOut.setResponseText(ProxyBase.encode(dm, returnFormatType));
+                    responseOut.setResponseContentType(returnFormatType.getContentType());
                 }
 
-
-                responseOut.setResponseText(ProxyBase.encode(dr, returnFormatType));
-                responseOut.setResponseContentType(returnFormatType.getContentType());
             } else if (sender.getContents().size() > 1){
                 OperationOutcome oo = wrapErrorInOperationOutcome("XDS Query returned " + sender.getContents().size() + " objects");
                 responseOut.setResponseText(ProxyBase.encode(oo, returnFormatType));
@@ -485,7 +630,7 @@ public class MhdChannel extends BaseChannel /*implements IBaseChannel*/ {
                         trans
                                 .setContainedIdAllocator(new ContainedIdAllocator())
                                 .setVal(val);
-                        DocumentReference dr = trans.getDocumentReference((ExtrinsicObjectType) it);
+                        DocumentReference dr = trans.getDocumentReference((ExtrinsicObjectType) it, channelConfig);
                         outContents.add(dr);
                     } else {
                         OperationOutcome oo = wrapErrorInOperationOutcome("Cannot transform " + it.getClass().getSimpleName() + " to FHIR");

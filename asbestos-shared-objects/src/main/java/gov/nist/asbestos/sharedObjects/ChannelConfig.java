@@ -1,5 +1,8 @@
 package gov.nist.asbestos.sharedObjects;
 
+import gov.nist.asbestos.serviceproperties.ServiceProperties;
+import gov.nist.asbestos.serviceproperties.ServicePropertiesEnum;
+
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -14,7 +17,7 @@ public class ChannelConfig {
     private String actorType;
     private String channelType;
     private boolean includeValidation;
-    private String fhirBase;
+    private String fhirBase = null;
     private String xdsSiteName;
     private boolean writeLocked;
 
@@ -92,7 +95,12 @@ public class ChannelConfig {
     }
 
     public String getFhirBase() {
-        return fhirBase;
+//        if (fhirBase != null)
+//            return fhirBase;
+        return ServiceProperties.getInstance().getPropertyOrStop(ServicePropertiesEnum.FHIR_TOOLKIT_BASE) +
+                "/proxy" +
+                "/" + this.testSession + "__" + this.channelId;
+
     }
 
     public ChannelConfig setFhirBase(String fhirBase) {

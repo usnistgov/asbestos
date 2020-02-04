@@ -63,7 +63,7 @@ public class ProxyServlet extends HttpServlet {
     public ProxyServlet() {
         super();
         proxyMap.put("fhir", new PassthroughChannelBuilder());
-        proxyMap.put("mhd", new MhdChannelBuilder());
+        proxyMap.put("mhd", new XdsOnFhirChannelBuilder());
     }
 
     @Override
@@ -211,7 +211,7 @@ public class ProxyServlet extends HttpServlet {
             logResponse(backSideTask, requestOut);
 
             // transform backend service response for client
-            HttpBase responseOut = transformResponse(clientTask, requestOut, channel, hostport);
+            HttpBase responseOut = transformResponse(clientTask, requestOut, channel, hostport, null);
 
 
             respond(resp, responseOut, inHeaders, clientTask, responseOut.getStatus());
@@ -409,7 +409,8 @@ public class ProxyServlet extends HttpServlet {
 
             // transform backend service response for client
             if (requestOut.isSuccess()) {
-                HttpBase responseOut = transformResponse(backSideTask, requestOut, channel, hostport);
+                String requestedType = new Ref(uri).getResourceType();
+                HttpBase responseOut = transformResponse(backSideTask, requestOut, channel, hostport, requestedType);
                 respond(resp, responseOut, inHeaders, clientTask, 200);
             } else {
                 respondWithError(req, resp, "backend call failed", inHeaders, clientTask);
@@ -733,9 +734,9 @@ public class ProxyServlet extends HttpServlet {
         return channelTransform.transformRequestUrl(headers.getPathInfo().getPath(), requestIn);
     }
 
-    static HttpBase transformResponse(ITask task, HttpBase responseIn, IBaseChannel channelTransform, String proxyHostPort) {
+    static HttpBase transformResponse(ITask task, HttpBase responseIn, IBaseChannel channelTransform, String proxyHostPort, String requestedType) {
         HttpBase responseOut = new HttpGet();  // here GET vs POST does not matter
-        channelTransform.transformResponse(responseIn, responseOut, proxyHostPort);
+        channelTransform.transformResponse(responseIn, responseOut, proxyHostPort, requestedType);
         //responseOut.setStatus(responseIn.getStatus());
         return responseOut;
     }

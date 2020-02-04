@@ -99,7 +99,7 @@ public class ResourceHasMethodsFilter {
 
         // Remove keys that we don't want
         myMap.remove("text");
-        myMap.remove("data");
+//        myMap.remove("data");
         return myMap;
     }
 }
