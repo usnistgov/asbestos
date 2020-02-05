@@ -25,7 +25,7 @@
                     <reference value="${patientResourceId}"/>
                 </subject>
                 <created value="2005-12-24"/>
-                <indexed value="2013-07-01T23:11:33+10:00"/>
+                <status value="current"/>
                 <securityLabel>
                     <coding>
                         <system value="http://terminology.hl7.org/CodeSystem/v3-Confidentiality"/>
@@ -71,6 +71,7 @@
                 <subject>
                     <reference value="${patientResourceId}"/>
                 </subject>
+                <status value="current"/>
                 <created value="2004-12-25T23:50:50-05:00"/>
                 <source value="urn:oid:1.3.6.1.4.1.21367.2009.1.2.1"/>
                 <description value="Physical"/>
