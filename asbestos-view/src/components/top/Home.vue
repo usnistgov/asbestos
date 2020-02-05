@@ -23,13 +23,13 @@
             Proxy is not responding
         </div>
         <div v-if="$store.state.testRunner.testCollectionsLoaded">
-            Test Engine is responding
+            Test Engine is responding at {{constFhirToolkitBaseUrl + '/engine'}}
         </div>
         <div v-else>
-            Test Engine is not responding
+            Test Engine is not responding at {{constFhirToolkitBaseUrl + '/engine'}}
         </div>
         <div v-if="$store.state.testRunner.hapiIsAlive">
-            HAPI server is responding - {{$store.state.testRunner.hapiDetails}}
+            HAPI server is responding - Proxy {{$store.state.testRunner.hapiDetails}}
         </div>
         <div v-else>
             HAPI server is not responding - {{$store.state.testRunner.hapiDetails}}
@@ -136,6 +136,8 @@ kinds of channels: FHIR - data passed without modification and MHD - translation
 
     </div>
 </template>
+
+import {constFhirToolkitBaseUrl} from "../common/http-common";
 
 <script>
     export default {

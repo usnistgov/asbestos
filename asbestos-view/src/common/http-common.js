@@ -34,12 +34,14 @@ export async function getServiceProperties() {
     }
 }
 
+export var constFhirToolkitBaseUrl
+
 export async function initServiceProperties() {
     if (FHIRTOOLKITBASEURL === null) {
         try {
             await getServiceProperties().then(response => {
                     PROJECTVERSION = `v${response.data.projectVersion}`
-                    const constFhirToolkitBaseUrl = response.data.fhirToolkitBase
+                    constFhirToolkitBaseUrl = response.data.fhirToolkitBase
 
                     FHIRTOOLKITBASEURL = constFhirToolkitBaseUrl
                     console.log('fhirToolkitBaseUrl is: ' + constFhirToolkitBaseUrl)
