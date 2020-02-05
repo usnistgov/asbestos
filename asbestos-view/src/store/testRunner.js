@@ -267,8 +267,8 @@ export const testRunnerStore = {
             const url = `hapiheartbeat`
             ENGINE.get(url)
                 .then(response => {
-                    commit('setHapiIsAlive', true)
-                    commit('setHapiDetails', response.data)
+                    commit('setHapiIsAlive', response.data.responding)
+                    commit('setHapiDetails', response.data.addr)
                 })
                 .catch (() => {
                     commit('setHapiIsAlive', false)
@@ -278,8 +278,8 @@ export const testRunnerStore = {
             const url = `xdsheartbeat`
             ENGINE.get(url)
                 .then(response => {
-                    commit('setXdsIsAlive', true)
-                    commit('setXdsDetails', response.data)
+                    commit('setXdsIsAlive', response.data.responding)
+                    commit('setXdsDetails', response.data.addr)
                 })
                 .catch (() => {
                     commit('setXdsIsAlive', false)

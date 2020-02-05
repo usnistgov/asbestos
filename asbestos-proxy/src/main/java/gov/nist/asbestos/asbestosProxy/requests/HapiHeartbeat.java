@@ -1,5 +1,6 @@
 package gov.nist.asbestos.asbestosProxy.requests;
 
+import com.google.gson.Gson;
 import gov.nist.asbestos.asbestosProxy.servlet.ChannelConnector;
 import gov.nist.asbestos.client.client.Format;
 import gov.nist.asbestos.http.operations.HttpGet;
@@ -33,6 +34,11 @@ public class HapiHeartbeat {
         this.request = request;
     }
 
+    class HeartBeat {
+        String addr;
+        boolean responding;
+    }
+
     public void run() {
         log.info("hapiheartbeat");
         String channelId = "default__default";
@@ -40,17 +46,22 @@ public class HapiHeartbeat {
         ChannelConfig channelConfig = ChannelConnector.getChannelConfig(request.resp, request.externalCache, channelId);
         if (channelConfig == null) throw new Error("Channel does not exist");
 
+        HeartBeat heartBeat = new HeartBeat();
         try {
-            request.resp.getOutputStream().write(("BaseAddress: " + channelConfig.getFhirBase()).getBytes());
-            URI uri = new URI(channelConfig.getFhirBase() + "/metadata");
+            request.resp.setStatus(request.resp.SC_OK);
+            heartBeat.addr = channelConfig.getChannelBase();
+//            request.resp.getOutputStream().write(("BaseAddress: " + channelConfig.getChannelBase()).getBytes());
+            URI uri = new URI(channelConfig.getChannelBase() + "/metadata");
             HttpGet getter = new HttpGet();
             getter.get(uri, Format.JSON.getContentType());
             if (getter.isSuccess()) {
-                request.resp.setStatus(request.resp.SC_OK);
-            } else
-                request.resp.setStatus(request.resp.SC_SERVICE_UNAVAILABLE);
+                heartBeat.responding = true;
+            } else {
+                heartBeat.responding = false;
+            }
         } catch (Throwable e) {
-            request.resp.setStatus(request.resp.SC_SERVICE_UNAVAILABLE);
+            heartBeat.responding = false;
         }
+        Returns.returnObject(request.resp, heartBeat);
     }
 }

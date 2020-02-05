@@ -41,21 +41,33 @@ public class XdsHeartbeat {
         this.request = request;
     }
 
+    class HeartBeat {
+        String addr;
+        boolean responding;
+    }
+
     public void run() {
         log.info("xdsheartbeat");
 
+        HeartBeat heartBeat = new HeartBeat();
         try {
+            request.resp.setStatus(request.resp.SC_OK);
             XdsToolkitConnection conn = new XdsToolkitConnection(request.externalCache, "default");
             Optional<SimConfig> simConfigOptional = conn.get("xds");
+            heartBeat.addr = conn.getXdsToolkitBase();
             if (simConfigOptional.isPresent()) {
-                msg("XDS Toolkit: xds sim exists on " + conn.getXdsToolkitBase());
+                heartBeat.responding = true;
+                //msg("XDS Toolkit: xds sim exists on " + conn.getXdsToolkitBase());
             } else {
-                msg("XDS Toolkit: xds sim does not exist on " + conn.getXdsToolkitBase());
-                request.resp.setStatus(request.resp.SC_SERVICE_UNAVAILABLE);
+                //msg("XDS Toolkit: xds sim does not exist on " + conn.getXdsToolkitBase());
+                heartBeat.responding = false;
+                //request.resp.setStatus(request.resp.SC_SERVICE_UNAVAILABLE);
             }
         } catch (IOException e) {
-            msg(e.getMessage());
+            heartBeat.responding = false;
+            //msg(e.getMessage());
         }
+        Returns.returnObject(request.resp, heartBeat);
     }
 
     private void msg(String msg)  {
