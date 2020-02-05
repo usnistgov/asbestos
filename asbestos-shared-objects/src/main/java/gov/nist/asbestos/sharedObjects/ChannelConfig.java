@@ -17,8 +17,8 @@ public class ChannelConfig {
     private String actorType;
     private String channelType;
     private boolean includeValidation;
-    private String fhirBase = null;
-    private String xdsSiteName;
+    private String fhirBase = null;   // points to fhir server is channel type if FHIR
+    private String xdsSiteName;       // point to XDS server if channel type is MHD
     private boolean writeLocked;
 
     public String getChannelBase() {
@@ -103,11 +103,14 @@ public class ChannelConfig {
     }
 
     public String getFhirBase() {
-//        if (fhirBase != null)
-//            return fhirBase;
-        return ServiceProperties.getInstance().getPropertyOrStop(ServicePropertiesEnum.FHIR_TOOLKIT_BASE) +
-                "/proxy" +
-                "/" + this.testSession + "__" + this.channelId;
+        if (fhirBase != null)
+            return fhirBase;
+        return null;
+//        return ServiceProperties.getInstance().getPropertyOrStop(ServicePropertiesEnum.FHIR_TOOLKIT_BASE)
+//                +
+//                "/proxy" +
+//                "/" + this.testSession + "__" + this.channelId
+//                ;
 
     }
 
