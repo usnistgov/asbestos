@@ -17,28 +17,28 @@
 
         <div class="selectable" @click="selfTest()">Run</div>
         <div v-if="$store.state.log.loaded">
-            Proxy is responding
+            Proxy is responding - {{proxyBase()}}
         </div>
         <div v-else>
-            Proxy is not responding
+            Proxy is <b>not</b> responding - {{proxyBase()}}
         </div>
         <div v-if="$store.state.testRunner.testCollectionsLoaded">
-            Test Engine is responding
+            Test Engine is responding at {{testEngineBase()}}
         </div>
         <div v-else>
-            Test Engine is not responding
+            Test Engine is <b>not</b> responding at {{testEngineBase()}}
         </div>
         <div v-if="$store.state.testRunner.hapiIsAlive">
             HAPI server is responding - {{$store.state.testRunner.hapiDetails}}
         </div>
         <div v-else>
-            HAPI server is not responding - {{$store.state.testRunner.hapiDetails}}
+            HAPI server is <b>not</b> responding - {{$store.state.testRunner.hapiDetails}}
         </div>
         <div v-if="$store.state.testRunner.xdsIsAlive">
             XDS Toolkit responding - {{$store.state.testRunner.xdsDetails}}
         </div>
         <div v-else>
-            XDS Toolkit not responding - {{$store.state.testRunner.xdsDetails}}
+            XDS Toolkit is <b>not</b> responding - {{$store.state.testRunner.xdsDetails}}
         </div>
 
 
@@ -137,7 +137,11 @@ kinds of channels: FHIR - data passed without modification and MHD - translation
     </div>
 </template>
 
+//import {constFhirToolkitBaseUrl} from "../common/http-common";
+
 <script>
+    import {initServiceProperties, UtilFunctions} from "../../common/http-common";
+
     export default {
         state() {
             return {
@@ -150,10 +154,17 @@ kinds of channels: FHIR - data passed without modification and MHD - translation
                 this.$store.commit('resetTestCollectionsLoaded')
                 this.$store.commit('setHapiIsAlive', false)
                 this.$store.commit('setXdsIsAlive', false)
+                initServiceProperties()
                 this.testTestEngine()
                 this.testProxy()
                 this.testHapi()
                 this.testXdsToolkit()
+            },
+            testEngineBase() {
+                return UtilFunctions.getTestEngineBase()
+            },
+            proxyBase() {
+                return UtilFunctions.getProxyBase()
             },
             testTestEngine() {
                 this.$store.dispatch('loadTestCollectionNames')
