@@ -274,13 +274,6 @@ public class SimStore {
         return eventDir;
     }
 
-    public String getEndpoint() {
-        if ("passthrough".equals(getChannelConfig().getChannelType()))
-            return channelConfig.getFhirBase() + "/" + resource;
-        else
-            return String.format("<%s:proxyBase>/%s" ,getChannelConfig().getChannelType(), resource);
-    }
-
     public SimId getChannelId() {
         return channelId;
     }

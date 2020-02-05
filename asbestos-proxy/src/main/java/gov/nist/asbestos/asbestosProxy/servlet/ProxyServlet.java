@@ -186,7 +186,7 @@ public class ProxyServlet extends HttpServlet {
 
             HttpPost requestIn = (HttpPost) logClientRequestIn(clientTask, inHeaders, inBody, Verb.POST);
 
-            log.info("=> " + simStore.getEndpoint() + " " + clientTask.getRequestHeader().getContentType());
+            log.info("=> " + uri.toString() + " ContentType: " + clientTask.getRequestHeader().getContentType());
 
             // interaction between proxy and target service
             ITask backSideTask = clientTask.newTask();
@@ -318,7 +318,7 @@ public class ProxyServlet extends HttpServlet {
             if (channelType == null)
                 throw new Exception("Sim " + simStore.getChannelId() + " does not define a Channel Type.");
 
-            log.info("Metadata Request => " + simStore.getEndpoint() + " " + inHeaders.getAccept());
+            log.info("Metadata Request => " + uri.toString() + " accept: " + inHeaders.getAccept());
 
             byte[] inBody = getRequestBody(req);
             HttpBase requestIn = logClientRequestIn(clientTask, inHeaders, inBody, verb);
@@ -377,7 +377,7 @@ public class ProxyServlet extends HttpServlet {
                 return;
             }
 
-            log.info("ProxyServlet => " + simStore.getEndpoint() + " " + clientTask.getRequestHeader().getAccept());
+            log.info("ProxyServlet => " + uri.toString() + " accept: " + clientTask.getRequestHeader().getAccept());
 
             byte[] inBody = getRequestBody(req);
             HttpBase requestIn = logClientRequestIn(clientTask, inHeaders, inBody, verb);
