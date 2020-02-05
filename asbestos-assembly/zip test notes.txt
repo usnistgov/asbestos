@@ -19,6 +19,9 @@ Before building Asbestos:
 \asbestos
 mvn clean install -P Sunil
 
+If there are unit test/IT test errors, you may want to skip tests temporarily.
+mvn clean install -P Sunil -DskipTests=true -DskipITs=true
+
 cd asbestos-assembly
 
 Without using a profile, assembly makes use of the default XdsToolkit port setting at 9770.
@@ -29,6 +32,7 @@ mvn clean package -P Sunil
 dir C:\Users\skb1\myprojects\asbestos\asbestos-assembly\target\asbestos.zip
 
 Normal path
+    Note: As of February 3, 2020 long file paths cause unzip errors.
     unzip -qq C:\Users\skb1\myprojects\asbestos\asbestos-assembly\target\asbestos.zip -d C:\Users\skb1\myprojects\asbestos\asbestos-assembly\target\asbestos
 
     --OR--
