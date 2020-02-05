@@ -43,7 +43,7 @@ public class GetTestCollectionNamesRequest {
             collection.server = "server".equals(props.getProperty("TestType"));
             collection.name = name;
             collection.channel = props.getProperty("channel");
-            collection.hidden = "true".equals(props.getProperty("hidden"));
+            collection.hidden = "true".equals(props.getProperty("Hidden"));
             collections.add(collection);
         }
         String json = new Gson().toJson(collections);
