@@ -7,7 +7,7 @@
                     {{ this.operationType(this.script.operation) }}
                 </span>
                 <span v-else>
-                    <span class="name selectable">assert: </span>
+                    <span class="selectable">assert: </span>
                 </span>
                 <span class="selectable">
                     {{ description }}
@@ -188,6 +188,9 @@
 </script>
 
 <style scoped>
+    .assert {
+        text-indent: 50px;
+    }
     .name {
         font-weight: bold;
     }
