@@ -1,8 +1,5 @@
 package gov.nist.asbestos.sharedObjects;
 
-import gov.nist.asbestos.serviceproperties.ServiceProperties;
-import gov.nist.asbestos.serviceproperties.ServicePropertiesEnum;
-
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -94,16 +91,14 @@ public class ChannelConfig {
         return this;
     }
 
+    /**
+     *  When the channel forwards to the system behind the proxy, it uses fhirBase.
+     * @return
+     */
     public String getFhirBase() {
         if (fhirBase != null)
             return fhirBase;
         return null;
-//        return ServiceProperties.getInstance().getPropertyOrStop(ServicePropertiesEnum.FHIR_TOOLKIT_BASE)
-//                +
-//                "/proxy" +
-//                "/" + this.testSession + "__" + this.channelId
-//                ;
-
     }
 
     public ChannelConfig setFhirBase(String fhirBase) {

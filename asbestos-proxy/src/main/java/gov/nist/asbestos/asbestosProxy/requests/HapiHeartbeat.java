@@ -1,19 +1,12 @@
 package gov.nist.asbestos.asbestosProxy.requests;
 
-import com.google.gson.Gson;
 import gov.nist.asbestos.asbestosProxy.servlet.ChannelConnector;
 import gov.nist.asbestos.client.client.Format;
 import gov.nist.asbestos.http.operations.HttpGet;
 import gov.nist.asbestos.sharedObjects.ChannelConfig;
-import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.log4j.Logger;
 
-import java.io.File;
-import java.io.IOException;
 import java.net.URI;
-import java.net.URISyntaxException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 
 // 0 - empty
 // 1 - appContext
@@ -49,9 +42,8 @@ public class HapiHeartbeat {
         HeartBeat heartBeat = new HeartBeat();
         try {
             request.resp.setStatus(request.resp.SC_OK);
-            heartBeat.addr = channelConfig.getChannelBase();
-//            request.resp.getOutputStream().write(("BaseAddress: " + channelConfig.getChannelBase()).getBytes());
-            URI uri = new URI(channelConfig.getChannelBase() + "/metadata");
+            heartBeat.addr = channelConfig.getFhirBase();
+            URI uri = new URI(channelConfig.getFhirBase() + "/metadata");
             HttpGet getter = new HttpGet();
             getter.get(uri, Format.JSON.getContentType());
             if (getter.isSuccess()) {
