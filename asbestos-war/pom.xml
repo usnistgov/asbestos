@@ -112,10 +112,10 @@
 
                     <testFailureIgnore>false</testFailureIgnore>
                     <excludes>
-<!--                        <exclude>**/PassthroughIT.java</exclude>-->
-<!--                        <exclude>**/ToFhirServerIT.java</exclude>-->
-                        <exclude>**/*IT.java</exclude>
+                        <exclude>**/ToFhirServerIT.java</exclude>
+                        <exclude>**/ToProxyMhdIT.java</exclude>
                         <exclude>**/ToProxyPassthroughIT.java</exclude>
+<!--                        <exclude>**/*IT.java</exclude>-->
                     </excludes>
                     <!--
                     NOTE:
