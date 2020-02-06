@@ -84,6 +84,11 @@
     <load-on-startup>3</load-on-startup> <!-- must be started after ProxyService -->
   </servlet>
 
+  <servlet>
+    <servlet-name>Gen500</servlet-name>
+    <servlet-class>gov.nist.asbestos.asbestosProxy.servlet.Gen500Servlet</servlet-class>
+  </servlet>
+
   <servlet-mapping>
     <servlet-name>ProxyService</servlet-name>
     <url-pattern>/proxy/*</url-pattern>
@@ -132,6 +137,11 @@
   <servlet-mapping>
     <servlet-name>ChannelControl</servlet-name>
     <url-pattern>/signIn</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>Gen500</servlet-name>
+    <url-pattern>/gen500</url-pattern>
   </servlet-mapping>
 
   <security-constraint>
