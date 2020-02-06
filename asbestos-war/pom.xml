@@ -50,20 +50,10 @@
 <!--        </dependency>-->
     </dependencies>
 
+
+
     <build>
         <finalName>asbestos-war</finalName>
-        <testResources>
-            <testResource>
-                <directory>src/test/resources</directory>
-                <filtering>true</filtering>
-                <includes>
-                    <include>service.properties</include>
-                </includes>
-            </testResource>
-            <testResource>
-                <directory>src/test/resources</directory>
-            </testResource>
-        </testResources>
         <resources>
             <resource>
                 <directory>src/main/resources</directory>
@@ -76,7 +66,18 @@
                 <directory>src/main/resources</directory>
             </resource>
         </resources>
-
+        <testResources>
+            <testResource>
+                <directory>src/test/resources</directory>
+                <filtering>true</filtering>
+                <includes>
+                    <include>service.properties</include>
+                </includes>
+            </testResource>
+            <testResource>
+                <directory>src/test/resources</directory>
+            </testResource>
+        </testResources>
         <plugins>
             <!--
             Surefire is to run Unit Tests *Test.java
