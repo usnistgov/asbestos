@@ -41,10 +41,25 @@
             <span v-else  class="instruction">
                 Server tests - click
                 <img src="../../assets/press-play-button.png">
-                to run test. <br />Requests will be sent to
-                <span v-if="channelObj" class="boxed">{{ channelObj.fhirBase }}</span>
-                <div class="divider"></div>
-                <span v-if="channelObj">(through the Proxy on Channel {{ channelObj.channelId }}) based on the Channel selection.</span>
+                to run test.
+                <!-- Display the property, if it exists, based on channel Type -->
+                <div v-if="channelObj">
+                    <span v-if="channelObj.channelType === 'passthrough' || channelObj.channelType === 'fhir'">
+                        Requests will be sent to
+                        <span v-if="channelObj.fhirBase" class="boxed">{{ channelObj.fhirBase }}</span>
+                        <div class="divider"></div>
+                        (through the Proxy on Channel {{ channelObj.channelId }}) based on the Channel selection.
+                    </span>
+                    <span v-else-if="channelObj.channelType === 'mhd'">
+                         Requests will be sent to XDS Site:
+                        <span v-if="channelObj.xdsSiteName" class="boxed">{{ channelObj.xdsSiteName }}</span>
+                        <div class="divider"></div>
+                        (through the Proxy on Channel {{ channelObj.channelId }}) based on the Channel selection.
+                    </span>
+                    <span v-else class="configurationError">
+                        Unknown channel.channelType for {{channelObj.channelId }}.
+                    </span>
+                </div>
             </span>
             <span class="divider"></span>
         </div>
@@ -207,7 +222,10 @@
                     this.$store.commit('setChannelId', requiredChannel)
                 }
                 // console.log(`loading ${this.fullChannelId}`)
-                // this.channelObj = await this.$store.dispatch('loadChannel', this.fullChannelId)
+                this.$store.dispatch('loadChannel', this.fullChannelId)
+                    .then(channel => {
+                        this.channelObj = channel
+                    })
                 //this.$router.push(`/session/${this.sessionId}/channel/${this.$store.state.base.channelId}/collection/${this.testCollection}`)
                 if (this.isClient)
                     this.evalStatus()
@@ -434,5 +452,8 @@
     .runallgroup {
         text-align: right;
         padding-bottom: 5px;
+    }
+    .configurationError {
+        color: red;
     }
 </style>
