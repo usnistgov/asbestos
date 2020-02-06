@@ -1,15 +1,17 @@
 package gov.nist.asbestos.proxyWar;
 
-import gov.nist.asbestos.http.operations.HttpGet;
+import com.google.gson.Gson;
 import gov.nist.asbestos.http.operations.HttpPost;
+import gov.nist.asbestos.serviceproperties.ServiceProperties;
+import gov.nist.asbestos.serviceproperties.ServicePropertiesEnum;
 import gov.nist.asbestos.sharedObjects.ChannelConfig;
-import gov.nist.asbestos.sharedObjects.ChannelConfigFactory;
+import org.hl7.fhir.r4.model.DocumentReference;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Properties;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -24,30 +26,23 @@ public class Response500IT {
         proxyPort = ITConfig.getProxyPort();
     }
 
-    void createChannel() throws URISyntaxException, IOException {
-        Properties properties = System.getProperties();
-        // create
-        ChannelConfig channelConfig = new ChannelConfig()
-                .setTestSession("default")
-                .setChannelId("g500")
-                .setEnvironment("default")
-                .setActorType("fhir")
-                .setChannelType("passthrough")
-                .setFhirBase("http://localhost:8877/fhir/fhir");
+    @Test
+    void expect500() throws URISyntaxException, IOException {
+        URI fhirBase500 = new URI("http://localhost:" + ITConfig.getProxyPort()  + "/asbestos/gen500");
+        ChannelConfig channelConfig = ChannelsForTests.create("default", "g500", fhirBase500);
+
         HttpPost poster = new HttpPost();
-        poster.postJson(new URI("http://localhost:" + proxyPort + "/asbestos/channel"), ChannelConfigFactory.convert(channelConfig));
+        String json = new Gson().toJson(new DocumentReference());
+        poster.postJson(getChannelBase(channelConfig), json);
         int status = poster.getStatus();
-        if (!(status == 200 || status == 201))
-            fail("200 or 201 required - returned " + status);
-
-        // verify
-        HttpGet getter = new HttpGet();
-        getter.getJson(new URI("http://localhost:" + proxyPort + "/asbestos/channel/default__test"));
-        status = getter.getStatus();
-        if (!(status == 200))
-            fail("200 required - returned " + status);
-        ChannelConfig returnConfig = ChannelConfigFactory.convert(getter.getResponseText());
-        assertEquals(channelConfig, returnConfig);
+        assertEquals(500, status, "URI is " + fhirBase500);
     }
-
+    public static URI getChannelBase(ChannelConfig channelConfig) {
+        String fhirToolkitBase = ServiceProperties.getInstance().getPropertyOrStop(ServicePropertiesEnum.FHIR_TOOLKIT_BASE);
+        try {
+            return new URI(fhirToolkitBase + "/proxy/" + channelConfig.asFullId());
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

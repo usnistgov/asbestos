@@ -39,6 +39,11 @@
             <artifactId>asbestos-shared-objects</artifactId>
             <version>1.2.0-SNAPSHOT</version>
         </dependency>
+        <dependency>
+            <groupId>gov.nist.asbestos</groupId>
+            <artifactId>service-properties</artifactId>
+            <version>1.2.0-SNAPSHOT</version>
+        </dependency>
     </dependencies>
 
 </project>

@@ -2,9 +2,15 @@ package gov.nist.asbestos.sharedObjects;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.http.client.methods.HttpPost;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+
+import static org.junit.Assert.fail;
 
 public class ChannelConfigFactory {
 
@@ -44,4 +50,5 @@ public class ChannelConfigFactory {
             throw new RuntimeException(e);
         }
     }
+
 }
