@@ -18,11 +18,11 @@
         <div class="selectable" @click="selfTest()">Run</div>
         <div v-if="$store.state.log.loaded">
             <img src="../../assets/check.png">
-            Proxy is responding - {{proxyBase()}}
+            Proxy is responding at {{proxyBase()}}
         </div>
         <div v-else>
             <img src="../../assets/cross.png">
-            Proxy is <b>not</b> responding - {{proxyBase()}}
+            Proxy is <b>not</b> responding at {{proxyBase()}}
         </div>
         <div v-if="$store.state.testRunner.testCollectionsLoaded">
             <img src="../../assets/check.png">
@@ -34,19 +34,19 @@
         </div>
         <div v-if="$store.state.testRunner.hapiIsAlive">
             <img src="../../assets/check.png">
-            HAPI server is responding - {{$store.state.testRunner.hapiDetails}}
+            HAPI server is responding at {{$store.state.testRunner.hapiDetails}}
         </div>
         <div v-else>
             <img src="../../assets/cross.png">
-            HAPI server is <b>not</b> responding - {{$store.state.testRunner.hapiDetails}}
+            HAPI server is <b>not</b> responding at {{$store.state.testRunner.hapiDetails}}
         </div>
         <div v-if="$store.state.testRunner.xdsIsAlive">
             <img src="../../assets/check.png">
-            XDS Toolkit responding - {{$store.state.testRunner.xdsDetails}}
+            XDS Toolkit is responding at {{$store.state.testRunner.xdsDetails}}
         </div>
         <div v-else>
             <img src="../../assets/cross.png">
-            XDS Toolkit is <b>not</b> responding - {{$store.state.testRunner.xdsDetails}}
+            XDS Toolkit is <b>not</b> responding at {{$store.state.testRunner.xdsDetails}}
         </div>
 
 
