@@ -42,6 +42,7 @@ public class AnalysisReport {
     private CodesValidation codesValidation;
     private Map atts;
     private String binaryUrl;
+    private boolean useGzip = false;
 
 
     private Report buildReport() {
@@ -99,6 +100,10 @@ public class AnalysisReport {
         this.codesValidation = new CodesValidation(ec);
     }
 
+    public AnalysisReport withGzip(boolean value) {
+        useGzip = value;
+        return this;
+    }
 
 //    public AnalysisReport(List<Ref> baseRefs, String source, EC ec) {
 //        this.relatedRefs.addAll(baseRefs);

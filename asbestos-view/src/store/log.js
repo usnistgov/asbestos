@@ -96,9 +96,11 @@ export const logStore = {
                 console.error(error)
             }
         },
-        async getLogEventAnalysisForObject({commit}, resourceUrl) {
+        async getLogEventAnalysisForObject({commit}, parms) {
+            const resourceUrl = parms.resourceUrl
+            const gzip = parms.gzip
             try {
-                const url = `analysis/url?url=${resourceUrl}`
+                const url = `analysis/url?url=${resourceUrl};gzip=${gzip}`
                 const result = await LOG.get(url)
                 //const data = {analysis: result.data, eventId: eventId}
                 commit('setAnalysis', result.data)

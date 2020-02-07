@@ -7,7 +7,7 @@ import gov.nist.asbestos.client.Base.EC;
 import gov.nist.asbestos.client.events.Event;
 import gov.nist.asbestos.client.events.UIEvent;
 import gov.nist.asbestos.client.log.SimStore;
-import gov.nist.asbestos.asbestosProxy.util.Gzip;
+import gov.nist.asbestos.http.util.Gzip;
 import gov.nist.asbestos.client.Base.ProxyBase;
 import gov.nist.asbestos.client.client.Format;
 import gov.nist.asbestos.client.events.ITask;
@@ -468,7 +468,8 @@ public class ProxyServlet extends HttpServlet {
     private void respondWithError(HttpServletRequest req, HttpServletResponse resp, Throwable t, Headers inHeaders, ITask
         clientTask) {
         log.error(ExceptionUtils.getStackTrace(t));
-        if (new Ref(Common.buildURI(req)).isQuery()) {
+        Ref ref = new Ref(Common.buildURI(req));
+        if (ref.isQuery()) {
             Bundle bundle = wrapInBundle(wrapInOutcome(t));
             respond(resp, bundle, inHeaders, clientTask, 200);
         } else {
@@ -628,7 +629,7 @@ public class ProxyServlet extends HttpServlet {
         task.putResponseBody(bytes);
         if (headers == null) {
             String txt = new String(bytes);
-            http.setResponseText(txt);
+            //http.setResponseText(txt);
             task.putResponseBodyText(txt);
         } else {
             List<String> encodings = headers.getContentEncoding().getAllValues();
@@ -637,7 +638,7 @@ public class ProxyServlet extends HttpServlet {
                 if (isStringType(contentType)) {
                     if (bytes != null) {
                         String txt = new String(bytes);
-                        http.setResponseText(txt);
+                        //http.setResponseText(txt);
                         task.putResponseBodyText(txt);
                     }
                 }
@@ -645,17 +646,17 @@ public class ProxyServlet extends HttpServlet {
                 String encoding = encodings.get(0);
                 if (encoding != null && encoding.equalsIgnoreCase("gzip")) {
                     if (bytes != null) {
-                        String txt = Gzip.decompressGZIP(bytes);
+                        String txt = http.getResponseText(); //Gzip.decompressGZIP(bytes);
                         task.putResponseBodyText(txt);
-                        http.setResponseText(txt);
+                        //http.setResponseText(txt);
                     }
                 } else if (headers.getContentType().getAllValues().get(0).equalsIgnoreCase("text/html")) {
                     task.putResponseHTMLBody(bytes);
-                    if (bytes != null)
-                        http.setResponseText(new String(bytes));
+                    //if (bytes != null)
+                       // http.setResponseText(new String(bytes));
                 } else if (isStringType(headers.getContentType().getAllValues().get(0))) {
-                    if (bytes != null)
-                        http.setResponseText(new String(bytes));
+                    //if (bytes != null)
+                     //   http.setResponseText(new String(bytes));
                 }
             }
         }

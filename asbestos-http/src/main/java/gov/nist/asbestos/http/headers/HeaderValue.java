@@ -36,6 +36,8 @@ public class HeaderValue {
     }
 
     public String getValueAndParms() {
+        if (parms.size() == 0)
+            return value;
         return value + ";" + String.join(";", parms);
     }
 

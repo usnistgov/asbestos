@@ -35,7 +35,7 @@ public class Ref {
             theRef = String.join("/", base, resourceType);
         else
             theRef = String.join("/", base, resourceType, id);
-        if (id.startsWith("?"))
+        if (id != null && id.startsWith("?"))
             theRef = theRef + id;
         uri = build(theRef);
     }
@@ -306,7 +306,10 @@ public class Ref {
     }
 
     public boolean isQuery() {
-        return uri != null && uri.toString().contains("?");
+        if (uri == null) return false;
+        String uriString = uri.toString();
+        if (uriString.contains("?_pretty")) return false;
+        return uriString.contains("?");
     }
 
     public URI getUri() {

@@ -1,4 +1,4 @@
-package gov.nist.asbestos.asbestosProxy.util;
+package gov.nist.asbestos.http.util;
 
 import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
 import org.apache.commons.io.IOUtils;

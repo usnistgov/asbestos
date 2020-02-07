@@ -32,6 +32,18 @@ public class Headers {
         return this;
     }
 
+    public Headers withAccept(String type) {
+        Header acc = new Header("Accept", type);
+        headers.add(acc);
+        return this;
+    }
+
+    public Headers withAcceptEncoding(String encoding) {
+        Header hdr = new Header("Accept-Encoding", Collections.singletonList(encoding));
+        headers.add(hdr);
+        return this;
+    }
+
     public Headers withVerb(String verb) {
         this.verb = verb;
         return this;

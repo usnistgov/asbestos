@@ -42,7 +42,8 @@ public class Response500IT {
         assertEquals(500, status, "URI is " + fhirBase500);
     }
     public static URI getChannelBase(ChannelConfig channelConfig) {
-        String fhirToolkitBase = ServiceProperties.getInstance().getPropertyOrStop(ServicePropertiesEnum.FHIR_TOOLKIT_BASE);
+        String fhirToolkitBase = "http://localhost:" +  ITConfig.getProxyPort() + "/asbestos";
+                //ServiceProperties.getInstance().getPropertyOrStop(ServicePropertiesEnum.FHIR_TOOLKIT_BASE);
         try {
             return new URI(fhirToolkitBase + "/proxy/" + channelConfig.asFullId());
         } catch (URISyntaxException e) {

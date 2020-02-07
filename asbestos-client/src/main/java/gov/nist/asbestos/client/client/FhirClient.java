@@ -26,8 +26,14 @@ public class FhirClient {
     private HttpBase httpBase = null;
     private Op op = null;
     private PatientCacheMgr patientCacheMgr = null;
+    private boolean requestGzip = false;
 
     public FhirClient() {}
+
+    public FhirClient requestGzip() {
+        this.requestGzip = true;
+        return this;
+    }
 
     public ResourceWrapper writeResource(BaseResource resource, Ref ref, Format format, Headers headers) {
         return writeResource(resource, ref, format, headers.asMap());
@@ -136,6 +142,7 @@ public class FhirClient {
         if (getter.getStatus() != 200) {
            return wrapper;
         }
+
         String resourceText = getter.getResponseText();
         if (resourceText == null || resourceText.equals("")) {
             if (getter.isSearch())

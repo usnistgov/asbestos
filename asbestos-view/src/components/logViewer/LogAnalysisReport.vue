@@ -115,6 +115,7 @@
                 selectedResourceIndex: null,  // -1 is focus object.  0 or greater is a related object.
                 history: [],   // report.base.url
                 index: 0,      // in history
+
             }
         },
         methods: {
@@ -150,7 +151,7 @@
             },
             loadAnalysisForObject(resourceUrl) {
                 //console.log(`loadForObject ${resourceUrl}`)
-                this.$store.dispatch('getLogEventAnalysisForObject', resourceUrl)
+                this.$store.dispatch('getLogEventAnalysisForObject', { resourceUrl: resourceUrl, gzip: this.gzip })
                 this.selectedResourceIndex = -1
             },
             loadAnalysisForObjectAndAddHistory(resourceUrl, index) {
@@ -205,7 +206,7 @@
             'theUrl': 'urlAnalysis'
         },
         props: [  // pass eventId OR theUrl
-            'sessionId', 'channelId', 'eventId', 'theUrl'
+            'sessionId', 'channelId', 'eventId', 'theUrl', 'gzip'
         ],
         components: { LogObjectDisplay },
         name: "LogAnalysisReport"

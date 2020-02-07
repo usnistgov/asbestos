@@ -100,7 +100,7 @@ public class PassthroughChannel extends BaseChannel /*implements IBaseChannel*/ 
             return;
         }
         Format format = Format.fromContentType(responseIn.getResponseHeaders().getContentType().getValue());
-        BaseResource resource = ProxyBase.parse(rawResponse, format);
+        BaseResource resource = ProxyBase.parse(responseIn.getResponseText(), format);
         if (resource instanceof Bundle) {
             boolean updated = false;
             Bundle bundle = (Bundle) resource;

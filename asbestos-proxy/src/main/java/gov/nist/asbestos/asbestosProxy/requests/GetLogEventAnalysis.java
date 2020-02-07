@@ -84,7 +84,7 @@ public class GetLogEventAnalysis {
                 String manifestReference = getManifestLocation(bundle);
                 boolean isSearchSet = bundle.hasType() && bundle.getType() == Bundle.BundleType.SEARCHSET;
                 if (manifestReference != null)
-                    runAndReturnReport(new Ref(manifestReference), "reference for Manifest taken from transaction response");
+                    runAndReturnReport(new Ref(manifestReference), "reference for Manifest taken from transaction response", false);
                 else if (isSearchSet) {
                     List<Ref> refs = new ArrayList<>();
                     for (Bundle.BundleEntryComponent component : bundle.getEntry()) {
@@ -100,7 +100,7 @@ public class GetLogEventAnalysis {
                 }
             } else if (responseHeaders.hasHeader("Content-Location")) {
                 Ref ref = new Ref(responseHeaders.get("Content-Location").getValue());
-                runAndReturnReport(ref, "link taken from response Content-location header");
+                runAndReturnReport(ref, "link taken from response Content-location header", false);
             } else {
                 returnReport(new Report("Do not understand event"));
             }
@@ -108,9 +108,13 @@ public class GetLogEventAnalysis {
             String query = request.req.getQueryString();
             if (query != null && query.contains("url=http")) {
                 int urlIndex = query.indexOf("url=http") + 4;
-                String url = query.substring(urlIndex);
+                int urlEndIndex = query.indexOf(";", urlIndex);
+                String url = query.substring(urlIndex, urlEndIndex);
                 Ref ref = new Ref(url);
-                runAndReturnReport(ref, "By Request");
+                boolean gzip = false;
+                if (query.contains("gzip=true"))
+                    gzip = true;
+                runAndReturnReport(ref, "By Request", gzip);
             }
         }
     }
@@ -126,8 +130,8 @@ public class GetLogEventAnalysis {
         request.resp.setStatus(request.resp.SC_OK);
     }
 
-    private void runAndReturnReport(Ref ref, String source) {
-        AnalysisReport analysisReport = new AnalysisReport(ref, source, request.ec);
+    private void runAndReturnReport(Ref ref, String source, boolean gzip) {
+        AnalysisReport analysisReport = new AnalysisReport(ref, source, request.ec).withGzip(gzip);
         Report report = analysisReport.run();
         returnReport(report);
     }

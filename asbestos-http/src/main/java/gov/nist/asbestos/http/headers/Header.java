@@ -64,7 +64,8 @@ public class Header {
     }
 
     public String getAllValuesAndParmsAsString() {
-        return String.join(",", getAllValuesAndParms());
+        List<String> valsAndParms = getAllValuesAndParms();
+        return String.join(",", valsAndParms);
     }
 
     public String getName() {

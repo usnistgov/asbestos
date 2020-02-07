@@ -59,7 +59,7 @@ class PassthroughIT {
     @Test
     void createPatientThroughProxyTest() throws IOException, URISyntaxException {
         String testSession = "default";
-        String channelId = "fhirpass";
+        String channelId = "default"; //"fhirpass";
         deleteChannels();
         String base = createChannel(testSession, channelId);
         client = ctx.newRestfulGenericClient(base);

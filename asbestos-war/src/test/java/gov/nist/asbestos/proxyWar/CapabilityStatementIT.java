@@ -177,6 +177,4 @@ public class CapabilityStatementIT {
 //        assert "text/html".equals(contentType);
     }
 
-
-
 }

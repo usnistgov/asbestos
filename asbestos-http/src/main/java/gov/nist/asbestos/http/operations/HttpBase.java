@@ -2,6 +2,7 @@ package gov.nist.asbestos.http.operations;
 
 import gov.nist.asbestos.http.headers.Header;
 import gov.nist.asbestos.http.headers.Headers;
+import gov.nist.asbestos.http.util.Gzip;
 import org.hl7.fhir.r4.model.OperationOutcome;
 
 import java.io.IOException;
@@ -108,8 +109,15 @@ abstract public class HttpBase {
     }
 
     public String getResponseText() {
-        if (_responseText == null && _response != null)
-            _responseText = new String(_response);
+        Header contentEncodingHeader = getResponseHeaders().get("Content-Encoding");
+        boolean zipped = contentEncodingHeader != null && contentEncodingHeader.getValue().equalsIgnoreCase("gzip");
+
+        if (_responseText == null && _response != null) {
+            if (zipped)
+                _responseText = Gzip.decompressGZIP(_response);
+            else
+                _responseText = new String(_response);
+        }
         return _responseText;
     }
 
@@ -231,5 +239,12 @@ abstract public class HttpBase {
 
     public String getContentLocation() {
         return getResponseHeaders().getHeaderValue("Content-Location");
+    }
+
+    public String getResponseContentEncoding() {
+        Header header = getResponseHeaders().get("content-encoding");
+        if (header != null)
+            return header.getValue();
+        return null;
     }
 }
