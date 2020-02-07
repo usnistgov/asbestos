@@ -29,6 +29,10 @@ public class FhirClient {
 
     public FhirClient() {}
 
+    public ResourceWrapper writeResource(BaseResource resource, Ref ref, Format format, Headers headers) {
+        return writeResource(resource, ref, format, headers.asMap());
+    }
+
     public ResourceWrapper writeResource(BaseResource resource, Ref ref, Format format, Map<String, String> headers) {
         Objects.requireNonNull(resource);
         Objects.requireNonNull(ref);

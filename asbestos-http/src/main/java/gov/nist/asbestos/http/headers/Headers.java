@@ -18,6 +18,14 @@ public class Headers {
         this.headers = headerList;
     }
 
+    public Map<String, String> asMap() {
+        Map<String, String> map = new HashMap<>();
+        for (Header header : headers) {
+            map.put(header.getName(), header.getAllValuesAsString());
+        }
+        return map;
+    }
+
     public Headers withContentType(String type) {
         Header ct = new Header("Content-Type", type);
         headers.add(ct);

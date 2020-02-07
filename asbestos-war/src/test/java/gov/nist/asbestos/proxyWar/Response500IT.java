@@ -1,6 +1,11 @@
 package gov.nist.asbestos.proxyWar;
 
 import com.google.gson.Gson;
+import gov.nist.asbestos.client.client.FhirClient;
+import gov.nist.asbestos.client.client.Format;
+import gov.nist.asbestos.client.resolver.Ref;
+import gov.nist.asbestos.client.resolver.ResourceWrapper;
+import gov.nist.asbestos.http.headers.Headers;
 import gov.nist.asbestos.http.operations.HttpPost;
 import gov.nist.asbestos.serviceproperties.ServiceProperties;
 import gov.nist.asbestos.serviceproperties.ServicePropertiesEnum;
@@ -30,11 +35,10 @@ public class Response500IT {
     void expect500() throws URISyntaxException, IOException {
         URI fhirBase500 = new URI("http://localhost:" + ITConfig.getProxyPort()  + "/asbestos/gen500");
         ChannelConfig channelConfig = ChannelsForTests.create("default", "g500", fhirBase500);
-
-        HttpPost poster = new HttpPost();
-        String json = new Gson().toJson(new DocumentReference());
-        poster.postJson(getChannelBase(channelConfig), json);
-        int status = poster.getStatus();
+        URI channelBase = getChannelBase(channelConfig);
+        FhirClient fhirClient = new FhirClient();
+        ResourceWrapper responseWrapper = fhirClient.writeResource(new DocumentReference(),  new Ref(channelBase), Format.JSON, new Headers().withContentType(Format.JSON.getContentType()));
+        int status = responseWrapper.getStatus();
         assertEquals(500, status, "URI is " + fhirBase500);
     }
     public static URI getChannelBase(ChannelConfig channelConfig) {

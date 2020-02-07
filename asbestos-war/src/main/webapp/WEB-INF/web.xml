@@ -141,7 +141,7 @@
 
   <servlet-mapping>
     <servlet-name>Gen500</servlet-name>
-    <url-pattern>/gen500</url-pattern>
+    <url-pattern>/gen500/*</url-pattern>
   </servlet-mapping>
 
   <security-constraint>

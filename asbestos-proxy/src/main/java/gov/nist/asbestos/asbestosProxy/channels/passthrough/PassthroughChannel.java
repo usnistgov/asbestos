@@ -95,6 +95,10 @@ public class PassthroughChannel extends BaseChannel /*implements IBaseChannel*/ 
         String oldBase = null;
         String newBase = null;
         byte[] rawResponse = responseIn.getResponse();
+        if (rawResponse == null) {
+            responseOut.setStatus(responseIn.getStatus());
+            return;
+        }
         Format format = Format.fromContentType(responseIn.getResponseHeaders().getContentType().getValue());
         BaseResource resource = ProxyBase.parse(rawResponse, format);
         if (resource instanceof Bundle) {
