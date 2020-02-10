@@ -155,7 +155,7 @@ export const baseStore = {
                 })
                 .catch (e => {
                     commit('setError', url + ': ' + e)
-                    console.error('ProxyBase' + ' ' + e)
+                    console.error('base.loadProxyBase' + ' ' + e)
                 })
         }
     },

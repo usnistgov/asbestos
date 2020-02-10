@@ -6,6 +6,7 @@ import gov.nist.asbestos.client.client.Format;
 import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.http.headers.Header;
 import gov.nist.asbestos.http.operations.HttpDelete;
+import gov.nist.asbestos.http.util.Gzip;
 import gov.nist.asbestos.serviceproperties.ServiceProperties;
 import gov.nist.asbestos.serviceproperties.ServicePropertiesEnum;
 import gov.nist.asbestos.sharedObjects.ChannelConfig;
@@ -130,8 +131,12 @@ public class PassthroughChannel extends BaseChannel /*implements IBaseChannel*/ 
                     }
                 }
             }
-            if (updated)
-                rawResponse = ProxyBase.encode(bundle, format).getBytes();
+            if (updated) {
+                byte[] encoded = ProxyBase.encode(bundle, format).getBytes();
+                if (responseOut.isResponseGzipEncoded())
+                    encoded = Gzip.compressGZIP(encoded);
+                rawResponse = encoded;
+            }
         }
         responseOut.setResponse(rawResponse);
     }

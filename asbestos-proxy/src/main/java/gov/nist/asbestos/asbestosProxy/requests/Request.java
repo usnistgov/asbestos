@@ -30,8 +30,10 @@ public class Request {
         this.resp = resp;
         String qstring = req.getQueryString();
         //isJson = "_format=json".equals(qstring);
-        isJson = qstring.contains("_format=json");
-        isGzip = qstring.contains("_gzip=true");
+        if (qstring != null) {
+            isJson = qstring.contains("_format=json");
+            isGzip = qstring.contains("_gzip=true");
+        }
         this.externalCache = externalCache;
         uri = Common.buildURI(req);
         uriParts = Arrays.asList(uri.getPath().split("/"));

@@ -97,6 +97,8 @@ export async function initServiceProperties() {
                             crossdomain: true,
                         }
                     })
+                console.log(`initServiceProperties done`)
+                console.log(`FHIR Toolkit base is ${constFhirToolkitBaseUrl}`)
                 }
             )
         } catch (e) {
