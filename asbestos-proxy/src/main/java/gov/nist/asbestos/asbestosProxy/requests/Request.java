@@ -23,12 +23,15 @@ public class Request {
     public String testSession;
     public String channelId;
     public boolean isJson = true;
+    public boolean isGzip = false;
 
     public Request(HttpServletRequest req, HttpServletResponse resp, File externalCache) {
         this.req = req;
         this.resp = resp;
         String qstring = req.getQueryString();
-        isJson = "_format=json".equals(qstring);
+        //isJson = "_format=json".equals(qstring);
+        isJson = qstring.contains("_format=json");
+        isGzip = qstring.contains("_gzip=true");
         this.externalCache = externalCache;
         uri = Common.buildURI(req);
         uriParts = Arrays.asList(uri.getPath().split("/"));

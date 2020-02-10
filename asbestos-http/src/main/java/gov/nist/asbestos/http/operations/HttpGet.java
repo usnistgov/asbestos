@@ -75,9 +75,9 @@ public class HttpGet extends HttpBase {
         headers.put("accept", contentType);
         headers.put("accept-charset", "utf-8");
         get(uri, headers);
-        if (getResponse() != null) {
-            setResponseText(new String(getResponse()));
-        }
+//        if (getResponse() != null) {
+//            setResponseText(new String(getResponse()));
+//        }
         return this;
     }
 

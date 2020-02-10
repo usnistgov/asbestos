@@ -73,6 +73,11 @@
             <span v-if="running" class="running">Running</span>
             <div class="divider"></div>
             <div class="divider"></div>
+
+            <input type="checkbox" id="doGzip" v-model="gzip">
+            <label for="doGzip">GZip?</label>
+            <div class="divider"></div>
+
             <button v-bind:class="{'button-selected': useJson, 'button-not-selected': !useJson}" @click="doJson()">JSON</button>
             <button v-bind:class="{'button-selected': !useJson, 'button-not-selected': useJson}" @click="doXml()">XML</button>
             <div class="divider"></div>
@@ -131,6 +136,7 @@
                 channelObj: null,  // channel object
                 useJson: true,
                 running: false,
+                gzip: false,
             }
         },
         methods: {
@@ -169,7 +175,7 @@
                     return
                 this.$store.commit('setCurrentTest', null)
                 try {
-                    const response = await ENGINE.post(`testrun/${this.sessionId}__${this.channelId}/${this.testCollection}/${testName}?_format=${this.useJson ? 'json' : 'xml'}`)
+                    const response = await ENGINE.post(`testrun/${this.sessionId}__${this.channelId}/${this.testCollection}/${testName}?_format=${this.useJson ? 'json' : 'xml'};_gzip=${this.gzip}`)
                     this.$store.commit('setTestReport', { testName: testName, testReport: response.data })
                 } catch (error) {
                     this.error(error)

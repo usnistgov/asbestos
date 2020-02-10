@@ -76,6 +76,10 @@ public class RunTestRequest {
         patientCacheDir.mkdirs();
         alternatePatientCacheDir.mkdirs();
 
+        FhirClient fhirClient = new FhirClient()
+                .setFormat(request.isJson ? Format.JSON : Format.XML)
+                .sendGzip(request.isGzip)
+                .requestGzip(request.isGzip);
         TestReport report;
         try {
             report = new TestEngine(testDir, proxy)
@@ -83,7 +87,7 @@ public class RunTestRequest {
                     .setChannelId(channelId)
                     .setExternalCache(request.externalCache)
                     .setVal(new Val())
-                    .setFhirClient(new FhirClient().setFormat(request.isJson ? Format.JSON : Format.XML))
+                    .setFhirClient(fhirClient)
                     .setTestCollection(testCollection)
                     .addCache(patientCacheDir)
                     .addCache(alternatePatientCacheDir)
