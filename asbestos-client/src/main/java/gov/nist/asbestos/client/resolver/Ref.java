@@ -42,6 +42,8 @@ public class Ref {
 
     public Ref(Ref base, String resourceType, String id, String version)  {
         String theRef;
+        if (id != null && id.equals("metadata") && resourceType.equals("metadata"))
+            id = null;
         if (id == null || id.equals(""))
             theRef = String.join("/", base.toString(), resourceType);
         else if (version == null || version.equals(""))
@@ -178,12 +180,30 @@ public class Ref {
 
     public String getResourceType() {
         String path = uri.getPath();
+        String[] parts = getURIParts();
+        int i = getResourceTypeIndex();
+        if (i == -1) return "";
+        return parts[i];
+//        for (int i=0; i<parts.length; i++) {
+//            if (resourceNames.contains(parts[i]))
+//                return parts[i];
+//        }
+//        return "";
+    }
+
+    public int getResourceTypeIndex() {
+        String path = uri.getPath();
         String[] parts = path.split("/");
         for (int i=0; i<parts.length; i++) {
             if (resourceNames.contains(parts[i]))
-                return parts[i];
+                return i;
         }
-        return "";
+        return -1;
+    }
+
+    public String[] getURIParts() {
+        String path = uri.getPath();
+        return path.split("/");
     }
 
     public Ref getRelative() {  // without base

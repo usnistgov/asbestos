@@ -1,6 +1,9 @@
 package gov.nist.asbestos.client.client;
 
+import gov.nist.asbestos.client.Base.EC;
 import gov.nist.asbestos.client.Base.ProxyBase;
+import gov.nist.asbestos.client.events.ProxyEvent;
+import gov.nist.asbestos.client.events.UIEvent;
 import gov.nist.asbestos.client.resolver.PatientCacheMgr;
 import gov.nist.asbestos.http.headers.Header;
 import gov.nist.asbestos.http.headers.Headers;
@@ -11,6 +14,7 @@ import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.client.resolver.ResourceCacheMgr;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import gov.nist.asbestos.http.operations.HttpPost;
+import gov.nist.asbestos.simapi.tk.installation.Installation;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.BaseResource;
 import org.hl7.fhir.r4.model.Bundle;
@@ -27,11 +31,17 @@ public class FhirClient {
     private Op op = null;
     private PatientCacheMgr patientCacheMgr = null;
     private boolean requestGzip = false;
+    private boolean sendGzip = false;
 
     public FhirClient() {}
 
-    public FhirClient requestGzip() {
-        this.requestGzip = true;
+    public FhirClient requestGzip(boolean requestGzip) {
+        this.requestGzip = requestGzip;
+        return this;
+    }
+
+    public FhirClient sendGzip(boolean sendGzip) {
+        this.sendGzip = sendGzip;
         return this;
     }
 
@@ -55,6 +65,10 @@ public class FhirClient {
             theHeaders.add(new Header("accept", contentType));
 
         HttpPost post = new HttpPost();
+        if (sendGzip)
+            post.sendGzip();
+        if (requestGzip)
+            post.acceptGzip();
         post.setRequestHeaders(theHeaders);
         post.setUri(ref.getUri());
         byte[] content;
@@ -62,6 +76,7 @@ public class FhirClient {
             content = ProxyBase.getFhirContext().newJsonParser().encodeResourceToString(resource).getBytes();
         else
             content = ProxyBase.getFhirContext().newXmlParser().encodeResourceToString(resource).getBytes();
+
         post.setRequest(content);
 
         post.post();
@@ -111,6 +126,8 @@ public class FhirClient {
 
     private ResourceWrapper readResource(Ref ref, Format format) {
         HttpGet getter = new HttpGet();
+        if (requestGzip)
+            getter.acceptGzip();
         httpBase = getter;
         ResourceWrapper wrapper = new ResourceWrapper();
         wrapper.setRef(ref);
@@ -192,6 +209,8 @@ public class FhirClient {
                 return item.getWrapper();
         }
         HttpGet getter = new HttpGet();
+        if (requestGzip)
+            getter.acceptGzip();
         ResourceWrapper wrapper = new ResourceWrapper();
         wrapper.setRef(ref);
         wrapper.setHttpBase(getter);
@@ -316,5 +335,9 @@ public class FhirClient {
 
     public void setPatientCacheMgr(PatientCacheMgr patientCacheMgr) {
         this.patientCacheMgr = patientCacheMgr;
+    }
+
+    public UIEvent getProxyEvent() {
+        return new ProxyEvent(httpBase).getEvent();
     }
 }

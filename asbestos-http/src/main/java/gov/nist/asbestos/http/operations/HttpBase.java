@@ -24,9 +24,27 @@ abstract public class HttpBase {
     byte[] _request;
     URI uri;
     private OperationOutcome operationOutcome = null;  // used for efficiency between components
+    protected boolean sendZip = false;
+    protected boolean acceptZip = false;
 
     public abstract HttpBase run() throws IOException;
     public abstract String getVerb();
+
+    public HttpBase sendGzip() {
+        if (_requestHeaders == null)
+            _requestHeaders = new Headers();
+        _requestHeaders.add(new Header("Content-Encoding", "gzip"));
+        this.sendZip = true;
+        return this;
+    }
+
+    public HttpBase acceptGzip() {
+        if (_requestHeaders == null)
+            _requestHeaders = new Headers();
+        _requestHeaders.add(new Header("Accept-Encoding", "gzip"));
+        this.acceptZip = true;
+        return this;
+    }
 
     public static String parameterMapToString(Map<String, List<String>> parameterMap) {
         if (parameterMap == null || parameterMap.isEmpty())
@@ -84,6 +102,9 @@ abstract public class HttpBase {
     }
 
     public void setRequest(byte[] bytes) {
+        if (sendZip) {
+            bytes = Gzip.compressGZIP(bytes);
+        }
         _request = bytes;
     }
 
@@ -98,9 +119,13 @@ abstract public class HttpBase {
     }
 
     public Headers setRequestHeaders(Headers hdrs) {
-        _requestHeaders = hdrs;
-        hdrs.setVerb(getVerb());
-        return hdrs;
+        String verb = getVerb();
+        if (_requestHeaders == null)
+            _requestHeaders = new Headers();
+        _requestHeaders.addAll(hdrs);
+        _requestHeaders.setVerb(verb);
+        _requestHeaders.setPathInfo(hdrs.getPathInfo());
+        return _requestHeaders;
     }
 
     public Headers setResponseHeaders(Headers hdrs) {

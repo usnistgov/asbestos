@@ -151,7 +151,7 @@
             },
             loadAnalysisForObject(resourceUrl) {
                 //console.log(`loadForObject ${resourceUrl}`)
-                this.$store.dispatch('getLogEventAnalysisForObject', { resourceUrl: resourceUrl, gzip: this.gzip })
+                this.$store.dispatch('getLogEventAnalysisForObject', { resourceUrl: resourceUrl, gzip: this.gzip, useProxy: this.useProxy })
                 this.selectedResourceIndex = -1
             },
             loadAnalysisForObjectAndAddHistory(resourceUrl, index) {
@@ -206,7 +206,7 @@
             'theUrl': 'urlAnalysis'
         },
         props: [  // pass eventId OR theUrl
-            'sessionId', 'channelId', 'eventId', 'theUrl', 'gzip'
+            'sessionId', 'channelId', 'eventId', 'theUrl', 'gzip', 'useProxy'
         ],
         components: { LogObjectDisplay },
         name: "LogAnalysisReport"

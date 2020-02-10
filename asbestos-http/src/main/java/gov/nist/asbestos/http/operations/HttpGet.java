@@ -25,6 +25,8 @@ public class HttpGet extends HttpBase {
 //            }
             connection = (HttpURLConnection) uri.toURL().openConnection();
             connection.setRequestMethod("GET");
+            if (_requestHeaders != null)
+                addHeaders(connection, _requestHeaders);
             if (headers != null)
                 addHeaders(connection, headers);
             requestHeadersList = connection.getRequestProperties();

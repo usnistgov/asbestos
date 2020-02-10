@@ -1,6 +1,7 @@
 package gov.nist.asbestos.http.operations;
 
 import gov.nist.asbestos.http.headers.Header;
+import gov.nist.asbestos.http.util.Gzip;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
@@ -20,6 +21,8 @@ public class HttpPost  extends HttpBase {
 
         try {
             connection = (HttpURLConnection) uri.toURL().openConnection();
+            if (_requestHeaders != null)
+                addHeaders(connection, _requestHeaders);
             if (headers != null)
                 addHeaders(connection, headers);
             requestHeadersList = connection.getRequestProperties();
@@ -27,8 +30,9 @@ public class HttpPost  extends HttpBase {
             connection.setDoOutput(true);
             connection.setDoInput(true);
             // TODO use proper charset (from input)
-            if (content != null)
+            if (content != null) {
                 connection.getOutputStream().write(content);
+            }
             status = connection.getResponseCode();
             try {
                 setResponseHeadersList(connection.getHeaderFields());
@@ -38,6 +42,11 @@ public class HttpPost  extends HttpBase {
                 else
                     is = connection.getInputStream();
                 setResponse(IOUtils.toByteArray(is));
+//                try {
+//                    _responseText = new String(_response);
+//                } catch (Throwable t) {
+//
+//                }
             } catch (Throwable t) {
                 // ok - won't always be available
             }
@@ -55,11 +64,11 @@ public class HttpPost  extends HttpBase {
         }
         if (getResponseHeaders() != null)
             locationHeader = getResponseHeaders().get("Location");
-        try {
-            setResponseText(new String(getResponse()));
-        } catch (Throwable t) {
-            // ignore
-        }
+//        try {
+//            setResponseText(new String(getResponse()));
+//        } catch (Throwable t) {
+//            // ignore
+//        }
     }
 
     public HttpPost post() {

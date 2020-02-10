@@ -43,6 +43,7 @@ public class AnalysisReport {
     private Map atts;
     private String binaryUrl;
     private boolean useGzip = false;
+    private boolean useProxy = false;
 
 
     private Report buildReport() {
@@ -102,6 +103,11 @@ public class AnalysisReport {
 
     public AnalysisReport withGzip(boolean value) {
         useGzip = value;
+        return this;
+    }
+
+    public AnalysisReport withProxy(boolean value) {
+        useProxy = value;
         return this;
     }
 
@@ -272,7 +278,8 @@ public class AnalysisReport {
 
     private void loadBase() {
         Objects.requireNonNull(baseRef);
-        Ref resourceRef = translateToProxyServerSide(baseRef);
+        Ref resourceRef;
+        resourceRef = (useProxy) ? baseRef : translateToProxyServerSide(baseRef);
         if (resourceRef == null)
             return;
 //        Ref baseRefRelative = baseRef.getRelative();
@@ -290,7 +297,7 @@ public class AnalysisReport {
 //            return;
 //        }
 
-        baseObj = fhirClient.readResource(resourceRef);
+        baseObj = new FhirClient().requestGzip(useGzip).readResource(resourceRef);
         if (baseObj.getStatus() != 200) {
             generalErrors.add("Status " + baseObj.getStatus());
         } else if (baseObj.getResource() instanceof OperationOutcome) {

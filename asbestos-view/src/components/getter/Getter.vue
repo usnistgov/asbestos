@@ -19,6 +19,8 @@
             <div class="vdivider"> </div>
             <input type="checkbox" id="doGzip" v-model="gzip">
             <label for="doGzip">GZip?</label>
+            <input type="checkbox" id="useProxy" v-model="useProxy">
+            <label for="useProxy">Use Proxy? (must be proxy URL for this to have any effect)</label>
             <div class="vdivider"> </div>
         </div>
         <div class="left">
@@ -29,7 +31,8 @@
                 :session-id="sessionId"
                 :channel-id="channelId"
                 :the-url="theUrl"
-                :gzip="gzip"> </log-analysis-report>
+                :gzip="gzip"
+                :use-proxy="useProxy"> </log-analysis-report>
         </div>
 
     </div>
@@ -46,6 +49,7 @@
                 url: null,
                 theUrl: null,
                 gzip: false,
+                useProxy: false,
                 rerenderkey: 0,
             }
         },

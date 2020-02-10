@@ -1,0 +1,232 @@
+{
+  "resourceType": "Bundle",
+  "meta": {
+    "profile": [
+      "http://ihe.net/fhir/StructureDefinition/IHE_MHD_Provide_Comprehensive_DocumentBundle"
+    ]
+  },
+  "type": "transaction",
+  "entry": [
+    {
+      "fullUrl": "DocumentReference/1.2.40.0.13.1.1.2981387887.20200123095521390.32771",
+      "resource": {
+        "resourceType": "DocumentReference",
+        "id": "1.2.40.0.13.1.1.2981387887.20200123095521390.32771",
+        "text": {
+          "status": "empty",
+          "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">Tiani-Text.txt</div>"
+        },
+        "contained": [
+          {
+            "resourceType": "Practitioner",
+            "id": "1",
+            "name": [
+              {
+                "family": "Heybey",
+                "given": [
+                  "Reinhard"
+                ]
+              }
+            ],
+            "telecom": [
+              {
+                "system": "email",
+                "value": "email@tiani-spirit.com"
+              }
+            ],
+            "qualification": [
+              {
+                "code": {
+                  "coding": [
+                    {
+                      "system": "http://hl7.org/fhir/practitioner-specialty",
+                      "code": "sysarch",
+                      "display": "Systems architect"
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "resourceType": "Organization",
+            "id": "2",
+            "identifier": [
+              {
+                "system": "urn:oid:1.3.6.1.4.1.21367.2005.13.20.3000",
+                "value": "1.2.3.4.5"
+              }
+            ],
+            "name": "Tiani-Organization"
+          },
+          {
+            "resourceType": "Patient",
+            "id": "3",
+            "identifier": [
+              {
+                "use": "usual",
+                "system": "urn:oid:urn:oid:1.3.6.1.4.1.21367.13.20.3000",
+                "value": "IHEBLUE-2613"
+              }
+            ],
+            "name": [
+              {
+                "family": "Doe",
+                "given": [
+                  "John"
+                ]
+              }
+            ],
+            "birthDate": "1956-05-27"
+          }
+        ],
+        "masterIdentifier": {
+          "system": "urn:ietf:rfc:3986",
+          "value": "urn:oid:1.2.40.0.13.1.1.2981387887.20200123095521390.32769"
+        },
+        "identifier": [
+          {
+            "use": "official",
+            "system": "urn:ietf:rfc:3986",
+            "value": "urn:uuid:1a5594fb-6521-4444-a79e-4b76940248ef"
+          }
+        ],
+        "status": "current",
+        "type": {
+          "coding": [
+            {
+              "system": "urn:oid:2.16.840.1.113883.6.1",
+              "code": "60591-5",
+              "display": "Patient Summary"
+            }
+          ]
+        },
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.3.6.1.4.1.19376.1.2.6.1",
+                "code": "REPORTS",
+                "display": "Reports"
+              }
+            ]
+          }
+        ],
+        "subject": {
+          "reference": "http://fhir-read-write:8080/fhir/baseR4/Patient/44"
+        },
+        "date": "2020-01-23T09:55:21.391-05:00",
+        "author": [
+          {
+            "reference": "#1"
+          },
+          {
+            "reference": "#2"
+          }
+        ],
+        "description": "1",
+        "securityLabel": [
+          {
+            "coding": [
+              {
+                "system": "urn:oid:2.16.840.1.113883.5.25",
+                "code": "N",
+                "display": "Normal"
+              }
+            ]
+          }
+        ],
+        "content": [
+          {
+            "attachment": {
+              "contentType": "text/plain",
+              "language": "de-at",
+              "url": "Binary/fhirDocument0",
+              "title": "Tiani-Text.txt"
+            },
+            "format": {
+              "system": "urn:oid:1.3.6.1.4.1.19376.1.2.3",
+              "code": "urn:ihe:rad:TEXT",
+              "display": "Radiology XDS-I Text"
+            }
+          }
+        ],
+        "context": {
+          "facilityType": {
+            "coding": [
+              {
+                "system": "urn:oid:2.16.840.1.113883.6.96",
+                "code": "225728007",
+                "display": "Accident and Emergency department"
+              }
+            ]
+          },
+          "practiceSetting": {
+            "coding": [
+              {
+                "system": "urn:oid:1.3.6.1.4.1.21367.2017.3",
+                "code": "Practice-A",
+                "display": "Radiology"
+              }
+            ]
+          },
+          "sourcePatientInfo": {
+            "reference": "#3"
+          }
+        }
+      }
+    },
+    {
+      "fullUrl": "1.2.40.0.13.1.1.2981387887.20200123095521390.32771",
+      "resource": {
+        "resourceType": "DocumentManifest",
+        "id": "1.2.40.0.13.1.1.2981387887.20200123095521390.32771",
+        "text": {
+          "status": "empty",
+          "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">Spirit Test SubmissionSet</div>"
+        },
+        "masterIdentifier": {
+          "system": "urn:ietf:rfc:3986",
+          "value": "urn:oid:1.2.40.0.13.1.1.2981387887.20200123095521390.32771"
+        },
+        "identifier": [
+          {
+            "use": "official",
+            "system": "urn:ietf:rfc:3986",
+            "value": "urn:uuid:cafd3ed5-b8ca-4766-9fcf-ba0deca27568"
+          }
+        ],
+        "status": "current",
+        "type": {
+          "coding": [
+            {
+              "system": "urn:oid:2.16.840.1.113883.6.1",
+              "code": "11369-6",
+              "display": "Immunization"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "http://fhir-read-write:8080/fhir/baseR4/Patient/44"
+        },
+        "created": "2020-01-23T09:55:21-05:00",
+        "source": "urn:oid:1.3.6.1.4.1.21367.13.60.411",
+        "description": "1",
+        "content": [
+          {
+            "reference": "DocumentReference/1.2.40.0.13.1.1.2981387887.20200123095521390.32769"
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "Binary/fhirDocument0",
+      "resource": {
+        "resourceType": "Binary",
+        "id": "fhirDocument0",
+        "contentType": "text/plain",
+        "data": "VGV4dGRvY3VtZW50IGZyb20gVGlhbmktU3Bpcml0IGZvciBDb25uZWN0QVRob24gQ2xldmVsYW5kIE5BMjAyMA=="
+      }
+    }
+  ]
+}

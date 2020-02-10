@@ -84,7 +84,7 @@ public class GetLogEventAnalysis {
                 String manifestReference = getManifestLocation(bundle);
                 boolean isSearchSet = bundle.hasType() && bundle.getType() == Bundle.BundleType.SEARCHSET;
                 if (manifestReference != null)
-                    runAndReturnReport(new Ref(manifestReference), "reference for Manifest taken from transaction response", false);
+                    runAndReturnReport(new Ref(manifestReference), "reference for Manifest taken from transaction response", false, false);
                 else if (isSearchSet) {
                     List<Ref> refs = new ArrayList<>();
                     for (Bundle.BundleEntryComponent component : bundle.getEntry()) {
@@ -100,7 +100,7 @@ public class GetLogEventAnalysis {
                 }
             } else if (responseHeaders.hasHeader("Content-Location")) {
                 Ref ref = new Ref(responseHeaders.get("Content-Location").getValue());
-                runAndReturnReport(ref, "link taken from response Content-location header", false);
+                runAndReturnReport(ref, "link taken from response Content-location header", false, false);
             } else {
                 returnReport(new Report("Do not understand event"));
             }
@@ -112,9 +112,12 @@ public class GetLogEventAnalysis {
                 String url = query.substring(urlIndex, urlEndIndex);
                 Ref ref = new Ref(url);
                 boolean gzip = false;
+                boolean useProxy = false;
                 if (query.contains("gzip=true"))
                     gzip = true;
-                runAndReturnReport(ref, "By Request", gzip);
+                if (query.contains("useProxy=true"))
+                    useProxy = true;
+                runAndReturnReport(ref, "By Request", gzip, useProxy);
             }
         }
     }
@@ -130,8 +133,8 @@ public class GetLogEventAnalysis {
         request.resp.setStatus(request.resp.SC_OK);
     }
 
-    private void runAndReturnReport(Ref ref, String source, boolean gzip) {
-        AnalysisReport analysisReport = new AnalysisReport(ref, source, request.ec).withGzip(gzip);
+    private void runAndReturnReport(Ref ref, String source, boolean gzip, boolean useProxy) {
+        AnalysisReport analysisReport = new AnalysisReport(ref, source, request.ec).withGzip(gzip).withProxy(useProxy);
         Report report = analysisReport.run();
         returnReport(report);
     }
