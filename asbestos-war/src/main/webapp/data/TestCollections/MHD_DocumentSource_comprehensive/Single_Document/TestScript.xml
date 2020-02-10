@@ -165,6 +165,22 @@
         </action>
         <action>
             <assert>
+                <description value="Bundle: entry.request must exist for each entry with method=POST and a url"/>
+                <compareToSourceId value="request"/>
+                <compareToSourceExpression value="Bundle.entry.all(request.exists() and request.method = 'POST' and request.url.exists())"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
+            <assert>
+                <description value="Bundle: entry.request.url must be the same as entry.fullUrl"/>
+                <compareToSourceId value="request"/>
+                <compareToSourceExpression value="Bundle.entry.all(fullUrl = request.url)"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
+            <assert>
                 <description value="DocumentReference: DocumentReference has single content element"/>
                 <compareToSourceId value="request"/>
                 <compareToSourceExpression value="Bundle.entry.resource.(is(FHIR.DocumentReference) implies content.count() = 1)"/>

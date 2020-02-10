@@ -74,9 +74,11 @@
             <div class="divider"></div>
             <div class="divider"></div>
 
-            <input type="checkbox" id="doGzip" v-model="gzip">
-            <label for="doGzip">GZip?</label>
-            <div class="divider"></div>
+            <span v-if="!$store.state.testRunner.isClientTest">
+                <input type="checkbox" id="doGzip" v-model="gzip">
+                <label for="doGzip">GZip?</label>
+                <div class="divider"></div>
+            </span>
 
             <button v-bind:class="{'button-selected': useJson, 'button-not-selected': !useJson}" @click="doJson()">JSON</button>
             <button v-bind:class="{'button-selected': !useJson, 'button-not-selected': useJson}" @click="doXml()">XML</button>
