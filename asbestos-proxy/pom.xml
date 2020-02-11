@@ -56,12 +56,6 @@
         </dependency>
         <dependency>
             <groupId>gov.nist.asbestos</groupId>
-            <artifactId>asbestos-test-engine</artifactId>
-            <version>1.2.0-SNAPSHOT</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>gov.nist.asbestos</groupId>
             <artifactId>service-properties</artifactId>
             <version>1.2.0-SNAPSHOT</version>
         </dependency>

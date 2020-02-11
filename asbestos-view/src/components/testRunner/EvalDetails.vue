@@ -16,12 +16,9 @@
 <!--            </div>-->
 
             <!--   add SETUP here  -->
-
-            <div v-for="(test, testi) in tests"
-                 :key="'Eval' + testi">
-                <div>
-                    <span class="selectable" @click.self="toggleEventDisplayed()">Message Log</span>
-                    <span v-if="eventDisplayed">
+            <div>
+                <span class="selectable" @click.self="toggleEventDisplayed()">Message Log</span>
+                <span v-if="eventDisplayed">
                         <img src="../../assets/arrow-down.png" @click.self="toggleEventDisplayed()">
                         <log-item
                                 :sessionId="sessionId"
@@ -30,13 +27,16 @@
                                 :noNav="true">
                         </log-item>
                     </span>
-                    <span v-else>
+                <span v-else>
                         <img src="../../assets/arrow-right.png" @click.self="toggleEventDisplayed()">
                     </span>
-                </div>
+            </div>
+            <div v-for="(test, testi) in tests" class="test-part"
+                 :key="'Eval' + testi">
+                <div v-bind:class="testResult(testi)">{{test.name}}</div>
 
                 <!-- actions will be asserts only-->
-                <div v-for="(action, actioni) in actions(testi)" class="test-part"
+                <div v-for="(action, actioni) in actions(testi)" class="assert-part"
                      :key="'Eval' + testi + 'Action' + actioni">
                     <div>
                         <div >
@@ -95,6 +95,18 @@
                 }
                 return null
             },
+            testResult(testIndex) {
+                let assertIndex
+                for (assertIndex=0; assertIndex<this.actions(testIndex).length; assertIndex++) {
+                    const result = this.assertResult(testIndex, assertIndex)
+                    if (result === 'pass')
+                        continue
+                    if (result === 'warning')
+                        continue
+                    return 'fail'
+                }
+                return 'pass'
+            },
             assertResult(testIndex, actionIndex) {
                 if (this.testReport && actionIndex < this.testReport.test[testIndex].action.length)
                     return this.testReport.test[testIndex].action[actionIndex].assert.result
@@ -146,7 +158,7 @@
                 this.report = this.$store.state.testRunner.testReports[this.testId]
             },
             actions(testIndex) {
-                return this.script.test[testIndex].action
+                return this.script.test[testIndex].action === undefined ? [] : this.script.test[testIndex].action
             },
             scriptAction(testi, actioni) {
                 return this.script.test[testi].action[actioni]
@@ -253,8 +265,8 @@
     .assert-part {
         margin-left: 20px;
         margin-right: 20px;
-        cursor: pointer;
-        text-decoration: underline;
+        /*cursor: pointer;*/
+        /*text-decoration: underline;*/
     }
     .message-part {
         margin-left: 25px;

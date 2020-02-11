@@ -56,7 +56,7 @@
                         'not-selected': !displayInspector
                         }"
                       @click="displayRequest = false; displayResponse = false; displayInspector = true; displayValidations = false">
-                    Inspect
+                    Inspect Server
                 </span>
                 <div class="divider"></div>
                 <span v-bind:class="{

@@ -93,7 +93,6 @@ public class PassthroughChannel extends BaseChannel /*implements IBaseChannel*/ 
     }
 
     private void transformResponseBody(HttpBase responseIn, HttpBase responseOut) {
-        String oldBase = null;
         String newBase = null;
         byte[] rawResponse = responseIn.getResponse();
         if (rawResponse == null) {
@@ -104,14 +103,13 @@ public class PassthroughChannel extends BaseChannel /*implements IBaseChannel*/ 
 
         BaseResource resource = ProxyBase.parse(responseIn.getResponseText(), format);
         if (resource instanceof Bundle) {
+            newBase = ServiceProperties.getInstance().getPropertyOrStop(ServicePropertiesEnum.FHIR_TOOLKIT_BASE) + "/proxy/" + channelConfig.asFullId();
             boolean updated = false;
             Bundle bundle = (Bundle) resource;
             if (bundle.hasLink()) {
                 Bundle.BundleLinkComponent linkComponent = bundle.getLink("self");
                 if (linkComponent != null) {
                     if (linkComponent.hasUrl()) {
-                        oldBase = linkComponent.getUrl();
-                        newBase = ServiceProperties.getInstance().getPropertyOrStop(ServicePropertiesEnum.FHIR_TOOLKIT_BASE) + "/proxy/" + channelConfig.asFullId();
                         linkComponent.setUrl(newBase);
                         updated = true;
                     }

@@ -41,7 +41,10 @@ public class ChannelConfig {
         parts.remove(0);
         String query = req.getQuery();
 
-        String uriString = fhirBase + "/" +  String.join("/", parts) + (query == null || query.equals("") ? "" : "?" + query);
+        String joinedparts = parts.size() == 0 ? "" : String.join("/", parts);
+        if (joinedparts.length() > 0)
+            joinedparts = "/" + joinedparts;
+        String uriString = fhirBase + joinedparts + (query == null || query.equals("") ? "" : "?" + query);
         URI uri = new URI(uriString);
         return uri;
     }
