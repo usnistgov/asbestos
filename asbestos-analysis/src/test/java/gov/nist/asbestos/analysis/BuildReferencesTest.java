@@ -26,7 +26,7 @@ class BuildReferencesTest {
     void buildRefs() {
         AnalysisReport ar = new AnalysisReport();
         Map atts = ResourceHasMethodsFilter.toMap(dm);
-        List<String> refs = ar.buildReferences(atts);
+        List<AnalysisReport.Reference2> refs = ar.buildReferences(atts);
         assertEquals(2, refs.size());
     }
 }
