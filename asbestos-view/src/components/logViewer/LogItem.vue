@@ -23,6 +23,10 @@
                     </span>
                 </span>
 
+                <a href="https://github.com/usnistgov/asbestos/wiki/zMessages" target="_blank">
+                <img src="../../assets/info.png">
+                </a>
+
                 <span class="link-position solid-boxed pointer-cursor" @click.stop.prevent="copyToClipboard">Copy Event Link</span>
                 <input type="hidden" id="the-link" :value="eventLink">
 
