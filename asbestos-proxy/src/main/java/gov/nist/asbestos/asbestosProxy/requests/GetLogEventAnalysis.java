@@ -27,6 +27,7 @@ import java.util.List;
 // 5 - testSession
 // 6 - channelId
 // 7 - eventId
+// 8 - "request" or "response"
 
 // OR
 
@@ -45,7 +46,7 @@ public class GetLogEventAnalysis {
     private Request request;
 
     public static boolean isRequest(Request request) {
-        return request.uriParts.size() == 8
+        return request.uriParts.size() == 9
                 && "log".equalsIgnoreCase(request.uriParts.get(2))
                 && "analysis".equalsIgnoreCase(request.uriParts.get(3))
                 && "event".equalsIgnoreCase(request.uriParts.get(4))
@@ -69,22 +70,39 @@ public class GetLogEventAnalysis {
         boolean htmlOk = acceptHeader.getValue().contains("text/html");
         boolean jsonOk = acceptHeader.getValue().contains("json");
 
-        if (request.uriParts.size() == 8) {
+        if (request.uriParts.size() == 9) {
             String testSession = request.uriParts.get(5);
             String channelId = request.uriParts.get(6);
             String eventId = request.uriParts.get(7);
+            String requestOrResponse = request.uriParts.get(8);
+            boolean analyseResponse = requestOrResponse.equals("response");
 
             UIEvent event = request.ec.getEvent(testSession, channelId, "null", eventId);
+            String requestBodyString = event.getClientTask().getRequestBody();
+            Headers requestHeaders = new Headers(event.getClientTask().getRequestHeader());
             String responseBodyString = event.getClientTask().getResponseBody();
             Headers responseHeaders = new Headers(event.getClientTask().getResponseHeader());
 
-            BaseResource baseResource = ProxyBase.parse(responseBodyString, Format.fromContentType(responseHeaders.getContentType().getValue()));
+            BaseResource requestResource = null;
+            if (requestBodyString.length() > 0)
+                requestResource = ProxyBase.parse(requestBodyString, Format.fromContentType(requestHeaders.getContentType().getValue()));
+            Bundle requestBundle = null;
+            if (requestResource instanceof Bundle)
+                requestBundle = (Bundle) requestResource;
+            String analysisSource = null;
+            if (analyseResponse)
+                analysisSource = responseBodyString;
+            BaseResource baseResource = ProxyBase.parse(analysisSource, Format.fromContentType(responseHeaders.getContentType().getValue()));
             if (baseResource instanceof Bundle) {
                 Bundle bundle = (Bundle) baseResource;
                 String manifestReference = getManifestLocation(bundle);
                 boolean isSearchSet = bundle.hasType() && bundle.getType() == Bundle.BundleType.SEARCHSET;
                 if (manifestReference != null)
-                    runAndReturnReport(new Ref(manifestReference), "reference for Manifest taken from transaction response", false, false);
+                    runAndReturnReport(new Ref(manifestReference),
+                            "reference for Manifest taken from transaction response",
+                            false,
+                            false,
+                            analyseResponse ? null : requestBundle);
                 else if (isSearchSet) {
                     List<Ref> refs = new ArrayList<>();
                     for (Bundle.BundleEntryComponent component : bundle.getEntry()) {
@@ -100,7 +118,7 @@ public class GetLogEventAnalysis {
                 }
             } else if (responseHeaders.hasHeader("Content-Location")) {
                 Ref ref = new Ref(responseHeaders.get("Content-Location").getValue());
-                runAndReturnReport(ref, "link taken from response Content-location header", false, false);
+                runAndReturnReport(ref, "link taken from response Content-location header", false, false, requestBundle);
             } else {
                 returnReport(new Report("Do not understand event"));
             }
@@ -117,7 +135,7 @@ public class GetLogEventAnalysis {
                     gzip = true;
                 if (query.contains("useProxy=true"))
                     useProxy = true;
-                runAndReturnReport(ref, "By Request", gzip, useProxy);
+                runAndReturnReport(ref, "By Request", gzip, useProxy, null);
             }
         }
     }
@@ -133,8 +151,11 @@ public class GetLogEventAnalysis {
         request.resp.setStatus(request.resp.SC_OK);
     }
 
-    private void runAndReturnReport(Ref ref, String source, boolean gzip, boolean useProxy) {
-        AnalysisReport analysisReport = new AnalysisReport(ref, source, request.ec).withGzip(gzip).withProxy(useProxy);
+    private void runAndReturnReport(Ref ref, String source, boolean gzip, boolean useProxy, BaseResource contextBundle) {
+        AnalysisReport analysisReport = new AnalysisReport(ref, source, request.ec)
+                .withGzip(gzip)
+                .withProxy(useProxy)
+                .withContextResource(contextBundle);
         Report report = analysisReport.run();
         returnReport(report);
     }

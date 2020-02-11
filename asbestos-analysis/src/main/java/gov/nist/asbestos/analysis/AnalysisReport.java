@@ -44,7 +44,7 @@ public class AnalysisReport {
     private String binaryUrl;
     private boolean useGzip = false;
     private boolean useProxy = false;
-
+    private BaseResource contextResource = null;
 
     private Report buildReport() {
         Report report = new Report();
@@ -114,23 +114,10 @@ public class AnalysisReport {
         return this;
     }
 
-//    public AnalysisReport(List<Ref> baseRefs, String source, EC ec) {
-//        this.relatedRefs.addAll(baseRefs);
-//        this.source = source;
-//        this.ec = ec;
-//        this.codesValidation = new CodesValidation(ec);
-//    }
-
-//    private Report runRelateOnly() {
-//        try {
-//            loadRelated();
-//            if (!generalErrors.isEmpty())
-//                return buildReport();
-//        } catch (Throwable t) {
-//            generalErrors.add(ExceptionUtils.getStackTrace(t));
-//            return buildReport();
-//        }
-//    }
+    public AnalysisReport withContextResource(BaseResource contextResource) {
+        this.contextResource = contextResource;
+        return this;
+    }
 
     public Report run() {
         try {
@@ -319,21 +306,6 @@ public class AnalysisReport {
         resourceRef = (useProxy) ? baseRef : translateToProxyServerSide(baseRef);
         if (resourceRef == null)
             return;
-//        Ref baseRefRelative = baseRef.getRelative();
-//        try {
-//            fhirBase = new Ref(new ChannelUrl(ec.externalCache).getFhirBase(baseRef.getUri()));
-//            if (fhirBase.toString().equals("")) {
-//                generalWarnings.add("No FHIRBASE registered for this channel. This may be an MHD channel. Directing queries to channel.");
-//                resourceRef = baseRef;
-//            } else {
-//                resourceRef = baseRefRelative.rebase(fhirBase);
-//            }
-//
-//        } catch (URISyntaxException e) {
-//            generalErrors.add("Error extracting FHIRBASE - " + e.getMessage());
-//            return;
-//        }
-
         baseObj = new FhirClient().requestGzip(useGzip).readResource(resourceRef);
         if (baseObj.getStatus() != 200) {
             generalErrors.add("Status " + baseObj.getStatus());

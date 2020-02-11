@@ -84,9 +84,10 @@ export const logStore = {
             const channel = parms.channel
             const session = parms.session
             const eventId = parms.eventId
+            const requestOrResponse = parms.requestOrResponse
 
             try {
-                const url = `analysis/event/${session}/${channel}/${eventId}`
+                const url = `analysis/event/${session}/${channel}/${eventId}/${requestOrResponse}`
                 const result = await LOG.get(url)
                 //const data = {analysis: result.data, eventId: eventId}
                 commit('setAnalysis', result.data)

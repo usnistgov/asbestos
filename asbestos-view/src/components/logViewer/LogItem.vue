@@ -88,7 +88,8 @@
                     <log-analysis-report
                             :session-id="sessionId"
                             :channel-id="channelId"
-                            :event-id="eventId"></log-analysis-report>
+                            :event-id="eventId"
+                            :request-or-response="'response'"></log-analysis-report>
         </div>
         <div v-if="displayValidations" class="request-response">
             <eval-details

@@ -147,7 +147,7 @@
             },
             async loadAnalysis2() {
                 if (this.eventId)
-                    await this.$store.dispatch('getLogEventAnalysis', {channel: this.channelId, session: this.sessionId, eventId: this.eventId})
+                    await this.$store.dispatch('getLogEventAnalysis', {channel: this.channelId, session: this.sessionId, eventId: this.eventId, requestOrResponse: this.requestOrResponse})
             },
             loadAnalysisForObject(resourceUrl) {
                 //console.log(`loadForObject ${resourceUrl}`)
@@ -206,7 +206,7 @@
             'theUrl': 'urlAnalysis'
         },
         props: [  // pass eventId OR theUrl
-            'sessionId', 'channelId', 'eventId', 'theUrl', 'gzip', 'useProxy'
+            'sessionId', 'channelId', 'eventId', 'theUrl', 'gzip', 'useProxy', "requestOrResponse"
         ],
         components: { LogObjectDisplay },
         name: "LogAnalysisReport"
