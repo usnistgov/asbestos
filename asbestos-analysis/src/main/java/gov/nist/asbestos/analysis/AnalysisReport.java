@@ -101,6 +101,9 @@ public class AnalysisReport {
         this.codesValidation = new CodesValidation(ec);
     }
 
+    // for tests only
+    AnalysisReport() {}
+
     public AnalysisReport withGzip(boolean value) {
         useGzip = value;
         return this;
@@ -176,6 +179,30 @@ public class AnalysisReport {
         for (Related rel : related) {
             if (rel.wrapper.hasResource()) {
                 rel.atts = ResourceHasMethodsFilter.toMap(rel.wrapper.getResource());
+            }
+        }
+    }
+
+    List<String> buildReferences(Map atts) {
+        List<String> refs = new ArrayList<>();
+        buildReferences2(atts, refs);
+        return refs;
+    }
+
+    private void buildReferences2(Map atts, List<String> refs) {
+        for (Object okey : atts.keySet()) {
+            String key = (String) okey;
+            Object value = atts.get(okey);
+            if ("reference".equals(key) && value instanceof String) {
+                refs.add((String) value);
+            } else if (value instanceof Map) {
+                buildReferences2((Map)value, refs);
+            } else if (value instanceof List) {
+                for (Object o : (List) value) {
+                    if (o instanceof Map) {
+                        buildReferences2((Map) o, refs);
+                    }
+                }
             }
         }
     }
