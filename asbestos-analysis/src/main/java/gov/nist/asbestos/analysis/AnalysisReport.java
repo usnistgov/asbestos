@@ -183,24 +183,34 @@ public class AnalysisReport {
         }
     }
 
-    List<String> buildReferences(Map atts) {
-        List<String> refs = new ArrayList<>();
-        buildReferences2(atts, refs);
+    class Reference2 {
+        String key;
+        String reference;
+
+        Reference2(String key, String reference) {
+            this.key = key;
+            this.reference = reference;
+        }
+    }
+
+    List<Reference2> buildReferences(Map atts) {
+        List<Reference2> refs = new ArrayList<>();
+        buildReferences2(atts, refs, "????");
         return refs;
     }
 
-    private void buildReferences2(Map atts, List<String> refs) {
+    private void buildReferences2(Map atts, List<Reference2> refs, String lastKey) {
         for (Object okey : atts.keySet()) {
             String key = (String) okey;
             Object value = atts.get(okey);
             if ("reference".equals(key) && value instanceof String) {
-                refs.add((String) value);
+                refs.add(new Reference2(lastKey, (String) value));
             } else if (value instanceof Map) {
-                buildReferences2((Map)value, refs);
+                buildReferences2((Map)value, refs, key);
             } else if (value instanceof List) {
                 for (Object o : (List) value) {
                     if (o instanceof Map) {
-                        buildReferences2((Map) o, refs);
+                        buildReferences2((Map) o, refs, key);
                     }
                 }
             }
@@ -368,7 +378,8 @@ public class AnalysisReport {
         } else if (baseResource instanceof Bundle) {
             buildRelated(baseResource);
         } else {
-            generalErrors.add("Do not know how to load BaseResource " + baseResource.getClass().getName());
+            buildRelatedOther(baseResource);
+            //generalErrors.add("Do not know how to load BaseResource " + baseResource.getClass().getName());
         }
     }
 
@@ -383,6 +394,15 @@ public class AnalysisReport {
 
     private boolean validAuthenticatorType(BaseResource resource) {
         return authenticatorTypes.contains(resource.getClass().getSimpleName());
+    }
+
+    private void buildRelatedOther(BaseResource resource) {
+        AnalysisReport ar = new AnalysisReport();
+        Map atts = ResourceHasMethodsFilter.toMap(resource);
+        List<Reference2> refs = ar.buildReferences(atts);
+        for (Reference2 ref : refs) {
+            load(new Ref(ref.reference), ref.key, resource);
+        }
     }
 
     private void buildRelated(Bundle bundle) {
@@ -585,7 +605,8 @@ public class AnalysisReport {
         else if (baseResource instanceof Patient) buildRelated((Patient) baseResource);
         else if (baseResource instanceof Bundle) buildRelated((Bundle) baseResource);
         else
-            generalErrors.add("Do not understand resource type " + baseResource.getClass().getSimpleName());
+            buildRelatedOther(baseResource);
+//            generalErrors.add("Do not understand resource type " + baseResource.getClass().getSimpleName());
     }
 
     private Related getFromRelated(Ref ref) {
