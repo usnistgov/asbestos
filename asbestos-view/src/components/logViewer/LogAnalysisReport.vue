@@ -203,6 +203,7 @@
         },
         watch: {
             'eventId': 'loadAnalysis',
+            'requestOrResponse': 'loadAnalysis',
             'theUrl': 'urlAnalysis'
         },
         props: [  // pass eventId OR theUrl

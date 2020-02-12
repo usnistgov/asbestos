@@ -14,6 +14,7 @@ import gov.nist.asbestos.http.support.Common;
 import org.apache.log4j.Logger;
 import org.hl7.fhir.r4.model.BaseResource;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.DocumentManifest;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -89,9 +90,7 @@ public class GetLogEventAnalysis {
             Bundle requestBundle = null;
             if (requestResource instanceof Bundle)
                 requestBundle = (Bundle) requestResource;
-            String analysisSource = null;
-            if (analyseResponse)
-                analysisSource = responseBodyString;
+            String analysisSource = analyseResponse ? responseBodyString : requestBodyString;
             BaseResource baseResource = ProxyBase.parse(analysisSource, Format.fromContentType(responseHeaders.getContentType().getValue()));
             if (baseResource instanceof Bundle) {
                 Bundle bundle = (Bundle) baseResource;
@@ -161,9 +160,20 @@ public class GetLogEventAnalysis {
     }
 
     private void runAndReturnReport(Bundle bundle, String source) {
-        AnalysisReport analysisReport = new AnalysisReport(bundle, source, request.ec);
+        Ref manifestFullUrl = getManifestFullUrl(bundle);
+        AnalysisReport analysisReport = new AnalysisReport(manifestFullUrl, source, request.ec);
+        analysisReport.withContextResource(bundle);
         Report report = analysisReport.run();
         returnReport(report);
+    }
+
+    private Ref getManifestFullUrl(Bundle bundle) {
+        for( Bundle.BundleEntryComponent comp : bundle.getEntry()) {
+            if (comp.getResource() instanceof DocumentManifest) {
+                return new Ref(comp.getFullUrl());
+            }
+        }
+        return null;
     }
 
     // from response bundle

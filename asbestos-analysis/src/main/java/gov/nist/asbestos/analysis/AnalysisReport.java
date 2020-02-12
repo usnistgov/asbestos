@@ -45,6 +45,7 @@ public class AnalysisReport {
     private boolean useGzip = false;
     private boolean useProxy = false;
     private BaseResource contextResource = null;
+    private Map<BaseResource, List<Reference2>> refs = new HashMap<>();
 
     private Report buildReport() {
         Report report = new Report();
@@ -121,7 +122,11 @@ public class AnalysisReport {
 
     public Report run() {
         try {
-            if (baseRef != null && baseObj == null) {
+            if (baseRef != null && baseObj == null && contextResource != null) {
+                loadBaseFromContext();
+                Objects.requireNonNull(baseObj);
+            }
+            else if (baseRef != null && baseObj == null) {
                 loadBase();
                 if (!generalErrors.isEmpty())
                     return buildReport();
@@ -138,6 +143,7 @@ public class AnalysisReport {
             return buildReport();
         }
     }
+
 
     public class Checked {
         String className;
@@ -166,40 +172,6 @@ public class AnalysisReport {
         for (Related rel : related) {
             if (rel.wrapper.hasResource()) {
                 rel.atts = ResourceHasMethodsFilter.toMap(rel.wrapper.getResource());
-            }
-        }
-    }
-
-    class Reference2 {
-        String key;
-        String reference;
-
-        Reference2(String key, String reference) {
-            this.key = key;
-            this.reference = reference;
-        }
-    }
-
-    List<Reference2> buildReferences(Map atts) {
-        List<Reference2> refs = new ArrayList<>();
-        buildReferences2(atts, refs, "????");
-        return refs;
-    }
-
-    private void buildReferences2(Map atts, List<Reference2> refs, String lastKey) {
-        for (Object okey : atts.keySet()) {
-            String key = (String) okey;
-            Object value = atts.get(okey);
-            if ("reference".equals(key) && value instanceof String) {
-                refs.add(new Reference2(lastKey, (String) value));
-            } else if (value instanceof Map) {
-                buildReferences2((Map)value, refs, key);
-            } else if (value instanceof List) {
-                for (Object o : (List) value) {
-                    if (o instanceof Map) {
-                        buildReferences2((Map) o, refs, key);
-                    }
-                }
             }
         }
     }
@@ -300,6 +272,56 @@ public class AnalysisReport {
         return resourceRef;
     }
 
+    private void loadBaseFromContext() {
+        Objects.requireNonNull(baseRef);
+        Objects.requireNonNull(contextResource);
+        Resource resource = resourceFromBundle((Bundle)contextResource, baseRef);
+        if (resource != null)
+            baseObj = new ResourceWrapper(resource).setRef(baseRef);
+        // load all bundle parts into related so they are found without pinging a server
+        if (contextResource instanceof Bundle) {
+            Bundle context = (Bundle) contextResource;
+            for (Bundle.BundleEntryComponent comp : context.getEntry()) {
+                if (baseObj.getResource().equals(comp.getResource())) {
+                    // don't load baseObj into related or it will be listed twice
+                    List<Reference2> refs = Reference2Builder.buildReferences(baseObj.getResource());
+                    for (Reference2 ref : refs) {
+                        String att = ref.att;
+                        Ref theRef = new Ref(ref.reference);
+                        if (theRef.isRelative()) {
+                            Resource theResource = resourceFromBundle(context, theRef);
+                            if (theResource != null) {
+                                ResourceWrapper wrapper = new ResourceWrapper(theResource).setRef(theRef);
+                                related.add(new Related(wrapper, att));
+                            }
+                        }
+                    }
+                    break;
+                }
+//                ResourceWrapper wrapper = new ResourceWrapper(comp.getResource())
+//                        .setRef(new Ref(comp.getFullUrl()));
+//                related.add(new Related(wrapper, "in request"));
+            }
+//            for (Bundle.BundleEntryComponent comp : context.getEntry()) {
+//                if (baseObj.getResource().equals(comp.getResource()))
+//                    continue;  // don't load into related or it will be listed twice
+//                ResourceWrapper wrapper = new ResourceWrapper(comp.getResource())
+//                        .setRef(new Ref(comp.getFullUrl()));
+//                related.add(new Related(wrapper, "in request"));
+//            }
+        }
+    }
+
+    private Resource resourceFromBundle(Bundle bundle, Ref fullUrl) {
+        Objects.requireNonNull(fullUrl);
+        for( Bundle.BundleEntryComponent comp : bundle.getEntry()) {
+            if (fullUrl.toString().equals(comp.getFullUrl()))
+                return comp.getResource();
+        }
+        return null;
+    }
+
+
     private void loadBase() {
         Objects.requireNonNull(baseRef);
         Ref resourceRef;
@@ -368,17 +390,19 @@ public class AnalysisReport {
         return authenticatorTypes.contains(resource.getClass().getSimpleName());
     }
 
+    // used for resoources outside of MHD - a more general approach
     private void buildRelatedOther(BaseResource resource) {
-        AnalysisReport ar = new AnalysisReport();
-        Map atts = ResourceHasMethodsFilter.toMap(resource);
-        List<Reference2> refs = ar.buildReferences(atts);
+        List<Reference2> refs = this.refs.get(resource);
+        if (refs == null) {
+            refs = Reference2Builder.buildReferences(resource);
+            this.refs.put(resource, refs);
+        }
         for (Reference2 ref : refs) {
-            load(new Ref(ref.reference), ref.key, resource);
+            load(new Ref(ref.reference), ref.att, resource);
         }
     }
 
     private void buildRelated(Bundle bundle) {
-//        Ref base = null;
         if (bundle.hasLink()) {
             Bundle.BundleLinkComponent bundleLinkComponent = bundle.getLink("self");
             if (bundleLinkComponent.hasUrl()) {
@@ -393,17 +417,6 @@ public class AnalysisReport {
                 Bundle.BundleEntryResponseComponent responseComponent = entryComponent.getResponse();
                 if (responseComponent.hasLocation()) {
                     String rawLocation = responseComponent.getLocation();
-//                    Ref entryRef;
-//                    Ref rawRef = new Ref(rawLocation);
-//                    if (rawRef.isRelative()) {
-//                        if (base == null) {
-//                            generalErrors.add("response.location is " + rawLocation + " and no self link is present");
-//                            continue;
-//                        }
-//                        entryRef = rawRef.rebase(base);
-//                    } else {
-//                        entryRef = rawRef;
-//                    }
                     load(new Ref(rawLocation), "component", bundle);
                 }
             }
@@ -578,12 +591,11 @@ public class AnalysisReport {
         else if (baseResource instanceof Bundle) buildRelated((Bundle) baseResource);
         else
             buildRelatedOther(baseResource);
-//            generalErrors.add("Do not understand resource type " + baseResource.getClass().getSimpleName());
     }
 
     private Related getFromRelated(Ref ref) {
         Objects.requireNonNull(ref);
-        if (ref.isRelative())
+        if (ref.isRelative() && fhirBase != null)
             ref.rebase(fhirBase);
         for (Related rel : related) {
             if (ref.equals(rel.wrapper.getRef()))

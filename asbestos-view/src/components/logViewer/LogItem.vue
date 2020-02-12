@@ -56,10 +56,18 @@
             <div class="vdivider"></div>
             <div>
                 <span v-bind:class="{
-                        selected: displayInspector,
-                        'not-selected': !displayInspector
+                        selected: inspectRequest,
+                        'not-selected': !inspectRequest
                         }"
-                      @click="displayRequest = false; displayResponse = false; displayInspector = true; displayValidations = false">
+                      @click="displayRequest = false; displayResponse = false; displayInspector = true; inspectType = 'request'; displayValidations = false">
+                    Inspect Request
+                </span>
+                <div class="divider"></div>
+                <span v-bind:class="{
+                        selected: inspectResponse,
+                        'not-selected': !inspectResponse
+                        }"
+                      @click="displayRequest = false; displayResponse = false; displayInspector = true; inspectType = 'response'; displayValidations = false">
                     Inspect Server
                 </span>
                 <div class="divider"></div>
@@ -84,12 +92,19 @@
                 <pre>{{responseBody}}</pre>
             </div>
         </div>
-        <div v-if="displayInspector" class="request-response">
+        <div v-if="inspectRequest" class="request-response">
                     <log-analysis-report
                             :session-id="sessionId"
                             :channel-id="channelId"
                             :event-id="eventId"
-                            :request-or-response="'response'"></log-analysis-report>
+                            :request-or-response="'request'"></log-analysis-report>
+        </div>
+        <div v-if="inspectResponse" class="request-response">
+            <log-analysis-report
+                    :session-id="sessionId"
+                    :channel-id="channelId"
+                    :event-id="eventId"
+                    :request-or-response="'response'"></log-analysis-report>
         </div>
         <div v-if="displayValidations" class="request-response">
             <eval-details
@@ -120,14 +135,10 @@
                 displayResponse: false,
                 displayInspector: false,
                 displayValidations: false,
+                inspectType: 'request',
             }
         },
         methods: {
-            doDisplayAnalysis() {
-                this.displayInspector = true;
-                this.displayRequest = false
-//                this.$store.dispatch('getLogEventAnalysis', {channel: this.channelId, session: this.sessionId, eventId: this.eventId})
-            },
             copyToClipboard() {
                 let linkToCopy = document.querySelector('#the-link')
                 linkToCopy.setAttribute('type', 'text')
@@ -200,6 +211,12 @@
             },
         },
         computed: {
+            inspectRequest() {
+                return this.displayInspector && this.inspectType === 'request'
+            },
+            inspectResponse() {
+                return this.displayInspector && this.inspectType === 'response'
+            },
             clientIP() {
                 const idx = this.index
                 return idx ? this.$store.state.log.eventSummaries[idx].ipAddr : null
