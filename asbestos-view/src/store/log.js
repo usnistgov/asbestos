@@ -98,11 +98,15 @@ export const logStore = {
             }
         },
         async getLogEventAnalysisForObject({commit}, parms) {
+            const channel = parms.channel
+            const session = parms.session
+            const eventId = parms.eventId
             const resourceUrl = parms.resourceUrl
             const gzip = parms.gzip
             const useProxy = parms.useProxy
+            const requestOrResponse = parms.requestOrResponse
             try {
-                const url = `analysis/url?url=${resourceUrl};gzip=${gzip};useProxy=${useProxy}`
+                const url = `analysis/url/${session}/${channel}/${eventId}/${requestOrResponse}?url=${resourceUrl};gzip=${gzip};useProxy=${useProxy}`
                 const result = await LOG.get(url)
                 //const data = {analysis: result.data, eventId: eventId}
                 commit('setAnalysis', result.data)

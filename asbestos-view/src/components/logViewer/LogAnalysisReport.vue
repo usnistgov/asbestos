@@ -31,8 +31,13 @@
         </div>
         <div class="vdivider"></div>
 
-        <div>Resource IDs are extracted from the Response message. Content shown comes directly from the server
-            via separate GETs.</div>
+        <div v-if="isRequest">
+            Content displayed is from Request message. Resources referenced by full URLs are pulled from their servers.
+        </div>
+        <div v-else>
+            Resource IDs are extracted from the Response message. Content shown comes from the server
+            via separate GETs.
+        </div>
         <div class="vdivider"></div>
 
         <!--   history navigation   -->
@@ -150,13 +155,10 @@
                     await this.$store.dispatch('getLogEventAnalysis', {channel: this.channelId, session: this.sessionId, eventId: this.eventId, requestOrResponse: this.requestOrResponse})
             },
             loadAnalysisForObject(resourceUrl) {
-                //console.log(`loadForObject ${resourceUrl}`)
-                this.$store.dispatch('getLogEventAnalysisForObject', { resourceUrl: resourceUrl, gzip: this.gzip, useProxy: this.useProxy })
+                this.$store.dispatch('getLogEventAnalysisForObject', { channel: this.channelId, session: this.sessionId, eventId: this.eventId, requestOrResponse: this.requestOrResponse, resourceUrl: resourceUrl, gzip: this.gzip, useProxy: this.useProxy })
                 this.selectedResourceIndex = -1
             },
             loadAnalysisForObjectAndAddHistory(resourceUrl, index) {
-                // console.log(`resourceUrl is ${resourceUrl}`)
-                // console.log(`index is ${index}`)
                 if (this.report.objects[index].url === 'Contained') {
                     let subReport = {}
                     subReport.base = this.report.objects[index]
@@ -184,6 +186,9 @@
             }
         },
         computed: {
+            isRequest() {
+                return this.requestOrResponse === 'request'
+            },
             report() {
                 // content from gov.nist.asbestos.analysis.AnalysisReport.Report
                 return this.$store.state.log.analysis

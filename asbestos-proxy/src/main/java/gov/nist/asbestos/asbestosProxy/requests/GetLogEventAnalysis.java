@@ -37,7 +37,11 @@ import java.util.List;
 // 2 - "log"
 // 3 - "analysis"
 // 4 - "url"
-// ?url=TheUrlOfAFHIRResource    -- this is a full url (http:...included)
+// 5 - testSession
+// 6 - channelId
+// 7 - eventId
+// 8 - "request" or "response"
+// ?url=TheUrlOfAFHIRResource;gzip=boolean;useProxy=boolean
 
 
 
@@ -54,7 +58,7 @@ public class GetLogEventAnalysis {
 
         ||
 
-        request.uriParts.size() == 5
+        request.uriParts.size() == 9
                 && "log".equalsIgnoreCase(request.uriParts.get(2))
                 && "analysis".equalsIgnoreCase(request.uriParts.get(3))
                 && "url".equalsIgnoreCase(request.uriParts.get(4));
@@ -64,34 +68,33 @@ public class GetLogEventAnalysis {
         this.request = request;
     }
 
+    private boolean analysisTargetIsRequest() {
+        String requestOrResponse = request.uriParts.get(8);
+        return requestOrResponse.equals("request");
+    }
+
     public void run() {
         log.info("GetLogEventAnalysisRequest");
-        Headers headers = Common.getRequestHeaders(request.req, Verb.GET);
-        Header acceptHeader = headers.getAccept();
-        boolean htmlOk = acceptHeader.getValue().contains("text/html");
-        boolean jsonOk = acceptHeader.getValue().contains("json");
+        String testSession = request.uriParts.get(5);
+        String channelId = request.uriParts.get(6);
+        String eventId = request.uriParts.get(7);
+        UIEvent event = request.ec.getEvent(testSession, channelId, "null", eventId);
+        String requestBodyString = event.getClientTask().getRequestBody();
+        Headers requestHeaders = new Headers(event.getClientTask().getRequestHeader());
+        String responseBodyString = event.getClientTask().getResponseBody();
+        Headers responseHeaders = new Headers(event.getClientTask().getResponseHeader());
+        String analysisSource = analysisTargetIsRequest() ? requestBodyString : responseBodyString;
+        BaseResource baseResource = ProxyBase.parse(analysisSource, Format.fromContentType(responseHeaders.getContentType().getValue()));
 
-        if (request.uriParts.size() == 9) {
-            String testSession = request.uriParts.get(5);
-            String channelId = request.uriParts.get(6);
-            String eventId = request.uriParts.get(7);
-            String requestOrResponse = request.uriParts.get(8);
-            boolean analyseResponse = requestOrResponse.equals("response");
 
-            UIEvent event = request.ec.getEvent(testSession, channelId, "null", eventId);
-            String requestBodyString = event.getClientTask().getRequestBody();
-            Headers requestHeaders = new Headers(event.getClientTask().getRequestHeader());
-            String responseBodyString = event.getClientTask().getResponseBody();
-            Headers responseHeaders = new Headers(event.getClientTask().getResponseHeader());
-
+        if (request.uriParts.get(4).equalsIgnoreCase("event")) {
             BaseResource requestResource = null;
             if (requestBodyString.length() > 0)
                 requestResource = ProxyBase.parse(requestBodyString, Format.fromContentType(requestHeaders.getContentType().getValue()));
             Bundle requestBundle = null;
             if (requestResource instanceof Bundle)
                 requestBundle = (Bundle) requestResource;
-            String analysisSource = analyseResponse ? responseBodyString : requestBodyString;
-            BaseResource baseResource = ProxyBase.parse(analysisSource, Format.fromContentType(responseHeaders.getContentType().getValue()));
+
             if (baseResource instanceof Bundle) {
                 Bundle bundle = (Bundle) baseResource;
                 String manifestReference = getManifestLocation(bundle);
@@ -101,7 +104,7 @@ public class GetLogEventAnalysis {
                             "reference for Manifest taken from transaction response",
                             false,
                             false,
-                            analyseResponse ? null : requestBundle);
+                            analysisTargetIsRequest() ? requestBundle : null);
                 else if (isSearchSet) {
                     List<Ref> refs = new ArrayList<>();
                     for (Bundle.BundleEntryComponent component : bundle.getEntry()) {
@@ -121,20 +124,28 @@ public class GetLogEventAnalysis {
             } else {
                 returnReport(new Report("Do not understand event"));
             }
-        } else {
+        } else {   // url
             String query = request.req.getQueryString();
-            if (query != null && query.contains("url=http")) {
-                int urlIndex = query.indexOf("url=http") + 4;
-                int urlEndIndex = query.indexOf(";", urlIndex);
-                String url = query.substring(urlIndex, urlEndIndex);
-                Ref ref = new Ref(url);
+            if (query != null) {
                 boolean gzip = false;
                 boolean useProxy = false;
                 if (query.contains("gzip=true"))
                     gzip = true;
                 if (query.contains("useProxy=true"))
                     useProxy = true;
-                runAndReturnReport(ref, "By Request", gzip, useProxy, null);
+                if (query.contains("url=http")){
+                    int urlIndex = query.indexOf("url=http") + 4;
+                    int urlEndIndex = query.indexOf(";", urlIndex);
+                    String url = query.substring(urlIndex, urlEndIndex);
+                    Ref ref = new Ref(url);
+                    runAndReturnReport(ref, "By Request", gzip, useProxy, null);
+                } else if (query.contains("url=urn:uuid")) {
+                    int urlIndex = query.indexOf("url=urn:uuid") + 4;
+                    int urlEndIndex = query.indexOf(";", urlIndex);
+                    String url = query.substring(urlIndex, urlEndIndex);
+                    Ref ref = new Ref(url);
+                    runAndReturnReport(ref, "By Request", gzip, useProxy, baseResource);
+                }
             }
         }
     }

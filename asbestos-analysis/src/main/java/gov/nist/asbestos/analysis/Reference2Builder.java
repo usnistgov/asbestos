@@ -23,6 +23,8 @@ class Reference2Builder {
             Object value = atts.get(okey);
             if ("reference".equals(key) && value instanceof String) {
                 refs.add(new Reference2(lastKey, (String) value));
+            } else if ("url".equals(key) && value instanceof String) {
+                refs.add(new Reference2(lastKey, (String) value));
             } else if (value instanceof Map) {
                 buildReferences2((Map)value, refs, key);
             } else if (value instanceof List) {
