@@ -84,8 +84,13 @@ public class GetLogEventAnalysis {
         String responseBodyString = event.getClientTask().getResponseBody();
         Headers responseHeaders = new Headers(event.getClientTask().getResponseHeader());
         String analysisSource = analysisTargetIsRequest() ? requestBodyString : responseBodyString;
-        BaseResource baseResource = ProxyBase.parse(analysisSource, Format.fromContentType(responseHeaders.getContentType().getValue()));
-
+        BaseResource baseResource;
+        try {
+            baseResource = ProxyBase.parse(analysisSource, Format.fromContentType(responseHeaders.getContentType().getValue()));
+        } catch (Exception e) {
+            returnReport(new Report("No content"));
+            return;
+        }
 
         if (request.uriParts.get(4).equalsIgnoreCase("event")) {
             BaseResource requestResource = null;

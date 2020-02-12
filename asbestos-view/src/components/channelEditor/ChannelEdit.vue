@@ -136,7 +136,13 @@
                 </div>
                 <div v-if="!edit">
                     <p class="caption">Channel Base Address: </p>
-                    <span>{{getChannelBase(channel)}}</span>
+                    <span class="center">{{getChannelBase(channel)}}</span>
+
+                    <p>
+                        Client sends to <b>Channel Base Address</b> and proxy forwards to <b>Fhir Base</b> for FHIR
+                        type channels. For MHD type channels the proxy forwards to the XDS Toolkit site named by
+                        <b>XDS Site Name</b>.
+                    </p>
                 </div>
             </div>
         </div>
@@ -537,5 +543,9 @@
     .caption {
         font-weight: bold;
         font-size: larger;
+    }
+    .center {
+        text-align: left;
+        margin-left: 50px;
     }
 </style>

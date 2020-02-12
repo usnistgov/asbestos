@@ -54,7 +54,7 @@ public class AnalysisReport {
         report.errors = new ArrayList<>(generalErrors);
         report.warnings = new ArrayList<>(generalWarnings);
 
-        if (baseObj != null && baseObj.getResource() != null) {
+        if (baseObj != null && baseObj.getResource() != null && !isSearchSet()) {
             report.base = new RelatedReport(baseObj, "");
             report.base.comprehensiveErrors = comprehensiveChecked == null ? new ArrayList<>() : comprehensiveChecked.report.missing; //comprehensiveErrors;
             report.base.isComprehensive = report.base.comprehensiveErrors.isEmpty(); // comprehensiveErrors != null && comprehensiveErrors.isEmpty();
@@ -130,6 +130,12 @@ public class AnalysisReport {
                 loadBase();
                 if (!generalErrors.isEmpty())
                     return buildReport();
+            } else if (contextResource != null &&
+                    contextResource instanceof Bundle &&
+                    ((Bundle) contextResource).hasType() &&
+                    ((Bundle) contextResource).getType().equals(Bundle.BundleType.SEARCHSET)) {
+                Bundle bundle = (Bundle) contextResource;
+                loadSearchSetFromContext(bundle);
             }
             buildRelated();
             comprehensiveEval();
@@ -281,34 +287,47 @@ public class AnalysisReport {
         // load all bundle parts into related so they are found without pinging a server
         if (contextResource instanceof Bundle) {
             Bundle context = (Bundle) contextResource;
-            for (Bundle.BundleEntryComponent comp : context.getEntry()) {
-                if (baseObj.getResource().equals(comp.getResource())) {
-                    // don't load baseObj into related or it will be listed twice
-                    List<Reference2> refs = Reference2Builder.buildReferences(baseObj.getResource());
-                    for (Reference2 ref : refs) {
-                        String att = ref.att;
-                        Ref theRef = new Ref(ref.reference);
-                        if (theRef.isRelative()) {
-                            Resource theResource = resourceFromBundle(context, theRef);
-                            if (theResource != null) {
-                                ResourceWrapper wrapper = new ResourceWrapper(theResource).setRef(theRef);
-                                related.add(new Related(wrapper, att));
-                            }
+            loadRelatedFromPDB(context);
+        }
+    }
+
+    private void loadRelatedFromPDB(Bundle context) {
+        for (Bundle.BundleEntryComponent comp : context.getEntry()) {
+            if (baseObj.getResource().equals(comp.getResource())) {
+                // don't load baseObj into related or it will be listed twice
+                List<Reference2> refs = Reference2Builder.buildReferences(baseObj.getResource());
+                for (Reference2 ref : refs) {
+                    String att = ref.att;
+                    Ref theRef = new Ref(ref.reference);
+                    if (theRef.isRelative()) {
+                        Resource theResource = resourceFromBundle(context, theRef);
+                        if (theResource != null) {
+                            ResourceWrapper wrapper = new ResourceWrapper(theResource).setRef(theRef);
+                            related.add(new Related(wrapper, att));
                         }
                     }
-                    break;
                 }
-//                ResourceWrapper wrapper = new ResourceWrapper(comp.getResource())
-//                        .setRef(new Ref(comp.getFullUrl()));
-//                related.add(new Related(wrapper, "in request"));
+                break;
             }
-//            for (Bundle.BundleEntryComponent comp : context.getEntry()) {
-//                if (baseObj.getResource().equals(comp.getResource()))
-//                    continue;  // don't load into related or it will be listed twice
-//                ResourceWrapper wrapper = new ResourceWrapper(comp.getResource())
-//                        .setRef(new Ref(comp.getFullUrl()));
-//                related.add(new Related(wrapper, "in request"));
-//            }
+        }
+    }
+
+    private boolean isSearchSet() {
+        if (contextResource == null) return false;
+        if (contextResource instanceof Bundle) {
+            Bundle bundle = (Bundle) contextResource;
+            return bundle.getType().equals(Bundle.BundleType.SEARCHSET);
+        }
+        return false;
+    }
+
+    private void loadSearchSetFromContext(Bundle bundle) {
+        for (Bundle.BundleEntryComponent comp : bundle.getEntry()) {
+            Resource resource = comp.getResource();
+            ResourceWrapper wrapper = new ResourceWrapper(resource).setRef(new Ref(resource.getId()));
+            if (baseObj == null)
+                baseObj = wrapper;
+            related.add(new Related(wrapper, "searchset"));
         }
     }
 
