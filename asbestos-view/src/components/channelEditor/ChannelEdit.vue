@@ -139,9 +139,14 @@
                     <span class="center">{{getChannelBase(channel)}}</span>
 
                     <p>
-                        Client sends to <b>Channel Base Address</b> and proxy forwards to <b>Fhir Base</b> for FHIR
-                        type channels. For MHD type channels the proxy forwards to the XDS Toolkit site named by
-                        <b>XDS Site Name</b>.
+                        Send to this URL and
+                        <ul>
+                            <li>Proxy will record your transaction</li>
+                            <li>Proxy will forward your transaction to
+                                <span v-if="channel.fhirBase">{{channel.fhirBase}}</span>
+                                <span v-if="channel.xdsSiteName">XDS Toolkit site {{channel.xdsSiteName}}</span>
+                            </li>
+                        </ul>
                     </p>
                 </div>
             </div>
