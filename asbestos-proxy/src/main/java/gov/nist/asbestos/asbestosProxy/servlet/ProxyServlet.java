@@ -552,7 +552,7 @@ public class ProxyServlet extends HttpServlet {
         base.setRequest(body);
         String encoding = (headers.getContentEncoding().getAllValues().isEmpty()) ? "" : headers.getContentEncoding().getAllValues().get(0);
         if (encoding.equalsIgnoreCase("gzip")) {
-            String txt = Gzip.decompressGZIP(body);
+            String txt = Gzip.decompressGZIPToString(body);
             task.putRequestBodyText(txt);
             base.setRequestText(txt);
         } else if (headers.getContentType().getAllValues().get(0).equalsIgnoreCase("text/html")) {
@@ -612,7 +612,7 @@ public class ProxyServlet extends HttpServlet {
         http.setRequest(bytes);
         String encoding = headers.getContentEncoding().getAllValues().get(0);
         if (encoding.equalsIgnoreCase("gzip")) {
-            String txt = Gzip.decompressGZIP(bytes);
+            String txt = Gzip.decompressGZIPToString(bytes);
             task.putRequestBodyText(txt);
             http.setRequest(txt.getBytes());
         } else if (headers.getContentType().getAllValues().get(0).equalsIgnoreCase("text/html")) {
@@ -679,7 +679,7 @@ public class ProxyServlet extends HttpServlet {
         else {
             String encoding = encodings.get(0);
             if (encoding != null && encoding.equalsIgnoreCase("gzip")) {
-                String txt = Gzip.decompressGZIP(bytes);
+                String txt = Gzip.decompressGZIPToString(bytes);
                 task.putRequestBodyText(txt);
                 http.setRequestText(txt);
             } else if (headers.getContentType().getAllValues().get(0).equalsIgnoreCase("text/html")) {

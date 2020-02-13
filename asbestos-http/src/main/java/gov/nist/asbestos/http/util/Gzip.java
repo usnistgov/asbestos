@@ -18,10 +18,20 @@ public class Gzip {
         }
     }
 
-    public static String decompressGZIP(byte[] input)  {
+    public static String decompressGZIPToString(byte[] input)  {
         try {
             try (GzipCompressorInputStream in = new GzipCompressorInputStream(new ByteArrayInputStream(input))) {
                 return new String(IOUtils.toByteArray(in));
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static byte[] decompressGZIP(byte[] input)  {
+        try {
+            try (GzipCompressorInputStream in = new GzipCompressorInputStream(new ByteArrayInputStream(input))) {
+                return IOUtils.toByteArray(in);
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -50,16 +60,4 @@ public class Gzip {
         return baos.toByteArray();
     }
 
-//    public static byte[] compressGZIP(byte[] input) {
-//        try  {
-//            ByteArrayOutputStream out = new ByteArrayOutputStream();
-//            //out = new ByteArrayOutputStream();
-//            try (GzipCompressorOutputStream outb = new GzipCompressorOutputStream(out)) {
-//                outb.write(input);
-//                return out.toByteArray();
-//            }
-//        } catch (Exception e) {
-//            throw new RuntimeException(e);
-//        }
-//    }
 }

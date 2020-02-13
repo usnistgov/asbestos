@@ -26,6 +26,11 @@ public class Headers {
         return map;
     }
 
+    public boolean isZipped() {
+        Header contentEncodingHeader = get("Content-Encoding");
+        return contentEncodingHeader != null && contentEncodingHeader.getValue().contains("gzip");
+    }
+
     public Headers withContentType(String type) {
         Header ct = new Header("Content-Type", type);
         headers.add(ct);

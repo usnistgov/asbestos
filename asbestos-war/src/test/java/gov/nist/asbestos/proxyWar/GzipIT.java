@@ -3,17 +3,10 @@ package gov.nist.asbestos.proxyWar;
 import gov.nist.asbestos.client.Base.ProxyBase;
 import gov.nist.asbestos.client.client.FhirClient;
 import gov.nist.asbestos.client.client.Format;
-import gov.nist.asbestos.client.events.ProxyEvent;
-import gov.nist.asbestos.client.events.UIEvent;
 import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import gov.nist.asbestos.http.headers.Headers;
 import gov.nist.asbestos.http.util.Gzip;
-import gov.nist.asbestos.serviceproperties.ServiceProperties;
-import gov.nist.asbestos.serviceproperties.ServicePropertiesEnum;
-import gov.nist.asbestos.sharedObjects.ChannelConfig;
-import gov.nist.asbestos.sharedObjects.ChannelConfigFactory;
-import ihe.iti.xds_b._2007.DocumentRequest;
 import org.hl7.fhir.r4.model.BaseResource;
 import org.hl7.fhir.r4.model.DocumentReference;
 import org.hl7.fhir.r4.model.Enumerations;
@@ -88,7 +81,7 @@ class GzipIT {
     void zipUnzip() {
         String data = "ABCDEFG";
         byte[] compressed = Gzip.compressGZIP(data.getBytes());
-        String uncompressed = Gzip.decompressGZIP(compressed);
+        String uncompressed = Gzip.decompressGZIPToString(compressed);
         assertEquals(data, uncompressed);
     }
 
