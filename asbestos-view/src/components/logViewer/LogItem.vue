@@ -54,6 +54,8 @@
 
             <!-- Inspect Validations -->
             <div class="vdivider"></div>
+            <div class="vdivider"></div>
+            <div class="vdivider"></div>
             <div>
                 <span v-bind:class="{
                         selected: inspectRequest,

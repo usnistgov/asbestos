@@ -62,7 +62,10 @@ public class Ref {
             uri = ref.getUri();
             return;
         }
-        uri = build(ref.toString() + "?" +  parameters);
+        uri = build(
+                ref.toString()
+                        + "?" +  parameters
+        );
     }
 
     public Ref(Reference reference) {
@@ -119,13 +122,17 @@ public class Ref {
             } else {
                 port = ":" + reference.getPort();
             }
+            String query = uri.getQuery();
+            if (query != null && query.length() > 0)
+                query = "?" + query;
+            if (query == null)
+                query = "";
             return new Ref(new URI((reference.getScheme() == null ? "http" : reference.getScheme())
                     + "://"
                     + ((reference.getHost() == null) ? this.uri.getHost() : reference.getHost())
                     + port
                     + uri.getPath()
-                    + "?"
-                    + uri.getQuery()));
+                    + query));
         } catch (URISyntaxException e) {
             throw new Error(e);
         }
