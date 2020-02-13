@@ -55,6 +55,20 @@
 
         <h3>MHD Document Responder</h3>
         Tests under development
+
+        <h2>Inspector</h2>
+        The Inspector is a tool for viewing the Proxy logs in raw mode (as they were sent on the wire) or tabular
+        form.  The contents of a Provide Document Bundle can be displayed as well as the related content extracted
+        from the server.  Also their is a PDB Validator that validates the PDB Request and Response message.
+
+        The Inspector can be entered:
+
+        <ul>
+            <li>From the running of a Test Collection (open a test, open a transaction/action and
+                select *Message Log*).</li>
+            <li>From the Getter (automatically opened at completion of HTTP GET.</li>
+            <li>From the Event Viewer.  Select an event and the Inspector opens.</li>
+        </ul>
     </div>
 </template>
 
