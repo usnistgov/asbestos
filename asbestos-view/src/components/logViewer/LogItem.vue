@@ -23,7 +23,7 @@
                     </span>
                 </span>
 
-                <a href="https://github.com/usnistgov/asbestos/wiki/zMessages" target="_blank">
+                <a href="https://github.com/usnistgov/asbestos/wiki/Connectathon-FAQ#inspector" target="_blank">
                 <img src="../../assets/info.png">
                 </a>
 

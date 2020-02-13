@@ -56,6 +56,15 @@ public class Ref {
         uri = build(theRef);
     }
 
+    public Ref(Ref base, String resourceType, String id, String version, String parameters)  {
+        Ref ref = new Ref(base, resourceType, id, version);
+        if (parameters == null || parameters.equals("")) {
+            uri = ref.getUri();
+            return;
+        }
+        uri = build(ref.toString() + "?" +  parameters);
+    }
+
     public Ref(Reference reference) {
         Objects.requireNonNull(reference);
         uri = build(reference.getReference());
@@ -114,7 +123,9 @@ public class Ref {
                     + "://"
                     + ((reference.getHost() == null) ? this.uri.getHost() : reference.getHost())
                     + port
-                    + uri.getPath()));
+                    + uri.getPath()
+                    + "?"
+                    + uri.getQuery()));
         } catch (URISyntaxException e) {
             throw new Error(e);
         }
@@ -249,7 +260,8 @@ public class Ref {
         String resourceType = getResourceType();
         String id = getId();
         String version = getVersion();
-        return new Ref(theBase, resourceType, id, version).httpizeTo(uri);
+        String params = getParameters();
+        return new Ref(theBase, resourceType, id, version, params);//.httpizeTo(uri);
     }
 
     public Ref rebase(Ref newBase) {
@@ -319,7 +331,8 @@ public class Ref {
 
     private URI build(String ref) {
         try {
-            return httpize(new URI(ref));
+            URI uri = new URI(ref);
+            return httpize(uri);
         } catch (Exception e) {
             throw new Error(e);
         }

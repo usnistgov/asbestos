@@ -25,4 +25,15 @@ class RefTest {
        aref = aref.httpizeTo(new URI(location));
         assertEquals("http://localhost:8080/proxy/prox/default_fhirpass/Channel/Patient/15142/_history/1", aref.toString());
     }
+
+    @Test
+    void rebaseWithQueryParams() {
+        String location = "http://localhost:8080/fhir/fhir/Patient?birthdate=1950-02-23&family=Alder&given=Alex";
+        String newBase = "http://localhost:8081/asbestos/proxy/default__default";
+
+        Ref ref = new Ref(location);
+        Ref newLocationRef = ref.rebase(newBase);
+        String newLocation = newLocationRef.toString();
+        assertEquals("http://localhost:8081/asbestos/proxy/default__default/Patient?birthdate=1950-02-23&family=Alder&given=Alex", newLocation);
+    }
 }

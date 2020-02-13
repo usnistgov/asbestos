@@ -110,7 +110,8 @@ public class PassthroughChannel extends BaseChannel /*implements IBaseChannel*/ 
                 Bundle.BundleLinkComponent linkComponent = bundle.getLink("self");
                 if (linkComponent != null) {
                     if (linkComponent.hasUrl()) {
-                        linkComponent.setUrl(newBase);
+                        linkComponent.setUrl(new Ref(linkComponent.getUrl()).rebase(newBase).toString());
+                        //linkComponent.setUrl(newBase);
                         updated = true;
                     }
                 }
@@ -126,6 +127,12 @@ public class PassthroughChannel extends BaseChannel /*implements IBaseChannel*/ 
                             responseComponent.setLocation(locRef.toString());
                             updated = true;
                         }
+                    }
+                }
+                if (component.hasFullUrl()) {
+                    Ref fullUrl = new Ref(component.getFullUrl());
+                    if (fullUrl.isAbsolute()) {
+                        component.setFullUrl(fullUrl.rebase(newBase).toString());
                     }
                 }
             }
