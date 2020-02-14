@@ -5,8 +5,6 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 import gov.nist.asbestos.http.operations.HttpDelete;
 import gov.nist.asbestos.http.operations.HttpGet;
 import gov.nist.asbestos.http.operations.HttpPost;
-import gov.nist.asbestos.serviceproperties.ServiceProperties;
-import gov.nist.asbestos.serviceproperties.ServicePropertiesEnum;
 import gov.nist.asbestos.sharedObjects.ChannelConfig;
 import gov.nist.asbestos.sharedObjects.ChannelConfigFactory;
 import org.hl7.fhir.r4.model.Bundle;
@@ -16,7 +14,6 @@ import org.hl7.fhir.r4.model.Resource;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -28,24 +25,25 @@ public class CapabilityStatementIT {
     private static FhirContext ctx;
     private static IGenericClient client;
     private static String proxyPort;
-    private static final String channelId = "mhdtest";
+    private static final String channelIdWithCsLog = "mhdtest_with_cslog";
+    private static final String channelIdWithoutCsLog = "mhdtest_without_cslog";
+
 
     @BeforeAll
     static void beforeAll() throws Exception {
-        URI baseUri = new URI("/asbestos/proxy/default__" + channelId);
+        URI baseUri = new URI("/asbestos/proxy/default__" + channelIdWithCsLog);
         ctx = FhirContext.forR4();
         proxyPort = ITConfig.getProxyPort();
         String proxyBase = String.format("http://localhost:%s%s", proxyPort, baseUri.toString());
         System.out.println(String.format("Using proxyBase: %s", proxyBase));
         client = ctx.newRestfulGenericClient(proxyBase);
 
-        deleteAndRecreateMhdTestChannel();
-
-        useServerCopyProperties();
+        deleteAndRecreateMhdTestChannel(channelIdWithCsLog, true);
+        deleteAndRecreateMhdTestChannel(channelIdWithoutCsLog, false);
     }
 
 
-    private static void deleteAndRecreateMhdTestChannel() throws URISyntaxException, IOException {
+    private static void deleteAndRecreateMhdTestChannel(String channelId, boolean csloggingEnabled) throws URISyntaxException, IOException {
         // create
         ChannelConfig channelConfig = new ChannelConfig()
                 .setTestSession("default")
@@ -53,7 +51,8 @@ public class CapabilityStatementIT {
                 .setEnvironment("default")
                 .setActorType("fhir")
                 .setChannelType("mhd")
-                .setXdsSiteName("bogus__rr"); // XdsSiteName is not used for this test
+                .setXdsSiteName("bogus__rr")
+                .setLogCapabilityStatement(csloggingEnabled); // XdsSiteName is not used for this test
 
         // delete
         String json = ChannelConfigFactory.convert(channelConfig);
@@ -110,52 +109,22 @@ public class CapabilityStatementIT {
         }
     }
 
-    /**
-     * NOTE
-     * NOTE
-     * NOTE
-     * Server response depends on the server copy of the service.properties, so point to the same copy since the property file will be manipulated for testing purposes.
-     * @throws Exception
-     */
-    private static void useServerCopyProperties() throws Exception {
-        String spFileString = ServiceProperties.getLocalSpFile(CapabilityStatementIT.class).toString();
-        String targetString = "test-classes";
-        String replaceString = "asbestos-war" + File.separator + "WEB-INF" + File.separator + "classes";
-
-        if (spFileString.contains(targetString)) {
-            File spFile = new File(spFileString.replace(targetString, replaceString));
-
-            assert  spFile.exists();
-
-            System.setProperty("SERVICE_PROPERTIES", spFile.toString());
-        } else {
-            throw new Exception("Unrecognized file path: " + spFileString);
-        }
-
-    }
-
     @Test
     void getCapabilityStatementWithoutLoggingEvent() throws Exception {
-        ServiceProperties.getInstance().setProperty(ServicePropertiesEnum.LOG_CS_METADATA_REQUEST.getKey(), "false");
-        ServiceProperties.getInstance().save();
-
         HttpGet getter = new HttpGet();
-        getter.getJson(new URI("http://localhost:"+ proxyPort + "/asbestos/proxy/default__" + channelId + "/metadata"));
+        getter.getJson(new URI("http://localhost:"+ proxyPort + "/asbestos/proxy/default__" + channelIdWithoutCsLog + "/metadata"));
         assertEquals(200, getter.getStatus());
         assert getter.getResponseHeaders().getHeaderValue("x-proxy-event") == null;
     }
 
     @Test
     void getCapabilityStatementWithLoggingEvent() throws Exception {
-        ServiceProperties.getInstance().setProperty(ServicePropertiesEnum.LOG_CS_METADATA_REQUEST.getKey(), "true");
-        ServiceProperties.getInstance().save();
-
         HttpGet getter = new HttpGet();
-        getter.getJson(new URI("http://localhost:"+ proxyPort + "/asbestos/proxy/default__" + channelId + "/metadata"));
+        getter.getJson(new URI("http://localhost:"+ proxyPort + "/asbestos/proxy/default__" + channelIdWithCsLog + "/metadata"));
         assertEquals(200, getter.getStatus());
         String xProxyEvent = getter.getResponseHeaders().getHeaderValue("x-proxy-event");
         assert xProxyEvent != null;
-        assert xProxyEvent.length() > 0 && xProxyEvent.contains("/asbestos/log/default/"+ channelId +"/metadata");
+        assert xProxyEvent.length() > 0 && xProxyEvent.contains("/asbestos/log/default/"+ channelIdWithCsLog +"/metadata");
 
         getter.getJson(new URI(xProxyEvent));
         assertEquals(200, getter.getStatus());
