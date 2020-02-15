@@ -13,10 +13,10 @@ public class ChannelConfig {
     private String channelId;   // simple id (no testSesssion__ prefix)
     private String actorType;
     private String channelType;
-    private boolean includeValidation;
+    private boolean includeValidation = false;
     private String fhirBase = null;   // points to fhir server is channel type if FHIR
     private String xdsSiteName;       // point to XDS server if channel type is MHD
-    private boolean writeLocked;
+    private boolean writeLocked = false;
 
     public String toString() {
         return new StringBuilder().append("Channel ").append(testSession).append("__").append(channelId)

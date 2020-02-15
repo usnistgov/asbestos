@@ -37,6 +37,8 @@ public class CreateChannelRequest {
         String rawRequest = IOUtils.toString(request.req.getInputStream(), Charset.defaultCharset());   // json
         log.debug("CREATE Channel " + rawRequest);
         ChannelConfig channelConfig = ChannelConfigFactory.convert(rawRequest);
+        if (channelConfig.getActorType() == null || channelConfig.getActorType().equals(""))
+            channelConfig.setActorType("fhir");
         SimStore simStore = new SimStore(request.externalCache,
                 new SimId(new TestSession(channelConfig.getTestSession()),
                         channelConfig.getChannelId(),

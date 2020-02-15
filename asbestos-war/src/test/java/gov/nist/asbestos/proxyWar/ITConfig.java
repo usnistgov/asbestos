@@ -3,7 +3,7 @@ package gov.nist.asbestos.proxyWar;
 /**
  * Use this to control port for maven vs manual running of IT tests
  */
-class ITConfig {
+public class ITConfig {
     private static final boolean forMavenBuild = false;
 
     static String getFhirPort() {
@@ -29,4 +29,5 @@ class ITConfig {
     static String getFhirBase() {
         return "http://localhost:" + getFhirPort() + "/fhir/fhir";
     }
+    static public String getAsbestosBase() { return "http://localhost:" + getProxyPort() + "/asbestos"; }
 }

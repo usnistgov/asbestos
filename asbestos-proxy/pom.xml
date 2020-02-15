@@ -36,7 +36,12 @@
         </dependency>
         <dependency>
             <groupId>gov.nist.asbestos</groupId>
-            <artifactId>asbestos-http</artifactId>
+            <artifactId>asbestos-shared-objects</artifactId>
+            <version>1.3.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>gov.nist.asbestos</groupId>
+            <artifactId>api</artifactId>
             <version>1.3.0-SNAPSHOT</version>
         </dependency>
         <dependency>
