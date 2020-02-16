@@ -1,4 +1,4 @@
-package gov.nist.asbestos.proxyWar;
+package gov.nist.asbestos.proxyWar.basic;
 
 import gov.nist.asbestos.utilities.MultipartSender;
 import gov.nist.asbestos.utilities.PnrWrapper;

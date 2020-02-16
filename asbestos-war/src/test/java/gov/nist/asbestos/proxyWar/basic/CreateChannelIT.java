@@ -1,10 +1,11 @@
-package gov.nist.asbestos.proxyWar;
+package gov.nist.asbestos.proxyWar.basic;
 
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import gov.nist.asbestos.http.operations.HttpDelete;
 import gov.nist.asbestos.http.operations.HttpGet;
 import gov.nist.asbestos.http.operations.HttpPost;
+import gov.nist.asbestos.proxyWar.support.ITConfig;
 import gov.nist.asbestos.sharedObjects.ChannelConfig;
 import gov.nist.asbestos.sharedObjects.ChannelConfigFactory;
 import org.junit.jupiter.api.BeforeAll;
@@ -15,7 +16,6 @@ import java.lang.reflect.Type;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 

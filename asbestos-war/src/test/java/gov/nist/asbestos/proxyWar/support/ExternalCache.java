@@ -1,11 +1,11 @@
-package gov.nist.asbestos.proxyWar;
+package gov.nist.asbestos.proxyWar.support;
 
 import java.io.File;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Paths;
 
-class ExternalCache {
+public class ExternalCache {
 
     public File getExternalCache() {
         URL url = this.getClass().getResource("/external_cache/findme.txt");

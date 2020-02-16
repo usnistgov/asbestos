@@ -1,4 +1,4 @@
-package gov.nist.asbestos.proxyWar;
+package gov.nist.asbestos.proxyWar.support;
 
 import gov.nist.asbestos.serviceproperties.ServiceProperties;
 import gov.nist.asbestos.serviceproperties.ServicePropertiesEnum;

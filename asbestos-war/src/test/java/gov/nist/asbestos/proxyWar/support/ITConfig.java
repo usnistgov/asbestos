@@ -1,4 +1,4 @@
-package gov.nist.asbestos.proxyWar;
+package gov.nist.asbestos.proxyWar.support;
 
 /**
  * Use this to control port for maven vs manual running of IT tests
@@ -6,7 +6,7 @@ package gov.nist.asbestos.proxyWar;
 public class ITConfig {
     private static final boolean forMavenBuild = false;
 
-    static String getFhirPort() {
+    public static String getFhirPort() {
         // for running in automatic IT tests from Maven
         if (forMavenBuild)
             return "8877";
@@ -16,7 +16,7 @@ public class ITConfig {
         return "8080";
     }
 
-    static String getProxyPort() {
+    public static String getProxyPort() {
         // for running in automatic IT tests from Maven
         if (forMavenBuild)
             return "8877";
@@ -26,7 +26,7 @@ public class ITConfig {
         return "8081";
     }
 
-    static String getFhirBase() {
+    public static String getFhirBase() {
         return "http://localhost:" + getFhirPort() + "/fhir/fhir";
     }
     static public String getAsbestosBase() { return "http://localhost:" + getProxyPort() + "/asbestos"; }

@@ -6,6 +6,7 @@ import gov.nist.asbestos.client.client.Format;
 import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import gov.nist.asbestos.http.headers.Headers;
+import gov.nist.asbestos.proxyWar.support.ITConfig;
 import org.hl7.fhir.r4.model.Bundle;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;

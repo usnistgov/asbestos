@@ -1,14 +1,12 @@
-package gov.nist.asbestos.proxyWar;
+package gov.nist.asbestos.proxyWar.basic;
 
-import com.google.gson.Gson;
 import gov.nist.asbestos.client.client.FhirClient;
 import gov.nist.asbestos.client.client.Format;
 import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import gov.nist.asbestos.http.headers.Headers;
-import gov.nist.asbestos.http.operations.HttpPost;
-import gov.nist.asbestos.serviceproperties.ServiceProperties;
-import gov.nist.asbestos.serviceproperties.ServicePropertiesEnum;
+import gov.nist.asbestos.proxyWar.support.ChannelsForTests;
+import gov.nist.asbestos.proxyWar.support.ITConfig;
 import gov.nist.asbestos.sharedObjects.ChannelConfig;
 import org.hl7.fhir.r4.model.DocumentReference;
 import org.junit.jupiter.api.BeforeAll;

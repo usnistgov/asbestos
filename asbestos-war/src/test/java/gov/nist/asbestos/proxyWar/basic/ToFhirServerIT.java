@@ -1,7 +1,9 @@
-package gov.nist.asbestos.proxyWar;
+package gov.nist.asbestos.proxyWar.basic;
 
 import ca.uhn.fhir.context.FhirContext;
 import gov.nist.asbestos.client.client.FhirClient;
+import gov.nist.asbestos.proxyWar.support.ExternalCache;
+import gov.nist.asbestos.proxyWar.support.ITConfig;
 import gov.nist.asbestos.simapi.validation.Val;
 import gov.nist.asbestos.testEngine.engine.TestEngine;
 import org.hl7.fhir.r4.model.TestReport;

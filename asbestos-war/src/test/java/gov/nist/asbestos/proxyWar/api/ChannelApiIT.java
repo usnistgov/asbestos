@@ -4,7 +4,7 @@ package gov.nist.asbestos.proxyWar.api;
 import gov.nist.asbestos.api.Channel;
 import gov.nist.asbestos.api.impl.ApiConfig;
 import gov.nist.asbestos.api.impl.ChannelRepo;
-import gov.nist.asbestos.proxyWar.ITConfig;
+import gov.nist.asbestos.proxyWar.support.ITConfig;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;

@@ -1,4 +1,4 @@
-package gov.nist.asbestos.proxyWar;
+package gov.nist.asbestos.proxyWar.support;
 
 import gov.nist.asbestos.http.operations.HttpPost;
 import gov.nist.asbestos.sharedObjects.ChannelConfig;

@@ -1,7 +1,9 @@
-package gov.nist.asbestos.proxyWar;
+package gov.nist.asbestos.proxyWar.basic;
 
 import gov.nist.asbestos.client.client.FhirClient;
 import gov.nist.asbestos.http.operations.HttpPost;
+import gov.nist.asbestos.proxyWar.support.ExternalCache;
+import gov.nist.asbestos.proxyWar.support.ITConfig;
 import gov.nist.asbestos.sharedObjects.ChannelConfig;
 import gov.nist.asbestos.sharedObjects.ChannelConfigFactory;
 import gov.nist.asbestos.simapi.validation.Val;

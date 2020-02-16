@@ -5,7 +5,7 @@ import gov.nist.asbestos.api.TestResult;
 import gov.nist.asbestos.api.impl.ApiConfig;
 import gov.nist.asbestos.api.impl.ChannelRepo;
 import gov.nist.asbestos.api.impl.TestRepo;
-import gov.nist.asbestos.proxyWar.ITConfig;
+import gov.nist.asbestos.proxyWar.support.ITConfig;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;

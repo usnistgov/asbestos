@@ -1,4 +1,4 @@
-package gov.nist.asbestos.proxyWar;
+package gov.nist.asbestos.proxyWar.basic;
 
 import gov.nist.asbestos.client.Base.ProxyBase;
 import gov.nist.asbestos.client.client.FhirClient;
@@ -7,6 +7,7 @@ import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import gov.nist.asbestos.http.headers.Headers;
 import gov.nist.asbestos.http.util.Gzip;
+import gov.nist.asbestos.proxyWar.support.ITConfig;
 import org.hl7.fhir.r4.model.BaseResource;
 import org.hl7.fhir.r4.model.DocumentReference;
 import org.hl7.fhir.r4.model.Enumerations;
