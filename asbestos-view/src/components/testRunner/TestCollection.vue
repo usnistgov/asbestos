@@ -177,7 +177,7 @@
                     return
                 this.$store.commit('setCurrentTest', null)
                 try {
-                    const response = await ENGINE.post(`testrun/${this.sessionId}__${this.channelId}/${this.testCollection}/${testName}?_format=${this.useJson ? 'json' : 'xml'};_gzip=${this.gzip}`)
+                    const response = await ENGINE.get(`testrun/${this.sessionId}__${this.channelId}/${this.testCollection}/${testName}?_format=${this.useJson ? 'json' : 'xml'};_gzip=${this.gzip}`)
                     this.$store.commit('setTestReport', { testName: testName, testReport: response.data })
                 } catch (error) {
                     this.error(error)

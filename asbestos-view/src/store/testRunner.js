@@ -173,28 +173,28 @@ export const testRunnerStore = {
                     commit('setError', url + ': ' + error)
                 })
         },
-        loadLastMarker({commit, rootState}) {
-            const uri = `marker/${rootState.base.session}/${rootState.base.channelId}`
-            LOG.get(uri)
-                .then(response => {
-                    const value = response.data === '' ? 'None' : response.data
-                    commit('setLastMarker', value)
-                })
-                .catch(function (error) {
-                    commit('setError', uri + ': ' + error)
-                })
-        },
-        setMarker({commit, rootState}) {
-            const url  = `marker/${rootState.base.session}/${rootState.base.channelId}`
-            LOG.post(url)
-                .then(response => {
-                    const value = response.data === '' ? 'None' : response.data
-                    commit('setLastMarker', value)
-                })
-                .catch(function (error) {
-                    commit('setError', url + ': ' + error)
-                })
-        },
+        // loadLastMarker({commit, rootState}) {
+        //     const uri = `marker/${rootState.base.session}/${rootState.base.channelId}`
+        //     LOG.get(uri)
+        //         .then(response => {
+        //             const value = response.data === '' ? 'None' : response.data
+        //             commit('setLastMarker', value)
+        //         })
+        //         .catch(function (error) {
+        //             commit('setError', uri + ': ' + error)
+        //         })
+        // },
+        // setMarker({commit, rootState}) {
+        //     const url  = `marker/${rootState.base.session}/${rootState.base.channelId}`
+        //     LOG.post(url)
+        //         .then(response => {
+        //             const value = response.data === '' ? 'None' : response.data
+        //             commit('setLastMarker', value)
+        //         })
+        //         .catch(function (error) {
+        //             commit('setError', url + ': ' + error)
+        //         })
+        // },
         loadTestScript({commit}, payload ) {
             const testCollection = payload.testCollection
             const testId = payload.testId

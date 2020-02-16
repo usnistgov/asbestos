@@ -49,6 +49,7 @@ public class TestEngineServlet extends HttpServlet {
             else if (GetClientEventEvalRequest.isRequest(request)) new GetClientEventEvalRequest(request).run();
             else if (HapiHeartbeat.isRequest(request)) new HapiHeartbeat(request).run();
             else if (XdsHeartbeat.isRequest(request)) new XdsHeartbeat(request).run();
+            else if (RunTestRequest.isRequest(request)) new RunTestRequest(request).run();
             else throw new Exception("Invalid request - do not understand URI " + request.uri);
 
         } catch (RuntimeException e) {
@@ -69,9 +70,8 @@ public class TestEngineServlet extends HttpServlet {
         log.info("Test Engine POST " + request.uri);
 
         try {
-
-            if (RunTestRequest.isRequest(request)) new RunTestRequest(request).run();
-            else if (EvalRequest.isRequest(request)) new EvalRequest(request).run();
+            // not sure this is used
+            if (EvalRequest.isRequest(request)) new EvalRequest(request).run();
             else throw new Exception("Invalid request - do not understand URI " + request.uri);
 
         } catch (IOException e) {
