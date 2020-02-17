@@ -1,8 +1,8 @@
-package gov.nist.asbestos.api.repo;
+package gov.nist.asbestos.asbestosApi.repo;
 
-import gov.nist.asbestos.api.Event;
-import gov.nist.asbestos.api.EventId;
-import gov.nist.asbestos.api.TestSession;
+import gov.nist.asbestos.asbestosApi.Event;
+import gov.nist.asbestos.asbestosApi.EventId;
+import gov.nist.asbestos.asbestosApi.TestSession;
 import gov.nist.asbestos.sharedObjects.ChannelConfig;
 
 public interface EventRepo {

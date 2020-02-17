@@ -1,6 +1,8 @@
 package gov.nist.asbestos.client.events;
 
 import gov.nist.asbestos.client.Base.EC;
+import gov.nist.asbestos.serviceproperties.ServiceProperties;
+import gov.nist.asbestos.serviceproperties.ServicePropertiesEnum;
 
 import java.io.File;
 import java.net.URI;
@@ -74,20 +76,34 @@ public class UIEvent {
         this.resourceType = resourceType;
     }
 
+    // this points to UI/browser rendition
     public URI getURI() {
         try {
-            return new URI("http://" +
-            hostPort +
-            "/asbestos/log/" +
-            testSession + "/" +
-            channelId + "/" +
-            resourceType + "/" +
-            eventName);
+            return new URI(
+                    ServiceProperties.getInstance().getPropertyOrStop(ServicePropertiesEnum.UI_FHIR_TOOLKIT_BASE)
+                    + "/session/" + testSession
+                    + "/channel/" + channelId
+                    + "/lognav/" + eventName
+            );
         } catch (URISyntaxException e) {
             throw new Error(e);
         }
-
     }
+
+//    // this points to HTML generator
+//    public URI getURI() {
+//        try {
+//            return new URI("http://" +
+//            hostPort +
+//            "/asbestos/log/" +
+//            testSession + "/" +
+//            channelId + "/" +
+//            resourceType + "/" +
+//            eventName);
+//        } catch (URISyntaxException e) {
+//            throw new Error(e);
+//        }
+//    }
 
     public void setHostPort(String hostPort) {
         this.hostPort = hostPort;

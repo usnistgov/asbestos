@@ -1,6 +1,4 @@
-package gov.nist.asbestos.api;
-
-import gov.nist.asbestos.sharedObjects.ChannelConfig;
+package gov.nist.asbestos.asbestosApi;
 
 import java.util.List;
 

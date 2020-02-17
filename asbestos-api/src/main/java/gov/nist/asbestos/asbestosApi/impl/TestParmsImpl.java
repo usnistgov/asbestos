@@ -1,6 +1,6 @@
-package gov.nist.asbestos.api.impl;
+package gov.nist.asbestos.asbestosApi.impl;
 
-import gov.nist.asbestos.api.TestParms;
+import gov.nist.asbestos.asbestosApi.TestParms;
 
 public class TestParmsImpl implements TestParms {
     private boolean useJson = true;

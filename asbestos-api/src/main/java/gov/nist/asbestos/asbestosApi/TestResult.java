@@ -1,4 +1,4 @@
-package gov.nist.asbestos.api;
+package gov.nist.asbestos.asbestosApi;
 
 import org.hl7.fhir.r4.model.TestReport;
 import org.hl7.fhir.r4.model.TestScript;

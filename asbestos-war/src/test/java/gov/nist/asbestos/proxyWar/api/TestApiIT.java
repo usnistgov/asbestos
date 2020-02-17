@@ -1,10 +1,10 @@
 package gov.nist.asbestos.proxyWar.api;
 
-import gov.nist.asbestos.api.Channel;
-import gov.nist.asbestos.api.TestResult;
-import gov.nist.asbestos.api.impl.ApiConfig;
-import gov.nist.asbestos.api.impl.ChannelRepo;
-import gov.nist.asbestos.api.impl.TestRepo;
+import gov.nist.asbestos.asbestosApi.Channel;
+import gov.nist.asbestos.asbestosApi.TestResult;
+import gov.nist.asbestos.asbestosApi.impl.ApiConfig;
+import gov.nist.asbestos.asbestosApi.impl.ChannelRepo;
+import gov.nist.asbestos.asbestosApi.impl.TestRepo;
 import gov.nist.asbestos.proxyWar.support.ITConfig;
 import org.junit.jupiter.api.Test;
 

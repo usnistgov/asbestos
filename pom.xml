@@ -66,7 +66,7 @@
         <module>asbestos-test-engine</module>
         <module>service-properties</module>
         <module>asbestos-analysis</module>
-        <module>api</module>
+        <module>asbestos-api</module>
     </modules>
 
     <dependencyManagement>

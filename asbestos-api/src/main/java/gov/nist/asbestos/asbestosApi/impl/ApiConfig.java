@@ -1,4 +1,4 @@
-package gov.nist.asbestos.api.impl;
+package gov.nist.asbestos.asbestosApi.impl;
 
 import java.util.Objects;
 

@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
-import {ENGINE, LOG} from '../common/http-common'
+import {ENGINE} from '../common/http-common'
 import {FHIRTOOLKITBASEURL} from "../common/http-common";
 
 Vue.use(Vuex)

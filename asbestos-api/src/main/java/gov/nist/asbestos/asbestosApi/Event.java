@@ -1,4 +1,4 @@
-package gov.nist.asbestos.api;
+package gov.nist.asbestos.asbestosApi;
 
 import gov.nist.asbestos.sharedObjects.ChannelConfig;
 

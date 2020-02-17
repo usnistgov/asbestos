@@ -1,6 +1,6 @@
-package gov.nist.asbestos.api.impl;
+package gov.nist.asbestos.asbestosApi.impl;
 
-import gov.nist.asbestos.api.Channel;
+import gov.nist.asbestos.asbestosApi.Channel;
 import gov.nist.asbestos.http.operations.HttpDelete;
 import gov.nist.asbestos.http.operations.HttpGet;
 import gov.nist.asbestos.http.operations.HttpPost;
