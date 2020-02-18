@@ -84,11 +84,12 @@
             },
             onOkClick() {
                 if (this.doDefaultSignIn) {
-                     this.defaultSignIn().then(response => {
-                         if (typeof response === 'boolean') {
-                             this.userProps.signedIn = response
+                    const that = this
+                    this.defaultSignIn().then(response => {
+                         if (response.data && response.data.isSignedIn) {
+                             that.userProps.signedIn = response.data.isSignedIn
                          }
-                         this.$emit('onOkClick')
+                         that.$emit('onOkClick')
                     })
                 } else {
                    this.userProps.signedIn = false
@@ -99,21 +100,24 @@
                 this.$emit('onCancelClick')
             },
             async defaultSignIn() {
-                let signedIn = false
                 const that = this
-                await TLS_UI_PROXY.get('signIn',  { auth: {username: this.usernameTxt, password: this.passwordTxt}})
+                return await TLS_UI_PROXY.get('signIn',  { auth: {username: this.usernameTxt, password: this.passwordTxt}})
                     .then(function () {
                         that.userProps.bauser = that.usernameTxt
                         that.userProps.bapw = that.passwordTxt
-                        signedIn = true
                         that.msg('You are signed-in.')
+                        return {
+                            data: {isSignedIn : true}
+                        }
                     })
                     .catch(function (error) {
                         let msg = ((error) ? error.message: '' )
                         msg += ((error && error.response && error.response.status && error.response.statusText) ? (error.response.status +  ': ' + error.response.statusText) : "")
                         that.error({message: msg})
+                        return {
+                            data: {isSignedIn : false}
+                        }
                     })
-                return signedIn
             }
 
         },
