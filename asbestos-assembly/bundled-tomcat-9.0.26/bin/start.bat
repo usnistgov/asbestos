@@ -29,21 +29,17 @@ SET XDSWEBAPPS=%XDSTOOLKIT%\webapps
 
 ECHO CATALINA_HOME is %CATALINA_HOME%
 
-REM this count includes parent dir so count of 1 means no sub-directories
+REM This count includes parent dir so count of 1 means no sub-directories
 ECHO Looking at %XDSWEBAPPS%
 
 SET /A "WEBAPPSCOUNT=0"
-SET "FLDR_NAME="
-SET "FLDR_NAME_PART="
 
+REM Check for non-empty folders
 FOR /D %%G IN ("%XDSWEBAPPS%\*") DO (
-    SET FLDR_NAME=%%G
-    SET "FLDR_NAME_PART=%FLDR_NAME:~-4%"
-    IF DEFINED FLDR_NAME_PART (
-       IF /I NOT [%FLDR_NAME_PART%]==ROOT SET /A "WEBAPPSCOUNT=WEBAPPSCOUNT+1"
-    )
+    FOR /F "tokens=*" %%H in ('DIR /B "%%G\*"') DO SET /A "WEBAPPSCOUNT=WEBAPPSCOUNT+1"
 )
 
+REM Check for war files ifnon-empty folder in webapps count is zero
 IF %WEBAPPSCOUNT% EQU 0 (
  REM Any war file
  IF EXIST "%XDSWEBAPPS%\*.war" (
@@ -51,7 +47,7 @@ IF %WEBAPPSCOUNT% EQU 0 (
  )
 )
 
-REM start XdsToolkit base if its webapps dir is not empty
+REM Start XdsToolkit base if its webapps dir is not empty
 
 ECHO Count is %WEBAPPSCOUNT%
 
@@ -68,9 +64,10 @@ IF %WEBAPPSCOUNT% GTR 0 (
 	ECHO XdsToolkit should not be started
 )
 
-REM start FhirToolkit
+REM Start FhirToolkit
 
 ECHO Starting FhirToolkit
 MKDIR %FHIRTOOLKIT%\logs
 SET CATALINA_BASE=%FHIRTOOLKIT%
 @CALL .\startup.bat
+
