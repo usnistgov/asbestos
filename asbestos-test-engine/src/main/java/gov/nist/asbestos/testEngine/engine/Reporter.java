@@ -2,7 +2,9 @@ package gov.nist.asbestos.testEngine.engine;
 
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import gov.nist.asbestos.simapi.validation.ValE;
+import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.TestReport;
+import org.hl7.fhir.r4.model.Type;
 
 import java.util.Objects;
 
@@ -59,9 +61,23 @@ class Reporter {
     }
 
     void report(String msg, ResourceWrapper wrapper) {
-        if (wrapper != null)
+        if (wrapper != null) {
             opReport.setDetail(wrapper.logLink());
+            String eventId = lastUrlPart(wrapper.logLink());
+            if (eventId != null) {
+                StringType type = new StringType();
+                type.setValue(eventId);
+                opReport.addExtension("eventId", type);
+            }
+        }
         report(msg);
+    }
+
+    private String lastUrlPart(String url) {
+        String[] parts = url.split("/");
+        if (parts.length == 0)
+            return null;
+        return parts[parts.length - 1];
     }
 
     static String formatMsg(String type, String id, String msg) {
