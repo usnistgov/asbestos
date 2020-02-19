@@ -1,5 +1,6 @@
 <template>
     <div>
+
 <!--        Report: {{ report }}-->
         <div v-if="script">
             <div v-bind:class="{'not-run': isNotRun, pass : isPass, error: isError, fail: isFail}"  @click="toggleMessageDisplay()">
@@ -71,6 +72,7 @@
 <script>
     import LogItem from "../logViewer/LogItem"
     import ScriptDisplay from "./ScriptDisplay"
+
     export default {
         data() {
             return {

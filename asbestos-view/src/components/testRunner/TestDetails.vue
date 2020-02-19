@@ -1,6 +1,22 @@
 <template>
     <div>
         <div v-if="script" class="script">
+            <div>
+                <span class="selectable" @click="toggleScriptViewer()">Test Viewer</span>
+                <span v-if="displayScriptViewer">
+                    <img src="../../assets/arrow-down.png" @click="toggleScriptViewer()">
+                    <test-script
+                            :script="script"
+                            :report="report">
+                    </test-script>
+                </span>
+                <span v-else>
+
+                    <img src="../../assets/arrow-right.png" @click="toggleScriptViewer()">
+                </span>
+            </div>
+
+
             <div v-if="displayDetail">
                 <div v-for="(fixture, i) in fixtures"
                      :key="i">
@@ -68,16 +84,20 @@
     import {ENGINE} from '../../common/http-common'
     import errorHandlerMixin from '../../mixins/errorHandlerMixin'
     import TestReportAction from './TestReportAction'
-
+    import TestScript from "../testViewer/TestScript"
     export default {
         data() {
             return {
                 script: null,
                 report: null,
                 displayDetail: false,
+                displayScriptViewer: false,
             }
         },
         methods: {
+            toggleScriptViewer() {
+                this.displayScriptViewer = !this.displayScriptViewer
+            },
             containedTestsRef(script_or_report, testi) {  // script or report
                 if (!script_or_report.test)
                     return null
@@ -179,7 +199,8 @@
             'sessionId', 'channelId', 'testCollection', 'testId'
         ],
         components: {
-            TestReportAction
+            TestReportAction,
+            TestScript,
         },
         name: "TestDetails"
     }
