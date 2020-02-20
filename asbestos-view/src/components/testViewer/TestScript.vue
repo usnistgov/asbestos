@@ -191,4 +191,11 @@
     .red {
         color: red;
     }
+    .left {
+        text-align: left;
+    }
+    .edit-view {
+        border: 2px solid;
+        background: lightblue;
+    }
 </style>
