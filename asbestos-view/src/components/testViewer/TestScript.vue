@@ -2,9 +2,15 @@
 
     <div>
         <div v-if="script" class="script-display">
+
+            <input type="checkbox" id="doEdit" v-model="edit">
+            <label for="doEdit">Edit</label>
+            <div class="divider"></div>
+
             <fixture-script
                     :fixtures="script.fixture"
-                    :unused-fixtures="unusedFixtures"> </fixture-script>
+                    :unused-fixtures="unusedFixtures"
+                    :edit="edit"> </fixture-script>
             <variable-script
                     :variables="script.variable"
                     :unused-variables="unusedVariables"> </variable-script>
@@ -47,6 +53,7 @@
             return {
                 unusedVariables: [],
                 unusedFixtures: [],
+                edit: false,
             }
         },
         methods: {

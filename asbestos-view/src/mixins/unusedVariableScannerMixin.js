@@ -3,14 +3,11 @@ export default {
         scanForUnusedVariables(script) {
             let unusedVariables = []
             const declaredVariables = this.scanScriptForDeclaredVariables(script)
-            //console.log(`declared = ${declaredVariables}`)
             const referencedVariables = this.scanScriptForUsedVariables(script)
-            console.log(`referenced = ${referencedVariables}`)
             declaredVariables.forEach(variable => {
                 if (!referencedVariables.includes(variable))
                     unusedVariables.push(variable)
             })
-            console.log(`Unused variables ${unusedVariables}`)
             return unusedVariables
         },
         scanScriptForDeclaredVariables(script) {
@@ -21,18 +18,13 @@ export default {
             if (script.setup)
                 variables = variables.concat(this.scanActionsForVariables(script.setup.action))
             if (script.test) {
-                console.log(`for script.test`)
                 script.test.forEach(tst => {
-                    console.log(`in`)
                     variables = variables.concat(this.scanActionsForVariables(tst.action))
-                    console.log(`out`)
                 })
-                console.log(`back`)
             }
             if (script.teardown)
                 variables = variables.concat(this.scanActionsForVariables(script.teardown.action))
             // remove duplicates
-            console.log(`scanScriptForUsedVariables(xxx) => ${variables}`)
             return variables.filter((a, b) => variables.indexOf(a) === b)
         },
         scanOperationForVariables(operation) {
@@ -48,7 +40,6 @@ export default {
                     operation.requestHeader.map(hdr => hdr.value)
                 ))
             variables = variables.concat(this.variableNamesFromString(operation.url))
-            console.log(`scanOperationForVariables(xxx) => ${variables}`)
             return variables
         },
         scanAssertForVariables(assert) {
@@ -62,7 +53,6 @@ export default {
             variables = variables.concat(this.variableNamesFromString(assert.requestURL))
             variables = variables.concat(this.variableNamesFromString(assert.responseCode))
             variables = variables.concat(this.variableNamesFromString(assert.value))
-            console.log(`scanAssertForVariables(xxx) => ${variables}`)
             return variables
         },
         scanActionsForVariables(actions) {
@@ -73,7 +63,6 @@ export default {
                 variables = variables.concat(this.scanOperationForVariables(action.operation))
                 variables = variables.concat(this.scanAssertForVariables(action.assert))
             })
-            console.log(`scanActionsForVariables(xxx) => ${variables}`)
             return variables
         },
         variableNameFromUsage(str, startingIndex) {  // startingIndex points to $ of ${xxxx}
@@ -103,7 +92,6 @@ export default {
                 names.push(variable)
                 index = index + 1
             }
-            console.log(`variableNamesFromString(${str}) => ${names}`)
             return names
         }
 
