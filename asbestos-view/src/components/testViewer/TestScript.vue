@@ -2,7 +2,9 @@
 
     <div>
         <div v-if="script" class="script-display">
-            <fixture-script :fixtures="script.fixture"> </fixture-script>
+            <fixture-script
+                    :fixtures="script.fixture"
+                    :unused-fixtures="unusedFixtures"> </fixture-script>
             <variable-script
                     :variables="script.variable"
                     :unused-variables="unusedVariables"> </variable-script>
@@ -37,125 +39,25 @@
     import VariableScript from "./VariableScript";
     import FixtureScript from "./FixtureScript";
     import TeardownScript from "./TeardownScript";
+    import unusedVariableScannerMixin from "../../mixins/unusedVariableScannerMixin";
+    import unusedFixtureScannerMixin from "../../mixins/unusedFixtureScannerMixin";
 
     export default {
         data() {
             return {
-                unusedVariables: []
+                unusedVariables: [],
+                unusedFixtures: [],
             }
         },
         methods: {
-            scanForUnusedVariables(script) {
-                let unusedVariables = []
-                const declaredVariables = this.scanScriptForDeclaredVariables(script)
-                //console.log(`declared = ${declaredVariables}`)
-                const referencedVariables = this.scanScriptForUsedVariables(script)
-                console.log(`referenced = ${referencedVariables}`)
-                declaredVariables.forEach(variable => {
-                    if (!referencedVariables.includes(variable))
-                        unusedVariables.push(variable)
-                })
-                return unusedVariables
-            },
-            scanScriptForDeclaredVariables(script) {
-                return (script.variable) ? script.variable.map(v => v.name) : []
-            },
-            scanScriptForUsedVariables(script) {
-                let variables = []
-                if (script.setup)
-                    variables = variables.concat(this.scanActionsForVariables(script.setup.action))
-                if (script.test) {
-                    console.log(`for script.test`)
-                    script.test.forEach(tst => {
-                        console.log(`in`)
-                        variables = variables.concat(this.scanActionsForVariables(tst.action))
-                        console.log(`out`)
-                    })
-                    console.log(`back`)
-                }
-                if (script.teardown)
-                    variables = variables.concat(this.scanActionsForVariables(script.teardown.action))
-                // remove duplicates
-                console.log(`scanScriptForUsedVariables(xxx) => ${variables}`)
-                return variables.filter((a, b) => variables.indexOf(a) === b)
-            },
-            scanOperationForVariables(operation) {
-                let variables = []
-                variables = variables.concat(this.variableNamesFromString(operation.accept))
-                variables = variables.concat(this.variableNamesFromString(operation.contentType))
-                variables = variables.concat(this.variableNamesFromString(operation.method))
-                variables = variables.concat(this.variableNamesFromString(operation.params))
-                variables = variables.concat(this.variableNamesFromStrings(
-                    operation.requestHeader.map(hdr => hdr.value)
-                ))
-                variables = variables.concat(this.variableNamesFromString(operation.url))
-                console.log(`scanOperationForVariables(xxx) => ${variables}`)
-                return variables
-            },
-            scanAssertForVariables(assert) {
-                let variables = []
-                variables = variables.concat(this.variableNamesFromString(assert.compareToSourceId))
-                variables = variables.concat(this.variableNamesFromString(assert.compareToSourceExpression))
-                variables = variables.concat(this.variableNamesFromString(assert.contentType))
-                variables = variables.concat(this.variableNamesFromString(assert.expression))
-                variables = variables.concat(this.variableNamesFromString(assert.requestURL))
-                variables = variables.concat(this.variableNamesFromString(assert.responseCode))
-                variables = variables.concat(this.variableNamesFromString(assert.value))
-                console.log(`scanAssertForVariables(xxx) => ${variables}`)
-                return variables
-            },
-            scanActionsForVariables(actions) {
-                let variables = []
-                if (!actions)
-                    return variables
-                actions.forEach(action => {
-                    variables = variables.concat(this.scanOperationForVariables(action.operation))
-                    variables = variables.concat(this.scanAssertForVariables(action.assert))
-                })
-                console.log(`scanActionsForVariables(xxx) => ${variables}`)
-                return variables
-            },
-            variableNameFromUsage(str, startingIndex) {  // startingIndex points to $ of ${xxxx}
-                let open =  startingIndex + 1
-                let close = str.indexOf("}", open + 1)
-                if (close === -1)
-                    return null
-                return str.substring(open+1, close)
-            },
-            variableNamesFromStrings(stringArray) {
-                let names = []
-                stringArray.forEach(str => names.push(this.variableNamesFromString(str)))
-                return names
-            },
-            variableNamesFromString(str) {
-                let names = []
-                if (!str)
-                    return names
-                let index = 0
-                while (index !== -1) {
-                    index = str.indexOf("$", index)
-                    if (index === -1)
-                        break
-                    const variable = this.variableNameFromUsage(str, index)
-                    if (variable === null)
-                        break
-                    names.push(variable)
-                    index = index + 1
-                }
-                console.log(`variableNamesFromString(${str}) => ${names}`)
-                return names
-            }
         },
         computed: {
             },
         created() {
-            //console.log(`testing`)
-            // console.log(`from String ${this.variableNamesFromString('Foo ${bar} x')}`)
-            // console.log(`from Strings ${this.variableNamesFromStrings(['Foo ${bar} x', '${val}'])}`)
-            //console.log(`multiple ${this.variableNamesFromString('${var}${foo}')}`)
-            //console.log(`test ${this.scanAssertForVariables(this.script.test[0].action[6].assert)}`)
-            if (this.script)
+            if (this.script) {
                 this.unusedVariables = this.scanForUnusedVariables(this.script)
+                this.unusedFixtures = this.scanForUnusedFixtures(this.script)
+            }
         },
         watch: {
 
@@ -164,6 +66,7 @@
         props: [
             'script', 'report'
         ],
+        mixins: [unusedVariableScannerMixin, unusedFixtureScannerMixin],
         components: {
             ActionScript, VariableScript, FixtureScript, TeardownScript
         }

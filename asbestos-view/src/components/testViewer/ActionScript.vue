@@ -55,17 +55,18 @@
                     <div class="name">params</div>
                     <div class="value">{{action.operation.params}}</div>
                 </div>
+                <div v-if="action.operation.requestHeader">
+                    <div v-for="(requestHeader, requestHeaderi) in action.operation.requestHeader"
+                         :key="requestHeader + requestHeaderi">
+                        <div v-if="requestHeader.field" class="spanner operation-box">
+                            <div class="name">requestHeader.field</div>
+                            <div class="value">{{requestHeader.field}}</div>
+                        </div>
 
-                <div v-for="(requestHeader, requestHeaderi) in action.operation.requestHeader"
-                     :key="requestHeader + requestHeaderi">
-                    <div v-if="requestHeader.field" class="spanner operation-box">
-                        <div class="name">requestHeader.field</div>
-                        <div class="value">{{requestHeader.field}}</div>
-                    </div>
-
-                    <div v-if="requestHeader.value" class="spanner operation-box">
-                        <div class="name">requestHeader.value</div>
-                        <div class="value">{{requestHeader.value}}</div>
+                        <div v-if="requestHeader.value" class="spanner operation-box">
+                            <div class="name">requestHeader.value</div>
+                            <div class="value">{{requestHeader.value}}</div>
+                        </div>
                     </div>
                 </div>
 
@@ -94,7 +95,7 @@
                     <div class="value">{{action.operation.url}}</div>
                 </div>
             </div>
-            <div v-else class="operation-box">
+            <div v-else-if="action.assert" class="operation-box">
                 <div class="assert-name">Assert</div>
                 <div class="assert-value"></div>
 

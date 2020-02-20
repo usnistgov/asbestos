@@ -6,9 +6,9 @@
 
             <div v-if="variable.name" class="variable-box top-border">
                 <div class="variable-name">name</div>
-                <div class="variable-value">
+                <div class="variable-value bold">
                     {{variable.name}}
-                    <span class="red">{{undefLabel(variable.name)}}</span>
+                    <span class="red">{{undefVariableLabel(variable.name)}}</span>
                 </div>
             </div>
 
@@ -53,13 +53,13 @@
 <script>
     export default {
         methods: {
-            undefLabel(variableName) {
-                return this.unusedVariables.indexOf(variableName) === -1 ? "Unused" : ""
-            }
+            undefVariableLabel(variableName) {
+                return this.unusedVariables.indexOf(variableName) === -1 ? "" : "Unused"
+            },
         },
         name: "VariableScript",
         props: [
-            'variables', 'unusedVariables'
+            'variables', 'unusedVariables',
         ]
     }
 </script>
