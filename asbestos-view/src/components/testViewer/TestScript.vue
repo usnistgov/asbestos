@@ -14,6 +14,9 @@
             <variable-script
                     :variables="script.variable"
                     :unused-variables="unusedVariables"> </variable-script>
+            <div class="setup-head">
+                Setup
+            </div>
             <div v-for="(setup, setupi) in script.setup"
                  :key="setup + setupi">
                 <action-script :actions="setup"> </action-script>
@@ -96,7 +99,7 @@
         grid-column: 1;
         font-weight: bold;
         border-top: 1px solid;
-        background: #445588;
+        background: #4183c4;
     }
     .test-name {
         grid-column: 1;
@@ -143,6 +146,12 @@
         font-weight: bold;
         border-top: 1px solid;
         background: #ffaaaa;
+    }
+    .setup-head {
+        grid-column: 1;
+        font-weight: bold;
+        border-top: 1px solid;
+        background: aquamarine;
     }
     .teardown-head {
         grid-column: 1;
