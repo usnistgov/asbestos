@@ -1,0 +1,9 @@
+<Patient xmlns="http://hl7.org/fhir">
+    <meta>
+        <security>
+            <system value="http://hl7.org/fhir/v3/ActReason"/>
+            <code value="HTEST"/>
+            <display value="test health data"/>
+        </security>
+    </meta>
+</Patient>

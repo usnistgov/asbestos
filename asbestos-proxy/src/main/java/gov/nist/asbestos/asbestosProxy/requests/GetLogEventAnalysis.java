@@ -78,21 +78,25 @@ public class GetLogEventAnalysis {
         String testSession = request.uriParts.get(5);
         String channelId = request.uriParts.get(6);
         String eventId = request.uriParts.get(7);
-        UIEvent event = request.ec.getEvent(testSession, channelId, "null", eventId);
-        String requestBodyString = event.getClientTask().getRequestBody();
-        Headers requestHeaders = new Headers(event.getClientTask().getRequestHeader());
-        String responseBodyString = event.getClientTask().getResponseBody();
-        Headers responseHeaders = new Headers(event.getClientTask().getResponseHeader());
-        String analysisSource = analysisTargetIsRequest() ? requestBodyString : responseBodyString;
-        BaseResource baseResource;
-        try {
-            baseResource = ProxyBase.parse(analysisSource, Format.fromContentType(responseHeaders.getContentType().getValue()));
-        } catch (Exception e) {
-            returnReport(new Report("No content"));
-            return;
-        }
 
         if (request.uriParts.get(4).equalsIgnoreCase("event")) {
+
+            UIEvent event = request.ec.getEvent(testSession, channelId, "null", eventId);
+            String requestBodyString = event.getClientTask().getRequestBody();
+            Headers requestHeaders = new Headers(event.getClientTask().getRequestHeader());
+            String responseBodyString = event.getClientTask().getResponseBody();
+            Headers responseHeaders = new Headers(event.getClientTask().getResponseHeader());
+            String analysisSource = analysisTargetIsRequest() ? requestBodyString : responseBodyString;
+            BaseResource baseResource;
+            try {
+                baseResource = ProxyBase.parse(analysisSource, Format.fromContentType(responseHeaders.getContentType().getValue()));
+            } catch (Exception e) {
+                returnReport(new Report("No content"));
+                return;
+            }
+
+
+
             BaseResource requestResource = null;
             if (requestBodyString.length() > 0)
                 requestResource = ProxyBase.parse(requestBodyString, Format.fromContentType(requestHeaders.getContentType().getValue()));
@@ -144,13 +148,14 @@ public class GetLogEventAnalysis {
                     String url = query.substring(urlIndex, urlEndIndex);
                     Ref ref = new Ref(url);
                     runAndReturnReport(ref, "By Request", gzip, useProxy, null);
-                } else if (query.contains("url=urn:uuid")) {
-                    int urlIndex = query.indexOf("url=urn:uuid") + 4;
-                    int urlEndIndex = query.indexOf(";", urlIndex);
-                    String url = query.substring(urlIndex, urlEndIndex);
-                    Ref ref = new Ref(url);
-                    runAndReturnReport(ref, "By Request", gzip, useProxy, baseResource);
                 }
+//                else if (query.contains("url=urn:uuid")) {
+//                    int urlIndex = query.indexOf("url=urn:uuid") + 4;
+//                    int urlEndIndex = query.indexOf(";", urlIndex);
+//                    String url = query.substring(urlIndex, urlEndIndex);
+//                    Ref ref = new Ref(url);
+//                    runAndReturnReport(ref, "By Request", gzip, useProxy, baseResource);
+//                }
             }
         }
     }

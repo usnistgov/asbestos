@@ -4,7 +4,7 @@ package gov.nist.asbestos.proxyWar;
  * Use this to control port for maven vs manual running of IT tests
  */
 class ITConfig {
-    private static final boolean forMavenBuild = true;
+    private static final boolean forMavenBuild = false;
 
     static String getFhirPort() {
         // for running in automatic IT tests from Maven

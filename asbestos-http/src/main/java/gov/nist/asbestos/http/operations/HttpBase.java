@@ -47,8 +47,7 @@ abstract public class HttpBase {
     }
 
     public boolean isResponseGzipEncoded() {
-        Header h = _responseHeaders.get("Content-Encoding");
-        return (h != null && h.getValue().contains("gzip"));
+        return _responseHeaders.isZipped();
     }
 
     public static String parameterMapToString(Map<String, List<String>> parameterMap) {
@@ -139,12 +138,13 @@ abstract public class HttpBase {
     }
 
     public String getResponseText() {
-        Header contentEncodingHeader = getResponseHeaders().get("Content-Encoding");
-        boolean zipped = contentEncodingHeader != null && contentEncodingHeader.getValue().contains("gzip");
+        //Header contentEncodingHeader = getResponseHeaders().get("Content-Encoding");
+        boolean zipped = getResponseHeaders().isZipped();
+                //contentEncodingHeader != null && contentEncodingHeader.getValue().contains("gzip");
 
         if (_responseText == null && _response != null) {
             if (zipped) {
-                    _responseText = Gzip.decompressGZIP(_response);
+                    _responseText = Gzip.decompressGZIPToString(_response);
             } else
                 _responseText = new String(_response);
         }

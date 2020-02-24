@@ -12,7 +12,8 @@ public enum ServicePropertiesEnum {
     FHIR_TOOLKIT_VERSION("fhirToolkitVersion"),
     HAPI_FHIR_BASE("hapiFhirBase"),
     LIMITED_CHANNEL_CAPABILITY_STATMENT_FILE("limitedChannelCapabilityStatementFile"),
-    XDS_CHANNEL_CAPABILITY_STATEMENT_FILE("xdsChannelCapabilityStatementFile");
+    XDS_CHANNEL_CAPABILITY_STATEMENT_FILE("xdsChannelCapabilityStatementFile"),
+    FHIR_VALIDATION_SERVER("fhirValidationServer");
 
     private String key;
 

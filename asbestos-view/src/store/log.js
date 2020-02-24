@@ -14,10 +14,18 @@ export const logStore = {
             channel: null,
             loaded: false,
             analysis: null,
+            validationServer: null,
+            validationResult: null,
 //            eventIdOfAnalysis: null,
         }
     },
     mutations: {
+        setValidationResult(state, result) {
+            state.validationResult = result
+        },
+        setValidationServer(state, server) {
+            state.validationServer = server
+        },
         setAnalysis(state, analysis) {
 //            const analysis = data.analysis
 //            const eventId = data.eventId
@@ -115,5 +123,27 @@ export const logStore = {
                 console.error(error)
             }
         },
+        async getValidationServer({commit}) {
+            try {
+                const url = `ValidationServer`
+                const result = await LOG.get(url)
+                commit('setValidationServer', result.data.value)
+            } catch (error) {
+                commit('setError', error)
+                console.error(error)
+            }
+        },
+        async getValidation({commit}, parms) {
+            const resourceType = parms.resourceType
+            const qurl = parms.url
+            try {
+                const url = `Validation/${resourceType}?url=${qurl}`
+                const result = await LOG.get(url)
+                commit('setValidationResult', result.data)
+            } catch (error) {
+                commit('setError', error)
+                console.error(error)
+            }
+        }
     }
 }

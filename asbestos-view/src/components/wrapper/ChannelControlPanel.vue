@@ -1,13 +1,13 @@
 <template>
     <div>
         <div class="control-panel-item-title" @click="manage()">Channels</div>
-        <div>
-            <span class="selectable" @click="manage()">Config</span>
+<!--        <div>-->
+<!--            <span class="selectable" @click="manage()">Config</span>-->
             &nbsp;
-            <span class="selectable" @click="showId()">List by ID</span>
-            &nbsp;
-            <span class="selectable" @click="showAddr()">List by URL</span>
-        </div>
+<!--            <span class="selectable" @click="showId()">List by ID</span>-->
+<!--            &nbsp;-->
+<!--            <span class="selectable" @click="showAddr()">List by URL</span>-->
+<!--        </div>-->
         <select v-model="channel" size="10" class="control-panel-font">
             <option v-for="(chann, channeli) in channelIds"
                     v-bind:value="getChannelIdByText(chann)"
@@ -67,13 +67,13 @@
                 if (this.channel === null)
                     return
                 if (this.channelId !== this.channel) {
-                    this.$router.push(`/session/${this.session}/channel/${this.channel}`)
+                    this.$router.push(`/session/${this.session}/channels/${this.channel}`)
                 }
                 this.channelId = this.channel
             },
             updateChannelFromUI() {
                 if (this.channelId !== this.channel)
-                    this.$router.push(`/session/${this.session}/channel/${this.channelId}`)
+                    this.$router.push(`/session/${this.session}/channels/${this.channelId}`)
             },
             getChannelIdByText(text) {
                 let found = this.channels.find(function (element) {
@@ -92,8 +92,10 @@
             },
             channel: {
                 set(name) {
-                    if (name !== this.$store.state.base.channelId)
+                    if (name !== this.$store.state.base.channelId) {
                         this.$store.commit('setChannelId', name)
+                        this.$store.dispatch('loadChannel', this.$store.getters.getFullChannelId)
+                    }
                 },
                 get() {
                     return this.$store.state.base.channelId

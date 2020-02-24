@@ -3,6 +3,7 @@ package gov.nist.asbestos.asbestosProxy.requests;
 import com.google.gson.Gson;
 import gov.nist.asbestos.client.Base.ProxyBase;
 import org.hl7.fhir.r4.model.BaseResource;
+import org.hl7.fhir.r4.model.OperationOutcome;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -35,6 +36,17 @@ public class Returns {
         }
     }
 
+    static class ValueHolder {
+        String value;
+        ValueHolder(String value) {
+            this.value = value;
+        }
+    }
+
+    static String returnValue(HttpServletResponse resp, String value) {
+           return returnObject(resp, new ValueHolder(value));
+    }
+
     static String returnObject(HttpServletResponse resp, Object o) {
         String json = new Gson().toJson(o);
         resp.setContentType("application/json");
@@ -44,6 +56,14 @@ public class Returns {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
 
+    static void returnOperationOutcome(HttpServletResponse resp, OperationOutcome.IssueSeverity severity, OperationOutcome.IssueType issueType, String diagnostics) {
+        OperationOutcome oo = new OperationOutcome();
+        OperationOutcome.OperationOutcomeIssueComponent comp = oo.addIssue();
+        comp.setSeverity(severity);
+        comp.setDiagnostics(diagnostics);
+        comp.setCode(issueType);
+        returnObject(resp, oo);
     }
 }

@@ -139,9 +139,14 @@
                     <span class="center">{{getChannelBase(channel)}}</span>
 
                     <p>
-                        Client sends to <b>Channel Base Address</b> and proxy forwards to <b>Fhir Base</b> for FHIR
-                        type channels. For MHD type channels the proxy forwards to the XDS Toolkit site named by
-                        <b>XDS Site Name</b>.
+                        Send to this URL and
+                        <ul>
+                            <li>Proxy will record your transaction</li>
+                            <li>Proxy will forward your transaction to
+                                <span v-if="channel.fhirBase">{{channel.fhirBase}}</span>
+                                <span v-if="channel.xdsSiteName">XDS Toolkit site {{channel.xdsSiteName}}</span>
+                            </li>
+                        </ul>
                     </p>
                 </div>
             </div>
@@ -366,6 +371,7 @@
                 if (this.channelIds.length === 0)
                     return
                 this.originalChannelId = this.channelId
+                this.lockCanceled()
                 if (this.isNewChannelId()) {
                     this.edit = true
                     this.isNew = true
@@ -417,7 +423,6 @@
                 this.lockAcked = function() {
                     that.lockChannel(boolIn).then (response => {
                         if (response) {console.log(response)}
-                        that.lockAckMode = ""
                     })
                 }
                 // If signedIn, directly run the method
@@ -443,20 +448,23 @@
                     .then(function () {
                         that.channel.writeLocked = bool
                         that.msg('Channel configuration is ' + ((bool)?'locked':'unlocked'))
+                        that.lockAckMode = ""
                     })
                     .catch(function (error) {
-                        let msg = ((error) ? error.message: '' )
-                        msg += ((error && error.response && error.response.status && error.response.statusText) ? (error.response.status +  ': ' + error.response.statusText) : "")
-                        that.error({message: msg})
+                        let msg = ((error && error.response && error.response.status && error.response.statusText) ? (error.response.status +  ': ' + error.response.statusText) : "")
+                        if (msg)
+                            that.error({message: msg})
                     })
             },
             guardedFn(str, fn) {
                 if (typeof fn === 'function') {
                     if (this.channel.writeLocked) {
                         if (this.editUserProps.signedIn) {
+                            this.lockAcked = null
                             fn.call()
                         } else {
-                            this.lockAcked = fn
+                            const that = this
+                            this.lockAcked = function() {that.guardedFn(str, fn)}
                             this.lockAckMode = str + ": "
                         }
                     } else {

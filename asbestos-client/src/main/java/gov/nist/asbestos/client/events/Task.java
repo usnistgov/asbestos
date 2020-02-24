@@ -3,10 +3,12 @@ package gov.nist.asbestos.client.events;
 
 import gov.nist.asbestos.http.headers.Headers;
 import gov.nist.asbestos.http.operations.HttpBase;
+import gov.nist.asbestos.http.util.Gzip;
 
 import java.io.FileOutputStream;
 import java.io.PrintWriter;
 import java.nio.file.Files;
+import java.util.Objects;
 
 public class Task implements ITask {
     private Event event;
@@ -14,11 +16,11 @@ public class Task implements ITask {
 
     private Headers _requestHeaders = null;
     private byte[] _requestRawBody = null;
-    private String _requestBody = null;
+    private String _requestBody = null;  // this is plain text even if bytes are zipped
 
     private Headers _responseHeaders = null;
     private byte[] _responseRawBody = null;
-    private String _responseBody = null;
+    private String _responseBody = null;  // this is plain text even if bytes are zipped
     private String _description = null;
 
     Task(int taskIndex, Event event) {
@@ -85,10 +87,14 @@ public class Task implements ITask {
 
     @Override
     public void putRequestBody(byte[] body) {
+        Objects.requireNonNull(_requestHeaders);
         _requestRawBody = body;
         initTask();
         if (body != null) {
-            _requestBody = new String(body);
+            if (_requestHeaders.isZipped())
+                _requestBody = Gzip.decompressGZIPToString(body);
+            else
+                _requestBody = new String(body);
             if (body.length > 0) {
                 try {
                     try (FileOutputStream stream = new FileOutputStream(event.getRequestBodyFile(taskIndex))) {
@@ -101,8 +107,10 @@ public class Task implements ITask {
         }
     }
 
+    // returns unzipped content
     @Override
     public byte[] getRequestBody() {
+        Objects.requireNonNull(_requestHeaders);
         if (_requestRawBody == null) {
             if (_requestBody != null) {
                 _requestRawBody = _requestBody.getBytes();
@@ -112,9 +120,15 @@ public class Task implements ITask {
                 _requestRawBody = Files.readAllBytes(event.getRequestBodyFile(taskIndex).toPath());
             } catch (Exception e) {
             }
-            if (_requestRawBody != null)
-                _requestBody = new String(_requestRawBody);
+            if (_requestRawBody != null) {
+                if (_requestHeaders.isZipped())
+                    _requestBody = Gzip.decompressGZIPToString(_requestRawBody);
+                else
+                    _requestBody = new String(_requestRawBody);
+            }
         }
+        if (_requestHeaders.isZipped())
+            return Gzip.decompressGZIP(_requestRawBody);
         return _requestRawBody;
     }
 
@@ -208,9 +222,14 @@ public class Task implements ITask {
 
     @Override
     public void putResponseHTMLBody(byte[] body) {
+        Objects.requireNonNull(_responseHeaders);
         initTask();
         putResponseBody(body);
-        String bodyString = new String(body);
+        String bodyString;
+        if (_responseHeaders.isZipped())
+            bodyString = Gzip.decompressGZIPToString(body);
+        else
+            bodyString = new String(body);
         putResponseBodyText(bodyString);
         try {
             try (PrintWriter out = new PrintWriter(event.getResponseBodyHTMLFile(taskIndex))) {
@@ -223,9 +242,14 @@ public class Task implements ITask {
 
     @Override
     public void putRequestHTMLBody(byte[] body) {
+        Objects.requireNonNull(_requestHeaders);
         initTask();
         putRequestBody(body);
-        String bodyString = new String(body);
+        String bodyString;
+        if (_requestHeaders.isZipped())
+            bodyString = Gzip.decompressGZIPToString(body);
+        else
+            bodyString = new String(body);
         putRequestBodyText(bodyString);
         try {
             try (PrintWriter out = new PrintWriter(event.getRequestBodyHTMLFile(taskIndex))) {
@@ -251,14 +275,21 @@ public class Task implements ITask {
 
     @Override
     public byte[] getResponseBody() {
+        Objects.requireNonNull(_responseHeaders);
         if (_responseRawBody == null) {
             if (_responseBody != null) {
-                _responseRawBody = _responseBody.getBytes();
+                if (_responseHeaders.isZipped())
+                    _responseRawBody = Gzip.compressGZIP(_responseBody.getBytes());
+                else
+                    _responseRawBody = _responseBody.getBytes();
                 return _responseRawBody;
             }
             try {
                 _responseRawBody = Files.readAllBytes(event.getResponseBodyFile(taskIndex).toPath());
-                _responseBody = new String(_responseRawBody);
+                if (_responseHeaders.isZipped())
+                    _responseBody = Gzip.decompressGZIPToString(_responseRawBody);
+                else
+                    _responseBody = new String(_responseRawBody);
             } catch (Exception e) {
 
             }
