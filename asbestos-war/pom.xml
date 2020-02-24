@@ -19,6 +19,7 @@
         <hapiFhirBase>http://localhost:8080/fhir/fhir</hapiFhirBase>
         <xdsToolkitBase>http://localhost:8080/xdstools</xdsToolkitBase>
         <tlsXdsToolkitBase>http://localhost:8443/xdstools</tlsXdsToolkitBase>
+        <fhirValidationServer>http://localhost:8080/fhir/fhir</fhirValidationServer>
     </properties>
 
     <dependencies>

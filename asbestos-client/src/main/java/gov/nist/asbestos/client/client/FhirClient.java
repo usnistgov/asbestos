@@ -88,11 +88,16 @@ public class FhirClient {
         if (returnedResourceText != null && !returnedResourceText.equals("")) {
             if (!returnedResourceText.startsWith("{") && !returnedResourceText.startsWith("<"))
                 throw new RuntimeException(returnedResourceText);
-            IBaseResource returnedResource = isXml
-                    ? ProxyBase.getFhirContext().newXmlParser().parseResource(returnedResourceText)
-                    : ProxyBase.getFhirContext().newJsonParser().parseResource(returnedResourceText);
-            if (returnedResource instanceof BaseResource)
-                response.setResource((BaseResource) returnedResource);
+            IBaseResource returnedResource;
+            try {
+                returnedResource = isXml
+                        ? ProxyBase.getFhirContext().newXmlParser().parseResource(returnedResourceText)
+                        : ProxyBase.getFhirContext().newJsonParser().parseResource(returnedResourceText);
+                if (returnedResource instanceof BaseResource)
+                    response.setResource((BaseResource) returnedResource);
+            } catch (Exception e) {
+                //
+            }
         }
         response.setHttpBase(post);
         this.httpBase = post;
@@ -157,7 +162,7 @@ public class FhirClient {
 
     private ResourceWrapper gobbleGetResponse(HttpGet getter, ResourceWrapper wrapper, Format format) {
         if (getter.getStatus() != 200) {
-           return wrapper;
+            return wrapper;
         }
 
         String resourceText = getter.getResponseText();
