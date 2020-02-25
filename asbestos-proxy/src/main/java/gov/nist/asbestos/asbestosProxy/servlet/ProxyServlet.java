@@ -309,7 +309,7 @@ public class ProxyServlet extends HttpServlet {
     private void doGetCapabilityStatement(HttpServletRequest req, HttpServletResponse resp, SimStore simStore, URI uri, Verb verb, Headers inHeaders, String channelId) {
         if (simStore == null) return;
 
-        boolean isLoggingEnabled = simStore.getChannelConfig().isLogCapabilityStatement();
+        boolean isLoggingEnabled = simStore.getChannelConfig().isLogMhdCapabilityStatementRequest();
 
         ITask clientTask = (isLoggingEnabled ? simStore.newEvent().getClientTask() : new NoOpTask());
         try {

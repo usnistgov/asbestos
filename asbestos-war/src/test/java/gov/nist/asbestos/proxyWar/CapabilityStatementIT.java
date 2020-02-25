@@ -52,7 +52,7 @@ public class CapabilityStatementIT {
                 .setActorType("fhir")
                 .setChannelType("mhd")
                 .setXdsSiteName("bogus__rr")
-                .setLogCapabilityStatement(csloggingEnabled); // XdsSiteName is not used for this test
+                .setLogMhdCapabilityStatementRequest(csloggingEnabled); // XdsSiteName is not used for this test
 
         // delete
         String json = ChannelConfigFactory.convert(channelConfig);
