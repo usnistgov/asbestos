@@ -152,7 +152,7 @@
                 </div>
             </div>
             <!-- end of grid -->
-            <div v-if="!edit">
+            <div v-if="channel && !edit">
                 <p class="caption">Channel Base Address: </p>
                 <span class="center">{{getChannelBase(channel)}}</span>
                 <div>
@@ -510,11 +510,13 @@
         /*background-color: rgba(255, 255, 255, 0.8);*/
         grid-column: 1;
         text-align: left;
+        margin-bottom: 3px;
     }
     .grid-item {
         /*background-color: rgba(255, 255, 255, 0.8);*/
         grid-column: 2;
         text-align: left;
+        margin-bottom: 3px;
     }
     .divider{
         width:5px;
@@ -532,6 +534,7 @@
     .button-bar {
         grid-column: 0 / span 2;
         alignment: left;
+        margin-bottom: 10px;
     }
     .tooltip {
         position: relative;
