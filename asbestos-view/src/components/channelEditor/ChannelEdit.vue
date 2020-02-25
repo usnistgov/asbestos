@@ -510,13 +510,13 @@
         /*background-color: rgba(255, 255, 255, 0.8);*/
         grid-column: 1;
         text-align: left;
-        margin-bottom: 3px;
+        margin-bottom: 2px;
     }
     .grid-item {
         /*background-color: rgba(255, 255, 255, 0.8);*/
         grid-column: 2;
         text-align: left;
-        margin-bottom: 3px;
+        margin-bottom: 2px;
     }
     .divider{
         width:5px;
