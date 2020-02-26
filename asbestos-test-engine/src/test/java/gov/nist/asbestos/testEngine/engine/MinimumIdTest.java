@@ -143,7 +143,7 @@ class MinimumIdTest {
         File refFile = Paths.get(getClass().getResource("/minimumId/reference/minimal/DocumentReference.xml").toURI()).toFile();
         DocumentReference reference = (DocumentReference) ProxyBase.parse(refFile);
         DocumentReference sut = (DocumentReference) ProxyBase.parse(Paths.get(getClass().getResource("/minimumId/missingSubject/DocumentReference/DocRef3.xml").toURI()).toFile());
-        MinimumId.Report report = new MinimumId().run(reference, sut);
+        MinimumId.Report report = new MinimumId().run(reference, sut, false);
         assertEquals(1, report.missing.size());
         assertEquals(".masterIdentifier.value", report.missing.get(0));
     }
@@ -154,7 +154,7 @@ class MinimumIdTest {
         File refFile = Paths.get(getClass().getResource("/minimumId/reference/minimal/DocumentReferenceSecurityLabel.xml").toURI()).toFile();
         DocumentReference reference = (DocumentReference) ProxyBase.parse(refFile);
         DocumentReference sut = (DocumentReference) ProxyBase.parse(Paths.get(getClass().getResource("/minimumId/missingSubject/DocumentReference/DocRef4.xml").toURI()).toFile());
-        MinimumId.Report report = new MinimumId().run(reference, sut);
+        MinimumId.Report report = new MinimumId().run(reference, sut, false);
         assertEquals(1, report.missing.size());
         assertEquals(".securityLabel.coding.code", report.missing.get(0));
     }

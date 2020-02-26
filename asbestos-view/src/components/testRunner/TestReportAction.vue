@@ -24,13 +24,8 @@
         </div>
 
         <div v-if="displayMessage">
-            <ul>
-                <div v-for="(line, linei) in translateNL(message)" :key="'msgDisp' + linei">
-                    <li>
-                        {{ line }}
-                    </li>
-                </div>
-            </ul>
+
+            {{ first(translateNL(message)) }}
 
             <div v-if="this.script.operation">
                 <span v-if="eventId" class="selectable" @click="toggleEventDisplayed()">Message Log</span>
@@ -87,6 +82,12 @@
                 if (!string)
                     return string
                 return string.replace(/\t/g, "  ").split('\n')
+            },
+            first(array) {
+                return array[0]
+            },
+            rest(array) {
+                return array.slice(1)
             },
             toggleEventDisplayed() {
                 this.eventDisplayed = !this.eventDisplayed
@@ -181,7 +182,7 @@
         ],
         components: {
             ScriptDisplay,
-            LogItem,
+            LogItem
         },
         name: "TestReportAction"
     }

@@ -46,6 +46,7 @@ public class AnalysisReport {
     private boolean useProxy = false;
     private BaseResource contextResource = null;
     private Map<BaseResource, List<Reference2>> refs = new HashMap<>();
+    private boolean isRequest = false;  // as opposed to response/contents from server
 
     private Report buildReport() {
         Report report = new Report();
@@ -117,6 +118,11 @@ public class AnalysisReport {
 
     public AnalysisReport withContextResource(BaseResource contextResource) {
         this.contextResource = contextResource;
+        return this;
+    }
+
+    public AnalysisReport analyseRequest(boolean isRequest) {
+        this.isRequest = isRequest;
         return this;
     }
 

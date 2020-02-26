@@ -23,6 +23,8 @@ import gov.nist.asbestos.mhd.transforms.DocumentEntryToDocumentReference;
 import gov.nist.asbestos.mhd.transforms.SubmissionSetToDocumentManifest;
 import gov.nist.asbestos.mhd.translation.ContainedIdAllocator;
 import gov.nist.asbestos.mhd.translation.search.FhirSq;
+import gov.nist.asbestos.serviceproperties.ServiceProperties;
+import gov.nist.asbestos.serviceproperties.ServicePropertiesEnum;
 import gov.nist.asbestos.sharedObjects.ChannelConfig;
 import gov.nist.asbestos.simapi.tk.installation.Installation;
 import gov.nist.asbestos.simapi.validation.Val;
@@ -525,6 +527,7 @@ public class XdsOnFhirChannel extends BaseChannel /*implements IBaseChannel*/ {
     }
 
     private void transformDSResponse(AhqrSender sender, HttpBase responseOut, String requestedType) {
+        String  newBase = ServiceProperties.getInstance().getPropertyOrStop(ServicePropertiesEnum.FHIR_TOOLKIT_BASE) + "/proxy/default__default";
         if (responseOut.getVerb().equals(Verb.GET.toString())) {  // FHIR READ
             if (sender.hasErrors()) {
                 OperationOutcome oo = regErrorListAsOperationOutcome(sender.getErrorList());
@@ -551,6 +554,13 @@ public class XdsOnFhirChannel extends BaseChannel /*implements IBaseChannel*/ {
 
                     DocumentReference dr = trans.getDocumentReference((ExtrinsicObjectType) sender.getContents().get(0), channelConfig);
 
+                    if (dr.hasSubject()) {
+                        Reference reference = dr.getSubject();
+                        Ref ref = new Ref(reference.getReference());
+                        ref = ref.rebase(newBase);
+                        reference.setReference(ref.toString());
+                    }
+
                     if (val.hasErrors()) {
                         OperationOutcome oo = new OperationOutcome();
                         for (ValE err : val.getErrors())
@@ -573,6 +583,7 @@ public class XdsOnFhirChannel extends BaseChannel /*implements IBaseChannel*/ {
 
                     RegistryPackageType ss = null;
                     List<AssociationType1> assocs = new ArrayList<>();
+                    List<ExtrinsicObjectType> eos = new ArrayList<>();
                     for (IdentifiableType identifiableType : sender.getContents()) {
                         if (identifiableType instanceof RegistryPackageType) {
                             RegistryPackageType rpt = (RegistryPackageType) identifiableType;
@@ -583,15 +594,48 @@ public class XdsOnFhirChannel extends BaseChannel /*implements IBaseChannel*/ {
                             }
                         } else if (identifiableType instanceof AssociationType1) {
                             assocs.add((AssociationType1) identifiableType);
+                        } else if (identifiableType instanceof ExtrinsicObjectType) {
+                            eos.add((ExtrinsicObjectType) identifiableType);
                         }
                     }
 
+//                    RegistryPackageType registryPackage = null;
+//                    List<AssociationType1> assocations = new ArrayList<>();
+//
+//                    List<IdentifiableType> objs = sender.getContents();
+//                    for (IdentifiableType obj : objs) {
+//                        if (obj instanceof RegistryPackageType)
+//                            registryPackage = (RegistryPackageType) obj;
+//                        else if (obj instanceof AssociationType1)
+//                            assocations.add((AssociationType1) obj);
+//                    }
+
                     DocumentManifest dm = null;
+                    if (ss != null)
+                        dm = trans.getDocumentManifest(ss, assocs, channelConfig);
+
+                    if (dm.hasSubject()) {
+                        Reference reference = dm.getSubject();
+                        Ref ref = new Ref(reference.getReference());
+                        ref.rebase(newBase);
+                        reference.setReference(ref.toString());
+                    }
 
                     if (ss == null) {
                         val.add(new ValE("No SubmissionSet in query response.").asError());
-                    } else {
-                        dm = trans.getDocumentManifest(ss, assocs, channelConfig);
+//                    } else {
+//                        for (AssociationType1 assoc : assocs) {
+//                            if (assoc.getAssociationType().endsWith("HasMember")) {
+//                                String target = assoc.getTargetObject();
+//                                for (ExtrinsicObjectType eo : eos) {
+//                                    String id = eo.getId();
+//                                    if (id != null && id.equals(target)) {
+//                                            String fhirBase = ServiceProperties.getInstance().getPropertyOrStop(ServicePropertiesEnum.FHIR_TOOLKIT_BASE) + "/proxy/" + channelConfig.asFullId();
+//                                            dm.addContent(new Reference(new Ref(fhirBase, "DocumentReference", id).toString()));
+//                                    }
+//                                }
+//                            }
+//                        }
                     }
 
                     if (val.hasErrors()) {

@@ -7,7 +7,7 @@ import gov.nist.asbestos.simapi.validation.ValE;
 import org.hl7.fhir.r4.model.TestReport;
 import org.hl7.fhir.r4.model.TestScript;
 
-import java.util.Objects;
+import java.util.*;
 
 public class VariableMgr {
     private TestScript testScript;
@@ -39,7 +39,24 @@ public class VariableMgr {
                 return comp;
         }
         return null;
+    }
 
+    private List<String> getVariableNames() {
+        List<String> names = new ArrayList<>();
+        for(TestScript.TestScriptVariableComponent comp : testScript.getVariable()) {
+            if (comp.hasName())
+                names.add(comp.getName());
+        }
+        return names;
+    }
+
+    public Map<String, String> getVariables() {
+        Map<String, String> vars = new HashMap<>();
+        for (String name : getVariableNames()) {
+            String value = eval(name, true);
+            vars.put(name, value);
+        }
+        return vars;
     }
 
     private boolean containsVariable(String reference) {
@@ -116,34 +133,46 @@ public class VariableMgr {
         if (!reference.contains(("${")))
             return reference;
         Variable var  = getNextVariable(reference); //reference.substring(from+2, to);
-        String update = eval(var.name);
+        String update = eval(var.name, false);
         if (update == null)
             return reference;
         return reference.substring(0, var.from) + update + reference.substring(var.to+1);
     }
 
-    String eval(String variableName) {
+    String eval(String variableName, boolean errorAsValue) {
         TestScript.TestScriptVariableComponent var = getVariable(variableName);
         if (var == null) {
-            reporter.reportError( "Variable " + variableName + " is referenced but not defined");
+            String error = "Variable " + variableName + " is referenced but not defined";
+            if (errorAsValue)
+                return error;
+            reporter.reportError(error);
             return null;
         }
         String sourceId = null;
         if (var.hasSourceId()) {
             sourceId = var.getSourceId();
         } else if (!var.hasDefaultValue()){
-            reporter.reportError("Variable " + variableName + " does not have a sourceId and does not define a defaultValue");
+            String error = "Variable " + variableName + " does not have a sourceId and does not define a defaultValue";
+            if (errorAsValue)
+                return error;
+            reporter.reportError(error);
             return null;
         }
         if (!fixtureMgr.containsKey(sourceId)) {
-            reporter.reportError( "Variable " + variableName + " references sourceId " + sourceId + " which does  not exist");
+            String error = "Variable " + variableName + " references sourceId " + sourceId + " which does  not exist";
+            if (errorAsValue)
+                return error;
+            reporter.reportError(error);
             return null;
         }
         FixtureComponent fixture = fixtureMgr.get(sourceId);
 
         if (var.hasHeaderField()) {
             if (!fixture.hasHttpBase()) {
-                reporter.reportError( "Variable " + variableName + " sourceId " + sourceId + " does not have a HTTP header behind it");
+                String error = "Variable " + variableName + " sourceId " + sourceId + " does not have a HTTP header behind it";
+                if (errorAsValue)
+                    return error;
+                reporter.reportError(error);
                 return null;
             }
             HttpBase base = fixture.getHttpBase();
@@ -160,10 +189,16 @@ public class VariableMgr {
         } else if (var.hasDefaultValue()) {
             return var.getDefaultValue();
         } else if (var.hasPath()) {
-            reporter.reportError("Variable " + variableName + " path not supported");
+            String error = "Variable " + variableName + " path not supported";
+            if (errorAsValue)
+                return error;
+            reporter.reportError(error);
             return null;
         } else {
-            reporter.reportError( "Variable " + variableName + " does not define one of headerField, expression, path, defaultValue");
+            String error = "Variable " + variableName + " does not define one of headerField, expression, path, defaultValue";
+            if (errorAsValue)
+                return error;
+            reporter.reportError(error);
             return null;
         }
     }

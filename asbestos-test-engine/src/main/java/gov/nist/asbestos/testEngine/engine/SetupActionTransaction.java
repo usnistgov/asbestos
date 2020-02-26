@@ -10,6 +10,7 @@ import org.hl7.fhir.r4.model.*;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 public class SetupActionTransaction extends GenericSetupAction {
@@ -19,12 +20,31 @@ public class SetupActionTransaction extends GenericSetupAction {
         this.fixtureMgr = fixtureMgr;
     }
 
+    private String asMarkdown(Map<String, String> table, String title) {
+        StringBuilder buf = new StringBuilder();
+        buf.append("### ").append(title).append("\n");
+        boolean first = true;
+        for (String key : table.keySet()) {
+            if (!first)
+                buf.append("\n");
+            first = false;
+            String value = table.get(key);
+            buf.append("**").append(key).append("**: ").append(value);
+        }
+        return buf.toString();
+    }
+
     void run(TestScript.SetupActionOperationComponent op, TestReport.SetupActionOperationComponent operationReport) {
         if (!preExecute(op, operationReport))
             return;
 
+        Map<String, String> variables = variableMgr.getVariables();
+        String markdown = asMarkdown(variables, "Variables");
+        reporter.report("No Evaluation\n" + markdown);
+
+
         ResourceWrapper wrapper = getFhirClient().writeResource(resourceToSend, targetUrl, fhirClient.getFormat(), requestHeader);
-        reporter.report("No evaluation", wrapper);
+        //reporter.report("No evaluation", wrapper);
 //        BaseResource resource = wrapper.getResource();
 //        if (wrapper.isOk()) {
 //            if ((resourced instanceof Bundle) && bundleContainsError((Bundle) resource) ) {

@@ -86,7 +86,8 @@ public class GetLogEventAnalysis {
             Headers requestHeaders = new Headers(event.getClientTask().getRequestHeader());
             String responseBodyString = event.getClientTask().getResponseBody();
             Headers responseHeaders = new Headers(event.getClientTask().getResponseHeader());
-            String analysisSource = analysisTargetIsRequest() ? requestBodyString : responseBodyString;
+            boolean isRequest = analysisTargetIsRequest();
+            String analysisSource = isRequest ? requestBodyString : responseBodyString;
             BaseResource baseResource;
             try {
                 baseResource = ProxyBase.parse(analysisSource, Format.fromContentType(responseHeaders.getContentType().getValue()));
@@ -121,10 +122,10 @@ public class GetLogEventAnalysis {
                         if (url != null && !url.equals(""))
                             refs.add(new Ref(url));
                     }
-                    runAndReturnReport(bundle, "A Bundle");
+                    runAndReturnReport(bundle, "A Bundle", isRequest);
                     //returnReport(new Report("Do not understand event"));
                 } else {
-                    runAndReturnReport(bundle, "A Bundle");
+                    runAndReturnReport(bundle, "A Bundle", isRequest);
                     //returnReport(new Report("Do not understand event"));
                 }
             } else if (responseHeaders.hasHeader("Content-Location")) {
@@ -180,10 +181,11 @@ public class GetLogEventAnalysis {
         returnReport(report);
     }
 
-    private void runAndReturnReport(Bundle bundle, String source) {
+    private void runAndReturnReport(Bundle bundle, String source, boolean isRequest) {
         Ref manifestFullUrl = getManifestFullUrl(bundle);
         AnalysisReport analysisReport = new AnalysisReport(manifestFullUrl, source, request.ec);
         analysisReport.withContextResource(bundle);
+        analysisReport.analyseRequest(isRequest);
         Report report = analysisReport.run();
         returnReport(report);
     }

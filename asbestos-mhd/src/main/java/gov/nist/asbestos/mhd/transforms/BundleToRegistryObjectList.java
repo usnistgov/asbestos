@@ -443,7 +443,7 @@ public class BundleToRegistryObjectList implements IVal {
             }
             if (context.hasSourcePatientInfo()) {
                 vale.addTr(new ValE("sourcePatientInfo"));
-                addSourcePatientInfo(eo, resource, context.getSourcePatientInfo(), vale);
+                addSourcePatient(eo, resource, context.getSourcePatientInfo(), vale);
             }
             if (context.hasFacilityType()) {
                 vale.addTr(new ValE("facilityType"));
@@ -677,36 +677,34 @@ public class BundleToRegistryObjectList implements IVal {
      * Patient resources shall not be in the bundle so don't look there.  Must have fullUrl reference
      */
 
-    private void addSourcePatientInfo(ExtrinsicObjectType eo, ResourceWrapper resource, Reference sourcePatient, ValE val) {
-    }
-        // TODO sourcePatientInfo is not populated
-//    private void addSourcePatient(ExtrinsicObjectType eo, ResourceWrapper resource, Reference sourcePatient) {
-//        if (!sourcePatient.reference)
-//            return
-//        val.add(new Val().msg("Resolve ${sourcePatient.reference} as SourcePatient"))
-//        def extra = 'DocumentReference.context.sourcePatientInfo must reference Contained Patient resource with Patient.identifier.use element set to "usual"'
-//        ResourceWrapper loadedPatient = rMgr.resolveReference(resource, new Ref(sourcePatient.reference), new ResolverConfig().containedRequired())
-//        if (!loadedPatient.resource) {
-//            val.err(new Val()
-//            .msg("Cannot load resource at ${loadedPatient.url}"))
-//            return
-//        }
-//
-//        if (!(loadedPatient.resource instanceof Patient)) {
-//            val.err(new Val()
-//            .msg("Patient loaded from ${loadedPatient.url} returned a ${loadedPatient.resource.class.simpleName} instead"))
-//            return
-//        }
-//
-//        Patient patient = (Patient) loadedPatient.resource
-//
-//        // find identifier that aligns with required Assigning Authority
-//        List<Identifier> identifiers = patient.getIdentifier()
-//
-//        String pid = findAcceptablePID(identifiers)
-//        if (pid)
-//            addSlot(builder, 'sourcePatientId', [pid])
+//    private void addSourcePatientInfo(ExtrinsicObjectType eo, ResourceWrapper resource, Reference sourcePatient, ValE val) {
 //    }
+        // TODO sourcePatientInfo is not populated
+    private void addSourcePatient(ExtrinsicObjectType eo, ResourceWrapper resource, Reference sourcePatient, ValE val) {
+        if (sourcePatient.getReference() == null)
+            return;
+        val.add(new ValE("Resolve ${sourcePatient.reference} as SourcePatient"));
+        String extra = "DocumentReference.context.sourcePatientInfo must reference Contained Patient resource with Patient.identifier.use element set to 'usual'";
+        Optional <ResourceWrapper> loadedPatient = rMgr.resolveReference(resource, new Ref(sourcePatient.getReference()), new ResolverConfig().containedRequired());
+        if (!loadedPatient.isPresent() || loadedPatient.get().getResource() == null) {
+            val.add(new ValE("Cannot load resource at ${loadedPatient.url}")).asError();
+            return;
+        }
+
+        if (!(loadedPatient.get().getResource() instanceof Patient)) {
+            val.add(new ValE("Patient loaded from " + loadedPatient.get().getRef().asString() +  " returned a " + loadedPatient.get().getResource().getClass().getSimpleName() + " instead")).asError();
+            return;
+        }
+
+        Patient patient = (Patient) loadedPatient.get().getResource();
+
+        // find identifier that aligns with required Assigning Authority
+        List<Identifier> identifiers = patient.getIdentifier();
+
+        String pid = findAcceptablePID(identifiers);
+        if (pid != null)
+            addSlot(eo, "sourcePatientId", Collections.singletonList(pid));
+    }
 
     private String findAcceptablePID(List<Identifier> identifiers) {
         Objects.requireNonNull(assigningAuthorities);
