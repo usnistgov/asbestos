@@ -35,7 +35,9 @@
                 </securityLabel>
                 <relatesTo>
                     <code value="replaces"/>
-                    <target value="${original}"/>
+                    <target>
+                        <reference value="${original}"/>
+                    </target>
                 </relatesTo>
                 <content>
                     <attachment>

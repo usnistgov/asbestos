@@ -34,6 +34,28 @@ abstract class GenericSetupAction {
     String label;
 
     abstract String resourceTypeToSend();
+
+    private String asMarkdown(Map<String, String> table, String title) {
+        StringBuilder buf = new StringBuilder();
+        buf.append("### ").append(title).append("\n");
+        boolean first = true;
+        for (String key : table.keySet()) {
+            if (!first)
+                buf.append("\n");
+            first = false;
+            String value = table.get(key);
+            buf.append("**").append(key).append("**: ").append(value);
+        }
+        return buf.toString();
+    }
+
+    void reportOperation(ResourceWrapper wrapper) {
+        String request = "### " + wrapper.getHttpBase().getVerb() + " " + wrapper.getHttpBase().getUri() + "\n";
+        Map<String, String> variables = variableMgr.getVariables();
+        String markdown = request + asMarkdown(variables, "Variables");
+        reporter.report(markdown, wrapper);
+    }
+
     abstract Ref buildTargetUrl();
 
     static void handleRequestHeader(Map<String, String> requestHeader, TestScript.SetupActionOperationComponent op, VariableMgr variableMgr) {
