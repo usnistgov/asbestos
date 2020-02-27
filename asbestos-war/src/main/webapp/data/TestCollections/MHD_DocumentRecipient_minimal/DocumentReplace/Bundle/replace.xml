@@ -2,7 +2,7 @@
     <id value="xds"/>
     <meta>
         <lastUpdated value="2013-07-01T13:11:33Z"/>
-        <profile value="http://ihe.net/fhir/StructureDefinition/IHE_MHD_Provide_Comprehensive_DocumentBundle"/>
+        <profile value="http://ihe.net/fhir/StructureDefinition/IHE_MHD_Minimal_DocumentManifest"/>
     </meta>
     <type value="transaction"/>
     <entry>
@@ -73,6 +73,12 @@
                         </coding>
                     </facilityType>
                 </context>
+                <relatesTo>
+                    <code value="replaces"/>
+                    <target>
+                        <reference value="${original}"/>
+                    </target>
+                </relatesTo>
                 <content>
                     <attachment>
                         <contentType value="text/plain"/>

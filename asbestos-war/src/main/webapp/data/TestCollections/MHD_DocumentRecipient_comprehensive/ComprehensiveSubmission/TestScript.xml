@@ -12,6 +12,14 @@
             <reference value="Patient/Alex_Alder"/>
         </resource>
     </fixture>
+    <fixture id="patient_bundle2">
+        <!--
+           This patient comes out of the test Patient cache
+        -->
+        <resource>
+            <reference value="Patient/Alex_Alder"/>
+        </resource>
+    </fixture>
     <variable>
         <name value="DocRefUrl"/>
         <expression value="Bundle.entry[0].response.location"/>
