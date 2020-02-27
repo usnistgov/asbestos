@@ -77,10 +77,6 @@ public class Ref {
         if (uri == null)
             return null;
         return uri.getQuery();
-//        String[] parts = uri.toString().split("\\?");
-//        if (parts.length == 0 || parts.length == 1)
-//            return null;
-//        return parts[1];
     }
 
     public Map<String, String> getParametersAsMap() {

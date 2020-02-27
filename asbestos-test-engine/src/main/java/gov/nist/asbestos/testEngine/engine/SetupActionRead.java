@@ -25,7 +25,7 @@ class SetupActionRead extends GenericSetupAction {
             return;
 
         ResourceWrapper wrapper = fhirClient.readResource(targetUrl, requestHeader);
-        reportOperation(wrapper);
+        //reportOperation(wrapper);
 
 //        reporter.report("GET " + wrapper.getRef(), wrapper);
 //        if (true || !wrapper.isOk()) {

@@ -42,7 +42,7 @@ class SetupActionDelete extends GenericSetupAction {
         Ref targetUrl = new Ref(createUrl.getBase(), createUrl.getResourceType(), createUrl.getId(), null);
         ResourceWrapper wrapper = getFhirClient().deleteResource(targetUrl, requestHeader);
 
-        reportOperation(wrapper);
+        //reportOperation(wrapper);
 
         if (wrapper.isOk())
             reporter.report(targetUrl + " deleted", wrapper);

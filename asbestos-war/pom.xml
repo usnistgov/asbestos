@@ -14,6 +14,7 @@
     <packaging>war</packaging>
 
     <properties>
+        <fhirToolkitUIBase>http://localhost:8082</fhirToolkitUIBase>
         <httpsFhirToolkitUIBase>https://fhirtoolkit.test:9743/asbestos</httpsFhirToolkitUIBase>
         <fhirToolkitBase>http://localhost:8081/asbestos</fhirToolkitBase>
         <hapiFhirBase>http://localhost:8080/fhir/fhir</hapiFhirBase>

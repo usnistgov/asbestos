@@ -206,6 +206,13 @@ public class Headers {
         return header.getValue();
     }
 
+    public String getProxyEvent() {
+        Header pe = get("x-proxy-event");
+        if (pe == null)
+            return null;
+        return pe.getValue();
+    }
+
     public Header getAccept() {
         Optional<Header> accepts = headers.stream()
                 .filter(header -> header.getName().equalsIgnoreCase("accept"))
@@ -262,8 +269,9 @@ public class Headers {
         return pathInfo;
     }
 
-    public void setPathInfo(URI pathInfo) {
+    public Headers setPathInfo(URI pathInfo) {
         this.pathInfo = pathInfo;
+        return this;
     }
 
     public int getStatus() {

@@ -18,7 +18,7 @@ class FixtureMgr {
         lastOp = name;
     }
 
-    FixtureComponent get(String name) {
+    public FixtureComponent get(String name) {
         return fixtures.get(name);
     }
 

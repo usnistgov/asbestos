@@ -3,12 +3,14 @@ package gov.nist.asbestos.mhd.transforms;
 
 import gov.nist.asbestos.asbestorCodesJaxb.Code;
 import gov.nist.asbestos.client.Base.IVal;
+import gov.nist.asbestos.client.events.ITask;
 import gov.nist.asbestos.client.resolver.IdBuilder;
 import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.client.resolver.ResolverConfig;
 import gov.nist.asbestos.client.resolver.ResourceMgr;
 import gov.nist.asbestos.mhd.SubmittedObject;
 import gov.nist.asbestos.mhd.exceptions.TransformException;
+import gov.nist.asbestos.mhd.transactionSupport.AhqrSender;
 import gov.nist.asbestos.mhd.transactionSupport.AssigningAuthorities;
 import gov.nist.asbestos.mhd.transactionSupport.CodeTranslator;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
@@ -16,16 +18,19 @@ import gov.nist.asbestos.mhd.translation.attribute.Author;
 import gov.nist.asbestos.mhd.translation.attribute.AuthorRole;
 import gov.nist.asbestos.mhd.translation.attribute.DateTransform;
 import gov.nist.asbestos.mhd.translation.attribute.EntryUuid;
+import gov.nist.asbestos.mhd.translation.search.FhirSq;
 import gov.nist.asbestos.simapi.validation.Val;
 import gov.nist.asbestos.simapi.validation.ValE;
 import oasis.names.tc.ebxml_regrep.xsd.rim._3.*;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.codesystems.DocumentRelationshipType;
 
 import javax.xml.bind.DatatypeConverter;
 import javax.xml.bind.JAXBElement;
 import javax.xml.namespace.QName;
 import javax.xml.transform.TransformerException;
+import java.net.URI;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -81,6 +86,8 @@ public class BundleToRegistryObjectList implements IVal {
     private Bundle responseBundle = null;
     private boolean responseHasError = false;
     private List<SubmittedObject> submittedObjects = new ArrayList<>();
+    private ITask task = null;
+    private URI sqEndpoint = null;
 
     public SubmittedObject findSubmittedObject(BaseResource resource) {
         for (SubmittedObject submittedObject : submittedObjects) {
@@ -140,6 +147,25 @@ public class BundleToRegistryObjectList implements IVal {
                 eos.add(eo);
                 submittedObjects.add(new SubmittedObject(wrapper.getAssignedUid(), resource));
                 rol.getIdentifiable().add(new JAXBElement<>(new QName("urn:oasis:names:tc:ebxml-regrep:xsd:rim:3.0", "ExtrinsicObject"), ExtrinsicObjectType.class, eo));
+                if (dr.hasRelatesTo()) {
+                    List<DocumentReference.DocumentReferenceRelatesToComponent> relates = dr.getRelatesTo();
+                    for (DocumentReference.DocumentReferenceRelatesToComponent relate : relates) {
+                        Reference reference = null;
+                        DocumentReference.DocumentRelationshipType code = null;
+                        if (relate.hasTarget())
+                            reference = relate.getTarget();
+                        if (relate.hasCode())
+                            code = relate.getCode();
+                        if (reference == null)
+                            vale.add(new ValE("relatesTo is missing the target.reference").asError());
+                        if (code == null)
+                            vale.add(new ValE("relatesTo is missing the target.code").asError());
+                        if (reference != null && code != null) {
+                            AssociationType1 hasMember = addRelationship(eo, code.toCode(), new Ref(reference.getReference()), vale);
+                            rol.getIdentifiable().add(new JAXBElement<>(new QName("urn:oasis:names:tc:ebxml-regrep:xsd:rim:3.0", "Association"), AssociationType1.class, hasMember));
+                        }
+                    }
+                }
             } else if (resource instanceof Binary) {
             } else {
                 vale.add(new ValE("Ignoring resource of type " + resource.getClass().getSimpleName()));
@@ -743,6 +769,31 @@ public class BundleToRegistryObjectList implements IVal {
             addExternalIdentifier(ro, scheme, pid, rMgr.allocateSymbolicId(), resource.getAssignedId(), attName, null);
     }
 
+    private AssociationType1 addRelationship(RegistryObjectType source, String relationshipType, Ref target, ValE val) {
+        Objects.requireNonNull(task);
+        Objects.requireNonNull(sqEndpoint);
+        if (relationshipType == null || !relationshipType.equals("replaces")) {
+            val.add(new ValE("Relationship " + relationshipType + " is not supported ").asError());
+            return null;
+        }
+
+        AhqrSender sender = FhirSq.documentEntryByUidQuery(target.getId(), sqEndpoint, task.newTask());
+        List<IdentifiableType> contents = sender.getContents();
+        if (contents.size() != 1) {
+            val.add(new ValE("Error retrieving DocumentEntry " + target.getId() + " from " + sqEndpoint + " - expected 1 entry but got " + contents.size()).asError());
+            return null;
+        }
+        ExtrinsicObjectType eo = (ExtrinsicObjectType) contents.get(0);
+        String targetId = eo.getId();
+
+        return createAssociation("urn:ihe:iti:2007:AssociationType:RPLC",
+                source.getId(),
+                targetId,
+                null,
+                null,
+                val);
+    }
+
     public void addExternalIdentifier(RegistryObjectType ro, String scheme, String value, String id, String registryObject, String name, IdBuilder idBuilder) {
         val.add(new ValE("ExternalIdentifier " + scheme));
         //List<ExternalIdentifierType> eits = ro.getExternalIdentifier();
@@ -973,5 +1024,15 @@ public class BundleToRegistryObjectList implements IVal {
 
     public boolean isResponseHasError() {
         return responseHasError;
+    }
+
+    public BundleToRegistryObjectList setTask(ITask task) {
+        this.task = task;
+        return this;
+    }
+
+    public BundleToRegistryObjectList setSqEndpoint(URI sqEndpoint) {
+        this.sqEndpoint = sqEndpoint;
+        return this;
     }
 }

@@ -26,7 +26,7 @@ public class SetupActionTransaction extends GenericSetupAction {
 
         ResourceWrapper wrapper = getFhirClient().writeResource(resourceToSend, targetUrl, fhirClient.getFormat(), requestHeader);
 
-        reportOperation(wrapper);
+       // reportOperation(wrapper);
 
 
         //reporter.report(markdown, wrapper);

@@ -49,6 +49,8 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.*;
 
+import static gov.nist.asbestos.mhd.translation.search.FhirSq.documentEntryByUidQuery;
+
 // TODO - honor the Prefer header - http://hl7.org/fhir/http.html#ops
 public class XdsOnFhirChannel extends BaseChannel /*implements IBaseChannel*/ {
     private Bundle requestBundle = null;
@@ -85,6 +87,16 @@ public class XdsOnFhirChannel extends BaseChannel /*implements IBaseChannel*/ {
         bundleToRegistryObjectList.setResourceMgr(rMgr);
         bundleToRegistryObjectList.setAssigningAuthorities(AssigningAuthorities.allowAny());
         bundleToRegistryObjectList.setIdBuilder(new IdBuilder(true));
+        bundleToRegistryObjectList.setTask(task);
+
+        try {
+            HttpGet requestIn = new HttpGet();
+            // only resource type is important
+            requestIn.setRequestHeaders(new Headers().setPathInfo(new URI("DocumentReference/1")));
+            bundleToRegistryObjectList.setSqEndpoint(transformRequestUrl(null, requestIn));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
 
         // perform translation
         rMgr.setBundle(bundle);
@@ -157,37 +169,7 @@ public class XdsOnFhirChannel extends BaseChannel /*implements IBaseChannel*/ {
 //    }
 
 
-    private AhqrSender documentEntryByUidQuery(String uid, URI toAddr, ITask task)  {
-        Map<String, List<String>> model = new HashMap<>();
-        model.put("$XDSDocumentEntryUniqueId", Collections.singletonList(uid));
-        return FhirSq.run(model, "urn:uuid:5c4f972b-d56b-40ac-a5fc-c8ca9b40b9d4", toAddr, true, task);
-    }
 
-    private AhqrSender documentEntryByUUIDQuery(String uuid, URI toAddr, ITask task)  {
-        Map<String, List<String>> model = new HashMap<>();
-        model.put("$XDSDocumentEntryEntryUUID", Collections.singletonList(uuid));
-        return FhirSq.run(model, "urn:uuid:5c4f972b-d56b-40ac-a5fc-c8ca9b40b9d4", toAddr, true, task);
-    }
-
-    private RetrieveContent binaryByUidRetrieve(String docUid, String repUid, URI toAddr, ITask task)  {
-        RetrieveDocumentSetRequestType request = new RetrieveDocumentSetRequestType();
-        RetrieveDocumentSetRequestType.DocumentRequest docRequest = new RetrieveDocumentSetRequestType.DocumentRequest();
-        docRequest.setRepositoryUniqueId(repUid);
-        docRequest.setDocumentUniqueId(docUid);
-        request.getDocumentRequest().add(docRequest);
-
-        return new RetrieveSender().send(request, toAddr, task);
-    }
-
-    private AhqrSender submissionSetByUidQuery(String uid, URI toAddr, ITask task)  {
-        Map<String, List<String>> model = new HashMap<>();
-        model.put("$XDSSubmissionSetUniqueId", Collections.singletonList(uid));
-        AhqrSender sender = FhirSq.run(model, "urn:uuid:e8e3cb2c-e39c-46b9-99e4-c12f57260b83", toAddr, true, task);
-
-        // query returns more than what we want - prune results
-
-        return sender;
-    }
 
     private OperationOutcome regErrorListAsOperationOutcome(RegErrorList regErrorList) {
         OperationOutcome oo = new OperationOutcome();
@@ -278,19 +260,19 @@ public class XdsOnFhirChannel extends BaseChannel /*implements IBaseChannel*/ {
             // GET
             if (resourceType.equals("DocumentReference") && uid.contains(".")) {
                 // by UID
-                sender = documentEntryByUidQuery(uid, toAddr, task);
+                sender = FhirSq.documentEntryByUidQuery(uid, toAddr, task);
                 returnAhqrResults(requestOut);
             } else if (resourceType.equals("DocumentReference") && uid.contains("-")) {
                 // by UUID
-                sender = documentEntryByUUIDQuery("urn:uuid:" + uid, toAddr, task);
+                sender = FhirSq.documentEntryByUUIDQuery("urn:uuid:" + uid, toAddr, task);
                 returnAhqrResults(requestOut);
             } else if (resourceType.equals("DocumentManifest")  && uid.contains(".")) {
-                sender = submissionSetByUidQuery(uid, toAddr, task);
+                sender = FhirSq.submissionSetByUidQuery(uid, toAddr, task);
                 returnAhqrResults(requestOut);
             } else if (resourceType.equalsIgnoreCase("Binary") && uid.contains(".")) {
                 // by UUID
                 String repUid = "1.1.1";
-                RetrieveContent retrieveContent = binaryByUidRetrieve(uid, repUid, toAddr, task);
+                RetrieveContent retrieveContent = FhirSq.binaryByUidRetrieve(uid, repUid, toAddr, task);
                 String retrieveContentStr = new String(retrieveContent.getContent());
                 binary = new Binary();
                 binary.setId(uid);
