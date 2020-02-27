@@ -38,7 +38,7 @@
         <sourceId value="pdb-bundle"/>
     </variable>
     <test>
-        <description value="Submit Provide Document Bundle to MHD Document Recipient and verify response."/>
+        <description value="Submit Provide Document Bundle to MHD Document Recipient and verify response. This test submits a DocumentReference with a fixed id so the second time (or after) you submit it will fail with a message: Submission includes pre-assigned id - This is ok."/>
         <action>
             <operation>
                 <!-- references patient from resourceCache in EC -->

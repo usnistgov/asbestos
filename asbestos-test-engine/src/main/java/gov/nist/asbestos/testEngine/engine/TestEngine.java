@@ -738,7 +738,7 @@ public class TestEngine  {
 
     private void buildCacheEntry(TestReport.SetupActionOperationComponent op, EC ec) {
         if ("pass".equals(op.getResult().toCode())) {
-            if (op.getMessage().startsWith("GET") || op.getMessage().startsWith("CREATE")) {
+            //if (op.getMessage().startsWith("GET") || op.getMessage().startsWith("CREATE")) {
                 URI uri;
                 try {
                     uri = new URI(op.getDetail());
@@ -747,7 +747,7 @@ public class TestEngine  {
                 }
                 UIEvent uiEvent = new UIEvent(ec).fromURI(uri);
                 buildCacheEntry(uiEvent, ec);
-            }
+           // }
         }
     }
 

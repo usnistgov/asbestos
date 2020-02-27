@@ -28,13 +28,18 @@ public class EntryUuid extends AbstractAttribute {
         ValE tr = val.addTr(new ValE("Identifier to entryUUID"));
         if (identifierList != null) {
             for (Identifier id : identifierList) {
-                if (id.hasValue() && ResourceMgr.isUUID(id.getValue())) {
+                if (id.hasValue()) {
                     boolean isOfficial = id.hasUse() && id.getUse() == Identifier.IdentifierUse.OFFICIAL;
-                    if (!isOfficial)
-                        tr.add(new ValE("DocumentReference.identifier is UUID but not labeled as official").asWarning());
-                    else {
-                        tr.add(new ValE("Official Identifier found").asTranslation());
-                        resource.setAssignedId(id.getValue());
+                    if (ResourceMgr.isUUID(id.getValue())) {
+                        if (!isOfficial)
+                            tr.add(new ValE("DocumentReference.identifier is UUID but not labeled as official").asWarning());
+                        else {
+                            tr.add(new ValE("Official Identifier found").asTranslation());
+                            resource.setAssignedId(id.getValue());
+                        }
+                    } else {
+                        if (isOfficial)
+                            tr.add(new ValE("Identifier is labeled Official but is not UUID format").asError());
                     }
                 }
             }
