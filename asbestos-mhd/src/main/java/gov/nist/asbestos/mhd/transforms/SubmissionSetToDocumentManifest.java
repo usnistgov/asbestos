@@ -7,6 +7,8 @@ import gov.nist.asbestos.mhd.transactionSupport.CodeTranslator;
 import gov.nist.asbestos.mhd.translation.ContainedIdAllocator;
 import gov.nist.asbestos.mhd.translation.attribute.PatientId;
 import gov.nist.asbestos.mhd.translation.attribute.Slot;
+import gov.nist.asbestos.serviceproperties.ServiceProperties;
+import gov.nist.asbestos.serviceproperties.ServicePropertiesEnum;
 import gov.nist.asbestos.sharedObjects.ChannelConfig;
 import gov.nist.asbestos.simapi.validation.Val;
 import gov.nist.asbestos.simapi.validation.ValE;
@@ -85,7 +87,8 @@ public class SubmissionSetToDocumentManifest implements IVal {
 
         for (AssociationType1 assoc : assocs) {
             if (assoc.getAssociationType().endsWith("HasMember") && assoc.getSourceObject().equals(id)) {
-                String reference = channelConfig.getFhirBase() +
+                String fhirBase = ServiceProperties.getInstance().getPropertyOrStop(ServicePropertiesEnum.FHIR_TOOLKIT_BASE) + "/proxy/" + channelConfig.asFullId();
+                String reference = fhirBase +
                         "/DocumentReference/" +
                         stripUrnPrefix(assoc.getTargetObject());
                 dm.addContent(new Reference(reference));

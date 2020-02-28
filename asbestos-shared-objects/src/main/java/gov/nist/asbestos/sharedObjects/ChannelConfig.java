@@ -17,6 +17,7 @@ public class ChannelConfig {
     private String fhirBase = null;   // points to fhir server is channel type if FHIR
     private String xdsSiteName;       // point to XDS server if channel type is MHD
     private boolean writeLocked;
+    private boolean logMhdCapabilityStatementRequest;
 
     public String toString() {
         return new StringBuilder().append("Channel ").append(testSession).append("__").append(channelId)
@@ -125,12 +126,14 @@ public class ChannelConfig {
                 Objects.equals(actorType, that.actorType) &&
                 Objects.equals(channelType, that.channelType) &&
                 Objects.equals(fhirBase, that.fhirBase) &&
-                Objects.equals(xdsSiteName, that.xdsSiteName);
+                Objects.equals(xdsSiteName, that.xdsSiteName) &&
+                Objects.equals(writeLocked, that.writeLocked) &&
+                Objects.equals(logMhdCapabilityStatementRequest, that.logMhdCapabilityStatementRequest);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(environment, testSession, channelId, actorType, channelType, includeValidation, fhirBase, xdsSiteName);
+        return Objects.hash(environment, testSession, channelId, actorType, channelType, includeValidation, fhirBase, xdsSiteName, writeLocked, logMhdCapabilityStatementRequest);
     }
 
     public String getXdsSiteName() {
@@ -156,5 +159,14 @@ public class ChannelConfig {
 
     public void setWriteLocked(boolean writeLocked) {
         this.writeLocked = writeLocked;
+    }
+
+    public boolean isLogMhdCapabilityStatementRequest() {
+        return logMhdCapabilityStatementRequest;
+    }
+
+    public ChannelConfig setLogMhdCapabilityStatementRequest(boolean logMhdCapabilityStatementRequest) {
+        this.logMhdCapabilityStatementRequest = logMhdCapabilityStatementRequest;
+        return this;
     }
 }

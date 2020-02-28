@@ -7,6 +7,7 @@ export function newChannel () {
         channelType: 'passthrough',
         fhirBase: '',
         xdsSiteName: '',
-        writeLocked: false
+        writeLocked: false,
+        logMhdCapabilityStatementRequest: false
     }
 }

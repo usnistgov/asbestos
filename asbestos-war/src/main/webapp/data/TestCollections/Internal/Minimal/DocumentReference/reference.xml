@@ -4,18 +4,6 @@
                     <system value="urn:ietf:rfc:3986"/>
                     <value value="urn:oid:1.2.129.6.58.92.88336.4"/>
                 </masterIdentifier>
-                <subject>
-                    <reference value="${patientResourceId}"/>
-                </subject>
-                <created value="2005-12-24"/>
-                <indexed value="2013-07-01T23:11:33+10:00"/>
-                <securityLabel>
-                    <coding>
-                        <system value="http://terminology.hl7.org/CodeSystem/v3-Confidentiality"/>
-                        <code value="N"/>
-                        <display value="normal"/>
-                    </coding>
-                </securityLabel>
                 <content>
                     <attachment>
                         <contentType value="text/plain"/>

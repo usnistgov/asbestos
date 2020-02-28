@@ -1,8 +1,8 @@
 <template xmlns:v-slot="http://www.w3.org/1999/XSL/Transform">
     <div>
+        <!-- begin grid -->
         <div class="window">
-            <div v-if="channel">
-                <div class="grid-container">
+            <div v-if="channel" class="grid-container">
                     <div class="button-bar">
                         <div v-if="edit">
                             <div v-if="badNameMode">
@@ -112,6 +112,22 @@
                     </div>
                     <div v-else class="grid-item">{{ channel.xdsSiteName }}</div>
 
+                    <label v-if="channel.channelType === 'mhd'" class="grid-name">Log MHD Capability Statement Request?</label>
+                    <div v-if="channel.channelType === 'mhd' && edit" class="grid-item">
+                        <input type="radio" id="noLogCapStmt" value="false" v-model="channel.logMhdCapabilityStatementRequest">
+                        <label for="noLogCapStmt">No</label>
+                        <input type="radio" id="logCapStmt" value="true" v-model="channel.logMhdCapabilityStatementRequest">
+                        <label for="logCapStmt">Yes</label>
+                    </div>
+                    <div v-else-if="channel.channelType === 'mhd'" class="grid-item">
+                        <div v-if="channel.logMhdCapabilityStatementRequest">
+                           Yes
+                        </div>
+                        <div v-else>
+                           No
+                        </div>
+                    </div>
+
                     <div v-if="!lockAckMode && !edit && !channel.fhirBase && !channel.xdsSiteName" class="channelError">
                         <div class="vdivider"></div>
                         <div class="vdivider"></div>
@@ -134,23 +150,22 @@
                         Warning: MHD type is selected but no XDS Site Name is configured
                     </div>
                 </div>
-                <div v-if="!edit">
-                    <p class="caption">Channel Base Address: </p>
-                    <span class="center">{{getChannelBase(channel)}}</span>
-
-                    <p>
-                        Send to this URL and
-                        <ul>
-                            <li>Proxy will record your transaction</li>
-                            <li>Proxy will forward your transaction to
-                                <span v-if="channel.fhirBase">{{channel.fhirBase}}</span>
-                                <span v-if="channel.xdsSiteName">XDS Toolkit site {{channel.xdsSiteName}}</span>
-                            </li>
-                        </ul>
-                    </p>
+            </div>
+            <!-- end of grid -->
+            <div v-if="channel && !edit">
+                <p class="caption">Channel Base Address: </p>
+                <span class="center">{{getChannelBase(channel)}}</span>
+                <div>
+                    <p>Send to this URL and</p>
+                    <ul>
+                         <li>Proxy will record your transaction</li>
+                         <li>Proxy will forward your transaction to
+                             <span v-if="channel.fhirBase">{{channel.fhirBase}}</span>
+                             <span v-if="channel.xdsSiteName">XDS Toolkit site {{channel.xdsSiteName}}</span>
+                         </li>
+                    </ul>
                 </div>
             </div>
-        </div>
     </div>
 </template>
 
@@ -495,11 +510,13 @@
         /*background-color: rgba(255, 255, 255, 0.8);*/
         grid-column: 1;
         text-align: left;
+        margin-bottom: 2px;
     }
     .grid-item {
         /*background-color: rgba(255, 255, 255, 0.8);*/
         grid-column: 2;
         text-align: left;
+        margin-bottom: 2px;
     }
     .divider{
         width:5px;
@@ -517,6 +534,7 @@
     .button-bar {
         grid-column: 0 / span 2;
         alignment: left;
+        margin-bottom: 10px;
     }
     .tooltip {
         position: relative;

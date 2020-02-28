@@ -6,11 +6,13 @@ import org.hl7.fhir.r4.model.BaseResource;
 import java.util.*;
 
 public class MinimumId {
+    private boolean isRequest = false;
 
     public static class Report {
         public List<String> missing = new ArrayList<>();
         public List<String> expected = new ArrayList<>();
         public List<String> errors = new ArrayList<>();
+
 
         public Report() {
 
@@ -27,7 +29,8 @@ public class MinimumId {
         }
     }
 
-    public Report run(BaseResource reference, BaseResource sut) {
+    public Report run(BaseResource reference, BaseResource sut, boolean isRequest) {
+        this.isRequest = isRequest;
         Class<?> miniClass = reference.getClass();
         Class<?> sourceClass = sut.getClass();
 
@@ -47,8 +50,14 @@ public class MinimumId {
         Report report = new Report();
         report.expected = refAtts;
         report.expected.remove("description");  // don't know why this shows up but it is wrong
-        report.expected.remove("id");
-        report.expected.remove("created");
+        if (isRequest) {
+            report.expected.remove("id");
+            report.expected.remove("created");
+            report.expected.remove("status");
+            diff.remove("id");
+            diff.remove("created");
+            diff.remove("status");
+        }
         List<String> copy = new ArrayList<>(report.expected);
         for (String s : copy) {
             if (s.endsWith(".coding.display"))

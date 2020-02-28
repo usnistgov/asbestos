@@ -25,6 +25,7 @@ export const baseStore = {
             errors: [],
 
             proxyBase: null,
+            channel: null,
         }
     },
     mutations: {
@@ -160,6 +161,15 @@ export const baseStore = {
         }
     },
     getters: {
-
+        getProxyBase: (state) => (parms) => {
+            if (parms === null)
+                return state.proxyBase
+            const channelId = parms.channelId
+            const sessionId = parms.sessionId
+            return `${state.proxyBase}/${sessionId}__${channelId}`
+        },
+        getFullChannelId: (state) => {
+            return `${state.session}__${state.channelId}`
+        }
     }
 }

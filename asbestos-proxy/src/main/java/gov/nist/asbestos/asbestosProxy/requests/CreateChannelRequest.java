@@ -37,6 +37,11 @@ public class CreateChannelRequest {
         String rawRequest = IOUtils.toString(request.req.getInputStream(), Charset.defaultCharset());   // json
         log.debug("CREATE Channel " + rawRequest);
         ChannelConfig channelConfig = ChannelConfigFactory.convert(rawRequest);
+
+        if ("fhir".equalsIgnoreCase(channelConfig.getChannelType()) && channelConfig.isLogMhdCapabilityStatementRequest()) {
+            channelConfig.setLogMhdCapabilityStatementRequest(false);
+        }
+
         SimStore simStore = new SimStore(request.externalCache,
                 new SimId(new TestSession(channelConfig.getTestSession()),
                         channelConfig.getChannelId(),

@@ -42,6 +42,7 @@ public class TestEngine  {
     private String channelId = null;
     private File externalCache = null;
     private String testCollection = null;
+    private boolean isRequest = false;  // running an eval on a request message?  alternative is regular server test
 
     public static final String LAST_OP = "_LAST_OP_";
 
@@ -115,6 +116,7 @@ public class TestEngine  {
         Objects.requireNonNull(val);
         Objects.requireNonNull(testSession);
         Objects.requireNonNull(externalCache);
+        isRequest = true;
         engineVal = new ValE(val);
         engineVal.setMsg("TestEngine");
         try {
@@ -500,7 +502,8 @@ public class TestEngine  {
                             .setVal(vale)
                             .setOpReport(testReport.getSetup().addAction().getOperation()))
 //                    .setTestReport(testReport)
-                    .setTestScript(testScript);
+                    .setTestScript(testScript)
+                    .setIsRequest(isRequest);
             report = runner.run(operation);
         } catch (Throwable t) {
             report = new TestReport.SetupActionAssertComponent();
@@ -735,7 +738,7 @@ public class TestEngine  {
 
     private void buildCacheEntry(TestReport.SetupActionOperationComponent op, EC ec) {
         if ("pass".equals(op.getResult().toCode())) {
-            if (op.getMessage().startsWith("GET") || op.getMessage().startsWith("CREATE")) {
+            //if (op.getMessage().startsWith("GET") || op.getMessage().startsWith("CREATE")) {
                 URI uri;
                 try {
                     uri = new URI(op.getDetail());
@@ -744,7 +747,7 @@ public class TestEngine  {
                 }
                 UIEvent uiEvent = new UIEvent(ec).fromURI(uri);
                 buildCacheEntry(uiEvent, ec);
-            }
+           // }
         }
     }
 

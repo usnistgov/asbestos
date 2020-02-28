@@ -2,7 +2,10 @@ package gov.nist.asbestos.mhd.translation.search;
 
 import gov.nist.asbestos.client.events.ITask;
 import gov.nist.asbestos.mhd.transactionSupport.AhqrSender;
+import gov.nist.asbestos.mhd.transactionSupport.RetrieveContent;
+import gov.nist.asbestos.mhd.transactionSupport.RetrieveSender;
 import gov.nist.asbestos.mhd.translation.attribute.Slot;
+import ihe.iti.xds_b._2007.RetrieveDocumentSetRequestType;
 import oasis.names.tc.ebxml_regrep.xsd.query._3.AdhocQueryRequest;
 import oasis.names.tc.ebxml_regrep.xsd.query._3.ResponseOptionType;
 import oasis.names.tc.ebxml_regrep.xsd.rim._3.AdhocQueryType;
@@ -34,7 +37,38 @@ public class FhirSq {
         return run(new DocRefSQParamTranslator().run(queryParams), "urn:uuid:14d4debf-8f97-4251-9a74-a90016b0af0d" /* FindDocuments */, toAddr, true, task);
     }
 
+    public static AhqrSender documentEntryByUidQuery(String uid, URI toAddr, ITask task)  {
+        Map<String, List<String>> model = new HashMap<>();
+        model.put("$XDSDocumentEntryUniqueId", Collections.singletonList(uid));
+        return run(model, "urn:uuid:5c4f972b-d56b-40ac-a5fc-c8ca9b40b9d4", toAddr, true, task);
+    }
+
+    public static AhqrSender documentEntryByUUIDQuery(String uuid, URI toAddr, ITask task)  {
+        Map<String, List<String>> model = new HashMap<>();
+        model.put("$XDSDocumentEntryEntryUUID", Collections.singletonList(uuid));
+        return run(model, "urn:uuid:5c4f972b-d56b-40ac-a5fc-c8ca9b40b9d4", toAddr, true, task);
+    }
+
+    public static RetrieveContent binaryByUidRetrieve(String docUid, String repUid, URI toAddr, ITask task)  {
+        RetrieveDocumentSetRequestType request = new RetrieveDocumentSetRequestType();
+        RetrieveDocumentSetRequestType.DocumentRequest docRequest = new RetrieveDocumentSetRequestType.DocumentRequest();
+        docRequest.setRepositoryUniqueId(repUid);
+        docRequest.setDocumentUniqueId(docUid);
+        request.getDocumentRequest().add(docRequest);
+
+        return new RetrieveSender().send(request, toAddr, task);
+    }
+
+    public static AhqrSender submissionSetByUidQuery(String uid, URI toAddr, ITask task)  {
+        Map<String, List<String>> model = new HashMap<>();
+        model.put("$XDSSubmissionSetUniqueId", Collections.singletonList(uid));
+        return run(model, "urn:uuid:e8e3cb2c-e39c-46b9-99e4-c12f57260b83", toAddr, true, task);
+
+        // query returns more than what we want - prune results
+    }
+
     // model is [queryParamName: [values]]
+    // toAddr is SQ endpoint on registry
     public static AhqrSender run(Map<String, List<String>> theModel, String sqid, URI toAddr, boolean leafClass, ITask task) {
         Map<String, List<String>> model = new HashMap<>();
         for (String key : theModel.keySet())

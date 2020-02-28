@@ -1,17 +1,20 @@
 package gov.nist.asbestos.asbestosProxy.servlet;
 
 
+import gov.nist.asbestos.asbestosProxy.channel.BaseChannel;
+import gov.nist.asbestos.asbestosProxy.channel.IBaseChannel;
+import gov.nist.asbestos.asbestosProxy.channel.IChannelBuilder;
+import gov.nist.asbestos.asbestosProxy.channel.PassthroughChannelBuilder;
+import gov.nist.asbestos.asbestosProxy.channel.XdsOnFhirChannelBuilder;
 import gov.nist.asbestos.asbestosProxy.channels.capabilitystatement.FhirToolkitCapabilityStatement;
-import gov.nist.asbestos.asbestosProxy.channel.*;
 import gov.nist.asbestos.client.Base.EC;
-import gov.nist.asbestos.client.events.Event;
-import gov.nist.asbestos.client.events.UIEvent;
-import gov.nist.asbestos.client.log.SimStore;
-import gov.nist.asbestos.http.util.Gzip;
 import gov.nist.asbestos.client.Base.ProxyBase;
 import gov.nist.asbestos.client.client.Format;
+import gov.nist.asbestos.client.events.Event;
 import gov.nist.asbestos.client.events.ITask;
 import gov.nist.asbestos.client.events.NoOpTask;
+import gov.nist.asbestos.client.events.UIEvent;
+import gov.nist.asbestos.client.log.SimStore;
 import gov.nist.asbestos.client.resolver.ChannelUrl;
 import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.http.headers.Header;
@@ -22,9 +25,9 @@ import gov.nist.asbestos.http.operations.HttpGet;
 import gov.nist.asbestos.http.operations.HttpPost;
 import gov.nist.asbestos.http.operations.Verb;
 import gov.nist.asbestos.http.support.Common;
-import gov.nist.asbestos.serviceproperties.ServiceProperties;
-import gov.nist.asbestos.serviceproperties.ServicePropertiesEnum;
+import gov.nist.asbestos.http.util.Gzip;
 import gov.nist.asbestos.mhd.exceptions.TransformException;
+import gov.nist.asbestos.serviceproperties.ServicePropertiesEnum;
 import gov.nist.asbestos.sharedObjects.ChannelConfig;
 import gov.nist.asbestos.sharedObjects.ChannelConfigFactory;
 import gov.nist.asbestos.simapi.simCommon.SimId;
@@ -306,7 +309,7 @@ public class ProxyServlet extends HttpServlet {
     private void doGetCapabilityStatement(HttpServletRequest req, HttpServletResponse resp, SimStore simStore, URI uri, Verb verb, Headers inHeaders, String channelId) {
         if (simStore == null) return;
 
-        boolean isLoggingEnabled = Boolean.parseBoolean(ServiceProperties.getInstance().getProperty(ServicePropertiesEnum.LOG_CS_METADATA_REQUEST.getKey()));
+        boolean isLoggingEnabled = simStore.getChannelConfig().isLogMhdCapabilityStatementRequest();
 
         ITask clientTask = (isLoggingEnabled ? simStore.newEvent().getClientTask() : new NoOpTask());
         try {

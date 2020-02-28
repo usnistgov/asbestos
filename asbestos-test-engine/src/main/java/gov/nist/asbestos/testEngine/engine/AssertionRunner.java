@@ -24,10 +24,16 @@ public class AssertionRunner {
     private TestReport.SetupActionAssertComponent assertReport;
     //private TestReport testReport = null;
     private VariableMgr variableMgr = null;
+    private boolean isRequest = false;  // is assertion being run on request message?
 
     AssertionRunner(FixtureMgr fixtureMgr) {
         Objects.requireNonNull(fixtureMgr);
         this.fixtureMgr = fixtureMgr;
+    }
+
+    public AssertionRunner setIsRequest(boolean isRequest) {
+        this.isRequest = isRequest;
+        return this;
     }
 
     AssertionRunner setVariableMgr(VariableMgr variableMgr) {
@@ -246,7 +252,7 @@ public class AssertionRunner {
 //            return false;
 //        }
 
-        MinimumId.Report report = new MinimumId().run(miniR, sourceR);
+        MinimumId.Report report = new MinimumId().run(miniR, sourceR, isRequest);
         if (!report.errors.isEmpty()) {
             assertReport.setUserData("No Comparison", report.errors.get(0));
             assertReport.setResult(TestReport.TestReportActionResult.SKIP);

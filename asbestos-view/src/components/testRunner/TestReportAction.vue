@@ -24,15 +24,21 @@
         </div>
 
         <div v-if="displayMessage">
-            <ul>
-                <div v-for="(line, linei) in translateNL(message)" :key="'msgDisp' + linei">
-                    <li>
-                        {{ line }}
-                    </li>
-                </div>
-            </ul>
 
-            <div v-if="this.script.operation">
+            <div v-if="message.indexOf('#') === -1">
+                <ul>
+                    <div v-for="(line, linei) in translateNL(message)" :key="'msgDisp' + linei">
+                        <li>
+                            {{ line }}
+                        </li>
+                    </div>
+                </ul>
+            </div>
+            <div v-else>
+                No Evaluation
+            </div>
+
+            <div v-if="script.operation">
                 <span v-if="eventId" class="selectable" @click="toggleEventDisplayed()">Message Log</span>
                 <span v-if="eventDisplayed && eventId">
                     <img src="../../assets/arrow-down.png" @click="toggleEventDisplayed()">
@@ -51,7 +57,7 @@
             </div>
 
             <div>
-                <span class="selectable" @click="toggleScriptDisplayed()">Test Report</span>
+                <span class="selectable" @click="toggleScriptDisplayed()">Test Script/Report</span>
                 <span v-if="displayScript">
                     <img src="../../assets/arrow-down.png" @click="toggleScriptDisplayed()">
                     <script-display
@@ -60,8 +66,17 @@
                     </script-display>
                 </span>
                 <span v-else>
-
                     <img src="../../assets/arrow-right.png" @click="toggleScriptDisplayed()">
+                </span>
+            </div>
+            <div>
+                <span class="selectable" @click="toggleDetailsDisplayed()">Details</span>
+                <span v-if="displayDetails">
+                    <img src="../../assets/arrow-down.png" @click="toggleDetailsDisplayed()">
+                   <vue-markdown>{{message}}</vue-markdown>
+                </span>
+                <span v-else>
+                    <img src="../../assets/arrow-right.png" @click="toggleDetailsDisplayed()">
                 </span>
             </div>
         </div>
@@ -71,12 +86,14 @@
 <script>
     import LogItem from "../logViewer/LogItem"
     import ScriptDisplay from "./ScriptDisplay"
+    import VueMarkdown from 'vue-markdown'
     export default {
         data() {
             return {
                 // message: null,
                 displayMessage: false,
                 displayScript: false,
+                displayDetails: false,
                 status: [],   // testName => undefined, 'pass', 'fail', 'error'
                 eventLogUrl: null,
                 eventDisplayed: false,
@@ -88,11 +105,20 @@
                     return string
                 return string.replace(/\t/g, "  ").split('\n')
             },
+            first(array) {
+                return array[0]
+            },
+            rest(array) {
+                return array.slice(1)
+            },
             toggleEventDisplayed() {
                 this.eventDisplayed = !this.eventDisplayed
             },
             toggleScriptDisplayed() {
                 this.displayScript = !this.displayScript
+            },
+            toggleDetailsDisplayed() {
+                this.displayDetails = !this.displayDetails
             },
             operationType(operation) {
                 return operation.type.code
@@ -182,6 +208,7 @@
         components: {
             ScriptDisplay,
             LogItem,
+            VueMarkdown
         },
         name: "TestReportAction"
     }

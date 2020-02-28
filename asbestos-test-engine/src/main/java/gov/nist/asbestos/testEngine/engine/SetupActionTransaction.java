@@ -10,6 +10,7 @@ import org.hl7.fhir.r4.model.*;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 public class SetupActionTransaction extends GenericSetupAction {
@@ -24,7 +25,14 @@ public class SetupActionTransaction extends GenericSetupAction {
             return;
 
         ResourceWrapper wrapper = getFhirClient().writeResource(resourceToSend, targetUrl, fhirClient.getFormat(), requestHeader);
-        reporter.report("No evaluation", wrapper);
+
+       // reportOperation(wrapper);
+
+
+        //reporter.report(markdown, wrapper);
+
+
+        //reporter.report("No evaluation", wrapper);
 //        BaseResource resource = wrapper.getResource();
 //        if (wrapper.isOk()) {
 //            if ((resourced instanceof Bundle) && bundleContainsError((Bundle) resource) ) {

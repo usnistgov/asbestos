@@ -5,6 +5,8 @@ import gov.nist.asbestos.client.client.FhirClient;
 import gov.nist.asbestos.client.client.Format;
 import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
+import gov.nist.asbestos.http.headers.Headers;
+import gov.nist.asbestos.http.operations.HttpBase;
 import gov.nist.asbestos.simapi.validation.ValE;
 import org.hl7.fhir.r4.model.BaseResource;
 import org.hl7.fhir.r4.model.TestReport;
@@ -34,6 +36,57 @@ abstract class GenericSetupAction {
     String label;
 
     abstract String resourceTypeToSend();
+
+    private String asMarkdown(Map<String, String> table, String title) {
+        StringBuilder buf = new StringBuilder();
+        buf.append("### ").append(title).append("\n");
+        boolean first = true;
+        for (String key : table.keySet()) {
+            if (!first)
+                buf.append("\n");
+            first = false;
+            String value = table.get(key);
+            buf.append("**").append(key).append("**: ").append(value);
+        }
+        return buf.toString();
+    }
+
+    private void reportOperation(ResourceWrapper wrapper) {
+        String request = "### " + wrapper.getHttpBase().getVerb() + " " + wrapper.getHttpBase().getUri() + "\n";
+
+        Map<String, String> fixtures = new HashMap<>();
+        for (String key : fixtureMgr.keySet()) {
+            FixtureComponent comp = fixtureMgr.get(key);
+            String value = null;
+
+            HttpBase httpBase = comp.getHttpBase();
+            if (httpBase != null) {
+                Headers responseHeaders = httpBase.getResponseHeaders();
+                String eventUrl = responseHeaders.getProxyEvent();
+                value = EventLinkToUILink.get(eventUrl);
+            } else if (comp.isLoaded()){
+                ResourceWrapper wrapper1 = comp.getResourceWrapper();
+                if (wrapper1 != null) {
+                    Ref ref = wrapper1.getRef();
+                    if (ref != null)
+                        value = ref.toString() + " (static)";
+                }
+            }
+
+
+            fixtures.put(key, value);
+        }
+
+        Map<String, String> variables = variableMgr.getVariables();
+
+        String markdown = request
+                + asMarkdown(fixtures, "Fixtures")
+                + "\n"
+                + asMarkdown(variables, "Variables");
+
+        reporter.report(markdown, wrapper);
+    }
+
     abstract Ref buildTargetUrl();
 
     static void handleRequestHeader(Map<String, String> requestHeader, TestScript.SetupActionOperationComponent op, VariableMgr variableMgr) {
@@ -108,6 +161,8 @@ abstract class GenericSetupAction {
                 .setResource(wrapper)
                 .setHttpBase(wrapper.getHttpBase());
         fixtureMgr.put(fixtureId, fixtureComponent);
+
+        reportOperation(wrapper);
     }
 
     String resourceTypeToBeReturned() {
