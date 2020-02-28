@@ -6,7 +6,7 @@
     <parent>
         <artifactId>asbestos</artifactId>
         <groupId>gov.nist.asbestos</groupId>
-        <version>1.2.0</version>
+        <version>1.3.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -26,6 +26,7 @@
         <!-- Production port number must match the bundled-tomcat application base's conf\server.xml Connector port -->
         <!-- Base path should not end with a slash -->
         <build.profile.id>Production</build.profile.id>
+        <fhirToolkitUIBase>http://localhost:9760</fhirToolkitUIBase>
         <httpsFhirToolkitUIBase>https://fhirtoolkit.test:9743/asbestos</httpsFhirToolkitUIBase>
         <fhirToolkitBase>http://localhost:9760/asbestos</fhirToolkitBase>
         <hapiFhirBase>http://localhost:9770/fhir/fhir</hapiFhirBase>
@@ -40,6 +41,7 @@
         <fhirToolkitTlsPort>9743</fhirToolkitTlsPort>
         <xdsToolkitHttpPort>9770</xdsToolkitHttpPort>
         <xdsToolkitTlsPort>9773</xdsToolkitTlsPort>
+        <fhirValidationServer>http://localhost:9770/fhir/fhir</fhirValidationServer>
     </properties>
 
 
