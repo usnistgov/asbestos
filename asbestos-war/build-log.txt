@@ -20,11 +20,11 @@
 [[1;34mINFO[m] asbestos-war                                                       [war]
 [[1;34mINFO[m] 
 [[1;34mINFO[m] [1m---------------------< [0;36mgov.nist.asbestos:asbestos[0;1m >---------------------[m
-[[1;34mINFO[m] [1mBuilding Asbestos 1.3.0-SNAPSHOT                                  [1/16][m
+[[1;34mINFO[m] [1mBuilding Asbestos 1.3.0                                           [1/16][m
 [[1;34mINFO[m] [1m--------------------------------[ pom ]---------------------------------[m
 [[1;34mINFO[m] 
 [[1;34mINFO[m] [1m-----------------< [0;36mgov.nist.asbestos:asbestos-adapter[0;1m >-----------------[m
-[[1;34mINFO[m] [1mBuilding Asbestos Adapter 1.3.0-SNAPSHOT                          [2/16][m
+[[1;34mINFO[m] [1mBuilding Asbestos Adapter 1.3.0                                   [2/16][m
 [[1;34mINFO[m] [1m--------------------------------[ jar ]---------------------------------[m
 [[1;34mINFO[m] 
 [[1;34mINFO[m] [1m--- [0;32mmaven-resources-plugin:2.6:resources[m [1m(default-resources)[m @ [36masbestos-adapter[0;1m ---[m
@@ -49,7 +49,7 @@
 [[1;34mINFO[m] Building jar: /home/bill/develop/asbestos/asbestos-adapter/target/asbestos-adapter.jar
 [[1;34mINFO[m] 
 [[1;34mINFO[m] [1m----------------------< [0;36mgov.nist.asbestos:simapi[0;1m >----------------------[m
-[[1;34mINFO[m] [1mBuilding simapi 1.3.0-SNAPSHOT                                    [3/16][m
+[[1;34mINFO[m] [1mBuilding simapi 1.3.0                                             [3/16][m
 [[1;34mINFO[m] [1m--------------------------------[ jar ]---------------------------------[m
 [[1;34mINFO[m] 
 [[1;34mINFO[m] [1m--- [0;32mmaven-resources-plugin:2.6:resources[m [1m(default-resources)[m @ [36msimapi[0;1m ---[m
@@ -74,7 +74,7 @@
 [[1;34mINFO[m] Building jar: /home/bill/develop/asbestos/asbestos-simapi/target/asbestos-simapi.jar
 [[1;34mINFO[m] 
 [[1;34mINFO[m] [1m-----------------------< [0;36mgov.nist.asbestos:view[0;1m >-----------------------[m
-[[1;34mINFO[m] [1mBuilding view 1.3.0-SNAPSHOT                                      [4/16][m
+[[1;34mINFO[m] [1mBuilding view 1.3.0                                               [4/16][m
 [[1;34mINFO[m] [1m--------------------------------[ jar ]---------------------------------[m
 [[1;34mINFO[m] 
 [[1;34mINFO[m] [1m--- [0;32mfrontend-maven-plugin:1.6:install-node-and-npm[m [1m(install node and npm)[m @ [36mview[0;1m ---[m
@@ -86,7 +86,7 @@
 [[1;33mWARNING[m] npm WARN optional SKIPPING OPTIONAL DEPENDENCY: fsevents@1.2.11 (node_modules/fsevents):
 [[1;33mWARNING[m] npm WARN notsup SKIPPING OPTIONAL DEPENDENCY: Unsupported platform for fsevents@1.2.11: wanted {"os":"darwin","arch":"any"} (current: {"os":"linux","arch":"x64"})
 [[1;31mERROR[m] 
-[[1;34mINFO[m] up to date in 5.976s
+[[1;34mINFO[m] up to date in 5.751s
 [[1;34mINFO[m] 
 [[1;34mINFO[m] [1m--- [0;32mfrontend-maven-plugin:1.6:npm[m [1m(npm run build)[m @ [36mview[0;1m ---[m
 [[1;34mINFO[m] Running 'npm run build' in /home/bill/develop/asbestos/asbestos-view
@@ -96,7 +96,7 @@
 [[1;34mINFO[m] 
 [[1;34mINFO[m] 
 [[1;31mERROR[m] -  Building for production...
-[[1;34mINFO[m]  WARNING  Compiled with 3 warnings10:32:35
+[[1;34mINFO[m]  WARNING  Compiled with 3 warnings10:49:33
 [[1;34mINFO[m] 
 [[1;34mINFO[m]  warning  
 [[1;34mINFO[m] 
@@ -157,7 +157,7 @@
 [[1;34mINFO[m] Building jar: /home/bill/develop/asbestos/asbestos-view/target/asbestos.jar
 [[1;34mINFO[m] 
 [[1;34mINFO[m] [1m------------------< [0;36mgov.nist.asbestos:asbestos-http[0;1m >-------------------[m
-[[1;34mINFO[m] [1mBuilding asbestos-http 1.3.0-SNAPSHOT                             [5/16][m
+[[1;34mINFO[m] [1mBuilding asbestos-http 1.3.0                                      [5/16][m
 [[1;34mINFO[m] [1m--------------------------------[ jar ]---------------------------------[m
 [[1;34mINFO[m] 
 [[1;34mINFO[m] [1m--- [0;32mmaven-resources-plugin:2.6:resources[m [1m(default-resources)[m @ [36masbestos-http[0;1m ---[m
@@ -194,7 +194,7 @@
 [[1;34mINFO[m] Building jar: /home/bill/develop/asbestos/asbestos-http/target/asbestos-http.jar
 [[1;34mINFO[m] 
 [[1;34mINFO[m] [1m----------------< [0;36mgov.nist.asbestos:service-properties[0;1m >----------------[m
-[[1;34mINFO[m] [1mBuilding service-properties 1.3.0-SNAPSHOT                        [6/16][m
+[[1;34mINFO[m] [1mBuilding service-properties 1.3.0                                 [6/16][m
 [[1;34mINFO[m] [1m--------------------------------[ jar ]---------------------------------[m
 [[1;34mINFO[m] 
 [[1;34mINFO[m] [1m--- [0;32mmaven-resources-plugin:2.6:resources[m [1m(default-resources)[m @ [36mservice-properties[0;1m ---[m
@@ -219,7 +219,7 @@
 [[1;34mINFO[m] Building jar: /home/bill/develop/asbestos/service-properties/target/asbestos.jar
 [[1;34mINFO[m] 
 [[1;34mINFO[m] [1m-------------< [0;36mgov.nist.asbestos:asbestos-shared-objects[0;1m >--------------[m
-[[1;34mINFO[m] [1mBuilding asbestos-shared-objects 1.3.0-SNAPSHOT                   [7/16][m
+[[1;34mINFO[m] [1mBuilding asbestos-shared-objects 1.3.0                            [7/16][m
 [[1;34mINFO[m] [1m--------------------------------[ jar ]---------------------------------[m
 [[1;34mINFO[m] 
 [[1;34mINFO[m] [1m--- [0;32mmaven-resources-plugin:2.6:resources[m [1m(default-resources)[m @ [36masbestos-shared-objects[0;1m ---[m
@@ -253,7 +253,7 @@
 [[1;34mINFO[m] Building jar: /home/bill/develop/asbestos/asbestos-shared-objects/target/asbestos-shared-objects.jar
 [[1;34mINFO[m] 
 [[1;34mINFO[m] [1m----------------< [0;36mgov.nist.asbestos:asbestos-xds-jaxb[0;1m >-----------------[m
-[[1;34mINFO[m] [1mBuilding asbestos-xds-jaxb 1.3.0-SNAPSHOT                         [8/16][m
+[[1;34mINFO[m] [1mBuilding asbestos-xds-jaxb 1.3.0                                  [8/16][m
 [[1;34mINFO[m] [1m--------------------------------[ jar ]---------------------------------[m
 [[1;34mINFO[m] 
 [[1;34mINFO[m] [1m--- [0;32mmaven-resources-plugin:2.6:resources[m [1m(default-resources)[m @ [36masbestos-xds-jaxb[0;1m ---[m
@@ -278,7 +278,7 @@
 [[1;34mINFO[m] Building jar: /home/bill/develop/asbestos/asbestos-xds-jaxb/target/asbestos.jar
 [[1;34mINFO[m] 
 [[1;34mINFO[m] [1m--------------< [0;36mgov.nist.asbestos:asbestos-proxy-support[0;1m >--------------[m
-[[1;34mINFO[m] [1mBuilding asbestos-proxy-support 1.3.0-SNAPSHOT                    [9/16][m
+[[1;34mINFO[m] [1mBuilding asbestos-proxy-support 1.3.0                             [9/16][m
 [[1;34mINFO[m] [1m--------------------------------[ jar ]---------------------------------[m
 [[1;34mINFO[m] 
 [[1;34mINFO[m] [1m--- [0;32mmaven-resources-plugin:2.6:resources[m [1m(default-resources)[m @ [36masbestos-proxy-support[0;1m ---[m
@@ -312,7 +312,7 @@
 [[1;34mINFO[m] Building jar: /home/bill/develop/asbestos/asbestos-client/target/asbestos.jar
 [[1;34mINFO[m] 
 [[1;34mINFO[m] [1m----------------< [0;36mgov.nist.asbestos:asbestos-utilities[0;1m >----------------[m
-[[1;34mINFO[m] [1mBuilding asbestos-utilities 1.3.0-SNAPSHOT                       [10/16][m
+[[1;34mINFO[m] [1mBuilding asbestos-utilities 1.3.0                                [10/16][m
 [[1;34mINFO[m] [1m--------------------------------[ jar ]---------------------------------[m
 [[1;34mINFO[m] 
 [[1;34mINFO[m] [1m--- [0;32mmaven-resources-plugin:2.6:resources[m [1m(default-resources)[m @ [36masbestos-utilities[0;1m ---[m
@@ -348,7 +348,7 @@ SLF4J: Defaulting to no-operation (NOP) logger implementation
 SLF4J: See http://www.slf4j.org/codes.html#StaticLoggerBinder for further details.
 Status: current
 Author: http://example.com/fhir/Author/1
-[[1;34mINFO[m] [1;32mTests run: [0;1;32m6[m, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.783 s - in gov.nist.asbestos.utilities.[1mResourceHasMethodsFilterTest[m
+[[1;34mINFO[m] [1;32mTests run: [0;1;32m6[m, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.18 s - in gov.nist.asbestos.utilities.[1mResourceHasMethodsFilterTest[m
 [[1;34mINFO[m] 
 [[1;34mINFO[m] Results:
 [[1;34mINFO[m] 
@@ -359,7 +359,7 @@ Author: http://example.com/fhir/Author/1
 [[1;34mINFO[m] Building jar: /home/bill/develop/asbestos/asbestos-utilities/target/asbestos.jar
 [[1;34mINFO[m] 
 [[1;34mINFO[m] [1m---------------< [0;36mgov.nist.asbestos:asbestos-test-engine[0;1m >---------------[m
-[[1;34mINFO[m] [1mBuilding asbestos-test-engine 1.3.0-SNAPSHOT                     [11/16][m
+[[1;34mINFO[m] [1mBuilding asbestos-test-engine 1.3.0                              [11/16][m
 [[1;34mINFO[m] [1m--------------------------------[ jar ]---------------------------------[m
 [[1;34mINFO[m] 
 [[1;34mINFO[m] [1m--- [0;32mmaven-resources-plugin:2.6:resources[m [1m(default-resources)[m @ [36masbestos-test-engine[0;1m ---[m
@@ -397,7 +397,7 @@ Author: http://example.com/fhir/Author/1
 [[1;34mINFO[m] Building jar: /home/bill/develop/asbestos/asbestos-test-engine/target/asbestos.jar
 [[1;34mINFO[m] 
 [[1;34mINFO[m] [1m---------------< [0;36mgov.nist.asbestos:asbestos-codes-jaxb[0;1m >----------------[m
-[[1;34mINFO[m] [1mBuilding asbestos-codes-jaxb 1.3.0-SNAPSHOT                      [12/16][m
+[[1;34mINFO[m] [1mBuilding asbestos-codes-jaxb 1.3.0                               [12/16][m
 [[1;34mINFO[m] [1m--------------------------------[ jar ]---------------------------------[m
 [[1;34mINFO[m] 
 [[1;34mINFO[m] [1m--- [0;32mmaven-resources-plugin:2.6:resources[m [1m(default-resources)[m @ [36masbestos-codes-jaxb[0;1m ---[m
@@ -422,7 +422,7 @@ Author: http://example.com/fhir/Author/1
 [[1;34mINFO[m] Building jar: /home/bill/develop/asbestos/asbestos-codes-jaxb/target/asbestos.jar
 [[1;34mINFO[m] 
 [[1;34mINFO[m] [1m-------------------< [0;36mgov.nist.asbestos:asbestos-mhd[0;1m >-------------------[m
-[[1;34mINFO[m] [1mBuilding asbestos-mhd 1.3.0-SNAPSHOT                             [13/16][m
+[[1;34mINFO[m] [1mBuilding asbestos-mhd 1.3.0                                      [13/16][m
 [[1;34mINFO[m] [1m--------------------------------[ jar ]---------------------------------[m
 [[1;34mINFO[m] 
 [[1;34mINFO[m] [1m--- [0;32mmaven-resources-plugin:2.6:resources[m [1m(default-resources)[m @ [36masbestos-mhd[0;1m ---[m
@@ -452,11 +452,11 @@ log4j:WARN Please initialize the log4j system properly.
 SLF4J: Failed to load class "org.slf4j.impl.StaticLoggerBinder".
 SLF4J: Defaulting to no-operation (NOP) logger implementation
 SLF4J: See http://www.slf4j.org/codes.html#StaticLoggerBinder for further details.
-[[1;34mINFO[m] [1;32mTests run: [0;1;32m1[m, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.875 s - in gov.nist.asbestos.mhd.resolver.[1mResourceCacheMgrTest[m
+[[1;34mINFO[m] [1;32mTests run: [0;1;32m1[m, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.754 s - in gov.nist.asbestos.mhd.resolver.[1mResourceCacheMgrTest[m
 [[1;34mINFO[m] Running gov.nist.asbestos.mhd.resolver.[1mFileSystemResourceCacheTest[m
 [[1;34mINFO[m] [1;32mTests run: [0;1;32m1[m, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0 s - in gov.nist.asbestos.mhd.resolver.[1mFileSystemResourceCacheTest[m
 [[1;34mINFO[m] Running gov.nist.asbestos.mhd.translation.test.[1mResourceManagerBundleTest[m
-[[1;34mINFO[m] [1;32mTests run: [0;1;32m6[m, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.351 s - in gov.nist.asbestos.mhd.translation.test.[1mResourceManagerBundleTest[m
+[[1;34mINFO[m] [1;32mTests run: [0;1;32m6[m, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.324 s - in gov.nist.asbestos.mhd.translation.test.[1mResourceManagerBundleTest[m
 [[1;34mINFO[m] Running gov.nist.asbestos.mhd.translation.test.[1mAttributesTest[m
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <ns3:SubmitObjectsRequest xmlns="urn:oasis:names:tc:ebxml-regrep:xsd:rim:3.0" xmlns:ns2="urn:oasis:names:tc:ebxml-regrep:xsd:rs:3.0" xmlns:ns4="urn:oasis:names:tc:ebxml-regrep:xsd:query:3.0" xmlns:ns3="urn:oasis:names:tc:ebxml-regrep:xsd:lcm:3.0">
@@ -540,7 +540,7 @@ SLF4J: See http://www.slf4j.org/codes.html#StaticLoggerBinder for further detail
     </RegistryObjectList>
 </ns3:SubmitObjectsRequest>
 
-[[1;34mINFO[m] [1;32mTests run: [0;1;32m6[m, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.757 s - in gov.nist.asbestos.mhd.translation.test.[1mAttributesTest[m
+[[1;34mINFO[m] [1;32mTests run: [0;1;32m6[m, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.711 s - in gov.nist.asbestos.mhd.translation.test.[1mAttributesTest[m
 [[1;34mINFO[m] Running gov.nist.asbestos.mhd.translation.test.[1mBuildRegistryObjectListTest[m
 {
   "elements" : [ {
@@ -954,19 +954,19 @@ SLF4J: See http://www.slf4j.org/codes.html#StaticLoggerBinder for further detail
   } ],
   "errors" : [ ]
 }
-[[1;34mINFO[m] [1;32mTests run: [0;1;32m1[m, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.279 s - in gov.nist.asbestos.mhd.translation.test.[1mBuildRegistryObjectListTest[m
+[[1;34mINFO[m] [1;32mTests run: [0;1;32m1[m, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.27 s - in gov.nist.asbestos.mhd.translation.test.[1mBuildRegistryObjectListTest[m
 [[1;34mINFO[m] Running gov.nist.asbestos.mhd.translation.test.documentEntry.[1mBase64BinaryTest[m
 [[1;34mINFO[m] [1;32mTests run: [0;1;32m1[m, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0 s - in gov.nist.asbestos.mhd.translation.test.documentEntry.[1mBase64BinaryTest[m
 [[1;34mINFO[m] Running gov.nist.asbestos.mhd.translation.test.documentEntry.[1mDocumentEntryTest[m
-[[1;34mINFO[m] [1;32mTests run: [0;1;32m17[m, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.295 s - in gov.nist.asbestos.mhd.translation.test.documentEntry.[1mDocumentEntryTest[m
+[[1;34mINFO[m] [1;32mTests run: [0;1;32m17[m, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.283 s - in gov.nist.asbestos.mhd.translation.test.documentEntry.[1mDocumentEntryTest[m
 [[1;34mINFO[m] Running gov.nist.asbestos.mhd.translation.test.documentEntry.[1mAuthorTest[m
-[[1;34mINFO[m] [1;32mTests run: [0;1;32m2[m, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.004 s - in gov.nist.asbestos.mhd.translation.test.documentEntry.[1mAuthorTest[m
+[[1;34mINFO[m] [1;32mTests run: [0;1;32m2[m, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0 s - in gov.nist.asbestos.mhd.translation.test.documentEntry.[1mAuthorTest[m
 [[1;34mINFO[m] Running gov.nist.asbestos.mhd.translation.test.[1mIdTest[m
-[[1;34mINFO[m] [1;32mTests run: [0;1;32m5[m, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.004 s - in gov.nist.asbestos.mhd.translation.test.[1mIdTest[m
+[[1;34mINFO[m] [1;32mTests run: [0;1;32m5[m, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s - in gov.nist.asbestos.mhd.translation.test.[1mIdTest[m
 [[1;34mINFO[m] Running gov.nist.asbestos.mhd.translation.test.[1mResourceMgrContainedTest[m
-[[1;34mINFO[m] [1;32mTests run: [0;1;32m3[m, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.006 s - in gov.nist.asbestos.mhd.translation.test.[1mResourceMgrContainedTest[m
+[[1;34mINFO[m] [1;32mTests run: [0;1;32m3[m, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.004 s - in gov.nist.asbestos.mhd.translation.test.[1mResourceMgrContainedTest[m
 [[1;34mINFO[m] Running gov.nist.asbestos.mhd.translation.test.[1mResourceManagerBundleWithDupTest[m
-[[1;34mINFO[m] [1;32mTests run: [0;1;32m1[m, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.007 s - in gov.nist.asbestos.mhd.translation.test.[1mResourceManagerBundleWithDupTest[m
+[[1;34mINFO[m] [1;32mTests run: [0;1;32m1[m, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.005 s - in gov.nist.asbestos.mhd.translation.test.[1mResourceManagerBundleWithDupTest[m
 [[1;34mINFO[m] 
 [[1;34mINFO[m] Results:
 [[1;34mINFO[m] 
@@ -977,7 +977,7 @@ SLF4J: See http://www.slf4j.org/codes.html#StaticLoggerBinder for further detail
 [[1;34mINFO[m] Building jar: /home/bill/develop/asbestos/asbestos-mhd/target/asbestos.jar
 [[1;34mINFO[m] 
 [[1;34mINFO[m] [1m----------------< [0;36mgov.nist.asbestos:asbestos-analysis[0;1m >-----------------[m
-[[1;34mINFO[m] [1mBuilding asbestos-analysis 1.3.0-SNAPSHOT                        [14/16][m
+[[1;34mINFO[m] [1mBuilding asbestos-analysis 1.3.0                                 [14/16][m
 [[1;34mINFO[m] [1m--------------------------------[ jar ]---------------------------------[m
 [[1;34mINFO[m] 
 [[1;34mINFO[m] [1m--- [0;32mmaven-resources-plugin:2.6:resources[m [1m(default-resources)[m @ [36masbestos-analysis[0;1m ---[m
@@ -1011,7 +1011,7 @@ SLF4J: See http://www.slf4j.org/codes.html#StaticLoggerBinder for further detail
 [[1;34mINFO[m] Building jar: /home/bill/develop/asbestos/asbestos-analysis/target/asbestos.jar
 [[1;34mINFO[m] 
 [[1;34mINFO[m] [1m------------------< [0;36mgov.nist.asbestos:asbestos-proxy[0;1m >------------------[m
-[[1;34mINFO[m] [1mBuilding asbestos-proxy 1.3.0-SNAPSHOT                           [15/16][m
+[[1;34mINFO[m] [1mBuilding asbestos-proxy 1.3.0                                    [15/16][m
 [[1;34mINFO[m] [1m--------------------------------[ jar ]---------------------------------[m
 [[1;34mINFO[m] 
 [[1;34mINFO[m] [1m--- [0;32mmaven-resources-plugin:2.6:resources[m [1m(default-resources)[m @ [36masbestos-proxy[0;1m ---[m
@@ -1038,13 +1038,13 @@ SLF4J: See http://www.slf4j.org/codes.html#StaticLoggerBinder for further detail
 [[1;34mINFO[m]  T E S T S
 [[1;34mINFO[m] -------------------------------------------------------
 [[1;34mINFO[m] Running gov.nist.asbestos.asbestosProxy.mhdChannel.[1mFaultParserTest[m
-[[1;34mINFO[m] [1;32mTests run: [0;1;32m6[m, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.343 s - in gov.nist.asbestos.asbestosProxy.mhdChannel.[1mFaultParserTest[m
+[[1;34mINFO[m] [1;32mTests run: [0;1;32m6[m, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.297 s - in gov.nist.asbestos.asbestosProxy.mhdChannel.[1mFaultParserTest[m
 [[1;34mINFO[m] Running gov.nist.asbestos.asbestosProxy.channels.capabilitystatement.[1mCapabilityStatementTest[m
 *** Loading service.properties from: /home/bill/develop/asbestos/asbestos-proxy/target/test-classes/service.properties
 SLF4J: Failed to load class "org.slf4j.impl.StaticLoggerBinder".
 SLF4J: Defaulting to no-operation (NOP) logger implementation
 SLF4J: See http://www.slf4j.org/codes.html#StaticLoggerBinder for further details.
-[[1;34mINFO[m] [1;32mTests run: [0;1;32m2[m, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.861 s - in gov.nist.asbestos.asbestosProxy.channels.capabilitystatement.[1mCapabilityStatementTest[m
+[[1;34mINFO[m] [1;32mTests run: [0;1;32m2[m, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.84 s - in gov.nist.asbestos.asbestosProxy.channels.capabilitystatement.[1mCapabilityStatementTest[m
 [[1;34mINFO[m] 
 [[1;34mINFO[m] Results:
 [[1;34mINFO[m] 
@@ -1055,7 +1055,7 @@ SLF4J: See http://www.slf4j.org/codes.html#StaticLoggerBinder for further detail
 [[1;34mINFO[m] Building jar: /home/bill/develop/asbestos/asbestos-proxy/target/asbestos.jar
 [[1;34mINFO[m] 
 [[1;34mINFO[m] [1m-------------------< [0;36mgov.nist.asbestos:asbestos-war[0;1m >-------------------[m
-[[1;34mINFO[m] [1mBuilding asbestos-war 1.3.0-SNAPSHOT                             [16/16][m
+[[1;34mINFO[m] [1mBuilding asbestos-war 1.3.0                                      [16/16][m
 [[1;34mINFO[m] [1m--------------------------------[ war ]---------------------------------[m
 [[1;34mINFO[m] 
 [[1;34mINFO[m] [1m--- [0;32mmaven-resources-plugin:2.6:resources[m [1m(default-resources)[m @ [36masbestos-war[0;1m ---[m
@@ -1091,31 +1091,31 @@ SLF4J: See http://www.slf4j.org/codes.html#StaticLoggerBinder for further detail
 [[1;34mINFO[m] Assembling webapp [asbestos-war] in [/home/bill/develop/asbestos/asbestos-war/target/asbestos-war]
 [[1;34mINFO[m] Processing war project
 [[1;34mINFO[m] Copying webapp resources [/home/bill/develop/asbestos/asbestos-war/src/main/webapp]
-[[1;34mINFO[m] Webapp assembled in [191 msecs]
+[[1;34mINFO[m] Webapp assembled in [177 msecs]
 [[1;34mINFO[m] Building war: /home/bill/develop/asbestos/asbestos-war/target/asbestos-war.war
 [[1;34mINFO[m] WEB-INF/web.xml already added, skipping
 [[1;34mINFO[m] [1m------------------------------------------------------------------------[m
-[[1;34mINFO[m] [1mReactor Summary for Asbestos 1.3.0-SNAPSHOT:[m
+[[1;34mINFO[m] [1mReactor Summary for Asbestos 1.3.0:[m
 [[1;34mINFO[m] 
-[[1;34mINFO[m] Asbestos ........................................... [1;32mSUCCESS[m [  0.003 s]
-[[1;34mINFO[m] Asbestos Adapter ................................... [1;32mSUCCESS[m [  1.226 s]
-[[1;34mINFO[m] simapi ............................................. [1;32mSUCCESS[m [  0.857 s]
-[[1;34mINFO[m] view ............................................... [1;32mSUCCESS[m [ 16.687 s]
-[[1;34mINFO[m] asbestos-http ...................................... [1;32mSUCCESS[m [  1.187 s]
-[[1;34mINFO[m] service-properties ................................. [1;32mSUCCESS[m [  0.085 s]
-[[1;34mINFO[m] asbestos-shared-objects ............................ [1;32mSUCCESS[m [  0.792 s]
-[[1;34mINFO[m] asbestos-xds-jaxb .................................. [1;32mSUCCESS[m [  0.476 s]
-[[1;34mINFO[m] asbestos-proxy-support ............................. [1;32mSUCCESS[m [  0.896 s]
-[[1;34mINFO[m] asbestos-utilities ................................. [1;32mSUCCESS[m [  2.820 s]
-[[1;34mINFO[m] asbestos-test-engine ............................... [1;32mSUCCESS[m [  1.132 s]
-[[1;34mINFO[m] asbestos-codes-jaxb ................................ [1;32mSUCCESS[m [  0.063 s]
-[[1;34mINFO[m] asbestos-mhd ....................................... [1;32mSUCCESS[m [  4.697 s]
-[[1;34mINFO[m] asbestos-analysis .................................. [1;32mSUCCESS[m [  0.670 s]
-[[1;34mINFO[m] asbestos-proxy ..................................... [1;32mSUCCESS[m [  2.529 s]
-[[1;34mINFO[m] asbestos-war ....................................... [1;32mSUCCESS[m [  5.311 s]
+[[1;34mINFO[m] Asbestos ........................................... [1;32mSUCCESS[m [  0.002 s]
+[[1;34mINFO[m] Asbestos Adapter ................................... [1;32mSUCCESS[m [  1.190 s]
+[[1;34mINFO[m] simapi ............................................. [1;32mSUCCESS[m [  0.698 s]
+[[1;34mINFO[m] view ............................................... [1;32mSUCCESS[m [ 17.804 s]
+[[1;34mINFO[m] asbestos-http ...................................... [1;32mSUCCESS[m [  0.998 s]
+[[1;34mINFO[m] service-properties ................................. [1;32mSUCCESS[m [  0.059 s]
+[[1;34mINFO[m] asbestos-shared-objects ............................ [1;32mSUCCESS[m [  0.646 s]
+[[1;34mINFO[m] asbestos-xds-jaxb .................................. [1;32mSUCCESS[m [  0.287 s]
+[[1;34mINFO[m] asbestos-proxy-support ............................. [1;32mSUCCESS[m [  0.874 s]
+[[1;34mINFO[m] asbestos-utilities ................................. [1;32mSUCCESS[m [  2.135 s]
+[[1;34mINFO[m] asbestos-test-engine ............................... [1;32mSUCCESS[m [  0.924 s]
+[[1;34mINFO[m] asbestos-codes-jaxb ................................ [1;32mSUCCESS[m [  0.058 s]
+[[1;34mINFO[m] asbestos-mhd ....................................... [1;32mSUCCESS[m [  3.967 s]
+[[1;34mINFO[m] asbestos-analysis .................................. [1;32mSUCCESS[m [  0.660 s]
+[[1;34mINFO[m] asbestos-proxy ..................................... [1;32mSUCCESS[m [  2.387 s]
+[[1;34mINFO[m] asbestos-war ....................................... [1;32mSUCCESS[m [  5.198 s]
 [[1;34mINFO[m] [1m------------------------------------------------------------------------[m
 [[1;34mINFO[m] [1;32mBUILD SUCCESS[m
 [[1;34mINFO[m] [1m------------------------------------------------------------------------[m
-[[1;34mINFO[m] Total time:  39.600 s
-[[1;34mINFO[m] Finished at: 2020-02-28T10:32:57-05:00
+[[1;34mINFO[m] Total time:  38.048 s
+[[1;34mINFO[m] Finished at: 2020-02-28T10:49:53-05:00
 [[1;34mINFO[m] [1m------------------------------------------------------------------------[m
