@@ -155,7 +155,16 @@
                     await this.$store.dispatch('getLogEventAnalysis', {channel: this.channelId, session: this.sessionId, eventId: this.eventId, requestOrResponse: this.requestOrResponse})
             },
             loadAnalysisForObject(resourceUrl) {
-                this.$store.dispatch('getLogEventAnalysisForObject', { channel: this.channelId, session: this.sessionId, eventId: this.eventId, requestOrResponse: this.requestOrResponse, resourceUrl: resourceUrl, gzip: this.gzip, useProxy: this.useProxy })
+                this.$store.dispatch('getLogEventAnalysisForObject', {
+                    channel: this.channelId,
+                    session: this.sessionId,
+                    eventId: this.eventId,
+                    requestOrResponse: this.requestOrResponse,
+                    resourceUrl: resourceUrl,
+                    gzip: this.gzip,
+                    useProxy: this.useProxy,
+                    ignoreBadRefs: this.ignoreBadRefs
+                })
                 this.selectedResourceIndex = -1
             },
             loadAnalysisForObjectAndAddHistory(resourceUrl, index) {
@@ -212,7 +221,7 @@
             'theUrl': 'urlAnalysis'
         },
         props: [  // pass eventId OR theUrl
-            'sessionId', 'channelId', 'eventId', 'theUrl', 'gzip', 'useProxy', "requestOrResponse"
+            'sessionId', 'channelId', 'eventId', 'theUrl', 'gzip', 'useProxy', "requestOrResponse", "ignoreBadRefs",
         ],
         components: { LogObjectDisplay },
         name: "LogAnalysisReport"

@@ -4,6 +4,7 @@ export var TLS_UI_PROXY = null
 export var PROXY = null
 export var ENGINE = null
 export var LOG = null
+export var VALIDATE = null
 export var CHANNEL = null
 export var FHIRTOOLKITBASEURL = null
 export var PROJECTVERSION = null
@@ -88,6 +89,15 @@ export async function initServiceProperties() {
                             crossdomain: true,
                         }
                     })
+                VALIDATE = axios.create({
+                    baseURL: `${constFhirToolkitBaseUrl}/validate/`,
+                    headers: {
+                        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS, PUT, PATCH, DELETE'
+                    },
+                    params: {
+                        crossdomain: true,
+                    }
+                })
                     CHANNEL = axios.create({
                         baseURL: `${constFhirToolkitBaseUrl}/channel/`,
                         headers: {

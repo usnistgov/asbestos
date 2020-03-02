@@ -9,6 +9,9 @@
         <br />
         <input type="radio" id="capstmt" value="capstmt" v-model="selection">
         <label for="capstmt">GET CapabilityStatement from selected Channel ({{channelId}})</label>
+        <br />
+        <input type="radio" id="valcapstmt" value="valcapstmt" v-model="selection">
+        <label for="valcapstmt">Validate CapabilityStatement from selected Channel ({{channelId}})</label>
 
         <div class="work-area">
             <div v-if="selection === 'plain'">
@@ -45,9 +48,9 @@
                 </div>
             </div>
             <div v-else-if="selection === 'capstmt'">
-<!--                <input type="checkbox" id="doValidate2" v-model="validate">-->
-<!--                <label for="doValidate2">Validate against configured FHIR Validation Server? ({{this.$store.state.log.validationServer}})</label>-->
-<!--                <br />-->
+                <input type="checkbox" id="doValidate2" v-model="validate">
+                <label for="doValidate2">Validate against configured FHIR Validation Server? ({{$store.state.log.validationServer}})</label>
+                <br />
                 <input type="checkbox" id="doGzip1" v-model="gzip">
                 <label for="doGzip1">GZip?</label>
                 <input type="checkbox" id="useProxy1" v-model="useProxy">
@@ -61,7 +64,26 @@
                                 :channel-id="channelId"
                                 :the-url="`${$store.getters.getProxyBase({channelId: channelId, sessionId: sessionId})}/metadata`"
                                 :gzip="gzip"
-                                :use-proxy="useProxy"> </log-analysis-report>
+                                :use-proxy="useProxy"
+                                :ignore-bad-refs="true"> </log-analysis-report>
+                    </div>
+                </div>
+            </div>
+            <div v-else-if="selection === 'valcapstmt'">
+                <label for="doValidate2">Using configured FHIR Validation Server ({{$store.state.log.validationServer}})</label>
+                <br />
+                <input type="checkbox" id="doGzip2" v-model="gzip">
+                <label for="doGzip2">GZip?</label>
+                <div class="left">
+                    <button class="left" @click="runCapStmtValidation()">Run</button>
+                    <div v-if="validate" class="request-response" :key="reValidation">
+                        <log-analysis-report
+                                :session-id="sessionId"
+                                :channel-id="channelId"
+                                :the-url="validateCallUrl"
+                                :gzip="gzip"
+                                :use-proxy="useProxy"
+                                :ignore-bad-refs="true"> </log-analysis-report>
                     </div>
                 </div>
             </div>
@@ -71,21 +93,21 @@
 
 <script>
     import LogAnalysisReport from "../logViewer/LogAnalysisReport";
-    //import Vue from 'vue';
-    //Vue.forceUpdate();
+    import {FHIRTOOLKITBASEURL} from "../../common/http-common";
 
     export default {
         data() {
             return {
                 url: null,
                 theUrl: null,
-                gzip: false,
+                gzip: true,
                 useProxy: false,
                 rerenderkey: 0,
                 selection: null,
                 validate: false,
                 reCapStmt: 0,
                 capStmt: null,
+                reValidation: 0,
                 validation: null,
             }
         },
@@ -102,9 +124,24 @@
                 this.capStmt = true
                 this.reCapStmt += 1
             },
+            runCapStmtValidation() {
+                this.validate = true
+                this.reValidation += 1
+            },
             runValidation() {
                 this.$store.dispatch('getValidation')
             },
+            async validateCall(resourceType, url) {
+                console.log('url is ' + url)
+                const valUrl =`${FHIRTOOLKITBASEURL}/validate/${resourceType}?${url}`
+                console.log(`valUrl is ${valUrl}`)
+            }
+        },
+        computed: {
+             validateCallUrl() {
+                 const url = this.$store.getters.getProxyBase({channelId: this.channelId, sessionId: this.sessionId}) + '/metadata'
+                 return this.validateCall('CapabilityStatement', url)
+             },
         },
         created() {
             if (this.$store.state.log.validationServer === null)

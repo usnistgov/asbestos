@@ -16,4 +16,12 @@ public class Report {
     public Report(String error) {
         errors = Collections.singletonList(error);
     }
+
+    public List<String> getErrors() {
+        return errors;
+    }
+
+    public void setErrors(List<String> errors) {
+        this.errors = errors;
+    }
 }
