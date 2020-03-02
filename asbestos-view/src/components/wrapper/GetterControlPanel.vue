@@ -1,6 +1,6 @@
 <template>
     <div>
-        <div class="control-panel-item-title" @click="manage()">GET Tool</div>
+        <div class="control-panel-item-title" @click="manage()">GET/Inspect/Validate</div>
         <div class="selectable" @click="launch()">Launch</div>
     </div>
 </template>

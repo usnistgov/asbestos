@@ -4,6 +4,7 @@ package gov.nist.asbestos.client.resolver;
 import gov.nist.asbestos.client.Base.ProxyBase;
 import gov.nist.asbestos.client.client.Format;
 import gov.nist.asbestos.http.headers.Header;
+import gov.nist.asbestos.http.headers.Headers;
 import gov.nist.asbestos.http.operations.HttpBase;
 import gov.nist.asbestos.http.operations.HttpDelete;
 import gov.nist.asbestos.http.operations.HttpGet;
@@ -117,6 +118,35 @@ public class ResourceWrapper {
                 return header.getValue();
         }
         return null;
+    }
+
+    private String[] getXProxyEventPathParts() {
+        if (httpBase == null)
+            return null;
+        Headers responseHeaders = httpBase.getResponseHeaders();
+        if (responseHeaders == null)
+            return null;
+        String eventUrl = responseHeaders.getHeaderValue("x-proxy-event");
+        if (eventUrl == null)
+            return null;
+        String[] parts = eventUrl.split("/");
+        if (parts.length <= 0)
+            return null;
+        return parts;
+    }
+
+    public String getEventId() {
+        String[] parts = getXProxyEventPathParts();
+        if (parts.length <= 0)
+            return null;
+        return parts[parts.length - 1];
+    }
+
+    public String getResponseResourceType() {
+        String[] parts = getXProxyEventPathParts();
+        if (parts.length < 2)
+            return null;
+        return parts[parts.length - 2];
     }
 
     @Override

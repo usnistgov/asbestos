@@ -10,6 +10,8 @@ public class Report {
     List<RelatedReport> objects = new ArrayList<>();
     List<String> errors;
     List<String> warnings;
+    String baseObjectEventId = null;
+    String baseObjectResourceType = null;
 
     public Report() {}
 

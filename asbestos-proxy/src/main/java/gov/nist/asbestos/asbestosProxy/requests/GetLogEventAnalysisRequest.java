@@ -7,10 +7,7 @@ import gov.nist.asbestos.client.Base.ProxyBase;
 import gov.nist.asbestos.client.client.Format;
 import gov.nist.asbestos.client.events.UIEvent;
 import gov.nist.asbestos.client.resolver.Ref;
-import gov.nist.asbestos.http.headers.Header;
 import gov.nist.asbestos.http.headers.Headers;
-import gov.nist.asbestos.http.operations.Verb;
-import gov.nist.asbestos.http.support.Common;
 import org.apache.log4j.Logger;
 import org.hl7.fhir.r4.model.BaseResource;
 import org.hl7.fhir.r4.model.Bundle;
@@ -29,6 +26,7 @@ import java.util.List;
 // 6 - channelId
 // 7 - eventId
 // 8 - "request" or "response"
+// Returns Report
 
 // OR
 
@@ -37,16 +35,13 @@ import java.util.List;
 // 2 - "log"
 // 3 - "analysis"
 // 4 - "url"
-// 5 - testSession
-// 6 - channelId
-// 7 - eventId
-// 8 - "request" or "response"
-// ?url=TheUrlOfAFHIRResource;gzip=boolean;useProxy=boolean
+// ?url=TheUrlOfAFHIRResource;gzip=boolean
+// Returns Report
 
 
 
-public class GetLogEventAnalysis {
-    private static Logger log = Logger.getLogger(GetLogEventAnalysis.class);
+public class GetLogEventAnalysisRequest {
+    private static Logger log = Logger.getLogger(GetLogEventAnalysisRequest.class);
 
     private Request request;
 
@@ -58,13 +53,13 @@ public class GetLogEventAnalysis {
 
         ||
 
-        request.uriParts.size() == 9
+        request.uriParts.size() == 5
                 && "log".equalsIgnoreCase(request.uriParts.get(2))
                 && "analysis".equalsIgnoreCase(request.uriParts.get(3))
                 && "url".equalsIgnoreCase(request.uriParts.get(4));
     }
 
-    public GetLogEventAnalysis(Request request) {
+    public GetLogEventAnalysisRequest(Request request) {
         this.request = request;
     }
 
@@ -75,11 +70,11 @@ public class GetLogEventAnalysis {
 
     public void run() {
         log.info("GetLogEventAnalysisRequest");
-        String testSession = request.uriParts.get(5);
-        String channelId = request.uriParts.get(6);
-        String eventId = request.uriParts.get(7);
 
         if (request.uriParts.get(4).equalsIgnoreCase("event")) {
+            String testSession = request.uriParts.get(5);
+            String channelId = request.uriParts.get(6);
+            String eventId = request.uriParts.get(7);
 
             UIEvent event = request.ec.getEvent(testSession, channelId, "null", eventId);
             String requestBodyString = event.getClientTask().getRequestBody();
@@ -113,7 +108,7 @@ public class GetLogEventAnalysis {
                     runAndReturnReport(new Ref(manifestReference),
                             "reference for Manifest taken from transaction response",
                             false,
-                            false,
+                            true,
                             false,
                             analysisTargetIsRequest() ? requestBundle : null);
                 else if (isSearchSet) {
@@ -139,12 +134,10 @@ public class GetLogEventAnalysis {
             String query = request.req.getQueryString();
             if (query != null) {
                 boolean gzip = false;
-                boolean useProxy = false;
+                boolean useProxy = true;
                 boolean ignoreBadRefs = false;
                 if (query.contains("gzip=true"))
                     gzip = true;
-                if (query.contains("useProxy=true"))
-                    useProxy = true;
                 if (query.contains("ignoreBadRefs=true"))
                     ignoreBadRefs = true;
                 if (query.contains("url=http")){

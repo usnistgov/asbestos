@@ -47,9 +47,13 @@ public class AnalysisReport {
     private BaseResource contextResource = null;
     private Map<BaseResource, List<Reference2>> refs = new HashMap<>();
     private boolean isRequest = false;  // as opposed to response/contents from server
+    private String baseObjectEventId = null;
+    private String baseObjectResourceType = null;
 
     private Report buildReport() {
         Report report = new Report();
+        report.baseObjectEventId = baseObjectEventId;
+        report.baseObjectResourceType = baseObjectResourceType;
 
         report.source = source;
         report.errors = new ArrayList<>(generalErrors);
@@ -354,6 +358,8 @@ public class AnalysisReport {
         if (resourceRef == null)
             return;
         baseObj = new FhirClient().requestGzip(useGzip).readResource(resourceRef);
+        baseObjectEventId = baseObj.getEventId();
+        baseObjectResourceType = baseObj.getResponseResourceType();
         if (baseObj.getStatus() != 200) {
             generalErrors.add("Status " + baseObj.getStatus());
         } else if (baseObj.getResource() instanceof OperationOutcome) {
@@ -699,5 +705,9 @@ public class AnalysisReport {
 
     public List<String> getGeneralErrors() {
         return generalErrors;
+    }
+
+    public String getBaseObjectEventId() {
+        return baseObjectEventId;
     }
 }

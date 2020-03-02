@@ -156,13 +156,8 @@
             },
             loadAnalysisForObject(resourceUrl) {
                 this.$store.dispatch('getLogEventAnalysisForObject', {
-                    channel: this.channelId,
-                    session: this.sessionId,
-                    eventId: this.eventId,
-                    requestOrResponse: this.requestOrResponse,
                     resourceUrl: resourceUrl,
                     gzip: this.gzip,
-                    useProxy: this.useProxy,
                     ignoreBadRefs: this.ignoreBadRefs
                 })
                 this.selectedResourceIndex = -1

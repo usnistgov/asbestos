@@ -59,7 +59,7 @@ public class ProxyLogServlet extends HttpServlet {
 
         try {
 
-            if (GetLogEventAnalysis.isRequest(request)) new GetLogEventAnalysis(request).run();
+            if (GetLogEventAnalysisRequest.isRequest(request)) new GetLogEventAnalysisRequest(request).run();
             else if (GetEventRequest.isRequest(request)) new GetEventRequest(request).run();
             else if (GetDocumentRequest.isRequest(request)) new GetDocumentRequest(request).run();
             else if (GetProxyBaseRequest.isRequest(request)) new GetProxyBaseRequest(request).run();

@@ -4,8 +4,9 @@ package gov.nist.asbestos.asbestosProxy.requests;
 // 0 - empty
 // 1 - app context  (asbestos)
 // 2 - "validate"
-// 3 - resourceType
-// query string url is url of resource to be validated
+// 3 - eventId
+// 4 - resourceType
+// validates response object from event
 
 // returns OperationOutcome
 
