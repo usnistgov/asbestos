@@ -228,11 +228,12 @@ public class ResourceWrapper {
             byte[] responseBytes = httpBase.getResponse();
             if (responseBytes.length == 0)
                 return null;
+            String responseString = httpBase.getResponseText();
             String contentType = httpBase.getResponseContentType();
             Format format = Format.fromContentType(contentType);
             if (format == null)
                 return null;
-            return ProxyBase.parse(responseBytes, format);
+            return ProxyBase.parse(responseString, format);
         }
         return null;
     }

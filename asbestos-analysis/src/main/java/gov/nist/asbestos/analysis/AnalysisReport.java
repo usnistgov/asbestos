@@ -3,9 +3,11 @@ package gov.nist.asbestos.analysis;
 import gov.nist.asbestos.client.Base.DocumentCache;
 import gov.nist.asbestos.client.Base.EC;
 import gov.nist.asbestos.client.client.FhirClient;
+import gov.nist.asbestos.client.client.Format;
 import gov.nist.asbestos.client.resolver.ChannelUrl;
 import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
+import gov.nist.asbestos.http.headers.Headers;
 import gov.nist.asbestos.serviceproperties.ServiceProperties;
 import gov.nist.asbestos.serviceproperties.ServicePropertiesEnum;
 import gov.nist.asbestos.simapi.validation.Val;
@@ -49,6 +51,7 @@ public class AnalysisReport {
     private boolean isRequest = false;  // as opposed to response/contents from server
     private String baseObjectEventId = null;
     private String baseObjectResourceType = null;
+    private boolean runValidation = false;
 
     private Report buildReport() {
         Report report = new Report();
@@ -70,6 +73,10 @@ public class AnalysisReport {
             report.base.codingErrors = codingErrors;
             report.base.atts = atts;
             report.base.binaryUrl = binaryUrl;
+            if (runValidation)
+                report.base.validationResult = runValidation(baseObj.getResource());
+            else
+                report.base.validationResult = new OperationOutcome();
         }
 
         for (Related rel : related) {
@@ -86,11 +93,48 @@ public class AnalysisReport {
                 relatedReport.codingErrors = rel.codingErrors;
                 relatedReport.atts = rel.atts;
                 relatedReport.binaryUrl = rel.binaryUrl;
+
+                if (runValidation)
+                    relatedReport.validationResult = runValidation(resource);
+                else
+                    report.base.validationResult = new OperationOutcome();
             }
             report.objects.add(relatedReport);
         }
 
         return report;
+    }
+
+    private OperationOutcome runValidation(BaseResource resource) {
+        List<String> errors = new ArrayList<>();
+        boolean gzip = true;
+        String resourceType = resource.getClass().getSimpleName();
+        String validationServer = ServiceProperties.getInstance().getPropertyOrStop(ServicePropertiesEnum.FHIR_VALIDATION_SERVER);
+        FhirClient fhirClient = new FhirClient()
+                .sendGzip(gzip)
+                .requestGzip(gzip);
+        ResourceWrapper wrapper = fhirClient.writeResource(resource,
+                new Ref(validationServer + "/" + resourceType + "/$validate?profile=http://hl7.org/fhir/StructureDefinition/" + resourceType),
+                Format.JSON,
+                new Headers().withContentType(Format.JSON.getContentType()));
+        if (wrapper.getResponseResource() == null) {
+            OperationOutcome oo = new OperationOutcome();
+            OperationOutcome.OperationOutcomeIssueComponent comp = new OperationOutcome.OperationOutcomeIssueComponent();
+            comp.setCode(OperationOutcome.IssueType.EXCEPTION);
+            comp.setSeverity(OperationOutcome.IssueSeverity.FATAL);
+            comp.setDiagnostics("request to validation server (\" +  validationServer  + \" ) failed");
+            return oo;
+        } else if ("OperationOutcome".equals(wrapper.getResponseResource().getClass().getSimpleName())) {
+            return (OperationOutcome) wrapper.getResponseResource();
+        } else {
+            OperationOutcome oo = new OperationOutcome();
+            OperationOutcome.OperationOutcomeIssueComponent comp = new OperationOutcome.OperationOutcomeIssueComponent();
+            comp.setCode(OperationOutcome.IssueType.EXCEPTION);
+            comp.setSeverity(OperationOutcome.IssueSeverity.FATAL);
+            comp.setDiagnostics("OperationOutcome not returned from  validation server (" +  validationServer  + " ) "
+                    + wrapper.getResponseResource().getClass() + " returned instead");
+            return oo;
+        }
     }
 
     public AnalysisReport(Ref baseRef, String source, EC ec) {
@@ -715,5 +759,10 @@ public class AnalysisReport {
 
     public String getBaseObjectEventId() {
         return baseObjectEventId;
+    }
+
+    public AnalysisReport withValidation(boolean runValidation) {
+        this.runValidation = runValidation;
+        return this;
     }
 }

@@ -1,7 +1,9 @@
 package gov.nist.asbestos.analysis;
 
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
+import org.hl7.fhir.r4.model.OperationOutcome;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -16,6 +18,8 @@ public class RelatedReport {
     List<String> codingErrors;
     List<String> minimalChecked;
     List<String> comprehensiveChecked;
+    OperationOutcome validationResult;
+
     Map atts;
     String binaryUrl;
 

@@ -26,6 +26,7 @@ import java.util.List;
 // 6 - channelId
 // 7 - eventId
 // 8 - "request" or "response"
+// ?validation=true
 // Returns Report
 
 // OR
@@ -75,6 +76,12 @@ public class GetLogEventAnalysisRequest {
             String testSession = request.uriParts.get(5);
             String channelId = request.uriParts.get(6);
             String eventId = request.uriParts.get(7);
+            boolean runValidation = false;
+            String query = request.req.getQueryString();
+            if (query != null) {
+                if (query.contains("validation=true"))
+                    runValidation = true;
+            }
 
             UIEvent event = request.ec.getEvent(testSession, channelId, "null", eventId);
             String requestBodyString = event.getClientTask().getRequestBody();
@@ -110,6 +117,7 @@ public class GetLogEventAnalysisRequest {
                             false,
                             true,
                             false,
+                            runValidation,
                             analysisTargetIsRequest() ? requestBundle : null);
                 else if (isSearchSet) {
                     List<Ref> refs = new ArrayList<>();
@@ -126,7 +134,7 @@ public class GetLogEventAnalysisRequest {
                 }
             } else if (responseHeaders.hasHeader("Content-Location")) {
                 Ref ref = new Ref(responseHeaders.get("Content-Location").getValue());
-                runAndReturnReport(ref, "link taken from response Content-location header", false, false, false, requestBundle);
+                runAndReturnReport(ref, "link taken from response Content-location header", false, false, false, runValidation, requestBundle);
             } else {
                 returnReport(new Report("Do not understand event"));
             }
@@ -145,7 +153,7 @@ public class GetLogEventAnalysisRequest {
                     int urlEndIndex = query.indexOf(";", urlIndex);
                     String url = query.substring(urlIndex, urlEndIndex);
                     Ref ref = new Ref(url);
-                    runAndReturnReport(ref, "By Request", gzip, useProxy, ignoreBadRefs, null);
+                    runAndReturnReport(ref, "By Request", gzip, useProxy, ignoreBadRefs, false, null);
                 }
 //                else if (query.contains("url=urn:uuid")) {
 //                    int urlIndex = query.indexOf("url=urn:uuid") + 4;
@@ -169,10 +177,11 @@ public class GetLogEventAnalysisRequest {
         request.resp.setStatus(request.resp.SC_OK);
     }
 
-    private void runAndReturnReport(Ref ref, String source, boolean gzip, boolean useProxy, boolean ignoreBadRefs, BaseResource contextBundle) {
+    private void runAndReturnReport(Ref ref, String source, boolean gzip, boolean useProxy, boolean ignoreBadRefs, boolean withValidation, BaseResource contextBundle) {
         AnalysisReport analysisReport = new AnalysisReport(ref, source, request.ec)
                 .withGzip(gzip)
                 .withProxy(useProxy)
+                .withValidation(withValidation)
                 .withContextResource(contextBundle);
         Report report = analysisReport.run();
 

@@ -33,6 +33,12 @@
                 <span v-else><img src="../../assets/cross.png"></span>
                 <log-error-list :att-list="report.codingErrors" :att-list-name="'Coding Errors'" :start-open="true"> </log-error-list>
             </div>
+<!--            <div>-->
+<!--                <span class="caption">Validation</span>-->
+<!--                <span v-if="report.validationErrors.length === 0"><img src="../../assets/check.png"></span>-->
+<!--                <span v-else><img src="../../assets/cross.png"></span>-->
+<!--                <log-error-list :att-list="report.validationErrors" :att-list-name="'Validation Errors'" :start-open="true"> </log-error-list>-->
+<!--            </div>-->
         </div>
         <div v-if="report.name === 'Binary'">
             <div>Contents: <a v-bind:href="report.binaryUrl" target="_blank">open</a> (in new browser tab) </div>
