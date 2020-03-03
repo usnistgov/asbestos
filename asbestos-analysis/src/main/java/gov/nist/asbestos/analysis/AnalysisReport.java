@@ -656,8 +656,14 @@ public class AnalysisReport {
                 related.add(rel2);
                 return rel2;
             }
-            if (ref.isRelative())
-                ref = ref.rebase(fhirBase);
+            if (ref.isRelative()) {
+                if (fhirBase != null)
+                    ref = ref.rebase(fhirBase);
+                else if (baseRef != null)
+                    ref = ref.rebase(baseRef);
+                else
+                    generalErrors.add("Ref (" + ref + ") is relative and both fhirBase and baseRef are null.");
+            }
             ResourceWrapper wrapper;
             try {
                 wrapper = fhirClient.readResource(ref);
