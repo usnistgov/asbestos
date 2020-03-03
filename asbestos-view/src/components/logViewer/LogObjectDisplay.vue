@@ -60,10 +60,14 @@
         computed: {
             isError() {
                 const issues = this.report.validationResult.issue
+                if (!issues)
+                    return false
                 return issues.some(this.hasError)
             },
             isWarning() {
                 const issues = this.report.validationResult.issue
+                if (!issues)
+                    return false
                 return issues.some(this.hasWarning)
             },
         },

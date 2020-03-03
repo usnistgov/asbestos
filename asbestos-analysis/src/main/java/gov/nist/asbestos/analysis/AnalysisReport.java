@@ -97,7 +97,7 @@ public class AnalysisReport {
                 if (runValidation)
                     relatedReport.validationResult = runValidation(resource);
                 else
-                    report.base.validationResult = new OperationOutcome();
+                    relatedReport.validationResult = new OperationOutcome();
             }
             report.objects.add(relatedReport);
         }

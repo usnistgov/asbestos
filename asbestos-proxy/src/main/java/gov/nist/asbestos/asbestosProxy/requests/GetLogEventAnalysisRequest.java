@@ -129,7 +129,14 @@ public class GetLogEventAnalysisRequest {
                     runAndReturnReport(bundle, "A Bundle", isRequest);
                     //returnReport(new Report("Do not understand event"));
                 } else {
-                    runAndReturnReport(bundle, "A Bundle", isRequest);
+                    runAndReturnReport(bundle,
+                            "A Bundle",
+                            isRequest,
+                            false,
+                            false,
+                            false,
+                            runValidation
+                    );
                     //returnReport(new Report("Do not understand event"));
                 }
             } else if (responseHeaders.hasHeader("Content-Location")) {
@@ -204,6 +211,18 @@ public class GetLogEventAnalysisRequest {
             report.setErrors(newErrors);
         }
 
+        returnReport(report);
+    }
+
+    private void runAndReturnReport(Bundle bundle, String source, boolean isRequest, boolean gzip, boolean useProxy, boolean ignoreBadRefs, boolean withValidation) {
+        Ref manifestFullUrl = getManifestFullUrl(bundle);
+        AnalysisReport analysisReport = new AnalysisReport(manifestFullUrl, source, request.ec)
+                .withGzip(gzip)
+                .withProxy(useProxy)
+                .withValidation(withValidation);
+        analysisReport.withContextResource(bundle);
+        analysisReport.analyseRequest(isRequest);
+        Report report = analysisReport.run();
         returnReport(report);
     }
 
