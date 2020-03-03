@@ -33,12 +33,14 @@
                 <span v-else><img src="../../assets/cross.png"></span>
                 <log-error-list :att-list="report.codingErrors" :att-list-name="'Coding Errors'" :start-open="true"> </log-error-list>
             </div>
-<!--            <div>-->
-<!--                <span class="caption">Validation</span>-->
-<!--                <span v-if="report.validationErrors.length === 0"><img src="../../assets/check.png"></span>-->
-<!--                <span v-else><img src="../../assets/cross.png"></span>-->
-<!--                <log-error-list :att-list="report.validationErrors" :att-list-name="'Validation Errors'" :start-open="true"> </log-error-list>-->
-<!--            </div>-->
+        </div>
+        <div>
+            <span class="caption">Validation</span>
+            <span v-if="report.validationResult.length === 0"><img src="../../assets/check.png"></span>
+            <span v-else-if="isError"><img src="../../assets/cross.png"></span>
+            <span v-else-if="isWarning"><img src="../../assets/warning-sign.png"></span>
+            <span v-else><img src="../../assets/check.png"></span>
+            <operation-outcome-display :oo="report.validationResult"> </operation-outcome-display>
         </div>
         <div v-if="report.name === 'Binary'">
             <div>Contents: <a v-bind:href="report.binaryUrl" target="_blank">open</a> (in new browser tab) </div>
@@ -52,12 +54,31 @@
 <script>
     import LogErrorList from "./LogErrorList"
     import LogAtts from "./LogAtts"
+    import OperationOutcomeDisplay from "./OperationOutcomeDisplay";
 
     export default {
+        computed: {
+            isError() {
+                const issues = this.report.validationResult.issue
+                return issues.some(this.hasError)
+            },
+            isWarning() {
+                const issues = this.report.validationResult.issue
+                return issues.some(this.hasWarning)
+            },
+        },
+        methods: {
+            hasError(issue) {
+                return issue.severity.myStringValue === 'error'
+            },
+            hasWarning(issue) {
+                return issue.severity.myStringValue === 'warning'
+            }
+        },
         props: [
             'report'
         ],
-        components: { LogErrorList, LogAtts },
+        components: { LogErrorList, LogAtts, OperationOutcomeDisplay },
         name: "LogObjectDisplay"
     }
 </script>

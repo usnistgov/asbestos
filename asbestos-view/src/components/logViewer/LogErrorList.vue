@@ -51,7 +51,6 @@
 <style scoped>
     .details {
         font-size: smaller;
-        /*border: 1px solid rgba(0, 0, 0, 0.8);*/
     }
     .red {
         color: red;
