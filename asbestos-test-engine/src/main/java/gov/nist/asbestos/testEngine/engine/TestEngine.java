@@ -22,6 +22,7 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.function.Supplier;
 
 /**
  * See http://hl7.org/fhir/testing.html
@@ -54,6 +55,7 @@ public class TestEngine  {
     public TestEngine(File testDef, URI sut) {
         Objects.requireNonNull(testDef);
         Objects.requireNonNull(sut);
+        Objects.requireNonNull(Ref.asURL(sut));
         this.testDef = testDef;
         this.sut = sut;
         // make test definition dir a temporary resource cache so elements of the TestScript

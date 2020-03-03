@@ -6,6 +6,7 @@ import org.hl7.fhir.r4.model.Resource;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.*;
 
 public class Ref {
@@ -71,6 +72,14 @@ public class Ref {
     public Ref(Reference reference) {
         Objects.requireNonNull(reference);
         uri = build(reference.getReference());
+    }
+
+    public static URL asURL(URI uri) {
+        try {
+            return uri.toURL();
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     public String getParameters() {
