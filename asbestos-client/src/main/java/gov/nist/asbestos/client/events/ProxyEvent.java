@@ -31,4 +31,8 @@ public class ProxyEvent {
 
         return new UIEvent(new EC(Installation.instance().externalCache())).fromURI(proxyEventURI);
     }
+
+    static public UIEvent eventFromEventURI(URI uri) {
+        return new UIEvent(new EC(Installation.instance().externalCache())).fromURI(uri);
+    }
 }

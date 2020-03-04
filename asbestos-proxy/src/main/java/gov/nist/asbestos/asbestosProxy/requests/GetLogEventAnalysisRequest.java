@@ -7,6 +7,7 @@ import gov.nist.asbestos.analysis.Report;
 import gov.nist.asbestos.client.Base.EventContext;
 import gov.nist.asbestos.client.Base.ProxyBase;
 import gov.nist.asbestos.client.client.Format;
+import gov.nist.asbestos.client.events.ProxyEvent;
 import gov.nist.asbestos.client.events.UIEvent;
 import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.http.headers.Headers;
@@ -16,6 +17,7 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.DocumentManifest;
 
 import java.io.IOException;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,7 +29,8 @@ import java.util.List;
 // 5 - testSession
 // 6 - channelId
 // 7 - eventId
-// 8 - "request" or "response"
+// 8 - url (may be null) - for private bundles this is the internal UUID
+// 9 - "request" or "response"
 // ?validation=true
 // Returns Report
 
@@ -49,7 +52,7 @@ public class GetLogEventAnalysisRequest {
     private Request request;
 
     public static boolean isRequest(Request request) {
-        return request.uriParts.size() == 9
+        return request.uriParts.size() == 10
                 && "log".equalsIgnoreCase(request.uriParts.get(2))
                 && "analysis".equalsIgnoreCase(request.uriParts.get(3))
                 && "event".equalsIgnoreCase(request.uriParts.get(4))
@@ -67,7 +70,7 @@ public class GetLogEventAnalysisRequest {
     }
 
     private boolean analysisTargetIsRequest() {
-        String requestOrResponse = request.uriParts.get(8);
+        String requestOrResponse = request.uriParts.get(9);
         return requestOrResponse.equals("request");
     }
 
@@ -78,6 +81,7 @@ public class GetLogEventAnalysisRequest {
             String testSession = request.uriParts.get(5);
             String channelId = request.uriParts.get(6);
             String eventId = request.uriParts.get(7);
+            String focusUrl = request.uriParts.get(8);
             boolean requestFocus = analysisTargetIsRequest();
             eventContext = new EventContext(testSession, channelId, eventId, requestFocus);
 
@@ -116,11 +120,11 @@ public class GetLogEventAnalysisRequest {
 
             if (baseResource instanceof Bundle) {
                 Bundle bundle = (Bundle) baseResource;
-                String manifestReference = getManifestLocation(bundle);
+                String focusReference = (focusUrl == null || focusUrl.equals("") || focusUrl.equals("null")) ? getManifestLocation(bundle) : focusUrl;
                 boolean isSearchSet = bundle.hasType() && bundle.getType() == Bundle.BundleType.SEARCHSET;
-                if (manifestReference != null)
-                    runAndReturnReport(new Ref(manifestReference),
-                            "reference for Manifest taken from transaction response",
+                if (focusReference != null)
+                    runAndReturnReport(new Ref(focusReference),
+                            "focus reference",
                             false,
                             true,
                             false,
@@ -158,15 +162,33 @@ public class GetLogEventAnalysisRequest {
                 boolean gzip = false;
                 boolean useProxy = true;
                 boolean ignoreBadRefs = false;
+                String eventId = null;
                 if (query.contains("gzip=true"))
                     gzip = true;
                 if (query.contains("ignoreBadRefs=true"))
                     ignoreBadRefs = true;
+                if (query.contains("eventId=")) {
+                    int index = query.indexOf("eventId=");
+                    index = query.indexOf("=", index);
+                    index++;
+                    int index2 = query.indexOf(";", index);
+                    if (index2 == -1)
+                        index2 = query.length() -1;
+                    if (index2 > index)  // event=  is a possibility
+                        eventId = query.substring(index, index2);
+                }
                 if (query.contains("url=http")){
                     int urlIndex = query.indexOf("url=http") + 4;
                     int urlEndIndex = query.indexOf(";", urlIndex);
                     String url = query.substring(urlIndex, urlEndIndex);
                     Ref ref = new Ref(url);
+                    if (eventId != null) {
+                        try {
+                            eventContext = new EventContext(ProxyEvent.eventFromEventURI(new URI(url)));
+                        } catch (Exception e) {
+                            throw new RuntimeException("URI " + url + " cannot be translated into an event");
+                        }
+                    }
                     runAndReturnReport(ref, "By Request", gzip, useProxy, ignoreBadRefs, false, null);
                 }
 //                else if (query.contains("url=urn:uuid")) {

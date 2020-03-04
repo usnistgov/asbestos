@@ -41,18 +41,18 @@
         <div class="vdivider"></div>
 
         <!--   history navigation   -->
-        <div v-if="history.length > 1" class="solid-boxed">
+        <div v-if="history.length > 0" class="solid-boxed">
             <div class="nav-buttons">
-                <div v-if="moreToTheLeft" class="tooltip left-arrow-position">
+                <div v-if="moreToTheLeft()" class="tooltip left-arrow-position">
                     <img id="left-button" class="selectable" src="../../assets/left-arrow.png" @click="left()"/>
                     <span class="tooltiptext">Previous</span>
                 </div>
-                <div v-if="moreToTheRight" class="tooltip right-arrow-position">
-                    <img id="right-button" class="selectable" src="../../assets/right-arrow.png" @click="right()"/>
-                    <span class="tooltiptext">Next</span>
-                </div>
+<!--                <div v-if="moreToTheRight" class="tooltip right-arrow-position">-->
+<!--                    <img id="right-button" class="selectable" src="../../assets/right-arrow.png" @click="right()"/>-->
+<!--                    <span class="tooltiptext">Next</span>-->
+<!--                </div>-->
             </div>
-            <div class="details">Navigate History</div>
+            <div class="details">History</div>
             <div class="vdivider"></div>
 
         </div>
@@ -87,7 +87,7 @@
                         {{ resource.name }} ({{ resource.relation }})
                         <span class="tooltip">
                             <!--   loadAnalysisForObjectAndAddHistory(report.objects[resourcei].url, resourcei)    -->
-                            <img id="focus" class="selectable" src="../../assets/focus.png" @click.stop="loadAnalyisFromEventContext(report.objects[resourcei].url, report.objects[resourcei].eventContext.eventId)">
+                            <img id="focus" class="selectable" src="../../assets/focus.png" @click.stop="loadAnalysisFromEventContext(report.objects[resourcei].url, report.objects[resourcei].eventContext, true)">
                             <span class="tooltiptext">Focus</span>
                         </span>
                     </span>
@@ -119,41 +119,55 @@
         data() {
             return {
                 selectedResourceIndex: null,  // -1 is focus object.  0 or greater is a related object.
-                history: [],   // report.base.url
-                index: 0,      // in history
-
+                history: [],   // {url: report.base.url, eventId: eventId } - history[0] is never removed - it is the base object
             }
         },
         methods: {
-            left() {
-                if (this.index > 0) {
-                    this.index = this.index - 1
-                    this.loadAnalysisForObject(this.history[this.index])
+            moreToTheLeft() {
+                return this.history.length > 1
+            },
+            historyClear() {
+                this.history.length = 0
+            },
+            historyPush(url, eventId) {
+                this.history.push({ url: url, eventId: eventId})
+            },
+            empty() {
+                return this.history.length === 0
+            },
+            left() {  // make previous object the focus
+                if (this.moreToTheLeft()) {
+                    this.pop()
+                    const history = this.peek()
+                    if (!history)
+                        this.loadAnalysis()
+                    else if (history.eventId)
+                        this.loadAnalyisFromEventId(history.url, history.eventId, false)
+                    else
+                        this.loadAnalysis()
                 }
             },
-            right() {
-                if (this.index + 1 < this.history.length) {
-                    this.index = this.index + 1
-                    this.loadAnalysisForObject(this.history[this.index])
-                }
+            peek() {
+                if (this.history.length === 0)
+                    return null
+                return this.history[this.history.length - 1]
             },
-            historyClean() {  // remove everything past index
-                this.history.length = this.index + 1
-            },
-            historyPush(url) {
-                this.historyClean()
-                this.history.push(url)
+            pop() {
+                if (this.history.length === 0)
+                    return null
+                return this.history.pop()
             },
             async  loadAnalysis() {
                 await this.loadAnalysis2()
                 this.selectedResourceIndex = -1
-                this.history.length = 0
+                this.historyClear()
                 //console.log(`using analysis`)
-                this.history.push(this.report.base.url)
+                this.historyPush(this.report.base.url, null)
             },
             async loadAnalysis2() {
                 if (this.eventId) {
                     console.log(`loadAnalysis2 for ${this.eventId}`)
+                    console.log(`theUrl=${this.theUrl}`)
                     await this.$store.dispatch('getLogEventAnalysis', {
                         channel: this.channelId,
                         session: this.sessionId,
@@ -162,14 +176,31 @@
                     })
                 }
             },
-            async loadAnalyisFromEventContext(url, eventId) {
+            async loadAnalysisFromEventContext(url, eventContext, addToHistory) {
+                const eventId = eventContext ? eventContext.eventId : null
+                if (url && url.startsWith('http') && eventId) {
+                    await this.$store.dispatch('getLogEventAnalysisForObject', {
+                        resourceUrl: url,
+                        gzip: this.gzip,
+                        ignoreBadRefs: this.ignoreBadRefs,
+                        eventId: eventId
+                    })
+                }
+                this.loadAnalyisFromEventId(url, eventId, addToHistory)
+            },
+            async loadAnalyisFromEventId(url, eventId, addToHistory) {
                 console.log(`loadAnalyisFromEventContext for ${eventId}`)
-                await this.$store.dispatch('getLogEventAnalysis', {channel: this.channelId, session: this.sessionId, eventId: eventId, requestOrResponse: this.requestOrResponse})
-                this.selectedResourceIndex = -1
-                this.history.length = 0
-                this.history.push(url)
+                console.log(`url=${url}`)
+                if (url.startsWith('http'))
+                    await this.loadAnalysisForObject(url)
+                else
+                    await this.$store.dispatch('getLogEventAnalysis', {channel: this.channelId, session: this.sessionId, eventId: eventId, requestOrResponse: this.requestOrResponse, url: url})
+                if (addToHistory)
+                    this.historyPush(url, eventId)
+                this.index = this.history.length - 1
             },
             loadAnalysisForObject(resourceUrl) {
+                console.log(`loadAnalysisForObject ${resourceUrl}`)
                 this.$store.dispatch('getLogEventAnalysisForObject', {
                     resourceUrl: resourceUrl,
                     gzip: this.gzip,
@@ -186,7 +217,7 @@
                 } else {
                     this.loadAnalysisForObject(resourceUrl)
                 }
-                this.historyPush(resourceUrl)
+                this.historyPush(resourceUrl, null)
                 this.index = this.history.length - 1
             },
             objectDisplayClass: function (resource) {
@@ -212,12 +243,6 @@
                 // content from gov.nist.asbestos.analysis.AnalysisReport.Report
                 return this.$store.state.log.analysis
             },
-            moreToTheLeft() {
-                return this.index > 0
-            },
-            moreToTheRight() {
-                return this.index + 1 < this.history.length
-            }
         },
         created() {
             if (this.theUrl) {

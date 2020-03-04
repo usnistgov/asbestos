@@ -49,6 +49,8 @@ public class UIEvent {
         UIEvent uiEvent = fromEventDir(eventDir);
         uiEvent.eventName = eventName;
         uiEvent.resourceType = resourceType;
+        uiEvent.testSession = testSession;
+        uiEvent.channelId = channelId;
         return uiEvent;
     }
 
@@ -61,6 +63,15 @@ public class UIEvent {
                 String channelId = parts.get(i+3);
                 String resourceType = parts.get(i+4);
                 String eventName = parts.get(i+5);
+                return fromParms(testSession, channelId, resourceType, eventName);
+            }
+            if ("asbestos".equals(part) && "proxy".equals(parts.get(i+1))) {
+                String testSessionChannelId = parts.get(i+2);
+                String[] tsParts = testSessionChannelId.split("__");
+                String testSession = tsParts[0];
+                String channelId = tsParts[1];
+                String resourceType = parts.get(i+3);
+                String eventName = parts.get(i+4);
                 return fromParms(testSession, channelId, resourceType, eventName);
             }
         }
@@ -126,5 +137,17 @@ public class UIEvent {
 
     public String getResponseBody() {
         return getClientTask().getResponseBody();
+    }
+
+    public String getTestSession() {
+        return testSession;
+    }
+
+    public String getChannelId() {
+        return channelId;
+    }
+
+    public String getEventName() {
+        return eventName;
     }
 }

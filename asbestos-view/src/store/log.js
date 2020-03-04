@@ -92,10 +92,14 @@ export const logStore = {
             const channel = parms.channel
             const session = parms.session
             const eventId = parms.eventId
+            let focusURl = parms.url
             const requestOrResponse = parms.requestOrResponse
 
+            if (!focusURl)
+                focusURl = "null"
+
             try {
-                const url = `analysis/event/${session}/${channel}/${eventId}/${requestOrResponse}?validation=true`
+                const url = `analysis/event/${session}/${channel}/${eventId}/${focusURl}/${requestOrResponse}?validation=true`
                 const result = await LOG.get(url)
                 //const data = {analysis: result.data, eventId: eventId}
                 commit('setAnalysis', result.data)
@@ -109,8 +113,9 @@ export const logStore = {
             const ignoreBadRefs = parms.ignoreBadRefs
             const resourceUrl = parms.resourceUrl
             const gzip = parms.gzip
+            const eventId = parms.eventId ? parms.eventId : ""
             try {
-                const url = `analysis/url/?url=${resourceUrl};gzip=${gzip};ignoreBadRefs=${ignoreBadRefs}`
+                const url = `analysis/url/?url=${resourceUrl};gzip=${gzip};ignoreBadRefs=${ignoreBadRefs};eventId=${eventId}`
                 console.log(`getAnalysis ${url}`)
                 const result = await LOG.get(url)
                 //const data = {analysis: result.data, eventId: eventId}

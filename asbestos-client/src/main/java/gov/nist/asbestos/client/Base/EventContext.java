@@ -1,5 +1,7 @@
 package gov.nist.asbestos.client.Base;
 
+import gov.nist.asbestos.client.events.UIEvent;
+
 public class EventContext {
     private String testSession;
     private String channelId;
@@ -11,6 +13,13 @@ public class EventContext {
         this.channelId = channelId;
         this.eventId = eventId;
         this.requestFocus = requestFocus;
+    }
+
+    public EventContext(UIEvent event) {
+        this.testSession = event.getTestSession();
+        this.channelId = event.getChannelId();
+        this.eventId = event.getEventName();
+        this.requestFocus = false;  // irrelevant
     }
 
     public String getTestSession() {
