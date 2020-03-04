@@ -86,7 +86,8 @@
                           @click="selectedResourceIndex = resourcei">
                         {{ resource.name }} ({{ resource.relation }})
                         <span class="tooltip">
-                            <img id="focus" class="selectable" src="../../assets/focus.png" @click.stop="loadAnalysisForObjectAndAddHistory(report.objects[resourcei].url, resourcei)">
+                            <!--   loadAnalysisForObjectAndAddHistory(report.objects[resourcei].url, resourcei)    -->
+                            <img id="focus" class="selectable" src="../../assets/focus.png" @click.stop="loadAnalyisFromEventContext(report.objects[resourcei].url, report.objects[resourcei].eventContext.eventId)">
                             <span class="tooltiptext">Focus</span>
                         </span>
                     </span>
@@ -151,8 +152,22 @@
                 this.history.push(this.report.base.url)
             },
             async loadAnalysis2() {
-                if (this.eventId)
-                    await this.$store.dispatch('getLogEventAnalysis', {channel: this.channelId, session: this.sessionId, eventId: this.eventId, requestOrResponse: this.requestOrResponse})
+                if (this.eventId) {
+                    console.log(`loadAnalysis2 for ${this.eventId}`)
+                    await this.$store.dispatch('getLogEventAnalysis', {
+                        channel: this.channelId,
+                        session: this.sessionId,
+                        eventId: this.eventId,
+                        requestOrResponse: this.requestOrResponse
+                    })
+                }
+            },
+            async loadAnalyisFromEventContext(url, eventId) {
+                console.log(`loadAnalyisFromEventContext for ${eventId}`)
+                await this.$store.dispatch('getLogEventAnalysis', {channel: this.channelId, session: this.sessionId, eventId: eventId, requestOrResponse: this.requestOrResponse})
+                this.selectedResourceIndex = -1
+                this.history.length = 0
+                this.history.push(url)
             },
             loadAnalysisForObject(resourceUrl) {
                 this.$store.dispatch('getLogEventAnalysisForObject', {
@@ -185,7 +200,7 @@
                 }
             },
             urlAnalysis() {
-                // console.log(`LogAnalysisReport url is ${this.theUrl}`)
+                console.log(`LogAnalysisReport url is ${this.theUrl}`)
                 this.loadAnalysisForObject(this.theUrl)
             }
         },
@@ -205,8 +220,10 @@
             }
         },
         created() {
-            if (this.theUrl)
+            if (this.theUrl) {
+                console.log(`created with url`)
                 this.urlAnalysis()
+            }
             else
                 this.loadAnalysis()
         },

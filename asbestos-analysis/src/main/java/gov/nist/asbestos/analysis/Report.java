@@ -26,4 +26,12 @@ public class Report {
     public void setErrors(List<String> errors) {
         this.errors = errors;
     }
+
+    public RelatedReport getBase() {
+        return base;
+    }
+
+    public List<RelatedReport> getObjects() {
+        return objects;
+    }
 }

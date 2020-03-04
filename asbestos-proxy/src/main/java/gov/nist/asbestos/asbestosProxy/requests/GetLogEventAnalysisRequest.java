@@ -2,7 +2,9 @@ package gov.nist.asbestos.asbestosProxy.requests;
 
 import com.google.gson.Gson;
 import gov.nist.asbestos.analysis.AnalysisReport;
+import gov.nist.asbestos.analysis.RelatedReport;
 import gov.nist.asbestos.analysis.Report;
+import gov.nist.asbestos.client.Base.EventContext;
 import gov.nist.asbestos.client.Base.ProxyBase;
 import gov.nist.asbestos.client.client.Format;
 import gov.nist.asbestos.client.events.UIEvent;
@@ -43,7 +45,7 @@ import java.util.List;
 
 public class GetLogEventAnalysisRequest {
     private static Logger log = Logger.getLogger(GetLogEventAnalysisRequest.class);
-
+    private EventContext eventContext;
     private Request request;
 
     public static boolean isRequest(Request request) {
@@ -76,6 +78,17 @@ public class GetLogEventAnalysisRequest {
             String testSession = request.uriParts.get(5);
             String channelId = request.uriParts.get(6);
             String eventId = request.uriParts.get(7);
+            boolean requestFocus = analysisTargetIsRequest();
+            eventContext = new EventContext(testSession, channelId, eventId, requestFocus);
+
+            UIEvent event = request.ec.getEvent(eventContext);
+            String requestBodyString = event.getRequestBody();
+            Headers requestHeaders = event.getRequestHeader();
+            String responseBodyString = event.getResponseBody();
+            Headers responseHeaders = event.getResponseHeader();
+
+            String analysisSource = requestFocus ? requestBodyString : responseBodyString;
+
             boolean runValidation = false;
             String query = request.req.getQueryString();
             if (query != null) {
@@ -83,13 +96,7 @@ public class GetLogEventAnalysisRequest {
                     runValidation = true;
             }
 
-            UIEvent event = request.ec.getEvent(testSession, channelId, "null", eventId);
-            String requestBodyString = event.getClientTask().getRequestBody();
-            Headers requestHeaders = new Headers(event.getClientTask().getRequestHeader());
-            String responseBodyString = event.getClientTask().getResponseBody();
-            Headers responseHeaders = new Headers(event.getClientTask().getResponseHeader());
-            boolean isRequest = analysisTargetIsRequest();
-            String analysisSource = isRequest ? requestBodyString : responseBodyString;
+
             BaseResource baseResource;
             try {
                 baseResource = ProxyBase.parse(analysisSource, Format.fromContentType(responseHeaders.getContentType().getValue()));
@@ -126,12 +133,12 @@ public class GetLogEventAnalysisRequest {
                         if (url != null && !url.equals(""))
                             refs.add(new Ref(url));
                     }
-                    runAndReturnReport(bundle, "A Bundle", isRequest);
+                    runAndReturnReport(bundle, "A Bundle", requestFocus);
                     //returnReport(new Report("Do not understand event"));
                 } else {
                     runAndReturnReport(bundle,
-                            "A Bundle",
-                            isRequest,
+                            "Static Bundle",
+                            requestFocus,
                             false,
                             false,
                             false,
@@ -174,6 +181,11 @@ public class GetLogEventAnalysisRequest {
     }
 
     private void returnReport(Report report) {
+        report.getBase().setEventContext(eventContext);
+        for (RelatedReport rr : report.getObjects()) {
+            rr.setEventContext(eventContext);
+        }
+
         String json = new Gson().toJson(report);
         request.resp.setContentType("application/json");
         try {
@@ -219,9 +231,9 @@ public class GetLogEventAnalysisRequest {
         AnalysisReport analysisReport = new AnalysisReport(manifestFullUrl, source, request.ec)
                 .withGzip(gzip)
                 .withProxy(useProxy)
-                .withValidation(withValidation);
-        analysisReport.withContextResource(bundle);
-        analysisReport.analyseRequest(isRequest);
+                .withValidation(withValidation)
+                .withContextResource(bundle)
+                .analyseRequest(isRequest);
         Report report = analysisReport.run();
         returnReport(report);
     }

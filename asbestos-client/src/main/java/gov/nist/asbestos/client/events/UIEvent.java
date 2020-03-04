@@ -1,6 +1,7 @@
 package gov.nist.asbestos.client.events;
 
 import gov.nist.asbestos.client.Base.EC;
+import gov.nist.asbestos.http.headers.Headers;
 
 import java.io.File;
 import java.net.URI;
@@ -110,4 +111,20 @@ public class UIEvent {
     }
 
     public int getTaskCount() { return tasks.size(); }
+
+    public Headers getRequestHeader() {
+        return new Headers(getClientTask().getRequestHeader());
+    }
+
+    public Headers getResponseHeader() {
+        return new Headers(getClientTask().getResponseHeader());
+    }
+
+    public String getRequestBody() {
+        return getClientTask().getRequestBody();
+    }
+
+    public String getResponseBody() {
+        return getClientTask().getResponseBody();
+    }
 }
