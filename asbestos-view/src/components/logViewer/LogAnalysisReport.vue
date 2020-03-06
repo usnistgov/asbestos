@@ -47,10 +47,6 @@
                     <img id="left-button" class="selectable" src="../../assets/left-arrow.png" @click="left()"/>
                     <span class="tooltiptext">Previous</span>
                 </div>
-<!--                <div v-if="moreToTheRight" class="tooltip right-arrow-position">-->
-<!--                    <img id="right-button" class="selectable" src="../../assets/right-arrow.png" @click="right()"/>-->
-<!--                    <span class="tooltiptext">Next</span>-->
-<!--                </div>-->
             </div>
             <div class="details">History</div>
             <div class="vdivider"></div>
@@ -60,7 +56,6 @@
         <!--  BASE OBJECT     -->
         <div>
             <span class="caption">Focus Object:</span>
-<!--            <span v-if="report.source">{{ report.source }}</span>-->
             <div class="vdivider"></div>
             <div class="grid-container">
                 <span v-if="report.base">
@@ -76,7 +71,8 @@
 
         <!--  RELATED     -->
         <div class="vdivider"></div>
-        <span class="caption">Related:</span>
+        <span class="caption">Related: </span>
+        <span>(referenced by Focus Object)</span>
         <div class="vdivider"></div>
         <div class="grid-container">
             <span v-for="(resource, resourcei) in report.objects"
@@ -177,6 +173,7 @@
                 }
             },
             async loadAnalysisFromEventContext(url, eventContext, addToHistory) {
+                console.log(`loadAnalysisFromEventContext url=${url} eventContext.eventId=${eventContext.eventId}`)
                 const eventId = eventContext ? eventContext.eventId : null
                 if (url && url.startsWith('http') && eventId) {
                     await this.$store.dispatch('getLogEventAnalysisForObject', {

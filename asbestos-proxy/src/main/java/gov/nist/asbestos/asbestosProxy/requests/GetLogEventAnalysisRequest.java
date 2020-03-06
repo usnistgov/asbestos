@@ -29,9 +29,10 @@ import java.util.List;
 // 5 - testSession
 // 6 - channelId
 // 7 - eventId
-// 8 - url (may be null) - for private bundles this is the internal UUID
-// 9 - "request" or "response"
+// 8 - "request" or "response"
 // ?validation=true
+// focusUrl=url (may be null) - for private bundles this is the internal UUID
+//             for contained it is ID#anchor
 // Returns Report
 
 // OR
@@ -52,7 +53,7 @@ public class GetLogEventAnalysisRequest {
     private Request request;
 
     public static boolean isRequest(Request request) {
-        return request.uriParts.size() == 10
+        return request.uriParts.size() == 9
                 && "log".equalsIgnoreCase(request.uriParts.get(2))
                 && "analysis".equalsIgnoreCase(request.uriParts.get(3))
                 && "event".equalsIgnoreCase(request.uriParts.get(4))
@@ -70,8 +71,28 @@ public class GetLogEventAnalysisRequest {
     }
 
     private boolean analysisTargetIsRequest() {
-        String requestOrResponse = request.uriParts.get(9);
+        String requestOrResponse = request.uriParts.get(8);
         return requestOrResponse.equals("request");
+    }
+
+    private String getParm(String name) {
+        String query = request.req.getQueryString();
+        if (query == null)
+            return null;
+        int parmi = query.indexOf(name + "=");
+        if (parmi == -1)
+            return null;
+        int parmend = query.indexOf(";", parmi);
+        if (parmend == -1)
+            parmend = query.length();
+        int parmstart = query.indexOf("=", parmi);
+        if (parmstart == -1)
+            return null;
+        parmstart++;
+        if (parmend <= parmstart)
+            return null;
+        return query.substring(parmstart, parmend);
+
     }
 
     public void run() {
@@ -81,7 +102,10 @@ public class GetLogEventAnalysisRequest {
             String testSession = request.uriParts.get(5);
             String channelId = request.uriParts.get(6);
             String eventId = request.uriParts.get(7);
-            String focusUrl = request.uriParts.get(8);
+            String focusUrl = getParm("focusUrl");
+            String focusAnchor = getParm("focusAnchor");
+            if (focusUrl != null && focusAnchor != null)
+                focusUrl = focusUrl + "#" + focusAnchor;
             boolean requestFocus = analysisTargetIsRequest();
             eventContext = new EventContext(testSession, channelId, eventId, requestFocus);
 

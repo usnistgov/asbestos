@@ -11,6 +11,7 @@ import java.util.*;
 
 public class Ref {
     private URI uri;
+    private String anchor = null;
 
     public Ref(URI uri) {
         Objects.requireNonNull(uri);
@@ -72,6 +73,17 @@ public class Ref {
     public Ref(Reference reference) {
         Objects.requireNonNull(reference);
         uri = build(reference.getReference());
+    }
+
+    public Ref withAnchor(String anchor) {
+        if (!anchor.startsWith("#"))
+            anchor = "#" + anchor;
+        this.anchor = anchor;
+        return this;
+    }
+
+    public String getAnchor() {
+        return anchor;
     }
 
     public static URL asURL(URI uri) {
@@ -204,6 +216,8 @@ public class Ref {
     public String getResourceType() {
         String path = uri.getPath();
         String[] parts = getURIParts();
+        if (parts == null)
+            return null;
         int i = getResourceTypeIndex();
         if (i == -1) return "";
         return parts[i];
@@ -216,6 +230,8 @@ public class Ref {
 
     public int getResourceTypeIndex() {
         String path = uri.getPath();
+        if (path == null)
+            return -1;
         String[] parts = path.split("/");
         for (int i=0; i<parts.length; i++) {
             if (resourceNames.contains(parts[i]))
@@ -226,6 +242,8 @@ public class Ref {
 
     public String[] getURIParts() {
         String path = uri.getPath();
+        if (path == null)
+            return null;
         return path.split("/");
     }
 
@@ -323,7 +341,9 @@ public class Ref {
 
     @Override
     public String toString() {
-        return uri.toString();
+        if (anchor == null)
+            return uri.toString();
+        return uri.toString() + anchor;
     }
 
     public String asString() { return uri.toString(); }
@@ -342,6 +362,11 @@ public class Ref {
     }
 
     private URI build(String ref) {
+        int anchori = ref.indexOf("#");
+        if (anchori != -1) {
+            this.anchor = ref.substring(anchori);
+            ref = ref.substring(0, anchori);
+        }
         try {
             URI uri = new URI(ref);
             return httpize(uri);
@@ -359,6 +384,10 @@ public class Ref {
 
     public URI getUri() {
         return uri;
+    }
+
+    public boolean hasAnchor() {
+        return anchor != null;
     }
 
     static private List<String> resourceNames = Arrays.asList(

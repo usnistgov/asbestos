@@ -4,6 +4,7 @@ import gov.nist.asbestos.client.Base.DocumentCache;
 import gov.nist.asbestos.client.Base.EC;
 import gov.nist.asbestos.client.client.FhirClient;
 import gov.nist.asbestos.client.client.Format;
+import gov.nist.asbestos.client.reporting.IErrorReporter;
 import gov.nist.asbestos.client.resolver.ChannelUrl;
 import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
@@ -52,6 +53,22 @@ public class AnalysisReport {
     private String baseObjectEventId = null;
     private String baseObjectResourceType = null;
     private boolean runValidation = false;
+
+    private class ErrorReporter implements IErrorReporter {
+
+        @Override
+        public void requireNonNull(Object o, String msg) {
+            if (o == null)
+                generalErrors.add(msg);
+        }
+
+        @Override
+        public void requireNull(Object o, String msg) {
+            if (o != null)
+                generalErrors.add(msg);
+        }
+    }
+    private ErrorReporter errorReporter = new ErrorReporter();
 
     private Report buildReport() {
         Report report = new Report();
@@ -174,6 +191,17 @@ public class AnalysisReport {
         return this;
     }
 
+    private ResourceWrapper findResourceInBundle(Bundle bundle, String ref) {
+        for (Bundle.BundleEntryComponent comp : bundle.getEntry()) {
+            if (ref.equals(comp.getFullUrl())) {
+                ResourceWrapper wrapper = new ResourceWrapper(comp.getResource());
+                wrapper.setRef(new Ref(ref));
+                return wrapper;
+            }
+        }
+        return null;
+    }
+
     public Report run() {
         try {
             if (baseRef != null && baseObj == null && contextResource != null) {
@@ -285,8 +313,6 @@ public class AnalysisReport {
                 .setExternalCache(ec.externalCache)
                 .runEval(wrapper, null);
         return testEngine;
-//        List<String> errors = testEngine.getTestReportErrors();
-//        return errors;
     }
 
     private Checked getMinimumIdReport(TestReport testReport) {
@@ -332,9 +358,12 @@ public class AnalysisReport {
         return resourceRef;
     }
 
+    // initialize baseObj
+    // if contextResource is loaded then load its contents into related
     private void loadBaseFromContext() {
-        Objects.requireNonNull(baseRef);
-        Objects.requireNonNull(contextResource);
+        errorReporter.requireNonNull(baseRef, "baseRef must be non-null in AnalysisReport.loadBaseFromContext");
+        errorReporter.requireNonNull(contextResource, "contextResource must be non-null in AnalysisReport.loadBaseFromContext");
+        errorReporter.requireNull(baseObj, "baseObj must be null in AnalysisReport.loadBaseFromContext");
         Resource resource = resourceFromBundle((Bundle)contextResource, baseRef);
         if (resource != null)
             baseObj = new ResourceWrapper(resource).setRef(baseRef);
@@ -343,6 +372,7 @@ public class AnalysisReport {
             Bundle context = (Bundle) contextResource;
             loadRelatedFromPDB(context);
         }
+        errorReporter.requireNonNull(baseObj, "baseObj must be loaded by AnalysisReport.loadBaseFromContext");
     }
 
     private void loadRelatedFromPDB(Bundle context) {
@@ -353,8 +383,17 @@ public class AnalysisReport {
                 for (Reference2 ref : refs) {
                     String att = ref.att;
                     Ref theRef = new Ref(ref.reference);
+                    if (theRef.toString().startsWith("#"))
+                        continue;  // Reference2Builder.buildReferences digs too deep
                     if (theRef.isRelative()) {
                         Resource theResource = resourceFromBundle(context, theRef);
+                        if (theResource != null) {
+                            ResourceWrapper wrapper = new ResourceWrapper(theResource).setRef(theRef);
+                            related.add(new Related(wrapper, att));
+                            continue;
+                        }
+                        if (theResource == null && comp.getResource() instanceof DomainResource)
+                            theResource = resourceFromContained((DomainResource) comp.getResource(), theRef);
                         if (theResource != null) {
                             ResourceWrapper wrapper = new ResourceWrapper(theResource).setRef(theRef);
                             related.add(new Related(wrapper, att));
@@ -364,6 +403,20 @@ public class AnalysisReport {
                 break;
             }
         }
+    }
+
+    private Resource resourceFromContained(DomainResource resource, Ref ref) {
+        if (ref == null)
+            return null;
+        String refId = ref.toString();  // include anchor
+        if (refId == null)
+            return null;
+        for (Resource res : resource.getContained()) {
+            String resId = res.getId();
+            if (refId.equals(resId))
+                return res;
+        }
+        return null;
     }
 
     private boolean isSearchSet() {
@@ -388,12 +441,29 @@ public class AnalysisReport {
     private Resource resourceFromBundle(Bundle bundle, Ref fullUrl) {
         Objects.requireNonNull(fullUrl);
         for( Bundle.BundleEntryComponent comp : bundle.getEntry()) {
-            if (fullUrl.toString().equals(comp.getFullUrl()))
+            // asString is used in case there is an anchor in the fullUrl
+            if (fullUrl.asString().equals(comp.getFullUrl())) {
+                if (fullUrl.hasAnchor()) {
+                    if (comp.getResource() instanceof DomainResource)
+                        return findResourceInContained((DomainResource) comp.getResource(), fullUrl);
+                }
                 return comp.getResource();
+            }
         }
         return null;
     }
 
+    private Resource findResourceInContained(DomainResource theResource, Ref fullUrl) {
+        String anchor = fullUrl.getAnchor();
+        if (anchor == null)
+            return null;
+        for (Resource resource : theResource.getContained()) {
+            if (anchor.equals(resource.getId())) {
+                return resource;
+            }
+        }
+        return null;
+    }
 
     private void loadBase() {
         Objects.requireNonNull(baseRef);
@@ -583,7 +653,11 @@ public class AnalysisReport {
         if (documentReference.hasContext()) {
             // sourcePatientInfo - contained only
             if (documentReference.getContext().hasSourcePatientInfo()) {
-                Related related = load(new Ref(documentReference.getContext().getSourcePatientInfo()), "SourcePatientInfo", documentReference);
+//                Related related = load(new Ref(documentReference.getContext().getSourcePatientInfo()), "SourcePatientInfo", documentReference);
+                Ref spi = new Ref(documentReference.getId()).withAnchor(documentReference.getContext().getSourcePatientInfo().getReference());
+                Related related = load(spi,
+                        "SourcePatientInfo",
+                        documentReference);
                 if (related != null && !related.contained)
                     generalErrors.add("DocumentReference.context.sourcePatientInfo must be contained");
                 if (related != null && related.wrapper.hasResource()) {
@@ -692,11 +766,37 @@ public class AnalysisReport {
         return rel;
     }
 
+    private Resource getResourceById(List<Resource> list, String id) {
+        for (Resource resource : list) {
+            if (id.equals(resource.getId()))
+                return resource;
+        }
+        return null;
+    }
+
     private Related load(Ref ref, String howRelated, BaseResource parent) {
+        if (ref.hasAnchor()) {
+            String anchor = ref.getAnchor();
+            if (parent instanceof DomainResource) {
+                DomainResource domainResource = (DomainResource) parent;
+                if (domainResource.hasContained()) {
+                    DomainResource contained = (DomainResource) getResourceById(domainResource.getContained(), anchor);
+                    ResourceWrapper wrapper = new ResourceWrapper(contained);
+                    wrapper.setRef(ref);
+                    Related rel = new Related(wrapper, howRelated + "/contained");
+                    rel.contained();
+                    related.add(rel);
+                    return rel;
+                }
+            }
+            generalErrors.add("Do not understand address " + anchor + " relative to " + parent.getId());
+            return null;
+        }
         Related rel = getFromRelated(ref);
         if (rel == null) {
             if (ref.isContained() && (parent instanceof DomainResource)) {
                 Related rel2 = new Related(new ResourceWrapper(ref.getContained((DomainResource) parent)), howRelated + "/contained").contained();
+                //rel2.wrapper.setRef(new Ref());
                 related.add(rel2);
                 return rel2;
             }

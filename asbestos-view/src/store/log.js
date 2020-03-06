@@ -92,14 +92,26 @@ export const logStore = {
             const channel = parms.channel
             const session = parms.session
             const eventId = parms.eventId
-            let focusURl = parms.url
+            let focusUrl = parms.url
+            console.log(`focusUrl is ${focusUrl}`)
+            let anchor
+            if (focusUrl) {
+                const focusUrlPoundi = focusUrl.indexOf('#')
+                if (focusUrlPoundi !== -1) {
+                    anchor = focusUrl.substring(focusUrlPoundi + 1)
+                    focusUrl = focusUrl.substring(0, focusUrlPoundi)
+                }
+            }
+            console.log(`focusUrl is ${focusUrl} anchor is ${anchor}`)
             const requestOrResponse = parms.requestOrResponse
 
-            if (!focusURl)
-                focusURl = "null"
+            if (!focusUrl)
+                focusUrl = ""
+            if (!anchor)
+                anchor = ""
 
             try {
-                const url = `analysis/event/${session}/${channel}/${eventId}/${focusURl}/${requestOrResponse}?validation=true`
+                const url = `analysis/event/${session}/${channel}/${eventId}/${requestOrResponse}?validation=true;focusUrl=${focusUrl};focusAnchor=${anchor}`
                 const result = await LOG.get(url)
                 //const data = {analysis: result.data, eventId: eventId}
                 commit('setAnalysis', result.data)
