@@ -76,6 +76,8 @@ public class Ref {
     }
 
     public Ref withAnchor(String anchor) {
+        if (anchor == null)
+            return this;
         if (!anchor.startsWith("#"))
             anchor = "#" + anchor;
         this.anchor = anchor;
@@ -296,7 +298,12 @@ public class Ref {
 
     public Ref rebase(Ref newBase) {
         Objects.requireNonNull(newBase);
-        return new Ref(newBase.getBase(), getResourceType(), getId(), getVersion()).httpizeTo(uri);
+        if (newBase.toString().startsWith("urn:uuid:")) {
+            return new Ref(newBase.toString()).withAnchor(getAnchor());
+        }
+        Ref newRef = new Ref(newBase.getBase(), getResourceType(), getId(), getVersion()).httpizeTo(uri);
+        newRef.withAnchor(this.getAnchor());
+        return newRef;
     }
 
     public Ref rebase(URI theUri) {

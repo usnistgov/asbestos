@@ -175,22 +175,22 @@
             async loadAnalysisFromEventContext(url, eventContext, addToHistory) {
                 console.log(`loadAnalysisFromEventContext url=${url} eventContext.eventId=${eventContext.eventId}`)
                 const eventId = eventContext ? eventContext.eventId : null
-                if (url && url.startsWith('http') && eventId) {
-                    await this.$store.dispatch('getLogEventAnalysisForObject', {
-                        resourceUrl: url,
-                        gzip: this.gzip,
-                        ignoreBadRefs: this.ignoreBadRefs,
-                        eventId: eventId
-                    })
-                }
+                // if (url && url.startsWith('http') && eventId) {
+                //     await this.$store.dispatch('getLogEventAnalysisForObject', {
+                //         resourceUrl: url,
+                //         gzip: this.gzip,
+                //         ignoreBadRefs: this.ignoreBadRefs,
+                //         eventId: eventId
+                //     })
+                // }
                 this.loadAnalyisFromEventId(url, eventId, addToHistory)
             },
             async loadAnalyisFromEventId(url, eventId, addToHistory) {
                 console.log(`loadAnalyisFromEventContext for ${eventId}`)
                 console.log(`url=${url}`)
-                if (url.startsWith('http'))
-                    await this.loadAnalysisForObject(url)
-                else
+                // if (url.startsWith('http'))
+                //     await this.loadAnalysisForObject(url)
+                // else
                     await this.$store.dispatch('getLogEventAnalysis', {channel: this.channelId, session: this.sessionId, eventId: eventId, requestOrResponse: this.requestOrResponse, url: url})
                 if (addToHistory)
                     this.historyPush(url, eventId)
@@ -201,7 +201,8 @@
                 this.$store.dispatch('getLogEventAnalysisForObject', {
                     resourceUrl: resourceUrl,
                     gzip: this.gzip,
-                    ignoreBadRefs: this.ignoreBadRefs
+                    ignoreBadRefs: this.ignoreBadRefs,
+                    eventId: this.eventId
                 })
                 this.selectedResourceIndex = -1
             },

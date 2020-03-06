@@ -40,4 +40,8 @@ public class RelatedReport {
     public void setEventContext(EventContext eventContext) {
         this.eventContext = eventContext;
     }
+
+    public String toString() {
+        return url;
+    }
 }

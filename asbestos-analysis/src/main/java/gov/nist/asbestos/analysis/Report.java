@@ -34,4 +34,13 @@ public class Report {
     public List<RelatedReport> getObjects() {
         return objects;
     }
+
+    public String toString() {
+        StringBuilder buf = new StringBuilder();
+        buf.append("Report");
+        for (RelatedReport rr : objects) {
+            buf.append("\n  ").append(rr.toString());
+        }
+        return buf.toString();
+    }
 }

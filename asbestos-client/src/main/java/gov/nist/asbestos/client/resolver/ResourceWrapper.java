@@ -137,6 +137,8 @@ public class ResourceWrapper {
 
     public String getEventId() {
         String[] parts = getXProxyEventPathParts();
+        if (parts == null)
+            return null;
         if (parts.length <= 0)
             return null;
         return parts[parts.length - 1];
@@ -144,6 +146,8 @@ public class ResourceWrapper {
 
     public String getResponseResourceType() {
         String[] parts = getXProxyEventPathParts();
+        if (parts == null)
+            return null;
         if (parts.length < 2)
             return null;
         return parts[parts.length - 2];

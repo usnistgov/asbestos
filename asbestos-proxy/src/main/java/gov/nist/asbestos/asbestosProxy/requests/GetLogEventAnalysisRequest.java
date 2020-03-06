@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 // 0 - empty
 // 1 - app context  (asbestos)
@@ -227,6 +228,8 @@ public class GetLogEventAnalysisRequest {
     }
 
     private void returnReport(Report report) {
+        Objects.requireNonNull(report);
+        Objects.requireNonNull(report.getBase());
         report.getBase().setEventContext(eventContext);
         for (RelatedReport rr : report.getObjects()) {
             rr.setEventContext(eventContext);

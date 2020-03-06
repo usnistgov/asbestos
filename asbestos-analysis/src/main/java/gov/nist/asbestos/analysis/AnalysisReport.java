@@ -206,6 +206,8 @@ public class AnalysisReport {
         try {
             if (baseRef != null && baseObj == null && contextResource != null) {
                 loadBaseFromContext();
+                if (baseObj == null)
+                    loadBase();
                 Objects.requireNonNull(baseObj);
             }
             else if (baseRef != null && baseObj == null) {
@@ -368,11 +370,11 @@ public class AnalysisReport {
         if (resource != null)
             baseObj = new ResourceWrapper(resource).setRef(baseRef);
         // load all bundle parts into related so they are found without pinging a server
-        if (contextResource instanceof Bundle) {
-            Bundle context = (Bundle) contextResource;
-            loadRelatedFromPDB(context);
-        }
-        errorReporter.requireNonNull(baseObj, "baseObj must be loaded by AnalysisReport.loadBaseFromContext");
+//        if (contextResource instanceof Bundle) {
+//            Bundle context = (Bundle) contextResource;
+//            loadRelatedFromPDB(context);
+//        }
+ //       errorReporter.requireNonNull(baseObj, "baseObj must be loaded by AnalysisReport.loadBaseFromContext");
     }
 
     private void loadRelatedFromPDB(Bundle context) {
@@ -472,6 +474,17 @@ public class AnalysisReport {
         if (resourceRef == null)
             return;
         baseObj = new FhirClient().requestGzip(useGzip).readResource(resourceRef);
+        if (resourceRef.hasAnchor()) {
+            BaseResource baseResource = baseObj.getResource();
+            if (baseResource instanceof DomainResource) {
+                Resource resource = findResourceInContained((DomainResource) baseResource, resourceRef);
+                if (resource != null) {
+                    baseObj = new ResourceWrapper(resource, resourceRef);
+                }
+            } else {
+                generalErrors.add("AnalysisReport#loadBase(): baseObj is not a DomainResource");
+            }
+        }
         baseObjectEventId = baseObj.getEventId();
         baseObjectResourceType = baseObj.getResponseResourceType();
         if (baseObj.getStatus() != 200) {
@@ -775,6 +788,14 @@ public class AnalysisReport {
     }
 
     private Related load(Ref ref, String howRelated, BaseResource parent) {
+        if (contextResource != null && contextResource instanceof Bundle) {
+            ResourceWrapper wrapper = findResourceInBundle((Bundle)contextResource, ref.toString());
+            if (wrapper != null) {
+                Related rel = new Related(wrapper, howRelated);
+                related.add(rel);
+                return rel;
+            }
+        }
         if (ref.hasAnchor()) {
             String anchor = ref.getAnchor();
             if (parent instanceof DomainResource) {
@@ -782,7 +803,10 @@ public class AnalysisReport {
                 if (domainResource.hasContained()) {
                     DomainResource contained = (DomainResource) getResourceById(domainResource.getContained(), anchor);
                     ResourceWrapper wrapper = new ResourceWrapper(contained);
-                    wrapper.setRef(ref);
+                    if (ref.isRelative())
+                        wrapper.setRef(ref.rebase(baseRef));
+                    else
+                        wrapper.setRef(ref);
                     Related rel = new Related(wrapper, howRelated + "/contained");
                     rel.contained();
                     related.add(rel);
