@@ -130,7 +130,7 @@ public class GetLogEventAnalysisRequest {
             try {
                 baseResource = ProxyBase.parse(analysisSource, Format.fromContentType(responseHeaders.getContentType().getValue()));
             } catch (Exception e) {
-                returnReport(new Report("No content"));
+                returnReport(new Report("No content in " + (requestFocus ? "Request" : "Response") + " message"));
                 return;
             }
 
@@ -229,12 +229,13 @@ public class GetLogEventAnalysisRequest {
 
     private void returnReport(Report report) {
         Objects.requireNonNull(report);
-        Objects.requireNonNull(report.getBase());
-        report.getBase().setEventContext(eventContext);
-        for (RelatedReport rr : report.getObjects()) {
-            rr.setEventContext(eventContext);
+        if (!report.hasErrors()) {
+            Objects.requireNonNull(report.getBase());
+            report.getBase().setEventContext(eventContext);
+            for (RelatedReport rr : report.getObjects()) {
+                rr.setEventContext(eventContext);
+            }
         }
-
         String json = new Gson().toJson(report);
         request.resp.setContentType("application/json");
         try {
@@ -251,7 +252,15 @@ public class GetLogEventAnalysisRequest {
                 .withProxy(useProxy)
                 .withValidation(withValidation)
                 .withContextResource(contextBundle);
-        Report report = analysisReport.run();
+
+        Report report;
+        try {
+            report = analysisReport.run();
+        } catch (Throwable t) {
+            report = new Report(t.getMessage());
+            returnReport(report);
+            return;
+        }
 
         if (ignoreBadRefs) {
             List<String> errors = report.getErrors();
@@ -283,7 +292,16 @@ public class GetLogEventAnalysisRequest {
                 .withValidation(withValidation)
                 .withContextResource(bundle)
                 .analyseRequest(isRequest);
-        Report report = analysisReport.run();
+
+        Report report;
+        try {
+            report = analysisReport.run();
+        } catch (Throwable t) {
+            report = new Report(t.getMessage());
+            returnReport(report);
+            return;
+        }
+
         returnReport(report);
     }
 
@@ -292,7 +310,16 @@ public class GetLogEventAnalysisRequest {
         AnalysisReport analysisReport = new AnalysisReport(manifestFullUrl, source, request.ec);
         analysisReport.withContextResource(bundle);
         analysisReport.analyseRequest(isRequest);
-        Report report = analysisReport.run();
+
+        Report report;
+        try {
+            report = analysisReport.run();
+        } catch (Throwable t) {
+            report = new Report(t.getMessage());
+            returnReport(report);
+            return;
+        }
+
         returnReport(report);
     }
 

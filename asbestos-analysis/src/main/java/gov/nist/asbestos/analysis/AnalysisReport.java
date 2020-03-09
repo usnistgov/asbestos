@@ -58,14 +58,18 @@ public class AnalysisReport {
 
         @Override
         public void requireNonNull(Object o, String msg) {
-            if (o == null)
+            if (o == null) {
                 generalErrors.add(msg);
+                throw new Error(msg);
+            }
         }
 
         @Override
         public void requireNull(Object o, String msg) {
-            if (o != null)
+            if (o != null) {
                 generalErrors.add(msg);
+                throw new Error(msg);
+            }
         }
     }
     private ErrorReporter errorReporter = new ErrorReporter();
@@ -258,6 +262,8 @@ public class AnalysisReport {
     }
 
     private void buildAtts() {
+        if (baseObj == null)
+            return;
         atts = ResourceHasMethodsFilter.toMap(baseObj.getResource());
         for (Related rel : related) {
             if (rel.wrapper.hasResource()) {
@@ -267,6 +273,8 @@ public class AnalysisReport {
     }
 
     private void binaryEval() {
+        if (baseObj == null)
+            return;
         if (baseObj.getResource().getClass().getSimpleName().equals("Binary")) {
             binaryUrl = extractDocument((Binary) baseObj.getResource());
         }
@@ -278,6 +286,8 @@ public class AnalysisReport {
 
 
     private void codingEval() {
+        if (baseObj == null)
+            return;
         codingErrors.addAll(codesValidation.validate(baseObj.getResource()));
         for (Related rel : related) {
             rel.codingErrors.addAll(codesValidation.validate(rel.wrapper.getResource()));
@@ -431,12 +441,20 @@ public class AnalysisReport {
     }
 
     private void loadSearchSetFromContext(Bundle bundle) {
+        buildListingFromContext(bundle, "searchset");
+    }
+
+    private void plainListing(Bundle bundle) {
+        buildListingFromContext(bundle, "listing");
+    }
+
+    private void buildListingFromContext(Bundle bundle, String howRelated) {
         for (Bundle.BundleEntryComponent comp : bundle.getEntry()) {
             Resource resource = comp.getResource();
             ResourceWrapper wrapper = new ResourceWrapper(resource).setRef(new Ref(resource.getId()));
             if (baseObj == null)
                 baseObj = wrapper;
-            related.add(new Related(wrapper, "searchset"));
+            related.add(new Related(wrapper, howRelated));
         }
     }
 
@@ -513,6 +531,12 @@ public class AnalysisReport {
     }
 
     private void buildRelated() {
+        if (baseObj == null && contextResource != null && contextResource instanceof Bundle) {
+            generalErrors.add("baseObject is null - shown is listing of contents only");
+            plainListing((Bundle) contextResource);
+            return;
+        }
+        errorReporter.requireNonNull(baseObj, "baseObject is null");
         BaseResource baseResource = baseObj.getResource();
         if (baseResource instanceof DomainResource) {
             DomainResource domainResource = (DomainResource) baseResource;
@@ -588,8 +612,6 @@ public class AnalysisReport {
             Related related = load(new Ref(documentManifest.getSubject()), "subject", documentManifest);
             if (related != null && related.contained)
                 generalErrors.add("DocumentManifest.subject is contained");
-        } else {
-            generalErrors.add("DocumentManifest has no subject");
         }
         // author - contained only
         if (documentManifest.hasAuthor()) {
@@ -643,8 +665,6 @@ public class AnalysisReport {
             Related related = load(new Ref(documentReference.getSubject()), "subject", documentReference);
             if (related.contained)
                 generalErrors.add("DocumentReference.subject is contained");
-        } else {
-            generalErrors.add("DocumentReference has no subject");
         }
         // authenticator - contained only
         if (documentReference.hasAuthenticator()) {

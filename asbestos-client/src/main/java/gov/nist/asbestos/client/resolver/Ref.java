@@ -180,7 +180,7 @@ public class Ref {
     }
 
     public boolean isContained() {
-        return uri.toString().startsWith("#");
+        return uri.toString().startsWith("#") || hasAnchor();
     }
 
     public Resource getContained(DomainResource domainResource) {

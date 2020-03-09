@@ -8,7 +8,7 @@ public class Report {
     String source = null;
     RelatedReport base = null;
     List<RelatedReport> objects = new ArrayList<>();
-    List<String> errors;
+    List<String> errors = new ArrayList<>();
     List<String> warnings;
     String baseObjectEventId = null;
     String baseObjectResourceType = null;
@@ -21,6 +21,10 @@ public class Report {
 
     public List<String> getErrors() {
         return errors;
+    }
+
+    public boolean hasErrors() {
+        return errors.size() > 0;
     }
 
     public void setErrors(List<String> errors) {
