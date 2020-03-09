@@ -147,16 +147,6 @@
             </assert>
         </action>
         <action>
-            <assert>
-                <description value="... Patient reference returned as sent"/>
-                <expression value="DocumentReference.subject.reference"/>
-                <sourceId value="readBackResponse"/>
-                <value value="${patientResourceId}"/>
-                <warningOnly value="false"/>
-            </assert>
-        </action>
-
-        <action>
             <operation>
                 <!-- references patient from resourceCache in EC -->
                 <description value="send Replace PDB"/>
