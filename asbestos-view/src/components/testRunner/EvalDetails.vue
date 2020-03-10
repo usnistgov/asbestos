@@ -1,25 +1,11 @@
 <template>
     <div>
         <div v-if="script && report" class="script">
-            <!--            <div v-if="script.description">-->
-            <!--                {{ script.description }}-->
-            <!--            </div>-->
-<!--            <div v-for="(fixture, i) in fixtures"-->
-<!--                 :key="i">-->
-<!--                <span class="name" >Fixture: </span>-->
-<!--                <span class="value">{{ fixture.id }}</span>-->
-<!--            </div>-->
-<!--            <div v-for="(variable, i) in variables"-->
-<!--                 :key="'Var' + i">-->
-<!--                <span class="name" >Variable: </span>-->
-<!--                <span class="value">{{ variable.name }}</span>-->
-<!--            </div>-->
-
             <!--   add SETUP here  -->
             <div>
-                <span class="selectable" @click.self="toggleEventDisplayed()">Message Log</span>
+                <span v-if="!noInspectLabel" class="selectable" @click.self="toggleEventDisplayed()">Inspect</span>
                 <span v-if="eventDisplayed">
-                        <img src="../../assets/arrow-down.png" @click.self="toggleEventDisplayed()">
+                    <img src="../../assets/arrow-down.png" @click.self="toggleEventDisplayed()">
                         <log-item
                                 :sessionId="sessionId"
                                 :channelId="channelId"
@@ -28,8 +14,10 @@
                         </log-item>
                     </span>
                 <span v-else>
+                    <span v-if="!noInspectLabel">
                         <img src="../../assets/arrow-right.png" @click.self="toggleEventDisplayed()">
                     </span>
+                </span>
             </div>
             <div v-for="(test, testi) in tests" class="test-part"
                  :key="'Eval' + testi">
@@ -242,7 +230,7 @@
         },
         mixins: [ errorHandlerMixin ],
         props: [
-            'sessionId', 'channelId', 'testCollection', 'testId', 'eventId', 'runEval'
+            'sessionId', 'channelId', 'testCollection', 'testId', 'eventId', 'runEval', 'noInspectLabel',
         ],
         components: {
             //EvalReportAssert

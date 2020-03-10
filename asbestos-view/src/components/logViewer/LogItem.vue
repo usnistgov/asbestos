@@ -2,20 +2,21 @@
     <div>
         <log-nav v-if="!noNav" :index="index" :sessionId="sessionId" :channelId="channelId"> </log-nav>
 
-        <!-- Event Header -->
-        <div v-if="eventSummary" class="event-description">
-            {{ eventAsDate(eventSummary.eventName) }} - {{ eventSummary.verb}} {{ eventSummary.resourceType }} - {{ eventSummary.status ? 'Ok' : 'Error' }}
-
-            <span class="client-server-position">
+        <div class="boxed">
+            <!-- Event Header -->
+            <div v-if="eventSummary" class="event-description">
+                {{ eventAsDate(eventSummary.eventName) }} - {{ eventSummary.verb}} {{ eventSummary.resourceType }} - {{ eventSummary.status ? 'Ok' : 'Error' }}
+                <span class="client-server-position">
                 <span class="bolded">Client:</span>  {{clientIP}}
                 <span class="bolded">Server:</span>  {{channelId}}
             </span>
-        </div>
+            </div>
 
-        <div class="request-response">
+            Raw Message:
+            <div class="request-response">
 
-            <!-- From Client To Server -->
-            <div v-if="selectedEvent">
+                <!-- From Client To Server -->
+                <div v-if="selectedEvent">
                 <span v-for="(task, taski) in tasks" :key="taski">
                     <span v-bind:class="[{ selected: taski === selectedTask, selectable: taski !== selectedTask }, 'cursor-pointer']" @click="selectTask(taski)">
                         {{ taskLabel(taski) }}
@@ -23,40 +24,44 @@
                     </span>
                 </span>
 
-                <a href="https://github.com/usnistgov/asbestos/wiki/Connectathon-FAQ#inspector" target="_blank">
-                <img src="../../assets/info.png">
-                </a>
+                    <a href="https://github.com/usnistgov/asbestos/wiki/Connectathon-FAQ#inspector" target="_blank">
+                        <img src="../../assets/info.png">
+                    </a>
 
-                <span class="link-position solid-boxed pointer-cursor" @click.stop.prevent="copyToClipboard">Copy Event Link</span>
-                <input type="hidden" id="the-link" :value="eventLink">
+                    <span class="link-position solid-boxed pointer-cursor" @click.stop.prevent="copyToClipboard">Copy Event Link</span>
+                    <input type="hidden" id="the-link" :value="eventLink">
 
-            </div>
-            <div v-else>
-                No Tasks
-            </div>
+                </div>
+                <div v-else>
+                    No Tasks
+                </div>
 
-            <!-- Request/Response line -->
-            <span v-bind:class="{
+                <!-- Request/Response line -->
+                <span v-bind:class="{
                 selected: displayRequest,
                 'not-selected': !displayRequest
               }"
-                  @click="displayRequest = true; displayResponse = false; displayInspector = false; displayValidations = false">
+                      @click="displayRequest = true; displayResponse = false; displayInspector = false; displayValidations = false">
                 Request
            </span>
-            <div class="divider"></div>
-            <span v-bind:class="{
+                <div class="divider"></div>
+                <span v-bind:class="{
                    selected: displayResponse,
                 'not-selected': !displayResponse
                }"
-                  @click="displayRequest = false; displayResponse = true; displayInspector = false; displayValidations = false">
+                      @click="displayRequest = false; displayResponse = true; displayInspector = false; displayValidations = false">
                 Response
             </span>
 
-            <!-- Inspect Validations -->
-            <div class="vdivider"></div>
-            <div class="vdivider"></div>
-            <div class="vdivider"></div>
-            <div>
+                <!-- Inspect Validations -->
+                <div class="vdivider"></div>
+                <div class="vdivider"></div>
+                <div class="vdivider"></div>
+            </div>
+
+            Inspector:
+            <div class="request-response">
+                <div>
                 <span v-bind:class="{
                         selected: inspectRequest,
                         'not-selected': !inspectRequest
@@ -64,66 +69,72 @@
                       @click="displayRequest = false; displayResponse = false; displayInspector = true; inspectType = 'request'; displayValidations = false">
                     Inspect Request
                 </span>
-                <div class="divider"></div>
-                <span v-bind:class="{
+                    <div class="divider"></div>
+                    <span v-bind:class="{
                         selected: inspectResponse,
                         'not-selected': !inspectResponse
                         }"
-                      @click="displayRequest = false; displayResponse = false; displayInspector = true; inspectType = 'response'; displayValidations = false">
+                          @click="displayRequest = false; displayResponse = false; displayInspector = true; inspectType = 'response'; displayValidations = false">
                     Inspect Server
                 </span>
-                <div class="divider"></div>
-                <span v-bind:class="{
+                    <div class="divider"></div>
+                    <span v-bind:class="{
                     selected: displayValidations,
                     'not-selected': !displayValidations
                     }" @click="displayRequest = false; displayResponse = false; displayInspector = false; displayValidations = true">
                     PDB Validations
                 </span>
+                </div>
             </div>
+            <br />
         </div>
 
-        <div v-if="!displayInspector && !displayValidations && getEvent()">
-            <div v-if="displayRequest" class="event-details">
+
+            <div v-if="!displayInspector && !displayValidations && getEvent()">
+                <div v-if="displayRequest" class="event-details">
                             <pre>{{ requestHeader }}
                             </pre>
-                <pre>{{ requestBody }}</pre>
-            </div>
-            <div v-if="!displayRequest" class="event-details">
+                    <pre>{{ requestBody }}</pre>
+                </div>
+                <div v-if="!displayRequest" class="event-details">
                             <pre>{{ responseHeader }}
                             </pre>
-                <pre>{{responseBody}}</pre>
+                    <pre>{{responseBody}}</pre>
+                </div>
             </div>
-        </div>
-        <div v-if="inspectRequest" class="request-response">
-                    <log-analysis-report
-                            :session-id="sessionId"
-                            :channel-id="channelId"
-                            :event-id="eventId"
-                            :request-or-response="'request'"></log-analysis-report>
-        </div>
-        <div v-if="inspectResponse" class="request-response">
-            <log-analysis-report
-                    :session-id="sessionId"
-                    :channel-id="channelId"
-                    :event-id="eventId"
-                    :request-or-response="'response'"></log-analysis-report>
-        </div>
-        <div v-if="displayValidations" class="request-response">
-            <eval-details
-                :session-id="sessionId"
-                :channel-id="channelId"
-                :event-id="eventId"
-                :test-id="'bundle_eval'"
-                :test-collection="'Internal'"
-                :run-eval="true"></eval-details>
-        </div>
+            <div v-if="inspectRequest" class="request-response">
+                <log-analysis-report
+                        :session-id="sessionId"
+                        :channel-id="channelId"
+                        :event-id="eventId"
+                        :request-or-response="'request'"
+                        :no-inspect-label="true"></log-analysis-report>
+            </div>
+            <div v-if="inspectResponse" class="request-response">
+                <log-analysis-report
+                        :session-id="sessionId"
+                        :channel-id="channelId"
+                        :event-id="eventId"
+                        :request-or-response="'response'"
+                        :no-inspect-label="true"></log-analysis-report>
+            </div>
+            <div v-if="displayValidations" class="request-response">
+                <eval-details
+                        :session-id="sessionId"
+                        :channel-id="channelId"
+                        :event-id="eventId"
+                        :test-id="'bundle_eval'"
+                        :test-collection="'Internal'"
+                        :run-eval="true"
+                        :no-inspect-label="true"></eval-details>
+            </div>
     </div>
 </template>
 
 <script>
     import LogNav from "./LogNav"
     import LogAnalysisReport from "./LogAnalysisReport"
- //   import EvalDetails from "../testRunner/EvalDetails"
+    //   import EvalDetails from "../testRunner/EvalDetails"
     import {LOG} from '../../common/http-common'
     import eventMixin from '../../mixins/eventMixin'
     import errorHandlerMixin from '../../mixins/errorHandlerMixin'
@@ -281,6 +292,11 @@
 </script>
 
 <style scoped>
+    .boxed {
+        border: 1px solid rgba(0, 0, 0, 0.8);
+        position: relative;
+        /*left: -60px;*/
+    }
     .bolded {
         font-weight: bold;
     }

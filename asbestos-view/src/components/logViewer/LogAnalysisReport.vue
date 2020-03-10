@@ -1,6 +1,6 @@
 <template>
     <div>
-        <div v-if="report" class="has-cursor">
+        <div v-if="report && !noInspectLabel" class="has-cursor">
             <span @click.stop="closed = !closed">Inspect</span>
             <span v-if="closed"><img src="../../assets/arrow-right.png" @click.stop="closed = !closed"/></span>
             <span v-else><img src="../../assets/arrow-down.png" @click.stop="closed = !closed"/></span>
@@ -268,7 +268,8 @@
             'theUrl': 'urlAnalysis'
         },
         props: [  // pass eventId OR theUrl
-            'sessionId', 'channelId', 'eventId', 'theUrl', 'gzip', 'useProxy', "requestOrResponse", "ignoreBadRefs", 'initiallyClosed',
+            'sessionId', 'channelId', 'eventId', 'theUrl', 'gzip', 'useProxy', "requestOrResponse", "ignoreBadRefs",
+            'initiallyClosed', 'noInspectLabel',
         ],
         components: { LogObjectDisplay },
         name: "LogAnalysisReport"
