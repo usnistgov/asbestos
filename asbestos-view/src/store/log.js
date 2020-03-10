@@ -27,10 +27,7 @@ export const logStore = {
             state.validationServer = server
         },
         setAnalysis(state, analysis) {
-//            const analysis = data.analysis
-//            const eventId = data.eventId
             state.analysis = analysis
-//            state.eventIdOfAnalysis = eventId
         },
         resetLogLoaded(state) {
             state.loaded = false
@@ -123,16 +120,27 @@ export const logStore = {
         },
         async getLogEventAnalysisForObject({commit}, parms) {
             const ignoreBadRefs = parms.ignoreBadRefs
-            const resourceUrl = parms.resourceUrl
+            let resourceUrl = parms.resourceUrl
+            if (resourceUrl)
+               resourceUrl = resourceUrl.trim()
             const gzip = parms.gzip
             const eventId = parms.eventId ? parms.eventId : ""
             try {
                 const url = `analysis/url/?url=${resourceUrl};gzip=${gzip};ignoreBadRefs=${ignoreBadRefs};eventId=${eventId}`
                 console.log(`getAnalysis ${url}`)
                 const result = await LOG.get(url)
-                //const data = {analysis: result.data, eventId: eventId}
                 commit('setAnalysis', result.data)
             } catch (error) {
+                commit('setError', error)
+                console.error(error)
+            }
+        },
+        async analyseResource({commit}, resourceString) {
+            try {
+                const url= `analysis/text`
+                const result = await LOG.post(url, {string: resourceString})
+                commit('setAnalysis', result.data)
+            }   catch (error) {
                 commit('setError', error)
                 console.error(error)
             }

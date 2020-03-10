@@ -12,6 +12,7 @@ import gov.nist.asbestos.client.events.UIEvent;
 import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.http.headers.Headers;
 import org.apache.log4j.Logger;
+import org.checkerframework.checker.units.qual.A;
 import org.hl7.fhir.r4.model.BaseResource;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.DocumentManifest;
@@ -69,6 +70,11 @@ public class GetLogEventAnalysisRequest {
 
     public GetLogEventAnalysisRequest(Request request) {
         this.request = request;
+    }
+
+    public GetLogEventAnalysisRequest setEventContext(EventContext eventContext) {
+        this.eventContext = eventContext;
+        return this;
     }
 
     private boolean analysisTargetIsRequest() {
@@ -144,37 +150,7 @@ public class GetLogEventAnalysisRequest {
                 requestBundle = (Bundle) requestResource;
 
             if (baseResource instanceof Bundle) {
-                Bundle bundle = (Bundle) baseResource;
-                String focusReference = (focusUrl == null || focusUrl.equals("") || focusUrl.equals("null")) ? getManifestLocation(bundle) : focusUrl;
-                boolean isSearchSet = bundle.hasType() && bundle.getType() == Bundle.BundleType.SEARCHSET;
-                if (focusReference != null)
-                    runAndReturnReport(new Ref(focusReference),
-                            "focus reference",
-                            false,
-                            true,
-                            false,
-                            runValidation,
-                            analysisTargetIsRequest() ? requestBundle : null);
-                else if (isSearchSet) {
-                    List<Ref> refs = new ArrayList<>();
-                    for (Bundle.BundleEntryComponent component : bundle.getEntry()) {
-                        String url = component.getFullUrl();
-                        if (url != null && !url.equals(""))
-                            refs.add(new Ref(url));
-                    }
-                    runAndReturnReport(bundle, "A Bundle", requestFocus);
-                    //returnReport(new Report("Do not understand event"));
-                } else {
-                    runAndReturnReport(bundle,
-                            "Static Bundle",
-                            requestFocus,
-                            false,
-                            false,
-                            false,
-                            runValidation
-                    );
-                    //returnReport(new Report("Do not understand event"));
-                }
+                analyseBundle(focusUrl, requestFocus, runValidation, (Bundle) baseResource /*, requestBundle */);
             } else if (responseHeaders.hasHeader("Content-Location")) {
                 Ref ref = new Ref(responseHeaders.get("Content-Location").getValue());
                 runAndReturnReport(ref, "link taken from response Content-location header", false, false, false, runValidation, requestBundle);
@@ -227,7 +203,52 @@ public class GetLogEventAnalysisRequest {
         }
     }
 
-    private void returnReport(Report report) {
+    void analyseBundle(String focusUrl, boolean requestFocus, boolean runValidation, Bundle bundle /*, Bundle requestBundle */) {
+        String focusReference = (focusUrl == null || focusUrl.equals("") || focusUrl.equals("null")) ? getManifestLocation(bundle) : focusUrl;
+        boolean isSearchSet = bundle.hasType() && bundle.getType() == Bundle.BundleType.SEARCHSET;
+        if (focusReference != null)
+            runAndReturnReport(new Ref(focusReference),
+                    "focus reference",
+                    false,
+                    true,
+                    false,
+                    runValidation,
+                    analysisTargetIsRequest() ? bundle : null);
+        else if (isSearchSet) {
+            List<Ref> refs = new ArrayList<>();
+            for (Bundle.BundleEntryComponent component : bundle.getEntry()) {
+                String url = component.getFullUrl();
+                if (url != null && !url.equals(""))
+                    refs.add(new Ref(url));
+            }
+            runAndReturnReport(bundle, "A Bundle", requestFocus);
+            //returnReport(new Report("Do not understand event"));
+        } else {
+            runAndReturnReport(bundle,
+                    "Static Bundle",
+                    requestFocus,
+                    false,
+                    false,
+                    false,
+                    runValidation
+            );
+            //returnReport(new Report("Do not understand event"));
+        }
+    }
+
+    void analyseResource(BaseResource baseResource, EventContext eventContext, boolean runValidation) {
+        Report report = new AnalysisReport((Ref)null, "User", request.ec)
+                .withContextResource(baseResource)
+                .withValidation(runValidation)
+                .run();
+        returnReport(report, request, eventContext);
+    }
+
+    void returnReport(Report report) {
+        returnReport(report, request, eventContext);
+    }
+
+    public void returnReport(Report report, Request request, EventContext eventContext) {
         Objects.requireNonNull(report);
         if (!report.hasErrors()) {
             Objects.requireNonNull(report.getBase());
@@ -245,6 +266,8 @@ public class GetLogEventAnalysisRequest {
         }
         request.resp.setStatus(request.resp.SC_OK);
     }
+
+
 
     private void runAndReturnReport(Ref ref, String source, boolean gzip, boolean useProxy, boolean ignoreBadRefs, boolean withValidation, BaseResource contextBundle) {
         AnalysisReport analysisReport = new AnalysisReport(ref, source, request.ec)

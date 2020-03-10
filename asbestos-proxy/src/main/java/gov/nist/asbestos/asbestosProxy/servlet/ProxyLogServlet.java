@@ -94,9 +94,8 @@ public class ProxyLogServlet extends HttpServlet {
         log.info("Log POST " + request.uri);
 
         try {
-
-            //if (CreateChannelMarkerRequest.isRequest(request)) new CreateChannelMarkerRequest(request).run();
-            //else
+            if (AnalyseResourceRequest.isRequest(request)) new AnalyseResourceRequest(request).run();
+            else
                 throw new Exception("Invalid request - do not understand URI " + request.uri);
 
         } catch (RuntimeException e) {

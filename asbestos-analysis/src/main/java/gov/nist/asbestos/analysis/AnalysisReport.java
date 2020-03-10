@@ -224,6 +224,10 @@ public class AnalysisReport {
                     ((Bundle) contextResource).getType().equals(Bundle.BundleType.SEARCHSET)) {
                 Bundle bundle = (Bundle) contextResource;
                 loadSearchSetFromContext(bundle);
+            } else if (baseRef == null &&
+                    contextResource != null &&
+                    !(contextResource instanceof Bundle)) {
+                baseObj = new ResourceWrapper(contextResource);
             }
             buildRelated();
             comprehensiveEval();
@@ -833,7 +837,8 @@ public class AnalysisReport {
                     return rel;
                 }
             }
-            generalErrors.add("Do not understand address " + anchor + " relative to " + parent.getId());
+            if (!ref.asString().endsWith("html"))
+                generalErrors.add("Do not understand address " + anchor + " relative to parent id " + parent.getId());
             return null;
         }
         Related rel = getFromRelated(ref);
