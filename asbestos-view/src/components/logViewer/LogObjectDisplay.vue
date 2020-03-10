@@ -40,7 +40,9 @@
             <span v-else-if="isError"><img src="../../assets/cross.png"></span>
             <span v-else-if="isWarning"><img src="../../assets/warning-sign.png"></span>
             <span v-else><img src="../../assets/check.png"></span>
-            <operation-outcome-display :oo="report.validationResult"> </operation-outcome-display>
+            <operation-outcome-display
+                    :oo="report.validationResult"
+                    :header-message="'Only the standard FHIR validators are included'"> </operation-outcome-display>
         </div>
         <div v-if="report.name === 'Binary'">
             <div>Contents: <a v-bind:href="report.binaryUrl" target="_blank">open</a> (in new browser tab) </div>

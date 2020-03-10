@@ -9,6 +9,12 @@
         </span>
 
         <div v-if="open">
+            <div v-if="headerMessage">
+                <span class="divider"></span>
+                <span>
+                    {{headerMessage}}
+                </span>
+            </div>
             <div v-for="(order, orderi) in orderLabels" :key="order + orderi">
                 <div v-for="(issue, issuei) in oo.issue" :key="issue + issuei">
                     <div v-if="issue.severity.myStringValue === order">
@@ -65,7 +71,7 @@
         },
         name: "OperationOutcomeDisplay",
         props: [
-            'oo'
+            'oo', 'headerMessage',
         ],
     }
 </script>
