@@ -130,7 +130,6 @@
 </template>
 
 <script>
-    import {ENGINE} from '../../common/http-common'
     import errorHandlerMixin from '../../mixins/errorHandlerMixin'
 
     export default {
@@ -178,15 +177,23 @@
                 //    ==> calls evalStatus
             },
             async runner(testName) {
-                if (!testName)
-                    return
-                this.$store.commit('setCurrentTest', null)
-                try {
-                    const response = await ENGINE.post(`testrun/${this.sessionId}__${this.channelId}/${this.testCollection}/${testName}?_format=${this.useJson ? 'json' : 'xml'};_gzip=${this.gzip}`)
-                    this.$store.commit('setTestReport', { testName: testName, testReport: response.data })
-                } catch (error) {
-                    this.error(error)
-                }
+                await this.$store.dispatch('runTest', {
+                    testName: testName,
+                    sessionId: this.sessionId,
+                    channelId: this.channelId,
+                    testCollection: this.testCollection,
+                    useJson: this.useJson,
+                    gzip: this.gzip
+                })
+                // if (!testName)
+                //     return
+                // this.$store.commit('setCurrentTest', null)
+                // try {
+                //     const response = await ENGINE.post(`testrun/${this.sessionId}__${this.channelId}/${this.testCollection}/${testName}?_format=${this.useJson ? 'json' : 'xml'};_gzip=${this.gzip}`)
+                //     this.$store.commit('setTestReport', { testName: testName, testReport: response.data })
+                // } catch (error) {
+                //     this.error(error)
+                // }
             },
             async doRun(testName) {  // server tests
                 if (!testName)

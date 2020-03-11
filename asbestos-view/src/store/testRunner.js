@@ -138,6 +138,24 @@ export const testRunnerStore = {
                     commit('setError', url + ': ' + error)
                 })
         },
+        async runTest({commit}, parms) {
+            const testName = parms.testName
+            const sessionId = parms.sessionId
+            const channelId = parms.channelId
+            const testCollection = parms.testCollection
+            const useJson = parms.useJson
+            const gzip = parms.gzip
+            if (!testName)
+                return
+            commit('setCurrentTest', null)
+            const url = `testrun/${sessionId}__${channelId}/${testCollection}/${testName}?_format=${useJson ? 'json' : 'xml'};_gzip=${gzip}`
+            try {
+                const response = await ENGINE.post(url)
+                commit('setTestReport', { testName: testName, testReport: response.data })
+            } catch (error) {
+                this.error(error + ` - ${url}`)
+            }
+        },
         runEval({commit, state, rootState}, testId) {
             const eventEval = state.eventEvalCount === 0 ? "marker" : state.eventEvalCount
             const url = `clienteval/${rootState.base.session}__${rootState.base.channelId}/${eventEval}/${state.currentTestCollectionName}/${testId}`
