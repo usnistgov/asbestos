@@ -17,12 +17,12 @@
 
                 <!-- From Client To Server -->
                 <div v-if="selectedEvent">
-                <span v-for="(task, taski) in tasks" :key="taski">
-                    <span v-bind:class="[{ selected: taski === selectedTask, selectable: taski !== selectedTask }, 'cursor-pointer']" @click="selectTask(taski)">
-                        {{ taskLabel(taski) }}
-                        <span class="divider"> </span>
+                    <span v-for="(task, taski) in tasks" :key="taski">
+                        <span v-bind:class="[{ selected: taski === selectedTask, selectable: taski !== selectedTask }, 'cursor-pointer']" @click="selectTask(taski)">
+                            {{ taskLabel(taski) }}
+                            <span class="divider"> </span>
+                        </span>
                     </span>
-                </span>
 
                     <a href="https://github.com/usnistgov/asbestos/wiki/Connectathon-FAQ#inspector" target="_blank">
                         <img src="../../assets/info.png">
@@ -38,20 +38,20 @@
 
                 <!-- Request/Response line -->
                 <span v-bind:class="{
-                selected: displayRequest,
-                'not-selected': !displayRequest
-              }"
+                    selected: displayRequest,
+                    'not-selected': !displayRequest
+                    }"
                       @click="displayRequest = true; displayResponse = false; displayInspector = false; displayValidations = false">
-                Request
-           </span>
+                    Request
+                </span>
                 <div class="divider"></div>
                 <span v-bind:class="{
                    selected: displayResponse,
-                'not-selected': !displayResponse
-               }"
+                    'not-selected': !displayResponse
+                    }"
                       @click="displayRequest = false; displayResponse = true; displayInspector = false; displayValidations = false">
-                Response
-            </span>
+                    Response
+                </span>
 
                 <!-- Inspect Validations -->
                 <div class="vdivider"></div>
@@ -60,30 +60,36 @@
             </div>
 
             Inspector:
-            <div class="request-response">
+            <div>
                 <div>
-                <span v-bind:class="{
-                        selected: inspectRequest,
-                        'not-selected': !inspectRequest
-                        }"
-                      @click="displayRequest = false; displayResponse = false; displayInspector = true; inspectType = 'request'; displayValidations = false">
-                    Inspect Request
-                </span>
-                    <div class="divider"></div>
-                    <span v-bind:class="{
-                        selected: inspectResponse,
-                        'not-selected': !inspectResponse
-                        }"
-                          @click="displayRequest = false; displayResponse = false; displayInspector = true; inspectType = 'response'; displayValidations = false">
-                    Inspect Server
-                </span>
-                    <div class="divider"></div>
-                    <span v-bind:class="{
-                    selected: displayValidations,
-                    'not-selected': !displayValidations
-                    }" @click="displayRequest = false; displayResponse = false; displayInspector = false; displayValidations = true">
-                    PDB Validations
-                </span>
+                    <span v-if="requestBody" class="tooltip requestInspect">
+                        <span v-bind:class="[{
+                            selected: inspectRequest,
+                            'not-selected': !inspectRequest
+                            }]"
+                        @click="displayRequest = false; displayResponse = false; displayInspector = true; inspectType = 'request'; displayValidations = false">
+                            Inspect Request
+                        </span>
+                        <span class="tooltiptext">Graphically display resource(s)</span>
+                    </span>
+<!--                    <div class="divider"></div>-->
+                    <span class="tooltip serverInspect">
+                        <span v-bind:class="[{
+                            selected: inspectResponse,
+                            'not-selected': !inspectResponse
+                            }]"
+                                @click="displayRequest = false; displayResponse = false; displayInspector = true; inspectType = 'response'; displayValidations = false">
+                            Inspect Server
+                        </span>
+                        <span class="tooltiptext">Graphically display resource(s) referenced</span>
+                    </span>
+<!--                    <div class="divider"></div>-->
+<!--                    <span v-bind:class="{-->
+<!--                        selected: displayValidations,-->
+<!--                        'not-selected': !displayValidations-->
+<!--                        }" @click="displayRequest = false; displayResponse = false; displayInspector = false; displayValidations = true">-->
+<!--                        PDB Validations-->
+<!--                    </span>-->
                 </div>
             </div>
             <br />
@@ -119,6 +125,9 @@
                         :no-inspect-label="true"></log-analysis-report>
             </div>
             <div v-if="displayValidations" class="request-response">
+                <span class="caption">
+                    PDB Validations
+                </span>
                 <eval-details
                         :session-id="sessionId"
                         :channel-id="channelId"
@@ -186,28 +195,26 @@
                 this.loadEvent()
                 return this.selectedEvent
             },
-            loadEvent() {
+            async loadEvent() {  // called twice by requestBody - someday figure out why
                 if (!this.$store.state.log.eventSummaries)
-                    return
+                    return null
                 const summary = this.$store.state.log.eventSummaries[this.index]
                 if (!summary)
-                    return
+                    return null
                 // don't reload if it is already the selected event
                 const selectedEventName = summary.eventName === this.selectedEventName() ? null: summary.eventName
                 if (selectedEventName !== null) {
                     this.selectedEvent = null
                     this.selectedTask = 0
-                    LOG.get(`${this.sessionId}/${this.channelId}/${summary.resourceType}/${summary.eventName}`)
-                        .then(response => {
-                            try {
-                                this.selectedEvent = response.data
-                            } catch (error) {
-                                this.error(error)
-                            }
-                        })
-                        .catch(error => {
-                            this.error(error)
-                        })
+                    try {
+                        const url = `${this.sessionId}/${this.channelId}/${summary.resourceType}/${summary.eventName}`
+                        const result = await LOG.get(url)
+                        this.selectedEvent = result.data
+                        return result
+                    } catch (error) {
+                        this.$store.commit('setError', error)
+                        console.error(error)
+                    }
                 }
             },
             limitLines(text) {
@@ -249,13 +256,21 @@
                 return this.selectedEvent.tasks[this.selectedTask].requestHeader
             },
             requestBody() {
-                return this.removeFormatting(this.limitLines(this.selectedEvent.tasks[this.selectedTask].requestBody))
+                this.loadEvent()
+                if (this.selectedEvent) {
+                    return this.removeFormatting(this.limitLines(this.selectedEvent.tasks[this.selectedTask].requestBody))
+                }
+                return ""
             },
             responseHeader() {
                 return this.selectedEvent.tasks[this.selectedTask].responseHeader
             },
             responseBody() {
-                return this.removeFormatting(this.limitLines(this.selectedEvent.tasks[this.selectedTask].responseBody))
+                this.loadEvent()
+                if (this.selectedEvent) {
+                    return this.removeFormatting(this.limitLines(this.selectedEvent.tasks[this.selectedTask].responseBody))
+                }
+                return ""
             },
             eventSummary() {
                 if (!this.$store.state.log.eventSummaries)
@@ -320,10 +335,13 @@
         left: 60px;
         text-align: left;
     }
-    .selected {
-        font-weight: bold;
-        cursor: pointer;
-        text-decoration: underline;
+    .requestInspect {
+        position: relative;
+        left: 60px;
+    }
+    .serverInspect {
+        position: relative;
+        left: 100px;
     }
     .right {
         text-align: right;
@@ -332,8 +350,35 @@
         position: absolute;
         left: 350px;
     }
+    .selected {
+        font-weight: bold;
+        cursor: pointer;
+        text-decoration: underline;
+    }
     .not-selected {
         cursor: pointer;
         text-decoration: underline;
+    }
+    .caption {
+        cursor: pointer;
+        text-decoration: underline;
+    }
+    .tooltip .tooltiptext {
+        visibility: hidden;
+        width: 420px;
+        background-color: lightgray;
+        color: black;
+
+        bottom: 100%;
+        left: 100%;
+        /*margin-left: -60px;*/
+
+        /* Position the tooltip */
+        position: absolute;
+        z-index: 1;
+    }
+
+    .tooltip:hover .tooltiptext {
+        visibility: visible;
     }
 </style>

@@ -1,6 +1,11 @@
 <template>
     <div>
         <div class="tool-title">
+            Conformance Testing
+        </div>
+        <br />
+        <div class="left bold">
+            Test Collection:
             <span>{{ clean(testCollection) }}</span>
             <span class="divider"></span>
             <img id="reload" class="selectable" @click="reload()" src="../../assets/reload.png"/>

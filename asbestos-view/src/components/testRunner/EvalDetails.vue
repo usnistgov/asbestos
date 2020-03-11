@@ -1,6 +1,23 @@
 <template>
-    <div>
-        <div v-if="script && report" class="script">
+    <span>
+        <span v-if="hasErrors()"><img src="../../assets/cross.png"></span>
+        <span v-else><img src="../../assets/check.png"></span>
+
+        <div class="divider"></div>
+        <div class="divider"></div>
+        <span class="has-cursor details">
+            <span @click.stop="open = !open">
+                <span v-if="caption" class="caption">
+                    {{caption}}
+                </span>
+                <span v-else class="caption">
+                    Details
+                </span>
+            </span>
+            <span v-if="open"><img src="../../assets/arrow-down.png" @click.stop="open = !open"></span>
+            <span v-else><img src="../../assets/arrow-right.png"  @click.stop="open = !open"></span>
+        </span>
+        <div v-if="script && report && open" class="script">
             <!--   add SETUP here  -->
             <div>
                 <span v-if="!noInspectLabel" class="selectable" @click.self="toggleEventDisplayed()">Inspect</span>
@@ -54,7 +71,7 @@
             <!-- add TEARDOWN here -->
 
         </div>
-    </div>
+    </span>
 </template>
 
 <script>
@@ -71,6 +88,7 @@
                 passClass: 'pass',
                 failClass: 'fail',
                 eventDisplayed: false,
+                open: false,
             }
         },
         methods: {
@@ -182,7 +200,18 @@
                     this.loadTestScript()
                     //this.loadTestReport()
                 }
-            }
+            },
+            hasErrors() {
+                const report = this.report
+                if (report) {
+                    return report.test.some(test => {
+                        return test.action.some(action => {
+                            return action.assert.result !== 'pass'
+                        })
+                    })
+                }
+                return false;
+            },
         },
         computed: {
             assertProfile() {
@@ -217,6 +246,7 @@
         },
         created() {
             this.testOrEventUpdated()
+            this.open = this.startOpen
         },
         mounted() {
 
@@ -230,7 +260,7 @@
         },
         mixins: [ errorHandlerMixin ],
         props: [
-            'sessionId', 'channelId', 'testCollection', 'testId', 'eventId', 'runEval', 'noInspectLabel',
+            'sessionId', 'channelId', 'testCollection', 'testId', 'eventId', 'runEval', 'noInspectLabel', 'startOpen', 'caption',
         ],
         components: {
             //EvalReportAssert
@@ -301,5 +331,12 @@
         border: 1px dotted black;
         cursor: pointer;
         /*font-size: larger;*/
+    }
+    .details {
+        font-size: smaller;
+    }
+    .caption {
+        text-decoration: underline;
+        cursor: pointer;
     }
 </style>

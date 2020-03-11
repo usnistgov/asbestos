@@ -3,7 +3,7 @@
         <div v-if="!selectable" class="not-available">Select FHIR Server</div>
         <div v-else>
             <div>
-                <span class="control-panel-item-title" @click="openCollection()">Test Collections</span>
+                <span class="control-panel-item-title" @click="openCollection()">Conformance Testing: Test Collections</span>
                 <img id="reload" class="selectable" @click="reload()" src="../../assets/reload.png"/>
                 <br />
             </div>

@@ -56,8 +56,24 @@
                 </span>
             </div>
 
+<!--            v-if="script.operation && script.operation.type && script.operation.type.code === 'mhd-pdb-transaction'"-->
+            <div id="pdbValidationParent">
+                <span>
+                    PDB Validations
+                </span>
+                <eval-details
+                        ref="pdbValidation"
+                        :session-id="sessionId"
+                        :channel-id="channelId"
+                        :event-id="eventId"
+                        :test-id="'bundle_eval'"
+                        :test-collection="'Internal'"
+                        :run-eval="true"
+                        :no-inspect-label="true"></eval-details>
+            </div>
+
             <div>
-                <span class="selectable" @click="toggleScriptDisplayed()">Test Script/Report</span>
+                <span class="selectable" @click="toggleScriptDisplayed()">Test Script & Report</span>
                 <span v-if="displayScript">
                     <img src="../../assets/arrow-down.png" @click="toggleScriptDisplayed()">
                     <script-display
@@ -70,7 +86,7 @@
                 </span>
             </div>
             <div>
-                <span class="selectable" @click="toggleDetailsDisplayed()">Details</span>
+                <span class="selectable" @click="toggleDetailsDisplayed()">Test Report Context</span>
                 <span v-if="displayDetails">
                     <img src="../../assets/arrow-down.png" @click="toggleDetailsDisplayed()">
                    <vue-markdown>{{message}}</vue-markdown>
@@ -84,9 +100,11 @@
 </template>
 
 <script>
+    import Vue from 'vue'
     import LogItem from "../logViewer/LogItem"
     import ScriptDisplay from "./ScriptDisplay"
     import VueMarkdown from 'vue-markdown'
+    import EvalDetails from "./EvalDetails";
     export default {
         data() {
             return {
@@ -129,6 +147,13 @@
             toggleMessageDisplay() {
                 this.displayMessage = !this.displayMessage
             },
+            pdbOK() {
+                const parent = new Vue({e1: '#pdbValidationParent'})
+                const  evalDetails = parent.$refs.pdbValidation
+                if (evalDetails)
+                    return !evalDetails.hasErrors()
+                return true
+            },
         },
         computed: {
             message() {
@@ -156,7 +181,7 @@
                 if (!this.report) return false
                 const part = this.report.operation ? this.report.operation : this.report.assert
                 if (!part) return false
-                return part.result === 'pass'
+                return part.result === 'pass' && this.pdbOK()
             },
             isError() {
                 if (!this.report) return false
@@ -208,7 +233,8 @@
         components: {
             ScriptDisplay,
             LogItem,
-            VueMarkdown
+            VueMarkdown,
+            EvalDetails,
         },
         name: "TestReportAction"
     }
@@ -249,5 +275,26 @@
         cursor: pointer;
         border-radius: 25px;
     }
+    .caption {
+        text-decoration: underline;
+        cursor: pointer;
+    }
+    .tooltip .tooltiptext {
+        visibility: hidden;
+        width: 120px;
+        background-color: blue;
+        color: #fff;
 
+        bottom: 100%;
+        left: 50%;
+        margin-left: -60px;
+
+        /* Position the tooltip */
+        position: absolute;
+        z-index: 1;
+    }
+
+    .tooltip:hover .tooltiptext {
+        visibility: visible;
+    }
 </style>

@@ -1,13 +1,6 @@
 <template>
     <div>
-        <div class="control-panel-item-title" @click="manage()">Channels</div>
-<!--        <div>-->
-<!--            <span class="selectable" @click="manage()">Config</span>-->
-            &nbsp;
-<!--            <span class="selectable" @click="showId()">List by ID</span>-->
-<!--            &nbsp;-->
-<!--            <span class="selectable" @click="showAddr()">List by URL</span>-->
-<!--        </div>-->
+        <div class="control-panel-item-title" @click="manage()">Channels (target systems)</div>
         <select v-model="channel" size="10" class="control-panel-font">
             <option v-for="(chann, channeli) in channelIds"
                     v-bind:value="getChannelIdByText(chann)"

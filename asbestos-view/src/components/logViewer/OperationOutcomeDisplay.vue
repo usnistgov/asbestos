@@ -1,6 +1,6 @@
 <template>
     <span>
-         <div class="divider"></div>
+        <div class="divider"></div>
         <div class="divider"></div>
         <span class="has-cursor details">
             <span @click.stop="open = !open">Details</span>
