@@ -222,8 +222,15 @@ public class TestEngine  {
     private void initWorkflow() {
         if (testScript == null)
             testScript = loadTestScript(testDef);
-        testReport.setName(testScript.getName());
-        testReport.setTestScript(new Reference(testScript.getId()));
+        String path = testScript.getName();
+        String name = "";
+        if (path.contains("/")) {
+            String[] parts = path.split("/");
+            name = parts[parts.length - 2];  // testId
+        } else
+            name = path;
+        testReport.setName(name);
+        testReport.setTestScript(new Reference(testDef.toString()));
         testReport.setIssued(new Date());
         TestReport.TestReportParticipantComponent part = testReport.addParticipant();
         part.setType(TestReport.TestReportParticipantType.SERVER);

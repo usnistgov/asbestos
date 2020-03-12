@@ -1,57 +1,54 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
-import {ENGINE, LOG} from '../common/http-common'
-import {FHIRTOOLKITBASEURL} from "../common/http-common";
+import {ENGINE} from '../common/http-common'
+//import {FHIRTOOLKITBASEURL} from "../common/http-common";
 
 Vue.use(Vuex)
 
 export const testRunnerStore = {
     state() {
         return {
+            // testCollections (for listings in control panel)
+            // loaded by action loadTestCollectionNames
             clientTestCollectionNames: [],
             serverTestCollectionNames: [],
+            testCollectionsLoaded: false,  // used as a startup heartbeat for test engine
+
+            // Only one testCollection is loaded at any time
             currentTestCollectionName: null,
+
             testScriptNames: [],
+            requiredChannel: null,   // applies to entire testCollection
+            isClientTest: false,  // applies to entire testCollection
+            collectionDescription: null,
+
+            testScripts: {}, // testId => TestScript
+
+
             testReportNames: [],
 
             currentTest: null,  // testId
             currentEvent: null,  // eventId
             currentAssertIndex: null,
-            isClientTest: false,  // applies to entire testCollection
-            requiredChannel: null,   // applies to entire testCollection
-            collectionDescription: null,
-            waitingOnClient: null, // testId waiting on or null
+//            waitingOnClient: null, // testId waiting on or null
 
-            testScripts: [], // testId => TestScript
-            testReports: [], // testId => TestReport
+            testReports: {}, // testId => TestReport
 
             // client eval control
             lastMarker: null,    // evaluate events since OR
             eventEvalCount: 0,   // number of most recent events to evaluate
 
             clientTestResult: [], // { testId: { eventId: TestReport } }
-            currentChannelBaseAddr: `${FHIRTOOLKITBASEURL}/`,
+//            currentChannelBaseAddr: `${FHIRTOOLKITBASEURL}/`,
             testAssertions: null,
-            testCollectionsLoaded: false,
-            hapiIsAlive: false,
-            hapiDetails: null,
-            xdsIsAlive: false,
-            xdsDetails: null,
+            debug: null,
         }
     },
     mutations: {
-        setHapiIsAlive(state, value) {
-            state.hapiIsAlive = value
+        setDebugValue(state, value) {
+            state.debug = value
         },
-        setHapiDetails(state, value) {
-            state.hapiDetails = value
-        },
-        setXdsIsAlive(state, value) {
-            state.xdsIsAlive = value
-        },
-        setXdsDetails(state, value) {
-            state.xdsDetails = value
-        },
+        // Test Script listing
         setRequiredChannel(state, channel) {
             state.requiredChannel = channel
         },
@@ -105,9 +102,8 @@ export const testRunnerStore = {
         clearTestScripts(state) {
             state.testScripts = []
         },
-        addTestScript(state, scriptObject) {
-            // scriptObject is  { name: testId, script: TestScript }
-            Vue.set(state.testScripts,scriptObject.name, scriptObject.script)
+        setTestScripts(state, scripts) {
+            state.testScripts = scripts
         },
         setTestCollectionName(state, name) {
             state.currentTestCollectionName = name
@@ -173,78 +169,24 @@ export const testRunnerStore = {
                     commit('setError', url + ': ' + error)
                 })
         },
-        loadLastMarker({commit, rootState}) {
-            const uri = `marker/${rootState.base.session}/${rootState.base.channelId}`
-            LOG.get(uri)
-                .then(response => {
-                    const value = response.data === '' ? 'None' : response.data
-                    commit('setLastMarker', value)
-                })
-                .catch(function (error) {
-                    commit('setError', uri + ': ' + error)
-                })
-        },
-        setMarker({commit, rootState}) {
-            const url  = `marker/${rootState.base.session}/${rootState.base.channelId}`
-            LOG.post(url)
-                .then(response => {
-                    const value = response.data === '' ? 'None' : response.data
-                    commit('setLastMarker', value)
-                })
-                .catch(function (error) {
-                    commit('setError', url + ': ' + error)
-                })
-        },
-        loadTestScript({commit}, payload ) {
-            const testCollection = payload.testCollection
-            const testId = payload.testId
-            const url = `collection/${testCollection}/${testId}`
-                return ENGINE.get(url)
-                    .then(response => {
-                        commit('addTestScript', {name: testId, script: response.data})
+        // expect currentTestCollectionName to be set
+        loadTestScripts({commit, state}, scriptNames) {
+            commit('clearTestScripts')
+            const promises = []
+            scriptNames.forEach(name => {
+                const url = `testScript/${state.currentTestCollectionName}/${name}`
+                const promise = ENGINE.get(url)
+                promises.push(promise)
+            })
+            const scripts = {}
+            return Promise.all(promises)
+                .then(results => {
+                    results.forEach(result => {
+                        const script = result.data
+                        scripts[script.name] = script
                     })
-                    .catch(function (error) {
-                        commit('setError', url + ': ' + error)
-                    })
-        },
-        loadTestCollectionNames({commit}) {
-            const url = `collections`
-            ENGINE.get(url)
-                .then(response => {
-                    commit('testCollectionsLoaded')
-                    let clientTestNames = []
-                    let serverTestNames = []
-                    response.data.forEach(collection => {
-                        if (!collection.hidden) {
-                            if (collection.server)
-                                serverTestNames.push(collection.name)
-                            else
-                                clientTestNames.push(collection.name)
-                        }
-                    })
-                    commit('setClientTestCollectionNames', clientTestNames.sort())
-                    commit('setServerTestCollectionNames', serverTestNames.sort())
+                    commit('setTestScripts', scripts)
                 })
-                .catch(function (error) {
-                    this.$store.commit('setError', url + ': ' +  error)
-                })
-        },
-        async loadTestScriptNames({commit, state}) {
-//            console.log(`loadTestScriptNames`)
-            const url = `collection/${state.currentTestCollectionName}`
-            try {
-                commit('clearTestScripts')
-                const response = await ENGINE.get(url)
-                const theResponse = response.data
-                commit('setTestScriptNames', theResponse.testNames)
-                const isClient = !theResponse.isServerTest
-                commit('setRequiredChannel', theResponse.requiredChannel)
-                const description = theResponse.description
-                commit('setCollectionDescription', description)
-                commit('setIsClientTest', isClient)
-            } catch (error) {
-                commit('setError', url + ': ' + error)
-            }
         },
         loadReports({commit, rootState}, testCollectionName) {
             //commit('clearTestReports')
@@ -263,28 +205,77 @@ export const testRunnerStore = {
                     commit('setError', url + ': ' + error)
                 })
         },
-        hapiHeartbeat({commit}) {
-            const url = `hapiheartbeat`
-            ENGINE.get(url)
-                .then(response => {
-                    commit('setHapiIsAlive', response.data.responding)
-                    commit('setHapiDetails', response.data.addr)
+        // loadReports({commit, rootState}, parms) {
+        //     const testCollectionId = parms.testCollectionId
+        //     // const testId = parms.testId
+        //     // commit('clearTestReports')
+        //     // if (!rootState.base.session || !rootState.base.channelId || !testCollectionId || !testId)
+        //     //     return
+        //     // const promises = []
+        //     // state.testScriptNames.forEach(testId => {
+        //     //     const url = `testlog/${rootState.base.session}__${rootState.base.channelId}/${testCollectionId}/${testId}`
+        //     //     promises.push(ENGINE.get(url))
+        //     // })
+        //     // const reports = {}
+        //     // return Promise.all(promises)
+        //     //     .then(results => {
+        //     //         results.forEach(result => {
+        //     //
+        //     //         })
+        //     //     })
+        //
+        //
+        //     const url = `testlog/${rootState.base.session}__${rootState.base.channelId}/${testCollectionId}`
+        //     ENGINE.get(url)
+        //         .then(response => {
+        //             let reports = []
+        //             for (const reportName of Object.keys(response.data)) {
+        //                 reports[reportName] = response.data[reportName]
+        //             }
+        //             commit('setTestReports', reports)
+        //         })
+        //         .catch(function (error) {
+        //             commit('setError', url + ': ' + error)
+        //         })
+        // },
+        async loadTestCollectionNames({commit}) {
+            const url = `collections`
+            try {
+                const response = await ENGINE.get(url)
+                commit('testCollectionsLoaded')  // startup heartbeat for test engine
+                let clientTestNames = []
+                let serverTestNames = []
+                response.data.forEach(collection => {
+                    if (!collection.hidden) {
+                        if (collection.server)
+                            serverTestNames.push(collection.name)
+                        else
+                            clientTestNames.push(collection.name)
+                    }
                 })
-                .catch (() => {
-                    commit('setHapiIsAlive', false)
-                })
+                commit('setClientTestCollectionNames', clientTestNames.sort())
+                commit('setServerTestCollectionNames', serverTestNames.sort())
+            } catch (error) {
+                this.$store.commit('setError', url + ': ' +  error)
+            }
         },
-        xdsHeartbeat({commit}) {
-            const url = `xdsheartbeat`
-            ENGINE.get(url)
-                .then(response => {
-                    commit('setXdsIsAlive', response.data.responding)
-                    commit('setXdsDetails', response.data.addr)
-                })
-                .catch (() => {
-                    commit('setXdsIsAlive', false)
-                })
-        }
+        async loadCurrentTestCollection({commit, state}) {
+            const url = `collection/${state.currentTestCollectionName}`
+            try {
+                commit('clearTestScripts')  // clears testScripts
+                const response = await ENGINE.get(url)
+                const theResponse = response.data
+                commit('setTestScriptNames', theResponse.testNames)  // sets testScriptNames
+                const isClient = !theResponse.isServerTest
+                commit('setRequiredChannel', theResponse.requiredChannel)  // sets requiredChannel
+                const description = theResponse.description
+                commit('setCollectionDescription', description)  // sets collectionDescription
+                commit('setIsClientTest', isClient)   // sets isClientTest
+            } catch (error) {
+                commit('setError', url + ': ' + error)
+            }
+        },
+
 
     }
 

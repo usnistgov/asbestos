@@ -32,7 +32,7 @@
             <img src="../../assets/cross.png">
             Test Engine is <b>not</b> responding at {{testEngineBase()}}
         </div>
-        <div v-if="$store.state.testRunner.hapiIsAlive">
+        <div v-if="$store.state.heartbeat.hapiIsAlive">
             <img src="../../assets/check.png">
             HAPI server is responding at {{$store.state.testRunner.hapiDetails}}
         </div>
@@ -40,7 +40,7 @@
             <img src="../../assets/cross.png">
             HAPI server is <b>not</b> responding at {{$store.state.testRunner.hapiDetails}}
         </div>
-        <div v-if="$store.state.testRunner.xdsIsAlive">
+        <div v-if="$store.state.heartbeat.xdsIsAlive">
             <img src="../../assets/check.png">
             XDS Toolkit is responding at {{$store.state.testRunner.xdsDetails}}
         </div>

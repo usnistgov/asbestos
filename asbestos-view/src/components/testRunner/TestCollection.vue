@@ -189,7 +189,7 @@
                 this.running = true
                 await this.runner(testName)
                 this.running = false
-                await this.$store.dispatch('loadTestScriptNames')  // force reload of UI
+                await this.$store.dispatch('loadCurrentTestCollection')  // force reload of UI
             },
             async doRunAll()  {
                 if (!this.status)
@@ -205,7 +205,7 @@
                     //await this.runner(name)
                 }
                 this.running = false
-                await this.$store.dispatch('loadTestScriptNames')  // force reload of UI
+                await this.$store.dispatch('loadCurrentTestCollection')  // force reload of UI
             },
             selectTest(name) {
                 if (!name)
@@ -223,7 +223,7 @@
             async reload() {
 //                console.log(`reload ${this.testCollection}`)
                this.$store.commit('setTestCollectionName', this.testCollection)
-                await this.$store.dispatch('loadTestScriptNames')
+                await this.$store.dispatch('loadCurrentTestCollection')
                 this.testScriptNamesUpdated()
                 const requiredChannel = this.$store.state.testRunner.requiredChannel
                 if (requiredChannel) {

@@ -65,7 +65,6 @@
 </template>
 
 <script>
-    import {ENGINE} from '../../common/http-common'
     import errorHandlerMixin from '../../mixins/errorHandlerMixin'
     import TestReportAction from './TestReportAction'
 
@@ -113,20 +112,9 @@
             assertionDescription(assert) {
                 return assert.description === undefined ? "" : assert.description
             },
-            loadTestScript() {
-                if (this.$store.state.testRunner.testScripts[this.testId] === undefined) {
-                    const that = this
-                    ENGINE.get(`collection/${this.testCollection}/${this.testId}`)
-                        .then(response => {
-                            this.$store.commit('addTestScript', {name: this.testId, script: response.data})
-                            this.script = response.data
-                        })
-                        .catch(function (error) {
-                            that.error(error)
-                        })
-                } else {
-                    this.script = this.$store.state.testRunner.testScripts[this.testId]
-                }
+            async loadTestScript() {
+                await this.$store.dispatch('loadTestScripts', this.$store.state.testRunner.testScriptNames)
+                this.script = this.$store.state.testRunner.testScripts[this.testId]
             },
             loadTestReport() {
                 this.report = this.$store.state.testRunner.testReports[this.testId]
