@@ -181,19 +181,24 @@
                 await this.$store.dispatch('loadReports', this.testCollection)
                 await this.loadTestScript()
             },
-            runSingleEventEval() {
-                this.$store.dispatch('runSingleEventEval',
-                    {
-                        testId: this.testId,
-                        eventId: this.eventId,
-                        testCollectionName: this.testCollection
-                    })
-            },
+            // runSingleEventEval() {
+            //     this.$store.dispatch('runSingleEventEval',
+            //         {
+            //             testId: this.testId,
+            //             eventId: this.eventId,
+            //             testCollectionName: this.testCollection
+            //         })
+            // },
             async testOrEventUpdated() {
                 if (this.runEval) {
                     if (!this.$store.state.testRunner.testAssertions)
-                        this.$store.dispatch('loadTestAssertions')
-                    await this.runSingleEventEval()
+                        await this.$store.dispatch('loadTestAssertions')
+                    await this.$store.dispatch('runSingleEventEval',
+                        {
+                            testId: this.testId,
+                            eventId: this.eventId,
+                            testCollectionName: this.testCollection
+                        })
                     await this.loadTestScript()
                 } else {
                     await this.loadReports()
@@ -202,15 +207,15 @@
                 }
             },
             hasErrors() {
-                const report = this.report
-                if (report) {
-                    return report.test.some(test => {
-                        return test.action.some(action => {
-                            return action.assert.result !== 'pass'
+                if (!this.$store.state.testRunner.testReports[this.testId]) {
+                    this.$store.dispatch('runSingleEventEval',
+                        {
+                            testId: this.testId,
+                            eventId: this.eventId,
+                            testCollectionName: this.testCollection
                         })
-                    })
                 }
-                return false;
+                return this.$store.getters.clientTestHasErrors(this.testId)
             },
         },
         computed: {

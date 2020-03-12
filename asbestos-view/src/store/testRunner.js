@@ -24,12 +24,12 @@ export const testRunnerStore = {
 
             testScripts: [], // testId => TestScript
             testReports: [], // testId => TestReport
+            clientTestResult: [], // { testId: { eventId: TestReport } }
 
             // client eval control
             lastMarker: null,    // evaluate events since OR
             eventEvalCount: 0,   // number of most recent events to evaluate
 
-            clientTestResult: [], // { testId: { eventId: TestReport } }
             currentChannelBaseAddr: `${FHIRTOOLKITBASEURL}/`,
             testAssertions: null,
             testCollectionsLoaded: false,
@@ -125,6 +125,16 @@ export const testRunnerStore = {
     getters: {
         testReportNames(state) {
             return Object.keys(state.testReports).sort()
+        },
+        clientTestHasErrors: (state) => (testId) => {
+            const report = state.testReports[testId]
+            if (!report)
+                return false
+            return report.test.some(test => {
+                return test.action.some(action => {
+                    return action.assert.result !== 'pass'
+                })
+            })
         }
     },
     actions: {
@@ -176,20 +186,19 @@ export const testRunnerStore = {
                     commit('setError', url + ': ' + error)
                 })
         },
-        runSingleEventEval({commit, rootState}, parms) {
+        async runSingleEventEval({commit, rootState}, parms) {
             const testId = parms.testId
             const eventId = parms.eventId
             const testCollectionName = parms.testCollectionName
             const url = `clienteventeval/${rootState.base.session}__${rootState.base.channelId}/${testCollectionName}/${testId}/${eventId}`
-            ENGINE.get(url)
-                .then(response => {
-                    const results = response.data
-                    commit('setClientTestResult', { testId: testId, result: results[testId] } )
-                    commit('setTestReport', { testName: testId, testReport: results[testId][eventId] } )
-                })
-                .catch(function (error) {
-                    commit('setError', url + ': ' + error)
-                })
+            try {
+                const response = await ENGINE.get(url)
+                const results = response.data
+                commit('setClientTestResult', { testId: testId, result: results[testId] } )
+                commit('setTestReport', { testName: testId, testReport: results[testId][eventId] } )
+            } catch (error) {
+                commit('setError', url + ': ' + error)
+            }
         },
         loadLastMarker({commit, rootState}) {
             const uri = `marker/${rootState.base.session}/${rootState.base.channelId}`

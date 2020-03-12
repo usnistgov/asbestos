@@ -100,7 +100,6 @@
 </template>
 
 <script>
-    import Vue from 'vue'
     import LogItem from "../logViewer/LogItem"
     import ScriptDisplay from "./ScriptDisplay"
     import VueMarkdown from 'vue-markdown'
@@ -147,13 +146,6 @@
             toggleMessageDisplay() {
                 this.displayMessage = !this.displayMessage
             },
-            pdbOK() {
-                const parent = new Vue({e1: '#pdbValidationParent'})
-                const  evalDetails = parent.$refs.pdbValidation
-                if (evalDetails)
-                    return !evalDetails.hasErrors()
-                return true
-            },
         },
         computed: {
             message() {
@@ -181,7 +173,7 @@
                 if (!this.report) return false
                 const part = this.report.operation ? this.report.operation : this.report.assert
                 if (!part) return false
-                return part.result === 'pass' && this.pdbOK()
+                return part.result === 'pass' && !this.pdbHasErrors
             },
             isError() {
                 if (!this.report) return false
@@ -193,7 +185,7 @@
                 if (!this.report) return false
                 const part = this.report.operation ? this.report.operation : this.report.assert
                 if (!part) return false
-                return part.result === 'fail'
+                return part.result === 'fail' || this.pdbHasErrors
             },
             isNotRun() {
                 if (!this.report) return true
@@ -211,6 +203,18 @@
             },
             description() {
                 return this.script.operation ? this.script.operation.description : this.script.assert.description
+            },
+            pdbHasErrors() {
+                return false;
+                // if (!this.script || !this.report) return false
+                // const isPDB = this.script.operation && this.script.operation.type.code === 'mhd-pdb-transaction'
+                // if (!isPDB) return false
+                // this.$store.dispatch('runSingleEventEval', {
+                //     testId: 'bundle_eval',
+                //     eventId: this.eventId,
+                //     testCollectionName: 'Internal'
+                // })
+                // return this.$store.getters.clientTestHasErrors('bundle_eval')
             },
         },
         created() {
