@@ -23,6 +23,7 @@ export const testRunnerStore = {
             collectionDescription: null,
 
             testScripts: {}, // testId => TestScript
+            testReports: {}, // testId => TestReport
 
 
             testReportNames: [],
@@ -32,7 +33,6 @@ export const testRunnerStore = {
             currentAssertIndex: null,
 //            waitingOnClient: null, // testId waiting on or null
 
-            testReports: {}, // testId => TestReport
 
             // client eval control
             lastMarker: null,    // evaluate events since OR
@@ -45,7 +45,7 @@ export const testRunnerStore = {
         }
     },
     mutations: {
-        setDebugValue(state, value) {
+        setDebug(state, value) {
             state.debug = value
         },
         // Test Script listing
@@ -89,18 +89,20 @@ export const testRunnerStore = {
             state.currentAssertIndex = index
         },
         clearTestReports(state) {
-            state.testReports = []
+            state.testReports = {}
+        },
+        setTestReport(state, report) {
+            state.testReports[report.name] = report
         },
         setTestReports(state, reports) {
-//            console.log(`setTestReports ${Object.keys(reports)}`)
             state.testReports = reports
         },
-        setTestReport(state, data) {
-//            console.log(`setTestReport ${data.testName}`)
-            Vue.set(state.testReports, data.testName, data.testReport)
-        },
         clearTestScripts(state) {
-            state.testScripts = []
+            state.testScripts = {}
+        },
+        setTestScript(state, script) {
+            console.log(`in commit: script=${script} name=${script.name}`)
+            state.testScripts[script.name] = script
         },
         setTestScripts(state, scripts) {
             state.testScripts = scripts
@@ -169,7 +171,6 @@ export const testRunnerStore = {
                     commit('setError', url + ': ' + error)
                 })
         },
-        // expect currentTestCollectionName to be set
         loadTestScripts({commit, state}, scriptNames) {
             commit('clearTestScripts')
             const promises = []
@@ -188,56 +189,53 @@ export const testRunnerStore = {
                     commit('setTestScripts', scripts)
                 })
         },
-        loadReports({commit, rootState}, testCollectionName) {
-            //commit('clearTestReports')
-            if (!rootState.base.session || !rootState.base.channelId || !testCollectionName)
-                return
-            const url = `testlog/${rootState.base.session}__${rootState.base.channelId}/${testCollectionName}`
-            ENGINE.get(url)
-                .then(response => {
-                    let reports = []
-                    for (const reportName of Object.keys(response.data)) {
-                        reports[reportName] = response.data[reportName]
-                    }
+        async loadTestReports({commit, rootState, state}, testCollectionId) {
+            commit('clearTestReports')
+            const promises = []
+            state.testScriptNames.forEach(name => {
+                const url = `testReport/${rootState.base.session}__${rootState.base.channelId}/${testCollectionId}/${name}`
+                const promise = ENGINE.get(url)
+                promises.push(promise)
+            })
+            const reports = {}
+            const combinedPromises = Promise.all(promises)
+                .then(results => {
+                    results.forEach(result => {
+                        const report = result.data
+                        reports[report.name] = report
+                    })
                     commit('setTestReports', reports)
                 })
-                .catch(function (error) {
-                    commit('setError', url + ': ' + error)
-                })
+            await combinedPromises
+            return reports
         },
-        // loadReports({commit, rootState}, parms) {
-        //     const testCollectionId = parms.testCollectionId
-        //     // const testId = parms.testId
-        //     // commit('clearTestReports')
-        //     // if (!rootState.base.session || !rootState.base.channelId || !testCollectionId || !testId)
-        //     //     return
-        //     // const promises = []
-        //     // state.testScriptNames.forEach(testId => {
-        //     //     const url = `testlog/${rootState.base.session}__${rootState.base.channelId}/${testCollectionId}/${testId}`
-        //     //     promises.push(ENGINE.get(url))
-        //     // })
-        //     // const reports = {}
-        //     // return Promise.all(promises)
-        //     //     .then(results => {
-        //     //         results.forEach(result => {
-        //     //
-        //     //         })
-        //     //     })
-        //
-        //
-        //     const url = `testlog/${rootState.base.session}__${rootState.base.channelId}/${testCollectionId}`
-        //     ENGINE.get(url)
-        //         .then(response => {
-        //             let reports = []
-        //             for (const reportName of Object.keys(response.data)) {
-        //                 reports[reportName] = response.data[reportName]
-        //             }
-        //             commit('setTestReports', reports)
-        //         })
-        //         .catch(function (error) {
-        //             commit('setError', url + ': ' + error)
-        //         })
-        // },
+        async loadTestScript({commit}, parms) {
+            const testCollectionId = parms.testCollectionId
+            const testId = parms.testId
+            const url = `testScript/${testCollectionId}/${testId}`
+            let script = ""
+            const promise = ENGINE.get(url)
+            promise.then(result => {
+                script = result.data
+            })
+            await promise
+            commit('setDebug', script)
+            commit('setTestScript', script)
+            return script
+        },
+        async loadTestReport({commit, rootState}, parms) {
+            const testCollectionId = parms.testCollectionId
+            const testId = parms.testId
+            const url = `testReport/${rootState.base.session}__${rootState.base.channelId}/${testCollectionId}/${testId}`
+            let report = ""
+            const promise = ENGINE.get(url)
+            promise.then(result => {
+                    report = result.data
+                })
+            await promise
+            commit('setTestReport', report)
+            return report
+        },
         async loadTestCollectionNames({commit}) {
             const url = `collections`
             try {
@@ -263,9 +261,14 @@ export const testRunnerStore = {
             const url = `collection/${state.currentTestCollectionName}`
             try {
                 commit('clearTestScripts')  // clears testScripts
-                const response = await ENGINE.get(url)
-                const theResponse = response.data
+                let theResponse = ""
+                const promise = ENGINE.get(url)
+                    .then(response => {
+                        theResponse = response.data
+                })
+                await promise
                 commit('setTestScriptNames', theResponse.testNames)  // sets testScriptNames
+                console.log(`setTestScriptNames`)
                 const isClient = !theResponse.isServerTest
                 commit('setRequiredChannel', theResponse.requiredChannel)  // sets requiredChannel
                 const description = theResponse.description

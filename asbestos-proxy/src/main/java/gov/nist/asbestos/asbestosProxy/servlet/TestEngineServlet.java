@@ -44,7 +44,7 @@ public class TestEngineServlet extends HttpServlet {
             else if (GetTestCollectionRequest.isRequest(request)) new GetTestCollectionRequest(request).run();
             else if (GetTestScriptRequest.isRequest(request)) new GetTestScriptRequest(request).run();
             else if (GetTestLogsRequest.isRequest(request)) new GetTestLogsRequest(request).run();
-            else if (GetTestLogRequest.isRequest(request)) new GetTestLogRequest(request).run();
+            else if (GetTestReportRequest.isRequest(request)) new GetTestReportRequest(request).run();
             else if (GetClientTestEvalRequest.isRequest(request)) new GetClientTestEvalRequest(request).run();
             else if (GetClientEventEvalRequest.isRequest(request)) new GetClientEventEvalRequest(request).run();
             else if (HapiHeartbeat.isRequest(request)) new HapiHeartbeat(request).run();

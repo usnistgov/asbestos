@@ -221,25 +221,21 @@
                 this.$router.push(route)
             },
             async reload() {
-//                console.log(`reload ${this.testCollection}`)
-               this.$store.commit('setTestCollectionName', this.testCollection)
+                this.$store.commit('setTestCollectionName', this.testCollection)
                 await this.$store.dispatch('loadCurrentTestCollection')
                 this.testScriptNamesUpdated()
                 const requiredChannel = this.$store.state.testRunner.requiredChannel
                 if (requiredChannel) {
                     this.$store.commit('setChannelId', requiredChannel)
                 }
-                // console.log(`loading ${this.fullChannelId}`)
                 this.$store.dispatch('loadChannel', this.fullChannelId)
                     .then(channel => {
                         this.channelObj = channel
                     })
-                //this.$router.push(`/session/${this.sessionId}/channel/${this.$store.state.base.channelId}/collection/${this.testCollection}`)
-                if (this.isClient)
-                    this.evalStatus()
-                else
-                    this.updateReportStatuses()
-//                console.log(`reload done`)
+                console.log(`using testScriptNames`)
+                // these are ok left as async - don't need an await
+                this.$store.dispatch('loadTestScripts', this.$store.state.testRunner.testScriptNames)
+                this.$store.dispatch('loadTestReports', this.$store.state.testRunner.currentTestCollectionName)
             },
             testReport(testName) {
                 if (!testName)
@@ -310,7 +306,7 @@
             },
             async testScriptNamesUpdated() {
 //                console.log(`test names updated`)
-                await this.$store.dispatch('loadReports', this.$store.state.testRunner.currentTestCollectionName)
+                await this.$store.dispatch('loadTestReports', this.$store.state.testRunner.currentTestCollectionName)
 //                console.log(`reports loaded`)
 
                 if (this.isClient) {
