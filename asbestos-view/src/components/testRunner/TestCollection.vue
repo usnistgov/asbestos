@@ -110,7 +110,7 @@
                                 <img src="../../assets/press-play-button.png" class="right" @click.stop="doRun(name)">
                             </div>
 
-                            Test: {{ clean(name) }}
+                            Script: {{ clean(name) }}
                             <span v-if="!$store.state.testRunner.isClientTest"> --  {{ time[name] }}</span>
                         </div>
                     </div>
@@ -232,7 +232,6 @@
                     .then(channel => {
                         this.channelObj = channel
                     })
-                console.log(`using testScriptNames`)
                 // these are ok left as async - don't need an await
                 this.$store.dispatch('loadTestScripts', this.$store.state.testRunner.testScriptNames)
                 this.$store.dispatch('loadTestReports', this.$store.state.testRunner.currentTestCollectionName)
@@ -270,48 +269,9 @@
                 this.time  = []
                 return status
             },
-            evalStatus() {
-                // console.log(`running evalStatus`)
-                // if (!this.isClient)
-                //     return
-                // let status=[]
-                // this.testScriptNames.forEach(testId => {
-                //     const eventResult = this.$store.state.testRunner.clientTestResult[testId]
-                //     if (!eventResult) {
-                //         status[testId] = 'not-run'
-                //     } else {
-                //         status[testId] = this.hasSuccessfulEvent(testId) ? 'pass' : 'fail'
-                //     }
-                // })
-                // this.status = status
-                // this.time  = []
-                // console.log(`eval status done`)
-            },
-            updateReportStatuses() {   // for server tests (and client tests too?)
-                // if (this.isClient)
-                //     return
-                // console.log(`updateReportStatues`)
-                // let status = []
-                // let time = []
-                // this.testScriptNames.forEach(testName => {
-                //     if (this.testReport(testName) === undefined) {
-                //         status[testName] = 'not-run'
-                //     } else {
-                //         status[testName] = this.testReport(testName).result  // 'pass', 'fail', 'error'
-                //         time[testName] = this.testReport(testName).issued
-                //     }
-                // })
-                // this.status = status
-                // this.time = time
-            },
             async testScriptNamesUpdated() {
-//                console.log(`test names updated`)
-                await this.$store.dispatch('loadTestReports', this.$store.state.testRunner.currentTestCollectionName)
-//                console.log(`reports loaded`)
-
                 if (this.isClient) {
                     return this.$store.state.testRunner.testScriptNames.forEach(name => {
-//                        console.log(`eval ${name}`)
                         this.doEval(name)
                     })
                 }
@@ -329,14 +289,6 @@
             },
             clientBaseAddress() { // for client tests
                 return `${this.$store.state.base.proxyBase}/${this.sessionId}__${this.channelId}`
-                // const channelId = this.$store.state.base.channelId
-                // const channelIndex = this.$store.state.base.channelURLs.findIndex(chanURL => {
-                //     return chanURL.id === channelId
-                // })
-                // const channelURL = this.$store.state.base.channelURLs[channelIndex]
-                // const xdsSite = channelURL.site
-                // const fhirURL = channelURL.url
-                // return xdsSite ? `XDS ${xdsSite} sim` : fhirURL
             },
             isClient() {
                 return this.$store.state.testRunner.isClientTest
@@ -386,9 +338,9 @@
                 if (this.channel !== newVal)
                     this.channel = newVal
             },
-           '$store.state.testRunner.testScriptNames' : 'testScriptNamesUpdated',
-           '$store.state.testRunner.testReports': 'updateReportStatuses',
-           '$store.state.testRunner.clientTestResult':'evalStatus'
+           //'$store.state.testRunner.testScriptNames' : 'testScriptNamesUpdated',
+           //'$store.state.testRunner.testReports': 'updateReportStatuses',
+           //'$store.state.testRunner.clientTestResult':'evalStatus'
         },
         mixins: [ errorHandlerMixin ],
         name: "TestCollection",

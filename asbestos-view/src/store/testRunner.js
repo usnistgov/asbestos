@@ -35,10 +35,9 @@ export const testRunnerStore = {
 
 
             // client eval control
-            lastMarker: null,    // evaluate events since OR
             eventEvalCount: 0,   // number of most recent events to evaluate
 
-            clientTestResult: [], // { testId: { eventId: TestReport } }
+            clientTestResult: {}, // { testId: { eventId: TestReport } }
 //            currentChannelBaseAddr: `${FHIRTOOLKITBASEURL}/`,
             testAssertions: null,
             debug: null,
@@ -101,7 +100,6 @@ export const testRunnerStore = {
             state.testScripts = {}
         },
         setTestScript(state, script) {
-            console.log(`in commit: script=${script} name=${script.name}`)
             state.testScripts[script.name] = script
         },
         setTestScripts(state, scripts) {
@@ -142,14 +140,6 @@ export const testRunnerStore = {
             ENGINE.get(url)
                 .then(response => {
                     const results = response.data
-                    // const resultMap = results[testId]
-                    // console.log(`Test ${testId}: ${resultMap}`)
-                    // const events = Object.keys(resultMap)
-                    // for (const eventId of events) {
-                    //     const report = resultMap[eventId]
-                    //     console.log(`${eventId}==>${report.result}`)
-                    // }
-
                     commit('setClientTestResult', { testId: testId, result: results[testId]} )
                 })
                 .catch(function (error) {
@@ -260,7 +250,7 @@ export const testRunnerStore = {
         async loadCurrentTestCollection({commit, state}) {
             const url = `collection/${state.currentTestCollectionName}`
             try {
-                commit('clearTestScripts')  // clears testScripts
+                //commit('clearTestScripts')  // clears testScripts
                 let theResponse = ""
                 const promise = ENGINE.get(url)
                     .then(response => {
@@ -268,7 +258,6 @@ export const testRunnerStore = {
                 })
                 await promise
                 commit('setTestScriptNames', theResponse.testNames)  // sets testScriptNames
-                console.log(`setTestScriptNames`)
                 const isClient = !theResponse.isServerTest
                 commit('setRequiredChannel', theResponse.requiredChannel)  // sets requiredChannel
                 const description = theResponse.description

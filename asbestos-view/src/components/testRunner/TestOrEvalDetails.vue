@@ -4,20 +4,20 @@
             <client-details :sessionId="sessionId" :channelId="channelId" :testCollection="testCollection" :testId="testId"></client-details>
         </div>
         <div v-else>
-            <test-details :sessionId="sessionId" :channelId="channelId" :testCollection="testCollection" :testId="testId"></test-details>
+            <script-details :sessionId="sessionId" :channelId="channelId" :testCollection="testCollection" :testId="testId"></script-details>
         </div>
     </div>
 </template>
 
 <script>
-    import TestDetails from './TestDetails'
+    import ScriptDetails from './ScriptDetails'
     import ClientDetails from './ClientDetails'
     export default {
         props: [
             'sessionId', 'channelId', 'testCollection', 'testId'
         ],
         components: {
-            TestDetails, ClientDetails
+            ScriptDetails, ClientDetails
         },
         mounted() {
             if (this.$store.state.testRunner.testAssertions === null)

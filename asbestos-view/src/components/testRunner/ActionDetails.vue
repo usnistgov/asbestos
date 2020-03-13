@@ -210,7 +210,7 @@
             LogItem,
             VueMarkdown
         },
-        name: "TestReportAction"
+        name: "ActionDetails"
     }
 </script>
 

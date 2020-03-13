@@ -22,10 +22,10 @@
             </div>
 
             <div v-if="!script.setup && report && report.setup">
-                <test-report-action
+                <action-details
                         :script="null"
                         :report="report.setup.action">
-                </test-report-action>
+                </action-details>
             </div>
 
 
@@ -43,17 +43,17 @@
                             </template>
                             <div v-for="(action, actioni) in test2.action" class="test-part"
                                  :key="'Test' + testi + 'Action' + actioni">
-                                <test-report-action
+                                <action-details
                                         :script="action"
-                                        :report="findContained(report, containedTestsRef(report, testi)).test[test2i].action[actioni]"> </test-report-action>
+                                        :report="findContained(report, containedTestsRef(report, testi)).test[test2i].action[actioni]"> </action-details>
                             </div>
                         </div>
                     main
                     <div v-for="(action, actioni) in actions(testi)" class="test-part"
                          :key="'Test' + testi + 'Action' + actioni">
-                        <test-report-action
+                        <action-details
                                 :script="action"
-                                :report="reportAction(report, testi, actioni)"> </test-report-action>
+                                :report="reportAction(report, testi, actioni)"> </action-details>
                     </div>
                 </div>
             </div>
@@ -66,7 +66,7 @@
 
 <script>
     import errorHandlerMixin from '../../mixins/errorHandlerMixin'
-    import TestReportAction from './TestReportAction'
+    import ActionDetails from './ActionDetails'
 
     export default {
         data() {
@@ -158,8 +158,8 @@
             },
         },
         created() {
-            this.loadTestScript()
-            this.loadTestReport()
+            this.script = this.$store.state.testRunner.testScripts[this.$store.state.testRunner.currentTest]
+            this.report = this.$store.state.testRunner.testReports[this.$store.state.testRunner.currentTest]
         },
         mounted() {
 
@@ -172,9 +172,9 @@
             'sessionId', 'channelId', 'testCollection', 'testId'
         ],
         components: {
-            TestReportAction
+            ActionDetails
         },
-        name: "TestDetails"
+        name: "ScriptDetails"
     }
 </script>
 
