@@ -1,5 +1,6 @@
 package gov.nist.asbestos.asbestosProxy.requests;
 
+import com.google.gson.Gson;
 import gov.nist.asbestos.asbestosProxy.servlet.ChannelConnector;
 import gov.nist.asbestos.sharedObjects.ChannelConfig;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -32,6 +33,10 @@ public class GetTestReportRequest {
         this.request = request;
     }
 
+    static class NoReport {
+        String value = "No Report";
+    }
+
     public void run() {
         log.info("GetTestReport");
         String channelId = request.uriParts.get(4);
@@ -46,8 +51,7 @@ public class GetTestReportRequest {
         try {
             json = new String(Files.readAllBytes(Paths.get(testLog.toString())));
         } catch (IOException e) {
-            log.error(ExceptionUtils.getStackTrace(e));
-            throw new RuntimeException(e);
+            json = new Gson().toJson(new NoReport());
         }
         Returns.returnString(request.resp, json);
         log.info("OK");

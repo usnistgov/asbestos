@@ -3,7 +3,7 @@
         <div class="tool-title">
             <span>{{ clean(testCollection) }}</span>
             <span class="divider"></span>
-            <img id="reload" class="selectable" @click="reload()" src="../../assets/reload.png"/>
+            <img id="reload" class="selectable" @click="load()" src="../../assets/reload.png"/>
             <span class="divider"></span>
         </div>
 
@@ -88,11 +88,16 @@
         </div>
 
         <div v-if="status">
-            <div v-for="(name, i) in Object.keys(status)"
+<!--            Object.keys(status)"-->
+            <div v-for="(name, i) in scriptNames"
                  :key="name + i">
                 <div >
-                    <div @click="selectTest(name)">
-                        <div v-bind:class="{ pass: status[name] === 'pass', fail: status[name] === 'fail', error: status[name] === 'error', 'not-run': status[name] === 'not-run' }">
+                    <div @click="openTest(name)">
+                        <div v-bind:class="{
+                            pass: status[name] === 'pass',
+                            fail: status[name] === 'fail',
+                            error: status[name] === 'error',
+                            'not-run': status[name] === 'not-run' }">
                             <div v-if="status[name] === 'pass'">
                                 <img src="../../assets/checked.png" class="right">
                             </div>
@@ -132,8 +137,7 @@
 
         data() {
             return {
-                //status: [],   // testId => undefined, 'pass', 'fail', 'error'
-                time: [],
+                time: [],   // built as a side-effect of status (computed)
                 evalCount: 5,
                 channelObj: null,  // channel object
                 useJson: true,
@@ -178,7 +182,8 @@
                 this.$store.commit('setCurrentTest', null)
                 try {
                     const response = await ENGINE.post(`testrun/${this.sessionId}__${this.channelId}/${this.testCollection}/${testName}?_format=${this.useJson ? 'json' : 'xml'};_gzip=${this.gzip}`)
-                    this.$store.commit('setTestReport', { testName: testName, testReport: response.data })
+                    const report = response.report
+                    this.$store.commit('setTestReport', report)
                 } catch (error) {
                     this.error(error)
                 }
@@ -187,9 +192,8 @@
                 if (!testName)
                     return
                 this.running = true
-                await this.runner(testName)
+                await this.$store.dispatch('runTest', testName)
                 this.running = false
-                await this.$store.dispatch('loadCurrentTestCollection')  // force reload of UI
             },
             async doRunAll()  {
                 if (!this.status)
@@ -205,9 +209,9 @@
                     //await this.runner(name)
                 }
                 this.running = false
-                await this.$store.dispatch('loadCurrentTestCollection')  // force reload of UI
+                await this.$store.dispatch('loadCurrentTestCollection')  // force load of UI
             },
-            selectTest(name) {
+            openTest(name) {
                 if (!name)
                     return
                 if (this.selected === name)  { // unselect
@@ -220,7 +224,7 @@
                 const route = `/session/${this.sessionId}/channel/${this.channelId}/collection/${this.testCollection}/test/${name}`
                 this.$router.push(route)
             },
-            async reload() {
+            async load() {
                 this.$store.commit('setTestCollectionName', this.testCollection)
                 await this.$store.dispatch('loadCurrentTestCollection')
                 this.testScriptNamesUpdated()
@@ -241,7 +245,7 @@
                     return null
                 return this.$store.state.testRunner.testReports[testName]
             },
-            importStatusServerTests() {
+            importStatusForServerTests() {
                 let status = []
                 let time = []
                 this.testScriptNames.forEach(testId => {
@@ -278,14 +282,15 @@
             },
             setEvalCount() {
                 this.$store.commit('setEventEvalCount', this.evalCount)
-            }
+            },
         },
         computed: {
+            // status (and time) array is computed to drive display
             status() {
                 if (this.isClient)
                     return this.importStatusClientTests()
                 else
-                    return this.importStatusServerTests()
+                    return this.importStatusForServerTests()
             },
             clientBaseAddress() { // for client tests
                 return `${this.$store.state.base.proxyBase}/${this.sessionId}__${this.channelId}`
@@ -309,6 +314,11 @@
                     return null
                 return Object.keys(reports).sort()
             },
+            scriptNames: {
+                get() {
+                    return this.$store.state.testRunner.testScriptNames
+                }
+            },
             channel: {
                 set(name) {
                     if (name !== this.$store.state.base.channelId) {
@@ -324,7 +334,7 @@
             },
         },
         created() {
-            this.reload()
+            this.load()
             this.channel = this.channelId
             this.setEvalCount()
         },

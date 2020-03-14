@@ -41,9 +41,17 @@ export const testRunnerStore = {
 //            currentChannelBaseAddr: `${FHIRTOOLKITBASEURL}/`,
             testAssertions: null,
             debug: null,
+            useJson: true,
+            useGzip: true,
         }
     },
     mutations: {
+        setUseJson(state, value) {
+            state.useJson = value;
+        },
+        setUseGzip(state, value) {
+            state.useGzip = value
+        },
         setDebug(state, value) {
             state.debug = value
         },
@@ -192,7 +200,8 @@ export const testRunnerStore = {
                 .then(results => {
                     results.forEach(result => {
                         const report = result.data
-                        reports[report.name] = report
+                        if (report.resourceType === 'TestReport')
+                            reports[report.name] = report
                     })
                     commit('setTestReports', reports)
                 })
@@ -223,8 +232,19 @@ export const testRunnerStore = {
                     report = result.data
                 })
             await promise
-            commit('setTestReport', report)
+            if (report && report.resourceType === 'TestReport')
+                commit('setTestReport', report)
             return report
+        },
+        runTest({commit, rootState, state}, testId) {
+            commit('setCurrentTest', testId)
+            const url = `testrun/${rootState.base.session}__${rootState.base.channelId}/${state.currentTestCollectionName}/${testId}?_format=${state.useJson ? 'json' : 'xml'};_gzip=${state.gzip}`
+            const promise = ENGINE.post(url)
+            promise.then(result => {
+                const report = result.data
+                commit('setTestReport', report)
+            })
+            return promise
         },
         async loadTestCollectionNames({commit}) {
             const url = `collections`

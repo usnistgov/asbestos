@@ -192,7 +192,7 @@
                 const summary = this.$store.state.log.eventSummaries[this.index]
                 if (!summary)
                     return
-                // don't reload if it is already the selected event
+                // don't load if it is already the selected event
                 const selectedEventName = summary.eventName === this.selectedEventName() ? null: summary.eventName
                 if (selectedEventName !== null) {
                     this.selectedEvent = null
