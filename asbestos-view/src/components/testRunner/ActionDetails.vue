@@ -1,8 +1,11 @@
 <template>
     <div>
-<!--        Report: {{ report }}-->
         <div v-if="script">
-            <div v-bind:class="{'not-run': isNotRun, pass : isPass, error: isError, fail: isFail}"  @click="toggleMessageDisplay()">
+            <div v-bind:class="{
+                'not-run': isNotRun,
+                pass : isPass,
+                error: isError,
+                fail: isFail}"  @click="toggleMessageDisplay()">
                 <span v-if="this.script.operation" class="name selectable">
                     {{ this.operationType(this.script.operation) }}
                 </span>
@@ -221,33 +224,4 @@
     .name {
         font-weight: bold;
     }
-    .pass {
-        background-color: lightgreen;
-        text-align: left;
-        border: 1px dotted black;
-        cursor: pointer;
-        border-radius: 25px;
-    }
-    .fail {
-        background-color: indianred;
-        text-align: left;
-        border: 1px dotted black;
-        cursor: pointer;
-        border-radius: 25px;
-    }
-    .error {
-        background-color: cornflowerblue;
-        text-align: left;
-        border: 1px dotted black;
-        cursor: pointer;
-        border-radius: 25px;
-    }
-    .not-run {
-        background-color: lightgray;
-        text-align: left;
-        border: 1px dotted black;
-        cursor: pointer;
-        border-radius: 25px;
-    }
-
 </style>

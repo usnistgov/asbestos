@@ -80,8 +80,8 @@
                 <div class="divider"></div>
             </span>
 
-            <button v-bind:class="{'button-selected': useJson, 'button-not-selected': !useJson}" @click="doJson()">JSON</button>
-            <button v-bind:class="{'button-selected': !useJson, 'button-not-selected': useJson}" @click="doXml()">XML</button>
+            <button v-bind:class="{'button-selected': json, 'button-not-selected': !json}" @click="doJson()">JSON</button>
+            <button v-bind:class="{'button-selected': !json, 'button-not-selected': json}" @click="doXml()">XML</button>
             <div class="divider"></div>
             <div class="divider"></div>
             <button class="runallbutton" @click="doRunAll()">Run All</button>
@@ -130,7 +130,6 @@
 </template>
 
 <script>
-    import {ENGINE} from '../../common/http-common'
     import errorHandlerMixin from '../../mixins/errorHandlerMixin'
 
     export default {
@@ -140,17 +139,15 @@
                 time: [],   // built as a side-effect of status (computed)
                 evalCount: 5,
                 channelObj: null,  // channel object
-                useJson: true,
                 running: false,
-                gzip: false,
             }
         },
         methods: {
             doJson() {
-                this.useJson = true
+                this.$store.commit('setUseJson', true)
             },
             doXml() {
-                this.useJson = false
+                this.$store.commit('setUseJson', false)
             },
             clean(text) {
                 if (text)
@@ -176,18 +173,6 @@
                 // ==> commits clientTestResult
                 //    ==> calls evalStatus
             },
-            async runner(testName) {
-                if (!testName)
-                    return
-                this.$store.commit('setCurrentTest', null)
-                try {
-                    const response = await ENGINE.post(`testrun/${this.sessionId}__${this.channelId}/${this.testCollection}/${testName}?_format=${this.useJson ? 'json' : 'xml'};_gzip=${this.gzip}`)
-                    const report = response.report
-                    this.$store.commit('setTestReport', report)
-                } catch (error) {
-                    this.error(error)
-                }
-            },
             async doRun(testName) {  // server tests
                 if (!testName)
                     return
@@ -196,20 +181,14 @@
                 this.running = false
             },
             async doRunAll()  {
-                if (!this.status)
-                    return
                 this.running = true
-                //for (const name of Object.keys(this.status)) {
-                for (const name of this.$store.state.testRunner.testScriptNames) {
-//                    console.log(`runAll test ${name}`)
+                for (const name of this.scriptNames) {
                     if (this.isClient)
                         await this.doEval(name)
                     else
-                        await this.runner(name)
-                    //await this.runner(name)
+                        await this.$store.dispatch('runTest', name)
                 }
                 this.running = false
-                await this.$store.dispatch('loadCurrentTestCollection')  // force load of UI
             },
             openTest(name) {
                 if (!name)
@@ -260,7 +239,7 @@
                 this.time = time
                 return status
             },
-            importStatusClientTests() {
+            importStatusForClientTests() {
                 let status=[]
                 this.testScriptNames.forEach(testId => {
                     const eventResult = this.$store.state.testRunner.clientTestResult[testId]
@@ -288,7 +267,7 @@
             // status (and time) array is computed to drive display
             status() {
                 if (this.isClient)
-                    return this.importStatusClientTests()
+                    return this.importStatusForClientTests()
                 else
                     return this.importStatusForServerTests()
             },
@@ -319,6 +298,19 @@
                     return this.$store.state.testRunner.testScriptNames
                 }
             },
+            json: {
+                get() {
+                    return this.$store.state.testRunner.useJson
+                }
+            },
+            gzip: {
+                set(use) {
+                    this.$store.commit('setUseGzip', use)
+                },
+                get() {
+                    return this.$store.state.testRunner.useGzip
+                }
+            },
             channel: {
                 set(name) {
                     if (name !== this.$store.state.base.channelId) {
@@ -343,14 +335,11 @@
         },
         watch: {
             'evalCount': 'setEvalCount',
-            'testCollection': 'reload',
+            'testCollection': 'load',
             'channelId': function(newVal) {
                 if (this.channel !== newVal)
                     this.channel = newVal
             },
-           //'$store.state.testRunner.testScriptNames' : 'testScriptNamesUpdated',
-           //'$store.state.testRunner.testReports': 'updateReportStatuses',
-           //'$store.state.testRunner.clientTestResult':'evalStatus'
         },
         mixins: [ errorHandlerMixin ],
         name: "TestCollection",
@@ -365,36 +354,8 @@
         background-color: lightgray;
         text-align: left;
     }
-    .pass {
-        background-color: lightgreen;
-        text-align: left;
-        border: 1px dotted black;
-        cursor: pointer;
-        border-radius: 25px;
-    }
     .running {
         background-color: lightgreen;
-    }
-    .fail {
-        background-color: indianred;
-        text-align: left;
-        border: 1px dotted black;
-        cursor: pointer;
-        border-radius: 25px;
-    }
-    .error {
-        background-color: cornflowerblue;
-        text-align: left;
-        border: 1px dotted black;
-        cursor: pointer;
-        border-radius: 25px;
-    }
-    .not-run {
-        background-color: lightgray;
-        text-align: left;
-        border: 1px dotted black;
-        cursor: pointer;
-        border-radius: 25px;
     }
     .button-selected {
         border: 1px solid black;
@@ -421,5 +382,35 @@
     }
     .configurationError {
         color: red;
+    }
+</style>
+<style>
+    .pass {
+        background-color: lightgreen;
+        text-align: left;
+        border: 1px dotted black;
+        cursor: pointer;
+        border-radius: 25px;
+    }
+    .fail {
+        background-color: indianred;
+        text-align: left;
+        border: 1px dotted black;
+        cursor: pointer;
+        border-radius: 25px;
+    }
+    .error {
+        background-color: cornflowerblue;
+        text-align: left;
+        border: 1px dotted black;
+        cursor: pointer;
+        border-radius: 25px;
+    }
+    .not-run {
+        background-color: lightgray;
+        text-align: left;
+        border: 1px dotted black;
+        cursor: pointer;
+        border-radius: 25px;
     }
 </style>

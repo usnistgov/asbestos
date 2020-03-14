@@ -1,6 +1,9 @@
 <template>
     <div>
         <div v-if="script" class="script">
+            <div v-if="script.description" class="script-description-margins">
+                {{ script.description }}
+            </div>
             <div v-if="displayDetail">
                 <div v-for="(fixture, i) in fixtures"
                      :key="i">
@@ -13,10 +16,7 @@
                     <span class="value">{{ variable.name }}</span>
                 </div>
             </div>
-            <!--   Setup is used for two things.
-                   1. Actual setup so there is script and report
-                   2. Deep errors and the error is reported in report.setup (with no corresponding script)
-                   -->
+
             <div v-if="script.setup && report && report.setup">
                 <!-- don't need yet -->
             </div>
@@ -31,30 +31,29 @@
 
             <div v-for="(test, testi) in tests"
                  :key="'Test' + testi">
-                    <template v-if="test.description" class="test-part">
-                        {{ test.description }}
+                <test-details
+                        :script="script.test[testi]"
+                        :report="report.test[testi]"
+                ></test-details>
+
+
+                <div v-for="(test2, test2i) in containedTests(findContained(script, containedTestsRef(script, testi)))"
+                     :key="'Test2' + test2i">
+                    <template v-if="test2.description" class="action-margins">
+                        {{ test2.description }}
                     </template>
-                <div>
-<!--                    Contained: {{ findContained(script, containedTests(testi)) }}-->
-                        <div v-for="(test2, test2i) in containedTests(findContained(script, containedTestsRef(script, testi)))"
-                             :key="'Test2' + test2i">
-                            <template v-if="test2.description" class="test-part">
-                                {{ test2.description }}
-                            </template>
-                            <div v-for="(action, actioni) in test2.action" class="test-part"
-                                 :key="'Test' + testi + 'Action' + actioni">
-                                <action-details
-                                        :script="action"
-                                        :report="findContained(report, containedTestsRef(report, testi)).test[test2i].action[actioni]"> </action-details>
-                            </div>
-                        </div>
-                    main
-                    <div v-for="(action, actioni) in actions(testi)" class="test-part"
+                    <div v-for="(action, actioni) in test2.action" class="action-margins"
                          :key="'Test' + testi + 'Action' + actioni">
                         <action-details
                                 :script="action"
-                                :report="reportAction(report, testi, actioni)"> </action-details>
+                                :report="findContained(report, containedTestsRef(report, testi)).test[test2i].action[actioni]"> </action-details>
                     </div>
+                </div>
+                <div v-for="(action, actioni) in actions(testi)" class="action-margins"
+                     :key="'Test' + testi + 'Action' + actioni">
+                    <action-details
+                            :script="action"
+                            :report="actionReport(report, testi, actioni)"> </action-details>
                 </div>
             </div>
 
@@ -67,6 +66,7 @@
 <script>
     import errorHandlerMixin from '../../mixins/errorHandlerMixin'
     import ActionDetails from './ActionDetails'
+    import TestDetails from "./TestDetails";
 
     export default {
         data() {
@@ -130,7 +130,7 @@
             scriptAction(testi, actioni) {
                 return this.script.test[testi].action[actioni]
             },
-            reportAction(report, testi, actioni) {
+            actionReport(report, testi, actioni) {
                 if (!report)
                     return null
                 if (!report.test)
@@ -172,7 +172,7 @@
             'sessionId', 'channelId', 'testCollection', 'testId'
         ],
         components: {
-            ActionDetails
+            ActionDetails, TestDetails,
         },
         name: "ScriptDetails"
     }
@@ -182,15 +182,26 @@
 .script {
     text-align: left;
 }
-.test-part {
-    margin-left: 20px;
-    margin-right: 20px;
-}
     .name {
         font-weight: bold;
     }
     .value {
 
+    }
+
+</style>
+<style>
+    .test-margins {
+        margin-left: 20px;
+        margin-right: 20px;
+    }
+    .action-margins {
+        margin-left: 40px;
+        margin-right: 40px;
+    }
+    .script-description-margins {
+        margin-left: 30px;
+        margin-right: 30px;
     }
 
 </style>

@@ -31,14 +31,10 @@ export const testRunnerStore = {
             currentTest: null,  // testId
             currentEvent: null,  // eventId
             currentAssertIndex: null,
-//            waitingOnClient: null, // testId waiting on or null
 
-
-            // client eval control
             eventEvalCount: 0,   // number of most recent events to evaluate
 
             clientTestResult: {}, // { testId: { eventId: TestReport } }
-//            currentChannelBaseAddr: `${FHIRTOOLKITBASEURL}/`,
             testAssertions: null,
             debug: null,
             useJson: true,
@@ -99,7 +95,8 @@ export const testRunnerStore = {
             state.testReports = {}
         },
         setTestReport(state, report) {
-            state.testReports[report.name] = report
+            Vue.set(state.testReports, report.name, report)
+            //state.testReports[report.name] = report
         },
         setTestReports(state, reports) {
             state.testReports = reports
@@ -108,7 +105,8 @@ export const testRunnerStore = {
             state.testScripts = {}
         },
         setTestScript(state, script) {
-            state.testScripts[script.name] = script
+            Vue.set(state.testScripts, script.name, script)
+            //state.testScripts[script.name] = script
         },
         setTestScripts(state, scripts) {
             state.testScripts = scripts
@@ -122,8 +120,8 @@ export const testRunnerStore = {
         setServerTestCollectionNames(state, names) {
             state.serverTestCollectionNames = names
         },
-        setClientTestResult(state, result) {     // { testId: testId, result: result }
-            Vue.set(state.clientTestResult, result.testId, result.result)
+        setClientTestResult(state, parms) {     // { testId: testId, result: result }
+            Vue.set(state.clientTestResult, parms.testId, parms.reports)
         }
     },
     getters: {
@@ -143,12 +141,11 @@ export const testRunnerStore = {
                 })
         },
         runEval({commit, state, rootState}, testId) {
-            const eventEval = state.eventEvalCount === 0 ? "marker" : state.eventEvalCount
-            const url = `clienteval/${rootState.base.session}__${rootState.base.channelId}/${eventEval}/${state.currentTestCollectionName}/${testId}`
+            const url = `clienteval/${rootState.base.session}__${rootState.base.channelId}/${state.eventEvalCount}/${state.currentTestCollectionName}/${testId}`
             ENGINE.get(url)
                 .then(response => {
-                    const results = response.data
-                    commit('setClientTestResult', { testId: testId, result: results[testId]} )
+                    const reports = response.data
+                    commit('setClientTestResult', { testId: testId, reports: reports[testId]} )
                 })
                 .catch(function (error) {
                     commit('setError', url + ': ' + error)
