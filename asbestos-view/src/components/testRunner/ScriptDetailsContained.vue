@@ -1,16 +1,21 @@
 <template>
-    <div>
+    <span>
+<!--        <div v-if="script" >-->
+<!--            Conditional:-->
+<!--            <span v-if="script.description">-->
+<!--                {{ script.description }}-->
+<!--            </span>-->
+<!--        </div>-->
+
+        <!-- Fixture, Variable, and setup stuff -->
         <div v-if="script" class="script">
-            <div v-if="script.description" class="script-description-margins">
-                {{ script.description }}
-            </div>
             <div v-if="displayDetail">
-                <div v-for="(fixture, i) in fixtures"
+                <div v-for="(fixture, i) in script.fixture"
                      :key="i">
                     <span class="name" >Fixture: </span>
                     <span class="value">{{ fixture.id }}</span>
                 </div>
-                <div v-for="(variable, i) in variables"
+                <div v-for="(variable, i) in script.variable"
                      :key="'Var' + i">
                     <span class="name" >Variable: </span>
                     <span class="value">{{ variable.name }}</span>
@@ -20,54 +25,41 @@
             <div v-if="script.setup && report && report.setup">
                 <!-- don't need yet -->
             </div>
+        </div>
 
-            <div v-if="!script.setup && report && report.setup">
-                <action-details
-                        :script="null"
-                        :report="report.setup.action">
-                </action-details>
-            </div>
-
-            <div v-for="(test, testi) in tests"
+        <div>
+            <div v-for="(test, testi) in script.test"
                  :key="'Test' + testi">
-                <test-details
+                <test-details-contained
                         :script="script.test[testi]"
                         :report="report.test[testi]"
-                        :script-contained="script.contained"
-                        :report-contained="report.contained"
-                ></test-details>
+                        :description="description(testi)"
+                ></test-details-contained>
 
             </div>
 
             <!-- add TEARDOWN here -->
 
         </div>
-    </div>
+    </span>
 </template>
 
 <script>
     import errorHandlerMixin from '../../mixins/errorHandlerMixin'
-    import TestDetails from "./TestDetails";
-    import ActionDetails from "./ActionDetails";
+    import TestDetailsContained from "./TestDetailsContained";
 
     export default {
         data() {
             return {
-                displayDetail: false,
+                displayDetail: false,  // display fixture, variable, setup stuff
             }
         },
         methods: {
+            description(index) {
+                return index === 0 ? 'Condition Context' : "Condition"
+            },
         },
         computed: {
-            fixtures() {
-                return this.script.fixture
-            },
-            variables() {
-                return this.script.variable
-            },
-            tests() {
-                return this.script.test
-            },
         },
         created() {
         },
@@ -81,9 +73,9 @@
             'script', 'report'  // TestScript and TestReport
         ],
         components: {
-            TestDetails, ActionDetails,
+            TestDetailsContained,
         },
-        name: "ScriptDetails"
+        name: "ScriptDetailsContained"
     }
 </script>
 

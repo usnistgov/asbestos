@@ -75,6 +75,8 @@ public class GetTestScriptRequest {
             if (test.hasModifierExtension() && test.getModifierExtension().get(0).hasValue()) {
                 TestScript containedTestScript = getContainedTestScript(testScript, test.getModifierExtension().get(0).getValue().toString());
                 if (containedTestScript != null) {
+                    if (!containedTestScript.hasName() && containedTestScript.hasId())
+                        containedTestScript.setName(containedTestScript.getId());
                     if (containedTestScript.hasTest() && !containedTestScript.getTest().isEmpty()) {
                         TestScript.TestScriptTestComponent containedTestComponent = containedTestScript.getTest().get(0);
                         // insert containedTestComponent before test

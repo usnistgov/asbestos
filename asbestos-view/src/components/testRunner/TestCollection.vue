@@ -399,6 +399,13 @@
         cursor: pointer;
         border-radius: 25px;
     }
+    .condition-fail {
+        background-color: gold;
+        text-align: left;
+        border: 1px dotted black;
+        cursor: pointer;
+        border-radius: 25px;
+    }
     .error {
         background-color: cornflowerblue;
         text-align: left;

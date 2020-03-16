@@ -96,7 +96,6 @@ export const testRunnerStore = {
         },
         setTestReport(state, report) {
             Vue.set(state.testReports, report.name, report)
-            //state.testReports[report.name] = report
         },
         setTestReports(state, reports) {
             state.testReports = reports
@@ -106,7 +105,6 @@ export const testRunnerStore = {
         },
         setTestScript(state, script) {
             Vue.set(state.testScripts, script.name, script)
-            //state.testScripts[script.name] = script
         },
         setTestScripts(state, scripts) {
             state.testScripts = scripts
@@ -197,8 +195,9 @@ export const testRunnerStore = {
                 .then(results => {
                     results.forEach(result => {
                         const report = result.data
-                        if (report.resourceType === 'TestReport')
+                        if (report.resourceType === 'TestReport') {
                             reports[report.name] = report
+                        }
                     })
                     commit('setTestReports', reports)
                 })

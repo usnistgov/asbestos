@@ -2,14 +2,23 @@ package gov.nist.asbestos.asbestosProxy.requests;
 
 import com.google.gson.Gson;
 import gov.nist.asbestos.asbestosProxy.servlet.ChannelConnector;
+import gov.nist.asbestos.client.Base.ProxyBase;
+import gov.nist.asbestos.client.client.Format;
 import gov.nist.asbestos.sharedObjects.ChannelConfig;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.log4j.Logger;
+import org.hl7.fhir.r4.model.BaseResource;
+import org.hl7.fhir.r4.model.Resource;
+import org.hl7.fhir.r4.model.TestReport;
+import org.hl7.fhir.r4.model.TestScript;
+import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.List;
 
 // 0 - empty
 // 1 - appContext
@@ -38,7 +47,7 @@ public class GetTestReportRequest {
     }
 
     public void run() {
-        log.info("GetTestReport");
+        log.info("GetTestReportRequest");
         String channelId = request.uriParts.get(4);
         String testCollection = request.uriParts.get(5);
         String testName = request.uriParts.get(6);
@@ -47,13 +56,51 @@ public class GetTestReportRequest {
         if (channelConfig == null) throw new Error("Channel does not exist");
 
         File testLog = request.ec.getTestLog(channelId, testCollection, testName);
-        String json;
+
+        byte[] bytes;
         try {
-            json = new String(Files.readAllBytes(Paths.get(testLog.toString())));
+            bytes = FileUtils.readFileToByteArray(testLog);
         } catch (IOException e) {
-            json = new Gson().toJson(new NoReport());
+            request.resp.setStatus(request.resp.SC_INTERNAL_SERVER_ERROR);
+            return;
         }
+
+        BaseResource resource = ProxyBase.parse(bytes, Format.fromContentType(testLog.getName()));
+        TestReport testReport = (TestReport) resource;
+
+        List<TestReport.TestReportTestComponent> testComponents = testReport.getTest();
+        int index = 0;
+        int testComponentCount = testComponents.size();
+
+        for (; index < testComponentCount; ) {
+            TestReport.TestReportTestComponent test = testComponents.get(index);
+            if (test.hasModifierExtension() && test.getModifierExtension().get(0).hasValue()) {
+                TestReport containedTestReport = getContainedTestReport(testReport, test.getModifierExtension().get(0).getValue().toString());
+                if (containedTestReport != null) {
+                    if (!containedTestReport.hasName() && containedTestReport.hasId())
+                        containedTestReport.setName(containedTestReport.getId());
+                }
+            }
+            index++;
+        }
+
+        testReport.setName(testName);
+
+        String json = ProxyBase.getFhirContext().newJsonParser().setPrettyPrint(true).encodeResourceToString(testReport);
         Returns.returnString(request.resp, json);
-        log.info("OK");
     }
+
+    private TestReport getContainedTestReport(TestReport testReport, String id) {
+        List<Resource> containeds = testReport.getContained();
+        for (Resource contained : containeds) {
+            if (contained instanceof TestReport) {
+                TestReport containedTestReport = (TestReport) contained;
+                if (contained.hasId() && contained.getId().equals(id)) {
+                    return containedTestReport;
+                }
+            }
+        }
+        return null;
+    }
+
 }
