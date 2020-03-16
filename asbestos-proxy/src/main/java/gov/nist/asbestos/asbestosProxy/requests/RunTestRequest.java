@@ -98,6 +98,7 @@ public class RunTestRequest {
             log.error(ExceptionUtils.getStackTrace(t));
             throw t;
         }
+        report.setName(testName);
         String json = Returns.returnResource(request.resp, report);
         Path path = request.ec.getTestLog(channelId, testCollection, testName).toPath();
         try (BufferedWriter writer = Files.newBufferedWriter(path))

@@ -195,8 +195,14 @@ export const testRunnerStore = {
                 .then(results => {
                     results.forEach(result => {
                         const report = result.data
-                        if (report.resourceType === 'TestReport') {
-                            reports[report.name] = report
+                        if (report && report.resourceType === 'TestReport') {
+                            if (report.status === 'entered-in-error') {
+                                //console.log(report.name)
+                                const message = report.setup.action[0].assert.message
+                                commit('setError', 'script: ' + report.name + ': ' + message)
+                            } else {
+                                reports[report.name] = report
+                            }
                         }
                     })
                     commit('setTestReports', reports)
@@ -229,7 +235,12 @@ export const testRunnerStore = {
                 })
             await promise
             if (report && report.resourceType === 'TestReport')
-                commit('setTestReport', report)
+                if (report.status === 'entered-in-error') {
+                    const message = report.setup.action[0].assert.message
+                    commit('setError', 'script: ' + report.name + ': ' + message)
+                } else {
+                    commit('setTestReport', report)
+                }
             return report
         },
         runTest({commit, rootState, state}, testId) {
@@ -238,7 +249,12 @@ export const testRunnerStore = {
             const promise = ENGINE.post(url)
             promise.then(result => {
                 const report = result.data
-                commit('setTestReport', report)
+                if (report.status === 'entered-in-error') {
+                    const message = report.setup.action[0].assert.message
+                    commit('setError', 'script: ' + report.name + ': ' + message)
+                } else {
+                    commit('setTestReport', report)
+                }
             })
             return promise
         },

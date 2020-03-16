@@ -22,7 +22,6 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
-import java.util.function.Supplier;
 
 /**
  * See http://hl7.org/fhir/testing.html
@@ -169,18 +168,26 @@ public class TestEngine  {
         return errors;
     }
 
+    public TestReport returnExceptionAsTestReport(Throwable t) {
+        testReport = new TestReport();
+        reportException(t);
+        logTestReport();
+        return testReport;
+    }
+
     private void reportException(Throwable t) {
-        String trace = ExceptionUtils.getStackTrace(t);
+       // String trace = ExceptionUtils.getStackTrace(t);
+        testReport.setStatus(TestReport.TestReportStatus.ENTEREDINERROR);
         TestReport.TestReportSetupComponent setup = testReport.getSetup();
         TestReport.SetupActionComponent comp = setup.addAction();
         TestReport.SetupActionAssertComponent asComp = new TestReport.SetupActionAssertComponent();
-        asComp.setMessage(trace);
+        asComp.setMessage(t.getMessage());
         asComp.setResult(TestReport.TestReportActionResult.ERROR);
         comp.setAssert(asComp);
         propagateStatus(testReport);
     }
 
-    private void returnTestReport() {
+    private void logTestReport() {
         File logDir = new File(new File(externalCache, testSession), testDef.getName());
         logDir.mkdirs();
         TestReport testReport = getTestReport();

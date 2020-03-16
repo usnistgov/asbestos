@@ -215,9 +215,10 @@
                     .then(channel => {
                         this.channelObj = channel
                     })
-                // these are ok left as async - don't need an await
-                this.$store.dispatch('loadTestScripts', this.$store.state.testRunner.testScriptNames)
-                this.$store.dispatch('loadTestReports', this.$store.state.testRunner.currentTestCollectionName)
+                const promises = []
+                promises.push(this.$store.dispatch('loadTestScripts', this.$store.state.testRunner.testScriptNames))
+                promises.push(this.$store.dispatch('loadTestReports', this.$store.state.testRunner.currentTestCollectionName))
+                await Promise.all(promises)
             },
             testReport(testName) {
                 if (!testName)

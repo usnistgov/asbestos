@@ -15,6 +15,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.hl7.fhir.r4.model.BaseResource;
 import org.hl7.fhir.r4.model.Resource;
+import org.hl7.fhir.r4.model.TestReport;
 import org.hl7.fhir.r4.model.TestScript;
 
 import java.io.File;
@@ -61,7 +62,19 @@ public class GetTestScriptRequest {
             return;
         }
 
-        BaseResource resource = ProxyBase.parse(bytes, Format.fromContentType(testFile.getName()));
+        BaseResource resource;
+        try {
+            resource = ProxyBase.parse(bytes, Format.fromContentType(testFile.getName()));
+        } catch (Throwable t) {
+//            request.resp.setStatus(request.resp.SC_INTERNAL_SERVER_ERROR);
+            TestEngine testEngine = new TestEngine(testFile)
+                    .setTestSession("default")
+                    .setExternalCache(request.externalCache);
+            TestReport testReport = testEngine.returnExceptionAsTestReport(t);
+            testReport.setName(testName);
+            Returns.returnResource(request.resp, testReport);
+            return;
+        }
         TestScript testScript = (TestScript) resource;
 
         // update TestScript with any contained TestScript Test elements

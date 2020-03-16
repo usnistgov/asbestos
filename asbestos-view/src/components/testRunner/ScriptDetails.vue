@@ -28,15 +28,17 @@
                 </action-details>
             </div>
 
-            <div v-for="(test, testi) in tests"
-                 :key="'Test' + testi">
-                <test-details
-                        :script="script.test[testi]"
-                        :report="report.test[testi]"
-                        :script-contained="script.contained"
-                        :report-contained="report.contained"
-                ></test-details>
+            <div v-if="report">
+                <div v-for="(test, testi) in tests"
+                     :key="'Test' + testi">
+                    <test-details
+                            :script="script.test[testi]"
+                            :report="report.test[testi]"
+                            :script-contained="script.contained"
+                            :report-contained="report.contained"
+                    ></test-details>
 
+                </div>
             </div>
 
             <!-- add TEARDOWN here -->
@@ -88,9 +90,9 @@
 </script>
 
 <style scoped>
-.script {
-    text-align: left;
-}
+    .script {
+        text-align: left;
+    }
     .name {
         font-weight: bold;
     }
