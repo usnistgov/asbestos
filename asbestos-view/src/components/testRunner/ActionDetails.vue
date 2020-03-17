@@ -21,14 +21,14 @@
             <!--
                 Used to report general errors within the tool
             -->
-            <div v-if="report[0]">
+            <div v-if=" report && report[0]">
                 {{ translateNL(report[0].assert.message)}}
             </div>
         </div>
 
         <div v-if="displayMessage">
 
-            <div v-if="message.indexOf('#') === -1">
+            <div v-if="message && message.indexOf('#') === -1">
                 <ul>
                     <div v-for="(line, linei) in translateNL(message)" :key="'msgDisp' + linei">
                         <li>
@@ -60,11 +60,12 @@
                 </span>
             </div>
 
+            <!-- Test Script/Report -->
             <div>
                 <span class="selectable" @click="toggleScriptDisplayed()">Test Script/Report</span>
                 <span v-if="displayScript">
                     <img src="../../assets/arrow-down.png" @click="toggleScriptDisplayed()">
-                   <vue-markdown>{{message}}</vue-markdown>
+                   <vue-markdown v-if="message">{{message}}</vue-markdown>
                     <script-display
                             :script="script"
                             :report="report">
@@ -74,16 +75,6 @@
                     <img src="../../assets/arrow-right.png" @click="toggleScriptDisplayed()">
                 </span>
             </div>
-<!--            <div>-->
-<!--                <span class="selectable" @click="toggleDetailsDisplayed()">Details</span>-->
-<!--                <span v-if="displayDetails">-->
-<!--                    <img src="../../assets/arrow-down.png" @click="toggleDetailsDisplayed()">-->
-<!--                   <vue-markdown>{{message}}</vue-markdown>-->
-<!--                </span>-->
-<!--                <span v-else>-->
-<!--                    <img src="../../assets/arrow-right.png" @click="toggleDetailsDisplayed()">-->
-<!--                </span>-->
-<!--            </div>-->
         </div>
     </div>
 </template>
@@ -92,6 +83,8 @@
     import LogItem from "../logViewer/LogItem"
     import ScriptDisplay from "./ScriptDisplay"
     import VueMarkdown from 'vue-markdown'
+    import colorizeTestReports from "../../mixins/colorizeTestReports";
+
     export default {
         data() {
             return {
@@ -157,30 +150,6 @@
                 const parts = logUrl.split('/')
                 return parts[parts.length-1]
             },
-            isPass() {
-                if (!this.report) return false
-                const part = this.report.operation ? this.report.operation : this.report.assert
-                if (!part) return false
-                return part.result === 'pass'
-            },
-            isError() {
-                if (!this.report) return false
-                const part = this.report.operation ? this.report.operation : this.report.assert
-                if (!part) return false
-                return part.result === 'error'
-            },
-            isFail() {
-                if (!this.report) return false
-                const part = this.report.operation ? this.report.operation : this.report.assert
-                if (!part) return false
-                return part.result === 'fail'
-            },
-            isNotRun() {
-                if (!this.report) return true
-                const part = this.report.operation ? this.report.operation : this.report.assert
-                if (!part) return true
-                return part.result === 'skip'
-            },
             operationOrAssertion() {
                 return this.script.operation
                     ? `${this.operationType(this.script.operation)}`
@@ -215,6 +184,7 @@
             LogItem,
             VueMarkdown
         },
+        mixins: [colorizeTestReports],
         name: "ActionDetails"
     }
 </script>

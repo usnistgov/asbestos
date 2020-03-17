@@ -5,8 +5,8 @@
         </div>
         <div v-else>
             <script-details
-            :script="$store.state.testRunner.testScripts[$store.state.testRunner.currentTest]"
-            :report="$store.state.testRunner.testReports[$store.state.testRunner.currentTest]"
+                :script="$store.state.testRunner.testScripts[$store.state.testRunner.currentTest]"
+                :report="$store.state.testRunner.testReports[$store.state.testRunner.currentTest]"
             > </script-details>
         </div>
     </div>

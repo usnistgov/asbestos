@@ -23,6 +23,7 @@
         },
         computed: {
             filteredReport() {
+                if (!this.report) return null
                 const copy = JSON.parse(JSON.stringify(this.report))
                 if (copy.operation)
                     copy.operation.message = 'removed by UI'

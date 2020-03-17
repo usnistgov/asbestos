@@ -27,7 +27,7 @@
                      :key="'Action' + actioni">
                     <action-details
                             :script="action"
-                            :report="report.action[actioni]"> </action-details>
+                            :report="report && report.action ? report.action[actioni] : null"> </action-details>
                 </div>
             </div>
         </div>
@@ -63,10 +63,12 @@
             reportConditional() { // TestReport representing conditional
                 if (!this.scriptConditionalRef) return null
                 let conditional = null
-                this.reportContained.forEach(contained => {
-                    if (contained.id === this.scriptConditionalRef && contained.resourceType === 'TestReport')
-                        conditional = contained
-                })
+                if (this.reportContained) {
+                    this.reportContained.forEach(contained => {
+                        if (contained.id === this.scriptConditionalRef && contained.resourceType === 'TestReport')
+                            conditional = contained
+                    })
+                }
                 return conditional
             },
             isConditional() {

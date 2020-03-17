@@ -17,31 +17,31 @@
                 </div>
             </div>
 
-            <div v-if="script.setup && report">
+            <div v-if="script.setup">
                 <test-details
                         :script="script.setup"
-                        :report="report.setup"
+                        :report="report ? report.setup : null"
                         :label="'Setup'"
                         :script-contained="script.contained"
-                        :report-contained="report.contained"
+                        :report-contained="report ? report.contained : null"
                 ></test-details>
             </div>
 
-            <div v-if="!script.setup && report && report.setup">
+            <div v-if="!script.setup">
                 <action-details
                         :script="null"
-                        :report="report.setup.action">
+                        :report="report && report.setup ? report.setup.action : null">
                 </action-details>
             </div>
 
-            <div v-if="report">
+            <div v-if="script">
                 <div v-for="(test, testi) in tests"
                      :key="'Test' + testi">
                     <test-details
                             :script="script.test[testi]"
-                            :report="report.test[testi]"
+                            :report="report ? report.test[testi] : null"
                             :script-contained="script.contained"
-                            :report-contained="report.contained"
+                            :report-contained="report ? report.contained : null"
                     ></test-details>
 
                 </div>
