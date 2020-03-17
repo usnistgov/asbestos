@@ -1,4 +1,5 @@
 <TestScript xmlns="http://hl7.org/fhir">
+    <description value="Submit Provide Document Bundle to MHD Document Recipient. If this transaction targets a DocumentRecipient coupled to an XDS DocumetDocumentReference contains a fixed id so the second time (or after) you submit it will fail with a message: Submission includes pre-assigned id which already exists. This is ok."/>
     <fixture id="pdb-bundle">
         <resource>
             <reference value="Bundle/pdb.xml"/>
@@ -38,7 +39,7 @@
         <sourceId value="pdb-bundle"/>
     </variable>
     <test>
-        <description value="Submit Provide Document Bundle to MHD Document Recipient and verify response. This test submits a DocumentReference with a fixed id so the second time (or after) you submit it will fail with a message: Submission includes pre-assigned id - This is ok."/>
+        <description value="Submit"/>
         <action>
             <operation>
                 <!-- references patient from resourceCache in EC -->
@@ -81,6 +82,9 @@
                 <warningOnly value="false"/>
             </assert>
         </action>
+    </test>
+    <test>
+        <description value="Read back DocumentReference"/>
         <action>
             <operation>
                 <description value="DocumentReference"/>

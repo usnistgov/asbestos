@@ -86,7 +86,9 @@
                 <warningOnly value="false"/>
             </assert>
         </action>
-        <!-- First DocumentReference -->
+    </test>
+    <test>
+        <description value="Read back first DocumentReference"/>
         <action>
             <operation>
                 <description value="DocumentReference"/>
@@ -121,7 +123,9 @@
                 <warningOnly value="false"/>
             </assert>
         </action>
-        <!-- Second DocumentReference -->
+    </test>
+    <test>
+        <description value="Read back second DocumentReference"/>
         <action>
             <operation>
                 <description value="DocumentReference"/>

@@ -1,4 +1,5 @@
 <TestScript xmlns="http://hl7.org/fhir">
+    <description value="Submit Provide Document Bundle to MHD Document Recipient. Transaction must fail."/>
     <fixture id="pdb-bundle">
         <resource>
             <reference value="Bundle/pdb.xml"/>
@@ -38,7 +39,7 @@
         <sourceId value="pdb-bundle"/>
     </variable>
     <test>
-        <description value="Submit Provide Document Bundle to MHD Document Recipient and verify response."/>
+        <description value="Submit"/>
         <action>
             <operation>
                 <!-- references patient from resourceCache in EC -->

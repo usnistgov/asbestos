@@ -1,4 +1,5 @@
 <TestScript xmlns="http://hl7.org/fhir">
+    <description value="Submit Provide Document Bundle that does not contain a DocumentReference.  It must fail."/>
     <fixture id="pdb-bundle">
         <resource>
             <reference value="Bundle/pdb.xml"/>

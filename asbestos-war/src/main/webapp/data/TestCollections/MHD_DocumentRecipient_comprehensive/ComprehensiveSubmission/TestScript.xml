@@ -1,4 +1,5 @@
 <TestScript xmlns="http://hl7.org/fhir">
+    <description value="Submit Comprehensive Metadata Provide Document Bundle and Read back the DocumentReference"/>
     <fixture id="pdb-bundle">
         <resource>
             <reference value="Bundle/pdb.xml"/>
@@ -46,7 +47,7 @@
         <sourceId value="pdb-bundle"/>
     </variable>
     <test>
-        <description value="Submit Provide Document Bundle to MHD Document Recipient and verify response. The DocumentReference is not Comprehensive Metadata compliant. It is missing the masterIdentifier."/>
+        <description value="Submit Provide Document Bundle to MHD Document Recipient."/>
         <!--
             Actions generic to all PDB transactions
         -->
@@ -109,6 +110,9 @@
                 <warningOnly value="false"/>
             </assert>
         </action>
+    </test>
+    <test>
+        <description value="Read back the DocumentReference and check it"/>
         <action>
             <operation>
                 <description value="DocumentReference"/>

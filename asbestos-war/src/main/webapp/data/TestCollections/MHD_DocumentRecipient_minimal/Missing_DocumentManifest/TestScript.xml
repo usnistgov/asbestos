@@ -1,4 +1,5 @@
 <TestScript xmlns="http://hl7.org/fhir">
+    <description value="Submit Provide Document Bundle to MHD Document Recipient. The DocumentManifest is missing so the transaction must fail (400)."/>
     <fixture id="pdb-bundle">
         <resource>
             <reference value="Bundle/pdb.xml"/>
@@ -33,7 +34,7 @@
         <sourceId value="read-back"/>
     </variable>
     <test>
-        <description value="Submit Provide Document Bundle to MHD Document Recipient and verify response. The DocumentManifest is missing so the transaction must fail (400)."/>
+        <description value="Submit Provide Document Bundle"/>
         <action>
             <operation>
                 <!-- references patient from resourceCache in EC -->

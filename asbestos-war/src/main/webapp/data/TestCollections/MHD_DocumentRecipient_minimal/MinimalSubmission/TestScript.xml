@@ -38,7 +38,7 @@
         <sourceId value="pdb-bundle"/>
     </variable>
     <test>
-        <description value="Submit Provide Document Bundle to MHD Document Recipient and verify response."/>
+        <description value="Submit Provide Document Bundle to MHD Document Recipient"/>
         <action>
             <operation>
                 <!-- references patient from resourceCache in EC -->
@@ -81,6 +81,9 @@
                 <warningOnly value="false"/>
             </assert>
         </action>
+    </test>
+    <test>
+        <description value="Read back DocumentReference"/>
         <action>
             <operation>
                 <description value="DocumentReference"/>

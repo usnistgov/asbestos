@@ -1,4 +1,5 @@
 <TestScript xmlns="http://hl7.org/fhir">
+    <description value="Submit Comprehensive Metadata Provide Document Bundle containing two DocumentReferences and Read back both"/>
     <fixture id="pdb-bundle">
         <resource>
             <reference value="Bundle/pdb.xml"/>
@@ -43,7 +44,7 @@
         <sourceId value="pdb-bundle"/>
     </variable>
     <test>
-        <description value="Submit Provide Document Bundle to MHD Document Recipient and verify response."/>
+        <description value="Submit"/>
         <action>
             <operation>
                 <!-- references patient from resourceCache in EC -->
@@ -86,7 +87,9 @@
                 <warningOnly value="false"/>
             </assert>
         </action>
-        <!-- First DocumentReference -->
+    </test>
+    <test>
+        <description value="Read back DocumentReference 1"/>
         <action>
             <operation>
                 <description value="DocumentReference"/>
@@ -121,7 +124,9 @@
                 <warningOnly value="false"/>
             </assert>
         </action>
-        <!-- Second DocumentReference -->
+    </test>
+    <test>
+        <description value="Read back DocumentReference 2"/>
         <action>
             <operation>
                 <description value="DocumentReference"/>

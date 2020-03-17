@@ -52,13 +52,11 @@
         <expression value="Bundle.entry[0].response.location"/>
         <sourceId value="pdb-response"/>
     </variable>
-    <test>
-        <description value="Submit Provide Document Bundle followed by Replace."/>
-
+    <setup>
         <action>
             <operation>
                 <!-- references patient from resourceCache in EC -->
-                <description value="send PDB"/>
+                <description value="send PDB with single DocumentReference"/>
                 <label value="create"/>
                 <type>
                     <system value="https://github.com/usnistgov/asbestos/wiki/Testscript-Operation-Codes"/>
@@ -114,6 +112,7 @@
                 <warningOnly value="false"/>
             </assert>
         </action>
+        <description value="Read back DocumentReference and verify"/>
         <action>
             <operation>
                 <description value="DocumentReference"/>
@@ -155,7 +154,9 @@
                 <warningOnly value="false"/>
             </assert>
         </action>
-
+    </setup>
+    <test>
+        <description value="Send Replacement DocumentReference"/>
         <action>
             <operation>
                 <!-- references patient from resourceCache in EC -->
@@ -215,6 +216,9 @@
                 <warningOnly value="false"/>
             </assert>
         </action>
+    </test>
+    <test>
+        <description value="Read back replacement"/>
         <action>
             <operation>
                 <description value="Replacement DocumentReference"/>
@@ -247,6 +251,9 @@
                 <warningOnly value="false"/>
             </assert>
         </action>
+    </test>
+    <test>
+        <description value="Read back original and verify it has status superseded"/>
         <action>
             <operation>
                 <description value="Original DocumentReference"/>

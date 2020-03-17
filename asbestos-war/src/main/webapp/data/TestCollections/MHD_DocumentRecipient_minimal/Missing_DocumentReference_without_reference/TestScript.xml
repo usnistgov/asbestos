@@ -1,5 +1,5 @@
 <TestScript xmlns="http://hl7.org/fhir">
-    <description value="Submit Provide Document Bundle that does not contain a DocumentManifest.  It must fail."/>
+    <description value="Submit Provide Document Bundle to MHD Document Recipient. The DocumentReference is missing so the transaction must fail (400)"/>
     <fixture id="pdb-bundle">
         <resource>
             <reference value="Bundle/pdb.xml"/>
@@ -34,7 +34,7 @@
         <sourceId value="read-back"/>
     </variable>
     <test>
-        <description value="Submit Provide Document Bundle to MHD Document Recipient and verify response. "/>
+        <description value="Submit Provide Document Bundle"/>
         <action>
             <operation>
                 <!-- references patient from resourceCache in EC -->
@@ -50,18 +50,11 @@
         </action>
         <action>
             <assert>
-                <description value="... transaction fails with status 400"/>
+                <description value="... fails"/>
                 <response value="bad"/>
                 <warningOnly value="false"/>
             </assert>
         </action>
-        <action>
-            <assert>
-                <description value="... transaction returns OperationOutcome"/>
-                <compareToSourceId value="pdb-response"/>
-                <compareToSourceExpression value="OperationOutcome.exists()"/>
-                <warningOnly value="false"/>
-            </assert>
-        </action>
+
     </test>
 </TestScript>

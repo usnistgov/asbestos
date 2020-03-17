@@ -10,7 +10,7 @@
 		<TestScript>
 			<id value="1"/>
 			<test>  <!-- basic operation and validation -->
-				<description value="conditional"/>
+				<description value="condition context"/>
 				<action>
 					<operation>
 						<description value="looking for patient"/>
@@ -94,6 +94,7 @@
 			</valueReference>
 <!--			<valueString value="#patientNeedsLoading"/>-->
 		</modifierExtension>
+		<description value="conditional patient submission"/>
 		<action>
 			<operation>
                 <!-- references patient from resourceCache in EC -->

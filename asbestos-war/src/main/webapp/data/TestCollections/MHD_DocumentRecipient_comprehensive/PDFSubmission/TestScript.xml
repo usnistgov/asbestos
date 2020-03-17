@@ -38,7 +38,7 @@
         <sourceId value="pdb-bundle"/>
     </variable>
     <test>
-        <description value="Submit Provide Document Bundle to MHD Document Recipient and verify response. The DocumentReference is Comprehensive Metadata compliant."/>
+        <description value="Submit Provide Document Bundle with Comprehensive Metadata to MHD Document Recipient and verify response."/>
         <!--
             Actions generic to all PDB transactions
         -->
@@ -101,6 +101,9 @@
                 <warningOnly value="false"/>
             </assert>
         </action>
+    </test>
+    <test>
+        <description value="Read back DocumentReference"/>
         <action>
             <operation>
                 <description value="DocumentReference"/>
