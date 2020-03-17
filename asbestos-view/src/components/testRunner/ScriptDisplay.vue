@@ -10,7 +10,7 @@
             <vue-json-pretty :data="script"></vue-json-pretty>
         </div>
         <div class="report">
-            <vue-json-pretty :data="report"></vue-json-pretty>
+            <vue-json-pretty :data="filteredReport"></vue-json-pretty>
         </div>
     </div>
 </template>
@@ -20,6 +20,16 @@
     export default {
         methods: {
 
+        },
+        computed: {
+            filteredReport() {
+                const copy = JSON.parse(JSON.stringify(this.report))
+                if (copy.operation)
+                    copy.operation.message = 'removed by UI'
+                if (copy.assert)
+                    copy.assert.message = 'removed by UI'
+                return copy
+            }
         },
         props: [
             // parts representing a single action

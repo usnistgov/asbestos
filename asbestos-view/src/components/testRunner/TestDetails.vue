@@ -7,7 +7,8 @@
                 pass : isPass,
                 fail: isFail}"  class="test-margins" @click="toggleDisplay()">
                 <span>
-                    <span class="bold">Test: </span>
+                    <span v-if="label" class="bold">{{label}}: </span>
+                    <span v-else class="bold">Test: </span>
                     {{ description }}
                 </span>
             </div>
@@ -89,6 +90,7 @@
             // parts representing a single test element of a TestScript
             'script', 'report',
             'scriptContained', 'reportContained', // contained section of the TestScript and TestReport
+            'label',
         ],
         components: {
             ActionDetails, ScriptDetailsContained,

@@ -61,7 +61,8 @@ public class GetTestReportRequest {
         try {
             bytes = FileUtils.readFileToByteArray(testLog);
         } catch (IOException e) {
-            request.resp.setStatus(request.resp.SC_INTERNAL_SERVER_ERROR);
+            String json = new Gson().toJson(new NoReport());
+            Returns.returnString(request.resp, json);
             return;
         }
 

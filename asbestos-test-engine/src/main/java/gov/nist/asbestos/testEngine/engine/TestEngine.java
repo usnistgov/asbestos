@@ -439,6 +439,7 @@ public class TestEngine  {
     }
 
     private void doSetup() {
+        boolean reportAsConditional = false;  // upgrade this when conditional execution comes to setup
         if (testScript.hasSetup()) {
             TestScript.TestScriptSetupComponent comp = testScript.getSetup();
             ValE fVal = new ValE(engineVal).setMsg("Setup");
@@ -447,16 +448,35 @@ public class TestEngine  {
                 String typePrefix = "setup.action";
                 for (TestScript.SetupActionComponent action : comp.getAction()) {
                     TestReport.SetupActionComponent actionReportComponent = setupReportComponent.addAction();
-                    if (action.hasOperation() && action.hasAssert()) {
-                        Reporter reporter = new Reporter(fVal, actionReportComponent.getOperation(), "", "");
-                        reporter.reportError( "action has both operation and assertion");
+                    if (invalidAction(action, actionReportComponent, fVal))
                         return;
-                    }
-                    if (action.hasOperation())
+                    if (action.hasOperation()) {
                         doOperation(typePrefix, action.getOperation(), actionReportComponent.getOperation());
+                        TestReport.SetupActionOperationComponent opReport = actionReportComponent.getOperation();
+                        if (opReport.getResult() == TestReport.TestReportActionResult.ERROR) {
+                            testReport.setStatus(TestReport.TestReportStatus.COMPLETED);
+                            testReport.setResult(TestReport.TestReportResult.FAIL);
+                            return;
+                        }
+                    }
                     if (action.hasAssert()) {
                         TestReport.SetupActionAssertComponent actionReport = doAssert(typePrefix, action.getAssert());
-
+                        actionReportComponent.setAssert(actionReport);
+                        if ("fail".equals(actionReport.getResult().toCode())) {
+                            if (reportAsConditional) {
+                                testReport.setStatus(TestReport.TestReportStatus.ENTEREDINERROR);
+                                testReport.setResult(TestReport.TestReportResult.PASS);
+                            } else {
+                                testReport.setStatus(TestReport.TestReportStatus.COMPLETED);
+                                testReport.setResult(TestReport.TestReportResult.FAIL);
+                            }
+                            return;
+                        }
+                        if ("error".equals(actionReport.getResult().toCode())) {
+                            testReport.setStatus(TestReport.TestReportStatus.COMPLETED);
+                            testReport.setResult(TestReport.TestReportResult.FAIL);
+                            return;
+                        }
                     }
                     if (hasError())
                         return;
@@ -543,7 +563,9 @@ public class TestEngine  {
                     ValE tVal = new ValE(fVal).setMsg(testName);
                     TestReport.TestReportTestComponent testReportComponent = testReport.addTest();
 
-                    // handle condition
+                    //
+                    // handle conditional execution
+                    //
                     TestScript containedTestScript = getConditional(testComponent, testReportComponent);
                     testReportComponent = testReport.addTest();
                     boolean conditionalResult = true;
@@ -673,6 +695,15 @@ public class TestEngine  {
             reporter.reportError( message);
             return;
         }
+
+    private boolean invalidAction(TestScript.SetupActionComponent action, TestReport.SetupActionComponent actionReportComponent, ValE fVal) {
+        if (action.hasOperation() && action.hasAssert()) {
+            Reporter reporter = new Reporter(fVal, actionReportComponent.getOperation(), "", "");
+            reporter.reportError( "action has both operation and assertion");
+            return true;
+        }
+        return false;
+    }
 
     private boolean invalidAction(TestScript.TestActionComponent action, TestReport.TestActionComponent actionReportComponent, ValE fVal) {
         if (action.hasOperation() && action.hasAssert()) {

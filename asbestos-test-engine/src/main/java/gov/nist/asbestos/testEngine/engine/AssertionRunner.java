@@ -96,7 +96,7 @@ public class AssertionRunner {
                     Reporter.reportError(val, assertReport, type, label, "Found no stringValue in modifierExtension");
                     return assertReport;
                 }
-                String resourceType = extension.getValue().toString(); // extension.getExtensionString("https://github.com/usnistgov/asbestos/wiki/TestScript-OncePerType");
+                String resourceType = extension.getValue().toString();
                 BaseResource sourceResource = source.getResourceResource();
                 assertReport = null;
                 Bundle bundle = (Bundle) sourceResource;
@@ -121,6 +121,9 @@ public class AssertionRunner {
                 Reporter.reportError(val, assertReport, type, label, "Found no " + resourceType + " resources in Bundle");
                 return assertReport;
             }
+        } else {
+            run2(as);
+            return assertReport;
         }
 
         assertReport = new TestReport.SetupActionAssertComponent();

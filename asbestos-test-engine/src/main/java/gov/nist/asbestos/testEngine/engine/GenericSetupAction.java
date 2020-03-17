@@ -73,6 +73,14 @@ abstract class GenericSetupAction {
                 }
             }
 
+            try {
+                Ref ref = new Ref(value);
+                if (ref.isAbsolute()) {
+                    value = "<a href=\"" + value + "\"" + " target=\"_blank\">" + value + "</a>";
+                }
+            } catch (Throwable t) {
+                // ignore
+            }
 
             fixtures.put(key, value);
         }

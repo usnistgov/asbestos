@@ -41,6 +41,7 @@
                 No Evaluation
             </div>
 
+        <!--  Inspect-->
             <div v-if="script.operation">
                 <span v-if="eventId" class="selectable" @click="toggleEventDisplayed()">Inspect</span>
                 <span v-if="eventDisplayed && eventId">
@@ -63,6 +64,7 @@
                 <span class="selectable" @click="toggleScriptDisplayed()">Test Script/Report</span>
                 <span v-if="displayScript">
                     <img src="../../assets/arrow-down.png" @click="toggleScriptDisplayed()">
+                   <vue-markdown>{{message}}</vue-markdown>
                     <script-display
                             :script="script"
                             :report="report">
@@ -72,16 +74,16 @@
                     <img src="../../assets/arrow-right.png" @click="toggleScriptDisplayed()">
                 </span>
             </div>
-            <div>
-                <span class="selectable" @click="toggleDetailsDisplayed()">Details</span>
-                <span v-if="displayDetails">
-                    <img src="../../assets/arrow-down.png" @click="toggleDetailsDisplayed()">
-                   <vue-markdown>{{message}}</vue-markdown>
-                </span>
-                <span v-else>
-                    <img src="../../assets/arrow-right.png" @click="toggleDetailsDisplayed()">
-                </span>
-            </div>
+<!--            <div>-->
+<!--                <span class="selectable" @click="toggleDetailsDisplayed()">Details</span>-->
+<!--                <span v-if="displayDetails">-->
+<!--                    <img src="../../assets/arrow-down.png" @click="toggleDetailsDisplayed()">-->
+<!--                   <vue-markdown>{{message}}</vue-markdown>-->
+<!--                </span>-->
+<!--                <span v-else>-->
+<!--                    <img src="../../assets/arrow-right.png" @click="toggleDetailsDisplayed()">-->
+<!--                </span>-->
+<!--            </div>-->
         </div>
     </div>
 </template>

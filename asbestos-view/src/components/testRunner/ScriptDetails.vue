@@ -17,8 +17,14 @@
                 </div>
             </div>
 
-            <div v-if="script.setup && report && report.setup">
-                <!-- don't need yet -->
+            <div v-if="script.setup && report">
+                <test-details
+                        :script="script.setup"
+                        :report="report.setup"
+                        :label="'Setup'"
+                        :script-contained="script.contained"
+                        :report-contained="report.contained"
+                ></test-details>
             </div>
 
             <div v-if="!script.setup && report && report.setup">

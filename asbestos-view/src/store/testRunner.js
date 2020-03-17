@@ -197,7 +197,6 @@ export const testRunnerStore = {
                         const report = result.data
                         if (report && report.resourceType === 'TestReport') {
                             if (report.status === 'entered-in-error') {
-                                //console.log(report.name)
                                 const message = report.setup.action[0].assert.message
                                 commit('setError', 'script: ' + report.name + ': ' + message)
                             } else {
@@ -205,7 +204,11 @@ export const testRunnerStore = {
                             }
                         }
                     })
-                    commit('setTestReports', reports)
+                    if (reports)
+                        commit('setTestReports', reports)
+                })
+                .catch(function(error) {
+                    commit('setError', `Loading reports: ${error}`)
                 })
             await combinedPromises
             return reports
