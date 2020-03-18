@@ -39,9 +39,17 @@ export const testRunnerStore = {
             debug: null,
             useJson: true,
             useGzip: true,
+            colorMode: false,
+            statusRight: false,
         }
     },
     mutations: {
+        setStatusRight(state, value) {
+            state.statusRight = value
+        },
+        setColorMode(state, value) {
+            state.colorMode = value
+        },
         setUseJson(state, value) {
             state.useJson = value;
         },
@@ -125,7 +133,45 @@ export const testRunnerStore = {
     getters: {
         testReportNames(state) {
             return Object.keys(state.testReports).sort()
-        }
+        },
+        testStatus(state, getters) {
+            if (state.isClientTest) {
+                let status=[]
+                state.testScriptNames.forEach(testId => {
+                    const eventResult = state.clientTestResult[testId]
+                    if (!eventResult) {
+                        status[testId] = 'not-run'
+                    } else {
+                        status[testId] = getters.hasSuccessfulEvent(testId) ? 'pass' : 'fail'
+                    }
+                })
+                return status
+            } else {
+                let status = []
+                state.testScriptNames.forEach(testId => {
+                    const testReport = state.testReports[testId]
+                    if (testReport === undefined) {
+                        status[testId] = 'not-run'
+                    } else {
+                        status[testId] = testReport.result  // 'pass', 'fail', 'error'
+                    }
+                })
+                return status
+            }
+        },
+        hasSuccessfulEvent: (state) => (testId) => {
+            if (testId === null)
+                return false
+            const eventResult = state.clientTestResult[testId]
+            for (const eventId in eventResult) {
+                if (eventResult.hasOwnProperty(eventId)) {
+                    const testReport = eventResult[eventId]
+                    if (testReport.result === 'pass')
+                        return  true
+                }
+            }
+            return false
+        },
     },
     actions: {
         loadTestAssertions({commit}) {

@@ -87,36 +87,34 @@
             <button class="runallbutton" @click="doRunAll()">Run All</button>
         </div>
 
-        <div v-if="status">
-<!--            Object.keys(status)"-->
+        <div>
             <div v-for="(name, i) in scriptNames"
                  :key="name + i">
                 <div >
                     <div @click="openTest(name)">
                         <div v-bind:class="{
-                            pass: status[name] === 'pass',
-                            fail: status[name] === 'fail',
-                            error: status[name] === 'error',
-                            'not-run': status[name] === 'not-run' }">
-                            <div v-if="status[name] === 'pass'">
-                                <img src="../../assets/checked.png" class="right">
-                            </div>
-                            <div v-else-if="status[name] === 'fail' || status[name] === 'error'">
-                                <img src="../../assets/error.png" class="right">
-                            </div>
-                            <div v-else>
-                                <img src="../../assets/blank-circle.png" class="right">
-                            </div>
+                                pass: status[name] === 'pass' && colorful,
+                                'pass-plain': status[name] === 'pass' && !colorful,
+                                fail: status[name] === 'fail' && colorful,
+                                'fail-plain': status[name] === 'fail' && !colorful,
+                                error: status[name] === 'error',
+                                'not-run': !status[name],
+                            }" class="align-left">
 
-                            <div v-if="isClient">
-                                <img src="../../assets/validate-search.png" class="right" @click.stop="doEval(name)">
-                            </div>
-                            <div v-else>
-                                <img src="../../assets/press-play-button.png" class="right" @click.stop="doRun(name)">
-                            </div>
+                            <script-status v-if="!statusRight" :status-right="statusRight" :name="name"> </script-status>
 
-                            Script: {{ clean(name) }}
+                            {{ clean(name) }}
                             <span v-if="!$store.state.testRunner.isClientTest"> --  {{ time[name] }}</span>
+
+                            <span v-if="isClient">
+                                <img src="../../assets/validate-search.png"  @click.stop="doEval(name)">
+                            </span>
+                            <span v-else>
+                                <img src="../../assets/press-play-button.png"  @click.stop="doRun(name)">
+                            </span>
+
+                            <script-status v-if="statusRight" :status-right="statusRight" :name="name"> </script-status>
+
                         </div>
                     </div>
                     <div v-if="selected === name">
@@ -131,7 +129,8 @@
 
 <script>
     import errorHandlerMixin from '../../mixins/errorHandlerMixin'
-
+    import colorizeTestReports from "../../mixins/colorizeTestReports";
+    import ScriptStatus from "./ScriptStatus";
     export default {
 
         data() {
@@ -225,34 +224,6 @@
                     return null
                 return this.$store.state.testRunner.testReports[testName]
             },
-            importStatusForServerTests() {
-                let status = []
-                let time = []
-                this.testScriptNames.forEach(testId => {
-                    const testReport = this.$store.state.testRunner.testReports[testId]
-                    if (testReport === undefined) {
-                        status[testId] = 'not-run'
-                    } else {
-                        status[testId] = testReport.result  // 'pass', 'fail', 'error'
-                        time[testId] = testReport.issued
-                    }
-                })
-                this.time = time
-                return status
-            },
-            importStatusForClientTests() {
-                let status=[]
-                this.testScriptNames.forEach(testId => {
-                    const eventResult = this.$store.state.testRunner.clientTestResult[testId]
-                    if (!eventResult) {
-                        status[testId] = 'not-run'
-                    } else {
-                        status[testId] = this.hasSuccessfulEvent(testId) ? 'pass' : 'fail'
-                    }
-                })
-                this.time  = []
-                return status
-            },
             async testScriptNamesUpdated() {
                 if (this.isClient) {
                     return this.$store.state.testRunner.testScriptNames.forEach(name => {
@@ -265,12 +236,8 @@
             },
         },
         computed: {
-            // status (and time) array is computed to drive display
             status() {
-                if (this.isClient)
-                    return this.importStatusForClientTests()
-                else
-                    return this.importStatusForServerTests()
+                return this.$store.getters.testStatus
             },
             clientBaseAddress() { // for client tests
                 return `${this.$store.state.base.proxyBase}/${this.sessionId}__${this.channelId}`
@@ -342,11 +309,14 @@
                     this.channel = newVal
             },
         },
-        mixins: [ errorHandlerMixin ],
+        mixins: [ errorHandlerMixin, colorizeTestReports ],
         name: "TestCollection",
         props: [
             'sessionId', 'channelId', 'testCollection',
-        ]
+        ],
+        components: {
+            ScriptStatus
+        }
     }
 </script>
 
@@ -367,8 +337,11 @@
         border: 1px solid black;
         cursor: pointer;
     }
-    .right {
+    .align-right {
         text-align: right;
+    }
+    .align-left {
+        text-align: left;
     }
     .runallbutton {
         /*padding-bottom: 5px;*/
@@ -393,10 +366,26 @@
         cursor: pointer;
         border-radius: 25px;
     }
+    .pass-plain {
+        /*background-color: lightgray;*/
+        text-align: left;
+        border-top: 1px solid black;
+        /*border-bottom: 1px solid black;*/
+        cursor: pointer;
+        /*border-radius: 25px;*/
+    }
     .fail {
         background-color: indianred;
         text-align: left;
         border: 1px dotted black;
+        cursor: pointer;
+        border-radius: 25px;
+    }
+    .fail-plain {
+        /*background-color: lightgray;*/
+        text-align: left;
+        border-top: 1px solid black;
+        /*border-bottom: 1px solid black;*/
         cursor: pointer;
         border-radius: 25px;
     }
