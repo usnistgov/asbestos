@@ -1,14 +1,6 @@
 export default {
     data() {
         return {
-            // colorization: {
-            //     pass: status[name] === 'pass' && colorful,
-            //     'pass-plain': status[name] === 'pass' && !colorful,
-            //     fail: status[name] === 'fail' && colorful,
-            //     'fail-plain': status[name] === 'fail' && !colorful,
-            //     error: status[name] === 'error',
-            //     'not-run': !status[name],
-            // },
         }
     },
     methods: {

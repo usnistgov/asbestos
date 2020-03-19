@@ -99,26 +99,34 @@
                                 'fail-plain': status[name] === 'fail' && !colorful,
                                 error: status[name] === 'error',
                                 'not-run': !status[name],
-                            }" class="align-left">
+                            }" >
 
                             <script-status v-if="!statusRight" :status-right="statusRight" :name="name"> </script-status>
 
-                            {{ clean(name) }}
-                            <span v-if="!$store.state.testRunner.isClientTest"> --  {{ time[name] }}</span>
+                            <span class="large-text">{{ clean(name) }}</span>
 
                             <span v-if="isClient">
-                                <img src="../../assets/validate-search.png"  @click.stop="doEval(name)">
+                                <button class="runallbutton" @click="doEval(name)">Run</button>
                             </span>
                             <span v-else>
-                                <img src="../../assets/press-play-button.png"  @click.stop="doRun(name)">
+                                <button class="runallbutton" @click="doRun(name)">Run</button>
                             </span>
 
                             <script-status v-if="statusRight" :status-right="statusRight" :name="name"> </script-status>
 
+                            <span v-if="!$store.state.testRunner.isClientTest"> --  {{ testTime(name) }}</span>
+
+                            <span v-if="$store.state.testRunner.currentTest === name">
+                                <img src="../../assets/arrow-down.png">
+                            </span>
+                            <span v-else>
+                                <img src="../../assets/arrow-right.png"/>
+                            </span>
+
                         </div>
                     </div>
                     <div v-if="selected === name">
-                        <router-view></router-view>
+                        <router-view></router-view>  <!--  opens TestOrEvalDetails   -->
                     </div>
                 </div>
             </div>
@@ -139,9 +147,16 @@
                 evalCount: 5,
                 channelObj: null,  // channel object
                 running: false,
+                testOpen: false,
             }
         },
         methods: {
+            testTime(name) {
+                const report = this.$store.state.testRunner.testReports[name]
+                if (!report)
+                    return null
+                return report.issued
+            },
             doJson() {
                 this.$store.commit('setUseJson', true)
             },
@@ -337,12 +352,6 @@
         border: 1px solid black;
         cursor: pointer;
     }
-    .align-right {
-        text-align: right;
-    }
-    .align-left {
-        text-align: left;
-    }
     .runallbutton {
         /*padding-bottom: 5px;*/
         background-color: cornflowerblue;
@@ -359,6 +368,9 @@
     }
 </style>
 <style>
+    .large-text {
+        font-size: large;
+    }
     .pass {
         background-color: lightgreen;
         text-align: left;
@@ -410,4 +422,11 @@
         cursor: pointer;
         border-radius: 25px;
     }
+    .align-right {
+        text-align: right;
+    }
+    .align-left {
+        text-align: left;
+    }
+
 </style>

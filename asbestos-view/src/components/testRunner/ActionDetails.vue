@@ -3,18 +3,40 @@
         <div v-if="script">
             <div v-bind:class="{
                 'not-run': isNotRun,
-                pass : isPass,
+                'pass-plain': isPass && !colorful,
+                pass : isPass && colorful,
                 error: isError,
-                fail: isFail}"  @click="toggleMessageDisplay()">
-                <span v-if="this.script.operation" class="name selectable">
-                    {{ this.operationType(this.script.operation) }}
+                fail: isFail && colorful,
+                'fail-plain': isFail && !colorful,
+            }"  @click="toggleMessageDisplay()">
+
+                <test-status v-if="!statusRight"
+                             :status-on-right="statusRight"
+                             :report="report"
+                > </test-status>
+
+                <span v-if="script.operation" class="name">
+                    {{ operationType(script.operation) }}
                 </span>
                 <span v-else>
-                    <span class="selectable">assert: </span>
+                    <span >assert: </span>
                 </span>
-                <span class="selectable">
+                <span>
                     {{ description }}
                 </span>
+
+                <test-status v-if="statusRight"
+                             :status-on-right="statusRight"
+                             :report="report"
+                > </test-status>
+
+                <span v-if="displayMessage">
+                    <img src="../../assets/arrow-down.png">
+                </span>
+                <span v-else>
+                    <img src="../../assets/arrow-right.png"/>
+                </span>
+
             </div>
         </div>
         <div v-else>
@@ -84,6 +106,7 @@
     import ScriptDisplay from "./ScriptDisplay"
     import VueMarkdown from 'vue-markdown'
     import colorizeTestReports from "../../mixins/colorizeTestReports";
+    import TestStatus from "./TestStatus";
 
     export default {
         data() {
@@ -182,7 +205,8 @@
         components: {
             ScriptDisplay,
             LogItem,
-            VueMarkdown
+            VueMarkdown,
+            TestStatus
         },
         mixins: [colorizeTestReports],
         name: "ActionDetails"

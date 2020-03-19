@@ -1,17 +1,39 @@
 <template>
     <div>
         <div v-if="script">
-            <div v-bind:class="{
-                'not-run': isNotRun,
-                error: isError,
-                pass : isPass,
-                fail: isFail}"  class="test-margins" @click="toggleDisplay()">
+            <span v-bind:class="{
+                pass: isPass && colorful,
+                'pass-plain': isPass && !colorful,
+                fail: isFail && colorful,
+                'fail-plain': isFail && !colorful,
+                 error: isError,
+                 'not-run': isNotRun,
+            }"  class="test-margins" @click="toggleDisplay()">
+
+                <test-status v-if="!statusRight"
+                             :status-on-right="statusRight"
+                             :report="report"
+                > </test-status>
+
                 <span>
                     <span v-if="label" class="bold">{{label}}: </span>
                     <span v-else class="bold">Test: </span>
                     {{ description }}
                 </span>
-            </div>
+            </span>
+
+            <test-status v-if="statusRight"
+                         :status-on-right="statusRight"
+                         :report="report"
+            > </test-status>
+
+            <span v-if="display">
+                <img src="../../assets/arrow-down.png">
+            </span>
+            <span v-else>
+                <img src="../../assets/arrow-right.png"/>
+            </span>
+
 
             <div v-if="isConditional" class="conditional-margins">
                 <div>
@@ -38,6 +60,7 @@
     import ActionDetails from './ActionDetails'
     import ScriptDetailsContained from "./ScriptDetailsContained";
     import colorizeTestReports from "../../mixins/colorizeTestReports";
+    import TestStatus from "./TestStatus";
 
     export default {
         data() {
@@ -95,7 +118,7 @@
             'label',
         ],
         components: {
-            ActionDetails, ScriptDetailsContained,
+            ActionDetails, ScriptDetailsContained, TestStatus
         },
         mixins: [colorizeTestReports],
         name: "TestDetails"
