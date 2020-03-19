@@ -1,13 +1,16 @@
 <template>
     <div>
+<!--        <br />-->
         <div v-if="script">
+            <div class="pre-test-gap"></div>
             <span v-bind:class="{
-                pass: isPass && colorful,
-                'pass-plain': isPass && !colorful,
-                fail: isFail && colorful,
-                'fail-plain': isFail && !colorful,
-                 error: isError,
-                 'not-run': isNotRun,
+                pass:         isPass  && colorful,
+                'pass-plain': isPass  && !colorful,
+                fail:         isFail  && colorful,
+                'fail-plain': isFail  && !colorful,
+                 error:       isError && colorful,
+                 'error-plain': isError && !colorful,
+                 'not-run':   isNotRun,
             }"  class="test-margins" @click="toggleDisplay()">
 
                 <test-status v-if="!statusRight"
@@ -53,6 +56,7 @@
                 </div>
             </div>
         </div>
+        <br />
     </div>
 </template>
 

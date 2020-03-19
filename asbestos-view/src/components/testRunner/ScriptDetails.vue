@@ -3,6 +3,9 @@
         <div v-if="script" class="script">
             <div v-if="script.description" class="script-description-margins">
                 {{ script.description }}
+                <div class="vdivider"></div>
+                <div class="vdivider"></div>
+                <div class="vdivider"></div>
             </div>
             <div v-if="displayDetail">
                 <div v-for="(fixture, i) in fixtures"

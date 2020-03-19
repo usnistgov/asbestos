@@ -4,8 +4,11 @@
             <span v-if="isPass">
                 <img src="../../assets/checked.png" class="align-right">
             </span>
-            <span v-else-if="isFail || isError">
+            <span v-else-if="isFail">
                 <img src="../../assets/error.png" class="align-right">
+            </span>
+            <span v-else-if="isError">
+                <img src="../../assets/yellow-error.png" class="align-right">
             </span>
             <span v-else>
                 <img src="../../assets/blank-circle.png" class="align-right">
@@ -15,8 +18,11 @@
             <span v-if="isPass">
                 <img src="../../assets/checked.png" class="align-left">
             </span>
-            <span v-else-if="isFail || isError">
+            <span v-else-if="isFail">
                 <img src="../../assets/error.png" class="align-left">
+            </span>
+            <span v-else-if="isError">
+                <img src="../../assets/yellow-error.png" class="align-left">
             </span>
             <span v-else>
                 <img src="../../assets/blank-circle.png" class="align-left">

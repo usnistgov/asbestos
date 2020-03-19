@@ -180,6 +180,10 @@
     .bold {
         font-weight: bold;
     }
+    .big-bold {
+        font-weight: bold;
+        font-size: large;
+    }
     .control-panel-item-title {
         font-weight: bold;
         /*cursor: pointer;*/
@@ -249,41 +253,6 @@
     .has-cursor {
         cursor: pointer;
     }
-    /*.pass {*/
-    /*    background-color: lightgreen;*/
-    /*    text-align: left;*/
-    /*    border: 1px dotted black;*/
-    /*    cursor: pointer;*/
-    /*    border-radius: 25px;*/
-    /*}*/
-    /*.fail {*/
-    /*    background-color: indianred;*/
-    /*    text-align: left;*/
-    /*    border: 1px dotted black;*/
-    /*    cursor: pointer;*/
-    /*    border-radius: 25px;*/
-    /*}*/
-    /*.error {*/
-    /*    background-color: indianred;*/
-    /*    text-align: left;*/
-    /*    border: 1px dotted black;*/
-    /*    cursor: pointer;*/
-    /*    border-radius: 25px;*/
-    /*}*/
-    /*.warning {*/
-    /*    background-color: #F6C6CE;*/
-    /*    text-align: left;*/
-    /*    border: 1px dotted black;*/
-    /*    cursor: pointer;*/
-    /*    border-radius: 25px;*/
-    /*}*/
-    /*.not-run {*/
-    /*    background-color: lightgray;*/
-    /*    text-align: left;*/
-    /*    border: 1px dotted black;*/
-    /*    cursor: pointer;*/
-    /*    border-radius: 25px;*/
-    /*}*/
     .instruction {
         text-align: left;
         padding-top: 5px;

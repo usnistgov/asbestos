@@ -1,6 +1,8 @@
 <template>
     <div>
+        <h2>Conformance Tests</h2>
         <div class="tool-title">
+            Test Collection:
             <span>{{ clean(testCollection) }}</span>
             <span class="divider"></span>
             <img id="reload" class="selectable" @click="load()" src="../../assets/reload.png"/>
@@ -39,9 +41,7 @@
                 </div>
             </span>
             <span v-else  class="instruction">
-                Server tests - click
-                <img src="../../assets/press-play-button.png">
-                to run test.
+                These are server tests
                 <!-- Display the property, if it exists, based on channel Type -->
                 <div v-if="channelObj">
                     <span v-if="channelObj.channelType === 'passthrough' || channelObj.channelType === 'fhir'">
@@ -88,9 +88,11 @@
         </div>
 
         <div>
+            <div class="big-bold">Tests</div>
             <div v-for="(name, i) in scriptNames"
                  :key="name + i">
-                <div >
+                <div>
+                    <br />
                     <div @click="openTest(name)">
                         <div v-bind:class="{
                                 pass: status[name] === 'pass' && colorful,
@@ -368,6 +370,10 @@
     }
 </style>
 <style>
+    .pre-test-gap{
+        height:1px;
+        width:auto;
+    }
     .large-text {
         font-size: large;
     }
@@ -399,7 +405,7 @@
         border-top: 1px solid black;
         /*border-bottom: 1px solid black;*/
         cursor: pointer;
-        border-radius: 25px;
+        /*border-radius: 25px;*/
     }
     .condition-fail {
         background-color: gold;
@@ -407,6 +413,13 @@
         border: 1px dotted black;
         cursor: pointer;
         border-radius: 25px;
+    }
+    .error-plain {
+        /*background-color: cornflowerblue;*/
+        text-align: left;
+        border-top: 1px solid black;
+        cursor: pointer;
+        /*border-radius: 25px;*/
     }
     .error {
         background-color: cornflowerblue;
@@ -421,6 +434,13 @@
         border: 1px dotted black;
         cursor: pointer;
         border-radius: 25px;
+    }
+    .not-run-plain {
+        /*background-color: lightgray;*/
+        text-align: left;
+        border-top: 1px solid black;
+        cursor: pointer;
+        /*border-radius: 25px;*/
     }
     .align-right {
         text-align: right;

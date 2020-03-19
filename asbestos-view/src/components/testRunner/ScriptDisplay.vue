@@ -23,13 +23,14 @@
         },
         computed: {
             filteredReport() {
-                if (!this.report) return null
-                const copy = JSON.parse(JSON.stringify(this.report))
-                if (copy.operation)
-                    copy.operation.message = 'removed by UI'
-                if (copy.assert)
-                    copy.assert.message = 'removed by UI'
-                return copy
+                return this.report
+                // if (!this.report) return null
+                // const copy = JSON.parse(JSON.stringify(this.report))
+                // if (copy.operation)
+                //     copy.operation.message = 'removed by UI'
+                // if (copy.assert)
+                //     copy.assert.message = 'removed by UI'
+                // return copy
             }
         },
         props: [

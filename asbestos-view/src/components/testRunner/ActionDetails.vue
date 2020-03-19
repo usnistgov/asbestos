@@ -2,10 +2,12 @@
     <div>
         <div v-if="script">
             <div v-bind:class="{
-                'not-run': isNotRun,
+                'not-run': isNotRun && colorful,
+                'not-run-plain': isNotRun && !colorful,
                 'pass-plain': isPass && !colorful,
                 pass : isPass && colorful,
-                error: isError,
+                error: isError && colorful,
+                'error-plain': isError && !colorful,
                 fail: isFail && colorful,
                 'fail-plain': isFail && !colorful,
             }"  @click="toggleMessageDisplay()">
