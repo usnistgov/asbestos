@@ -260,7 +260,7 @@ export const testRunnerStore = {
             return reports
         },
         async loadTestScript({commit}, parms) {
-            const testCollectionId = parms.testCollectionId
+            const testCollectionId = parms.testCollection
             const testId = parms.testId
             const url = `testScript/${testCollectionId}/${testId}`
             let script = ""
@@ -268,8 +268,10 @@ export const testRunnerStore = {
             promise.then(result => {
                 script = result.data
             })
+                .catch(function(error) {
+                    commit('setError', `Loading report from ${url} - ${error}`)
+                })
             await promise
-            commit('setDebug', script)
             commit('setTestScript', script)
             return script
         },

@@ -1,7 +1,27 @@
 <template>
     <div>
         <div v-if="$store.state.testRunner.isClientTest">
-            <client-details :sessionId="sessionId" :channelId="channelId" :testCollection="testCollection" :testId="testId"></client-details>
+            <div v-if="testScript">
+                <div class="instruction">
+                    {{ testScript.description }}
+                </div>
+                <div v-if="eventIds === null">
+                    No messages present on this channel
+                </div>
+                <div v-else>
+                    <div v-for="(eventId, eventi) in eventIds"
+                         :key="'Disp' + eventi">
+                        <client-details
+                                :sessionId="sessionId"
+                                :channelId="channelId"
+                                :testCollection="testCollection"
+                                :testId="testId"
+                                :eventId="eventId"></client-details>
+                    </div>
+                </div>
+            </div>
+
+
         </div>
         <div v-else>
             <script-details
@@ -16,6 +36,15 @@
     import ScriptDetails from './ScriptDetails'
     import ClientDetails from './ClientDetails'
     export default {
+        computed: {
+            testScript() {
+                return   this.$store.state.testRunner.testScripts[this.testId]
+            },
+            eventIds() {
+                if (!this.$store.state.testRunner.clientTestResult) return null
+                return Object.keys(this.$store.state.testRunner.clientTestResult[this.testId])
+            },
+        },
         props: [
             'sessionId', 'channelId', 'testCollection', 'testId'
         ],

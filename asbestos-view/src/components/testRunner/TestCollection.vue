@@ -233,7 +233,8 @@
                     })
                 const promises = []
                 promises.push(this.$store.dispatch('loadTestScripts', this.$store.state.testRunner.testScriptNames))
-                promises.push(this.$store.dispatch('loadTestReports', this.$store.state.testRunner.currentTestCollectionName))
+                if (!this.$store.state.testRunner.isClientTest)
+                    promises.push(this.$store.dispatch('loadTestReports', this.$store.state.testRunner.currentTestCollectionName))
                 await Promise.all(promises)
             },
             testReport(testName) {

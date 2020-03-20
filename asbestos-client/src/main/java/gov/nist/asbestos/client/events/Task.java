@@ -275,7 +275,7 @@ public class Task implements ITask {
 
     @Override
     public byte[] getResponseBody() {
-        Objects.requireNonNull(_responseHeaders);
+        //Objects.requireNonNull(_responseHeaders);
         if (_responseRawBody == null) {
             if (_responseBody != null) {
                 if (_responseHeaders.isZipped())
