@@ -1,7 +1,7 @@
 <template>
     <div>
         <div v-if="script && report" class="script">
-            <!--   add SETUP here  -->
+
             <div>
                 <span v-if="!noInspectLabel" class="selectable" @click.self="toggleEventDisplayed()">Inspect</span>
                 <span v-if="eventDisplayed">
@@ -19,77 +19,32 @@
                     </span>
                 </span>
             </div>
-            <div v-for="(test, testi) in tests" class="test-part"
+
+            <div class="vdivider"/>
+            <div class="vdivider"/>
+            <div class="vdivider"/>
+            Evaluation
+
+            <div v-for="(test, testi) in script.test" class="test-part"
                  :key="'Eval' + testi">
-                <div v-bind:class="testResult(testi)">{{test.description}}</div>
 
-                <!-- actions will be asserts only-->
-                <div v-for="(action, actioni) in actions(testi)" class="assert-part"
-                     :key="'Eval' + testi + 'Action' + actioni">
+                <eval-test-details
+                        :script="test"
+                        :report="report.test[testi]"
+                > </eval-test-details>
 
-                    <eval-action-details
-                            :script="testScript"
-                            :report="testReport"
-                    > </eval-action-details>
-
-
-
-<!--                    <div>-->
-<!--                        <div >-->
-<!--                            <div @click.self="selectAssert(testi, actioni)" v-bind:class="{-->
-<!--                                    pass: assertResult(testi, actioni) === 'pass' && colorful,-->
-<!--                                    'pass-plain': assertResult(testi, actioni) === 'pass' && !colorful,-->
-<!--                                    fail: assertResult(testi, actioni) === 'fail' && colorful,-->
-<!--                                    'fail-plain': assertResult(testi, actioni) === 'fail' && !colorful,-->
-<!--                                    error: assertResult(testi, actioni) === 'error' && colorful,-->
-<!--                                    'error-plain': assertResult(testi, actioni) === 'error' && !colorful,-->
-<!--                                    warning: assertResult(testi, actioni) === 'warning' && colorful,-->
-<!--                                    'not-run': assertResult(testi, actioni) === 'not-run'  && colorful-->
-<!--                            }">-->
-<!--                                <span class="selectable">Assert:</span> {{ assertDesc(testi, actioni) }}-->
-<!--                            </div>-->
-
-<!--                            <test-status v-if="!statusRight"-->
-<!--                                         :status-on-right="statusRight"-->
-<!--                                         :report="report"-->
-<!--                            > </test-status>-->
-
-<!--                            <div v-if="selectedTestIndex === testi && selectedAssertIndex === actioni" class="message-part">-->
-<!--                                <div v-if="assertRef(testi, actioni)">-->
-<!--                                    {{ assertRef(testi, actioni) }}-->
-<!--                                </div>-->
-<!--                                <ul>-->
-<!--                                    <li v-for="(item, itemi) in assertMessage(testi, actioni)" :key="'AM' + itemi">-->
-<!--                                        {{ item }}-->
-<!--                                    </li>-->
-<!--                                </ul>-->
-<!--                            </div>-->
-
-<!--                            <test-status v-if="statusRight"-->
-<!--                                         :status-on-right="statusRight"-->
-<!--                                         :report="report"-->
-<!--                            > </test-status>-->
-
-<!--                        </div>-->
-<!--                    </div>-->
-                </div>
             </div>
 
-            <!-- add TEARDOWN here -->
-
-        </div>
-        <div v-else>
-            Debug
         </div>
     </div>
 </template>
 
 <script>
     import errorHandlerMixin from '../../mixins/errorHandlerMixin'
-    import colorizeTestReports from "../../mixins/colorizeTestReports";
     import LogItem from "../logViewer/LogItem"
-    //import TestStatus from "./TestStatus";
-    import EvalActionDetails from "./EvalActionDetails";
+
+    import EvalTestDetails from "./EvalTestDetails";
+
 
     export default {
         data() {
@@ -121,8 +76,10 @@
                         continue
                     if (result === 'warning')
                         continue
+                    console.log(`${testIndex} - fail`)
                     return 'fail'
                 }
+                console.log(`${testIndex} - pass`)
                 return 'pass'
             },
             assertResult(testIndex, actionIndex) {
@@ -162,37 +119,37 @@
                 }
             },
             operationOrAssertion(testi, actioni) {
-                const action = this.script.test[testi].action[actioni]
+                const action = this.script.test[testi].action[actioni];
                 return action.operation ? `Operation: ${this.operationType(action.operation)}` : `Assert: ${this.assertionDescription(action.assert)}`
             },
             operationType(operation) {
-                return operation.type.code
+                return operation.type.code;
             },
             assertionDescription(assert) {
-                return assert.description === undefined ? "" : assert.description
+                return assert.description === undefined ? "" : assert.description;
             },
             loadTestScript() {
                 //await this.$store.dispatch('loadTestScripts', this.$store.state.testRunner.testScriptNames)
                 this.script = this.$store.state.testRunner.testScripts[this.testId]
             },
             loadTestReport() {
-                const reports = this.$store.state.testRunner.clientTestResult[this.testId]
+                const reports = this.$store.state.testRunner.clientTestResult[this.testId];
                 if (reports)
-                    this.report = reports[this.eventId]
+                    this.report = reports[this.eventId];
             },
             actions(testIndex) {
-                return this.script.test[testIndex].action === undefined ? [] : this.script.test[testIndex].action
+                return this.script.test[testIndex].action === undefined ? [] : this.script.test[testIndex].action;
             },
             scriptAction(testi, actioni) {
-                return this.script.test[testi].action[actioni]
+                return this.script.test[testi].action[actioni];
             },
             reportAction(testi, actioni) {
                 if (!this.report)
-                    return null
-                return this.report.test[testi].action[actioni]
+                    return null;
+                return this.report.test[testi].action[actioni];
             },
             assertMsg(assertId) {
-                return this.$store.state.testRunner.testAssertions[assertId]
+                return this.$store.state.testRunner.testAssertions[assertId];
             },
             runSingleEventEval() {
                 this.$store.dispatch('runSingleEventEval',
@@ -200,20 +157,21 @@
                         testId: this.testId,
                         eventId: this.eventId,
                         testCollectionName: this.testCollection
-                    })
+                    });
             },
             async testOrEventUpdated() {
                 if (this.runEval) {
                     if (!this.$store.state.testRunner.testAssertions)
-                        this.$store.dispatch('loadTestAssertions')
-                    await this.runSingleEventEval()
-                    await this.loadTestScript()
+                        await this.$store.dispatch('loadTestAssertions');
+                    await this.runSingleEventEval();
+                    await this.loadTestScript();
                 } else {
-                    await this.$store.dispatch('runEval', this.testId)
-                    this.loadTestScript()
-                    this.loadTestReport()
+                    await this.$store.dispatch('runEval', this.testId);
+                    this.loadTestScript();
+                    this.loadTestReport();
                 }
-            }
+            },
+
         },
         computed: {
             assertProfile() {
@@ -259,15 +217,14 @@
                 this.loadTestReport()
             }
         },
-        mixins: [ errorHandlerMixin, colorizeTestReports ],
+        mixins: [ errorHandlerMixin ],
         props: [
             'sessionId', 'channelId', 'testCollection', 'testId', 'eventId', 'runEval', 'noInspectLabel',
         ],
         components: {
+            EvalTestDetails,
             //EvalReportAssert
             LogItem,
-           // TestStatus,
-            EvalActionDetails
         },
         name: "EvalDetails"
     }
@@ -283,12 +240,7 @@
         margin-left: 20px;
         margin-right: 20px;
     }
-    .assert-part {
-        margin-left: 20px;
-        margin-right: 20px;
-        /*cursor: pointer;*/
-        /*text-decoration: underline;*/
-    }
+
     .message-part {
         margin-left: 25px;
         margin-right: 25px;

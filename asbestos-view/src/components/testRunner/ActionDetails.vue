@@ -27,11 +27,6 @@
                     {{ description }}
                 </span>
 
-                <test-status v-if="statusRight"
-                             :status-on-right="statusRight"
-                             :report="report"
-                > </test-status>
-
                 <span v-if="displayMessage">
                     <img src="../../assets/arrow-down.png">
                 </span>
