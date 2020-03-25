@@ -42,20 +42,23 @@
             </div>
 
             <div v-if="script.operation">
+               <span v-if="eventDisplayed && eventId">
+                    <img src="../../assets/arrow-down.png" @click="toggleEventDisplayed()">
+               </span>
+                <span v-else>
+                    <span v-if="eventId">
+                        <img src="../../assets/arrow-right.png" @click="toggleEventDisplayed()">
+                    </span>
+                </span>
+
                 <span v-if="eventId" class="selectable" @click="toggleEventDisplayed()">Inspect</span>
                 <span v-if="eventDisplayed && eventId">
-                    <img src="../../assets/arrow-down.png" @click="toggleEventDisplayed()">
                     <log-item
                             :sessionId="$store.state.base.session"
                             :channelId="$store.state.base.channelId"
                             :eventId="eventId"
                             :noNav="true">
                     </log-item>
-                </span>
-                <span v-else>
-                    <span v-if="eventId">
-                        <img src="../../assets/arrow-right.png" @click="toggleEventDisplayed()">
-                    </span>
                 </span>
             </div>
 

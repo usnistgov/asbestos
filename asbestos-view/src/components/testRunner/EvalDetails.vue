@@ -3,9 +3,16 @@
         <div v-if="script && report" class="script">
             <!--   add SETUP here  -->
             <div>
-                <span v-if="!noInspectLabel" class="selectable" @click.self="toggleEventDisplayed()">Inspect</span>
                 <span v-if="eventDisplayed">
                     <img src="../../assets/arrow-down.png" @click.self="toggleEventDisplayed()">
+                </span>
+                <span v-else>
+                    <span v-if="!noInspectLabel">
+                        <img src="../../assets/arrow-right.png" @click.self="toggleEventDisplayed()">
+                    </span>
+                </span>
+                <span v-if="!noInspectLabel" class="selectable" @click.self="toggleEventDisplayed()">Inspect</span>
+                <span v-if="eventDisplayed">
                         <log-item
                                 :sessionId="sessionId"
                                 :channelId="channelId"
@@ -13,15 +20,10 @@
                                 :noNav="true">
                         </log-item>
                     </span>
-                <span v-else>
-                    <span v-if="!noInspectLabel">
-                        <img src="../../assets/arrow-right.png" @click.self="toggleEventDisplayed()">
-                    </span>
-                </span>
             </div>
             <div v-for="(test, testi) in tests" class="test-part"
                  :key="'Eval' + testi">
-                <div v-bind:class="testResult(testi)">{{test.description}}</div>
+                <div v-bind:class="testResult(testi) + ((colorful)?'':'plain-detail')">{{test.description}}</div>
 
                 <!-- actions will be asserts only-->
                 <div v-for="(action, actioni) in actions(testi)" class="assert-part"

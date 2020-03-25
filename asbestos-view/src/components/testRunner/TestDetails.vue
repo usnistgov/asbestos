@@ -5,18 +5,26 @@
             <div class="pre-test-gap"></div>
             <span v-bind:class="{
                 pass:         isPass  && colorful,
-                'pass-plain': isPass  && !colorful,
+                'pass-plain-detail': isPass  && !colorful,
                 fail:         isFail  && colorful,
-                'fail-plain': isFail  && !colorful,
+                'fail-plain-detail': isFail  && !colorful,
                  error:       isError && colorful,
                  'error-plain': isError && !colorful,
-                 'not-run':   isNotRun,
+                 'not-run':   isNotRun && colorful,
+                 'not-run-plain-detail' : isNotRun && ! colorful,
             }"  class="test-margins" @click="toggleDisplay()">
 
                 <test-status v-if="!statusRight"
                              :status-on-right="statusRight"
                              :report="report"
                 > </test-status>
+
+            <span v-if="display">
+                <img src="../../assets/arrow-down.png">
+            </span>
+            <span v-else>
+                <img src="../../assets/arrow-right.png"/>
+            </span>
 
                 <span>
                     <span v-if="label" class="bold">{{label}}: </span>
@@ -29,13 +37,6 @@
                          :status-on-right="statusRight"
                          :report="report"
             > </test-status>
-
-            <span v-if="display">
-                <img src="../../assets/arrow-down.png">
-            </span>
-            <span v-else>
-                <img src="../../assets/arrow-right.png"/>
-            </span>
 
 
             <div v-if="isConditional" class="conditional-margins">

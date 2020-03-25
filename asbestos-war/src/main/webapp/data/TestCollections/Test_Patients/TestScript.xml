@@ -10,10 +10,10 @@
 		<TestScript>
 			<id value="1"/>
 			<test>  <!-- basic operation and validation -->
-				<description value="condition context"/>
+				<description value="condition context."/>
 				<action>
 					<operation>
-						<description value="looking for patient"/>
+						<description value="looking for patient."/>
 						<type>
 							<code value="search"/>
 						</type>
@@ -25,7 +25,7 @@
 				</action>
 				<action>
 					<assert>
-						<description value="Search has ok status"/>
+						<description value="Search has ok status."/>
 						<sourceId value="patient1-search"/>
 						<response value="okay"/>
 						<warningOnly value="false"/>
@@ -33,7 +33,7 @@
 				</action>
 				<action>
 					<assert>
-						<description value="No OperationOutcome"/>
+						<description value="No OperationOutcome."/>
 						<compareToSourceId value="patient1-search"/>
 						<compareToSourceExpression value="Bundle.entry.response.outcome.where(is(FHIR.OperationOutcome)).empty()"/>
 						<warningOnly value="false"/>
@@ -41,7 +41,7 @@
 				</action>
 				<action>
   				<assert>
-	  			  <description value="check for multiple copies on the server"/>
+	  			  <description value="check for multiple copies on the server."/>
 						<expression value="Bundle.total"/>
 						<operator value="lessThan"/>
 						<value value="2"/>
@@ -50,10 +50,10 @@
 				</action>
 			</test>
 			<test>  <!-- asserts to trigger conditional - one fail and condition is false -->
-				<description value="assertion"/>
+				<description value="assertion."/>
 				<action>
 					<assert>
-						<description value="needs loading"/>
+						<description value="needs loading."/>
 						<expression value="Bundle.total"/>
 						<operator value="equals"/>
 						<value value="0"/>
@@ -94,11 +94,11 @@
 			</valueReference>
 <!--			<valueString value="#patientNeedsLoading"/>-->
 		</modifierExtension>
-		<description value="conditional patient submission"/>
+		<description value="conditional patient submission."/>
 		<action>
 			<operation>
                 <!-- references patient from resourceCache in EC -->
-				<description value="submit patient"/>
+				<description value="submit patient."/>
 				<type>
 					<code value="create"/>
 				</type>

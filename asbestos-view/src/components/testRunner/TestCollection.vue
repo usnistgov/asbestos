@@ -1,6 +1,6 @@
 <template>
     <div>
-        <h2>Conformance Tests</h2>
+        <h2 class="conformance-tests-header">Conformance Tests</h2>
         <div class="tool-title">
             Test Collection:
             <span>{{ clean(testCollection) }}</span>
@@ -88,23 +88,29 @@
         </div>
 
         <div>
-            <div class="big-bold">Tests</div>
+            <h3 class="conformance-tests-header">Tests</h3>
             <div v-for="(name, i) in scriptNames"
                  :key="name + i">
                 <div>
                     <br />
                     <div @click="openTest(name)">
                         <div v-bind:class="{
-                                pass: status[name] === 'pass' && colorful,
-                                'pass-plain': status[name] === 'pass' && !colorful,
-                                fail: status[name] === 'fail' && colorful,
-                                'fail-plain': status[name] === 'fail' && !colorful,
-                                error: status[name] === 'error',
-                                'not-run': !status[name],
+                                'pass': status[name] === 'pass' && colorful,
+                                'pass-plain-header': status[name] === 'pass' && !colorful,
+                                'fail': status[name] === 'fail' && colorful,
+                                'fail-plain-header': status[name] === 'fail' && !colorful,
+                                'error': status[name] === 'error',
+                                'not-run':  status[name] === 'not-run' && colorful /*  !status[name] */,
+                                'not-run-plain': status[name] === 'not-run' && ! colorful,
                             }" >
 
                             <script-status v-if="!statusRight" :status-right="statusRight" :name="name"> </script-status>
-
+                            <span v-if="$store.state.testRunner.currentTest === name">
+                                <img src="../../assets/arrow-down.png">
+                            </span>
+                            <span v-else>
+                                <img src="../../assets/arrow-right.png"/>
+                            </span>
                             <span class="large-text">{{ clean(name) }}</span>
 
                             <span v-if="isClient">
@@ -118,12 +124,6 @@
 
                             <span v-if="!$store.state.testRunner.isClientTest"> --  {{ testTime(name) }}</span>
 
-                            <span v-if="$store.state.testRunner.currentTest === name">
-                                <img src="../../assets/arrow-down.png">
-                            </span>
-                            <span v-else>
-                                <img src="../../assets/arrow-right.png"/>
-                            </span>
 
                         </div>
                     </div>
@@ -339,6 +339,9 @@
 </script>
 
 <style scoped>
+    .conformance-tests-header {
+        background-color: #DBD9BE;
+    }
     .banner-color {
         background-color: lightgray;
         text-align: left;
@@ -393,6 +396,17 @@
         cursor: pointer;
         /*border-radius: 25px;*/
     }
+    .pass-plain-header {
+        margin: 2px;
+        text-align: left;
+        border-top: 1px solid black;
+        cursor: pointer;
+    }
+    .pass-plain-detail {
+        margin: 4px;
+        text-align: left;
+        cursor: pointer;
+    }
     .fail {
         background-color: indianred;
         text-align: left;
@@ -407,6 +421,17 @@
         /*border-bottom: 1px solid black;*/
         cursor: pointer;
         /*border-radius: 25px;*/
+    }
+    .fail-plain-header {
+        margin: 2px;
+        text-align: left;
+        border-top: 1px solid black;
+        cursor: pointer;
+    }
+    .fail-plain-detail {
+        margin: 4px;
+        text-align: left;
+        cursor: pointer;
     }
     .condition-fail {
         background-color: gold;
@@ -437,12 +462,16 @@
         border-radius: 25px;
     }
     .not-run-plain {
-        /*background-color: lightgray;*/
         text-align: left;
         border-top: 1px solid black;
         cursor: pointer;
-        /*border-radius: 25px;*/
     }
+    .not-run-plain-detail {
+        margin: 4px;
+        text-align: left;
+        cursor: pointer;
+    }
+
     .align-right {
         text-align: right;
     }

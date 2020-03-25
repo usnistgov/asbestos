@@ -215,7 +215,7 @@
         border: 1px solid black;
     }
     .panel {
-        padding: 20px;
+        padding: 27px;
     }
     .tooltip {
         position: relative;
