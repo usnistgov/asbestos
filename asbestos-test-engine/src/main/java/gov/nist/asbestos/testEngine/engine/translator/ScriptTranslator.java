@@ -5,6 +5,8 @@ import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.TestScript;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ScriptTranslator {
     private File testDef;
@@ -23,12 +25,18 @@ public class ScriptTranslator {
         if (script.hasTest()) {
             for (TestScript.TestScriptTestComponent test : script.getTest()) {
                 if (test.hasModifierExtension()) {
+                    List<ComponentReference> rawRefs = new ArrayList<>();
                     for (Extension e : test.getModifierExtension()) {
                         if (e.getUrl().equals("urn:import")) {
                             ComponentReference ref = new ComponentReference(testDef, e.getExtension());
                             ref.loadComponentHeader();
-                            resolve(ref, test);
+                            rawRefs.add(ref);
                         }
+                    }
+                    ComponentReferences refs = new ComponentReferences(rawRefs);
+
+                    for (ComponentReference ref : rawRefs) {
+                        resolve(ref, refs, test);
                     }
                 }
             }
@@ -37,7 +45,7 @@ public class ScriptTranslator {
         return output;
     }
 
-    private void resolve(ComponentReference ref, TestScript.TestScriptTestComponent test) {
+    private void resolve(ComponentReference ref, ComponentReferences refs, TestScript.TestScriptTestComponent test) {
         // within test, update
         // requestId, sourceId, targetId from parameter-in
         // responseId from parameter-out
