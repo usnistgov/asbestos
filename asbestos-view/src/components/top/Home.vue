@@ -34,19 +34,19 @@
         </div>
         <div v-if="$store.state.heartbeat.hapiIsAlive">
             <img src="../../assets/check.png">
-            HAPI server is responding at {{$store.state.testRunner.hapiDetails}}
+            HAPI server is responding at {{$store.state.heartbeat.hapiDetails}}
         </div>
         <div v-else>
             <img src="../../assets/cross.png">
-            HAPI server is <b>not</b> responding at {{$store.state.testRunner.hapiDetails}}
+            HAPI server is <b>not</b> responding at {{$store.state.heartbeat.hapiDetails}}
         </div>
         <div v-if="$store.state.heartbeat.xdsIsAlive">
             <img src="../../assets/check.png">
-            XDS Toolkit is responding at {{$store.state.testRunner.xdsDetails}}
+            XDS Toolkit is responding at {{$store.state.heartbeat.xdsDetails}}
         </div>
         <div v-else>
             <img src="../../assets/cross.png">
-            XDS Toolkit is <b>not</b> responding at {{$store.state.testRunner.xdsDetails}}
+            XDS Toolkit is <b>not</b> responding at {{$store.state.heartbeat.xdsDetails}}
         </div>
 
 
