@@ -168,7 +168,7 @@
         /*grid-column: 2;*/
         /*grid-row: 2;*/
         position: absolute;
-        right: 4px;
+        right: 9px;
         text-align: left;
     }
 </style>

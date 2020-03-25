@@ -397,13 +397,12 @@
         /*border-radius: 25px;*/
     }
     .pass-plain-header {
-        margin: 2px;
         text-align: left;
         border-top: 1px solid black;
         cursor: pointer;
     }
     .pass-plain-detail {
-        margin: 4px;
+        margin: 2px;
         text-align: left;
         cursor: pointer;
     }
@@ -423,13 +422,12 @@
         /*border-radius: 25px;*/
     }
     .fail-plain-header {
-        margin: 2px;
         text-align: left;
         border-top: 1px solid black;
         cursor: pointer;
     }
     .fail-plain-detail {
-        margin: 4px;
+        margin: 2px;
         text-align: left;
         cursor: pointer;
     }
@@ -467,7 +465,7 @@
         cursor: pointer;
     }
     .not-run-plain-detail {
-        margin: 4px;
+        margin: 2px;
         text-align: left;
         cursor: pointer;
     }
