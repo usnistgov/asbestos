@@ -1,5 +1,5 @@
 <TestScript xmlns="http://hl7.org/fhir">
-    <description value="Submit Provide Document Bundle to MHD Document Recipient. The DocumentReference is missing so the transaction must fail (400)"/>
+    <description value="Submit Provide Document Bundle to MHD Document Recipient. The DocumentReference is missing so the transaction must fail (400)."/>
     <fixture id="pdb-bundle">
         <resource>
             <reference value="Bundle/pdb.xml"/>
@@ -34,11 +34,11 @@
         <sourceId value="read-back"/>
     </variable>
     <test>
-        <description value="Submit Provide Document Bundle"/>
+        <description value="Submit Provide Document Bundle."/>
         <action>
             <operation>
                 <!-- references patient from resourceCache in EC -->
-                <description value="send PDB"/>
+                <description value="send PDB."/>
                 <label value="create"/>
                 <type>
                     <system value="https://github.com/usnistgov/asbestos/wiki/Testscript-Operation-Codes"/>
@@ -50,7 +50,7 @@
         </action>
         <action>
             <assert>
-                <description value="... fails"/>
+                <description value="... fails."/>
                 <response value="bad"/>
                 <warningOnly value="false"/>
             </assert>

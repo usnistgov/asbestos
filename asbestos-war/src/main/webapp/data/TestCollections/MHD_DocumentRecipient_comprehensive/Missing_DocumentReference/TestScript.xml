@@ -37,7 +37,7 @@
         <action>
             <operation>
                 <!-- references patient from resourceCache in EC -->
-                <description value="send PDB"/>
+                <description value="send PDB."/>
                 <label value="create"/>
                 <type>
                     <system value="https://github.com/usnistgov/asbestos/wiki/Testscript-Operation-Codes"/>
@@ -49,14 +49,14 @@
         </action>
         <action>
             <assert>
-                <description value="... transaction fails with status 400"/>
+                <description value="... transaction fails with status 400."/>
                 <response value="bad"/>
                 <warningOnly value="false"/>
             </assert>
         </action>
         <action>
             <assert>
-                <description value="... transaction returns OperationOutcome"/>
+                <description value="... transaction returns OperationOutcome."/>
                 <compareToSourceId value="pdb-response"/>
                 <compareToSourceExpression value="OperationOutcome.exists()"/>
                 <warningOnly value="false"/>

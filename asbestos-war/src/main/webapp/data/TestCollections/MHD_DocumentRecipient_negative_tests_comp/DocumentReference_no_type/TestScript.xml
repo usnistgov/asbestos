@@ -39,14 +39,14 @@
         <sourceId value="pdb-bundle"/>
     </variable>
     <test>
-        <description value="Submit Provide Document Bundle"/>
+        <description value="Submit Provide Document Bundle."/>
         <!--
             Actions generic to all PDB transactions
         -->
         <action>
             <operation>
                 <!-- references patient from resourceCache in EC -->
-                <description value="send PDB"/>
+                <description value="send PDB."/>
                 <label value="create"/>
                 <type>
                     <system value="https://github.com/usnistgov/asbestos/wiki/Testscript-Operation-Codes"/>
@@ -58,7 +58,7 @@
         </action>
         <action>
             <assert>
-                <description value="... transaction must fail"/>
+                <description value="... transaction must fail."/>
                 <response value="bad"/>
                 <warningOnly value="false"/>
             </assert>

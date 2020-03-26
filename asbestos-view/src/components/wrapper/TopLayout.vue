@@ -168,7 +168,7 @@
         /*grid-column: 2;*/
         /*grid-row: 2;*/
         position: absolute;
-        right: 4px;
+        right: 9px;
         text-align: left;
     }
 </style>
@@ -215,7 +215,7 @@
         border: 1px solid black;
     }
     .panel {
-        padding: 20px;
+        padding: 27px;
     }
     .tooltip {
         position: relative;
