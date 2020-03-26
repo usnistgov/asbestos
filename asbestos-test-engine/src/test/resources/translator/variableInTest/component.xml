@@ -1,10 +1,10 @@
 <TestScript xmlns="http://hl7.org/fhir">
     <extension url="urn:component-parameters">
         <extension url="urn:parameter-in">
-            <valueString  value="pdbRequest"/>
+            <valueString  value="patientFixture"/>
         </extension>
-        <extension url="urn:parameter-out">
-            <valueString value="pdbResponse"/>
+        <extension url="urn:parameter-in">
+            <valueString  value="patientFamilyNameVar"/>
         </extension>
     </extension>
 
@@ -14,14 +14,11 @@
 
     <test>
         <action>
-            <operation>
-                <type>
-                    <system value="https://github.com/usnistgov/asbestos/wiki/Testscript-Operation-Codes"/>
-                    <code value="mhd-pdb-transaction"/>
-                </type>
-                <responseId value="pdbResponse"/>
-                <sourceId value="pdbRequest"/>
-            </operation>
+            <assert>
+                <path value="Patient/family/name"/>
+                <sourceId value="patientFixture"/>
+                <value value="${patientFamilyNameVar}"/>
+            </assert>
         </action>
     </test>
 </TestScript>

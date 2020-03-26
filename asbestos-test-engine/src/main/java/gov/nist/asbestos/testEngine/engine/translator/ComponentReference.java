@@ -20,18 +20,18 @@ public class ComponentReference {
             for (Extension e : imd.getExtension()) {
                 String url = e.getUrl();
                 String value = e.getValue().toString();  // value type is Type????
-                if (url.equals("urn:component")) {
+                if (url.equals("component")) {
                     this.relativePath = value;
-                } else if (url.equals("urn:component-in")) {
+                } else if (url.equals("urn:parameter-in")) {
                     Parameter p = new Parameter();
                     p.setCallerName(value);
                     in.add(p);
-                } else if (url.equals("urn:component-out")) {
+                } else if (url.equals("urn:parameter-out")) {
                     Parameter p = new Parameter();
                     p.setCallerName(value);
                     out.add(p);
                 } else {
-                    throw new RuntimeException("Do not understand extension " + url);
+                    throw new RuntimeException("Do not understand extension " + url + " in " + testDef);
                 }
             }
         }
@@ -57,6 +57,10 @@ public class ComponentReference {
         return component;
     }
 
+    public String getRelativePath() {
+        return relativePath;
+    }
+
     public void loadComponentHeader() {
         int inI = 0;
         int outI = 0;
@@ -76,7 +80,7 @@ public class ComponentReference {
                     out.get(outI).setLocalName(value);
                     outI++;
                 } else {
-                    throw new RuntimeException("Component " + relativePath + " was not called with a " + inI + "th out parameter");
+                    throw new RuntimeException("Component " + relativePath + " was not called with a " + outI + "th out parameter");
                 }
             }
         }

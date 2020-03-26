@@ -48,4 +48,8 @@ public class ComponentReferences {
         }
         return null;
     }
+
+    public List<ComponentReference> getReferences() {
+        return refs;
+    }
 }
