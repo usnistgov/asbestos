@@ -1,7 +1,6 @@
 <template>
-    <div>
-        <div v-if="$store.state.testRunner.isClientTest">
-            <div v-if="testScript">
+    <ul class="noTopMargin">
+        <li v-if="$store.state.testRunner.isClientTest && testScript">
                 <div class="instruction">
                     {{ testScript.description }}
                 </div>
@@ -9,7 +8,8 @@
                     No messages present on this channel
                 </div>
                 <div v-else>
-                    <div v-for="(eventId, eventi) in eventIds"
+                    <ul class="noListStyle">
+                    <li v-for="(eventId, eventi) in eventIds"
                          :key="'Disp' + eventi">
                         <client-details
                                 :sessionId="sessionId"
@@ -17,19 +17,17 @@
                                 :testCollection="testCollection"
                                 :testId="testId"
                                 :eventId="eventId"></client-details>
-                    </div>
+                    </li>
+                    </ul>
                 </div>
-            </div>
-
-
-        </div>
-        <div v-else>
+        </li>
+        <li v-else>
             <script-details
                 :script="$store.state.testRunner.testScripts[$store.state.testRunner.currentTest]"
                 :report="$store.state.testRunner.testReports[$store.state.testRunner.currentTest]"
             > </script-details>
-        </div>
-    </div>
+        </li>
+    </ul>
 </template>
 
 <script>
@@ -60,5 +58,6 @@
 </script>
 
 <style scoped>
+
 
 </style>

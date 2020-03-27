@@ -6,7 +6,7 @@
                 error: isError,
                 'condition-fail': isConditionFailed,
                 pass : isPass,
-                fail: isFail}"  class="test-margins" @click="toggleConditionDisplay()">
+                fail: isFail}"  class="test-margins" @click.stop="toggleConditionDisplay()">
                 <span v-if="hasOperation">
                     <span class="bold">Condition Context: </span> <!--{{ description }}-->
                 </span>
@@ -15,7 +15,7 @@
                 </span>
             </div>
 
-            <div v-if="displayCondition" @click="toggleThenClauseDisplay()">
+            <div v-if="displayCondition" @click.stop="toggleThenClauseDisplay()">
                 <div v-for="(action, actioni) in script.action" class="action-margins"
                      :key="'Action' + actioni">
                     <action-details-contained

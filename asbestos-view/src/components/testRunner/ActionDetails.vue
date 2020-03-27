@@ -1,7 +1,8 @@
 <template>
-    <div>
+<!--    <div>-->
         <div v-if="script">
-            <div v-bind:class="{
+            <span
+            v-bind:class="{
                 'not-run': isNotRun && colorful,
                 'not-run-plain-detail': isNotRun && !colorful,
                 'pass-plain-detail': isPass && !colorful,
@@ -10,7 +11,8 @@
                 'error-plain': isError && !colorful,
                 fail: isFail && colorful,
                 'fail-plain-detail': isFail && !colorful,
-            }"  @click="toggleMessageDisplay()">
+            }"
+            @click.stop="toggleMessageDisplay()">
 
                 <test-status v-if="!statusRight"
                              :status-on-right="statusRight"
@@ -41,7 +43,63 @@
 
 
 
+            </span>
+            <div v-if="displayMessage">
+
+                <div v-if="message && message.indexOf('#') === -1">
+                    <ul>
+                        <div v-for="(line, linei) in translateNL(message)" :key="'msgDisp' + linei">
+                            <li>
+                                {{ line }}
+                            </li>
+                        </div>
+                    </ul>
+                </div>
+                <div v-else>
+                    No Evaluation
+                </div>
+
+                <!--  Inspect-->
+                <div v-if="script.operation">
+                <span v-if="eventDisplayed && eventId">
+                    <img src="../../assets/arrow-down.png" @click.stop="toggleEventDisplayed()">
+                </span>
+                    <span v-else>
+                    <span v-if="eventId">
+                        <img src="../../assets/arrow-right.png" @click.stop="toggleEventDisplayed()">
+                    </span>
+                </span>
+
+                    <span v-if="eventId" class="selectable" @click.stop="toggleEventDisplayed()">Inspect</span>
+                    <span v-if="eventDisplayed && eventId">
+                    <log-item
+                            :sessionId="$store.state.base.session"
+                            :channelId="$store.state.base.channelId"
+                            :eventId="eventId"
+                            :noNav="true">
+                    </log-item>
+                </span>
+                </div>
+
+                <!-- Test Script/Report -->
+                <div>
+               <span v-if="displayScript">
+                    <img src="../../assets/arrow-down.png" @click.stop="toggleScriptDisplayed()">
+               </span>
+                    <span v-else>
+                    <img src="../../assets/arrow-right.png" @click.stop="toggleScriptDisplayed()">
+                </span>
+                    <span class="selectable" @click.stop="toggleScriptDisplayed()">Test Script/Report</span>
+                    <span v-if="displayScript">
+                   <vue-markdown v-if="message">{{message}}</vue-markdown>
+                    <script-display
+                            :script="script"
+                            :report="report">
+                    </script-display>
+                </span>
+                </div>
             </div>
+
         </div>
         <div v-else>
             <!--
@@ -51,63 +109,7 @@
                 {{ translateNL(report[0].assert.message)}}
             </div>
         </div>
-
-        <div v-if="displayMessage">
-
-            <div v-if="message && message.indexOf('#') === -1">
-                <ul>
-                    <div v-for="(line, linei) in translateNL(message)" :key="'msgDisp' + linei">
-                        <li>
-                            {{ line }}
-                        </li>
-                    </div>
-                </ul>
-            </div>
-            <div v-else>
-                No Evaluation
-            </div>
-
-        <!--  Inspect-->
-            <div v-if="script.operation">
-                <span v-if="eventDisplayed && eventId">
-                    <img src="../../assets/arrow-down.png" @click="toggleEventDisplayed()">
-                </span>
-                <span v-else>
-                    <span v-if="eventId">
-                        <img src="../../assets/arrow-right.png" @click="toggleEventDisplayed()">
-                    </span>
-                </span>
-
-                <span v-if="eventId" class="selectable" @click="toggleEventDisplayed()">Inspect</span>
-                <span v-if="eventDisplayed && eventId">
-                    <log-item
-                            :sessionId="$store.state.base.session"
-                            :channelId="$store.state.base.channelId"
-                            :eventId="eventId"
-                            :noNav="true">
-                    </log-item>
-                </span>
-            </div>
-
-            <!-- Test Script/Report -->
-            <div>
-               <span v-if="displayScript">
-                    <img src="../../assets/arrow-down.png" @click="toggleScriptDisplayed()">
-               </span>
-                <span v-else>
-                    <img src="../../assets/arrow-right.png" @click="toggleScriptDisplayed()">
-                </span>
-                <span class="selectable" @click="toggleScriptDisplayed()">Test Script/Report</span>
-                <span v-if="displayScript">
-                   <vue-markdown v-if="message">{{message}}</vue-markdown>
-                    <script-display
-                            :script="script"
-                            :report="report">
-                    </script-display>
-                </span>
-            </div>
-        </div>
-    </div>
+<!--    </div>-->
 </template>
 
 <script>

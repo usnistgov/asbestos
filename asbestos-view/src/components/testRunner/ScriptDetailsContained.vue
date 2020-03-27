@@ -92,6 +92,7 @@
 
 </style>
 <style>
+    /*
     .test-margins {
         margin-left: 20px;
         margin-right: 20px;
@@ -108,5 +109,7 @@
         margin-left: 30px;
         margin-right: 30px;
     }
+
+     */
 
 </style>

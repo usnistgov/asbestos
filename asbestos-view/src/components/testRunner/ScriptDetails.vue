@@ -1,11 +1,16 @@
 <template>
     <div>
         <div v-if="script" class="script">
-            <div v-if="script.description" class="script-description-margins">
-                {{ script.description }}
-                <div class="vdivider"></div>
-                <div class="vdivider"></div>
-                <div class="vdivider"></div>
+            <div v-if="script.description && script.description != ''" class="script-description-margins">
+                {{
+                script.description
+                }}
+<!--                <div class="vdivider"></div>-->
+<!--                <div class="vdivider"></div>-->
+<!--                <div class="vdivider"></div>-->
+            </div>
+            <div class="grayText" v-else>
+                (No description.)
             </div>
             <div v-if="displayDetail">
                 <div v-for="(fixture, i) in fixtures"
@@ -111,6 +116,7 @@
 
 </style>
 <style>
+    /*
     .test-margins {
         margin-left: 20px;
         margin-right: 20px;
@@ -127,5 +133,7 @@
         margin-left: 30px;
         margin-right: 30px;
     }
+
+     */
 
 </style>

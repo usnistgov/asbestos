@@ -89,11 +89,9 @@
 
         <div>
             <h3 class="conformance-tests-header">Tests</h3>
-            <div v-for="(name, i) in scriptNames"
-                 :key="name + i">
-                <div>
-                    <br />
-                    <div @click="openTest(name)">
+            <div>
+            <div class="testBarMargin" v-for="(name, i) in scriptNames"
+                 :key="name + i" >
                         <div v-bind:class="{
                                 'pass': status[name] === 'pass' && colorful,
                                 'pass-plain-header': status[name] === 'pass' && !colorful,
@@ -102,7 +100,7 @@
                                 'error': status[name] === 'error',
                                 'not-run':  status[name] === 'not-run' && colorful /*  !status[name] */,
                                 'not-run-plain': status[name] === 'not-run' && ! colorful,
-                            }" >
+                            }" @click.prevent="openTest(name)">
 
                             <script-status v-if="!statusRight" :status-right="statusRight" :name="name"> </script-status>
                             <span v-if="$store.state.testRunner.currentTest === name">
@@ -117,7 +115,7 @@
                                 <button class="runallbutton" @click="doEval(name)">Run</button>
                             </span>
                             <span v-else>
-                                <button class="runallbutton" @click="doRun(name)">Run</button>
+                                <button class="runallbutton" @click.stop="doRun(name)">Run</button>
                             </span>
 
                             <script-status v-if="statusRight" :status-right="statusRight" :name="name"> </script-status>
@@ -126,11 +124,8 @@
 
 
                         </div>
-                    </div>
-                    <div v-if="selected === name">
-                        <router-view></router-view>  <!--  opens TestOrEvalDetails   -->
-                    </div>
-                </div>
+                        <router-view v-if="selected === name"></router-view>  <!--  opens TestOrEvalDetails   -->
+            </div>
             </div>
         </div>
 
@@ -374,6 +369,9 @@
     }
 </style>
 <style>
+    .noListStyle {
+        list-style-type: none;
+    }
     .pre-test-gap{
         height:1px;
         width:auto;
@@ -402,7 +400,7 @@
         cursor: pointer;
     }
     .pass-plain-detail {
-        margin: 2px;
+        margin-bottom: 2px;
         text-align: left;
         cursor: pointer;
     }
@@ -427,7 +425,7 @@
         cursor: pointer;
     }
     .fail-plain-detail {
-        margin: 2px;
+        margin-bottom: 2px;
         text-align: left;
         cursor: pointer;
     }
@@ -465,7 +463,7 @@
         cursor: pointer;
     }
     .not-run-plain-detail {
-        margin: 2px;
+        margin-bottom: 2px;
         text-align: left;
         cursor: pointer;
     }
@@ -475,6 +473,19 @@
     }
     .align-left {
         text-align: left;
+    }
+    .debugIndicator {
+        list-style-type: "\1F6D1";
+        /* 1F6D1 = Stop sign */
+    }
+    .noTopMargin {
+        margin-top: 0px;
+    }
+    .grayText {
+        color: gray;
+    }
+    .testBarMargin {
+        margin-bottom: 3px;
     }
 
 </style>

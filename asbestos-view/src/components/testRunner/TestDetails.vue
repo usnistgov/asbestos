@@ -1,7 +1,7 @@
 <template>
-    <div>
+    <ul class="noListStyle">
 <!--        <br />-->
-        <div v-if="script">
+        <li v-if="script">
             <div class="pre-test-gap"></div>
             <span v-bind:class="{
                 pass:         isPass  && colorful,
@@ -12,7 +12,7 @@
                  'error-plain': isError && !colorful,
                  'not-run':   isNotRun && colorful,
                  'not-run-plain-detail' : isNotRun && ! colorful,
-            }"  class="test-margins" @click="toggleDisplay()">
+            }"  class="test-margins" @click.stop="toggleDisplay()">
 
                 <test-status v-if="!statusRight"
                              :status-on-right="statusRight"
@@ -48,17 +48,17 @@
                 </div>
             </div>
 
-            <div v-if="display">
-                <div v-for="(action, actioni) in script.action" class="action-margins"
+            <ul v-if="display" class="noListStyle">
+                <li v-for="(action, actioni) in script.action" class="action-margins"
                      :key="'Action' + actioni">
                     <action-details
                             :script="action"
                             :report="report && report.action ? report.action[actioni] : null"> </action-details>
-                </div>
-            </div>
-        </div>
-        <br />
-    </div>
+                </li>
+            </ul>
+        </li>
+<!--        <br />-->
+    </ul>
 </template>
 
 <script>
