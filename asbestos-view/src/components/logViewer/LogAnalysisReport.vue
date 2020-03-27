@@ -1,9 +1,9 @@
 <template>
     <div>
         <div v-if="report && !noInspectLabel" class="has-cursor">
-            <span @click.stop="closed = !closed">Inspect</span>
             <span v-if="closed"><img src="../../assets/arrow-right.png" @click.stop="closed = !closed"/></span>
             <span v-else><img src="../../assets/arrow-down.png" @click.stop="closed = !closed"/></span>
+            <span @click.stop="closed = !closed">Inspect</span>
         </div>
         <div v-if="!closed">
             <!--  report is the Inspection report and not TestReport    -->

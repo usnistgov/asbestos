@@ -3,19 +3,26 @@
         <div v-if="script">
             <div v-bind:class="{
                 'not-run': isNotRun && colorful,
-                'not-run-plain': isNotRun && !colorful,
-                'pass-plain': isPass && !colorful,
+                'not-run-plain-detail': isNotRun && !colorful,
+                'pass-plain-detail': isPass && !colorful,
                 pass : isPass && colorful,
                 error: isError && colorful,
                 'error-plain': isError && !colorful,
                 fail: isFail && colorful,
-                'fail-plain': isFail && !colorful,
+                'fail-plain-detail': isFail && !colorful,
             }"  @click="toggleMessageDisplay()">
 
                 <test-status v-if="!statusRight"
                              :status-on-right="statusRight"
                              :report="report"
                 > </test-status>
+
+                <span v-if="displayMessage">
+                    <img src="../../assets/arrow-down.png">
+                </span>
+                <span v-else>
+                    <img src="../../assets/arrow-right.png"/>
+                </span>
 
                 <span v-if="script.operation" class="name">
                     {{ operationType(script.operation) }}
@@ -32,12 +39,7 @@
                              :report="report"
                 > </test-status>
 
-                <span v-if="displayMessage">
-                    <img src="../../assets/arrow-down.png">
-                </span>
-                <span v-else>
-                    <img src="../../assets/arrow-right.png"/>
-                </span>
+
 
             </div>
         </div>
@@ -67,9 +69,17 @@
 
         <!--  Inspect-->
             <div v-if="script.operation">
-                <span v-if="eventId" class="selectable" @click="toggleEventDisplayed()">Inspect</span>
                 <span v-if="eventDisplayed && eventId">
                     <img src="../../assets/arrow-down.png" @click="toggleEventDisplayed()">
+                </span>
+                <span v-else>
+                    <span v-if="eventId">
+                        <img src="../../assets/arrow-right.png" @click="toggleEventDisplayed()">
+                    </span>
+                </span>
+
+                <span v-if="eventId" class="selectable" @click="toggleEventDisplayed()">Inspect</span>
+                <span v-if="eventDisplayed && eventId">
                     <log-item
                             :sessionId="$store.state.base.session"
                             :channelId="$store.state.base.channelId"
@@ -77,26 +87,23 @@
                             :noNav="true">
                     </log-item>
                 </span>
-                <span v-else>
-                    <span v-if="eventId">
-                        <img src="../../assets/arrow-right.png" @click="toggleEventDisplayed()">
-                    </span>
-                </span>
             </div>
 
             <!-- Test Script/Report -->
             <div>
+               <span v-if="displayScript">
+                    <img src="../../assets/arrow-down.png" @click="toggleScriptDisplayed()">
+               </span>
+                <span v-else>
+                    <img src="../../assets/arrow-right.png" @click="toggleScriptDisplayed()">
+                </span>
                 <span class="selectable" @click="toggleScriptDisplayed()">Test Script/Report</span>
                 <span v-if="displayScript">
-                    <img src="../../assets/arrow-down.png" @click="toggleScriptDisplayed()">
                    <vue-markdown v-if="message">{{message}}</vue-markdown>
                     <script-display
                             :script="script"
                             :report="report">
                     </script-display>
-                </span>
-                <span v-else>
-                    <img src="../../assets/arrow-right.png" @click="toggleScriptDisplayed()">
                 </span>
             </div>
         </div>

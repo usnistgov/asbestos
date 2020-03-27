@@ -36,7 +36,7 @@ class FixtureTest {
 
 //    @Test
 //    void autoCreateFlag() {
-//        TestScript testScript = load("/fixtures/autoCreate/TestScript.xml");
+//        TestScript testScript = load("/fixtures/autoCreate/script.xml");
 //        assertNotNull(testScript);
 //        assertEquals(1, testScript.getFixture().size());
 //        assertTrue(testScript.getFixture().get(0).getAutocreate());

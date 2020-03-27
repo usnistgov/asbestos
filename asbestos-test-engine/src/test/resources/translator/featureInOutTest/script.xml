@@ -1,0 +1,39 @@
+<TestScript xmlns="http://hl7.org/fhir">
+    <url value=""/>
+    <name value="SendPdb"/>
+    <status value="active"/>
+
+    <!-- Static Fixtures -->
+    <fixture id="pdb-bundle">
+        <resource>
+            <reference value="Bundle/pdb.xml"/>
+        </resource>
+    </fixture>
+    <fixture id="patient">
+        <resource>
+            <reference value="Patient/Alex_Alder.json"/>
+        </resource>
+    </fixture>
+
+    <variable>
+        <name value="requestPatientRef"/>
+        <expression value="Bundle.entry.fullUrl"/>
+        <sourceId value="patient"/>
+    </variable>
+
+    <test>
+        <modifierExtension url="urn:import">
+            <extension url="component">
+                <valueString value="./component.xml"/>
+            </extension>
+            <extension url="urn:parameter-in">
+                <valueString  value="pdb-bundle"/>
+            </extension>
+            <extension url="urn:parameter-out">
+                <valueString value="pdb-response"/>
+            </extension>
+        </modifierExtension>
+
+    </test>
+
+</TestScript>

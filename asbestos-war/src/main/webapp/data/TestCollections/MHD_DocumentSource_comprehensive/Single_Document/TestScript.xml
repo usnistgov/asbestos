@@ -36,6 +36,9 @@
                 <warningOnly value="false"/>
             </assert>
         </action>
+    </test>
+    <test>
+        <description value="Request Bundle"/>
         <action>
             <assert>
                 <description value="contains one DocumentManifest|MHDPDBOneDocumentManifest"/>
@@ -52,9 +55,6 @@
                 <warningOnly value="false"/>
             </assert>
         </action>
-    </test>
-    <test>
-        <description value="Request Bundle"/>
         <action>
             <assert>
                 <description value="Bundle.entry.fullUrl starts with http, urn:uuid: or urn:oid:"/>

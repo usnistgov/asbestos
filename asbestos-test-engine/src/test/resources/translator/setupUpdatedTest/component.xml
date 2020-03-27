@@ -1,0 +1,27 @@
+<TestScript xmlns="http://hl7.org/fhir">
+    <extension url="urn:component-parameters">
+        <extension url="urn:parameter-in">
+            <valueString  value="pdbRequest"/>
+        </extension>
+        <extension url="urn:parameter-out">
+            <valueString value="pdbResponse"/>
+        </extension>
+    </extension>
+
+    <url value="xxx"/>
+    <name value="xxx"/>
+    <status value="active"/>
+
+    <setup>
+        <action>
+            <operation>
+                <type>
+                    <system value="https://github.com/usnistgov/asbestos/wiki/Testscript-Operation-Codes"/>
+                    <code value="mhd-pdb-transaction"/>
+                </type>
+                <responseId value="pdbResponse"/>
+                <sourceId value="pdbRequest"/>
+            </operation>
+        </action>
+    </setup>
+</TestScript>

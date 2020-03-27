@@ -1,0 +1,31 @@
+<TestScript xmlns="http://hl7.org/fhir">
+    <url value=""/>
+    <name value="SendPdb"/>
+    <status value="active"/>
+
+    <fixture id="patient">
+        <resource>
+            <reference value="Patient/Alex_Alder.json"/>
+        </resource>
+    </fixture>
+    <variable>
+        <name value="familyName"/>
+        <defaultValue value="Jones"/>
+    </variable>
+
+    <test>
+        <modifierExtension url="urn:import">
+            <extension url="component">
+                <valueString value="./component.xml"/>
+            </extension>
+            <extension url="urn:parameter-in">
+                <valueString  value="patient"/>
+            </extension>
+            <extension url="urn:parameter-in">
+                <valueString  value="familyName"/>
+            </extension>
+        </modifierExtension>
+
+    </test>
+
+</TestScript>

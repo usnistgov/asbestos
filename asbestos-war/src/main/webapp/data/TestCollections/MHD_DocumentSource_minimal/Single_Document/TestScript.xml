@@ -9,8 +9,17 @@
     -->
 
     <test>
-        <name value="Evaluations"/>
-        <description value="The Description"/>
+        <description value="Request type"/>
+        <action>
+            <assert>
+                <description value="PDB: Verb is POST|MHDPDBUsesPost"/>
+                <requestMethod value="post"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+    </test>
+    <test>
+        <description value="Request"/>
         <action>
             <assert>
                 <description value="Test: Request includes one DocumentReference|MHDPDBOnePlusDocumentReference"/>
@@ -20,14 +29,7 @@
             </assert>
         </action>
 
-        <action>
-            <assert>
-                <description value="PDB: Verb is POST|MHDPDBUsesPost"/>
-                <requestMethod value="post"/>
-                <warningOnly value="false"/>
-            </assert>
-        </action>
-        <action>
+       <action>
             <assert>
                 <description value="PDB: Request contains one DocumentManifest|MHDPDBOneDocumentManifest"/>
                 <compareToSourceId value="request"/>
@@ -43,6 +45,8 @@
                 <warningOnly value="false"/>
             </assert>
         </action>
+    </test>
+    <test>
         <action>
             <assert>
                 <description value="PDB: Comprehensive or Minimal metadata identified in profile|MHDPDBMetadataType"/>

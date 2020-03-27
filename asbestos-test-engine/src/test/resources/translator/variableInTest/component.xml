@@ -1,0 +1,24 @@
+<TestScript xmlns="http://hl7.org/fhir">
+    <extension url="urn:component-parameters">
+        <extension url="urn:parameter-in">
+            <valueString  value="patientFixture"/>
+        </extension>
+        <extension url="urn:parameter-in">
+            <valueString  value="patientFamilyNameVar"/>
+        </extension>
+    </extension>
+
+    <url value="xxx"/>
+    <name value="xxx"/>
+    <status value="active"/>
+
+    <test>
+        <action>
+            <assert>
+                <path value="Patient/family/name"/>
+                <sourceId value="patientFixture"/>
+                <value value="${patientFamilyNameVar}"/>
+            </assert>
+        </action>
+    </test>
+</TestScript>

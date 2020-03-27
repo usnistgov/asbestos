@@ -3,18 +3,19 @@
 
         <script-status v-if="!statusRight" :status-right="statusRight" :name="testId"> </script-status>
 
-        <span  @click.self="selectEvent()" class="event-part" v-bind:class="[isEventPass() ? passClass : failClass]">
-            Message: {{ eventId }} - {{ eventDetail(eventId) }}
-        </span>
-
-        <script-status v-if="statusRight" :status-right="statusRight" :name="testId"> </script-status>
-
         <span v-if="$store.state.testRunner.currentEvent === eventId">
             <img src="../../assets/arrow-down.png">
         </span>
         <span v-else>
             <img src="../../assets/arrow-right.png"/>
         </span>
+
+        <span  @click.self="selectEvent()" class="event-part" v-bind:class="[isEventPass() ? passClass : failClass]">
+            Message: {{ eventId }} - {{ eventDetail(eventId) }}
+        </span>
+
+        <script-status v-if="statusRight" :status-right="statusRight" :name="testId"> </script-status>
+
 
         <div v-if="selected === eventId">
             <router-view></router-view>
@@ -110,8 +111,8 @@ import ScriptStatus from "./ScriptStatus";
                 this.passClass = 'pass'
                 this.failClass = 'fail'
             } else {
-                this.passClass = 'pass-plain'
-                this.failClass = 'fail-plain'
+                this.passClass = 'pass-plain-detail'
+                this.failClass = 'fail-plain-detail'
             }
             this.loadTest()
         },
@@ -131,8 +132,8 @@ import ScriptStatus from "./ScriptStatus";
 
 <style scoped>
     .event-part {
-        margin-left: 15px;
-        margin-right: 15px;
+        /*margin-left: 5px;*/
+        /*margin-right: 15px;*/
         cursor: pointer;
         text-decoration: underline;
     }

@@ -38,11 +38,11 @@
         <sourceId value="pdb-bundle"/>
     </variable>
     <test>
-        <description value="Submit Provide Document Bundle to MHD Document Recipient"/>
+        <description value="Submit Provide Document Bundle to MHD Document Recipient."/>
         <action>
             <operation>
                 <!-- references patient from resourceCache in EC -->
-                <description value="send PDB"/>
+                <description value="send PDB."/>
                 <label value="create"/>
                 <type>
                     <system value="https://github.com/usnistgov/asbestos/wiki/Testscript-Operation-Codes"/>
@@ -54,28 +54,28 @@
         </action>
         <action>
             <assert>
-                <description value="... was successful transaction"/>
+                <description value="... was successful transaction."/>
                 <response value="okay"/>
                 <warningOnly value="false"/>
             </assert>
         </action>
         <action>
             <assert>
-                <description value="... Bundle was returned"/>
+                <description value="... Bundle was returned."/>
                 <expression value="Bundle.exists()"/>
                 <warningOnly value="false"/>
             </assert>
         </action>
         <action>
             <assert>
-                <description value="... all parts of transaction successful"/>
+                <description value="... all parts of transaction successful."/>
                 <expression value="Bundle.entry.response.all(status.startsWith(201))"/>
                 <warningOnly value="false"/>
             </assert>
         </action>
         <action>
             <assert>
-                <description value="... response contains one entry for each entry in request"/>
+                <description value="... response contains one entry for each entry in request."/>
                 <expression value="Bundle.entry.count()"/>
                 <value value="${requestEntryCount}"/>
                 <warningOnly value="false"/>
@@ -83,10 +83,10 @@
         </action>
     </test>
     <test>
-        <description value="Read back DocumentReference"/>
+        <description value="Read back DocumentReference."/>
         <action>
             <operation>
-                <description value="DocumentReference"/>
+                <description value="DocumentReference."/>
                 <label value="read-back"/>
                 <type>
                     <code value="read"/>
@@ -97,21 +97,21 @@
         </action>
         <action>
             <assert>
-                <description value="... was successful"/>
+                <description value="... was successful."/>
                 <response value="okay"/>
                 <warningOnly value="false"/>
             </assert>
         </action>
         <action>
             <assert>
-                <description value="... returned a DocumentReference"/>
+                <description value="... returned a DocumentReference."/>
                 <resource value="DocumentReference"/>
                 <warningOnly value="false"/>
             </assert>
         </action>
         <action>
             <assert>
-                <description value="... Patient reference returned as sent"/>
+                <description value="... Patient reference returned as sent."/>
                 <expression value="DocumentReference.subject.reference"/>
                 <sourceId value="readBackResponse"/>
                 <value value="${patientResourceId}"/>

@@ -57,7 +57,7 @@
         <action>
             <operation>
                 <!-- references patient from resourceCache in EC -->
-                <description value="send PDB"/>
+                <description value="send PDB."/>
                 <label value="create"/>
                 <type>
                     <system value="https://github.com/usnistgov/asbestos/wiki/Testscript-Operation-Codes"/>
@@ -69,14 +69,14 @@
         </action>
         <action>
             <assert>
-                <description value="... transaction was successful"/>
+                <description value="... transaction was successful."/>
                 <response value="okay"/>
                 <warningOnly value="false"/>
             </assert>
         </action>
         <action>
             <assert>
-                <description value="... return Bundle"/>
+                <description value="... return Bundle."/>
                 <compareToSourceId value="pdb-response"/>
                 <compareToSourceExpression value="Bundle.exists()"/>
                 <warningOnly value="false"/>
@@ -84,7 +84,7 @@
         </action>
         <action>
             <assert>
-                <description value="... Bundle is type transaction-response"/>
+                <description value="... Bundle is type transaction-response."/>
                 <compareToSourceId value="pdb-response"/>
                 <compareToSourceExpression value="Bundle.type = 'transaction-response'"/>
                 <warningOnly value="false"/>
@@ -92,7 +92,7 @@
         </action>
         <action>
             <assert>
-                <description value="... Bundle may not contain OperationOutcome"/>
+                <description value="... Bundle may not contain OperationOutcome."/>
                 <compareToSourceId value="pdb-response"/>
                 <compareToSourceExpression value="Bundle.entry.response.outcome.where(OperationOutcome).exists().not()"/>
                 <warningOnly value="false"/>
@@ -100,14 +100,14 @@
         </action>
         <action>
             <assert>
-                <description value="... all parts of transaction successful"/>
+                <description value="... all parts of transaction successful."/>
                 <expression value="Bundle.entry.response.all(status.startsWith(201))"/>
                 <warningOnly value="false"/>
             </assert>
         </action>
         <action>
             <assert>
-                <description value="... response contains one entry for each entry in request"/>
+                <description value="... response contains one entry for each entry in request."/>
                 <expression value="Bundle.entry.count()"/>
                 <value value="${requestEntryCount}"/>
                 <warningOnly value="false"/>
@@ -115,7 +115,7 @@
         </action>
         <action>
             <operation>
-                <description value="DocumentReference"/>
+                <description value="DocumentReference."/>
                 <label value="read-back"/>
                 <type>
                     <code value="read"/>
@@ -126,32 +126,32 @@
         </action>
         <action>
             <assert>
-                <description value="... was successful"/>
+                <description value="... was successful."/>
                 <response value="okay"/>
                 <warningOnly value="false"/>
             </assert>
         </action>
         <action>
             <assert>
-                <description value="... returned a DocumentReference"/>
+                <description value="... returned a DocumentReference."/>
                 <resource value="DocumentReference"/>
                 <warningOnly value="false"/>
             </assert>
         </action>
         <action>
             <assert>
-                <description value="... status is current"/>
+                <description value="... status is current."/>
                 <expression value="DocumentReference.status = 'current'"/>
                 <warningOnly value="false"/>
             </assert>
         </action>
     </setup>
     <test>
-        <description value="Send Replacement DocumentReference in PDB"/>
+        <description value="Send Replacement DocumentReference in PDB."/>
         <action>
             <operation>
                 <!-- references patient from resourceCache in EC -->
-                <description value="send Replace PDB"/>
+                <description value="send Replace PDB."/>
                 <label value="create"/>
                 <type>
                     <system value="https://github.com/usnistgov/asbestos/wiki/Testscript-Operation-Codes"/>
@@ -163,14 +163,14 @@
         </action>
         <action>
             <assert>
-                <description value="... transaction was successful"/>
+                <description value="... transaction was successful."/>
                 <response value="okay"/>
                 <warningOnly value="false"/>
             </assert>
         </action>
         <action>
             <assert>
-                <description value="... return Bundle"/>
+                <description value="... return Bundle."/>
                 <compareToSourceId value="replace-response"/>
                 <compareToSourceExpression value="Bundle.exists()"/>
                 <warningOnly value="false"/>
@@ -178,7 +178,7 @@
         </action>
         <action>
             <assert>
-                <description value="... Bundle is type transaction-response"/>
+                <description value="... Bundle is type transaction-response."/>
                 <compareToSourceId value="replace-response"/>
                 <compareToSourceExpression value="Bundle.type = 'transaction-response'"/>
                 <warningOnly value="false"/>
@@ -186,7 +186,7 @@
         </action>
         <action>
             <assert>
-                <description value="... Bundle may not contain OperationOutcome"/>
+                <description value="... Bundle may not contain OperationOutcome."/>
                 <compareToSourceId value="replace-response"/>
                 <compareToSourceExpression value="Bundle.entry.response.outcome.where(OperationOutcome).exists().not()"/>
                 <warningOnly value="false"/>
@@ -194,14 +194,14 @@
         </action>
         <action>
             <assert>
-                <description value="... all parts of transaction successful"/>
+                <description value="... all parts of transaction successful."/>
                 <expression value="Bundle.entry.response.all(status.startsWith(201))"/>
                 <warningOnly value="false"/>
             </assert>
         </action>
         <action>
             <assert>
-                <description value="... response contains one entry for each entry in request"/>
+                <description value="... response contains one entry for each entry in request."/>
                 <expression value="Bundle.entry.count()"/>
                 <value value="${requestEntryCount}"/>
                 <warningOnly value="false"/>
@@ -209,10 +209,10 @@
         </action>
     </test>
     <test>
-        <description value="Read back replacement DocumentReference"/>
+        <description value="Read back replacement DocumentReference."/>
         <action>
             <operation>
-                <description value="Replacement DocumentReference"/>
+                <description value="Replacement DocumentReference."/>
                 <label value="read-back"/>
                 <type>
                     <code value="read"/>
@@ -223,31 +223,31 @@
         </action>
         <action>
             <assert>
-                <description value="... was successful"/>
+                <description value="... was successful."/>
                 <response value="okay"/>
                 <warningOnly value="false"/>
             </assert>
         </action>
         <action>
             <assert>
-                <description value="... returned a DocumentReference"/>
+                <description value="... returned a DocumentReference."/>
                 <resource value="DocumentReference"/>
                 <warningOnly value="false"/>
             </assert>
         </action>
         <action>
             <assert>
-                <description value="... status is current"/>
+                <description value="... status is current."/>
                 <expression value="DocumentReference.status = 'current'"/>
                 <warningOnly value="false"/>
             </assert>
         </action>
     </test>
     <test>
-        <description value="Read back original DocumentReference and verify status is superseded"/>
+        <description value="Read back original DocumentReference and verify status is superseded."/>
         <action>
             <operation>
-                <description value="Original DocumentReference"/>
+                <description value="Original DocumentReference."/>
                 <label value="read-back"/>
                 <type>
                     <code value="read"/>
@@ -258,21 +258,21 @@
         </action>
         <action>
             <assert>
-                <description value="... was successful"/>
+                <description value="... was successful."/>
                 <response value="okay"/>
                 <warningOnly value="false"/>
             </assert>
         </action>
         <action>
             <assert>
-                <description value="... returned a DocumentReference"/>
+                <description value="... returned a DocumentReference."/>
                 <resource value="DocumentReference"/>
                 <warningOnly value="false"/>
             </assert>
         </action>
         <action>
             <assert>
-                <description value="... status is superseded"/>
+                <description value="... status is superseded."/>
                 <expression value="DocumentReference.status = 'superseded'"/>
                 <warningOnly value="false"/>
             </assert>
