@@ -1,7 +1,7 @@
 <template>
     <div>
         <div v-if="script">
-            <div v-bind:class="{
+            <span v-bind:class="{
                 'not-run': isNotRun,
                 pass : isPass,
                 error: isError,
@@ -15,7 +15,7 @@
                 <span class="selectable">
                     {{ description }}
                 </span>
-            </div>
+            </span>
         </div>
         <div v-else>
             <!--
