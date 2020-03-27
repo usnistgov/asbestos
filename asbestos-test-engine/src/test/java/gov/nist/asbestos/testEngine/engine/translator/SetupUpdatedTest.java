@@ -32,10 +32,4 @@ class SetupUpdatedTest {
         assertEquals("pdb-response", op.getResponseId());
     }
 
-    // action used in setup is not coded for setup in component
-    @Test
-    void setupReferencesActions() {
-        assertTrue(false);
-    }
-
 }

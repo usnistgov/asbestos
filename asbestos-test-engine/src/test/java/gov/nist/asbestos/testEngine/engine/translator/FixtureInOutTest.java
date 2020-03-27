@@ -52,15 +52,4 @@ class FixtureInOutTest {
         assertEquals("pdb-bundle", op.getSourceId());
         assertEquals("pdb-response", op.getResponseId());
     }
-
-    @Test
-    void scriptWithOtherModifierExtensionsPresent() {
-        assertTrue(false);
-    }
-
-    @Test
-    void componentWithOtherExtensionsPresent() {
-        assertTrue(false);
-    }
-
 }
