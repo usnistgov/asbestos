@@ -1,0 +1,20 @@
+<TestScript xmlns="http://hl7.org/fhir">
+    <url value=""/>
+    <name value="test1"/>
+    <status value="draft"/>
+
+    <test>
+        <!-- violates schema - no action present -->
+        <modifierExtension url="urn:import">
+            <extension url="component">
+                <valueString value="./component.xml"/>
+            </extension>
+            <extension url="urn:fixture-in">
+                <valueString  value="pdb-bundle"/>
+            </extension>
+            <extension url="urn:fixture-out">
+                <valueString value="pdb-response"/>
+            </extension>
+        </modifierExtension>
+    </test>
+</TestScript>

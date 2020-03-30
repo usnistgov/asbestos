@@ -22,11 +22,11 @@ public class ComponentReference {
                 String value = e.getValue().toString();  // value type is Type????
                 if (url.equals("component")) {
                     this.relativePath = value;
-                } else if (url.equals("urn:parameter-in")) {
+                } else if (url.equals("urn:fixture-in")) {
                     Parameter p = new Parameter();
                     p.setCallerName(value);
                     in.add(p);
-                } else if (url.equals("urn:parameter-out")) {
+                } else if (url.equals("urn:fixture-out")) {
                     Parameter p = new Parameter();
                     p.setCallerName(value);
                     out.add(p);
@@ -68,14 +68,14 @@ public class ComponentReference {
         for (Extension e : paramsExtension.getExtension()) {
             String url = e.getUrl();
             String value = e.getValue().toString();
-            if (url.equals("urn:parameter-in")) {
+            if (url.equals("urn:fixture-in")) {
                 if (inI < in.size()) {
                     in.get(inI).setLocalName(value);
                     inI++;
                 } else {
                     throw new RuntimeException("Component " + relativePath + " was not called with a " + inI + "th in parameter");
                 }
-            } else if (url.equals("urn:parameter-out")) {
+            } else if (url.equals("urn:fixture-out")) {
                 if (outI < out.size()) {
                     out.get(outI).setLocalName(value);
                     outI++;

@@ -1,31 +1,32 @@
 <TestScript xmlns="http://hl7.org/fhir">
     <url value=""/>
-    <name value="SendPdb"/>
-    <status value="active"/>
+    <name value="test1"/>
+    <status value="draft"/>
 
+    <!-- Static Fixtures -->
+    <fixture id="pdb-bundle">
+        <resource>
+            <reference value="Bundle/pdb.xml"/>
+        </resource>
+    </fixture>
     <fixture id="patient">
         <resource>
             <reference value="Patient/Alex_Alder.json"/>
         </resource>
     </fixture>
-    <variable>
-        <name value="familyName"/>
-        <defaultValue value="Jones"/>
-    </variable>
 
     <test>
+        <!-- violates schema - no action present -->
         <modifierExtension url="urn:import">
             <extension url="component">
                 <valueString value="./component.xml"/>
             </extension>
-            <extension url="urn:parameter-in">
-                <valueString  value="patient"/>
+            <extension url="urn:fixture-in">
+                <valueString  value="pdb-bundle"/>
             </extension>
-            <extension url="urn:parameter-in">
-                <valueString  value="familyName"/>
+            <extension url="urn:fixture-out">
+                <valueString value="pdb-response"/>
             </extension>
         </modifierExtension>
-
     </test>
-
 </TestScript>

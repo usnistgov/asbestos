@@ -63,7 +63,7 @@ public class TestEngine  {
         fhirClientForFixtures = new FhirClient().setResourceCacheMgr(inTestResources);
     }
 
-    // used for evaluation
+    // used for evaluation including in the Inspector
     public TestEngine(File testDef) {
         Objects.requireNonNull(testDef);
         this.testDef = testDef;
@@ -71,6 +71,7 @@ public class TestEngine  {
         fhirClientForFixtures = new FhirClient().setResourceCacheMgr(inTestResources);
     }
 
+    // used for client tests
     public TestEngine(File testDef, TestScript testScript) {
         this.testDef = testDef;
         this.testScript = testScript;
@@ -334,7 +335,6 @@ public class TestEngine  {
             for(TestScript.TestScriptVariableComponent comp : testScript.getVariable()) {
                 if (!comp.hasName())
                     throw new Error("Variable defined without name");
-
             }
         }
     }
