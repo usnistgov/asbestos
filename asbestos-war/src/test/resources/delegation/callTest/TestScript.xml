@@ -1,0 +1,45 @@
+<TestScript xmlns="http://hl7.org/fhir">
+    <url value=""/>
+    <name value="test1"/>
+    <status value="draft"/>
+
+    <!-- Static Fixtures -->
+    <fixture id="the-patient">
+        <autocreate value="true"/>
+        <autodelete value="true"/>
+        <resource>
+            <reference value="Patient/patient.xml"/>
+        </resource>
+    </fixture>
+    <fixture id="pdb-bundle">
+        <autocreate value="false"/>
+        <autodelete value="false"/>
+        <resource>
+            <reference value="Bundle/pdb.xml"/>
+        </resource>
+    </fixture>
+
+    <variable>
+        <name value="patientResourceId"/>
+        <expression value="Bundle.entry.fullUrl"/>
+        <sourceId value="the-patient"/>
+    </variable>
+
+    <test>
+        <action>
+            <operation>
+                <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
+                    <extension url="component">
+                        <valueString value="./module.xml"/>
+                    </extension>
+                    <extension url="urn:fixture-in">
+                        <valueString  value="pdb-bundle"/>
+                    </extension>
+                    <extension url="urn:fixture-out">
+                        <valueString value="pdb-response"/>
+                    </extension>
+                </modifierExtension>
+            </operation>
+        </action>
+    </test>
+</TestScript>

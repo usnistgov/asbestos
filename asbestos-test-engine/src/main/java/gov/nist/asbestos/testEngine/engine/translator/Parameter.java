@@ -48,4 +48,8 @@ public class Parameter {
         }
         return null;
     }
+
+    public boolean isVariable() {
+        return isVariable;
+    }
 }

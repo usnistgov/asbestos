@@ -57,6 +57,10 @@ public class ComponentReference {
         return component;
     }
 
+    public File getComponentRef() {
+        return componentRef;
+    }
+
     public String getRelativePath() {
         return relativePath;
     }

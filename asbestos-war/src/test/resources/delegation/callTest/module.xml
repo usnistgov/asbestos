@@ -16,5 +16,15 @@
                 <valueString value="pdb-response"/>
             </extension>
         </modifierExtension>
+        <action>
+            <operation>
+                <type>
+                    <system value="https://github.com/usnistgov/asbestos/wiki/Testscript-Operation-Codes"/>
+                    <code value="mhd-pdb-transaction"/>
+                </type>
+                <responseId value="pdb-response"/>
+                <sourceId value="pdb-bundle"/>
+            </operation>
+        </action>
     </test>
 </TestScript>

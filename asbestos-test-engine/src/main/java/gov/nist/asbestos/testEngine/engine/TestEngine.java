@@ -11,6 +11,8 @@ import gov.nist.asbestos.client.resolver.ResourceCacheMgr;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import gov.nist.asbestos.simapi.validation.Val;
 import gov.nist.asbestos.simapi.validation.ValE;
+import gov.nist.asbestos.testEngine.engine.translator.ComponentReference;
+import gov.nist.asbestos.testEngine.engine.translator.Parameter;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.*;
@@ -27,15 +29,16 @@ import java.util.*;
  * See http://hl7.org/fhir/testing.html
  */
 public class TestEngine  {
-    private File testDef = null;
+    private File testDef = null; // directory holding test definition
+    private String testScriptName = null;   // name of testscript file, TestScript.xml by default
     private URI sut = null;
     private TestScript testScript = null;
+    private TestReport testReport = new TestReport();
     private boolean failOverride = false;
     private FixtureMgr fixtureMgr = new FixtureMgr();
     private Val val;
     private ValE engineVal;
     private FhirClient fhirClientForFixtures;
-    private TestReport testReport = new TestReport();
     private List<String> errors;
     private FhirClient fhirClient = null;
     private String testSession = null;
@@ -55,7 +58,7 @@ public class TestEngine  {
         Objects.requireNonNull(testDef);
         Objects.requireNonNull(sut);
         Objects.requireNonNull(Ref.asURL(sut));
-        this.testDef = testDef;
+        setTestDef(testDef);
         this.sut = sut;
         // make test definition dir a temporary resource cache so elements of the TestScript
         // can be found
@@ -66,17 +69,22 @@ public class TestEngine  {
     // used for evaluation including in the Inspector
     public TestEngine(File testDef) {
         Objects.requireNonNull(testDef);
-        this.testDef = testDef;
+        setTestDef(testDef);
         ResourceCacheMgr inTestResources = new ResourceCacheMgr(testDef, new Ref(""));
         fhirClientForFixtures = new FhirClient().setResourceCacheMgr(inTestResources);
     }
 
     // used for client tests
     public TestEngine(File testDef, TestScript testScript) {
-        this.testDef = testDef;
+        setTestDef(testDef);
         this.testScript = testScript;
         ResourceCacheMgr inTestResources = new ResourceCacheMgr(testDef, new Ref(""));
         fhirClientForFixtures = new FhirClient().setResourceCacheMgr(inTestResources);
+    }
+
+    public TestEngine setFixtures(Map<String, FixtureComponent> fixtures) {
+        fixtureMgr.putAll(fixtures);
+        return this;
     }
 
     public TestEngine setTestSession(String testSession) {
@@ -141,17 +149,17 @@ public class TestEngine  {
     public List<String> getTestReportErrors() {
         List<String> errors = new ArrayList<>();
         TestReport.TestReportSetupComponent testComponent = testReport.getSetup();
-            for (TestReport.SetupActionComponent actionComponent : testComponent.getAction()) {
-                if (actionComponent.hasAssert()) {
-                    TestReport.SetupActionAssertComponent assertComponent = actionComponent.getAssert();
-                    if (assertComponent.hasResult()) {
-                        TestReport.TestReportActionResult actionResult = assertComponent.getResult();
-                        if (actionResult.equals(TestReport.TestReportActionResult.ERROR) ||
+        for (TestReport.SetupActionComponent actionComponent : testComponent.getAction()) {
+            if (actionComponent.hasAssert()) {
+                TestReport.SetupActionAssertComponent assertComponent = actionComponent.getAssert();
+                if (assertComponent.hasResult()) {
+                    TestReport.TestReportActionResult actionResult = assertComponent.getResult();
+                    if (actionResult.equals(TestReport.TestReportActionResult.ERROR) ||
                             actionResult.equals(TestReport.TestReportActionResult.FAIL))
                         errors.add(assertComponent.getMessage());
-                    }
                 }
             }
+        }
 
         for (TestReport.TestReportTestComponent testComponent1 : testReport.getTest()) {
             for (TestReport.TestActionComponent actionComponent : testComponent1.getAction()) {
@@ -177,7 +185,7 @@ public class TestEngine  {
     }
 
     private void reportException(Throwable t) {
-       // String trace = ExceptionUtils.getStackTrace(t);
+        // String trace = ExceptionUtils.getStackTrace(t);
         testReport.setStatus(TestReport.TestReportStatus.ENTEREDINERROR);
         TestReport.TestReportSetupComponent setup = testReport.getSetup();
         TestReport.SetupActionComponent comp = setup.addAction();
@@ -346,31 +354,31 @@ public class TestEngine  {
             ValE fVal = new ValE(engineVal).setMsg("Fixtures");
 
             try {
-            for (TestScript.TestScriptFixtureComponent comp : testScript.getFixture()) {
-                String id = comp.getId();
-                if (id == null || id.equals("")) {
-                    throw new Error("Static Fixture has no id and cannot be referenced");
-                }
-//                if (!comp.hasAutocreate())
-//                    throw new Error("fixture.autocreate is a required field");
-//                if (!comp.hasAutodelete())
-//                    throw new Error("fixture.autodelete is a required field");
-                Ref ref = new Ref(comp.getResource().getReference());
-                Optional<ResourceWrapper> optWrapper = fhirClientForFixtures.readCachedResource(ref);
+                for (TestScript.TestScriptFixtureComponent comp : testScript.getFixture()) {
+                    String id = comp.getId();
+                    if (id == null || id.equals("")) {
+                        throw new Error("Static Fixture has no id and cannot be referenced");
+                    }
+                    if (!comp.hasAutocreate())
+                        throw new Error("fixture.autocreate is a required field");
+                    if (!comp.hasAutodelete())
+                        throw new Error("fixture.autodelete is a required field");
+                    Ref ref = new Ref(comp.getResource().getReference());
+                    Optional<ResourceWrapper> optWrapper = fhirClientForFixtures.readCachedResource(ref);
 
-                // never happens - Throwable thrown if not found
-                if (!optWrapper.isPresent())
-                    throw new Error("Static Fixture " + ref + " cannot be loaded");
-                ResourceWrapper wrapper = optWrapper.get();
-                FixtureComponent fixtureComponent;
-                try {
-                    fixtureComponent = new FixtureComponent(id).setResource(wrapper).setVal(fVal).load(wrapper);
-                    if (fixtureComponent != null)
-                        fixtureMgr.put(id, fixtureComponent);
-                } catch (Throwable e) {
-                    throw new Error(e);
+                    // never happens - Throwable thrown if not found
+                    if (!optWrapper.isPresent())
+                        throw new Error("Static Fixture " + ref + " cannot be loaded");
+                    ResourceWrapper wrapper = optWrapper.get();
+                    FixtureComponent fixtureComponent;
+                    try {
+                        fixtureComponent = new FixtureComponent(id).setResource(wrapper).setVal(fVal).load(wrapper);
+                        if (fixtureComponent != null)
+                            fixtureMgr.put(id, fixtureComponent);
+                    } catch (Throwable e) {
+                        throw new Error(e);
+                    }
                 }
-            }
             } catch (Throwable t) {
                 reportParsingError(testReport.addTest(), t.getMessage());
             }
@@ -511,20 +519,36 @@ public class TestEngine  {
 //    }
 
     private void doOperation(String typePrefix, TestScript.SetupActionOperationComponent operation, TestReport.SetupActionOperationComponent report) {
-        try {
-            OperationRunner runner = new OperationRunner(fixtureMgr)
-                    .setVal(new ValE(val).setMsg(typePrefix))
-                    .setTypePrefix(typePrefix)
-                    .setFhirClient(fhirClient)
-                    .setSut(sut)
-                    .setTestReport(testReport)
-                    .setTestScript(testScript);
-            runner.run(operation, report);
-        } catch (Throwable t) {
-            report.setMessage(ExceptionUtils.getStackTrace(t));
+        if (operation.hasType()) {
+            try {
+                OperationRunner runner = new OperationRunner(fixtureMgr)
+                        .setVal(new ValE(val).setMsg(typePrefix))
+                        .setTypePrefix(typePrefix)
+                        .setFhirClient(fhirClient)
+                        .setSut(sut)
+                        .setTestReport(testReport)
+                        .setTestScript(testScript);
+                runner.run(operation, report);
+            } catch (Throwable t) {
+                report.setMessage(ExceptionUtils.getStackTrace(t));
+                report.setResult(TestReport.TestReportActionResult.ERROR);
+            }
+            propagateStatus(testReport);
+        } else if (operation.hasModifierExtension()) {
+            List<Extension> extensions = operation.getModifierExtension();
+            for (Extension extension : extensions) {
+                String url = extension.getUrl();
+                if (url.equals("https://github.com/usnistgov/asbestos/wiki/TestScript-Import")) {
+                    handleImport(extension, report);
+                } else {
+                    report.setMessage("Operation with unknown modifierExtension " + url + " found");
+                    report.setResult(TestReport.TestReportActionResult.ERROR);
+                }
+            }
+        } else  {
+            report.setMessage("Found operation with no type and no modifierExtension");
             report.setResult(TestReport.TestReportActionResult.ERROR);
         }
-        propagateStatus(testReport);
     }
 
     private TestReport.SetupActionAssertComponent doAssert(String typePrefix, TestScript.SetupActionAssertComponent operation) {
@@ -563,62 +587,135 @@ public class TestEngine  {
                     ValE tVal = new ValE(fVal).setMsg(testName);
                     TestReport.TestReportTestComponent testReportComponent = testReport.addTest();
 
-                    //
-                    // handle conditional execution
-                    //
-                    TestScript containedTestScript = getConditional(testComponent, testReportComponent);
-                    testReportComponent = testReport.addTest();
-                    boolean conditionalResult = true;
 
-
-                    if (containedTestScript != null) {
-                        List<TestScript.TestScriptTestComponent> tests = containedTestScript.getTest();
-                        if (tests.size() != 2) {
-                            reportParsingError(testReportComponent, "test condition must contain two test elements");
+                    //
+                    //  handle modifier extensions
+                    //
+                    List<Extension> extensions = testComponent.getModifierExtension();
+                    for (Extension extension : extensions ) {
+                        if (!extension.hasUrl()) {
+                            reportParsingError(testReportComponent, "Extension found without URL");
                             return;
                         }
-
-                        TestReport containedTestReport = new TestReport();
-
-                        Extension extension = new Extension("https://github.com/usnistgov/asbestos/wiki/TestScript-Conditional",
-                                new Reference(containedTestReport));
-                        testReportComponent.addModifierExtension(extension);
-
-                        // basic operation and validation
-                        TestScript.TestScriptTestComponent basicOperationTest = tests.get(0);
-                        TestReport.TestReportTestComponent containedTestReportComponent = containedTestReport.addTest();
-                        boolean opResult = doTestPart(basicOperationTest, containedTestReportComponent, containedTestReport, false);
-
-                        if (!opResult) {
-                            failOverride = true;
-//                        testReport.setResult(TestReport.TestReportResult.FAIL);
-                            containedTestReportComponent = containedTestReport.addTest();
-                            reportSkip(containedTestReportComponent);
-                            reportSkip(testReportComponent);
+                        String url = extension.getUrl();
+                        if (url.equals("https://github.com/usnistgov/asbestos/wiki/TestScript-Conditional")) {
+                            boolean conditionalResult = handleConditionalTest(testComponent, testReportComponent, extension);
+                            if (conditionalResult) {
+                                doTestPart(testComponent, testReportComponent, testReport, false);
+                            } else {
+                                reportSkip(testReportComponent);
+                            }
+                        } else {
+                            reportParsingError(testReportComponent, "Do not understand ModifierExtension " + url);
                             return;
                         }
-                        // asserts to trigger conditional
-                        TestScript.TestScriptTestComponent conditionalTest = tests.get(1);
-
-                        containedTestReportComponent = containedTestReport.addTest();
-                        conditionalResult = doTestPart(conditionalTest, containedTestReportComponent, containedTestReport, true);
-
-                        if (containedTestReport.getResult() == TestReport.TestReportResult.FAIL)
-                            return;
                     }
 
+                    doTestPart(testComponent, testReportComponent, testReport, false);
 
-                    if (conditionalResult) {
-                        doTestPart(testComponent, testReportComponent, testReport, false);
-                    } else {
-                        reportSkip(testReportComponent);
-                    }
+
                 }
             } catch (Throwable t) {
-                reportParsingError(testReport.addTest(), t.getMessage());
+                String msg = t.getMessage();
+                if (msg == null || msg.equals(""))
+                    msg = ExceptionUtils.getStackTrace(t);
+                reportParsingError(testReport.addTest(), msg);
             }
 
         }
+    }
+
+    private void handleImport(Extension extension, TestReport.SetupActionOperationComponent actionReport) {
+        ComponentReference componentReference = new ComponentReference(testDef, Collections.singletonList(extension));
+        Map<String, FixtureComponent> inFixturesForComponent = new HashMap<>();
+        for (Parameter parm : componentReference.getIn()) {
+            if (parm.isVariable())
+                throw new RuntimeException("Script import with input variables not supported");
+            String outerName = parm.getCallerName();
+            String innnerName = parm.getLocalName();
+            FixtureComponent fixtureComponent = fixtureMgr.get(outerName);
+            if (fixtureComponent == null)
+                throw new RuntimeException("Fixture " + outerName + " does not exist");
+            inFixturesForComponent.put(innnerName, fixtureComponent);
+        }
+        TestEngine testEngine1 = new TestEngine(
+                componentReference.getComponentRef(),
+                this.sut)
+                .setTestSession(testSession)
+                .setExternalCache(externalCache)
+                .setFixtures(inFixturesForComponent)
+                ;
+        testEngine1.runTest();   // needs name qualifier for component log file generation
+
+        FixtureMgr innerFixtures = testEngine1.fixtureMgr;
+        Map<String, FixtureComponent> outFixturesForComponent = new HashMap<>();
+        for (Parameter parm : componentReference.getOut()) {
+            if (parm.isVariable())
+                throw new RuntimeException("Script import with output variables not supported");
+            String outerName = parm.getCallerName();
+            String innnerName = parm.getLocalName();
+            FixtureComponent fixtureComponent = innerFixtures.get(innnerName);
+            if (fixtureComponent == null)
+                throw new RuntimeException("Script import - " + componentReference.getComponentRef() + " did not produce Fixture " + innnerName);
+            fixtureMgr.put(outerName, fixtureComponent);
+        }
+        String result = testEngine1.getTestReport().getResult().toCode();
+        actionReport.setResult(TestReport.TestReportActionResult.fromCode(result));
+    }
+
+    // returns ok?
+    private boolean handleConditionalTest(TestScript.TestScriptTestComponent testComponent, TestReport.TestReportTestComponent testReportComponent, Extension extension) {
+        TestScript containedTestScript = null;
+
+        if (extension.getValue() instanceof Reference) {
+            Reference ref = (Reference) extension.getValue();
+            if (ref.getResource() instanceof TestScript) {
+                containedTestScript = (TestScript) ref.getResource();
+            }
+        }
+        if (containedTestScript == null)
+            return false;
+        //
+        // handle conditional execution
+        //
+        //testReportComponent = testReport.addTest();
+        boolean conditionalResult = true;
+
+
+        List<TestScript.TestScriptTestComponent> tests = containedTestScript.getTest();
+        if (tests.size() != 2) {
+            reportParsingError(testReportComponent, "test condition must contain two test elements");
+            return false;
+        }
+
+        TestReport containedTestReport = new TestReport();
+
+        Extension extension1 = new Extension("https://github.com/usnistgov/asbestos/wiki/TestScript-Conditional",
+                new Reference(containedTestReport));
+        testReportComponent.addModifierExtension(extension1);
+
+        // basic operation and validation
+        TestScript.TestScriptTestComponent basicOperationTest = tests.get(0);
+        TestReport.TestReportTestComponent containedTestReportComponent = containedTestReport.addTest();
+        boolean opResult = doTestPart(basicOperationTest, containedTestReportComponent, containedTestReport, false);
+
+        if (!opResult) {
+            failOverride = true;
+            containedTestReportComponent = containedTestReport.addTest();
+            reportSkip(containedTestReportComponent);
+            reportSkip(testReportComponent);
+            return false;
+        }
+        // asserts to trigger conditional
+        TestScript.TestScriptTestComponent conditionalTest = tests.get(1);
+
+        containedTestReportComponent = containedTestReport.addTest();
+
+        conditionalResult = doTestPart(conditionalTest, containedTestReportComponent, containedTestReport, true);
+
+        if (containedTestReport.getResult() == TestReport.TestReportResult.FAIL)
+            return false;
+        return conditionalResult;
     }
 
     private void reportSkip(TestReport.TestReportTestComponent reportComponent) {
@@ -671,30 +768,13 @@ public class TestEngine  {
         return result;
     }
 
-    private TestScript getConditional(TestScript.TestScriptTestComponent testComponent, TestReport.TestReportTestComponent testReportComponent) {
-        if (testComponent.hasModifierExtension()) {
-            Extension extension = testComponent.getModifierExtensionFirstRep();
-            if (!extension.hasUrl() || !extension.getUrl().equals("https://github.com/usnistgov/asbestos/wiki/TestScript-Conditional")) {
-                reportParsingError(testReportComponent, "Do not understand modifierExtension");
-                return null;
-            }
-            if (extension.getValue() instanceof Reference) {
-                Reference ref = (Reference) extension.getValue();
-                if (ref.getResource() instanceof TestScript) {
-                    return (TestScript) ref.getResource();
-                }
-            }
-        }
-        return null;
+    private void reportParsingError(TestReport.TestReportTestComponent testReportComponent, String message) {
+        ValE fVal = new ValE(engineVal).setMsg("Test");
+        TestReport.TestActionComponent actionReportComponent = testReportComponent.addAction();
+        Reporter reporter = new Reporter(fVal, actionReportComponent.getOperation(), "", "");
+        reporter.reportError( message);
+        return;
     }
-
-        private void reportParsingError(TestReport.TestReportTestComponent testReportComponent, String message) {
-            ValE fVal = new ValE(engineVal).setMsg("Test");
-            TestReport.TestActionComponent actionReportComponent = testReportComponent.addAction();
-            Reporter reporter = new Reporter(fVal, actionReportComponent.getOperation(), "", "");
-            reporter.reportError( message);
-            return;
-        }
 
     private boolean invalidAction(TestScript.SetupActionComponent action, TestReport.SetupActionComponent actionReportComponent, ValE fVal) {
         if (action.hasOperation() && action.hasAssert()) {
@@ -786,15 +866,15 @@ public class TestEngine  {
     private void buildCacheEntry(TestReport.SetupActionOperationComponent op, EC ec) {
         if ("pass".equals(op.getResult().toCode())) {
             //if (op.getMessage().startsWith("GET") || op.getMessage().startsWith("CREATE")) {
-                URI uri;
-                try {
-                    uri = new URI(op.getDetail());
-                } catch (URISyntaxException e) {
-                    throw new Error(e);
-                }
-                UIEvent uiEvent = new UIEvent(ec).fromURI(uri);
-                buildCacheEntry(uiEvent, ec);
-           // }
+            URI uri;
+            try {
+                uri = new URI(op.getDetail());
+            } catch (URISyntaxException e) {
+                throw new Error(e);
+            }
+            UIEvent uiEvent = new UIEvent(ec).fromURI(uri);
+            buildCacheEntry(uiEvent, ec);
+            // }
         }
     }
 
@@ -1023,6 +1103,18 @@ public class TestEngine  {
 
     public TestEngine setTestCollection(String testCollection) {
         this.testCollection = testCollection;
+        return this;
+    }
+
+    private TestEngine setTestDef(File testDef) {
+        Objects.requireNonNull(testDef);
+        if (testDef.isDirectory()) {
+            this.testDef = testDef;
+            this.testScriptName = null;
+        } else {
+            this.testDef = testDef.getParentFile();
+            this.testScriptName = testDef.getName();
+        }
         return this;
     }
 }

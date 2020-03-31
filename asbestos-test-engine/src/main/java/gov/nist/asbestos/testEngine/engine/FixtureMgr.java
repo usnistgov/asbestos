@@ -13,6 +13,10 @@ class FixtureMgr {
 
     }
 
+    void putAll(Map<String, FixtureComponent> fixtures) {
+        this.fixtures.putAll(fixtures);
+    }
+
     void put(String name, FixtureComponent component) {
         fixtures.put(name, component);
         lastOp = name;
