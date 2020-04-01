@@ -145,8 +145,6 @@ kinds of channels: FHIR - data passed without modification and MHD - translation
     </div>
 </template>
 
-//import {constFhirToolkitBaseUrl} from "../common/http-common";
-
 <script>
     import {initServiceProperties, UtilFunctions} from "../../common/http-common";
 
