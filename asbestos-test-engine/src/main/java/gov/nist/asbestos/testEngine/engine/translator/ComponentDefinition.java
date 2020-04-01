@@ -11,6 +11,7 @@ public class ComponentDefinition {
     private List<Parameter> fixturesIn = new ArrayList<>();
     private List<Parameter> fixturesOut = new ArrayList<>();
     private List<Parameter> variablesIn = new ArrayList<>();
+    private List<Parameter> variablesInNoTranslation = new ArrayList<>();
     private List<Parameter> variablesOut = new ArrayList<>();
 
     private File testScriptFile;
@@ -43,6 +44,11 @@ public class ComponentDefinition {
                 Parameter p = new Parameter().setVariable(true);
                 p.setLocalName(value);
                 variablesIn.add(p);
+            } else if (url.equals("urn:variable-in-no-translation")) {
+                Parameter p = new Parameter().setVariable(true);
+                p.setLocalName(value);
+                p.setCallerName(value);
+                variablesInNoTranslation.add(p);
             } else if (url.equals("urn:variable-out")) {
                 Parameter p = new Parameter().setVariable(true);
                 p.setLocalName(value);
@@ -72,6 +78,10 @@ public class ComponentDefinition {
 
         for (int i = 0; i< variablesIn.size(); i++) {
             componentReference.getVariablesIn().get(i).setLocalName(variablesIn.get(i).getLocalName());
+        }
+
+        for (int i = 0; i< variablesInNoTranslation.size(); i++) {
+            componentReference.getVariablesInNoTranslation().add(variablesInNoTranslation.get(i));
         }
 
         if (fixturesOut.size() !=  componentReference.getFixturesOut().size())
@@ -108,5 +118,9 @@ public class ComponentDefinition {
         if (i >= fixturesIn.size())
             return null;
         return fixturesIn.get(i).getLocalName();
+    }
+
+    public List<Parameter> getVariablesInNoTranslation() {
+        return variablesInNoTranslation;
     }
 }

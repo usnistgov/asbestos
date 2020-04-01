@@ -8,7 +8,9 @@ public class Parameter {
     private boolean isVariable = false;
 
     public String getCallerName() {
-        return isVariable ? "${" + callerName + "}" : callerName;
+        return
+                //isVariable ? "${" + callerName + "}" :
+                callerName;
     }
 
     public String getLocalName() {

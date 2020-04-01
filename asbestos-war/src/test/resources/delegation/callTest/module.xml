@@ -3,9 +3,6 @@
         <extension url="urn:fixture-in">
             <valueString  value="pdb-bundle-param"/>
         </extension>
-        <extension url="urn:variable-in">
-            <valueString value="patientResourceId"/>
-        </extension>
         <extension url="urn:fixture-out">
             <valueString value="pdb-response-module"/>
         </extension>
@@ -14,7 +11,6 @@
     <url value=""/>
     <name value="test1"/>
     <status value="draft"/>
-
 
     <test>
         <action>

@@ -15,6 +15,7 @@ public class ComponentReference {
     private List<Parameter> fixturesIn = new ArrayList<>();
     private List<Parameter> fixturesOut = new ArrayList<>();
     private List<Parameter> variablesIn = new ArrayList<>();
+    private List<Parameter> variablesInNoTranslation = new ArrayList<>();
     private List<Parameter> variablesOut = new ArrayList<>();
 
     public ComponentReference(File testDef, List<Extension> importDeclaration)  {
@@ -36,6 +37,11 @@ public class ComponentReference {
                     Parameter p = new Parameter();
                     p.setCallerName(value);
                     variablesIn.add(p);
+                } else if (url.equals("urn:variable-in-no-translation")) {
+                    Parameter p = new Parameter().setVariable(true);
+                    p.setLocalName(value);
+                    p.setCallerName(value);
+                    variablesInNoTranslation.add(p);
                 } else if (url.equals("urn:variable-out")) {
                     Parameter p = new Parameter();
                     p.setCallerName(value);
@@ -106,5 +112,9 @@ public class ComponentReference {
                 }
             }
         }
+    }
+
+    public List<Parameter> getVariablesInNoTranslation() {
+        return variablesInNoTranslation;
     }
 }

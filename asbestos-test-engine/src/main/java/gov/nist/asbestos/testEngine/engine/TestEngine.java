@@ -687,6 +687,12 @@ public class TestEngine  {
             String value = varMgr.eval(outerName, false);
             externalVariables.put(innerName, value);
         }
+        for (Parameter parm : componentReference.getVariablesInNoTranslation()) {
+            String outerName = parm.getCallerName();
+            String innerName = parm.getLocalName();
+            String value = varMgr.eval(outerName, false);
+            externalVariables.put(innerName, value);
+        }
 
         if (engineVal.hasErrors())
             return;

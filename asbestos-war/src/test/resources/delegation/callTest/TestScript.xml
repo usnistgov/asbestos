@@ -38,7 +38,12 @@
                     <extension url="urn:fixture-in">
                         <valueString  value="pdb-bundle"/>
                     </extension>
-                    <extension url="urn:variable-in">
+                    <!--
+                    this is the name expected in the static fixture pdb-bundle
+                    so it should not be translated or even expected in the module. It
+                    is passed through module processing unaltered.
+                    -->
+                    <extension url="urn:variable-in-no-translation">
                         <valueString value="patientResourceId"/>
                     </extension>
                     <extension url="urn:fixture-out">
@@ -46,6 +51,14 @@
                     </extension>
                 </modifierExtension>
             </operation>
+        </action>
+        <action>
+            <assert>
+                <description value="... transaction was successful"/>
+                <response value="okay"/>
+                <sourceId value="pdb-response"/>
+                <warningOnly value="false"/>
+            </assert>
         </action>
     </test>
 </TestScript>
