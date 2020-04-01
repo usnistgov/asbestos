@@ -11,10 +11,11 @@ import java.util.*;
 
 public class VariableMgr {
     private TestScript testScript;
-    private FixtureMgr fixtureMgr;
+    private FixtureMgr fixtureMgr;  // variables reference fixtures so this is needed
     private ValE val;
     private TestReport.SetupActionOperationComponent opReport;
     private Reporter reporter;
+    private Map<String, String> externalVariables = new HashMap<>();  // passed by module call
 
     VariableMgr(TestScript testScript, FixtureMgr fixtureMgr) {
         Objects.requireNonNull(testScript);
@@ -140,6 +141,9 @@ public class VariableMgr {
     }
 
     String eval(String variableName, boolean errorAsValue) {
+        Objects.requireNonNull(reporter);
+        if (externalVariables.containsKey(variableName))
+            return externalVariables.get(variableName);
         TestScript.TestScriptVariableComponent var = getVariable(variableName);
         if (var == null) {
             String error = "Variable " + variableName + " is referenced but not defined";
@@ -216,4 +220,9 @@ public class VariableMgr {
         return this;
     }
 
+
+    public VariableMgr setExternalVariables(Map<String, String> variables) {
+        this.externalVariables = variables;
+        return this;
+    }
 }

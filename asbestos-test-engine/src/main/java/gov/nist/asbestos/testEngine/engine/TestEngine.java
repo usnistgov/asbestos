@@ -11,6 +11,7 @@ import gov.nist.asbestos.client.resolver.ResourceCacheMgr;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import gov.nist.asbestos.simapi.validation.Val;
 import gov.nist.asbestos.simapi.validation.ValE;
+import gov.nist.asbestos.testEngine.engine.translator.ComponentDefinition;
 import gov.nist.asbestos.testEngine.engine.translator.ComponentReference;
 import gov.nist.asbestos.testEngine.engine.translator.Parameter;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -32,8 +33,14 @@ public class TestEngine  {
     private File testDef = null; // directory holding test definition
     private String testScriptName = null;   // name of testscript file, TestScript.xml by default
     private URI sut = null;
+
+    // current script and report
     private TestScript testScript = null;
     private TestReport testReport = new TestReport();
+    // all scripts an reports.  [0] is top level, all others are called modules
+    private List<TestScript> testScripts = new ArrayList<>();
+    private List<TestReport> testReports = new ArrayList<>();
+
     private boolean failOverride = false;
     private FixtureMgr fixtureMgr = new FixtureMgr();
     private Val val;
@@ -49,6 +56,9 @@ public class TestEngine  {
 
     public static final String LAST_OP = "_LAST_OP_";
 
+    private ModularEngine modularEngine = null;
+    private Map<String, String> externalVariables = new HashMap<>();
+
     /**
      *
      * @param testDef  directory containing test definition
@@ -62,7 +72,9 @@ public class TestEngine  {
         this.sut = sut;
         // make test definition dir a temporary resource cache so elements of the TestScript
         // can be found
-        ResourceCacheMgr inTestResources = new ResourceCacheMgr(testDef, new Ref(""));
+        // this.testDef is important.  testDef, the parameter can be a path to a testscript.
+        // this.testDef is always the test definition directory
+        ResourceCacheMgr inTestResources = new ResourceCacheMgr(this.testDef, new Ref(""));
         fhirClientForFixtures = new FhirClient().setResourceCacheMgr(inTestResources);
     }
 
@@ -84,6 +96,11 @@ public class TestEngine  {
 
     public TestEngine setFixtures(Map<String, FixtureComponent> fixtures) {
         fixtureMgr.putAll(fixtures);
+        return this;
+    }
+
+    public TestEngine setExternalVariables(Map<String, String> externalVariables) {
+        this.externalVariables =externalVariables;
         return this;
     }
 
@@ -237,7 +254,7 @@ public class TestEngine  {
 
     private void initWorkflow() {
         if (testScript == null)
-            testScript = loadTestScript(testDef);
+            testScript = loadTestScript(testDef, testScriptName);
         String path = testScript.getName();
         String name = "";
         if (path.contains("/")) {
@@ -246,7 +263,20 @@ public class TestEngine  {
         } else
             name = path;
         testReport.setName(name);
-        testReport.setTestScript(new Reference(testDef.toString()));
+        String def;
+        if (testScriptName == null) {
+            File file;
+            file = new File(testDef, "TestScript.xml");
+            if (file.exists()) {
+                def = file.toString();
+            } else {
+                def = new File(testDef, "TestScript.json").toString();
+            }
+        } else {
+            def = new File(testDef, testScriptName).toString();
+        }
+
+        testReport.setTestScript(new Reference(def));
         testReport.setIssued(new Date());
         TestReport.TestReportParticipantComponent part = testReport.addParticipant();
         part.setType(TestReport.TestReportParticipantType.SERVER);
@@ -405,6 +435,7 @@ public class TestEngine  {
                                 .setType("fixture.autocreate")
                                 .setVal(fVal)
                                 .setVariableMgr(new VariableMgr(testScript, fixtureMgr)
+                                        .setExternalVariables(externalVariables)
                                         .setVal(fVal)
                                         .setOpReport(operationReport));
                         create.run(comp.getId(), comp.getResource(), operationReport);
@@ -435,6 +466,7 @@ public class TestEngine  {
                                 .setType("fixture.autodelete")
                                 .setVal(fVal)
                                 .setVariableMgr(new VariableMgr(testScript, fixtureMgr)
+                                        .setExternalVariables(externalVariables)
                                         .setVal(fVal)
                                         .setOpReport(operationReport));
                         delete.run(comp.getId(), comp.getResource(), operationReport);
@@ -521,7 +553,7 @@ public class TestEngine  {
     private void doOperation(String typePrefix, TestScript.SetupActionOperationComponent operation, TestReport.SetupActionOperationComponent report) {
         if (operation.hasType()) {
             try {
-                OperationRunner runner = new OperationRunner(fixtureMgr)
+                OperationRunner runner = new OperationRunner(fixtureMgr, externalVariables)
                         .setVal(new ValE(val).setMsg(typePrefix))
                         .setTypePrefix(typePrefix)
                         .setFhirClient(fhirClient)
@@ -559,6 +591,7 @@ public class TestEngine  {
                     .setVal(vale.setMsg(typePrefix))
                     .setTypePrefix(typePrefix)
                     .setVariableMgr(new VariableMgr(testScript, fixtureMgr)
+                            .setExternalVariables(externalVariables)
                             .setVal(vale)
                             .setOpReport(testReport.getSetup().addAction().getOperation()))
 //                    .setTestReport(testReport)
@@ -627,10 +660,14 @@ public class TestEngine  {
 
     private void handleImport(Extension extension, TestReport.SetupActionOperationComponent actionReport) {
         ComponentReference componentReference = new ComponentReference(testDef, Collections.singletonList(extension));
+
+        TestScript module = componentReference.getComponent();
+        // fill in componentReference with local names from module definition
+        new ComponentDefinition(getTestScriptFile(), module).loadTranslation(componentReference);
+
+        // align fixtures for module
         Map<String, FixtureComponent> inFixturesForComponent = new HashMap<>();
-        for (Parameter parm : componentReference.getIn()) {
-            if (parm.isVariable())
-                throw new RuntimeException("Script import with input variables not supported");
+        for (Parameter parm : componentReference.getFixturesIn()) {
             String outerName = parm.getCallerName();
             String innnerName = parm.getLocalName();
             FixtureComponent fixtureComponent = fixtureMgr.get(outerName);
@@ -638,18 +675,38 @@ public class TestEngine  {
                 throw new RuntimeException("Fixture " + outerName + " does not exist");
             inFixturesForComponent.put(innnerName, fixtureComponent);
         }
+
+        // align variables for module
+        Map<String, String> externalVariables = new HashMap<>();
+        VariableMgr varMgr = new VariableMgr(testScript, fixtureMgr)
+                .setVal(engineVal)
+                .setOpReport(actionReport);
+        for (Parameter parm : componentReference.getVariablesIn()) {
+            String outerName = parm.getCallerName();
+            String innerName = parm.getLocalName();
+            String value = varMgr.eval(outerName, false);
+            externalVariables.put(innerName, value);
+        }
+
+        if (engineVal.hasErrors())
+            return;
+
         TestEngine testEngine1 = new TestEngine(
                 componentReference.getComponentRef(),
                 this.sut)
                 .setTestSession(testSession)
+                .setVal(new Val())
                 .setExternalCache(externalCache)
                 .setFixtures(inFixturesForComponent)
+                .setExternalVariables(externalVariables)
+                .setFhirClient(new FhirClient())
                 ;
-        testEngine1.runTest();   // needs name qualifier for component log file generation
+        modularEngine.add(testEngine1);
+        testEngine1.runTest();
 
         FixtureMgr innerFixtures = testEngine1.fixtureMgr;
         Map<String, FixtureComponent> outFixturesForComponent = new HashMap<>();
-        for (Parameter parm : componentReference.getOut()) {
+        for (Parameter parm : componentReference.getFixturesOut()) {
             if (parm.isVariable())
                 throw new RuntimeException("Script import with output variables not supported");
             String outerName = parm.getCallerName();
@@ -914,8 +971,16 @@ public class TestEngine  {
     }
 
     public static TestScript loadTestScript(File testDefDir) {
+        return loadTestScript(testDefDir, null);
+    }
+
+    public static TestScript loadTestScript(File testDefDir, String fileName) {
         Objects.requireNonNull(testDefDir);
-        File location = findTestScriptFile(testDefDir);
+        File location;
+        if (fileName == null)
+            location = findTestScriptFile(testDefDir);
+        else
+            location = new File(testDefDir, fileName);
         InputStream is;
         try {
             is = new FileInputStream(location);
@@ -1115,6 +1180,21 @@ public class TestEngine  {
             this.testDef = testDef.getParentFile();
             this.testScriptName = testDef.getName();
         }
+        return this;
+    }
+
+    private File getTestScriptFile() {
+        if (testScriptName == null) {
+            File file = new File(testDef, "TestScript.xml");
+            if (file.exists())
+                return file;
+            return new File(testDef, "TestScript.json");
+        }
+        return new File(testDef, testScriptName);
+    }
+
+    public TestEngine setModularEngine(ModularEngine modularEngine) {
+        this.modularEngine = modularEngine;
         return this;
     }
 }

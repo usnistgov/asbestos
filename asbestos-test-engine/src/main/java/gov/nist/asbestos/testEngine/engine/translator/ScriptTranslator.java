@@ -138,8 +138,8 @@ public class ScriptTranslator {
 
 
     private List<TestScript.TestActionComponent> updateTestComponent(TestScript.TestScriptTestComponent componentTest, ComponentReference ref) {
-        List<Parameter> inUpdates = ref.getIn();
-        List<Parameter> outUpdates = ref.getOut();
+        List<Parameter> inUpdates = ref.getFixturesIn();
+        List<Parameter> outUpdates = ref.getFixturesOut();
         for (TestScript.TestActionComponent action : componentTest.getAction()) {
             if (action.hasOperation()) {
                 TestScript.SetupActionOperationComponent op = action.getOperation();
@@ -154,8 +154,8 @@ public class ScriptTranslator {
     }
 
     private List<TestScript.SetupActionComponent> updateSetupComponent(TestScript.TestScriptSetupComponent componentTest, ComponentReference ref) {
-        List<Parameter> inUpdates = ref.getIn();
-        List<Parameter> outUpdates = ref.getOut();
+        List<Parameter> inUpdates = ref.getFixturesIn();
+        List<Parameter> outUpdates = ref.getFixturesOut();
         for (TestScript.SetupActionComponent action : componentTest.getAction()) {
             if (action.hasOperation()) {
                 TestScript.SetupActionOperationComponent op = action.getOperation();
@@ -170,8 +170,8 @@ public class ScriptTranslator {
     }
 
     private void updateOperation(TestScript.SetupActionOperationComponent op, ComponentReference ref) {
-        List<Parameter> inUpdates = ref.getIn();
-        List<Parameter> outUpdates = ref.getOut();
+        List<Parameter> inUpdates = ref.getFixturesIn();
+        List<Parameter> outUpdates = ref.getFixturesOut();
         if (op.hasRequestId()) {
             Parameter p = Parameter.findByLocalName(inUpdates, op.getRequestId());
             if (p != null) op.setRequestId(p.getCallerName());
@@ -191,8 +191,8 @@ public class ScriptTranslator {
     }
 
     private void updateAssert(TestScript.SetupActionAssertComponent as, ComponentReference ref) {
-        List<Parameter> inUpdates = ref.getIn();
-        List<Parameter> outUpdates = ref.getOut();
+        List<Parameter> inUpdates = ref.getFixturesIn();
+        List<Parameter> outUpdates = ref.getFixturesOut();
         if (as.hasSourceId()) {
             Parameter p = Parameter.findByLocalName(inUpdates, as.getSourceId());
             if (p != null) as.setSourceId(p.getCallerName());

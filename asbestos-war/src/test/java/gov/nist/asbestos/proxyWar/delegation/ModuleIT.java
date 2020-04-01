@@ -1,5 +1,6 @@
 package gov.nist.asbestos.proxyWar.delegation;
 
+import gov.nist.asbestos.client.Base.EC;
 import gov.nist.asbestos.client.client.FhirClient;
 import gov.nist.asbestos.http.operations.HttpPost;
 import gov.nist.asbestos.proxyWar.ExternalCache;
@@ -7,6 +8,7 @@ import gov.nist.asbestos.proxyWar.ITConfig;
 import gov.nist.asbestos.sharedObjects.ChannelConfig;
 import gov.nist.asbestos.sharedObjects.ChannelConfigFactory;
 import gov.nist.asbestos.simapi.validation.Val;
+import gov.nist.asbestos.testEngine.engine.ModularEngine;
 import gov.nist.asbestos.testEngine.engine.TestEngine;
 import org.hl7.fhir.r4.model.TestReport;
 import org.junit.jupiter.api.BeforeAll;
@@ -38,13 +40,25 @@ class ModuleIT {
     TestEngine run(String testScriptLocation) throws URISyntaxException {
         Val val = new Val();
         File test1 = Paths.get(getClass().getResource(testScriptLocation).toURI()).getParent().toFile();
-        TestEngine testEngine = new TestEngine(test1, base)
+
+        File patientCacheDir = new EC(ExternalCache.getExternalCache()).getTestLogCacheDir("default__default");
+        patientCacheDir.mkdirs();
+
+        ModularEngine modularEngine = new ModularEngine(test1, base);
+        TestEngine testEngine = modularEngine.getLastTestEngine();
+        testEngine
                 .setVal(val)
                 .setTestSession(testScriptLocation)
                 .setExternalCache(ExternalCache.getExternalCache())
                 .setFhirClient(new FhirClient())
+                .addCache(patientCacheDir)
                 .runTest();
-        System.out.println(testEngine.getTestReportAsJson());
+        int i = 0;
+        for (TestEngine engine : modularEngine.getTestEngines()) {
+            System.out.println("ENGINE " + i);
+            System.out.println(engine.getTestReportAsJson());
+            i++;
+        }
         TestReport report = testEngine.getTestReport();
         TestReport.TestReportResult result = report.getResult();
         assertEquals(TestReport.TestReportResult.PASS, result);

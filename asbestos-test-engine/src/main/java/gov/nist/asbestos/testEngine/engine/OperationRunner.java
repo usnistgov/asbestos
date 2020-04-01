@@ -8,6 +8,7 @@ import org.hl7.fhir.r4.model.TestReport;
 import org.hl7.fhir.r4.model.TestScript;
 
 import java.net.URI;
+import java.util.Map;
 import java.util.Objects;
 
 public class OperationRunner {
@@ -21,10 +22,12 @@ public class OperationRunner {
     private TestReport testReport = null;
     private URI sut = null;
     private Reporter reporter;
+    private Map<String, String> externalVariables;
 
-    OperationRunner(FixtureMgr fixtureMgr) {
+    OperationRunner(FixtureMgr fixtureMgr, Map<String, String> externalVariables) {
         Objects.requireNonNull(fixtureMgr);
         this.fixtureMgr = fixtureMgr;
+        this.externalVariables = externalVariables;
     }
 
     void run(TestScript.SetupActionOperationComponent op, TestReport.SetupActionOperationComponent operationReport) {
@@ -93,6 +96,7 @@ public class OperationRunner {
                     .setType(type + ".read")
                     .setTestReport(testReport);
             setupActionRead.setVariableMgr(new VariableMgr(testScript, fixtureMgr)
+                    .setExternalVariables(externalVariables)
                             .setVal(val)
                         .setOpReport(operationReport)
                         );
@@ -108,6 +112,7 @@ public class OperationRunner {
                         .setVal(val)
                         .setVariableMgr(
                                 new VariableMgr(testScript, fixtureMgr)
+                                        .setExternalVariables(externalVariables)
                                         .setVal(val)
                                         .setOpReport(operationReport));
                 setupActionSearch.run(op, operationReport);
@@ -120,6 +125,7 @@ public class OperationRunner {
                             .setVal(val);
             setupActionCreate.setVariableMgr(
                     new VariableMgr(testScript, fixtureMgr)
+                            .setExternalVariables(externalVariables)
                             .setVal(val)
                             .setOpReport(operationReport));
             setupActionCreate.run(op, operationReport);
@@ -132,6 +138,7 @@ public class OperationRunner {
                             .setVal(val);
             setupActionDelete.setVariableMgr(
                     new VariableMgr(testScript, fixtureMgr)
+                            .setExternalVariables(externalVariables)
                             .setVal(val)
                             .setOpReport(operationReport));
             setupActionDelete.run(op, operationReport);
@@ -144,6 +151,7 @@ public class OperationRunner {
                             .setVal(val);
             setupActionTransaction.setVariableMgr(
                     new VariableMgr(testScript, fixtureMgr)
+                            .setExternalVariables(externalVariables)
                             .setVal(val)
                             .setOpReport(operationReport));
             setupActionTransaction.run(op, operationReport);
@@ -156,6 +164,7 @@ public class OperationRunner {
                             .setVal(val);
             setupActionTransaction.setVariableMgr(
                     new VariableMgr(testScript, fixtureMgr)
+                            .setExternalVariables(externalVariables)
                             .setVal(val)
                             .setOpReport(operationReport));
             setupActionTransaction.run(op, operationReport);

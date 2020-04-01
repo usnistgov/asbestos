@@ -52,4 +52,9 @@ public class Parameter {
     public boolean isVariable() {
         return isVariable;
     }
+
+    public Parameter setVariable(boolean variable) {
+        isVariable = variable;
+        return this;
+    }
 }

@@ -11,7 +11,7 @@ public class ComponentReferences {
 
     public ComponentReference getCallerIn(String name) {
         for (ComponentReference c : refs) {
-            for (Parameter p : c.getIn()) {
+            for (Parameter p : c.getFixturesIn()) {
                 if (p.getCallerName().equals(name))
                     return c;
             }
@@ -21,7 +21,7 @@ public class ComponentReferences {
 
     public ComponentReference getCallerOut(String name) {
         for (ComponentReference c : refs) {
-            for (Parameter p : c.getOut()) {
+            for (Parameter p : c.getFixturesOut()) {
                 if (p.getCallerName().equals(name))
                     return c;
             }
@@ -31,7 +31,7 @@ public class ComponentReferences {
 
     public ComponentReference getLocalIn(String name) {
         for (ComponentReference c : refs) {
-            for (Parameter p : c.getIn()) {
+            for (Parameter p : c.getFixturesIn()) {
                 if (p.getLocalName().equals(name))
                     return c;
             }
@@ -41,7 +41,7 @@ public class ComponentReferences {
 
     public ComponentReference getLocalOut(String name) {
         for (ComponentReference c : refs) {
-            for (Parameter p : c.getOut()) {
+            for (Parameter p : c.getFixturesOut()) {
                 if (p.getLocalName().equals(name))
                     return c;
             }

@@ -12,8 +12,10 @@ public class ComponentReference {
     private String relativePath = null;
     private File componentRef = null;
     private TestScript component = null;
-    private List<Parameter> in = new ArrayList<>();
-    private List<Parameter> out = new ArrayList<>();
+    private List<Parameter> fixturesIn = new ArrayList<>();
+    private List<Parameter> fixturesOut = new ArrayList<>();
+    private List<Parameter> variablesIn = new ArrayList<>();
+    private List<Parameter> variablesOut = new ArrayList<>();
 
     public ComponentReference(File testDef, List<Extension> importDeclaration)  {
         for (Extension imd : importDeclaration) {
@@ -25,13 +27,21 @@ public class ComponentReference {
                 } else if (url.equals("urn:fixture-in")) {
                     Parameter p = new Parameter();
                     p.setCallerName(value);
-                    in.add(p);
+                    fixturesIn.add(p);
                 } else if (url.equals("urn:fixture-out")) {
                     Parameter p = new Parameter();
                     p.setCallerName(value);
-                    out.add(p);
+                    fixturesOut.add(p);
+                } else if (url.equals("urn:variable-in")) {
+                    Parameter p = new Parameter();
+                    p.setCallerName(value);
+                    variablesIn.add(p);
+                } else if (url.equals("urn:variable-out")) {
+                    Parameter p = new Parameter();
+                    p.setCallerName(value);
+                    variablesOut.add(p);
                 } else {
-                    throw new RuntimeException("Do not understand extension " + url + " in " + testDef);
+                    throw new RuntimeException("Do not understand extension " + url + " in ComponentReference " + testDef);
                 }
             }
         }
@@ -42,12 +52,20 @@ public class ComponentReference {
             throw new RuntimeException("Component reference " + this.componentRef + " does not exist");
     }
 
-    public List<Parameter> getIn() {
-        return in;
+    public List<Parameter> getFixturesIn() {
+        return fixturesIn;
     }
 
-    public List<Parameter> getOut() {
-        return out;
+    public List<Parameter> getFixturesOut() {
+        return fixturesOut;
+    }
+
+    public List<Parameter> getVariablesIn() {
+        return variablesIn;
+    }
+
+    public List<Parameter> getVariablesOut() {
+        return variablesOut;
     }
 
     public TestScript getComponent() {
@@ -73,15 +91,15 @@ public class ComponentReference {
             String url = e.getUrl();
             String value = e.getValue().toString();
             if (url.equals("urn:fixture-in")) {
-                if (inI < in.size()) {
-                    in.get(inI).setLocalName(value);
+                if (inI < fixturesIn.size()) {
+                    fixturesIn.get(inI).setLocalName(value);
                     inI++;
                 } else {
                     throw new RuntimeException("Component " + relativePath + " was not called with a " + inI + "th in parameter");
                 }
             } else if (url.equals("urn:fixture-out")) {
-                if (outI < out.size()) {
-                    out.get(outI).setLocalName(value);
+                if (outI < fixturesOut.size()) {
+                    fixturesOut.get(outI).setLocalName(value);
                     outI++;
                 } else {
                     throw new RuntimeException("Component " + relativePath + " was not called with a " + outI + "th out parameter");

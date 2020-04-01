@@ -7,7 +7,7 @@ import gov.nist.asbestos.serviceproperties.ServiceProperties;
 import gov.nist.asbestos.serviceproperties.ServicePropertiesEnum;
 import gov.nist.asbestos.sharedObjects.ChannelConfig;
 import gov.nist.asbestos.simapi.validation.Val;
-import gov.nist.asbestos.testEngine.engine.TestEngine;
+import gov.nist.asbestos.testEngine.engine.ModularEngine;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.log4j.Logger;
 import org.hl7.fhir.r4.model.TestReport;
@@ -81,8 +81,11 @@ public class RunTestRequest {
                 .sendGzip(request.isGzip)
                 .requestGzip(request.isGzip);
         TestReport report;
+        ModularEngine modularEngine;
         try {
-            report = new TestEngine(testDir, proxy)
+            modularEngine = new ModularEngine(testDir, proxy);
+            report = modularEngine
+                    .getLastTestEngine()
                     .setTestSession(testSession)
                     .setChannelId(channelId)
                     .setExternalCache(request.externalCache)
