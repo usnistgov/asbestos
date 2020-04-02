@@ -1,6 +1,8 @@
 <TestScript xmlns="http://hl7.org/fhir">
     <description value="Submit Comprehensive Metadata Provide Document Bundle and Read back the DocumentReference."/>
     <fixture id="pdb-bundle">
+        <autocreate value="false"/>
+        <autodelete value="false"/>
         <resource>
             <reference value="Bundle/pdb.xml"/>
         </resource>
@@ -9,6 +11,8 @@
         <!--
            This patient comes out of the test Patient cache
         -->
+        <autocreate value="false"/>
+        <autodelete value="false"/>
         <resource>
             <reference value="Patient/Alex_Alder"/>
         </resource>
@@ -17,6 +21,8 @@
         <!--
            This patient comes out of the test Patient cache
         -->
+        <autocreate value="false"/>
+        <autodelete value="false"/>
         <resource>
             <reference value="Patient/Alex_Alder"/>
         </resource>

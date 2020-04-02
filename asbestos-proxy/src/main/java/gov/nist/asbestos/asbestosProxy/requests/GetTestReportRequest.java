@@ -59,6 +59,8 @@ public class GetTestReportRequest {
         try {
             String json = new ModularLogs(request.ec, channelId, testCollection, testName).asJson();
             Returns.returnString(request.resp, json);
+            log.info("ModuleLogs:");
+            log.info(json);
         } catch (IOException e) {
             Returns.returnString(request.resp, new ModularLogs().asJson());
         }

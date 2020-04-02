@@ -84,7 +84,7 @@ public class RunTestRequest {
         TestReport report;
         ModularEngine modularEngine;
         try {
-            modularEngine = new ModularEngine(testDir, proxy);
+            modularEngine = new ModularEngine(testDir, proxy).setSaveLogs(true);
             report = modularEngine
                     //.getLastTestEngine()
                     .setTestSession(testSession)
@@ -103,16 +103,16 @@ public class RunTestRequest {
             throw t;
         }
 
-        // Save test log to FhirTestLogs
-        report.setName(testName);
-        String json = Returns.returnResource(request.resp, report);
-        Path path = request.ec.getTestLog(channelId, testCollection, testName).toPath();
-        try (BufferedWriter writer = Files.newBufferedWriter(path))
-        {
-            writer.write(json);
-        } catch (IOException e) {
-            log.error(ExceptionUtils.getStackTrace(e));
-            throw new RuntimeException(e);
-        }
+//        // Save test log to FhirTestLogs
+//        report.setName(testName);
+//        String json = Returns.returnResource(request.resp, report);
+//        Path path = request.ec.getTestLog(channelId, testCollection, testName).toPath();
+//        try (BufferedWriter writer = Files.newBufferedWriter(path))
+//        {
+//            writer.write(json);
+//        } catch (IOException e) {
+//            log.error(ExceptionUtils.getStackTrace(e));
+//            throw new RuntimeException(e);
+//        }
     }
 }

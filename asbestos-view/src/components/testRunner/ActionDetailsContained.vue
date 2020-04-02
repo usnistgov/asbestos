@@ -129,7 +129,7 @@
                 this.displayDetails = !this.displayDetails
             },
             operationType(operation) {
-                return operation.type.code
+                return operation && operation.type ? operation.type.code : null
             },
             assertionDescription() {
                 return this.script.assert.description === undefined ? "" : this.script.assert.description

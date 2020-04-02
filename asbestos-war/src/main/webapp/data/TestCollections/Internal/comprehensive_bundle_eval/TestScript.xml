@@ -10,10 +10,10 @@
 
     <test>
         <name value="Evaluations"/>
-        <description value="The Description."/>
+        <description value="The Description"/>
         <action>
             <assert>
-                <description value="DocumentReference: category is required."/>
+                <description value="DocumentReference: category is required"/>
                 <compareToSourceId value="request"/>
                 <compareToSourceExpression value="Bundle.entry.resource.where(is(FHIR.DocumentReference)).category.exists()"/>
                 <warningOnly value="false"/>
@@ -21,7 +21,7 @@
         </action>
         <action>
             <assert>
-                <description value="DocumentManifest: type is required."/>
+                <description value="DocumentManifest: type is required"/>
                 <compareToSourceId value="request"/>
                 <compareToSourceExpression value="Bundle.entry.resource.where(is(FHIR.DocumentReference)).type.exists()"/>
                 <warningOnly value="false"/>

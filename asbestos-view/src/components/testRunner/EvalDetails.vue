@@ -168,7 +168,7 @@
                 return action.operation ? `Operation: ${this.operationType(action.operation)}` : `Assert: ${this.assertionDescription(action.assert)}`
             },
             operationType(operation) {
-                return operation.type.code
+                return operation && operation.type ? operation.type.code : null
             },
             assertionDescription(assert) {
                 return assert.description === undefined ? "" : assert.description

@@ -58,6 +58,9 @@
                 <ul>
                     <div v-for="(line, linei) in translateNL(message)" :key="'msgDisp' + linei">
                         <li>
+                            <span v-if="isError">
+                                <img src="../../assets/yellow-error.png">
+                            </span>
                             {{ line }}
                         </li>
                     </div>
@@ -151,7 +154,7 @@
                 this.displayDetails = !this.displayDetails
             },
             operationType(operation) {
-                return operation.type.code
+                return operation && operation.type ? operation.type.code : null
             },
             assertionDescription() {
                 return this.script.assert.description === undefined ? "" : this.script.assert.description
@@ -161,6 +164,17 @@
             },
         },
         computed: {
+            isError() {
+                return this.result === 'error'
+            },
+            result() {
+                if (!this.report)
+                    return null
+                return this.report.assert
+                    ? this.report.assert.result
+                    : this.report.operation.result
+
+            },
             message() {
                 if (!this.report)
                     return null

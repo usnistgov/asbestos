@@ -240,13 +240,20 @@ export const testRunnerStore = {
             const combinedPromises = Promise.all(promises)
                 .then(results => {
                     results.forEach(result => {
-                        const report = result.data
-                        if (report && report.resourceType === 'TestReport') {
-                            if (report.status === 'entered-in-error') {
-                                const message = report.setup.action[0].assert.message
-                                commit('setError', 'script: ' + report.name + ': ' + message)
-                            } else {
-                                reports[report.name] = report
+                        const reportsData = result.data
+                        if (reportsData) {
+                            // only consumes/stores top level report
+                            //console.log(`got ${Object.keys(reportsData).length} reports`)
+                            const testName = Object.keys(reportsData)[0]
+                            //console.log(`test name is ${testName}`)
+                            const report = reportsData[testName]
+                            if (report && report.resourceType === 'TestReport') {
+                                if (report.status === 'entered-in-error') {
+                                    const message = report.setup.action[0].assert.message
+                                    commit('setError', 'script: ' + report.name + ': ' + message)
+                                } else {
+                                    reports[report.name] = report
+                                }
                             }
                         }
                     })

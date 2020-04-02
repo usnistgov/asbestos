@@ -146,6 +146,12 @@ public class EC {
         return names;
     }
 
+    public File getTestLogDir(String channelId, String collectionName, String testName) {
+        File collectionDir = getTestLogCollectionDir(channelId, collectionName);
+        File testDir = new File(collectionDir, testName);
+        return testDir;
+    }
+
      public File getTestLog(String channelId, String collectionName, String testName, String moduleName) {
         File collectionDir = getTestLogCollectionDir(channelId, collectionName);
         File testDir = new File(collectionDir, testName);

@@ -1,5 +1,7 @@
 <TestScript xmlns="http://hl7.org/fhir">
     <fixture id="pdb-bundle">
+        <autocreate value="false"/>
+        <autodelete value="false"/>
         <resource>
             <reference value="Bundle/pdb.xml"/>
         </resource>
@@ -8,6 +10,8 @@
         <!--
            This patient comes out of the test Patient cache
         -->
+        <autocreate value="false"/>
+        <autodelete value="false"/>
         <resource>
             <reference value="Patient/Alex_Alder"/>
         </resource>
@@ -18,11 +22,11 @@
         <sourceId value="patient_bundle"/>
     </variable>
     <test>
-        <description value="Bundle.meta.profile missing."/>
+        <description value="Bundle.meta.profile missing"/>
         <action>
             <operation>
                 <!-- references patient from resourceCache in EC -->
-                <description value="send PDB."/>
+                <description value="send PDB"/>
                 <label value="create"/>
                 <type>
                     <system value="https://github.com/usnistgov/asbestos/wiki/Testscript-Operation-Codes"/>
@@ -34,14 +38,14 @@
         </action>
         <action>
             <assert>
-                <description value="... transaction failed."/>
+                <description value="... transaction failed"/>
                 <response value="bad"/>
                 <warningOnly value="false"/>
             </assert>
         </action>
         <action>
             <assert>
-                <description value="... return OperationOutcome."/>
+                <description value="... return OperationOutcome"/>
                 <compareToSourceId value="pdb-response"/>
                 <compareToSourceExpression value="where(OperationOutcome).exists()"/>
                 <warningOnly value="false"/>

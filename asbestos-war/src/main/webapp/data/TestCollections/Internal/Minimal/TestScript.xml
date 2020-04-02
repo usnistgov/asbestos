@@ -24,7 +24,7 @@
                 <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-OncePerType">
                     <valueString value="DocumentReference"/>
                 </modifierExtension>
-                <description value="verify required attributes present in DocumentReference(s)."/>
+                <description value="verify required attributes present in DocumentReference(s)"/>
                 <sourceId value="request"/>
                 <minimumId value="referenceDocumentReference"/>
                 <warningOnly value="false"/>
@@ -38,7 +38,7 @@
                 <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-OncePerType">
                     <valueString value="DocumentManifest"/>
                 </modifierExtension>
-                <description value="verify required attributes present in DocumentManifest(s)."/>
+                <description value="verify required attributes present in DocumentManifest(s)"/>
                 <sourceId value="request"/>
                 <minimumId value="referenceDocumentManifest"/>
                 <warningOnly value="false"/>
