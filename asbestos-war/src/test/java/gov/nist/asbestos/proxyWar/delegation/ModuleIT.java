@@ -32,10 +32,15 @@ class ModuleIT {
     private static URI base;
 
     @Test
-    void runScript() throws URISyntaxException {
+    void simpleCallTest() throws URISyntaxException {
         run("/delegation/callTest/TestScript.xml");
     }
 
+    @Test
+    void libraryCallTest() throws URISyntaxException {
+        // This reuses module.xml from simpleCallTest
+        run("/delegation/libraryTest/TestScript.xml");
+    }
 
     TestEngine run(String testScriptLocation) throws URISyntaxException {
         Val val = new Val();
@@ -44,11 +49,12 @@ class ModuleIT {
         File patientCacheDir = new EC(ExternalCache.getExternalCache()).getTestLogCacheDir("default__default");
         patientCacheDir.mkdirs();
 
-        ModularEngine modularEngine = new ModularEngine(test1, base);
-        TestEngine testEngine = modularEngine.getLastTestEngine();
-        testEngine
+        ModularEngine modularEngine = new ModularEngine(test1, base).setSaveLogs(true);
+        TestEngine mainTestEngine = modularEngine.getMainTestEngine();
+        modularEngine
                 .setVal(val)
                 .setTestSession(testScriptLocation)
+                .setChannelId("default__default")
                 .setExternalCache(ExternalCache.getExternalCache())
                 .setFhirClient(new FhirClient())
                 .addCache(patientCacheDir)
@@ -59,10 +65,10 @@ class ModuleIT {
             System.out.println(engine.getTestReportAsJson());
             i++;
         }
-        TestReport report = testEngine.getTestReport();
+        TestReport report = mainTestEngine.getTestReport();
         TestReport.TestReportResult result = report.getResult();
         assertEquals(TestReport.TestReportResult.PASS, result);
-        return testEngine;
+        return mainTestEngine;
     }
 
     @BeforeAll

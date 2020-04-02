@@ -1203,4 +1203,20 @@ public class TestEngine  {
         this.modularEngine = modularEngine;
         return this;
     }
+
+    public String getTestScriptName() {
+        return testScriptName;
+    }
+
+    public File getExternalCache() {
+        return externalCache;
+    }
+
+    public String getChannelId() {
+        return channelId;
+    }
+
+    public String getTestCollection() {
+        return testCollection;
+    }
 }

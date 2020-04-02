@@ -94,7 +94,7 @@ public class GetClientTestEvalRequest {
         if (!useMarker)
             events = events.subList(0, Math.min(events.size(), eventsToEvaluate));
 
-        File testLogDir = request.ec.getTestLogDir(request.fullChannelId(), testCollection);
+        File testLogDir = request.ec.getTestLogCollectionDir(request.fullChannelId(), testCollection);
 
         // for one testId
         String testId = request.uriParts.get(7);

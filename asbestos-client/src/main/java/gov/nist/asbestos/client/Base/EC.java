@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Properties;
 import java.util.stream.Collectors;
 
@@ -125,16 +126,41 @@ public class EC {
         return collectionRoot;
     }
 
-     public File getTestLog(String channelId, String collectionName, String testName) {
-        File testLogs = new File(externalCache, "FhirTestLogs");
-        File forChannelId = new File(testLogs, channelId);
-        File forCollection = new File(forChannelId, collectionName);
-        forCollection.mkdirs();
-        return new File(forCollection, testName + ".json");
+    public File getTestLog(String channelId, String collectionName, String testName) {
+        return getTestLog(channelId, collectionName, testName, null);
+    }
+
+    public List<String> getTestLogModules(String channelId, String collectionName, String testName) {
+        List<String> names = new ArrayList<>();
+        File collectionDir = getTestLogCollectionDir(channelId, collectionName);
+        File testDir = new File(collectionDir, testName);
+        if (!testDir.isDirectory())
+            return names;
+        File[] files = testDir.listFiles();
+        if (files == null)
+            return names;
+        for (File file : files) {
+            if (file.isDirectory())
+                names.add(file.getName());
+        }
+        return names;
+    }
+
+     public File getTestLog(String channelId, String collectionName, String testName, String moduleName) {
+        File collectionDir = getTestLogCollectionDir(channelId, collectionName);
+        File testDir = new File(collectionDir, testName);
+        if (moduleName == null) {
+            testDir.mkdirs();
+            return new File(testDir, "TestReport.json");
+        }
+        File moduleDir = new File(testDir, moduleName);
+        moduleDir.mkdirs();
+        return new File(moduleDir, "TestReport.json");
     }
 
     // channelId is testSession__channel
-    public File getTestLogDir(String channelId, String collectionName) {
+    public File getTestLogCollectionDir(String channelId, String collectionName) {
+        Objects.requireNonNull(channelId);
         File testLogs = new File(externalCache, "FhirTestLogs");
         File forChannelId = new File(testLogs, channelId);
         File forCollection = (collectionName == null) ? forChannelId : new File(forChannelId, collectionName);
@@ -143,14 +169,14 @@ public class EC {
     }
 
     public File getTestLogCacheDir(String channelId) {
-        return new File(getTestLogDir(channelId, null), "cache");
+        return new File(getTestLogCollectionDir(channelId, null), "cache");
     }
 
     // channelId is testSession__channel
     public List<File> getTestLogs(String channelId, String collectionName) {
-        File testLogs = new File(externalCache, "FhirTestLogs");
-        File forTestSession = new File(testLogs, channelId);
-        File forCollection = new File(forTestSession, collectionName);
+//        File testLogs = new File(externalCache, "FhirTestLogs");
+//        File forTestSession = new File(testLogs, channelId);
+        File forCollection = getTestLogCollectionDir(channelId, collectionName); //new File(forTestSession, collectionName);
 
         List<File> testLogList = new ArrayList<>();
         File[] tests = forCollection.listFiles();
@@ -163,7 +189,7 @@ public class EC {
                 testLogList.add(test);
             }
         }
-        log.info("got " + testLogList.size() + " test logs from " + testLogs.toString());
+//        log.info("got " + testLogList.size() + " test logs from " + testLogs.toString());
         return testLogList;
     }
 

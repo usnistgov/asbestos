@@ -20,7 +20,7 @@
                      :key="'Action' + actioni">
                     <action-details-contained
                             :script="action"
-                            :report="report.action[actioni]"> </action-details-contained>
+                            :report="report ? report.action[actioni] : null"> </action-details-contained>
                 </div>
             </div>
         </div>

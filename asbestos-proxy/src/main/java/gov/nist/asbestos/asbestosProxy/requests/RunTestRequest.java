@@ -26,6 +26,7 @@ import java.nio.file.Path;
 // 4 - channelName (testSession__channelId)
 // 5 - testCollectionId
 // 6 - testId
+// Returns single TestReport
 
 public class RunTestRequest {
     private static Logger log = Logger.getLogger(RunTestRequest.class);
@@ -85,7 +86,7 @@ public class RunTestRequest {
         try {
             modularEngine = new ModularEngine(testDir, proxy);
             report = modularEngine
-                    .getLastTestEngine()
+                    //.getLastTestEngine()
                     .setTestSession(testSession)
                     .setChannelId(channelId)
                     .setExternalCache(request.externalCache)
@@ -101,6 +102,8 @@ public class RunTestRequest {
             log.error(ExceptionUtils.getStackTrace(t));
             throw t;
         }
+
+        // Save test log to FhirTestLogs
         report.setName(testName);
         String json = Returns.returnResource(request.resp, report);
         Path path = request.ec.getTestLog(channelId, testCollection, testName).toPath();

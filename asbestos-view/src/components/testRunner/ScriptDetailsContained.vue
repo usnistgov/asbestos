@@ -32,7 +32,7 @@
                  :key="'Test' + testi">
                 <test-details-contained
                         :script="script.test[testi]"
-                        :report="report.test[testi]"
+                        :report="report ? report.test[testi] : null"
                         :description="description(testi)"
                 ></test-details-contained>
 
