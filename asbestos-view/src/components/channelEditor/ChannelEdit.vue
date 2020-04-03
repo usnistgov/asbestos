@@ -153,8 +153,14 @@
             </div>
             <!-- end of grid -->
             <div v-if="channel && !edit">
-                <p class="caption">Channel Base Address: </p>
-                <span class="center">{{getChannelBase(channel)}}</span>
+                <div>
+                    <p class="caption">Channel Base Address: </p>
+                    <span class="center">{{getChannelBase(false, channel)}}</span>
+                </div>
+                <div v-if="isHttpsMode()">
+                    <p class="caption">Optional HTTPS Channel Base Address: </p>
+                    <span class="center">{{getChannelBase(true, channel)}}</span>
+                </div>
                 <div>
                     <p>Send to this URL and</p>
                     <ul>
@@ -172,7 +178,7 @@
 <script>
     import Vue from 'vue'
     import {store} from "../../store"
-    import {UtilFunctions, TLS_UI_PROXY, PROXY, CHANNEL, ASBTS_USERPROPS} from '../../common/http-common'
+    import {UtilFunctions, PROXY, CHANNEL, ASBTS_USERPROPS} from '../../common/http-common'
     import VueFlashMessage from 'vue-flash-message';
     Vue.use(VueFlashMessage);
     require('vue-flash-message/dist/vue-flash-message.min.css')
@@ -268,7 +274,7 @@
                     if (! this.channel.writeLocked) {
                         await PROXY.delete('channel/' + this.sessionId + '__' + this.channelId)
                     } else if (this.editUserProps.bapw != "") {
-                        await TLS_UI_PROXY.delete('channelGuard/' + this.sessionId + '__' + this.channelId, { auth: {username: this.editUserProps.bauser, password: this.editUserProps.bapw}})
+                        await PROXY.delete('channelGuard/' + this.sessionId + '__' + this.channelId, { auth: {username: this.editUserProps.bauser, password: this.editUserProps.bapw}})
                     }
                     this.msg('Deleted')
                     this.$store.commit('deleteChannel', this.channelId)
@@ -322,7 +328,7 @@
                                 that.edit = false
                             })
                     } else {
-                        TLS_UI_PROXY.post('/channelGuard', this.channel, {
+                        PROXY.post('/channelGuard', this.channel, {
                             auth: {
                                 username: this.editUserProps.bauser,
                                 password: this.editUserProps.bapw
@@ -429,8 +435,14 @@
                 this.$store.commit('setChannelId', this.channel.channelId)
                 this.$router.push(newRoute)
             },
-            getChannelBase(channel) {
-                return UtilFunctions.getChannelBase(channel)
+            isHttpsMode() {
+               return UtilFunctions.isHttpsMode()
+            },
+            getChannelBase(https, channel) {
+                if (https)
+                    return UtilFunctions.getHttpsChannelBase(channel)
+                else
+                    return UtilFunctions.getChannelBase(channel)
             },
             requestLock(boolIn) {
                 const bool = boolIn
@@ -459,7 +471,7 @@
                 const that = this
                 let chan = cloneDeep(this.channel)
                 chan.writeLocked = bool
-                await TLS_UI_PROXY.post('channelLock', chan, { auth: {username: this.editUserProps.bauser, password: this.editUserProps.bapw}})
+                await PROXY.post('channelLock', chan, { auth: {username: this.editUserProps.bauser, password: this.editUserProps.bapw}})
                     .then(function () {
                         that.channel.writeLocked = bool
                         that.msg('Channel configuration is ' + ((bool)?'locked':'unlocked'))

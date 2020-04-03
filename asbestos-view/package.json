@@ -6,6 +6,7 @@
   "author": "",
   "scripts": {
     "serve": "vue-cli-service serve",
+    "serve_prod": "vue-cli-service serve --mode production",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint"
   },
