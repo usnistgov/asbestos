@@ -116,6 +116,7 @@
                             </span>
                             <span v-else>
                                 <button class="runallbutton" @click.stop="doRun(name)">Run</button>
+                                <button v-if="i in $store.state.testScriptDebugger.showDebugButton && Boolean($store.state.testScriptDebugger.showDebugButton[i])" class="debugTestScriptButton" @click.stop="doDebug(name)">Debug</button>
                             </span>
 
                             <script-status v-if="statusRight" :status-right="statusRight" :name="name"> </script-status>
@@ -185,6 +186,13 @@
                 //    ==> calls evalStatus
             },
             async doRun(testName) {  // server tests
+                if (!testName)
+                    return
+                this.running = true
+                await this.$store.dispatch('runTest', testName)
+                this.running = false
+            },
+            async doDebug(testName) {  // server tests
                 if (!testName)
                     return
                 this.running = true
@@ -364,6 +372,14 @@
         text-align: right;
         padding-bottom: 5px;
     }
+    .debugTestScriptButton {
+        /*padding-bottom: 5px;*/
+        margin-left: 10px;
+        background-color: cornflowerblue;
+        cursor: pointer;
+        border-radius: 25px;
+        font-weight: bold;
+    }
     .configurationError {
         color: red;
     }
@@ -474,9 +490,11 @@
     .align-left {
         text-align: left;
     }
-    .debugIndicator {
-        list-style-type: "\1F6D1";
-        /* 1F6D1 = Stop sign */
+    .breakpoint-indicator {
+        list-style-type: "\1F6D1"; /* Stop sign */
+    }
+    .debug-hint {
+        list-style-type: "\1F41E"; /* Lady bug */
     }
     .noTopMargin {
         margin-top: 0px;
@@ -486,6 +504,9 @@
     }
     .testBarMargin {
         margin-bottom: 3px;
+    }
+    .inlineDiv {
+        display: inline;
     }
 
 </style>

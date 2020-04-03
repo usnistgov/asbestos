@@ -45,13 +45,18 @@
             <div v-if="script">
                 <div v-for="(test, testi) in tests"
                      :key="'Test' + testi">
-                    <test-details
-                            :script="script.test[testi]"
-                            :report="report ? report.test[testi] : null"
-                            :script-contained="script.contained"
-                            :report-contained="report ? report.contained : null"
-                    ></test-details>
-
+                    <ul class="noListStyle">
+                        <li v-if="script">
+                            <test-details
+                                :script="script.test[testi]"
+                                :report="report ? report.test[testi] : null"
+                                :script-contained="script.contained"
+                                :report-contained="report ? report.contained : null"
+                                :test-script-index="testScriptIndex"
+                                :test-index="testi"
+                            ></test-details>
+                        </li>
+                    </ul>
                 </div>
             </div>
 
@@ -94,7 +99,8 @@
         },
         mixins: [ errorHandlerMixin ],
         props: [
-            'script', 'report'  // TestScript and TestReport
+            'script', 'report',  // TestScript and TestReport
+            'testScriptIndex',
         ],
         components: {
             TestDetails, ActionDetails,

@@ -25,6 +25,7 @@
             <script-details
                 :script="$store.state.testRunner.testScripts[$store.state.testRunner.currentTest]"
                 :report="$store.state.testRunner.testReports[$store.state.testRunner.currentTest]"
+                :test-script-index="$store.state.testRunner.testScriptNames.indexOf(testId)"
             > </script-details>
         </li>
     </ul>

@@ -1,5 +1,4 @@
 <template>
-<!--    <div>-->
         <div v-if="script">
             <span
             v-bind:class="{
@@ -14,10 +13,14 @@
             }"
             @click.stop="toggleMessageDisplay()">
 
-                <test-status v-if="!statusRight"
+                <test-status-event-wrapper v-if="!statusRight"
                              :status-on-right="statusRight"
                              :report="report"
-                > </test-status>
+                             :debug-title="debugTitle"
+                             @onStatusMouseOver="$emit('onStatusMouseOver')"
+                             @onStatusMouseLeave="$emit('onStatusMouseLeave')"
+                             @onStatusClick="$emit('onStatusClick')"
+                > </test-status-event-wrapper>
 
                 <span v-if="displayMessage">
                     <img src="../../assets/arrow-down.png">
@@ -36,12 +39,10 @@
                     {{ description }}
                 </span>
 
-                <test-status v-if="statusRight"
+                <test-status-event-wrapper v-if="statusRight"
                              :status-on-right="statusRight"
                              :report="report"
-                > </test-status>
-
-
+                > </test-status-event-wrapper>
 
             </span>
             <div v-if="displayMessage">
@@ -109,7 +110,6 @@
                 {{ translateNL(report[0].assert.message)}}
             </div>
         </div>
-<!--    </div>-->
 </template>
 
 <script>
@@ -117,7 +117,7 @@
     import ScriptDisplay from "./ScriptDisplay"
     import VueMarkdown from 'vue-markdown'
     import colorizeTestReports from "../../mixins/colorizeTestReports";
-    import TestStatus from "./TestStatus";
+    import TestStatusEventWrapper from "./TestStatusEventWrapper";
 
     export default {
         data() {
@@ -211,13 +211,13 @@
         },
         props: [
             // parts representing a single action
-            'script', 'report',
+            'script', 'report', 'debugTitle',
         ],
         components: {
             ScriptDisplay,
             LogItem,
             VueMarkdown,
-            TestStatus
+            TestStatusEventWrapper
         },
         mixins: [colorizeTestReports],
         name: "ActionDetails"
