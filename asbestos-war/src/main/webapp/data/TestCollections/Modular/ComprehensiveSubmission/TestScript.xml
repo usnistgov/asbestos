@@ -47,16 +47,8 @@
         <expression value="Patient.identifier.value"/>
         <sourceId value="read-back"/>
     </variable>
-<!--    <variable>-->
-<!--        <name value="requestEntryCount"/>-->
-<!--        <expression value="Bundle.entry.count()"/>-->
-<!--        <sourceId value="pdb-bundle"/>-->
-<!--    </variable>-->
     <test>
         <description value="Submit Provide Document Bundle to MHD Document Recipient."/>
-        <!--
-            Actions generic to all PDB transactions
-        -->
         <action>
             <operation>
                 <description value="Submit Provide Document Bundle to MHD Document Recipient."/>
@@ -67,11 +59,6 @@
                     <extension url="urn:fixture-in">
                         <valueString  value="pdb-bundle"/>
                     </extension>
-                    <!--
-                    this is the name expected in the static fixture pdb-bundle
-                    so it should not be translated or even expected in the module. It
-                    is passed through module processing unaltered.
-                    -->
                     <extension url="urn:variable-in-no-translation">
                         <valueString value="patientResourceId"/>
                     </extension>
@@ -81,69 +68,6 @@
                 </modifierExtension>
             </operation>
         </action>
-
-
-
-
-<!--        <action>-->
-<!--            <operation>-->
-<!--                &lt;!&ndash; references patient from resourceCache in EC &ndash;&gt;-->
-<!--                <description value="send PDB"/>-->
-<!--                <label value="create"/>-->
-<!--                <type>-->
-<!--                    <system value="https://github.com/usnistgov/asbestos/wiki/Testscript-Operation-Codes"/>-->
-<!--                    <code value="mhd-pdb-transaction"/>-->
-<!--                </type>-->
-<!--                <sourceId value="pdb-bundle"/>-->
-<!--                <responseId value="pdb-response"/>-->
-<!--            </operation>-->
-<!--        </action>-->
-<!--        <action>-->
-<!--            <assert>-->
-<!--                <description value="... transaction was successful"/>-->
-<!--                <response value="okay"/>-->
-<!--                <warningOnly value="false"/>-->
-<!--            </assert>-->
-<!--        </action>-->
-<!--        <action>-->
-<!--            <assert>-->
-<!--                <description value="... return Bundle"/>-->
-<!--                <compareToSourceId value="pdb-response"/>-->
-<!--                <compareToSourceExpression value="Bundle.exists()"/>-->
-<!--                <warningOnly value="false"/>-->
-<!--            </assert>-->
-<!--        </action>-->
-<!--        <action>-->
-<!--            <assert>-->
-<!--                <description value="... Bundle is type transaction-response"/>-->
-<!--                <compareToSourceId value="pdb-response"/>-->
-<!--                <compareToSourceExpression value="Bundle.type = 'transaction-response'"/>-->
-<!--                <warningOnly value="false"/>-->
-<!--            </assert>-->
-<!--        </action>-->
-<!--        <action>-->
-<!--            <assert>-->
-<!--                <description value="... Bundle may not contain OperationOutcome"/>-->
-<!--                <compareToSourceId value="pdb-response"/>-->
-<!--                <compareToSourceExpression value="Bundle.entry.response.outcome.where(OperationOutcome).exists().not()"/>-->
-<!--                <warningOnly value="false"/>-->
-<!--            </assert>-->
-<!--        </action>-->
-<!--        <action>-->
-<!--            <assert>-->
-<!--                <description value="... all parts of transaction successful"/>-->
-<!--                <expression value="Bundle.entry.response.all(status.startsWith(201))"/>-->
-<!--                <warningOnly value="false"/>-->
-<!--            </assert>-->
-<!--        </action>-->
-<!--        <action>-->
-<!--            <assert>-->
-<!--                <description value="... response contains one entry for each entry in request"/>-->
-<!--                <expression value="Bundle.entry.count()"/>-->
-<!--                <value value="${requestEntryCount}"/>-->
-<!--                <warningOnly value="false"/>-->
-<!--            </assert>-->
-<!--        </action>-->
     </test>
     <test>
         <description value="Read back the DocumentReference and check it"/>
