@@ -1,7 +1,8 @@
 <template>
+    <div>
         <div v-if="script">
             <span
-            v-bind:class="{
+                    v-bind:class="{
                 'not-run': isNotRun && colorful,
                 'not-run-plain-detail': isNotRun && !colorful,
                 'pass-plain-detail': isPass && !colorful,
@@ -11,15 +12,15 @@
                 fail: isFail && colorful,
                 'fail-plain-detail': isFail && !colorful,
             }"
-            @click.stop="toggleMessageDisplay()">
+                    @click.stop="toggleMessageDisplay()">
 
                 <test-status-event-wrapper v-if="!statusRight"
-                             :status-on-right="statusRight"
-                             :report="report"
-                             :debug-title="debugTitle"
-                             @onStatusMouseOver="$emit('onStatusMouseOver')"
-                             @onStatusMouseLeave="$emit('onStatusMouseLeave')"
-                             @onStatusClick="$emit('onStatusClick')"
+                                           :status-on-right="statusRight"
+                                           :report="report"
+                                           :debug-title="debugTitle"
+                                           @onStatusMouseOver="$emit('onStatusMouseOver')"
+                                           @onStatusMouseLeave="$emit('onStatusMouseLeave')"
+                                           @onStatusClick="$emit('onStatusClick')"
                 > </test-status-event-wrapper>
 
                 <span v-if="displayMessage">
@@ -33,7 +34,7 @@
                     {{ operationType(script.operation) }}
                 </span>
                 <span v-else>
-                    <span >assert: </span>
+                    <span>assert: </span>
                 </span>
                 <span>
                     {{ description }}
@@ -43,77 +44,77 @@
                              :status-on-right="statusRight"
                              :report="report"
                 > </test-status>
-            </span>  <div v-else>
+            </span>
+        </div>
+        <div v-else>
             <!--
-                Used to report general errors within the tool
+             Used to report general errors within the tool
             -->
             <div v-if=" report && report[0]">
                 {{ translateNL(report[0].assert.message)}}
             </div>
         </div>
 
-            <div v-if="displayMessage">
+        <div v-if="displayMessage">
 
-                <div v-if="message && message.indexOf('#') === -1">
-                    <ul>
-                        <div v-for="(line, linei) in translateNL(message)" :key="'msgDisp' + linei">
-                            <li>
-                            <span v-if="isError">
-                                <img src="../../assets/yellow-error.png">
-                            </span>
-                                {{ line }}
-                            </li>
-                        </div>
-                    </ul>
-                </div>
-                <div v-else>
-                    No Evaluation
-                </div>
-
-                <!--  Inspect-->
-                <div v-if="script.operation">
-
-                <span v-if="eventDisplayed && eventId">
-                    <img src="../../assets/arrow-down.png" @click.stop="toggleEventDisplayed()">
-                </span>
-                    <span v-else>
-                    <span v-if="eventId">
-                        <img src="../../assets/arrow-right.png" @click.stop="toggleEventDisplayed()">
-                    </span>
-                </span>
-
-                    <span v-if="eventId" class="selectable" @click.stop="toggleEventDisplayed()">Inspect</span>
-                    <span v-if="eventDisplayed && eventId">
-                    <log-item
-                            :sessionId="$store.state.base.session"
-                            :channelId="$store.state.base.channelId"
-                            :eventId="eventId"
-                            :noNav="true">
-                    </log-item>
-                </span>
-                </div>
-
-                <!-- Test Script/Report -->
-                <div>
-               <span v-if="displayScript">
-                    <img src="../../assets/arrow-down.png" @click.stop="toggleScriptDisplayed()">
-               </span>
-                    <span v-else>
-                    <img src="../../assets/arrow-right.png" @click.stop="toggleScriptDisplayed()">
-                </span>
-                    <span class="selectable" @click.stop="toggleScriptDisplayed()">Test Script/Report</span>
-                    <span v-if="displayScript">
-                   <vue-markdown v-if="message">{{message}}</vue-markdown>
-                    <script-display
-                            :script="script"
-                            :report="report">
-                    </script-display>
-                </span>
-                </div>
+            <div v-if="message && message.indexOf('#') === -1">
+                <ul>
+                    <div v-for="(line, linei) in translateNL(message)" :key="'msgDisp' + linei">
+                        <li>
+                        <span v-if="isError">
+                            <img src="../../assets/yellow-error.png">
+                        </span>
+                            {{ line }}
+                        </li>
+                    </div>
+                </ul>
+            </div>
+            <div v-else>
+                No Evaluation
             </div>
 
+            <!--  Inspect-->
+            <div v-if="script.operation">
 
+            <span v-if="eventDisplayed && eventId">
+                <img src="../../assets/arrow-down.png" @click.stop="toggleEventDisplayed()">
+            </span>
+                <span v-else>
+                <span v-if="eventId">
+                    <img src="../../assets/arrow-right.png" @click.stop="toggleEventDisplayed()">
+                </span>
+            </span>
+
+                <span v-if="eventId" class="selectable" @click.stop="toggleEventDisplayed()">Inspect</span>
+                <span v-if="eventDisplayed && eventId">
+                <log-item
+                        :sessionId="$store.state.base.session"
+                        :channelId="$store.state.base.channelId"
+                        :eventId="eventId"
+                        :noNav="true">
+                </log-item>
+            </span>
+            </div>
+
+            <!-- Test Script/Report -->
+            <div>
+           <span v-if="displayScript">
+                <img src="../../assets/arrow-down.png" @click.stop="toggleScriptDisplayed()">
+           </span>
+                <span v-else>
+                <img src="../../assets/arrow-right.png" @click.stop="toggleScriptDisplayed()">
+            </span>
+                <span class="selectable" @click.stop="toggleScriptDisplayed()">Test Script/Report</span>
+                <span v-if="displayScript">
+               <vue-markdown v-if="message">{{message}}</vue-markdown>
+                <script-display
+                        :script="script"
+                        :report="report">
+                </script-display>
+            </span>
+            </div>
         </div>
+    </div>
 </template>
 
 <script>
@@ -122,7 +123,7 @@
     import VueMarkdown from 'vue-markdown'
     import colorizeTestReports from "../../mixins/colorizeTestReports";
     import TestStatusEventWrapper from "./TestStatusEventWrapper";
-    import TestStatus from './TestStatus";
+    import TestStatus from "./TestStatus";
 
     export default {
         data() {
@@ -198,7 +199,7 @@
                 if (!logUrl)
                     return null
                 const parts = logUrl.split('/')
-                return parts[parts.length-1]
+                return parts[parts.length - 1]
             },
             operationOrAssertion() {
                 return this.script.operation
@@ -219,10 +220,10 @@
 
         },
         watch: {
-            report: function(action) {
-                  if (action && action.operation && action.operation.detail) {
-                      this.eventLogUrl = action.operation.detail
-                  }
+            report: function (action) {
+                if (action && action.operation && action.operation.detail) {
+                    this.eventLogUrl = action.operation.detail
+                }
             },
         },
         props: [
@@ -245,6 +246,7 @@
     .assert {
         text-indent: 50px;
     }
+
     .name {
         font-weight: bold;
     }
