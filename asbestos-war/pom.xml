@@ -134,7 +134,7 @@
                         <exclude>**/ToFhirServerIT.java</exclude>
                         <exclude>**/ToProxyMhdIT.java</exclude>
                         <exclude>**/ToProxyPassthroughIT.java</exclude>
-                        <exclude>**/CapabilityStatementIT.java</exclude>
+<!--                        <exclude>**/CapabilityStatementIT.java</exclude>-->
 <!--                        <exclude>**/*IT.java</exclude>-->
                     </excludes>
                     <!--
