@@ -10,6 +10,7 @@ package gov.nist.asbestos.asbestosProxy.requests;
 
 import gov.nist.asbestos.client.Base.ProxyBase;
 import gov.nist.asbestos.client.client.Format;
+import gov.nist.asbestos.testEngine.engine.ModularScripts;
 import gov.nist.asbestos.testEngine.engine.TestEngine;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
@@ -48,76 +49,80 @@ public class GetTestScriptRequest {
             return;
         }
 
-        byte[] bytes;
-        File testFile = TestEngine.findTestScriptFile(testDef);
-        if (!testFile.exists()) {
-            request.resp.setStatus(request.resp.SC_NOT_FOUND);
-            log.info("Not Found");
-            return;
-        }
-        try {
-            bytes = FileUtils.readFileToByteArray(testFile);
-        } catch (IOException e) {
-            request.resp.setStatus(request.resp.SC_INTERNAL_SERVER_ERROR);
-            return;
-        }
-
-        BaseResource resource;
-        try {
-            resource = ProxyBase.parse(bytes, Format.fromContentType(testFile.getName()));
-        } catch (Throwable t) {
-//            request.resp.setStatus(request.resp.SC_INTERNAL_SERVER_ERROR);
-            TestEngine testEngine = new TestEngine(testFile)
-                    .setTestSession("default")
-                    .setExternalCache(request.externalCache);
-            TestReport testReport = testEngine.returnExceptionAsTestReport(t);
-            testReport.setName(testName);
-            Returns.returnResource(request.resp, testReport);
-            return;
-        }
-        TestScript testScript = (TestScript) resource;
-
-        // update TestScript with any contained TestScript Test elements
-
-        List<TestScript.TestScriptTestComponent> testComponents = testScript.getTest();
-        int index = 0;
-        int testComponentCount = testComponents.size();
-
-        for (; index < testComponentCount; ) {
-            TestScript.TestScriptTestComponent test = testComponents.get(index);
-            if (test.hasModifierExtension() && test.getModifierExtension().get(0).hasValue()) {
-                TestScript containedTestScript = getContainedTestScript(testScript, test.getModifierExtension().get(0).getValue().toString());
-                if (containedTestScript != null) {
-                    if (!containedTestScript.hasName() && containedTestScript.hasId())
-                        containedTestScript.setName(containedTestScript.getId());
-                    if (containedTestScript.hasTest() && !containedTestScript.getTest().isEmpty()) {
-                        TestScript.TestScriptTestComponent containedTestComponent = containedTestScript.getTest().get(0);
-                        // insert containedTestComponent before test
-                        testComponents.add(index, containedTestComponent);
-                        index++;
-                    }
-                }
-            }
-            index++;
-        }
-
-        testScript.setName(testName);
-
-        String json = ProxyBase.getFhirContext().newJsonParser().setPrettyPrint(true).encodeResourceToString(testScript);
+        ModularScripts modularScripts = new ModularScripts(testDef);
+        String json = modularScripts.asJson();
         Returns.returnString(request.resp, json);
 
-    }
-
-    private TestScript getContainedTestScript(TestScript testScript, String id) {
-        List<Resource> containeds = testScript.getContained();
-        for (Resource contained : containeds) {
-            if (contained instanceof TestScript) {
-                TestScript containedTestScript = (TestScript) contained;
-                if (contained.hasId() && contained.getId().equals(id)) {
-                    return containedTestScript;
-                }
-            }
-        }
-        return null;
+//        byte[] bytes;
+//        File testFile = TestEngine.findTestScriptFile(testDef);
+//        if (!testFile.exists()) {
+//            request.resp.setStatus(request.resp.SC_NOT_FOUND);
+//            log.info("Not Found");
+//            return;
+//        }
+//        try {
+//            bytes = FileUtils.readFileToByteArray(testFile);
+//        } catch (IOException e) {
+//            request.resp.setStatus(request.resp.SC_INTERNAL_SERVER_ERROR);
+//            return;
+//        }
+//
+//        BaseResource resource;
+//        try {
+//            resource = ProxyBase.parse(bytes, Format.fromContentType(testFile.getName()));
+//        } catch (Throwable t) {
+////            request.resp.setStatus(request.resp.SC_INTERNAL_SERVER_ERROR);
+//            TestEngine testEngine = new TestEngine(testFile)
+//                    .setTestSession("default")
+//                    .setExternalCache(request.externalCache);
+//            TestReport testReport = testEngine.returnExceptionAsTestReport(t);
+//            testReport.setName(testName);
+//            Returns.returnResource(request.resp, testReport);
+//            return;
+//        }
+//        TestScript testScript = (TestScript) resource;
+//
+//        // update TestScript with any contained TestScript Test elements
+//
+//        List<TestScript.TestScriptTestComponent> testComponents = testScript.getTest();
+//        int index = 0;
+//        int testComponentCount = testComponents.size();
+//
+//        for (; index < testComponentCount; ) {
+//            TestScript.TestScriptTestComponent test = testComponents.get(index);
+//            if (test.hasModifierExtension() && test.getModifierExtension().get(0).hasValue()) {
+//                TestScript containedTestScript = getContainedTestScript(testScript, test.getModifierExtension().get(0).getValue().toString());
+//                if (containedTestScript != null) {
+//                    if (!containedTestScript.hasName() && containedTestScript.hasId())
+//                        containedTestScript.setName(containedTestScript.getId());
+//                    if (containedTestScript.hasTest() && !containedTestScript.getTest().isEmpty()) {
+//                        TestScript.TestScriptTestComponent containedTestComponent = containedTestScript.getTest().get(0);
+//                        // insert containedTestComponent before test
+//                        testComponents.add(index, containedTestComponent);
+//                        index++;
+//                    }
+//                }
+//            }
+//            index++;
+//        }
+//
+//        testScript.setName(testName);
+//
+//        String json = ProxyBase.getFhirContext().newJsonParser().setPrettyPrint(true).encodeResourceToString(testScript);
+//        Returns.returnString(request.resp, json);
+//
+//    }
+//
+//    private TestScript getContainedTestScript(TestScript testScript, String id) {
+//        List<Resource> containeds = testScript.getContained();
+//        for (Resource contained : containeds) {
+//            if (contained instanceof TestScript) {
+//                TestScript containedTestScript = (TestScript) contained;
+//                if (contained.hasId() && contained.getId().equals(id)) {
+//                    return containedTestScript;
+//                }
+//            }
+//        }
+//        return null;
     }
 }

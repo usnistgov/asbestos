@@ -14,9 +14,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 public class ModularEngine {
     private static Logger log = Logger.getLogger(ModularEngine.class);
@@ -24,7 +22,7 @@ public class ModularEngine {
     private List<TestEngine> engines = new ArrayList<>();
     private boolean saveLogs = false;
     private String testName;
-    private List<String> testReports = new ArrayList<>();   // json
+    private Map<String, String> reports = new HashMap<>();   // name => TestReport json
 
     public ModularEngine(File testDefDir) {
         this(testDefDir, null);
@@ -55,6 +53,10 @@ public class ModularEngine {
         return engines.get(0);
     }
 
+    public String reportsAsJson() {
+        return new ModularLogs(reports).asJson();
+    }
+
     public ModularEngine setSaveLogs(boolean save) {
         saveLogs = save;
         return this;
@@ -76,7 +78,7 @@ public class ModularEngine {
             TestReport report = engine.getTestReport();
             report.setName(this.testName + (moduleName == null ? "" : "/" + moduleName));
             String json = ProxyBase.getFhirContext().newJsonParser().setPrettyPrint(true).encodeResourceToString(report);
-            testReports.add(json);
+            reports.put(report.getName(), json);
 
             if (saveLogs) {
                 Path path = new EC(engine.getExternalCache()).getTestLog(

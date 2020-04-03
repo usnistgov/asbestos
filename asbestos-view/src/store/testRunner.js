@@ -25,6 +25,8 @@ export const testRunnerStore = {
             testScripts: {}, // testId => TestScript
             testReports: {}, // testId => TestReport
 
+            moduleTestScripts: {}, // moduleId => TestScript
+            moduleTestReports: {},  // testId/moduleId => TestReport
 
             testReportNames: [],
 
@@ -101,6 +103,7 @@ export const testRunnerStore = {
         },
         clearTestReports(state) {
             state.testReports = {}
+            state.moduleTestReports = {}
         },
         setTestReport(state, report) {
             Vue.set(state.testReports, report.name, report)
@@ -110,12 +113,41 @@ export const testRunnerStore = {
         },
         clearTestScripts(state) {
             state.testScripts = {}
+            state.moduleTestReports = {}
         },
         setTestScript(state, script) {
             Vue.set(state.testScripts, script.name, script)
         },
+        setTestScriptModule(state, script) {
+            Vue.set(state.moduleTestScripts, script.name, script)
+        },
+        setTestReportModule(state, report) {
+            Vue.set(state.moduleTestReports, report.name, report)
+        },
         setTestScripts(state, scripts) {
             state.testScripts = scripts
+        },
+        setModuleTestScripts(state, scripts) {
+            state.moduleTestScripts = scripts
+        },
+        setModuleTestReports(state, reports) {
+            state.moduleTestReports = reports
+        },
+        setCombinedTestReports(state, reportData) {
+            for (let testName in reportData) {
+                const report = reportData[testName]
+                if (report && report.resourceType === 'TestReport') {
+                    if (report.status === 'entered-in-error') {
+                        const message = report.setup.action[0].assert.message
+                        this.commit('setError', 'script: ' + report.name + ': ' + message)
+                    } else {
+                        if (testName.includes("/"))
+                            Vue.set(state.moduleTestReports, testName, report)
+                        else
+                            Vue.set(state.testReports, testName, report)
+                    }
+                }
+            }
         },
         setTestCollectionName(state, name) {
             state.currentTestCollectionName = name
@@ -219,13 +251,23 @@ export const testRunnerStore = {
                 promises.push(promise)
             })
             const scripts = {}
+            const moduleScripts = {}
             return Promise.all(promises)
                 .then(results => {
                     results.forEach(result => {
-                        const script = result.data
-                        scripts[script.name] = script
+                        const scriptData = result.data
+                        if (scriptData) {
+                            for (let testName in scriptData) {
+                                const script = scriptData[testName]
+                                if (testName.includes("/"))
+                                    moduleScripts[testName] = script
+                                else
+                                    scripts[testName] = script
+                            }
+                        }
                     })
                     commit('setTestScripts', scripts)
+                    commit('setModuleTestScripts', moduleScripts)
                 })
         },
         async loadTestReports({commit, rootState, state}, testCollectionId) {
@@ -236,35 +278,19 @@ export const testRunnerStore = {
                 const promise = ENGINE.get(url)
                 promises.push(promise)
             })
-            const reports = {}
             const combinedPromises = Promise.all(promises)
                 .then(results => {
                     results.forEach(result => {
-                        const reportsData = result.data
-                        if (reportsData) {
-                            // only consumes/stores top level report
-                            //console.log(`got ${Object.keys(reportsData).length} reports`)
-                            const testName = Object.keys(reportsData)[0]
-                            //console.log(`test name is ${testName}`)
-                            const report = reportsData[testName]
-                            if (report && report.resourceType === 'TestReport') {
-                                if (report.status === 'entered-in-error') {
-                                    const message = report.setup.action[0].assert.message
-                                    commit('setError', 'script: ' + report.name + ': ' + message)
-                                } else {
-                                    reports[report.name] = report
-                                }
-                            }
+                        const reportData = result.data
+                        if (reportData) {
+                            commit('setCombinedTestReports', reportData)
                         }
                     })
-                    if (reports)
-                        commit('setTestReports', reports)
                 })
                 .catch(function(error) {
                     commit('setError', `Loading reports: ${error}`)
                 })
             await combinedPromises
-            return reports
         },
         async loadTestScript({commit}, parms) {
             const testCollectionId = parms.testCollection
@@ -292,13 +318,7 @@ export const testRunnerStore = {
                     report = result.data
                 })
             await promise
-            if (report && report.resourceType === 'TestReport')
-                if (report.status === 'entered-in-error') {
-                    const message = report.setup.action[0].assert.message
-                    commit('setError', 'script: ' + report.name + ': ' + message)
-                } else {
-                    commit('setTestReport', report)
-                }
+            commit('setCombinedTestReports', report)
             return report
         },
         runTest({commit, rootState, state}, testId) {
@@ -306,13 +326,8 @@ export const testRunnerStore = {
             const url = `testrun/${rootState.base.session}__${rootState.base.channelId}/${state.currentTestCollectionName}/${testId}?_format=${state.useJson ? 'json' : 'xml'};_gzip=${state.gzip}`
             const promise = ENGINE.post(url)
             promise.then(result => {
-                const report = result.data
-                if (report.status === 'entered-in-error') {
-                    const message = report.setup.action[0].assert.message
-                    commit('setError', 'script: ' + report.name + ': ' + message)
-                } else {
-                    commit('setTestReport', report)
-                }
+                const reports = result.data
+                commit('setCombinedTestReports', reports)
             })
             return promise
         },

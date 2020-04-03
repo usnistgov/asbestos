@@ -26,7 +26,8 @@ import java.nio.file.Path;
 // 4 - channelName (testSession__channelId)
 // 5 - testCollectionId
 // 6 - testId
-// Returns single TestReport
+// Returns modular test reports
+//   JSON object : test/moduleId => TestReport
 
 public class RunTestRequest {
     private static Logger log = Logger.getLogger(RunTestRequest.class);
@@ -102,6 +103,9 @@ public class RunTestRequest {
             log.error(ExceptionUtils.getStackTrace(t));
             throw t;
         }
+
+        String json = modularEngine.reportsAsJson();
+        Returns.returnString(request.resp, json);
 
 //        // Save test log to FhirTestLogs
 //        report.setName(testName);

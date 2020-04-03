@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.Map;
 
 public class ModularLogs {
-    public Map<String, String> reports = new HashMap<>();  // name => TestReport json
+    private Map<String, String> reports = new HashMap<>();  // name => TestReport json
 
     public ModularLogs(EC ec, String channelId, String testCollection, String testName) throws IOException {
         File base = ec.getTestLogDir(channelId, testCollection, testName);
@@ -31,6 +31,10 @@ public class ModularLogs {
                     addReport(new File(module, "TestReport.json"));
             }
         }
+    }
+
+    public ModularLogs(Map<String, String> reports) {
+        this.reports = reports;
     }
 
     public ModularLogs() {
