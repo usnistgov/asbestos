@@ -25,6 +25,7 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.regex.Pattern;
 
 /**
  * See http://hl7.org/fhir/testing.html
@@ -257,8 +258,8 @@ public class TestEngine  {
             testScript = loadTestScript(testDef, testScriptName);
         String path = testScript.getName();
         String name = "";
-        if (path.contains("/")) {
-            String[] parts = path.split("/");
+        if (path.contains(File.separator)) {
+            String[] parts = path.split(Pattern.quote(File.separator));
             name = parts[parts.length - 2];  // testId
         } else
             name = path;

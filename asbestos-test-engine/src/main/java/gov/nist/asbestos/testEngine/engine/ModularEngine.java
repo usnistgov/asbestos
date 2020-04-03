@@ -15,6 +15,7 @@ import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.regex.Pattern;
 
 public class ModularEngine {
     private static Logger log = Logger.getLogger(ModularEngine.class);
@@ -37,7 +38,7 @@ public class ModularEngine {
 
     private void nameFromTestDefDir(File testDefDir) {
         Objects.requireNonNull(testDefDir);
-        String[] parts = testDefDir.toString().split("/");
+        String[] parts = testDefDir.toString().split(Pattern.quote(File.separator));
         int i = parts.length - 1;
         if (parts[i].equals(""))
             i--;
@@ -76,7 +77,7 @@ public class ModularEngine {
             String moduleName = first ? null : scriptName;
 
             TestReport report = engine.getTestReport();
-            report.setName(this.testName + (moduleName == null ? "" : "/" + moduleName));
+            report.setName(this.testName + (moduleName == null ? "" : File.separator + moduleName));
             String json = ProxyBase.getFhirContext().newJsonParser().setPrettyPrint(true).encodeResourceToString(report);
             reports.put(report.getName(), json);
 
