@@ -14,7 +14,7 @@ module.exports = {
 
 const fs = require('fs')
 
-devServer1 = null
+var devServer1 = null
 
 console.log("VUE_APP_PROTOCOL_TO_USE is: " + process.env.VUE_APP_PROTOCOL_TO_USE)
 
@@ -38,5 +38,5 @@ if (process.env.VUE_APP_PROTOCOL_TO_USE === 'https') {
 }
 
 module.exports = {
-    devServer: devServer1
+    devServer: devServer1 ? devServer1 : {}
 }
