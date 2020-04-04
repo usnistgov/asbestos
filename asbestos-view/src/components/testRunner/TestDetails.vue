@@ -51,9 +51,19 @@
             <div v-if="display">
                 <div v-for="(action, actioni) in script.action" class="action-margins"
                      :key="'Action' + actioni">
-                    <action-details
+                    <div v-if="setImportComponentName(action)">
+                        <div v-for="(caction, cactioni) in componentScriptActions" class="action-margins"
+                             :key="'CAction' + cactioni">
+                            <action-details
+                                :script="caction"
+                                :report="componentReportActions ? componentReportActions[cactioni] : null"/>
+                        </div>
+                    </div>
+                    <div v-else>
+                        <action-details
                             :script="action"
                             :report="report && report.action ? report.action[actioni] : null"> </action-details>
+                    </div>
                 </div>
             </div>
         </div>
@@ -66,6 +76,7 @@
     import ScriptDetailsContained from "./ScriptDetailsContained";
     import colorizeTestReports from "../../mixins/colorizeTestReports";
     import TestStatus from "./TestStatus";
+    import importMixin from "../../mixins/importMixin";
 
     export default {
         data() {
@@ -125,7 +136,7 @@
         components: {
             ActionDetails, ScriptDetailsContained, TestStatus
         },
-        mixins: [colorizeTestReports],
+        mixins: [colorizeTestReports, importMixin],
         name: "TestDetails"
     }
 </script>

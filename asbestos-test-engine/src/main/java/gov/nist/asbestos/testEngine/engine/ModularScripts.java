@@ -89,7 +89,7 @@ public class ModularScripts {
 
     private String fileName(File file) {
         String name = file.getName();
-        int dot = name.indexOf("\\.");
+        int dot = name.indexOf(".");
         if (dot == -1)
             return name;
         return name.substring(0, dot);
