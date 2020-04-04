@@ -35,7 +35,8 @@ export default {
             return this.componentName
         },
         getImport(actionScript) {
-            if (!actionScript.operation) return false
+            if (!actionScript.operation) return null
+            if (!actionScript.operation.modifierExtension) return null
             let theImport = null
             actionScript.operation.modifierExtension.forEach(extension => {
                 if (extension.url === 'https://github.com/usnistgov/asbestos/wiki/TestScript-Import')
