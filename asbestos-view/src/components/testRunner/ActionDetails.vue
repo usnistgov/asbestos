@@ -1,7 +1,8 @@
 <template>
     <div>
         <div v-if="script">
-            <div v-bind:class="{
+            <span
+                    v-bind:class="{
                 'not-run': isNotRun && colorful,
                 'not-run-plain-detail': isNotRun && !colorful,
                 'pass-plain-detail': isPass && !colorful,
@@ -10,12 +11,17 @@
                 'error-plain': isError && !colorful,
                 fail: isFail && colorful,
                 'fail-plain-detail': isFail && !colorful,
-            }"  @click="toggleMessageDisplay()">
+            }"
+                    @click.stop="toggleMessageDisplay()">
 
-                <test-status v-if="!statusRight"
-                             :status-on-right="statusRight"
-                             :report="report"
-                > </test-status>
+                <test-status-event-wrapper v-if="!statusRight"
+                                           :status-on-right="statusRight"
+                                           :report="report"
+                                           :debug-title="debugTitle"
+                                           @onStatusMouseOver="$emit('onStatusMouseOver')"
+                                           @onStatusMouseLeave="$emit('onStatusMouseLeave')"
+                                           @onStatusClick="$emit('onStatusClick')"
+                > </test-status-event-wrapper>
 
                 <span v-if="displayMessage">
                     <img src="../../assets/arrow-down.png">
@@ -28,7 +34,7 @@
                     {{ operationType(script.operation) }}
                 </span>
                 <span v-else>
-                    <span >assert: </span>
+                    <span>assert: </span>
                 </span>
                 <span>
                     {{ description }}
@@ -38,14 +44,11 @@
                              :status-on-right="statusRight"
                              :report="report"
                 > </test-status>
-
-
-
-            </div>
+            </span>
         </div>
         <div v-else>
             <!--
-                Used to report general errors within the tool
+             Used to report general errors within the tool
             -->
             <div v-if=" report && report[0]">
                 {{ translateNL(report[0].assert.message)}}
@@ -58,9 +61,9 @@
                 <ul>
                     <div v-for="(line, linei) in translateNL(message)" :key="'msgDisp' + linei">
                         <li>
-                            <span v-if="isError">
-                                <img src="../../assets/yellow-error.png">
-                            </span>
+                        <span v-if="isError">
+                            <img src="../../assets/yellow-error.png">
+                        </span>
                             {{ line }}
                         </li>
                     </div>
@@ -70,44 +73,45 @@
                 No Evaluation
             </div>
 
-        <!--  Inspect-->
+            <!--  Inspect-->
             <div v-if="script.operation">
-                <span v-if="eventDisplayed && eventId">
-                    <img src="../../assets/arrow-down.png" @click="toggleEventDisplayed()">
-                </span>
-                <span v-else>
-                    <span v-if="eventId">
-                        <img src="../../assets/arrow-right.png" @click="toggleEventDisplayed()">
-                    </span>
-                </span>
 
-                <span v-if="eventId" class="selectable" @click="toggleEventDisplayed()">Inspect</span>
-                <span v-if="eventDisplayed && eventId">
-                    <log-item
-                            :sessionId="$store.state.base.session"
-                            :channelId="$store.state.base.channelId"
-                            :eventId="eventId"
-                            :noNav="true">
-                    </log-item>
+            <span v-if="eventDisplayed && eventId">
+                <img src="../../assets/arrow-down.png" @click.stop="toggleEventDisplayed()">
+            </span>
+                <span v-else>
+                <span v-if="eventId">
+                    <img src="../../assets/arrow-right.png" @click.stop="toggleEventDisplayed()">
                 </span>
+            </span>
+
+                <span v-if="eventId" class="selectable" @click.stop="toggleEventDisplayed()">Inspect</span>
+                <span v-if="eventDisplayed && eventId">
+                <log-item
+                        :sessionId="$store.state.base.session"
+                        :channelId="$store.state.base.channelId"
+                        :eventId="eventId"
+                        :noNav="true">
+                </log-item>
+            </span>
             </div>
 
             <!-- Test Script/Report -->
             <div>
-               <span v-if="displayScript">
-                    <img src="../../assets/arrow-down.png" @click="toggleScriptDisplayed()">
-               </span>
+           <span v-if="displayScript">
+                <img src="../../assets/arrow-down.png" @click.stop="toggleScriptDisplayed()">
+           </span>
                 <span v-else>
-                    <img src="../../assets/arrow-right.png" @click="toggleScriptDisplayed()">
-                </span>
-                <span class="selectable" @click="toggleScriptDisplayed()">Test Script/Report</span>
+                <img src="../../assets/arrow-right.png" @click.stop="toggleScriptDisplayed()">
+            </span>
+                <span class="selectable" @click.stop="toggleScriptDisplayed()">Test Script/Report</span>
                 <span v-if="displayScript">
-                   <vue-markdown v-if="message">{{message}}</vue-markdown>
-                    <script-display
-                            :script="script"
-                            :report="report">
-                    </script-display>
-                </span>
+               <vue-markdown v-if="message">{{message}}</vue-markdown>
+                <script-display
+                        :script="script"
+                        :report="report">
+                </script-display>
+            </span>
             </div>
         </div>
     </div>
@@ -118,6 +122,7 @@
     import ScriptDisplay from "./ScriptDisplay"
     import VueMarkdown from 'vue-markdown'
     import colorizeTestReports from "../../mixins/colorizeTestReports";
+    import TestStatusEventWrapper from "./TestStatusEventWrapper";
     import TestStatus from "./TestStatus";
 
     export default {
@@ -194,7 +199,7 @@
                 if (!logUrl)
                     return null
                 const parts = logUrl.split('/')
-                return parts[parts.length-1]
+                return parts[parts.length - 1]
             },
             operationOrAssertion() {
                 return this.script.operation
@@ -215,21 +220,22 @@
 
         },
         watch: {
-            report: function(action) {
-                  if (action && action.operation && action.operation.detail) {
-                      this.eventLogUrl = action.operation.detail
-                  }
+            report: function (action) {
+                if (action && action.operation && action.operation.detail) {
+                    this.eventLogUrl = action.operation.detail
+                }
             },
         },
         props: [
             // parts representing a single action
-            'script', 'report',
+            'script', 'report', 'debugTitle',
         ],
         components: {
             ScriptDisplay,
             LogItem,
             VueMarkdown,
-            TestStatus
+            TestStatus,
+            TestStatusEventWrapper,
         },
         mixins: [colorizeTestReports],
         name: "ActionDetails"
@@ -240,6 +246,7 @@
     .assert {
         text-indent: 50px;
     }
+
     .name {
         font-weight: bold;
     }

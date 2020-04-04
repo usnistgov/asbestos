@@ -1,21 +1,21 @@
 <template>
     <div>
         <div v-if="script">
-            <div v-bind:class="{
+            <span v-bind:class="{
                 'not-run': isNotRun,
                 error: isError,
                 'condition-fail': isConditionFailed,
                 pass : isPass,
-                fail: isFail}"  class="test-margins" @click="toggleConditionDisplay()">
+                fail: isFail}"  class="test-margins" @click.stop="toggleConditionDisplay()">
                 <span v-if="hasOperation">
                     <span class="bold">Condition Context: </span> <!--{{ description }}-->
                 </span>
                 <span v-else>
                     <span class="bold">Condition: </span> <!--{{ description }}-->
                 </span>
-            </div>
+            </span>
 
-            <div v-if="displayCondition" @click="toggleThenClauseDisplay()">
+            <div v-if="displayCondition" @click.stop="toggleThenClauseDisplay()">
                 <div v-for="(action, actioni) in script.action" class="action-margins"
                      :key="'Action' + actioni">
                     <action-details-contained

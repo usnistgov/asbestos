@@ -59,11 +59,11 @@ public class ModularScripts {
                     for (Extension componentExtension : importExtension.getExtension()) {
                         if (componentExtension.getUrl().equals("component")) {
                             String relativePath = componentExtension.getValue().toString();
-                            String componentPath = testDef.getPath() + "/" + relativePath;
+                            String componentPath = testDef.getPath() + File.separator + relativePath;
                             File componentFile = new File(componentPath);
                             TestScript componentScript = (TestScript) ProxyBase.parse(componentFile);
                             String componentId = fileName(componentFile);
-                            String fullComponentId = testId + "/" + componentId;
+                            String fullComponentId = testId + File.separator + componentId;
                             componentScript.setName(fullComponentId);
                             String componentJson = ProxyBase.encode(componentScript, Format.JSON);
                             scripts.put(fullComponentId, componentJson);
