@@ -48,8 +48,12 @@ export const testScriptDebuggerStore = {
         },
     },
     getters: {
-        hasBreakpointsForTestScriptId: (state) => (id) => {
-            return state.breakpointMap.has(id)
+        hasBreakpoint: (state) => (obj) => {
+            if (state.breakpointMap.has(obj.testScriptIndex)) {
+                const breakpointSet = state.breakpointMap.get(obj.testScriptIndex)
+                return breakpointSet.has(obj.breakpointIndex)
+            }
+            return false
         }
     },
     actions: {
