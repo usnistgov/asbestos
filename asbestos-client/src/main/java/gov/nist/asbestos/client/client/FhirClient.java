@@ -57,7 +57,7 @@ public class FhirClient {
             headers = new HashMap<>();
         if (format == null)
             format = Format.XML;
-        String contentType = (format == Format.XML) ? "application/fhir+xml" : (format == Format.JSON ? "application/fhir+json" : null);
+        String contentType = format.getContentType(); //(format == Format.XML) ? "application/fhir+xml" : (format == Format.JSON ? "application/fhir+json" : null);
         if (contentType != null)
             headers.put("content-type", contentType);
         Headers theHeaders = new Headers(headers);

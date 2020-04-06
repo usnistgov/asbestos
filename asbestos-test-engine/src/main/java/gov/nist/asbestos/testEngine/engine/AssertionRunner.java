@@ -39,11 +39,18 @@ public class AssertionRunner {
 
     private FixtureComponent sourceOverride = null;
     private FixtureComponent getSource(TestScript.SetupActionAssertComponent as) {
+        FixtureComponent sourceFixture = getSourceIfAvailable(as);
+        if (sourceFixture == null)
+            Reporter.reportError(val, assertReport, type, label, "no source available for comparison.");
+        return sourceFixture;
+    }
+
+    private FixtureComponent getSourceIfAvailable(TestScript.SetupActionAssertComponent as) {
         if (sourceOverride != null)
             return sourceOverride;
         FixtureComponent sourceFixture = as.hasSourceId() ? fixtureMgr.get(as.getSourceId()) : fixtureMgr.get(fixtureMgr.getLastOp());
-        if (sourceFixture == null)
-            Reporter.reportError(val, assertReport, type, label, "no source available for comparison.");
+//        if (sourceFixture == null)
+//            Reporter.reportError(val, assertReport, type, label, "no source available for comparison.");
         return sourceFixture;
     }
 
@@ -53,12 +60,12 @@ public class AssertionRunner {
         Objects.requireNonNull(testScript);
 
         assertReport = new TestReport.SetupActionAssertComponent();
-        FixtureComponent source = getSource(as);
-        if (source == null)
-            return assertReport;
+        FixtureComponent source = getSourceIfAvailable(as);
+//        if (source == null)
+//            return assertReport;
 
 
-        if ("Bundle".equals(source.getResponseType())) {
+        if (source != null && "Bundle".equals(source.getResponseType())) {
             if (as.hasExpression() && !as.getExpression().trim().startsWith("Bundle")) {
                 // assertion could be targeting Bundle or a resource in the Bundle (search)
                 if (as.hasExpression() && as.getExpression().trim().startsWith("Bundle")) {

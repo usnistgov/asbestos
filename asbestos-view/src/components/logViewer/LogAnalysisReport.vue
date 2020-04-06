@@ -173,8 +173,8 @@
             },
             async loadAnalysis2() {
                 if (this.eventId) {
-                    console.log(`loadAnalysis2 for ${this.eventId}`)
-                    console.log(`theUrl=${this.theUrl}`)
+                    //console.log(`loadAnalysis2 for ${this.eventId}`)
+                    //console.log(`theUrl=${this.theUrl}`)
                     await this.$store.dispatch('getLogEventAnalysis', {
                         channel: this.channelId,
                         session: this.sessionId,

@@ -16,22 +16,22 @@ export default {
         setImportComponentName(actionScript) {
             const theImport = this.getImport(actionScript)
             if (!theImport) return null
-            console.log(`import`)
+            //console.log(`import`)
             let componentName = null
             if (!theImport.modifierExtension) return null
-            console.log(`import.modifierExtension`)
+            //console.log(`import.modifierExtension`)
             theImport.modifierExtension.forEach(extension => {
                 if (extension.url === 'component') {
                     const value = extension.valueString
                     componentName = this.getComponentName(value)
                 }
             })
-            console.log(`componentName ${componentName}`)
+            //console.log(`componentName ${componentName}`)
             if (componentName)
                 this.componentName = this.currentTest + '/' + componentName
             else
                 this.componentName = null
-            console.log(`componentName ${this.componentName}`)
+            //console.log(`componentName ${this.componentName}`)
             return this.componentName
         },
         getImport(actionScript) {

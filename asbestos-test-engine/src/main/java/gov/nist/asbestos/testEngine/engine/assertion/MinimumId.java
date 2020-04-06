@@ -29,6 +29,10 @@ public class MinimumId {
         }
     }
 
+    public static Report getReport(String error) {
+        return new Report(error);
+    }
+
     public Report run(BaseResource reference, BaseResource sut, boolean isRequest) {
         this.isRequest = isRequest;
         Class<?> miniClass = reference.getClass();

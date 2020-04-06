@@ -26,13 +26,17 @@
             </div>
 
             <div v-if="script.setup">
-                <test-details
-                        :script="script.setup"
-                        :report="report ? report.setup : null"
-                        :label="'Setup'"
-                        :script-contained="script.contained"
-                        :report-contained="report ? report.contained : null"
-                ></test-details>
+                <ul class="noListStyle">
+                    <li>
+                        <test-details
+                            :script="script.setup"
+                            :report="report ? report.setup : null"
+                            :label="'Setup'"
+                            :script-contained="script.contained"
+                            :report-contained="report ? report.contained : null"
+                        ></test-details>
+                    </li>
+                </ul>
             </div>
 
             <div v-if="!script.setup">
