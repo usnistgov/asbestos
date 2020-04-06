@@ -1,12 +1,9 @@
 <template>
-    <span>
     <span
-            v-bind:class="{'breakpoint-gutter-inactive': breakpointGutter}"
             @mouseover="onStatusMouseOver"
             @mouseleave="onStatusMouseLeave"
             @click.stop="onStatusClick"
-            :title="debugTitle">&nbsp;
-    </span>
+            :title="debugTitle">
              <test-status
                           :status-on-right="false"
                           :report="report"
@@ -20,18 +17,13 @@
     export default {
         data() {
             return {
-                displayBreakpointTitle: false,
-                breakpointGutter: false,
             }
         },
         methods: {
             onStatusMouseOver() {
-                this.breakpointGutter = true
                 this.$emit('onStatusMouseOver')
             },
             onStatusMouseLeave() {
-                this.breakpointGutter = false
-                this.titleText = ''
                 this.$emit('onStatusMouseLeave')
             },
             onStatusClick() {
