@@ -493,6 +493,10 @@
     .breakpoint-indicator {
         list-style-type: "\1F6D1"; /* Stop sign */
     }
+    .breakpoint-gutter-inactive {
+        border-style: dotted;
+        border-width: thin;
+    }
     .debug-hint {
         list-style-type: "\1F41E"; /* Lady bug */
     }
@@ -508,5 +512,4 @@
     .inlineDiv {
         display: inline;
     }
-
 </style>

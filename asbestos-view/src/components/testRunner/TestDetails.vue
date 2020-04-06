@@ -50,7 +50,7 @@
             <li v-for="(action, actioni) in script.action"
                 v-bind:class="{
                     'action-margins': true,
-                    'breakpoint-indicator': isBreakpoint(testScriptIndex, testIndex, actioni),
+                    'breakpoint-indicator': showBreakpointIndicator(testScriptIndex, testIndex, actioni),
                 }"
                  :key="'Action' + actioni">
                 <div v-if="setImportComponentName(action)">
@@ -94,7 +94,6 @@
             return {
                 display: false,
                 hoverActionIndex: -1,
-                breakpointIndex: [],
             }
         },
         methods: {
@@ -102,16 +101,15 @@
                 this.display = !this.display
             },
             toggleBreakpointIndex(testScriptIndex, testIndex, actionIndex) {
-                if (this.breakpointIndex[actionIndex]) { // Turn off the debug indicator when breakpoint indicator already shows
-                    this.hoverActionIndex = -1
-                }
-                this.breakpointIndex[actionIndex] = ! this.breakpointIndex[actionIndex]
-                if (this.breakpointIndex[actionIndex]) {
+                // console.log("enter toggleBreakpointIndex")
+                if (! this.$store.getters.hasBreakpoint({testScriptIndex: testScriptIndex, breakpointIndex: testIndex + "." + actionIndex})) {
                     this.hoverActionIndex = actionIndex
                     // console.log("calling dispatch" + testScriptIndex + " breakpointIndex: " + testIndex + "." + actionIndex)
                     this.$store.dispatch('addBreakpoint', {testScriptIndex: testScriptIndex, breakpointIndex: testIndex + "." + actionIndex})
                 } else {
+                    this.hoverActionIndex = -1 // Immediately remove the debug indicator while the mouse hover is still active but without having to wait for the mouseLeave event
                    // remove breakpoint
+                   //  console.log("calling removeBreakpoint dispatch" + testScriptIndex + " breakpointIndex: " + testIndex + "." + actionIndex)
                     this.$store.dispatch('removeBreakpoint', {testScriptIndex: testScriptIndex, breakpointIndex: testIndex + "." + actionIndex})
                 }
             },
@@ -122,10 +120,9 @@
                     return "Set breakpoint"
                 }
             },
-            isBreakpoint(testScriptIndex, testIndex, actionIndex) {
+            showBreakpointIndicator(testScriptIndex, testIndex, actionIndex) {
                 return this.$store.getters.hasBreakpoint({testScriptIndex: testScriptIndex, breakpointIndex: testIndex + "." + actionIndex})
-                    ||  Boolean(this.breakpointIndex[actionIndex])
-                    || ! this.breakpointIndex[actionIndex] && this.hoverActionIndex === actionIndex
+                    || this.hoverActionIndex === actionIndex
             }
         },
         computed: {
