@@ -29,12 +29,7 @@ public class GetProxyBaseRequest {
     public void run() {
         log.info("GetProxyBaseRequest");
         String base = ServiceProperties.getInstance().getPropertyOrStop(ServicePropertiesEnum.FHIR_TOOLKIT_BASE) + "/proxy";
-        try {
-            request.resp.getOutputStream().write(base.getBytes());
-            request.resp.setStatus(request.resp.SC_OK);
-        } catch (IOException e) {
-            request.resp.setStatus(request.resp.SC_INTERNAL_SERVER_ERROR);
-        }
+        Returns.returnValue(request.resp, base);
     }
 
 }
