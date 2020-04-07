@@ -53,7 +53,7 @@
                     'breakpoint-indicator': isBreakpoint(actioni),
                 }"
                  :key="'Action' + actioni">
-                <div v-if="setImportComponentName(action)">
+                <div v-if="setImportComponentName(report && report.action ? report.action[actioni] : null)">
                     <div v-for="(caction, cactioni) in componentScriptActions" class="action-margins"
                          :key="'CAction' + cactioni">
                         <action-details

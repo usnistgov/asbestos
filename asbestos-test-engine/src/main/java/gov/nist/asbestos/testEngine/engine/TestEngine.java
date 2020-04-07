@@ -17,6 +17,7 @@ import gov.nist.asbestos.testEngine.engine.translator.Parameter;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.utilities.graphql.StringValue;
 
 
 import java.io.*;
@@ -659,7 +660,19 @@ public class TestEngine  {
         }
     }
 
-    private void handleImport(Extension extension, TestReport.SetupActionOperationComponent actionReport) {
+    Set<String> moduleIds = new HashSet<>();
+    private String assignModuleId(String candidate) {
+        String real = candidate;
+        int i = 1;
+        while (moduleIds.contains(real)) {
+            real = candidate + i;
+            i++;
+        }
+        moduleIds.add(real);
+        return real;
+    }
+
+    private void handleImport(Extension extension, TestReport.SetupActionOperationComponent opReport) {
         ComponentReference componentReference = new ComponentReference(testDef, Collections.singletonList(extension));
 
         TestScript module = componentReference.getComponent();
@@ -681,7 +694,7 @@ public class TestEngine  {
         Map<String, String> externalVariables = new HashMap<>();
         VariableMgr varMgr = new VariableMgr(testScript, fixtureMgr)
                 .setVal(engineVal)
-                .setOpReport(actionReport);
+                .setOpReport(opReport);
         for (Parameter parm : componentReference.getVariablesIn()) {
             String outerName = parm.getCallerName();
             String innerName = parm.getLocalName();
@@ -711,6 +724,10 @@ public class TestEngine  {
         modularEngine.add(testEngine1);
         testEngine1.runTest();
 
+        String moduleId = assignModuleId(simpleName(componentReference.getComponentRef()));
+        opReport.addExtension("urn:moduleId", new StringType(moduleId));
+        testEngine1.getTestReport().addExtension("urn:moduleId", new StringType(moduleId));
+
         FixtureMgr innerFixtures = testEngine1.fixtureMgr;
         Map<String, FixtureComponent> outFixturesForComponent = new HashMap<>();
         for (Parameter parm : componentReference.getFixturesOut()) {
@@ -724,7 +741,15 @@ public class TestEngine  {
             fixtureMgr.put(outerName, fixtureComponent);
         }
         String result = testEngine1.getTestReport().getResult().toCode();
-        actionReport.setResult(TestReport.TestReportActionResult.fromCode(result));
+        opReport.setResult(TestReport.TestReportActionResult.fromCode(result));
+    }
+
+    private String simpleName(File file) {
+        String name = file.getName();
+        int i = name.indexOf(".");
+        if (i == -1)
+            return name;
+        return name.substring(0, i);
     }
 
     // returns ok?
