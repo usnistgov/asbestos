@@ -1,3 +1,4 @@
+const path = require('path')
 export default {
     data() {
         return {
@@ -6,7 +7,7 @@ export default {
     },
     methods: {
         getComponentName(url) {
-            const dirs = url.split('/')
+            const dirs = url.split(path.sep)
             if (dirs.length === 0) return url
             const nameAndExtension = dirs[dirs.length - 1]
             const parts = nameAndExtension.split('.')
