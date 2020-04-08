@@ -243,28 +243,6 @@ public class AnalysisReport {
     }
 
 
-    public class Checked {
-        String className;
-        MinimumId.Report report;
-        String script;
-
-        Checked(String className, MinimumId.Report report, String script) {
-            this.className = className;
-            this.report = report;
-            this.script = script;
-        }
-
-        Checked(MinimumId.Report report) {
-            this.className = "";
-            this.script = "";
-            this.report = report;
-        }
-
-        public String toString() {
-            return "Checked: " + className + " Script: " + script + " Atts: " + report.expected;
-        }
-    }
-
     private void buildAtts() {
         if (baseObj == null)
             return;
@@ -335,6 +313,15 @@ public class AnalysisReport {
         if (testReport == null) return new Checked("", new MinimumId.Report(), "");
         for (TestReport.TestReportTestComponent testComponent : testReport.getTest()) {
             for (TestReport.TestActionComponent actionComponent : testComponent.getAction()) {
+                TestReport.SetupActionOperationComponent operationComponent = actionComponent.getOperation();
+                if (operationComponent != null) {
+                    if (operationComponent.hasResult()) {
+                        if (operationComponent.getResult().equals(TestReport.TestReportActionResult.ERROR)) {
+//                            return new Checked(MinimumId.getReport(operationComponent.getMessage()));
+                            throw new Error(operationComponent.getMessage());
+                        }
+                    }
+                }
                 TestReport.SetupActionAssertComponent assertComponent = actionComponent.getAssert();
                 if (assertComponent != null) {
                     if (assertComponent.getUserData(AssertionRunner.RAW_REPORT) != null && assertComponent.getUserData(AssertionRunner.RAW_REPORT) instanceof MinimumId.Report)

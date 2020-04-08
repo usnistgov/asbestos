@@ -45,6 +45,22 @@
                              :report="report"
                 > </test-status>
             </span>
+
+            <div v-if="displayMessage">
+                <div v-for="(ref, refi) in references"
+                    :key="'Ref' + refi" class="assert">
+                    <div v-if="$store.state.testRunner.testAssertions[ref].startsWith('http')">
+                        Reference:
+                        <a v-bind:href="$store.state.testRunner.testAssertions[ref]" target="_blank">
+                            {{ $store.state.testRunner.testAssertions[ref] }}
+                        </a>
+                    </div>
+                    <div v-else>
+                        Reference: {{ $store.state.testRunner.testAssertions[ref] }}
+                    </div>
+                </div>
+            </div>
+
         </div>
         <div v-else>
             <!--
@@ -167,6 +183,13 @@
             toggleMessageDisplay() {
                 this.displayMessage = !this.displayMessage
             },
+            referenceDescription(refName) {
+                const ref = this.$store.state.testRunner.testAssertions[refName]
+                if (!ref.startsWith('http'))
+                    return `Reference: ${ref}`
+                return `<a href="${ref}" target="_blank">Reference</a>`
+            },
+
         },
         computed: {
             isError() {
@@ -210,6 +233,17 @@
                 return this.script.operation ? this.script.operation.label : this.script.assert.label
             },
             description() {
+                const attr = this.descriptionAtt
+                const parts = attr.split('|')
+                return parts[0]
+            },
+            references() {
+                const attr = this.descriptionAtt
+                let parts = attr.split('|')
+                parts.shift()
+                return parts
+            },
+            descriptionAtt() {
                 return this.script.operation ? this.script.operation.description : this.script.assert.description
             },
         },

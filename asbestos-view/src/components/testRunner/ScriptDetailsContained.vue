@@ -27,7 +27,7 @@
             </div>
         </div>
 
-        <div>
+        <div v-if="script">
             <div v-for="(test, testi) in script.test"
                  :key="'Test' + testi">
                 <test-details-contained

@@ -8,11 +8,15 @@
         response - the response resource (could be OperationOutcome)
     -->
     <fixture id="referenceDocumentReference">
+        <autocreate value="false"/>
+        <autodelete value="false"/>
         <resource>
             <reference value="DocumentReference/reference"/>
         </resource>
     </fixture>
     <fixture id="referenceDocumentManifest">
+        <autocreate value="false"/>
+        <autodelete value="false"/>
         <resource>
             <reference value="DocumentManifest/reference"/>
         </resource>
@@ -41,6 +45,6 @@
                 <minimumId value="referenceDocumentManifest"/>
                 <warningOnly value="false"/>
             </assert>
-        </action>    
+        </action>
         </test>
 </TestScript>

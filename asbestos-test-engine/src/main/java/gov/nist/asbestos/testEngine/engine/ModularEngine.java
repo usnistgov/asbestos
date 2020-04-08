@@ -73,7 +73,6 @@ public class ModularEngine {
         String testCollection = getMainTestEngine().getTestCollection();
         for (TestEngine engine : engines) {
             String scriptName = stripExtension(engine.getTestScriptName());
-            String testName = first ? this.testName : scriptName;
             String moduleName = first ? null : scriptName;
 
             TestReport report = engine.getTestReport();
@@ -106,7 +105,6 @@ public class ModularEngine {
         if (i == -1) return name;
         return name.substring(0, i);
     }
-
 
 
     //

@@ -39,14 +39,14 @@
         </action>
         <action>
             <assert>
-                <description value="... transaction was successful"/>
+                <description value="... successful"/>
                 <response value="okay"/>
                 <warningOnly value="false"/>
             </assert>
         </action>
         <action>
             <assert>
-                <description value="... return Bundle"/>
+                <description value="... returned Bundle|FHIRTransReturnsBundle"/>
                 <compareToSourceId value="pdb-response-bundle"/>
                 <compareToSourceExpression value="Bundle.exists()"/>
                 <warningOnly value="false"/>
@@ -54,7 +54,7 @@
         </action>
         <action>
             <assert>
-                <description value="... Bundle is type transaction-response"/>
+                <description value="... Bundle is type transaction-response|FHIRTransReturnsBundle"/>
                 <compareToSourceId value="pdb-response-bundle"/>
                 <compareToSourceExpression value="Bundle.type = 'transaction-response'"/>
                 <warningOnly value="false"/>
@@ -62,7 +62,7 @@
         </action>
         <action>
             <assert>
-                <description value="... Bundle may not contain OperationOutcome"/>
+                <description value="... Bundle does not contain OperationOutcome|FHIRTransReturnsBundle"/>
                 <compareToSourceId value="pdb-response-bundle"/>
                 <compareToSourceExpression value="Bundle.entry.response.outcome.where(OperationOutcome).exists().not()"/>
                 <warningOnly value="false"/>
@@ -70,16 +70,16 @@
         </action>
         <action>
             <assert>
-                <description value="... all parts of transaction successful"/>
-                <expression value="Bundle.entry.response.all(status.startsWith(201))"/>
+                <description value="... response contains one entry for each entry in request|FHIRTransReturnsBundle"/>
+                <expression value="Bundle.entry.count()"/>
+                <value value="${requestEntryCount}"/>
                 <warningOnly value="false"/>
             </assert>
         </action>
         <action>
             <assert>
-                <description value="... response contains one entry for each entry in request"/>
-                <expression value="Bundle.entry.count()"/>
-                <value value="${requestEntryCount}"/>
+                <description value="... all entries of transaction successful|FHIRTransReturns201"/>
+                <expression value="Bundle.entry.response.all(status.startsWith(201))"/>
                 <warningOnly value="false"/>
             </assert>
         </action>

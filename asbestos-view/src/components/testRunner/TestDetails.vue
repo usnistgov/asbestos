@@ -10,24 +10,24 @@
              'error-plain': isError && !colorful,
              'not-run':   isNotRun && colorful,
              'not-run-plain-detail' : isNotRun && ! colorful,
-        }"  class="test-margins" @click.stop="toggleDisplay()">
+            }"  class="test-margins" @click.stop="toggleDisplay()">
 
             <test-status-event-wrapper v-if="!statusRight"
                          :status-on-right="statusRight"
                          :report="report"
             > </test-status-event-wrapper>
 
-        <span v-if="display">
-            <img src="../../assets/arrow-down.png">
-        </span>
-        <span v-else>
-            <img src="../../assets/arrow-right.png"/>
-        </span>
+            <span v-if="display">
+                <img src="../../assets/arrow-down.png">
+            </span>
+            <span v-else>
+                <img src="../../assets/arrow-right.png"/>
+            </span>
 
             <span>
                 <span v-if="label" class="bold">{{label}}: </span>
                 <span v-else class="bold">Test: </span>
-                {{ description }}
+                    {{ description }}
             </span>
         </span>
 
@@ -53,7 +53,7 @@
                     'breakpoint-indicator': isBreakpoint(actioni),
                 }"
                  :key="'Action' + actioni">
-                <div v-if="setImportComponentName(action)">
+                <div v-if="setImportComponentName(report && report.action ? report.action[actioni] : null)">
                     <div v-for="(caction, cactioni) in componentScriptActions" class="action-margins"
                          :key="'CAction' + cactioni">
                         <action-details

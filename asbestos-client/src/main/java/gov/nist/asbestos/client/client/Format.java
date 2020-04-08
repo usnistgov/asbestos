@@ -11,8 +11,10 @@ public enum Format {
     XML,
     NONE;
 
+    private static String fhirVersionHeader = "fhirVersion=4.0";
+
     public String getContentType() {
-        return this.name().equals("JSON") ? "application/fhir+json" : "application/fhir+xml";
+        return (this.name().equals("JSON") ? "application/fhir+json" : "application/fhir+xml") + "; " + fhirVersionHeader;
     }
 
     private static List<String> formats = new ArrayList<>();

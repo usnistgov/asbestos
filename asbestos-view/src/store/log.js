@@ -90,7 +90,7 @@ export const logStore = {
             const session = parms.session
             const eventId = parms.eventId
             let focusUrl = parms.url
-            console.log(`focusUrl is ${focusUrl}`)
+            //console.log(`focusUrl is ${focusUrl}`)
             let anchor
             if (focusUrl) {
                 const focusUrlPoundi = focusUrl.indexOf('#')
@@ -99,7 +99,7 @@ export const logStore = {
                     focusUrl = focusUrl.substring(0, focusUrlPoundi)
                 }
             }
-            console.log(`focusUrl is ${focusUrl} anchor is ${anchor}`)
+            //console.log(`focusUrl is ${focusUrl} anchor is ${anchor}`)
             const requestOrResponse = parms.requestOrResponse
 
             if (!focusUrl)
