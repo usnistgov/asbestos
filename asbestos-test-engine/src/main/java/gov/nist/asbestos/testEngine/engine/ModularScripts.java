@@ -13,7 +13,10 @@ import org.hl7.fhir.r4.model.TestReport;
 import org.hl7.fhir.r4.model.TestScript;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -43,6 +46,19 @@ public class ModularScripts {
         }
         TestScript testScript = (TestScript) resource;
         testScript.setName(testId);
+
+        File descriptionFile = new File(testDef, "description.md");
+        if (descriptionFile.exists()) {
+            try {
+                InputStream ins = new FileInputStream(descriptionFile);
+                String description = org.apache.commons.io.IOUtils.toString(ins, Charset.defaultCharset());
+                description = description.replaceAll("\\n", "\\\\n");
+                testScript.setDescription(description);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+
         String json = ProxyBase.encode(testScript, Format.JSON);
         scripts.put(testScript.getName(), json);
 

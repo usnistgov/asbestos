@@ -27,7 +27,7 @@
             <span>
                 <span v-if="label" class="bold">{{label}}: </span>
                 <span v-else class="bold">Test: </span>
-                    {{ description }}
+                {{ description }}
             </span>
         </span>
 
@@ -171,7 +171,9 @@
             'testScriptIndex', 'testIndex',
         ],
         components: {
-            ActionDetails, ScriptDetailsContained, TestStatusEventWrapper
+            ActionDetails,
+            ScriptDetailsContained,
+            TestStatusEventWrapper,
         },
         mixins: [colorizeTestReports, importMixin],
         name: "TestDetails"

@@ -57,7 +57,7 @@ public class MinimumId {
         if (isRequest) {
             report.expected.remove("id");
             report.expected.remove("created");
-            report.expected.remove("status");
+            //report.expected.remove("status");
             diff.remove("id");
             diff.remove("created");
             diff.remove("status");
@@ -68,7 +68,6 @@ public class MinimumId {
                 report.expected.remove(s);
         }
         report.missing = diff;
-
         return report;
     }
 
@@ -119,6 +118,19 @@ public class MinimumId {
         List<String> diff = new ArrayList<>();
         for (String x : minList) {
             if (!sut.contains(x))
+                diff.add(x);
+        }
+        return diff;
+    }
+
+    // what does sut contain beyond the minimum
+    public List<String> rdiff(Set<String> minimum, Set<String> sut) {
+        List<String> sutList = new ArrayList<>(sut);
+        List<String> minList = new ArrayList<>(minimum);
+        Collections.sort(sutList);
+        List<String> diff = new ArrayList<>();
+        for (String x : sutList) {
+            if (!minList.contains(x))
                 diff.add(x);
         }
         return diff;

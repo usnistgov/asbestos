@@ -18,11 +18,13 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.utilities.graphql.StringValue;
+import sun.misc.IOUtils;
 
 
 import java.io.*;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
@@ -1006,7 +1008,7 @@ public class TestEngine  {
         return loadTestScript(testDefDir, null);
     }
 
-    public static TestScript loadTestScript(File testDefDir, String fileName) {
+    public static TestScript loadTestScript(File testDefDir, String fileName)  {
         Objects.requireNonNull(testDefDir);
         File location;
         if (fileName == null)
@@ -1024,6 +1026,7 @@ public class TestEngine  {
         assert resource instanceof TestScript;
         TestScript testScript = (TestScript) resource;
         testScript.setName(location.toString());
+
         return testScript;
     }
 

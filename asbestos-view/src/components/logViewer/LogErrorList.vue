@@ -22,6 +22,7 @@
                         <div class="divider"></div>
                         {{ att }}
                         <span v-if="errorList && errorList.indexOf(att) >= 0" class="red">Missing</span>
+                        <span v-if="extraList && extraList.indexOf(att) >= 0">Extra</span>
                     </div>
                 </div>
             </div>
@@ -42,7 +43,7 @@
             }
         },
         props: [
-            'errorList', 'attList', 'attListName', 'startOpen'
+            'errorList', 'attList', 'attListName', 'startOpen', 'extraList',
         ],
         name: "LogErrorList"
     }

@@ -1,8 +1,12 @@
 <template>
+    <div>
+<!--        <div class="instruction">-->
+<!--            <vue-markdown>{{ description }}</vue-markdown>-->
+<!--        </div>-->
     <ul class="noTopMargin">
         <li v-if="$store.state.testRunner.isClientTest && testScript">
                 <div class="instruction">
-                    {{ testScript.description }}
+                    <vue-markdown>{{ testScript.description }}</vue-markdown>
                 </div>
                 <div v-if="eventIds === null">
                     No messages present on this channel
@@ -29,13 +33,20 @@
             > </script-details>
         </li>
     </ul>
+    </div>
 </template>
 
 <script>
     import ScriptDetails from './ScriptDetails'
     import ClientDetails from './ClientDetails'
+    import VueMarkdown from "vue-markdown";
     export default {
         computed: {
+            description() {
+                if (!this.$store.state.testRunner.testScripts) return null
+                if (!this.$store.state.testRunner.testScripts[this.testId].description) return null
+                return this.$store.state.testRunner.testScripts[this.testId].description.replace(/\n/g, "<br />")
+            },
             testScript() {
                 return   this.$store.state.testRunner.testScripts[this.testId]
             },
@@ -48,7 +59,7 @@
             'sessionId', 'channelId', 'testCollection', 'testId'
         ],
         components: {
-            ScriptDetails, ClientDetails
+            ScriptDetails, ClientDetails, VueMarkdown,
         },
         mounted() {
             if (this.$store.state.testRunner.testAssertions === null)

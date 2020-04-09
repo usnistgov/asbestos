@@ -31,6 +31,20 @@ class FhirPathEngineBuilder {
         return true;
     }
 
+    public static Resource evalForResource(Resource resourceIn, String expression) {
+        List<Base> results = build().evaluate(resourceIn, expression);
+        if (results.isEmpty())
+            return null;
+        if (results.size() > 1)
+            return null;
+        Base result = results.get(0);
+        if (result.hasType("ResourceType")) {
+            Resource resource = result.castToResource(result);
+            return resource;
+        }
+        return null;
+    }
+
     public static String evalForString(BaseResource resource, String expression) {
         List<Base> results = build().evaluate(resource, expression);
         if (results.isEmpty())

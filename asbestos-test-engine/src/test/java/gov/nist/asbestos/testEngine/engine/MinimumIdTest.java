@@ -4,6 +4,7 @@ import gov.nist.asbestos.client.Base.ProxyBase;
 import gov.nist.asbestos.client.client.FhirClient;
 import gov.nist.asbestos.simapi.validation.Val;
 import gov.nist.asbestos.testEngine.engine.assertion.MinimumId;
+import gov.nist.asbestos.testEngine.engine.assertion.Report;
 import org.hl7.fhir.r4.model.DocumentReference;
 import org.hl7.fhir.r4.model.TestReport;
 import org.junit.jupiter.api.Test;
@@ -11,7 +12,6 @@ import org.junit.jupiter.api.Test;
 import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.nio.file.Paths;
 import java.util.*;
 

@@ -18,20 +18,32 @@
                 <span v-else><img src="../../assets/cross.png"></span>
                 <span class="caption">Comprehensive Metadata </span>
                 <div class="divider"></div>
-                <log-error-list :errorList="report.comprehensiveErrors" :attList="report.comprehensiveChecked" :att-list-name="'Required'" :start-open="true"> </log-error-list>
+                <log-error-list
+                        :errorList="report.comprehensiveErrors"
+                        :attList="report.comprehensiveChecked"
+                        :att-list-name="'Required'"
+                        :extra-list="report.extra"
+                        :start-open="true"> </log-error-list>
             </div>
             <div>
                 <span v-if="report.isMinimal"><img src="../../assets/check.png"></span>
                 <span v-else><img src="../../assets/cross.png"></span>
                 <span class="caption">Minimal Metadata </span>
                 <div class="divider"></div>
-                <log-error-list :errorList="report.minimalErrors" :attList="report.minimalChecked" :att-list-name="'Required'" :start-open="true"> </log-error-list>
+                <log-error-list
+                        :errorList="report.minimalErrors"
+                        :attList="report.minimalChecked"
+                        :att-list-name="'Required'"
+                        :start-open="true"> </log-error-list>
             </div>
             <div>
                 <span v-if="report.codingErrors.length === 0"><img src="../../assets/check.png"></span>
                 <span v-else><img src="../../assets/cross.png"></span>
                 <span class="caption">Coding</span>
-                <log-error-list :att-list="report.codingErrors" :att-list-name="'Coding Errors'" :start-open="true"> </log-error-list>
+                <log-error-list
+                        :att-list="report.codingErrors"
+                        :att-list-name="'Coding Errors'"
+                        :start-open="true"> </log-error-list>
             </div>
         </div>
         <div>

@@ -2,12 +2,7 @@
     <div>
         <div v-if="script" class="script">
             <div v-if="script.description && script.description != ''" class="script-description-margins">
-                {{
-                script.description
-                }}
-<!--                <div class="vdivider"></div>-->
-<!--                <div class="vdivider"></div>-->
-<!--                <div class="vdivider"></div>-->
+               <vue-markdown>{{ description }}</vue-markdown>
             </div>
             <div class="grayText" v-else>
                 (No description.)
@@ -74,6 +69,7 @@
     import errorHandlerMixin from '../../mixins/errorHandlerMixin'
     import TestDetails from "./TestDetails";
     import ActionDetails from "./ActionDetails";
+    import VueMarkdown from "vue-markdown";
 
     export default {
         data() {
@@ -84,6 +80,9 @@
         methods: {
         },
         computed: {
+            description() {
+                return this.script.description.replace(/\\n\\n/g, "<br />").replace(/\\n/g, " ")
+            },
             fixtures() {
                 return this.script.fixture
             },
@@ -107,7 +106,7 @@
             'testScriptIndex',
         ],
         components: {
-            TestDetails, ActionDetails,
+            TestDetails, ActionDetails, VueMarkdown,
         },
         name: "ScriptDetails"
     }
