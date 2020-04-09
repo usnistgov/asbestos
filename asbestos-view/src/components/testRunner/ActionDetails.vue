@@ -46,7 +46,7 @@
                 > </test-status>
             </span>
 
-            <div v-if="displayMessage">
+            <div v-if="displayMessage && $store.state.testRunner.testAssertions">
                 <div v-for="(ref, refi) in references"
                     :key="'Ref' + refi" class="assert">
                     <div v-if="$store.state.testRunner.testAssertions[ref].startsWith('http')">
@@ -183,13 +183,6 @@
             toggleMessageDisplay() {
                 this.displayMessage = !this.displayMessage
             },
-            referenceDescription(refName) {
-                const ref = this.$store.state.testRunner.testAssertions[refName]
-                if (!ref.startsWith('http'))
-                    return `Reference: ${ref}`
-                return `<a href="${ref}" target="_blank">Reference</a>`
-            },
-
         },
         computed: {
             isError() {

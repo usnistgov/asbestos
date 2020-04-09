@@ -71,7 +71,7 @@
         </attachment>
         <format>
             <system value="http://ihe.net/fhir/ValueSet/IHE.FormatCode.codsystem"/>
-            <code value="urn:ihe:pcc:cm:2008"/>
+            <code value="urn:ihe:pcc:handp:2008"/>
         </format>
     </content>
 </DocumentReference>

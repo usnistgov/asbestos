@@ -388,33 +388,55 @@ public class TestEngine  {
             ValE fVal = new ValE(engineVal).setMsg("Fixtures");
 
             try {
-                for (TestScript.TestScriptFixtureComponent comp : testScript.getFixture()) {
-                    String id = comp.getId();
+                for (TestScript.TestScriptFixtureComponent fix : testScript.getFixture()) {
+                    String id = fix.getId();
                     if (id == null || id.equals("")) {
                         throw new Error("Static Fixture has no id and cannot be referenced");
                     }
-                    if (!comp.hasAutocreate())
+                    if (!fix.hasAutocreate())
                         throw new Error("fixture.autocreate is a required field");
-                    if (!comp.hasAutodelete())
+                    if (!fix.hasAutodelete())
                         throw new Error("fixture.autodelete is a required field");
-                    Ref ref = new Ref(comp.getResource().getReference());
-                    Optional<ResourceWrapper> optWrapper = fhirClientForFixtures.readCachedResource(ref);
 
-                    // never happens - Throwable thrown if not found
-                    if (!optWrapper.isPresent())
-                        throw new Error("Static Fixture " + ref + " cannot be loaded");
-                    ResourceWrapper wrapper = optWrapper.get();
-                    FixtureComponent fixtureComponent;
-                    try {
-                        fixtureComponent = new FixtureComponent(id).setResource(wrapper).setVal(fVal).load(wrapper);
-                        if (fixtureComponent != null)
-                            fixtureMgr.put(id, fixtureComponent);
-                    } catch (Throwable e) {
-                        throw new Error(e);
+                    if (fix.hasResource()) {
+                        Ref ref = new Ref(fix.getResource().getReference());
+                        Optional<ResourceWrapper> optWrapper = fhirClientForFixtures.readCachedResource(ref);
+
+                        // never happens - Throwable thrown if not found
+                        if (!optWrapper.isPresent())
+                            throw new Error("Static Fixture " + ref + " cannot be loaded");
+                        ResourceWrapper wrapper = optWrapper.get();
+                        FixtureComponent fixtureComponent;
+                        try {
+                            fixtureComponent = new FixtureComponent(id).setResource(wrapper).setVal(fVal).load(wrapper);
+                            if (fixtureComponent != null)
+                                fixtureMgr.put(id, fixtureComponent);
+                        } catch (Throwable e) {
+                            throw new Error(e);
+                        }
+                    } else if (fix.hasExtension("urn:subFixture")) {
+                        Extension subfix = fix.getExtensionByUrl("urn:subFixture");
+
+                        Extension fhirPathExt = subfix.getExtensionByUrl("urn:fhirPath");
+                        if (fhirPathExt == null || fhirPathExt.getValue() == null)
+                            throw new Error("Extension urn:subFixture has no value for its urn:fhirPath subExtension");
+                        String fhirPath = fhirPathExt.getValue().toString();
+
+                        Extension sourceIdExt = subfix.getExtensionByUrl("urn:sourceId");
+                        if(sourceIdExt == null || sourceIdExt.getValue() == null)
+                            throw new Error("Extension urn:subFixture has no value for its urn:sourceId subExtension");
+                        String sourceId = sourceIdExt.getValue().toString();
+
+                        FixtureSub fixtureSub = new FixtureSub(fixtureMgr, sourceId, fhirPath);
+                        FixtureComponent fixtureComponent = new FixtureComponent(id).setFixtureSub(fixtureSub).setVal(fVal);
+                        fixtureMgr.put(id, fixtureComponent);
                     }
                 }
             } catch (Throwable t) {
-                reportParsingError(testReport.addTest(), t.getMessage());
+                String msg = t.getMessage();
+                if (msg == null || msg.equals(""))
+                    msg = ExceptionUtils.getStackTrace(t);
+                reportParsingError(testReport.addTest(), msg);
             }
 
         }
@@ -1048,11 +1070,6 @@ public class TestEngine  {
 
     private boolean isFixtureDefined(String id) {
         return fixtureMgr.containsKey(id);
-    }
-
-    private TestEngine addFixture(FixtureComponent fixtureComp) {
-        fixtureMgr.put(fixtureComp.getId(), fixtureComp);
-        return this;
     }
 
     FixtureMgr getFixtures() {

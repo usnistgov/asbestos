@@ -1,5 +1,4 @@
 <TestScript xmlns="http://hl7.org/fhir">
-    <description value="Submit Comprehensive Metadata Provide Document Bundle containing two DocumentReferences and Read back both"/>
     <fixture id="pdb-bundle">
         <autocreate value="false"/>
         <autodelete value="false"/>
@@ -14,10 +13,20 @@
         <autocreate value="false"/>
         <autodelete value="false"/>
         <resource>
-            <reference value="Patient/Alex_Alder.json"/>
+            <reference value="Patient/Alex_Alder"/>
         </resource>
     </fixture>
-    <fixture id="submittedDocRef1">
+    <fixture id="patient_bundle2">
+        <!--
+           This patient comes out of the test Patient cache
+        -->
+        <autocreate value="false"/>
+        <autodelete value="false"/>
+        <resource>
+            <reference value="Patient/Alex_Alder"/>
+        </resource>
+    </fixture>
+    <fixture id="submittedDocRef">
         <autocreate value="false"/>
         <autodelete value="false"/>
         <extension url="urn:subFixture">
@@ -29,32 +38,9 @@
             </extension>
         </extension>
     </fixture>
-    <fixture id="submittedDocRef2">
-        <autocreate value="false"/>
-        <autodelete value="false"/>
-        <extension url="urn:subFixture">
-            <extension url="urn:fhirPath">
-                <valueString value="Bundle.entry[1]"/>
-            </extension>
-            <extension url="urn:sourceId">
-                <valueString value="pdb-bundle"/>
-            </extension>
-        </extension>
-    </fixture>
-
     <variable>
-        <name value="DocRefUrl1"/>
+        <name value="DocRefUrl"/>
         <expression value="Bundle.entry[0].response.location"/>
-        <sourceId value="pdb-response"/>
-    </variable>
-    <variable>
-        <name value="DocRefUrl2"/>
-        <expression value="Bundle.entry[1].response.location"/>
-        <sourceId value="pdb-response"/>
-    </variable>
-    <variable>
-        <name value="DocRefUrl2"/>
-        <expression value="Bundle.entry[1].response.location"/>
         <sourceId value="pdb-response"/>
     </variable>
     <variable>  <!-- referenced in pdb -->
@@ -72,13 +58,8 @@
         <expression value="Patient.identifier.value"/>
         <sourceId value="read-back"/>
     </variable>
-    <variable>
-        <name value="requestEntryCount"/>
-        <expression value="Bundle.entry.count()"/>
-        <sourceId value="pdb-bundle"/>
-    </variable>
     <test>
-        <description value="Submit"/>
+        <description value="Submit Provide Document Bundle to MHD Document Recipient."/>
         <action>
             <operation>
                 <description value="Submit Provide Document Bundle to MHD Document Recipient."/>
@@ -116,29 +97,7 @@
         </action>
     </test>
     <test>
-        <description value="Read back DocumentReference 1"/>
-        <action>
-                <operation>
-                    <description value="Read back the DocumentReference and validate"/>
-                    <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
-                        <extension url="component">
-                            <valueString value="../../Library/ReadValidateDocRef.xml"/>
-                        </extension>
-                        <extension url="urn:fixture-in">
-                            <valueString  value="submittedDocRef1"/>
-                        </extension>
-                        <extension url="urn:variable-in">
-                            <valueString value="DocRefUrl1"/>
-                        </extension>
-                        <extension url="urn:variable-in">
-                            <valueString value="patientResourceId"/>
-                        </extension>
-                    </modifierExtension>
-                </operation>
-        </action>
-    </test>
-    <test>
-        <description value="Read back DocumentReference 2"/>
+        <description value="Read back the DocumentReference and validate"/>
         <action>
             <operation>
                 <description value="Read back the DocumentReference and validate"/>
@@ -147,10 +106,10 @@
                         <valueString value="../../Library/ReadValidateDocRef.xml"/>
                     </extension>
                     <extension url="urn:fixture-in">
-                        <valueString  value="submittedDocRef2"/>
+                        <valueString  value="submittedDocRef"/>
                     </extension>
                     <extension url="urn:variable-in">
-                        <valueString value="DocRefUrl2"/>
+                        <valueString value="DocRefUrl"/>
                     </extension>
                     <extension url="urn:variable-in">
                         <valueString value="patientResourceId"/>

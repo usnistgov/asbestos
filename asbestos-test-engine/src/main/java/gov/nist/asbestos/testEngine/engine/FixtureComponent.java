@@ -13,11 +13,12 @@ public class FixtureComponent {
     private String id;
     // these are for holding request/resource bodies.  For HTTP operation, see fhirClient
 //    private ResourceWrapper request;
-    private ResourceWrapper resource;
+    private ResourceWrapper resourceWrapper;
     private boolean is_static = false; // if true then has resource and no request
     private HttpBase httpBase;  //
     private ValE val;
     private FhirClient fhirClient = null;
+    private FixtureSub fixtureSub = null;
 
     FixtureComponent(String id) {
         Objects.requireNonNull(id);
@@ -25,24 +26,36 @@ public class FixtureComponent {
     }
 
     FixtureComponent(BaseResource baseResource) {
-        resource = new ResourceWrapper(baseResource);
+        resourceWrapper = new ResourceWrapper(baseResource);
     }
 
-    FixtureComponent(ResourceWrapper resource) {
-        this.resource = resource;
+    FixtureComponent(ResourceWrapper resourceWrapper) {
+        this.resourceWrapper = resourceWrapper;
+    }
+
+    public FixtureComponent setFixtureSub(FixtureSub fixtureSub) {
+        this.fixtureSub = fixtureSub;
+        return this;
     }
 
     FixtureComponent load(ResourceWrapper it) {  //  static loads
         Objects.requireNonNull(it);
         Objects.requireNonNull(it.getRef());
-        resource = it;
+        resourceWrapper = it;
         if (isLoaded())
             return this;
         if (fhirClient == null)
             fhirClient = new FhirClient();
-        resource = fhirClient.readResource(it.getRef());
+        resourceWrapper = fhirClient.readResource(it.getRef());
         is_static = true;
         return this;
+    }
+
+    private BaseResource getResource() {
+        getResourceWrapper();
+        if (resourceWrapper != null)
+            return resourceWrapper.getResource();
+        return null;
     }
 
     /**
@@ -54,7 +67,7 @@ public class FixtureComponent {
     }
 
     public boolean isLoaded() {
-        return resource.isLoaded() && resource.isOk();
+        return resourceWrapper != null && resourceWrapper.isLoaded() && resourceWrapper.isOk();
     }
 
     String getId() {
@@ -67,13 +80,21 @@ public class FixtureComponent {
     }
 
     public BaseResource getResourceResource() {
-        if (resource != null)
-            return resource.getResource();
+        ResourceWrapper resourceWrapper = getResourceWrapper();
+        if (resourceWrapper != null)
+            return resourceWrapper.getResource();
         return null;
     }
 
     public ResourceWrapper getResourceWrapper() {
-        return resource;
+        if (resourceWrapper != null)
+            return resourceWrapper;
+        if (fixtureSub != null) {
+            ResourceWrapper wrapper = fixtureSub.get();
+            resourceWrapper = wrapper;
+            return resourceWrapper;
+        }
+        return null;
     }
 
     public String getResponseType() {
@@ -84,13 +105,14 @@ public class FixtureComponent {
     }
 
     public FixtureComponent setResource(ResourceWrapper resource) {
-        this.resource = resource;
+        this.resourceWrapper = resource;
         return this;
     }
 
 
     public boolean hasResource() {
-        return resource != null;
+        getResourceWrapper();
+        return resourceWrapper != null;
     }
 
     public HttpBase getHttpBase() {

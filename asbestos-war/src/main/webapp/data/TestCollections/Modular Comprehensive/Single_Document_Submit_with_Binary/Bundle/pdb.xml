@@ -13,22 +13,6 @@
                     <div xmlns="http://www.w3.org/1999/xhtml">Comment</div>
                     <status value="empty"/>
                 </text>
-                <contained>
-                    <Patient xmlns="http://hl7.org/fhir">
-                            <id value="sourcePatient"/>
-                    <identifier>
-                        <use value="usual" />
-                        <type>
-                            <coding>
-                                <system value="urn:ietf:rfc:3986" />
-                                <code value="urn:ihe:iti:xds:2013:accession" />
-                            </coding>
-                        </type>
-                        <system value="urn:oid:1.2.214" />
-                        <value value="myMRN" />
-                    </identifier>
-                    </Patient>
-                </contained>
                 <status value="current"/>
                 <masterIdentifier>
                     <system value="urn:ietf:rfc:3986"/>
@@ -60,9 +44,6 @@
                     </coding>
                 </securityLabel>
                 <context>
-                    <sourcePatientInfo>
-                        <reference value="#sourcePatient"/>
-                    </sourcePatientInfo>
                     <practiceSetting>
                         <coding>
                             <system value="http://snomed.info/sct"/>
@@ -113,7 +94,6 @@
                     <value value="urn:oid:1.2.129.6.58.92.88337.4"/>
                 </masterIdentifier>
                 <status value="current"/>
-                <created value="2019"/>
                 <type>
                     <coding>
                         <system value="http://snomed.info/sct"/>

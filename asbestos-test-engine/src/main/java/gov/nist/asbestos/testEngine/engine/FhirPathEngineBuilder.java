@@ -38,9 +38,9 @@ class FhirPathEngineBuilder {
         if (results.size() > 1)
             return null;
         Base result = results.get(0);
-        if (result.hasType("ResourceType")) {
-            Resource resource = result.castToResource(result);
-            return resource;
+        if (result instanceof Bundle.BundleEntryComponent) {
+            Bundle.BundleEntryComponent comp = (Bundle.BundleEntryComponent) result;
+            return comp.getResource();
         }
         return null;
     }

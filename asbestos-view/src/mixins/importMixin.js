@@ -15,6 +15,7 @@ export default {
             return this.componentName;
         },
         getModuleIdFromReport(actionReport) {
+            if (!actionReport) return null;
             if (!actionReport.operation) return null;
             if (!actionReport.operation.extension) return null;
             let moduleId = null;
