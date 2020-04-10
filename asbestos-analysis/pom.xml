@@ -29,6 +29,12 @@
             <artifactId>asbestos-mhd</artifactId>
             <version>1.4.0-SNAPSHOT</version>
         </dependency>
+
+        <dependency>
+            <groupId>ca.uhn.hapi.fhir</groupId>
+            <artifactId>hapi-fhir-validation-resources-r4</artifactId>
+            <version>${hapi.version}</version>
+        </dependency>
     </dependencies>
 
 </project>

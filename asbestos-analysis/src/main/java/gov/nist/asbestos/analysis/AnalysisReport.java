@@ -1,7 +1,12 @@
 package gov.nist.asbestos.analysis;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.validation.FhirValidator;
+import ca.uhn.fhir.validation.ValidationOptions;
+import ca.uhn.fhir.validation.ValidationResult;
 import gov.nist.asbestos.client.Base.DocumentCache;
 import gov.nist.asbestos.client.Base.EC;
+import gov.nist.asbestos.client.Base.ProxyBase;
 import gov.nist.asbestos.client.client.FhirClient;
 import gov.nist.asbestos.client.client.Format;
 import gov.nist.asbestos.client.reporting.IErrorReporter;
@@ -18,6 +23,10 @@ import gov.nist.asbestos.testEngine.engine.assertion.MinimumId;
 import gov.nist.asbestos.utilities.ResourceHasMethodsFilter;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.log4j.Logger;
+import org.hl7.fhir.r4.hapi.ctx.DefaultProfileValidationSupport;
+import org.hl7.fhir.r4.hapi.validation.FhirInstanceValidator;
+import org.hl7.fhir.r4.hapi.validation.PrePopulatedValidationSupport;
+import org.hl7.fhir.r4.hapi.validation.ValidationSupportChain;
 import org.hl7.fhir.r4.model.*;
 
 import java.io.File;
@@ -125,6 +134,37 @@ public class AnalysisReport {
 
         return report;
     }
+
+//    // https://hapifhir.io/hapi-fhir/docs/validation/validation_support_modules.html
+//    private OperationOutcome runLocalValidation(BaseResource resource) {
+//        FhirContext ctx = ProxyBase.getFhirContext();
+//
+//        // Create a validation support chain
+//        ValidationSupportChain supportChain = new ValidationSupportChain();
+//        supportChain.addValidationSupport(new DefaultProfileValidationSupport());
+//
+//        PrePopulatedValidationSupport prePopulatedSupport = new PrePopulatedValidationSupport();
+//        prePopulatedSupport.addStructureDefinition(someStructureDefnition);
+//
+//
+//        // Create a FhirInstanceValidator and register it to a validator
+//        FhirValidator validator = ctx.newValidator();
+//        FhirInstanceValidator instanceValidator = new FhirInstanceValidator(supportChain);
+//        validator.registerValidatorModule(instanceValidator);
+//
+//        /*
+//         * If you want, you can configure settings on the validator to adjust
+//         * its behaviour during validation
+//         */
+//        instanceValidator.setAnyExtensionsAllowed(true);
+//
+//        // Validate
+//        ValidationResult result = validator.validateWithResult(resource,
+//                new ValidationOptions().addProfile("http://myprofile.com")
+//        );
+//
+//        return (OperationOutcome) result.toOperationOutcome();
+//    }
 
     private OperationOutcome runValidation(BaseResource resource) {
         List<String> errors = new ArrayList<>();
