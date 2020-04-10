@@ -116,7 +116,9 @@
                             </span>
                             <span v-else>
                                 <button class="runallbutton" @click.stop="doRun(name)">Run</button>
-                                <button v-if="i in $store.state.testScriptDebugger.showDebugButton && Boolean($store.state.testScriptDebugger.showDebugButton[i])" class="debugTestScriptButton" @click.stop="doDebug(name)">Debug</button>
+                                <button v-if="isDebuggable(i)"
+                                        class="debugTestScriptButton"
+                                        @click.stop="doDebug(name)">Debug</button>
                             </span>
 
                             <script-status v-if="statusRight" :status-right="statusRight" :name="name"> </script-status>
@@ -149,6 +151,12 @@
             }
         },
         methods: {
+            isDebuggable(testScriptIndex) {
+                const testCollectionIndex = this.$store.state.testRunner.serverTestCollectionNames.indexOf(this.testCollection)
+                const key = testCollectionIndex + '.' + testScriptIndex // Follow proper key format
+                return key in this.$store.state.testScriptDebugger.showDebugButton && Boolean(this.$store.state.testScriptDebugger.showDebugButton[key])
+                // i in $store.state.testScriptDebugger.showDebugButton && Boolean($store.state.testScriptDebugger.showDebugButton[i])
+            },
             testTime(name) {
                 const report = this.$store.state.testRunner.testReports[name]
                 if (!report)
@@ -196,7 +204,7 @@
                 if (!testName)
                     return
                 this.running = true
-                await this.$store.dispatch('runTest', testName)
+                await this.$store.dispatch('debugTestScript', testName)
                 this.running = false
             },
             async doRunAll()  {
@@ -430,7 +438,7 @@
     .fail-plain {
         /*background-color: lightgray;*/
         text-align: left;
-        border-top: 1px solid black;
+        /*border-top: 1px solid black;*/
         /*border-bottom: 1px solid black;*/
         cursor: pointer;
         /*border-radius: 25px;*/
@@ -455,7 +463,7 @@
     .error-plain {
         /*background-color: cornflowerblue;*/
         text-align: left;
-        border-top: 1px solid black;
+        /*border-top: 1px solid black;*/
         cursor: pointer;
         /*border-radius: 25px;*/
     }
@@ -493,8 +501,9 @@
     .breakpoint-indicator {
         list-style-type: "\1F6D1"; /* Stop sign */
     }
-    .debug-hint {
-        list-style-type: "\1F41E"; /* Lady bug */
+    .breakpoint-indicator-hint {
+        list-style-type: "\1F6D1"; /* Stop sign */
+        opacity: .5;
     }
     .noTopMargin {
         margin-top: 0px;

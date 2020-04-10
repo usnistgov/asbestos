@@ -30,7 +30,7 @@ public class Returns {
         return json;
     }
 
-    static void returnString(HttpServletResponse resp, String json) {
+    public static void returnString(HttpServletResponse resp, String json) {
         resp.setContentType("application/json");
         try {
             resp.getOutputStream().print(json);

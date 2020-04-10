@@ -74,6 +74,7 @@
         <module>asbestos-test-engine</module>
         <module>service-properties</module>
         <module>asbestos-analysis</module>
+        <module>asbestos-testscript-debugger</module>
     </modules>
 
     <dependencyManagement>
@@ -160,7 +161,12 @@
             <version>2.5</version>
             <scope>provided</scope>
         </dependency>
-
+        <dependency>
+            <groupId>javax.websocket</groupId>
+            <artifactId>javax.websocket-api</artifactId>
+            <version>1.1</version>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 
     <build>

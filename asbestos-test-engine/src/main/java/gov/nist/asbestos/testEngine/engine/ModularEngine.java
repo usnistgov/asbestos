@@ -3,6 +3,7 @@ package gov.nist.asbestos.testEngine.engine;
 import gov.nist.asbestos.client.Base.EC;
 import gov.nist.asbestos.client.Base.ProxyBase;
 import gov.nist.asbestos.client.client.FhirClient;
+import gov.nist.asbestos.sharedObjects.TestScriptDebugState;
 import gov.nist.asbestos.simapi.validation.Val;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.log4j.Logger;
@@ -24,19 +25,25 @@ public class ModularEngine {
     private boolean saveLogs = false;
     private String testName;
     private Map<String, String> reports = new HashMap<>();   // name => TestReport json
+    private TestScriptDebugState testScriptDebugState;
 
     public ModularEngine(File testDefDir) {
         this(testDefDir, null);
     }
 
     public ModularEngine(File testDefDir, URI sut) {
+        this(testDefDir, sut, null);
+    }
+
+    public ModularEngine(File testDefDir, URI sut, TestScriptDebugState state) {
+        this.testScriptDebugState = state;
         nameFromTestDefDir(testDefDir);
-        TestEngine testEngine = new TestEngine(testDefDir, sut);
+        TestEngine testEngine = new TestEngine(testDefDir, sut, state);
         engines.add(testEngine);
         testEngine.setModularEngine(this);
     }
 
-    private void nameFromTestDefDir(File testDefDir) {
+        private void nameFromTestDefDir(File testDefDir) {
         Objects.requireNonNull(testDefDir);
         String[] parts = testDefDir.toString().split(Pattern.quote(File.separator));
         int i = parts.length - 1;

@@ -8,6 +8,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.File;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -30,14 +31,17 @@ public class Request {
         this.resp = resp;
         String qstring = req.getQueryString();
         //isJson = "_format=json".equals(qstring);
-        if (qstring != null) {
-            isJson = qstring.contains("_format=json");
-            isGzip = qstring.contains("_gzip=true");
-        }
-        this.externalCache = externalCache;
+        setOptions(qstring);
+        setExternalCache(externalCache);
         uri = Common.buildURI(req);
-        uriParts = Arrays.asList(uri.getPath().split("/"));
-        ec = new EC(externalCache);
+        setUriParts(uri);
+    }
+
+    public Request(String url, File externalCache) throws URISyntaxException {
+       setOptions(url);
+       setExternalCache(externalCache);
+       uri = new URI(url);
+       setUriParts(uri);
     }
 
     public String fullChannelId() { return testSession + "__" + channelId; }
@@ -52,6 +56,22 @@ public class Request {
         if (parts.length == 2) {
             testSession = parts[0];
             channelId = parts[1];
+        }
+    }
+
+    private void setUriParts(URI uri) {
+        uriParts = Arrays.asList(uri.getPath().split("/"));
+    }
+
+    private void setExternalCache(File externalCache) {
+        this.externalCache = externalCache;
+        ec = new EC(externalCache);
+    }
+
+    private void setOptions(String qstring) {
+        if (qstring != null) {
+            isJson = qstring.contains("_format=json");
+            isGzip = qstring.contains("_gzip=true");
         }
     }
 

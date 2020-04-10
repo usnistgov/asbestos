@@ -9,6 +9,7 @@ import gov.nist.asbestos.client.events.UIEvent;
 import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.client.resolver.ResourceCacheMgr;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
+import gov.nist.asbestos.sharedObjects.TestScriptDebugState;
 import gov.nist.asbestos.simapi.validation.Val;
 import gov.nist.asbestos.simapi.validation.ValE;
 import gov.nist.asbestos.testEngine.engine.translator.ComponentDefinition;
@@ -59,6 +60,10 @@ public class TestEngine  {
 
     private ModularEngine modularEngine = null;
     private Map<String, String> externalVariables = new HashMap<>();
+    /**
+     * If testScriptDebugState is null, then TestScript is being run normally. ie., TestScript is not being debugged.
+     */
+    private TestScriptDebugState testScriptDebugState;
 
     /**
      *
@@ -77,6 +82,11 @@ public class TestEngine  {
         // this.testDef is always the test definition directory
         ResourceCacheMgr inTestResources = new ResourceCacheMgr(this.testDef, new Ref(""));
         fhirClientForFixtures = new FhirClient().setResourceCacheMgr(inTestResources);
+    }
+
+    public TestEngine(File testDef, URI sut, TestScriptDebugState state) {
+       this(testDef, sut);
+       this.testScriptDebugState = state;
     }
 
     // used for evaluation including in the Inspector
@@ -482,12 +492,19 @@ public class TestEngine  {
     private void doSetup() {
         boolean reportAsConditional = false;  // upgrade this when conditional execution comes to setup
         if (testScript.hasSetup()) {
+            if (hasDebugState()) {
+                pauseIfBreakpoint("setup", 0, null); // There is only one TestScript.Setup so parent index is always 0
+            }
             TestScript.TestScriptSetupComponent comp = testScript.getSetup();
             ValE fVal = new ValE(engineVal).setMsg("Setup");
             TestReport.TestReportSetupComponent setupReportComponent = testReport.getSetup();
             if (comp.hasAction()) {
                 String typePrefix = "setup.action";
+                int actionIndex = 0;
                 for (TestScript.SetupActionComponent action : comp.getAction()) {
+                    if (hasDebugState()) {
+                        pauseIfBreakpoint("setup", 0, actionIndex);
+                    }
                     TestReport.SetupActionComponent actionReportComponent = setupReportComponent.addAction();
                     if (invalidAction(action, actionReportComponent, fVal))
                         return;
@@ -521,6 +538,7 @@ public class TestEngine  {
                     }
                     if (hasError())
                         return;
+                    actionIndex++;
                 }
             }
         }
@@ -614,6 +632,11 @@ public class TestEngine  {
             try {
                 int testCounter = 1;
                 for (TestScript.TestScriptTestComponent testComponent : testScript.getTest()) {
+                    int testIndex = testScript.getTest().indexOf(testComponent);
+                    System.out.println(String.format(" -------------------------------- %d", testIndex));
+                    if (hasDebugState()) {
+                        pauseIfBreakpoint("test", testIndex, null);
+                    }
                     String testName = testComponent.getName();
                     if (testName == null || testName.equals(""))
                         testName = "Test" + testCounter;
@@ -621,10 +644,10 @@ public class TestEngine  {
                     ValE tVal = new ValE(fVal).setMsg(testName);
                     TestReport.TestReportTestComponent testReportComponent = testReport.addTest();
 
-
                     //
                     //  handle modifier extensions
                     //
+
                     List<Extension> extensions = testComponent.getModifierExtension();
                     for (Extension extension : extensions ) {
                         if (!extension.hasUrl()) {
@@ -646,8 +669,6 @@ public class TestEngine  {
                     }
 
                     doTestPart(testComponent, testReportComponent, testReport, false);
-
-
                 }
             } catch (Throwable t) {
                 String msg = t.getMessage();
@@ -790,11 +811,18 @@ public class TestEngine  {
     }
 
     private boolean doTestPart(TestScript.TestScriptTestComponent testScriptElement, TestReport.TestReportTestComponent testReportComponent, TestReport testReport, boolean reportAsConditional) {
+        int testIndex = testScript.getTest().indexOf(testScriptElement);
         ValE fVal = new ValE(engineVal).setMsg("Test");
         boolean result = true;
+
         if (testScriptElement.hasAction()) {
             String typePrefix = "contained.action";
+            int testPartIndex = 0;
             for (TestScript.TestActionComponent action : testScriptElement.getAction()) {
+                System.out.println(String.format("%s %d:%d state is null? %s", testScriptElement.getName(), testIndex, testPartIndex, hasDebugState()));
+                if (hasDebugState()) {
+                    pauseIfBreakpoint("test", testIndex, testPartIndex);
+                }
                 TestReport.TestActionComponent actionReportComponent = testReportComponent.addAction();
                 if (invalidAction(action, actionReportComponent, fVal))
                     return false;
@@ -827,9 +855,29 @@ public class TestEngine  {
                         return false;
                     }
                 }
+                testPartIndex++;
             }
         }
         return result;
+    }
+
+    private void pauseIfBreakpoint(String parentType, Integer parentIndex, Integer childPartIndex) {
+        String breakpointIndex = String.format("%s%d", parentType, parentIndex);
+        if (childPartIndex != null) {
+            breakpointIndex += String.format(".%d", childPartIndex);
+        }
+        if (testScriptDebugState.getBreakpointSet().contains(breakpointIndex)) {
+            testScriptDebugState.getResume().set(false);
+            testScriptDebugState.getSession().getAsyncRemote().sendText("{\"messageType\":\"breakpoint-hit\",\"breakpointIndex\":\"" + breakpointIndex + "\",\"testReport\":" + getModularEngine().reportsAsJson()  + "}");
+            synchronized (testScriptDebugState.getLock()) {
+                while (! testScriptDebugState.getResume().get()) {
+                    try {
+                        testScriptDebugState.getLock().wait(); // Release the lock and wait for getResume to be True
+                    } catch (InterruptedException ie) {
+                    }
+                }
+            }
+        }
     }
 
     private void reportParsingError(TestReport.TestReportTestComponent testReportComponent, String message) {
@@ -1205,6 +1253,10 @@ public class TestEngine  {
         return this;
     }
 
+    public ModularEngine getModularEngine() {
+        return modularEngine;
+    }
+
     public String getTestScriptName() {
         return testScriptName;
     }
@@ -1219,5 +1271,9 @@ public class TestEngine  {
 
     public String getTestCollection() {
         return testCollection;
+    }
+
+    public boolean hasDebugState() {
+        return testScriptDebugState != null;
     }
 }

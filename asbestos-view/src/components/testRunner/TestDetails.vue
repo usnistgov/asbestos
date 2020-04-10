@@ -50,7 +50,7 @@
             <li v-for="(action, actioni) in script.action"
                 v-bind:class="{
                     'action-margins': true,
-                    'breakpoint-indicator': showBreakpointIndicator(testScriptIndex, testIndex, actioni),
+                    'breakpoint-indicator': showBreakpointIndicator(testScriptIndex, testType, testIndex, actioni),
                 }"
                  :key="'Action' + actioni">
                 <div v-if="setImportComponentName(action)">
@@ -59,20 +59,20 @@
                         <action-details
                                 :script="caction"
                                 :report="componentReportActions ? componentReportActions[cactioni] : null"
-                                :debug-title="debugTitle(testScriptIndex, testIndex, actioni)"
+                                :debug-title="debugTitle(testScriptIndex, testType, testIndex, actioni)"
                                 @onStatusMouseOver="hoverActionIndex = actioni"
                                 @onStatusMouseLeave="hoverActionIndex = -1"
-                                @onStatusClick="toggleBreakpointIndex(testScriptIndex, testIndex, actioni)"></action-details>
+                                @onStatusClick="toggleBreakpointIndex(testScriptIndex, testType, testIndex, actioni)"></action-details>
                     </div>
                 </div>
                 <div v-else>
                     <action-details
                         :script="action"
                         :report="report && report.action ? report.action[actioni] : null"
-                        :debug-title="debugTitle(testScriptIndex, testIndex, actioni)"
+                        :debug-title="debugTitle(testScriptIndex, testType, testIndex, actioni)"
                         @onStatusMouseOver="hoverActionIndex = actioni"
                         @onStatusMouseLeave="hoverActionIndex = -1"
-                        @onStatusClick="toggleBreakpointIndex(testScriptIndex, testIndex, actioni)"
+                        @onStatusClick="toggleBreakpointIndex(testScriptIndex, testType, testIndex, actioni)"
                     >
                     </action-details>
                 </div>
@@ -100,30 +100,30 @@
             toggleDisplay() {
                 this.display = !this.display
             },
-            toggleBreakpointIndex(testScriptIndex, testIndex, actionIndex) {
+            toggleBreakpointIndex(testScriptIndex, testType, testIndex, actionIndex) {
                 // console.log("enter toggleBreakpointIndex")
-                if (! this.$store.getters.hasBreakpoint({testScriptIndex: testScriptIndex, breakpointIndex: testIndex + "." + actionIndex})) {
-                    this.hoverActionIndex = actionIndex
+                let obj = {testScriptIndex: testScriptIndex, breakpointIndex: testType + testIndex + "." + actionIndex}
+                if (! this.$store.getters.hasBreakpoint(obj)) {
+                     this.hoverActionIndex = actionIndex // Restore the hoverActionIndex when toggle on the same item goes from on(#)-off(-1)-on(#)
                     // console.log("calling dispatch" + testScriptIndex + " breakpointIndex: " + testIndex + "." + actionIndex)
-                    this.$store.dispatch('addBreakpoint', {testScriptIndex: testScriptIndex, breakpointIndex: testIndex + "." + actionIndex})
+                    this.$store.dispatch('addBreakpoint', obj)
+
                 } else {
                     this.hoverActionIndex = -1 // Immediately remove the debug indicator while the mouse hover is still active but without having to wait for the mouseLeave event
                    // remove breakpoint
                    //  console.log("calling removeBreakpoint dispatch" + testScriptIndex + " breakpointIndex: " + testIndex + "." + actionIndex)
-                    this.$store.dispatch('removeBreakpoint', {testScriptIndex: testScriptIndex, breakpointIndex: testIndex + "." + actionIndex})
+                    this.$store.dispatch('removeBreakpoint', obj)
                 }
             },
-            debugTitle(testScriptIndex, testIndex, actionIndex) {
-                if (this.$store.getters.hasBreakpoint({testScriptIndex: testScriptIndex, breakpointIndex: testIndex + "." + actionIndex})) {
-                    return "Remove breakpoint"
-                } else {
-                    return "Set breakpoint"
-                }
+            debugTitle(testScriptIndex, testType, testIndex, actionIndex) {
+                let obj = {testScriptIndex: testScriptIndex, breakpointIndex: testType + testIndex + "." + actionIndex}
+                return this.$store.getters.getDebugTitle(obj);
             },
-            showBreakpointIndicator(testScriptIndex, testIndex, actionIndex) {
-                return this.$store.getters.hasBreakpoint({testScriptIndex: testScriptIndex, breakpointIndex: testIndex + "." + actionIndex})
-                    || this.hoverActionIndex === actionIndex
-            }
+            showBreakpointIndicator(testScriptIndex, testType, testIndex, actionIndex) {
+                let obj = {testScriptIndex: testScriptIndex, breakpointIndex: testType + testIndex + "." + actionIndex}
+                return this.$store.getters.hasBreakpoint(obj) || this.hoverActionIndex === actionIndex
+            },
+
         },
         computed: {
             scriptConditional() { // TestScript representing conditional
@@ -167,7 +167,7 @@
             'script', 'report',
             'scriptContained', 'reportContained', // contained section of the TestScript and TestReport
             'label',
-            'testScriptIndex', 'testIndex',
+            'testScriptIndex', 'testIndex', 'testType',
         ],
         components: {
             ActionDetails, ScriptDetailsContained, TestStatusEventWrapper
