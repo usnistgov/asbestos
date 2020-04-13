@@ -16,13 +16,13 @@
                                            @onStatusClick="$emit('onStatusClick')"
                 > </test-status-event-wrapper>
 
-                <span v-if="this.script.operation" class="selectable">
+                <span v-if="this.script.operation" class="has-cursor">
                     {{ this.operationType(this.script.operation) }}:
                 </span>
                 <span v-else>
-                    <span class="selectable">assert: </span>
+                    <span class="has-cursor">assert: </span>
                 </span>
-                <span class="selectable">
+                <span class="has-cursor">
                     {{ description }}
                 </span>
             </span>

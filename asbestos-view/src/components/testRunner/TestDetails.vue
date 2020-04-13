@@ -24,7 +24,7 @@
                 <img src="../../assets/arrow-right.png"/>
             </span>
 
-            <span>
+            <span class="has-cursor">
                 <span v-if="label">{{label}}: </span>
                 <span v-else-if="isConditional" class="bold">If: </span>
 <!--                <span v-else class="bold">Test: </span>-->
@@ -69,7 +69,7 @@
 <!--                    </div>-->
 <!--                </div>-->
                 </div>
-                <div v-else>
+                <div v-else class="has-cursor">
                     <action-details
                         :script="action"
                         :report="report && report.action ? report.action[actioni] : null"
