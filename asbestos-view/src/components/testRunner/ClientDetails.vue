@@ -1,4 +1,4 @@
-<template>
+<template>  <!-- once for each client test-->
     <div v-if="testScript" class="align-left test-margins">
 
         <script-status v-if="!statusRight" :status-right="statusRight" :name="testId"> </script-status>
@@ -18,7 +18,7 @@
 
 
         <div v-if="selected === eventId">
-            <router-view></router-view>
+            <router-view></router-view>  <!-- eval-details -->
         </div>
     </div>
 </template>
@@ -135,6 +135,6 @@ import ScriptStatus from "./ScriptStatus";
         /*margin-left: 5px;*/
         /*margin-right: 15px;*/
         cursor: pointer;
-        text-decoration: underline;
+        /*text-decoration: underline;*/
     }
 </style>

@@ -63,12 +63,12 @@
 
                 <span v-if="eventId" class="selectable" @click="toggleEventDisplayed()">Inspect</span>
                 <span v-if="eventDisplayed && eventId">
-                    <log-item
+                    <InspectEvent
                             :sessionId="$store.state.base.session"
                             :channelId="$store.state.base.channelId"
                             :eventId="eventId"
                             :noNav="true">
-                    </log-item>
+                    </InspectEvent>
                 </span>
             </div>
 
@@ -100,7 +100,7 @@
 </template>
 
 <script>
-    import LogItem from "../logViewer/LogItem"
+    import InspectEvent from "../logViewer/InspectEvent"
     import ScriptDisplay from "./ScriptDisplay"
     import VueMarkdown from 'vue-markdown'
     import colorizeTestReports from "../../mixins/colorizeTestReports";
@@ -205,7 +205,7 @@
         ],
         components: {
             ScriptDisplay,
-            LogItem,
+            InspectEvent,
             VueMarkdown,
             TestStatusEventWrapper
         },

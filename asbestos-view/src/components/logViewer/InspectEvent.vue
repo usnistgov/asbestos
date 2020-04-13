@@ -287,7 +287,7 @@
             LogAnalysisReport,
             EvalDetails: () => import ('../testRunner/EvalDetails.vue')
         },
-        name: "LogItem"
+        name: "InspectEvent"
     }
 </script>
 

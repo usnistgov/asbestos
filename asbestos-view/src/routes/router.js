@@ -10,7 +10,7 @@ import ChannelView from "../components/channelEditor/ChannelView";
 import LogsView from "../components/LogsView"
 //import ChannelLogList from "../components/ChannelLogList"
 import LogList from "../components/logViewer/LogList"
-import LogItem from "../components/logViewer/LogItem"
+import LogItem from "../components/logViewer/InspectEvent"
 import TestCollection from "../components/testRunner/TestCollection"
 import TestOrEvalDetails from "../components/testRunner/TestOrEvalDetails"
 import EvalDetails from "../components/testRunner/EvalDetails"

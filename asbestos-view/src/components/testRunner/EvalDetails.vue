@@ -3,35 +3,38 @@
         <div v-if="script && report" class="script">
             <!--   add SETUP here  -->
             <div>
-                <span v-if="eventDisplayed">
-                    <img src="../../assets/arrow-down.png" @click.self="toggleEventDisplayed()">
+                <span v-if="inspectorOpen">
+                    <img src="../../assets/arrow-down.png" @click.self="toggleInspectorOpen()">
                 </span>
                 <span v-else>
                     <span v-if="!noInspectLabel">
-                        <img src="../../assets/arrow-right.png" @click.self="toggleEventDisplayed()">
+                        <img src="../../assets/arrow-right.png" @click.self="toggleInspectorOpen()">
                     </span>
                 </span>
-                <span v-if="!noInspectLabel" class="selectable" @click.self="toggleEventDisplayed()">Inspect</span>
-                <span v-if="eventDisplayed">
-                        <log-item
+
+                <span v-if="!noInspectLabel" class="selectable" @click.self="toggleInspectorOpen()">Inspect</span>
+                <span v-if="inspectorOpen">
+                        <inspect-event
                                 :sessionId="sessionId"
                                 :channelId="channelId"
                                 :eventId="eventId"
                                 :noNav="true">
-                        </log-item>
+                        </inspect-event>
                     </span>
             </div>
+
+
             <div v-for="(test, testi) in tests" class="test-part"
-                 :key="'Eval' + testi">
-                <div v-bind:class="testResult(testi) + ((colorful)?'':'plain-detail')">{{test.description}}</div>
+                 :key="'Eval' + testi">    <!--   v-bind:class="testResult(testi) + ((colorful)?'':'plain-detail')"   -->
+                <div >{{test.description}}</div>
 
                 <!-- actions will be asserts only-->
                 <div v-for="(action, actioni) in actions(testi)" class="assert-part"
                      :key="'Eval' + testi + 'Action' + actioni">
 
                     <eval-action-details
-                            :script="testScript"
-                            :report="testReport"
+                            :script="action"
+                            :report="reportAction(testi, actioni)"
                     > </eval-action-details>
 
 
@@ -89,7 +92,7 @@
 <script>
     import errorHandlerMixin from '../../mixins/errorHandlerMixin'
     import colorizeTestReports from "../../mixins/colorizeTestReports";
-    import LogItem from "../logViewer/LogItem"
+    import InspectEvent from "../logViewer/InspectEvent"
     //import TestStatus from "./TestStatus";
     import EvalActionDetails from "./EvalActionDetails";
 
@@ -102,12 +105,15 @@
                 selectedTestIndex: null,
                 passClass: 'pass',
                 failClass: 'fail',
-                eventDisplayed: false,
+                inspectorOpen: false,
             }
         },
         methods: {
-            toggleEventDisplayed() {
-                this.eventDisplayed = !this.eventDisplayed
+            reportAction(testi, actioni) {
+                return this.report.test[testi].action[actioni]
+            },
+            toggleInspectorOpen() {
+                this.inspectorOpen = !this.inspectorOpen
             },
             assertMessage(testIndex, actionIndex) {
                 if (this.testReport  &&  actionIndex < this.testReport.test[testIndex].action.length) {
@@ -138,31 +144,31 @@
             assertScript(testIndex, actionIndex) {
                 return this.testScript.test[testIndex].action[actionIndex].assert
             },
-            assertDesc(testIndex, actionIndex) {
-                const rawDesc = this.assertScript(testIndex, actionIndex).description
-                if (!rawDesc.includes("|"))
-                    return rawDesc
-                const elements = rawDesc.split("|")
-                const msg = elements[0]
-                return msg
-            },
-            assertRef(testIndex, actionIndex) {
-                const rawDesc = this.assertScript(testIndex, actionIndex).description
-                if (!rawDesc.includes("|"))
-                    return ''
-                const elements = rawDesc.split("|")
-                const assertId = elements[1]
-                return `Reference: ${this.assertProfile} - ${this.assertMsg(assertId)}\n`
-            },
-            selectAssert(testIndex, assertIndex) {
-                if (this.selectedTestIndex === testIndex && this.selectedAssertIndex === assertIndex) {
-                    this.selectedTestIndex = null
-                    this.selectedAssertIndex = null
-                } else {
-                    this.selectedTestIndex = testIndex
-                    this.selectedAssertIndex = assertIndex
-                }
-            },
+            // assertDesc(testIndex, actionIndex) {
+            //     const rawDesc = this.assertScript(testIndex, actionIndex).description
+            //     if (!rawDesc.includes("|"))
+            //         return rawDesc
+            //     const elements = rawDesc.split("|")
+            //     const msg = elements[0]
+            //     return msg
+            // },
+            // assertRef(testIndex, actionIndex) {
+            //     const rawDesc = this.assertScript(testIndex, actionIndex).description
+            //     if (!rawDesc.includes("|"))
+            //         return ''
+            //     const elements = rawDesc.split("|")
+            //     const assertId = elements[1]
+            //     return `Reference: ${this.assertProfile} - ${this.assertMsg(assertId)}\n`
+            // },
+            // selectAssert(testIndex, assertIndex) {
+            //     if (this.selectedTestIndex === testIndex && this.selectedAssertIndex === assertIndex) {
+            //         this.selectedTestIndex = null
+            //         this.selectedAssertIndex = null
+            //     } else {
+            //         this.selectedTestIndex = testIndex
+            //         this.selectedAssertIndex = assertIndex
+            //     }
+            // },
             operationOrAssertion(testi, actioni) {
                 const action = this.script.test[testi].action[actioni]
                 return action.operation ? `Operation: ${this.operationType(action.operation)}` : `Assert: ${this.assertionDescription(action.assert)}`
@@ -185,14 +191,14 @@
             actions(testIndex) {
                 return this.script.test[testIndex].action === undefined ? [] : this.script.test[testIndex].action
             },
-            scriptAction(testi, actioni) {
-                return this.script.test[testi].action[actioni]
-            },
-            reportAction(testi, actioni) {
-                if (!this.report)
-                    return null
-                return this.report.test[testi].action[actioni]
-            },
+            // scriptAction(testi, actioni) {
+            //     return this.script.test[testi].action[actioni]
+            // },
+            // reportAction(testi, actioni) {
+            //     if (!this.report)
+            //         return null
+            //     return this.report.test[testi].action[actioni]
+            // },
             assertMsg(assertId) {
                 return this.$store.state.testRunner.testAssertions[assertId]
             },
@@ -233,18 +239,18 @@
             tests() {
                 return this.script.test
             },
-            current() {
-                return this.$store.state.base.testCollectionDetails.find(item => {
-                    return item.name === this.testId
-                })
-            },
+            // current() {
+            //     return this.$store.state.base.testCollectionDetails.find(item => {
+            //         return item.name === this.testId
+            //     })
+            // },
             testScript() {
                 return this.$store.state.testRunner.testScripts[this.testId]
             },
             testReport() {
                 return this.$store.state.testRunner.clientTestResult[this.testId][this.eventId]
             },
-            testReports() {  // see watch
+            testReports() {  // see watch of the same name
                 return this.$store.state.testRunner.testReports[this.testId]
             }
         },
@@ -267,7 +273,7 @@
         ],
         components: {
             //EvalReportAssert
-            LogItem,
+            InspectEvent,
            // TestStatus,
             EvalActionDetails
         },

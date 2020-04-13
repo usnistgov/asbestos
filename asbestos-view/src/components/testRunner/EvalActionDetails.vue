@@ -1,14 +1,11 @@
 <template>
     <div>
+        <div v-if="scriptAction && reportAction">
         <div @click.self="select()" v-bind:class="{
-                                    pass: result === 'pass' && colorful,
-                                    'pass-plain': result === 'pass' && !colorful,
-                                    fail: result === 'fail' && colorful,
-                                    'fail-plain': result === 'fail' && !colorful,
-                                    error: result === 'error' && colorful,
-                                    'error-plain': result === 'error' && !colorful,
-                                    warning: result === 'warning' && colorful,
-                                    'not-run': result === 'not-run'  && colorful
+                                    'evalpass': result === 'pass',
+                                    'evalfail': result === 'fail',
+                                    'evalerror': result === 'error',
+                                    'evalnotrun': result === 'not-run'
                             }">
 
             <test-status v-if="!statusRight"
@@ -16,7 +13,7 @@
                          :report="report"
             > </test-status>
 
-            <span class="selectable" @click.self="select()">Assert:  {{ description }}</span>
+            <span class="selectable" @click.self="select()"> {{ description }}</span>
 
             <span v-if="open">
                 <img src="../../assets/arrow-down.png" @click.self="select()">
@@ -57,6 +54,7 @@
                 </span>
             </div>
         </div>
+        </div>
     </div>
 </template>
 
@@ -87,6 +85,12 @@
             }
         },
         computed: {
+            scriptAction() {
+                return this.script;
+            },
+            reportAction() {
+                return this.report;
+            },
             message() {
                 return this.report.assert.message
             },
@@ -115,5 +119,24 @@
 </script>
 
 <style scoped>
-
+    .evalpass {
+        text-align: left;
+        /*border-top: 1px solid black;*/
+        cursor: pointer;
+    }
+    .evalfail {
+        text-align: left;
+        /*border-top: 1px solid black;*/
+        cursor: pointer;
+    }
+    .evalerror {
+        text-align: left;
+        /*border-top: 1px solid black;*/
+        cursor: pointer;
+    }
+    .evalnotrun {
+        text-align: left;
+        /*border-top: 1px solid black;*/
+        cursor: pointer;
+    }
 </style>

@@ -245,7 +245,7 @@
     }
     .selectable {
         cursor: pointer;
-        text-decoration: underline;
+        /*text-decoration: underline;*/
     }
     .pointer-cursor {
         cursor: pointer;
