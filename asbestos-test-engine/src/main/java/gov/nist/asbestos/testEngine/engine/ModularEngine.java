@@ -55,7 +55,7 @@ public class ModularEngine {
     }
 
     public String reportsAsJson() {
-        return new ModularLogs(reports).asJson();
+        return new ModularReports(reports).asJson();
     }
 
     public ModularEngine setSaveLogs(boolean save) {

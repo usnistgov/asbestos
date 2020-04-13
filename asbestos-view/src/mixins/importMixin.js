@@ -7,7 +7,7 @@ export default {
         }
     },
     methods: {
-        setComponentName(actionReport) {
+        setComponentName(actionScript, actionReport) {
             if (actionReport === null) return null;
             const moduleId = this.getModuleIdFromReport(actionReport);
             if (!moduleId) return null;

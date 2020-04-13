@@ -17,10 +17,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class ModularLogs {
+public class ModularReports {
     private Map<String, String> reports = new HashMap<>();  // name => TestReport json
 
-    public ModularLogs(EC ec, String channelId, String testCollection, String testName) throws IOException {
+    public ModularReports(EC ec, String channelId, String testCollection, String testName) throws IOException {
         File base = ec.getTestLogDir(channelId, testCollection, testName);
 
         addReport(new File(base, "TestReport.json"));
@@ -33,11 +33,11 @@ public class ModularLogs {
         }
     }
 
-    public ModularLogs(Map<String, String> reports) {
+    public ModularReports(Map<String, String> reports) {
         this.reports = reports;
     }
 
-    public ModularLogs() {
+    public ModularReports() {
 
     }
 

@@ -62,29 +62,52 @@ public class ModularScripts {
         String json = ProxyBase.encode(testScript, Format.JSON);
         scripts.put(testScript.getName(), json);
 
+        TestScript.TestScriptSetupComponent setup = testScript.getSetup();
+        if (setup != null ) {
+            for (TestScript.SetupActionComponent action : setup.getAction()) {
+                handleImportScripts(testDef, testId, action);
+            }
+        }
+
+
         for (TestScript.TestScriptTestComponent test : testScript.getTest()) {
             for (TestScript.TestActionComponent action: test.getAction()) {
-                if (!action.hasOperation())
-                    continue;
-                TestScript.SetupActionOperationComponent op = action.getOperation();
-                if (!op.hasModifierExtension())
-                    continue;
-                for (Extension importExtension : op.getModifierExtension()) {
-                    if (!importExtension.getUrl().equals("https://github.com/usnistgov/asbestos/wiki/TestScript-Import"))
-                        continue;
-                    for (Extension componentExtension : importExtension.getExtension()) {
-                        if (componentExtension.getUrl().equals("component")) {
-                            String relativePath = componentExtension.getValue().toString();
-                            String componentPath = testDef.getPath() + File.separator + relativePath;
-                            File componentFile = new File(componentPath);
-                            TestScript componentScript = (TestScript) ProxyBase.parse(componentFile);
-                            String componentId = fileName(componentFile);
-                            String fullComponentId = testId + File.separator + componentId;
-                            componentScript.setName(fullComponentId);
-                            String componentJson = ProxyBase.encode(componentScript, Format.JSON);
-                            scripts.put(fullComponentId, componentJson);
-                        }
-                    }
+                handleImportScripts(testDef, testId, action);
+            }
+        }
+    }
+
+    void handleImportScripts(File testDef, String testId, TestScript.SetupActionComponent action) {
+        if (!action.hasOperation())
+            return;
+        TestScript.SetupActionOperationComponent op = action.getOperation();
+        handleImportAction(testDef, testId, op);
+    }
+
+    void handleImportScripts(File testDef, String testId, TestScript.TestActionComponent action) {
+        if (!action.hasOperation())
+            return;
+        TestScript.SetupActionOperationComponent op = action.getOperation();
+        handleImportAction(testDef, testId, op);
+    }
+
+    private void handleImportAction(File testDef, String testId, TestScript.SetupActionOperationComponent op) {
+        if (!op.hasModifierExtension())
+            return;
+        for (Extension importExtension : op.getModifierExtension()) {
+            if (!importExtension.getUrl().equals("https://github.com/usnistgov/asbestos/wiki/TestScript-Import"))
+                continue;
+            for (Extension componentExtension : importExtension.getExtension()) {
+                if (componentExtension.getUrl().equals("component")) {
+                    String relativePath = componentExtension.getValue().toString();
+                    String componentPath = testDef.getPath() + File.separator + relativePath;
+                    File componentFile = new File(componentPath);
+                    TestScript componentScript = (TestScript) ProxyBase.parse(componentFile);
+                    String componentId = fileName(componentFile);
+                    String fullComponentId = testId + File.separator + componentId;
+                    componentScript.setName(fullComponentId);
+                    String componentJson = ProxyBase.encode(componentScript, Format.JSON);
+                    scripts.put(fullComponentId, componentJson);
                 }
             }
         }

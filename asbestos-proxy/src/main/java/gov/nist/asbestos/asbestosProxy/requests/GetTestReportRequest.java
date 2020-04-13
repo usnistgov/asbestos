@@ -1,25 +1,11 @@
 package gov.nist.asbestos.asbestosProxy.requests;
 
-import com.google.gson.Gson;
 import gov.nist.asbestos.asbestosProxy.servlet.ChannelConnector;
-import gov.nist.asbestos.client.Base.ProxyBase;
-import gov.nist.asbestos.client.client.Format;
 import gov.nist.asbestos.sharedObjects.ChannelConfig;
-import gov.nist.asbestos.testEngine.engine.ModularLogs;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.exception.ExceptionUtils;
+import gov.nist.asbestos.testEngine.engine.ModularReports;
 import org.apache.log4j.Logger;
-import org.hl7.fhir.r4.model.BaseResource;
-import org.hl7.fhir.r4.model.Resource;
-import org.hl7.fhir.r4.model.TestReport;
-import org.hl7.fhir.r4.model.TestScript;
-import org.junit.Test;
 
-import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.List;
 
 // 0 - empty
 // 1 - appContext
@@ -57,12 +43,12 @@ public class GetTestReportRequest {
         if (channelConfig == null) throw new Error("Channel does not exist");
 
         try {
-            String json = new ModularLogs(request.ec, channelId, testCollection, testName).asJson();
+            String json = new ModularReports(request.ec, channelId, testCollection, testName).asJson();
             Returns.returnString(request.resp, json);
             log.info("ModuleLogs:");
             log.info(json);
         } catch (IOException e) {
-            Returns.returnString(request.resp, new ModularLogs().asJson());
+            Returns.returnString(request.resp, new ModularReports().asJson());
         }
 
 //        //File testLog = request.ec.getTestLog(channelId, testCollection, testName);

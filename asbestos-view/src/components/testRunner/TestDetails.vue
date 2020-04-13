@@ -52,17 +52,22 @@
                     'breakpoint-indicator': isBreakpoint(actioni),
                 }"
                  :key="'Action' + actioni">
-                <div v-if="setComponentName(report && report.action ? report.action[actioni] : null)">
-                    <div v-for="(caction, cactioni) in componentScriptActions"
-                         :key="'CAction' + cactioni">   <!--   class="action-margins"   -->
-                        <action-details
-                                :script="caction"
-                                :report="componentReportActions ? componentReportActions[cactioni] : null"
-                                :debug-title="debugTitle(actioni)"
-                                @onStatusMouseOver="hoverActionIndex = actioni"
-                                @onStatusMouseLeave="hoverActionIndex = -1"
-                                @onStatusClick="toggleBreakpointIndex(actioni)"></action-details>
-                    </div>
+                <div v-if="containsImport(action)">
+                    <component-script
+                        :action-script="action"
+                        :action-report="report && report.action ? report.action[actioni] : null"> </component-script>
+<!--                <div v-if="setComponentName(action, report && report.action ? report.action[actioni] : null)">-->
+<!--                    <div v-for="(caction, cactioni) in componentScriptActions"-->
+<!--                         :key="'CAction' + cactioni">   &lt;!&ndash;   class="action-margins"   &ndash;&gt;-->
+<!--                        <action-details-->
+<!--                                :script="caction"-->
+<!--                                :report="componentReportActions ? componentReportActions[cactioni] : null"-->
+<!--                                :debug-title="debugTitle(actioni)"-->
+<!--                                @onStatusMouseOver="hoverActionIndex = actioni"-->
+<!--                                @onStatusMouseLeave="hoverActionIndex = -1"-->
+<!--                                @onStatusClick="toggleBreakpointIndex(actioni)"></action-details>-->
+<!--                    </div>-->
+<!--                </div>-->
                 </div>
                 <div v-else>
                     <action-details
@@ -85,21 +90,32 @@
     import ScriptDetailsContained from "./ScriptDetailsContained";
     import colorizeTestReports from "../../mixins/colorizeTestReports";
    // import TestStatus from "./TestStatus";
-    import importMixin from "../../mixins/importMixin";
+   // import importMixin from "../../mixins/importMixin";
     import TestStatusEventWrapper from "./TestStatusEventWrapper";
+    import ComponentScript from "./ComponentScript";
 
     export default {
         data() {
             return {
                 displayOpen: false,
                 hoverActionIndex: -1,
-                breakpointIndex: [],
+                breakpointIndex: [],  // sunil - this is present here and in ComponentScript.vue - should be in store
             }
         },
         methods: {
+            containsImport(action) {
+                if (!action.operation) return false;
+                if (!action.operation.modifierExtension) return false;
+                let hasImport = false;
+                action.operation.modifierExtension.forEach(extension => {
+                    if (extension.url === 'https://github.com/usnistgov/asbestos/wiki/TestScript-Import') hasImport = true
+                })
+                return hasImport
+            },
             toggleDisplay() {
                 this.displayOpen = !this.displayOpen
             },
+            // sunil - these  methods are present here and in ComponentScript.vue.  Should be store getters so they can be shared
             toggleBreakpointIndex(actionIndex) {
                 if (this.breakpointIndex[actionIndex]) {
                     this.hoverActionIndex = -1
@@ -173,8 +189,12 @@
             ActionDetails,
             ScriptDetailsContained,
             TestStatusEventWrapper,
+            ComponentScript,
         },
-        mixins: [colorizeTestReports, importMixin],
+        mixins: [
+            colorizeTestReports,
+        //    importMixin
+        ],
         name: "TestDetails"
     }
 </script>
