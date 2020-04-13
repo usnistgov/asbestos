@@ -51,7 +51,14 @@ import ActionDetails from "./ActionDetails";
             },
         },
         computed: {
+            // if a component is used multiple times then the componentName is the same and the componentId is different
             componentName() {
+                if (this.actionReport === null) return null;
+                const moduleName = this.moduleName;
+                if (!moduleName) return null;
+                return this.testId + path.sep + moduleName;
+            },
+            componentId() {
                 if (this.actionReport === null) return null;
                 const moduleId = this.moduleId;
                 if (!moduleId) return null;
@@ -68,6 +75,17 @@ import ActionDetails from "./ActionDetails";
                 })
                 return moduleId;
             },
+            moduleName() {
+                if (!this.actionReport) return null;
+                if (!this.actionReport.operation) return null;
+                if (!this.actionReport.operation.extension) return null;
+                let moduleName = null;
+                this.actionReport.operation.extension.forEach(extension => {
+                    if (extension.url === 'urn:moduleName')
+                        moduleName = extension.valueString;
+                })
+                return moduleName;
+            },
             scriptActions() {   // component has no setup and a single test
                 if (this.componentName === null) return null
                 const script = this.$store.state.testRunner.moduleTestScripts[this.componentName]
@@ -75,8 +93,8 @@ import ActionDetails from "./ActionDetails";
                 return script.test[0].action
             },
             reportActions() {  // component has no setup and a single test
-                if (this.componentName === null) return null
-                const report = this.$store.state.testRunner.moduleTestReports[this.componentName]
+                if (this.componentId === null) return null
+                const report = this.$store.state.testRunner.moduleTestReports[this.componentId]
                 if (!report || !report.test || !report.test[0]) return null
                 return report.test[0].action
             },

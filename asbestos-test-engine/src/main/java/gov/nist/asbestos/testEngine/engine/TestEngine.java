@@ -752,9 +752,12 @@ public class TestEngine  {
         modularEngine.add(testEngine1);
         testEngine1.runTest();
 
-        String moduleId = assignModuleId(simpleName(componentReference.getComponentRef()));
+        String moduleName = simpleName(componentReference.getComponentRef());
+        String moduleId = assignModuleId(moduleName);
         opReport.addExtension("urn:moduleId", new StringType(moduleId));
+        opReport.addExtension("urn:moduleName", new StringType(moduleName));
         testEngine1.getTestReport().addExtension("urn:moduleId", new StringType(moduleId));
+        testEngine1.getTestReport().addExtension("urn:moduleName", new StringType(moduleName));
 
         FixtureMgr innerFixtures = testEngine1.fixtureMgr;
         Map<String, FixtureComponent> outFixturesForComponent = new HashMap<>();

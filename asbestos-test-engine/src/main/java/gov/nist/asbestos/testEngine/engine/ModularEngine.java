@@ -6,6 +6,7 @@ import gov.nist.asbestos.client.client.FhirClient;
 import gov.nist.asbestos.simapi.validation.Val;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.log4j.Logger;
+import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.TestReport;
 
 import java.io.BufferedWriter;
@@ -72,10 +73,20 @@ public class ModularEngine {
         String channelId = getMainTestEngine().getChannelId();
         String testCollection = getMainTestEngine().getTestCollection();
         for (TestEngine engine : engines) {
-            String scriptName = stripExtension(engine.getTestScriptName());
-            String moduleName = first ? null : scriptName;
-
             TestReport report = engine.getTestReport();
+            String scriptName = stripExtension(engine.getTestScriptName());
+
+            // scriptReportName can be different from scriptName if same script (module) used more than once
+            String scriptReportName = scriptName;
+            if (report.hasExtension()) {
+                for (Extension e : report.getExtension()) {
+                    if ("urn:moduleId".equals(e.getUrl())) {
+                        scriptReportName = e.getValue().toString();
+                    }
+                }
+            }
+            String moduleName = first ? null : scriptReportName;
+
             report.setName(this.testName + (moduleName == null ? "" : File.separator + moduleName));
             String json = ProxyBase.getFhirContext().newJsonParser().setPrettyPrint(true).encodeResourceToString(report);
             reports.put(report.getName(), json);
