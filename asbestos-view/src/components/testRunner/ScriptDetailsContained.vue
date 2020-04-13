@@ -1,38 +1,36 @@
-<template>
+<template>   <!-- contained testscript holding conditional -->
     <span>
-<!--        <div v-if="script" >-->
-<!--            Conditional:-->
-<!--            <span v-if="script.description">-->
-<!--                {{ script.description }}-->
-<!--            </span>-->
-<!--        </div>-->
 
         <!-- Fixture, Variable, and setup stuff -->
-        <div v-if="script" class="script">
-            <div v-if="displayDetail">
-                <div v-for="(fixture, i) in script.fixture"
+        <div v-if="conditionScript" class="script">
+            <div v-if="displayOpen">
+
+                <!-- local fixtures -->
+                <div v-for="(fixture, i) in conditionScript.fixture"
                      :key="i">
                     <span class="name" >Fixture: </span>
                     <span class="value">{{ fixture.id }}</span>
                 </div>
-                <div v-for="(variable, i) in script.variable"
+
+                <!-- local variables -->
+                <div v-for="(variable, i) in conditionScript.variable"
                      :key="'Var' + i">
                     <span class="name" >Variable: </span>
                     <span class="value">{{ variable.name }}</span>
                 </div>
             </div>
 
-            <div v-if="script.setup && report && report.setup">
+            <div v-if="conditionScript.setup && conditionReport && conditionReport.setup">
                 <!-- don't need yet -->
             </div>
         </div>
 
-        <div v-if="script">
-            <div v-for="(test, testi) in script.test"
+        <div v-if="conditionScript">
+            <div v-for="(test, testi) in conditionScript.test"
                  :key="'Test' + testi">
                 <test-details-contained
-                        :script="script.test[testi]"
-                        :report="report ? report.test[testi] : null"
+                        :script="conditionScript.test[testi]"
+                        :report="conditionReport ? conditionReport.test[testi] : null"
                         :description="description(testi)"
                 ></test-details-contained>
 
@@ -51,7 +49,7 @@
     export default {
         data() {
             return {
-                displayDetail: false,  // display fixture, variable, setup stuff
+                displayOpen: true,  // start closed
             }
         },
         methods: {
@@ -70,7 +68,7 @@
         },
         mixins: [ errorHandlerMixin ],
         props: [
-            'script', 'report'  // TestScript and TestReport
+            'conditionScript', 'conditionReport'
         ],
         components: {
             TestDetailsContained,
@@ -92,24 +90,4 @@
 
 </style>
 <style>
-    /*
-    .test-margins {
-        margin-left: 20px;
-        margin-right: 20px;
-    }
-    .action-margins {
-        margin-left: 50px;
-        margin-right: 50px;
-    }
-    .conditional-margins {
-        margin-left: 40px;
-        margin-right: 40px;
-    }
-    .script-description-margins {
-        margin-left: 30px;
-        margin-right: 30px;
-    }
-
-     */
-
 </style>

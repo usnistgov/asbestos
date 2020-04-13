@@ -17,7 +17,7 @@
                          :report="report"
             > </test-status-event-wrapper>
 
-            <span v-if="display">
+            <span v-if="displayOpen">
                 <img src="../../assets/arrow-down.png">
             </span>
             <span v-else>
@@ -25,37 +25,36 @@
             </span>
 
             <span>
-                <span v-if="label" class="bold">{{label}}: </span>
-                <span v-else class="bold">Test: </span>
+                <span v-if="label">{{label}}: </span>
+                <span v-else-if="isConditional" class="bold">If: </span>
+<!--                <span v-else class="bold">Test: </span>-->
                 {{ description }}
             </span>
         </span>
 
-        <test-status-event-wrapper v-if="statusRight"
-                     :status-on-right="statusRight"
-                     :report="report"
-        > </test-status-event-wrapper>
-
-
-        <div v-if="isConditional" class="conditional-margins">
-            <div>
+        <div v-if="displayOpen &&  isConditional" class="conditional-margins">
+            <div>  <!-- enter contained test script with conditional test -->
                 <script-details-contained
-                        :script="scriptConditional"
-                        :report="reportConditional"
+                        :conditionScript="scriptConditional"
+                        :conditionReport="reportConditional"
                 > </script-details-contained>
             </div>
         </div>
 
-        <ul v-if="display" class="noListStyle">
+        <!--
+            (!isConditional && displayOpen) ==> default closed for most things
+            isConditional ==> then is displayed by default
+        -->
+        <ul v-if="isConditional || (!isConditional && displayOpen)" class="noListStyle">
             <li v-for="(action, actioni) in script.action"
                 v-bind:class="{
                     'action-margins': true,
                     'breakpoint-indicator': isBreakpoint(actioni),
                 }"
                  :key="'Action' + actioni">
-                <div v-if="setImportComponentName(report && report.action ? report.action[actioni] : null)">
-                    <div v-for="(caction, cactioni) in componentScriptActions" class="action-margins"
-                         :key="'CAction' + cactioni">
+                <div v-if="setComponentName(report && report.action ? report.action[actioni] : null)">
+                    <div v-for="(caction, cactioni) in componentScriptActions"
+                         :key="'CAction' + cactioni">   <!--   class="action-margins"   -->
                         <action-details
                                 :script="caction"
                                 :report="componentReportActions ? componentReportActions[cactioni] : null"
@@ -92,14 +91,14 @@
     export default {
         data() {
             return {
-                display: false,
+                displayOpen: false,
                 hoverActionIndex: -1,
                 breakpointIndex: [],
             }
         },
         methods: {
             toggleDisplay() {
-                this.display = !this.display
+                this.displayOpen = !this.displayOpen
             },
             toggleBreakpointIndex(actionIndex) {
                 if (this.breakpointIndex[actionIndex]) {
@@ -168,7 +167,7 @@
             'script', 'report',
             'scriptContained', 'reportContained', // contained section of the TestScript and TestReport
             'label',
-            'testScriptIndex', 'testIndex',
+            'testScriptIndex', 'testIndex',   // used by debugger
         ],
         components: {
             ActionDetails,

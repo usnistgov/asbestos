@@ -2,12 +2,22 @@
     <div>
         <div v-if="script">
             <span v-bind:class="{
-                'not-run': isNotRun,
-                pass : isPass,
-                error: isError,
-                fail: isFail}"  @click="toggleMessageDisplay()">
-                <span v-if="this.script.operation" class="name selectable">
-                    {{ this.operationType(this.script.operation) }}
+                'not-run-plain-detail': isNotRun,
+                'pass-plain-detail' : isPass,
+                'error-plain': isError,
+                'fail-plain-detail': isFail}"  @click.stop="toggleMessageDisplay()">
+
+                <test-status-event-wrapper v-if="!statusRight"
+                                           :status-on-right="statusRight"
+                                           :report="report"
+                                           :debug-title="debugTitle"
+                                           @onStatusMouseOver="$emit('onStatusMouseOver')"
+                                           @onStatusMouseLeave="$emit('onStatusMouseLeave')"
+                                           @onStatusClick="$emit('onStatusClick')"
+                > </test-status-event-wrapper>
+
+                <span v-if="this.script.operation" class="selectable">
+                    {{ this.operationType(this.script.operation) }}:
                 </span>
                 <span v-else>
                     <span class="selectable">assert: </span>
@@ -94,17 +104,18 @@
     import ScriptDisplay from "./ScriptDisplay"
     import VueMarkdown from 'vue-markdown'
     import colorizeTestReports from "../../mixins/colorizeTestReports";
+    import TestStatusEventWrapper from "./TestStatusEventWrapper";
 
     export default {
         data() {
             return {
                 // message: null,
                 displayMessage: false,
-                displayScript: false,
+                displayScript: true,
                 displayDetails: false,
                 status: [],   // testName => undefined, 'pass', 'fail', 'error'
                 eventLogUrl: null,
-                eventDisplayed: false,
+                eventDisplayed: true,
             }
         },
         methods: {
@@ -184,15 +195,19 @@
                       this.eventLogUrl = action.operation.detail
                   }
             },
+            startDisplayOpen: function(value) {
+                this.eventDisplayed = value;
+            }
         },
         props: [
             // parts representing a single action
-            'script', 'report',
+            'script', 'report', 'startDisplayOpen',
         ],
         components: {
             ScriptDisplay,
             LogItem,
-            VueMarkdown
+            VueMarkdown,
+            TestStatusEventWrapper
         },
         mixins: [colorizeTestReports],
         name: "ActionDetailsContained"

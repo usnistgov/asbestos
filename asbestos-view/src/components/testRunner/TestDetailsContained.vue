@@ -1,22 +1,23 @@
 <template>
     <div>
-        <div v-if="script">
-            <span v-bind:class="{
-                'not-run': isNotRun,
-                error: isError,
-                'condition-fail': isConditionFailed,
-                pass : isPass,
-                fail: isFail}"  class="test-margins" @click.stop="toggleConditionDisplay()">
-                <span v-if="hasOperation">
-                    <span class="bold">Condition Context: </span> <!--{{ description }}-->
-                </span>
-                <span v-else>
-                    <span class="bold">Condition: </span> <!--{{ description }}-->
-                </span>
-            </span>
+        <div v-if="script" class="conditional-margins">
+<!--            <span v-bind:class="{-->
+<!--                'not-run': isNotRun,-->
+<!--                error: isError,-->
+<!--                'condition-fail': isConditionFailed,-->
+<!--                pass : isPass,-->
+<!--                fail: isFail}"  class="test-margins" @click.stop="toggleDisplay()">-->
 
-            <div v-if="displayCondition" @click.stop="toggleThenClauseDisplay()">
-                <div v-for="(action, actioni) in script.action" class="action-margins"
+<!--                <span v-if="script.description">-->
+<!--                    <span class="bold">{{ script.description }} </span>-->
+<!--                </span>-->
+<!--                <span v-else>-->
+<!--                    <span class="bold">Then </span>-->
+<!--                </span>-->
+<!--            </span>-->
+
+            <div v-if="displayOpen" @click.stop="toggleDisplay()">
+                <div v-for="(action, actioni) in script.action"
                      :key="'Action' + actioni">
                     <action-details-contained
                             :script="action"
@@ -34,17 +35,13 @@
     export default {
         data() {
             return {
-                displayThenClause: false,
-                displayCondition: false,
+                displayOpen: true,  // start closed
             }
         },
         methods: {
-            toggleThenClauseDisplay() {
-                this.displayThenClause = !this.displayThenClause
+            toggleDisplay() {
+                this.displayOpen = !this.displayOpen
             },
-            toggleConditionDisplay() {
-                this.displayCondition = !this.displayCondition
-            }
         },
         computed: {
             hasOperation() {

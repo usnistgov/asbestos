@@ -4,7 +4,8 @@
 <!--            <vue-markdown>{{ description }}</vue-markdown>-->
 <!--        </div>-->
     <ul class="noTopMargin">
-        <li v-if="$store.state.testRunner.isClientTest && testScript">
+        <li v-if="$store.state.testRunner.isClientTest">
+            <div v-if="testScript">
                 <div class="instruction">
                     <vue-markdown>{{ testScript.description }}</vue-markdown>
                 </div>
@@ -24,6 +25,7 @@
                     </li>
                     </ul>
                 </div>
+            </div>
         </li>
         <li v-else>
             <script-details

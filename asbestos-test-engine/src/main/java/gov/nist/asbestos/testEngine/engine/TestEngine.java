@@ -650,6 +650,8 @@ public class TestEngine  {
                     //
                     //  handle modifier extensions
                     //
+
+                    boolean isConditional = false;
                     List<Extension> extensions = testComponent.getModifierExtension();
                     for (Extension extension : extensions ) {
                         if (!extension.hasUrl()) {
@@ -658,11 +660,12 @@ public class TestEngine  {
                         }
                         String url = extension.getUrl();
                         if (url.equals("https://github.com/usnistgov/asbestos/wiki/TestScript-Conditional")) {
+                            isConditional = true;
                             boolean conditionalResult = handleConditionalTest(testComponent, testReportComponent, extension);
                             if (conditionalResult) {
                                 doTestPart(testComponent, testReportComponent, testReport, false);
                             } else {
-                                reportSkip(testReportComponent);
+                                reportSkip(testReportComponent);   // for the then part
                             }
                         } else {
                             reportParsingError(testReportComponent, "Do not understand ModifierExtension " + url);
@@ -670,7 +673,8 @@ public class TestEngine  {
                         }
                     }
 
-                    doTestPart(testComponent, testReportComponent, testReport, false);
+                    if (!isConditional)
+                        doTestPart(testComponent, testReportComponent, testReport, false);
 
 
                 }

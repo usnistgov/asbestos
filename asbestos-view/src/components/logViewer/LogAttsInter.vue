@@ -38,7 +38,7 @@
     .container {
         position: relative;
         left: 15px;
-        /*display: grid;*/
+        /*displayOpen: grid;*/
         /*border: 1px solid black;*/
     }
     .container name {

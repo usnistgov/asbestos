@@ -1,10 +1,10 @@
 <template>
     <div>
         <div v-if="script" class="script">
-            <div v-if="script.description && script.description != ''" class="script-description-margins">
+            <div v-if="script.description && script.description !== ''" class="script-description-margins">
                <vue-markdown>{{ description }}</vue-markdown>
             </div>
-            <div class="grayText" v-else>
+            <div v-else class="grayText">
                 (No description.)
             </div>
             <div v-if="displayDetail">
@@ -22,7 +22,7 @@
 
             <div v-if="script.setup">
                 <ul class="noListStyle">
-                    <li>
+                    <li v-if="script">
                         <test-details
                             :script="script.setup"
                             :report="report ? report.setup : null"
@@ -33,22 +33,21 @@
                     </li>
                 </ul>
             </div>
+<!--            <div v-else>-->
+<!--                <action-details-->
+<!--                        :script="null"-->
+<!--                        :report="report && report.setup ? report.setup.action : null">-->
+<!--                </action-details>-->
+<!--            </div>-->
 
-            <div v-if="!script.setup">
-                <action-details
-                        :script="null"
-                        :report="report && report.setup ? report.setup.action : null">
-                </action-details>
-            </div>
-
-            <div v-if="script">
-                <div v-for="(test, testi) in tests"
+            <div v-if="script.test">
+                <div v-for="(test, testi) in script.test"
                      :key="'Test' + testi">
                     <ul class="noListStyle">
                         <li v-if="script">
                             <test-details
                                 :script="script.test[testi]"
-                                :report="report ? report.test[testi] : null"
+                                :report="report && report.test  ? report.test[testi] : null"
                                 :script-contained="script.contained"
                                 :report-contained="report ? report.contained : null"
                                 :test-script-index="testScriptIndex"
@@ -68,7 +67,7 @@
 <script>
     import errorHandlerMixin from '../../mixins/errorHandlerMixin'
     import TestDetails from "./TestDetails";
-    import ActionDetails from "./ActionDetails";
+    // import ActionDetails from "./ActionDetails";
     import VueMarkdown from "vue-markdown";
 
     export default {
@@ -106,7 +105,9 @@
             'testScriptIndex',
         ],
         components: {
-            TestDetails, ActionDetails, VueMarkdown,
+            TestDetails,
+            // ActionDetails,
+            VueMarkdown,
         },
         name: "ScriptDetails"
     }
@@ -125,14 +126,14 @@
 
 </style>
 <style>
-    /*
+
     .test-margins {
-        margin-left: 20px;
-        margin-right: 20px;
+        margin-left: 0px;
+        margin-right: 0px;
     }
     .action-margins {
-        margin-left: 50px;
-        margin-right: 50px;
+        margin-left: 20px;
+        margin-right: 20px;
     }
     .conditional-margins {
         margin-left: 40px;
@@ -143,6 +144,6 @@
         margin-right: 30px;
     }
 
-     */
+
 
 </style>

@@ -7,7 +7,7 @@ export default {
         }
     },
     methods: {
-        setImportComponentName(actionReport) {
+        setComponentName(actionReport) {
             if (actionReport === null) return null;
             const moduleId = this.getModuleIdFromReport(actionReport);
             if (!moduleId) return null;
@@ -30,11 +30,13 @@ export default {
         componentScriptActions() {
             if (this.componentName === null) return null
             const script = this.$store.state.testRunner.moduleTestScripts[this.componentName]
+            if (!script || !script.test || !script.test[0]) return null
             return script.test[0].action
         },
         componentReportActions() {
             if (this.componentName === null) return null
             const report = this.$store.state.testRunner.moduleTestReports[this.componentName]
+            if (!report || !report.test || !report.test[0]) return null
             return report.test[0].action
         },
         currentTest() {

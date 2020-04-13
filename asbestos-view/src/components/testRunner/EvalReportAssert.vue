@@ -35,7 +35,7 @@
             }
         },
         methods: {
-            toggleAssertMessageDisplay() {  // display of the message returned in the assert
+            toggleAssertMessageDisplay() {  // displayOpen of the message returned in the assert
                 this.displayAssertMessage = !this.displayAssertMessage
             },
         },

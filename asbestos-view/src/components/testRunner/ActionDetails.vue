@@ -46,17 +46,19 @@
                 > </test-status>
             </span>
 
-            <div v-if="displayMessage && $store.state.testRunner.testAssertions">
+            <div v-if="displayMessage && assertions">
                 <div v-for="(ref, refi) in references"
                     :key="'Ref' + refi" class="assert">
-                    <div v-if="$store.state.testRunner.testAssertions[ref].startsWith('http')">
-                        Reference:
-                        <a v-bind:href="$store.state.testRunner.testAssertions[ref]" target="_blank">
-                            {{ $store.state.testRunner.testAssertions[ref] }}
-                        </a>
-                    </div>
-                    <div v-else>
-                        Reference: {{ $store.state.testRunner.testAssertions[ref] }}
+                    <div v-if="assertions && assertions[ref]">
+                        <div v-if="assertions[ref].startsWith('http')">
+                            Reference:
+                            <a v-bind:href="assertions[ref]" target="_blank">
+                                {{assertions[ref] }}
+                            </a>
+                        </div>
+                        <div v-else>
+                            Reference: {{ assertions[ref] }}
+                        </div>
                     </div>
                 </div>
             </div>
@@ -185,6 +187,9 @@
             },
         },
         computed: {
+            assertions() {
+                return this.$store.state.testRunner.testAssertions
+            },
             isError() {
                 return this.result === 'error'
             },
