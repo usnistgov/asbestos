@@ -534,7 +534,8 @@
         list-style-type: "\1F6D1"; /* Stop sign */
     }
     .breakpoint-hit-indicator {
-        list-style-type: "\27A1"; /* Right arrow */
+        list-style-type: "\1F449"; /* Index finger pointing right */
+        /* 27A1 = Right arrow */
     }
     .noTopMargin {
         margin-top: 0px;

@@ -74,7 +74,7 @@ public class ModularEngine {
         return engines;
     }
 
-    private void saveLogs() {
+    void saveLogs() {
         boolean first = true;
         String channelId = getMainTestEngine().getChannelId();
         String testCollection = getMainTestEngine().getTestCollection();

@@ -869,6 +869,7 @@ public class TestEngine  {
             breakpointIndex += String.format(".%d", childPartIndex);
         }
         if (testScriptDebugState.getBreakpointSet().contains(breakpointIndex)) {
+            getModularEngine().saveLogs(); // Without this getTestReportsAsJson is empty
             log.info("pausing at " + breakpointIndex);
             testScriptDebugState.getResume().set(false);
             testScriptDebugState.getSession().getAsyncRemote().sendText(
@@ -876,7 +877,7 @@ public class TestEngine  {
                     + ",\"testScriptIndex\":\"" + testScriptDebugState.getTestScriptIndex() + "\""
                     + ",\"breakpointIndex\":\"" + breakpointIndex + "\""
                     + ",\"debugButtonLabel\":\"Resume\""
-                    + ",\"testReport\":" + getModularEngine().getMainTestEngine().getTestReportAsJson()  + "}");
+                    + ",\"testReport\":" + getModularEngine().reportsAsJson()  + "}"); // getModularEngine().reportsAsJson()
 //            log.info("About to lock and wait...");
             synchronized (testScriptDebugState.getLock()) {
 //                log.info("Locked!");

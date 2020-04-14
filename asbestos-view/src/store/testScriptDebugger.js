@@ -152,6 +152,7 @@ export const testScriptDebuggerStore = {
                     // Disable Run button
                     console.log('In socket onOpen. event: ' + event === undefined)
                     // clear log 1?
+                    commit('clearTestReports')
                     let uri = `debug-testscript/${rootState.base.session}__${rootState.base.channelId}/${testCollectionName}/${testId}?_format=${this.state.testRunner.useJson ? 'json' : 'xml'};_gzip=${this.state.testRunner.useGzip}`
                     if (indexOfTestId > -1) {
                         const breakpointSet = state.breakpointMap.get(mapKey) // Follow proper key format
