@@ -16,6 +16,7 @@ import gov.nist.asbestos.testEngine.engine.translator.ComponentDefinition;
 import gov.nist.asbestos.testEngine.engine.translator.ComponentReference;
 import gov.nist.asbestos.testEngine.engine.translator.Parameter;
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.apache.log4j.Logger;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.*;
 
@@ -64,6 +65,7 @@ public class TestEngine  {
      * If testScriptDebugState is null, then TestScript is being run normally. ie., TestScript is not being debugged.
      */
     private TestScriptDebugState testScriptDebugState;
+    private static Logger log = Logger.getLogger(TestEngine.class);
 
     /**
      *
@@ -633,7 +635,7 @@ public class TestEngine  {
                 int testCounter = 1;
                 for (TestScript.TestScriptTestComponent testComponent : testScript.getTest()) {
                     int testIndex = testScript.getTest().indexOf(testComponent);
-                    System.out.println(String.format(" -------------------------------- %d", testIndex));
+                    log.info(String.format(" -------------------------------- %d", testIndex));
                     if (hasDebugState()) {
                         pauseIfBreakpoint("test", testIndex, null);
                     }
@@ -819,7 +821,7 @@ public class TestEngine  {
             String typePrefix = "contained.action";
             int testPartIndex = 0;
             for (TestScript.TestActionComponent action : testScriptElement.getAction()) {
-                System.out.println(String.format("%s %d:%d state is null? %s", testScriptElement.getName(), testIndex, testPartIndex, hasDebugState()));
+//                log.info(String.format("%s %d:%d state is null? %s", testScriptElement.getName(), testIndex, testPartIndex, hasDebugState()));
                 if (hasDebugState()) {
                     pauseIfBreakpoint("test", testIndex, testPartIndex);
                 }
@@ -867,14 +869,27 @@ public class TestEngine  {
             breakpointIndex += String.format(".%d", childPartIndex);
         }
         if (testScriptDebugState.getBreakpointSet().contains(breakpointIndex)) {
+            log.info("pausing at " + breakpointIndex);
             testScriptDebugState.getResume().set(false);
-            testScriptDebugState.getSession().getAsyncRemote().sendText("{\"messageType\":\"breakpoint-hit\",\"breakpointIndex\":\"" + breakpointIndex + "\",\"testReport\":" + getModularEngine().reportsAsJson()  + "}");
+            testScriptDebugState.getSession().getAsyncRemote().sendText(
+                    "{\"messageType\":\"breakpoint-hit\""
+                    + ",\"testScriptIndex\":\"" + testScriptDebugState.getTestScriptIndex() + "\""
+                    + ",\"breakpointIndex\":\"" + breakpointIndex + "\""
+                    + ",\"debugButtonLabel\":\"Resume\""
+                    + ",\"testReport\":" + getModularEngine().getMainTestEngine().getTestReportAsJson()  + "}");
+//            log.info("About to lock and wait...");
             synchronized (testScriptDebugState.getLock()) {
-                while (! testScriptDebugState.getResume().get()) {
+//                log.info("Locked!");
+                while (! testScriptDebugState.getResume().get() && ! testScriptDebugState.getKill().get()) {
                     try {
                         testScriptDebugState.getLock().wait(); // Release the lock and wait for getResume to be True
                     } catch (InterruptedException ie) {
                     }
+                }
+                if (testScriptDebugState.getResume().get()) {
+                    log.info("Resuming " +  testScriptDebugState.getSession().getId());
+                } else if (testScriptDebugState.getKill().get()) {
+                    throw new Error("KILL session: " + testScriptDebugState.getSession().getId());
                 }
             }
         }

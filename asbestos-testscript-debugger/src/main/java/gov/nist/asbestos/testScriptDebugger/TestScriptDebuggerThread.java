@@ -19,9 +19,7 @@ import javax.websocket.Session;
 import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentSkipListSet;
-import java.util.concurrent.atomic.AtomicBoolean;
 // 0 - "debug-testscript"
 // 1 - channelName (testSession__channelId)
 // 2 - testCollectionId
@@ -29,8 +27,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 // Returns modular test reports
 //   JSON object : test/moduleId => TestReport
 
-public class TestScriptDebugger implements Callable<String> {
-    private static Logger log = Logger.getLogger(TestScriptDebugger.class);
+public class TestScriptDebuggerThread implements Runnable {
+    private static Logger log = Logger.getLogger(TestScriptDebuggerThread.class);
 
     private Request request;
     private TestScriptDebugState state;
@@ -39,9 +37,9 @@ public class TestScriptDebugger implements Callable<String> {
         return request.uriParts.size() == 4 && request.uriParts.get(0).equals("debug-testscript");
     }
 
-    public TestScriptDebugger(Request request, Session session) {
+    public TestScriptDebuggerThread(Request request, Session session, String testScriptIndex) {
         this.request = request;
-        this.state = new TestScriptDebugState(new AtomicBoolean(), new ConcurrentSkipListSet(), session);
+        this.state = new TestScriptDebugState(session, testScriptIndex, new ConcurrentSkipListSet());
     }
 
     public TestScriptDebugState getState() {
@@ -49,7 +47,7 @@ public class TestScriptDebugger implements Callable<String> {
     }
 
     @Override
-    public String call() throws Exception {
+    public void run() {
         log.info("Run DebugTestScriptRequest");
         String channelId = request.uriParts.get(1);
         String testCollection = request.uriParts.get(2);
@@ -113,10 +111,16 @@ public class TestScriptDebugger implements Callable<String> {
 
         } catch (Throwable t) {
             log.error(ExceptionUtils.getStackTrace(t));
+            if (state.getKill().get()) {
+                state.getSession().getAsyncRemote().sendText("{\"messageType\":\"killed\", \"testReport\":{}}");
+            } else {
+                state.getSession().getAsyncRemote().sendText("{\"messageType\":\"unexpected-error\", \"testReport\":{}}");
+            }
             throw t;
         }
 
         String json = modularEngine.reportsAsJson();
-        return json;
+        state.getSession().getAsyncRemote().sendText("{\"messageType\":\"final-report\", \"testReport\":" + ((json != null)?json:"{}") + "}");
+
     }
 }

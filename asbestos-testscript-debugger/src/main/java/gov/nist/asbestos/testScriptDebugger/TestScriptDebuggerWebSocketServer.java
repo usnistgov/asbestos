@@ -7,17 +7,17 @@ import gov.nist.asbestos.simapi.tk.installation.Installation;
 import org.apache.log4j.Logger;
 
 import javax.websocket.OnClose;
+import javax.websocket.OnError;
 import javax.websocket.OnMessage;
 import javax.websocket.OnOpen;
 import javax.websocket.Session;
 import javax.websocket.server.ServerEndpoint;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 import com.google.gson.Gson;
 
@@ -25,8 +25,8 @@ import com.google.gson.Gson;
 @ServerEndpoint("/testScriptDebugger")
 public class TestScriptDebuggerWebSocketServer {
     private static Logger log = Logger.getLogger(TestScriptDebuggerWebSocketServer.class);
-    private static final ConcurrentHashMap<String, TestScriptDebugState> testScriptDebugStateMap = new ConcurrentHashMap<>();
-    private static final ConcurrentHashMap<String, ExecutorService> testScriptDebugExecutorMap = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<String, TestScriptDebugState> debugStateMap = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<String, ExecutorService> debugExecutorMap = new ConcurrentHashMap<>();
 
     @OnOpen
     public void onOpen(Session session) {
@@ -46,7 +46,8 @@ public class TestScriptDebuggerWebSocketServer {
                 if (uriString != null) {
                     if (myMap.get("breakpointList") != null) {
                         List<String> myList = (List<String>) myMap.get("breakpointList");
-                        doUri(session, uriString, myList);
+                        String testScriptIndex = (String) myMap.get("testScriptIndex");
+                        startDebuggerThread(session, uriString, testScriptIndex, myList);
                     } else {
                         String exception = "breakpointList is empty.";
                         log.error(exception);
@@ -55,6 +56,8 @@ public class TestScriptDebuggerWebSocketServer {
                 }
             } else if (myMap.get("resumeBreakpoint") != null) {
                doResumeBreakpoint(session);
+            } else if (myMap.get("killDebug") != null) {
+                killSession(session);
             }
 
         }
@@ -63,50 +66,70 @@ public class TestScriptDebuggerWebSocketServer {
 
     @OnClose
     public void onClose(Session session) {
-        log.info("Close: " + session.getId());
+        final String sessionId = session.getId();
+        log.info("Close: " + sessionId);
+        // Close off threads created by session
+        if (debugExecutorMap != null && debugStateMap.get(sessionId).getKill().get()) {
+            ExecutorService service = debugExecutorMap.get(sessionId);
+            try {
+//                if (debugStateMap.get(sessionId).getResume().get()) {
+////                    debugStateMap.get(sessionId).getBreakpointSet().clear();
+//                    killSession(session);
+//                }
+                service.awaitTermination(2, TimeUnit.SECONDS);
+            } catch (Throwable t) {
+            } finally {
+                log.info(String.format("Session %s was terminated: %s", sessionId, service.isTerminated()));
+            }
+        }
+
     }
 
-    /*
     @OnError
     public void onError(Throwable t) {
        log.error(t.toString());
     }
-    *
-     */
 
-    private void doUri(Session session, String uriString, List<String> breakpointList) throws Exception {
+    private void startDebuggerThread(Session session, String uriString, String testScriptIndex, List<String> breakpointList) throws Exception {
         String sessionId = session.getId();
         Request request = new Request(uriString, Installation.instance().externalCache());
 
-        if (TestScriptDebugger.isRequest(request)) {
+        if (TestScriptDebuggerThread.isRequest(request)) {
             // Only one debug request for the channel/testCollection is allowed
-            if (! testScriptDebugExecutorMap.contains(sessionId)) {
+            if (! debugExecutorMap.contains(sessionId)) {
 
                 ExecutorService executorService = Executors.newSingleThreadExecutor();
-                testScriptDebugExecutorMap.put(sessionId, executorService);
+                debugExecutorMap.put(sessionId, executorService);
 
-                TestScriptDebugger debugger = new TestScriptDebugger(request, session);
-                testScriptDebugStateMap.put(sessionId, debugger.getState());
+                TestScriptDebuggerThread debugger = new TestScriptDebuggerThread(request, session, testScriptIndex);
+                debugStateMap.put(sessionId, debugger.getState());
                 debugger.getState().getBreakpointSet().addAll(breakpointList);
 
-                Future<String> future = executorService.submit(debugger);
+                executorService.submit(debugger);
                 executorService.shutdown();
-
-                String finalReport = future.get();
-                if (finalReport != null) {
-                    session.getAsyncRemote().sendText("{\"messageType\":\"final-report\", \"testReport\":" + finalReport + "}");
-                }
             }
         }
     }
 
     private void doResumeBreakpoint(Session session) {
         String sessionId = session.getId();
-        TestScriptDebugState state = testScriptDebugStateMap.get(sessionId);
+        TestScriptDebugState state = debugStateMap.get(sessionId);
         synchronized (state.getLock()) {
            state.getResume().set(true);
            state.getLock().notify();
         }
     }
+
+    private void killSession(Session session) {
+        String sessionId = session.getId();
+        log.info("killSession: " + sessionId);
+        debugStateMap.get(session.getId()).getKill().set(true);
+        TestScriptDebugState state = debugStateMap.get(sessionId);
+        synchronized (state.getLock()) {
+            state.getKill().set(true);
+            state.getLock().notify();
+        }
+    }
+
 
 }

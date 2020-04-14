@@ -51,6 +51,7 @@
                 v-bind:class="{
                     'action-margins': true,
                     'breakpoint-indicator': showBreakpointIndicator(testScriptIndex, testType, testIndex, actioni),
+                    'breakpoint-hit-indicator': isBreakpointHit(testScriptIndex, testType, testIndex, actioni),
                 }"
                  :key="'Action' + actioni">
                 <div v-if="setImportComponentName(action)">
@@ -121,9 +122,12 @@
             },
             showBreakpointIndicator(testScriptIndex, testType, testIndex, actionIndex) {
                 let obj = {testScriptIndex: testScriptIndex, breakpointIndex: testType + testIndex + "." + actionIndex}
-                return this.$store.getters.hasBreakpoint(obj) || this.hoverActionIndex === actionIndex
+                return (this.$store.getters.hasBreakpoint(obj) || this.hoverActionIndex === actionIndex) && ! this.isBreakpointHit(testScriptIndex, testType, testIndex, actionIndex)
             },
-
+            isBreakpointHit(testScriptIndex, testType, testIndex, actionIndex) {
+                let obj = {testScriptIndex: testScriptIndex, breakpointIndex: testType + testIndex + "." + actionIndex}
+                return this.$store.getters.isBreakpointHit(obj)
+            },
         },
         computed: {
             scriptConditional() { // TestScript representing conditional

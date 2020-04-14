@@ -7,14 +7,22 @@ import javax.websocket.Session;
 public class TestScriptDebugState {
     Object lock;
     AtomicBoolean resume;
+    AtomicBoolean kill;
+    String testScriptIndex; /* TestCollectionIndex + TestScriptIndex */
     ConcurrentSkipListSet breakpointSet;
     Session session;
 
-    public TestScriptDebugState(AtomicBoolean resume, ConcurrentSkipListSet breakpointSet, Session session) {
+    public TestScriptDebugState(Session session, String testScriptIndex, ConcurrentSkipListSet breakpointSet) {
         this.lock = new Object();
-        this.resume = resume;
+        this.testScriptIndex = testScriptIndex;
+        this.resume = new AtomicBoolean();
+        this.kill = new AtomicBoolean();
         this.breakpointSet = breakpointSet;
         this.session = session;
+    }
+
+    public String getTestScriptIndex() {
+        return testScriptIndex;
     }
 
     public Object getLock() {
@@ -23,6 +31,10 @@ public class TestScriptDebugState {
 
     public AtomicBoolean getResume() {
         return resume;
+    }
+
+    public AtomicBoolean getKill() {
+        return kill;
     }
 
     public ConcurrentSkipListSet getBreakpointSet() {

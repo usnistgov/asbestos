@@ -118,7 +118,10 @@
                                 <button class="runallbutton" @click.stop="doRun(name)">Run</button>
                                 <button v-if="isDebuggable(i)"
                                         class="debugTestScriptButton"
-                                        @click.stop="doDebug(name)">Debug</button>
+                                        @click.stop="doDebug(name)">{{getDebugActionButtonLabel(i)}}</button>
+                                <button v-if="isDebugKillable(i)"
+                                        class="debugKillTestScriptButton"
+                                        @click.stop="doDebugKill(i)">Kill</button>
                             </span>
 
                             <script-status v-if="statusRight" :status-right="statusRight" :name="name"> </script-status>
@@ -152,10 +155,31 @@
         },
         methods: {
             isDebuggable(testScriptIndex) {
+                const key = this.getTestScriptIndexKey(testScriptIndex)
+                return key in this.$store.state.testScriptDebugger.showDebugButton && Boolean(this.$store.state.testScriptDebugger.showDebugButton[key])
+            },
+            getDebugActionButtonLabel(testScriptIndex) {
+                const key = this.getTestScriptIndexKey(testScriptIndex)
+                if (key in this.$store.state.testScriptDebugger.showDebugButton) {
+                    let valObj = this.$store.state.testScriptDebugger.showDebugButton[key]
+                    if (valObj != undefined) {
+                        return valObj.debugButtonLabel
+                    }
+                    // return "Debug"
+                    return "X"
+                }
+            },
+            isDebugKillable(testScriptIndex) {
+               return (this.getDebugActionButtonLabel(testScriptIndex) === 'Resume')
+            },
+            async doDebugKill(testScriptIndex) {
+                this.running = false
+                await this.$store.dispatch('debugKill', this.getTestScriptIndexKey(testScriptIndex))
+            },
+            getTestScriptIndexKey(testScriptIndex) {
                 const testCollectionIndex = this.$store.state.testRunner.serverTestCollectionNames.indexOf(this.testCollection)
                 const key = testCollectionIndex + '.' + testScriptIndex // Follow proper key format
-                return key in this.$store.state.testScriptDebugger.showDebugButton && Boolean(this.$store.state.testScriptDebugger.showDebugButton[key])
-                // i in $store.state.testScriptDebugger.showDebugButton && Boolean($store.state.testScriptDebugger.showDebugButton[i])
+                return key
             },
             testTime(name) {
                 const report = this.$store.state.testRunner.testReports[name]
@@ -388,6 +412,14 @@
         border-radius: 25px;
         font-weight: bold;
     }
+    .debugKillTestScriptButton {
+        /*padding-bottom: 5px;*/
+        margin-left: 10px;
+        background-color: red;
+        cursor: pointer;
+        border-radius: 25px;
+        font-weight: bold;
+    }
     .configurationError {
         color: red;
     }
@@ -501,9 +533,8 @@
     .breakpoint-indicator {
         list-style-type: "\1F6D1"; /* Stop sign */
     }
-    .breakpoint-indicator-hint {
-        list-style-type: "\1F6D1"; /* Stop sign */
-        opacity: .5;
+    .breakpoint-hit-indicator {
+        list-style-type: "\27A1"; /* Right arrow */
     }
     .noTopMargin {
         margin-top: 0px;
