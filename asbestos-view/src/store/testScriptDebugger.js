@@ -118,7 +118,7 @@ export const testScriptDebuggerStore = {
         removeBreakpoint({commit}, value) {
             commit('removeBreakpoint', value)
         },
-        async debugKill({commit, rootState, state}, mapKey) {
+        async debugKill({state}, mapKey) {
             if (state.testScriptDebuggerWebSocket != null) {
                 state.testScriptDebuggerWebSocket.send('{"killDebug":"true"}')
                 // let valObj = state.showDebugButton[mapKey]
@@ -128,11 +128,11 @@ export const testScriptDebuggerStore = {
                 //     valObj.debugButtonLabel = "Debug"
                 // }
             } else {
-                console.log('debugKill failed: WebSocket is null!')
+                console.log('debugKill '+ mapKey + ' failed: WebSocket is null!')
             }
         },
         async debugTestScript({commit, rootState, state, getters}, testId) {
-            console.log('in debug' + testId)
+            console.log('in debug' + testId + ' isGettersUndefined: ' + getters === undefined)
             // commit('setTestReport',{name: testId, testReport: null})
             // console.log('log cleared for ' + testId)
 
