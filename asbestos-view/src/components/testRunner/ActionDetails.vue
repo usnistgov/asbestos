@@ -64,10 +64,11 @@
             </div>
 
         </div>
-        <div v-else>
+        <div>
             <!--
              Used to report general errors within the tool
             -->
+
             <div v-if=" report && report[0]">
                 {{ translateNL(report[0].assert.message)}}
             </div>

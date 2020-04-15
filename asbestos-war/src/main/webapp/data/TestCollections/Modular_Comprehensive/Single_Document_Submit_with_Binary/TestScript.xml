@@ -59,7 +59,7 @@
         <sourceId value="read-back"/>
     </variable>
     <test>
-        <description value="Submit Provide Document Bundle to MHD Document Recipient."/>
+        <description value="Submit."/>
         <action>
             <operation>
                 <description value="Submit Provide Document Bundle to MHD Document Recipient."/>
@@ -81,10 +81,10 @@
         </action>
     </test>
     <test>
-        <description value="Validate transaction response"/>
+        <description value="Validate transaction response."/>
         <action>
             <operation>
-                <description value="Validate transaction response"/>
+                <description value="Validate transaction response."/>
                 <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
                     <extension url="component">
                         <valueString value="../../Library/ResponseBundleEval.xml"/>
@@ -97,10 +97,10 @@
         </action>
     </test>
     <test>
-        <description value="Read back the DocumentReference and validate"/>
+        <description value="Read back the DocumentReference and validate."/>
         <action>
             <operation>
-                <description value="Read back the DocumentReference and validate"/>
+                <description value="Read back the DocumentReference and validate."/>
                 <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
                     <extension url="component">
                         <valueString value="../../Library/ReadValidateDocRef.xml"/>

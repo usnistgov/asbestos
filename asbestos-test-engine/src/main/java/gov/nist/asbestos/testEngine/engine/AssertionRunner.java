@@ -18,7 +18,7 @@ public class AssertionRunner {
     private ValE val;
     private TestScript testScript = null;
     private FixtureMgr fixtureMgr;
-    private TestReport.SetupActionAssertComponent assertReport;
+    //private TestReport.SetupActionAssertComponent assertReport;
     //private TestReport testReport = null;
     private VariableMgr variableMgr = null;
     private boolean isRequest = false;  // is assertion being run on request message?
@@ -39,7 +39,7 @@ public class AssertionRunner {
     }
 
     private FixtureComponent sourceOverride = null;
-    private FixtureComponent getSource(TestScript.SetupActionAssertComponent as) {
+    private FixtureComponent getSource(TestScript.SetupActionAssertComponent as,  TestReport.SetupActionAssertComponent assertReport) {
         FixtureComponent sourceFixture = getSourceIfAvailable(as);
         if (sourceFixture == null)
             Reporter.reportError(val, assertReport, type, label, "no source available for comparison.");
@@ -55,12 +55,13 @@ public class AssertionRunner {
         return sourceFixture;
     }
 
-    TestReport.SetupActionAssertComponent run(TestScript.SetupActionAssertComponent as) {
+    void run(TestScript.SetupActionAssertComponent as, TestReport.SetupActionAssertComponent assertReport) {
         Objects.requireNonNull(typePrefix);
         Objects.requireNonNull(val);
         Objects.requireNonNull(testScript);
 
-        assertReport = new TestReport.SetupActionAssertComponent();
+        boolean reported = false;
+
         FixtureComponent source = getSourceIfAvailable(as);
 //        if (source == null)
 //            return assertReport;
@@ -72,71 +73,73 @@ public class AssertionRunner {
                 if (as.hasExpression() && as.getExpression().trim().startsWith("Bundle")) {
                     BaseResource sourceResource = source.getResourceResource();
                     if (!(sourceResource instanceof Bundle)) {
-                        assertReport = new TestReport.SetupActionAssertComponent();
-                        return Reporter.reportError(val, assertReport, type, label, "expression targets a Bundle but sourceId points to a " + sourceResource.getClass().getSimpleName());
+                        Reporter.reportError(val, assertReport, type, label, "expression targets a Bundle but sourceId points to a " + sourceResource.getClass().getSimpleName());
+                        return;
                     }
                     Bundle bundle = (Bundle) sourceResource;
                     for (Bundle.BundleEntryComponent component : bundle.getEntry()) {
-                        assertReport = new TestReport.SetupActionAssertComponent();
+//                        assertReport = new TestReport.SetupActionAssertComponent();
                         if (component.hasResource()) {
                             sourceOverride = new FixtureComponent(component.getResource());
-                            if (run2(as)) {
-                                return assertReport;  // good enough to find one component that matches assertion
+                            reported = true;
+                            if (run2(as, assertReport)) {
+                                return;  // good enough to find one component that matches assertion
                             }
                         }
                     }
-                    assertReport = new TestReport.SetupActionAssertComponent();
-                    return Reporter.reportError(val, assertReport, type, label, "no resource in Bundle matches assertion.");
+  //                  assertReport = new TestReport.SetupActionAssertComponent();
+                    Reporter.reportError(val, assertReport, type, label, "no resource in Bundle matches assertion.");
+                    return;
                 } else {
                     sourceOverride = null;
-                    assertReport = new TestReport.SetupActionAssertComponent();
-                    run2(as);
-                    return assertReport;
+    //                assertReport = new TestReport.SetupActionAssertComponent();
+                    reported = true;
+                    run2(as, assertReport);
+                    return;
                 }
             } else if (as.hasModifierExtension()) {
                 Extension extension = as.getModifierExtension().isEmpty() ? null : as.getModifierExtension().get(0);
                 if (extension == null) {
-                    assertReport = new TestReport.SetupActionAssertComponent();
+      //              assertReport = new TestReport.SetupActionAssertComponent();
                     Reporter.reportError(val, assertReport, type, label, "Found no stringValue in modifierExtension.");
-                    return assertReport;
+                    return;
                 }
                 String resourceType = extension.getValue().toString();
                 BaseResource sourceResource = source.getResourceResource();
-                assertReport = null;
+//                assertReport = null;
                 Bundle bundle = (Bundle) sourceResource;
                 int i=0;
                 for (Bundle.BundleEntryComponent component : bundle.getEntry()) {
                     Resource resource = component.getResource();
                     if (resource.getClass().getSimpleName().equals(resourceType)) {
-                        assertReport = new TestReport.SetupActionAssertComponent();
+              //          assertReport = new TestReport.SetupActionAssertComponent();
                         ResourceWrapper savedSource = source.getResourceWrapper();  // new value (from Bundle) for FixtureComponent
                         source.setResource(new ResourceWrapper(resource));  // so it applies to the in-bundle resource
                         source.setId(resourceType + " #" + i);
-                        boolean success = run2(as);
+                        reported = true;
+                        boolean success = run2(as, assertReport);
                         source.setResource(savedSource);  // restore FixtureComponent
                         if (!success)
                             break;
                         //assertReport = null;
                     }
                 }
-                if (assertReport != null)
-                    return assertReport;
-                assertReport = new TestReport.SetupActionAssertComponent();
+                if (reported)
+                    return;
                 Reporter.reportError(val, assertReport, type, label, "Found no " + resourceType + " resources in Bundle.");
-                return assertReport;
             }
         } else {
-            run2(as);
-            return assertReport;
+            run2(as, assertReport);
+            return;
         }
 
-        assertReport = new TestReport.SetupActionAssertComponent();
-        run2(as);
-        return assertReport;
+      //  assertReport = new TestReport.SetupActionAssertComponent();
+        if (!reported)
+            run2(as, assertReport);
     }
 
     // success?
-    boolean run2(TestScript.SetupActionAssertComponent as) {
+    boolean run2(TestScript.SetupActionAssertComponent as, TestReport.SetupActionAssertComponent assertReport) {
         Objects.requireNonNull(variableMgr);
         //this.assertReport = assertReport;
 
@@ -167,41 +170,41 @@ public class AssertionRunner {
 
 //        INSTRUCTIONS
 
-        if (as.hasCompareToSourceId() && as.hasCompareToSourceExpression()) return instSourceIdSourceExpression(as, warningOnly);
+        if (as.hasCompareToSourceId() && as.hasCompareToSourceExpression()) return instSourceIdSourceExpression(as, assertReport, warningOnly);
 
-        if (as.hasMinimumId()) return instMinimumId(as, warningOnly);
+        if (as.hasMinimumId()) return instMinimumId(as, assertReport, warningOnly);
 
         // resource type pattern
         // resource type specified sourceId or lastOperation must have returned that resource type
-        if (as.hasResource()) return instResource(as, warningOnly);
+        if (as.hasResource()) return instResource(as, assertReport, warningOnly);
 
         // contentType pattern
         // compares against sourceId or return of lastOperation
-        if (as.hasContentType()) return instContentType(as, warningOnly);
+        if (as.hasContentType()) return instContentType(as, assertReport, warningOnly);
 
         // headerField/value comparison pattern
         // compares against sourceId or return of lastOperation
-        if (as.hasHeaderField() && as.hasValue()) return instHeaderFieldValue(as, warningOnly);
+        if (as.hasHeaderField() && as.hasValue()) return instHeaderFieldValue(as, assertReport, warningOnly);
 
         // response pattern
-        if (as.hasResponse()) return instResponse(as, warningOnly);
+        if (as.hasResponse()) return instResponse(as, assertReport, warningOnly);
 
         // responseCodePattern
-        if (as.hasResponseCode()) return instResponseCode(as, warningOnly);
+        if (as.hasResponseCode()) return instResponseCode(as, assertReport, warningOnly);
 
         // expression and value pattern
-        if (as.hasExpression() && as.hasValue()) return instExpressionValue(as, warningOnly);
+        if (as.hasExpression() && as.hasValue()) return instExpressionValue(as, assertReport, warningOnly);
 
         // expression
-        if (as.hasExpression()) return instExpression(as, warningOnly);
+        if (as.hasExpression()) return instExpression(as, assertReport, warningOnly);
 
-        if (as.hasRequestMethod()) return instRequestMethod(as, warningOnly);
+        if (as.hasRequestMethod()) return instRequestMethod(as, assertReport, warningOnly);
 
         Reporter.reportError(val, assertReport, type, label, "No assertion.");
         return false;
     }
 
-    private boolean instSourceIdSourceExpression(TestScript.SetupActionAssertComponent as, boolean warningOnly) {
+    private boolean instSourceIdSourceExpression(TestScript.SetupActionAssertComponent as, TestReport.SetupActionAssertComponent assertReport, boolean warningOnly) {
         FixtureComponent  sourceFixture = fixtureMgr.get(as.getCompareToSourceId());
         if (sourceFixture == null) {
             Reporter.reportError(val, assertReport, type, label, "compareToSourceId references " + as.getCompareToSourceId() + " which cannot be found.");
@@ -234,8 +237,8 @@ public class AssertionRunner {
     static public final String RAW_REPORT = "Raw Report";
 //    static public final String ATTS_NOT_FOUND = "Atts Not Found";
 
-    private boolean instMinimumId(TestScript.SetupActionAssertComponent as, boolean warningOnly) {
-        FixtureComponent sourceFixture = getSource(as);
+    private boolean instMinimumId(TestScript.SetupActionAssertComponent as, TestReport.SetupActionAssertComponent assertReport, boolean warningOnly) {
+        FixtureComponent sourceFixture = getSource(as, assertReport);
         if (sourceFixture == null) return false;
 
         FixtureComponent miniFixture  = fixtureMgr.get(as.getMinimumId());
@@ -287,8 +290,8 @@ public class AssertionRunner {
 
     }
 
-    private boolean instResource(TestScript.SetupActionAssertComponent as, boolean warningOnly) {
-        FixtureComponent sourceFixture = getSource(as);
+    private boolean instResource(TestScript.SetupActionAssertComponent as, TestReport.SetupActionAssertComponent assertReport, boolean warningOnly) {
+        FixtureComponent sourceFixture = getSource(as, assertReport);
         if (sourceFixture == null) return false;
         if (sourceFixture.getResponseType() == null) {
             Reporter.reportError(val, assertReport, type, label, "sourceId or lastOperation references no resource.");
@@ -299,16 +302,16 @@ public class AssertionRunner {
         return Reporter.reportPass(val, assertReport, type, label, "resource type comparison (" + sourceFixture.getResponseType() + ")" );
     }
 
-    private boolean instContentType(TestScript.SetupActionAssertComponent as, boolean warningOnly) {
-        FixtureComponent sourceFixture = getSource(as);
+    private boolean instContentType(TestScript.SetupActionAssertComponent as, TestReport.SetupActionAssertComponent assertReport, boolean warningOnly) {
+        FixtureComponent sourceFixture = getSource(as, assertReport);
         if (sourceFixture == null) return false;
         if (!as.getContentType().equalsIgnoreCase(sourceFixture.getResponseType()))
             return Reporter.reportFail(val, assertReport, type, label, "expecting " + as.getContentType() + " found " + sourceFixture.getResponseType(), warningOnly);
         return Reporter.reportPass(val, assertReport, type, label, as.getContentType() + " = " + sourceFixture.getResponseType());
     }
 
-    private boolean instHeaderFieldValue(TestScript.SetupActionAssertComponent as, boolean warningOnly) {
-        FixtureComponent sourceFixture = getSource(as);
+    private boolean instHeaderFieldValue(TestScript.SetupActionAssertComponent as, TestReport.SetupActionAssertComponent assertReport,boolean warningOnly) {
+        FixtureComponent sourceFixture = getSource(as, assertReport);
         if (sourceFixture == null) return false;
         String sourceHeaderFieldValue = sourceFixture.getHttpBase().getResponseHeaders().getValue(as.getHeaderField());
         if (sourceHeaderFieldValue == null)
@@ -318,8 +321,8 @@ public class AssertionRunner {
         return Reporter.reportPass(val, assertReport, type, label, sourceHeaderFieldValue + " = " + as.getValue());
     }
 
-    private boolean instResponse(TestScript.SetupActionAssertComponent as, boolean warningOnly) {
-        FixtureComponent sourceFixture = getSource(as);
+    private boolean instResponse(TestScript.SetupActionAssertComponent as, TestReport.SetupActionAssertComponent assertReport, boolean warningOnly) {
+        FixtureComponent sourceFixture = getSource(as, assertReport);
         if (sourceFixture == null) return false;
         int codeFound = sourceFixture.getResourceWrapper().getHttpBase().getStatus();
         String found = responseCodeAsString(codeFound);
@@ -330,8 +333,8 @@ public class AssertionRunner {
         return Reporter.reportPass(val, assertReport, type, label, found + " " + operator + " " + expected);
     }
 
-    private boolean instResponseCode(TestScript.SetupActionAssertComponent as, boolean warningOnly) {
-        FixtureComponent sourceFixture = getSource(as);
+    private boolean instResponseCode(TestScript.SetupActionAssertComponent as, TestReport.SetupActionAssertComponent assertReport, boolean warningOnly) {
+        FixtureComponent sourceFixture = getSource(as, assertReport);
         if (sourceFixture == null) return false;
         int codeFound = sourceFixture.getResourceWrapper().getHttpBase().getStatus();
         String found = String.valueOf(codeFound);
@@ -342,8 +345,8 @@ public class AssertionRunner {
         return Reporter.reportPass(val, assertReport, type, label, found + " " + operator + " " + expected);
     }
 
-    private boolean instExpressionValue(TestScript.SetupActionAssertComponent as, boolean warningOnly) {
-        FixtureComponent sourceFixture = getSource(as);
+    private boolean instExpressionValue(TestScript.SetupActionAssertComponent as,  TestReport.SetupActionAssertComponent assertReport, boolean warningOnly) {
+        FixtureComponent sourceFixture = getSource(as, assertReport);
         if (sourceFixture == null) return false;
         BaseResource sourceResource = sourceFixture.getResourceResource();
         if (sourceResource == null) {
@@ -386,8 +389,8 @@ public class AssertionRunner {
         return Reporter.reportPass(val, assertReport, type, label, expression);
     }
 
-    private boolean instExpression(TestScript.SetupActionAssertComponent as, boolean warningOnly) {
-        FixtureComponent sourceFixture = getSource(as);
+    private boolean instExpression(TestScript.SetupActionAssertComponent as,  TestReport.SetupActionAssertComponent assertReport, boolean warningOnly) {
+        FixtureComponent sourceFixture = getSource(as, assertReport);
         if (sourceFixture == null) return false;
         BaseResource sourceResource = sourceFixture.getResourceResource();
         if (sourceResource == null) {
@@ -408,8 +411,8 @@ public class AssertionRunner {
         return Reporter.reportFail(val, assertReport, type, label, "expression " + as.getExpression()  +  " failed.", warningOnly);
     }
 
-    private boolean instRequestMethod(TestScript.SetupActionAssertComponent as, boolean warningOnly) {
-        FixtureComponent sourceFixture = getSource(as);
+    private boolean instRequestMethod(TestScript.SetupActionAssertComponent as,  TestReport.SetupActionAssertComponent assertReport, boolean warningOnly) {
+        FixtureComponent sourceFixture = getSource(as, assertReport);
         String requestedMethod = as.getRequestMethod().toCode();
         if (sourceFixture == null) return false;
         String method = sourceFixture.getResourceWrapper().getHttpBase().getVerb();
@@ -421,7 +424,7 @@ public class AssertionRunner {
         return false;
     }
 
-    private boolean hasNoFixtureResource(FixtureComponent fixture, String msg) {
+    private boolean hasNoFixtureResource(FixtureComponent fixture, TestReport.SetupActionAssertComponent assertReport, String msg) {
         if (fixture == null) {
             Reporter.reportError(val, assertReport, type, label, msg + " - no fixture is referenced.");
             return true;

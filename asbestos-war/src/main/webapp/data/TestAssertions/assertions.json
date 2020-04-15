@@ -16,5 +16,7 @@
   "MHDPDBReturnLocation": "ITI-65 - 3.65.4.2.2 Message Semantics Para 2",
   "MHDPDBReturnEtag": "ITI-65 - 3.65.4.2.2 Message Semantics Para 2",
   "MHDPDBDocRefHasAttachment": "ITI-65 - Table 4.5.1.1-1 content.attachment.url",
-  "MHDPDBFullUrlUniqueInBundle": "http://hl7.org/fhir/bundle.html#invs bld-7"
+  "MHDPDBFullUrlUniqueInBundle": "http://hl7.org/fhir/bundle.html#invs bld-7",
+  "FHIRTransReturnsBundle": "http://hl7.org/fhir/http.html#transaction-response",
+  "FHIRTransReturns201": "http://hl7.org/fhir/http.html#transaction-response"
 }

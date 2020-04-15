@@ -11,7 +11,7 @@
     <url value=""/>
     <name value="SendPDB"/>
     <status value="active"/>
-    <description value="Submit Comprehensive Metadata Provide Document Bundle and validate response"/>
+
 
     <variable>
         <name value="requestEntryCount"/>
@@ -27,7 +27,7 @@
         <action>
             <operation>
                 <!-- references patient from resourceCache in EC -->
-                <description value="send PDB"/>
+                <description value="send PDB."/>
                 <label value="create"/>
                 <type>
                     <system value="https://github.com/usnistgov/asbestos/wiki/Testscript-Operation-Codes"/>
@@ -39,14 +39,14 @@
         </action>
         <action>
             <assert>
-                <description value="... successful"/>
+                <description value="... successful."/>
                 <response value="okay"/>
                 <warningOnly value="false"/>
             </assert>
         </action>
         <action>
             <assert>
-                <description value="... returned Bundle|FHIRTransReturnsBundle"/>
+                <description value="... returned Bundle.|FHIRTransReturnsBundle"/>
                 <compareToSourceId value="pdb-response-bundle"/>
                 <compareToSourceExpression value="Bundle.exists()"/>
                 <warningOnly value="false"/>
@@ -54,7 +54,7 @@
         </action>
         <action>
             <assert>
-                <description value="... Bundle is type transaction-response|FHIRTransReturnsBundle"/>
+                <description value="... Bundle is type transaction-response|FHIRTransReturnsBundle."/>
                 <compareToSourceId value="pdb-response-bundle"/>
                 <compareToSourceExpression value="Bundle.type = 'transaction-response'"/>
                 <warningOnly value="false"/>
@@ -62,7 +62,7 @@
         </action>
         <action>
             <assert>
-                <description value="... Bundle does not contain OperationOutcome|FHIRTransReturnsBundle"/>
+                <description value="... Bundle does not contain OperationOutcome.|FHIRTransReturnsBundle"/>
                 <compareToSourceId value="pdb-response-bundle"/>
                 <compareToSourceExpression value="Bundle.entry.response.outcome.where(OperationOutcome).exists().not()"/>
                 <warningOnly value="false"/>
@@ -70,7 +70,7 @@
         </action>
         <action>
             <assert>
-                <description value="... response contains one entry for each entry in request|FHIRTransReturnsBundle"/>
+                <description value="... response contains one entry for each entry in request.|FHIRTransReturnsBundle"/>
                 <expression value="Bundle.entry.count()"/>
                 <value value="${requestEntryCount}"/>
                 <warningOnly value="false"/>
@@ -78,7 +78,7 @@
         </action>
         <action>
             <assert>
-                <description value="... all entries of transaction successful|FHIRTransReturns201"/>
+                <description value="... all entries of transaction successful.|FHIRTransReturns201"/>
                 <expression value="Bundle.entry.response.all(status.startsWith(201))"/>
                 <warningOnly value="false"/>
             </assert>

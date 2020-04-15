@@ -1,0 +1,96 @@
+<TestScript xmlns="http://hl7.org/fhir">
+
+    <fixture id="thePatient">
+        <autocreate value="false"/>
+        <autodelete value="false"/>
+
+        <resource>
+            <reference value="Patient/patient.xml"/>
+        </resource>
+    </fixture>
+    <variable>
+        <name value="FirstName"/>
+        <expression value="Patient.name.given"/>
+        <sourceId value="thePatient"/>
+    </variable>
+    <variable>
+        <name value="LastName"/>
+        <expression value="Patient.name.family"/>
+        <sourceId value="thePatient"/>
+    </variable>
+    <variable>
+        <name value="birthDate"/>
+        <expression value="Patient.birthDate"/>
+        <sourceId value="thePatient"/>
+    </variable>
+
+
+    <test>
+        <description value="Does patient exist?"/>
+        <action>
+            <operation>
+                <description value="search for patient."/>
+                <type>
+                    <code value="search"/>
+                </type>
+                <resource value="Patient"> </resource>
+                <contentType value="json"> </contentType>
+                <params value="?given=${FirstName}&amp;family=${LastName}&amp;birthdate=${birthDate}"> </params>
+                <responseId value="patient1-search"/>
+            </operation>
+        </action>
+        <action>
+            <assert>
+                <description value="ok status."/>
+                <sourceId value="patient1-search"/>
+                <response value="okay"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
+            <assert>
+                <description value="No OperationOutcome."/>
+                <compareToSourceId value="patient1-search"/>
+                <compareToSourceExpression value="Bundle.entry.response.outcome.where(is(FHIR.OperationOutcome)).empty()"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+    </test>
+
+    <test>
+        <description value="Check for error condition - multiple Patient instances."/>
+        <action>
+            <assert>
+                <description value="Multiple instances?"/>
+                <expression value="Bundle.total"/>
+                <operator value="lessThan"/>
+                <value value="2"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+    </test>
+
+    <test>
+        <action>
+            <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Conditional"/>
+            <assert>
+                <description value="needs loading."/>
+                <expression value="Bundle.total"/>
+                <operator value="equals"/>
+                <value value="0"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
+            <operation>
+                <!-- references patient from resourceCache in EC -->
+                <description value="submit patient."/>
+                <type>
+                    <code value="create"/>
+                </type>
+                <sourceId value="thePatient"/>
+            </operation>
+        </action>
+        <!--  Since test is not followed by an assertion - if this operation fails the script will fail -->
+    </test>
+</TestScript>

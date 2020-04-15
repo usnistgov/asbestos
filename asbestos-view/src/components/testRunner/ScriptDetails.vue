@@ -7,6 +7,9 @@
             <div v-else class="grayText">
                 (No description.)
             </div>
+            <div v-if="systemError" class="system-error">
+                {{systemError}}
+            </div>
             <div v-if="displayDetail">
                 <div v-for="(fixture, i) in fixtures"
                      :key="i">
@@ -79,6 +82,16 @@
         methods: {
         },
         computed: {
+            systemError() {
+                if (!this.report) return null;
+                if (!this.report.extension) return null;
+                let error = null
+                this.report.extension.forEach(extension => {
+                    if (extension.url === 'urn:failure')
+                        error = extension.valueString;
+                })
+                return error
+            },
             description() {
                 return this.script.description.replace(/\\n\\n/g, "<br />").replace(/\\n/g, " ")
             },

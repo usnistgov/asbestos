@@ -139,7 +139,7 @@ export const testRunnerStore = {
                 if (report && report.resourceType === 'TestReport') {
                     if (report.status === 'entered-in-error') {
                         const message = report.setup.action[0].assert.message
-                        this.commit('setError', 'script: ' + report.name + ': ' + message)
+                        this.commit('setError', 'report named ' + report.name + ' has status ' + report.status + '; message is: ' + message)
                     } else {
                         if (testName.includes("/"))
                             Vue.set(state.moduleTestReports, testName, report)

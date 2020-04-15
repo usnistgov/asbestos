@@ -174,6 +174,11 @@
 </style>
 // these are shared across the tool
 <style>
+    .system-error {
+        font-weight: bold;
+        font-size: larger;
+        background-color: red;
+    }
     .control-panel-font {
         font-size: small;
     }

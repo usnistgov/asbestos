@@ -8,9 +8,36 @@ import java.util.Objects;
 
 class Reporter {
 
+    private static class Report {
+        private TestReport.SetupActionOperationComponent opReport = null;
+        private TestReport.SetupActionAssertComponent asReport = null;
+
+        Report(TestReport.SetupActionOperationComponent opReport) {
+            this.opReport = opReport;
+        }
+        Report(TestReport.SetupActionAssertComponent asReport) {
+            this.asReport = asReport;
+        }
+        void setDetail(String s) {
+            if (opReport == null) asReport.setDetail(s);
+            else opReport.setDetail(s);
+        }
+        void setMessage(String s) {
+            if (opReport == null) asReport.setMessage(s);
+            else opReport.setMessage(s);
+        }
+        String getMessage() {
+            if (opReport == null) return asReport.getMessage();
+            return opReport.getMessage();
+        }
+        void setResult(TestReport.TestReportActionResult result) {
+            if (opReport == null) asReport.setResult(result);
+            else opReport.setResult(result);
+        }
+    }
 
     private final ValE val;
-    private final TestReport.SetupActionOperationComponent opReport;
+    private final Report report;
     private final String type;
     private final String label;
     private static boolean debug = false;
@@ -18,49 +45,57 @@ class Reporter {
     Reporter(ValE val, TestReport.SetupActionOperationComponent opReport, String type, String label) {
         Objects.requireNonNull(val);
         this.val = val;
-        this.opReport = opReport;
+        this.report = new Report(opReport);
+        this.type = type;
+        this.label = label;
+    }
+
+    Reporter(ValE val, TestReport.SetupActionAssertComponent asReport, String type, String label) {
+        Objects.requireNonNull(val);
+        this.val = val;
+        this.report = new Report(asReport);
         this.type = type;
         this.label = label;
     }
 
     void reportError(String msg, ResourceWrapper wrapper) {
         if (wrapper != null)
-            opReport.setDetail(wrapper.logLink());
+            report.setDetail(wrapper.logLink());
         reportError(msg);
     }
 
     void reportError(String msg) {
         String theMsg = formatMsg(type, label, msg);
         val.add(new ValE(theMsg).asError());
-        opReport.setResult(TestReport.TestReportActionResult.ERROR);
-        String existing = opReport.getMessage();
-        opReport.setMessage(existing == null ? (debug ? theMsg : msg) : existing + "\n" + (debug ? theMsg : msg));
+        report.setResult(TestReport.TestReportActionResult.ERROR);
+        String existing = report.getMessage();
+        report.setMessage(existing == null ? (debug ? theMsg : msg) : existing + "\n" + (debug ? theMsg : msg));
 
         //throw new RuntimeException("Internal Error");
     }
 
     void reportFail(String msg, ResourceWrapper wrapper) {
         if (wrapper != null)
-            opReport.setDetail(wrapper.logLink());
+            report.setDetail(wrapper.logLink());
         reportFail(msg);
     }
 
     void reportFail(String msg) {
         String theMsg = formatMsg(type, label, msg);
         val.add(new ValE(theMsg).asError());
-        opReport.setResult(TestReport.TestReportActionResult.FAIL);
-        opReport.setMessage(debug ? theMsg : msg);
+        report.setResult(TestReport.TestReportActionResult.FAIL);
+        report.setMessage(debug ? theMsg : msg);
     }
 
     void report(String msg) {
         String theMsg = formatMsg(type, label, msg);
-        String existing = opReport.getMessage();
-        opReport.setMessage(existing == null ? (debug ? theMsg : msg) : existing + "\n" + (debug ? theMsg : msg));
+        String existing = report.getMessage();
+        report.setMessage(existing == null ? (debug ? theMsg : msg) : existing + "\n" + (debug ? theMsg : msg));
     }
 
     void report(String msg, ResourceWrapper wrapper) {
         if (wrapper != null)
-            opReport.setDetail(wrapper.logLink());
+            report.setDetail(wrapper.logLink());
         report(msg);
     }
 

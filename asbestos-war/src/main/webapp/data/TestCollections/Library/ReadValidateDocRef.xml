@@ -14,13 +14,13 @@
     <url value=""/>
     <name value="ReadValidateDocRef"/>
     <status value="active"/>
-    <description value="Read DocumentReference and validate against what was sent"/>
+    <description value="Read DocumentReference and validate against what was sent."/>
 
     <test>
-        <description value="Read back the DocumentReference and validate"/>
+        <description value="Read back the DocumentReference and validate."/>
         <action>
             <operation>
-                <description value="DocumentReference"/>
+                <description value="DocumentReference."/>
                 <label value="read-back"/>
                 <type>
                     <code value="read"/>
@@ -31,21 +31,21 @@
         </action>
         <action>
             <assert>
-                <description value="... was successful"/>
+                <description value="... was successful."/>
                 <response value="okay"/>
                 <warningOnly value="false"/>
             </assert>
         </action>
         <action>
             <assert>
-                <description value="... returned a DocumentReference"/>
+                <description value="... returned a DocumentReference."/>
                 <resource value="DocumentReference"/>
                 <warningOnly value="false"/>
             </assert>
         </action>
         <action>
             <assert>
-                <description value="... Patient reference returned as sent"/>
+                <description value="... Patient reference returned as sent."/>
                 <expression value="DocumentReference.subject.reference"/>
                 <sourceId value="readBackResponse"/>
                 <value value="${patientResourceId}"/>

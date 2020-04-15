@@ -13,6 +13,16 @@
                     <div xmlns="http://www.w3.org/1999/xhtml">Comment</div>
                     <status value="empty"/>
                 </text>
+                <contained>
+                    <Patient xmlns="http://hl7.org/fhir">
+                        <id value="sourcePatient"/>
+                        <identifier>
+                            <use value="usual" />
+                            <system value="urn:oid:1.2.214" />
+                            <value value="myMRN" />
+                        </identifier>
+                    </Patient>
+                </contained>
                 <status value="current"/>
                 <masterIdentifier>
                     <system value="urn:ietf:rfc:3986"/>

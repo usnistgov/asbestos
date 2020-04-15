@@ -13,7 +13,7 @@ public class VariableMgr {
     private TestScript testScript;
     private FixtureMgr fixtureMgr;  // variables reference fixtures so this is needed
     private ValE val;
-    private TestReport.SetupActionOperationComponent opReport;
+    //private TestReport.SetupActionOperationComponent opReport;
     private Reporter reporter;
     private Map<String, String> externalVariables = new HashMap<>();  // passed by module call
 
@@ -215,8 +215,16 @@ public class VariableMgr {
     VariableMgr setOpReport(TestReport.SetupActionOperationComponent opReport) {
         Objects.requireNonNull(opReport);
         Objects.requireNonNull(val);
-        this.opReport = opReport;
+        //this.opReport = opReport;
         reporter = new Reporter(val, opReport, "", "");
+        return this;
+    }
+
+    VariableMgr setOpReport(TestReport.SetupActionAssertComponent asReport) {
+        Objects.requireNonNull(asReport);
+        Objects.requireNonNull(val);
+        //this.opReport = opReport;
+        reporter = new Reporter(val, asReport, "", "");
         return this;
     }
 
