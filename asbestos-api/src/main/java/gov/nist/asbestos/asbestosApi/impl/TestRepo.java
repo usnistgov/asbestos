@@ -10,8 +10,19 @@ import org.hl7.fhir.r4.model.TestScript;
 
 import java.net.URISyntaxException;
 
+/**
+ * Run tests
+ */
 public class TestRepo {
 
+    /**
+     * Run a server test
+     * @param channel represents the SUT
+     * @param testCollectionName test collection the test is found in
+     * @param testName name of the test
+     * @return the result
+     * @throws URISyntaxException
+     */
     public static TestResult runServerTest(Channel channel, String testCollectionName, String testName) throws URISyntaxException {
 
         // get TestScript

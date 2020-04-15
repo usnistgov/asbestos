@@ -2,6 +2,9 @@ package gov.nist.asbestos.asbestosApi.impl;
 
 import gov.nist.asbestos.asbestosApi.TestParms;
 
+/**
+ * Parameters controlling how a test is run/encoded.
+ */
 public class TestParmsImpl implements TestParms {
     private boolean useJson = true;
     private boolean useGzip = false;

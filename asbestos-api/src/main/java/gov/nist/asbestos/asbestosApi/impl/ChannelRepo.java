@@ -11,6 +11,9 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
+/**
+ * Access portal to create, retrieve, and delete channels.
+ */
 public class ChannelRepo {
 
     static public Channel get(String testSession, String channelId) throws Exception {
