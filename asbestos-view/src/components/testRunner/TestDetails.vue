@@ -1,6 +1,5 @@
 <template>
     <div class="inlineDiv">
-        <div class="pre-test-gap"></div>
         <span v-bind:class="{
             pass:         isPass  && colorful,
             'pass-plain-detail': isPass  && !colorful,
@@ -15,6 +14,10 @@
             <test-status-event-wrapper v-if="!statusRight"
                          :status-on-right="statusRight"
                          :report="report"
+                         :debug-title="testLevelDebugTitle"
+                         @onStatusMouseOver="$emit('onStatusMouseOver')"
+                         @onStatusMouseLeave="$emit('onStatusMouseLeave')"
+                         @onStatusClick="$emit('onStatusClick')"
             > </test-status-event-wrapper>
 
         <span v-if="display">
@@ -172,6 +175,7 @@
             'scriptContained', 'reportContained', // contained section of the TestScript and TestReport
             'label',
             'testScriptIndex', 'testIndex', 'testType',
+            'testLevelDebugTitle',
         ],
         components: {
             ActionDetails, ScriptDetailsContained, TestStatusEventWrapper

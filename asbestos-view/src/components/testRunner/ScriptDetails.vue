@@ -27,7 +27,13 @@
 
             <div v-if="script.setup">
                 <ul class="noListStyle">
-                    <li>
+                    <li
+                            :key="'Setup0'"
+                            v-bind:class="{
+                                'breakpoint-indicator': showSetupBreakpointIndicator(testScriptIndex, 0),
+                                'breakpoint-hit-indicator': isBreakpointHit(testScriptIndex, 'setup', 0),
+                            }"
+                    >
                     <test-details
                         :script="script.setup"
                         :report="report ? report.setup : null"
@@ -37,6 +43,10 @@
                         :test-script-index="testScriptIndex"
                         :test-type="'setup'"
                         :test-index="0"
+                        :test-level-debug-title="debugTitle(testScriptIndex, 'setup', 0)"
+                        @onStatusMouseOver="hoverSetupLevelIndex = 0"
+                        @onStatusMouseLeave="hoverSetupLevelIndex = -1"
+                        @onStatusClick="toggleBreakpointIndex(testScriptIndex, 'setup', 0)"
                     ></test-details>
                     </li>
                 </ul>
@@ -50,22 +60,30 @@
             </div>
 
             <div v-if="script">
-                <div v-for="(test, testi) in tests"
-                     :key="'Test' + testi">
                     <ul class="noListStyle">
-                        <li v-if="script">
+                        <li
+                           v-for="(test, testi) in tests"
+                           :key="'Test' + testi"
+                           v-bind:class="{
+                                'breakpoint-indicator': showTestBreakpointIndicator(testScriptIndex, 'test', testi),
+                                'breakpoint-hit-indicator': isBreakpointHit(testScriptIndex, 'test', testi),
+                            }"
+                        >
                             <test-details
                                 :script="script.test[testi]"
-                                :report="report ? report.test[testi] : null"
+                                :report="report ? (report.test ? report.test[testi] : null) : null"
                                 :script-contained="script.contained"
                                 :report-contained="report ? report.contained : null"
                                 :test-script-index="testScriptIndex"
                                 :test-type="'test'"
                                 :test-index="testi"
+                                :test-level-debug-title="debugTitle(testScriptIndex, 'test', testi)"
+                                @onStatusMouseOver="hoverTestLevelIndex = testi"
+                                @onStatusMouseLeave="hoverTestLevelIndex = -1"
+                                @onStatusClick="toggleBreakpointIndex(testScriptIndex, 'test', testi)"
                             ></test-details>
                         </li>
                     </ul>
-                </div>
             </div>
 
             <!-- add TEARDOWN here -->
@@ -83,9 +101,52 @@
         data() {
             return {
                 displayDetail: false,
+                hoverTestLevelIndex: -1,
+                hoverSetupLevelIndex: -1,
             }
         },
         methods: {
+            async toggleBreakpointIndex(testScriptIndex, testType, testIndex) {
+                // console.log("enter toggleBreakpointIndex")
+                let obj = {testScriptIndex: testScriptIndex, breakpointIndex: testType + testIndex }
+                if (! this.$store.getters.hasBreakpoint(obj)) {
+
+                    if (testType === 'test') {
+                        this.hoverTestLevelIndex = testIndex // Restore the hoverActionIndex when toggle on the same item goes from on(#)-off(-1)-on(#)
+                    } else if (testType === 'setup') {
+                        this.hoverSetupLevelIndex = testIndex
+                    }
+                    await this.$store.dispatch('addBreakpoint', obj)
+                } else {
+                    if (testType === 'test') {
+                        this.hoverTestLevelIndex = -1 // Immediately remove the debug indicator while the mouse hover is still active but without having to wait for the mouseLeave event
+                    } else if (testType === 'setup') {
+                        this.hoverSetupLevelIndex = -1
+                    }
+                    // remove breakpoint
+                    await this.$store.dispatch('removeBreakpoint', obj)
+                }
+            },
+            debugTitle(testScriptIndex, testType, testIndex) {
+                let obj = {testScriptIndex: testScriptIndex, breakpointIndex: testType + testIndex }
+                return this.$store.getters.getDebugTitle(obj);
+            },
+            showSetupBreakpointIndicator(testScriptIndex, setupIndex) {
+                let obj = {testScriptIndex: testScriptIndex, breakpointIndex: 'setup0' }
+                let hasBreakpoint = this.$store.getters.hasBreakpoint(obj)
+                let isHover = setupIndex === this.hoverSetupLevelIndex
+                let isBreakpointHit = this.isBreakpointHit(testScriptIndex, 'setup', 0)
+                return (hasBreakpoint || isHover) && ! isBreakpointHit // Vue Reactivity seems to work better when boolean logic is written like this. Otherwise this whole method showSetup... does not even get called for unknown reason.
+            },
+            showTestBreakpointIndicator(testScriptIndex, testType, testIndex) {
+                // console.log('calling showTestBreakpointIndicator ' + this.hoverTestLevelIndex)
+                let obj = {testScriptIndex: testScriptIndex, breakpointIndex: testType + testIndex }
+                return (this.$store.getters.hasBreakpoint(obj) || this.hoverTestLevelIndex === testIndex) && ! this.isBreakpointHit(testScriptIndex, testType, testIndex)
+            },
+            isBreakpointHit(testScriptIndex, testType, testIndex) {
+                let obj = {testScriptIndex: testScriptIndex, breakpointIndex: testType + testIndex}
+                return this.$store.getters.isBreakpointHit(obj)
+            },
         },
         computed: {
             fixtures() {

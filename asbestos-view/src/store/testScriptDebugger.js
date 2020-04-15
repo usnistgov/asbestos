@@ -6,6 +6,7 @@ Vue.use(Vuex)
 export const testScriptDebuggerStore = {
     state() {
         return {
+            waitingForBreakpoint: false,
             showDebugButton: {}, /* keyProperty{testScriptIndex:}=value{breakpointIndex:,debugButtonLabel:} */
             /* debugButtonLabel exists inside of showDebugButton because there are multiple testscripts and it is necessary to keep showing the Debug button labels for other test scripts.
             If a single button label variable was used then all of the Debug buttons would be become changed to Resume when a breakpoint is hit */
@@ -149,6 +150,7 @@ export const testScriptDebuggerStore = {
             if (state.testScriptDebuggerWebSocket === null) {
                 state.testScriptDebuggerWebSocket = new WebSocket('wss://fhirtoolkit.test:9743/asbestos/testScriptDebugger') // TODO: Replace https off the HTTPS TOOLKIT BASE and append the Endpoint
                 state.testScriptDebuggerWebSocket.onopen = event => {
+                    state.waitingForBreakpoint = true
                     // Disable Run button
                     console.log('In socket onOpen. event: ' + event === undefined)
                     // clear log 1?
@@ -165,6 +167,7 @@ export const testScriptDebuggerStore = {
                     }
                 }
                 state.testScriptDebuggerWebSocket.onclose = event => {
+                    state.waitingForBreakpoint = false
                     // Enable Run button
                     if (event != null && event != undefined) {
                         console.log('onclose data: ' + event.returnData)
@@ -179,9 +182,11 @@ export const testScriptDebuggerStore = {
                     console.log('onMessage: ' + event.data)
                     let returnData = JSON.parse(event.data)
                     if (returnData.messageType === 'final-report') {
+                        state.waitingForBreakpoint = false
                         commit('setCombinedTestReports', returnData.testReport)
                         state.testScriptDebuggerWebSocket.close()
                     } else if (returnData.messageType === 'breakpoint-hit') {
+                        state.waitingForBreakpoint = false
                         // clear log 2?
                        console.log('breakpoint hit: ' + returnData.breakpointIndex) //  This needs to be {key: x, breakpointIndex: x}
                        commit('setDebugAction', returnData)
@@ -195,12 +200,14 @@ export const testScriptDebuggerStore = {
                     }
                 }
                 state.testScriptDebuggerWebSocket.onerror = function(event) {
+                    state.waitingForBreakpoint = false
                     if (event != null && event != undefined) {
                         alert('Error: ' + event.data)
                     }
                 }
 
             } else if (mapKey in state.showDebugButton && state.showDebugButton[mapKey].debugButtonLabel === 'Resume') {
+                state.waitingForBreakpoint = true
                 console.log('Resuming from ' + state.showDebugButton[mapKey].breakpointIndex)
                 state.testScriptDebuggerWebSocket.send('{"resumeBreakpoint":"true"}')
                 state.showDebugButton[mapKey].breakpointIndex = null // Clear flag

@@ -122,6 +122,7 @@
                                 <button v-if="isDebugKillable(i)"
                                         class="debugKillTestScriptButton"
                                         @click.stop="doDebugKill(i)">Kill</button>
+                                <span v-if="$store.state.testScriptDebugger.waitingForBreakpoint">&nbsp;&nbsp;&#x23F1;</span> <!-- Display a stopwatch if waiting for breakpoint to be hit -->
                             </span>
 
                             <script-status v-if="statusRight" :status-right="statusRight" :name="name"> </script-status>
