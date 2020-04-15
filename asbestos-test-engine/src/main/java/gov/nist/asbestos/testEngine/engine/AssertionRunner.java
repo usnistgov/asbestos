@@ -4,7 +4,6 @@ import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import gov.nist.asbestos.simapi.validation.ValE;
 import gov.nist.asbestos.testEngine.engine.assertion.MinimumId;
-import gov.nist.asbestos.testEngine.engine.assertion.Report;
 import org.hl7.fhir.r4.model.*;
 
 import java.util.Arrays;

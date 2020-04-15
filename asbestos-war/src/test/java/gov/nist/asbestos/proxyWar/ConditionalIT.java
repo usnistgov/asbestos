@@ -1,15 +1,13 @@
 package gov.nist.asbestos.proxyWar;
 
-import gov.nist.asbestos.client.Base.EC;
 import gov.nist.asbestos.client.client.FhirClient;
 import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
-import gov.nist.asbestos.http.operations.HttpDelete;
-import gov.nist.asbestos.http.operations.HttpGet;
 import gov.nist.asbestos.http.operations.HttpPost;
 import gov.nist.asbestos.sharedObjects.ChannelConfig;
 import gov.nist.asbestos.sharedObjects.ChannelConfigFactory;
 import gov.nist.asbestos.simapi.validation.Val;
+import gov.nist.asbestos.testEngine.engine.ExtensionDef;
 import gov.nist.asbestos.testEngine.engine.ModularEngine;
 import gov.nist.asbestos.testEngine.engine.TestEngine;
 import org.hl7.fhir.r4.model.Extension;
@@ -61,19 +59,28 @@ class ConditionalIT {
     }
 
     @Test
-    void simpleTest() throws URISyntaxException {
+    void submissionTest() throws URISyntaxException {
+
+        //
+        // First time submission - actual submission happens
+        //
+
         TestEngine engine = run("/conditional/install/TestScript.xml");
         assertEquals(TestReport.TestReportResult.PASS, engine.getTestReport().getResult());
 
+        // first time submission should happen
         engine.getTestReport().getTest().get(2).getAction().get(1).getOperation().getResult().equals(TestReport.TestReportActionResult.PASS);
 
         TestReport.TestReportSetupComponent setups = engine.getTestReport().getSetup();
         assertEquals(0, setups.getAction().size());
 
-        List<Extension> failures = engine.getTestReport().getExtensionsByUrl("urn:failure");
+        List<Extension> failures = engine.getTestReport().getExtensionsByUrl(ExtensionDef.failure);
         assertEquals(0, failures.size());
 
 
+        //
+        // Second time submission - actual submission does not happen
+        //
 
         TestEngine engine2 = run("/conditional/install/TestScript.xml");
         assertEquals(TestReport.TestReportResult.PASS, engine2.getTestReport().getResult());
@@ -84,7 +91,7 @@ class ConditionalIT {
         TestReport.TestReportSetupComponent setups2 = engine2.getTestReport().getSetup();
         assertEquals(0, setups2.getAction().size());
 
-        List<Extension> failures2 = engine.getTestReport().getExtensionsByUrl("urn:failure");
+        List<Extension> failures2 = engine.getTestReport().getExtensionsByUrl(ExtensionDef.failure);
         assertEquals(0, failures2.size());
     }
 

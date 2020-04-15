@@ -214,7 +214,7 @@ public class TestEngine  {
         getTestReport().setStatus(TestReport.TestReportStatus.ENTEREDINERROR);
         getTestReport().setResult(TestReport.TestReportResult.FAIL);
 
-        Extension extension = new Extension().setUrl("urn:failure").setValue(new StringType(msg));
+        Extension extension = new Extension().setUrl(ExtensionDef.failure).setValue(new StringType(msg));
         getTestReport().getExtension().add(extension);
 
 //        TestReport.TestReportSetupComponent setup = testReport.getSetup();
@@ -268,33 +268,48 @@ public class TestEngine  {
     }
 
     private void fillInSkips() {
-        List<TestScript.SetupActionComponent> scriptSetups = testScript.getSetup().getAction();
-        while (testReport.getSetup().getAction().size() < scriptSetups.size()) {
-            testReport.getSetup().addAction().set
-        }
-        if (scriptSetups.size() != reportSetups.size())
-            reportTerminalFailure("TestEngine internal Error: Script Setup had " +
-                    scriptSetups.size() +
-                    " elements but Report had " +
-                    reportSetups.size());
+        int scriptCount;
+        int reportCount;
 
-        for (int i=0; i< testScript.getTest().size(); i++) {
-            List<TestScript.TestActionComponent> tests = testScript.getTest().get(i).getAction();
-            List<TestReport.TestActionComponent> reports = testReport.getTest().get(i).getAction();
-            if (tests.size() != reports.size())
-                reportTerminalFailure("TestEngine internal Error: Script Test " + i + " had " +
-                        tests.size() +
-                        " elements but Report had " +
-                        reports.size());
+        scriptCount = testScript.getSetup().getAction().size();
+        reportCount = testReport.getSetup().getAction().size();
+        for (int i=reportCount; i<scriptCount; i++) {
+            if (testScript.getSetup().getAction().get(i).hasOperation()) {
+                testReport.getSetup().addAction().setOperation(
+                        new TestReport.SetupActionOperationComponent().setResult(TestReport.TestReportActionResult.SKIP)
+                );
+            } else {
+                testReport.getSetup().addAction().setAssert(
+                        new TestReport.SetupActionAssertComponent().setResult(TestReport.TestReportActionResult.SKIP)
+                );
+            }
         }
 
-        List<TestScript.TeardownActionComponent> script = testScript.getTeardown().getAction();
-        List<TestReport.TeardownActionComponent> report = testReport.getTeardown().getAction();
-        if (script.size() != report.size())
-            reportTerminalFailure("TestEngine internal Error: Script Teardown had " +
-                    script.size() +
-                    " elements but Report had " +
-                    report.size());
+        for (int testi=0; testi<testScript.getTest().size(); testi++) {
+            scriptCount = testScript.getTest().get(testi).getAction().size();
+            reportCount = testReport.getTest().get(testi).getAction().size();
+            for (int i=reportCount; i<scriptCount; i++) {
+                if (testScript.getTest().get(testi).getAction().get(i).hasOperation()) {
+                    testReport.getTest().get(testi).addAction().setOperation(
+                            new TestReport.SetupActionOperationComponent().setResult(TestReport.TestReportActionResult.SKIP)
+                    );
+                } else {
+                    testReport.getTest().get(testi).addAction().setAssert(
+                            new TestReport.SetupActionAssertComponent().setResult(TestReport.TestReportActionResult.SKIP)
+                    );
+                }
+            }
+        }
+
+        scriptCount = testScript.getTeardown().getAction().size();
+        reportCount = testReport.getTeardown().getAction().size();
+        for (int i=reportCount; i<scriptCount; i++) {
+            if (testScript.getTeardown().getAction().get(i).hasOperation()) {
+                testReport.getTeardown().addAction().setOperation(
+                        new TestReport.SetupActionOperationComponent().setResult(TestReport.TestReportActionResult.SKIP)
+                );
+            }
+        }
     }
 
     // number of actions in script and report must be the same
@@ -395,7 +410,7 @@ public class TestEngine  {
                 TestReport.SetupActionOperationComponent op = action.getOperation();
                 TestReport.TestReportActionResult result = op.getResult();
                 if (result == TestReport.TestReportActionResult.FAIL || result == TestReport.TestReportActionResult.ERROR) {
-                    if (op.getExtensionByUrl("urn:conditional") == null)
+                    if (op.getExtensionByUrl(ExtensionDef.conditional) == null)
                         failingComponents.add(op.getMessage());
                 }
             }
@@ -403,7 +418,7 @@ public class TestEngine  {
                 TestReport.SetupActionAssertComponent as = action.getAssert();
                 TestReport.TestReportActionResult result2 = as.getResult();
                 if (result2 == TestReport.TestReportActionResult.FAIL || result2 == TestReport.TestReportActionResult.ERROR) {
-                    if (as.getExtensionByUrl("urn:conditional") == null)
+                    if (as.getExtensionByUrl(ExtensionDef.conditional) == null)
                         failingComponents.add(as.getMessage());
                 }
             }
@@ -414,7 +429,7 @@ public class TestEngine  {
                     TestReport.SetupActionOperationComponent op = action.getOperation();
                     TestReport.TestReportActionResult result = op.getResult();
                     if (result == TestReport.TestReportActionResult.FAIL || result == TestReport.TestReportActionResult.ERROR) {
-                        if (op.getExtensionByUrl("urn:conditional") == null)
+                        if (op.getExtensionByUrl(ExtensionDef.conditional) == null)
                             failingComponents.add(op.getMessage());
                     }
                 }
@@ -422,7 +437,7 @@ public class TestEngine  {
                     TestReport.SetupActionAssertComponent as = action.getAssert();
                     TestReport.TestReportActionResult result2 = as.getResult();
                     if (result2 == TestReport.TestReportActionResult.FAIL || result2 == TestReport.TestReportActionResult.ERROR) {
-                        if (as.getExtensionByUrl("urn:conditional") == null)
+                        if (as.getExtensionByUrl(ExtensionDef.conditional) == null)
                             failingComponents.add(as.getMessage());
                     }
                 }
@@ -494,17 +509,17 @@ public class TestEngine  {
                         } catch (Throwable e) {
                             throw new Error(e);
                         }
-                    } else if (fix.hasExtension("urn:subFixture")) {
-                        Extension subfix = fix.getExtensionByUrl("urn:subFixture");
+                    } else if (fix.hasExtension(ExtensionDef.subFixture)) {
+                        Extension subfix = fix.getExtensionByUrl(ExtensionDef.subFixture);
 
-                        Extension fhirPathExt = subfix.getExtensionByUrl("urn:fhirPath");
+                        Extension fhirPathExt = subfix.getExtensionByUrl(ExtensionDef.fhirPath);
                         if (fhirPathExt == null || fhirPathExt.getValue() == null)
-                            throw new Error("Extension urn:subFixture has no value for its urn:fhirPath subExtension");
+                            throw new Error("Extension urn:subFixture has no value for its " + ExtensionDef.failure + " subExtension");
                         String fhirPath = fhirPathExt.getValue().toString();
 
-                        Extension sourceIdExt = subfix.getExtensionByUrl("urn:sourceId");
+                        Extension sourceIdExt = subfix.getExtensionByUrl(ExtensionDef.sourceId);
                         if(sourceIdExt == null || sourceIdExt.getValue() == null)
-                            throw new Error("Extension urn:subFixture has no value for its urn:sourceId subExtension");
+                            throw new Error("Extension " + ExtensionDef.subFixture + " has no value for its " + ExtensionDef.sourceId + " subExtension");
                         String sourceId = sourceIdExt.getValue().toString();
 
                         FixtureSub fixtureSub = new FixtureSub(fixtureMgr, sourceId, fhirPath);
@@ -682,7 +697,7 @@ public class TestEngine  {
             List<Extension> extensions = operation.getModifierExtension();
             for (Extension extension : extensions) {
                 String url = extension.getUrl();
-                if (url.equals("https://github.com/usnistgov/asbestos/wiki/TestScript-Import")) {
+                if (url.equals(ExtensionDef.ts_import)) {
                     handleImport(extension, report);
                 } else {
                     report.setMessage("Operation with unknown modifierExtension " + url + " found");
@@ -745,7 +760,7 @@ public class TestEngine  {
                         }
                         // conditional no longer used this way
                         String url = extension.getUrl();
-                        if (url.equals("https://github.com/usnistgov/asbestos/wiki/TestScript-Conditional")) {
+                        if (url.equals(ExtensionDef.conditional)) {
                             isConditional = true;
                             boolean conditionalResult = handleConditionalTest(testComponent, testReportComponent, extension);
                             if (conditionalResult) {
@@ -840,10 +855,10 @@ public class TestEngine  {
 
         String moduleName = simpleName(componentReference.getComponentRef());
         String moduleId = assignModuleId(moduleName);
-        opReport.addExtension("urn:moduleId", new StringType(moduleId));
-        opReport.addExtension("urn:moduleName", new StringType(moduleName));
-        testEngine1.getTestReport().addExtension("urn:moduleId", new StringType(moduleId));
-        testEngine1.getTestReport().addExtension("urn:moduleName", new StringType(moduleName));
+        opReport.addExtension(ExtensionDef.moduleId, new StringType(moduleId));
+        opReport.addExtension(ExtensionDef.moduleName, new StringType(moduleName));
+        testEngine1.getTestReport().addExtension(ExtensionDef.moduleId, new StringType(moduleId));
+        testEngine1.getTestReport().addExtension(ExtensionDef.moduleName, new StringType(moduleName));
 
         FixtureMgr innerFixtures = testEngine1.fixtureMgr;
         Map<String, FixtureComponent> outFixturesForComponent = new HashMap<>();
@@ -896,7 +911,7 @@ public class TestEngine  {
 
         TestReport containedTestReport = new TestReport();
 
-        Extension extension1 = new Extension("https://github.com/usnistgov/asbestos/wiki/TestScript-Conditional",
+        Extension extension1 = new Extension(ExtensionDef.ts_conditional,
                 new Reference(containedTestReport));
         testReportComponent.addModifierExtension(extension1);
 
@@ -938,7 +953,7 @@ public class TestEngine  {
             String typePrefix = "contained.action";
             for (int i=0; i<testScriptElement.getAction().size(); i++) {
                 TestScript.TestActionComponent action = testScriptElement.getAction().get(i);
-                Extension conditional = getExtension(action.getModifierExtension(), "https://github.com/usnistgov/asbestos/wiki/TestScript-Conditional");
+                Extension conditional = getExtension(action.getModifierExtension(), ExtensionDef.ts_conditional);
                 boolean isConditional = conditional != null;
                 TestReport.TestActionComponent actionReportComponent = testReportComponent.addAction();
                 if (invalidAction(action, actionReportComponent, fVal))
@@ -954,7 +969,7 @@ public class TestEngine  {
                     }
                     if (isConditional && testReport.getResult().equals(TestReport.TestReportResult.FAIL)) {
                         // report error  but do not propagate
-                        reportOp.addExtension("urn:conditional", new StringType(""));
+                        reportOp.addExtension(ExtensionDef.conditional, new StringType("x"));
                         return false;
                     }
                     // an operation not followed by an assert that fails causes test to fail
@@ -974,7 +989,7 @@ public class TestEngine  {
                     if ("fail".equals(actionReport.getResult().toCode())) {
                         if (isConditional) {
                             // report error  but do not propagate
-                            actionReport.addExtension("urn:conditional", new StringType(""));
+                            actionReport.addExtension(ExtensionDef.conditional, new StringType("x"));
                             return false;
                         } else {
                             testReport.setStatus(TestReport.TestReportStatus.COMPLETED);
@@ -1084,7 +1099,7 @@ public class TestEngine  {
 
             if (testComponent.hasModifierExtension()) {
                 Extension extension = testComponent.getModifierExtensionFirstRep();
-                if (extension.getUrl().equals("https://github.com/usnistgov/asbestos/wiki/TestScript-Conditional")) {
+                if (extension.getUrl().equals(ExtensionDef.ts_conditional)) {
                     if (extension.getValue() instanceof Reference) {
                         Reference reference = (Reference) extension.getValue();
                         if (reference.getResource() instanceof TestReport) {
