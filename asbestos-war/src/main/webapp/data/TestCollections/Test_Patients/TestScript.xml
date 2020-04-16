@@ -1,61 +1,11 @@
 <!--
-	This TestScript is generic - it will work with any Patient resource
-	as long as Patient is in Patient/patient.xml and it has a
-	given and family name and dob that make it unique.
+	This script works for all patients in the local directories.
 -->
 
-<TestScript xmlns="http://hl7.org/fhir">
-	<description value="Load patient if needed."/>
-	<contained>
-		<TestScript>
-			<id value="1"/>
-			<description value="patient needs loading."/>
-			<test>  <!-- basic operation and validation -->
-				<action>
-					<operation>
-						<description value="looking for patient."/>
-						<type>
-							<code value="search"/>
-						</type>
-						<resource value="Patient"> </resource>
-						<contentType value="json"> </contentType>
-						<params value="?given=${FirstName}&amp;family=${LastName}&amp;birthdate=${birthDate}"> </params>
-						<responseId value="patient1-search"/>
-					</operation>
-				</action>
-				<action>
-					<assert>
-						<description value="Search has ok status."/>
-						<sourceId value="patient1-search"/>
-						<response value="okay"/>
-						<warningOnly value="false"/>
-					</assert>
-				</action>
-				<action>
-					<assert>
-						<description value="No OperationOutcome."/>
-						<compareToSourceId value="patient1-search"/>
-						<compareToSourceExpression value="Bundle.entry.response.outcome.where(is(FHIR.OperationOutcome)).empty()"/>
-						<warningOnly value="false"/>
-					</assert>
-				</action>
-				<action>
-					<assert>
-						<description value="needs loading."/>
-						<expression value="Bundle.total"/>
-						<operator value="equals"/>
-						<value value="0"/>
-						<warningOnly value="false"/>
-					</assert>
-				</action>
-			</test>
-		</TestScript>
-	</contained>
 
-	<fixture id="patient1">
-		<!--
-           This patient comes out of the test definition
-        -->
+<TestScript xmlns="http://hl7.org/fhir">
+
+	<fixture id="thePatient">
 		<autocreate value="false"/>
 		<autodelete value="false"/>
 
@@ -65,26 +15,81 @@
 	</fixture>
 	<variable>
 		<name value="FirstName"/>
-		<sourceId value="patient1"/>
 		<expression value="Patient.name.given"/>
+		<sourceId value="thePatient"/>
 	</variable>
 	<variable>
 		<name value="LastName"/>
-		<sourceId value="patient1"/>
 		<expression value="Patient.name.family"/>
+		<sourceId value="thePatient"/>
 	</variable>
 	<variable>
 		<name value="birthDate"/>
-		<sourceId value="patient1"/>
 		<expression value="Patient.birthDate"/>
+		<sourceId value="thePatient"/>
 	</variable>
+
+
 	<test>
-		<modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Conditional">
-			<valueReference>
-				<reference value="#1"/>
-			</valueReference>
-		</modifierExtension>
-		<description value="patient not loaded."/>
+		<description value="Does patient exist?"/>
+		<action>
+			<operation>
+				<description value="search for patient."/>
+				<type>
+					<code value="search"/>
+				</type>
+				<resource value="Patient"> </resource>
+				<contentType value="json"> </contentType>
+				<params value="?given=${FirstName}&amp;family=${LastName}&amp;birthdate=${birthDate}"> </params>
+				<responseId value="patient1-search"/>
+			</operation>
+		</action>
+		<action>
+			<assert>
+				<description value="ok status."/>
+				<sourceId value="patient1-search"/>
+				<response value="okay"/>
+				<warningOnly value="false"/>
+			</assert>
+		</action>
+		<action>
+			<assert>
+				<description value="No OperationOutcome."/>
+				<compareToSourceId value="patient1-search"/>
+				<compareToSourceExpression value="Bundle.entry.response.outcome.where(is(FHIR.OperationOutcome)).empty()"/>
+				<warningOnly value="false"/>
+			</assert>
+		</action>
+	</test>
+
+	<test>
+		<description value="Check for error condition - multiple Patient instances."/>
+		<action>
+			<assert>
+				<description value="Multiple instances?"/>
+				<expression value="Bundle.total"/>
+				<operator value="lessThan"/>
+				<value value="2"/>
+				<warningOnly value="false"/>
+			</assert>
+		</action>
+	</test>
+
+	<test>
+		<action>
+			<!--
+                This is a condition.  If this assert fails then the remaining actions in this test do not run.
+                This assert failing does not cause the overall script to fail.
+            -->
+			<modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Conditional"/>
+			<assert>
+				<description value="needs loading."/>
+				<expression value="Bundle.total"/>
+				<operator value="equals"/>
+				<value value="0"/>
+				<warningOnly value="false"/>
+			</assert>
+		</action>
 		<action>
 			<operation>
 				<!-- references patient from resourceCache in EC -->
@@ -92,9 +97,9 @@
 				<type>
 					<code value="create"/>
 				</type>
-				<sourceId value="patient1"/>
-				<responseId value="patient1-response"/>
+				<sourceId value="thePatient"/>
 			</operation>
 		</action>
+		<!--  Since test is not followed by an assertion - if this operation fails the script will fail -->
 	</test>
 </TestScript>

@@ -1,0 +1,67 @@
+<TestScript>
+
+    <fixture id="thePatient">
+        <autocreate value="false"/>
+        <autodelete value="false"/>
+        <resource>
+            <reference value="Patient/patient.xml"/>
+        </resource>
+    </fixture>
+    <variable>
+        <name value="FirstName"/>
+        <expression value="Patient.name.given"/>
+        <sourceId value="thePatient"/>
+    </variable>
+    <variable>
+        <name value="LastName"/>
+        <expression value="Patient.name.family"/>
+        <sourceId value="thePatient"/>
+    </variable>
+    <variable>
+        <name value="birthDate"/>
+        <expression value="Patient.birthDate"/>
+        <sourceId value="thePatient"/>
+    </variable>
+
+    <test>
+        <!-- this will succeed -->
+        <action>
+            <operation>
+                <description value="search for patient."/>
+                <type>
+                    <code value="search"/>
+                </type>
+                <resource value="Patient"> </resource>
+                <contentType value="json"> </contentType>
+                <params value="?given=${FirstName}&amp;family=${LastName}&amp;birthdate=${birthDate}"> </params>
+                <responseId value="patient1-search"/>
+            </operation>
+        </action>
+
+        <!-- this will fail -->
+        <action>
+            <assert>
+                <sourceId value="patient1-search"/>
+                <response value="bad"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+
+    </test>
+
+    <test>
+        <!-- this would normally run because it is in a different test
+         The extension changes that - a previous failure causes this not to run
+        -->
+        <modifierExtension url="urn:noErrors"/>
+        <action>
+            <assert>
+                <description value="Multiple instances?"/>
+                <expression value="Bundle.total"/>
+                <operator value="greaterThan"/>
+                <value value="-1"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+    </test>
+</TestScript>

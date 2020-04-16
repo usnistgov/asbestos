@@ -1,4 +1,4 @@
-package gov.nist.asbestos.proxyWar.delegation;
+package gov.nist.asbestos.proxyWar;
 
 import gov.nist.asbestos.client.Base.EC;
 import gov.nist.asbestos.client.client.FhirClient;

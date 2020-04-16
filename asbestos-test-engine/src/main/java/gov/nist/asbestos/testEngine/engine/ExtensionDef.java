@@ -3,6 +3,8 @@ package gov.nist.asbestos.testEngine.engine;
 public class ExtensionDef {
 
     public static final String failure = "urn:failure";
+    public static final String multiErrors = "urn:multipleErrors";
+    public static final String noErrors = "urn:noErrors";
     public static final String conditional = "urn:conditional";
     public static final String subFixture = "urn:subFixture";
     public static final String fhirPath = "urn:fhirPath";

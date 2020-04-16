@@ -3,7 +3,6 @@
     <fixture id="thePatient">
         <autocreate value="false"/>
         <autodelete value="false"/>
-
         <resource>
             <reference value="Patient/patient.xml"/>
         </resource>

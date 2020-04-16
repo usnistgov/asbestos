@@ -203,7 +203,7 @@ public class TestEngine  {
     }
 
     private void reportTerminalFailure(Throwable t) {
-        String msg = t.getMessage();
+        String msg = t.getClass().getSimpleName() + ": " + t.getMessage();
         if (msg == null || msg.equals(""))
             msg = ExceptionUtils.getStackTrace(t);
         reportTerminalFailure(msg);
@@ -287,6 +287,8 @@ public class TestEngine  {
 
         for (int testi=0; testi<testScript.getTest().size(); testi++) {
             scriptCount = testScript.getTest().get(testi).getAction().size();
+            if (testReport.getTest().size() <= testi)
+                testReport.addTest();
             reportCount = testReport.getTest().get(testi).getAction().size();
             for (int i=reportCount; i<scriptCount; i++) {
                 if (testScript.getTest().get(testi).getAction().get(i).hasOperation()) {
@@ -325,7 +327,11 @@ public class TestEngine  {
 
         for (int i=0; i< testScript.getTest().size(); i++) {
             List<TestScript.TestActionComponent> tests = testScript.getTest().get(i).getAction();
-            List<TestReport.TestActionComponent> reports = testReport.getTest().get(i).getAction();
+            List<TestReport.TestActionComponent> reports;
+            if (testReport.getTest().size() > i)
+                reports = testReport.getTest().get(i).getAction();
+            else
+                reports = new ArrayList<>();
             if (tests.size() != reports.size())
                 reportTerminalFailure("TestEngine internal Error: Script Test " + i + " had " +
                         tests.size() +
@@ -334,7 +340,8 @@ public class TestEngine  {
         }
 
         List<TestScript.TeardownActionComponent> script = testScript.getTeardown().getAction();
-        List<TestReport.TeardownActionComponent> report = testReport.getTeardown().getAction();
+        List<TestReport.TeardownActionComponent> report;
+        report = testReport.getTeardown().getAction();
         if (script.size() != report.size())
             reportTerminalFailure("TestEngine internal Error: Script Teardown had " +
                     script.size() +
@@ -385,6 +392,7 @@ public class TestEngine  {
         errors = doReportResult();
         if (hasError()) {
             doTearDown();
+            fillInSkips();
             doLintTestReport();
             return true;
         }
@@ -739,6 +747,15 @@ public class TestEngine  {
             try {
                 int testCounter = 1;
                 for (TestScript.TestScriptTestComponent testComponent : testScript.getTest()) {
+
+                    // if noErrors extension present and script has already hit an error then bail out
+                    // and don't run actions in this test
+                    if (getExtension(testComponent.getModifierExtension(), ExtensionDef.noErrors) != null) {
+                        if (!getTestReport().getResult().equals(TestReport.TestReportResult.PASS))
+                            return;
+                    }
+
+
                     String testName = testComponent.getName();
                     if (testName == null || testName.equals(""))
                         testName = "Test" + testCounter;
@@ -768,6 +785,8 @@ public class TestEngine  {
                             } else {
                                 reportSkip(testReportComponent);   // for the then part
                             }
+                        } else if (url.equals(ExtensionDef.multiErrors)) {
+                            // will be handled in doTestPart
                         } else {
                             reportParsingError(testReportComponent, "Do not understand ModifierExtension " + url);
                             return;
@@ -948,9 +967,11 @@ public class TestEngine  {
 
     private boolean doTestPart(TestScript.TestScriptTestComponent testScriptElement, TestReport.TestReportTestComponent testReportComponent, TestReport testReport) {
         ValE fVal = new ValE(engineVal).setMsg("Test");
-        boolean result = true;
         if (testScriptElement.hasAction()) {
             String typePrefix = "contained.action";
+
+            boolean multiErrorsAllowed = getExtension(testScriptElement.getModifierExtension(), ExtensionDef.multiErrors) != null;
+
             for (int i=0; i<testScriptElement.getAction().size(); i++) {
                 TestScript.TestActionComponent action = testScriptElement.getAction().get(i);
                 Extension conditional = getExtension(action.getModifierExtension(), ExtensionDef.ts_conditional);
@@ -978,6 +999,8 @@ public class TestEngine  {
                         if (!nextAction.hasAssert() && actionReportComponent.getOperation().getResult().equals(TestReport.TestReportActionResult.FAIL)) {
                             testReport.setStatus(TestReport.TestReportStatus.COMPLETED);
                             testReport.setResult(TestReport.TestReportResult.FAIL);
+                            if (!multiErrorsAllowed)
+                                return false;
                         }
                     }
                 }
@@ -994,8 +1017,10 @@ public class TestEngine  {
                         } else {
                             testReport.setStatus(TestReport.TestReportStatus.COMPLETED);
                             testReport.setResult(TestReport.TestReportResult.FAIL);
+                            if (!multiErrorsAllowed)
+                                return false;
                         }
-                        result = false;
+                        //result = false;
                         //return false;  // don't jump ship on first assertion failure
                     }
                     if ("error".equals(actionReport.getResult().toCode())) {
@@ -1006,7 +1031,7 @@ public class TestEngine  {
                 }
             }
         }
-        return result;
+        return true;
     }
 
     private Extension getExtension(List<Extension> extensions, String url) {

@@ -3,12 +3,7 @@ package gov.nist.asbestos.proxyWar;
 import gov.nist.asbestos.client.client.FhirClient;
 import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
-import gov.nist.asbestos.http.operations.HttpPost;
-import gov.nist.asbestos.sharedObjects.ChannelConfig;
-import gov.nist.asbestos.sharedObjects.ChannelConfigFactory;
-import gov.nist.asbestos.simapi.validation.Val;
 import gov.nist.asbestos.testEngine.engine.ExtensionDef;
-import gov.nist.asbestos.testEngine.engine.ModularEngine;
 import gov.nist.asbestos.testEngine.engine.TestEngine;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Patient;
@@ -16,11 +11,9 @@ import org.hl7.fhir.r4.model.TestReport;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -29,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class ConditionalIT {
     private static String testSession = "default";
-    private static String channelId = "ConditionalIT";
+    private static String channelId = "IT";
     private static String fhirPort = ITConfig.getFhirPort();
     private static String proxyPort = ITConfig.getProxyPort();
 
@@ -37,7 +30,7 @@ class ConditionalIT {
 
     @BeforeAll
     static void createTheChannel() throws IOException, URISyntaxException {
-        base = new URI(createChannel());
+        base = new URI(Utility.createChannel(testSession, channelId, fhirPort, proxyPort));
     }
 
     @BeforeAll
@@ -65,7 +58,7 @@ class ConditionalIT {
         // First time submission - actual submission happens
         //
 
-        TestEngine engine = run("/conditional/install/TestScript.xml");
+        TestEngine engine = Utility.run(base, "/engine/conditional/TestScript.xml");
         assertEquals(TestReport.TestReportResult.PASS, engine.getTestReport().getResult());
 
         // first time submission should happen
@@ -82,7 +75,7 @@ class ConditionalIT {
         // Second time submission - actual submission does not happen
         //
 
-        TestEngine engine2 = run("/conditional/install/TestScript.xml");
+        TestEngine engine2 = Utility.run(base, "/engine/conditional/TestScript.xml");
         assertEquals(TestReport.TestReportResult.PASS, engine2.getTestReport().getResult());
 
         // second time should return a skip for the load
@@ -94,47 +87,4 @@ class ConditionalIT {
         List<Extension> failures2 = engine.getTestReport().getExtensionsByUrl(ExtensionDef.failure);
         assertEquals(0, failures2.size());
     }
-
-    private static TestEngine run(String testScriptLocation) throws URISyntaxException {
-        Val val = new Val();
-        File test1 = Paths.get(ConditionalIT.class.getResource(testScriptLocation).toURI()).getParent().toFile();
-
-        ModularEngine modularEngine = new ModularEngine(test1, base).setSaveLogs(true);
-        TestEngine mainTestEngine = modularEngine.getMainTestEngine();
-        modularEngine
-                .setVal(val)
-                .setTestSession(testScriptLocation)
-                .setChannelId("default__default")
-                .setExternalCache(ExternalCache.getExternalCache())
-                .setFhirClient(new FhirClient())
-                .runTest();
-        int i = 0;
-        for (TestEngine engine : modularEngine.getTestEngines()) {
-            System.out.println("ENGINE " + i);
-            System.out.println(engine.getTestReportAsJson());
-            i++;
-        }
-        TestReport report = mainTestEngine.getTestReport();
-        TestReport.TestReportResult result = report.getResult();
-        //assertEquals(TestReport.TestReportResult.PASS, result);
-        return mainTestEngine;
-    }
-
-    private static String createChannel() throws URISyntaxException, IOException {
-        ChannelConfig channelConfig = new ChannelConfig()
-                .setTestSession(testSession)
-                .setChannelId(channelId)
-                .setEnvironment("default")
-                .setActorType("fhir")
-                .setChannelType("fhir")
-                .setFhirBase("http://localhost:" + fhirPort + "/fhir/fhir");
-        String json = ChannelConfigFactory.convert(channelConfig);
-        HttpPost poster = new HttpPost();
-        poster.postJson(new URI("http://localhost:" + proxyPort + "/asbestos/channel"), json);
-        int status = poster.getStatus();
-        if (!(status == 200 || status == 201))
-            fail("200 or 201 required - returned " + status);
-        return "http://localhost:" + proxyPort + "/asbestos/proxy/" + testSession + "__" + channelId;
-    }
-
 }
