@@ -92,9 +92,9 @@ public class TestScriptDebuggerWebSocketEndpoint {
     @OnClose
     public void onClose(Session session) {
         final String sessionId = session.getId();
-        log.info("Close: " + sessionId);
-        // Close off threads created by session
-        if (debugStateMap.contains(sessionId)) {
+        log.info("Close: " + sessionId + ". debugStateMap has: " + debugStateMap.keySet().toString());
+
+        if (debugStateMap.containsKey(sessionId)) {
             ExecutorService service = debugExecutorMap.get(sessionId);
             if (debugStateMap.get(sessionId).getKill().get()) {
                 try {
@@ -104,14 +104,14 @@ public class TestScriptDebuggerWebSocketEndpoint {
                     log.info(String.format("Session %s was terminated: %s", sessionId, service.isTerminated()));
 
                 }
-            } else {
-                if (!debugExecutorMap.get(sessionId).isTerminated()) {
-                    debugExecutorMap.remove(sessionId);
-                    if (debugStateMap.contains(sessionId)) {
-                        debugStateMap.remove(sessionId);
-                    }
-                }
             }
+
+            log.info("is service terminated? " + service.isTerminated() + ". is shutdown? " + service.isShutdown());
+            if (service.isTerminated()) {
+                debugExecutorMap.remove(sessionId);
+                debugStateMap.remove(sessionId);
+            }
+
         }
     }
 
