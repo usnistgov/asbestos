@@ -4,6 +4,16 @@ export default {
         }
     },
     methods: {
+        isReportConditional(report) {
+            if (!report) return false;
+            if (!report.extension) return false;
+            let cond = false;
+            report.extension.forEach(ex => {
+                if (ex.url === 'urn:conditional')
+                    cond = true;
+            })
+            return cond;
+        },
     },
     computed: {
         colorStatus() {
@@ -15,6 +25,9 @@ export default {
         statusRight() {
             return this.$store.state.testRunner.statusRight
         },
+
+        // these can be called either with an this.report set to an action
+        // or to a test/setup/teardown
         isPass() {
             if (!this.report) return false
             if (this.report.operation) return this.report.operation.result === 'pass'
@@ -23,9 +36,23 @@ export default {
             let pass = true
             this.report.action.forEach(action => {
                 const part = action.operation ? action.operation : action.assert
-                if (part && part.result !== 'pass') pass = false
+                const conditional = this.isReportConditional(part)
+                if (part && part.result !== 'pass' && !conditional) pass = false
             })
             return pass
+        },
+        isTrue() {
+            if (!this.report) return false
+            if (this.report.operation) return this.report.operation.result === 'pass'
+            if (this.report.assert) return this.report.assert.result === 'pass'
+            if (!this.report.action) return false
+            let isTrue = false
+            this.report.action.forEach(action => {
+                const part = action.operation ? action.operation : action.assert
+                const conditional = this.isReportConditional(part)
+                if (part && part.result !== 'pass' && conditional) isTrue = false
+            })
+            return isTrue
         },
         isError() {
             if (!this.report) return false
@@ -47,7 +74,21 @@ export default {
             let fail = false
             this.report.action.forEach(action => {
                 const part = action.operation ? action.operation : action.assert
-                if (part && part.result === 'fail') fail = true
+                const conditional = this.isReportConditional(part)
+                if (part && part.result === 'fail' && !conditional) fail = true
+            })
+            return fail
+        },
+        isFalse() {
+            if (!this.report) return false
+            if (this.report.operation) return this.report.operation.result === 'fail'
+            if (this.report.assert) return this.report.assert.result === 'fail'
+            if (!this.report.action) return false
+            let fail = false
+            this.report.action.forEach(action => {
+                const part = action.operation ? action.operation : action.assert
+                const conditional = this.isReportConditional(part)
+                if (part && (part.result === 'fail' || part.result === 'error') && conditional) fail = true
             })
             return fail
         },

@@ -787,6 +787,8 @@ public class TestEngine  {
                             }
                         } else if (url.equals(ExtensionDef.multiErrors)) {
                             // will be handled in doTestPart
+                        } else if (url.equals(ExtensionDef.noErrors)) {
+                            // handled above
                         } else {
                             reportParsingError(testReportComponent, "Do not understand ModifierExtension " + url);
                             return;

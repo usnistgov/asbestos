@@ -12,7 +12,7 @@ import java.net.URISyntaxException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class NoErrorsIT {
+class ConditionalNoErrorsIT {
     private static String testSession = "default";
     private static String channelId = "IT";
     private static String fhirPort = ITConfig.getFhirPort();
@@ -26,17 +26,17 @@ class NoErrorsIT {
     }
 
     @Test
-    void noErrorsTest() throws URISyntaxException {
-        TestEngine engine = Utility.run(base, "/engine/noErrors/TestScript.xml");
+    void conditionalNoErrorsTest() throws URISyntaxException {
+        TestEngine engine = Utility.run(base, "/engine/conditionalNoErrors/TestScript.xml");
 
         // no engine failure
         assertEquals(0, engine.getTestReport().getExtensionsByUrl(ExtensionDef.failure).size());
 
-        // assert (action 1) in test 0 fails
-        assertEquals(TestReport.TestReportActionResult.FAIL, engine.getTestReport().getTest().get(0).getAction().get(1).getAssert().getResult());
+        // assert (action 0) in test 1 fails
+        assertEquals(TestReport.TestReportActionResult.FAIL, engine.getTestReport().getTest().get(1).getAction().get(0).getAssert().getResult());
 
-        // test 1 does not run because of noErrors extension
-        assertEquals(TestReport.TestReportActionResult.SKIP, engine.getTestReport().getTest().get(1).getAction().get(0).getAssert().getResult());
+        // test 2 does not run because of noErrors extension
+        assertEquals(TestReport.TestReportActionResult.SKIP, engine.getTestReport().getTest().get(2).getAction().get(0).getAssert().getResult());
 
         // script fails
         assertEquals(TestReport.TestReportResult.FAIL, engine.getTestReport().getResult());

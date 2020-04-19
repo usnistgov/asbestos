@@ -16,6 +16,7 @@
 
                 <test-status-event-wrapper v-if="!statusRight"
                                            :status-on-right="statusRight"
+                                           :script="script"
                                            :report="report"
                                            :debug-title="debugTitle"
                                            @onStatusMouseOver="$emit('onStatusMouseOver')"
@@ -34,7 +35,8 @@
                     {{ operationType(script.operation) }}
                 </span>
                 <span v-else>
-                    <span>assert: </span>
+                    <span v-if="isConditional">if: </span>
+                    <span v-else>assert: </span>
                 </span>
                 <span>
                     {{ description }}
@@ -188,6 +190,15 @@
             },
         },
         computed: {
+            isConditional() {
+                if (!this.script.modifierExtension) return false
+                let cond = false
+                this.script.modifierExtension.forEach(ext => {
+                    if (ext.url === 'https://github.com/usnistgov/asbestos/wiki/TestScript-Conditional')
+                        cond = true
+                })
+                return cond
+            },
             assertions() {
                 return this.$store.state.testRunner.testAssertions
             },

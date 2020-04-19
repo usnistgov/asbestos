@@ -2,6 +2,7 @@
     <span @mouseover="onStatusMouseOver" @mouseleave="onStatusMouseLeave" @click.stop="onStatusClick" :title="debugTitle">
              <test-status
                           :status-on-right="false"
+                          :script="script"
                           :report="report"
              > </test-status>
     </span>
@@ -32,7 +33,7 @@
         computed: {
         },
         props: [
-            'statusOnRight', 'report', 'debugTitle'
+            'statusOnRight', 'script', 'report', 'debugTitle'
         ],
         components: {
             TestStatus
