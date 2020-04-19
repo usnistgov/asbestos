@@ -11,14 +11,16 @@ public class TestScriptDebugState {
     String testScriptIndex; /* TestCollectionIndex + TestScriptIndex */
     ConcurrentSkipListSet breakpointSet;
     Session session;
+    String userType;
 
-    public TestScriptDebugState(Session session, String testScriptIndex, ConcurrentSkipListSet breakpointSet) {
+    public TestScriptDebugState(Session session, String userType, String testScriptIndex, ConcurrentSkipListSet breakpointSet) {
         this.lock = new Object();
         this.testScriptIndex = testScriptIndex;
         this.resume = new AtomicBoolean();
         this.kill = new AtomicBoolean();
         this.breakpointSet = breakpointSet;
         this.session = session;
+        this.userType = userType;
     }
 
     public String getTestScriptIndex() {

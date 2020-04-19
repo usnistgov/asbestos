@@ -1,4 +1,4 @@
-package gov.nist.asbestos.testScriptDebugger;
+package gov.nist.asbestos.testScriptDebugger.requests;
 
 import gov.nist.asbestos.asbestosProxy.requests.Request;
 import gov.nist.asbestos.client.client.FhirClient;
@@ -27,8 +27,8 @@ import java.util.concurrent.ConcurrentSkipListSet;
 // Returns modular test reports
 //   JSON object : test/moduleId => TestReport
 
-public class TestScriptDebuggerThread implements Runnable {
-    private static Logger log = Logger.getLogger(TestScriptDebuggerThread.class);
+public class DebugTestScriptRequest implements Runnable {
+    private static Logger log = Logger.getLogger(DebugTestScriptRequest.class);
 
     private Request request;
     private TestScriptDebugState state;
@@ -37,9 +37,9 @@ public class TestScriptDebuggerThread implements Runnable {
         return request.uriParts.size() == 4 && request.uriParts.get(0).equals("debug-testscript");
     }
 
-    public TestScriptDebuggerThread(Request request, Session session, String testScriptIndex) {
+    public DebugTestScriptRequest(Request request, TestScriptDebugState state) {
         this.request = request;
-        this.state = new TestScriptDebugState(session, testScriptIndex, new ConcurrentSkipListSet());
+        this.state = state;
     }
 
     public TestScriptDebugState getState() {

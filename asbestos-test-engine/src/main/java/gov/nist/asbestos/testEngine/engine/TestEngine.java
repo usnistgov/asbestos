@@ -635,7 +635,6 @@ public class TestEngine  {
                 int testCounter = 1;
                 for (TestScript.TestScriptTestComponent testComponent : testScript.getTest()) {
                     int testIndex = testScript.getTest().indexOf(testComponent);
-                    log.info(String.format(" -------------------------------- %d", testIndex));
                     if (hasDebugState()) {
                         pauseIfBreakpoint("test", testIndex, null);
                     }
@@ -821,9 +820,15 @@ public class TestEngine  {
             String typePrefix = "contained.action";
             int testPartIndex = 0;
             for (TestScript.TestActionComponent action : testScriptElement.getAction()) {
-//                log.info(String.format("%s %d:%d state is null? %s", testScriptElement.getName(), testIndex, testPartIndex, hasDebugState()));
                 if (hasDebugState()) {
-                    pauseIfBreakpoint("test", testIndex, testPartIndex);
+                    // Do
+                    // Must pause first before Eval
+                    pauseIfBreakpoint("test", testIndex, testPartIndex);  // if eval, exit
+                    // If onEvalRequest send a copy of the Assertion as JSON using Gson??
+                    // If state.getDoEval is true, EvaluateAssertion like so: get the object-value to eval from state. Copy the current Assertion, replace the compareToSourceId, compareToSourceExpression, warningOnly properties.
+                        // Return Assertion Result through WS: message, detail as Json String
+                        // Set resume to false
+                    // while ! resume && ! kill
                 }
                 TestReport.TestActionComponent actionReportComponent = testReportComponent.addAction();
                 if (invalidAction(action, actionReportComponent, fVal))
@@ -881,7 +886,7 @@ public class TestEngine  {
 //            log.info("About to lock and wait...");
             synchronized (testScriptDebugState.getLock()) {
 //                log.info("Locked!");
-                while (! testScriptDebugState.getResume().get() && ! testScriptDebugState.getKill().get()) {
+                while (! testScriptDebugState.getResume().get() && ! testScriptDebugState.getKill().get()) { // && ! getEvaluate
                     try {
                         testScriptDebugState.getLock().wait(); // Release the lock and wait for getResume to be True
                     } catch (InterruptedException ie) {

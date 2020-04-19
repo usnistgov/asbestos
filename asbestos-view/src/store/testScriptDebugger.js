@@ -25,17 +25,13 @@ export const testScriptDebuggerStore = {
             breakpointSet = state.breakpointMap.get(obj.testScriptIndex)
 
             breakpointSet.add(obj.breakpointIndex)
+            console.log(obj.testScriptIndex + " added " + obj.breakpointIndex)
 
             // Sync showDebugButton because Vue does not support reactivity on Map or Set
 
-            // if (obj.testScriptIndex in state.showDebugButton === false) {
+            if (obj.testScriptIndex in state.showDebugButton === false) { // Only add it the first time where the showDebugButton object is missing the scriptIndex property
                 Vue.set(state.showDebugButton, obj.testScriptIndex, {breakpointIndex: null, debugButtonLabel: "Debug"}) // Add property using Vue.set to nudge reactivity
-                console.log(obj.testScriptIndex + "added" + obj.breakpointIndex)
-            // } else {
-            //     if (state.showDebugButton[obj.testScriptIndex] === false) {
-            //         Vue.set(state.showDebugButton, obj.testScriptIndex, true)
-            //     }
-            // }
+            }
         },
         removeBreakpoint(state, obj) {
             if (state.breakpointMap.has(obj.testScriptIndex)) {
@@ -43,10 +39,15 @@ export const testScriptDebuggerStore = {
                 if (breakpointSet.has(obj.breakpointIndex)) {
                     breakpointSet.delete(obj.breakpointIndex)
 
-                    if (breakpointSet.size == 0) {
+                    if (breakpointSet.size == 0) {// When all breakpoints were removed while in Resume activity, then still allow to Resume so when breakpointList is empty
                         if (obj.testScriptIndex in state.showDebugButton === true) {
                             // Vue.set(state.showDebugButton, obj.testScriptIndex, false) // Add property using Vue.set to nudge reactivity
-                            Vue.delete(state.showDebugButton, obj.testScriptIndex)
+                            let valObj = state.showDebugButton[obj.testScriptIndex]
+                            if (valObj != undefined) {
+                                if (valObj.debugButtonLabel === 'Debug') { // Only remove when Debug hasn't started yet
+                                    Vue.delete(state.showDebugButton, obj.testScriptIndex)
+                                }
+                            }
                             // console.log(obj.testScriptIndex + "removed" + obj.breakpointIndex)
                         }
                     }
@@ -148,7 +149,7 @@ export const testScriptDebuggerStore = {
             // Technically it is possible to run many debugger web sockets but the test display only allows "opening" one active Test bar at a time since the previous test bar is automatically closed.
 
             if (state.testScriptDebuggerWebSocket === null) {
-                state.testScriptDebuggerWebSocket = new WebSocket('wss://fhirtoolkit.test:9743/asbestos/testScriptDebugger') // TODO: Replace https off the HTTPS TOOLKIT BASE and append the Endpoint
+                state.testScriptDebuggerWebSocket = new WebSocket('wss://fhirtoolkit.test:9743/asbestos/testScriptDebugger/developer/'+mapKey) // TODO: Replace https off the HTTPS TOOLKIT BASE and append the Endpoint
                 state.testScriptDebuggerWebSocket.onopen = event => {
                     state.waitingForBreakpoint = true
                     // Disable Run button
@@ -208,8 +209,12 @@ export const testScriptDebuggerStore = {
 
             } else if (mapKey in state.showDebugButton && state.showDebugButton[mapKey].debugButtonLabel === 'Resume') {
                 state.waitingForBreakpoint = true
+                const breakpointSet = state.breakpointMap.get(mapKey) // Follow proper key format
+                let breakpointArrayString = JSON.stringify([...breakpointSet])
+                let sendData = `{"resumeBreakpoint":"true","testScriptIndex":"${mapKey}","breakpointList":${breakpointArrayString}}`
+
                 console.log('Resuming from ' + state.showDebugButton[mapKey].breakpointIndex)
-                state.testScriptDebuggerWebSocket.send('{"resumeBreakpoint":"true"}')
+                state.testScriptDebuggerWebSocket.send(sendData)
                 state.showDebugButton[mapKey].breakpointIndex = null // Clear flag
             }
         },
