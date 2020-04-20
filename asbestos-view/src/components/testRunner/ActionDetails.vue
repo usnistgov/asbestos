@@ -90,44 +90,43 @@
                     </div>
                 </ul>
             </div>
-            <div v-else>
-                No Evaluation
-            </div>
+<!--            <div v-else>-->
+<!--                No Evaluation-->
+<!--            </div>-->
 
             <!--  Inspect-->
             <div v-if="script.operation">
 
-            <span v-if="eventDisplayed && eventId">
-                <img src="../../assets/arrow-down.png" @click.stop="toggleEventDisplayed()">
-            </span>
-                <span v-else>
-                <span v-if="eventId">
-                    <img src="../../assets/arrow-right.png" @click.stop="toggleEventDisplayed()">
+                <span v-if="eventDisplayed && eventId">
+                    <img src="../../assets/arrow-down.png" @click.stop="toggleEventDisplayed()">
                 </span>
-            </span>
-
+                <span v-else>
+                    <span v-if="eventId">
+                        <img src="../../assets/arrow-right.png" @click.stop="toggleEventDisplayed()">
+                    </span>
+                </span>
                 <span v-if="eventId" class="selectable" @click.stop="toggleEventDisplayed()">Inspect</span>
                 <span v-if="eventDisplayed && eventId">
-                <inspect-event
+                    <inspect-event
                         :sessionId="$store.state.base.session"
                         :channelId="$store.state.base.channelId"
                         :eventId="eventId"
                         :noNav="true">
-                </inspect-event>
-            </span>
+                    </inspect-event>
+                </span>
             </div>
 
             <!-- Test Script/Report -->
             <div>
-           <span v-if="displayScript">
-                <img src="../../assets/arrow-down.png" @click.stop="toggleScriptDisplayed()">
-           </span>
+                <span v-if="displayScript">
+                    <img src="../../assets/arrow-down.png" @click.stop="toggleScriptDisplayed()">
+                </span>
                 <span v-else>
-                <img src="../../assets/arrow-right.png" @click.stop="toggleScriptDisplayed()">
-            </span>
+                    <img src="../../assets/arrow-right.png" @click.stop="toggleScriptDisplayed()">
+                </span>
                 <span class="selectable" @click.stop="toggleScriptDisplayed()">Test Script/Report</span>
                 <span v-if="displayScript">
-               <vue-markdown v-if="message">{{message}}</vue-markdown>
+                <vue-markdown v-if="message">{{message}}</vue-markdown>
                 <script-display
                         :script="script"
                         :report="report">

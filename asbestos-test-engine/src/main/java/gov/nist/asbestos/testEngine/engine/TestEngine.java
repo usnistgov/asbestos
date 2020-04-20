@@ -746,17 +746,17 @@ public class TestEngine  {
 
             try {
                 int testCounter = 1;
-                for (TestScript.TestScriptTestComponent testComponent : testScript.getTest()) {
+                for (TestScript.TestScriptTestComponent test : testScript.getTest()) {
 
                     // if noErrors extension present and script has already hit an error then bail out
                     // and don't run actions in this test
-                    if (getExtension(testComponent.getModifierExtension(), ExtensionDef.noErrors) != null) {
+                    if (getExtension(test.getModifierExtension(), ExtensionDef.noErrors) != null) {
                         if (!getTestReport().getResult().equals(TestReport.TestReportResult.PASS))
                             return;
                     }
 
 
-                    String testName = testComponent.getName();
+                    String testName = test.getName();
                     if (testName == null || testName.equals(""))
                         testName = "Test" + testCounter;
                     testCounter++;
@@ -769,7 +769,7 @@ public class TestEngine  {
                     //
 
                     boolean isConditional = false;
-                    List<Extension> extensions = testComponent.getModifierExtension();
+                    List<Extension> extensions = test.getModifierExtension();
                     for (Extension extension : extensions ) {
                         if (!extension.hasUrl()) {
                             reportParsingError(testReportComponent, "Extension found without URL");
@@ -779,9 +779,9 @@ public class TestEngine  {
                         String url = extension.getUrl();
                         if (url.equals(ExtensionDef.conditional)) {
                             isConditional = true;
-                            boolean conditionalResult = handleConditionalTest(testComponent, testReportComponent, extension);
+                            boolean conditionalResult = handleConditionalTest(test, testReportComponent, extension);
                             if (conditionalResult) {
-                                doTestPart(testComponent, testReportComponent, testReport);
+                                doTestPart(test, testReportComponent, testReport);
                             } else {
                                 reportSkip(testReportComponent);   // for the then part
                             }
@@ -796,7 +796,7 @@ public class TestEngine  {
                     }
 
                     if (!isConditional)
-                        doTestPart(testComponent, testReportComponent, testReport);
+                        doTestPart(test, testReportComponent, testReport);
 
 
                 }
@@ -881,20 +881,89 @@ public class TestEngine  {
         testEngine1.getTestReport().addExtension(ExtensionDef.moduleId, new StringType(moduleId));
         testEngine1.getTestReport().addExtension(ExtensionDef.moduleName, new StringType(moduleName));
 
+        ErrorReport errorReport = getErrorMessage(testEngine1.getTestReport());
+        if (errorReport != null) {
+            opReport.setResult(errorReport.type);
+            opReport.setMessage(errorReport.message);
+        }
+
         FixtureMgr innerFixtures = testEngine1.fixtureMgr;
         Map<String, FixtureComponent> outFixturesForComponent = new HashMap<>();
         for (Parameter parm : componentReference.getFixturesOut()) {
             if (parm.isVariable())
                 throw new RuntimeException("Script import with output variables not supported");
             String outerName = parm.getCallerName();
-            String innnerName = parm.getLocalName();
-            FixtureComponent fixtureComponent = innerFixtures.get(innnerName);
-            if (fixtureComponent == null)
-                throw new RuntimeException("Script import - " + componentReference.getComponentRef() + " did not produce Fixture " + innnerName);
-            fixtureMgr.put(outerName, fixtureComponent);
+            String innerName = parm.getLocalName();
+            FixtureComponent fixtureComponent = innerFixtures.get(innerName);
+            if (errorReport == null) {
+                if (fixtureComponent == null)
+                    throw new RuntimeException("Script import - " + componentReference.getComponentRef() + " did not produce Fixture " + innerName);
+                fixtureMgr.put(outerName, fixtureComponent);
+            }
         }
         String result = testEngine1.getTestReport().getResult().toCode();
         opReport.setResult(TestReport.TestReportActionResult.fromCode(result));
+
+        if (testEngine1.getTestReport().getResult() == TestReport.TestReportResult.FAIL)
+            getTestReport().setResult(TestReport.TestReportResult.FAIL);
+    }
+
+    static class ErrorReport {
+        TestReport.TestReportActionResult type;
+        String message;
+
+        ErrorReport(TestReport.SetupActionAssertComponent theAssert) {
+            type = theAssert.getResult();
+            message = theAssert.getMessage();
+        }
+
+        ErrorReport(TestReport.SetupActionOperationComponent theOp) {
+            type = theOp.getResult();
+            message = theOp.getMessage();
+        }
+    }
+
+    private boolean hasErrorOrFail(TestReport.SetupActionAssertComponent theAssert) {
+        return theAssert.hasResult() &&
+                (theAssert.getResult().equals(TestReport.TestReportActionResult.FAIL) ||
+                        theAssert.getResult().equals(TestReport.TestReportActionResult.ERROR));
+    }
+
+    private boolean hasErrorOrFail(TestReport.SetupActionOperationComponent theOp) {
+        return theOp.hasResult() &&
+                (theOp.getResult().equals(TestReport.TestReportActionResult.FAIL) ||
+                        theOp.getResult().equals(TestReport.TestReportActionResult.ERROR));
+    }
+
+    private ErrorReport getErrorMessage(TestReport report) {
+        if (report.hasSetup()) {
+            for (TestReport.SetupActionComponent action : report.getSetup().getAction()) {
+                if (action.hasAssert() && hasErrorOrFail(action.getAssert()))
+                    return new ErrorReport(action.getAssert());
+                if (action.hasOperation() && hasErrorOrFail(action.getOperation()))
+                    return new ErrorReport(action.getOperation());
+            }
+        }
+
+        if (report.hasTest()) {
+            for (TestReport.TestReportTestComponent test : report.getTest()) {
+                for (TestReport.TestActionComponent action : test.getAction()) {
+                    if (action.hasAssert() && hasErrorOrFail(action.getAssert()))
+                        return new ErrorReport(action.getAssert());
+                    if (action.hasOperation() && hasErrorOrFail(action.getOperation()))
+                        return new ErrorReport(action.getOperation());
+                }
+            }
+        }
+        if (report.hasTeardown()) {
+            TestReport.TestReportTeardownComponent teardown = report.getTeardown();
+            for (TestReport.TeardownActionComponent action : teardown.getAction()) {
+                if (action.hasOperation() && hasErrorOrFail(action.getOperation())) {
+                    return new ErrorReport(action.getOperation());
+                }
+            }
+        }
+        return null;
     }
 
     private String simpleName(File file) {
@@ -1116,38 +1185,38 @@ public class TestEngine  {
         for (TestReport.TestReportTestComponent testComponent : testReport.getTest()) {
 
 
-//            for (TestReport.TestActionComponent actionResult : testComponent.getAction()) {
-//                if (!actionResult.hasOperation())
-//                    continue;
-//                TestReport.SetupActionOperationComponent op = actionResult.getOperation();
-//                buildCacheEntry(op, ec);
-//            }
-
-
-            if (testComponent.hasModifierExtension()) {
-                Extension extension = testComponent.getModifierExtensionFirstRep();
-                if (extension.getUrl().equals(ExtensionDef.ts_conditional)) {
-                    if (extension.getValue() instanceof Reference) {
-                        Reference reference = (Reference) extension.getValue();
-                        if (reference.getResource() instanceof TestReport) {
-                            TestReport containedTestReport = (TestReport) reference.getResource();
-                            for (TestReport.TestReportTestComponent containedTestComponent : containedTestReport.getTest()) {
-                                for (TestReport.TestActionComponent actionResult : containedTestComponent.getAction()) {
-                                    if (actionResult.hasOperation()) {
-                                        TestReport.SetupActionOperationComponent op = actionResult.getOperation();
-                                        buildCacheEntry(op, ec);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
+            for (TestReport.TestActionComponent actionResult : testComponent.getAction()) {
+                if (!actionResult.hasOperation())
+                    continue;
+                TestReport.SetupActionOperationComponent op = actionResult.getOperation();
+                buildCacheEntry(op, ec);
             }
+
+
+//            if (testComponent.hasModifierExtension()) {
+//                Extension extension = testComponent.getModifierExtensionFirstRep();
+//                if (extension.getUrl().equals(ExtensionDef.ts_conditional)) {
+//                    if (extension.getValue() instanceof Reference) {
+//                        Reference reference = (Reference) extension.getValue();
+//                        if (reference.getResource() instanceof TestReport) {
+//                            TestReport containedTestReport = (TestReport) reference.getResource();
+//                            for (TestReport.TestReportTestComponent containedTestComponent : containedTestReport.getTest()) {
+//                                for (TestReport.TestActionComponent actionResult : containedTestComponent.getAction()) {
+//                                    if (actionResult.hasOperation()) {
+//                                        TestReport.SetupActionOperationComponent op = actionResult.getOperation();
+//                                        buildCacheEntry(op, ec);
+//                                    }
+//                                }
+//                            }
+//                        }
+//                    }
+//                }
+//            }
         }
     }
 
     private void buildCacheEntry(TestReport.SetupActionOperationComponent op, EC ec) {
-        if (!"fail".equals(op.getResult().toCode())) {
+        if ("pass".equals(op.getResult().toCode())) {
             //if (op.getMessage().startsWith("GET") || op.getMessage().startsWith("CREATE")) {
             if (op.getDetail() == null)
                 throw new Error("Error building cache entry - op.detail is null");

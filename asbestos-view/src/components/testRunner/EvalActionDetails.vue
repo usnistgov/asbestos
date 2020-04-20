@@ -34,9 +34,9 @@
                     </div>
                 </ul>
             </div>
-            <div v-else>
-                No Evaluation
-            </div>
+<!--            <div v-else>-->
+<!--                No Evaluation-->
+<!--            </div>-->
 
             <!-- Test Script/Report -->
             <div>

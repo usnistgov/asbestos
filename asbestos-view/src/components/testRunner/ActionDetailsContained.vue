@@ -47,9 +47,9 @@
                     </div>
                 </ul>
             </div>
-            <div v-else>
-                No Evaluation
-            </div>
+<!--            <div v-else>-->
+<!--                No Evaluation-->
+<!--            </div>-->
 
             <div v-if="script.operation">
                <span v-if="eventDisplayed && eventId">

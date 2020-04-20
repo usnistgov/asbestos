@@ -137,15 +137,17 @@ export const testRunnerStore = {
             for (let testName in reportData) {
                 const report = reportData[testName]
                 if (report && report.resourceType === 'TestReport') {
-                    if (report.status === 'entered-in-error') {
-                        const message = report.setup.action[0].assert.message
-                        this.commit('setError', 'report named ' + report.name + ' has status ' + report.status + '; message is: ' + message)
-                    } else {
-                        if (testName.includes("/"))
-                            Vue.set(state.moduleTestReports, testName, report)
-                        else
-                            Vue.set(state.testReports, testName, report)
+                    if (report.extension) {
+                        report.extension.forEach(e => {
+                            if (e.url === 'urn:failure') {
+                                this.commit('setError', e.valueString)
+                            }
+                        })
                     }
+                    if (testName.includes("/"))
+                        Vue.set(state.moduleTestReports, testName, report)
+                    else
+                        Vue.set(state.testReports, testName, report)
                 }
             }
         },
@@ -322,7 +324,7 @@ export const testRunnerStore = {
             return report
         },
         runTest({commit, rootState, state}, testId) {
-            commit('setCurrentTest', testId)
+            //commit('setCurrentTest', testId)
             const url = `testrun/${rootState.base.session}__${rootState.base.channelId}/${state.currentTestCollectionName}/${testId}?_format=${state.useJson ? 'json' : 'xml'};_gzip=${state.gzip}`
             const promise = ENGINE.post(url)
             promise.then(result => {

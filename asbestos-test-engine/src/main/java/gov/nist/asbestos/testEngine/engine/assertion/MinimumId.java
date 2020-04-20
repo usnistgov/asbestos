@@ -42,16 +42,24 @@ public class MinimumId {
             return new Report("minimumId: cannot compare " + miniClass.getName() +  " and " + sourceClass.getName());
         }
 
-        Map refMap = ResourceHasMethodsFilter.toMap(reference);
-        Map sutMap = ResourceHasMethodsFilter.toMap(sut);
-
-        Set<String> refKeys = mapKeys("", refMap);
-        Set<String> sutKeys = mapKeys("", sutMap);
-        List<String> refAtts = new ArrayList<>(refKeys);
-        List<String> diff = diff(refKeys, sutKeys);
-
-        Collections.sort(refAtts);
         Report report = new Report();
+        Set<String> refKeys;
+        Set<String> sutKeys;
+        List<String> refAtts;
+        List<String> diff;
+        try {
+            Map refMap = ResourceHasMethodsFilter.toMap(reference);
+            Map sutMap = ResourceHasMethodsFilter.toMap(sut);
+
+            refKeys = mapKeys("", refMap);
+            sutKeys = mapKeys("", sutMap);
+            refAtts = new ArrayList<>(refKeys);
+            diff = diff(refKeys, sutKeys);
+
+            Collections.sort(refAtts);
+        } catch (Throwable t) {
+            return new Report(t.getMessage());
+        }
         report.expected = refAtts;
         report.expected.remove("description");  // don't know why this shows up but it is wrong
         if (isRequest) {
@@ -59,7 +67,7 @@ public class MinimumId {
             report.expected.remove("created");
             //report.expected.remove("status");
             diff.remove("id");
-            diff.remove("created");
+            //diff.remove("created");
             diff.remove("status");
         }
         List<String> copy = new ArrayList<>(report.expected);
@@ -78,6 +86,8 @@ public class MinimumId {
             if (key instanceof String) {
                 Object value = ref.get(key);
                 if (value instanceof String) {
+                    keys.add(base + key);
+                } else if (value instanceof Double) {
                     keys.add(base + key);
                 } else if (value instanceof Map) {
                     keys.addAll(mapKeys(base + key + ".", (Map) value));
