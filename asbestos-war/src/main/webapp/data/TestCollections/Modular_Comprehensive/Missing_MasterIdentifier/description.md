@@ -4,7 +4,6 @@ actor.
 **Message contents**: Bundle resource containing a DocumentManifest, a DocumentReference, and a Binary. The standard
 linkage between DocumentManifest and DocumentReference and between DocumentReference and Binary is present.
 
-**Metadata contents**: DocumentManifest contains the minimum required by Comprehensive Metadata.  DocumentReference
-contains the minimum required by Comprehensive Metadata.
+**Metadata contents**: DocumentManifest contains the minimum required by Comprehensive Metadata.  DocumentReference is missing the MasterIdentifier
 
-**Expected Outcome**: Transaction will fail with status 400 and the contents will not be persisted to the server.
+**Expected Outcome**: Transaction will fail with status 400 and the contents will not be persisted to the server. This test cannot verify that the contents were not persisted.

@@ -81,6 +81,7 @@
         </action>
     </test>
     <test>
+      <modifierExtension url="urn:noErrors"/>
         <description value="Validate transaction response."/>
         <action>
             <operation>
@@ -97,6 +98,7 @@
         </action>
     </test>
     <test>
+      <modifierExtension url="urn:noErrors"/>
         <description value="Read back the DocumentReference and validate."/>
         <action>
             <operation>
