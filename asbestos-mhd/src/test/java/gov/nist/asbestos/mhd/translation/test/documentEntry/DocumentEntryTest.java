@@ -85,10 +85,6 @@ class DocumentEntryTest {
 
         CodeTranslator codeTranslator = new CodeTranslator(getCodesFile());
 
-        String json = fhirContext.newJsonParser().encodeResourceToString(expected);
-        JsonParser jsonParser1 = jsonFactory.createParser(json);
-        JsonNode expectedJson = objectMapper.readTree(jsonParser1);
-
         ChannelConfig channelConfig = new ChannelConfig()
                 .setChannelId("test")
                 .setChannelType("mhd")
@@ -144,6 +140,12 @@ class DocumentEntryTest {
                 documentReference1.getContent().get(0).getAttachment().setUrl(null);
             }
         }
+
+        expected.setDate(documentReference1.getDate());
+
+        String json = fhirContext.newJsonParser().encodeResourceToString(expected);
+        JsonParser jsonParser1 = jsonFactory.createParser(json);
+        JsonNode expectedJson = objectMapper.readTree(jsonParser1);
 
         String json2 = fhirContext.newJsonParser().encodeResourceToString(documentReference1);
         JsonParser jsonParser2 = jsonFactory.createParser(json2);
@@ -803,7 +805,7 @@ class DocumentEntryTest {
         attachment.setContentType("text/plain");
         attachment.setLanguage("en-us");
         attachment.setTitle("comments");
-        attachment.setCreation(new Date());
+        //attachment.setCreation(new Date());
         content.setFormat(new Coding()
                 .setCode("1.2.840.10008.5.1.4.1.1.88.59")
                 .setSystem("http://dicom.nema.org/resources/ontology/DCM")
@@ -820,7 +822,8 @@ class DocumentEntryTest {
         DocumentReference expected = withContentType();
         expected.getIdentifier().remove(0);  // ID1 not appropriate (was placeholder for ID)
         x.add(expected);
-        expected.getContent().get(0).getAttachment().setCreation(original.getContent().get(0).getAttachment().getCreation());
+//        expected.getContent().get(0)
+//                .getAttachment().setCreation(original.getContent().get(0).getAttachment().getCreation());
         return x;
     }
 

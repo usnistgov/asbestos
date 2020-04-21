@@ -144,6 +144,9 @@ public class AssertionRunner {
 
         assertReport.setResult(TestReport.TestReportActionResult.PASS);  // may be overwritten
 
+        // add context to report
+        new ActionReporter().reportAssertion(fixtureMgr, variableMgr, new Reporter(val, assertReport, "", ""));
+
         label = as.getLabel();
         type = typePrefix + ".assert";
 

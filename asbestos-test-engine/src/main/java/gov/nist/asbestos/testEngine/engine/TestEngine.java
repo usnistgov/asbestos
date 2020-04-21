@@ -204,7 +204,7 @@ public class TestEngine  {
 
     private void reportTerminalFailure(Throwable t) {
         String msg = t.getClass().getSimpleName() + ": " + t.getMessage();
-        if (msg == null || msg.equals(""))
+        if (t.getMessage() == null || t.getMessage().equals(""))
             msg = ExceptionUtils.getStackTrace(t);
         reportTerminalFailure(msg);
     }

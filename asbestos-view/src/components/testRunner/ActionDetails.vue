@@ -126,12 +126,13 @@
                 </span>
                 <span class="selectable" @click.stop="toggleScriptDisplayed()">Test Script/Report</span>
                 <span v-if="displayScript">
-                <vue-markdown v-if="message">{{message}}</vue-markdown>
-                <script-display
+<!--                    <vue-markdown v-if="message">{{message}}</vue-markdown>-->
+                    <vue-markdown v-if="actionContext">{{actionContext}}</vue-markdown>
+                    <script-display
                         :script="script"
                         :report="report">
-                </script-display>
-            </span>
+                    </script-display>
+                </span>
             </div>
         </div>
     </div>
@@ -187,6 +188,20 @@
             toggleMessageDisplay() {
                 this.displayMessage = !this.displayMessage
             },
+            getExtension(root, url) {
+                if (!root || !root.extension) return null;
+                let ext = null;
+                root.extension.forEach(e => {
+                    if (e.url === url)
+                        ext = e;
+                })
+                return ext;
+            },
+            getExtensionValue(root, url) {
+                const ext = this.getExtension(root, url);
+                if (!ext) return null;
+                return ext.valueString;
+            },
         },
         computed: {
             isConditional() {
@@ -218,6 +233,13 @@
                 return this.report.assert
                     ? this.report.assert.message
                     : this.report.operation.message
+            },
+            actionContext() {
+                if (!this.report)
+                    return null;
+                return this.report.assert
+                    ? this.getExtensionValue(this.report.assert, "urn:action-context")
+                    : this.getExtensionValue(this.report.operation, "urn:action-context");
             },
             detail() {
                 if (!this.report)

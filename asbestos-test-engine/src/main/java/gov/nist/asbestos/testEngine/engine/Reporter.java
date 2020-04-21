@@ -2,6 +2,8 @@ package gov.nist.asbestos.testEngine.engine;
 
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import gov.nist.asbestos.simapi.validation.ValE;
+import org.hl7.fhir.r4.model.Extension;
+import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.TestReport;
 
 import java.util.Objects;
@@ -24,7 +26,14 @@ class Reporter {
         }
         void setMessage(String s) {
             if (opReport == null) asReport.setMessage(s);
-            else opReport.setMessage(s);
+            else {
+                opReport.setMessage(s);
+            }
+        }
+        void setActionContext(String s) {
+            Extension extension = opReport == null ? asReport.addExtension() : opReport.addExtension();
+            extension.setUrl("urn:action-context");
+            extension.setValue(new StringType(s));
         }
         String getMessage() {
             if (opReport == null) return asReport.getMessage();
@@ -80,23 +89,24 @@ class Reporter {
         reportFail(msg);
     }
 
-    void reportFail(String msg) {
+    private void reportFail(String msg) {
         String theMsg = formatMsg(type, label, msg);
         val.add(new ValE(theMsg).asError());
         report.setResult(TestReport.TestReportActionResult.FAIL);
         report.setMessage(debug ? theMsg : msg);
     }
 
-    void report(String msg) {
+    private void report(String msg) {
         String theMsg = formatMsg(type, label, msg);
         String existing = report.getMessage();
         report.setMessage(existing == null ? (debug ? theMsg : msg) : existing + "\n" + (debug ? theMsg : msg));
     }
 
     void report(String msg, ResourceWrapper wrapper) {
-        if (wrapper != null)
+        if (wrapper != null) {
             report.setDetail(wrapper.logLink());
-        report(msg);
+        }
+        report.setActionContext(msg);
     }
 
     static String formatMsg(String type, String id, String msg) {
