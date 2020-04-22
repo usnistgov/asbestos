@@ -112,15 +112,15 @@ public class DebugTestScriptRequest implements Runnable {
         } catch (Throwable t) {
             log.error(ExceptionUtils.getStackTrace(t));
             if (state.getKill().get()) {
-                state.getSession().getAsyncRemote().sendText("{\"messageType\":\"killed\", \"testReport\":{}}");
+                state.sendKilled();
             } else {
-                state.getSession().getAsyncRemote().sendText("{\"messageType\":\"unexpected-error\", \"testReport\":{}}");
+                state.sendUnexpectedError();
             }
             throw t;
         }
 
         String json = modularEngine.reportsAsJson();
-        state.getSession().getAsyncRemote().sendText("{\"messageType\":\"final-report\", \"testReport\":" + ((json != null)?json:"{}") + "}");
-
+        String testReport = ((json != null)?json:"{}");
+        state.sendFinalReport(testReport);
     }
 }

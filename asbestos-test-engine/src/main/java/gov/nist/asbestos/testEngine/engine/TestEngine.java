@@ -1,6 +1,7 @@
 package gov.nist.asbestos.testEngine.engine;
 
 import ca.uhn.fhir.parser.IParser;
+import com.google.gson.Gson;
 import gov.nist.asbestos.client.Base.EC;
 import gov.nist.asbestos.client.Base.ProxyBase;
 import gov.nist.asbestos.client.client.FhirClient;
@@ -491,6 +492,16 @@ public class TestEngine  {
         }
     }
 
+    private void pauseIfBreakpoint(String parentType, Integer parentIndex, Integer childPartIndex) {
+        String breakpointIndex = TestScriptDebugState.getBreakpointIndex(parentType, parentIndex, childPartIndex);
+        boolean isBreakpoint = testScriptDebugState.isBreakpoint(breakpointIndex);
+        if (isBreakpoint) {
+            getModularEngine().saveLogs(); // Without this getTestReportsAsJson is empty
+            testScriptDebugState.sendBreakpointHit(breakpointIndex, getModularEngine().reportsAsJson(), false);
+            testScriptDebugState.pauseOnBreakpoint();
+        }
+    }
+
     private void doSetup() {
         boolean reportAsConditional = false;  // upgrade this when conditional execution comes to setup
         if (testScript.hasSetup()) {
@@ -811,6 +822,45 @@ public class TestEngine  {
         setupActionOperationComponent.setMessage("skipped");
     }
 
+    private void pauseIfActionBreakpoint(TestScript.TestActionComponent action, String parentType, Integer parentIndex, Integer childPartIndex) {
+
+        String breakpointIndex = TestScriptDebugState.getBreakpointIndex(parentType, parentIndex, childPartIndex);
+        boolean isBreakpoint = testScriptDebugState.isBreakpoint(breakpointIndex);
+        if (isBreakpoint) {
+            getModularEngine().saveLogs(); // Without this getTestReportsAsJson is empty
+            testScriptDebugState.sendBreakpointHit(breakpointIndex, getModularEngine().reportsAsJson(), true);
+            do {
+                // Must pause first before Eval
+                testScriptDebugState.pauseOnBreakpoint(); // if eval, exit pause
+                if (action.hasAssert() && testScriptDebugState.getEvaluateMode().get()) { // Only assertion-eval is supported for now. Need to address Operations later
+                    testScriptDebugState.getEvaluateMode().set(false); // will loop and wait for Resume
+                   if (testScriptDebugState.getEvalJsonString() == null) {
+                       // If evalJsonString is empty, Send original assertion as a template for the user to edit an assertion
+                       String assertionJsonStr = new Gson().toJson(action.getAssert());
+                       testScriptDebugState.sendAssertionStr(assertionJsonStr);
+                   } else {
+                      // Eval
+                   }
+                }
+            } while (! testScriptDebugState.getResume().get() && ! testScriptDebugState.getKill().get());
+        }
+
+        // Do
+//        pauseIfBreakpoint("test", testIndex, testPartIndex);  // if eval, exit
+//        if (action.hasAssert() && testScriptDebugState.getEvaluateMode().get()) { // Only assertion-eval is supported for now. Need to address Operations later.
+//            String actionAssertStr = "";
+//            new Gson().toJson(action.getAssert())
+//        }
+
+
+        // If onEvalRequest send a copy of the Assertion as JSON using Gson??
+        // If state.getDoEval is true, EvaluateAssertion like so: get the object-value to eval from state. Copy the current Assertion, replace the compareToSourceId, compareToSourceExpression, warningOnly properties.
+        // Return Assertion Result through WS: message, detail as Json String
+        // Set resume to false
+        // while ! resume && ! kill
+
+    }
+
     private boolean doTestPart(TestScript.TestScriptTestComponent testScriptElement, TestReport.TestReportTestComponent testReportComponent, TestReport testReport, boolean reportAsConditional) {
         int testIndex = testScript.getTest().indexOf(testScriptElement);
         ValE fVal = new ValE(engineVal).setMsg("Test");
@@ -821,14 +871,7 @@ public class TestEngine  {
             int testPartIndex = 0;
             for (TestScript.TestActionComponent action : testScriptElement.getAction()) {
                 if (hasDebugState()) {
-                    // Do
-                    // Must pause first before Eval
-                    pauseIfBreakpoint("test", testIndex, testPartIndex);  // if eval, exit
-                    // If onEvalRequest send a copy of the Assertion as JSON using Gson??
-                    // If state.getDoEval is true, EvaluateAssertion like so: get the object-value to eval from state. Copy the current Assertion, replace the compareToSourceId, compareToSourceExpression, warningOnly properties.
-                        // Return Assertion Result through WS: message, detail as Json String
-                        // Set resume to false
-                    // while ! resume && ! kill
+                    pauseIfActionBreakpoint(action, "test", testIndex, testPartIndex);
                 }
                 TestReport.TestActionComponent actionReportComponent = testReportComponent.addAction();
                 if (invalidAction(action, actionReportComponent, fVal))
@@ -866,39 +909,6 @@ public class TestEngine  {
             }
         }
         return result;
-    }
-
-    private void pauseIfBreakpoint(String parentType, Integer parentIndex, Integer childPartIndex) {
-        String breakpointIndex = String.format("%s%d", parentType, parentIndex);
-        if (childPartIndex != null) {
-            breakpointIndex += String.format(".%d", childPartIndex);
-        }
-        if (testScriptDebugState.getBreakpointSet().contains(breakpointIndex)) {
-            getModularEngine().saveLogs(); // Without this getTestReportsAsJson is empty
-            log.info("pausing at " + breakpointIndex);
-            testScriptDebugState.getResume().set(false);
-            testScriptDebugState.getSession().getAsyncRemote().sendText(
-                    "{\"messageType\":\"breakpoint-hit\""
-                    + ",\"testScriptIndex\":\"" + testScriptDebugState.getTestScriptIndex() + "\""
-                    + ",\"breakpointIndex\":\"" + breakpointIndex + "\""
-                    + ",\"debugButtonLabel\":\"Resume\""
-                    + ",\"testReport\":" + getModularEngine().reportsAsJson()  + "}"); // getModularEngine().reportsAsJson()
-//            log.info("About to lock and wait...");
-            synchronized (testScriptDebugState.getLock()) {
-//                log.info("Locked!");
-                while (! testScriptDebugState.getResume().get() && ! testScriptDebugState.getKill().get()) { // && ! getEvaluate
-                    try {
-                        testScriptDebugState.getLock().wait(); // Release the lock and wait for getResume to be True
-                    } catch (InterruptedException ie) {
-                    }
-                }
-                if (testScriptDebugState.getResume().get()) {
-                    log.info("Resuming " +  testScriptDebugState.getSession().getId());
-                } else if (testScriptDebugState.getKill().get()) {
-                    throw new Error("KILL session: " + testScriptDebugState.getSession().getId());
-                }
-            }
-        }
     }
 
     private void reportParsingError(TestReport.TestReportTestComponent testReportComponent, String message) {

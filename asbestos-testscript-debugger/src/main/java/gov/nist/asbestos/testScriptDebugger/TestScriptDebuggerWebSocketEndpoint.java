@@ -14,6 +14,7 @@ import javax.websocket.OnOpen;
 import javax.websocket.Session;
 import javax.websocket.server.PathParam;
 import javax.websocket.server.ServerEndpoint;
+import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -80,7 +81,12 @@ public class TestScriptDebuggerWebSocketEndpoint {
                 // Create new exception for Kill because the next Test is run and the KILL exception is shown in the next Test.
                 // - See how failures in Setup are handled. The Kill should act that way.
             } else if (myMap.get("evaluateAssertion") != null) {
-
+                // if json string not empty, then store it!
+                String evalJsonString = (String)myMap.get("evalJsonString");
+                if (evalJsonString != null) {
+                    state.setEvalJsonString(new String(Base64.getDecoder().decode(evalJsonString)));
+                }
+                doEvaluate(state);
             }
             // else if stepOver
             // else if Restart
@@ -143,11 +149,20 @@ public class TestScriptDebuggerWebSocketEndpoint {
         }
     }
 
+    private void doEvaluate(TestScriptDebugState state) {
+        synchronized (state.getLock()) {
+            state.getEvaluateMode().set(true);
+            state.getLock().notify();
+        }
+    }
+
 
     private void killSession(TestScriptDebugState state) {
         String sessionId = state.getSession().getId();
         log.info("killSession: " + sessionId);
         synchronized (state.getLock()) {
+            state.getResume().set(false);
+            state.getEvaluateMode().set(false);
             state.getKill().set(true);
             state.getLock().notify();
         }

@@ -7,6 +7,7 @@ export const testScriptDebuggerStore = {
     state() {
         return {
             waitingForBreakpoint: false,
+            evalMode: false,
             showDebugButton: {}, /* keyProperty{testScriptIndex:}=value{breakpointIndex:,debugButtonLabel:} */
             /* debugButtonLabel exists inside of showDebugButton because there are multiple testscripts and it is necessary to keep showing the Debug button labels for other test scripts.
             If a single button label variable was used then all of the Debug buttons would be become changed to Resume when a breakpoint is hit */
@@ -103,7 +104,17 @@ export const testScriptDebuggerStore = {
            }
            console.log('Active debug testScriptIndex not found!')
            return null
-        }
+        },
+        getIndexOfTestId: (state, getters, rootState) => (testId) => {
+            let indexOfTestId = rootState.testRunner.testScriptNames.indexOf(testId)
+            return indexOfTestId
+        },
+        getMapKey: (state, getters, rootState)  => (testId) => {
+            let testCollectionName = rootState.testRunner.currentTestCollectionName
+            const testCollectionIndex = rootState.testRunner.serverTestCollectionNames.indexOf(testCollectionName)
+            const mapKey = testCollectionIndex + '.' + getters.getIndexOfTestId(testId)
+            return mapKey
+        },
     },
     actions: {
         addBreakpoint({commit}, value) {
@@ -133,18 +144,21 @@ export const testScriptDebuggerStore = {
                 console.log('debugKill '+ mapKey + ' failed: WebSocket is null!')
             }
         },
+        async doDebugEvalMode({state, getters}, testId) {
+            console.log('In doDebugEvalMode')
+            const mapKey = getters.getMapKey(testId)
+            let sendData = `{"evaluateAssertion":"true","testScriptIndex":"${mapKey}"}`
+
+            console.log('Evaluating ' + state.showDebugButton[mapKey].breakpointIndex)
+            state.testScriptDebuggerWebSocket.send(sendData)
+        },
         async debugTestScript({commit, rootState, state, getters}, testId) {
-            console.log('in debug' + testId + ' isGettersUndefined: ' + getters === undefined)
+            console.log('in debug' + testId + ' isGettersUndefined: ' + (getters === undefined).valueOf())
             // commit('setTestReport',{name: testId, testReport: null})
             // console.log('log cleared for ' + testId)
 
             commit('setCurrentTest', testId)
-            console.log('pass 2')
-
-            let indexOfTestId = this.state.testRunner.testScriptNames.indexOf(testId)
-            let testCollectionName = this.state.testRunner.currentTestCollectionName
-            const testCollectionIndex = this.state.testRunner.serverTestCollectionNames.indexOf(testCollectionName)
-            const mapKey = testCollectionIndex + '.' + indexOfTestId
+            const mapKey = this.getters.getMapKey(testId)
 
             // Technically it is possible to run many debugger web sockets but the test display only allows "opening" one active Test bar at a time since the previous test bar is automatically closed.
 
@@ -153,10 +167,11 @@ export const testScriptDebuggerStore = {
                 state.testScriptDebuggerWebSocket.onopen = event => {
                     state.waitingForBreakpoint = true
                     // Disable Run button
-                    console.log('In socket onOpen. event: ' + event === undefined)
+                    console.log('In socket onOpen. event: ' + (event === undefined).valueOf())
                     // clear log 1?
                     commit('clearTestReports')
-                    let uri = `debug-testscript/${rootState.base.session}__${rootState.base.channelId}/${testCollectionName}/${testId}?_format=${this.state.testRunner.useJson ? 'json' : 'xml'};_gzip=${this.state.testRunner.useGzip}`
+                    let uri = `debug-testscript/${rootState.base.session}__${rootState.base.channelId}/${this.state.testRunner.currentTestCollectionName}/${testId}?_format=${this.state.testRunner.useJson ? 'json' : 'xml'};_gzip=${this.state.testRunner.useGzip}`
+                    let indexOfTestId = getters.getIndexOfTestId(testId)
                     if (indexOfTestId > -1) {
                         const breakpointSet = state.breakpointMap.get(mapKey) // Follow proper key format
                         let breakpointArrayString = JSON.stringify([...breakpointSet])
@@ -165,6 +180,7 @@ export const testScriptDebuggerStore = {
                         state.testScriptDebuggerWebSocket.send(sendData)
                     } else {
                         console.log(indexOfTestId + ": index not found for testId:  " + testId)
+                        return
                     }
                 }
                 state.testScriptDebuggerWebSocket.onclose = event => {
@@ -192,6 +208,11 @@ export const testScriptDebuggerStore = {
                        console.log('breakpoint hit: ' + returnData.breakpointIndex) //  This needs to be {key: x, breakpointIndex: x}
                        commit('setDebugAction', returnData)
                        commit('setCombinedTestReports', returnData.testReport)
+                        if (('isEvaluable' in returnData) && returnData.isEvaluable === 'true') {
+                           state.evalMode = true
+                        }
+                    } else if (returnData.messageType === 'original-assertion') {
+                        alert(JSON.stringify(returnData.assertionJson))
                     } else if (returnData.messageType === 'killed') {
                         alert('Debug: Killed')
                         state.testScriptDebuggerWebSocket.close()
@@ -208,6 +229,7 @@ export const testScriptDebuggerStore = {
                 }
 
             } else if (mapKey in state.showDebugButton && state.showDebugButton[mapKey].debugButtonLabel === 'Resume') {
+                state.evalMode = false
                 state.waitingForBreakpoint = true
                 const breakpointSet = state.breakpointMap.get(mapKey) // Follow proper key format
                 let breakpointArrayString = JSON.stringify([...breakpointSet])

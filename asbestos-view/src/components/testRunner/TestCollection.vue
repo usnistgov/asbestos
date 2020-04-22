@@ -119,6 +119,9 @@
                                 <button v-if="isDebuggable(i)"
                                         class="debugTestScriptButton"
                                         @click.stop="doDebug(name)">{{getDebugActionButtonLabel(i)}}</button>
+                                <button v-if="isEvaluable(i)"
+                                        class="debugTestScriptButton"
+                                        @click.stop="doDebugEvalMode(name)">Eval</button>
                                 <button v-if="isDebugKillable(i)"
                                         class="debugKillTestScriptButton"
                                         @click.stop="doDebugKill(i)">Kill</button>
@@ -169,6 +172,9 @@
                     // return "Debug"
                     return "X"
                 }
+            },
+            isEvaluable(testScriptIndex) {
+                return (this.getDebugActionButtonLabel(testScriptIndex) === 'Resume') && this.$store.state.testScriptDebugger.evalMode
             },
             isDebugKillable(testScriptIndex) {
                return (this.getDebugActionButtonLabel(testScriptIndex) === 'Resume')
@@ -231,6 +237,9 @@
                 this.running = true
                 await this.$store.dispatch('debugTestScript', testName)
                 this.running = false
+            },
+            async doDebugEvalMode(testName) {
+                await this.$store.dispatch('doDebugEvalMode', testName)
             },
             async doRunAll()  {
                 this.running = true
