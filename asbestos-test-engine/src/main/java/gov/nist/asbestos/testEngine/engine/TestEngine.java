@@ -497,6 +497,7 @@ public class TestEngine  {
         boolean isBreakpoint = testScriptDebugState.isBreakpoint(breakpointIndex);
         if (isBreakpoint) {
             getModularEngine().saveLogs(); // Without this getTestReportsAsJson is empty
+            testScriptDebugState.cancelResumeMode();
             testScriptDebugState.sendBreakpointHit(breakpointIndex, getModularEngine().reportsAsJson(), false);
             testScriptDebugState.pauseOnBreakpoint();
         }
@@ -828,12 +829,13 @@ public class TestEngine  {
         boolean isBreakpoint = testScriptDebugState.isBreakpoint(breakpointIndex);
         if (isBreakpoint) {
             getModularEngine().saveLogs(); // Without this getTestReportsAsJson is empty
+            testScriptDebugState.cancelResumeMode();
             testScriptDebugState.sendBreakpointHit(breakpointIndex, getModularEngine().reportsAsJson(), true);
             do {
                 // Must pause first before Eval
                 testScriptDebugState.pauseOnBreakpoint(); // if eval, exit pause
                 if (action.hasAssert() && testScriptDebugState.getEvaluateMode().get()) { // Only assertion-eval is supported for now. Need to address Operations later
-                    testScriptDebugState.getEvaluateMode().set(false); // will loop and wait for Resume
+                    testScriptDebugState.cancelEvalMode();
                    if (testScriptDebugState.getEvalJsonString() == null) {
                        // If evalJsonString is empty, Send original assertion as a template for the user to edit an assertion
                        String assertionJsonStr = new Gson().toJson(action.getAssert());

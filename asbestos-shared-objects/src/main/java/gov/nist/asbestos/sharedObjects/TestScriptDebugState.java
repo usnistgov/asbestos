@@ -67,6 +67,20 @@ public class TestScriptDebugState {
         this.evalJsonString = evalJsonString;
     }
 
+    /**
+     * Reset Resume: will resume the normal program flow until the next breakpoint
+     */
+    public void cancelResumeMode() {
+       this.resume.set(false);
+    }
+
+    /**
+     * Reset Eval mode: will loop and wait for Resume or Eval
+     */
+    public void cancelEvalMode() {
+       this.evaluateMode.set(false);
+    }
+
     public void sendKilled() {
         getSession().getAsyncRemote().sendText("{\"messageType\":\"killed\", \"testReport\":{}}");
     }
@@ -85,7 +99,6 @@ public class TestScriptDebugState {
 
     public void sendBreakpointHit(String breakpointIndex, String reportsAsJson, boolean isEvaluable) {
         log.info("pausing at " + breakpointIndex);
-        getResume().set(false); // will allow to be resumed by next breakpoint
         getSession().getAsyncRemote().sendText(
                 "{\"messageType\":\"breakpoint-hit\""
                         + ",\"testScriptIndex\":\"" + getTestScriptIndex() + "\""

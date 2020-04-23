@@ -161,8 +161,8 @@ public class TestScriptDebuggerWebSocketEndpoint {
         String sessionId = state.getSession().getId();
         log.info("killSession: " + sessionId);
         synchronized (state.getLock()) {
-            state.getResume().set(false);
-            state.getEvaluateMode().set(false);
+            state.cancelResumeMode();
+            state.cancelEvalMode();
             state.getKill().set(true);
             state.getLock().notify();
         }
