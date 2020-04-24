@@ -497,9 +497,8 @@ public class TestEngine  {
         boolean isBreakpoint = testScriptDebugState.isBreakpoint(breakpointIndex);
         if (isBreakpoint) {
             getModularEngine().saveLogs(); // Without this getTestReportsAsJson is empty
-            testScriptDebugState.cancelResumeMode();
             testScriptDebugState.sendBreakpointHit(breakpointIndex, getModularEngine().reportsAsJson(), false);
-            testScriptDebugState.pauseOnBreakpoint();
+            testScriptDebugState.waitOnBreakpoint();
         }
     }
 
@@ -829,11 +828,10 @@ public class TestEngine  {
         boolean isBreakpoint = testScriptDebugState.isBreakpoint(breakpointIndex);
         if (isBreakpoint) {
             getModularEngine().saveLogs(); // Without this getTestReportsAsJson is empty
-            testScriptDebugState.cancelResumeMode();
             testScriptDebugState.sendBreakpointHit(breakpointIndex, getModularEngine().reportsAsJson(), true);
             do {
                 // Must pause first before Eval
-                testScriptDebugState.pauseOnBreakpoint(); // if eval, exit pause
+                testScriptDebugState.waitOnBreakpoint(); // if eval, exit pause
                 if (action.hasAssert() && testScriptDebugState.getEvaluateMode().get()) { // Only assertion-eval is supported for now. Need to address Operations later
                     testScriptDebugState.cancelEvalMode();
                    if (testScriptDebugState.getEvalJsonString() == null) {

@@ -130,11 +130,11 @@ public class TestScriptDebugState {
     }
 
 
-    public void pauseOnBreakpoint() {
-//            log.info("About to lock and wait...");
+    public void waitOnBreakpoint() {
+        cancelResumeMode();
+
         synchronized (getLock()) {
-//                log.info("Locked!");
-            while (isWait()) {
+            while (isWait()) { // Condition must be false to exit the wait and to protect from spurious wake-ups
                 try {
                     getLock().wait(); // Release the lock and wait for getResume to be True
                 } catch (InterruptedException ie) {
