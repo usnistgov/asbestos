@@ -7,6 +7,8 @@ import gov.nist.asbestos.client.resolver.SearchParms;
 import gov.nist.asbestos.http.operations.HttpGet;
 import gov.nist.asbestos.http.operations.HttpPost;
 import gov.nist.asbestos.simapi.validation.ValE;
+import gov.nist.asbestos.testEngine.engine.fixture.FixtureComponent;
+import gov.nist.asbestos.testEngine.engine.fixture.FixtureMgr;
 import org.hl7.fhir.r4.model.TestReport;
 import org.hl7.fhir.r4.model.TestScript;
 

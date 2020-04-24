@@ -21,6 +21,7 @@ import MhdTesting from "../components/top/MhdTesting"
 import Configurations from "../components/top/Configurations"
 import Getter from "../components/getter/Getter"
 import Admin from "../components/wrapper/Admin";
+import StaticFixtureDisplay from "../components/testRunner/StaticFixtureDisplay";
 
 Vue.use( VueRouter )
 
@@ -137,6 +138,10 @@ export const routes = [
             {
                 path: 'session',
                 components: { session: SessionView },
+            },{
+                path: 'collection/:testCollection/test/:testId/fixture/:path',
+                component: StaticFixtureDisplay,
+                props: true
             }
         ]
     },

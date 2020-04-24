@@ -5,6 +5,8 @@ import gov.nist.asbestos.client.client.Format;
 import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import gov.nist.asbestos.simapi.validation.ValE;
+import gov.nist.asbestos.testEngine.engine.fixture.FixtureComponent;
+import gov.nist.asbestos.testEngine.engine.fixture.FixtureMgr;
 import org.hl7.fhir.r4.model.BaseResource;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.TestReport;
@@ -51,10 +53,11 @@ class SetupActionCreate extends GenericSetupAction {
             reporter.report(wrapper.getRef() + " created", wrapper);
         else
             reporter.reportError(wrapper.getRef() + " not created", wrapper);
-        fixtureComponent = new FixtureComponent(fixtureId)
+//        fixtureComponent = new FixtureComponent(fixtureId)
+        fixtureMgr.add(fixtureId)
                 .setResource(wrapper)
                 .setHttpBase(wrapper.getHttpBase());
-        fixtureMgr.put(fixtureId, fixtureComponent);
+//        fixtureMgr.put(fixtureId, fixtureComponent);
     }
 
     void run(TestScript.SetupActionOperationComponent op, TestReport.SetupActionOperationComponent operationReport) {

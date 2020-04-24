@@ -1,6 +1,7 @@
 package gov.nist.asbestos.testEngine.engine;
 
 import gov.nist.asbestos.client.resolver.IdBuilder;
+import gov.nist.asbestos.testEngine.engine.fixture.FixtureMgr;
 import org.hl7.fhir.r4.model.*;
 
 import java.util.Objects;

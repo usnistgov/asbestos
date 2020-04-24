@@ -3,6 +3,8 @@ package gov.nist.asbestos.testEngine.engine;
 import gov.nist.asbestos.client.client.FhirClient;
 import gov.nist.asbestos.client.client.Format;
 import gov.nist.asbestos.simapi.validation.ValE;
+import gov.nist.asbestos.testEngine.engine.fixture.FixtureComponent;
+import gov.nist.asbestos.testEngine.engine.fixture.FixtureMgr;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.TestReport;
 import org.hl7.fhir.r4.model.TestScript;
@@ -23,6 +25,9 @@ public class OperationRunner {
     private URI sut = null;
     private Reporter reporter;
     private Map<String, String> externalVariables;
+    private String testCollectionId = null;
+    private String testId = null;
+    private TestEngine testEngine = null;
 
     OperationRunner(FixtureMgr fixtureMgr, Map<String, String> externalVariables) {
         Objects.requireNonNull(fixtureMgr);
@@ -36,6 +41,8 @@ public class OperationRunner {
         Objects.requireNonNull(fhirClient);
         Objects.requireNonNull(testScript);
         Objects.requireNonNull(operationReport);
+        Objects.requireNonNull(testCollectionId);
+        Objects.requireNonNull(testId);
 
         reporter = new Reporter(val, operationReport, "", "");
 
@@ -100,6 +107,10 @@ public class OperationRunner {
                             .setVal(val)
                         .setOpReport(operationReport)
                         );
+            setupActionRead
+                    .setTestCollectionId(testCollectionId)
+                    .setTestId(testId)
+                    .setTestEngine(testEngine);
             setupActionRead.run(op, operationReport);
         } else if ("search".equals(code)) {
                 SetupActionSearch setupActionSearch = new SetupActionSearch(fixtureMgr)
@@ -123,11 +134,15 @@ public class OperationRunner {
                             .setType(type + ".create")
                             .setSut(sut)
                             .setVal(val);
+            setupActionCreate.setTestEngine(testEngine);
             setupActionCreate.setVariableMgr(
                     new VariableMgr(testScript, fixtureMgr)
                             .setExternalVariables(externalVariables)
                             .setVal(val)
                             .setOpReport(operationReport));
+            setupActionCreate
+                    .setTestCollectionId(testCollectionId)
+                    .setTestId(testId);
             setupActionCreate.run(op, operationReport);
         } else if ("delete".equals(code)) {
             SetupActionDelete setupActionDelete =
@@ -136,6 +151,8 @@ public class OperationRunner {
                             .setFhirClient(fhirClient)
                             .setType(type + ".delete")
                             .setVal(val);
+            setupActionDelete
+                    .setTestEngine(testEngine);
             setupActionDelete.setVariableMgr(
                     new VariableMgr(testScript, fixtureMgr)
                             .setExternalVariables(externalVariables)
@@ -149,6 +166,8 @@ public class OperationRunner {
                             .setFhirClient(fhirClient)
                             .setType(type + ".transaction")
                             .setVal(val);
+            setupActionTransaction
+                    .setTestEngine(testEngine);
             setupActionTransaction.setVariableMgr(
                     new VariableMgr(testScript, fixtureMgr)
                             .setExternalVariables(externalVariables)
@@ -161,7 +180,11 @@ public class OperationRunner {
             setupActionTransaction.setSut(sut)
                             .setFhirClient(fhirClient)
                             .setType(type + ".mhd-pdb-transaction")
-                            .setVal(val);
+                            .setVal(val)
+                    .setTestCollectionId(testCollectionId)
+                    .setTestId(testId);
+            setupActionTransaction
+                    .setTestEngine(testEngine);
             setupActionTransaction.setVariableMgr(
                     new VariableMgr(testScript, fixtureMgr)
                             .setExternalVariables(externalVariables)
@@ -200,6 +223,21 @@ public class OperationRunner {
 
     public OperationRunner setSut(URI sut) {
         this.sut = sut;
+        return this;
+    }
+
+    public OperationRunner setTestCollectionId(String testCollectionId) {
+        this.testCollectionId = testCollectionId;
+        return this;
+    }
+
+    public OperationRunner setTestId(String testId) {
+        this.testId = testId;
+        return this;
+    }
+
+    public OperationRunner setTestEngine(TestEngine testEngine) {
+        this.testEngine = testEngine;
         return this;
     }
 }

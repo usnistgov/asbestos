@@ -67,9 +67,9 @@ import ActionDetails from "./ActionDetails";
             moduleId() {
                 if (!this.actionReport) return null;
                 if (!this.actionReport.operation) return null;
-                if (!this.actionReport.operation.extension) return null;
+                if (!this.actionReport.operation.modifierExtension) return null;
                 let moduleId = null;
-                this.actionReport.operation.extension.forEach(extension => {
+                this.actionReport.operation.modifierExtension.forEach(extension => {
                     if (extension.url === 'urn:moduleId')
                         moduleId = extension.valueString;
                 })
@@ -78,9 +78,9 @@ import ActionDetails from "./ActionDetails";
             moduleName() {
                 if (!this.actionReport) return null;
                 if (!this.actionReport.operation) return null;
-                if (!this.actionReport.operation.extension) return null;
+                if (!this.actionReport.operation.modifierExtension) return null;
                 let moduleName = null;
-                this.actionReport.operation.extension.forEach(extension => {
+                this.actionReport.operation.modifierExtension.forEach(extension => {
                     if (extension.url === 'urn:moduleName')
                         moduleName = extension.valueString;
                 })

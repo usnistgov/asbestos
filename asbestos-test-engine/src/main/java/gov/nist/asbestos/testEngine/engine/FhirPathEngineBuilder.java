@@ -8,7 +8,7 @@ import org.hl7.fhir.r4.utils.FHIRPathEngine;
 
 import java.util.List;
 
-class FhirPathEngineBuilder {
+public class FhirPathEngineBuilder {
 
     static FHIRPathEngine build() {
         return new FHIRPathEngine(new HapiWorkerContext(ProxyBase.getFhirContext(), new PrePopulatedValidationSupport()));

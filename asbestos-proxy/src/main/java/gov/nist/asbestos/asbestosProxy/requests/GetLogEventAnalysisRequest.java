@@ -16,7 +16,9 @@ import org.checkerframework.checker.units.qual.A;
 import org.hl7.fhir.r4.model.BaseResource;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.DocumentManifest;
+import org.hl7.fhir.r4.model.Procedure;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
@@ -47,6 +49,19 @@ import java.util.Objects;
 // ?url=TheUrlOfAFHIRResource;gzip=boolean
 // Returns Report
 
+// OR
+
+// 0 - empty
+// 1 - app context  (asbestos)
+// 2 - "log"
+// 3 - "analysis"
+// 4 - "static"
+// 5 - testCollectionId
+// 6 - testId
+// ?url=reference
+// Returns Report
+
+
 
 
 public class GetLogEventAnalysisRequest {
@@ -65,7 +80,17 @@ public class GetLogEventAnalysisRequest {
         request.uriParts.size() == 5
                 && "log".equalsIgnoreCase(request.uriParts.get(2))
                 && "analysis".equalsIgnoreCase(request.uriParts.get(3))
-                && "url".equalsIgnoreCase(request.uriParts.get(4));
+                && "url".equalsIgnoreCase(request.uriParts.get(4))
+
+                ||
+
+                request.uriParts.size() == 7
+                        && "log".equalsIgnoreCase(request.uriParts.get(2))
+                        && "analysis".equalsIgnoreCase(request.uriParts.get(3))
+                        && "static".equalsIgnoreCase(request.uriParts.get(4));
+
+
+
     }
 
     public GetLogEventAnalysisRequest(Request request) {
@@ -82,35 +107,63 @@ public class GetLogEventAnalysisRequest {
         return requestOrResponse.equals("request");
     }
 
-    private String getParm(String name) {
-        String query = request.req.getQueryString();
-        if (query == null)
-            return null;
-        int parmi = query.indexOf(name + "=");
-        if (parmi == -1)
-            return null;
-        int parmend = query.indexOf(";", parmi);
-        if (parmend == -1)
-            parmend = query.length();
-        int parmstart = query.indexOf("=", parmi);
-        if (parmstart == -1)
-            return null;
-        parmstart++;
-        if (parmend <= parmstart)
-            return null;
-        return query.substring(parmstart, parmend);
-
-    }
+//    private String getParm(String name) {
+//        String query = request.req.getQueryString();
+//        if (query == null)
+//            return null;
+//        int parmi = query.indexOf(name + "=");
+//        if (parmi == -1)
+//            return null;
+//        int parmend = query.indexOf(";", parmi);
+//        if (parmend == -1)
+//            parmend = query.length();
+//        int parmstart = query.indexOf("=", parmi);
+//        if (parmstart == -1)
+//            return null;
+//        parmstart++;
+//        if (parmend <= parmstart)
+//            return null;
+//        return query.substring(parmstart, parmend);
+//
+//    }
 
     public void run() {
         log.info("GetLogEventAnalysisRequest");
 
-        if (request.uriParts.get(4).equalsIgnoreCase("event")) {
+        if (request.uriParts.get(4).equalsIgnoreCase("static")) {
+            // load static fixture from test definition
+            String testCollectionId = request.uriParts.get(5);
+            String testId = request.uriParts.get(6);
+            String ref = request.getParm("url");
+            if (ref == null) {
+                request.resp.setStatus(request.resp.SC_BAD_REQUEST);
+                return;
+            }
+            File testDir = request.ec.getTest(testCollectionId, testId);
+            if (!testDir.exists() || !testDir.isDirectory()) {
+                request.resp.setStatus(request.resp.SC_NOT_FOUND);
+                return;
+            }
+            File file = new File(testDir, ref);
+            if (!file.exists() || !file.isFile()) {
+                request.resp.setStatus(request.resp.SC_NOT_FOUND);
+                return;
+            }
+            BaseResource resource;
+            try {
+                resource = ProxyBase.parse(file);
+            } catch (Exception e) {
+                returnReport(new Report("Not found or not a resource: " + file));
+                return;
+            }
+            analyseResource(resource, null, true);
+
+        } else if (request.uriParts.get(4).equalsIgnoreCase("event")) {
             String testSession = request.uriParts.get(5);
             String channelId = request.uriParts.get(6);
             String eventId = request.uriParts.get(7);
-            String focusUrl = getParm("focusUrl");
-            String focusAnchor = getParm("focusAnchor");
+            String focusUrl = request.getParm("focusUrl");
+            String focusAnchor = request.getParm("focusAnchor");
             if (focusUrl != null && focusAnchor != null)
                 focusUrl = focusUrl + "#" + focusAnchor;
             boolean requestFocus = analysisTargetIsRequest();

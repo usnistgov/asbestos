@@ -2,6 +2,7 @@ package gov.nist.asbestos.testEngine.engine;
 
 import gov.nist.asbestos.client.Base.ProxyBase;
 import gov.nist.asbestos.simapi.validation.*;
+import gov.nist.asbestos.testEngine.engine.fixture.FixtureComponent;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.TestScript;

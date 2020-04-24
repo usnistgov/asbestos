@@ -4,6 +4,9 @@ import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import gov.nist.asbestos.simapi.validation.ValE;
 import gov.nist.asbestos.testEngine.engine.assertion.MinimumId;
+import gov.nist.asbestos.testEngine.engine.fixture.FixtureComponent;
+import gov.nist.asbestos.testEngine.engine.fixture.FixtureMgr;
+import gov.nist.asbestos.testEngine.engine.fixture.UnregisteredFixtureComponent;
 import org.hl7.fhir.r4.model.*;
 
 import java.util.Arrays;
@@ -21,6 +24,9 @@ public class AssertionRunner {
     //private TestReport testReport = null;
     private VariableMgr variableMgr = null;
     private boolean isRequest = false;  // is assertion being run on request message?
+    private String testCollectionId = null;
+    private String testId = null;
+    private TestEngine testEngine = null;
 
     AssertionRunner(FixtureMgr fixtureMgr) {
         Objects.requireNonNull(fixtureMgr);
@@ -37,7 +43,7 @@ public class AssertionRunner {
         return this;
     }
 
-    private FixtureComponent sourceOverride = null;
+    private UnregisteredFixtureComponent sourceOverride = null;
     private FixtureComponent getSource(TestScript.SetupActionAssertComponent as,  TestReport.SetupActionAssertComponent assertReport) {
         FixtureComponent sourceFixture = getSourceIfAvailable(as);
         if (sourceFixture == null)
@@ -58,6 +64,7 @@ public class AssertionRunner {
         Objects.requireNonNull(typePrefix);
         Objects.requireNonNull(val);
         Objects.requireNonNull(testScript);
+        Objects.requireNonNull(testEngine);
 
         boolean reported = false;
 
@@ -79,7 +86,7 @@ public class AssertionRunner {
                     for (Bundle.BundleEntryComponent component : bundle.getEntry()) {
 //                        assertReport = new TestReport.SetupActionAssertComponent();
                         if (component.hasResource()) {
-                            sourceOverride = new FixtureComponent(component.getResource());
+                            sourceOverride = new UnregisteredFixtureComponent(component.getResource());
                             reported = true;
                             if (run2(as, assertReport)) {
                                 return;  // good enough to find one component that matches assertion
@@ -145,7 +152,16 @@ public class AssertionRunner {
         assertReport.setResult(TestReport.TestReportActionResult.PASS);  // may be overwritten
 
         // add context to report
-        new ActionReporter().reportAssertion(fixtureMgr, variableMgr, new Reporter(val, assertReport, "", ""));
+        new ActionReporter()
+                .setTestCollectionId(testCollectionId)
+                .setTestId(testId)
+                .setTestEngine(testEngine)
+                .reportAssertion(
+                        fixtureMgr,
+                        variableMgr,
+                        new Reporter(val, assertReport, "", ""),
+                        getSourceIfAvailable(as)
+                );
 
         label = as.getLabel();
         type = typePrefix + ".assert";
@@ -525,8 +541,24 @@ public class AssertionRunner {
         return this;
     }
 
-//    public AssertionRunner setTestReport(TestReport testReport) {
+    public AssertionRunner setTestCollectionId(String testCollectionId) {
+        this.testCollectionId = testCollectionId;
+        return this;
+    }
+
+    public AssertionRunner setTestId(String testId) {
+        this.testId = testId;
+        return this;
+    }
+
+    //    public AssertionRunner setTestReport(TestReport testReport) {
 //        this.testReport = testReport;
 //        return this;
 //    }
+
+
+    public AssertionRunner setTestEngine(TestEngine testEngine) {
+        this.testEngine = testEngine;
+        return this;
+    }
 }

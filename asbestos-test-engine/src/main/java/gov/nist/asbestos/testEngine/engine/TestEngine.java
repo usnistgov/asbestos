@@ -11,10 +11,14 @@ import gov.nist.asbestos.client.resolver.ResourceCacheMgr;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import gov.nist.asbestos.simapi.validation.Val;
 import gov.nist.asbestos.simapi.validation.ValE;
+import gov.nist.asbestos.testEngine.engine.fixture.FixtureComponent;
+import gov.nist.asbestos.testEngine.engine.fixture.FixtureMgr;
+import gov.nist.asbestos.testEngine.engine.fixture.FixtureSub;
 import gov.nist.asbestos.testEngine.engine.translator.ComponentDefinition;
 import gov.nist.asbestos.testEngine.engine.translator.ComponentReference;
 import gov.nist.asbestos.testEngine.engine.translator.Parameter;
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.apache.log4j.Logger;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.*;
 
@@ -31,9 +35,12 @@ import java.util.regex.Pattern;
  * See http://hl7.org/fhir/testing.html
  */
 public class TestEngine  {
+    private static Logger log = Logger.getLogger(TestEngine.class);
+
     private File testDef = null; // directory holding test definition
     private String testScriptName = null;   // name of testscript file, TestScript.xml by default
     private URI sut = null;
+    TestEngine parent = null;
 
     // current script and report
     private TestScript testScript = null;
@@ -53,6 +60,7 @@ public class TestEngine  {
     private String channelId = null;
     private File externalCache = null;
     private String testCollection = null;
+    private String testId = null;
     private boolean isRequest = false;  // running an eval on a request message?  alternative is regular server test
 
     public static final String LAST_OP = "_LAST_OP_";
@@ -126,6 +134,13 @@ public class TestEngine  {
         Objects.requireNonNull(externalCache);
         engineVal = new ValE(val);
         engineVal.setMsg("TestEngine");
+        if (testId == null || testCollection == null) {
+            String[] parts = testDef.toString().split("/");
+            if (parts.length > 1) {
+                setTestId(parts[parts.length - 1]);
+                setTestCollection(parts[parts.length - 2]);
+            }
+        }
         try {
             doWorkflow();
         } catch (Throwable t) {
@@ -151,9 +166,11 @@ public class TestEngine  {
             initWorkflow();
             doLoadFixtures();
             if (requestResource != null)
-                fixtureMgr.put("request", new FixtureComponent(requestResource));
+                fixtureMgr.add("request", responseResource);
+                //fixtureMgr.put("request", new FixtureComponent(requestResource));
             if (responseResource != null)
-                fixtureMgr.put("response", new FixtureComponent(responseResource));
+                fixtureMgr.add("response", responseResource);
+                //fixtureMgr.put("response", new FixtureComponent(responseResource));
             doTest(); // should only be asserts
             errorOut();
         } catch (Throwable t) {
@@ -204,7 +221,7 @@ public class TestEngine  {
 
     private void reportTerminalFailure(Throwable t) {
         String msg = t.getClass().getSimpleName() + ": " + t.getMessage();
-        if (t.getMessage() == null || t.getMessage().equals(""))
+        if (t.getMessage() == null || t.getMessage().endsWith("Exception"))
             msg = ExceptionUtils.getStackTrace(t);
         reportTerminalFailure(msg);
     }
@@ -216,6 +233,7 @@ public class TestEngine  {
 
         Extension extension = new Extension().setUrl(ExtensionDef.failure).setValue(new StringType(msg));
         getTestReport().getExtension().add(extension);
+        log.error(msg);
 
 //        TestReport.TestReportSetupComponent setup = testReport.getSetup();
 //        TestReport.SetupActionComponent comp = setup.addAction();
@@ -511,9 +529,15 @@ public class TestEngine  {
                         ResourceWrapper wrapper = optWrapper.get();
                         FixtureComponent fixtureComponent;
                         try {
-                            fixtureComponent = new FixtureComponent(id).setResource(wrapper).setVal(fVal).load(wrapper);
-                            if (fixtureComponent != null)
-                                fixtureMgr.put(id, fixtureComponent);
+//                            fixtureComponent = new FixtureComponent(id)
+                            fixtureMgr.add(id)
+//                                    .setTestCollectionId(testCollection)
+//                                    .setTestId(testId)
+                                    .setResource(wrapper)   // testCollectionId and testId must be set before this
+                                    .setVal(fVal)
+                                    .load(wrapper);
+//                            if (fixtureComponent != null)
+//                                fixtureMgr.put(id, fixtureComponent);
                         } catch (Throwable e) {
                             throw new Error(e);
                         }
@@ -531,8 +555,8 @@ public class TestEngine  {
                         String sourceId = sourceIdExt.getValue().toString();
 
                         FixtureSub fixtureSub = new FixtureSub(fixtureMgr, sourceId, fhirPath);
-                        FixtureComponent fixtureComponent = new FixtureComponent(id).setFixtureSub(fixtureSub).setVal(fVal);
-                        fixtureMgr.put(id, fixtureComponent);
+                        FixtureComponent fixtureComponent = fixtureMgr.add(id).setFixtureSub(fixtureSub).setVal(fVal);
+                        //fixtureMgr.put(id, fixtureComponent);
                     }
                 }
             } catch (Throwable t) {
@@ -694,7 +718,10 @@ public class TestEngine  {
                         .setFhirClient(fhirClient)
                         .setSut(sut)
                         .setTestReport(testReport)
-                        .setTestScript(testScript);
+                        .setTestScript(testScript)
+                        .setTestCollectionId(testCollection)
+                        .setTestId(testId);
+                runner.setTestEngine(this);
                 runner.run(operation, report);
             } catch (Throwable t) {
                 report.setMessage(ExceptionUtils.getStackTrace(t));
@@ -731,6 +758,10 @@ public class TestEngine  {
 //                    .setTestReport(testReport)
                     .setTestScript(testScript)
                     .setIsRequest(isRequest);
+            runner
+                    .setTestCollectionId(testCollection)
+                    .setTestId(testId)
+                    .setTestEngine(this);
             runner.run(theAssert, report);
         } catch (Throwable t) {
             reportTerminalFailure(t);
@@ -870,14 +901,17 @@ public class TestEngine  {
                 .setFixtures(inFixturesForComponent)
                 .setExternalVariables(externalVariables)
                 .setFhirClient(new FhirClient())
+                .setTestCollection(testCollection)
+                .setTestId(testId)
                 ;
         modularEngine.add(testEngine1);
+        testEngine1.parent = this;
         testEngine1.runTest();
 
         String moduleName = simpleName(componentReference.getComponentRef());
         String moduleId = assignModuleId(moduleName);
-        opReport.addExtension(ExtensionDef.moduleId, new StringType(moduleId));
-        opReport.addExtension(ExtensionDef.moduleName, new StringType(moduleName));
+        opReport.addModifierExtension(new Extension(ExtensionDef.moduleId, new StringType(moduleId)));
+        opReport.addModifierExtension(new Extension(ExtensionDef.moduleName, new StringType(moduleName)));
         testEngine1.getTestReport().addExtension(ExtensionDef.moduleId, new StringType(moduleId));
         testEngine1.getTestReport().addExtension(ExtensionDef.moduleName, new StringType(moduleName));
 
@@ -1461,6 +1495,15 @@ public class TestEngine  {
 
     public TestEngine setTestCollection(String testCollection) {
         this.testCollection = testCollection;
+        if (fixtureMgr != null)
+            fixtureMgr.setTestCollectionId(testCollection);
+        return this;
+    }
+
+    public TestEngine setTestId(String testId) {
+        this.testId = testId;
+        if (fixtureMgr != null)
+            fixtureMgr.setTestId(testId);
         return this;
     }
 
@@ -1505,5 +1548,15 @@ public class TestEngine  {
 
     public String getTestCollection() {
         return testCollection;
+    }
+
+    String getTestEnginePath() {
+        if (parent != null) {
+            String parentPath = parent.getTestEnginePath();
+            if (parentPath.endsWith(":"))
+                return parentPath + " " + testScriptName;
+            return parentPath + "/" + testScriptName;
+        }
+        return "/" + testCollection + "/" + testId + ":";
     }
 }

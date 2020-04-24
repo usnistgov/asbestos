@@ -1,11 +1,18 @@
-package gov.nist.asbestos.testEngine.engine;
+package gov.nist.asbestos.testEngine.engine.fixture;
 
 import gov.nist.asbestos.client.client.FhirClient;
+import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
+import gov.nist.asbestos.client.resolver.SearchParms;
 import gov.nist.asbestos.http.operations.HttpBase;
+import gov.nist.asbestos.serviceproperties.ServiceProperties;
+import gov.nist.asbestos.serviceproperties.ServicePropertiesEnum;
 import gov.nist.asbestos.simapi.validation.ValE;
 import org.hl7.fhir.r4.model.BaseResource;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Objects;
 
 public class FixtureComponent {
@@ -19,18 +26,20 @@ public class FixtureComponent {
     private ValE val;
     private FhirClient fhirClient = null;
     private FixtureSub fixtureSub = null;
+    private FixtureMgr fixtureMgr = null;
 
+    // constructors only available to FixtureMgr
     FixtureComponent(String id) {
         Objects.requireNonNull(id);
         this.id = id;
     }
 
     FixtureComponent(BaseResource baseResource) {
-        resourceWrapper = new ResourceWrapper(baseResource);
+        setResource(new ResourceWrapper(baseResource));
     }
 
     FixtureComponent(ResourceWrapper resourceWrapper) {
-        this.resourceWrapper = resourceWrapper;
+        setResource(resourceWrapper);
     }
 
     public FixtureComponent setFixtureSub(FixtureSub fixtureSub) {
@@ -38,7 +47,7 @@ public class FixtureComponent {
         return this;
     }
 
-    FixtureComponent load(ResourceWrapper it) {  //  static loads
+    public FixtureComponent load(ResourceWrapper it) {  //  static loads
         Objects.requireNonNull(it);
         Objects.requireNonNull(it.getRef());
         resourceWrapper = it;
@@ -62,7 +71,7 @@ public class FixtureComponent {
      *
      * @return -1 if not loaded or HTTP status
      */
-    boolean IsOk() {
+    public boolean IsOk() {
         return httpBase != null && httpBase.getStatus() == 200;
     }
 
@@ -70,7 +79,7 @@ public class FixtureComponent {
         return resourceWrapper != null && resourceWrapper.isLoaded() && resourceWrapper.isOk();
     }
 
-    String getId() {
+    public String getId() {
         return id;
     }
 
@@ -97,6 +106,26 @@ public class FixtureComponent {
         return null;
     }
 
+    public static Ref generateStaticFixtureRef(String resourceType, String fixturePath, String fhirPath, String testCollectionId, String testId) {
+        URI uri = null;
+        try {
+            uri = new URI(ServiceProperties.getInstance().getPropertyOrStop(ServicePropertiesEnum.FHIR_TOOLKIT_BASE)
+                    + "/engine/staticFixture/" + testCollectionId + "/" + testId);
+        } catch (URISyntaxException e) {
+            return null;
+        }
+        String searchString = "?url=" + fixturePath;
+        if (fhirPath != null && !fhirPath.equals(""))
+            searchString = searchString + ";fhirPath=" + fhirPath;
+        SearchParms searchParms = new SearchParms();
+        try {
+            searchParms.setParms(searchString, true);
+        } catch (UnsupportedEncodingException e) {
+            return null;
+        }
+        return new Ref(uri, resourceType, searchParms);
+    }
+
     public String getResponseType() {
         BaseResource resource = getResourceResource();
         if (resource == null)
@@ -105,7 +134,17 @@ public class FixtureComponent {
     }
 
     public FixtureComponent setResource(ResourceWrapper resource) {
+        Objects.requireNonNull(getTestCollectionId());
+        Objects.requireNonNull(getTestId());
         this.resourceWrapper = resource;
+        if (resource.hasRef() && resource.getRef().isRelative()) {
+            Ref ref = generateStaticFixtureRef(resource.getResource().getClass().getSimpleName(),
+                    resource.getRef().toString(),
+                    null,
+                    getTestCollectionId(),
+                    getTestId());
+            resource.setRef(ref);
+        }
         return this;
     }
 
@@ -143,5 +182,20 @@ public class FixtureComponent {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public FixtureComponent setFixtureMgr(FixtureMgr mgr) {
+        fixtureMgr = mgr;
+        return this;
+    }
+
+    private String getTestCollectionId() {
+        Objects.requireNonNull(fixtureMgr);
+        return fixtureMgr.getTestCollectionId();
+    }
+
+    private String getTestId() {
+        Objects.requireNonNull(fixtureMgr);
+        return fixtureMgr.getTestId();
     }
 }

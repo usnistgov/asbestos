@@ -17,12 +17,12 @@
 
                 <!-- From Client To Server -->
                 <div v-if="selectedEvent">
-                <span v-for="(task, taski) in tasks" :key="taski">
-                    <span v-bind:class="[{ selected: taski === selectedTask, selectable: taski !== selectedTask }, 'cursor-pointer']" @click="selectTask(taski)">
-                        {{ taskLabel(taski) }}
-                        <span class="divider"> </span>
+                    <span v-for="(task, taski) in tasks" :key="taski">
+                        <span v-bind:class="[{ selected: taski === selectedTask, selectable: taski !== selectedTask }, 'cursor-pointer']" @click="selectTask(taski)">
+                            {{ taskLabel(taski) }}
+                            <span class="divider"> </span>
+                        </span>
                     </span>
-                </span>
 
                     <a href="https://github.com/usnistgov/asbestos/wiki/Connectathon-FAQ#inspector" target="_blank">
                         <img src="../../assets/info.png">
@@ -43,7 +43,7 @@
               }"
                       @click="displayRequest = true; displayResponse = false; displayInspector = false; displayValidations = false">
                 Request
-           </span>
+                </span>
                 <div class="divider"></div>
                 <span v-bind:class="{
                    selected: displayResponse,

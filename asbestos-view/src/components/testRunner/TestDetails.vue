@@ -52,7 +52,11 @@
                     'breakpoint-indicator': isBreakpoint(actioni),
                 }"
                  :key="'Action' + actioni">
-                <div v-if="containsImport(action)">
+                <!--
+                    If attempt to call test component fails (component not called)
+                    No extension/import will be shown in report
+                -->
+                <div v-if="scriptContainsImport(action)">
                     <component-script
                         :action-script="action"
                         :action-report="report && report.action ? report.action[actioni] : null"> </component-script>
@@ -103,12 +107,20 @@
             }
         },
         methods: {
-            containsImport(action) {
+            reportContainsImport(action, actioni) {
+                if (!this.report.action) return false
+                const reportAction = this.report.action[actioni]
+                if (!reportAction) return false
+                if (!reportAction.operation) return false
+                if (!reportAction.operation.modifierExtension) return false
+            },
+            scriptContainsImport(action) {
                 if (!action.operation) return false;
                 if (!action.operation.modifierExtension) return false;
                 let hasImport = false;
                 action.operation.modifierExtension.forEach(extension => {
-                    if (extension.url === 'https://github.com/usnistgov/asbestos/wiki/TestScript-Import') hasImport = true
+                    if (extension.url === 'https://github.com/usnistgov/asbestos/wiki/TestScript-Import')
+                        hasImport = true
                 })
                 return hasImport
             },

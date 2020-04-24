@@ -5,9 +5,9 @@ import gov.nist.asbestos.client.client.FhirClient;
 import gov.nist.asbestos.client.client.Format;
 import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
-import gov.nist.asbestos.http.headers.Headers;
-import gov.nist.asbestos.http.operations.HttpBase;
 import gov.nist.asbestos.simapi.validation.ValE;
+import gov.nist.asbestos.testEngine.engine.fixture.FixtureComponent;
+import gov.nist.asbestos.testEngine.engine.fixture.FixtureMgr;
 import org.hl7.fhir.r4.model.BaseResource;
 import org.hl7.fhir.r4.model.TestReport;
 import org.hl7.fhir.r4.model.TestScript;
@@ -34,6 +34,9 @@ abstract class GenericSetupAction {
     BaseResource resourceToSend;
     Reporter reporter;
     String label;
+    private String testCollectionId = null;
+    private String testId = null;
+    private TestEngine testEngine = null;
 
     abstract String resourceTypeToSend();
 
@@ -52,7 +55,14 @@ abstract class GenericSetupAction {
 //    }
 
     private void reportOperation(ResourceWrapper wrapper) {
-        new ActionReporter().reportOperation(wrapper, fixtureMgr, variableMgr, reporter);
+        Objects.requireNonNull(testCollectionId);
+        Objects.requireNonNull(testId);
+        Objects.requireNonNull(testEngine);
+        new ActionReporter()
+                .setTestEngine(testEngine)
+                .setTestCollectionId(testCollectionId)
+                .setTestId(testId)
+                .reportOperation(wrapper, fixtureMgr, variableMgr, reporter);
 //        String request = "### " + wrapper.getHttpBase().getVerb() + " " + wrapper.getHttpBase().getUri() + "\n";
 //
 //        Map<String, String> fixtures = new HashMap<>();
@@ -112,6 +122,8 @@ abstract class GenericSetupAction {
         Objects.requireNonNull(op);
         Objects.requireNonNull(operationReport);
         Objects.requireNonNull(variableMgr);
+        Objects.requireNonNull(testEngine);
+
         val = new ValE(val).setMsg(type);
         this.op = op;
         this.opReport = operationReport;
@@ -156,6 +168,8 @@ abstract class GenericSetupAction {
     }
 
     void postExecute(ResourceWrapper wrapper) {
+        Objects.requireNonNull(testEngine);
+
         if (wrapper.hasResource()) {
             String receivedResourceType = wrapper.getResource().getClass().getSimpleName();
             String expectedResourceType = resourceTypeToBeReturned();
@@ -166,10 +180,13 @@ abstract class GenericSetupAction {
         }
 
         String fixtureId = op.hasResponseId() ? op.getResponseId() : FixtureComponent.getNewId();
-        fixtureComponent = new FixtureComponent(fixtureId)
+//        fixtureComponent = new FixtureComponent(fixtureId)
+        fixtureMgr.add(fixtureId)
+//                .setTestCollectionId(testCollectionId)
+//                .setTestId(testId)
                 .setResource(wrapper)
                 .setHttpBase(wrapper.getHttpBase());
-        fixtureMgr.put(fixtureId, fixtureComponent);
+        //fixtureMgr.put(fixtureId, fixtureComponent);
 
         reportOperation(wrapper);
     }
@@ -187,5 +204,20 @@ abstract class GenericSetupAction {
     boolean isPUTorPOST() {
         String type = op.getType().getCode();
         return putPostTypes.contains(type);
+    }
+
+    public GenericSetupAction setTestCollectionId(String testCollectionId) {
+        this.testCollectionId = testCollectionId;
+        return this;
+    }
+
+    public GenericSetupAction setTestId(String testId) {
+        this.testId = testId;
+        return this;
+    }
+
+    public GenericSetupAction setTestEngine(TestEngine testEngine) {
+        this.testEngine = testEngine;
+        return this;
     }
 }

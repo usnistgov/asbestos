@@ -186,15 +186,7 @@
             async loadAnalysisFromEventContext(url, eventContext, addToHistory) {
                 console.log(`loadAnalysisFromEventContext url=${url} eventContext.eventId=${eventContext.eventId}`)
                 const eventId = eventContext ? eventContext.eventId : null
-                // if (url && url.startsWith('http') && eventId) {
-                //     await this.$store.dispatch('getLogEventAnalysisForObject', {
-                //         resourceUrl: url,
-                //         gzip: this.gzip,
-                //         ignoreBadRefs: this.ignoreBadRefs,
-                //         eventId: eventId
-                //     })
-                // }
-                this.loadAnalyisFromEventId(url, eventId, addToHistory)
+                await this.loadAnalyisFromEventId(url, eventId, addToHistory)
             },
             async loadAnalyisFromEventId(url, eventId, addToHistory) {
                 console.log(`loadAnalyisFromEventContext for ${eventId}`)

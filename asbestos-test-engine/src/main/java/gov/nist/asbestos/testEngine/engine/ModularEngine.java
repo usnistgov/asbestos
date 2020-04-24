@@ -52,6 +52,7 @@ public class ModularEngine {
     }
 
     public TestEngine getMainTestEngine() {
+        TestEngine te = engines.get(0);
         return engines.get(0);
     }
 

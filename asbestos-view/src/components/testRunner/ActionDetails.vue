@@ -127,11 +127,13 @@
                 <span class="selectable" @click.stop="toggleScriptDisplayed()">Test Script/Report</span>
                 <span v-if="displayScript">
 <!--                    <vue-markdown v-if="message">{{message}}</vue-markdown>-->
+                    <hr />
                     <vue-markdown v-if="actionContext">{{actionContext}}</vue-markdown>
                     <script-display
                         :script="script"
                         :report="report">
                     </script-display>
+                    <hr />
                 </span>
             </div>
         </div>
