@@ -41,18 +41,22 @@ class ActionReporter {
 
         if (source != null) {
             HttpBase httpBase = source.getHttpBase();
-            Headers responseHeaders = httpBase.getResponseHeaders();
-            String eventUrl = responseHeaders.getProxyEvent();
-            String value = EventLinkToUILink.get(eventUrl);
-            try {
-                Ref ref = new Ref(value);
-                if (ref.isAbsolute()) {
-                    value = "<a href=\"" + value + "\"" + " target=\"_blank\">" + value + "</a>";
+            if (httpBase != null ) {
+                Headers responseHeaders = httpBase.getResponseHeaders();
+                String eventUrl = responseHeaders.getProxyEvent();
+                if (eventUrl != null) {
+                    String value = EventLinkToUILink.get(eventUrl);
+                    try {
+                        Ref ref = new Ref(value);
+                        if (ref.isAbsolute()) {
+                            value = "<a href=\"" + value + "\"" + " target=\"_blank\">" + value + "</a>";
+                        }
+                    } catch (Throwable t) {
+                        // ignore
+                    }
+                    fixtures.put("lastOperation", value);
                 }
-            } catch (Throwable t) {
-                // ignore
             }
-            fixtures.put("lastOperation", value);
         }
 
         for (String key : fixtureMgr.keySet()) {
@@ -64,7 +68,8 @@ class ActionReporter {
             if (httpBase != null) {
                 Headers responseHeaders = httpBase.getResponseHeaders();
                 String eventUrl = responseHeaders.getProxyEvent();
-                value = EventLinkToUILink.get(eventUrl);
+                if (eventUrl != null)
+                    value = EventLinkToUILink.get(eventUrl);
             } else if (wrapper1 != null) {
                 Ref ref = wrapper1.getRef();
                 if (ref != null) {

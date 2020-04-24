@@ -468,6 +468,7 @@ public class AssertionRunner {
             case 410: return "gone";
             case 412: return "preconditionFailed";
             case 422: return "unprocessable";
+            case 500: return "server failure";
             default: return "CODE_NOT_UNDERSTOOD";
         }
     }

@@ -15,6 +15,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Paths;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class Utility {
@@ -31,8 +32,9 @@ public class Utility {
         HttpPost poster = new HttpPost();
         poster.postJson(new URI("http://localhost:" + proxyPort + "/asbestos/channel"), json);
         int status = poster.getStatus();
-        if (!(status == 200 || status == 201))
-            fail("200 or 201 required - returned " + status);
+        assertTrue(status == 200 || status == 201, "POST to " + "http://localhost:" + proxyPort + "/asbestos/channel");
+//        if (!(status == 200 || status == 201))
+//            fail("200 or 201 required - returned " + status);
         return "http://localhost:" + proxyPort + "/asbestos/proxy/" + testSession + "__" + channelId;
     }
 

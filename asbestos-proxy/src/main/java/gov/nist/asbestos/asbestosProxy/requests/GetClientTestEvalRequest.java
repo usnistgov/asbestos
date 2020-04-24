@@ -39,8 +39,9 @@ public class GetClientTestEvalRequest {
     private Request request;
 
     public static boolean isRequest(Request request) {
-        return  request.uriParts.get(3).equals("clienteval") &&
-                (request.uriParts.size() == 7 || request.uriParts.size() == 8);
+        return  (request.uriParts.size() == 7 || request.uriParts.size() == 8) &&
+                request.uriParts.get(3).equals("clienteval")
+                ;
     }
 
     public GetClientTestEvalRequest(Request request) {

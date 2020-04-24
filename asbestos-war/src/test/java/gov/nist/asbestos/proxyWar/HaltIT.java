@@ -12,7 +12,7 @@ import java.net.URISyntaxException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class TestHaltIT {
+class HaltIT {
     private static String testSession = "default";
     private static String channelId = "IT";
     private static String fhirPort = ITConfig.getFhirPort();

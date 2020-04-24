@@ -8,6 +8,7 @@ import org.hl7.fhir.r4.model.OperationOutcome;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -200,6 +201,13 @@ abstract public class HttpBase {
     }
 
     public static URI buildURI(String url, Map<String, List<String>> parameterMap)  {
+        if (parameterMap == null) {
+            try {
+                return new URI(url);
+            } catch (URISyntaxException e) {
+                throw new RuntimeException(e);
+            }
+        }
         String params = parameterMapToString(parameterMap);
         try {
             if (params.length() > 0)

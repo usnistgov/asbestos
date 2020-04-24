@@ -126,6 +126,9 @@ public class OperationRunner {
                                         .setExternalVariables(externalVariables)
                                         .setVal(val)
                                         .setOpReport(operationReport));
+                setupActionSearch.setTestEngine(testEngine);
+                setupActionSearch.setTestCollectionId(testCollectionId);
+                setupActionSearch.setTestId(testId);
                 setupActionSearch.run(op, operationReport);
         } else if ("create".equals(code)) {
             SetupActionCreate setupActionCreate =

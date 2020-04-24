@@ -10,6 +10,7 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 // format of Channel URI is also found in ProxyServlet.parseUri()
 public class ChannelUrl {
@@ -63,6 +64,7 @@ public class ChannelUrl {
     }
 
     public static List<String> uriParts(URI uri) {
+        Objects.requireNonNull(uri);
         List<String> uriParts1 = Arrays.asList(uri.getPath().split("/"));
         return new ArrayList<>(uriParts1);  // so parts are deletable
     }
