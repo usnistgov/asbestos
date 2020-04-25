@@ -14,13 +14,7 @@
             <reference value="DocumentReference/reference"/>
         </resource>
     </fixture>
-    <fixture id="referenceDocumentManifest">
-        <autocreate value="false"/>
-        <autodelete value="false"/>
-        <resource>
-            <reference value="DocumentManifest/reference"/>
-        </resource>
-    </fixture>
+    
     <test>
         <action>
             <assert>
