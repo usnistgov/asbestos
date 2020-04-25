@@ -14,6 +14,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Objects;
+import java.util.Optional;
 
 public class FixtureComponent {
     private static int idCounter = 1;
@@ -27,6 +28,7 @@ public class FixtureComponent {
     private FhirClient fhirClient = null;
     private FixtureSub fixtureSub = null;
     private FixtureMgr fixtureMgr = null;
+    private Ref staticRef = null;
 
     // constructors only available to FixtureMgr
     FixtureComponent(String id) {
@@ -38,8 +40,8 @@ public class FixtureComponent {
         setResource(new ResourceWrapper(baseResource));
     }
 
-    FixtureComponent(ResourceWrapper resourceWrapper) {
-        setResource(resourceWrapper);
+    FixtureComponent() {
+        //setResource(resourceWrapper);
     }
 
     public FixtureComponent setFixtureSub(FixtureSub fixtureSub) {
@@ -95,7 +97,32 @@ public class FixtureComponent {
         return null;
     }
 
+    private FhirClient getFhirClient() {
+        Objects.requireNonNull(fixtureMgr);
+        FhirClient fhirClient = fixtureMgr.getFhirClient();
+        Objects.requireNonNull(fhirClient);
+        return fhirClient;
+    }
+
+    private void loadStatic() {
+        Optional<ResourceWrapper> optWrapper;
+        FhirClient fhirClient = getFhirClient();
+        try {
+            // with optional return this should not throw an exception - but it does
+            optWrapper = fhirClient.readCachedResource(staticRef);
+        } catch (Throwable t) {
+            optWrapper = Optional.empty();
+        }
+
+        if (!optWrapper.isPresent())
+            throw new Error("Static Fixture " + staticRef + " cannot be loaded");
+        resourceWrapper = optWrapper.get();
+    }
+
     public ResourceWrapper getResourceWrapper() {
+        if (resourceWrapper == null && staticRef != null) {
+            loadStatic();
+        }
         if (resourceWrapper != null)
             return resourceWrapper;
         if (fixtureSub != null) {
@@ -131,6 +158,12 @@ public class FixtureComponent {
         if (resource == null)
             return null;
         return resource.getClass().getSimpleName();
+    }
+
+    public FixtureComponent setStaticRef(Ref ref) {
+        this.staticRef = ref;
+        this.is_static = true;
+        return this;
     }
 
     public FixtureComponent setResource(ResourceWrapper resource) {

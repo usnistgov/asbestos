@@ -85,6 +85,7 @@ public class TestEngine  {
         // this.testDef is always the test definition directory
         ResourceCacheMgr inTestResources = new ResourceCacheMgr(this.testDef, new Ref(""));
         fhirClientForFixtures = new FhirClient().setResourceCacheMgr(inTestResources);
+        fixtureMgr.setFhirClient(fhirClientForFixtures);
     }
 
     // used for evaluation including in the Inspector
@@ -93,6 +94,7 @@ public class TestEngine  {
         setTestDef(testDef);
         ResourceCacheMgr inTestResources = new ResourceCacheMgr(testDef, new Ref(""));
         fhirClientForFixtures = new FhirClient().setResourceCacheMgr(inTestResources);
+        fixtureMgr.setFhirClient(fhirClientForFixtures);
     }
 
     // used for client tests
@@ -101,6 +103,7 @@ public class TestEngine  {
         this.testScript = testScript;
         ResourceCacheMgr inTestResources = new ResourceCacheMgr(testDef, new Ref(""));
         fhirClientForFixtures = new FhirClient().setResourceCacheMgr(inTestResources);
+        fixtureMgr.setFhirClient(fhirClientForFixtures);
     }
 
     public TestEngine setFixtures(Map<String, FixtureComponent> fixtures) {
@@ -166,7 +169,7 @@ public class TestEngine  {
             initWorkflow();
             doLoadFixtures();
             if (requestResource != null)
-                fixtureMgr.add("request", responseResource);
+                fixtureMgr.add("request", requestResource);
                 //fixtureMgr.put("request", new FixtureComponent(requestResource));
             if (responseResource != null)
                 fixtureMgr.add("response", responseResource);
@@ -183,6 +186,13 @@ public class TestEngine  {
 
     public List<String> getTestReportErrors() {
         List<String> errors = new ArrayList<>();
+        if (testReport.hasExtension()) {
+            for (Extension extension : testReport.getExtension()) {
+                if (extension.getUrl().equals(ExtensionDef.failure)) {
+                    errors.add(extension.getValue().toString());
+                }
+            }
+        }
         TestReport.TestReportSetupComponent testComponent = testReport.getSetup();
         for (TestReport.SetupActionComponent actionComponent : testComponent.getAction()) {
             if (actionComponent.hasAssert()) {
@@ -521,26 +531,35 @@ public class TestEngine  {
 
                     if (fix.hasResource()) {
                         Ref ref = new Ref(fix.getResource().getReference());
-                        Optional<ResourceWrapper> optWrapper = fhirClientForFixtures.readCachedResource(ref);
+//                        Optional<ResourceWrapper> optWrapper;
+//                        try {
+//                            optWrapper = fhirClientForFixtures.readCachedResource(ref);
+//                        } catch (Throwable t) {
+//                            optWrapper = Optional.empty();
+//                        }
+//
+//                        // never happens - Throwable thrown if not found
+//                        if (!optWrapper.isPresent())
+//                            throw new Error("Static Fixture " + ref + " cannot be loaded");
+//                        ResourceWrapper wrapper = optWrapper.get();
+//                        FixtureComponent fixtureComponent;
+                        fixtureMgr.add(id)
+                                .setStaticRef(ref)
+                                .setVal(fVal);
 
-                        // never happens - Throwable thrown if not found
-                        if (!optWrapper.isPresent())
-                            throw new Error("Static Fixture " + ref + " cannot be loaded");
-                        ResourceWrapper wrapper = optWrapper.get();
-                        FixtureComponent fixtureComponent;
-                        try {
-//                            fixtureComponent = new FixtureComponent(id)
-                            fixtureMgr.add(id)
-//                                    .setTestCollectionId(testCollection)
-//                                    .setTestId(testId)
-                                    .setResource(wrapper)   // testCollectionId and testId must be set before this
-                                    .setVal(fVal)
-                                    .load(wrapper);
-//                            if (fixtureComponent != null)
-//                                fixtureMgr.put(id, fixtureComponent);
-                        } catch (Throwable e) {
-                            throw new Error(e);
-                        }
+//                        try {
+////                            fixtureComponent = new FixtureComponent(id)
+//                            fixtureMgr.add(id)
+////                                    .setTestCollectionId(testCollection)
+////                                    .setTestId(testId)
+//                                    .setResource(wrapper)   // testCollectionId and testId must be set before this
+//                                    .setVal(fVal)
+//                                    .load(wrapper);
+////                            if (fixtureComponent != null)
+////                                fixtureMgr.put(id, fixtureComponent);
+//                        } catch (Throwable e) {
+//                            throw new Error(e);
+//                        }
                     } else if (fix.hasExtension(ExtensionDef.subFixture)) {
                         Extension subfix = fix.getExtensionByUrl(ExtensionDef.subFixture);
 

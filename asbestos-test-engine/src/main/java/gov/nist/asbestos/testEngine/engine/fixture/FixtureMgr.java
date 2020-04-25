@@ -1,6 +1,7 @@
 package gov.nist.asbestos.testEngine.engine.fixture;
 
 
+import gov.nist.asbestos.client.client.FhirClient;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import org.hl7.fhir.r4.model.BaseResource;
 import org.hl7.fhir.r4.model.Resource;
@@ -15,6 +16,7 @@ public class FixtureMgr {
     private String lastOp = null;  // last operation that created a fixture
     private String testCollectionId = null;
     private String testId = null;
+    private FhirClient fhirClient = null;
 
     public FixtureMgr() {
 
@@ -80,9 +82,10 @@ public class FixtureMgr {
 //    }
 
     public FixtureComponent add(String id, ResourceWrapper resourceWrapper) {
-        FixtureComponent c = new FixtureComponent(resourceWrapper);
-        c.setId(id);
+        FixtureComponent c = new FixtureComponent();
         c.setFixtureMgr(this);
+        c.setResource(resourceWrapper);
+        c.setId(id);
         put(id, c);
         return c;
     }
@@ -103,5 +106,14 @@ public class FixtureMgr {
 
     public String getTestId() {
         return testId;
+    }
+
+    public FhirClient getFhirClient() {
+        return fhirClient;
+    }
+
+    public FixtureMgr setFhirClient(FhirClient fhirClient) {
+        this.fhirClient = fhirClient;
+        return this;
     }
 }

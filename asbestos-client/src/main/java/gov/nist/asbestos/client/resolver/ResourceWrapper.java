@@ -153,6 +153,12 @@ public class ResourceWrapper {
         return parts[parts.length - 2];
     }
 
+    public String getResourceType() {
+        if (resource == null)
+            return null;
+        return resource.getClass().getSimpleName();
+    }
+
     @Override
     public String toString() {
         StringBuilder buf = new  StringBuilder();

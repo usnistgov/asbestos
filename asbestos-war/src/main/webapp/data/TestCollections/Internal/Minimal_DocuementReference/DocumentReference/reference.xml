@@ -1,0 +1,13 @@
+<DocumentReference>
+    <status value="current"/>
+                <masterIdentifier>
+                    <system value="urn:ietf:rfc:3986"/>
+                    <value value="urn:oid:1.2.129.6.58.92.88336.4"/>
+                </masterIdentifier>
+                <content>
+                    <attachment>
+                        <contentType value="text/plain"/>
+                        <url value="urn:uuid:3fdc72f4-a11d-4a9d-9260-a9f745779e03"/>
+                    </attachment>
+                </content>
+            </DocumentReference>

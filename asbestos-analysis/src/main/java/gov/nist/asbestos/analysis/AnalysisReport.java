@@ -95,9 +95,13 @@ public class AnalysisReport {
         if (baseObj != null && baseObj.getResource() != null && !isSearchSet()) {
             report.base = new RelatedReport(baseObj, "");
             report.base.comprehensiveErrors = comprehensiveChecked == null ? new ArrayList<>() : comprehensiveChecked.report.missing; //comprehensiveErrors;
+            report.base.comprehensiveErrors.addAll(comprehensiveErrors);
             report.base.isComprehensive = report.base.comprehensiveErrors.isEmpty(); // comprehensiveErrors != null && comprehensiveErrors.isEmpty();
+
             report.base.minimalErrors = minimalChecked == null ? new ArrayList<>() : minimalChecked.report.missing; //minimalErrors;
+            report.base.minimalErrors.addAll(minimalErrors);
             report.base.isMinimal = report.base.minimalErrors.isEmpty(); //minimalErrors!= null && minimalErrors.isEmpty();
+
             report.base.minimalChecked = minimalChecked == null ? new ArrayList<>() : minimalChecked.report.expected;
             report.base.comprehensiveChecked = comprehensiveChecked == null ? new ArrayList<>() : comprehensiveChecked.report.expected;
             report.base.codingErrors = codingErrors;
@@ -115,8 +119,10 @@ public class AnalysisReport {
             RelatedReport relatedReport = new RelatedReport(wrapper, rel.howRelated);
             if (resource != null) {
                 relatedReport.comprehensiveErrors = rel.comprehensiveChecked == null ? new ArrayList<>() : rel.comprehensiveChecked.report.missing;
+                relatedReport.comprehensiveErrors.addAll(rel.comprehensiveErrors);
                 relatedReport.isComprehensive = relatedReport.comprehensiveErrors.isEmpty(); //rel.comprehensiveErrors != null && rel.comprehensiveErrors.isEmpty();
                 relatedReport.minimalErrors = rel.minimalChecked == null ? new ArrayList<>() : rel.minimalChecked.report.missing;
+                relatedReport.minimalErrors.addAll(rel.minimalErrors);
                 relatedReport.isMinimal = relatedReport.minimalErrors.isEmpty();  //rel.minimalErrors!= null && rel.minimalErrors.isEmpty();
                 relatedReport.comprehensiveChecked = rel.comprehensiveChecked == null ? new ArrayList<>() : rel.comprehensiveChecked.report.expected;
                 relatedReport.minimalChecked = rel.minimalChecked == null ? new ArrayList<>() : rel.minimalChecked.report.expected;
@@ -318,7 +324,10 @@ public class AnalysisReport {
 
     private void comprehensiveEval() {
         TestEngine testEngine = comprehensiveEval(baseObj);
-        Checked checked = getMinimumIdReport(testEngine.getTestReport());
+        if (testEngine == null)
+            return;
+        TestReport report = testEngine.getTestReport();
+        Checked checked = getMinimumIdReport(report);
         comprehensiveErrors = testEngine.getTestReportErrors();
         comprehensiveChecked = checked;
         for (Related rel : related) {
@@ -330,6 +339,8 @@ public class AnalysisReport {
 
     private void minimalEval() {
         TestEngine testEngine  = minimalEval(baseObj);
+        if (testEngine == null)
+            return;
         minimalErrors = testEngine.getTestReportErrors();
         minimalChecked = getMinimumIdReport(testEngine.getTestReport());
         for (Related rel : related) {
@@ -340,11 +351,16 @@ public class AnalysisReport {
     }
 
     private TestEngine comprehensiveEval(ResourceWrapper wrapper) {
-        File testDef = new File(new File(new File(ec.externalCache, "FhirTestCollections"), "Internal"), "Comprehensive");
+        String type = wrapper.getResourceType();
+        File testDef = new File(new File(new File(ec.externalCache, "FhirTestCollections"), "Internal"), "Comprehensive_" + type);
+//        if (!testDef.isDirectory())
+//            return null;
         TestEngine testEngine = new TestEngine(testDef)
                 .setVal(new Val())
                 .setTestSession("default")
                 .setExternalCache(ec.externalCache)
+                .setTestCollection("Inspector")
+                .setTestId("Inspector")
                 .runEval(wrapper, null);
         return testEngine;
     }
@@ -373,9 +389,14 @@ public class AnalysisReport {
     }
 
     private TestEngine minimalEval(ResourceWrapper wrapper) {
-        File testDef = new File(new File(new File(ec.externalCache, "FhirTestCollections"), "Internal"), "Minimal");
+        String type = wrapper.getResourceType();
+        File testDef = new File(new File(new File(ec.externalCache, "FhirTestCollections"), "Internal"), "Minimal_" + type);
+//        if (!testDef.isDirectory())
+//            return null;
         TestEngine testEngine = new TestEngine(testDef)
                 .setVal(new Val())
+                .setTestCollection("Inspector")
+                .setTestId("Inspector")
                 .setTestSession("default")
                 .setExternalCache(ec.externalCache)
                 .runEval(wrapper, null);

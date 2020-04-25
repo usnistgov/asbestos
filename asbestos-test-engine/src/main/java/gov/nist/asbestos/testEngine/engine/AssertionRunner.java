@@ -261,7 +261,7 @@ public class AssertionRunner {
 
         FixtureComponent miniFixture  = fixtureMgr.get(as.getMinimumId());
         if (miniFixture == null) {
-            Reporter.reportError(val, assertReport, type, label, "minimumId references " + as.getMinimumId() + " which cannot be found.");
+            Reporter.reportError(val, assertReport, type, label, "minimumId references fixture " + as.getMinimumId() + " which cannot be found.");
             return false;
         }
 
