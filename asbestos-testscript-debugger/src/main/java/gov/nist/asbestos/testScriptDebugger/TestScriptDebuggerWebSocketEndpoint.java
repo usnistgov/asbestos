@@ -127,7 +127,7 @@ public class TestScriptDebuggerWebSocketEndpoint {
     }
 
     private void startDebuggerThread(TestScriptDebugState state, String uriString) throws Exception {
-        String sessionId = state.getSession().getId();
+        String sessionId = state.getSessionId();
         Request request = new Request(uriString, Installation.instance().externalCache());
 
         if (DebugTestScriptRequest.isRequest(request)) {
@@ -158,11 +158,11 @@ public class TestScriptDebuggerWebSocketEndpoint {
 
 
     private void killSession(TestScriptDebugState state) {
-        String sessionId = state.getSession().getId();
+        String sessionId = state.getSessionId();
         log.info("killSession: " + sessionId);
         synchronized (state.getLock()) {
             state.cancelResumeMode();
-            state.cancelEvalMode();
+            state.resetEvalMode();
             state.getKill().set(true);
             state.getLock().notify();
         }

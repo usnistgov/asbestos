@@ -213,6 +213,9 @@ export const testScriptDebuggerStore = {
                         }
                     } else if (returnData.messageType === 'original-assertion') {
                         alert(JSON.stringify(returnData.assertionJson))
+                        // rootState.testScriptAssertionEval.
+                        commit('copyAssertionEvalObj', returnData.assertionJson)
+
                     } else if (returnData.messageType === 'killed') {
                         alert('Debug: Killed')
                         state.testScriptDebuggerWebSocket.close()

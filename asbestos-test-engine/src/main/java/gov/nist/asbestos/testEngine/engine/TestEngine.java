@@ -833,13 +833,15 @@ public class TestEngine  {
                 // Must pause first before Eval
                 testScriptDebugState.waitOnBreakpoint(); // if eval, exit pause
                 if (action.hasAssert() && testScriptDebugState.getEvaluateMode().get()) { // Only assertion-eval is supported for now. Need to address Operations later
-                    testScriptDebugState.cancelEvalMode();
+                    testScriptDebugState.resetEvalMode();
                    if (testScriptDebugState.getEvalJsonString() == null) {
                        // If evalJsonString is empty, Send original assertion as a template for the user to edit an assertion
                        String assertionJsonStr = new Gson().toJson(action.getAssert());
                        testScriptDebugState.sendAssertionStr(assertionJsonStr);
                    } else {
                       // Eval
+//                       action.getAssert().getDirection()
+//                       TestScript.AssertionDirectionType.fromCode(
                    }
                 }
             } while (! testScriptDebugState.getResume().get() && ! testScriptDebugState.getKill().get());

@@ -7,6 +7,7 @@ import {logStore} from "./log";
 import {testRunnerStore} from "./testRunner";
 import {heartbeatStore} from "./heartbeat";
 import {testScriptDebuggerStore} from "./testScriptDebugger";
+import {testScriptAssertionEvalStore} from "./testScriptAssertionEval";
 
 Vue.use(Vuex)
 
@@ -20,6 +21,7 @@ export const store = new Vuex.Store(
             testRunner: testRunnerStore,
             heartbeat: heartbeatStore,
             testScriptDebugger: testScriptDebuggerStore,
+            testScriptAssertionEval: testScriptAssertionEvalStore,
         }
     }
 )

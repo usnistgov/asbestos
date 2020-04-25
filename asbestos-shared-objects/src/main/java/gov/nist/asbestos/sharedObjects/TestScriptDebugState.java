@@ -51,8 +51,12 @@ public class TestScriptDebugState {
         return breakpointSet;
     }
 
-    public Session getSession() {
+    Session getSession() {
         return session;
+    }
+
+    public String getSessionId() {
+        return getSession().getId();
     }
 
     public AtomicBoolean getEvaluateMode() {
@@ -77,7 +81,7 @@ public class TestScriptDebugState {
     /**
      * Reset Eval mode: will loop and wait for Resume or Eval
      */
-    public void cancelEvalMode() {
+    public void resetEvalMode() {
        this.evaluateMode.set(false);
     }
 
@@ -143,7 +147,7 @@ public class TestScriptDebugState {
             if (getResume().get()) {
                 log.info("Resuming " +  getSession().getId());
             } else if (getKill().get()) {
-                throw new Error("KILL session: " + getSession().getId());
+                throw new Error("KILL session: " + getSession().getId()); // This needs to throw a custom exception that does not show up in the test report
             } else if (getEvaluateMode().get()) {
                 log.info("Eval mode is true.");
             }
