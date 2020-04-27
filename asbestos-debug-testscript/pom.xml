@@ -9,16 +9,14 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>asbestos-testscript-debugger</artifactId>
+    <artifactId>asbestos-debug-testscript</artifactId>
 
     <packaging>jar</packaging>
     <build>
-        <finalName>${project.name}-testscript-debugger</finalName>
+        <finalName>${project.name}-debug-testscript</finalName>
     </build>
 
     <dependencies>
-
-
         <dependency>
             <groupId>gov.nist.asbestos</groupId>
             <artifactId>asbestos-proxy</artifactId>

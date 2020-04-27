@@ -1,10 +1,10 @@
-package gov.nist.asbestos.testScriptDebugger;
+package gov.nist.asbestos.debug.testScript;
 
 
 import gov.nist.asbestos.asbestosProxy.requests.Request;
 import gov.nist.asbestos.sharedObjects.TestScriptDebugState;
 import gov.nist.asbestos.simapi.tk.installation.Installation;
-import gov.nist.asbestos.testScriptDebugger.requests.DebugTestScriptRequest;
+import gov.nist.asbestos.debug.testScript.requests.DebugTestScriptRequest;
 import org.apache.log4j.Logger;
 
 import javax.websocket.OnClose;
@@ -25,9 +25,9 @@ import java.util.concurrent.TimeUnit;
 
 import com.google.gson.Gson;
 
-@ServerEndpoint("/testScriptDebugger/{userType}/{param1}")
-public class TestScriptDebuggerWebSocketEndpoint {
-    private static Logger log = Logger.getLogger(TestScriptDebuggerWebSocketEndpoint.class);
+@ServerEndpoint("/debugTestScript/{userType}/{param1}")
+public class DebugTestScriptWebSocketEndpoint {
+    private static Logger log = Logger.getLogger(DebugTestScriptWebSocketEndpoint.class);
     private static final ConcurrentHashMap<String, TestScriptDebugState> debugStateMap = new ConcurrentHashMap<>();
     private static final ConcurrentHashMap<String, ExecutorService> debugExecutorMap = new ConcurrentHashMap<>();
 

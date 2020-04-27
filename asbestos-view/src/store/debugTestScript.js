@@ -3,7 +3,7 @@ import Vuex from "vuex";
 
 Vue.use(Vuex)
 
-export const testScriptDebuggerStore = {
+export const debugTestScriptStore = {
     state() {
         return {
             waitingForBreakpoint: false,
@@ -163,7 +163,7 @@ export const testScriptDebuggerStore = {
             // Technically it is possible to run many debugger web sockets but the test display only allows "opening" one active Test bar at a time since the previous test bar is automatically closed.
 
             if (state.testScriptDebuggerWebSocket === null) {
-                state.testScriptDebuggerWebSocket = new WebSocket('wss://fhirtoolkit.test:9743/asbestos/testScriptDebugger/developer/'+mapKey) // TODO: Replace https off the HTTPS TOOLKIT BASE and append the Endpoint
+                state.testScriptDebuggerWebSocket = new WebSocket('wss://fhirtoolkit.test:9743/asbestos/debugTestScript/developer/'+mapKey) // TODO: Replace https off the HTTPS TOOLKIT BASE and append the Endpoint
                 state.testScriptDebuggerWebSocket.onopen = event => {
                     state.waitingForBreakpoint = true
                     // Disable Run button
@@ -214,7 +214,7 @@ export const testScriptDebuggerStore = {
                     } else if (returnData.messageType === 'original-assertion') {
                         alert(JSON.stringify(returnData.assertionJson))
                         // rootState.testScriptAssertionEval.
-                        commit('copyAssertionEvalObj', returnData.assertionJson)
+                        commit('updateAssertionEvalObj', returnData.assertionJson)
 
                     } else if (returnData.messageType === 'killed') {
                         alert('Debug: Killed')

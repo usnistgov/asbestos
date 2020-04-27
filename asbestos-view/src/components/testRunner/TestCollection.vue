@@ -125,7 +125,7 @@
                                 <button v-if="isDebugKillable(i)"
                                         class="debugKillTestScriptButton"
                                         @click.stop="doDebugKill(i)">Kill</button>
-                                <span v-if="$store.state.testScriptDebugger.waitingForBreakpoint">&nbsp;&nbsp;&#x23F1;</span> <!-- Display a stopwatch if waiting for breakpoint to be hit -->
+                                <span v-if="$store.state.debugTestScript.waitingForBreakpoint">&nbsp;&nbsp;&#x23F1;</span> <!-- Display a stopwatch if waiting for breakpoint to be hit -->
                             </span>
 
                             <script-status v-if="statusRight" :status-right="statusRight" :name="name"> </script-status>
@@ -137,6 +137,7 @@
                         <router-view v-if="selected === name"></router-view>  <!--  opens TestOrEvalDetails   -->
             </div>
             </div>
+            <debug-assertion-eval :show="$store.state.debugAssertionEval.showModal" @close="closeModal()"></debug-assertion-eval>
         </div>
 
     </div>
@@ -146,6 +147,7 @@
     import errorHandlerMixin from '../../mixins/errorHandlerMixin'
     import colorizeTestReports from "../../mixins/colorizeTestReports";
     import ScriptStatus from "./ScriptStatus";
+    import DebugAssertionEval from "./debugger/DebugAssertionEval";
     export default {
 
         data() {
@@ -158,14 +160,17 @@
             }
         },
         methods: {
+            closeModal() {
+                this.$store.commit('setShowDebugEvalModal', false)
+            },
             isDebuggable(testScriptIndex) {
                 const key = this.getTestScriptIndexKey(testScriptIndex)
-                return key in this.$store.state.testScriptDebugger.showDebugButton && Boolean(this.$store.state.testScriptDebugger.showDebugButton[key])
+                return key in this.$store.state.debugTestScript.showDebugButton && Boolean(this.$store.state.debugTestScript.showDebugButton[key])
             },
             getDebugActionButtonLabel(testScriptIndex) {
                 const key = this.getTestScriptIndexKey(testScriptIndex)
-                if (key in this.$store.state.testScriptDebugger.showDebugButton) {
-                    let valObj = this.$store.state.testScriptDebugger.showDebugButton[key]
+                if (key in this.$store.state.debugTestScript.showDebugButton) {
+                    let valObj = this.$store.state.debugTestScript.showDebugButton[key]
                     if (valObj != undefined) {
                         return valObj.debugButtonLabel
                     }
@@ -174,7 +179,7 @@
                 }
             },
             isEvaluable(testScriptIndex) {
-                return (this.getDebugActionButtonLabel(testScriptIndex) === 'Resume') && this.$store.state.testScriptDebugger.evalMode
+                return (this.getDebugActionButtonLabel(testScriptIndex) === 'Resume') && this.$store.state.debugTestScript.evalMode
             },
             isDebugKillable(testScriptIndex) {
                return (this.getDebugActionButtonLabel(testScriptIndex) === 'Resume')
@@ -378,7 +383,8 @@
             'sessionId', 'channelId', 'testCollection',
         ],
         components: {
-            ScriptStatus
+            ScriptStatus,
+            DebugAssertionEval,
         }
     }
 </script>

@@ -3,10 +3,11 @@ import Vuex from "vuex";
 
 Vue.use(Vuex)
 
-export const testScriptAssertionEvalStore = {
+export const debugAssertionEvalStore = {
     state() {
         return {
-            displayEvalModal: false,
+            showModal: false,
+            isEvalObjUpdated: false,
             evalObj: {
                 label: '',
                 description: '',
@@ -34,12 +35,23 @@ export const testScriptAssertionEvalStore = {
         }
     },
     mutations: {
-        copyAssertionEvalObj(state, obj) {
+        setShowDebugEvalModal(state, bVal) {
+            state.showModal = Boolean(bVal)
+        },
+        updateAssertionEvalObj(state, obj) {
+           let atLeastOnePropertyWasUpdated = false
            for (let propKey in state.evalObj) {
              if (propKey in obj) {
                  state.evalObj[propKey] = obj[propKey]
+                 if (atLeastOnePropertyWasUpdated === false) {
+                     atLeastOnePropertyWasUpdated = true
+                 }
              }
             }
+           if (atLeastOnePropertyWasUpdated) {
+              state.isEvalObjUpdated = true
+           }
+           state.showModal = true
         },
     },
     actions: {},

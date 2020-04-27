@@ -1,4 +1,4 @@
-package gov.nist.asbestos.testScriptDebugger.requests;
+package gov.nist.asbestos.debug.testScript.requests;
 
 import gov.nist.asbestos.asbestosProxy.requests.Request;
 import gov.nist.asbestos.client.client.FhirClient;
@@ -15,11 +15,9 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.log4j.Logger;
 import org.hl7.fhir.r4.model.TestReport;
 
-import javax.websocket.Session;
 import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.concurrent.ConcurrentSkipListSet;
 // 0 - "debug-testscript"
 // 1 - channelName (testSession__channelId)
 // 2 - testCollectionId

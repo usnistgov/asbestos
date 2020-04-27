@@ -51,7 +51,7 @@
         </dependency>
         <dependency>
             <groupId>gov.nist.asbestos</groupId>
-            <artifactId>asbestos-testscript-debugger</artifactId>
+            <artifactId>asbestos-debug-testscript</artifactId>
             <version>1.4.0-SNAPSHOT</version>
         </dependency>
 <!--        <dependency>-->
