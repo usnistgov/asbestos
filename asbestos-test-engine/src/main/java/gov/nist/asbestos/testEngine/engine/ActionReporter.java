@@ -1,19 +1,19 @@
 package gov.nist.asbestos.testEngine.engine;
 
+import gov.nist.asbestos.client.events.UIEvent;
 import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import gov.nist.asbestos.http.headers.Headers;
 import gov.nist.asbestos.http.operations.HttpBase;
 import gov.nist.asbestos.testEngine.engine.fixture.FixtureComponent;
 import gov.nist.asbestos.testEngine.engine.fixture.FixtureMgr;
+import org.checkerframework.checker.units.qual.A;
 import org.hl7.fhir.r4.model.TestScript;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 class ActionReporter {
     private String testCollectionId = null;
@@ -61,32 +61,42 @@ class ActionReporter {
         }
 
         for (String key : fixtureMgr.keySet()) {
-            String additionalKey = null;
+            Set<String> additionalKey = new HashSet<>();
             if (key != null && source != null && key.equals(source.getId()))
-                additionalKey = "sourceId";
+                additionalKey.add("sourceId");
             if (key != null && op != null && op.hasResponseId() && key.equals(op.getResponseId()))
-                additionalKey = "responseId";
+                additionalKey.add("responseId");
+            if (key != null && op != null && op.hasSourceId() && key.equals(op.getSourceId()))
+                additionalKey.add("sourceId");
             FixtureComponent fixtureComponent = fixtureMgr.get(key);
             String value = null;
 
             HttpBase httpBase = fixtureComponent.getHttpBase();
             ResourceWrapper wrapper1 = fixtureComponent.getResourceWrapper();
-            if (httpBase != null) {
+            String refStrEncoded;    // relative static fixture path - URL encoded
+            if (httpBase != null) {  // fixtureComponent created by operation
                 Headers responseHeaders = httpBase.getResponseHeaders();
                 String eventUrl = responseHeaders.getProxyEvent();
                 if (eventUrl != null)
                     value = EventLinkToUILink.get(eventUrl);
-            } else if (wrapper1 != null) {
+            } else if (wrapper1 != null) {   // static fixtureComponent
                 Ref ref = wrapper1.getRef();
                 if (ref != null) {
-                    String refStrEncoded = ref.toString();    // relative static fixture path - URL encoded
-                    String refStrRaw = null;   // no URL encoding
-                    try {
-                        refStrRaw = URLDecoder.decode(refStrEncoded, StandardCharsets.UTF_8.toString());
-                    } catch (UnsupportedEncodingException e) {
-                        continue;
+                    refStrEncoded = ref.toString();
+                    String refStrRaw = null;
+                    UIEvent uiEvent = fixtureComponent.getCreatedByUIEvent();
+                    if (uiEvent != null) {
+                        refStrRaw = "http://localhost:8082/session/" + testEngine.getTestSession()
+                                + "/channel/" + testEngine.getChannelName()
+                                + "/lognav/" + uiEvent.getEventName();
                     }
-                        value = "<a href=\"" +  refStrEncoded + "\"" + " target=\"_blank\">" + refStrRaw + "</a>";
+
+//                    try {
+//                        refStrRaw = URLDecoder.decode(refStrEncoded, StandardCharsets.UTF_8.toString());
+//                    } catch (UnsupportedEncodingException e) {
+//                        continue;
+//                    }
+                    value = "<a href=\"" +  refStrRaw + "\"" + " target=\"_blank\">" + refStrRaw + "</a>";
                 }
             }
 
@@ -100,8 +110,8 @@ class ActionReporter {
             }
 
             fixtures.put(key, value);
-            if (additionalKey != null)
-                fixtures.put(additionalKey, value);
+            for (String otherKey : additionalKey)
+                fixtures.put(otherKey, value);
         }
 
         Map<String, String> variables = variableMgr.getVariables();

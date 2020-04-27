@@ -107,32 +107,32 @@ public class OperationRunner {
                     .setTestReport(testReport);
             setupActionRead.setVariableMgr(new VariableMgr(testScript, fixtureMgr)
                     .setExternalVariables(externalVariables)
-                            .setVal(val)
-                        .setOpReport(operationReport)
-                        );
+                    .setVal(val)
+                    .setOpReport(operationReport)
+            );
             setupActionRead
                     .setTestCollectionId(testCollectionId)
                     .setTestId(testId)
                     .setTestEngine(testEngine);
             setupActionRead.run(op, operationReport);
         } else if ("search".equals(code)) {
-                SetupActionSearch setupActionSearch = new SetupActionSearch(actionReference, fixtureMgr)
-                        .setVal(val)
-                        .setFhirClient(fhirClient)
-                        .setSut(sut)
-                        .setType(type + ".search")
-                        .setTestReport(testReport);
-                setupActionSearch
-                        .setVal(val)
-                        .setVariableMgr(
-                                new VariableMgr(testScript, fixtureMgr)
-                                        .setExternalVariables(externalVariables)
-                                        .setVal(val)
-                                        .setOpReport(operationReport));
-                setupActionSearch.setTestEngine(testEngine);
-                setupActionSearch.setTestCollectionId(testCollectionId);
-                setupActionSearch.setTestId(testId);
-                setupActionSearch.run(op, operationReport);
+            SetupActionSearch setupActionSearch = new SetupActionSearch(actionReference, fixtureMgr)
+                    .setVal(val)
+                    .setFhirClient(fhirClient)
+                    .setSut(sut)
+                    .setType(type + ".search")
+                    .setTestReport(testReport);
+            setupActionSearch
+                    .setVal(val)
+                    .setVariableMgr(
+                            new VariableMgr(testScript, fixtureMgr)
+                                    .setExternalVariables(externalVariables)
+                                    .setVal(val)
+                                    .setOpReport(operationReport));
+            setupActionSearch.setTestEngine(testEngine);
+            setupActionSearch.setTestCollectionId(testCollectionId);
+            setupActionSearch.setTestId(testId);
+            setupActionSearch.run(op, operationReport);
         } else if ("create".equals(code)) {
             SetupActionCreate setupActionCreate =
                     new SetupActionCreate(actionReference, fixtureMgr)
@@ -183,10 +183,11 @@ public class OperationRunner {
         } else if ("mhd-pdb-transaction".equals(code)) {
             SetupActionMhdPdbTransaction setupActionTransaction =
                     new SetupActionMhdPdbTransaction(actionReference, fixtureMgr);
-            setupActionTransaction.setSut(sut)
-                            .setFhirClient(fhirClient)
-                            .setType(type + ".mhd-pdb-transaction")
-                            .setVal(val)
+            setupActionTransaction
+                    .setSut(sut)
+                    .setFhirClient(fhirClient)
+                    .setType(type + ".mhd-pdb-transaction")
+                    .setVal(val)
                     .setTestCollectionId(testCollectionId)
                     .setTestId(testId);
             setupActionTransaction

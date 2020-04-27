@@ -1,8 +1,10 @@
 package gov.nist.asbestos.testEngine.engine;
 
+import gov.nist.asbestos.client.Base.EC;
 import gov.nist.asbestos.client.Base.ProxyBase;
 import gov.nist.asbestos.client.client.FhirClient;
 import gov.nist.asbestos.client.client.Format;
+import gov.nist.asbestos.client.events.UIEvent;
 import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import gov.nist.asbestos.simapi.validation.ValE;
@@ -19,6 +21,7 @@ abstract class GenericSetupAction {
     FixtureMgr fixtureMgr;  // static fixtures and history of operations
     ValE val;
     FixtureComponent fixtureComponent = null;
+    FixtureComponent sourceFixture = null;
     FhirClient fhirClient = null;
     VariableMgr variableMgr = null;
     URI sut = null;
@@ -89,12 +92,12 @@ abstract class GenericSetupAction {
                 reporter.reportError("has no sourceId on operation " + op.getType().getCode());
                 return false;
             }
-            FixtureComponent sourceFixture = fixtureMgr.get(op.getSourceId());
+            sourceFixture = fixtureMgr.get(op.getSourceId());
             if (sourceFixture == null) {
                 reporter.reportError("sourceId " + op.getSourceId() + " does not exist");
                 return false;
             }
-            sourceFixture.setReferencedBy(actionReference);
+            sourceFixture.setReferencedByActionReference(actionReference);
             resourceToSend = sourceFixture.getResourceResource();
             resourceToSend = updateResourceToSend(resourceToSend);
         }
@@ -119,6 +122,14 @@ abstract class GenericSetupAction {
         return ProxyBase.parse(updatedResourceString, Format.JSON);
     }
 
+    UIEvent getUIEvent(ResourceWrapper wrapper) {
+        return new EC(getTestEngine().getExternalCache())
+                .getEvent(getTestEngine().getTestSession(),
+                        getTestEngine().getChannelId(),
+                        wrapper.getResourceType(),
+                        wrapper.getEventId());
+    }
+
     void postExecute(ResourceWrapper wrapper) {
         Objects.requireNonNull(testEngine);
 
@@ -132,10 +143,16 @@ abstract class GenericSetupAction {
         }
 
         String fixtureId = op.hasResponseId() ? op.getResponseId() : FixtureComponent.getNewId();
+        UIEvent uiEvent = getUIEvent(wrapper);
         fixtureMgr.add(fixtureId)
                 .setResource(wrapper)
                 .setHttpBase(wrapper.getHttpBase())
-        .setCreatedBy(actionReference);
+        .setCreatedByActionReference(actionReference)
+        .setCreatedByUIEvent(uiEvent);
+
+        if (sourceFixture != null) {
+            sourceFixture.setCreatedByUIEvent(uiEvent);
+        }
 
         reportOperation(wrapper);
     }
@@ -163,6 +180,10 @@ abstract class GenericSetupAction {
     public GenericSetupAction setTestId(String testId) {
         this.testId = testId;
         return this;
+    }
+
+    public TestEngine getTestEngine() {
+        return testEngine;
     }
 
     public GenericSetupAction setTestEngine(TestEngine testEngine) {

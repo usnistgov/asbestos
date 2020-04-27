@@ -1,5 +1,6 @@
 package gov.nist.asbestos.asbestosProxy.requests;
 
+// This returns static fixture to UI as UIEvent
 // 0 - empty
 // 1 - appContext
 // 2 - "engine"
@@ -9,11 +10,14 @@ package gov.nist.asbestos.asbestosProxy.requests;
 // 6 - resourceType
 // param url=relative path to file
 // optional param fhirPath=path within bundle
-// returns resource in json
+// returns UIEvent as JSON
 
+import com.google.gson.Gson;
+import gov.nist.asbestos.client.events.UIEvent;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import org.apache.log4j.Logger;
 
+import java.io.IOException;
 import java.net.URL;
 
 public class GetStaticFixtureRequest {
@@ -46,6 +50,17 @@ public class GetStaticFixtureRequest {
             request.resp.setStatus(request.resp.SC_BAD_REQUEST);
             return;
         }
-        Returns.returnResource(request.resp, wrapper.getResource());
+        //Returns.returnResource(request.resp, wrapper.getResource());
+        UIEvent uiEvent = new UIEvent(request.ec).fromResource(wrapper);
+
+        String json = new Gson().toJson(uiEvent);
+        request.resp.setContentType("application/json");
+        try {
+            request.resp.getOutputStream().write(json.getBytes());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        request.resp.setStatus(request.resp.SC_OK);
     }
 }

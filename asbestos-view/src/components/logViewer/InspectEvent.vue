@@ -89,7 +89,7 @@
             <br />
         </div>
 
-
+        <!-- basic event display choices -->
             <div v-if="!displayInspector && !displayValidations && getEvent()">
                 <div v-if="displayRequest" class="event-details">
                             <pre>{{ requestHeader }}
@@ -102,6 +102,8 @@
                     <pre>{{responseBody}}</pre>
                 </div>
             </div>
+
+            <!-- extended displays -->
             <div v-if="inspectRequest" class="request-response">
                 <log-analysis-report
                         :session-id="sessionId"
@@ -142,7 +144,7 @@
     export default {
         data() {
             return {
-                selectedEvent: null,
+                selectedEvent: null,    // UIEvent
                 selectedTask: 0,
                 displayRequest: true,
                 displayResponse: false,

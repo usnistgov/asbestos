@@ -1,7 +1,9 @@
 package gov.nist.asbestos.testEngine.engine;
 
+import gov.nist.asbestos.client.Base.EC;
 import gov.nist.asbestos.client.client.FhirClient;
 import gov.nist.asbestos.client.client.Format;
+import gov.nist.asbestos.client.events.UIEvent;
 import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import gov.nist.asbestos.simapi.validation.ValE;
@@ -54,10 +56,12 @@ class SetupActionCreate extends GenericSetupAction {
         else
             reporter.reportError(wrapper.getRef() + " not created", wrapper);
         ActionReference action = new ActionReference(testScript, comp);
+        UIEvent uiEvent = getUIEvent(wrapper);
         fixtureMgr.add(fixtureId)
                 .setResource(wrapper)
                 .setHttpBase(wrapper.getHttpBase())
-                .setCreatedBy(action);
+                .setCreatedByActionReference(action)
+                .setCreatedByUIEvent(uiEvent);
     }
 
     void run(TestScript.SetupActionOperationComponent op, TestReport.SetupActionOperationComponent operationReport) {
@@ -78,6 +82,7 @@ class SetupActionCreate extends GenericSetupAction {
         }
         postExecute(wrapper);
     }
+
 
     String resourceTypeToSend() {
         return resourceToSend.getClass().getSimpleName();

@@ -1,7 +1,9 @@
 package gov.nist.asbestos.client.events;
 
 import gov.nist.asbestos.client.Base.EC;
+import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import gov.nist.asbestos.http.headers.Headers;
+import org.hl7.fhir.r4.model.Resource;
 
 import java.io.File;
 import java.net.URI;
@@ -9,6 +11,7 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 public class UIEvent {
     private String hostPort;
@@ -32,6 +35,18 @@ public class UIEvent {
             uiTask.setIndex(i++);
             tasks.add(uiTask);
         }
+        return this;
+    }
+
+    public UIEvent fromResource(ResourceWrapper wrapper) {
+        Objects.requireNonNull(wrapper);
+        hostPort = "";
+        testSession = "";
+        channelId = "";
+        eventName = "";
+        resourceType = wrapper.getResourceType();
+        UITask task = new UITask(wrapper);
+
         return this;
     }
 

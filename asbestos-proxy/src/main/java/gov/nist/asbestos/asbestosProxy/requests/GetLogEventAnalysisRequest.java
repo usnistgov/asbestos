@@ -107,26 +107,6 @@ public class GetLogEventAnalysisRequest {
         return requestOrResponse.equals("request");
     }
 
-//    private String getParm(String name) {
-//        String query = request.req.getQueryString();
-//        if (query == null)
-//            return null;
-//        int parmi = query.indexOf(name + "=");
-//        if (parmi == -1)
-//            return null;
-//        int parmend = query.indexOf(";", parmi);
-//        if (parmend == -1)
-//            parmend = query.length();
-//        int parmstart = query.indexOf("=", parmi);
-//        if (parmstart == -1)
-//            return null;
-//        parmstart++;
-//        if (parmend <= parmstart)
-//            return null;
-//        return query.substring(parmstart, parmend);
-//
-//    }
-
     public void run() {
         log.info("GetLogEventAnalysisRequest");
 
@@ -245,13 +225,6 @@ public class GetLogEventAnalysisRequest {
                     }
                     runAndReturnReport(ref, "By Request", gzip, useProxy, ignoreBadRefs, false, null);
                 }
-//                else if (query.contains("url=urn:uuid")) {
-//                    int urlIndex = query.indexOf("url=urn:uuid") + 4;
-//                    int urlEndIndex = query.indexOf(";", urlIndex);
-//                    String url = query.substring(urlIndex, urlEndIndex);
-//                    Ref ref = new Ref(url);
-//                    runAndReturnReport(ref, "By Request", gzip, useProxy, baseResource);
-//                }
             }
         }
     }

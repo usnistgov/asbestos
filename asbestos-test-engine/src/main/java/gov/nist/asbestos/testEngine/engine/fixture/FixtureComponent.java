@@ -1,6 +1,7 @@
 package gov.nist.asbestos.testEngine.engine.fixture;
 
 import gov.nist.asbestos.client.client.FhirClient;
+import gov.nist.asbestos.client.events.UIEvent;
 import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import gov.nist.asbestos.client.resolver.SearchParms;
@@ -32,8 +33,9 @@ public class FixtureComponent {
     private FixtureSub fixtureSub = null;
     private FixtureMgr fixtureMgr = null;
     private Ref staticRef = null;
-    private ActionReference createdBy = null;  // script action that created this fixture
-    private List<ActionReference> referencedBy = new ArrayList<>();
+    private ActionReference createdByActionReference = null;  // script action that created this fixture
+    private List<ActionReference> referencedByActionReference = new ArrayList<>();
+    private UIEvent createdByUIEvent = null;
 
     // constructors only available to FixtureMgr
     FixtureComponent(String id) {
@@ -52,6 +54,13 @@ public class FixtureComponent {
     public FixtureComponent setFixtureSub(FixtureSub fixtureSub) {
         this.fixtureSub = fixtureSub;
         return this;
+    }
+
+    @Override
+    public String toString() {
+        return id
+        + (createdByUIEvent == null ? "" : ": " + createdByUIEvent.getEventName())
+                + (resourceWrapper == null ? "" : ": " + resourceWrapper.toString());
     }
 
     public FixtureComponent load(ResourceWrapper it) {  //  static loads
@@ -237,21 +246,30 @@ public class FixtureComponent {
         return fixtureMgr.getTestId();
     }
 
-    public FixtureComponent setCreatedBy(ActionReference createdBy) {
-        this.createdBy = createdBy;
+    public FixtureComponent setCreatedByActionReference(ActionReference createdByActionReference) {
+        this.createdByActionReference = createdByActionReference;
         return this;
     }
 
-    public ActionReference getCreatedBy() {
-        return createdBy;
+    public ActionReference getCreatedByActionReference() {
+        return createdByActionReference;
     }
 
-    public FixtureComponent setReferencedBy(ActionReference actionReference) {
-        referencedBy.add(actionReference);
+    public FixtureComponent setReferencedByActionReference(ActionReference actionReference) {
+        referencedByActionReference.add(actionReference);
         return this;
     }
 
-    public List<ActionReference> getReferencedBy() {
-        return referencedBy;
+    public List<ActionReference> getReferencedByActionReference() {
+        return referencedByActionReference;
+    }
+
+    public UIEvent getCreatedByUIEvent() {
+        return createdByUIEvent;
+    }
+
+    public FixtureComponent setCreatedByUIEvent(UIEvent createdByUIEvent) {
+        this.createdByUIEvent = createdByUIEvent;
+        return this;
     }
 }

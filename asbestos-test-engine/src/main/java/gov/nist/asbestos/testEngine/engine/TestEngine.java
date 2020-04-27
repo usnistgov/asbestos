@@ -57,7 +57,7 @@ public class TestEngine  {
     private List<String> errors;
     private FhirClient fhirClient = null;
     private String testSession = null;
-    private String channelId = null;
+    private String channelId = null;   // testSession __ channelName
     private File externalCache = null;
     private String testCollection = null;
     private String testId = null;
@@ -675,32 +675,8 @@ public class TestEngine  {
         }
     }
 
-//    private void doAction(String typePrefix, boolean isOperation, TestScript.SetupActionOperationComponent operation, TestReport.TestActionComponent actionReport, boolean isAssert, TestScript.SetupActionAssertComponent anAssert) {
-//        if (isOperation) {
-//            TestScript.SetupActionOperationComponent opComponent = operation;
-//            TestReport.SetupActionOperationComponent opReport = actionReport.getOperation();
-//            OperationRunner runner = new OperationRunner(fixtureMgr)
-//                    .setVal(new ValE(val).setMsg(typePrefix))
-//                    .setTypePrefix(typePrefix)
-//                    .setFhirClient(fhirClient)
-//                    .setSut(sut)
-//                    .setTestReport(testReport)
-//                    .setTestScript(testScript);
-//            runner.run(opComponent, opReport);
-//        } else if (isAssert) {
-//            TestScript.SetupActionAssertComponent actionAssertComponent = anAssert;
-//            TestReport.SetupActionAssertComponent assertComponent = actionReport.getAssert();
-//            AssertionRunner runner = new AssertionRunner(fixtureMgr)
-//                    .setVal(new ValE(val).setMsg(typePrefix))
-//                    .setTypePrefix(typePrefix)
-//                    .setTestReport(testReport)
-//                    .setTestScript(testScript);
-//            runner.run(actionAssertComponent, assertComponent);
-//        }
-//        propagateStatus(testReport);
-//    }
-
     private void doOperation(ActionReference actionReference, String typePrefix, TestScript.SetupActionOperationComponent operation, TestReport.SetupActionOperationComponent report) {
+        Objects.requireNonNull(channelId);
         if (operation.hasType()) {
             try {
                 OperationRunner runner = new OperationRunner(actionReference, fixtureMgr, externalVariables)
@@ -893,6 +869,7 @@ public class TestEngine  {
                 .setFixtures(inFixturesForComponent)
                 .setExternalVariables(externalVariables)
                 .setFhirClient(new FhirClient())
+                .setChannelId(channelId)
                 .setTestCollection(testCollection)
                 .setTestId(testId)
                 ;
@@ -1545,9 +1522,9 @@ public class TestEngine  {
         return externalCache;
     }
 
-    public String getChannelId() {
-        return channelId;
-    }
+//    public String getChannelId() {
+//        return channelId;
+//    }
 
     public String getTestCollection() {
         return testCollection;
@@ -1561,5 +1538,25 @@ public class TestEngine  {
             return parentPath + "/" + testScriptName;
         }
         return "/" + testCollection + "/" + testId + ":";
+    }
+
+//    public String getTestSession() {
+//        return testSession;
+//    }
+
+    public String getChannelId() {  // testSession __ channelName
+        return channelId;
+    }
+
+    public String getTestSession() {
+        String[] parts = getChannelId().split("__");
+        assert parts.length == 2;
+            return parts[0];
+    }
+
+    public String getChannelName() {
+        String[] parts = getChannelId().split("__");
+        assert parts.length == 2;
+        return parts[1];
     }
 }

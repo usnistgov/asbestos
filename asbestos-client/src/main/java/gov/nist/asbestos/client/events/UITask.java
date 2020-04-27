@@ -1,6 +1,9 @@
 package gov.nist.asbestos.client.events;
 
+import gov.nist.asbestos.client.Base.ProxyBase;
+import gov.nist.asbestos.client.client.Format;
 import gov.nist.asbestos.client.events.Reader;
+import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import gov.nist.asbestos.http.headers.Header;
 import gov.nist.asbestos.http.headers.Headers;
 
@@ -21,6 +24,16 @@ public class UITask {
         requestBody = Reader.read(eventDir, taskLabel, "request_body.txt");
         responseHeader = Reader.read(eventDir, taskLabel, "response_header.txt");
         responseBody = Reader.read(eventDir, taskLabel, "response_body.txt");
+    }
+
+    public UITask(ResourceWrapper wrapper) {
+        index = 0;
+        label = "";
+        description = wrapper.getRef().toString();
+        requestHeader = new Headers().withContentType(Format.JSON.getContentType()).toString();
+        requestBody = ProxyBase.encode(wrapper.getResource(), Format.JSON);
+        responseBody = "";
+        responseHeader = "";
     }
 
     public boolean isHTMLResponse() {

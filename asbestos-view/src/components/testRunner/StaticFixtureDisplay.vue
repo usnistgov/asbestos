@@ -27,7 +27,7 @@
         props: [
             'testCollection',
             'testId',
-            'path'  // uses . for separator
+            'path'  // uses , for separator
         ]
     }
 </script>
