@@ -11,8 +11,8 @@ import java.net.URI;
 class SetupActionSearch extends SetupActionRead {
 
 
-    SetupActionSearch(FixtureMgr fixtureMgr) {
-        super(fixtureMgr);
+    SetupActionSearch(ActionReference actionReference, FixtureMgr fixtureMgr) {
+        super(actionReference, fixtureMgr);
     }
 
     @Override

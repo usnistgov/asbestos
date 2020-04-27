@@ -37,22 +37,14 @@ abstract class GenericSetupAction {
     private String testCollectionId = null;
     private String testId = null;
     private TestEngine testEngine = null;
+    ActionReference actionReference = null;
 
     abstract String resourceTypeToSend();
 
-//    private String asMarkdown(Map<String, String> table, String title) {
-//        StringBuilder buf = new StringBuilder();
-//        buf.append("### ").append(title).append("\n");
-//        boolean first = true;
-//        for (String key : table.keySet()) {
-//            if (!first)
-//                buf.append("\n");
-//            first = false;
-//            String value = table.get(key);
-//            buf.append("**").append(key).append("**: ").append(value);
-//        }
-//        return buf.toString();
-//    }
+    GenericSetupAction(ActionReference actionReference) {
+        this.actionReference = actionReference;
+        Objects.requireNonNull(actionReference);
+    }
 
     private void reportOperation(ResourceWrapper wrapper) {
         Objects.requireNonNull(testCollectionId);
@@ -62,48 +54,7 @@ abstract class GenericSetupAction {
                 .setTestEngine(testEngine)
                 .setTestCollectionId(testCollectionId)
                 .setTestId(testId)
-                .reportOperation(wrapper, fixtureMgr, variableMgr, reporter);
-//        String request = "### " + wrapper.getHttpBase().getVerb() + " " + wrapper.getHttpBase().getUri() + "\n";
-//
-//        Map<String, String> fixtures = new HashMap<>();
-//        for (String key : fixtureMgr.keySet()) {
-//            FixtureComponent comp = fixtureMgr.get(key);
-//            String value = null;
-//
-//            HttpBase httpBase = comp.getHttpBase();
-//            if (httpBase != null) {
-//                Headers responseHeaders = httpBase.getResponseHeaders();
-//                String eventUrl = responseHeaders.getProxyEvent();
-//                value = EventLinkToUILink.get(eventUrl);
-//            } else if (comp.isLoaded()){
-//                ResourceWrapper wrapper1 = comp.getResourceWrapper();
-//                if (wrapper1 != null) {
-//                    Ref ref = wrapper1.getRef();
-//                    if (ref != null)
-//                        value = ref.toString() + " (static)";
-//                }
-//            }
-//
-//            try {
-//                Ref ref = new Ref(value);
-//                if (ref.isAbsolute()) {
-//                    value = "<a href=\"" + value + "\"" + " target=\"_blank\">" + value + "</a>";
-//                }
-//            } catch (Throwable t) {
-//                // ignore
-//            }
-//
-//            fixtures.put(key, value);
-//        }
-//
-//        Map<String, String> variables = variableMgr.getVariables();
-//
-//        String markdown = request
-//                + ActionReporter.asMarkdown(fixtures, "Fixtures")
-//                + "\n"
-//                + ActionReporter.asMarkdown(variables, "Variables");
-//
-//        reporter.report(markdown, wrapper);
+                .reportOperation(wrapper, fixtureMgr, variableMgr, reporter, op);
     }
 
     abstract Ref buildTargetUrl();
@@ -143,6 +94,7 @@ abstract class GenericSetupAction {
                 reporter.reportError("sourceId " + op.getSourceId() + " does not exist");
                 return false;
             }
+            sourceFixture.setReferencedBy(actionReference);
             resourceToSend = sourceFixture.getResourceResource();
             resourceToSend = updateResourceToSend(resourceToSend);
         }
@@ -180,13 +132,10 @@ abstract class GenericSetupAction {
         }
 
         String fixtureId = op.hasResponseId() ? op.getResponseId() : FixtureComponent.getNewId();
-//        fixtureComponent = new FixtureComponent(fixtureId)
         fixtureMgr.add(fixtureId)
-//                .setTestCollectionId(testCollectionId)
-//                .setTestId(testId)
                 .setResource(wrapper)
-                .setHttpBase(wrapper.getHttpBase());
-        //fixtureMgr.put(fixtureId, fixtureComponent);
+                .setHttpBase(wrapper.getHttpBase())
+        .setCreatedBy(actionReference);
 
         reportOperation(wrapper);
     }
@@ -195,7 +144,7 @@ abstract class GenericSetupAction {
         return resourceTypeToSend();
     }
 
-    private List<String> putPostTypes = new ArrayList<String>(
+    private final List<String> putPostTypes = new ArrayList<String>(
             Arrays.asList(
             "update", "updateCreate", "create", "transaction", "mhd-pdb-transaction"
             )

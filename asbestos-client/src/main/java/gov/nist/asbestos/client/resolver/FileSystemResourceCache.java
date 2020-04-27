@@ -58,6 +58,12 @@ public class FileSystemResourceCache implements ResourceCache {
 
     }
 
+    public List<File> getCacheDirs() {
+        return cacheDirs;
+    }
+
+    public void insertCache(File cacheDir) { this.cacheDirs.add(0, cacheDir); }
+
     public void addCache(File cacheDir) {
         this.cacheDirs.add(cacheDir);
     }

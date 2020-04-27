@@ -28,11 +28,13 @@ public class OperationRunner {
     private String testCollectionId = null;
     private String testId = null;
     private TestEngine testEngine = null;
+    private ActionReference actionReference = null;
 
-    OperationRunner(FixtureMgr fixtureMgr, Map<String, String> externalVariables) {
+    OperationRunner(ActionReference actionReference, FixtureMgr fixtureMgr, Map<String, String> externalVariables) {
         Objects.requireNonNull(fixtureMgr);
         this.fixtureMgr = fixtureMgr;
         this.externalVariables = externalVariables;
+        this.actionReference = actionReference;
     }
 
     void run(TestScript.SetupActionOperationComponent op, TestReport.SetupActionOperationComponent operationReport) {
@@ -43,6 +45,7 @@ public class OperationRunner {
         Objects.requireNonNull(operationReport);
         Objects.requireNonNull(testCollectionId);
         Objects.requireNonNull(testId);
+        Objects.requireNonNull(actionReference);
 
         reporter = new Reporter(val, operationReport, "", "");
 
@@ -96,7 +99,7 @@ public class OperationRunner {
             fhirClient.setFormat(Format.JSON);
 
         if ("read".equals(code)) {
-            SetupActionRead setupActionRead = new SetupActionRead(fixtureMgr)
+            SetupActionRead setupActionRead = new SetupActionRead(actionReference, fixtureMgr)
                     .setVal(val)
                     .setFhirClient(fhirClient)
                     .setSut(sut)
@@ -113,7 +116,7 @@ public class OperationRunner {
                     .setTestEngine(testEngine);
             setupActionRead.run(op, operationReport);
         } else if ("search".equals(code)) {
-                SetupActionSearch setupActionSearch = new SetupActionSearch(fixtureMgr)
+                SetupActionSearch setupActionSearch = new SetupActionSearch(actionReference, fixtureMgr)
                         .setVal(val)
                         .setFhirClient(fhirClient)
                         .setSut(sut)
@@ -132,7 +135,7 @@ public class OperationRunner {
                 setupActionSearch.run(op, operationReport);
         } else if ("create".equals(code)) {
             SetupActionCreate setupActionCreate =
-                    new SetupActionCreate(fixtureMgr)
+                    new SetupActionCreate(actionReference, fixtureMgr)
                             .setFhirClient(fhirClient)
                             .setType(type + ".create")
                             .setSut(sut)
@@ -149,7 +152,7 @@ public class OperationRunner {
             setupActionCreate.run(op, operationReport);
         } else if ("delete".equals(code)) {
             SetupActionDelete setupActionDelete =
-                    new SetupActionDelete(fixtureMgr)
+                    new SetupActionDelete(actionReference, fixtureMgr)
                             .setSut(sut)
                             .setFhirClient(fhirClient)
                             .setType(type + ".delete")
@@ -164,7 +167,7 @@ public class OperationRunner {
             setupActionDelete.run(op, operationReport);
         } else if ("transaction".equals(code)) {
             SetupActionTransaction setupActionTransaction =
-                    new SetupActionTransaction(fixtureMgr)
+                    new SetupActionTransaction(actionReference, fixtureMgr)
                             .setSut(sut)
                             .setFhirClient(fhirClient)
                             .setType(type + ".transaction")
@@ -179,7 +182,7 @@ public class OperationRunner {
             setupActionTransaction.run(op, operationReport);
         } else if ("mhd-pdb-transaction".equals(code)) {
             SetupActionMhdPdbTransaction setupActionTransaction =
-                    new SetupActionMhdPdbTransaction(fixtureMgr);
+                    new SetupActionMhdPdbTransaction(actionReference, fixtureMgr);
             setupActionTransaction.setSut(sut)
                             .setFhirClient(fhirClient)
                             .setType(type + ".mhd-pdb-transaction")

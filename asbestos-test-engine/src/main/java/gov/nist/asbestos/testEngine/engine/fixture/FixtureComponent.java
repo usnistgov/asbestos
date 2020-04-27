@@ -8,11 +8,14 @@ import gov.nist.asbestos.http.operations.HttpBase;
 import gov.nist.asbestos.serviceproperties.ServiceProperties;
 import gov.nist.asbestos.serviceproperties.ServicePropertiesEnum;
 import gov.nist.asbestos.simapi.validation.ValE;
+import gov.nist.asbestos.testEngine.engine.ActionReference;
 import org.hl7.fhir.r4.model.BaseResource;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -29,6 +32,8 @@ public class FixtureComponent {
     private FixtureSub fixtureSub = null;
     private FixtureMgr fixtureMgr = null;
     private Ref staticRef = null;
+    private ActionReference createdBy = null;  // script action that created this fixture
+    private List<ActionReference> referencedBy = new ArrayList<>();
 
     // constructors only available to FixtureMgr
     FixtureComponent(String id) {
@@ -230,5 +235,23 @@ public class FixtureComponent {
     private String getTestId() {
         Objects.requireNonNull(fixtureMgr);
         return fixtureMgr.getTestId();
+    }
+
+    public FixtureComponent setCreatedBy(ActionReference createdBy) {
+        this.createdBy = createdBy;
+        return this;
+    }
+
+    public ActionReference getCreatedBy() {
+        return createdBy;
+    }
+
+    public FixtureComponent setReferencedBy(ActionReference actionReference) {
+        referencedBy.add(actionReference);
+        return this;
+    }
+
+    public List<ActionReference> getReferencedBy() {
+        return referencedBy;
     }
 }

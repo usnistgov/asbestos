@@ -153,7 +153,7 @@
             return {
                 // message: null,
                 displayMessage: false,
-                displayScript: false,
+                displayScript: true,
                 displayDetails: false,
                 status: [],   // testName => undefined, 'pass', 'fail', 'error'
                 eventLogUrl: null,

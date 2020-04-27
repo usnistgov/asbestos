@@ -35,6 +35,16 @@ class CacheBundle {
         }
     }
 
+    void insertFileCache(File cacheDir) {
+        file.insertCache(cacheDir);
+    }
+
+    List<File> getFileSystemCacheDirs() {
+        if (file == null)
+            return new ArrayList<>();
+        return file.getCacheDirs();
+    }
+
     Ref getBase() {
         if (file == null)
             return null;

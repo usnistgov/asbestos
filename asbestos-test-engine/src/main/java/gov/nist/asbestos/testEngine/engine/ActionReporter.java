@@ -6,6 +6,7 @@ import gov.nist.asbestos.http.headers.Headers;
 import gov.nist.asbestos.http.operations.HttpBase;
 import gov.nist.asbestos.testEngine.engine.fixture.FixtureComponent;
 import gov.nist.asbestos.testEngine.engine.fixture.FixtureMgr;
+import org.hl7.fhir.r4.model.TestScript;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
@@ -20,20 +21,20 @@ class ActionReporter {
     private TestEngine testEngine = null;
     private FixtureComponent source  = null;
 
-    void reportOperation(ResourceWrapper wrapper, FixtureMgr fixtureMgr, VariableMgr variableMgr, Reporter reporter) {
+    void reportOperation(ResourceWrapper wrapper, FixtureMgr fixtureMgr, VariableMgr variableMgr, Reporter reporter, TestScript.SetupActionOperationComponent op) {
         String request = "### " + wrapper.getHttpBase().getVerb() + " " + wrapper.getHttpBase().getUri() + "\n";
 
-        report(wrapper, fixtureMgr, variableMgr, reporter, request);
+        report(wrapper, fixtureMgr, variableMgr, reporter, request, op);
     }
 
     void reportAssertion(FixtureMgr fixtureMgr, VariableMgr variableMgr, Reporter reporter, FixtureComponent source) {
         this.source = source;
         String request = "";
 
-        report(null, fixtureMgr, variableMgr, reporter, request);
+        report(null, fixtureMgr, variableMgr, reporter, request, null);
     }
 
-    private void report(ResourceWrapper wrapper, FixtureMgr fixtureMgr, VariableMgr variableMgr, Reporter reporter, String request) {
+    private void report(ResourceWrapper wrapper, FixtureMgr fixtureMgr, VariableMgr variableMgr, Reporter reporter, String request, TestScript.SetupActionOperationComponent op) {
         Objects.requireNonNull(testCollectionId);
         Objects.requireNonNull(testId);
         Objects.requireNonNull(testEngine);
@@ -60,6 +61,11 @@ class ActionReporter {
         }
 
         for (String key : fixtureMgr.keySet()) {
+            String additionalKey = null;
+            if (key != null && source != null && key.equals(source.getId()))
+                additionalKey = "sourceId";
+            if (key != null && op != null && op.hasResponseId() && key.equals(op.getResponseId()))
+                additionalKey = "responseId";
             FixtureComponent fixtureComponent = fixtureMgr.get(key);
             String value = null;
 
@@ -80,13 +86,7 @@ class ActionReporter {
                     } catch (UnsupportedEncodingException e) {
                         continue;
                     }
-//                    String[] parts = refStrEncoded.split(File.separator);
-//                    if (parts.length == 2) {
-//                        String base = ServiceProperties.getInstance().getPropertyOrStop(ServicePropertiesEnum.FHIR_TOOLKIT_UI_HOME_PAGE);
-//                        String url = refStrRaw; //base + "/collection/" + testCollectionId + "/test/" + testId + "/fixture/" + refStr2;
                         value = "<a href=\"" +  refStrEncoded + "\"" + " target=\"_blank\">" + refStrRaw + "</a>";
-//                    } else
-//                        value = ref.toString() + " (static)";
                 }
             }
 
@@ -100,6 +100,8 @@ class ActionReporter {
             }
 
             fixtures.put(key, value);
+            if (additionalKey != null)
+                fixtures.put(additionalKey, value);
         }
 
         Map<String, String> variables = variableMgr.getVariables();

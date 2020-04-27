@@ -61,23 +61,11 @@ public class FixtureMgr {
         return c;
     }
 
-//    public FixtureComponent add(BaseResource baseResource) {
+//    public FixtureComponent add(String id, BaseResource baseResource) {
 //        FixtureComponent c = new FixtureComponent(baseResource);
+//        c.setId(id);
 //        c.setFixtureMgr(this);
-//        return c;
-//    }
-
-    public FixtureComponent add(String id, BaseResource baseResource) {
-        FixtureComponent c = new FixtureComponent(baseResource);
-        c.setId(id);
-        c.setFixtureMgr(this);
-        put(id, c);
-        return c;
-    }
-
-//    public FixtureComponent add(ResourceWrapper resourceWrapper) {
-//        FixtureComponent c = new FixtureComponent(resourceWrapper);
-//        c.setFixtureMgr(this);
+//        put(id, c);
 //        return c;
 //    }
 

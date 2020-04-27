@@ -15,7 +15,8 @@ import java.util.Objects;
 
 public class SetupActionTransaction extends GenericSetupAction {
 
-    SetupActionTransaction(FixtureMgr fixtureMgr) {
+    SetupActionTransaction(ActionReference actionReference, FixtureMgr fixtureMgr) {
+        super(actionReference);
         Objects.requireNonNull(fixtureMgr);
         this.fixtureMgr = fixtureMgr;
     }

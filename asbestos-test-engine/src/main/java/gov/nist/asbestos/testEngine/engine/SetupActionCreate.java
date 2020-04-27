@@ -19,7 +19,8 @@ import java.util.Objects;
 
 class SetupActionCreate extends GenericSetupAction {
 
-    SetupActionCreate(FixtureMgr fixtureMgr) {
+    SetupActionCreate(ActionReference actionReference, FixtureMgr fixtureMgr) {
+        super(actionReference);
         Objects.requireNonNull(fixtureMgr);
         this.fixtureMgr = fixtureMgr;
     }
@@ -30,7 +31,7 @@ class SetupActionCreate extends GenericSetupAction {
      * @param reference
      * @param operationReport
      */
-    void run(String fixtureId, Reference reference, TestReport.SetupActionOperationComponent operationReport) {
+    void run(TestScript testScript, TestScript.TestScriptFixtureComponent comp, String fixtureId, Reference reference, TestReport.SetupActionOperationComponent operationReport) {
         Reporter reporter = new Reporter(val, operationReport, type, "");
         FixtureComponent sourceFixture = fixtureMgr.get(fixtureId);
         if (sourceFixture == null) {
@@ -48,16 +49,15 @@ class SetupActionCreate extends GenericSetupAction {
             return;
         ResourceWrapper wrapper = getFhirClient().writeResource(resourceToSend, targetUrl, Format.XML, requestHeader);
 
-        //reportOperation(wrapper);
         if (wrapper.isOk())
             reporter.report(wrapper.getRef() + " created", wrapper);
         else
             reporter.reportError(wrapper.getRef() + " not created", wrapper);
-//        fixtureComponent = new FixtureComponent(fixtureId)
+        ActionReference action = new ActionReference(testScript, comp);
         fixtureMgr.add(fixtureId)
                 .setResource(wrapper)
-                .setHttpBase(wrapper.getHttpBase());
-//        fixtureMgr.put(fixtureId, fixtureComponent);
+                .setHttpBase(wrapper.getHttpBase())
+                .setCreatedBy(action);
     }
 
     void run(TestScript.SetupActionOperationComponent op, TestReport.SetupActionOperationComponent operationReport) {

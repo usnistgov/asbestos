@@ -17,7 +17,8 @@ import java.net.URI;
 
 class SetupActionRead extends GenericSetupAction {
 
-    SetupActionRead(FixtureMgr fixtureMgr) {
+    SetupActionRead(ActionReference actionReference, FixtureMgr fixtureMgr) {
+        super(actionReference);
         this.fixtureMgr = fixtureMgr;
     }
 

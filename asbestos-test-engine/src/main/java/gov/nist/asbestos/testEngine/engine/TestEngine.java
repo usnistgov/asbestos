@@ -531,35 +531,12 @@ public class TestEngine  {
 
                     if (fix.hasResource()) {
                         Ref ref = new Ref(fix.getResource().getReference());
-//                        Optional<ResourceWrapper> optWrapper;
-//                        try {
-//                            optWrapper = fhirClientForFixtures.readCachedResource(ref);
-//                        } catch (Throwable t) {
-//                            optWrapper = Optional.empty();
-//                        }
-//
-//                        // never happens - Throwable thrown if not found
-//                        if (!optWrapper.isPresent())
-//                            throw new Error("Static Fixture " + ref + " cannot be loaded");
-//                        ResourceWrapper wrapper = optWrapper.get();
-//                        FixtureComponent fixtureComponent;
                         fixtureMgr.add(id)
                                 .setStaticRef(ref)
-                                .setVal(fVal);
+                                .setVal(fVal)
+                        //        .setCreatedBy(new Action(testScript, fix))
+                        ;
 
-//                        try {
-////                            fixtureComponent = new FixtureComponent(id)
-//                            fixtureMgr.add(id)
-////                                    .setTestCollectionId(testCollection)
-////                                    .setTestId(testId)
-//                                    .setResource(wrapper)   // testCollectionId and testId must be set before this
-//                                    .setVal(fVal)
-//                                    .load(wrapper);
-////                            if (fixtureComponent != null)
-////                                fixtureMgr.put(id, fixtureComponent);
-//                        } catch (Throwable e) {
-//                            throw new Error(e);
-//                        }
                     } else if (fix.hasExtension(ExtensionDef.subFixture)) {
                         Extension subfix = fix.getExtensionByUrl(ExtensionDef.subFixture);
 
@@ -574,19 +551,14 @@ public class TestEngine  {
                         String sourceId = sourceIdExt.getValue().toString();
 
                         FixtureSub fixtureSub = new FixtureSub(fixtureMgr, sourceId, fhirPath);
-                        FixtureComponent fixtureComponent = fixtureMgr.add(id).setFixtureSub(fixtureSub).setVal(fVal);
-                        //fixtureMgr.put(id, fixtureComponent);
+                        FixtureComponent fixtureComponent = fixtureMgr
+                                .add(id)
+                                .setFixtureSub(fixtureSub)
+                                .setVal(fVal);
                     }
                 }
             } catch (Throwable t) {
                 reportTerminalFailure(t);
-//                String msg = t.getMessage();
-//                if (msg == null || msg.equals(""))
-//                    msg = ExceptionUtils.getStackTrace(t);
-//                // This is pretty bad - report SYSTEM error
-//                Extension extension = new Extension().setUrl("urn:failure").setValue(new StringType(msg));
-//                getTestReport().getExtension().add(extension);
-//                //reportParsingError(testReport.addTest(), msg);
             }
 
         }
@@ -605,7 +577,7 @@ public class TestEngine  {
                         String resourceType = resource.getType();
                         TestReport.SetupActionOperationComponent operationReport = actionReport.getOperation();
                         operationReport.setResult(TestReport.TestReportActionResult.PASS);  // may be overwritten
-                        SetupActionCreate create = new SetupActionCreate(fixtureMgr)
+                        SetupActionCreate create = new SetupActionCreate(new ActionReference(testScript, comp), fixtureMgr)
                                 .setFhirClient(fhirClient)
                                 .setSut(sut)
                                 .setType("fixture.autocreate")
@@ -614,7 +586,7 @@ public class TestEngine  {
                                         .setExternalVariables(externalVariables)
                                         .setVal(fVal)
                                         .setOpReport(operationReport));
-                        create.run(comp.getId(), comp.getResource(), operationReport);
+                        create.run(testScript, comp, comp.getId(), comp.getResource(), operationReport);
                         if (propagateStatus(testReport))
                             return;  // fail
                     }
@@ -636,7 +608,7 @@ public class TestEngine  {
                         String resourceType = resource.getType();
                         TestReport.SetupActionOperationComponent operationReport = actionReport.getOperation();
                         operationReport.setResult(TestReport.TestReportActionResult.PASS);  // may be overwritten
-                        SetupActionDelete delete = new SetupActionDelete(fixtureMgr)
+                        SetupActionDelete delete = new SetupActionDelete(new ActionReference(testScript, comp), fixtureMgr)
                                 .setFhirClient(fhirClient)
                                 .setSut(sut)
                                 .setType("fixture.autodelete")
@@ -667,7 +639,7 @@ public class TestEngine  {
                     if (invalidAction(action, actionReportComponent, fVal))
                         return;
                     if (action.hasOperation()) {
-                        doOperation(typePrefix, action.getOperation(), actionReportComponent.getOperation());
+                        doOperation(new ActionReference(testScript, action), typePrefix, action.getOperation(), actionReportComponent.getOperation());
                         TestReport.SetupActionOperationComponent opReport = actionReportComponent.getOperation();
                         if (opReport.getResult() == TestReport.TestReportActionResult.ERROR) {
                             testReport.setStatus(TestReport.TestReportStatus.COMPLETED);
@@ -728,10 +700,10 @@ public class TestEngine  {
 //        propagateStatus(testReport);
 //    }
 
-    private void doOperation(String typePrefix, TestScript.SetupActionOperationComponent operation, TestReport.SetupActionOperationComponent report) {
+    private void doOperation(ActionReference actionReference, String typePrefix, TestScript.SetupActionOperationComponent operation, TestReport.SetupActionOperationComponent report) {
         if (operation.hasType()) {
             try {
-                OperationRunner runner = new OperationRunner(fixtureMgr, externalVariables)
+                OperationRunner runner = new OperationRunner(actionReference, fixtureMgr, externalVariables)
                         .setVal(new ValE(val).setMsg(typePrefix))
                         .setTypePrefix(typePrefix)
                         .setFhirClient(fhirClient)
@@ -915,6 +887,7 @@ public class TestEngine  {
                 componentReference.getComponentRef(),
                 this.sut)
                 .setTestSession(testSession)
+                .withResourceCacheManager(this.getCacheManager())
                 .setVal(new Val())
                 .setExternalCache(externalCache)
                 .setFixtures(inFixturesForComponent)
@@ -959,6 +932,17 @@ public class TestEngine  {
 
         if (testEngine1.getTestReport().getResult() == TestReport.TestReportResult.FAIL)
             getTestReport().setResult(TestReport.TestReportResult.FAIL);
+    }
+
+    private TestEngine withResourceCacheManager(ResourceCacheMgr mgr) {
+        for (File file : mgr.getDefaultCacheDirs()) {
+            fixtureMgr.getFhirClient().getResourceCacheMgr().insertIntoFileSystemResourceCache(file);
+        }
+        return this;
+    }
+
+    private ResourceCacheMgr getCacheManager() {
+        return fixtureMgr.getFhirClient().getResourceCacheMgr();
     }
 
     static class ErrorReport {
@@ -1105,7 +1089,7 @@ public class TestEngine  {
                     return false;
                 if (action.hasOperation()) {
                     TestReport.SetupActionOperationComponent reportOp = actionReportComponent.getOperation();
-                    doOperation(typePrefix, action.getOperation(), reportOp);
+                    doOperation(new ActionReference(testScript, action), typePrefix, action.getOperation(), reportOp);
                     TestReport.SetupActionOperationComponent opReport = actionReportComponent.getOperation();
                     if (opReport.getResult() == TestReport.TestReportActionResult.ERROR) {
                         testReport.setStatus(TestReport.TestReportStatus.COMPLETED);
@@ -1213,7 +1197,7 @@ public class TestEngine  {
                     if (action.hasOperation()) {
                         TestScript.SetupActionOperationComponent setupActionOperationComponent = action.getOperation();
                         if (action.hasOperation())
-                            doOperation(typePrefix, action.getOperation(), actionReport.getOperation());
+                            doOperation(new ActionReference(testScript, action), typePrefix, action.getOperation(), actionReport.getOperation());
 
                         if (hasError())
                             return;
