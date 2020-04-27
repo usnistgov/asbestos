@@ -14,6 +14,15 @@
                         Body
                         <textarea rows="5" class="form-control"></textarea>
                     </label>
+
+                    <!-- begin -->
+                    <div v-for="(val, propKey) in $store.state.debugAssertionEval.evalObj" :key="propKey" >
+                        <label  :for="propKey">{{propKey}}</label>
+                        <input  :id="propKey"  :value="$store.state.debugAssertionEval.evalObj[propKey]" @input="onEvalObjPropUpdate">
+                    </div>
+
+
+                    <!-- end -->
                 </div>
                 <div class="modal-footer text-right">
                     <button class="modal-default-button" @click="doEval()">
@@ -26,10 +35,19 @@
 </template>
 
 <script>
-
     export default {
+        data() {
+            return {
+            }
+        },
         props: ['show'],
+        computed: {
+        },
         methods: {
+            onEvalObjPropUpdate(e) {
+                console.log('onEvalObjProp.. was called.')
+             this.$store.commit('setEvalObjProperty', {propKey: e.target.id, propVal: e.target.value})
+            },
             close: function () {
                 this.$emit('close');
             },

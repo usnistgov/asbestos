@@ -6,6 +6,7 @@ Vue.use(Vuex)
 export const debugAssertionEvalStore = {
     state() {
         return {
+            assertionEvalBreakpointIndex: '',
             showModal: false,
             isEvalObjUpdated: false,
             evalObj: {
@@ -35,6 +36,16 @@ export const debugAssertionEvalStore = {
         }
     },
     mutations: {
+        setAssertionEvalBreakpointIndex(state, val) {
+         state.assertionEvalBreakpointIndex = val
+        },
+        setEvalObjProperty(state, obj) {
+            if ('propKey' in obj) {
+                if (obj.propKey in state.evalObj) {
+                    state.evalObj[obj.propKey] = obj.propVal
+                }
+            }
+        },
         setShowDebugEvalModal(state, bVal) {
             state.showModal = Boolean(bVal)
         },
@@ -42,10 +53,17 @@ export const debugAssertionEvalStore = {
            let atLeastOnePropertyWasUpdated = false
            for (let propKey in state.evalObj) {
              if (propKey in obj) {
-                 state.evalObj[propKey] = obj[propKey]
+                 if (typeof obj[propKey] === 'string') {
+                     state.evalObj[propKey] = obj[propKey]
+                 } else if ('myStringValue' in obj[propKey]) {
+                    state.evalObj[propKey] = obj[propKey].myStringValue
+                 }
                  if (atLeastOnePropertyWasUpdated === false) {
                      atLeastOnePropertyWasUpdated = true
+                     console.log('propKey: ' + propKey + ' was set to: ' + state.evalObj[propKey] + '. inprop? ' + Boolean('myStringValue' in obj[propKey])) // obj[propKey].myStringValue
                  }
+             } else {
+                 state.evalObj[propKey] = ''
              }
             }
            if (atLeastOnePropertyWasUpdated) {

@@ -144,13 +144,19 @@ export const debugTestScriptStore = {
                 console.log('debugKill '+ mapKey + ' failed: WebSocket is null!')
             }
         },
-        async doDebugEvalMode({state, getters}, testId) {
-            console.log('In doDebugEvalMode')
+        async doDebugEvalMode({commit, state, rootState, getters}, testId) {
+            console.log('In doDebugEvalMode: ' + testId)
             const mapKey = getters.getMapKey(testId)
-            let sendData = `{"evaluateAssertion":"true","testScriptIndex":"${mapKey}"}`
+            const breakpointIndex = state.showDebugButton[mapKey].breakpointIndex
+            if (rootState.debugAssertionEval.assertionEvalBreakpointIndex === breakpointIndex) {
+               commit('setShowDebugEvalModal', true)
+            } else {
+               commit('setAssertionEvalBreakpointIndex', breakpointIndex)
+                let sendData = `{"evaluateAssertion":"true","testScriptIndex":"${mapKey}"}`
 
-            console.log('Evaluating ' + state.showDebugButton[mapKey].breakpointIndex)
-            state.testScriptDebuggerWebSocket.send(sendData)
+                console.log('Evaluating ' + breakpointIndex)
+                state.testScriptDebuggerWebSocket.send(sendData)
+            }
         },
         async debugTestScript({commit, rootState, state, getters}, testId) {
             console.log('in debug' + testId + ' isGettersUndefined: ' + (getters === undefined).valueOf())
@@ -212,7 +218,7 @@ export const debugTestScriptStore = {
                            state.evalMode = true
                         }
                     } else if (returnData.messageType === 'original-assertion') {
-                        alert(JSON.stringify(returnData.assertionJson))
+                        // alert(JSON.stringify(returnData.assertionJson))
                         // rootState.testScriptAssertionEval.
                         commit('updateAssertionEvalObj', returnData.assertionJson)
 
