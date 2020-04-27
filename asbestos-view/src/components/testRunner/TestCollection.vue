@@ -135,9 +135,9 @@
 
                         </div>
                         <router-view v-if="selected === name"></router-view>  <!--  opens TestOrEvalDetails   -->
+                        <debug-assertion-eval v-if="isEvaluable(i)" :show="$store.state.debugAssertionEval.showModal" @close="closeModal()" @resume="doDebug(name)"></debug-assertion-eval>
             </div>
             </div>
-            <debug-assertion-eval :show="$store.state.debugAssertionEval.showModal" @close="closeModal()"></debug-assertion-eval>
         </div>
 
     </div>

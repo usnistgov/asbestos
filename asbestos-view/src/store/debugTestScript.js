@@ -158,7 +158,7 @@ export const debugTestScriptStore = {
                 state.testScriptDebuggerWebSocket.send(sendData)
             }
         },
-        async debugTestScript({commit, rootState, state, getters}, testId) {
+        async debugTestScript({commit, rootState, state, getters, dispatch}, testId) {
             console.log('in debug' + testId + ' isGettersUndefined: ' + (getters === undefined).valueOf())
             // commit('setTestReport',{name: testId, testReport: null})
             // console.log('log cleared for ' + testId)
@@ -206,6 +206,7 @@ export const debugTestScriptStore = {
                     let returnData = JSON.parse(event.data)
                     if (returnData.messageType === 'final-report') {
                         state.waitingForBreakpoint = false
+                        commit('setShowDebugEvalModal', false) // If this is not here, the modal will automatically re-open when the test script is debugged again immediately
                         commit('setCombinedTestReports', returnData.testReport)
                         state.testScriptDebuggerWebSocket.close()
                     } else if (returnData.messageType === 'breakpoint-hit') {
@@ -216,6 +217,11 @@ export const debugTestScriptStore = {
                        commit('setCombinedTestReports', returnData.testReport)
                         if (('isEvaluable' in returnData) && returnData.isEvaluable === 'true') {
                            state.evalMode = true
+                            if (rootState.debugAssertionEval.showModal === true) {
+                               // Auto-refresh the modal if already evalMode is already displaying the modal
+                               //  state.doDebugEvalMode({commit: commit, state: state, rootState: rootState, getters: getters}, testId)
+                                dispatch('doDebugEvalMode', testId)
+                            }
                         }
                     } else if (returnData.messageType === 'original-assertion') {
                         // alert(JSON.stringify(returnData.assertionJson))

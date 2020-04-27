@@ -6,25 +6,26 @@
                     <h3>Eval</h3>
                 </div>
                 <div class="modal-body">
-                    <label class="form-label">
-                        Title
-                        <input class="form-control">
-                    </label>
-                    <label class="form-label">
-                        Body
-                        <textarea rows="5" class="form-control"></textarea>
-                    </label>
+<!--                    <label class="form-label">-->
+<!--                        Title-->
+<!--                        <input class="form-control">-->
+<!--                    </label>-->
+<!--                    <label class="form-label">-->
+<!--                        Body-->
+<!--                        <textarea rows="5" class="form-control"></textarea>-->
+<!--                    </label>-->
 
                     <!-- begin -->
                     <div v-for="(val, propKey) in $store.state.debugAssertionEval.evalObj" :key="propKey" >
-                        <label  :for="propKey">{{propKey}}</label>
-                        <input  :id="propKey"  :value="$store.state.debugAssertionEval.evalObj[propKey]" @input="onEvalObjPropUpdate">
+                        <label class="form-label"  :for="propKey">{{propKey}}</label>
+                        <input  class="form-control" :id="propKey"  :value="$store.state.debugAssertionEval.evalObj[propKey]" @input="onEvalObjPropUpdate">
                     </div>
 
 
                     <!-- end -->
                 </div>
                 <div class="modal-footer text-right">
+                    <button class="modal-button" @click="doResume()">Resume</button>&nbsp;
                     <button class="modal-default-button" @click="doEval()">
                         Save
                     </button>
@@ -49,10 +50,13 @@
              this.$store.commit('setEvalObjProperty', {propKey: e.target.id, propVal: e.target.value})
             },
             close: function () {
-                this.$emit('close');
+                this.$emit('close')
             },
             doEval: function () {
-                this.close();
+                this.close()
+            },
+            doResume: function() {
+                this.$emit('resume')
             }
         },
         name: "DebugAssertionEval"
@@ -74,17 +78,19 @@
         width: 100%;
         height: 100%;
         background-color: rgba(0, 0, 0, .5);
-        transition: opacity .3s ease;
+        transition: opacity 1s ease;
     }
 
     .modal-container {
-        width: 300px;
+        width: 40%;
+        max-height: 70%;
+        overflow-y: auto;
         margin: 40px auto 0;
         padding: 20px 30px;
         background-color: #fff;
         border-radius: 2px;
         box-shadow: 0 2px 8px rgba(0, 0, 0, .33);
-        transition: all .3s ease;
+        transition: all 1s ease;
         font-family: Helvetica, Arial, sans-serif;
     }
 
@@ -128,17 +134,17 @@
      */
 
     .modal-enter {
-        opacity: 0;
+        opacity: .5;
     }
 
     .modal-leave-active {
-        opacity: 0;
+        opacity: .5;
     }
 
-    .modal-enter .modal-container,
-    .modal-leave-active .modal-container {
-        -webkit-transform: scale(1.1);
-        transform: scale(1.1);
-    }
+    /*.modal-enter .modal-container,*/
+    /*.modal-leave-active .modal-container {*/
+    /*    -webkit-transform: scale(1.1);*/
+    /*    transform: scale(1.1);*/
+    /*}*/
 
 </style>
