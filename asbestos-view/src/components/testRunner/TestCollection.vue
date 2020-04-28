@@ -130,12 +130,11 @@
 
                             <script-status v-if="statusRight" :status-right="statusRight" :name="name"> </script-status>
 
-                            <span v-if="!$store.state.testRunner.isClientTest"> --  {{ testTime(name) }}</span>
-
+                            <span v-if="! $store.state.debugTestScript.waitingForBreakpoint && ! $store.state.testRunner.isClientTest"> --  {{ testTime(name) }}</span>
 
                         </div>
-                        <router-view v-if="selected === name"></router-view>  <!--  opens TestOrEvalDetails   -->
-                        <debug-assertion-eval v-if="isEvaluable(i)" :show="$store.state.debugAssertionEval.showModal" @close="closeModal()" @resume="doDebug(name)"></debug-assertion-eval>
+                <debug-assertion-eval v-if="isEvaluable(i)" :show="$store.state.debugAssertionEval.showModal" @close="closeModal()" @resume="doDebug(name)"></debug-assertion-eval>
+                <router-view v-if="selected === name"></router-view>  <!--  opens TestOrEvalDetails   -->
             </div>
             </div>
         </div>
@@ -551,6 +550,8 @@
     }
     .breakpoint-hit-indicator {
         list-style-type: "\1F449"; /* Index finger pointing right */
+        background: yellow;
+        transition: background-color 2s ease-out;
         /* 27A1 = Right arrow */
     }
     .noTopMargin {

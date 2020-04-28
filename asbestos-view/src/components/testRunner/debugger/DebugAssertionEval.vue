@@ -1,5 +1,5 @@
 <template>
-    <transition name="modal">
+    <div name="modal">
         <div class="modal-mask" @click="close" v-show="show">
             <div class="modal-container" @click.stop>
                 <div class="modal-header">
@@ -17,35 +17,50 @@
 
                     <!-- begin -->
                     <div v-for="(val, propKey) in $store.state.debugAssertionEval.evalObj" :key="propKey" >
-                        <label class="form-label"  :for="propKey">{{propKey}}</label>
-                        <input  class="form-control" :id="propKey"  :value="$store.state.debugAssertionEval.evalObj[propKey]" @input="onEvalObjPropUpdate">
+<!--                        <div v-if="! wasEdited && '' === getPropVal(propKey).valueOf()">-->
+<!--                            <span class="form-label form-block">{{propKey}}</span>&nbsp;-->
+<!--                            <span class="grayText">(No value)</span>&nbsp;-->
+<!--                            <button class="modal-button" @click="doAdd()">Add</button>-->
+<!--                        </div>-->
+<!--                        <div v-else-if="getPropVal(propKey).valueOf().length > 0">-->
+                            <label class="form-label form-block"  :for="propKey">{{propKey}}</label>
+                            <input  class="form-control" :id="propKey"  :value="getPropVal(propKey)" @input="onEvalObjPropUpdate">
+                            <button class="modal-button" @click="doEval()">Eval</button>&nbsp;
+                            <button class="modal-button" @click="doResume()" title="Resume execution or resume until next breakpoint">Resume</button>&nbsp;
+<!--                        </div>-->
                     </div>
-
-
                     <!-- end -->
                 </div>
-                <div class="modal-footer text-right">
-                    <button class="modal-button" @click="doResume()">Resume</button>&nbsp;
-                    <button class="modal-default-button" @click="doEval()">
-                        Save
-                    </button>
-                </div>
+
+<!--                <div class="modal-footer text-right">-->
+<!--                    <button class="modal-button" @click="doResume()">Resume</button>&nbsp;-->
+<!--                    <button class="modal-default-button" @click="doEval()">-->
+<!--                        Save-->
+<!--                    </button>-->
+<!--                </div>-->
             </div>
         </div>
-    </transition>
+    </div>
 </template>
 
 <script>
     export default {
         data() {
             return {
+                // wasEdited: false,
             }
+        },
+        mounted() {
         },
         props: ['show'],
         computed: {
         },
         methods: {
+            getPropVal(key) {
+               return this.$store.state.debugAssertionEval.evalObj[key]
+            },
             onEvalObjPropUpdate(e) {
+                // this.wasEdited = true
                 console.log('onEvalObjProp.. was called.')
              this.$store.commit('setEvalObjProperty', {propKey: e.target.id, propVal: e.target.value})
             },
@@ -57,6 +72,9 @@
             },
             doResume: function() {
                 this.$emit('resume')
+            },
+            doAdd: function() {
+
             }
         },
         name: "DebugAssertionEval"
@@ -70,6 +88,7 @@
         box-sizing: border-box;
     }
 
+
     .modal-mask {
         position: fixed;
         z-index: 9998;
@@ -77,8 +96,8 @@
         left: 0;
         width: 100%;
         height: 100%;
-        background-color: rgba(0, 0, 0, .5);
-        transition: opacity 1s ease;
+        /*background-color: rgba(0, 0, 0, .5);*/
+        /*transition: opacity 500ms ease;*/
     }
 
     .modal-container {
@@ -89,8 +108,8 @@
         padding: 20px 30px;
         background-color: #fff;
         border-radius: 2px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, .33);
-        transition: all 1s ease;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, .33);
+        /*transition: all 500ms ease;*/
         font-family: Helvetica, Arial, sans-serif;
     }
 
@@ -108,8 +127,11 @@
     }
 
     .form-label {
-        display: block;
         margin-bottom: 1em;
+    }
+
+    .form-block {
+        display: block;
     }
 
     .form-label > .form-control {
@@ -117,8 +139,8 @@
     }
 
     .form-control {
-        display: block;
-        width: 100%;
+        /*display: block;*/
+        width: 70%;
         padding: 0.5em 1em;
         line-height: 1.5;
         border: 1px solid #ddd;
