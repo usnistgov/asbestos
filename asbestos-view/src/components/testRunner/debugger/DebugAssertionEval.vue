@@ -6,26 +6,10 @@
                     <h3>Eval</h3>
                 </div>
                 <div class="modal-body">
-<!--                    <label class="form-label">-->
-<!--                        Title-->
-<!--                        <input class="form-control">-->
-<!--                    </label>-->
-<!--                    <label class="form-label">-->
-<!--                        Body-->
-<!--                        <textarea rows="5" class="form-control"></textarea>-->
-<!--                    </label>-->
-
-                    <!-- begin -->
                     <div v-for="(val, propKey) in $store.state.debugAssertionEval.evalObj" :key="propKey" >
-<!--                        <div v-if="! wasEdited && '' === getPropVal(propKey).valueOf()">-->
-<!--                            <span class="form-label form-block">{{propKey}}</span>&nbsp;-->
-<!--                            <span class="grayText">(No value)</span>&nbsp;-->
-<!--                            <button class="modal-button" @click="doAdd()">Add</button>-->
-<!--                        </div>-->
-<!--                        <div v-else-if="getPropVal(propKey).valueOf().length > 0">-->
-                            <label class="form-label form-block"  :for="propKey">{{propKey}}</label>
+                            <label @click="openHelp(propKey)" class="form-label form-block"  :for="propKey">{{propKey}}&nbsp;&#x2139;</label>
 <!--                            <textarea  rows="5" class="form-control" :id="propKey"  :value="getPropVal(propKey)" @input="onEvalObjPropUpdate"/>-->
-                            <input class="form-control" :id="propKey"  :value="getPropVal(propKey)" @input="onEvalObjPropUpdate">
+                            <input class="form-control" :id="propKey"  :value="getPropVal(propKey)" @input="onEvalObjPropUpdate">&nbsp;
                             <button class="modal-button" @click="doEval(propKey)">Eval</button>&nbsp;
                             <button class="modal-button" @click="doResume()" title="Resume execution or resume until next breakpoint">Resume</button>&nbsp;
                             <div v-if="getPropKey() === propKey"
@@ -35,16 +19,10 @@
                                 <span class="form-block">{{getResultCode()}}</span> <!-- TestReport.SetupActionAssertComponent getResult code -->
                                 <vue-markdown v-bind:source="$store.state.debugAssertionEval.debugAssertionEvalResult.markdownMessage"></vue-markdown>
                             </div>
-<!--                        </div>-->
                     </div>
-                    <!-- end -->
                 </div>
 
 <!--                <div class="modal-footer text-right">-->
-<!--                    <button class="modal-button" @click="doResume()">Resume</button>&nbsp;-->
-<!--                    <button class="modal-default-button" @click="doEval()">-->
-<!--                        Save-->
-<!--                    </button>-->
 <!--                </div>-->
             </div>
         </div>
@@ -57,7 +35,6 @@
     export default {
         data() {
             return {
-                // wasEdited: false,
             }
         },
         mounted() {
@@ -66,6 +43,9 @@
         computed: {
         },
         methods: {
+            openHelp(propKey) {
+              window.open("http://hl7.org/fhir/testscript-definitions.html#TestScript.setup.action.assert."+propKey, "_blank")
+            },
             getResultCode() {
                 return this.$store.state.debugAssertionEval.debugAssertionEvalResult.resultMessage
             },
@@ -76,7 +56,6 @@
                return this.$store.state.debugAssertionEval.evalObj[key]
             },
             onEvalObjPropUpdate(e) {
-                // this.wasEdited = true
                 // console.log('onEvalObjProp.. was called.')
              this.$store.commit('setEvalObjProperty', {propKey: e.target.id, propVal: e.target.value})
             },
@@ -152,7 +131,7 @@
     }
 
     .form-label {
-        margin-bottom: 1em;
+        margin-bottom: 2px;
     }
 
     .form-block {
@@ -169,6 +148,7 @@
         padding: 0.5em 1em;
         line-height: 1.5;
         border: 1px solid #ddd;
+        margin-bottom: 1em;
     }
 
     /*
