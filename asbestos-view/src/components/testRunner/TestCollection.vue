@@ -551,7 +551,7 @@
     .breakpoint-hit-indicator {
         list-style-type: "\1F449"; /* Index finger pointing right */
         background: yellow;
-        transition: background-color 2s ease-out;
+        /*transition: background-color 500ms ease-in-out;*/
         /* 27A1 = Right arrow */
     }
     .noTopMargin {

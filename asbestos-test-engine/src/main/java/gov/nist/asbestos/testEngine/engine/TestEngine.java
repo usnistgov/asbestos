@@ -822,7 +822,7 @@ public class TestEngine  {
         setupActionOperationComponent.setMessage("skipped");
     }
 
-    private void pauseIfActionBreakpoint(TestScript.TestActionComponent action, String parentType, Integer parentIndex, Integer childPartIndex) {
+    private void pauseIfActionBreakpoint(final TestScript.TestActionComponent action, final String parentType, final Integer parentIndex, final Integer childPartIndex, final boolean reportAsConditional) {
 
         String breakpointIndex = TestScriptDebugState.getBreakpointIndex(parentType, parentIndex, childPartIndex);
         boolean isBreakpoint = testScriptDebugState.isBreakpoint(breakpointIndex);
@@ -832,9 +832,10 @@ public class TestEngine  {
             do {
                 // Must pause first before Eval
                 testScriptDebugState.waitOnBreakpoint(); // if eval, exit pause
-                if (action.hasAssert() && testScriptDebugState.getEvaluateMode().get()) { // Only assertion-eval is supported for now. Need to address Operations later
+                if (action.hasAssert() && testScriptDebugState.getDebugEvaluateMode().get()) { // Only assertion-eval is supported for now. Need to address Operations later
                     testScriptDebugState.resetEvalMode();
-                   if (testScriptDebugState.getEvalJsonString() == null) {
+                    String evalJsonString = testScriptDebugState.getEvalJsonString();
+                   if (evalJsonString == null) {
                        // If evalJsonString is empty, Send original assertion as a template for the user to edit an assertion
                        String assertionJsonStr = new Gson().toJson(action.getAssert());
                        testScriptDebugState.sendAssertionStr(assertionJsonStr);
@@ -842,6 +843,68 @@ public class TestEngine  {
                       // Eval
 //                       action.getAssert().getDirection()
 //                       TestScript.AssertionDirectionType.fromCode(
+                       Map<String, String> myMap = new Gson().fromJson(evalJsonString, Map.class);
+                       TestScript.SetupActionAssertComponent copy = action.getAssert().copy();
+                       copy.setLabel(myMap.get("label"));
+                       copy.setDescription(myMap.get("description"));
+                       copy.setDirection(TestScript.AssertionDirectionType.fromCode(myMap.get("direction")));
+                       copy.setCompareToSourceId(myMap.get("compareToSourceId"));
+                       copy.setCompareToSourceExpression(myMap.get("compareToSourceExpression"));
+                       copy.setCompareToSourcePath(myMap.get("compareToSourcePath"));
+                       copy.setContentType(myMap.get("contentType"));
+                       copy.setExpression(myMap.get("expression"));
+                       copy.setHeaderField(myMap.get("headerField"));
+                       copy.setMinimumId(myMap.get("minimumId"));
+                       copy.setNavigationLinks(new Boolean(myMap.get("navigationLinks")).booleanValue());
+                       copy.setOperator(TestScript.AssertionOperatorType.fromCode(myMap.get("operator")));
+                       copy.setPath(myMap.get("path"));
+                       copy.setRequestMethod(TestScript.TestScriptRequestMethodCode.fromCode(myMap.get("requestMethod")));
+                       copy.setRequestURL(myMap.get("requestURL"));
+                       copy.setResource(myMap.get("resource"));
+                       copy.setResponse(TestScript.AssertionResponseTypes.fromCode(myMap.get("response")));
+                       copy.setResponseCode(myMap.get("responseCode"));
+                       copy.setSourceId(myMap.get("sourceId"));
+                       copy.setValidateProfileId(myMap.get("validateProfileId"));
+                       copy.setValue(myMap.get("value"));
+                       copy.setWarningOnly(new Boolean(myMap.get("warningOnly")));
+
+                       String typePrefix = "contained.action";
+                       TestReport.SetupActionAssertComponent actionReport = doAssert(typePrefix, copy);
+                       String code = actionReport.getResult().toCode();
+                       if ("fail".equals(code)) {
+                           log.info("copy eval failed.");
+                       } else if ("error".equals(code)) {
+                           log.info("copy eval error.");
+                       }
+                       testScriptDebugState.sendDebugAssertionEvalResultStr(code, actionReport.getMessage());
+
+
+                               /*
+               label: '',
+               description: '',
+                direction: '',
+                compareToSourceId: '',
+                compareToSourceExpression: '',
+                compareToSourcePath: '',
+                contentType: '',
+                expression: '',
+                headerField: '',
+                minimumId: '',
+                navigationLinks: '',
+                operator: '',
+                path: '',
+                requestMethod: '',
+                requestURL: '',
+                resource: '',
+                response: '',
+                responseCode: '',
+                sourceId: '',
+                validateProfileId: '',
+                value: '',
+                warningOnly: '',
+
+                                */
+
                    }
                 }
             } while (! testScriptDebugState.getResume().get() && ! testScriptDebugState.getKill().get());
@@ -873,7 +936,7 @@ public class TestEngine  {
             int testPartIndex = 0;
             for (TestScript.TestActionComponent action : testScriptElement.getAction()) {
                 if (hasDebugState()) {
-                    pauseIfActionBreakpoint(action, "test", testIndex, testPartIndex);
+                    pauseIfActionBreakpoint(action, "test", testIndex, testPartIndex, reportAsConditional);
                 }
                 TestReport.TestActionComponent actionReportComponent = testReportComponent.addAction();
                 if (invalidAction(action, actionReportComponent, fVal))

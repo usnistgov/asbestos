@@ -24,9 +24,17 @@
 <!--                        </div>-->
 <!--                        <div v-else-if="getPropVal(propKey).valueOf().length > 0">-->
                             <label class="form-label form-block"  :for="propKey">{{propKey}}</label>
-                            <input  class="form-control" :id="propKey"  :value="getPropVal(propKey)" @input="onEvalObjPropUpdate">
-                            <button class="modal-button" @click="doEval()">Eval</button>&nbsp;
+<!--                            <textarea  rows="5" class="form-control" :id="propKey"  :value="getPropVal(propKey)" @input="onEvalObjPropUpdate"/>-->
+                            <input class="form-control" :id="propKey"  :value="getPropVal(propKey)" @input="onEvalObjPropUpdate">
+                            <button class="modal-button" @click="doEval(propKey)">Eval</button>&nbsp;
                             <button class="modal-button" @click="doResume()" title="Resume execution or resume until next breakpoint">Resume</button>&nbsp;
+                            <div v-if="getPropKey() === propKey"
+                                 v-bind:class="{
+                                'evalNotPassed': getResultCode().valueOf() !== 'pass',
+                            }">
+                                <span class="form-block">{{getResultCode()}}</span> <!-- TestReport.SetupActionAssertComponent getResult code -->
+                                <vue-markdown v-bind:source="$store.state.debugAssertionEval.debugAssertionEvalResult.markdownMessage"></vue-markdown>
+                            </div>
 <!--                        </div>-->
                     </div>
                     <!-- end -->
@@ -44,6 +52,8 @@
 </template>
 
 <script>
+    import VueMarkdown from 'vue-markdown'
+
     export default {
         data() {
             return {
@@ -56,26 +66,41 @@
         computed: {
         },
         methods: {
+            getResultCode() {
+                return this.$store.state.debugAssertionEval.debugAssertionEvalResult.resultMessage
+            },
+            getPropKey() {
+                return this.$store.state.debugAssertionEval.debugAssertionEvalResult.propKey
+            },
             getPropVal(key) {
                return this.$store.state.debugAssertionEval.evalObj[key]
             },
             onEvalObjPropUpdate(e) {
                 // this.wasEdited = true
-                console.log('onEvalObjProp.. was called.')
+                // console.log('onEvalObjProp.. was called.')
              this.$store.commit('setEvalObjProperty', {propKey: e.target.id, propVal: e.target.value})
             },
             close: function () {
+                this.$store.commit('setDebugAssertionEvalPropKey', '')
                 this.$emit('close')
             },
-            doEval: function () {
-                this.close()
+            doEval(propKey) {
+                this.$store.commit('setDebugAssertionEvalPropKey', propKey)
+                let assertDataString = JSON.stringify(this.$store.state.debugAssertionEval.evalObj)
+               console.log('before base64: ' + assertDataString)
+                this.$store.dispatch('doDebugEvalAssertion', window.btoa(assertDataString))
+                // this.close()
             },
             doResume: function() {
+                this.$store.commit('setDebugAssertionEvalPropKey', '')
                 this.$emit('resume')
             },
             doAdd: function() {
 
             }
+        },
+        components: {
+            VueMarkdown
         },
         name: "DebugAssertionEval"
     }
@@ -168,5 +193,9 @@
     /*    -webkit-transform: scale(1.1);*/
     /*    transform: scale(1.1);*/
     /*}*/
+
+    .evalNotPassed {
+        color: red;
+    }
 
 </style>

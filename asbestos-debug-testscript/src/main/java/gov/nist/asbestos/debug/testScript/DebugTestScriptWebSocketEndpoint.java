@@ -71,22 +71,16 @@ public class DebugTestScriptWebSocketEndpoint {
                 }
             } else if (myMap.get("resumeBreakpoint") != null) {
                 List<String> updateList = (List<String>) myMap.get("breakpointList");
-                if (updateList != null) {
-                    state.getBreakpointSet().clear();
-                    state.getBreakpointSet().addAll(updateList);
-                }
-                doResumeBreakpoint(state);
+                doResumeBreakpoint(state, updateList);
             } else if (myMap.get("killDebug") != null) {
                 killSession(state);
                 // Create new exception for Kill because the next Test is run and the KILL exception is shown in the next Test.
                 // - See how failures in Setup are handled. The Kill should act that way.
-            } else if (myMap.get("evaluateAssertion") != null) {
-                // if json string not empty, then store it!
-                String evalJsonString = (String)myMap.get("evalJsonString");
-                if (evalJsonString != null) {
-                    state.setEvalJsonString(new String(Base64.getDecoder().decode(evalJsonString)));
-                }
-                doEvaluate(state);
+            } else if (myMap.get("requestOriginalAssertion") != null) {
+                doRequestOriginalAssertion(state);
+            } else if (myMap.get("debugEvalAssertion") != null) {
+                String base64String = (String)myMap.get("base64String");
+                doDebugEvaluate(state, base64String);
             }
             // else if stepOver
             // else if Restart
@@ -142,17 +136,33 @@ public class DebugTestScriptWebSocketEndpoint {
         }
     }
 
-    private void doResumeBreakpoint(TestScriptDebugState state) {
+    private void doResumeBreakpoint(TestScriptDebugState state, List<String> updateList) {
+        if (updateList != null) {
+            state.getBreakpointSet().clear();
+            state.getBreakpointSet().addAll(updateList);
+        }
+
         synchronized (state.getLock()) {
            state.getResume().set(true);
            state.getLock().notify();
         }
     }
 
-    private void doEvaluate(TestScriptDebugState state) {
+    private void doRequestOriginalAssertion(TestScriptDebugState state) {
         synchronized (state.getLock()) {
-            state.getEvaluateMode().set(true);
+            state.resetEvalJsonString();
+            state.getDebugEvaluateMode().set(true);
             state.getLock().notify();
+        }
+    }
+
+    private void doDebugEvaluate(TestScriptDebugState state, String base64String) {
+        if (base64String != null) {
+            state.setEvalJsonString(new String(Base64.getDecoder().decode(base64String)));
+            synchronized (state.getLock()) {
+                state.getDebugEvaluateMode().set(true);
+                state.getLock().notify();
+            }
         }
     }
 

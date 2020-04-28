@@ -2,6 +2,7 @@ package gov.nist.asbestos.sharedObjects;
 
 import org.apache.log4j.Logger;
 
+import java.util.Base64;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.atomic.AtomicBoolean;
 import javax.websocket.Session;
@@ -59,7 +60,7 @@ public class TestScriptDebugState {
         return getSession().getId();
     }
 
-    public AtomicBoolean getEvaluateMode() {
+    public AtomicBoolean getDebugEvaluateMode() {
         return evaluateMode;
     }
 
@@ -69,6 +70,13 @@ public class TestScriptDebugState {
 
     public void setEvalJsonString(String evalJsonString) {
         this.evalJsonString = evalJsonString;
+    }
+
+    /**
+     * Clear the variable state. An empty eval Json is an indicator for requesting original-assertion if no assertion data is provided
+     */
+    public void resetEvalJsonString() {
+        this.evalJsonString = null;
     }
 
     /**
@@ -101,6 +109,12 @@ public class TestScriptDebugState {
         getSession().getAsyncRemote().sendText("{\"messageType\":\"original-assertion\", \"assertionJson\":" + assertionJson +"}");
     }
 
+    public void sendDebugAssertionEvalResultStr(String str, String markdownMessage) {
+        String base64 = (markdownMessage != null && markdownMessage.length() > 0) ? Base64.getEncoder().encodeToString(markdownMessage.getBytes()) : "";
+        getSession().getAsyncRemote().sendText("{\"messageType\":\"eval-assertion-result\", \"resultMessage\":\"" + str +"\","
+                + "\"markdownMessage\":\"" + base64 + "\"}");
+    }
+
     public void sendBreakpointHit(String breakpointIndex, String reportsAsJson, boolean isEvaluable) {
         log.info("pausing at " + breakpointIndex);
         getSession().getAsyncRemote().sendText(
@@ -128,7 +142,7 @@ public class TestScriptDebugState {
     private boolean isWait() {
         boolean isWait = ! getKill().get();
         isWait = isWait && ! getResume().get();
-        isWait = isWait && ! getEvaluateMode().get();
+        isWait = isWait && ! getDebugEvaluateMode().get();
 
         return isWait;
     }
@@ -148,7 +162,7 @@ public class TestScriptDebugState {
                 log.info("Resuming " +  getSession().getId());
             } else if (getKill().get()) {
                 throw new Error("KILL session: " + getSession().getId()); // This needs to throw a custom exception that does not show up in the test report
-            } else if (getEvaluateMode().get()) {
+            } else if (getDebugEvaluateMode().get()) {
                 log.info("Eval mode is true.");
             }
         }

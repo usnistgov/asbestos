@@ -9,6 +9,7 @@ export const debugAssertionEvalStore = {
             assertionEvalBreakpointIndex: '',
             showModal: false,
             isEvalObjUpdated: false,
+            debugAssertionEvalResult: {propKey: '', resultMessage: '', markdownMessage: ''},
             evalObj: {
                 label: '',
                 description: '',
@@ -49,6 +50,19 @@ export const debugAssertionEvalStore = {
         setShowDebugEvalModal(state, bVal) {
             state.showModal = Boolean(bVal)
         },
+        setDebugAssertionEvalPropKey(state, key) {
+            state.debugAssertionEvalResult.propKey = key
+        },
+        setDebugAssertionEvalResult(state, obj) {
+           state.debugAssertionEvalResult.resultMessage = obj.resultMessage
+            let mkdwnMsg = ''
+            if ('markdownMessage' in obj) {
+                if (obj.markdownMessage.valueOf().length > 0) {
+                    mkdwnMsg = window.atob(obj.markdownMessage)
+                }
+            }
+            state.debugAssertionEvalResult.markdownMessage = mkdwnMsg
+        },
         updateAssertionEvalObj(state, obj) {
            let atLeastOnePropertyWasUpdated = false
            for (let propKey in state.evalObj) {
@@ -60,7 +74,7 @@ export const debugAssertionEvalStore = {
                  }
                  if (atLeastOnePropertyWasUpdated === false) {
                      atLeastOnePropertyWasUpdated = true
-                     console.log('propKey: ' + propKey + ' was set to: ' + state.evalObj[propKey] + '. inprop? ' + Boolean('myStringValue' in obj[propKey])) // obj[propKey].myStringValue
+                     // console.log('propKey: ' + propKey + ' was set to: ' + state.evalObj[propKey] + '. inprop? ' + Boolean('myStringValue' in obj[propKey])) // obj[propKey].myStringValue
                  }
              } else {
                  state.evalObj[propKey] = ''
@@ -72,5 +86,6 @@ export const debugAssertionEvalStore = {
            state.showModal = true
         },
     },
-    actions: {},
+    actions: {
+    },
 }

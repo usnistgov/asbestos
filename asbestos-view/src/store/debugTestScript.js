@@ -152,11 +152,15 @@ export const debugTestScriptStore = {
                commit('setShowDebugEvalModal', true)
             } else {
                commit('setAssertionEvalBreakpointIndex', breakpointIndex)
-                let sendData = `{"evaluateAssertion":"true","testScriptIndex":"${mapKey}"}`
+                let sendData = `{"requestOriginalAssertion":"true","testScriptIndex":"${mapKey}"}`
 
-                console.log('Evaluating ' + breakpointIndex)
+                console.log('Requesting original-assertion ' + breakpointIndex)
                 state.testScriptDebuggerWebSocket.send(sendData)
             }
+        },
+        async doDebugEvalAssertion({state}, assertionDataBase64) {
+            let sendData = `{"debugEvalAssertion":"true", "base64String":"${assertionDataBase64}"}`
+           state.testScriptDebuggerWebSocket.send(sendData)
         },
         async debugTestScript({commit, rootState, state, getters, dispatch}, testId) {
             console.log('in debug' + testId + ' isGettersUndefined: ' + (getters === undefined).valueOf())
@@ -190,6 +194,7 @@ export const debugTestScriptStore = {
                     }
                 }
                 state.testScriptDebuggerWebSocket.onclose = event => {
+                    commit('setAssertionEvalBreakpointIndex', '') // Reset the Eval state on Close so original assertion is requested next time it is run
                     state.waitingForBreakpoint = false
                     // Enable Run button
                     if (event != null && event != undefined) {
@@ -227,7 +232,8 @@ export const debugTestScriptStore = {
                         // alert(JSON.stringify(returnData.assertionJson))
                         // rootState.testScriptAssertionEval.
                         commit('updateAssertionEvalObj', returnData.assertionJson)
-
+                    } else if (returnData.messageType === 'eval-assertion-result') {
+                       commit('setDebugAssertionEvalResult', returnData)
                     } else if (returnData.messageType === 'killed') {
                         alert('Debug: Killed')
                         state.testScriptDebuggerWebSocket.close()
