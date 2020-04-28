@@ -833,6 +833,11 @@ public class TestEngine  {
             String outerName = parm.getCallerName();
             String innnerName = parm.getLocalName();
             FixtureComponent fixtureComponent = fixtureMgr.get(outerName);
+            if (fixtureComponent.getFixtureSub() != null) {
+                // create temporary FixtureComponent containing the translations
+                // and the extracted content
+                fixtureComponent = fixtureComponent.getFixtureSub().getSubFixture(fixtureComponent);
+            }
             if (fixtureComponent == null)
                 throw new RuntimeException("Fixture " + outerName + " does not exist");
             inFixturesForComponent.put(innnerName, fixtureComponent);

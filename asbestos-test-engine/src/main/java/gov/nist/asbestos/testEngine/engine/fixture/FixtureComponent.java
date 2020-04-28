@@ -51,6 +51,15 @@ public class FixtureComponent {
         //setResource(resourceWrapper);
     }
 
+    public FixtureSub getFixtureSub() {
+        return fixtureSub;
+    }
+
+    public FixtureComponent setResourceSimple(ResourceWrapper resource) {
+        resourceWrapper = resource;
+        return this;
+    }
+
     public FixtureComponent setFixtureSub(FixtureSub fixtureSub) {
         this.fixtureSub = fixtureSub;
         return this;

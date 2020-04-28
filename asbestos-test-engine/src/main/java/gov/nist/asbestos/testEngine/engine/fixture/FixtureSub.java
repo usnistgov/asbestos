@@ -18,6 +18,22 @@ public class FixtureSub {
         this.fhirPath = fhirPath;
     }
 
+    @Override
+    public String toString() {
+        return sourceId + ": " + fhirPath;
+    }
+
+    // create temporary/unregistered FixtureComponent for SubFixture
+    // do dereferencing now.  Life span is only duration of module call
+    public FixtureComponent getSubFixture(FixtureComponent fixtureComponent) {
+        FixtureComponent fc = new FixtureComponent(fixtureComponent.getId());
+        FixtureComponent referencedFixtureComponent = fixtureMgr.get(sourceId);
+        fc.setCreatedByUIEvent(referencedFixtureComponent.getCreatedByUIEvent());
+        fc.setResourceSimple(get());
+        fc.setHttpBase(null);
+        return fc;
+    }
+
     public ResourceWrapper get() {
         FixtureComponent fixtureComponent = fixtureMgr.get(sourceId);
         if (fixtureComponent == null)
@@ -46,22 +62,6 @@ public class FixtureSub {
         Objects.requireNonNull(getTestCollectionId());
         Objects.requireNonNull(getTestId());
         return FixtureComponent.generateStaticFixtureRef(resourceType, fixturePath, fhirPath, getTestCollectionId(), getTestId());
-//        URI uri = null;
-//        try {
-//            uri = new URI(ServiceProperties.getInstance().getPropertyOrStop(ServicePropertiesEnum.FHIR_TOOLKIT_BASE) + "/engine/staticFixture/IT_Test_Support/StaticFixture");
-//        } catch (URISyntaxException e) {
-//            return null;
-//        }
-//        String searchString = "?url=" + fixturePath;
-//        if (fhirPath != null && !fhirPath.equals(""))
-//            searchString = searchString + ";fhirPath=" + fhirPath;
-//        SearchParms searchParms = new SearchParms();
-//        try {
-//            searchParms.setParms(searchString, true);
-//        } catch (UnsupportedEncodingException e) {
-//            return null;
-//        }
-//        return new Ref(uri, resourceType, searchParms);
     }
 
     public String getSourceId() {

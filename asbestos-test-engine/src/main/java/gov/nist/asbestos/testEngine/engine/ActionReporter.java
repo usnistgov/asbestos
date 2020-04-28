@@ -83,9 +83,11 @@ class ActionReporter {
                 Ref ref = wrapper1.getRef();
                 if (ref != null) {
                     refStrEncoded = ref.toString();
-                    String refStrRaw = null;
+                    String refStrRaw;
                     UIEvent uiEvent = fixtureComponent.getCreatedByUIEvent();
-                    if (uiEvent != null) {
+                    if (uiEvent == null)
+                        refStrRaw = null;
+                    else {
                         refStrRaw = "http://localhost:8082/session/" + testEngine.getTestSession()
                                 + "/channel/" + testEngine.getChannelName()
                                 + "/lognav/" + uiEvent.getEventName();

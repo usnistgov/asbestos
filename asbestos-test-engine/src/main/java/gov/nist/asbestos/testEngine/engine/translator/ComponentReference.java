@@ -58,6 +58,11 @@ public class ComponentReference {
             throw new RuntimeException("Component reference " + this.componentRef + " does not exist");
     }
 
+    @Override
+    public String toString() {
+        return relativePath;
+    }
+
     public List<Parameter> getFixturesIn() {
         return fixturesIn;
     }
