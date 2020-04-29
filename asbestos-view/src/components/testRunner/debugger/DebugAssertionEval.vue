@@ -7,7 +7,7 @@
                 </div>
                 <div class="modal-body">
                     <div v-for="(val, propKey) in $store.state.debugAssertionEval.evalObj" :key="propKey" >
-                            <label @click="openHelp(propKey)" class="form-label form-block"  :for="propKey">{{propKey}}&nbsp;&#x2139;</label>
+                        <div><label  class="form-label"  :for="propKey">{{propKey}}</label><span @click.stop="openHelp(propKey)" class="inputLabelInformation">&#x2139;</span></div>
 <!--                            <textarea  rows="5" class="form-control" :id="propKey"  :value="getPropVal(propKey)" @input="onEvalObjPropUpdate"/>-->
                             <input class="form-control" :id="propKey"  :value="getPropVal(propKey)" @input="onEvalObjPropUpdate">&nbsp;
                             <button class="modal-button" @click="doEval(propKey)">Eval</button>&nbsp;
@@ -92,6 +92,12 @@
         box-sizing: border-box;
     }
 
+    .inputLabelInformation {
+       cursor: pointer;
+        font-size: larger;
+         margin-left: 4px;
+        margin-bottom: 4px;
+    }
 
     .modal-mask {
         position: fixed;
@@ -131,7 +137,7 @@
     }
 
     .form-label {
-        margin-bottom: 2px;
+        margin-bottom: 4px;
     }
 
     .form-block {
