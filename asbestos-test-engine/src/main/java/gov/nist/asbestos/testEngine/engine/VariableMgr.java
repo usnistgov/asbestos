@@ -3,6 +3,7 @@ package gov.nist.asbestos.testEngine.engine;
 import gov.nist.asbestos.http.headers.Headers;
 import gov.nist.asbestos.http.operations.HttpBase;
 import gov.nist.asbestos.http.operations.HttpPost;
+import gov.nist.asbestos.simapi.tk.stubs.UUIDFactory;
 import gov.nist.asbestos.simapi.validation.ValE;
 import gov.nist.asbestos.testEngine.engine.fixture.FixtureComponent;
 import gov.nist.asbestos.testEngine.engine.fixture.FixtureMgr;
@@ -37,18 +38,30 @@ public class VariableMgr {
 
     private TestScript.TestScriptVariableComponent getVariable(String name) {
         Objects.requireNonNull(name);
+        TestScript.TestScriptVariableComponent theVar = null;
         for(TestScript.TestScriptVariableComponent comp : testScript.getVariable()) {
-            if (comp.hasName() && name.equals(comp.getName()))
-                return comp;
+            if (comp.hasName() && name.equals(comp.getName())) {
+                if (theVar != null) {
+                    String msg = "variable " + name + " is defined multiple times";
+                    reporter.reportError(msg);
+                }
+                theVar = comp;
+            }
         }
-        return null;
+        return theVar;
     }
 
     private List<String> getVariableNames() {
         List<String> names = new ArrayList<>();
         for(TestScript.TestScriptVariableComponent comp : testScript.getVariable()) {
-            if (comp.hasName())
+            if (comp.hasName()) {
+                String theName = comp.getName();
+                if (names.contains(theName)) {
+                    String msg = "variable " + theName + " is defined multiple times";
+                    reporter.reportError(msg);
+                }
                 names.add(comp.getName());
+            }
         }
         return names;
     }
@@ -98,7 +111,7 @@ public class VariableMgr {
         Variable var = getNextVariable(reference);
         if (var != null) {
             reporter.reportError("variable " + var.name + " cannot be resolved");
-            throw new Error("variable " + var.name + " cannot be resolved");
+            //throw new Error("variable " + var.name + " cannot be resolved");
         }
         return null;
     }
@@ -154,6 +167,17 @@ public class VariableMgr {
             reporter.reportError(error);
             return null;
         }
+
+        // special feature to generate unique UUIDs
+        if (var.hasSourceId() && "GENERATEUUID".equals(var.getSourceId())) {
+            String newUUID = "urn:uuid:" + UUIDFactory.getInstance().newUUID().toString();
+            var.setSourceId(null);
+            var.setDefaultValue(newUUID);
+        }
+
+        if (var.hasDefaultValue())
+            return var.getDefaultValue();
+
         String sourceId = null;
         if (var.hasSourceId()) {
             sourceId = var.getSourceId();
@@ -164,6 +188,8 @@ public class VariableMgr {
             reporter.reportError(error);
             return null;
         }
+
+
         if (!fixtureMgr.containsKey(sourceId)) {
             String error = "Variable " + variableName + " references sourceId " + sourceId + " which does  not exist";
             if (errorAsValue)
@@ -192,8 +218,6 @@ public class VariableMgr {
             return responseHeaders.getValue(var.getHeaderField());
         } else if (var.hasExpression()) {
             return FhirPathEngineBuilder.evalForString(fixture.getResourceResource(), var.getExpression());
-        } else if (var.hasDefaultValue()) {
-            return var.getDefaultValue();
         } else if (var.hasPath()) {
             String error = "Variable " + variableName + " path not supported";
             if (errorAsValue)

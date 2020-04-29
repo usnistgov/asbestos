@@ -56,22 +56,24 @@
                     If attempt to call test component fails (component not called)
                     No extension/import will be shown in report
                 -->
-                <div v-if="scriptContainsImport(action)">
+                <div v-if="report && report.action && report.action[actioni] && reportContainsError(report.action[actioni])">
+                    <action-details
+                            :script="action"
+                            :report="report && report.action ? report.action[actioni] : null"
+                            :debug-title="debugTitle(actioni)"
+                            @onStatusMouseOver="hoverActionIndex = actioni"
+                            @onStatusMouseLeave="hoverActionIndex = -1"
+                            @onStatusClick="toggleBreakpointIndex(actioni)"
+                    >
+                    </action-details>
+                </div>
+                <!-- a successful call to a module is reported here.
+                    The action may fail but at least the module call was good
+                    -->
+                <div v-else-if="scriptContainsImport(action)">
                     <component-script
                         :action-script="action"
                         :action-report="report && report.action ? report.action[actioni] : null"> </component-script>
-<!--                <div v-if="setComponentName(action, report && report.action ? report.action[actioni] : null)">-->
-<!--                    <div v-for="(caction, cactioni) in componentScriptActions"-->
-<!--                         :key="'CAction' + cactioni">   &lt;!&ndash;   class="action-margins"   &ndash;&gt;-->
-<!--                        <action-details-->
-<!--                                :script="caction"-->
-<!--                                :report="componentReportActions ? componentReportActions[cactioni] : null"-->
-<!--                                :debug-title="debugTitle(actioni)"-->
-<!--                                @onStatusMouseOver="hoverActionIndex = actioni"-->
-<!--                                @onStatusMouseLeave="hoverActionIndex = -1"-->
-<!--                                @onStatusClick="toggleBreakpointIndex(actioni)"></action-details>-->
-<!--                    </div>-->
-<!--                </div>-->
                 </div>
                 <div v-else class="has-cursor">
                     <action-details
@@ -107,6 +109,17 @@
             }
         },
         methods: {
+            // did call to module fail (different from action in module failing)
+            reportContainsError(reportAction) {
+                if (!reportAction)
+                    return false;
+                if (reportAction.operation && reportAction.operation.result && reportAction.operation.result === 'error')
+                    return true;
+                // I do not think this can happen.abbrev. Module call errors are reported in the operation.
+                if (reportAction.assert && reportAction.assert.result && reportAction.assert.result === 'error')
+                    return true;
+                return false;
+            },
             reportContainsImport(action, actioni) {
                 if (!this.report.action) return false
                 const reportAction = this.report.action[actioni]

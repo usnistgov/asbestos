@@ -700,7 +700,7 @@ public class TestEngine  {
             for (Extension extension : extensions) {
                 String url = extension.getUrl();
                 if (url.equals(ExtensionDef.ts_import)) {
-                    handleImport(extension, report);
+                    handleImport(extension, operation, report);
                 } else {
                     report.setMessage("Operation with unknown modifierExtension " + url + " found");
                     report.setResult(TestReport.TestReportActionResult.ERROR);
@@ -820,7 +820,7 @@ public class TestEngine  {
         return real;
     }
 
-    private void handleImport(Extension extension, TestReport.SetupActionOperationComponent opReport) {
+    private void handleImport(Extension extension, TestScript.SetupActionOperationComponent opScript, TestReport.SetupActionOperationComponent opReport) {
         ComponentReference componentReference = new ComponentReference(testDef, Collections.singletonList(extension));
 
         TestScript module = componentReference.getComponent();
@@ -833,7 +833,7 @@ public class TestEngine  {
             String outerName = parm.getCallerName();
             String innnerName = parm.getLocalName();
             FixtureComponent fixtureComponent = fixtureMgr.get(outerName);
-            if (fixtureComponent.getFixtureSub() != null) {
+            if (fixtureComponent != null && fixtureComponent.getFixtureSub() != null) {
                 // create temporary FixtureComponent containing the translations
                 // and the extracted content
                 fixtureComponent = fixtureComponent.getFixtureSub().getSubFixture(fixtureComponent);
@@ -857,12 +857,26 @@ public class TestEngine  {
         for (Parameter parm : componentReference.getVariablesInNoTranslation()) {
             String outerName = parm.getCallerName();
             String innerName = parm.getLocalName();
+            // this generates errors
             String value = varMgr.eval(outerName, false);
+
             externalVariables.put(innerName, value);
         }
 
-        if (engineVal.hasErrors())
+        if (engineVal.hasErrors()) {
+            new ActionReporter()
+                    .setTestEngine(this)
+                    .setTestCollectionId(testCollection)
+                    .setTestId(testId)
+                    .reportOperation(
+                    null,
+                    fixtureMgr,
+                    varMgr,
+                    new Reporter(new ValE(engineVal), opReport, "", ""),
+                    opScript
+            );
             return;
+        }
 
         TestEngine testEngine1 = new TestEngine(
                 componentReference.getComponentRef(),

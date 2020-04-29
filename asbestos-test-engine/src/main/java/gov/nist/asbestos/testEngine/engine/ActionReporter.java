@@ -22,7 +22,7 @@ class ActionReporter {
     private FixtureComponent source  = null;
 
     void reportOperation(ResourceWrapper wrapper, FixtureMgr fixtureMgr, VariableMgr variableMgr, Reporter reporter, TestScript.SetupActionOperationComponent op) {
-        String request = "### " + wrapper.getHttpBase().getVerb() + " " + wrapper.getHttpBase().getUri() + "\n";
+        String request = wrapper == null ? "" : "### " + wrapper.getHttpBase().getVerb() + " " + wrapper.getHttpBase().getUri() + "\n";
 
         report(wrapper, fixtureMgr, variableMgr, reporter, request, op);
     }
@@ -34,6 +34,15 @@ class ActionReporter {
         report(null, fixtureMgr, variableMgr, reporter, request, null);
     }
 
+    /**
+     *
+     * @param wrapper - for link to inspector
+     * @param fixtureMgr
+     * @param variableMgr
+     * @param reporter
+     * @param request - for logging request signature
+     * @param op - script operation being reported on
+     */
     private void report(ResourceWrapper wrapper, FixtureMgr fixtureMgr, VariableMgr variableMgr, Reporter reporter, String request, TestScript.SetupActionOperationComponent op) {
         Objects.requireNonNull(testCollectionId);
         Objects.requireNonNull(testId);
@@ -92,12 +101,6 @@ class ActionReporter {
                                 + "/channel/" + testEngine.getChannelName()
                                 + "/lognav/" + uiEvent.getEventName();
                     }
-
-//                    try {
-//                        refStrRaw = URLDecoder.decode(refStrEncoded, StandardCharsets.UTF_8.toString());
-//                    } catch (UnsupportedEncodingException e) {
-//                        continue;
-//                    }
                     value = "<a href=\"" +  refStrRaw + "\"" + " target=\"_blank\">" + refStrRaw + "</a>";
                 }
             }

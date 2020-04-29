@@ -24,6 +24,9 @@ public class ValE {
     public String toString() {
         StringBuilder buf = new StringBuilder();
 
+        if (hasErrors())
+            buf.append("Has Errors! ");
+
         buf.append(types).append("  ").append(msg);
 
         return buf.toString();
