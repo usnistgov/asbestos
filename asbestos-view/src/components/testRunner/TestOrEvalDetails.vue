@@ -1,8 +1,5 @@
 <template>
     <div>
-<!--        <div class="instruction">-->
-<!--            <vue-markdown>{{ description }}</vue-markdown>-->
-<!--        </div>-->
     <ul class="noTopMargin">
         <li v-if="$store.state.testRunner.isClientTest">
             <div v-if="testScript">

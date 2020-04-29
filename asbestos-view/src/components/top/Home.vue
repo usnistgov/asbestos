@@ -1,7 +1,7 @@
 <template>
     <div class="left">
 
-        <h2>Self Test</h2>
+        <h2>Services</h2>
         <p>Verify that all back-end services are responding.</p>
 
         <p>For problems with Proxy or Test Engine status look in

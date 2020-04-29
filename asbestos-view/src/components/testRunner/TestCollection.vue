@@ -1,5 +1,11 @@
 <template>
     <div>
+
+        <!--
+
+            HEADER
+
+        -->
         <h2 class="conformance-tests-header">Conformance Tests</h2>
         <div class="tool-title">
             Test Collection:
@@ -87,12 +93,19 @@
             <button class="runallbutton" @click="doRunAll()">Run All</button>
         </div>
 
+        <!--
+
+                BODY
+
+        -->
+
+
         <div>
             <h3 class="conformance-tests-header">Tests</h3>
             <div>
-            <div class="testBarMargin" v-for="(name, i) in scriptNames"
-                 :key="name + i" >
-                        <div v-bind:class="{
+                <div class="testBarMargin" v-for="(name, i) in scriptNames"
+                    :key="name + i" >
+                    <div v-bind:class="{
                                 'pass': status[name] === 'pass' && colorful,
                                 'pass-plain-header': status[name] === 'pass' && !colorful,
                                 'fail': status[name] === 'fail' && colorful,
@@ -100,33 +113,32 @@
                                 'error': status[name] === 'error',
                                 'not-run':  status[name] === 'not-run' && colorful /*  !status[name] */,
                                 'not-run-plain': status[name] === 'not-run' && ! colorful,
-                            }" @click.prevent="openTest(name)">
+                           }" @click.prevent="openTest(name)">
 
-                            <script-status v-if="!statusRight" :status-right="statusRight" :name="name"> </script-status>
-                            <span v-if="$store.state.testRunner.currentTest === name">
-                                <img src="../../assets/arrow-down.png">
-                            </span>
-                            <span v-else>
-                                <img src="../../assets/arrow-right.png"/>
-                            </span>
-                            <span class="large-text">{{ clean(name) }}</span>
+                        <script-status v-if="!statusRight" :status-right="statusRight" :name="name"> </script-status>
 
-                            <span v-if="isClient">
-                                <button class="runallbutton" @click="doEval(name)">Run</button>
-                            </span>
-                            <span v-else>
-                                <button class="runallbutton" @click.stop="doRun(name)">Run</button>
-                                <button v-if="i in $store.state.testScriptDebugger.showDebugButton && Boolean($store.state.testScriptDebugger.showDebugButton[i])" class="debugTestScriptButton" @click.stop="doDebug(name)">Debug</button>
-                            </span>
+                        <span v-if="$store.state.testRunner.currentTest === name">
+                            <img src="../../assets/arrow-down.png">
+                        </span>
+                        <span v-else>
+                            <img src="../../assets/arrow-right.png"/>
+                        </span>
+                        <span class="large-text">{{ clean(name) }}</span>
 
-                            <script-status v-if="statusRight" :status-right="statusRight" :name="name"> </script-status>
-
-                            <span v-if="!$store.state.testRunner.isClientTest"> --  {{ testTime(name) }}</span>
+                        <span v-if="isClient">
+                            <button class="runallbutton" @click="doEval(name)">Run</button>
+                        </span>
+                        <span v-else>
+                            <button class="runallbutton" @click.stop="doRun(name)">Run</button>
+                            <button v-if="i in $store.state.testScriptDebugger.showDebugButton && Boolean($store.state.testScriptDebugger.showDebugButton[i])" class="debugTestScriptButton" @click.stop="doDebug(name)">Debug</button>
+                             --  {{ testTime(name) }}
+                        </span>
 
 
-                        </div>
-                        <router-view v-if="selected === name"></router-view>  <!--  opens TestOrEvalDetails   -->
-            </div>
+
+                    </div>
+                    <router-view v-if="selected === name"></router-view>  <!--  opens TestOrEvalDetails   -->
+                </div>
             </div>
         </div>
 

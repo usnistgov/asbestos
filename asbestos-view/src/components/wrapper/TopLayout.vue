@@ -20,6 +20,9 @@
             <span class="selectable" @click="go('/about')">About</span>
 
             <div class="divider"></div>
+            <span class="selectable" @click="go('/setup')">Setup</span>
+
+            <div class="divider"></div>
             <span v-if="this.asbts_UserProps.signedIn === false" class="selectable" @click="go('/admin')">Admin</span>
 
             <div class="divider"></div>
