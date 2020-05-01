@@ -53,37 +53,12 @@
             },
         },
         computed: {
-            //
-            // testScriptNames() {
-            //     const scripts = this.$store.state.testRunner.testScriptNames
-            //     if (!scripts)
-            //         return null
-            //     const names = scripts.sort()
-            //     return names
-            // },
-            // testReportNames() {  // just the ones with reports available
-            //     const reports = this.$store.state.testRunner.testReports
-            //     if (!reports)
-            //         return null
-            //     return Object.keys(reports).sort()
-            // },
-
         },
         created() {
-            // this.load(this.testCollection)
-            // this.channel = this.channelId
-            // this.setEvalCount()
         },
         mounted() {
-
         },
         watch: {
-            // 'evalCount': 'setEvalCount',
-            // 'testCollection': 'load',
-            // 'channelId': function(newVal) {
-            //     if (this.channel !== newVal)
-            //         this.channel = newVal
-            // },
         },
         mixins: [ errorHandlerMixin, colorizeTestReports, testCollectionMgmt ],
         name: "TestCollection",

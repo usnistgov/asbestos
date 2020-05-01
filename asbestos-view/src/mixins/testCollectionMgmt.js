@@ -8,6 +8,12 @@ export default {
         }
     },
     methods: {
+        testTime(name) {  // time of test run for test name in testCollection
+            const report = this.$store.state.testRunner.testReports[name]
+            if (!report)
+                return null
+            return report.issued
+        },
         setEvalCount() {
             this.$store.commit('setEventEvalCount', this.evalCount)
         },
@@ -18,11 +24,31 @@ export default {
                 })
             }
         },
+        // run testName of testCollection
+        async doRun(testName) {  // server tests
+            if (!testName)
+                return
+            this.running = true
+            await this.$store.dispatch('runTest', testName)
+            this.running = false
+        },
+        async doEval(testName) {  // client tests
+            if (testName)
+                await this.$store.dispatch('runEval', testName)
+        },
+        async doDebug(testName) {  // server tests
+            if (!testName)
+                return
+            this.running = true
+            await this.$store.dispatch('runTest', testName)
+            this.running = false
+        },
+        // run all tests in collection
         async doRunAll()  {
             this.running = true
             for (const name of this.scriptNames) {
-                if (this.isClient)
-                    await this.doEval(name)
+                if (this.isClient)  // collection is client or server
+                    await this.$store.dispatch('runEval', name)
                 else
                     await this.$store.dispatch('runTest', name)
             }
@@ -51,24 +77,6 @@ export default {
                 return text.replace(/_/g, ' ')
             return ''
         },
-        async doEval(testName) {  // client tests
-            if (testName)
-                await this.$store.dispatch('runEval', testName)
-        },
-        async doRun(testName) {  // server tests
-            if (!testName)
-                return
-            this.running = true
-            await this.$store.dispatch('runTest', testName)
-            this.running = false
-        },
-        async doDebug(testName) {  // server tests
-            if (!testName)
-                return
-            this.running = true
-            await this.$store.dispatch('runTest', testName)
-            this.running = false
-        },
         doJson() {
             this.$store.commit('setUseJson', true)
         },
@@ -77,6 +85,46 @@ export default {
         },
     },
     computed: {
+        collectionStatus() {  // 'not-run', 'pass', 'fail', 'error'
+            const statuses = this.status;   // object of status indexed by testId
+            let collectionStatus = 'pass'
+            statuses.forEach(status => {
+                switch (status) {
+                    case 'not-run':
+                        if (collectionStatus === 'pass') collectionStatus = 'not-run';
+                        break;
+                    case 'error':
+                        collectionStatus = 'error';
+                        break;
+                    case 'fail':
+                        if (collectionStatus !== 'error') collectionStatus = 'fail';
+                        break;
+                }
+            })
+            return collectionStatus;
+        },
+        collectionTime() {
+            let collectionTime = null;
+            this.scriptNames.forEach(testName => {
+                const testTime = this.testTime(testName)
+                if (collectionTime === null)
+                    collectionTime = testTime;
+                if (testTime < collectionTime)
+                    collectionTime = testTime;
+            })
+            return collectionTime;
+        },
+        status() { // status object for collection indexed by testId
+            return this.$store.getters.testStatus
+        },
+        isClient() {
+            return this.$store.state.testRunner.isClientTest
+        },
+        scriptNames: {
+            get() {
+                return this.$store.state.testRunner.testScriptNames
+            }
+        },
         clientBaseAddress() { // for client tests
             return `${this.$store.state.base.proxyBase}/${this.sessionId}__${this.channelId}`
         },

@@ -40,7 +40,7 @@ public class GetTestReportRequest {
         String testName = request.uriParts.get(6);
 
         ChannelConfig channelConfig = ChannelConnector.getChannelConfig(request.resp, request.externalCache, channelId);
-        if (channelConfig == null) throw new Error("Channel does not exist");
+        if (channelConfig == null) throw new Error("Channel " + channelId + " does not exist");
 
         try {
             String json = new ModularReports(request.ec, channelId, testCollection, testName).asJson();

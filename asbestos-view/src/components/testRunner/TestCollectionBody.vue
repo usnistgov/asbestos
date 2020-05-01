@@ -23,13 +23,10 @@
             <div class="testBarMargin" v-for="(name, i) in scriptNames"
                  :key="name + i" >
                 <div v-bind:class="{
-                                'pass': status[name] === 'pass' && colorful,
                                 'pass-plain-header': status[name] === 'pass' && !colorful,
-                                'fail': status[name] === 'fail' && colorful,
                                 'fail-plain-header': status[name] === 'fail' && !colorful,
                                 'error': status[name] === 'error',
-                                'not-run':  status[name] === 'not-run' && colorful /*  !status[name] */,
-                                'not-run-plain': status[name] === 'not-run' && ! colorful,
+                                'not-run-plain': status[name] === 'not-run' && !colorful,
                            }" @click.prevent="openTest(name)">
 
                     <script-status v-if="!statusRight" :status-right="statusRight" :name="name"> </script-status>
@@ -50,14 +47,10 @@
                             <button v-if="i in $store.state.testScriptDebugger.showDebugButton && Boolean($store.state.testScriptDebugger.showDebugButton[i])" class="debugTestScriptButton" @click.stop="doDebug(name)">Debug</button>
                              --  {{ testTime(name) }}
                         </span>
-
-
-
                 </div>
                 <router-view v-if="selected === name"></router-view>  <!--  opens TestOrEvalDetails   -->
             </div>
         </div>
-
     </div>
 </template>
 
@@ -68,12 +61,6 @@
 
     export default {
         methods: {
-            testTime(name) {
-                const report = this.$store.state.testRunner.testReports[name]
-                if (!report)
-                    return null
-                return report.issued
-            },
             load() {
                 this.loadTestCollection(this.testCollection)
             },
@@ -94,18 +81,6 @@
         computed: {
             selected() {
                 return this.$store.state.testRunner.currentTest
-            },
-            isClient() {
-                return this.$store.state.testRunner.isClientTest
-            },
-
-            status() {
-                return this.$store.getters.testStatus
-            },
-            scriptNames: {
-                get() {
-                    return this.$store.state.testRunner.testScriptNames
-                }
             },
         },
         created() {

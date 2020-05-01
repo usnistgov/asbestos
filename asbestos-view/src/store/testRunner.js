@@ -43,9 +43,20 @@ export const testRunnerStore = {
             useGzip: true,
             colorMode: false,
             statusRight: false,
+            hapiFhirBase: null,
+            autoRoute: false,
         }
     },
     mutations: {
+        setAutoRoute(state, value) {
+            state.autoRoute = value;
+        },
+        setHapiFhirBase(state, value) {
+            state.hapiFhirBase = value;
+        },
+        setCurrentTestCollection(state, value) {
+            state.currentTestCollectionName = value;
+        },
         setStatusRight(state, value) {
             state.statusRight = value
         },
@@ -208,6 +219,12 @@ export const testRunnerStore = {
         },
     },
     actions: {
+        async loadHapiFhirBase({commit}) {
+            if (this.hapiFhirBase !== null)
+                return;
+            const result = await ENGINE.get('hapiFhirBase');
+            commit('setHapiFhirBase', result.data);
+        },
         loadTestAssertions({commit}) {
             const url = `assertions`
             ENGINE.get(url)
@@ -363,6 +380,29 @@ export const testRunnerStore = {
                     .then(response => {
                         theResponse = response.data
                 })
+                await promise
+                commit('setTestScriptNames', theResponse.testNames)  // sets testScriptNames
+                const isClient = !theResponse.isServerTest
+                commit('setRequiredChannel', theResponse.requiredChannel)  // sets requiredChannel
+                const description = theResponse.description
+                commit('setCollectionDescription', description)  // sets collectionDescription
+                commit('setIsClientTest', isClient)   // sets isClientTest
+            } catch (error) {
+                commit('setError', url + ': ' + error)
+            }
+        },
+        // this exists because loadCurrentTestCollection updates currentTestCollectionName
+        // which causes TestControlPanel2 to auto-route to test display
+        // this was first used for self tests.
+        async loadTestCollection({commit}, testCollectionName) {
+            const url = `collection/${testCollectionName}`
+            try {
+                //commit('clearTestScripts')  // clears testScripts
+                let theResponse = ""
+                const promise = ENGINE.get(url)
+                    .then(response => {
+                        theResponse = response.data
+                    })
                 await promise
                 commit('setTestScriptNames', theResponse.testNames)  // sets testScriptNames
                 const isClient = !theResponse.isServerTest

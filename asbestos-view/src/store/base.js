@@ -169,6 +169,12 @@ export const baseStore = {
         },
         getFullChannelId: (state) => {
             return `${state.session}__${state.channelId}`
+        },
+        channelExists: (state) => (theChannelId) => {
+            const index = state.channelIds.findIndex(function(channelId) {
+                return channelId === theChannelId;
+            })
+            return index !== -1;
         }
     }
 }
