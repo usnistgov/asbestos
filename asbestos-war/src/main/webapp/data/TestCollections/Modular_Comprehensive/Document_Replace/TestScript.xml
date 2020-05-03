@@ -26,12 +26,7 @@
     <variable>
         <name value="DocRefUrl"/>
         <expression value="Bundle.entry[0].response.location"/>
-        <sourceId value="pdb-response"/>
-    </variable>
-    <variable>
-        <name value="original"/>
-        <expression value="Bundle.entry[0].response.location"/>
-        <sourceId value="pdb-response"/>
+        <sourceId value="original-response"/>
     </variable>
     <variable>
         <name value="DocRefUrlReplace"/>
@@ -61,68 +56,20 @@
     <variable>
         <name value="original"/>
         <expression value="Bundle.entry[0].response.location"/>
-        <sourceId value="pdb-response"/>
+        <sourceId value="original-response"/>
     </variable>
     <setup>
         <action>
             <operation>
-                <description value="Submit."/>
-                <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
-                    <extension url="component">
-                        <valueString value="../../Library/SendPDB.xml"/>
-                    </extension>
-                    <extension url="urn:fixture-in">
-                        <valueString  value="original-bundle"/>
-                    </extension>
-                    <extension url="urn:variable-in-no-translation">
-                        <valueString value="patientResourceId"/>
-                    </extension>
-                    <extension url="urn:fixture-out">
-                        <valueString value="pdb-response"/>
-                    </extension>
-                </modifierExtension>
-            </operation>
-        </action>
-        <action>
-            <operation>
-                <description value="Read back DocumentReference and verify."/>
-                <label value="read-back"/>
+                <description value="send PDB."/>
+                <label value="create"/>
                 <type>
-                    <code value="read"/>
+                    <system value="https://github.com/usnistgov/asbestos/wiki/Testscript-Operation-Codes"/>
+                    <code value="mhd-pdb-transaction"/>
                 </type>
-                <url value="${DocRefUrl}"/>
-                <responseId value="readBackResponse"/>
+                <sourceId value="original-bundle"/>
+                <responseId value="original-response"/>
             </operation>
-        </action>
-        <action>
-            <assert>
-                <description value="... was successful."/>
-                <response value="okay"/>
-                <warningOnly value="false"/>
-            </assert>
-        </action>
-        <action>
-            <assert>
-                <description value="... returned a DocumentReference."/>
-                <resource value="DocumentReference"/>
-                <warningOnly value="false"/>
-            </assert>
-        </action>
-        <action>
-            <assert>
-                <description value="... status is current."/>
-                <expression value="DocumentReference.status = 'current'"/>
-                <warningOnly value="false"/>
-            </assert>
-        </action>
-        <action>
-            <assert>
-                <description value="... Patient reference returned as sent."/>
-                <expression value="DocumentReference.subject.reference"/>
-                <sourceId value="readBackResponse"/>
-                <value value="${patientResourceId}"/>
-                <warningOnly value="false"/>
-            </assert>
         </action>
     </setup>
     <test>
