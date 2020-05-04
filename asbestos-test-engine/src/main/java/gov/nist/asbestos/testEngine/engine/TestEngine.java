@@ -138,7 +138,7 @@ public class TestEngine  {
         engineVal = new ValE(val);
         engineVal.setMsg("TestEngine");
         if (testId == null || testCollection == null) {
-            String[] parts = testDef.toString().split("/");
+            String[] parts = testDef.toString().split(Pattern.quote(File.separator));
             if (parts.length > 1) {
                 setTestId(parts[parts.length - 1]);
                 setTestCollection(parts[parts.length - 2]);
