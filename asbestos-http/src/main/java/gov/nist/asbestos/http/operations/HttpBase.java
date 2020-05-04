@@ -4,6 +4,7 @@ import gov.nist.asbestos.http.headers.Header;
 import gov.nist.asbestos.http.headers.Headers;
 import gov.nist.asbestos.http.util.Gzip;
 import org.hl7.fhir.r4.model.OperationOutcome;
+import org.w3c.dom.events.UIEvent;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;

@@ -122,6 +122,7 @@ public class TestEngine  {
     }
 
     public TestEngine setChannelId(String channelId) {
+        assert channelId.split("__").length == 2;
         this.channelId = channelId;
         return this;
     }
@@ -572,10 +573,12 @@ public class TestEngine  {
             for (TestScript.TestScriptFixtureComponent comp : testScript.getFixture()) {
                 if (comp.hasAutocreate()) {
                     if (comp.getAutocreate()) {
-                        TestReport.SetupActionComponent actionReport = setupReportComponent.addAction();
+                        TestReport.SetupActionComponent actionReport = new TestReport.SetupActionComponent(); //setupReportComponent.addAction();
                         Reference resource = comp.getResource();
                         String resourceType = resource.getType();
-                        TestReport.SetupActionOperationComponent operationReport = actionReport.getOperation();
+                        // create unregistered operationReport - nobody wants to know how this went
+//                        TestReport.SetupActionOperationComponent operationReport = actionReport.getOperation();
+                        TestReport.SetupActionOperationComponent operationReport = new TestReport.SetupActionOperationComponent();
                         operationReport.setResult(TestReport.TestReportActionResult.PASS);  // may be overwritten
                         SetupActionCreate create = new SetupActionCreate(new ActionReference(testScript, comp), fixtureMgr)
                                 .setFhirClient(fhirClient)
@@ -586,12 +589,15 @@ public class TestEngine  {
                                         .setExternalVariables(externalVariables)
                                         .setVal(fVal)
                                         .setOpReport(operationReport));
+                        create.setTestEngine(this);
+                        create.setChannelId(this.getChannelId());
                         create.run(testScript, comp, comp.getId(), comp.getResource(), operationReport);
                         if (propagateStatus(testReport))
                             return;  // fail
                     }
                 }
             }
+
         }
     }
 
@@ -606,7 +612,7 @@ public class TestEngine  {
                         TestReport.TeardownActionComponent actionReport = teardownReportComponent.addAction();
                         Reference resource = comp.getResource();
                         String resourceType = resource.getType();
-                        TestReport.SetupActionOperationComponent operationReport = actionReport.getOperation();
+                        TestReport.SetupActionOperationComponent operationReport = new TestReport.SetupActionOperationComponent(); //actionReport.getOperation();
                         operationReport.setResult(TestReport.TestReportActionResult.PASS);  // may be overwritten
                         SetupActionDelete delete = new SetupActionDelete(new ActionReference(testScript, comp), fixtureMgr)
                                 .setFhirClient(fhirClient)
@@ -1568,6 +1574,7 @@ public class TestEngine  {
     }
 
     public String getTestSession() {
+        Objects.requireNonNull(getChannelId());
         String[] parts = getChannelId().split("__");
         assert parts.length == 2;
             return parts[0];

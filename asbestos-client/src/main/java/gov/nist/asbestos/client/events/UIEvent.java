@@ -2,6 +2,7 @@ package gov.nist.asbestos.client.events;
 
 import gov.nist.asbestos.client.Base.EC;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
+import gov.nist.asbestos.http.headers.Header;
 import gov.nist.asbestos.http.headers.Headers;
 import org.hl7.fhir.r4.model.Resource;
 
@@ -46,6 +47,20 @@ public class UIEvent {
         eventName = "";
         resourceType = wrapper.getResourceType();
         UITask task = new UITask(wrapper);
+        String requestHeader = task.getRequestHeader();
+        Headers headers = new Headers(requestHeader);
+        Header header = headers.get("x-proxy-event");
+        if (header != null) {
+            String value = header.getValue();
+            if (value != null) {
+                String[] parts = value.split("/");
+                if (parts.length > 2) {
+                    String id = parts[parts.length - 1];
+                    eventName = id;
+                }
+            }
+        }
+        tasks.add(task);
 
         return this;
     }

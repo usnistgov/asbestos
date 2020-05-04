@@ -20,26 +20,11 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class ToProxyPassthroughIT {
     private static String testSession = "default";
-    private static String channelId = "fhirpass";
+    private static String channelId = "default";
     private static String fhirPort = ITConfig.getFhirPort();
     private static String proxyPort = ITConfig.getProxyPort();
     private static URI base;
 
-    /**
-     * create patient and verify the returned reference is via the proxy
-     * @throws URISyntaxException
-     */
-    @Test
-    void createPatient() throws URISyntaxException {
-        TestEngine testEngine = run("/toProxy/createPatient/TestScript.xml");
-        TestReport testReport = testEngine.getTestReport();
-        System.out.println("foo");
-        String message = testReport.getTest().get(0).getAction().get(0).getOperation().getMessage();
-        int httpI = message.indexOf("http");
-        assertNotEquals(-1, httpI);
-        String http  = message.substring(httpI); // has extra at the end
-        assertTrue(http.contains("prox"));
-    }
 
     @Test
     void patientWithAutoCreate() throws URISyntaxException {
@@ -56,6 +41,9 @@ class ToProxyPassthroughIT {
         File test1 = Paths.get(getClass().getResource(testScriptLocation).toURI()).getParent().toFile();
         TestEngine testEngine = new TestEngine(test1, base)
                 .setVal(val)
+                .setTestSession("default")
+                .setChannelId("default__default")
+                .setExternalCache(ExternalCache.getExternalCache())
                 .setFhirClient(new FhirClient())
                 .runTest();
         System.out.println(testEngine.getTestReportAsJson());
@@ -72,7 +60,7 @@ class ToProxyPassthroughIT {
 
    @BeforeAll
      static void beforeAll() throws IOException, URISyntaxException {
-        base = new URI(createChannel());
+        base = new URI(ITConfig.getChannelBase(testSession, channelId));
     }
 
     private static String createChannel() throws URISyntaxException, IOException {

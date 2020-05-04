@@ -15,6 +15,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class GetStaticFixtureIT {
@@ -22,24 +23,24 @@ class GetStaticFixtureIT {
     @Test
     void getBundle() throws Exception {
         FhirClient fhirClient = new FhirClient();
-        URI uri = new URI(ServiceProperties.getInstance().getPropertyOrStop(ServicePropertiesEnum.FHIR_TOOLKIT_BASE) + "/engine/staticFixture/IT_Test_Support/StaticFixture");
+        URI uri = new URI(ITConfig.getFhirToolkitBase() + "/engine/staticFixture/IT_Test_Support/StaticFixture");
         SearchParms searchParms = new SearchParms();
         searchParms.setParms("?url=Bundle/pdb.xml", true);
         Ref ref = new Ref(uri, "Bundle", searchParms);
         ResourceWrapper wrapper = fhirClient.readResource(ref, Format.JSON);
-        assertTrue(wrapper.isOk());
-        assertTrue(wrapper.getResource() instanceof Bundle);
+        assertTrue(wrapper.isOk(), "uri is " + uri);
+        assertTrue(wrapper.getResource() instanceof Bundle, "resource is " + wrapper.getResourceType());
     }
 
     @Test
     void getResourceInBundle() throws URISyntaxException, UnsupportedEncodingException {
         FhirClient fhirClient = new FhirClient();
-        URI uri = new URI(ServiceProperties.getInstance().getPropertyOrStop(ServicePropertiesEnum.FHIR_TOOLKIT_BASE) + "/engine/staticFixture/IT_Test_Support/StaticFixture");
+        URI uri = new URI(ITConfig.getFhirToolkitBase() + "/engine/staticFixture/IT_Test_Support/StaticFixture");
         SearchParms searchParms = new SearchParms();
         searchParms.setParms("?url=Bundle/pdb.xml;fhirPath=Bundle.entry[0]", true);
         Ref ref = new Ref(uri, "DocumentReference", searchParms);
         ResourceWrapper wrapper = fhirClient.readResource(ref, Format.JSON);
-        assertTrue(wrapper.isOk());
+        assertTrue(wrapper.isOk(), "uri is " + "resource is " + wrapper.getResourceType());
         assertTrue(wrapper.getResource() instanceof DocumentReference);
     }
 

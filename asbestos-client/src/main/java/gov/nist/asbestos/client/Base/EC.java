@@ -255,6 +255,8 @@ public class EC {
             }
         }
         File resourceTypeFile = new File(fhir, resourceType);
+        if (eventName == null)
+            return null;
         File eventDir = new File(resourceTypeFile, eventName);
 
         UIEvent uiEvent = new UIEvent(new EC(externalCache)).fromEventDir(eventDir);

@@ -5,6 +5,9 @@
         <resource>
             <reference value="Patient/patient-example.xml"/>
         </resource>
+        <autocreate value="false"/>
+        <autodelete value="false"/>
+
     </fixture>
     <variable>
         <name value="V1"/>

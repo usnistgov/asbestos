@@ -15,6 +15,8 @@ public class HttpDelete  extends HttpBase {
         Objects.requireNonNull(uri);
         HttpURLConnection connection = null;
         try {
+            if (!uri.isAbsolute())
+                throw new URISyntaxException("URI is not absolute", uri.toString());
             connection = (HttpURLConnection) uri.toURL().openConnection();
             connection.setDoOutput(true);
             connection.setRequestProperty(
@@ -28,7 +30,8 @@ public class HttpDelete  extends HttpBase {
             } catch (Throwable t) {
                 // ok - won't always be available
             }
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             throw new RuntimeException(e);
         } finally {
             if (connection != null)

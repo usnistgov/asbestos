@@ -41,6 +41,7 @@ abstract class GenericSetupAction {
     private String testId = null;
     private TestEngine testEngine = null;
     ActionReference actionReference = null;
+    String channelId = null;
 
     abstract String resourceTypeToSend();
 
@@ -123,8 +124,9 @@ abstract class GenericSetupAction {
     }
 
     UIEvent getUIEvent(ResourceWrapper wrapper) {
-        return new EC(getTestEngine().getExternalCache())
-                .getEvent(getTestEngine().getTestSession(),
+        Objects.requireNonNull(getTestEngine());
+        EC ec = new EC(getTestEngine().getExternalCache());
+        return ec.getEvent(getTestEngine().getTestSession(),
                         getTestEngine().getChannelId(),
                         wrapper.getResourceType(),
                         wrapper.getEventId());
@@ -188,6 +190,15 @@ abstract class GenericSetupAction {
 
     public GenericSetupAction setTestEngine(TestEngine testEngine) {
         this.testEngine = testEngine;
+        return this;
+    }
+
+    public String getChannelId() {
+        return channelId;
+    }
+
+    public GenericSetupAction setChannelId(String channelId) {
+        this.channelId = channelId;
         return this;
     }
 }

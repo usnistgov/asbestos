@@ -130,10 +130,13 @@
                     <reuseForks>false</reuseForks>
 
                     <testFailureIgnore>false</testFailureIgnore>
+<!--                    <includes>-->
+<!--                        <include>**/GetStaticFixtureIT.java</include>-->
+<!--                    </includes>-->
                     <excludes>
-                        <exclude>**/ToFhirServerIT.java</exclude>
-                        <exclude>**/ToProxyMhdIT.java</exclude>
-                        <exclude>**/ToProxyPassthroughIT.java</exclude>
+<!--                        <exclude>**/ToFhirServerIT.java</exclude>-->
+<!--                        <exclude>**/ToProxyMhdIT.java</exclude>-->
+<!--                        <exclude>**/ToProxyPassthroughIT.java</exclude>-->
 <!--                        <exclude>**/CapabilityStatementIT.java</exclude>-->
 <!--                        <exclude>**/*IT.java</exclude>-->
                     </excludes>
@@ -182,10 +185,10 @@
                             <war>${project.build.directory}/${project.name}.war</war>
                             <contextPath>/asbestos</contextPath>
                         </contextHandler>
-                        <contextHandler implementation="org.eclipse.jetty.webapp.WebAppContext">
-                            <war>${project.basedir}/../../hapi-fhir-jpaserver-starter/target/hapi-fhir-jpaserver.war</war>
-                            <contextPath>/fhir</contextPath>
-                        </contextHandler>
+<!--                        <contextHandler implementation="org.eclipse.jetty.webapp.WebAppContext">-->
+<!--                            <war>${project.basedir}/../../hapi-fhir-jpaserver-starter/target/hapi-fhir-jpaserver.war</war>-->
+<!--                            <contextPath>/fhir</contextPath>-->
+<!--                        </contextHandler>-->
                     </contextHandlers>
                     <!-- Enter any systemProperties here. -->
                     <jettyXml>${basedir}/src/test/etc/jetty.xml,${basedir}/src/test/etc/jetty-http.xml,${basedir}/src/test/etc/jetty-https.xml,${basedir}/src/test/etc/jetty-ssl.xml,${basedir}/src/test/etc/jetty-logging.xml</jettyXml>

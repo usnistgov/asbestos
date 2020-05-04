@@ -6,6 +6,7 @@
             <reference value="Patient/example-patient.xml"/>
         </resource>
         <autocreate value="true"/>
+        <autodelete value="false"/>
     </fixture>
     <test>
         <action>

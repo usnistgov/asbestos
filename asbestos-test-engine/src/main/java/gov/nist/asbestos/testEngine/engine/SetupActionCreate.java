@@ -3,6 +3,7 @@ package gov.nist.asbestos.testEngine.engine;
 import gov.nist.asbestos.client.Base.EC;
 import gov.nist.asbestos.client.client.FhirClient;
 import gov.nist.asbestos.client.client.Format;
+import gov.nist.asbestos.client.events.Event;
 import gov.nist.asbestos.client.events.UIEvent;
 import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
@@ -56,12 +57,17 @@ class SetupActionCreate extends GenericSetupAction {
         else
             reporter.reportError(wrapper.getRef() + " not created", wrapper);
         ActionReference action = new ActionReference(testScript, comp);
-        UIEvent uiEvent = getUIEvent(wrapper);
-        fixtureMgr.add(fixtureId)
+//        UIEvent uiEvent = getUIEvent(wrapper);
+        UIEvent uiEvent = new UIEvent(new EC(getTestEngine().getExternalCache())).fromResource(wrapper);
+        //fixtureMgr.add(fixtureId)
+        sourceFixture
                 .setResource(wrapper)
                 .setHttpBase(wrapper.getHttpBase())
                 .setCreatedByActionReference(action)
                 .setCreatedByUIEvent(uiEvent);
+        if (wrapper.isOk())
+            reporter.report(wrapper.getRef() + " created", wrapper);
+
     }
 
     void run(TestScript.SetupActionOperationComponent op, TestReport.SetupActionOperationComponent operationReport) {
