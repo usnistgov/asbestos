@@ -109,16 +109,17 @@ public class TestInstallerServlet  extends HttpServlet {
                     }
                     log.info(String.format("Refreshing channel %s", name));
                     switch (name) {
-                            case "default": {
-                                configureDefaultChannel(externalChannels, name);
-                                break;
-                            }
-                            case "xds": /* FALLTHROUGH */
-                            case "limited": {
-                                configureXdsChannels(externalChannels, name);
-                                break;
-                            }
+                        case "default": {
+                            configureDefaultChannel(externalChannels, name);
+                            break;
                         }
+                        case "xds": /* FALLTHROUGH */
+                        case "selftest_comprehensive":
+                        case "limited": {
+                            configureXdsChannels(externalChannels, name);
+                            break;
+                        }
+                    }
                 }
             }
         } catch (IOException e) {
@@ -144,19 +145,19 @@ public class TestInstallerServlet  extends HttpServlet {
                 try {
                     simConfig = xdsSimApi.get(simIdResource);
                 } catch (ToolkitServiceException getSimEx) {
-                   // Sim does not exist if 404
-                   if (getSimEx.getCode() == HttpStatus.SC_NOT_FOUND) {
-                      // Create the sim
-                       try {
-                           DocumentRegRep rr = xdsSimApi.createDocumentRegRep(simIdResource.getId(), simIdResource.getUser(), "default");
-                           simConfig = rr.getConfig();
-                       } catch (ToolkitServiceException createEx) {
-                           log.error(createEx.toString());
-                           log.error(String.format("Error: %s sim could not be created on %s", xdsSiteName, xdsToolkitBase));
-                       }
-                   } else {
-                       log.error(String.format("Error: HTTP Status: %d. Unhandled exception %s", getSimEx.getCode(),  getSimEx.toString()));
-                   }
+                    // Sim does not exist if 404
+                    if (getSimEx.getCode() == HttpStatus.SC_NOT_FOUND) {
+                        // Create the sim
+                        try {
+                            DocumentRegRep rr = xdsSimApi.createDocumentRegRep(simIdResource.getId(), simIdResource.getUser(), "default");
+                            simConfig = rr.getConfig();
+                        } catch (ToolkitServiceException createEx) {
+                            log.error(createEx.toString());
+                            log.error(String.format("Error: %s sim could not be created on %s", xdsSiteName, xdsToolkitBase));
+                        }
+                    } else {
+                        log.error(String.format("Error: HTTP Status: %d. Unhandled exception %s", getSimEx.getCode(),  getSimEx.toString()));
+                    }
                 }
                 if (simConfig != null) {
                     // Sim exists, check if configured properly according to the Rules of the "Predefined Channels" section in the Home page doc

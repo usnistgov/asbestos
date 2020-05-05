@@ -9,10 +9,10 @@
         </p>
 
         <!--  SelfTest is an alternate test runner   -->
-        <self-test
+        <self-test-installs
             :session-id="'default'"
             :channel-id="'default'"
-            :test-collection="'Test_Patients'"> </self-test>
+            :test-collection="'Test_Patients'"> </self-test-installs>
 
         <h3>Self Tests</h3>
         <p>The following Test Collections are run against internal simulators to verify both the
@@ -29,7 +29,7 @@
 <script>
     import testCollectionMgmt from "../../mixins/testCollectionMgmt";
     import colorizeTestReports from "../../mixins/colorizeTestReports";
-    import SelfTest from "../testRunner/SelfTest";
+    import SelfTestInstalls from "../testRunner/SelfTestInstalls";
     import {CHANNEL} from "../../common/http-common";
 
     export default {
@@ -38,19 +38,9 @@
                 // this will force change to channel default - configured in test collection
                 this.$store.commit('setCurrentTestCollection', 'Test_Patients')
                 await this.$store.dispatch('loadCurrentTestCollection')
-                // .then( function ()  {
-                //     this.$router.push('/setup');
-                // }).then( function ()  {
-                //     this.$router.push('/setup');
-                // });
-                // this.$store.dispatch('loadChannel', `default__selftest_default`)
-                //     .then(channel => {
-                //         this.channelObj = channel;
-                //     });
 
                 await this.$store.dispatch('loadTestScripts', this.$store.state.testRunner.testScriptNames)
-                if (!this.$store.state.testRunner.isClientTest)
-                    await this.$store.dispatch('loadTestReports', this.$store.state.testRunner.currentTestCollectionName)
+                await this.$store.dispatch('loadTestReports', this.$store.state.testRunner.currentTestCollectionName)
             },
             async createChannel(channel) {
                 await CHANNEL.post('', channel)
@@ -110,7 +100,7 @@
 
         ],
         components: {
-            SelfTest
+            SelfTestInstalls
         }
 
     }

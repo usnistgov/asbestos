@@ -66,53 +66,53 @@
             // here the state is maintained in the component.  The
             // store is organized for loading one collection at at time.
             // This is supporting a multiple collection survey
-            // async loadTestReports(sessionId, channelId, collectionId) {
-            //     await this.loadTestCollection(collectionId);
-            //     const testIds = this.$store.state.testRunner.testScriptNames;
-            //     const promises = [];
-            //     let hasFailures = false;
-            //     let hasNoRuns = false;
-            //     let earliestRunTime = null;
-            //     testIds.forEach(testId => {
-            //         const url = `testReport/${sessionId}__${channelId}/${collectionId}/${testId}`
-            //         const promise = ENGINE.get(url)
-            //         promises.push(promise)
-            //     })
-            //     const combinedPromises = Promise.all(promises)
-            //         .then(results => {
-            //             results.forEach(result => {
-            //                 const testReport = result.data
-            //                 if (testReport) {
-            //                     if (testReport.result === 'fail')
-            //                         hasFailures = true;
-            //                     if (testReport.issued && !earliestRunTime)
-            //                         earliestRunTime = testReport.issued;
-            //                     else if (testReport.issued && testReport.issued < earliestRunTime)
-            //                         earliestRunTime = testReport.issued;
-            //                 } else {
-            //                     hasNoRuns = true;
-            //                 }
-            //             })
-            //         })
-            //         .catch(function(error) {
-            //             this.state.errors.push(`Loading reports: ${error}`)
-            //         })
-            //     await combinedPromises
-            //     this.hasFailures = hasFailures;
-            //     this.hasNoRuns = hasNoRuns;
-            //     this.earliestRunTime = earliestRunTime;
-            // },
+            async loadTestReports(sessionId, channelId, collectionId) {
+                await this.loadTestCollection(collectionId);
+                const testIds = this.$store.state.testRunner.testScriptNames;
+                const promises = [];
+                let hasFailures = false;
+                let hasNoRuns = false;
+                let earliestRunTime = null;
+                testIds.forEach(testId => {
+                    const url = `testReport/${sessionId}__${channelId}/${collectionId}/${testId}`
+                    const promise = ENGINE.get(url)
+                    promises.push(promise)
+                })
+                const combinedPromises = Promise.all(promises)
+                    .then(results => {
+                        results.forEach(result => {
+                            const testReport = result.data
+                            if (testReport) {
+                                if (testReport.result === 'fail')
+                                    hasFailures = true;
+                                if (testReport.issued && !earliestRunTime)
+                                    earliestRunTime = testReport.issued;
+                                else if (testReport.issued && testReport.issued < earliestRunTime)
+                                    earliestRunTime = testReport.issued;
+                            } else {
+                                hasNoRuns = true;
+                            }
+                        })
+                    })
+                    .catch(function(error) {
+                        this.state.errors.push(`Loading reports: ${error}`)
+                    })
+                await combinedPromises
+                this.hasFailures = hasFailures;
+                this.hasNoRuns = hasNoRuns;
+                this.earliestRunTime = earliestRunTime;
+            },
             async loadTestCollection(testCollection) {
                 this.$store.commit('setCurrentTestCollection', testCollection);
                 await this.$store.dispatch('loadCurrentTestCollection')
             },
         },
         created() {
-            //this.loadTestReports(this.sessionId, this.channelId, this.testCollection);
+            this.loadTestReports(this.sessionId, this.channelId, this.testCollection);
             this.channel = this.channelId;
         },
         mixins: [ colorizeTestReports, testCollectionMgmt ],
-        name: "SelfTest",
+        name: "SelfTestInstalls",
         props: [
             'sessionId', 'channelId', 'testCollection',
         ],

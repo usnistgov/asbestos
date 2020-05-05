@@ -40,6 +40,7 @@ public class TestEngineServlet extends HttpServlet {
 
         try {
             if (GetTestCollectionNamesRequest.isRequest(request)) new GetTestCollectionNamesRequest(request).run();
+            else if (RunSelftestRequest.isRequest(request)) new RunSelftestRequest(request).run();
             else if (GetDefaultFhirBaseRequest.isRequest(request)) new GetDefaultFhirBaseRequest(request).run();
             else if (GetStaticFixtureRequest.isRequest(request)) new GetStaticFixtureRequest(request).run();
             else if (GetTestAssertionsRequest.isRequest(request)) new GetTestAssertionsRequest(request).run();
