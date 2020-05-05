@@ -1,6 +1,0 @@
-<Patient xmlns="http://hl7.org/fhir">
-    <identifier>
-        <system value="urn:oid:1.2.3.4.5"/>
-        <value value="89765a87b"/>
-    </identifier>
-</Patient>
