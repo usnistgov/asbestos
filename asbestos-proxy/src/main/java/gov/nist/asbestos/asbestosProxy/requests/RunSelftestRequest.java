@@ -68,7 +68,7 @@ public class RunSelftestRequest {
         }
 
         if (isRun) {
-            URI proxy = channelConfig.getProxy();
+            URI proxy = channelConfig.proxyURI();
 
             File patientCacheDir = request.ec.getTestLogCacheDir(channelName);
             File alternatePatientCacheDir = request.ec.getTestLogCacheDir("default__default");
