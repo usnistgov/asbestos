@@ -11,9 +11,9 @@
         <div v-if="listOpen || !attListName">
             <div v-for="(err, erri) in errorList"
                  :key="err + erri">
-                <div class="divider"></div>
-                <div class="divider"></div>
-                <div class="divider"></div>
+<!--                <div class="divider"></div>-->
+<!--                <div class="divider"></div>-->
+<!--                <div class="divider"></div>-->
                 <span v-if="attList && attList.indexOf(err) < 0" class="red">{{ err }}</span>
             </div>
         </div>
@@ -31,9 +31,9 @@
             <div v-if="listOpen || !attListName">
                 <div v-for="(att, atti) in attList"
                      :key="att + atti">
-                    <div class="divider"></div>
-                    <div class="divider"></div>
-                    <div class="divider"></div>
+<!--                    <div class="divider"></div>-->
+<!--                    <div class="divider"></div>-->
+<!--                    <div class="divider"></div>-->
                         {{ att }}
                     <span v-if="errorList && errorList.indexOf(att) >= 0" class="red">Missing</span>
                     <span v-if="extraList && extraList.indexOf(att) >= 0">Extra</span>

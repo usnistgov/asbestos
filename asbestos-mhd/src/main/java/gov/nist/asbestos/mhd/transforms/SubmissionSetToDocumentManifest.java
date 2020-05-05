@@ -3,8 +3,10 @@ package gov.nist.asbestos.mhd.transforms;
 import gov.nist.asbestos.client.Base.IVal;
 import gov.nist.asbestos.client.client.FhirClient;
 import gov.nist.asbestos.client.resolver.ResourceCacheMgr;
+import gov.nist.asbestos.mhd.exceptions.MetadataAttributeTranslationException;
 import gov.nist.asbestos.mhd.transactionSupport.CodeTranslator;
 import gov.nist.asbestos.mhd.translation.ContainedIdAllocator;
+import gov.nist.asbestos.mhd.translation.attribute.DateTransform;
 import gov.nist.asbestos.mhd.translation.attribute.PatientId;
 import gov.nist.asbestos.mhd.translation.attribute.Slot;
 import gov.nist.asbestos.serviceproperties.ServiceProperties;
@@ -60,6 +62,7 @@ public class SubmissionSetToDocumentManifest implements IVal {
                 dm.setMasterIdentifier(idr);
             } else if ("urn:uuid:554ac39e-e3fe-47fe-b233-965d2a147832".equals(scheme)) {
                 // source ID
+                dm.setSource("urn:oid:" + ei.getValue());
             } else {
                 val.add(new ValE("SubmissionSetToDocumentManifest: Do not understand ExternalIdentifier identification scheme " + scheme).asError());
             }
@@ -84,6 +87,16 @@ public class SubmissionSetToDocumentManifest implements IVal {
             dm.setDescription(Slot.getValue(ss.getName()));
         if (ss.getStatus().endsWith("Approved"))
             dm.setStatus(Enumerations.DocumentReferenceStatus.CURRENT);
+        List<SlotType1> slots = ss.getSlot();
+        for (SlotType1 slot : slots) {
+            if ("submissionTime".equals(slot.getName())) {
+                try {
+                    dm.setCreated(DateTransform.dtmToDate(slot.getValueList().getValue().get(0)));
+                } catch (MetadataAttributeTranslationException e) {
+                    val.err("Error translating SubmissionSet.submissionTime");
+                }
+            }
+        }
 
         for (AssociationType1 assoc : assocs) {
             if (assoc.getAssociationType().endsWith("HasMember") && assoc.getSourceObject().equals(id)) {

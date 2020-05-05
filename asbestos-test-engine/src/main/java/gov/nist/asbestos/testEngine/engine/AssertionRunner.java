@@ -302,7 +302,7 @@ public class AssertionRunner {
             return true;
         } else {
             String atts = String.join(", ", report.missing);
-            Reporter.reportFail(val, assertReport, type, label, "minimumId: attributes [" + atts + "] not found ", warningOnly);
+            Reporter.reportFail(val, assertReport, type, label, "attributes [" + atts + "] not found ", warningOnly);
             return false;
         }
 

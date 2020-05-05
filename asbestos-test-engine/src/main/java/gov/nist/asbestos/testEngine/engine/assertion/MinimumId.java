@@ -64,7 +64,7 @@ public class MinimumId {
         report.expected.remove("description");  // don't know why this shows up but it is wrong
         if (isRequest) {
             report.expected.remove("id");
-            report.expected.remove("created");
+            //report.expected.remove("created");
             //report.expected.remove("status");
             diff.remove("id");
             //diff.remove("created");

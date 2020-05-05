@@ -7,19 +7,15 @@ import gov.nist.asbestos.http.headers.Headers;
 import gov.nist.asbestos.http.operations.HttpBase;
 import gov.nist.asbestos.testEngine.engine.fixture.FixtureComponent;
 import gov.nist.asbestos.testEngine.engine.fixture.FixtureMgr;
-import org.checkerframework.checker.units.qual.A;
 import org.hl7.fhir.r4.model.TestScript;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 class ActionReporter {
     private String testCollectionId = null;
     private String testId = null;
     private TestEngine testEngine = null;
-    private FixtureComponent source  = null;
+    private FixtureComponent assertionSource = null;
 
     void reportOperation(ResourceWrapper wrapper, FixtureMgr fixtureMgr, VariableMgr variableMgr, Reporter reporter, TestScript.SetupActionOperationComponent op) {
         String request = wrapper == null ? "" : "### " + wrapper.getHttpBase().getVerb() + " " + wrapper.getHttpBase().getUri() + "\n";
@@ -27,8 +23,8 @@ class ActionReporter {
         report(wrapper, fixtureMgr, variableMgr, reporter, request, op);
     }
 
-    void reportAssertion(FixtureMgr fixtureMgr, VariableMgr variableMgr, Reporter reporter, FixtureComponent source) {
-        this.source = source;
+    void reportAssertion(FixtureMgr fixtureMgr, VariableMgr variableMgr, Reporter reporter, FixtureComponent assertionSource) {
+        this.assertionSource = assertionSource;
         String request = "";
 
         report(null, fixtureMgr, variableMgr, reporter, request, null);
@@ -49,8 +45,9 @@ class ActionReporter {
         Objects.requireNonNull(testEngine);
         Map<String, String> fixtures = new HashMap<>();
 
-        if (source != null) {
-            HttpBase httpBase = source.getHttpBase();
+        // report assertion source (only for assertions)
+        if (assertionSource != null) {
+            HttpBase httpBase = assertionSource.getHttpBase();
             if (httpBase != null ) {
                 Headers responseHeaders = httpBase.getResponseHeaders();
                 String eventUrl = responseHeaders.getProxyEvent();
@@ -59,7 +56,7 @@ class ActionReporter {
                     try {
                         Ref ref = new Ref(value);
                         if (ref.isAbsolute()) {
-                            value = "<a href=\"" + value + "\"" + " target=\"_blank\">" + value + "</a>";
+                            value = "<a href=\"" + value + "/resp" + "\"" + " target=\"_blank\">" + "Open in Inspector" + "</a>";
                         }
                     } catch (Throwable t) {
                         // ignore
@@ -70,53 +67,72 @@ class ActionReporter {
         }
 
         for (String key : fixtureMgr.keySet()) {
-            Set<String> additionalKey = new HashSet<>();
-            if (key != null && source != null && key.equals(source.getId()))
-                additionalKey.add("sourceId");
-            if (key != null && op != null && op.hasResponseId() && key.equals(op.getResponseId()))
-                additionalKey.add("responseId");
-            if (key != null && op != null && op.hasSourceId() && key.equals(op.getSourceId()))
-                additionalKey.add("sourceId");
-            FixtureComponent fixtureComponent = fixtureMgr.get(key);
-            String value = null;
 
-            HttpBase httpBase = fixtureComponent.getHttpBase();
+            // Establish additional labels (keys) for this fixture.
+            // If it was referenced as either sourceId or reponseId for this action
+            // it should be displayed that way.
+            Set<String> additionalKey = new HashSet<>();
+            boolean sourceId = false;
+            boolean responseId = false;
+            String reference = null;
+            String label = null;
+            if (key != null && assertionSource != null && key.equals(assertionSource.getId())) {
+                sourceId = true;
+                label = "sourceId";
+            }
+            if (key != null && op != null && op.hasResponseId() && key.equals(op.getResponseId())) {
+                responseId = true;
+                label = "responseId";
+            }
+            if (key != null && op != null && op.hasSourceId() && key.equals(op.getSourceId())) {
+                sourceId = true;
+                label = "sourceId";
+            }
+            String tail = "";
+            if (sourceId)
+                tail = "/req";
+            else if (responseId)
+                tail = "/resp";
+            else if (key != null && key.equals("lastOperation")) {
+                tail = "/resp";
+                label = key;
+            }
+
+            FixtureComponent fixtureComponent = fixtureMgr.get(key);
+
+            HttpBase httpBase = fixtureComponent.getHttpBase();  // http operation of fixtureComponent.wrapper
             ResourceWrapper wrapper1 = fixtureComponent.getResourceWrapper();
-            String refStrEncoded;    // relative static fixture path - URL encoded
+
             if (httpBase != null) {  // fixtureComponent created by operation
                 Headers responseHeaders = httpBase.getResponseHeaders();
                 String eventUrl = responseHeaders.getProxyEvent();
-                if (eventUrl != null)
-                    value = EventLinkToUILink.get(eventUrl);
+                if (eventUrl != null) {
+                    String refStrRaw = EventLinkToUILink.get(eventUrl, tail);
+                    reference = "<a href=\"" +  refStrRaw + "\"" + " target=\"_blank\">" +
+                            ((label == null) ? refStrRaw : "Open in Inspector") +
+                            "</a>";
+                }
             } else if (wrapper1 != null) {   // static fixtureComponent
                 Ref ref = wrapper1.getRef();
                 if (ref != null) {
-                    refStrEncoded = ref.toString();
                     String refStrRaw;
                     UIEvent uiEvent = fixtureComponent.getCreatedByUIEvent();
                     if (uiEvent == null)
                         refStrRaw = null;
                     else {
+
                         refStrRaw = "http://localhost:8082/session/" + testEngine.getTestSession()
                                 + "/channel/" + testEngine.getChannelName()
-                                + "/lognav/" + uiEvent.getEventName();
+                                + "/lognav/" + uiEvent.getEventName()
+                        + tail;
                     }
-                    value = "<a href=\"" +  refStrRaw + "\"" + " target=\"_blank\">" + refStrRaw + "</a>";
+                    reference = "<a href=\"" +  refStrRaw + "\"" + " target=\"_blank\">" +
+                            ((label == null) ? refStrRaw : "Open in Inspector") +
+                            "</a>";
                 }
             }
-
-            try {
-                Ref ref = new Ref(value);
-                if (ref.isAbsolute()) {
-                    value = "<a href=\"" + value + "\"" + " target=\"_blank\">" + value + "</a>";
-                }
-            } catch (Throwable t) {
-                // ignore
-            }
-
-            fixtures.put(key, value);
-            for (String otherKey : additionalKey)
-                fixtures.put(otherKey, value);
+            if (label != null && reference != null)
+                fixtures.put(label, reference);
         }
 
         Map<String, String> variables = variableMgr.getVariables();

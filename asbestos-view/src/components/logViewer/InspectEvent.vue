@@ -12,11 +12,12 @@
             </span>
             </div>
 
-            Raw Message:
             <div class="request-response">
+                <div class="divider"></div>
 
                 <!-- From Client To Server -->
                 <div v-if="selectedEvent">
+                    Raw Event:
                     <span v-for="(task, taski) in tasks" :key="taski">
                         <span v-bind:class="[{ selected: taski === selectedTask, selectable: taski !== selectedTask }, 'cursor-pointer']" @click="selectTask(taski)">
                             {{ taskLabel(taski) }}
@@ -31,27 +32,29 @@
                     <span class="link-position solid-boxed pointer-cursor" @click.stop.prevent="copyToClipboard">Copy Event Link</span>
                     <input type="hidden" id="the-link" :value="eventLink">
 
+                    <!-- Request/Response line -->
+                    <span v-bind:class="{
+                        selected: displayRequest,
+                        'not-selected': !displayRequest
+                        }"
+                          @click="displayRequest = true; displayResponse = false; displayInspector = false; displayValidations = false">
+                        Request
+                    </span>
+
+                    <div class="divider"></div>
+                    <span v-bind:class="{
+                        selected: displayResponse,
+                        'not-selected': !displayResponse
+                        }"
+                          @click="displayRequest = false; displayResponse = true; displayInspector = false; displayValidations = false">
+                        Response
+                    </span>
+
                 </div>
                 <div v-else>
-                    No Tasks
+                    <div class="not-selected" @click="selectedEvent = true"> Enable display of raw event</div>
                 </div>
 
-                <!-- Request/Response line -->
-                <span v-bind:class="{
-                selected: displayRequest,
-                'not-selected': !displayRequest
-              }"
-                      @click="displayRequest = true; displayResponse = false; displayInspector = false; displayValidations = false">
-                Request
-                </span>
-                <div class="divider"></div>
-                <span v-bind:class="{
-                   selected: displayResponse,
-                'not-selected': !displayResponse
-               }"
-                      @click="displayRequest = false; displayResponse = true; displayInspector = false; displayValidations = false">
-                Response
-            </span>
 
                 <!-- Inspect Validations -->
                 <div class="vdivider"></div>
@@ -59,23 +62,23 @@
                 <div class="vdivider"></div>
             </div>
 
-            Inspector:
             <div class="request-response">
                 <div>
-                <span v-bind:class="{
-                        selected: inspectRequest,
-                        'not-selected': !inspectRequest
+                    Inspector:
+                    <span v-bind:class="{
+                        selected: inspectRequest && requestEnabled,
+                        'not-selected': !(inspectRequest && requestEnabled)
                         }"
                       @click="displayRequest = false; displayResponse = false; displayInspector = true; inspectType = 'request'; displayValidations = false">
-                    Inspect Request
-                </span>
+                        Inspect Request
+                    </span>
                     <div class="divider"></div>
                     <span v-bind:class="{
-                        selected: inspectResponse,
-                        'not-selected': !inspectResponse
+                        selected: inspectResponse && responseEnabled,
+                        'not-selected': !(inspectResponse && responseEnabled)
                         }"
                           @click="displayRequest = false; displayResponse = false; displayInspector = true; inspectType = 'response'; displayValidations = false">
-                    Inspect Server
+                    Inspect Response/Server
                 </span>
                     <div class="divider"></div>
                     <span v-bind:class="{
@@ -151,6 +154,7 @@
                 displayInspector: false,
                 displayValidations: false,
                 inspectType: 'request',
+                allEnabled: false,
             }
         },
         methods: {
@@ -226,6 +230,18 @@
             },
         },
         computed: {
+            requestEnabled() {
+                if (this.allEnabled) return true;
+                if (!this.reqresp)
+                    return false;
+                return this.reqresp === 'req';
+            },
+            responseEnabled() {
+                if (this.allEnabled) return true;
+                if (!this.reqresp)
+                    return false;
+                return this.reqresp === 'resp';
+            },
             inspectRequest() {
                 return this.displayInspector && this.inspectType === 'request'
             },
@@ -272,6 +288,14 @@
         },
         created() {
             this.loadEventSummaries()
+            if (this.requestEnabled && !this.responseEnabled) {
+                this.displayInspector = true;
+                this.inspectType = 'request';
+            }
+            if (!this.requestEnabled && this.responseEnabled) {
+                this.displayInspector = true;
+                this.inspectType = 'response';
+            }
         },
         watch: {
             eventId() {
@@ -281,7 +305,7 @@
             },
         },
         props: [
-            'eventId', 'sessionId', 'channelId', 'noNav',
+            'eventId', 'sessionId', 'channelId', 'noNav', 'reqresp',
         ],
         mixins: [eventMixin, errorHandlerMixin],
         components: {
