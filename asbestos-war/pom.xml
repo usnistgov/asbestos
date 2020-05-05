@@ -17,6 +17,7 @@
         <fhirToolkitUIHomePage>http://localhost:8082</fhirToolkitUIHomePage>
         <httpsFhirToolkitBase>https://fhirtoolkit.test:9743/asbestos</httpsFhirToolkitBase>
         <fhirToolkitBase>http://localhost:8081/asbestos</fhirToolkitBase>
+        <itTestfhirToolkitBase>http://localhost:8877/asbestos</itTestfhirToolkitBase>
         <hapiFhirBase>http://localhost:8080/fhir/fhir</hapiFhirBase>
         <xdsToolkitBase>http://localhost:8080/xdstools</xdsToolkitBase>
         <tlsXdsToolkitBase>http://localhost:8443/xdstools</tlsXdsToolkitBase>
@@ -67,6 +68,7 @@
                 <filtering>true</filtering>
                 <includes>
                     <include>service.properties</include>
+                    <include>ittest-service.properties</include>
                 </includes>
             </resource>
             <resource>
@@ -123,7 +125,7 @@
                 </executions>
                 <configuration>
                     <systemPropertyVariables>
-                        <fhir.port>8877</fhir.port>
+                        <fhir.port>8080</fhir.port>
                         <proxy.port>8877</proxy.port>
                     </systemPropertyVariables>
                     <forkCount>1</forkCount>
@@ -206,6 +208,10 @@
                         <systemProperty>
                             <name>EXTERNAL_CACHE</name>
                             <value>${itTestsExternalCache}</value>
+                        </systemProperty>
+                        <systemProperty>
+                            <name>SERVICE_PROPERTIES</name>
+                            <value>ittest-service.properties</value>
                         </systemProperty>
                     </systemProperties>
                 </configuration>
