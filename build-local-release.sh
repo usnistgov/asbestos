@@ -18,8 +18,14 @@ if [ -d asbestos-war/target ]; then
   echo "asbestos clean failed"
 fi
 
+echo ""
+echo ''
+echo "PACKAGE asbestos-war - this will take a while"
+echo ''
+echo ""
+
 mkdir asbestos-war/target
-mvn package &> asbestos-war/build-log.txt   # does not run integration tests, there is more enviromental setup required for that
+mvn package &> asbestos-war/build-log.txt   # does not run integration tests, there is more environment setup required for that
 if [ ! -f asbestos-war/target/asbestos-war.war ]; then
   echo "asbestos build failed"
   exit -1
@@ -27,7 +33,7 @@ fi
 
 echo "BUILD ASBESTOS-ASSEMBLY"
 cd asbestos-assembly
-mvn clean 
+mvn clean
 if [ -d target ]; then
   echo "asbestos-assembly clean failed"
   exit -1

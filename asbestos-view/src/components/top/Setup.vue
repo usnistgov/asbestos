@@ -5,7 +5,8 @@
         be re-run later to verify operation.</p>
 
         <h3>Load static resources</h3>
-        <p>These resources are referenced in tests and must be loaded for tests to operate.
+        <p>These resources are referenced in tests and must be loaded for tests to operate. They are loaded
+            into the supporting HAPI server. This initialization can be re-run at any time.
         </p>
 
         <!--  SelfTest is an alternate test runner   -->
@@ -17,7 +18,7 @@
         <h3>Self Tests</h3>
         <p>The following Test Collections are run against internal simulators to verify both the
         tests and the simulators. The status shows either success (green check) or failure/not run (
-        red X).</p>
+        red X). These can be re-run at any time.</p>
 
         <p>Run against XDS Toolkit Repository/Registry simulator. </p>
         <self-test

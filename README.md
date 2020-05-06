@@ -58,3 +58,31 @@ To build Run/Debug Configuration in IntelliJ
     VM options: -DEXTERNAL_CACHE=/home/bill/ec  (your milage will vary here)
     On the Deployment tab - select asbestos-war:war exploded and set Application context to /asbestos
     
+# Development environment
+    
+See https://github.com/usnistgov/asbestos/wiki/Development-Environment
+    
+# Special builds
+
+These are shell scripts in the root of the project. The top release building script is build-zip-release.sh
+which calls the rest to do their part. The end result is the file /opt/asbestos.zip which is ready for release.
+
+install-local.sh - asbestos and asbestos-assembly have been built.  This script 
+                   installs asbestos-assembly in /opt/asbestos then 
+                   adds xdstoolkit and
+                   hapi fhir to the package in the correct places.
+fhir.zip and the xdstools project must be alongside asbestos in the common directory:
+
+    .
+        fhir.zip
+        asbestos/
+        toolkit2/
+                   
+build-local-release.sh - Build asbestos and then asbestos-assembly.  Install asbestos-assembly (the file
+structure of the release) and then add xdstools and hapi to the correct directories. Uses install-local.sh.
+
+rebuild-local-release.sh - deletes current release as /opt/asbestos and calls build-local-release.sh to rebuild it.
+
+build-zip-release.sh - relies on rebuild-local-release.sh to build up release content in /opt/asbestos. This
+script then packages that directory as /opt/asbestos.zip which is ready for release.
+
