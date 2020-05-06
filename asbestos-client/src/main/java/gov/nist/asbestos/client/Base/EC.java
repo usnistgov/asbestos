@@ -203,11 +203,17 @@ public class EC {
         File[] tests = forCollection.listFiles();
         if (tests != null) {
             for (File test : tests) {
-                String name = test.toString();
-                if (!name.endsWith(".json")) continue;
-                if (name.startsWith(".")) continue;
-                if (name.startsWith("_")) continue;
-                testLogList.add(test);
+                if (test.isDirectory()) {
+                    File report = new File(test, "TestReport.json");
+                    if (report.exists())
+                        testLogList.add(report);
+                } else {
+                    String name = test.toString();
+                    if (!name.endsWith(".json")) continue;
+                    if (name.startsWith(".")) continue;
+                    if (name.startsWith("_")) continue;
+                    testLogList.add(test);
+                }
             }
         }
 //        log.info("got " + testLogList.size() + " test logs from " + testLogs.toString());

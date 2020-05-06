@@ -43,31 +43,41 @@
                 hasFailures: false,
                 hasNoRuns: false,
                 earliestRunTime: null,
+                hasError: null,
+                allRun: false,
             }
         },
         methods: {
-            getStatus() {
-                const url = `selftest/${this.sessionId}__${this.channelId}/${this.collection}/status`;
-                let status;
-                ENGINE.get(url)
-                .then(function() {
-                    status = true;
-                })
-                .catch(function() {
-                    status = false;
-                });
-                return status;
-            },
-            doView(testCollection) {
+            async doView(testCollection) {
+                await this.loadTestCollection(testCollection);
                 this.$store.commit('setChannelId', this.channelId)
                 this.$router.push(`/session/${this.sessionId}/channel/${this.channelId}/collection/${testCollection}`)
+            },
+            async loadStatus() {
+                console.log(`Installs starts`)
+                const url = `selftest/${this.sessionId}__${this.channelId}/${this.testCollection}/status`;
+                const promise = ENGINE.get(url);
+                promise
+                    .then(response => {
+                        const data = response.data;
+                        this.hasFailures = data.hasError;
+                        this.allRun = data.allRun;
+                        this.earliestRunTime = data.time;
+                        this.hasNoRuns = data.noRuns;
+                    })
+                    .catch(function() {
+                        this.$store.commit('setError', "Selftest failed - cannot reach server");
+                    });
+                await promise;
+                console.log(`Installs ends`)
             },
             // This is close to a duplicate of testRunner:loadTestReports except
             // here the state is maintained in the component.  The
             // store is organized for loading one collection at at time.
             // This is supporting a multiple collection survey
             async loadTestReports(sessionId, channelId, collectionId) {
-                await this.loadTestCollection(collectionId);
+                console.log(`Installs starts`)
+
                 const testIds = this.$store.state.testRunner.testScriptNames;
                 const promises = [];
                 let hasFailures = false;
@@ -101,6 +111,8 @@
                 this.hasFailures = hasFailures;
                 this.hasNoRuns = hasNoRuns;
                 this.earliestRunTime = earliestRunTime;
+                console.log(`Installs ends`)
+
             },
             async loadTestCollection(testCollection) {
                 this.$store.commit('setCurrentTestCollection', testCollection);
@@ -108,8 +120,8 @@
             },
         },
         created() {
-            this.loadTestReports(this.sessionId, this.channelId, this.testCollection);
-            this.channel = this.channelId;
+            this.loadStatus();
+            //this.loadTestReports(this.sessionId, this.channelId, this.testCollection);
         },
         mixins: [ colorizeTestReports, testCollectionMgmt ],
         name: "SelfTestInstalls",

@@ -122,7 +122,8 @@ public class TestEngine  {
     }
 
     public TestEngine setChannelId(String channelId) {
-        assert channelId.split("__").length == 2;
+        if (channelId.split("__").length != 2)
+            throw new Error("TestEngine: channelId must be testSession__channelId format - found " + channelId );
         this.channelId = channelId;
         return this;
     }

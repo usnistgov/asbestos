@@ -11,7 +11,8 @@
                     <img src="../../assets/error.png" class="align-left">
                 </span>
                 <span v-else-if="hasNoRuns">
-                    <img src="../../assets/blank-circle.png" class="align-left">
+                    <img src="../../assets/error.png" class="align-left">
+<!--                    <img src="../../assets/blank-circle.png" class="align-left">-->
                 </span>
                 <span v-else>
                     <img src="../../assets/checked.png" class="align-left">
@@ -21,13 +22,13 @@
             <span class="large-text">{{ cleanTestName(testCollection) }}</span>
 
             <span>
-                <button class="runallbutton" @click.stop="doRunAll()">Run</button>
-                    --  {{ collectionTime }}
+                <button class="runallbutton" @click.stop="runIt()">Run</button>
+                    --  {{ earliestRunTime }}
             </span>
 
             <button class="runallbutton" @click.stop="doView(testCollection)">View</button>
 
-            Uses channel {{ channelId }}
+            Channel {{ channelId }}
         </div>
     </div>
 </template>
@@ -41,75 +42,44 @@
         data() {
             return {
                 hasFailures: false,
-                hasNoRuns: false,
+                allRun: false,
                 earliestRunTime: null,
+                hasNoRuns: true,
             }
         },
         methods: {
-            getStatus() {
-                const url = `selftest/${this.sessionId}__${this.channelId}/${this.collection}/status`;
-                let status;
-                ENGINE.get(url)
-                .then(function() {
-                    status = true;
-                })
-                .catch(function() {
-                    status = false;
-                });
-                return status;
+            async runIt() {
+                await this.loadStatus('run');
             },
-            doView(testCollection) {
+            async loadStatus(type) {
+                const url = `selftest/${this.sessionId}__${this.channelId}/${this.testCollection}/${type}`;
+                const promise = ENGINE.get(url);
+                promise
+                    .then(response => {
+                        const data = response.data;
+                        this.hasFailures = data.hasError;
+                        this.allRun = data.allRun;
+                        this.earliestRunTime = data.time;
+                        this.hasNoRuns = data.noRuns;
+                    })
+                    .catch(function() {
+                        this.$store.commit('setError', "Selftest failed - cannot reach server");
+                    });
+                await promise;
+            },
+            async doView() {
+                await this.loadTestCollection(this.testCollection);
                 this.$store.commit('setChannelId', this.channelId)
-                this.$router.push(`/session/${this.sessionId}/channel/${this.channelId}/collection/${testCollection}`)
+                this.$router.push(`/session/${this.sessionId}/channel/${this.channelId}/collection/${this.testCollection}`)
             },
-            // This is close to a duplicate of testRunner:loadTestReports except
-            // here the state is maintained in the component.  The
-            // store is organized for loading one collection at at time.
-            // This is supporting a multiple collection survey
-            // async loadTestReports(sessionId, channelId, collectionId) {
-            //     await this.loadTestCollection(collectionId);
-            //     const testIds = this.$store.state.testRunner.testScriptNames;
-            //     const promises = [];
-            //     let hasFailures = false;
-            //     let hasNoRuns = false;
-            //     let earliestRunTime = null;
-            //     testIds.forEach(testId => {
-            //         const url = `testReport/${sessionId}__${channelId}/${collectionId}/${testId}`
-            //         const promise = ENGINE.get(url)
-            //         promises.push(promise)
-            //     })
-            //     const combinedPromises = Promise.all(promises)
-            //         .then(results => {
-            //             results.forEach(result => {
-            //                 const testReport = result.data
-            //                 if (testReport) {
-            //                     if (testReport.result === 'fail')
-            //                         hasFailures = true;
-            //                     if (testReport.issued && !earliestRunTime)
-            //                         earliestRunTime = testReport.issued;
-            //                     else if (testReport.issued && testReport.issued < earliestRunTime)
-            //                         earliestRunTime = testReport.issued;
-            //                 } else {
-            //                     hasNoRuns = true;
-            //                 }
-            //             })
-            //         })
-            //         .catch(function(error) {
-            //             this.state.errors.push(`Loading reports: ${error}`)
-            //         })
-            //     await combinedPromises
-            //     this.hasFailures = hasFailures;
-            //     this.hasNoRuns = hasNoRuns;
-            //     this.earliestRunTime = earliestRunTime;
-            // },
             async loadTestCollection(testCollection) {
                 this.$store.commit('setCurrentTestCollection', testCollection);
                 await this.$store.dispatch('loadCurrentTestCollection')
             },
         },
         created() {
-            //this.loadTestReports(this.sessionId, this.channelId, this.testCollection);
-            this.channel = this.channelId;
+            this.loadStatus("status");
+            //this.channel = this.channelId;
         },
         mixins: [ colorizeTestReports, testCollectionMgmt ],
         name: "SelfTest",

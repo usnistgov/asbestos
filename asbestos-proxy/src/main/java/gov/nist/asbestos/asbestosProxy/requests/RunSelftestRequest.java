@@ -11,9 +11,8 @@ package gov.nist.asbestos.asbestosProxy.requests;
 // "run"  reruns the tests
 // "status" returns status of last run
 
-// returns earliest run time
-// 200 status - ok
-// 409 status (conflict) - error
+// returns LastTime class
+// and 200 status
 
 import gov.nist.asbestos.asbestosProxy.servlet.ChannelConnector;
 import gov.nist.asbestos.client.Base.ProxyBase;
@@ -37,6 +36,9 @@ public class RunSelftestRequest {
 
     static class LastTime {
         String time = null;
+        boolean allRun = true;
+        boolean hasError = false;
+        boolean noRuns = false;
     }
 
     public static boolean isRequest(Request request) {
@@ -82,7 +84,6 @@ public class RunSelftestRequest {
             TestReport report;
             ModularEngine modularEngine;
 
-            boolean hasError = false;
             List<String> testNames = request.ec.getTestsInCollection(testCollection);
             for (String testName : testNames) {
                 File testDir = request.ec.getTest(testCollection, testName);
@@ -91,7 +92,7 @@ public class RunSelftestRequest {
                     report = modularEngine
                             //.getLastTestEngine()
                             .setTestSession(channelConfig.getTestSession())
-                            .setChannelId(channelConfig.getChannelId())
+                            .setChannelId(channelConfig.getTestSession() + "__" + channelConfig.getChannelId())
                             .setExternalCache(request.externalCache)
                             .setVal(new Val())
                             .setFhirClient(fhirClient)
@@ -102,32 +103,43 @@ public class RunSelftestRequest {
                             .getTestReport();
 
                     if (report.getResult() == TestReport.TestReportResult.FAIL)
-                        hasError = true;
+                        lastTime.hasError = true;
 
                     String time = report.getIssued().toString();
                     if (lastTime.time == null)
                         lastTime.time = time;
-                    else if (time.compareTo(lastTime.time) == -1)
+                    else if (time.compareTo(lastTime.time) < 0)
                         lastTime.time = time;
 
                 } catch (Throwable t) {
                     log.error(ExceptionUtils.getStackTrace(t));
-                    hasError = true;
+                    lastTime.hasError = true;
                 }
             }
-            if (hasError)
-                request.resp.setStatus(request.resp.SC_CONFLICT);
-            else
-                request.resp.setStatus(request.resp.SC_OK);
+            Returns.returnObject(request.resp, lastTime);
+            request.resp.setStatus(request.resp.SC_OK);
         } else {  // status
             List<File> testLogFiles = request.ec.getTestLogs(channelName, testCollection);
+            boolean aRun = false;
             for (File testLogFile : testLogFiles) {
-                TestReport report = (TestReport) ProxyBase.parse(testLogFile);
-                if (report.getResult() == TestReport.TestReportResult.FAIL) {
-                    request.resp.setStatus(request.resp.SC_CONFLICT);
-                    return;
+                if (!testLogFile.exists()) {
+                    lastTime.allRun = false;
+                    continue;
                 }
+                aRun = true;
+                TestReport report = (TestReport) ProxyBase.parse(testLogFile);
+                if (report.getResult() == TestReport.TestReportResult.FAIL)
+                    lastTime.hasError = true;
+                String time = report.getIssued().toString();
+                if (lastTime.time == null)
+                    lastTime.time = time;
+                else if (time.compareTo(lastTime.time) < 0)
+                    lastTime.time = time;
             }
+            lastTime.noRuns = !aRun;
+            if (lastTime.noRuns)
+                lastTime.allRun = false;
+            Returns.returnObject(request.resp, lastTime);
             request.resp.setStatus(request.resp.SC_OK);
         }
     }

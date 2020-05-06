@@ -341,6 +341,7 @@ export const testRunnerStore = {
             return report
         },
         runTest({commit, rootState, state}, testId) {
+            console.log(`run ${testId}`)
             //commit('setCurrentTest', testId)
             const url = `testrun/${rootState.base.session}__${rootState.base.channelId}/${state.currentTestCollectionName}/${testId}?_format=${state.useJson ? 'json' : 'xml'};_gzip=${state.gzip}`
             const promise = ENGINE.post(url)
