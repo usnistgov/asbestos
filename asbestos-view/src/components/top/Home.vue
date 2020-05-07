@@ -1,7 +1,7 @@
 <template>
     <div class="left">
 
-        <h2>Self Test</h2>
+        <h2>Services</h2>
         <p>Verify that all back-end services are responding.</p>
 
         <p>For problems with Proxy or Test Engine status look in
@@ -32,23 +32,26 @@
             <img src="../../assets/cross.png">
             Test Engine is <b>not</b> responding at {{testEngineBase()}}
         </div>
-        <div v-if="$store.state.testRunner.hapiIsAlive">
+        <div v-if="$store.state.heartbeat.hapiIsAlive">
             <img src="../../assets/check.png">
-            HAPI server is responding at {{$store.state.testRunner.hapiDetails}}
+            HAPI server is responding at {{$store.state.heartbeat.hapiDetails}}
         </div>
         <div v-else>
             <img src="../../assets/cross.png">
-            HAPI server is <b>not</b> responding at {{$store.state.testRunner.hapiDetails}}
+            HAPI server is <b>not</b> responding at {{$store.state.heartbeat.hapiDetails}}
         </div>
-        <div v-if="$store.state.testRunner.xdsIsAlive">
+        <div v-if="$store.state.heartbeat.xdsIsAlive">
             <img src="../../assets/check.png">
-            XDS Toolkit is responding at {{$store.state.testRunner.xdsDetails}}
+            XDS Toolkit is responding at {{$store.state.heartbeat.xdsDetails}}
         </div>
         <div v-else>
             <img src="../../assets/cross.png">
-            XDS Toolkit is <b>not</b> responding at {{$store.state.testRunner.xdsDetails}}
+            XDS Toolkit is <b>not</b> responding at {{$store.state.heartbeat.xdsDetails}}
         </div>
 
+        <h2>Setup</h2>
+        <p>When this toolkit is first installed it must be initialized.  Go to the Setup page (top menu ribbon)
+            and follow the directions there.</p>
 
         <h2>FHIR Toolkit structure</h2>
 
@@ -80,22 +83,12 @@ kinds of channels: FHIR - data passed without modification and MHD - translation
         <span class="bold">Test Collections</span>
         - There are two types of Test Collections: client and server.  Client tests are used to evaluate an
         SUT that initiates a transaction such as a Document Source. Server tests evaluate SUTs that accept transactions such as a
-        Document Recipient. Each Test Collection targets a particular actor. Once a Test Collection is selected it can be returned to
-        by clicking on "View".
+        Document Recipient. Each Test Collection targets a particular actor.
 
         <h2>Patient Management</h2>
-        All Document Sharing tests depend on a reference to a Patient resource. There is a Test Collection named Test Patients
-        that can be used to load a small collection of Patient resources into the integrated FHIR server. This must be done before any testing
-        can be performed.  These are sent to the default channel which points to the integrated HAPI FHIR server.
-        This can be repeated without harm - the loading process checks and only loads what is needed.  There is no overlap between
-        these Patient resources and the ones defined for Connectathon.
-
-        To load:
-        <ol>
-            <li>Select Test Patients from Test Collections - the appropriate tests will display in the center and the
-            default channel will be selected.</li>
-            <li>Click Run All</li>
-        </ol>
+        All Document Sharing tests depend on a reference to a Patient resource. This toolit manages patients by
+        loading a small set of Patient resources into the support HAPI server.  This procedure is handled in
+        the Setup section above.
 
         <h2>Predefined Channels</h2>
         A collection of Channels comes pre-configured with the toolkit:<br /><br />
@@ -106,21 +99,16 @@ kinds of channels: FHIR - data passed without modification and MHD - translation
 
         <span class="bold">sut</span>
         - a placeholder for your System Under Test. This is used for server testing only.
-
-        <ul>
-        <li>Use the Channel Editor (Config in the Channels Control panel) to
-            configure the FHIR Base Address of your System Under Test before using.</li>
-        </ul>
+        Use the Channel Editor (Config in the Channels Control panel) to
+            configure the FHIR Base Address of your System Under Test before using.
 
         <span class="bold">xds</span>
         - leads to a Repository/Registry simulator in XDS Toolkit. The Channel Configuration contains the XDS Site Name.
         This is configured at system start up to point to the default__asbtsrr simulator in XDS Toolkit. The location of
         XDS Toolkit is identified in the Service Properties file.
 
-        <ul>
-        <li>This simulator must have <span class="bold">Validate Against Patient Identity Feed</span> unchecked as we do not
-            send Patient Identity Feed messages to the simulator.</li>
-        </ul>
+        This simulator must have <span class="bold">Validate Against Patient Identity Feed</span> unchecked as we do not
+            send Patient Identity Feed messages to the simulator.
 
         This Channel is used for validating MHD Comprehensive metadeata.
         <br /><br />
@@ -129,23 +117,27 @@ kinds of channels: FHIR - data passed without modification and MHD - translation
         - leads to a Repository/Registry simulator in XDS Toolkit.  Within the Channel Configuration, the XDS Site Name
         is configured. On my system it is default__limited which is the default Test Session and the simulator limited.
 
-        <ul>
-        <li>This simulator must have <span class="bold">Validate Against Patient Identity Feed</span> unchecked as we do not
-            send Patient Identity Feed messages to the simulator.</li>
-            <li>This simulator must have <span class="bold">Metadata Limited</span> checked so validation is done using the
-                rules for Metadata Limited messages.</li>
-        </ul>
+        This simulator must have <span class="bold">Validate Against Patient Identity Feed</span> unchecked as we do not
+            send Patient Identity Feed messages to the simulator.
+            This simulator must have <span class="bold">Metadata Limited</span> checked so validation is done using the
+                rules for Metadata Limited messages.
 
 
         This Channel is used for validating MHD Minimal metadeata.
+
+        <br /><br />
+        <span class="bold">selftest_comprehensive</span>
+            - leads to a Repository/Registry simulator in XDS Toolkit and is used for self tests on the Setup page.
+
+        <br /><br />
+        <span class="bold">selftest_minimal</span>
+        - leads to a Repository/Registry simulator in XDS Toolkit and is used for self tests on the Setup page.
 
         <h2>FHIR Toolkit Configuration</h2>
         For details about configuration look in the <a href="https://github.com/usnistgov/asbestos/wiki/Configuration" target="_blank">wiki</a>.
 
     </div>
 </template>
-
-//import {constFhirToolkitBaseUrl} from "../common/http-common";
 
 <script>
     import {initServiceProperties, UtilFunctions} from "../../common/http-common";

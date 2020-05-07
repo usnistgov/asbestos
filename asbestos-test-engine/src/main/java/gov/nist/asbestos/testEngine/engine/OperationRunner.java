@@ -3,11 +3,14 @@ package gov.nist.asbestos.testEngine.engine;
 import gov.nist.asbestos.client.client.FhirClient;
 import gov.nist.asbestos.client.client.Format;
 import gov.nist.asbestos.simapi.validation.ValE;
+import gov.nist.asbestos.testEngine.engine.fixture.FixtureComponent;
+import gov.nist.asbestos.testEngine.engine.fixture.FixtureMgr;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.TestReport;
 import org.hl7.fhir.r4.model.TestScript;
 
 import java.net.URI;
+import java.util.Map;
 import java.util.Objects;
 
 public class OperationRunner {
@@ -21,10 +24,17 @@ public class OperationRunner {
     private TestReport testReport = null;
     private URI sut = null;
     private Reporter reporter;
+    private Map<String, String> externalVariables;
+    private String testCollectionId = null;
+    private String testId = null;
+    private TestEngine testEngine = null;
+    private ActionReference actionReference = null;
 
-    OperationRunner(FixtureMgr fixtureMgr) {
+    OperationRunner(ActionReference actionReference, FixtureMgr fixtureMgr, Map<String, String> externalVariables) {
         Objects.requireNonNull(fixtureMgr);
         this.fixtureMgr = fixtureMgr;
+        this.externalVariables = externalVariables;
+        this.actionReference = actionReference;
     }
 
     void run(TestScript.SetupActionOperationComponent op, TestReport.SetupActionOperationComponent operationReport) {
@@ -33,6 +43,9 @@ public class OperationRunner {
         Objects.requireNonNull(fhirClient);
         Objects.requireNonNull(testScript);
         Objects.requireNonNull(operationReport);
+        Objects.requireNonNull(testCollectionId);
+        Objects.requireNonNull(testId);
+        Objects.requireNonNull(actionReference);
 
         reporter = new Reporter(val, operationReport, "", "");
 
@@ -86,76 +99,102 @@ public class OperationRunner {
             fhirClient.setFormat(Format.JSON);
 
         if ("read".equals(code)) {
-            SetupActionRead setupActionRead = new SetupActionRead(fixtureMgr)
+            SetupActionRead setupActionRead = new SetupActionRead(actionReference, fixtureMgr)
                     .setVal(val)
                     .setFhirClient(fhirClient)
                     .setSut(sut)
                     .setType(type + ".read")
                     .setTestReport(testReport);
             setupActionRead.setVariableMgr(new VariableMgr(testScript, fixtureMgr)
-                            .setVal(val)
-                        .setOpReport(operationReport)
-                        );
+                    .setExternalVariables(externalVariables)
+                    .setVal(val)
+                    .setOpReport(operationReport)
+            );
+            setupActionRead
+                    .setTestCollectionId(testCollectionId)
+                    .setTestId(testId)
+                    .setTestEngine(testEngine);
             setupActionRead.run(op, operationReport);
         } else if ("search".equals(code)) {
-                SetupActionSearch setupActionSearch = new SetupActionSearch(fixtureMgr)
-                        .setVal(val)
-                        .setFhirClient(fhirClient)
-                        .setSut(sut)
-                        .setType(type + ".search")
-                        .setTestReport(testReport);
-                setupActionSearch
-                        .setVal(val)
-                        .setVariableMgr(
-                                new VariableMgr(testScript, fixtureMgr)
-                                        .setVal(val)
-                                        .setOpReport(operationReport));
-                setupActionSearch.run(op, operationReport);
+            SetupActionSearch setupActionSearch = new SetupActionSearch(actionReference, fixtureMgr)
+                    .setVal(val)
+                    .setFhirClient(fhirClient)
+                    .setSut(sut)
+                    .setType(type + ".search")
+                    .setTestReport(testReport);
+            setupActionSearch
+                    .setVal(val)
+                    .setVariableMgr(
+                            new VariableMgr(testScript, fixtureMgr)
+                                    .setExternalVariables(externalVariables)
+                                    .setVal(val)
+                                    .setOpReport(operationReport));
+            setupActionSearch.setTestEngine(testEngine);
+            setupActionSearch.setTestCollectionId(testCollectionId);
+            setupActionSearch.setTestId(testId);
+            setupActionSearch.run(op, operationReport);
         } else if ("create".equals(code)) {
             SetupActionCreate setupActionCreate =
-                    new SetupActionCreate(fixtureMgr)
+                    new SetupActionCreate(actionReference, fixtureMgr)
                             .setFhirClient(fhirClient)
                             .setType(type + ".create")
                             .setSut(sut)
                             .setVal(val);
+            setupActionCreate.setTestEngine(testEngine);
             setupActionCreate.setVariableMgr(
                     new VariableMgr(testScript, fixtureMgr)
+                            .setExternalVariables(externalVariables)
                             .setVal(val)
                             .setOpReport(operationReport));
+            setupActionCreate
+                    .setTestCollectionId(testCollectionId)
+                    .setTestId(testId);
             setupActionCreate.run(op, operationReport);
         } else if ("delete".equals(code)) {
             SetupActionDelete setupActionDelete =
-                    new SetupActionDelete(fixtureMgr)
+                    new SetupActionDelete(actionReference, fixtureMgr)
                             .setSut(sut)
                             .setFhirClient(fhirClient)
                             .setType(type + ".delete")
                             .setVal(val);
+            setupActionDelete
+                    .setTestEngine(testEngine);
             setupActionDelete.setVariableMgr(
                     new VariableMgr(testScript, fixtureMgr)
+                            .setExternalVariables(externalVariables)
                             .setVal(val)
                             .setOpReport(operationReport));
             setupActionDelete.run(op, operationReport);
         } else if ("transaction".equals(code)) {
             SetupActionTransaction setupActionTransaction =
-                    new SetupActionTransaction(fixtureMgr)
+                    new SetupActionTransaction(actionReference, fixtureMgr)
                             .setSut(sut)
                             .setFhirClient(fhirClient)
                             .setType(type + ".transaction")
                             .setVal(val);
+            setupActionTransaction
+                    .setTestEngine(testEngine);
             setupActionTransaction.setVariableMgr(
                     new VariableMgr(testScript, fixtureMgr)
+                            .setExternalVariables(externalVariables)
                             .setVal(val)
                             .setOpReport(operationReport));
             setupActionTransaction.run(op, operationReport);
         } else if ("mhd-pdb-transaction".equals(code)) {
             SetupActionMhdPdbTransaction setupActionTransaction =
-                    new SetupActionMhdPdbTransaction(fixtureMgr);
-            setupActionTransaction.setSut(sut)
-                            .setFhirClient(fhirClient)
-                            .setType(type + ".mhd-pdb-transaction")
-                            .setVal(val);
+                    new SetupActionMhdPdbTransaction(actionReference, fixtureMgr);
+            setupActionTransaction
+                    .setSut(sut)
+                    .setFhirClient(fhirClient)
+                    .setType(type + ".mhd-pdb-transaction")
+                    .setVal(val)
+                    .setTestCollectionId(testCollectionId)
+                    .setTestId(testId);
+            setupActionTransaction
+                    .setTestEngine(testEngine);
             setupActionTransaction.setVariableMgr(
                     new VariableMgr(testScript, fixtureMgr)
+                            .setExternalVariables(externalVariables)
                             .setVal(val)
                             .setOpReport(operationReport));
             setupActionTransaction.run(op, operationReport);
@@ -191,6 +230,21 @@ public class OperationRunner {
 
     public OperationRunner setSut(URI sut) {
         this.sut = sut;
+        return this;
+    }
+
+    public OperationRunner setTestCollectionId(String testCollectionId) {
+        this.testCollectionId = testCollectionId;
+        return this;
+    }
+
+    public OperationRunner setTestId(String testId) {
+        this.testId = testId;
+        return this;
+    }
+
+    public OperationRunner setTestEngine(TestEngine testEngine) {
+        this.testEngine = testEngine;
         return this;
     }
 }

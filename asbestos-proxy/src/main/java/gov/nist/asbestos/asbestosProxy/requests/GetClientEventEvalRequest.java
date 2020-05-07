@@ -63,7 +63,7 @@ public class GetClientEventEvalRequest {
 
         String myStr = buf.toString();
 
-        File testLogDir = request.ec.getTestLogDir(request.fullChannelId(), testCollection);
+        File testLogDir = request.ec.getTestLogCollectionDir(request.fullChannelId(), testCollection);
         try {
             Files.write(Paths.get(new File(testLogDir, testId + ".json").toString()), myStr.getBytes());
         } catch (IOException e) {

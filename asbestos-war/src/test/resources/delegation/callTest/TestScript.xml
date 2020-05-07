@@ -1,0 +1,64 @@
+<TestScript xmlns="http://hl7.org/fhir">
+    <url value=""/>
+    <name value="test1"/>
+    <status value="draft"/>
+
+    <!-- Static Fixtures -->
+    <fixture id="patient-bundle">
+        <!--
+           This patient comes out of the test Patient cache
+        -->
+        <autocreate value="false"/>
+        <autodelete value="false"/>
+        <resource>
+            <reference value="Patient/Alex_Alder"/>
+        </resource>
+    </fixture>
+    <fixture id="pdb-bundle">
+        <autocreate value="false"/>
+        <autodelete value="false"/>
+        <resource>
+            <reference value="Bundle/pdb.xml"/>
+        </resource>
+    </fixture>
+
+    <variable>
+        <name value="patientResourceId"/>
+        <expression value="Bundle.entry.fullUrl"/>
+        <sourceId value="patient-bundle"/>
+    </variable>
+
+    <test>
+        <action>
+            <operation>
+                <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
+                    <extension url="component">
+                        <valueString value="module.xml"/>
+                    </extension>
+                    <extension url="urn:fixture-in">
+                        <valueString  value="pdb-bundle"/>
+                    </extension>
+                    <!--
+                    this is the name expected in the static fixture pdb-bundle
+                    so it should not be translated or even expected in the module. It
+                    is passed through module processing unaltered.
+                    -->
+                    <extension url="urn:variable-in-no-translation">
+                        <valueString value="patientResourceId"/>
+                    </extension>
+                    <extension url="urn:fixture-out">
+                        <valueString value="pdb-response"/>
+                    </extension>
+                </modifierExtension>
+            </operation>
+        </action>
+        <action>
+            <assert>
+                <description value="... transaction was successful"/>
+                <response value="okay"/>
+                <sourceId value="pdb-response"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+    </test>
+</TestScript>

@@ -8,7 +8,7 @@ import org.hl7.fhir.r4.utils.FHIRPathEngine;
 
 import java.util.List;
 
-class FhirPathEngineBuilder {
+public class FhirPathEngineBuilder {
 
     static FHIRPathEngine build() {
         return new FHIRPathEngine(new HapiWorkerContext(ProxyBase.getFhirContext(), new PrePopulatedValidationSupport()));
@@ -29,6 +29,20 @@ class FhirPathEngineBuilder {
             return val;
         }
         return true;
+    }
+
+    public static Resource evalForResource(Resource resourceIn, String expression) {
+        List<Base> results = build().evaluate(resourceIn, expression);
+        if (results.isEmpty())
+            return null;
+        if (results.size() > 1)
+            return null;
+        Base result = results.get(0);
+        if (result instanceof Bundle.BundleEntryComponent) {
+            Bundle.BundleEntryComponent comp = (Bundle.BundleEntryComponent) result;
+            return comp.getResource();
+        }
+        return null;
     }
 
     public static String evalForString(BaseResource resource, String expression) {

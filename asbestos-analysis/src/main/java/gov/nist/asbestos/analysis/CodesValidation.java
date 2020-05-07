@@ -66,6 +66,8 @@ public class CodesValidation {
     public void check(Coding coding, String fhirCodeName, String xdsCodeName, List<String> errors) {
         if (coding == null)
             return;
+        if (coding.getSystem() == null && coding.getCode() == null)
+            return;
         boolean error = false;
         if (coding.getSystem() == null) {
             error = true;

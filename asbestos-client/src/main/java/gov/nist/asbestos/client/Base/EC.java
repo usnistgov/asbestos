@@ -4,16 +4,32 @@ import com.google.gson.Gson;
 import gov.nist.asbestos.client.events.EventSummary;
 import gov.nist.asbestos.client.events.UIEvent;
 import gov.nist.asbestos.client.log.SimStore;
+import gov.nist.asbestos.client.resolver.Ref;
+import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import gov.nist.asbestos.simapi.simCommon.SimId;
 import org.apache.log4j.Logger;
+import org.hl7.fhir.r4.hapi.ctx.HapiWorkerContext;
+import org.hl7.fhir.r4.hapi.validation.PrePopulatedValidationSupport;
+import org.hl7.fhir.r4.model.Base;
+import org.hl7.fhir.r4.model.BaseResource;
+import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Resource;
+import org.hl7.fhir.r4.utils.FHIRPathEngine;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Properties;
 import java.util.stream.Collectors;
 
@@ -125,16 +141,47 @@ public class EC {
         return collectionRoot;
     }
 
-     public File getTestLog(String channelId, String collectionName, String testName) {
-        File testLogs = new File(externalCache, "FhirTestLogs");
-        File forChannelId = new File(testLogs, channelId);
-        File forCollection = new File(forChannelId, collectionName);
-        forCollection.mkdirs();
-        return new File(forCollection, testName + ".json");
+    public File getTestLog(String channelId, String collectionName, String testName) {
+        return getTestLog(channelId, collectionName, testName, null);
+    }
+
+    public List<String> getTestLogModules(String channelId, String collectionName, String testName) {
+        List<String> names = new ArrayList<>();
+        File collectionDir = getTestLogCollectionDir(channelId, collectionName);
+        File testDir = new File(collectionDir, testName);
+        if (!testDir.isDirectory())
+            return names;
+        File[] files = testDir.listFiles();
+        if (files == null)
+            return names;
+        for (File file : files) {
+            if (file.isDirectory())
+                names.add(file.getName());
+        }
+        return names;
+    }
+
+    public File getTestLogDir(String channelId, String collectionName, String testName) {
+        File collectionDir = getTestLogCollectionDir(channelId, collectionName);
+        File testDir = new File(collectionDir, testName);
+        return testDir;
+    }
+
+     public File getTestLog(String channelId, String collectionName, String testName, String moduleName) {
+        File collectionDir = getTestLogCollectionDir(channelId, collectionName);
+        File testDir = new File(collectionDir, testName);
+        if (moduleName == null) {
+            testDir.mkdirs();
+            return new File(testDir, "TestReport.json");
+        }
+        File moduleDir = new File(testDir, moduleName);
+        moduleDir.mkdirs();
+        return new File(moduleDir, "TestReport.json");
     }
 
     // channelId is testSession__channel
-    public File getTestLogDir(String channelId, String collectionName) {
+    public File getTestLogCollectionDir(String channelId, String collectionName) {
+        Objects.requireNonNull(channelId);
         File testLogs = new File(externalCache, "FhirTestLogs");
         File forChannelId = new File(testLogs, channelId);
         File forCollection = (collectionName == null) ? forChannelId : new File(forChannelId, collectionName);
@@ -143,27 +190,33 @@ public class EC {
     }
 
     public File getTestLogCacheDir(String channelId) {
-        return new File(getTestLogDir(channelId, null), "cache");
+        return new File(getTestLogCollectionDir(channelId, null), "cache");
     }
 
     // channelId is testSession__channel
     public List<File> getTestLogs(String channelId, String collectionName) {
-        File testLogs = new File(externalCache, "FhirTestLogs");
-        File forTestSession = new File(testLogs, channelId);
-        File forCollection = new File(forTestSession, collectionName);
+//        File testLogs = new File(externalCache, "FhirTestLogs");
+//        File forTestSession = new File(testLogs, channelId);
+        File forCollection = getTestLogCollectionDir(channelId, collectionName); //new File(forTestSession, collectionName);
 
         List<File> testLogList = new ArrayList<>();
         File[] tests = forCollection.listFiles();
         if (tests != null) {
             for (File test : tests) {
-                String name = test.toString();
-                if (!name.endsWith(".json")) continue;
-                if (name.startsWith(".")) continue;
-                if (name.startsWith("_")) continue;
-                testLogList.add(test);
+                if (test.isDirectory()) {
+                    File report = new File(test, "TestReport.json");
+                    if (report.exists())
+                        testLogList.add(report);
+                } else {
+                    String name = test.toString();
+                    if (!name.endsWith(".json")) continue;
+                    if (name.startsWith(".")) continue;
+                    if (name.startsWith("_")) continue;
+                    testLogList.add(test);
+                }
             }
         }
-        log.info("got " + testLogList.size() + " test logs from " + testLogs.toString());
+//        log.info("got " + testLogList.size() + " test logs from " + testLogs.toString());
         return testLogList;
     }
 
@@ -190,6 +243,15 @@ public class EC {
         resp.setStatus(resp.SC_OK);
     }
 
+    public UIEvent getEvent(EventContext eventContext) {
+        return getEvent(
+            eventContext.getTestSession(),
+            eventContext.getChannelId(),
+            "null",
+            eventContext.getEventId()
+        );
+    }
+
     public UIEvent getEvent(String testSession, String channelId, String resourceType, String eventName) {
         File fhir = fhirDir(testSession, channelId);
         if (resourceType.equals("null")) {
@@ -199,6 +261,8 @@ public class EC {
             }
         }
         File resourceTypeFile = new File(fhir, resourceType);
+        if (eventName == null)
+            return null;
         File eventDir = new File(resourceTypeFile, eventName);
 
         UIEvent uiEvent = new UIEvent(new EC(externalCache)).fromEventDir(eventDir);
@@ -335,5 +399,78 @@ public class EC {
 
     public File getCodesFile(String environment) {
         return new File(new File(new File(externalCache, "environment"), environment), "codes.xml");
+    }
+
+    // these utilities duplicated from FhirPathEngineBuilder
+    private FHIRPathEngine build() {
+        return new FHIRPathEngine(new HapiWorkerContext(ProxyBase.getFhirContext(), new PrePopulatedValidationSupport()));
+    }
+
+    private Resource evalForResource(Resource resourceIn, String expression) {
+        List<Base> results = build().evaluate(resourceIn, expression);
+        if (results.isEmpty())
+            return null;
+        if (results.size() > 1)
+            return null;
+        Base result = results.get(0);
+        if (result instanceof Bundle.BundleEntryComponent) {
+            Bundle.BundleEntryComponent comp = (Bundle.BundleEntryComponent) result;
+            return comp.getResource();
+        }
+        return null;
+    }
+
+
+    public ResourceWrapper getStaticFixture(String testCollectionId, String testId, String fixturePath, String fhirPath, URL url) {
+        if (fixturePath == null || fixturePath.startsWith("/") || fixturePath.startsWith("."))
+            return null;
+        File testDir = getTest(testCollectionId, testId);
+        if (!testDir.exists() || !testDir.isDirectory())
+            return null;
+        if (fixturePath.contains("?")) {
+            String[] parts = fixturePath.split("\\?");
+            String query = parts[1];
+            if (query.startsWith("url")) {
+                try {
+                    fixturePath = URLDecoder.decode(query, StandardCharsets.UTF_8.toString());
+                } catch (UnsupportedEncodingException e) {
+                    return null;
+                }
+                parts = fixturePath.split("=");
+                if (parts.length == 2)
+                    fixturePath = parts[1];
+            }
+        }
+
+
+        File file = new File(testDir, fixturePath);
+        if (!file.exists() || !file.isFile())
+            return null;
+        BaseResource resource;
+        try {
+            resource = ProxyBase.parse(file);
+        } catch (Exception e) {
+            return null;
+        }
+        URI uri;
+        try {
+            uri = url.toURI();
+        } catch (URISyntaxException e) {
+            return null;
+        }
+        ResourceWrapper wrapper = new ResourceWrapper();
+        wrapper.setRef(new Ref(uri));
+        if (fhirPath == null) {
+            wrapper.setResource(resource);
+        } else if (resource instanceof Bundle) {
+            Bundle bundle = (Bundle) resource;
+            Resource resource1 = evalForResource(bundle, fhirPath);
+            if (resource1 == null)
+                return null;
+            wrapper.setResource(resource1);
+        } else {
+            return null;
+        }
+        return wrapper;
     }
 }

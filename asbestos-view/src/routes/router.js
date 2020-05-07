@@ -10,7 +10,7 @@ import ChannelView from "../components/channelEditor/ChannelView";
 import LogsView from "../components/LogsView"
 //import ChannelLogList from "../components/ChannelLogList"
 import LogList from "../components/logViewer/LogList"
-import LogItem from "../components/logViewer/LogItem"
+import InspectEvent from "../components/logViewer/InspectEvent"
 import TestCollection from "../components/testRunner/TestCollection"
 import TestOrEvalDetails from "../components/testRunner/TestOrEvalDetails"
 import EvalDetails from "../components/testRunner/EvalDetails"
@@ -21,6 +21,8 @@ import MhdTesting from "../components/top/MhdTesting"
 import Configurations from "../components/top/Configurations"
 import Getter from "../components/getter/Getter"
 import Admin from "../components/wrapper/Admin";
+import StaticFixtureDisplay from "../components/testRunner/StaticFixtureDisplay";
+import Setup from "../components/top/Setup";
 
 Vue.use( VueRouter )
 
@@ -43,6 +45,12 @@ export const routes = [
                 path: 'home',
                 components: {
                     default: Home
+                }
+            },
+            {
+                path: 'setup',
+                components: {
+                    default: Setup
                 }
             },
             {
@@ -98,8 +106,13 @@ export const routes = [
                             //     props: true,
                             // },
                             {
+                                path: 'lognav/:eventId/:reqresp',
+                                component: InspectEvent,
+                                props: true,
+                            },
+                            {
                                 path: 'lognav/:eventId',
-                                component: LogItem,
+                                component: InspectEvent,
                                 props: true,
                             },
                             {
@@ -137,6 +150,10 @@ export const routes = [
             {
                 path: 'session',
                 components: { session: SessionView },
+            },{
+                path: 'collection/:testCollection/test/:testId/fixture/:path',
+                component: StaticFixtureDisplay,
+                props: true
             }
         ]
     },

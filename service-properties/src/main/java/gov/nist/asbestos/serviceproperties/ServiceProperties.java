@@ -17,6 +17,7 @@ import java.util.Properties;
  * NOTE: Only FhirToolkit (Asbestos) is intended to use this class.
  */
 public class ServiceProperties {
+    public static String SERVICE_PROPERTIES_FILE_NAME = "service.properties";
     private static final Logger logger = Logger.getLogger(ServiceProperties.class);
     private static File spFile;
     private long spFileLastModified;
@@ -27,13 +28,16 @@ public class ServiceProperties {
         String spString = System.getProperty("SERVICE_PROPERTIES");
         if (spString == null) {
             try {
-                spFile = getLocalSpFile(getClass());
+                spFile = getLocalSpFile(getClass(), SERVICE_PROPERTIES_FILE_NAME);
             } catch (Exception ex) {
                 logger.error("Could not locate the service.properties file: " + ex.toString());
                 throw ex;
             }
         } else {
-            spFile = new File(spString);
+            spFile = new File(spString); // Could be Full path Or leaf i.e., only the file name
+            if (spFile.getParent() == null) { // This is only a leaf file name
+                spFile = getLocalSpFile(getClass(), spString);
+            }
         }
         properties = new Properties();
         loadProperties();
@@ -81,9 +85,9 @@ public class ServiceProperties {
         }
     }
 
-    public static File getLocalSpFile(Class clazz) throws URISyntaxException  {
+    public static File getLocalSpFile(Class clazz, String fileNameString) throws URISyntaxException  {
         Objects.requireNonNull(clazz);
-        return Paths.get(clazz.getResource("/").toURI()).resolve("service.properties").toFile();
+        return Paths.get(clazz.getResource("/").toURI()).resolve(fileNameString).toFile();
     }
 
     /**

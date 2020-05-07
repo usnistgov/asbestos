@@ -116,7 +116,7 @@
                 this.selectedTask = task
             },
             selectSummary(summary) {
-                // don't reload if it is already the selected event
+                // don't load if it is already the selected event
                 this.selectedEventName = summary.eventName === this.selectedEventName ? null: summary.eventName
                 if (this.selectedEventName !== null) {
                     this.selectedEvent = null

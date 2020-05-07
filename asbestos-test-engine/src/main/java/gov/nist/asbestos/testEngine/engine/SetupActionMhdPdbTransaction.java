@@ -1,6 +1,7 @@
 package gov.nist.asbestos.testEngine.engine;
 
 import gov.nist.asbestos.client.resolver.IdBuilder;
+import gov.nist.asbestos.testEngine.engine.fixture.FixtureMgr;
 import org.hl7.fhir.r4.model.*;
 
 import java.util.Objects;
@@ -9,8 +10,8 @@ public class SetupActionMhdPdbTransaction extends SetupActionTransaction {
     private IdBuilder idBuilder = new IdBuilder(true);
     private int counter = 1;
 
-    SetupActionMhdPdbTransaction(FixtureMgr fixtureMgr) {
-        super(fixtureMgr);
+    SetupActionMhdPdbTransaction(ActionReference actionReference, FixtureMgr fixtureMgr) {
+        super(actionReference, fixtureMgr);
         Objects.requireNonNull(fixtureMgr);
         this.fixtureMgr = fixtureMgr;
     }

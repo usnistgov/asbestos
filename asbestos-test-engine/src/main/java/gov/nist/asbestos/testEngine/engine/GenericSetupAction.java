@@ -1,13 +1,15 @@
 package gov.nist.asbestos.testEngine.engine;
 
+import gov.nist.asbestos.client.Base.EC;
 import gov.nist.asbestos.client.Base.ProxyBase;
 import gov.nist.asbestos.client.client.FhirClient;
 import gov.nist.asbestos.client.client.Format;
+import gov.nist.asbestos.client.events.UIEvent;
 import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
-import gov.nist.asbestos.http.headers.Headers;
-import gov.nist.asbestos.http.operations.HttpBase;
 import gov.nist.asbestos.simapi.validation.ValE;
+import gov.nist.asbestos.testEngine.engine.fixture.FixtureComponent;
+import gov.nist.asbestos.testEngine.engine.fixture.FixtureMgr;
 import org.hl7.fhir.r4.model.BaseResource;
 import org.hl7.fhir.r4.model.TestReport;
 import org.hl7.fhir.r4.model.TestScript;
@@ -19,6 +21,7 @@ abstract class GenericSetupAction {
     FixtureMgr fixtureMgr;  // static fixtures and history of operations
     ValE val;
     FixtureComponent fixtureComponent = null;
+    FixtureComponent sourceFixture = null;
     FhirClient fhirClient = null;
     VariableMgr variableMgr = null;
     URI sut = null;
@@ -34,57 +37,28 @@ abstract class GenericSetupAction {
     BaseResource resourceToSend;
     Reporter reporter;
     String label;
+    private String testCollectionId = null;
+    private String testId = null;
+    private TestEngine testEngine = null;
+    ActionReference actionReference = null;
+    String channelId = null;
 
     abstract String resourceTypeToSend();
 
-    private String asMarkdown(Map<String, String> table, String title) {
-        StringBuilder buf = new StringBuilder();
-        buf.append("### ").append(title).append("\n");
-        boolean first = true;
-        for (String key : table.keySet()) {
-            if (!first)
-                buf.append("\n");
-            first = false;
-            String value = table.get(key);
-            buf.append("**").append(key).append("**: ").append(value);
-        }
-        return buf.toString();
+    GenericSetupAction(ActionReference actionReference) {
+        this.actionReference = actionReference;
+        Objects.requireNonNull(actionReference);
     }
 
     private void reportOperation(ResourceWrapper wrapper) {
-        String request = "### " + wrapper.getHttpBase().getVerb() + " " + wrapper.getHttpBase().getUri() + "\n";
-
-        Map<String, String> fixtures = new HashMap<>();
-        for (String key : fixtureMgr.keySet()) {
-            FixtureComponent comp = fixtureMgr.get(key);
-            String value = null;
-
-            HttpBase httpBase = comp.getHttpBase();
-            if (httpBase != null) {
-                Headers responseHeaders = httpBase.getResponseHeaders();
-                String eventUrl = responseHeaders.getProxyEvent();
-                value = EventLinkToUILink.get(eventUrl);
-            } else if (comp.isLoaded()){
-                ResourceWrapper wrapper1 = comp.getResourceWrapper();
-                if (wrapper1 != null) {
-                    Ref ref = wrapper1.getRef();
-                    if (ref != null)
-                        value = ref.toString() + " (static)";
-                }
-            }
-
-
-            fixtures.put(key, value);
-        }
-
-        Map<String, String> variables = variableMgr.getVariables();
-
-        String markdown = request
-                + asMarkdown(fixtures, "Fixtures")
-                + "\n"
-                + asMarkdown(variables, "Variables");
-
-        reporter.report(markdown, wrapper);
+        Objects.requireNonNull(testCollectionId);
+        Objects.requireNonNull(testId);
+        Objects.requireNonNull(testEngine);
+        new ActionReporter()
+                .setTestEngine(testEngine)
+                .setTestCollectionId(testCollectionId)
+                .setTestId(testId)
+                .reportOperation(wrapper, fixtureMgr, variableMgr, reporter, op);
     }
 
     abstract Ref buildTargetUrl();
@@ -103,6 +77,8 @@ abstract class GenericSetupAction {
         Objects.requireNonNull(op);
         Objects.requireNonNull(operationReport);
         Objects.requireNonNull(variableMgr);
+        Objects.requireNonNull(testEngine);
+
         val = new ValE(val).setMsg(type);
         this.op = op;
         this.opReport = operationReport;
@@ -117,11 +93,12 @@ abstract class GenericSetupAction {
                 reporter.reportError("has no sourceId on operation " + op.getType().getCode());
                 return false;
             }
-            FixtureComponent sourceFixture = fixtureMgr.get(op.getSourceId());
+            sourceFixture = fixtureMgr.get(op.getSourceId());
             if (sourceFixture == null) {
                 reporter.reportError("sourceId " + op.getSourceId() + " does not exist");
                 return false;
             }
+            sourceFixture.setReferencedByActionReference(actionReference);
             resourceToSend = sourceFixture.getResourceResource();
             resourceToSend = updateResourceToSend(resourceToSend);
         }
@@ -146,7 +123,18 @@ abstract class GenericSetupAction {
         return ProxyBase.parse(updatedResourceString, Format.JSON);
     }
 
+    UIEvent getUIEvent(ResourceWrapper wrapper) {
+        Objects.requireNonNull(getTestEngine());
+        EC ec = new EC(getTestEngine().getExternalCache());
+        return ec.getEvent(getTestEngine().getTestSession(),
+                        getTestEngine().getChannelId(),
+                        wrapper.getResourceType(),
+                        wrapper.getEventId());
+    }
+
     void postExecute(ResourceWrapper wrapper) {
+        Objects.requireNonNull(testEngine);
+
         if (wrapper.hasResource()) {
             String receivedResourceType = wrapper.getResource().getClass().getSimpleName();
             String expectedResourceType = resourceTypeToBeReturned();
@@ -157,10 +145,16 @@ abstract class GenericSetupAction {
         }
 
         String fixtureId = op.hasResponseId() ? op.getResponseId() : FixtureComponent.getNewId();
-        fixtureComponent = new FixtureComponent(fixtureId)
+        UIEvent uiEvent = getUIEvent(wrapper);
+        fixtureMgr.add(fixtureId)
                 .setResource(wrapper)
-                .setHttpBase(wrapper.getHttpBase());
-        fixtureMgr.put(fixtureId, fixtureComponent);
+                .setHttpBase(wrapper.getHttpBase())
+        .setCreatedByActionReference(actionReference)
+        .setCreatedByUIEvent(uiEvent);
+
+        if (sourceFixture != null) {
+            sourceFixture.setCreatedByUIEvent(uiEvent);
+        }
 
         reportOperation(wrapper);
     }
@@ -169,7 +163,7 @@ abstract class GenericSetupAction {
         return resourceTypeToSend();
     }
 
-    private List<String> putPostTypes = new ArrayList<String>(
+    private final List<String> putPostTypes = new ArrayList<String>(
             Arrays.asList(
             "update", "updateCreate", "create", "transaction", "mhd-pdb-transaction"
             )
@@ -178,5 +172,33 @@ abstract class GenericSetupAction {
     boolean isPUTorPOST() {
         String type = op.getType().getCode();
         return putPostTypes.contains(type);
+    }
+
+    public GenericSetupAction setTestCollectionId(String testCollectionId) {
+        this.testCollectionId = testCollectionId;
+        return this;
+    }
+
+    public GenericSetupAction setTestId(String testId) {
+        this.testId = testId;
+        return this;
+    }
+
+    public TestEngine getTestEngine() {
+        return testEngine;
+    }
+
+    public GenericSetupAction setTestEngine(TestEngine testEngine) {
+        this.testEngine = testEngine;
+        return this;
+    }
+
+    public String getChannelId() {
+        return channelId;
+    }
+
+    public GenericSetupAction setChannelId(String channelId) {
+        this.channelId = channelId;
+        return this;
     }
 }

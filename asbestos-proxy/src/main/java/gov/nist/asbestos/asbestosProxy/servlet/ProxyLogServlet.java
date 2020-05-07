@@ -59,13 +59,13 @@ public class ProxyLogServlet extends HttpServlet {
 
         try {
 
-            if (GetLogEventAnalysis.isRequest(request)) new GetLogEventAnalysis(request).run();
+            if (GetLogEventAnalysisRequest.isRequest(request)) new GetLogEventAnalysisRequest(request).run();
             else if (GetEventRequest.isRequest(request)) new GetEventRequest(request).run();
             else if (GetDocumentRequest.isRequest(request)) new GetDocumentRequest(request).run();
             else if (GetProxyBaseRequest.isRequest(request)) new GetProxyBaseRequest(request).run();
             else if (GetValidationServerRequest.isRequest(request)) new GetValidationServerRequest(request).run();
-            else if (GetValidationRequest.isRequest(request)) new GetValidationRequest(request).run();
-            else if (GetChannelMarkerRequest.isRequest(request)) new GetChannelMarkerRequest(request).run();
+            //else if (GetValidationRequest.isRequest(request)) new GetValidationRequest(request).run();
+            //else if (GetChannelMarkerRequest.isRequest(request)) new GetChannelMarkerRequest(request).run();
             else if (GetEventForResourceTypeRequest.isRequest(request)) new GetEventForResourceTypeRequest(request).run();
             else if (GetEventsForChannelRequest.isRequest(request)) new GetEventsForChannelRequest(request).run();
             else throw new Exception("Invalid request - do not understand URI " + request.uri);
@@ -94,9 +94,9 @@ public class ProxyLogServlet extends HttpServlet {
         log.info("Log POST " + request.uri);
 
         try {
-
-            if (CreateChannelMarkerRequest.isRequest(request)) new CreateChannelMarkerRequest(request).run();
-            else throw new Exception("Invalid request - do not understand URI " + request.uri);
+            if (AnalyseResourceRequest.isRequest(request)) new AnalyseResourceRequest(request).run();
+            else
+                throw new Exception("Invalid request - do not understand URI " + request.uri);
 
         } catch (RuntimeException e) {
             log.error(ExceptionUtils.getStackTrace(e));

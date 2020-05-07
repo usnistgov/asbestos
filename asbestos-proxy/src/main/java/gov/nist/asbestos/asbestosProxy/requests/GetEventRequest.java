@@ -19,6 +19,7 @@ import java.util.List;
 // 4 - channelId
 // 5 - resourceType - may be null
 // 6 - event
+// returns UIEvent as JSON
 
 public class GetEventRequest {
     private static Logger log = Logger.getLogger(GetEventRequest.class);

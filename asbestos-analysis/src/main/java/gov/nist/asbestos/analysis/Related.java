@@ -1,12 +1,10 @@
 package gov.nist.asbestos.analysis;
 
-import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 class Related {
     ResourceWrapper wrapper;
@@ -14,8 +12,8 @@ class Related {
     List<String> minimalErrors;
     List<String> comprehensiveErrors;
     List<String> codingErrors = new ArrayList<>();
-    AnalysisReport.Checked comprehensiveChecked;
-    AnalysisReport.Checked minimalChecked;
+    Checked comprehensiveChecked;
+    Checked minimalChecked;
     Map atts;
     boolean contained = false;
     String binaryUrl;

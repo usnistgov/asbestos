@@ -1,5 +1,8 @@
 <TestScript xmlns="http://hl7.org/fhir">
+    <description value="Submit Provide Document Bundle to MHD Document Recipient. The DocumentReference is not Comprehensive Metadata compliant. It is missing the type. Transaction must be rejected with code 400."/>
     <fixture id="pdb-bundle">
+        <autocreate value="false"/>
+        <autodelete value="false"/>
         <resource>
             <reference value="Bundle/pdb.xml"/>
         </resource>
@@ -8,6 +11,8 @@
         <!--
            This patient comes out of the test Patient cache
         -->
+        <autocreate value="false"/>
+        <autodelete value="false"/>
         <resource>
             <reference value="Patient/Alex_Alder"/>
         </resource>
@@ -38,7 +43,7 @@
         <sourceId value="pdb-bundle"/>
     </variable>
     <test>
-        <description value="Submit Provide Document Bundle to MHD Document Recipient and verify response. The DocumentReference is not Comprehensive Metadata compliant. It is missing the masterIdentifier."/>
+        <description value="Submit Provide Document Bundle"/>
         <!--
             Actions generic to all PDB transactions
         -->

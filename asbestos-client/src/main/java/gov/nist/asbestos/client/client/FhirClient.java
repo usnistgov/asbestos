@@ -57,7 +57,7 @@ public class FhirClient {
             headers = new HashMap<>();
         if (format == null)
             format = Format.XML;
-        String contentType = (format == Format.XML) ? "application/fhir+xml" : (format == Format.JSON ? "application/fhir+json" : null);
+        String contentType = format.getContentType(); //(format == Format.XML) ? "application/fhir+xml" : (format == Format.JSON ? "application/fhir+json" : null);
         if (contentType != null)
             headers.put("content-type", contentType);
         Headers theHeaders = new Headers(headers);
@@ -129,7 +129,7 @@ public class FhirClient {
     }
 
 
-    private ResourceWrapper readResource(Ref ref, Format format) {
+    public ResourceWrapper readResource(Ref ref, Format format) {
         HttpGet getter = new HttpGet();
         if (requestGzip)
             getter.acceptGzip();
@@ -182,11 +182,11 @@ public class FhirClient {
             if (iBaseResource instanceof BaseResource)
                 resource = (BaseResource) iBaseResource;
         }
-        if (getter.isSearch()) {
-            if (!(resource instanceof Bundle)) {
-                throw new Error("Search must return Bundle - received " + resource.getClass().getSimpleName() + " instead");
-            }
-        } else {
+//        if (getter.isSearch()) {
+//            if (!(resource instanceof Bundle)) {
+//                throw new Error("Search must return Bundle - received " + resource.getClass().getSimpleName() + " instead");
+//            }
+//        } else {
             Ref ref = new Ref(getter.getUri());
             String expectedResourceType = ref.getResourceType();
             String returnedResourceType = resource.getClass().getSimpleName();
@@ -194,12 +194,19 @@ public class FhirClient {
                 if (!returnedResourceType.equals("OperationOutcome")) {
                     if (!expectedResourceType.equals("metadata") && !returnedResourceType.equals("CapabilityStatement")) {
                         if (!returnedResourceType.equals(expectedResourceType)) {
-                            throw new Error("Read must return " + expectedResourceType + " - received " + resource.getClass().getSimpleName() + " instead");
+                            if (getter.isSearch() && returnedResourceType.equals("Bundle")) {
+                                Bundle bundle = (Bundle) resource;
+                                if (bundle.hasEntry()) {
+                                    if (!bundle.getEntry().get(0).getResource().getClass().getSimpleName().equals(expectedResourceType))
+                                        throw new Error("Search returned bundle containing " + bundle.getEntry().get(0).getResource().getClass().getSimpleName() + " instead of " + expectedResourceType);
+                                }
+                            } else
+                                throw new Error("Read must return " + expectedResourceType + " - received " + resource.getClass().getSimpleName() + " instead");
                         }
                     }
                 }
             }
-        }
+//        }
         wrapper.setResource(resource);
         this.httpBase = getter;
         op = Op.GET;

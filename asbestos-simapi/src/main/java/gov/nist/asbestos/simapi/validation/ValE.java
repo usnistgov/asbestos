@@ -21,6 +21,17 @@ public class ValE {
         this.msg = msg;
     }
 
+    public String toString() {
+        StringBuilder buf = new StringBuilder();
+
+        if (hasErrors())
+            buf.append("Has Errors! ");
+
+        buf.append(types).append("  ").append(msg);
+
+        return buf.toString();
+    }
+
     public ValE asError() {
         types.add(ValType.Error);
         return this;

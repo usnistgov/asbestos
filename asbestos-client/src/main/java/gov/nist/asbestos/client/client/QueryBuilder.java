@@ -9,7 +9,7 @@ class QueryBuilder {
 
     static URI buildUrl(Ref ref, Class<?> resourceType, List<String> params) {
         Ref x = ref.withResource(resourceType.getSimpleName());
-        String refstring = x.toString() + "?" + String.join(";", params);
+        String refstring = x.toString() + "?" + String.join("&", params);
         return EncodeUri.get(refstring);
     }
 }

@@ -1,0 +1,151 @@
+<Bundle xmlns="http://hl7.org/fhir">
+    <id value="xds"/>
+    <meta>
+        <lastUpdated value="2013-07-01T13:11:33Z"/>
+        <profile value="http://ihe.net/fhir/StructureDefinition/IHE_MHD_Provide_Comprehensive_DocumentBundle"/>
+    </meta>
+    <type value="transaction"/>
+    <entry>
+        <fullUrl value="urn:uuid:1e404af3-077f-4bee-b7a6-a9be97e1ce01"/>
+        <resource>
+            <DocumentReference>
+                <text>
+                    <div xmlns="http://www.w3.org/1999/xhtml">Comment</div>
+                    <status value="empty"/>
+                </text>
+                <contained>
+                    <Patient xmlns="http://hl7.org/fhir">
+                        <id value="sourcePatient"/>
+                        <identifier>
+                            <use value="usual" />
+                            <type>
+                                <coding>
+                                    <system value="urn:ietf:rfc:3986" />
+                                    <code value="urn:ihe:iti:xds:2013:accession" />
+                                </coding>
+                            </type>
+                            <system value="urn:oid:1.2.214" />
+                            <value value="myMRN" />
+                        </identifier>
+                    </Patient>
+                </contained>
+                <status value="current"/>
+                <masterIdentifier>
+                    <system value="urn:ietf:rfc:3986"/>
+                    <value value="urn:oid:1.2.129.6.58.92.88336.4"/>
+                </masterIdentifier>
+                <type>
+                    <coding>
+                        <system value="http://loinc.org"/>
+                        <code value="34895-3"/>
+                        <display value="Education Note"/>
+                    </coding>
+                </type>
+                <category>
+                    <coding>
+                        <system value="urn:oid:1.3.6.1.4.1.19376.1.2.6.1"/>
+                        <code value="REPORTS"/>
+                        <display value="Reports"/>
+                    </coding>
+                </category>
+                <subject>
+                    <reference value="${patientResourceId}"/>
+                </subject>
+                <date value="2015-02-07T13:28:17.239+02:00"/>
+                <securityLabel>
+                    <coding>
+                        <system value="http://terminology.hl7.org/CodeSystem/v3-Confidentiality"/>
+                        <code value="N"/>
+                        <display value="normal"/>
+                    </coding>
+                </securityLabel>
+                <context>
+                    <sourcePatientInfo>
+                        <reference value="#sourcePatient"/>
+                    </sourcePatientInfo>
+                    <practiceSetting>
+                        <coding>
+                            <system value="http://snomed.info/sct"/>
+                            <code value="R-300E3"/>
+                            <display value="Accident and Emergency"/>
+                        </coding>
+                    </practiceSetting>
+                    <facilityType>
+                        <coding>
+                            <system value="http://snomed.info/sct"/>
+                            <code value="264372000"/>
+                            <display value="Pharmacy"/>
+                        </coding>
+                    </facilityType>
+                </context>
+                <content>
+                    <attachment>
+                        <contentType value="text/plain"/>
+                        <url value="urn:uuid:3fdc72f4-a11d-4a9d-9260-a9f745779e03"/>
+                        <language value="en-US"/>
+                    </attachment>
+                    <format>
+                        <system value="http://ihe.net/fhir/ValueSet/IHE.FormatCode.codsystem"/>
+                        <code value="urn:ihe:pcc:cm:2008"/>
+                    </format>
+                </content>
+            </DocumentReference>
+        </resource>
+        <request>
+            <method value="POST"/>
+            <url value="urn:uuid:1e404af3-077f-4bee-b7a6-a9be97e1ce01"/>
+        </request>
+    </entry>
+    <entry>
+        <fullUrl value="urn:uuid:3fdc72f4-a11d-4a9d-9260-a9f745779e02"/>
+        <resource>
+            <DocumentManifest xmlns="http://hl7.org/fhir">
+                <text>
+                    <div xmlns="http://www.w3.org/1999/xhtml">Comment</div>
+                    <status value="empty"/>
+                </text>
+                <masterIdentifier>
+                    <system value="urn:ietf:rfc:3986"/>
+                    <value value="urn:oid:1.2.129.6.58.92.88337.4"/>
+                </masterIdentifier>
+                <status value="current"/>
+                <type>
+                    <coding>
+                        <system value="http://snomed.info/sct"/>
+                        <code value="225728007"/>
+                        <display value="Accident and Emergency department"/>
+                    </coding>
+                </type>
+                <subject>
+                    <reference value="${patientResourceId}"/>
+                </subject>
+                <created value="2004-12-25T23:50:50-05:00"/>
+                <source value="urn:oid:1.3.6.1.4.1.21367.2009.1.2.1"/>
+                <description value="Physical"/>
+                <content>
+                    <reference value="urn:uuid:1e404af3-077f-4bee-b7a6-a9be97e1ce01"/>
+                </content>
+            </DocumentManifest>
+        </resource>
+        <request>
+            <method value="POST"/>
+            <url value="urn:uuid:3fdc72f4-a11d-4a9d-9260-a9f745779e02"/>
+        </request>
+    </entry>
+    <entry>
+        <fullUrl value="urn:uuid:3fdc72f4-a11d-4a9d-9260-a9f745779e03"/>
+        <resource>
+            <Binary>
+                <meta>
+                    <lastUpdated value="2013-07-01T13:11:33Z"/>
+                </meta>
+                <contentType value="application/pdf"/>
+                <data value="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b6Wtgq4KZW5kc3RyZWFtCmVuZG9iagoKOSAwIG9iago8PC9UeXBlL0ZvbnQvU3VidHlwZS9UcnVlVHlwZS9CYXNlRm9udC9CQUFBQUErTGliZXJhdGlvblNlcmlmCi9GaXJzdENoYXIgMAovTGFzdENoYXIgMTAKL1dpZHRoc1s3NzcgODg5IDUwMCAyNTAgNTAwIDMzMyA1MDAgNzIyIDUwMCA0NDMgMjUwIF0KL0ZvbnREZXNjcmlwdG9yIDcgMCBSCi9Ub1VuaWNvZGUgOCAwIFIKPj4KZW5kb2JqCgoxMCAwIG9iago8PC9GMSA5IDAgUgo+PgplbmRvYmoKCjExIDAgb2JqCjw8L0ZvbnQgMTAgMCBSCi9Qcm9jU2V0Wy9QREYvVGV4dF0KPj4KZW5kb2JqCgoxIDAgb2JqCjw8L1R5cGUvUGFnZS9QYXJlbnQgNCAwIFIvUmVzb3VyY2VzIDExIDAgUi9NZWRpYUJveFswIDAgNjEyIDc5Ml0vUm90YXRlIDAKL0dyb3VwPDwvUy9UcmFuc3BhcmVuY3kvQ1MvRGV2aWNlUkdCL0kgdHJ1ZT4+L0NvbnRlbnRzIDIgMCBSPj4KZW5kb2JqCgo0IDAgb2JqCjw8L1R5cGUvUGFnZXMKL1Jlc291cmNlcyAxMSAwIFIKL01lZGlhQm94WyAwIDAgNjEyIDc5MiBdCi9LaWRzWyAxIDAgUiBdCi9Db3VudCAxPj4KZW5kb2JqCgoxMiAwIG9iago8PC9UeXBlL0NhdGFsb2cvUGFnZXMgNCAwIFIKL1ZpZXdlclByZWZlcmVuY2VzPDwvRGlzcGxheURvY1RpdGxlIHRydWUKPj4KL0xhbmcoZW4tVVMpCj4+CmVuZG9iagoKMTMgMCBvYmoKPDwvVGl0bGU8RkVGRjAwNTUwMDZFMDA3NDAwNjkwMDc0MDA2QzAwNjUwMDY0MDAyMDAwMzE+Ci9DcmVhdG9yPEZFRkYwMDRDMDA2OTAwNjIwMDcyMDA2NTAwNEYwMDY2MDA2NjAwNjkwMDYzMDA2NTAwMjAwMDM2MDAyRTAwMzAwMDJFMDAzNzAwMkUwMDMzPgovUHJvZHVjZXI8RkVGRjAwNEMwMDY5MDA2MjAwNzIwMDY1MDA0RjAwNjYwMDY2MDA2OTAwNjMwMDY1MDAyMDAwMzYwMDJFMDAzMDAwMkUwMDM3MDAyRTAwMzM+Ci9DcmVhdGlvbkRhdGUoRDoyMDIwMDEzMTA5MTE1NS0wNScwMCcpPj4KZW5kb2JqCgp4cmVmCjAgMTQKMDAwMDAwMDAwMCA2NTUzNSBmIAowMDAwMDA2NjExIDAwMDAwIG4gCjAwMDAwMDAwMTkgMDAwMDAgbiAKMDAwMDAwMDE4NCAwMDAwMCBuIAowMDAwMDA2NzY0IDAwMDAwIG4gCjAwMDAwMDAyMDMgMDAwMDAgbiAKMDAwMDAwNTc2OSAwMDAwMCBuIAowMDAwMDA1NzkwIDAwMDAwIG4gCjAwMDAwMDU5ODUgMDAwMDAgbiAKMDAwMDAwNjMyNCAwMDAwMCBuIAowMDAwMDA2NTI0IDAwMDAwIG4gCjAwMDAwMDY1NTYgMDAwMDAgbiAKMDAwMDAwNjg2MyAwMDAwMCBuIAowMDAwMDA2OTY5IDAwMDAwIG4gCnRyYWlsZXIKPDwvU2l6ZSAxNC9Sb290IDEyIDAgUgovSW5mbyAxMyAwIFIKL0lEIFsgPDdDMTRFRTM1OTJFODk1REU1MTg0MTEyMjM5NTUwNTc1Pgo8N0MxNEVFMzU5MkU4OTVERTUxODQxMTIyMzk1NTA1NzU+IF0KL0RvY0NoZWNrc3VtIC9EMzc1MDZERUJEQUU2NzJFRUM2ODY3NTc2QzRERkMwQQo+PgpzdGFydHhyZWYKNzI2NQolJUVPRgo="/>
+            </Binary>
+        </resource>
+        <request>
+            <method value="POST"/>
+            <url value="urn:uuid:3fdc72f4-a11d-4a9d-9260-a9f745779e02"/>
+        </request>
+    </entry>
+</Bundle>

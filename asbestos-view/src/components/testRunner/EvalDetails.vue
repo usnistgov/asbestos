@@ -1,78 +1,59 @@
 <template>
     <div>
         <div v-if="script && report" class="script">
-            <!--            <div v-if="script.description">-->
-            <!--                {{ script.description }}-->
-            <!--            </div>-->
-<!--            <div v-for="(fixture, i) in fixtures"-->
-<!--                 :key="i">-->
-<!--                <span class="name" >Fixture: </span>-->
-<!--                <span class="value">{{ fixture.id }}</span>-->
-<!--            </div>-->
-<!--            <div v-for="(variable, i) in variables"-->
-<!--                 :key="'Var' + i">-->
-<!--                <span class="name" >Variable: </span>-->
-<!--                <span class="value">{{ variable.name }}</span>-->
-<!--            </div>-->
-
             <!--   add SETUP here  -->
             <div>
-                <span class="selectable" @click.self="toggleEventDisplayed()">Message Log</span>
-                <span v-if="eventDisplayed">
-                        <img src="../../assets/arrow-down.png" @click.self="toggleEventDisplayed()">
-                        <log-item
+                <span v-if="inspectorOpen">
+                    <img src="../../assets/arrow-down.png" @click.self="toggleInspectorOpen()">
+                </span>
+                <span v-else>
+                    <span v-if="!noInspectLabel">
+                        <img src="../../assets/arrow-right.png" @click.self="toggleInspectorOpen()">
+                    </span>
+                </span>
+
+                <span v-if="!noInspectLabel" class="selectable" @click.self="toggleInspectorOpen()">Inspect</span>
+                <span v-if="inspectorOpen">
+                        <inspect-event
                                 :sessionId="sessionId"
                                 :channelId="channelId"
                                 :eventId="eventId"
                                 :noNav="true">
-                        </log-item>
-                    </span>
-                <span v-else>
-                        <img src="../../assets/arrow-right.png" @click.self="toggleEventDisplayed()">
+                        </inspect-event>
                     </span>
             </div>
+
+
             <div v-for="(test, testi) in tests" class="test-part"
-                 :key="'Eval' + testi">
-                <div v-bind:class="testResult(testi)">{{test.name}}</div>
+                 :key="'Eval' + testi">    <!--   v-bind:class="testResult(testi) + ((colorful)?'':'plain-detail')"   -->
+                <div >{{test.description}}</div>
 
                 <!-- actions will be asserts only-->
                 <div v-for="(action, actioni) in actions(testi)" class="assert-part"
                      :key="'Eval' + testi + 'Action' + actioni">
-                    <div>
-                        <div >
-                            <div @click.self="selectAssert(actioni)" v-bind:class="{
-                                    pass: assertResult(testi, actioni) === 'pass',
-                                    fail: assertResult(testi, actioni) === 'fail',
-                                    error: assertResult(testi, actioni) === 'error',
-                                    warning: assertResult(testi, actioni) === 'warning',
-                                    'not-run': assertResult(testi, actioni) === 'not-run' }">
-                                <span class="selectable">Assert:</span> {{ assertDesc(testi, actioni) }}
-                            </div>
-                            <div v-if="selectedAssertIndex === actioni" class="message-part">
-                                <div v-if="assertRef(testi, actioni)">
-                                    {{ assertRef(testi, actioni) }}
-                                </div>
-                                <ul>
-                                    <li v-for="(item, itemi) in assertMessage(testi, actioni)" :key="'AM' + itemi">
-                                        {{ item }}
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
+
+                    <eval-action-details
+                            :script="action"
+                            :report="reportAction(testi, actioni)"
+                    > </eval-action-details>
                 </div>
             </div>
 
             <!-- add TEARDOWN here -->
 
         </div>
+        <div v-else>
+            Not Available
+        </div>
     </div>
 </template>
 
 <script>
     import errorHandlerMixin from '../../mixins/errorHandlerMixin'
-    //import EvalReportAssert from './EvalReportAssert'
-    import LogItem from "../logViewer/LogItem"
+    import colorizeTestReports from "../../mixins/colorizeTestReports";
+    import InspectEvent from "../logViewer/InspectEvent"
+    //import TestStatus from "./TestStatus";
+    import EvalActionDetails from "./EvalActionDetails";
 
     export default {
         data() {
@@ -80,17 +61,21 @@
                 script: null,
                 report: null,
                 selectedAssertIndex: null,
+                selectedTestIndex: null,
                 passClass: 'pass',
                 failClass: 'fail',
-                eventDisplayed: false,
+                inspectorOpen: false,
             }
         },
         methods: {
-            toggleEventDisplayed() {
-                this.eventDisplayed = !this.eventDisplayed
+            reportAction(testi, actioni) {
+                return this.report.test[testi].action[actioni]
+            },
+            toggleInspectorOpen() {
+                this.inspectorOpen = !this.inspectorOpen
             },
             assertMessage(testIndex, actionIndex) {
-                if (this.testReport && actionIndex < this.testReport.test[testIndex].action.length) {
+                if (this.testReport  &&  actionIndex < this.testReport.test[testIndex].action.length) {
                     return this.testReport.test[testIndex].action[actionIndex].assert.message.split("\n")
                 }
                 return null
@@ -108,8 +93,8 @@
                 return 'pass'
             },
             assertResult(testIndex, actionIndex) {
-                if (this.testReport && actionIndex < this.testReport.test[testIndex].action.length)
-                    return this.testReport.test[testIndex].action[actionIndex].assert.result
+                if (this.report && actionIndex < this.report.test[testIndex].action.length)
+                    return this.report.test[testIndex].action[actionIndex].assert.result
                 return 'not-run'
             },
             assertReport(testIndex, actionIndex) {
@@ -118,62 +103,63 @@
             assertScript(testIndex, actionIndex) {
                 return this.testScript.test[testIndex].action[actionIndex].assert
             },
-            assertDesc(testIndex, actionIndex) {
-                const rawDesc = this.assertScript(testIndex, actionIndex).description
-                if (!rawDesc.includes("|"))
-                    return rawDesc
-                const elements = rawDesc.split("|")
-                const msg = elements[0]
-                return msg
-            },
-            assertRef(testIndex, actionIndex) {
-                const rawDesc = this.assertScript(testIndex, actionIndex).description
-                if (!rawDesc.includes("|"))
-                    return ''
-                const elements = rawDesc.split("|")
-                const assertId = elements[1]
-                return `Reference: ${this.assertProfile} - ${this.assertMsg(assertId)}\n`
-            },
-            selectAssert(assertIndex) {
-                if (this.selectedAssertIndex === assertIndex)
-                    this.selectedAssertIndex = null
-                else
-                    this.selectedAssertIndex = assertIndex
-            },
+            // assertDesc(testIndex, actionIndex) {
+            //     const rawDesc = this.assertScript(testIndex, actionIndex).description
+            //     if (!rawDesc.includes("|"))
+            //         return rawDesc
+            //     const elements = rawDesc.split("|")
+            //     const msg = elements[0]
+            //     return msg
+            // },
+            // assertRef(testIndex, actionIndex) {
+            //     const rawDesc = this.assertScript(testIndex, actionIndex).description
+            //     if (!rawDesc.includes("|"))
+            //         return ''
+            //     const elements = rawDesc.split("|")
+            //     const assertId = elements[1]
+            //     return `Reference: ${this.assertProfile} - ${this.assertMsg(assertId)}\n`
+            // },
+            // selectAssert(testIndex, assertIndex) {
+            //     if (this.selectedTestIndex === testIndex && this.selectedAssertIndex === assertIndex) {
+            //         this.selectedTestIndex = null
+            //         this.selectedAssertIndex = null
+            //     } else {
+            //         this.selectedTestIndex = testIndex
+            //         this.selectedAssertIndex = assertIndex
+            //     }
+            // },
             operationOrAssertion(testi, actioni) {
                 const action = this.script.test[testi].action[actioni]
                 return action.operation ? `Operation: ${this.operationType(action.operation)}` : `Assert: ${this.assertionDescription(action.assert)}`
             },
             operationType(operation) {
-                return operation.type.code
+                return operation && operation.type ? operation.type.code : null
             },
             assertionDescription(assert) {
                 return assert.description === undefined ? "" : assert.description
             },
-            async loadTestScript() {
-                await this.$store.dispatch('loadTestScript', { testCollection: this.testCollection, testId: this.testId })
+            loadTestScript() {
+                //await this.$store.dispatch('loadTestScripts', this.$store.state.testRunner.testScriptNames)
                 this.script = this.$store.state.testRunner.testScripts[this.testId]
             },
             loadTestReport() {
-                this.report = this.$store.state.testRunner.testReports[this.testId]
+                const reports = this.$store.state.testRunner.clientTestResult[this.testId]
+                if (reports)
+                    this.report = reports[this.eventId]
             },
             actions(testIndex) {
                 return this.script.test[testIndex].action === undefined ? [] : this.script.test[testIndex].action
             },
-            scriptAction(testi, actioni) {
-                return this.script.test[testi].action[actioni]
-            },
-            reportAction(testi, actioni) {
-                if (!this.report)
-                    return null
-                return this.report.test[testi].action[actioni]
-            },
+            // scriptAction(testi, actioni) {
+            //     return this.script.test[testi].action[actioni]
+            // },
+            // reportAction(testi, actioni) {
+            //     if (!this.report)
+            //         return null
+            //     return this.report.test[testi].action[actioni]
+            // },
             assertMsg(assertId) {
                 return this.$store.state.testRunner.testAssertions[assertId]
-            },
-            async loadReports() {
-                await this.$store.dispatch('loadReports', this.testCollection)
-                await this.loadTestScript()
             },
             runSingleEventEval() {
                 this.$store.dispatch('runSingleEventEval',
@@ -190,9 +176,9 @@
                     await this.runSingleEventEval()
                     await this.loadTestScript()
                 } else {
-                    await this.loadReports()
+                    await this.$store.dispatch('runEval', this.testId)
                     this.loadTestScript()
-                    //this.loadTestReport()
+                    this.loadTestReport()
                 }
             }
         },
@@ -212,23 +198,23 @@
             tests() {
                 return this.script.test
             },
-            current() {
-                return this.$store.state.base.testCollectionDetails.find(item => {
-                    return item.name === this.testId
-                })
-            },
+            // current() {
+            //     return this.$store.state.base.testCollectionDetails.find(item => {
+            //         return item.name === this.testId
+            //     })
+            // },
             testScript() {
                 return this.$store.state.testRunner.testScripts[this.testId]
             },
             testReport() {
                 return this.$store.state.testRunner.clientTestResult[this.testId][this.eventId]
             },
-            testReports() {  // see watch
+            testReports() {  // see watch of the same name
                 return this.$store.state.testRunner.testReports[this.testId]
             }
         },
         created() {
-            this.testOrEventUpdated()
+           this.testOrEventUpdated()
         },
         mounted() {
 
@@ -240,13 +226,15 @@
                 this.loadTestReport()
             }
         },
-        mixins: [ errorHandlerMixin ],
+        mixins: [ errorHandlerMixin, colorizeTestReports ],
         props: [
-            'sessionId', 'channelId', 'testCollection', 'testId', 'eventId', 'runEval'
+            'sessionId', 'channelId', 'testCollection', 'testId', 'eventId', 'runEval', 'noInspectLabel',
         ],
         components: {
             //EvalReportAssert
-            LogItem
+            InspectEvent,
+           // TestStatus,
+            EvalActionDetails
         },
         name: "EvalDetails"
     }

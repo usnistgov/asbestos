@@ -5,7 +5,7 @@
     <parent>
         <artifactId>asbestos</artifactId>
         <groupId>gov.nist.asbestos</groupId>
-        <version>1.3.0</version>
+        <version>2.0.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -14,9 +14,10 @@
     <packaging>war</packaging>
 
     <properties>
-        <fhirToolkitUIBase>http://localhost:8082</fhirToolkitUIBase>
-        <httpsFhirToolkitUIBase>https://fhirtoolkit.test:9743/asbestos</httpsFhirToolkitUIBase>
+        <fhirToolkitUIHomePage>http://localhost:8082</fhirToolkitUIHomePage>
+        <httpsFhirToolkitBase>https://fhirtoolkit.test:9743/asbestos</httpsFhirToolkitBase>
         <fhirToolkitBase>http://localhost:8081/asbestos</fhirToolkitBase>
+        <itTestfhirToolkitBase>http://localhost:8877/asbestos</itTestfhirToolkitBase>
         <hapiFhirBase>http://localhost:8080/fhir/fhir</hapiFhirBase>
         <xdsToolkitBase>http://localhost:8080/xdstools</xdsToolkitBase>
         <tlsXdsToolkitBase>http://localhost:8443/xdstools</tlsXdsToolkitBase>
@@ -27,22 +28,27 @@
         <dependency>
             <groupId>gov.nist.asbestos</groupId>
             <artifactId>asbestos-utilities</artifactId>
-            <version>1.3.0</version>
+            <version>2.0.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>gov.nist.asbestos</groupId>
             <artifactId>asbestos-proxy</artifactId>
-            <version>1.3.0</version>
+            <version>2.0.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>gov.nist.asbestos</groupId>
             <artifactId>asbestos-test-engine</artifactId>
-            <version>1.3.0</version>
+            <version>2.0.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.thetransactioncompany</groupId>
             <artifactId>cors-filter</artifactId>
             <version>2.4</version>
+        </dependency>
+        <dependency>
+            <groupId>gov.nist.asbestos</groupId>
+            <artifactId>asbestos-proxy-support</artifactId>
+            <version>2.0.0-SNAPSHOT</version>
         </dependency>
 <!--        <dependency>-->
 <!--            <groupId>org.apache.tomcat</groupId>-->
@@ -62,6 +68,7 @@
                 <filtering>true</filtering>
                 <includes>
                     <include>service.properties</include>
+                    <include>ittest-service.properties</include>
                 </includes>
             </resource>
             <resource>
@@ -118,18 +125,21 @@
                 </executions>
                 <configuration>
                     <systemPropertyVariables>
-                        <fhir.port>8877</fhir.port>
+                        <fhir.port>8080</fhir.port>
                         <proxy.port>8877</proxy.port>
                     </systemPropertyVariables>
                     <forkCount>1</forkCount>
                     <reuseForks>false</reuseForks>
 
                     <testFailureIgnore>false</testFailureIgnore>
+<!--                    <includes>-->
+<!--                        <include>**/GetStaticFixtureIT.java</include>-->
+<!--                    </includes>-->
                     <excludes>
-                        <exclude>**/ToFhirServerIT.java</exclude>
-                        <exclude>**/ToProxyMhdIT.java</exclude>
-                        <exclude>**/ToProxyPassthroughIT.java</exclude>
-                        <exclude>**/CapabilityStatementIT.java</exclude>
+<!--                        <exclude>**/ToFhirServerIT.java</exclude>-->
+<!--                        <exclude>**/ToProxyMhdIT.java</exclude>-->
+<!--                        <exclude>**/ToProxyPassthroughIT.java</exclude>-->
+<!--                        <exclude>**/CapabilityStatementIT.java</exclude>-->
 <!--                        <exclude>**/*IT.java</exclude>-->
                     </excludes>
                     <!--
@@ -177,10 +187,10 @@
                             <war>${project.build.directory}/${project.name}.war</war>
                             <contextPath>/asbestos</contextPath>
                         </contextHandler>
-                        <contextHandler implementation="org.eclipse.jetty.webapp.WebAppContext">
-                            <war>${project.basedir}/../../hapi-fhir-jpaserver-starter/target/hapi-fhir-jpaserver.war</war>
-                            <contextPath>/fhir</contextPath>
-                        </contextHandler>
+<!--                        <contextHandler implementation="org.eclipse.jetty.webapp.WebAppContext">-->
+<!--                            <war>${project.basedir}/../../hapi-fhir-jpaserver-starter/target/hapi-fhir-jpaserver.war</war>-->
+<!--                            <contextPath>/fhir</contextPath>-->
+<!--                        </contextHandler>-->
                     </contextHandlers>
                     <!-- Enter any systemProperties here. -->
                     <jettyXml>${basedir}/src/test/etc/jetty.xml,${basedir}/src/test/etc/jetty-http.xml,${basedir}/src/test/etc/jetty-https.xml,${basedir}/src/test/etc/jetty-ssl.xml,${basedir}/src/test/etc/jetty-logging.xml</jettyXml>
@@ -198,6 +208,10 @@
                         <systemProperty>
                             <name>EXTERNAL_CACHE</name>
                             <value>${itTestsExternalCache}</value>
+                        </systemProperty>
+                        <systemProperty>
+                            <name>SERVICE_PROPERTIES</name>
+                            <value>ittest-service.properties</value>
                         </systemProperty>
                     </systemProperties>
                 </configuration>

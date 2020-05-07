@@ -33,6 +33,22 @@ public class ResourceCacheMgr {
         loadPatientServers(externalCache);
     }
 
+    public List<File> getDefaultCacheDirs() {
+        CacheBundle cacheBundle = caches.get(new Ref(""));
+        if (cacheBundle == null)
+            return new ArrayList<>();
+        return cacheBundle.getFileSystemCacheDirs();
+    }
+
+    public void insertIntoFileSystemResourceCache(File cacheDir) {
+        CacheBundle cacheBundle = caches.get(new Ref(""));
+        if (cacheBundle == null) {
+            cacheBundle = new CacheBundle();
+            caches.put(new Ref(""), cacheBundle);
+        }
+        cacheBundle.insertFileCache(cacheDir);
+    }
+
     private void loadPatientServers(File externalCache) {
         File patientServersFile = new File(externalCache, "patientServers.txt");
         try (Stream<String> stream = Files.lines(Paths.get(patientServersFile.toString()))) {

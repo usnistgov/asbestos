@@ -3,6 +3,7 @@ package gov.nist.asbestos.testEngine.engine;
 import gov.nist.asbestos.client.client.FhirClient;
 import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.simapi.validation.ValE;
+import gov.nist.asbestos.testEngine.engine.fixture.FixtureMgr;
 import org.hl7.fhir.r4.model.TestReport;
 
 import java.net.URI;
@@ -10,8 +11,8 @@ import java.net.URI;
 class SetupActionSearch extends SetupActionRead {
 
 
-    SetupActionSearch(FixtureMgr fixtureMgr) {
-        super(fixtureMgr);
+    SetupActionSearch(ActionReference actionReference, FixtureMgr fixtureMgr) {
+        super(actionReference, fixtureMgr);
     }
 
     @Override

@@ -85,10 +85,6 @@ class DocumentEntryTest {
 
         CodeTranslator codeTranslator = new CodeTranslator(getCodesFile());
 
-        String json = fhirContext.newJsonParser().encodeResourceToString(expected);
-        JsonParser jsonParser1 = jsonFactory.createParser(json);
-        JsonNode node1 = objectMapper.readTree(jsonParser1);
-
         ChannelConfig channelConfig = new ChannelConfig()
                 .setChannelId("test")
                 .setChannelType("mhd")
@@ -109,6 +105,8 @@ class DocumentEntryTest {
         ITask task = event.newTask();
         rMgr.setTask(task);
 
+
+        // Translate DocRef to XDS
         BundleToRegistryObjectList bundleToRegistryObjectList = new BundleToRegistryObjectList();
         bundleToRegistryObjectList.setVal(val);
         bundleToRegistryObjectList.setCodeTranslator(codeTranslator);
@@ -121,6 +119,8 @@ class DocumentEntryTest {
         rMgr.setVal(val);
         rMgr.setFhirClient(fhirClient);
 
+
+        // Translate XDS back to DocRef
         ExtrinsicObjectType extrinsicObjectType = bundleToRegistryObjectList.createExtrinsicObject(resource, new ValE(val));
 
         DocumentEntryToDocumentReference documentEntryToDocumentReference = new DocumentEntryToDocumentReference();
@@ -141,16 +141,22 @@ class DocumentEntryTest {
             }
         }
 
+        expected.setDate(documentReference1.getDate());
+
+        String json = fhirContext.newJsonParser().encodeResourceToString(expected);
+        JsonParser jsonParser1 = jsonFactory.createParser(json);
+        JsonNode expectedJson = objectMapper.readTree(jsonParser1);
+
         String json2 = fhirContext.newJsonParser().encodeResourceToString(documentReference1);
         JsonParser jsonParser2 = jsonFactory.createParser(json2);
-        JsonNode node2 = objectMapper.readTree(jsonParser2);
+        JsonNode translatedJson = objectMapper.readTree(jsonParser2);
 
         if (checkForErrors && val.hasErrors())
             fail(ValFactory.toJson(new ValErrors(val)));
         if (checkForErrors && val.hasWarnings())
             fail(ValFactory.toJson(new ValWarnings(val)));
 
-        assertEquals(node1, node2);
+        assertEquals(expectedJson, translatedJson);
     }
 
     private DocumentReference getEmptyDR() {
@@ -174,8 +180,8 @@ class DocumentEntryTest {
 
         if (!val.ignore("masterIdentifier not present"))
             fail("Error did not occur");
-        if ( !val.ignore("subject not present or has no reference"))
-            fail("Error did not occur");
+//        if ( !val.ignore("subject not present or has no reference"))
+//            fail("Error did not occur");
 
         if (val.hasErrors())
             fail(ValFactory.toJson(new ValErrors(val)));
@@ -198,8 +204,8 @@ class DocumentEntryTest {
 
         run(documentReference, null, false);
 
-        if (!val.ignore("subject not present or has no reference"))
-            fail("Error did not occur");
+//        if (!val.ignore("subject not present or has no reference"))
+//            fail("Error did not occur");
 
         if (val.hasErrors())
             fail(ValFactory.toJson(new ValErrors(val)));
@@ -222,8 +228,8 @@ class DocumentEntryTest {
 
         run(documentReference, null, false);
 
-        if (!val.ignore("subject not present or has no reference"))
-            fail("Error did not occur");
+//        if (!val.ignore("subject not present or has no reference"))
+//            fail("Error did not occur");
 
         if (val.hasErrors())
             fail(ValFactory.toJson(new ValErrors(val)));
@@ -253,8 +259,8 @@ class DocumentEntryTest {
 
         if (!val.ignore("DocumentReference.identifier is UUID but not labeled as official"))
             fail("Error did not occur");
-        if (!val.ignore("subject not present or has no reference"))
-            fail("Error did not occur");
+//        if (!val.ignore("subject not present or has no reference"))
+//            fail("Error did not occur");
 
         if (val.hasErrors())
             fail(ValFactory.toJson(new ValErrors(val)));
@@ -321,8 +327,8 @@ class DocumentEntryTest {
 
         run(documentReference, expected, false);
 
-        if (!val.ignore("subject not present or has no reference"))
-            fail("Error did not occur");
+//        if (!val.ignore("subject not present or has no reference"))
+//            fail("Error did not occur");
 
         if (val.hasErrors())
             fail(ValFactory.toJson(new ValErrors(val)));
@@ -360,8 +366,8 @@ class DocumentEntryTest {
 
         run(documentReference, expected, false);
 
-        if (!val.ignore("subject not present or has no reference"))
-            fail("Error did not occur");
+//        if (!val.ignore("subject not present or has no reference"))
+//            fail("Error did not occur");
 
         if (val.hasErrors())
             fail(ValFactory.toJson(new ValErrors(val)));
@@ -398,8 +404,8 @@ class DocumentEntryTest {
 
         run(documentReference, expected, false);
 
-        if (!val.ignore("subject not present or has no reference"))
-            fail("Error did not occur");
+//        if (!val.ignore("subject not present or has no reference"))
+//            fail("Error did not occur");
 
         if (val.hasErrors())
             fail(ValFactory.toJson(new ValErrors(val)));
@@ -436,8 +442,8 @@ class DocumentEntryTest {
 
         run(documentReference, expected, false);
 
-        if (!val.ignore("subject not present or has no reference"))
-            fail("Error did not occur");
+//        if (!val.ignore("subject not present or has no reference"))
+//            fail("Error did not occur");
 
         if (val.hasErrors())
             fail(ValFactory.toJson(new ValErrors(val)));
@@ -462,15 +468,7 @@ class DocumentEntryTest {
         return x;
     }
 
-//    @Test
-//    void patient() throws IOException, JAXBException {
-//        List<DocumentReference> x = withPatientAndExpected();
-//        DocumentReference documentReference = x.get(0);
-//        DocumentReference expected = x.get(1);
-//
-//        run(documentReference, expected, true);
-//    }
-
+    // Build DocRef with Offical ID and contained legal authenticator
     private DocumentReference withLegalAuthenticator() {
         DocumentReference documentReference = withOfficialEntryUUID();
 
@@ -503,8 +501,8 @@ class DocumentEntryTest {
 
         run(documentReference, expected, false);
 
-        if (!val.ignore("subject not present or has no reference"))
-            fail("Error did not occur");
+//        if (!val.ignore("subject not present or has no reference"))
+//            fail("Error did not occur");
 
         if (val.hasErrors())
             fail(ValFactory.toJson(new ValErrors(val)));
@@ -542,8 +540,8 @@ class DocumentEntryTest {
 
         run(documentReference, expected, false);
 
-        if (!val.ignore("subject not present or has no reference"))
-            fail("Error did not occur");
+//        if (!val.ignore("subject not present or has no reference"))
+//            fail("Error did not occur");
 
         if (val.hasErrors())
             fail(ValFactory.toJson(new ValErrors(val)));
@@ -584,8 +582,8 @@ class DocumentEntryTest {
 
         run(documentReference, expected, false);
 
-        if (!val.ignore("subject not present or has no reference"))
-            fail("Error did not occur");
+//        if (!val.ignore("subject not present or has no reference"))
+//            fail("Error did not occur");
 
         if (val.hasErrors())
             fail(ValFactory.toJson(new ValErrors(val)));
@@ -631,8 +629,8 @@ class DocumentEntryTest {
 
         run(documentReference, expected, false);
 
-        if (!val.ignore("subject not present or has no reference"))
-            fail("Error did not occur");
+//        if (!val.ignore("subject not present or has no reference"))
+//            fail("Error did not occur");
 
         if (val.hasErrors())
             fail(ValFactory.toJson(new ValErrors(val)));
@@ -674,8 +672,8 @@ class DocumentEntryTest {
 
         run(documentReference, expected, false);
 
-        if (!val.ignore("subject not present or has no reference"))
-            fail("Error did not occur");
+//        if (!val.ignore("subject not present or has no reference"))
+//            fail("Error did not occur");
 
         if (val.hasErrors())
             fail(ValFactory.toJson(new ValErrors(val)));
@@ -720,8 +718,8 @@ class DocumentEntryTest {
 
         run(documentReference, expected, false);
 
-        if (!val.ignore("subject not present or has no reference"))
-            fail("Error did not occur");
+//        if (!val.ignore("subject not present or has no reference"))
+//            fail("Error did not occur");
 
         if (val.hasErrors())
             fail(ValFactory.toJson(new ValErrors(val)));
@@ -754,8 +752,8 @@ class DocumentEntryTest {
 
         run(documentReference, expected, false);
 
-        if (!val.ignore("subject not present or has no reference"))
-            fail("Error did not occur");
+//        if (!val.ignore("subject not present or has no reference"))
+//            fail("Error did not occur");
 
         if (val.hasErrors())
             fail(ValFactory.toJson(new ValErrors(val)));
@@ -792,8 +790,8 @@ class DocumentEntryTest {
 
         run(documentReference, expected, false);
 
-        if ( !val.ignore("subject not present or has no reference"))
-            fail("Error did not occur");
+//        if ( !val.ignore("subject not present or has no reference"))
+//            fail("Error did not occur");
 
         if (val.hasErrors())
             fail(ValFactory.toJson(new ValErrors(val)));
@@ -807,7 +805,7 @@ class DocumentEntryTest {
         attachment.setContentType("text/plain");
         attachment.setLanguage("en-us");
         attachment.setTitle("comments");
-        attachment.setCreation(new Date());
+        //attachment.setCreation(new Date());
         content.setFormat(new Coding()
                 .setCode("1.2.840.10008.5.1.4.1.1.88.59")
                 .setSystem("http://dicom.nema.org/resources/ontology/DCM")
@@ -824,7 +822,8 @@ class DocumentEntryTest {
         DocumentReference expected = withContentType();
         expected.getIdentifier().remove(0);  // ID1 not appropriate (was placeholder for ID)
         x.add(expected);
-        expected.getContent().get(0).getAttachment().setCreation(original.getContent().get(0).getAttachment().getCreation());
+//        expected.getContent().get(0)
+//                .getAttachment().setCreation(original.getContent().get(0).getAttachment().getCreation());
         return x;
     }
 
@@ -836,8 +835,8 @@ class DocumentEntryTest {
 
         run(documentReference, expected, false);
 
-        if ( !val.ignore("subject not present or has no reference"))
-            fail("Error did not occur");
+//        if ( !val.ignore("subject not present or has no reference"))
+//            fail("Error did not occur");
 
         if (val.hasErrors())
             fail(ValFactory.toJson(new ValErrors(val)));

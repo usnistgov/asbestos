@@ -73,6 +73,11 @@
   </servlet>
 
   <servlet>
+    <servlet-name>validationService</servlet-name>
+    <servlet-class>gov.nist.asbestos.asbestosProxy.servlet.ValidationServlet</servlet-class>
+  </servlet>
+
+  <servlet>
     <servlet-name>TestEngine</servlet-name>
     <servlet-class>gov.nist.asbestos.asbestosProxy.servlet.TestEngineServlet</servlet-class>
     <load-on-startup>3</load-on-startup> <!-- must be started after ProxyService -->
@@ -117,6 +122,11 @@
   <servlet-mapping>
     <servlet-name>logViewer</servlet-name>
     <url-pattern>/log/*</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>validationService</servlet-name>
+    <url-pattern>/validate/*</url-pattern>
   </servlet-mapping>
 
   <servlet-mapping>

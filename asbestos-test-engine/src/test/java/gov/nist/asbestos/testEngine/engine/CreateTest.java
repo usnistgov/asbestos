@@ -6,6 +6,8 @@ import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import gov.nist.asbestos.http.operations.HttpPost;
 import gov.nist.asbestos.simapi.validation.Val;
+import gov.nist.asbestos.testEngine.engine.fixture.FixtureComponent;
+import gov.nist.asbestos.testEngine.engine.fixture.UnregisteredFixtureComponent;
 import org.hl7.fhir.r4.model.BaseResource;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Patient;
@@ -80,7 +82,7 @@ class CreateTest {
                 .setVal(val)
                 .setFhirClient(fhirClientMock);
 
-        testEngine.getFixtures().put("http://localhost:9999/fhir/Patient/45", new FixtureComponent("create").setHttpBase(poster));
+        testEngine.getFixtures().put("http://localhost:9999/fhir/Patient/45", new UnregisteredFixtureComponent("create").setHttpBase(poster));
         testEngine.runTest();
         System.out.println(testEngine.getTestReportAsJson());
         List<String> errors = testEngine.getErrors();

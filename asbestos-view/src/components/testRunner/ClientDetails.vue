@@ -1,51 +1,54 @@
-<template>
-    <div v-if="testScript">
-        <div class="instruction">
-            {{ testScript.description }}
-        </div>
-        <div v-if="eventIds === null">
-            No messages present on this channel
-        </div>
-        <div v-else>
-            <div v-for="(eventId, eventi) in eventIds"
-                :key="'Disp' + eventi">
-                <div>
-                    <div  @click.self="selectEvent(eventId)" v-bind:class="[isEventPass(eventId) ? passClass : failClass, 'event-part']">
-                        Message: {{ eventId }} - {{ eventDetail(eventId) }}
-                    </div>
-                    <div v-if="selected === eventId">
-                        <router-view></router-view>
-                    </div>
-                </div>
-            </div>
+<template>  <!-- once for each client test-->
+    <div v-if="testScript" class="align-left test-margins">
+
+        <script-status v-if="!statusRight" :status-right="statusRight" :name="testId"> </script-status>
+
+        <span v-if="$store.state.testRunner.currentEvent === eventId">
+            <img src="../../assets/arrow-down.png">
+        </span>
+        <span v-else>
+            <img src="../../assets/arrow-right.png"/>
+        </span>
+
+        <span  @click.self="selectEvent()" class="event-part" v-bind:class="[isEventPass() ? passClass : failClass]">
+            Message: {{ eventId }} - {{ eventDetail(eventId) }}
+        </span>
+
+        <script-status v-if="statusRight" :status-right="statusRight" :name="testId"> </script-status>
+
+
+        <div v-if="selected === eventId">
+            <router-view></router-view>  <!-- eval-details -->
         </div>
     </div>
 </template>
 
 <script>
+import colorizeTestReports from "../../mixins/colorizeTestReports";
+import ScriptStatus from "./ScriptStatus";
 
     export default {
         data() {
             return {
-                passClass: 'pass',
-                failClass: 'fail',
+                passClass: null,  // initialized in created()
+                failClass: null,
             }
         },
         methods: {
-            selectEvent(name) {
-                if (this.selected === name)  { // unselect
+            selectEvent() {
+                if (this.selected === this.eventId)  { // unselect
                     this.$store.commit('setCurrentEvent', null)
                     const route = `/session/${this.sessionId}/channel/${this.channelId}/collection/${this.testCollection}/test/${this.testId}`
                     this.$router.push(route)
                 } else {
-                    this.$store.commit('setCurrentEvent', name)
-                    const route = `/session/${this.sessionId}/channel/${this.channelId}/collection/${this.testCollection}/test/${this.testId}/event/${name}`
+                    this.$store.commit('setCurrentEvent', this.eventId)
+                    const route = `/session/${this.sessionId}/channel/${this.channelId}/collection/${this.testCollection}/test/${this.testId}/event/${this.eventId}`
                     this.$router.push(route)
                 }
             },
             eventDetail(eventId) {
                 if (this.logSummariesNeedLoading || this.logSummariesNeedLoading2) {
-                    //console.log(`calling loadEventSummaries`)
+                    console.log(`calling loadEventSummaries`)
                     this.$store.dispatch('loadEventSummaries', {session: this.sessionId, channel: this.channelId})
                     //console.log(`loadEventSummaries returned`)
                 }
@@ -57,17 +60,24 @@
                 }
                 return null
             },
-            isEventPass(eventId) {
-                return this.eventResult[eventId].result === 'pass'
+            isEventPass() {
+                return this.eventResult[this.eventId].result === 'pass'
             },
             selectCurrent() {
                 this.selectEvent(this.selected)
             },
             loadTest() {
-                this.$store.dispatch('loadTestScript', { testCollection: this.testCollection, testId: this.testId })
+                if (!this.$store.state.testRunner.testScripts[this.testId])
+                    this.$store.dispatch('loadTestScript', { testCollection: this.testCollection, testId: this.testId })
             },
         },
         computed: {
+            isPass() {
+                return this.eventResult[this.eventId].result === 'pass'
+            },
+            isFail() {
+                return this.eventResult[this.eventId].result === 'fail'
+            },
             logSummariesNeedLoading() {  // because of channel change
                 return !this.$store.state.log.eventSummaries ||
                     this.sessionId !== this.$store.state.log.session ||
@@ -97,26 +107,34 @@
             },
         },
         created() {
+            if (this.$store.state.testRunner.colorMode) {
+                this.passClass = 'pass'
+                this.failClass = 'fail'
+            } else {
+                this.passClass = 'pass-plain-detail'
+                this.failClass = 'fail-plain-detail'
+            }
             this.loadTest()
         },
         watch: {
             'testId': 'loadTest'
         },
         props: [
-            'sessionId', 'channelId', 'testCollection', 'testId'
+            'sessionId', 'channelId', 'testCollection', 'testId', 'eventId'
         ],
         components: {
-
+            ScriptStatus
         },
+        mixins: [colorizeTestReports],
         name: "ClientDetails"
     }
 </script>
 
 <style scoped>
     .event-part {
-        margin-left: 15px;
-        margin-right: 15px;
+        /*margin-left: 5px;*/
+        /*margin-right: 15px;*/
         cursor: pointer;
-        text-decoration: underline;
+        /*text-decoration: underline;*/
     }
 </style>

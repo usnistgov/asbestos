@@ -1,5 +1,7 @@
 package gov.nist.asbestos.asbestosProxy.requests;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import gov.nist.asbestos.client.Base.ProxyBase;
 import org.hl7.fhir.r4.model.BaseResource;
@@ -11,6 +13,7 @@ import java.util.List;
 
 public class Returns {
 
+    // This doesn't work if the values are JSON
     static void returnList(HttpServletResponse resp, List<String> values) {
         String json = new Gson().toJson(values);
         resp.setContentType("application/json");

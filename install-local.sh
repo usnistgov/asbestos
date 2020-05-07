@@ -15,26 +15,50 @@ if [ -d $INSTALL ]
 then
   echo "$INSTALL already exists"
   exit -1
+else
+  echo "No existing installation"
 fi
 
 # make some checks on $DEVELOP to make sure things are where we expect them
 echo "CHECK ALL DEVELOPMENT ELEMENTS ARE AVAILABLE"
 cd $DEVELOP
-if [ ! -d asbestos ] 
+if [ ! -d asbestos ]
 then
   echo "$DEVELOP/asbestos does not exist"
-  exit -1  
+  exit -1
+else
+  echo "$DEVELOP/asbestos exists"
+fi
+
+if [ ! -f $DEVELOP/asbestos/asbestos-assembly/target/asbestos.zip ]
+then
+  echo "$DEVELOP/asbestos/asbestos-assembly/target/asbestos.zip does not exist"
+  exit -1
+else
+    echo "$DEVELOP/asbestos/asbestos-assembly/target/asbestos.zip exists"
 fi
 
 if [ ! -d toolkit2 ]
 then
   echo "$DEVELOP/toolkit2 does not exist"
   exit -1
+else
+  echo "$DEVELOP/toolkit2 exists"
+fi
+
+if [ ! -f $DEVELOP/toolkit2/xdstools2/target/xdstools*.war ]
+then
+  echo "$DEVELOP/toolkit2/xdstools2/target/xdstools*.war does not exist"
+  exit -1
+else
+  echo "$DEVELOP/toolkit2/xdstools2/target/xdstools*.war exists"
 fi
 
 if [ ! -f fhir.zip ]
 then
   echo "$DEVELOP/fhir.zip does not exist"
+else
+  echo "$DEVELOP/fhir.zip exists"
 fi
 
 echo "COPY ASBESTOS.ZIP"
@@ -57,5 +81,6 @@ echo "INSTALL HAPI"
 cd $INSTALL/tomcat/Toolkits/XdsToolkit/webapps
 unzip -qq fhir.zip
 echo "REMOVE FHIR.ZIP"
-rm fhir.zip
+rm -f fhir.zip
+echo "DONE"
 

@@ -3,10 +3,10 @@ package gov.nist.asbestos.asbestosProxy.requests;
 
 // 0 - empty
 // 1 - app context  (asbestos)
-// 2 - "log"
-// 3 - "Validation"
+// 2 - "validate"
+// 3 - eventId
 // 4 - resourceType
-// query string url is url of resource to be validated
+// validates response object from event
 
 // returns OperationOutcome
 
@@ -29,7 +29,7 @@ public class GetValidationRequest {
     private Request request;
 
     public static boolean isRequest(Request request) {
-        return request.uriParts.size() == 4 && "Validation".equalsIgnoreCase(request.uriParts.get(3));
+        return request.uriParts.size() == 4 && "Validate".equalsIgnoreCase(request.uriParts.get(2));
     }
 
     public GetValidationRequest(Request request) {
@@ -38,7 +38,7 @@ public class GetValidationRequest {
 
     public void run() {
         log.info("GetValidationRequest");
-        String resourceType = request.uriParts.get(4);
+        String resourceType = request.uriParts.get(3);
         String base = ServiceProperties.getInstance().getPropertyOrStop(ServicePropertiesEnum.FHIR_VALIDATION_SERVER);
         Returns.returnValue(request.resp, base);
 

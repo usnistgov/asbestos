@@ -4,6 +4,7 @@ package gov.nist.asbestos.client.resolver;
 import gov.nist.asbestos.client.Base.ProxyBase;
 import gov.nist.asbestos.client.client.Format;
 import gov.nist.asbestos.http.headers.Header;
+import gov.nist.asbestos.http.headers.Headers;
 import gov.nist.asbestos.http.operations.HttpBase;
 import gov.nist.asbestos.http.operations.HttpDelete;
 import gov.nist.asbestos.http.operations.HttpGet;
@@ -119,6 +120,45 @@ public class ResourceWrapper {
         return null;
     }
 
+    private String[] getXProxyEventPathParts() {
+        if (httpBase == null)
+            return null;
+        Headers responseHeaders = httpBase.getResponseHeaders();
+        if (responseHeaders == null)
+            return null;
+        String eventUrl = responseHeaders.getHeaderValue("x-proxy-event");
+        if (eventUrl == null)
+            return null;
+        String[] parts = eventUrl.split("/");
+        if (parts.length <= 0)
+            return null;
+        return parts;
+    }
+
+    public String getEventId() {
+        String[] parts = getXProxyEventPathParts();
+        if (parts == null)
+            return null;
+        if (parts.length <= 0)
+            return null;
+        return parts[parts.length - 1];
+    }
+
+    public String getResponseResourceType() {
+        String[] parts = getXProxyEventPathParts();
+        if (parts == null)
+            return null;
+        if (parts.length < 2)
+            return null;
+        return parts[parts.length - 2];
+    }
+
+    public String getResourceType() {
+        if (resource == null)
+            return null;
+        return resource.getClass().getSimpleName();
+    }
+
     @Override
     public String toString() {
         StringBuilder buf = new  StringBuilder();
@@ -173,10 +213,11 @@ public class ResourceWrapper {
                         BaseResource resource = getResponseResource();
                         if (resource == null)
                             return false;
-                        if (ref.isQuery()) {
-                            if (!resource.getClass().getSimpleName().equals("Bundle"))
-                                return false;
-                        } else if (!resource.getClass().getSimpleName().equals(resourceType))
+//                        if (ref.isQuery()) {
+//                            if (!resource.getClass().getSimpleName().equals("Bundle"))
+//                                return false;
+//                        } else
+                            if (!resource.getClass().getSimpleName().equals(resourceType))
                             return false;
                     }
                 }
@@ -198,11 +239,12 @@ public class ResourceWrapper {
             byte[] responseBytes = httpBase.getResponse();
             if (responseBytes.length == 0)
                 return null;
+            String responseString = httpBase.getResponseText();
             String contentType = httpBase.getResponseContentType();
             Format format = Format.fromContentType(contentType);
             if (format == null)
                 return null;
-            return ProxyBase.parse(responseBytes, format);
+            return ProxyBase.parse(responseString, format);
         }
         return null;
     }

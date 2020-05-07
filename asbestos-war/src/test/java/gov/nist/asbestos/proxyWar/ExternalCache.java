@@ -5,15 +5,15 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Paths;
 
-class ExternalCache {
+public class ExternalCache {
 
-    public File getExternalCache() {
-        URL url = this.getClass().getResource("/external_cache/findme.txt");
+    static public File getExternalCache() {
+        URL url = ExternalCache.class.getResource("/external_cache/findme.txt");
         assert url != null;
 
         File ec = null;
         try {
-            ec = Paths.get(this.getClass().getResource("/").toURI()).resolve("external_cache/findme.txt").toFile().getParentFile();
+            ec = Paths.get(ExternalCache.class.getResource("/").toURI()).resolve("external_cache/findme.txt").toFile().getParentFile();
         } catch (URISyntaxException e) {
             assert false;
         }

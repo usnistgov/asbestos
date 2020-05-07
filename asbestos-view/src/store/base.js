@@ -135,7 +135,6 @@ export const baseStore = {
         },
         loadChannel({commit}, fullId) {
             const url = `CHANNEL/${fullId}`
-            console.log(`load channel from ${url}`)
             return CHANNEL.get(fullId)
                 .then(response => {
                     commit('installChannel', response.data)
@@ -170,6 +169,12 @@ export const baseStore = {
         },
         getFullChannelId: (state) => {
             return `${state.session}__${state.channelId}`
+        },
+        channelExists: (state) => (theChannelId) => {
+            const index = state.channelIds.findIndex(function(channelId) {
+                return channelId === theChannelId;
+            })
+            return index !== -1;
         }
     }
 }

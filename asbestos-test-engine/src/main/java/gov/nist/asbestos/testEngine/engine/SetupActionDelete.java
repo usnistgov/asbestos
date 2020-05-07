@@ -5,6 +5,8 @@ import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import gov.nist.asbestos.http.operations.HttpBase;
 import gov.nist.asbestos.simapi.validation.ValE;
+import gov.nist.asbestos.testEngine.engine.fixture.FixtureComponent;
+import gov.nist.asbestos.testEngine.engine.fixture.FixtureMgr;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.TestReport;
 import org.hl7.fhir.r4.model.TestScript;
@@ -17,7 +19,8 @@ import java.util.Objects;
 
 class SetupActionDelete extends GenericSetupAction {
 
-    SetupActionDelete(FixtureMgr fixtureMgr) {
+    SetupActionDelete(ActionReference actionReference, FixtureMgr fixtureMgr) {
+        super(actionReference);
         Objects.requireNonNull(fixtureMgr);
         this.fixtureMgr = fixtureMgr;
     }

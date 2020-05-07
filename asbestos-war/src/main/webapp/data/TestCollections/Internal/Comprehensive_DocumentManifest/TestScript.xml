@@ -1,0 +1,32 @@
+<TestScript xmlns="http://hl7.org/fhir">
+    <id value="comprehensive"/>
+    <name value="comprehensive"/>
+    <description value="Evaluate input for Comprehensive Metadata compliance."/>
+    <!--
+      These fixtures will be inserted by the TestEngine:
+        request - the input resource
+        response - the response resource (could be OperationOutcome)
+    -->
+    
+    <fixture id="referenceDocumentManifest">
+        <autocreate value="false"/>
+        <autodelete value="false"/>
+        <resource>
+            <reference value="DocumentManifest/reference"/>
+        </resource>
+    </fixture>
+    <test>
+        <action>
+            <assert>
+                <label value="Comprehensive DocumentManifest"/>
+                <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-OncePerType">
+                    <valueString value="DocumentManifest"/>
+                </modifierExtension>
+                <description value="verify required attributes present in DocumentManifest(s)"/>
+                <sourceId value="request"/>
+                <minimumId value="referenceDocumentManifest"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        </test>
+</TestScript>

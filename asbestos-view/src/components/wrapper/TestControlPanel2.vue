@@ -46,7 +46,9 @@
                 this.$store.dispatch('loadTestCollectionNames')
             },
             vuexCollectionUpdated() {
-                if (this.collection !== this.$store.state.testRunner.currentTestCollectionName) {
+                if (this.$store.state.testRunner.currentTestCollectionName === null)
+                    return;
+                if (this.$store.state.testRunner.autoRoute && this.collection !== this.$store.state.testRunner.currentTestCollectionName) {
                     this.collection = this.$store.state.testRunner.currentTestCollectionName
                     this.openCollection()
                 }

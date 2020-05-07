@@ -1,0 +1,34 @@
+<TestScript xmlns="http://hl7.org/fhir">
+    <modifierExtension url="urn:module">
+        <extension url="urn:fixture-in">
+            <valueString  value="pdb-bundle-param"/>
+        </extension>
+        <extension url="urn:fixture-out">
+            <valueString value="pdb-response-module"/>
+        </extension>
+    </modifierExtension>
+
+    <url value=""/>
+    <name value="test1"/>
+    <status value="draft"/>
+
+    <test>
+        <action>
+            <operation>
+                <type>
+                    <system value="https://github.com/usnistgov/asbestos/wiki/Testscript-Operation-Codes"/>
+                    <code value="mhd-pdb-transaction"/>
+                </type>
+                <responseId value="pdb-response-module"/>
+                <sourceId value="pdb-bundle-param"/>
+            </operation>
+        </action>
+        <action>
+            <assert>
+                <description value="... transaction was successful"/>
+                <response value="okay"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+    </test>
+</TestScript>

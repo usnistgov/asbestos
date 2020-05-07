@@ -27,10 +27,7 @@ export const logStore = {
             state.validationServer = server
         },
         setAnalysis(state, analysis) {
-//            const analysis = data.analysis
-//            const eventId = data.eventId
             state.analysis = analysis
-//            state.eventIdOfAnalysis = eventId
         },
         resetLogLoaded(state) {
             state.loaded = false
@@ -92,10 +89,26 @@ export const logStore = {
             const channel = parms.channel
             const session = parms.session
             const eventId = parms.eventId
+            let focusUrl = parms.url
+            //console.log(`focusUrl is ${focusUrl}`)
+            let anchor
+            if (focusUrl) {
+                const focusUrlPoundi = focusUrl.indexOf('#')
+                if (focusUrlPoundi !== -1) {
+                    anchor = focusUrl.substring(focusUrlPoundi + 1)
+                    focusUrl = focusUrl.substring(0, focusUrlPoundi)
+                }
+            }
+            //console.log(`focusUrl is ${focusUrl} anchor is ${anchor}`)
             const requestOrResponse = parms.requestOrResponse
 
+            if (!focusUrl)
+                focusUrl = ""
+            if (!anchor)
+                anchor = ""
+
             try {
-                const url = `analysis/event/${session}/${channel}/${eventId}/${requestOrResponse}`
+                const url = `analysis/event/${session}/${channel}/${eventId}/${requestOrResponse}?validation=true;focusUrl=${focusUrl};focusAnchor=${anchor}`
                 const result = await LOG.get(url)
                 //const data = {analysis: result.data, eventId: eventId}
                 commit('setAnalysis', result.data)
@@ -106,19 +119,28 @@ export const logStore = {
             }
         },
         async getLogEventAnalysisForObject({commit}, parms) {
-            const channel = parms.channel
-            const session = parms.session
-            const eventId = parms.eventId
-            const resourceUrl = parms.resourceUrl
+            const ignoreBadRefs = parms.ignoreBadRefs
+            let resourceUrl = parms.resourceUrl
+            if (resourceUrl)
+               resourceUrl = resourceUrl.trim()
             const gzip = parms.gzip
-            const useProxy = parms.useProxy
-            const requestOrResponse = parms.requestOrResponse
+            const eventId = parms.eventId ? parms.eventId : ""
             try {
-                const url = `analysis/url/${session}/${channel}/${eventId}/${requestOrResponse}?url=${resourceUrl};gzip=${gzip};useProxy=${useProxy}`
+                const url = `analysis/url/?url=${resourceUrl};gzip=${gzip};ignoreBadRefs=${ignoreBadRefs};eventId=${eventId}`
+                console.log(`getAnalysis ${url}`)
                 const result = await LOG.get(url)
-                //const data = {analysis: result.data, eventId: eventId}
                 commit('setAnalysis', result.data)
             } catch (error) {
+                commit('setError', error)
+                console.error(error)
+            }
+        },
+        async analyseResource({commit}, resourceString) {
+            try {
+                const url= `analysis/text`
+                const result = await LOG.post(url, {string: resourceString})
+                commit('setAnalysis', result.data)
+            }   catch (error) {
                 commit('setError', error)
                 console.error(error)
             }

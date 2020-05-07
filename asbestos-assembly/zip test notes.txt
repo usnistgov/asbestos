@@ -24,7 +24,8 @@ mvn clean install -P Sunil -DskipTests=true -DskipITs=true
 
 cd asbestos-assembly
 
-Without using a profile, assembly makes use of the default XdsToolkit port setting at 9770.
+Without using a profile, assembly makes use of the default XdsToolkit port setting at 9770. Do not use a profile for Production package.
+If Sunil profile is used, XdsToolkit port 8080 will be used. Use this for development testing.
 mvn clean package -P Sunil
 
 @call c:\Users\skb1\myprojects\env.bat cd
@@ -41,8 +42,13 @@ Short directory paths
     del /f /s /q c:\temp\asbestos\*.*
     rmdir /q /s c:\temp\asbestos
     unzip -qq C:\Users\skb1\myprojects\asbestos\asbestos-assembly\target\asbestos.zip -d C:\temp\asbestos
+    robocopy C:\Users\skb1\ec\ec_shared\environment C:\temp\asbestos\tomcat\Toolkits\ExternalCache\environment /MIR
     cd c:\temp\asbestos\tomcat\bin
+    If XdsToolkit is not bundled, then a running copy of the XdsToolkit must use the same EC Dir for the codes.xml verification to work on FHIR Toolkit startup.
+    If Tomcat at 8080 with XdsToolkit is already running, then:
+    .\start
 
+If Tomcat needs to be copied to the testing area:
 copy C:\Users\skb1\myprojects\fhirtoolkit-cert\XdsToolkit\webapps\fhir to C:\Users\skb1\myprojects\asbestos\asbestos-assembly\target\asbestos\tomcat\Toolkits\XdsToolkit\webapps
 copy C:\Users\skb1\myprojects\fhirtoolkit-cert\XdsToolkit\webapps\xdstools to C:\Users\skb1\myprojects\asbestos\asbestos-assembly\target\asbestos\tomcat\Toolkits\XdsToolkit\webapps
 

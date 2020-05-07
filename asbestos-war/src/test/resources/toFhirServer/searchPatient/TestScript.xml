@@ -50,7 +50,7 @@
         </action>
         <action>
             <assert>
-                <expression value="Patient.name.given=James"/>
+                <expression value="Bundle.entry.select(resource as Patient).where(name.given = 'James')"/>
                 <warningOnly value="false"/>
             </assert>
         </action>

@@ -1,6 +1,10 @@
 package gov.nist.asbestos.client.events;
 
 import gov.nist.asbestos.client.Base.EC;
+import gov.nist.asbestos.client.resolver.ResourceWrapper;
+import gov.nist.asbestos.http.headers.Header;
+import gov.nist.asbestos.http.headers.Headers;
+import org.hl7.fhir.r4.model.Resource;
 
 import java.io.File;
 import java.net.URI;
@@ -8,6 +12,7 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 public class UIEvent {
     private String hostPort;
@@ -34,6 +39,32 @@ public class UIEvent {
         return this;
     }
 
+    public UIEvent fromResource(ResourceWrapper wrapper) {
+        Objects.requireNonNull(wrapper);
+        hostPort = "";
+        testSession = "";
+        channelId = "";
+        eventName = "";
+        resourceType = wrapper.getResourceType();
+        UITask task = new UITask(wrapper);
+        String requestHeader = task.getRequestHeader();
+        Headers headers = new Headers(requestHeader);
+        Header header = headers.get("x-proxy-event");
+        if (header != null) {
+            String value = header.getValue();
+            if (value != null) {
+                String[] parts = value.split("/");
+                if (parts.length > 2) {
+                    String id = parts[parts.length - 1];
+                    eventName = id;
+                }
+            }
+        }
+        tasks.add(task);
+
+        return this;
+    }
+
     UIEvent fromParms(String testSession, String channelId, String resourceType, String eventName) {
         File fhir = ec.fhirDir(testSession, channelId);
         if (resourceType.equals("null")) {
@@ -48,6 +79,8 @@ public class UIEvent {
         UIEvent uiEvent = fromEventDir(eventDir);
         uiEvent.eventName = eventName;
         uiEvent.resourceType = resourceType;
+        uiEvent.testSession = testSession;
+        uiEvent.channelId = channelId;
         return uiEvent;
     }
 
@@ -60,6 +93,15 @@ public class UIEvent {
                 String channelId = parts.get(i+3);
                 String resourceType = parts.get(i+4);
                 String eventName = parts.get(i+5);
+                return fromParms(testSession, channelId, resourceType, eventName);
+            }
+            if ("asbestos".equals(part) && "proxy".equals(parts.get(i+1))) {
+                String testSessionChannelId = parts.get(i+2);
+                String[] tsParts = testSessionChannelId.split("__");
+                String testSession = tsParts[0];
+                String channelId = tsParts[1];
+                String resourceType = parts.get(i+3);
+                String eventName = parts.get(i+4);
                 return fromParms(testSession, channelId, resourceType, eventName);
             }
         }
@@ -110,4 +152,32 @@ public class UIEvent {
     }
 
     public int getTaskCount() { return tasks.size(); }
+
+    public Headers getRequestHeader() {
+        return new Headers(getClientTask().getRequestHeader());
+    }
+
+    public Headers getResponseHeader() {
+        return new Headers(getClientTask().getResponseHeader());
+    }
+
+    public String getRequestBody() {
+        return getClientTask().getRequestBody();
+    }
+
+    public String getResponseBody() {
+        return getClientTask().getResponseBody();
+    }
+
+    public String getTestSession() {
+        return testSession;
+    }
+
+    public String getChannelId() {
+        return channelId;
+    }
+
+    public String getEventName() {
+        return eventName;
+    }
 }

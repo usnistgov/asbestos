@@ -1,0 +1,87 @@
+<TestScript xmlns="http://hl7.org/fhir">
+    <modifierExtension url="urn:module">
+        <extension url="urn:fixture-in">
+            <valueString  value="pdb-request-bundle"/>
+        </extension>
+        <extension url="urn:fixture-out">
+            <valueString value="pdb-response-bundle"/>
+        </extension>
+    </modifierExtension>
+
+    <url value=""/>
+    <name value="SendPDB"/>
+    <status value="active"/>
+
+
+    <variable>
+        <name value="requestEntryCount"/>
+        <expression value="Bundle.entry.count()"/>
+        <sourceId value="pdb-request-bundle"/>
+    </variable>
+
+    <test>
+<!--        <description value="Submit Provide Document Bundle to MHD Document Recipient."/>-->
+        <!--
+            Actions generic to all PDB transactions
+        -->
+        <action>
+            <operation>
+                <!-- references patient from resourceCache in EC -->
+                <description value="send PDB."/>
+                <label value="create"/>
+                <type>
+                    <system value="https://github.com/usnistgov/asbestos/wiki/Testscript-Operation-Codes"/>
+                    <code value="mhd-pdb-transaction"/>
+                </type>
+                <sourceId value="pdb-request-bundle"/>
+                <responseId value="pdb-response-bundle"/>
+            </operation>
+        </action>
+        <action>
+            <assert>
+                <description value="... successful."/>
+                <response value="okay"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
+            <assert>
+                <description value="... returned Bundle.|FHIRTransReturnsBundle"/>
+                <compareToSourceId value="pdb-response-bundle"/>
+                <compareToSourceExpression value="Bundle.exists()"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
+            <assert>
+                <description value="... Bundle is type transaction-response|FHIRTransReturnsBundle."/>
+                <compareToSourceId value="pdb-response-bundle"/>
+                <compareToSourceExpression value="Bundle.type = 'transaction-response'"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
+            <assert>
+                <description value="... Bundle does not contain OperationOutcome.|FHIRTransReturnsBundle"/>
+                <compareToSourceId value="pdb-response-bundle"/>
+                <compareToSourceExpression value="Bundle.entry.response.outcome.where(OperationOutcome).exists().not()"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
+            <assert>
+                <description value="... response contains one entry for each entry in request.|FHIRTransReturnsBundle"/>
+                <expression value="Bundle.entry.count()"/>
+                <value value="${requestEntryCount}"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
+            <assert>
+                <description value="... all entries of transaction successful.|FHIRTransReturns201"/>
+                <expression value="Bundle.entry.response.all(status.startsWith(201))"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+    </test>
+</TestScript>

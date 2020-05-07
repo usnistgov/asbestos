@@ -20,6 +20,9 @@
             <span class="selectable" @click="go('/about')">About</span>
 
             <div class="divider"></div>
+            <span class="selectable" @click="go('/setup')">Setup</span>
+
+            <div class="divider"></div>
             <span v-if="this.asbts_UserProps.signedIn === false" class="selectable" @click="go('/admin')">Admin</span>
 
             <div class="divider"></div>
@@ -49,19 +52,13 @@
                 <div class="vdivider"></div>
                 <channel-control-panel class="solid-boxed"> </channel-control-panel>
                 <div class="vdivider"></div>
-                <getter-control-panel class="solid-boxed"> </getter-control-panel>
+                <general-control-panel class="solid-boxed"> </general-control-panel>
+<!--                <getter-control-panel class="solid-boxed"> </getter-control-panel>-->
                 <div class="vdivider"></div>
-<!--                <log-control-panel class="solid-boxed"></log-control-panel>-->
-<!--                <div class="vdivider"></div>-->
-                <channel-log-control-panel class="solid-boxed"> </channel-log-control-panel>
-                <div class="vdivider"></div>
-<!--                <test-control-panel class="solid-boxed"> </test-control-panel>-->
-<!--                <div class="vdivider"></div>-->
-<!--                <test-control-panel class="solid-boxed"> </test-control-panel>-->
+<!--                <channel-log-control-panel class="solid-boxed"> </channel-log-control-panel>-->
 <!--                <div class="vdivider"></div>-->
                 <test-control-panel2 class="solid-boxed"> </test-control-panel2>
                 <div class="vdivider"></div>
-<!--                <debug-control-panel class="solid-boxed"></debug-control-panel>-->
             </div>
         </div>
     </div>
@@ -70,10 +67,10 @@
 <script>
     import SessionControlPanel from "./SessionControlPanel"
     import ChannelControlPanel from "./ChannelControlPanel"
-    // import TestControlPanel from "./TestControlPanel"
+    import GeneralControlPanel from "./GeneralControlPanel";
     import TestControlPanel2 from "./TestControlPanel2"
-    import ChannelLogControlPanel from "./ChannelLogControlPanel"
-    import GetterControlPanel from "./GetterControlPanel";
+    // import ChannelLogControlPanel from "./ChannelLogControlPanel"
+    // import GetterControlPanel from "./GetterControlPanel";
     // import DebugControlPanel from "./DebugControlPanel"
     import {PROJECTVERSION, ASBTS_USERPROPS} from "../../common/http-common";
 
@@ -119,11 +116,10 @@
         components: {
             SessionControlPanel,
             ChannelControlPanel,
-            // TestControlPanel,
+            GeneralControlPanel,
             TestControlPanel2,
-            ChannelLogControlPanel,
-            GetterControlPanel
-            // DebugControlPanel,
+            // ChannelLogControlPanel,
+            // GetterControlPanel
         }
     }
 
@@ -175,17 +171,26 @@
         /*grid-column: 2;*/
         /*grid-row: 2;*/
         position: absolute;
-        right: 4px;
+        right: 9px;
         text-align: left;
     }
 </style>
 // these are shared across the tool
 <style>
+    .system-error {
+        font-weight: bold;
+        font-size: larger;
+        background-color: red;
+    }
     .control-panel-font {
         font-size: small;
     }
     .bold {
         font-weight: bold;
+    }
+    .big-bold {
+        font-weight: bold;
+        font-size: large;
     }
     .control-panel-item-title {
         font-weight: bold;
@@ -218,7 +223,7 @@
         border: 1px solid black;
     }
     .panel {
-        padding: 20px;
+        padding: 27px;
     }
     .tooltip {
         position: relative;
@@ -248,48 +253,13 @@
     }
     .selectable {
         cursor: pointer;
-        text-decoration: underline;
+        /*text-decoration: underline;*/
     }
     .pointer-cursor {
         cursor: pointer;
     }
     .has-cursor {
         cursor: pointer;
-    }
-    .pass {
-        background-color: lightgreen;
-        text-align: left;
-        border: 1px dotted black;
-        cursor: pointer;
-        border-radius: 25px;
-    }
-    .fail {
-        background-color: indianred;
-        text-align: left;
-        border: 1px dotted black;
-        cursor: pointer;
-        border-radius: 25px;
-    }
-    .error {
-        background-color: indianred;
-        text-align: left;
-        border: 1px dotted black;
-        cursor: pointer;
-        border-radius: 25px;
-    }
-    .warning {
-        background-color: #F6C6CE;
-        text-align: left;
-        border: 1px dotted black;
-        cursor: pointer;
-        border-radius: 25px;
-    }
-    .not-run {
-        background-color: lightgray;
-        text-align: left;
-        border: 1px dotted black;
-        cursor: pointer;
-        border-radius: 25px;
     }
     .instruction {
         text-align: left;

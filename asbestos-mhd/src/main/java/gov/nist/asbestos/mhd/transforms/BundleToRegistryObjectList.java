@@ -539,7 +539,7 @@ public class BundleToRegistryObjectList implements IVal {
 
         tr = vale.add(new ValE("DocumentReference.subject is [1..1]").addIheRequirement(DRTable));
         if (!dr.hasSubject() || !dr.getSubject().hasReference()) {
-            tr.add(new ValE("subject not present or has no reference").asError());
+            //tr.add(new ValE("subject not present or has no reference").asError());
         } else {
             vale.add(new ValE("subject to Patient Id").asTranslation());
             addSubject(eo, resource,  new Ref(dr.getSubject()), CodeTranslator.DE_PID, "XDSDocumentEntry.patientId", tr);
@@ -713,12 +713,12 @@ public class BundleToRegistryObjectList implements IVal {
         String extra = "DocumentReference.context.sourcePatientInfo must reference Contained Patient resource with Patient.identifier.use element set to 'usual'";
         Optional <ResourceWrapper> loadedPatient = rMgr.resolveReference(resource, new Ref(sourcePatient.getReference()), new ResolverConfig().containedRequired());
         if (!loadedPatient.isPresent() || loadedPatient.get().getResource() == null) {
-            val.add(new ValE("Cannot load resource at ${loadedPatient.url}")).asError();
+            val.add(new ValE("Cannot load resource at ${loadedPatient.url}").asError());
             return;
         }
 
         if (!(loadedPatient.get().getResource() instanceof Patient)) {
-            val.add(new ValE("Patient loaded from " + loadedPatient.get().getRef().asString() +  " returned a " + loadedPatient.get().getResource().getClass().getSimpleName() + " instead")).asError();
+            val.add(new ValE("Patient loaded from " + loadedPatient.get().getRef().asString() +  " returned a " + loadedPatient.get().getResource().getClass().getSimpleName() + " instead").asError());
             return;
         }
 
@@ -941,7 +941,7 @@ public class BundleToRegistryObjectList implements IVal {
                 if (patientUrl == null) {
                     patientUrl = dm.getSubject().getReference();
                 } else {
-                    if (!dm.getSubject().getReference().equals(patientUrl)) {
+                    if (dm.hasSubject() && !dm.getSubject().getReference().equals(patientUrl)) {
                         val.add(new ValE("Multiple patients reference in Bundle").asError()
                                 .add(new ValE("3.65.4.1.2.2 Patient Identity").asDoc()));
                         break;

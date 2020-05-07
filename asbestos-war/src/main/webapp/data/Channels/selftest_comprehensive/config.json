@@ -1,0 +1,10 @@
+{
+  "environment" : "default",
+  "testSession" : "default",
+  "channelId" : "selftest_comprehensive",
+  "actorType" : "fhir",
+  "channelType" : "mhd",
+  "includeValidation" : false,
+  "fhirBase" : "",
+  "xdsSiteName" : "default__asbtsrr"
+}

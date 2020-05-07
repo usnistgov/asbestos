@@ -1,158 +1,34 @@
 <template>
     <div>
-        <div class="tool-title">
-            <span>{{ clean(testCollection) }}</span>
-            <span class="divider"></span>
-            <img id="reload" class="selectable" @click="reload()" src="../../assets/reload.png"/>
-            <span class="divider"></span>
-        </div>
 
-        <div class="vdivider"></div>
-        <div class="vdivider"></div>
+        <test-collection-header
+            :test-collection="testCollection"
+            :session-id="sessionId"
+            :channel-id="channelId"> </test-collection-header>
 
-        <div class="left">
-            Description: <span v-html="$store.state.testRunner.collectionDescription"></span>
-        </div>
-
-        <div class="vdivider"></div>
-        <div class="vdivider"></div>
-
-        <div class="instruction">
-            <span v-if="$store.state.testRunner.isClientTest"  class="instruction">
-                These are Client tests - the system under test sends messages to the
-                FHIR Server Base Address shown below for evaluation. To run:
-                <br />
-                <ol>
-                    <li>Send messages matching each per-test description.</li>
-                    <li>Response message will reflect evaluation by the FHIR server (or XDS server for MHD tests) running in the background.</li>
-                    <li>Once an adequate collection of messages has been sent to satisfy the tests, evaluate them further by clicking the
-                    spyglass icon to evaluate against a set of assertions specific to each test.
-                    This evaluation will include validating the response from the background server.</li>
-                    <li>Only the most recent messages will be evaluated.  Adjust the count below.</li>
-                    <li>A test passes if one or more message evaluates correctly.</li>
-                    <li>Click on a test to see the messages evaluated.  Click on a message to see the result of each
-                        assertion that was evaluated.</li>
-                </ol>
-                <div>
-                    Send to:
-                    <span class="boxed">{{ clientBaseAddress }}</span>  based on the Channel selection.
-                </div>
-            </span>
-            <span v-else  class="instruction">
-                Server tests - click
-                <img src="../../assets/press-play-button.png">
-                to run test.
-                <!-- Display the property, if it exists, based on channel Type -->
-                <div v-if="channelObj">
-                    <span v-if="channelObj.channelType === 'passthrough' || channelObj.channelType === 'fhir'">
-                        Requests will be sent to
-                        <span v-if="channelObj.fhirBase" class="boxed">{{ channelObj.fhirBase }}</span>
-                        <div class="divider"></div>
-                        (through the Proxy on Channel {{ channelObj.channelId }}) based on the Channel selection.
-                    </span>
-                    <span v-else-if="channelObj.channelType === 'mhd'">
-                         Requests will be sent to XDS Site:
-                        <span v-if="channelObj.xdsSiteName" class="boxed">{{ channelObj.xdsSiteName }}</span>
-                        <div class="divider"></div>
-                        (through the Proxy on Channel {{ channelObj.channelId }}) based on the Channel selection.
-                    </span>
-                    <span v-else class="configurationError">
-                        Unknown channel.channelType for {{channelObj.channelId }}.
-                    </span>
-                </div>
-            </span>
-            <span class="divider"></span>
-        </div>
-
-        <div v-if="$store.state.testRunner.isClientTest" class="second-instruction">
-            Number of most recent events to evaluate:
-            <input v-model="evalCount" placeholder="5">
-        </div>
-
-        <div class="runallgroup">
-            <span v-if="running" class="running">Running</span>
-            <div class="divider"></div>
-            <div class="divider"></div>
-
-            <span v-if="!$store.state.testRunner.isClientTest">
-                <input type="checkbox" id="doGzip" v-model="gzip">
-                <label for="doGzip">GZip?</label>
-                <div class="divider"></div>
-            </span>
-
-            <button v-bind:class="{'button-selected': useJson, 'button-not-selected': !useJson}" @click="doJson()">JSON</button>
-            <button v-bind:class="{'button-selected': !useJson, 'button-not-selected': useJson}" @click="doXml()">XML</button>
-            <div class="divider"></div>
-            <div class="divider"></div>
-            <button class="runallbutton" @click="doRunAll()">Run All</button>
-        </div>
-
-        <div v-if="status">
-            <div v-for="(name, i) in Object.keys(status)"
-                 :key="name + i">
-                <div >
-                    <div @click="selectTest(name)">
-                        <div v-bind:class="{ pass: status[name] === 'pass', fail: status[name] === 'fail', error: status[name] === 'error', 'not-run': status[name] === 'not-run' }">
-                            <div v-if="status[name] === 'pass'">
-                                <img src="../../assets/checked.png" class="right">
-                            </div>
-                            <div v-else-if="status[name] === 'fail' || status[name] === 'error'">
-                                <img src="../../assets/error.png" class="right">
-                            </div>
-                            <div v-else>
-                                <img src="../../assets/blank-circle.png" class="right">
-                            </div>
-
-                            <div v-if="isClient">
-                                <img src="../../assets/validate-search.png" class="right" @click.stop="doEval(name)">
-                            </div>
-                            <div v-else>
-                                <img src="../../assets/press-play-button.png" class="right" @click.stop="doRun(name)">
-                            </div>
-
-                            Test: {{ clean(name) }}
-                            <span v-if="!$store.state.testRunner.isClientTest"> --  {{ time[name] }}</span>
-                        </div>
-                    </div>
-                    <div v-if="selected === name">
-                        <router-view></router-view>
-                    </div>
-                </div>
-            </div>
-        </div>
-
+        <test-collection-body
+                :test-collection="testCollection"
+                :session-id="sessionId"
+                :channel-id="channelId"> </test-collection-body>
     </div>
 </template>
 
 <script>
-    import {ENGINE} from '../../common/http-common'
     import errorHandlerMixin from '../../mixins/errorHandlerMixin'
+    import colorizeTestReports from "../../mixins/colorizeTestReports";
+    import TestCollectionHeader from "./TestCollectionHeader";
+    import TestCollectionBody from "./TestCollectionBody";
+    import testCollectionMgmt from "../../mixins/testCollectionMgmt";
 
     export default {
 
         data() {
             return {
-                //status: [],   // testId => undefined, 'pass', 'fail', 'error'
-                time: [],
-                evalCount: 5,
-                channelObj: null,  // channel object
-                useJson: true,
-                running: false,
-                gzip: false,
+                time: [],   // built as a side-effect of status (computed)
             }
         },
         methods: {
-            doJson() {
-                this.useJson = true
-            },
-            doXml() {
-                this.useJson = false
-            },
-            clean(text) {
-                if (text)
-                    return text.replace(/_/g, ' ')
-                return ''
-            },
+
             hasSuccessfulEvent(testId) {
                 if (testId === null)
                     return false
@@ -166,239 +42,32 @@
                 }
                 return false
             },
-            async doEval(testName) {  // client tests
-                if (testName)
-                    await this.$store.dispatch('runEval', testName)
-                // ==> commits clientTestResult
-                //    ==> calls evalStatus
-            },
-            async runner(testName) {
-                if (!testName)
-                    return
-                this.$store.commit('setCurrentTest', null)
-                try {
-                    const response = await ENGINE.post(`testrun/${this.sessionId}__${this.channelId}/${this.testCollection}/${testName}?_format=${this.useJson ? 'json' : 'xml'};_gzip=${this.gzip}`)
-                    this.$store.commit('setTestReport', { testName: testName, testReport: response.data })
-                } catch (error) {
-                    this.error(error)
-                }
-            },
-            async doRun(testName) {  // server tests
-                if (!testName)
-                    return
-                this.running = true
-                await this.runner(testName)
-                this.running = false
-                await this.$store.dispatch('loadTestScriptNames')  // force reload of UI
-            },
-            async doRunAll()  {
-                if (!this.status)
-                    return
-                this.running = true
-                //for (const name of Object.keys(this.status)) {
-                for (const name of this.$store.state.testRunner.testScriptNames) {
-//                    console.log(`runAll test ${name}`)
-                    if (this.isClient)
-                        await this.doEval(name)
-                    else
-                        await this.runner(name)
-                    //await this.runner(name)
-                }
-                this.running = false
-                await this.$store.dispatch('loadTestScriptNames')  // force reload of UI
-            },
-            selectTest(name) {
-                if (!name)
-                    return
-                if (this.selected === name)  { // unselect
-                    this.$store.commit('setCurrentTest', null)
-                    const route = `/session/${this.sessionId}/channel/${this.channelId}/collection/${this.testCollection}`
-                    this.$router.push(route)
-                    return
-                }
-                this.$store.commit('setCurrentTest', name)
-                const route = `/session/${this.sessionId}/channel/${this.channelId}/collection/${this.testCollection}/test/${name}`
-                this.$router.push(route)
-            },
-            async reload() {
-//                console.log(`reload ${this.testCollection}`)
-               this.$store.commit('setTestCollectionName', this.testCollection)
-                await this.$store.dispatch('loadTestScriptNames')
-                this.testScriptNamesUpdated()
-                const requiredChannel = this.$store.state.testRunner.requiredChannel
-                if (requiredChannel) {
-                    this.$store.commit('setChannelId', requiredChannel)
-                }
-                // console.log(`loading ${this.fullChannelId}`)
-                this.$store.dispatch('loadChannel', this.fullChannelId)
-                    .then(channel => {
-                        this.channelObj = channel
-                    })
-                //this.$router.push(`/session/${this.sessionId}/channel/${this.$store.state.base.channelId}/collection/${this.testCollection}`)
-                if (this.isClient)
-                    this.evalStatus()
-                else
-                    this.updateReportStatuses()
-//                console.log(`reload done`)
-            },
+
             testReport(testName) {
                 if (!testName)
                     return null
                 return this.$store.state.testRunner.testReports[testName]
             },
-            importStatusServerTests() {
-                let status = []
-                let time = []
-                this.testScriptNames.forEach(testId => {
-                    const testReport = this.$store.state.testRunner.testReports[testId]
-                    if (testReport === undefined) {
-                        status[testId] = 'not-run'
-                    } else {
-                        status[testId] = testReport.result  // 'pass', 'fail', 'error'
-                        time[testId] = testReport.issued
-                    }
-                })
-                this.time = time
-                return status
+            load() {
+                this.loadTestCollection(this.testCollection)
             },
-            importStatusClientTests() {
-                let status=[]
-                this.testScriptNames.forEach(testId => {
-                    const eventResult = this.$store.state.testRunner.clientTestResult[testId]
-                    if (!eventResult) {
-                        status[testId] = 'not-run'
-                    } else {
-                        status[testId] = this.hasSuccessfulEvent(testId) ? 'pass' : 'fail'
-                    }
-                })
-                this.time  = []
-                return status
-            },
-            evalStatus() {
-                // console.log(`running evalStatus`)
-                // if (!this.isClient)
-                //     return
-                // let status=[]
-                // this.testScriptNames.forEach(testId => {
-                //     const eventResult = this.$store.state.testRunner.clientTestResult[testId]
-                //     if (!eventResult) {
-                //         status[testId] = 'not-run'
-                //     } else {
-                //         status[testId] = this.hasSuccessfulEvent(testId) ? 'pass' : 'fail'
-                //     }
-                // })
-                // this.status = status
-                // this.time  = []
-                // console.log(`eval status done`)
-            },
-            updateReportStatuses() {   // for server tests (and client tests too?)
-                // if (this.isClient)
-                //     return
-                // console.log(`updateReportStatues`)
-                // let status = []
-                // let time = []
-                // this.testScriptNames.forEach(testName => {
-                //     if (this.testReport(testName) === undefined) {
-                //         status[testName] = 'not-run'
-                //     } else {
-                //         status[testName] = this.testReport(testName).result  // 'pass', 'fail', 'error'
-                //         time[testName] = this.testReport(testName).issued
-                //     }
-                // })
-                // this.status = status
-                // this.time = time
-            },
-            async testScriptNamesUpdated() {
-//                console.log(`test names updated`)
-                await this.$store.dispatch('loadReports', this.$store.state.testRunner.currentTestCollectionName)
-//                console.log(`reports loaded`)
-
-                if (this.isClient) {
-                    return this.$store.state.testRunner.testScriptNames.forEach(name => {
-//                        console.log(`eval ${name}`)
-                        this.doEval(name)
-                    })
-                }
-            },
-            setEvalCount() {
-                this.$store.commit('setEventEvalCount', this.evalCount)
-            }
         },
         computed: {
-            status() {
-                if (this.isClient)
-                    return this.importStatusClientTests()
-                else
-                    return this.importStatusServerTests()
-            },
-            clientBaseAddress() { // for client tests
-                return `${this.$store.state.base.proxyBase}/${this.sessionId}__${this.channelId}`
-                // const channelId = this.$store.state.base.channelId
-                // const channelIndex = this.$store.state.base.channelURLs.findIndex(chanURL => {
-                //     return chanURL.id === channelId
-                // })
-                // const channelURL = this.$store.state.base.channelURLs[channelIndex]
-                // const xdsSite = channelURL.site
-                // const fhirURL = channelURL.url
-                // return xdsSite ? `XDS ${xdsSite} sim` : fhirURL
-            },
-            isClient() {
-                return this.$store.state.testRunner.isClientTest
-            },
-            selected() {
-                return this.$store.state.testRunner.currentTest
-            },
-            testScriptNames() {
-                const scripts = this.$store.state.testRunner.testScriptNames
-                if (!scripts)
-                    return null
-                const names = scripts.sort()
-                return names
-            },
-            testReportNames() {  // just the ones with reports available
-                const reports = this.$store.state.testRunner.testReports
-                if (!reports)
-                    return null
-                return Object.keys(reports).sort()
-            },
-            channel: {
-                set(name) {
-                    if (name !== this.$store.state.base.channelId) {
-                        this.$store.commit('setChannelId', name)
-                    }
-                },
-                get() {
-                    return this.$store.state.base.channelId
-                }
-            },
-            fullChannelId() {
-                return `${this.sessionId}__${this.channelId}`
-            },
         },
         created() {
-            this.reload()
-            this.channel = this.channelId
-            this.setEvalCount()
         },
         mounted() {
-
         },
         watch: {
-            'evalCount': 'setEvalCount',
-            'testCollection': 'reload',
-            'channelId': function(newVal) {
-                if (this.channel !== newVal)
-                    this.channel = newVal
-            },
-           '$store.state.testRunner.testScriptNames' : 'testScriptNamesUpdated',
-           '$store.state.testRunner.testReports': 'updateReportStatuses',
-           '$store.state.testRunner.clientTestResult':'evalStatus'
         },
-        mixins: [ errorHandlerMixin ],
+        mixins: [ errorHandlerMixin, colorizeTestReports, testCollectionMgmt ],
         name: "TestCollection",
         props: [
             'sessionId', 'channelId', 'testCollection',
-        ]
+        ],
+        components: {
+            TestCollectionHeader, TestCollectionBody,
+        }
     }
 </script>
 
@@ -407,6 +76,55 @@
         background-color: lightgray;
         text-align: left;
     }
+    .debugTestScriptButton {
+        /*padding-bottom: 5px;*/
+        margin-left: 10px;
+        background-color: cornflowerblue;
+        cursor: pointer;
+        border-radius: 25px;
+        font-weight: bold;
+    }
+    .configurationError {
+        color: red;
+    }
+</style>
+<style>
+    .runallbutton {
+        /*padding-bottom: 5px;*/
+        background-color: cornflowerblue;
+        cursor: pointer;
+        border-radius: 25px;
+        font-weight: bold;
+    }
+    .button-selected {
+        border: 1px solid black;
+        background-color: lightgray;
+        cursor: pointer;
+    }
+    .button-not-selected {
+        border: 1px solid black;
+        cursor: pointer;
+    }
+    .runallgroup {
+        text-align: right;
+        padding-bottom: 5px;
+    }
+    .running {
+        background-color: lightgreen;
+    }
+    .conformance-tests-header {
+        background-color: #DBD9BE;
+    }
+    .noListStyle {
+        list-style-type: none;
+    }
+    .pre-test-gap{
+        height:1px;
+        width:auto;
+    }
+    .large-text {
+        font-size: large;
+    }
     .pass {
         background-color: lightgreen;
         text-align: left;
@@ -414,8 +132,23 @@
         cursor: pointer;
         border-radius: 25px;
     }
-    .running {
-        background-color: lightgreen;
+    .pass-plain {
+        /*background-color: lightgray;*/
+        text-align: left;
+        border-top: 1px solid black;
+        /*border-bottom: 1px solid black;*/
+        cursor: pointer;
+        /*border-radius: 25px;*/
+    }
+    .pass-plain-header {
+        text-align: left;
+        border-top: 1px solid black;
+        cursor: pointer;
+    }
+    .pass-plain-detail {
+        margin-bottom: 2px;
+        text-align: left;
+        cursor: pointer;
     }
     .fail {
         background-color: indianred;
@@ -423,6 +156,38 @@
         border: 1px dotted black;
         cursor: pointer;
         border-radius: 25px;
+    }
+    .fail-plain {
+        /*background-color: lightgray;*/
+        text-align: left;
+        border-top: 1px solid black;
+        /*border-bottom: 1px solid black;*/
+        cursor: pointer;
+        /*border-radius: 25px;*/
+    }
+    .fail-plain-header {
+        text-align: left;
+        border-top: 1px solid black;
+        cursor: pointer;
+    }
+    .fail-plain-detail {
+        margin-bottom: 2px;
+        text-align: left;
+        cursor: pointer;
+    }
+    .condition-fail {
+        background-color: gold;
+        text-align: left;
+        border: 1px dotted black;
+        cursor: pointer;
+        border-radius: 25px;
+    }
+    .error-plain {
+        /*background-color: cornflowerblue;*/
+        text-align: left;
+        border-top: 1px solid black;
+        cursor: pointer;
+        /*border-radius: 25px;*/
     }
     .error {
         background-color: cornflowerblue;
@@ -438,30 +203,40 @@
         cursor: pointer;
         border-radius: 25px;
     }
-    .button-selected {
-        border: 1px solid black;
-        background-color: lightgray;
+    .not-run-plain {
+        text-align: left;
+        border-top: 1px solid black;
         cursor: pointer;
     }
-    .button-not-selected {
-        border: 1px solid black;
+    .not-run-plain-detail {
+        margin-bottom: 2px;
+        text-align: left;
         cursor: pointer;
     }
-    .right {
+
+    .align-right {
         text-align: right;
     }
-    .runallbutton {
-        /*padding-bottom: 5px;*/
-        background-color: cornflowerblue;
-        cursor: pointer;
-        border-radius: 25px;
-        font-weight: bold;
+    .align-left {
+        text-align: left;
     }
-    .runallgroup {
-        text-align: right;
-        padding-bottom: 5px;
+    .breakpoint-indicator {
+        list-style-type: "\1F6D1"; /* Stop sign */
     }
-    .configurationError {
-        color: red;
+    .debug-hint {
+        list-style-type: "\1F41E"; /* Lady bug */
     }
+    .noTopMargin {
+        margin-top: 0px;
+    }
+    .grayText {
+        color: gray;
+    }
+    .testBarMargin {
+        margin-bottom: 3px;
+    }
+    .inlineDiv {
+        display: inline;
+    }
+
 </style>

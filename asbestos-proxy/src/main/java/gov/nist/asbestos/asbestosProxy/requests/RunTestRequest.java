@@ -7,7 +7,7 @@ import gov.nist.asbestos.serviceproperties.ServiceProperties;
 import gov.nist.asbestos.serviceproperties.ServicePropertiesEnum;
 import gov.nist.asbestos.sharedObjects.ChannelConfig;
 import gov.nist.asbestos.simapi.validation.Val;
-import gov.nist.asbestos.testEngine.engine.TestEngine;
+import gov.nist.asbestos.testEngine.engine.ModularEngine;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.log4j.Logger;
 import org.hl7.fhir.r4.model.TestReport;
@@ -26,6 +26,8 @@ import java.nio.file.Path;
 // 4 - channelName (testSession__channelId)
 // 5 - testCollectionId
 // 6 - testId
+// Returns modular test reports
+//   JSON object : test/moduleId => TestReport
 
 public class RunTestRequest {
     private static Logger log = Logger.getLogger(RunTestRequest.class);
@@ -81,8 +83,11 @@ public class RunTestRequest {
                 .sendGzip(request.isGzip)
                 .requestGzip(request.isGzip);
         TestReport report;
+        ModularEngine modularEngine;
         try {
-            report = new TestEngine(testDir, proxy)
+            modularEngine = new ModularEngine(testDir, proxy).setSaveLogs(true);
+            report = modularEngine
+                    //.getLastTestEngine()
                     .setTestSession(testSession)
                     .setChannelId(channelId)
                     .setExternalCache(request.externalCache)
@@ -98,14 +103,20 @@ public class RunTestRequest {
             log.error(ExceptionUtils.getStackTrace(t));
             throw t;
         }
-        String json = Returns.returnResource(request.resp, report);
-        Path path = request.ec.getTestLog(channelId, testCollection, testName).toPath();
-        try (BufferedWriter writer = Files.newBufferedWriter(path))
-        {
-            writer.write(json);
-        } catch (IOException e) {
-            log.error(ExceptionUtils.getStackTrace(e));
-            throw new RuntimeException(e);
-        }
+
+        String json = modularEngine.reportsAsJson();
+        Returns.returnString(request.resp, json);
+
+//        // Save test log to FhirTestLogs
+//        report.setName(testName);
+//        String json = Returns.returnResource(request.resp, report);
+//        Path path = request.ec.getTestLog(channelId, testCollection, testName).toPath();
+//        try (BufferedWriter writer = Files.newBufferedWriter(path))
+//        {
+//            writer.write(json);
+//        } catch (IOException e) {
+//            log.error(ExceptionUtils.getStackTrace(e));
+//            throw new RuntimeException(e);
+//        }
     }
 }

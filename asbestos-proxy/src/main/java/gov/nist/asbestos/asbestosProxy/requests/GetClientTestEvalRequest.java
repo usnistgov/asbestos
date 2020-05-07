@@ -39,8 +39,9 @@ public class GetClientTestEvalRequest {
     private Request request;
 
     public static boolean isRequest(Request request) {
-        return  request.uriParts.get(3).equals("clienteval") &&
-                (request.uriParts.size() == 7 || request.uriParts.size() == 8);
+        return  (request.uriParts.size() == 7 || request.uriParts.size() == 8) &&
+                request.uriParts.get(3).equals("clienteval")
+                ;
     }
 
     public GetClientTestEvalRequest(Request request) {
@@ -94,7 +95,7 @@ public class GetClientTestEvalRequest {
         if (!useMarker)
             events = events.subList(0, Math.min(events.size(), eventsToEvaluate));
 
-        File testLogDir = request.ec.getTestLogDir(request.fullChannelId(), testCollection);
+        File testLogDir = request.ec.getTestLogCollectionDir(request.fullChannelId(), testCollection);
 
         // for one testId
         String testId = request.uriParts.get(7);

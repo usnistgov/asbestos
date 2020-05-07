@@ -190,12 +190,28 @@ public class DocumentEntryToDocumentReference implements IVal {
                     }
                 } else if ("creationTime".equals(name)) {
                     try {
-                        attachment.setCreation(DateTransform.dtmToDate(value1));
+                        dr.setDate(DateTransform.dtmToDate(value1));
+                        //attachment.setCreation(DateTransform.dtmToDate(value1));
                     } catch (MetadataAttributeTranslationException e) {
                         val.add(new ValE(e.getMessage()).asError());
                     }
                 } else if ("sourcePatientId".equals(name)) {
-
+                    String[] parts = value1.split("\\^");
+                    if (parts.length == 4) {
+                        String id = parts[0];
+                        String aa = parts[3];
+                        if (aa != null || !aa.equals("")) {
+                            String[] aaParts = aa.split("&");
+                            if (aaParts.length == 3) {
+                                String aaOid = aaParts[1];
+                                Patient patient = new Patient();
+                                patient.addIdentifier().setValue(id).setSystem("urn:oid:" + aaOid).setUse(Identifier.IdentifierUse.USUAL);
+                                patient.setId("sourcePatientId");
+                                dr.addContained(patient);
+                                dr.getContext().setSourcePatientInfo(new Reference("#sourcePatientId"));
+                            }
+                        }
+                    }
                 } else if ("sourcePatientInfo".equals(name)) {
 
                 } else if ("legalAuthenticator".equals(name)) {

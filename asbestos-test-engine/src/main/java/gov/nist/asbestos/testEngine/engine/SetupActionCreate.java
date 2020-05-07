@@ -1,10 +1,15 @@
 package gov.nist.asbestos.testEngine.engine;
 
+import gov.nist.asbestos.client.Base.EC;
 import gov.nist.asbestos.client.client.FhirClient;
 import gov.nist.asbestos.client.client.Format;
+import gov.nist.asbestos.client.events.Event;
+import gov.nist.asbestos.client.events.UIEvent;
 import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import gov.nist.asbestos.simapi.validation.ValE;
+import gov.nist.asbestos.testEngine.engine.fixture.FixtureComponent;
+import gov.nist.asbestos.testEngine.engine.fixture.FixtureMgr;
 import org.hl7.fhir.r4.model.BaseResource;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.TestReport;
@@ -17,7 +22,8 @@ import java.util.Objects;
 
 class SetupActionCreate extends GenericSetupAction {
 
-    SetupActionCreate(FixtureMgr fixtureMgr) {
+    SetupActionCreate(ActionReference actionReference, FixtureMgr fixtureMgr) {
+        super(actionReference);
         Objects.requireNonNull(fixtureMgr);
         this.fixtureMgr = fixtureMgr;
     }
@@ -28,7 +34,7 @@ class SetupActionCreate extends GenericSetupAction {
      * @param reference
      * @param operationReport
      */
-    void run(String fixtureId, Reference reference, TestReport.SetupActionOperationComponent operationReport) {
+    void run(TestScript testScript, TestScript.TestScriptFixtureComponent comp, String fixtureId, Reference reference, TestReport.SetupActionOperationComponent operationReport) {
         Reporter reporter = new Reporter(val, operationReport, type, "");
         FixtureComponent sourceFixture = fixtureMgr.get(fixtureId);
         if (sourceFixture == null) {
@@ -46,15 +52,22 @@ class SetupActionCreate extends GenericSetupAction {
             return;
         ResourceWrapper wrapper = getFhirClient().writeResource(resourceToSend, targetUrl, Format.XML, requestHeader);
 
-        //reportOperation(wrapper);
         if (wrapper.isOk())
             reporter.report(wrapper.getRef() + " created", wrapper);
         else
             reporter.reportError(wrapper.getRef() + " not created", wrapper);
-        fixtureComponent = new FixtureComponent(fixtureId)
+        ActionReference action = new ActionReference(testScript, comp);
+//        UIEvent uiEvent = getUIEvent(wrapper);
+        UIEvent uiEvent = new UIEvent(new EC(getTestEngine().getExternalCache())).fromResource(wrapper);
+        //fixtureMgr.add(fixtureId)
+        sourceFixture
                 .setResource(wrapper)
-                .setHttpBase(wrapper.getHttpBase());
-        fixtureMgr.put(fixtureId, fixtureComponent);
+                .setHttpBase(wrapper.getHttpBase())
+                .setCreatedByActionReference(action)
+                .setCreatedByUIEvent(uiEvent);
+        if (wrapper.isOk())
+            reporter.report(wrapper.getRef() + " created", wrapper);
+
     }
 
     void run(TestScript.SetupActionOperationComponent op, TestReport.SetupActionOperationComponent operationReport) {
@@ -75,6 +88,7 @@ class SetupActionCreate extends GenericSetupAction {
         }
         postExecute(wrapper);
     }
+
 
     String resourceTypeToSend() {
         return resourceToSend.getClass().getSimpleName();

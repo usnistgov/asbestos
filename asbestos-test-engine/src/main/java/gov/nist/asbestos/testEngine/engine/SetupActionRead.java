@@ -7,6 +7,8 @@ import gov.nist.asbestos.client.resolver.SearchParms;
 import gov.nist.asbestos.http.operations.HttpGet;
 import gov.nist.asbestos.http.operations.HttpPost;
 import gov.nist.asbestos.simapi.validation.ValE;
+import gov.nist.asbestos.testEngine.engine.fixture.FixtureComponent;
+import gov.nist.asbestos.testEngine.engine.fixture.FixtureMgr;
 import org.hl7.fhir.r4.model.TestReport;
 import org.hl7.fhir.r4.model.TestScript;
 
@@ -15,7 +17,8 @@ import java.net.URI;
 
 class SetupActionRead extends GenericSetupAction {
 
-    SetupActionRead(FixtureMgr fixtureMgr) {
+    SetupActionRead(ActionReference actionReference, FixtureMgr fixtureMgr) {
+        super(actionReference);
         this.fixtureMgr = fixtureMgr;
     }
 
@@ -25,20 +28,6 @@ class SetupActionRead extends GenericSetupAction {
             return;
 
         ResourceWrapper wrapper = fhirClient.readResource(targetUrl, requestHeader);
-        //reportOperation(wrapper);
-
-//        reporter.report("GET " + wrapper.getRef(), wrapper);
-//        if (true || !wrapper.isOk()) {
-//            reporter.report( "GET (with errors) ", wrapper);
-//            List<String> errors = servlet.errorsFromOperationOutcome();
-//            String errs = "";
-//            for (String error : errors)
-//                errs = errs + "\n" + error;
-//            Reporter.reportError(val, opReport, null, type, label, "Errors returned from " + targetUrl + "\n" + errs, servlet.logLink());
-//            return;
-//        } else {
-//            reporter.report("GET " + wrapper.getRef(), wrapper);
-//        }
         postExecute(wrapper);
     }
 
