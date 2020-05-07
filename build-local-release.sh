@@ -25,7 +25,7 @@ echo ''
 echo ""
 
 mkdir asbestos-war/target
-mvn package &> asbestos-war/build-log.txt   # does not run integration tests, there is more environment setup required for that
+mvn install -Dmaven.test.skip=true &> asbestos-war/build-log.txt   # does not run any tests, there is more environment setup required for that
 if [ ! -f asbestos-war/target/asbestos-war.war ]; then
   echo "asbestos build failed"
   exit -1

@@ -49,7 +49,9 @@
         },
         methods: {
             async runIt() {
+                this.running = true;
                 await this.loadStatus('run');
+                this.running = false;
             },
             async loadStatus(type) {
                 const url = `selftest/${this.sessionId}__${this.channelId}/${this.testCollection}/${type}`;
@@ -92,5 +94,9 @@
 </script>
 
 <style scoped>
+    .runallgroup {
+        text-align: center;
+        padding-bottom: 5px;
+    }
 
 </style>

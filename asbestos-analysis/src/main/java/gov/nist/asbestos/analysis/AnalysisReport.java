@@ -323,6 +323,8 @@ public class AnalysisReport {
     }
 
     private void comprehensiveEval() {
+        if (baseObj == null)
+            return;
         TestEngine testEngine = comprehensiveEval(baseObj);
         if (testEngine == null)
             return;
@@ -331,22 +333,28 @@ public class AnalysisReport {
         comprehensiveErrors = testEngine.getTestReportErrors();
         comprehensiveChecked = checked;
         for (Related rel : related) {
-            testEngine = comprehensiveEval(rel.wrapper);
-            rel.comprehensiveChecked = getMinimumIdReport(testEngine.getTestReport());
-            rel.comprehensiveErrors = testEngine.getTestReportErrors();
+            if (rel.wrapper != null) {
+                testEngine = comprehensiveEval(rel.wrapper);
+                rel.comprehensiveChecked = getMinimumIdReport(testEngine.getTestReport());
+                rel.comprehensiveErrors = testEngine.getTestReportErrors();
+            }
         }
     }
 
     private void minimalEval() {
+        if (baseObj == null)
+            return;
         TestEngine testEngine  = minimalEval(baseObj);
         if (testEngine == null)
             return;
         minimalErrors = testEngine.getTestReportErrors();
         minimalChecked = getMinimumIdReport(testEngine.getTestReport());
         for (Related rel : related) {
-            testEngine = minimalEval(rel.wrapper);
-            rel.minimalChecked = getMinimumIdReport(testEngine.getTestReport());
-            rel.minimalErrors = testEngine.getTestReportErrors();
+            if (rel.wrapper != null) {
+                testEngine = minimalEval(rel.wrapper);
+                rel.minimalChecked = getMinimumIdReport(testEngine.getTestReport());
+                rel.minimalErrors = testEngine.getTestReportErrors();
+            }
         }
     }
 
@@ -584,7 +592,7 @@ public class AnalysisReport {
 
     private void buildRelated() {
         if (baseObj == null && contextResource != null && contextResource instanceof Bundle) {
-            generalErrors.add("baseObject is null - shown is listing of contents only");
+            generalErrors.add("No content is available for display.");
             plainListing((Bundle) contextResource);
             return;
         }

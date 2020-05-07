@@ -92,6 +92,7 @@
 			</assert>
 		</action>
 		<action>
+			<!--  Since test is not followed by an assertion - if this operation fails the script will fail -->
 			<operation>
 				<!-- references patient from resourceCache in EC -->
 				<description value="submit patient."/>
@@ -101,6 +102,19 @@
 				<sourceId value="thePatient"/>
 			</operation>
 		</action>
-		<!--  Since test is not followed by an assertion - if this operation fails the script will fail -->
+		<action>
+			<!-- This search is necessary to trigger Cache loading in TestEngine#doPostProcessing() -->
+			<operation>
+				<description value="Second search for patient. Triggers building of Patient cache."/>
+				<type>
+					<code value="search"/>
+				</type>
+				<resource value="Patient"> </resource>
+				<contentType value="json"> </contentType>
+				<params value="?given=${FirstName}&amp;family=${LastName}&amp;birthdate=${birthDate}"> </params>
+				<responseId value="patient1-search"/>
+			</operation>
+		</action>
+
 	</test>
 </TestScript>

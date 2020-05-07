@@ -36,47 +36,6 @@
                             :script="action"
                             :report="reportAction(testi, actioni)"
                     > </eval-action-details>
-
-
-
-<!--                    <div>-->
-<!--                        <div >-->
-<!--                            <div @click.self="selectAssert(testi, actioni)" v-bind:class="{-->
-<!--                                    pass: assertResult(testi, actioni) === 'pass' && colorful,-->
-<!--                                    'pass-plain': assertResult(testi, actioni) === 'pass' && !colorful,-->
-<!--                                    fail: assertResult(testi, actioni) === 'fail' && colorful,-->
-<!--                                    'fail-plain': assertResult(testi, actioni) === 'fail' && !colorful,-->
-<!--                                    error: assertResult(testi, actioni) === 'error' && colorful,-->
-<!--                                    'error-plain': assertResult(testi, actioni) === 'error' && !colorful,-->
-<!--                                    warning: assertResult(testi, actioni) === 'warning' && colorful,-->
-<!--                                    'not-run': assertResult(testi, actioni) === 'not-run'  && colorful-->
-<!--                            }">-->
-<!--                                <span class="selectable">Assert:</span> {{ assertDesc(testi, actioni) }}-->
-<!--                            </div>-->
-
-<!--                            <test-status v-if="!statusRight"-->
-<!--                                         :status-on-right="statusRight"-->
-<!--                                         :report="report"-->
-<!--                            > </test-status>-->
-
-<!--                            <div v-if="selectedTestIndex === testi && selectedAssertIndex === actioni" class="message-part">-->
-<!--                                <div v-if="assertRef(testi, actioni)">-->
-<!--                                    {{ assertRef(testi, actioni) }}-->
-<!--                                </div>-->
-<!--                                <ul>-->
-<!--                                    <li v-for="(item, itemi) in assertMessage(testi, actioni)" :key="'AM' + itemi">-->
-<!--                                        {{ item }}-->
-<!--                                    </li>-->
-<!--                                </ul>-->
-<!--                            </div>-->
-
-<!--                            <test-status v-if="statusRight"-->
-<!--                                         :status-on-right="statusRight"-->
-<!--                                         :report="report"-->
-<!--                            > </test-status>-->
-
-<!--                        </div>-->
-<!--                    </div>-->
                 </div>
             </div>
 
@@ -84,7 +43,7 @@
 
         </div>
         <div v-else>
-            Debug
+            Not Available
         </div>
     </div>
 </template>

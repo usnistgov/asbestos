@@ -66,14 +66,14 @@
                     <span class="caption">Focus Object:</span>
                     <div class="vdivider"></div>
                     <div class="grid-container">
-                <span v-if="report.base">
-                    <div class="grid-item">
-                        <span v-bind:class="objectDisplayClass(report.base)"
-                              @click="selectedResourceIndex = -1">
-                            {{ report.base.name }}
+                        <span v-if="report.base">
+                            <div class="grid-item">
+                                <span v-bind:class="objectDisplayClass(report.base)"
+                                    @click="selectedResourceIndex = -1">
+                                        {{ report.base.name }}
+                                </span>
+                            </div>
                         </span>
-                    </div>
-                </span>
                     </div>
                 </div>
 

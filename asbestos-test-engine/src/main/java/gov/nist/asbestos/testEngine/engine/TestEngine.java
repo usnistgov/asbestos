@@ -1231,27 +1231,6 @@ public class TestEngine  {
                 TestReport.SetupActionOperationComponent op = actionResult.getOperation();
                 buildCacheEntry(op, ec);
             }
-
-
-//            if (testComponent.hasModifierExtension()) {
-//                Extension extension = testComponent.getModifierExtensionFirstRep();
-//                if (extension.getUrl().equals(ExtensionDef.ts_conditional)) {
-//                    if (extension.getValue() instanceof Reference) {
-//                        Reference reference = (Reference) extension.getValue();
-//                        if (reference.getResource() instanceof TestReport) {
-//                            TestReport containedTestReport = (TestReport) reference.getResource();
-//                            for (TestReport.TestReportTestComponent containedTestComponent : containedTestReport.getTest()) {
-//                                for (TestReport.TestActionComponent actionResult : containedTestComponent.getAction()) {
-//                                    if (actionResult.hasOperation()) {
-//                                        TestReport.SetupActionOperationComponent op = actionResult.getOperation();
-//                                        buildCacheEntry(op, ec);
-//                                    }
-//                                }
-//                            }
-//                        }
-//                    }
-//                }
-//            }
         }
     }
 
@@ -1298,6 +1277,7 @@ public class TestEngine  {
         String given = patient.getNameFirstRep().getGiven().get(0).toString();
         String family = patient.getNameFirstRep().getFamily();
         if (given != null &&!given.equals("") && family != null && !family.equals("")) {
+            log.info("Writing cache entry for " + given + "_" + family);
             ProxyBase.toFile(bundle, resourceTypeFile, given + "_" + family, Format.JSON);
         }
     }

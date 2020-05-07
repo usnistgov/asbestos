@@ -15,6 +15,9 @@
             <div class="request-response">
                 <div class="divider"></div>
 
+                <span class="link-position solid-boxed pointer-cursor" @click.stop.prevent="copyToClipboard">Copy Event Link</span>
+                <input type="hidden" id="the-link" :value="eventLink">
+
                 <!-- From Client To Server -->
                 <div v-if="selectedEvent">
                     Raw Event:
@@ -29,10 +32,11 @@
                         <img src="../../assets/info.png">
                     </a>
 
-                    <span class="link-position solid-boxed pointer-cursor" @click.stop.prevent="copyToClipboard">Copy Event Link</span>
-                    <input type="hidden" id="the-link" :value="eventLink">
+<!--                    <span class="link-position solid-boxed pointer-cursor" @click.stop.prevent="copyToClipboard">Copy Event Link</span>-->
+<!--                    <input type="hidden" id="the-link" :value="eventLink">-->
 
                     <!-- Request/Response line -->
+                    <div>
                     <span v-bind:class="{
                         selected: displayRequest,
                         'not-selected': !displayRequest
@@ -49,10 +53,11 @@
                           @click="displayRequest = false; displayResponse = true; displayInspector = false; displayValidations = false">
                         Response
                     </span>
+                    </div>
 
                 </div>
                 <div v-else>
-                    <div class="not-selected" @click="selectedEvent = true"> Enable display of raw event</div>
+                    <div class="not-selected" @click="selectedEvent = true; displayRequest = true; displayInspector = false;"> Enable display of raw event</div>
                 </div>
 
 
@@ -143,6 +148,7 @@
     import {LOG} from '../../common/http-common'
     import eventMixin from '../../mixins/eventMixin'
     import errorHandlerMixin from '../../mixins/errorHandlerMixin'
+    import EvalDetails from "../testRunner/EvalDetails";
 
     export default {
         data() {
@@ -311,7 +317,7 @@
         components: {
             LogNav,
             LogAnalysisReport,
-            EvalDetails: () => import ('../testRunner/EvalDetails.vue')
+            EvalDetails
         },
         name: "InspectEvent"
     }

@@ -277,10 +277,11 @@ public class GetLogEventAnalysisRequest {
     public void returnReport(Report report, Request request, EventContext eventContext) {
         Objects.requireNonNull(report);
         if (!report.hasErrors()) {
-            Objects.requireNonNull(report.getBase());
-            report.getBase().setEventContext(eventContext);
-            for (RelatedReport rr : report.getObjects()) {
-                rr.setEventContext(eventContext);
+            if (report.getBase() != null) {
+                report.getBase().setEventContext(eventContext);
+                for (RelatedReport rr : report.getObjects()) {
+                    rr.setEventContext(eventContext);
+                }
             }
         }
         String json = new Gson().toJson(report);

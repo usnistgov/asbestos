@@ -5,6 +5,8 @@ import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import gov.nist.asbestos.http.headers.Headers;
 import gov.nist.asbestos.http.operations.HttpBase;
+import gov.nist.asbestos.serviceproperties.ServiceProperties;
+import gov.nist.asbestos.serviceproperties.ServicePropertiesEnum;
 import gov.nist.asbestos.testEngine.engine.fixture.FixtureComponent;
 import gov.nist.asbestos.testEngine.engine.fixture.FixtureMgr;
 import org.hl7.fhir.r4.model.TestScript;
@@ -120,8 +122,8 @@ class ActionReporter {
                     if (uiEvent == null)
                         refStrRaw = null;
                     else {
-
-                        refStrRaw = "http://localhost:8082/session/" + testEngine.getTestSession()
+                        String base = ServiceProperties.getInstance().getPropertyOrStop(ServicePropertiesEnum.FHIR_TOOLKIT_UI_HOME_PAGE);
+                        refStrRaw = base + "/session/" + testEngine.getTestSession()
                                 + "/channel/" + testEngine.getChannelName()
                                 + "/lognav/" + uiEvent.getEventName()
                         + tail;

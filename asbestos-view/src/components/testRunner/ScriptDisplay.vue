@@ -23,15 +23,22 @@
         },
         computed: {
             filteredReport() {
-                //return this.report
-                if (!this.report) return null
+//                return this.report
+                if (!this.report) return null;
                 const copy = JSON.parse(JSON.stringify(this.report))
-                if (copy.operation &&
-                    copy.operation.extension &&
-                    copy.operation.extension[0] &&
-                    copy.operation.extension[0].url === 'urn:action-context'
-            )
-                    copy.operation.extension[0] = 'Removed by UI';
+                if (copy.operation && copy.operation.extension) {
+                    const extension = copy.operation.extension;
+                    for (let i=0; i<extension.length; i++) {
+                        if (extension[i].url  === 'urn:action-context')
+                            extension[i].url = 'Removed by UI';
+                    }
+                }
+            //     if (copy.operation &&
+            //         copy.operation.extension &&
+            //         copy.operation.extension[0] &&
+            //         copy.operation.extension[0].url === 'urn:action-context'
+            // )
+            //         copy.operation.extension[0] = 'Removed by UI';
                 return copy
             }
         },
