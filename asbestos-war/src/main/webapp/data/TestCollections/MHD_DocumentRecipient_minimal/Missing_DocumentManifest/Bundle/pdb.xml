@@ -1,0 +1,74 @@
+<Bundle xmlns="http://hl7.org/fhir">
+    <id value="xds"/>
+    <meta>
+        <lastUpdated value="2013-07-01T13:11:33Z"/>
+        <profile value="http://ihe.net/fhir/StructureDefinition/IHE_MHD_Provide_Minimal_DocumentBundle"/>
+    </meta>
+    <type value="transaction"/>
+    <entry>
+        <fullUrl value="http://localhost:9556/svc/fhir/DocumentReference/45"/>
+        <resource>
+            <DocumentReference>
+                <meta>
+                    <lastUpdated value="2013-07-01T13:11:33Z"/>
+                </meta>
+                <text>
+                    <status value="generated"/>
+                    <div xmlns="http://www.w3.org/1999/xhtml">
+
+                        <a href="http://localhost:9556/svc/fhir/Binary/1e404af3-077f-4bee-b7a6-a9be97e1ce32">Document: urn:oid:129.6.58.92.88336</a> undefined, created 24/12/2005
+                    </div>
+                </text>
+                <masterIdentifier>
+                    <system value="urn:ietf:rfc:3986"/>
+                    <value value="urn:oid:1.2.129.6.58.92.88336.4"/>
+                </masterIdentifier>
+                <status value="current"/>
+                <subject>
+                    <reference value="${requestPatientRef}"/>
+                </subject>
+                <description value="Physical"/>
+                <securityLabel>
+                    <coding>
+                        <system value="http://terminology.hl7.org/CodeSystem/v3-Confidentiality"/>
+                        <code value="N"/>
+                        <display value="normal"/>
+                    </coding>
+                </securityLabel>
+                <content>
+                    <attachment>
+                        <contentType value="text/plain"/>
+                        <language value="en-us"/>
+                        <url value="http://localhost:9556/svc/fhir/Binary/1e404af3-077f-4bee-b7a6-a9be97e1ce32"/>
+                    </attachment>
+                </content>
+                <context>
+                    <period>
+                        <start value="2004-12-23T08:00:00+10:00"/>
+                        <end value="2004-12-23T08:01:00+10:00"/>
+                    </period>
+                </context>
+            </DocumentReference>
+        </resource>
+        <request>
+            <method value="POST"/>
+            <ref value="DocumentReference"/>
+        </request>
+    </entry>
+    <entry>
+        <fullUrl value="http://localhost:9556/svc/fhir/Binary/1e404af3-077f-4bee-b7a6-a9be97e1ce32"/>
+        <resource>
+            <Binary>
+                <id value="1e404af3-077f-4bee-b7a6-a9be97e1ce32"/>
+                <meta>
+                    <lastUpdated value="2013-07-01T13:11:33Z"/>
+                </meta>
+                <contentType value="text/plain"/>
+                <data value="Zm9vYmFy"/>
+            </Binary>
+        </resource>
+        <request>
+            <method value="POST"/>
+        </request>
+    </entry>
+</Bundle>
