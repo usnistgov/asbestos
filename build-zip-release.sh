@@ -7,7 +7,7 @@
 
 echo "BUILDING ZIP"
 cd /opt
-zip -r --q asbestos.zip asbestos
+zip -r -q asbestos.zip asbestos
 
 echo "ZIP IS /OPT/ASBESTOS.ZIP"
 
