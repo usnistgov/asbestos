@@ -49,11 +49,13 @@
 <!--            <outputDirectory>./HOW-TO</outputDirectory>-->
 <!--        </fileSet>-->
         <!-- end Copy the HOW-TO files -->
+        <!-- Copy the Asbestos war files. This is the back-end code. -->
         <fileSet>
             <useDefaultExcludes>false</useDefaultExcludes>
             <directory>${basedir}/target/unpacked-war</directory>
             <excludes>
-                <exclude>WEB-INF/classes/service.properties</exclude>
+                <exclude>WEB-INF/classes/service.properties</exclude> <!-- the service property file will be copied to the FhirToolkit conf directory -->
+                <exclude>WEB-INF/classes/ittest-service.properties</exclude> <!-- exclude the it test service properties -->
             </excludes>
             <outputDirectory>${bundledTomcatDir}/Toolkits/FhirToolkit/webapps/asbestos</outputDirectory>
         </fileSet>
