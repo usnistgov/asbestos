@@ -11,6 +11,7 @@ import gov.nist.asbestos.http.operations.HttpPost;
 import gov.nist.asbestos.simapi.simCommon.SimId;
 import gov.nist.asbestos.simapi.validation.Val;
 import gov.nist.asbestos.testEngine.engine.TestEngine;
+import gov.nist.asbestos.testEngine.engine.fixture.FixtureMgr;
 import org.apache.log4j.Logger;
 import org.hl7.fhir.r4.model.BaseResource;
 import org.hl7.fhir.r4.model.TestReport;
@@ -168,6 +169,11 @@ public class GetClientTestEvalRequest {
             TestScript testScript = testScripts.get(theTestId);
             for (Event event : events) {
                 TestEngine testEngine = new TestEngine(testDir, testScript);
+                FixtureMgr fm = testEngine.getFixtureMgr();
+                fm.setTestId(theTestId);
+                fm.setTestCollectionId("Inspector");
+                testEngine.setTestId(theTestId);
+                testEngine.setTestCollection("Inspector");
                 testEngine.setVal(new Val());
                 testEngine.setTestSession(testSession);
                 testEngine.setExternalCache(request.externalCache);

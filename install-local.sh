@@ -74,10 +74,21 @@ rm asbestos.zip
 
 echo "INSTALL XDSTOOLS"
 cp $DEVELOP/toolkit2/xdstools2/target/xdstools*.war $INSTALL/tomcat/Toolkits/XdsToolkit/webapps/xdstools.war
-echo "INSTALL FHIRTOOLS"
-cp $DEVELOP/fhir.zip $INSTALL/tomcat/Toolkits/XdsToolkit/webapps
+
+echo "EXPAND XDSTOOLS"
+cd $INSTALL/tomcat/Toolkits/XdsToolkit/webapps
+mkdir xdstools
+cd xdstools
+unzip ../xdstools.war
+
+echo "REMOVE XDSTOOLS.WAR"
+rm -f ../xdstools.war
+
+echo "INSTALL PRODUCTION TOOLKIT.PROPERTIES"
+cp $DEVELOP/asbestos/asbestos-assembly/src/main/assembly/toolkit.properties $INSTALL/tomcat/Toolkits/XdsToolkit/webapps/xdstools/WEB-INF/classes
 
 echo "INSTALL HAPI"
+cp $DEVELOP/fhir.zip $INSTALL/tomcat/Toolkits/XdsToolkit/webapps
 cd $INSTALL/tomcat/Toolkits/XdsToolkit/webapps
 unzip -qq fhir.zip
 echo "REMOVE FHIR.ZIP"
