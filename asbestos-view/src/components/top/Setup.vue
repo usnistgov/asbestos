@@ -27,14 +27,14 @@
         <self-test
                 :session-id="'default'"
                 :channel-id="'selftest_comprehensive'"
-                :test-collection="'MHD_DocumentRecipient_Comprehensive'"> </self-test>
+                :test-collection="'MHD_DocumentRecipient_comprehensive'"> </self-test>
 
         <p>Run against MHD Document Recipient offering XDSonFHIR option - links to XDS Toolkit Repository/Registry
             simulator configured to accept Limited Metadata. </p>
         <self-test
                 :session-id="'default'"
                 :channel-id="'selftest_limited'"
-                :test-collection="'MHD_DocumentRecipient_Minimal'"> </self-test>
+                :test-collection="'MHD_DocumentRecipient_minimal'"> </self-test>
 
     </div>
 </template>
