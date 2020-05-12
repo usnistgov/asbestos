@@ -211,7 +211,13 @@ public class FixtureComponent {
     }
 
     public HttpBase getHttpBase() {
-        return httpBase;
+        if (httpBase != null)
+            return httpBase;
+        if (resourceWrapper != null) {
+            if (resourceWrapper.getHttpBase() != null)
+                return resourceWrapper.getHttpBase();
+        }
+        return null;
     }
 
     public FixtureComponent setHttpBase(HttpBase httpBase) {
@@ -220,7 +226,7 @@ public class FixtureComponent {
     }
 
     public boolean hasHttpBase() {
-        return httpBase != null;
+        return getHttpBase() != null;
     }
 
     public static String getNewId() {

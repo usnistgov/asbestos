@@ -181,7 +181,7 @@ export const testRunnerStore = {
         },
         testStatus(state, getters) {
             if (state.isClientTest) {
-                let status=[]
+                let status={}
                 state.testScriptNames.forEach(testId => {
                     const eventResult = state.clientTestResult[testId]
                     if (!eventResult) {
@@ -192,7 +192,7 @@ export const testRunnerStore = {
                 })
                 return status
             } else {
-                let status = []
+                let status = {}
                 state.testScriptNames.forEach(testId => {
                     const testReport = state.testReports[testId]
                     if (testReport === undefined) {
@@ -318,6 +318,7 @@ export const testRunnerStore = {
             let script = ""
             const promise = ENGINE.get(url)
             promise.then(result => {
+                console.log(`test script loaded`)
                 script = result.data
             })
                 .catch(function(error) {

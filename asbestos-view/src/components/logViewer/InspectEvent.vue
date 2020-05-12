@@ -142,12 +142,11 @@
 </template>
 
 <script>
-    import LogNav from "./LogNav"
-    import LogAnalysisReport from "./LogAnalysisReport"
-    //   import EvalDetails from "../testRunner/EvalDetails"
-    import {LOG} from '../../common/http-common'
-    import eventMixin from '../../mixins/eventMixin'
-    import errorHandlerMixin from '../../mixins/errorHandlerMixin'
+    import LogNav from "./LogNav";
+    import LogAnalysisReport from "./LogAnalysisReport";
+    import {LOG} from '../../common/http-common';
+    import eventMixin from '../../mixins/eventMixin';
+    import errorHandlerMixin from '../../mixins/errorHandlerMixin';
     import EvalDetails from "../testRunner/EvalDetails";
 
     export default {

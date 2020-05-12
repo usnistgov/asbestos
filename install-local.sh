@@ -72,6 +72,10 @@ unzip -qq asbestos.zip
 echo "REMOVE ASBESTOS.ZIP"
 rm asbestos.zip
 
+echo "BUILD FHIRTOOLKIT/TMP"
+mkdir $INSTALL/tomcat/Toolkits/FhirToolkit/temp
+echo "Place Holder" > $INSTALL/tomcat/Toolkits/FhirToolkit/temp/placeholder.txt
+
 echo "INSTALL XDSTOOLS"
 cp $DEVELOP/toolkit2/xdstools2/target/xdstools*.war $INSTALL/tomcat/Toolkits/XdsToolkit/webapps/xdstools.war
 

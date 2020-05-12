@@ -23,10 +23,10 @@
             <div class="testBarMargin" v-for="(name, i) in scriptNames"
                  :key="name + i" >
                 <div v-bind:class="{
-                                'pass-plain-header': status[name] === 'pass' && !colorful,
-                                'fail-plain-header': status[name] === 'fail' && !colorful,
+                                'pass-plain-header': status[name] === 'pass',
+                                'fail-plain-header': status[name] === 'fail',
                                 'error': status[name] === 'error',
-                                'not-run-plain': status[name] === 'not-run' && !colorful,
+                                'not-run-plain': status[name] === 'not-run',
                            }" @click.prevent="openTest(name)">
 
                     <script-status v-if="!statusRight" :status-right="statusRight" :name="name"> </script-status>

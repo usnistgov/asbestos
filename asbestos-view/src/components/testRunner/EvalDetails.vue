@@ -51,7 +51,7 @@
 <script>
     import errorHandlerMixin from '../../mixins/errorHandlerMixin'
     import colorizeTestReports from "../../mixins/colorizeTestReports";
-    import InspectEvent from "../logViewer/InspectEvent"
+//    import InspectEvent from "../logViewer/InspectEvent";
     //import TestStatus from "./TestStatus";
     import EvalActionDetails from "./EvalActionDetails";
 
@@ -103,31 +103,6 @@
             assertScript(testIndex, actionIndex) {
                 return this.testScript.test[testIndex].action[actionIndex].assert
             },
-            // assertDesc(testIndex, actionIndex) {
-            //     const rawDesc = this.assertScript(testIndex, actionIndex).description
-            //     if (!rawDesc.includes("|"))
-            //         return rawDesc
-            //     const elements = rawDesc.split("|")
-            //     const msg = elements[0]
-            //     return msg
-            // },
-            // assertRef(testIndex, actionIndex) {
-            //     const rawDesc = this.assertScript(testIndex, actionIndex).description
-            //     if (!rawDesc.includes("|"))
-            //         return ''
-            //     const elements = rawDesc.split("|")
-            //     const assertId = elements[1]
-            //     return `Reference: ${this.assertProfile} - ${this.assertMsg(assertId)}\n`
-            // },
-            // selectAssert(testIndex, assertIndex) {
-            //     if (this.selectedTestIndex === testIndex && this.selectedAssertIndex === assertIndex) {
-            //         this.selectedTestIndex = null
-            //         this.selectedAssertIndex = null
-            //     } else {
-            //         this.selectedTestIndex = testIndex
-            //         this.selectedAssertIndex = assertIndex
-            //     }
-            // },
             operationOrAssertion(testi, actioni) {
                 const action = this.script.test[testi].action[actioni]
                 return action.operation ? `Operation: ${this.operationType(action.operation)}` : `Assert: ${this.assertionDescription(action.assert)}`
@@ -149,17 +124,6 @@
             },
             actions(testIndex) {
                 return this.script.test[testIndex].action === undefined ? [] : this.script.test[testIndex].action
-            },
-            // scriptAction(testi, actioni) {
-            //     return this.script.test[testi].action[actioni]
-            // },
-            // reportAction(testi, actioni) {
-            //     if (!this.report)
-            //         return null
-            //     return this.report.test[testi].action[actioni]
-            // },
-            assertMsg(assertId) {
-                return this.$store.state.testRunner.testAssertions[assertId]
             },
             runSingleEventEval() {
                 this.$store.dispatch('runSingleEventEval',
@@ -232,7 +196,8 @@
         ],
         components: {
             //EvalReportAssert
-            InspectEvent,
+
+            InspectEvent: () => import('../logViewer/InspectEvent'),
            // TestStatus,
             EvalActionDetails
         },

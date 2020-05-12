@@ -1,7 +1,7 @@
 <template>  <!-- once for each client test-->
     <div v-if="testScript" class="align-left test-margins">
 
-        <script-status v-if="!statusRight" :status-right="statusRight" :name="testId"> </script-status>
+        <script-status :name="testId"> </script-status>
 
         <span v-if="$store.state.testRunner.currentEvent === eventId">
             <img src="../../assets/arrow-down.png">
@@ -13,9 +13,6 @@
         <span  @click.self="selectEvent()" class="event-part" v-bind:class="[isEventPass() ? passClass : failClass]">
             Message: {{ eventId }} - {{ eventDetail(eventId) }}
         </span>
-
-        <script-status v-if="statusRight" :status-right="statusRight" :name="testId"> </script-status>
-
 
         <div v-if="selected === eventId">
             <router-view></router-view>  <!-- eval-details -->
@@ -86,7 +83,7 @@ import ScriptStatus from "./ScriptStatus";
             logSummariesNeedLoading2() {  // because there are eventIds not present in summaries
                 if (!this.eventIds) return false
                 const lastEventId = this.eventIds[0]
-                if (!this.$store.state.log.eventSummaries) return true
+                if (this.$store.state.log.eventSummaries.length === 0) return true
                 const lastSummaryId = this.$store.state.log.eventSummaries[0].eventName
                 return lastEventId > lastSummaryId
             },
