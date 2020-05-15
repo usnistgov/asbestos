@@ -151,7 +151,7 @@ export const baseStore = {
             const url = `ProxyBase`
             LOG.get(url)
                 .then(response => {
-                    commit('setProxyBase', response.data)
+                    commit('setProxyBase', response.data.value)
                 })
                 .catch (e => {
                     commit('setError', url + ': ' + e)

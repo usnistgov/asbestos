@@ -1306,10 +1306,20 @@ public class TestEngine  {
         File resourceTypeFile = new File(cacheDir, "Patient");
         resourceTypeFile.mkdirs();
 
-        String given = patient.getNameFirstRep().getGiven().get(0).toString();
-        String family = patient.getNameFirstRep().getFamily();
+        String given;
+        try {
+            given = patient.getNameFirstRep().getGiven().get(0).toString();
+        } catch (Throwable t) {
+            given = "Missing";
+        }
+        String family;
+        try {
+            family = patient.getNameFirstRep().getFamily();
+        } catch (Throwable t) {
+            family = "Person";
+        }
         if (given != null &&!given.equals("") && family != null && !family.equals("")) {
-            log.info("Writing cache entry for " + given + "_" + family);
+            log.info("Writing cache entry to " + resourceTypeFile + " for " + given + "_" + family);
             ProxyBase.toFile(bundle, resourceTypeFile, given + "_" + family, Format.JSON);
         }
     }

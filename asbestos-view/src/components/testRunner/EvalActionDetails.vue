@@ -43,7 +43,7 @@
                 <span class="selectable" @click="toggleScriptDisplayed()">Test Script/Report</span>
                 <span v-if="displayScript">
                     <img src="../../assets/arrow-down.png" @click="toggleScriptDisplayed()">
-                   <vue-markdown v-if="message">{{message}}</vue-markdown>
+                   <vue-markdown v-if="actionContext">{{actionContext}}</vue-markdown>
                     <script-display
                             :script="script"
                             :report="report">
@@ -68,7 +68,7 @@
         data() {
             return {
                 open: false,
-                displayScript: false,
+                displayScript: true,
             }
         },
         methods: {
@@ -82,7 +82,21 @@
             },
             select() {
                 this.open = !this.open;
-            }
+            },
+            getExtensionValue(root, url) {
+                const ext = this.getExtension(root, url);
+                if (!ext) return null;
+                return ext.valueString;
+            },
+            getExtension(root, url) {
+                if (!root || !root.extension) return null;
+                let ext = null;
+                root.extension.forEach(e => {
+                    if (e.url === url)
+                        ext = e;
+                })
+                return ext;
+            },
         },
         computed: {
             scriptAction() {
@@ -93,6 +107,13 @@
             },
             message() {
                 return this.report.assert.message
+            },
+            actionContext() {
+                if (!this.report)
+                    return null;
+                return this.report.assert
+                    ? this.getExtensionValue(this.report.assert, "urn:action-context")
+                    : this.getExtensionValue(this.report.operation, "urn:action-context");
             },
             result() {
                 return this.report.assert.result;

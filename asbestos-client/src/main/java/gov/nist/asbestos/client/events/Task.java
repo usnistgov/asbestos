@@ -129,6 +129,8 @@ public class Task implements ITask {
         }
         if (_requestHeaders.isZipped())
             return Gzip.decompressGZIP(_requestRawBody);
+        if (_requestBody == null && _requestRawBody != null)
+            _requestBody = new String(_requestRawBody);
         return _requestRawBody;
     }
 
@@ -294,6 +296,8 @@ public class Task implements ITask {
 
             }
         }
+        if (_responseBody == null && _responseRawBody != null)
+            _responseBody = new String(_responseRawBody);
         return _responseRawBody;
     }
 

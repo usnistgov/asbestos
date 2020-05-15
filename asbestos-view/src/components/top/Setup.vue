@@ -6,9 +6,14 @@
 
         <h3>Load static resources</h3>
         <p>These resources are referenced in tests and must be loaded for tests to operate. They are loaded
-            into the supporting HAPI server and to a cache in FHIR Toolkit located in the External Cache.
+            into the supporting HAPI server (default channel) and to a cache in FHIR Toolkit located in the External Cache.
             This initialization can be re-run at any time.
             If the External Cache is cleared these must be run again to re-initialize the cache.
+            Once the cache is established for the default channel it is available for testing on any channel.
+            To store the static resources in a different server/channel, manually select the channel and the
+            test collection and use RunAll button to load. This channel-specific cache will only be used for this channel.
+            The cache on the default channel is always available for when there is no channel-specific cache
+            available.
         </p>
 
         <!--  SelfTest is an alternate test runner   -->
