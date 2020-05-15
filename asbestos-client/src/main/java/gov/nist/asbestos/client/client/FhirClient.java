@@ -32,6 +32,8 @@ public class FhirClient {
     private PatientCacheMgr patientCacheMgr = null;
     private boolean requestGzip = false;
     private boolean sendGzip = false;
+    private Header supportRequestHeader = new Header("x-ftk-support", "true");
+    private boolean supportRequest = false;
 
     public FhirClient() {}
 
@@ -61,6 +63,8 @@ public class FhirClient {
         if (contentType != null)
             headers.put("content-type", contentType);
         Headers theHeaders = new Headers(headers);
+        if (isSupportRequest())
+            theHeaders.add(supportRequestHeader);
         if (theHeaders.getHeaderValue("accept") == null)
             theHeaders.add(new Header("accept", contentType));
 
@@ -112,7 +116,10 @@ public class FhirClient {
         if (headers == null)
             headers = new HashMap<>();
         HttpDelete delete = new HttpDelete();
-        delete.setRequestHeaders(new Headers(headers));
+        Headers theHeaders = new Headers(headers);
+        if (isSupportRequest())
+            theHeaders.add(supportRequestHeader);
+        delete.setRequestHeaders(theHeaders);
         delete.setUri(ref.getUri());
 
         delete.run();
@@ -138,6 +145,11 @@ public class FhirClient {
         wrapper.setRef(ref);
         wrapper.setHttpBase(getter);
         String contentType = (format == Format.JSON) ? "application/fhir+json" : "application/fhir+xml";
+        Headers theHeaders = new Headers();
+        if (isSupportRequest()) {
+            theHeaders.add(supportRequestHeader);
+            getter.setRequestHeaders(theHeaders);
+        }
         getter.get(ref.getUri(), contentType);
         return gobbleGetResponse(getter, wrapper, format);
     }
@@ -228,6 +240,8 @@ public class FhirClient {
         wrapper.setHttpBase(getter);
         getter.setUri(ref.getUri());
         Headers headers = new Headers(requestHeader);
+        if (isSupportRequest())
+            headers.add(supportRequestHeader);
         String contentType = format == null ? Format.XML.getContentType() : format.getContentType();
         if (headers.getHeaderValue("accept") == null)
             headers.add(new Header("accept", contentType));
@@ -351,5 +365,14 @@ public class FhirClient {
 
     public UIEvent getProxyEvent() {
         return new ProxyEvent(httpBase).getEvent();
+    }
+
+    public boolean isSupportRequest() {
+        return supportRequest;
+    }
+
+    public FhirClient setSupportRequest(boolean supportRequest) {
+        this.supportRequest = supportRequest;
+        return this;
     }
 }

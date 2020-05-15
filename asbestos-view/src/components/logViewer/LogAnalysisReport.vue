@@ -184,13 +184,13 @@
                 }
             },
             async loadAnalysisFromEventContext(url, eventContext, addToHistory) {
-                console.log(`loadAnalysisFromEventContext url=${url} eventContext.eventId=${eventContext.eventId}`)
+                //console.log(`loadAnalysisFromEventContext url=${url} eventContext.eventId=${eventContext.eventId}`)
                 const eventId = eventContext ? eventContext.eventId : null
                 await this.loadAnalyisFromEventId(url, eventId, addToHistory)
             },
             async loadAnalyisFromEventId(url, eventId, addToHistory) {
-                console.log(`loadAnalyisFromEventContext for ${eventId}`)
-                console.log(`url=${url}`)
+                //console.log(`loadAnalyisFromEventContext for ${eventId}`)
+                //console.log(`url=${url}`)
                 // if (url.startsWith('http'))
                 //     await this.loadAnalysisForObject(url)
                 // else

@@ -15,6 +15,8 @@ public class FhirPathEngineBuilder {
     }
 
     public static boolean evalForBoolean(BaseResource resource, String expression) {
+        if (resource == null)
+            return false;
         List<Base> results;
         try {
             results = build().evaluate(resource, expression);
@@ -32,6 +34,8 @@ public class FhirPathEngineBuilder {
     }
 
     public static Resource evalForResource(Resource resourceIn, String expression) {
+        if (resourceIn == null)
+            return null;
         List<Base> results = build().evaluate(resourceIn, expression);
         if (results.isEmpty())
             return null;
@@ -46,6 +50,8 @@ public class FhirPathEngineBuilder {
     }
 
     public static String evalForString(BaseResource resource, String expression) {
+        if (resource == null)
+            return "";
         List<Base> results = build().evaluate(resource, expression);
         if (results.isEmpty())
             return null;

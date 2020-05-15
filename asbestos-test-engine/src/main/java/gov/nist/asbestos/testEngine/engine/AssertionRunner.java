@@ -231,7 +231,7 @@ public class AssertionRunner {
 
         BaseResource sourceResource = sourceFixture.getResourceResource();
         if (sourceResource == null) {
-            Reporter.reportError(val, assertReport, type, label,"Fixture referenced " + sourceFixture.getId()  + " has no resource.");
+            Reporter.reportError(val, assertReport, type, label,"Fixture referenced <" + sourceFixture.getId()  + "> has no resource.");
             return false;
         }
         String expression = variableMgr.updateReference(as.getCompareToSourceExpression());
@@ -368,7 +368,7 @@ public class AssertionRunner {
         if (sourceFixture == null) return false;
         BaseResource sourceResource = sourceFixture.getResourceResource();
         if (sourceResource == null) {
-            Reporter.reportError(val, assertReport, type, label,"Fixture referenced " + sourceFixture.getId()  + " has no resource");
+            Reporter.reportError(val, assertReport, type, label,"Fixture referenced <" + sourceFixture.getId()  + "> has no resource");
             return false;
         }
         String expression = variableMgr.updateReference(as.getExpression());
@@ -412,7 +412,7 @@ public class AssertionRunner {
         if (sourceFixture == null) return false;
         BaseResource sourceResource = sourceFixture.getResourceResource();
         if (sourceResource == null) {
-            Reporter.reportError(val, assertReport, type, label,"Fixture referenced " + sourceFixture.getId()  + " has no resource.");
+            Reporter.reportError(val, assertReport, type, label,"Fixture referenced <" + sourceFixture.getId()  + "> has no resource.");
             return false;
         }
         String expression = as.getExpression();
