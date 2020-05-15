@@ -5,10 +5,10 @@
             <action-details
                     :script="caction"
                     :report="reportActions ? reportActions[cactioni] : null"
-                    :debug-title="debugTitle(cactioni)"
-                    @onStatusMouseOver="hoverActionIndex = cactioni"
-                    @onStatusMouseLeave="hoverActionIndex = -1"
-                    @onStatusClick="toggleBreakpointIndex(cactioni)"></action-details>
+                    :debug-title="'debugTitle'"
+                    >
+
+            </action-details>
         </div>
     </div>
 </template>
@@ -25,30 +25,6 @@ import ActionDetails from "./ActionDetails";
         },
         name: "ComponentScript",
         methods: {
-            debugTitle(idx) {
-                if (! this.breakpointIndex[idx]) {
-                    return "Set breakpoint"
-                } else {
-                    return "Remove breakpoint"
-                }
-            },
-            isBreakpoint(actionIdx) {
-                return Boolean(this.breakpointIndex[actionIdx]) || ! this.breakpointIndex[actionIdx] && this.hoverActionIndex === actionIdx
-            },
-            toggleBreakpointIndex(actionIndex) {
-                if (this.breakpointIndex[actionIndex]) {
-                    this.hoverActionIndex = -1
-                }
-                this.breakpointIndex[actionIndex] = ! this.breakpointIndex[actionIndex]
-                if (this.breakpointIndex[actionIndex]) {
-                    this.hoverActionIndex = actionIndex
-                    // console.log("calling dispatch" + this.testScriptIndex + " breakpointIndex: " + this.testIndex + "." + actionIndex)
-                    this.$store.dispatch('addBreakpoint', {testScriptIndex: this.testScriptIndex, breakpointIndex: this.testIndex + "." + actionIndex})
-                } else {
-                    // remove breakpoint
-                    this.$store.dispatch('removeBreakpoint', {testScriptIndex: this.testScriptIndex, breakpointIndex: this.testIndex + "." + actionIndex})
-                }
-            },
         },
         computed: {
             // if a component is used multiple times then the componentName is the same and the componentId is different
