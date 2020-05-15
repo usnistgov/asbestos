@@ -5,14 +5,21 @@
                     'breakpoint-indicator': showBreakpointIndicator,
                     'breakpoint-hit-indicator': isBreakpointHit,
                 }"
-        :data-map-key="currentMapKey"
         :data-breakpoint-index="breakpointIndex"
     >
         <!-- TODO:
         add off/on label to the gutter
              div.onClick register breakpoint with li.data-index value
+        :data-map-key="currentMapKey"
+              :title="hasBreakpoint ? 'Remove breakpoint' : 'Set breakpoint'"
         -->
-        <span style="position: absolute; left: 1px; font-size: 8px; color: gray">OFF</span>
+        <span
+              :class="{
+                    'breakpointControlOff' : ! hasBreakpoint,
+                    'breakpointControlOn' : hasBreakpoint,
+              }"
+              @click.stop="doToggle()"
+        >{{breakpointSwitchStatus}}</span>
         <slot></slot>
     </li>
 
@@ -25,20 +32,42 @@
     export default {
         data() {
             return {
+                isUpdated: false, // Only to nudge Vue reactivity
             }
         },
         methods: {
-        },
+            doToggle() {
+                this.toggleBreakpointIndex(this.indexObj)
+                    .then(resultCode => {
+                        if (resultCode)
+                            this.isUpdated = ! this.isUpdated // Keep this to nudge reactivity
+                    })
+            },
 
+
+        },
         computed: {
+            indexObj() {
+                if (this.isUpdated) {this.isUpdated.valueOf()}
+               return this.getBreakpointObj(this.breakpointIndex)
+            },
+            hasBreakpoint() {
+                let retVal = this.$store.getters.hasBreakpoint(this.indexObj)
+                return retVal
+            },
             showBreakpointIndicator() {
-                let obj = this.getBreakpointObj(this.breakpointIndex)
-                return this.$store.getters.hasBreakpoint(obj) && ! this.isBreakpointHit
+                return this.$store.getters.hasBreakpoint(this.indexObj) && ! this.isBreakpointHit
             },
             isBreakpointHit() {
-                let obj = this.getBreakpointObj(this.breakpointIndex)
-                return this.$store.getters.isBreakpointHit(obj)
+                return this.$store.getters.isBreakpointHit(this.indexObj)
             },
+            breakpointSwitchStatus() {
+                if (this.hasBreakpoint) {
+                    return "ON"
+                } else {
+                    return "OFF"
+                }
+            }
         },
         props: [
             'breakpointIndex',
@@ -53,5 +82,25 @@
 </script>
 
 <style scoped>
+
+    span.breakpointControlOn,
+    span.breakpointControlOff {
+        position: absolute;
+        left: 0px;
+        font-size: 8px;
+        cursor: pointer;
+        color: gray;
+        border: #f5f5f5 solid 1px;
+    }
+
+    span.breakpointControlOn {
+        color: black;
+        border : black solid 1px;
+    }
+
+    span.breakpointControlOn:hover,
+    span.breakpointControlOff:hover {
+       text-decoration: underline;
+    }
 
 </style>

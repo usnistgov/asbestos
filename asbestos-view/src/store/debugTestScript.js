@@ -74,7 +74,8 @@ export const debugTestScriptStore = {
         hasBreakpoint: (state) => (obj) => {
             if (state.breakpointMap.has(obj.testScriptIndex)) {
                 const breakpointSet = state.breakpointMap.get(obj.testScriptIndex)
-                return breakpointSet.has(obj.breakpointIndex)
+                const retVal = breakpointSet.has(obj.breakpointIndex)
+                return retVal
             }
             return false
         },
@@ -130,14 +131,16 @@ export const debugTestScriptStore = {
                 if (value.testScriptIndex != null && value.testScriptIndex != undefined) {
                     if (value.breakpointIndex != null && value.breakpointIndex != undefined) {
                         commit('addBreakpoint', value)
-                        return;
+                        return true
                     }
                 }
             }
             alert('Requested breakpoint could not be added.')
+            return false
         },
         removeBreakpoint({commit}, value) {
             commit('removeBreakpoint', value)
+            return true
         },
         async debugKill({state}, mapKey) {
             if (state.testScriptDebuggerWebSocket != null) {

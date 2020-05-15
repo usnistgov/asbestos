@@ -47,19 +47,19 @@ export default {
             let obj = {testScriptIndex: this.currentMapKey, breakpointIndex: breakpointIndex}
             return obj
         },
-        toggleBreakpointIndex(testScriptIndex, testType, testIndex, actionIndex) {
+        toggleBreakpointIndex(obj) {
             // console.log("enter toggleBreakpointIndex")
-            let obj = {testScriptIndex: testScriptIndex, breakpointIndex: testType + testIndex + "." + actionIndex}
+            // let obj = {testScriptIndex: testScriptIndex, breakpointIndex: testType + testIndex + "." + actionIndex}
             if (! this.$store.getters.hasBreakpoint(obj)) {
-                this.hoverActionIndex = actionIndex // Restore the hoverActionIndex when toggle on the same item goes from on(#)-off(-1)-on(#)
+                // this.hoverActionIndex = actionIndex // Restore the hoverActionIndex when toggle on the same item goes from on(#)-off(-1)-on(#)
                 // console.log("calling dispatch" + testScriptIndex + " breakpointIndex: " + testIndex + "." + actionIndex)
-                this.$store.dispatch('addBreakpoint', obj)
+                return this.$store.dispatch('addBreakpoint', obj)
 
             } else {
-                this.hoverActionIndex = -1 // Immediately remove the debug indicator while the mouse hover is still active but without having to wait for the mouseLeave event
+                // this.hoverActionIndex = -1 // Immediately remove the debug indicator while the mouse hover is still active but without having to wait for the mouseLeave event
                 // remove breakpoint
                 //  console.log("calling removeBreakpoint dispatch" + testScriptIndex + " breakpointIndex: " + testIndex + "." + actionIndex)
-                this.$store.dispatch('removeBreakpoint', obj)
+                return this.$store.dispatch('removeBreakpoint', obj)
             }
         },
         debugTitle(testScriptIndex, testType, testIndex, actionIndex) {
