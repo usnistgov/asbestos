@@ -1,16 +1,11 @@
 <template>
     <div>
         <div v-if="script">
-            <span
-                    v-bind:class="{
-                'not-run': isNotRun && colorful,
-                'not-run-plain-detail': isNotRun && !colorful,
-                'pass-plain-detail': isPass && !colorful,
-                pass : isPass && colorful,
-                error: isError && colorful,
-                'error-plain': isError && !colorful,
-                fail: isFail && colorful,
-                'fail-plain-detail': isFail && !colorful,
+            <span v-bind:class="{
+                'not-run-plain-detail': isNotRun,
+                'pass-plain-detail': isPass,
+                'error-plain': isError,
+                'fail-plain-detail': isFail,
             }"
                     @click.stop="toggleMessageDisplay()">
 
@@ -36,7 +31,7 @@
                 </span>
                 <span v-else>
                     <span v-if="isConditional">if: </span>
-                    <span v-else>assert: </span>
+<!--                    <span v-else>assert: </span>-->
                 </span>
                 <span>
                     {{ description }}
@@ -266,11 +261,13 @@
                 return this.script.operation ? this.script.operation.label : this.script.assert.label
             },
             description() {
+                if (!this.descriptionAtt || !this.descriptionAtt.includes('|')) return this.descriptionAtt;
                 const attr = this.descriptionAtt
                 const parts = attr.split('|')
                 return parts[0]
             },
             references() {
+                if (!this.descriptionAtt || !this.descriptionAtt.includes('|')) return '';
                 const attr = this.descriptionAtt
                 let parts = attr.split('|')
                 parts.shift()

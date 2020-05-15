@@ -32,27 +32,25 @@
                         <img src="../../assets/info.png">
                     </a>
 
-<!--                    <span class="link-position solid-boxed pointer-cursor" @click.stop.prevent="copyToClipboard">Copy Event Link</span>-->
-<!--                    <input type="hidden" id="the-link" :value="eventLink">-->
-
                     <!-- Request/Response line -->
                     <div>
-                    <span v-bind:class="{
-                        selected: displayRequest,
-                        'not-selected': !displayRequest
-                        }"
+                        <span class="divider80"></span>
+                        <span v-bind:class="{
+                            selected: displayRequest,
+                            'not-selected': !displayRequest
+                         }"
                           @click="displayRequest = true; displayResponse = false; displayInspector = false; displayValidations = false">
-                        Request
-                    </span>
+                            Request
+                        </span>
 
-                    <div class="divider"></div>
-                    <span v-bind:class="{
-                        selected: displayResponse,
-                        'not-selected': !displayResponse
-                        }"
-                          @click="displayRequest = false; displayResponse = true; displayInspector = false; displayValidations = false">
-                        Response
-                    </span>
+                        <div class="divider"></div>
+                        <span v-bind:class="{
+                            selected: displayResponse,
+                            'not-selected': !displayResponse
+                            }"
+                            @click="displayRequest = false; displayResponse = true; displayInspector = false; displayValidations = false">
+                            Response
+                        </span>
                     </div>
 
                 </div>
@@ -69,7 +67,7 @@
 
             <div class="request-response">
                 <div>
-                    Inspector:
+                    Content:
                     <span v-bind:class="{
                         selected: inspectRequest && requestEnabled,
                         'not-selected': !(inspectRequest && requestEnabled)
@@ -152,7 +150,7 @@
     export default {
         data() {
             return {
-                selectedEvent: null,    // UIEvent
+                selectedEvent: false,
                 selectedTask: 0,
                 displayRequest: true,
                 displayResponse: false,

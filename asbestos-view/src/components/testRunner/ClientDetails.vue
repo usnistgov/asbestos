@@ -1,7 +1,7 @@
 <template>  <!-- once for each client test-->
     <div v-if="testScript" class="align-left test-margins">
 
-        <script-status :name="testId"> </script-status>
+        <script-status :name="testId" :event-id="eventId"> </script-status>
 
         <span v-if="$store.state.testRunner.currentEvent === eventId">
             <img src="../../assets/arrow-down.png">
@@ -14,8 +14,18 @@
             Message: {{ eventId }} - {{ eventDetail(eventId) }}
         </span>
 
-        <div v-if="selected === eventId">
-            <router-view></router-view>  <!-- eval-details -->
+        <div v-if="currentEvent === eventId">
+            <!-- wants only the action part of report -->
+            <div v-if="primaryTestReport">
+                <script-details
+                        :script="testScript"
+                        :report="primaryTestReport"> </script-details>
+            </div>
+            <div v-else>
+                <script-details
+                        :script="testScript"
+                        :report="testReport"> </script-details>
+            </div>
         </div>
     </div>
 </template>
@@ -23,22 +33,45 @@
 <script>
 import colorizeTestReports from "../../mixins/colorizeTestReports";
 import ScriptStatus from "./ScriptStatus";
+import ScriptDetails from "./ScriptDetails";
 
     export default {
         data() {
             return {
                 passClass: null,  // initialized in created()
                 failClass: null,
+                primaryTestReport: null,
             }
         },
         methods: {
             selectEvent() {
-                if (this.selected === this.eventId)  { // unselect
+                // currentEvent is this.$store.state.testRunner.currentEvent
+                // eventId is always set (passed from parent)
+                if (this.currentEvent === this.eventId)  { // unselect
+                    this.primaryTestReport = null;
                     this.$store.commit('setCurrentEvent', null)
                     const route = `/session/${this.sessionId}/channel/${this.channelId}/collection/${this.testCollection}/test/${this.testId}`
                     this.$router.push(route)
                 } else {
                     this.$store.commit('setCurrentEvent', this.eventId)
+                    // If this is a client test then testReport is an array.
+                    // Parse this into the primary (put into primaryTestReport) and secondaries (modules).
+                    // Module reports are put into testRunner.moduleTestReports.
+                    // ScriptDetails expects this partitioning.
+                    if (Array.isArray(this.testReport)) {
+                        if (this.testReport.length > 0)
+                            this.primaryTestReport = this.testReport[0];
+                        else
+                            this.primaryTestReport = null;
+                        let moduleReports = {};
+                        for (let i = 1; i < this.testReport.length; i++) {
+                            const report = this.testReport[i];
+                            const name = report.name;
+                            moduleReports[name] = report;
+                        }
+                        this.$store.commit('setModuleTestReports', moduleReports);
+                    }
+
                     const route = `/session/${this.sessionId}/channel/${this.channelId}/collection/${this.testCollection}/test/${this.testId}/event/${this.eventId}`
                     this.$router.push(route)
                 }
@@ -58,7 +91,7 @@ import ScriptStatus from "./ScriptStatus";
                 return null
             },
             isEventPass() {
-                return this.eventResult[this.eventId].result === 'pass'
+                return this.eventResult[this.eventId][0].result === 'pass'
             },
             selectCurrent() {
                 this.selectEvent(this.selected)
@@ -90,7 +123,7 @@ import ScriptStatus from "./ScriptStatus";
             testScript() {
                 return this.$store.state.testRunner.testScripts[this.testId]
             },
-            selected() {
+            currentEvent() {
                 return this.$store.state.testRunner.currentEvent
             },
             eventIds() {
@@ -99,9 +132,14 @@ import ScriptStatus from "./ScriptStatus";
                 }
                 return Object.keys(this.eventResult).sort().reverse()
             },
-            eventResult() {
+            eventResult() {  // returns array of reports (primary and any modules)
                 return this.$store.state.testRunner.clientTestResult[this.testId]
             },
+            testReport() {  // should return primary only
+                if (!this.currentEvent)
+                    return null;
+                return this.eventResult[this.currentEvent];
+            }
         },
         created() {
             if (this.$store.state.testRunner.colorMode) {
@@ -120,7 +158,7 @@ import ScriptStatus from "./ScriptStatus";
             'sessionId', 'channelId', 'testCollection', 'testId', 'eventId'
         ],
         components: {
-            ScriptStatus
+            ScriptStatus, ScriptDetails
         },
         mixins: [colorizeTestReports],
         name: "ClientDetails"

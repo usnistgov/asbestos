@@ -47,12 +47,19 @@
                 return this.$store.state.testRunner.testScripts[this.testId].description.replace(/\n/g, "<br />")
             },
             testScript() {
+                this.loadTestScript();
                 return   this.$store.state.testRunner.testScripts[this.testId]
             },
             eventIds() {
                 if (!this.$store.state.testRunner.clientTestResult) return null
                 return Object.keys(this.$store.state.testRunner.clientTestResult[this.testId])
             },
+        },
+        methods: {
+            async loadTestScript() {
+                if (this.$store.state.testRunner.testScripts[this.testId] === null)
+                    await this.$store.dispatch('loadTestScript', {testCollection: this.testCollection, testId: this.testId});
+            }
         },
         props: [
             'sessionId', 'channelId', 'testCollection', 'testId'

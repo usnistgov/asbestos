@@ -45,4 +45,6 @@ public interface ITask {
     String getDescription();
 
     String getResponseBodyAsString();
+
+    HttpBase getHttpBase();
 }

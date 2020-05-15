@@ -10,8 +10,10 @@ import gov.nist.asbestos.http.operations.HttpGet;
 import gov.nist.asbestos.http.operations.HttpPost;
 import gov.nist.asbestos.simapi.simCommon.SimId;
 import gov.nist.asbestos.simapi.validation.Val;
+import gov.nist.asbestos.testEngine.engine.ModularEngine;
 import gov.nist.asbestos.testEngine.engine.TestEngine;
 import gov.nist.asbestos.testEngine.engine.fixture.FixtureMgr;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.log4j.Logger;
 import org.hl7.fhir.r4.model.BaseResource;
 import org.hl7.fhir.r4.model.TestReport;
@@ -54,7 +56,7 @@ public class GetClientTestEvalRequest {
     }
 
     class EventResult {
-        Map<String, TestReport> reports = new HashMap<>(); // eventId -> TestReport
+        Map<String, List<TestReport>> reports = new HashMap<>(); // eventId -> TestReport
     }
 
     public void run() {
@@ -130,34 +132,41 @@ public class GetClientTestEvalRequest {
         for (Event event : events) {
             ITask task = event.getClientTask();
             String verb = task.getVerb();
+
+            // request
             try {
+                String requestContentType = event.getClientTask().getRequestHeader().getContentType().getValue();
+                Format format = Format.fromContentType(requestContentType);
                 String requestString = task.getRequestBodyAsString();
-                if (requestString != null) {
-                    String requestContentType = event.getClientTask().getRequestHeader().getContentType().getValue();
-                    Format format = Format.fromContentType(requestContentType);
+                ResourceWrapper wrapper;
+                if (requestString == null) {
+                    wrapper = new ResourceWrapper();
+                } else {
                     BaseResource resource = ProxyBase.parse(requestString, format);
-                    ResourceWrapper wrapper = new ResourceWrapper(resource);
-                    HttpBase base = verb.equalsIgnoreCase("post") ? new HttpPost() : new HttpGet();
-                    task.fromTask(base);
-                    wrapper.setHttpBase(base);
-                    requestResources.put(event, wrapper);
+                    wrapper = new ResourceWrapper(resource);
                 }
+                HttpBase base = task.getHttpBase();
+                wrapper.setHttpBase(base);
+                requestResources.put(event, wrapper);
             } catch (Throwable t) {
                 t.printStackTrace();
             }
 
+            // response
             try {
                 String responseString = event.getClientTask().getResponseBodyAsString();
-                if (responseString != null) {
-                    String responseContentType = event.getClientTask().getResponseHeader().getContentType().getValue();
-                    Format rformat = Format.fromContentType(responseContentType);
+                String responseContentType = event.getClientTask().getResponseHeader().getContentType().getValue();
+                Format rformat = Format.fromContentType(responseContentType);
+                ResourceWrapper wrapper;
+                if (responseString == null) {
+                    wrapper = new ResourceWrapper();
+                } else {
                     BaseResource rresource = ProxyBase.parse(responseString, rformat);
-                    ResourceWrapper wrapper = new ResourceWrapper(rresource);
-                    HttpBase base = verb.equalsIgnoreCase("post") ? new HttpPost() : new HttpGet();
-                    task.fromTask(base);
-                    wrapper.setHttpBase(base);
-                    responseResources.put(event, wrapper);
+                    wrapper = new ResourceWrapper(rresource);
                 }
+                HttpBase base = task.getHttpBase();
+                wrapper.setHttpBase(base);
+                responseResources.put(event, wrapper);
             } catch (Throwable t) {
                 t.printStackTrace();
             }
@@ -168,22 +177,28 @@ public class GetClientTestEvalRequest {
             File testDir = testIds.get(theTestId);
             TestScript testScript = testScripts.get(theTestId);
             for (Event event : events) {
-                TestEngine testEngine = new TestEngine(testDir, testScript);
-                FixtureMgr fm = testEngine.getFixtureMgr();
-                fm.setTestId(theTestId);
-                fm.setTestCollectionId("Inspector");
-                testEngine.setTestId(theTestId);
-                testEngine.setTestCollection("Inspector");
-                testEngine.setVal(new Val());
-                testEngine.setTestSession(testSession);
-                testEngine.setExternalCache(request.externalCache);
-                ResourceWrapper responseResource = responseResources.get(event);
-                testEngine.runEval(requestResources.get(event), responseResources.get(event));
-                EventResult eventResult = result.results.get(theTestId); //new EventResult();
-                if (eventResult == null)
-                    eventResult = new EventResult();
-                eventResult.reports.put(event.getEventId(), testEngine.getTestReport());
-                result.results.put(theTestId, eventResult);
+                try {
+                    ModularEngine modularEngine = new ModularEngine(testDir, testScript);
+                    FixtureMgr fm = modularEngine.getFixtureMgr();
+                    fm.setTestId(theTestId);
+                    fm.setTestCollectionId("Inspector");
+                    modularEngine.setTestId(theTestId);
+                    modularEngine.setTestCollection("Inspector");
+                    modularEngine.setChannelId(request.fullChannelId());
+                    modularEngine.setVal(new Val());
+                    modularEngine.setTestSession(testSession);
+                    modularEngine.setExternalCache(request.externalCache);
+                    ResourceWrapper responseResource = responseResources.get(event);
+                    modularEngine.runEval(requestResources.get(event), responseResources.get(event));
+                    EventResult eventResult = result.results.get(theTestId); //new EventResult();
+                    if (eventResult == null)
+                        eventResult = new EventResult();
+                    eventResult.reports.put(event.getEventId(), modularEngine.getTestReports());
+                    result.results.put(theTestId, eventResult);
+                } catch (Throwable t) {
+                    log.error(ExceptionUtils.getStackTrace(t));
+                    throw t;
+                }
             }
         }
 
@@ -197,15 +212,26 @@ public class GetClientTestEvalRequest {
         else {
             buf.append(" {\n");
             boolean first = true;
-            for (String eventId : er.reports.keySet()) {
+            //for (String eventId : er.reports.keySet()) {
+            // keep the reports in eventId order
+            for (Event event : events) {
+                String eventId = event.getEventId();
                 if (first)
                     first = false;
                 else
                     buf.append(',');
 
                 buf.append('"').append(eventId).append('"').append(":\n ");
-                TestReport testReport = er.reports.get(eventId);
-                buf.append(ProxyBase.encode(testReport, Format.JSON));
+                List<TestReport> testReports = er.reports.get(eventId);
+                buf.append("[\n");
+                boolean isFirst = true;
+                for (TestReport testReport : testReports) {
+                    if (!isFirst)
+                        buf.append(",");
+                    isFirst = false;
+                    buf.append(ProxyBase.encode(testReport, Format.JSON));
+                }
+                buf.append("]\n");
             }
             buf.append("\n  }\n");
         }

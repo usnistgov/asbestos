@@ -1,13 +1,17 @@
 package gov.nist.asbestos.testEngine.engine;
 
+import com.sun.org.apache.xpath.internal.operations.Mod;
 import gov.nist.asbestos.client.Base.EC;
 import gov.nist.asbestos.client.Base.ProxyBase;
 import gov.nist.asbestos.client.client.FhirClient;
+import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import gov.nist.asbestos.simapi.validation.Val;
+import gov.nist.asbestos.testEngine.engine.fixture.FixtureMgr;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.log4j.Logger;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.TestReport;
+import org.hl7.fhir.r4.model.TestScript;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -27,14 +31,23 @@ public class ModularEngine {
     private Map<String, String> reports = new HashMap<>();   // name => TestReport json
 
     public ModularEngine(File testDefDir) {
-        this(testDefDir, null);
+        this(testDefDir, (URI) null);
+    }
+
+    public ModularEngine(File testDefDir, TestScript testScript) {
+        this(testDefDir, (URI) null);
+        getMainTestEngine().setTestScript(testScript);
     }
 
     public ModularEngine(File testDefDir, URI sut) {
         nameFromTestDefDir(testDefDir);
-        TestEngine testEngine = new TestEngine(testDefDir, sut);
+        TestEngine testEngine = sut == null ? new TestEngine(testDefDir) : new TestEngine(testDefDir, sut);
         engines.add(testEngine);
         testEngine.setModularEngine(this);
+    }
+
+    public boolean isClientTest() {
+        return getMainTestEngine().getSut() == null;
     }
 
     private void nameFromTestDefDir(File testDefDir) {
@@ -67,6 +80,28 @@ public class ModularEngine {
 
     public List<TestEngine> getTestEngines() {
         return engines;
+    }
+
+    private void installModuleNames() {
+        boolean first = true;
+        for (TestEngine engine : engines) {
+            TestReport report = engine.getTestReport();
+            String scriptName = stripExtension(engine.getTestScriptName());
+
+            // scriptReportName can be different from scriptName if same script (module) used more than once
+            String scriptReportName = scriptName;
+            if (report.hasExtension()) {
+                for (Extension e : report.getExtension()) {
+                    if ("urn:moduleId".equals(e.getUrl())) {
+                        scriptReportName = e.getValue().toString();
+                    }
+                }
+            }
+            String moduleName = first ? null : scriptReportName;
+
+            report.setName(this.testName + (moduleName == null ? "" : File.separator + moduleName));
+            first = false;
+        }
     }
 
     private void saveLogs() {
@@ -168,4 +203,26 @@ public class ModularEngine {
         return getMainTestEngine().getTestReport();
     }
 
+    public List<TestReport> getTestReports() {
+        List<TestReport> reports = new ArrayList<>();
+        for (TestEngine engine : getTestEngines()) {
+            reports.add(engine.getTestReport());
+        }
+        return reports;
+    }
+
+    public FixtureMgr getFixtureMgr() {
+        return getMainTestEngine().getFixtureMgr();
+    }
+
+    public ModularEngine setTestId(String theTestId) {
+        getMainTestEngine().setTestId(theTestId);
+        return this;
+    }
+
+    public ModularEngine runEval(ResourceWrapper wrapper, ResourceWrapper wrapper1) {
+        getMainTestEngine().runEval(wrapper, wrapper1);
+        installModuleNames();
+        return this;
+    }
 }

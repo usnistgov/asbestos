@@ -78,7 +78,7 @@ public class Event implements Comparable<Event> {
     }
 
     public String toString() {
-        return "Event: " + tasks.size() + " tasks";
+        return "Event: " + eventDir + " - " + tasks.size() + " tasks";
     }
 
     public ITask newTask() {

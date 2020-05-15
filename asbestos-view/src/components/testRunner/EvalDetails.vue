@@ -113,8 +113,9 @@
             assertionDescription(assert) {
                 return assert.description === undefined ? "" : assert.description
             },
-            loadTestScript() {
-                //await this.$store.dispatch('loadTestScripts', this.$store.state.testRunner.testScriptNames)
+            async loadTestScript() {
+                this.$store.commit('setTestCollectionName', this.testCollection)
+                await this.$store.dispatch('loadTestScripts', [this.testId]);
                 this.script = this.$store.state.testRunner.testScripts[this.testId]
             },
             loadTestReport() {

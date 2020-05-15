@@ -106,17 +106,5 @@ public class RunTestRequest {
 
         String json = modularEngine.reportsAsJson();
         Returns.returnString(request.resp, json);
-
-//        // Save test log to FhirTestLogs
-//        report.setName(testName);
-//        String json = Returns.returnResource(request.resp, report);
-//        Path path = request.ec.getTestLog(channelId, testCollection, testName).toPath();
-//        try (BufferedWriter writer = Files.newBufferedWriter(path))
-//        {
-//            writer.write(json);
-//        } catch (IOException e) {
-//            log.error(ExceptionUtils.getStackTrace(e));
-//            throw new RuntimeException(e);
-//        }
     }
 }

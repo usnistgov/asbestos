@@ -2,19 +2,16 @@
     <div class="inlineDiv">
         <div class="pre-test-gap"></div>
         <span v-bind:class="{
-            pass:         isPass  && colorful,
-            'pass-plain-detail': isPass  && !colorful,
-            fail:         isFail  && colorful,
-            'fail-plain-detail': isFail  && !colorful,
-             error:       isError && colorful,
-             'error-plain': isError && !colorful,
-             'not-run':   isNotRun && colorful,
-             'not-run-plain-detail' : isNotRun && ! colorful,
+            'pass-plain-detail': isPass,
+            'fail-plain-detail': isFail,
+             'error-plain': isError,
+             'not-run-plain-detail' : isNotRun,
             }"  class="test-margins" @click.stop="toggleDisplay()">
 
             <test-status-event-wrapper v-if="!statusRight"
-                         :status-on-right="statusRight"
-                         :report="report"
+                                       :status-on-right="statusRight"
+                                       :script="script"
+                                       :report="report"
             > </test-status-event-wrapper>
 
             <span v-if="displayOpen">
@@ -206,7 +203,7 @@
         props: [
             // parts representing a single test element of a TestScript
             'script', 'report',
-            'scriptContained', 'reportContained', // contained section of the TestScript and TestReport
+            'scriptContained', 'reportContained', // contained section of the TestScript and TestReport - used in conditional
             'label',
             'testScriptIndex', 'testIndex',   // used by debugger
         ],

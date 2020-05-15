@@ -109,4 +109,9 @@ public class NoOpTask implements ITask {
     public String getResponseBodyAsString() {
         return null;
     }
+
+    @Override
+    public HttpBase getHttpBase() {
+        return null;
+    }
 }

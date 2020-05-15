@@ -202,6 +202,11 @@
         height:auto;
         display:inline-block;
     }
+    .divider80{
+        width:80px;
+        height:auto;
+        display:inline-block;
+    }
     .vdivider{
         height:3px;
         width:auto;

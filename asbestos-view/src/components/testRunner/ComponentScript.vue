@@ -93,6 +93,8 @@ import ActionDetails from "./ActionDetails";
                 return script.test[0].action
             },
             reportActions() {  // component has no setup and a single test
+                // for server tests the module-report is in separate file (hense moduleTestReports)
+                // but for client tests it is compressed all into one report file
                 if (this.componentId === null) return null
                 const report = this.$store.state.testRunner.moduleTestReports[this.componentId]
                 if (!report || !report.test || !report.test[0]) return null

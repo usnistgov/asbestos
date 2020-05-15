@@ -36,18 +36,11 @@
                     </li>
                 </ul>
             </div>
-<!--            <div v-else>-->
-<!--                <action-details-->
-<!--                        :script="null"-->
-<!--                        :report="report && report.setup ? report.setup.action : null">-->
-<!--                </action-details>-->
-<!--            </div>-->
-
             <div v-if="script.test">
                 <div v-for="(test, testi) in script.test"
                      :key="'Test' + testi">
                     <ul class="noListStyle">
-                        <li v-if="script">
+                        <li>
                             <test-details
                                 :script="script.test[testi]"
                                 :report="report && report.test  ? report.test[testi] : null"

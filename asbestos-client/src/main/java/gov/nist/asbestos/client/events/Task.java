@@ -3,6 +3,9 @@ package gov.nist.asbestos.client.events;
 
 import gov.nist.asbestos.http.headers.Headers;
 import gov.nist.asbestos.http.operations.HttpBase;
+import gov.nist.asbestos.http.operations.HttpDelete;
+import gov.nist.asbestos.http.operations.HttpGet;
+import gov.nist.asbestos.http.operations.HttpPost;
 import gov.nist.asbestos.http.util.Gzip;
 
 import java.io.FileOutputStream;
@@ -27,6 +30,23 @@ public class Task implements ITask {
         this.taskIndex = taskIndex;  // will be overwritten by initTask()
         // this allows tasks to be allocated but not used - initialization happens on first use
         this.event = event;
+    }
+
+    // Re-create HttpBase from Task
+    @Override
+    public HttpBase getHttpBase() {
+        HttpBase base = null;
+        String verb = getVerb();
+        if ("GET".equalsIgnoreCase(verb))
+            base = new HttpGet();
+        else if ("POST".equalsIgnoreCase(verb))
+            base = new HttpPost();
+        else if ("DELETE".equalsIgnoreCase(verb))
+            base = new HttpDelete();
+        else
+            throw new Error("Cannot translate Task into HttpBase - Headers are " + _requestHeaders);
+        fromTask(base);
+        return base;
     }
 
     @Override

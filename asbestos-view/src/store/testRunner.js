@@ -145,6 +145,7 @@ export const testRunnerStore = {
             state.moduleTestReports = reports
         },
         setCombinedTestReports(state, reportData) {
+            console.log(`setCombinedTestReports`)
             for (let testName in reportData) {
                 const report = reportData[testName]
                 if (report && report.resourceType === 'TestReport') {
@@ -210,7 +211,10 @@ export const testRunnerStore = {
             const eventResult = state.clientTestResult[testId]
             for (const eventId in eventResult) {
                 if (eventResult.hasOwnProperty(eventId)) {
-                    const testReport = eventResult[eventId]
+                    let testReport = eventResult[eventId]
+                    if (Array.isArray(testReport)) {
+                        testReport = testReport[0];
+                    }
                     if (testReport.result === 'pass')
                         return  true
                 }
@@ -254,8 +258,8 @@ export const testRunnerStore = {
             ENGINE.get(url)
                 .then(response => {
                     const results = response.data
-                    commit('setClientTestResult', { testId: testId, result: results[testId] } )
-                    commit('setTestReport', { testName: testId, testReport: results[testId][eventId] } )
+                    commit('setClientTestResult', { testId: testId, reports: results[testId] } )
+                    commit('setTestReport', results[testId][eventId] )
                 })
                 .catch(function (error) {
                     commit('setError', url + ': ' + error)
@@ -322,7 +326,7 @@ export const testRunnerStore = {
                 script = result.data
             })
                 .catch(function(error) {
-                    commit('setError', `Loading report from ${url} - ${error}`)
+                    commit('setError', `Loading script from ${url} - ${error}`)
                 })
             await promise
             commit('setTestScript', script)

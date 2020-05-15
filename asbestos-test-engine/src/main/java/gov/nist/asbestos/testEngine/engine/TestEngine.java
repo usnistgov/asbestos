@@ -178,6 +178,8 @@ public class TestEngine  {
                 //fixtureMgr.put("response", new FixtureComponent(responseResource));
             doTest(); // should only be asserts
             errorOut();
+            fillInSkips();
+            doLintTestReport();
         } catch (Throwable t) {
             reportTerminalFailure(t);
         }
@@ -885,9 +887,10 @@ public class TestEngine  {
             return;
         }
 
-        TestEngine testEngine1 = new TestEngine(
-                componentReference.getComponentRef(),
-                this.sut)
+        TestEngine testEngine1 = sut == null
+                ? new TestEngine(componentReference.getComponentRef())
+                : new TestEngine(componentReference.getComponentRef(), this.sut);
+        testEngine1
                 .setTestSession(testSession)
                 .withResourceCacheManager(this.getCacheManager())
                 .setVal(new Val())
@@ -1232,6 +1235,9 @@ public class TestEngine  {
                 buildCacheEntry(op, ec);
             }
         }
+
+        TestScript.TestActionComponent foo;
+
     }
 
     private void buildCacheEntry(TestReport.SetupActionOperationComponent op, EC ec) {
@@ -1575,5 +1581,9 @@ public class TestEngine  {
         String[] parts = getChannelId().split("__");
         assert parts.length == 2;
         return parts[1];
+    }
+
+    public URI getSut() {
+        return sut;
     }
 }
