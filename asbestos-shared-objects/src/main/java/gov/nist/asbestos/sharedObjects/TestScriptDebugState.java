@@ -182,12 +182,13 @@ public class TestScriptDebugState {
     }
 
     public String getCurrentExecutionIndex() {
-        String parentIndex = String.join("." , parentExecutionIndex);
-        if (parentIndex != "") {
-            return parentIndex + "." + currentExecutionIndex;
+        if (parentExecutionIndex != null) {
+            String parentIndex = String.join(".", parentExecutionIndex);
+            if (! parentIndex.equals("")) {
+                return parentIndex + "." + currentExecutionIndex;
+            }
         }
-        else
-            return currentExecutionIndex;
+        return currentExecutionIndex;
     }
 
     public String setCurrentExecutionIndex(String parentType, Integer parentIndex, Integer childPartIndex) {

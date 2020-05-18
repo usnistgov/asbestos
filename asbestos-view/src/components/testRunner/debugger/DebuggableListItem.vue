@@ -1,6 +1,9 @@
 <template>
 
     <li
+            :class="{
+                    'bkptHit': isBreakpointHit,
+            }"
         :data-breakpoint-index="breakpointIndex"
     >
         <!-- TODO:
@@ -8,10 +11,7 @@
              div.onClick register breakpoint with li.data-index value
         :data-map-key="currentMapKey"
               {{breakpointSwitchStatus}}
-            :class="{
-                    'breakpoint-indicator': showBreakpointIndicator,
-                    'breakpoint-hit-indicator': isBreakpointHit,
-                }"
+
                   -->
         <span
                 :class="{
@@ -24,7 +24,7 @@
               @click.stop="doToggle()"
         >
             <template v-if="hasBreakpoint">
-               &#x1F6D1;
+               &#x1F6D1; <!-- Stop sign -->
             </template>
             <template v-else>
                 &nbsp;
@@ -134,5 +134,9 @@
 <style>
     .bkptBorderFocusOn {
         border: red dotted 2px;
+    }
+    .bkptHit {
+        list-style-type: "\1F449"; /* Index finger pointing right */
+        background-color: yellow;
     }
 </style>

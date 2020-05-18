@@ -47,16 +47,18 @@
                         </span>
                     <span v-else>
                             <button class="runallbutton" @click.stop="doRun(name)">Run</button>
-                            <button v-if="isDebuggable(i)"
+                            <template v-if="$store.state.testRunner.currentTest === name">
+                                <button v-if="isDebuggable(i)"
                                         class="debugTestScriptButton"
                                         @click.stop="doDebug(name)">{{getDebugActionButtonLabel(i)}}</button>
-                            <button v-if="isEvaluable(i)"
+                                <button v-if="isEvaluable(i)"
                                         class="debugTestScriptButton"
                                         @click.stop="doDebugEvalMode(name)">Eval</button>
-                            <button v-if="isDebugKillable(i)"
+                                <button v-if="isDebugKillable(i)"
                                         class="debugKillTestScriptButton"
                                         @click.stop="doDebugKill(i)">Kill</button>
-                            <span v-if="$store.state.debugTestScript.waitingForBreakpoint">&nbsp;&nbsp;&#x23F1;</span> <!-- Display a stopwatch if waiting for breakpoint to be hit -->
+                                <span v-if="$store.state.debugTestScript.waitingForBreakpoint">&nbsp;&nbsp;&#x23F1;</span> <!-- Display a stopwatch if waiting for breakpoint to be hit -->
+                            </template>
                     </span>
                     <span v-if="! $store.state.debugTestScript.waitingForBreakpoint && ! $store.state.testRunner.isClientTest"> --  {{ testTime(name) }}</span>
                 </div>
@@ -129,5 +131,15 @@
         left: 0px;
         font-size: 8px;
         text-decoration: underline;
+    }
+</style>
+<style>
+    .debugTestScriptButton {
+        /*padding-bottom: 5px;*/
+        margin-left: 10px;
+        background-color: cornflowerblue;
+        cursor: pointer;
+        border-radius: 25px;
+        font-weight: bold;
     }
 </style>

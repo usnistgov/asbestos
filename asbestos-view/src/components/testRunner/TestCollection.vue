@@ -74,14 +74,6 @@
         background-color: lightgray;
         text-align: left;
     }
-    .debugTestScriptButton {
-        /*padding-bottom: 5px;*/
-        margin-left: 10px;
-        background-color: cornflowerblue;
-        cursor: pointer;
-        border-radius: 25px;
-        font-weight: bold;
-    }
     .configurationError {
         color: red;
     }
