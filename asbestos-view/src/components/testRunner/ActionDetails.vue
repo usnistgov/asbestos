@@ -14,15 +14,11 @@
             }"
                     @click.stop="toggleMessageDisplay()">
 
-                <test-status-event-wrapper v-if="!statusRight"
+                <test-status v-if="!statusRight"
                                            :status-on-right="statusRight"
                                            :script="script"
                                            :report="report"
-                                           :debug-title="debugTitle"
-                                           @onStatusMouseOver="$emit('onStatusMouseOver')"
-                                           @onStatusMouseLeave="$emit('onStatusMouseLeave')"
-                                           @onStatusClick="$emit('onStatusClick')"
-                > </test-status-event-wrapper>
+                > </test-status>
 
                 <span v-if="displayMessage">
                     <img src="../../assets/arrow-down.png">

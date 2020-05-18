@@ -35,7 +35,6 @@
                     <script-status v-if="!statusRight" :status-right="statusRight" :name="name"> </script-status>
 
                     <span v-if="$store.state.testRunner.currentTest === name">
-                            <span class="breakpointColumnHeader" title="Breakpoint Column Header">BKPT.</span>
                             <img src="../../assets/arrow-down.png">
                         </span>
                     <span v-else>

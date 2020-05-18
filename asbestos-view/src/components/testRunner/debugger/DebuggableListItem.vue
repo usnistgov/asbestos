@@ -1,25 +1,35 @@
 <template>
 
     <li
-        :class="{
-                    'breakpoint-indicator': showBreakpointIndicator,
-                    'breakpoint-hit-indicator': isBreakpointHit,
-                }"
         :data-breakpoint-index="breakpointIndex"
     >
         <!-- TODO:
         add off/on label to the gutter
              div.onClick register breakpoint with li.data-index value
         :data-map-key="currentMapKey"
-              :title="hasBreakpoint ? 'Remove breakpoint' : 'Set breakpoint'"
-        -->
+              {{breakpointSwitchStatus}}
+            :class="{
+                    'breakpoint-indicator': showBreakpointIndicator,
+                    'breakpoint-hit-indicator': isBreakpointHit,
+                }"
+                  -->
         <span
-              :class="{
+                :class="{
                     'breakpointControlOff' : ! hasBreakpoint,
                     'breakpointControlOn' : hasBreakpoint,
               }"
+                :title="hasBreakpoint ? 'Remove breakpoint' : 'Set breakpoint'"
+              @mouseover="onBkptSwitchMouseOver"
+              @mouseleave="onBkptSwitchMouseLeave"
               @click.stop="doToggle()"
-        >{{breakpointSwitchStatus}}</span>
+        >
+            <template v-if="hasBreakpoint">
+               &#x1F6D1;
+            </template>
+            <template v-else>
+                &nbsp;
+            </template>
+        </span>
         <slot></slot>
     </li>
 
@@ -43,8 +53,24 @@
                             this.isUpdated = ! this.isUpdated // Keep this to nudge reactivity
                     })
             },
-
-
+            onBkptSwitchMouseOver(event) {
+                if (event) {
+                    let nobj = event.target.parentNode.querySelector('span:nth-child(3)')
+                       if (nobj) {
+                           nobj.classList.add('bkptBorderFocusOn')
+                       }  else {
+                           console.log('nobj is null!')
+                       }
+                }
+            },
+            onBkptSwitchMouseLeave(event) {
+                if (event) {
+                    let nobj = event.target.parentNode.querySelector('span:nth-child(3)')
+                    if (nobj) {
+                        nobj.classList.remove('bkptBorderFocusOn')
+                    }
+                }
+            }
         },
         computed: {
             indexObj() {
@@ -65,7 +91,7 @@
                 if (this.hasBreakpoint) {
                     return "ON"
                 } else {
-                    return "OFF"
+                    return  "OFF"
                 }
             }
         },
@@ -87,20 +113,26 @@
     span.breakpointControlOff {
         position: absolute;
         left: 0px;
-        font-size: 8px;
         cursor: pointer;
-        color: gray;
-        border: #f5f5f5 solid 1px;
+        /*border: gray dotted 1px;*/
+        border: gray solid 1px;
+        horiz-align: center;
+        text-align: center;
     }
 
     span.breakpointControlOn {
-        color: black;
-        border : black solid 1px;
+        border : none;
+        font-size: smaller;
     }
 
-    span.breakpointControlOn:hover,
     span.breakpointControlOff:hover {
-       text-decoration: underline;
+        border: red dotted 1px;
     }
 
+
+</style>
+<style>
+    .bkptBorderFocusOn {
+        border: red dotted 2px;
+    }
 </style>
