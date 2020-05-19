@@ -82,7 +82,8 @@ public class FileSystemResourceCache implements ResourceCache {
         }
         file = cacheFile(url, "json");
         if (file == null)
-            throw new Error("Cache resource does not exist:" + url);
+            return null;
+            //throw new Error("Cache resource does not exist:" + url);
         String id = file.getName();
         id = id.substring(0, id.indexOf(".json"));
         if (file.exists()) {
@@ -150,12 +151,13 @@ public class FileSystemResourceCache implements ResourceCache {
 
     private File cacheFile(Ref relativeUrl, String fileType) {
         Ref base = relativeUrl.getBase();
+        boolean isRelative = relativeUrl.isRelative();
         boolean hasBase = !base.toString().equals(relativeUrl.toString());
         String type = relativeUrl.getResourceType();
         String id = relativeUrl.getId() + ((fileType != null) ? "." + fileType : "");
         for (File cacheDir : cacheDirs) {
             File file;
-            if (hasBase)
+            if (hasBase && isRelative)
                 file = new File(new File(new File(cacheDir, base.toString()), type), id);
             else
                 file = new File(new File(cacheDir, type), id);
