@@ -670,11 +670,11 @@ public class TestEngine  {
                 String typePrefix = "setup.action";
                 int actionIndex = 0;
                 for (TestScript.SetupActionComponent action : comp.getAction()) {
-                    ifDebuggingPauseIfBreakpoint("setup", 0, actionIndex);
                     TestReport.SetupActionComponent actionReportComponent = setupReportComponent.addAction();
                     if (invalidAction(action, actionReportComponent, fVal))
                         return;
                     if (action.hasOperation()) {
+                        ifDebuggingPauseIfBreakpoint("setup", 0, actionIndex);
                         doOperation(new ActionReference(testScript, action), typePrefix, action.getOperation(), actionReportComponent.getOperation());
                         TestReport.SetupActionOperationComponent opReport = actionReportComponent.getOperation();
                         if (opReport.getResult() == TestReport.TestReportActionResult.ERROR) {
@@ -684,6 +684,7 @@ public class TestEngine  {
                         }
                     }
                     if (action.hasAssert()) {
+                        ifDebuggingPauseIfBreakpoint("setup", 0, action.getAssert(), actionIndex);
                         TestReport.SetupActionAssertComponent actionReport = actionReportComponent.getAssert();
                         doAssert(typePrefix, action.getAssert(), actionReport);
                         if (actionReport == null)
@@ -1116,13 +1117,13 @@ public class TestEngine  {
 
             for (int testPartIndex=0; testPartIndex<testScriptElement.getAction().size(); testPartIndex++) {
                 TestScript.TestActionComponent action = testScriptElement.getAction().get(testPartIndex);
-                ifDebuggingPauseIfBreakpoint("test", testIndex, action, testPartIndex);
                 Extension conditional = getExtension(action.getModifierExtension(), ExtensionDef.ts_conditional);
                 boolean isConditional = conditional != null;
                 TestReport.TestActionComponent actionReportComponent = testReportComponent.addAction();
                 if (invalidAction(action, actionReportComponent, fVal))
                     return false;
                 if (action.hasOperation()) {
+                    ifDebuggingPauseIfBreakpoint("test", testIndex, testPartIndex);
                     TestReport.SetupActionOperationComponent reportOp = actionReportComponent.getOperation();
                     doOperation(new ActionReference(testScript, action), typePrefix, action.getOperation(), reportOp);
                     TestReport.SetupActionOperationComponent opReport = actionReportComponent.getOperation();
@@ -1148,8 +1149,10 @@ public class TestEngine  {
                     }
                 }
                 if (action.hasAssert()) {
+                    TestScript.SetupActionAssertComponent assertComponent = action.getAssert();
+                    ifDebuggingPauseIfBreakpoint("test", testIndex, assertComponent, testPartIndex);
                     TestReport.SetupActionAssertComponent actionReport = actionReportComponent.getAssert();
-                    doAssert(typePrefix, action.getAssert(), actionReport);
+                    doAssert(typePrefix, assertComponent, actionReport);
                     if (actionReport == null)
                         return false;
                     if ("fail".equals(actionReport.getResult().toCode())) {
@@ -1618,7 +1621,7 @@ public class TestEngine  {
     }
 
 
-    private void ifDebuggingPauseIfBreakpoint(final String parentType, final Integer parentIndex, final TestScript.TestActionComponent action, final Integer childPartIndex) {
+    private void ifDebuggingPauseIfBreakpoint(final String parentType, final Integer parentIndex, final TestScript.SetupActionAssertComponent assertComponent, final Integer childPartIndex) {
         if (! hasDebugState()) {
            return;
         }
@@ -1631,17 +1634,17 @@ public class TestEngine  {
                 do {
                     // Must pause first before Eval
                     testScriptDebugState.waitOnBreakpoint(); // if eval, exit pause
-                    if (action.hasAssert() && testScriptDebugState.getDebugEvaluateMode().get()) { // Only assertion-eval is supported for now. Need to address Operations later
-                        testScriptDebugState.resetEvalMode();
+                    if (testScriptDebugState.getDebugEvaluateModeWasRequested().get()) { // Only assertion-eval is supported for now. Need to address Operations later
+                        testScriptDebugState.resetEvalModeWasRequested();
                         String evalJsonString = testScriptDebugState.getEvalJsonString();
                         if (evalJsonString == null) {
                             // If evalJsonString is empty, Send original assertion as a template for the user to edit an assertion
-                            String assertionJsonStr = new Gson().toJson(action.getAssert());
+                            String assertionJsonStr = new Gson().toJson(assertComponent);
                             testScriptDebugState.sendAssertionStr(assertionJsonStr);
                         } else {
                             // Eval
                             Map<String, String> myMap = new Gson().fromJson(evalJsonString, Map.class);
-                            TestScript.SetupActionAssertComponent copy = action.getAssert().copy();
+                            TestScript.SetupActionAssertComponent copy = assertComponent.copy();
                             copy.setLabel(myMap.get("label"));
                             copy.setDescription(myMap.get("description"));
                             copy.setDirection(TestScript.AssertionDirectionType.fromCode(myMap.get("direction")));
@@ -1693,4 +1696,4 @@ public class TestEngine  {
     }
 
 
-}
+    }

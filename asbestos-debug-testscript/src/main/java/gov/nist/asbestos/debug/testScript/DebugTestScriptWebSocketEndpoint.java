@@ -151,7 +151,7 @@ public class DebugTestScriptWebSocketEndpoint {
     private void doRequestOriginalAssertion(TestScriptDebugState state) {
         synchronized (state.getLock()) {
             state.resetEvalJsonString();
-            state.getDebugEvaluateMode().set(true);
+            state.getDebugEvaluateModeWasRequested().set(true);
             state.getLock().notify();
         }
     }
@@ -160,7 +160,7 @@ public class DebugTestScriptWebSocketEndpoint {
         if (base64String != null) {
             state.setEvalJsonString(new String(Base64.getDecoder().decode(base64String)));
             synchronized (state.getLock()) {
-                state.getDebugEvaluateMode().set(true);
+                state.getDebugEvaluateModeWasRequested().set(true);
                 state.getLock().notify();
             }
         }
@@ -172,7 +172,7 @@ public class DebugTestScriptWebSocketEndpoint {
         log.info("killSession: " + sessionId);
         synchronized (state.getLock()) {
             state.cancelResumeMode();
-            state.resetEvalMode();
+            state.resetEvalModeWasRequested();
             state.getKill().set(true);
             state.getLock().notify();
         }

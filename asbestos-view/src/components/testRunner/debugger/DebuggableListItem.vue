@@ -2,19 +2,17 @@
 
     <li
             :class="{
-                    'bkptHit': isBreakpointHit,
+                    'breakpointHit': isBreakpointHit,
             }"
         :data-breakpoint-index="breakpointIndex"
     >
-        <!-- TODO:
-        add off/on label to the gutter
-             div.onClick register breakpoint with li.data-index value
+        <!--
         :data-map-key="currentMapKey"
               {{breakpointSwitchStatus}}
-
                   -->
         <span
                 :class="{
+                    'breakpointGutter' : true,
                     'breakpointControlOff' : ! hasBreakpoint,
                     'breakpointControlOn' : hasBreakpoint,
               }"
@@ -27,9 +25,10 @@
                &#x1F6D1; <!-- Stop sign -->
             </template>
             <template v-else>
-                &nbsp;
+                &nbsp;&nbsp;
             </template>
         </span>
+        <span v-if="isBreakpointHit" class="breakpointGutterOption evalBtn" @click.stop="doDebugEvalMode($store.state.testRunner.currentTest)">Eval.</span>
         <slot></slot>
     </li>
 
@@ -53,24 +52,27 @@
                             this.isUpdated = ! this.isUpdated // Keep this to nudge reactivity
                     })
             },
-            onBkptSwitchMouseOver(event) {
-                if (event) {
-                    let nobj = event.target.parentNode.querySelector('span:nth-child(3)')
-                       if (nobj) {
-                           nobj.classList.add('bkptBorderFocusOn')
-                       }  else {
-                           console.log('nobj is null!')
-                       }
-                }
-            },
-            onBkptSwitchMouseLeave(event) {
+            doFocusHint(event, displayOn) {
                 if (event) {
                     let nobj = event.target.parentNode.querySelector('span:nth-child(3)')
                     if (nobj) {
-                        nobj.classList.remove('bkptBorderFocusOn')
+                        let className = 'breakpointBorderFocusOn'
+                        if (displayOn)
+                            nobj.classList.add(className)
+                        else
+                            nobj.classList.remove('breakpointBorderFocusOn')
+                    }  else {
+                        console.log('nobj is null!')
                     }
                 }
-            }
+
+            },
+            onBkptSwitchMouseOver(event) {
+                this.doFocusHint(event, true)
+            },
+            onBkptSwitchMouseLeave(event) {
+                this.doFocusHint(event, false)
+            },
         },
         computed: {
             indexObj() {
@@ -109,20 +111,27 @@
 
 <style scoped>
 
+    span.breakpointGutter {
+        position: absolute;
+        left: 5px;
+    }
+    span.breakpointGutterOption {
+        position: absolute;
+        left: 25px;
+    }
+
     span.breakpointControlOn,
     span.breakpointControlOff {
-        position: absolute;
-        left: 0px;
         cursor: pointer;
         /*border: gray dotted 1px;*/
-        border: gray solid 1px;
+        border: lightgray solid 1px;
         horiz-align: center;
         text-align: center;
     }
 
     span.breakpointControlOn {
         border : none;
-        font-size: smaller;
+        font-size: x-small;
     }
 
     span.breakpointControlOff:hover {
@@ -132,11 +141,19 @@
 
 </style>
 <style>
-    .bkptBorderFocusOn {
+    .breakpointBorderFocusOn {
         border: red dotted 2px;
     }
-    .bkptHit {
+    .breakpointHit {
         list-style-type: "\1F449"; /* Index finger pointing right */
         background-color: yellow;
+    }
+    .evalBtn {
+        cursor: pointer;
+        color: blue;
+        font-size: x-small;
+    }
+    .evalBtn:hover {
+        text-decoration: underline;
     }
 </style>

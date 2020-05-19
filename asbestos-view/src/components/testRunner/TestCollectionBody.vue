@@ -51,9 +51,9 @@
                                 <button v-if="isDebuggable(i)"
                                         class="debugTestScriptButton"
                                         @click.stop="doDebug(name)">{{getDebugActionButtonLabel(i)}}</button>
-                                <button v-if="isEvaluable(i)"
-                                        class="debugTestScriptButton"
-                                        @click.stop="doDebugEvalMode(name)">Eval</button>
+<!--                                <button v-if="isEvaluable(i)"-->
+<!--                                        class="debugTestScriptButton"-->
+<!--                                        @click.stop="doDebugEvalMode(name)">Eval</button>-->
                                 <button v-if="isDebugKillable(i)"
                                         class="debugKillTestScriptButton"
                                         @click.stop="doDebugKill(i)">Kill</button>
@@ -126,16 +126,9 @@
 </script>
 
 <style scoped>
-    .breakpointColumnHeader {
-        position: absolute;
-        left: 0px;
-        font-size: 8px;
-        text-decoration: underline;
-    }
 </style>
 <style>
     .debugTestScriptButton {
-        /*padding-bottom: 5px;*/
         margin-left: 10px;
         background-color: cornflowerblue;
         cursor: pointer;

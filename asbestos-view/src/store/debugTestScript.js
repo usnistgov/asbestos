@@ -218,7 +218,7 @@ export const debugTestScriptStore = {
                     console.log('done.')
                 }
                 state.testScriptDebuggerWebSocket.onmessage = event => {
-                    console.log('onMessage: ' + event.data)
+                    console.log('onMessage: ' + (event.data.length < 500 ?  event.data : 'message too long.'))
                     let returnData = JSON.parse(event.data)
                     if (returnData.messageType === 'final-report') {
                         state.waitingForBreakpoint = false

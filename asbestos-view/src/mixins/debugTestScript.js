@@ -1,5 +1,9 @@
 export default {
-    methods: {
+    data() {
+        return {
+        }
+    },
+     methods: {
         getTestScriptIndexKey(testScriptIndex) {
             const testCollectionIndex = this.$store.state.testRunner.serverTestCollectionNames.indexOf(this.testCollection)
             const key = testCollectionIndex + '.' + testScriptIndex // Follow proper key format
@@ -27,15 +31,12 @@ export default {
             return (this.getDebugActionButtonLabel(testScriptIndex) === 'Resume')
         },
         async doDebugKill(testScriptIndex) {
-            this.running = false
             await this.$store.dispatch('debugKill', this.getTestScriptIndexKey(testScriptIndex))
         },
         async doDebug(testName) {  // server tests
             if (!testName)
                 return
-            this.running = true
             await this.$store.dispatch('debugTestScript', testName)
-            this.running = false
         },
         async doDebugEvalMode(testName) {
             await this.$store.dispatch('doDebugEvalMode', testName)
@@ -66,7 +67,9 @@ export default {
             let obj = {testScriptIndex: testScriptIndex, breakpointIndex: testType + testIndex + "." + actionIndex}
             return this.$store.getters.getDebugTitle(obj);
         },
-
+        closeModal() {
+            this.$store.commit('setShowDebugEvalModal', false)
+        },
     },
     computed: {
         currentMapKey()  {

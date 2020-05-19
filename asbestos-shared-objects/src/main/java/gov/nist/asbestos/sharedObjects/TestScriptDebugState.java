@@ -65,7 +65,7 @@ public class TestScriptDebugState {
         return getSession().getId();
     }
 
-    public AtomicBoolean getDebugEvaluateMode() {
+    public AtomicBoolean getDebugEvaluateModeWasRequested() {
         return evaluateMode;
     }
 
@@ -94,7 +94,7 @@ public class TestScriptDebugState {
     /**
      * Reset Eval mode: will loop and wait for Resume or Eval
      */
-    public void resetEvalMode() {
+    public void resetEvalModeWasRequested() {
        this.evaluateMode.set(false);
     }
 
@@ -155,7 +155,7 @@ public class TestScriptDebugState {
     private boolean isWait() {
         boolean isWait = ! getKill().get();
         isWait = isWait && ! getResume().get();
-        isWait = isWait && ! getDebugEvaluateMode().get();
+        isWait = isWait && ! getDebugEvaluateModeWasRequested().get();
 
         return isWait;
     }
@@ -175,7 +175,7 @@ public class TestScriptDebugState {
                 log.info("Resuming " +  getSession().getId());
             } else if (getKill().get()) {
                 throw new Error("KILL session: " + getSession().getId()); // This needs to throw a custom exception that does not show up in the test report
-            } else if (getDebugEvaluateMode().get()) {
+            } else if (getDebugEvaluateModeWasRequested().get()) {
                 log.info("Eval mode is true.");
             }
         }
