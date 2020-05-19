@@ -11,7 +11,7 @@
         </span>
 
         <span  @click.self="selectEvent()" class="event-part" v-bind:class="[isEventPass() ? passClass : failClass]">
-            Message: {{ eventId }} - {{ eventDetail(eventId) }}
+            Message: {{ eventId }} - {{ eventDetail }}
         </span>
 
         <div v-if="currentEvent === eventId">
@@ -40,7 +40,7 @@ import ScriptDetails from "./ScriptDetails";
             return {
                 passClass: null,  // initialized in created()
                 failClass: null,
-                primaryTestReport: null,
+                //primaryTestReport: null,
             }
         },
         methods: {
@@ -48,7 +48,7 @@ import ScriptDetails from "./ScriptDetails";
                 // currentEvent is this.$store.state.testRunner.currentEvent
                 // eventId is always set (passed from parent)
                 if (this.currentEvent === this.eventId)  { // unselect
-                    this.primaryTestReport = null;
+                    // this.primaryTestReport = null;
                     this.$store.commit('setCurrentEvent', null)
                     const route = `/session/${this.sessionId}/channel/${this.channelId}/collection/${this.testCollection}/test/${this.testId}`
                     this.$router.push(route)
@@ -59,10 +59,10 @@ import ScriptDetails from "./ScriptDetails";
                     // Module reports are put into testRunner.moduleTestReports.
                     // ScriptDetails expects this partitioning.
                     if (Array.isArray(this.testReport)) {
-                        if (this.testReport.length > 0)
-                            this.primaryTestReport = this.testReport[0];
-                        else
-                            this.primaryTestReport = null;
+                        // if (this.testReport.length > 0)
+                        //     this.primaryTestReport = this.testReport[0];
+                        // else
+                        //     this.primaryTestReport = null;
                         let moduleReports = {};
                         for (let i = 1; i < this.testReport.length; i++) {
                             const report = this.testReport[i];
@@ -76,20 +76,6 @@ import ScriptDetails from "./ScriptDetails";
                     this.$router.push(route)
                 }
             },
-            eventDetail(eventId) {
-                if (this.logSummariesNeedLoading || this.logSummariesNeedLoading2) {
-                    console.log(`calling loadEventSummaries`)
-                    this.$store.dispatch('loadEventSummaries', {session: this.sessionId, channel: this.channelId})
-                    //console.log(`loadEventSummaries returned`)
-                }
-                if (this.$store.state.log.eventSummaries) {
-                    const summary = this.$store.state.log.eventSummaries.find(it =>
-                        it.eventName === eventId)
-                    if (summary)
-                        return `${summary.verb} ${summary.resourceType} from ${summary.ipAddr}`
-                }
-                return null
-            },
             isEventPass() {
                 return this.eventResult[this.eventId][0].result === 'pass'
             },
@@ -102,6 +88,23 @@ import ScriptDetails from "./ScriptDetails";
             },
         },
         computed: {
+            eventDetail() {
+                if (this.logSummariesNeedLoading || this.logSummariesNeedLoading2) {
+                    this.$store.dispatch('loadEventSummaries', {session: this.sessionId, channel: this.channelId})
+                }
+                if (this.$store.state.log.eventSummaries) {
+                    const summary = this.$store.state.log.eventSummaries.find(it =>
+                        it.eventName === this.eventId)
+                    if (summary)
+                        return `${summary.verb} ${summary.resourceType} from ${summary.ipAddr}`
+                }
+                return null
+            },
+            primaryTestReport() {
+                  return (this.testReport && this.testReport.length > 0)
+                      ? this.testReport[0]
+                      : null;
+            },
             isPass() {
                 return this.eventResult[this.eventId].result === 'pass'
             },
@@ -152,7 +155,7 @@ import ScriptDetails from "./ScriptDetails";
             this.loadTest()
         },
         watch: {
-            'testId': 'loadTest'
+            'testId': 'loadTest',
         },
         props: [
             'sessionId', 'channelId', 'testCollection', 'testId', 'eventId'

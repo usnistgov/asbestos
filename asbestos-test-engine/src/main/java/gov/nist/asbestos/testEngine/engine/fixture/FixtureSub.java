@@ -37,21 +37,22 @@ public class FixtureSub {
     public ResourceWrapper get() {
         FixtureComponent fixtureComponent = fixtureMgr.get(sourceId);
         if (fixtureComponent == null)
-            throw new RuntimeException("SubFixture " + sourceId + " does not exist in Fixture Manager");
+            throw new RuntimeException("Fixture " + sourceId + " does not exist in Fixture Manager");
         BaseResource baseResource = fixtureComponent.getResourceResource();
         if (baseResource == null)
-            throw new RuntimeException("SubFixture " + sourceId + " does not contain a resource");
+            throw new RuntimeException("Fixture " + sourceId + " does not contain a resource");
         Resource resource;
         if (baseResource instanceof Resource)
             resource = (Resource) baseResource;
         else
             throw new RuntimeException("SubFixture: fixture " + sourceId + " of type " + baseResource.getClass().getName() + " cannot be converted to type Resource");
         if (!(resource instanceof Bundle))
-            throw new RuntimeException("SubFixture " + sourceId + " does not contain a Bundle");
+            throw new RuntimeException("Fixture " + sourceId + " does not contain a Bundle");
         Resource resource1 = FhirPathEngineBuilder.evalForResource(resource, fhirPath);
         ResourceWrapper wrapper = new ResourceWrapper(resource1);
         if (resource1 != null) {
-            String fixturePath = fixtureComponent.getResourceWrapper().getRef().toString();
+            Ref fixturePathRef = fixtureComponent.getResourceWrapper().getRef();
+            String fixturePath = fixturePathRef == null ? null : fixturePathRef.toString();
             Ref ref = getRef(resource1.getClass().getSimpleName(), fixturePath, fhirPath);
             wrapper.setRef(ref);
         }

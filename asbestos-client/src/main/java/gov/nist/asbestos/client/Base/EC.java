@@ -141,6 +141,10 @@ public class EC {
         return collectionRoot;
     }
 
+    public File getTestCollectionsBase() {
+        return new File(externalCache, TEST_COLLECTIONS_DIR);
+    }
+
     public File getTestLog(String channelId, String collectionName, String testName) {
         return getTestLog(channelId, collectionName, testName, null);
     }

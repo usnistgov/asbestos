@@ -149,10 +149,16 @@ public class FileSystemResourceCache implements ResourceCache {
     }
 
     private File cacheFile(Ref relativeUrl, String fileType) {
+        Ref base = relativeUrl.getBase();
+        boolean hasBase = !base.toString().equals(relativeUrl.toString());
         String type = relativeUrl.getResourceType();
         String id = relativeUrl.getId() + ((fileType != null) ? "." + fileType : "");
         for (File cacheDir : cacheDirs) {
-            File file = new File(new File(cacheDir, type), id);
+            File file;
+            if (hasBase)
+                file = new File(new File(new File(cacheDir, base.toString()), type), id);
+            else
+                file = new File(new File(cacheDir, type), id);
             if (file.exists())
                 return file;
         }

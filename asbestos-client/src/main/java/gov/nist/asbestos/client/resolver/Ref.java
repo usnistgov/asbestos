@@ -360,7 +360,10 @@ public class Ref {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Ref ref = (Ref) o;
-        return Objects.equals(uri, ref.uri);
+        String refUri = ref.uri.toString();
+        String theUri = uri.toString();
+        return Objects.equals(refUri, theUri);
+//        return Objects.equals(uri, ref.uri);
     }
 
     @Override

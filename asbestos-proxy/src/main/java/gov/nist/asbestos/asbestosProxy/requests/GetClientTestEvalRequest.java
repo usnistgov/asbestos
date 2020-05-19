@@ -76,10 +76,6 @@ public class GetClientTestEvalRequest {
             testDirs = request.ec.getTests(testCollection);
         else { // testId specified - do one
             File dir = request.ec.getTest(testCollection, request.uriParts.get(7));
-//            if (dir == null) {
-//                request.resp.setStatus(request.resp.SC_NOT_FOUND);
-//                return;
-//            }
             if (dir != null)
                 testDirs = Collections.singletonList(dir);
         }
@@ -95,8 +91,8 @@ public class GetClientTestEvalRequest {
         eventDirsSinceMarker.sort(Comparator.comparing(File::getName).reversed());
         List<Event> events = eventDirsSinceMarker.stream().map(Event::new).sorted().collect(Collectors.toList());
         Collections.reverse(events);
-        if (!useMarker)
-            events = events.subList(0, Math.min(events.size(), eventsToEvaluate));
+//        if (!useMarker)
+//            events = events.subList(0, Math.min(events.size(), eventsToEvaluate));
 
         File testLogDir = request.ec.getTestLogCollectionDir(request.fullChannelId(), testCollection);
 
@@ -104,7 +100,7 @@ public class GetClientTestEvalRequest {
         String testId = request.uriParts.get(7);
 
 
-        StringBuilder buf = evalClientTest(testDirs, testSession, events);
+        StringBuilder buf = evalClientTest(testDirs, testSession, events, eventsToEvaluate);
 
         String myStr = buf.toString();
         try {
@@ -116,9 +112,55 @@ public class GetClientTestEvalRequest {
         Returns.returnString(request.resp, myStr);
     }
 
+    private ResourceWrapper getRequestResource(Event event) {
+        ITask task = event.getClientTask();
+
+        try {
+            String requestContentType = event.getClientTask().getRequestHeader().getContentType().getValue();
+            Format format = Format.fromContentType(requestContentType);
+            String requestString = task.getRequestBodyAsString();
+            ResourceWrapper wrapper;
+            if (requestString == null) {
+                wrapper = new ResourceWrapper();
+            } else {
+                BaseResource resource = ProxyBase.parse(requestString, format);
+                wrapper = new ResourceWrapper(resource);
+            }
+            HttpBase base = task.getHttpBase();
+            wrapper.setHttpBase(base);
+            return wrapper;
+        } catch (Throwable t) {
+            t.printStackTrace();
+            throw new Error(t);
+        }
+    }
+
+    private ResourceWrapper getResponseResource(Event event) {
+        ITask task = event.getClientTask();
+
+        try {
+            String responseString = event.getClientTask().getResponseBodyAsString();
+            String responseContentType = event.getClientTask().getResponseHeader().getContentType().getValue();
+            Format rformat = Format.fromContentType(responseContentType);
+            ResourceWrapper wrapper;
+            if (responseString == null) {
+                wrapper = new ResourceWrapper();
+            } else {
+                BaseResource rresource = ProxyBase.parse(responseString, rformat);
+                wrapper = new ResourceWrapper(rresource);
+            }
+            HttpBase base = task.getHttpBase();
+            wrapper.setHttpBase(base);
+            return wrapper;
+        } catch (Throwable t) {
+            t.printStackTrace();
+            throw new Error(t);
+        }
+    }
+
     // testDirs always has single entry
     // returns JSON response to client
-    public StringBuilder evalClientTest(List<File> testDirs, String testSession, List<Event> events) {
+    public StringBuilder evalClientTest(List<File> testDirs, String testSession, List<Event> events, int eventsToEvaluate) {
         Map<String, File> testIds = testDirs.stream().collect(Collectors.toMap(File::getName, x -> x));
         String testId = testDirs.get(0).getName();
 
@@ -127,56 +169,69 @@ public class GetClientTestEvalRequest {
                 Collectors.toMap(File::getName, TestEngine::loadTestScript)
         );
 
-        Map<Event, ResourceWrapper> requestResources = new HashMap<>();
-        Map<Event, ResourceWrapper> responseResources = new HashMap<>();
-        for (Event event : events) {
-            ITask task = event.getClientTask();
-            String verb = task.getVerb();
-
-            // request
-            try {
-                String requestContentType = event.getClientTask().getRequestHeader().getContentType().getValue();
-                Format format = Format.fromContentType(requestContentType);
-                String requestString = task.getRequestBodyAsString();
-                ResourceWrapper wrapper;
-                if (requestString == null) {
-                    wrapper = new ResourceWrapper();
-                } else {
-                    BaseResource resource = ProxyBase.parse(requestString, format);
-                    wrapper = new ResourceWrapper(resource);
-                }
-                HttpBase base = task.getHttpBase();
-                wrapper.setHttpBase(base);
-                requestResources.put(event, wrapper);
-            } catch (Throwable t) {
-                t.printStackTrace();
-            }
-
-            // response
-            try {
-                String responseString = event.getClientTask().getResponseBodyAsString();
-                String responseContentType = event.getClientTask().getResponseHeader().getContentType().getValue();
-                Format rformat = Format.fromContentType(responseContentType);
-                ResourceWrapper wrapper;
-                if (responseString == null) {
-                    wrapper = new ResourceWrapper();
-                } else {
-                    BaseResource rresource = ProxyBase.parse(responseString, rformat);
-                    wrapper = new ResourceWrapper(rresource);
-                }
-                HttpBase base = task.getHttpBase();
-                wrapper.setHttpBase(base);
-                responseResources.put(event, wrapper);
-            } catch (Throwable t) {
-                t.printStackTrace();
-            }
-        }
+//        Map<Event, ResourceWrapper> requestResources = new HashMap<>();
+//        Map<Event, ResourceWrapper> responseResources = new HashMap<>();
+//        for (Event event : events) {
+//            ITask task = event.getClientTask();
+//
+//            // request
+//            try {
+//                String requestContentType = event.getClientTask().getRequestHeader().getContentType().getValue();
+//                Format format = Format.fromContentType(requestContentType);
+//                String requestString = task.getRequestBodyAsString();
+//                ResourceWrapper wrapper;
+//                if (requestString == null) {
+//                    wrapper = new ResourceWrapper();
+//                } else {
+//                    BaseResource resource = ProxyBase.parse(requestString, format);
+//                    wrapper = new ResourceWrapper(resource);
+//                }
+//                HttpBase base = task.getHttpBase();
+//                wrapper.setHttpBase(base);
+//                requestResources.put(event, wrapper);
+//            } catch (Throwable t) {
+//                t.printStackTrace();
+//            }
+//
+//            // response
+//            try {
+//                String responseString = event.getClientTask().getResponseBodyAsString();
+//                String responseContentType = event.getClientTask().getResponseHeader().getContentType().getValue();
+//                Format rformat = Format.fromContentType(responseContentType);
+//                ResourceWrapper wrapper;
+//                if (responseString == null) {
+//                    wrapper = new ResourceWrapper();
+//                } else {
+//                    BaseResource rresource = ProxyBase.parse(responseString, rformat);
+//                    wrapper = new ResourceWrapper(rresource);
+//                }
+//                HttpBase base = task.getHttpBase();
+//                wrapper.setHttpBase(base);
+//                responseResources.put(event, wrapper);
+//            } catch (Throwable t) {
+//                t.printStackTrace();
+//            }
+//        }
+        //File base = request.ec.getTestCollectionsBase();
+        //List<File> cacheDirs = new ArrayList<>();
+        //cacheDirs.add(new File(base, "Internal"));
+        File testCollectionsBase = request.ec.getTestCollectionsBase();
 
         Result result = new Result();
+        List<Event> selectedEvents = new ArrayList<>();
         for (String theTestId : testIds.keySet()) {
             File testDir = testIds.get(theTestId);
             TestScript testScript = testScripts.get(theTestId);
+            int eventCount = 0;
+            // Since we may be filtering events, collect the ones that are actually
+            // evaluated.
             for (Event event : events) {
+                if (eventCount >= eventsToEvaluate)
+                    break;
+                if (event.isSupportEvent())
+                    continue;
+                selectedEvents.add(eventCount, event);
+                eventCount++;
                 try {
                     ModularEngine modularEngine = new ModularEngine(testDir, testScript);
                     FixtureMgr fm = modularEngine.getFixtureMgr();
@@ -185,11 +240,13 @@ public class GetClientTestEvalRequest {
                     modularEngine.setTestId(theTestId);
                     modularEngine.setTestCollection("Inspector");
                     modularEngine.setChannelId(request.fullChannelId());
+                    modularEngine.addCache(testCollectionsBase);
                     modularEngine.setVal(new Val());
                     modularEngine.setTestSession(testSession);
                     modularEngine.setExternalCache(request.externalCache);
-                    ResourceWrapper responseResource = responseResources.get(event);
-                    modularEngine.runEval(requestResources.get(event), responseResources.get(event));
+                    ResourceWrapper requestResource = getRequestResource(event);
+                    ResourceWrapper responseResource = getResponseResource(event);
+                    modularEngine.runEval(requestResource, responseResource);
                     EventResult eventResult = result.results.get(theTestId); //new EventResult();
                     if (eventResult == null)
                         eventResult = new EventResult();
@@ -214,7 +271,7 @@ public class GetClientTestEvalRequest {
             boolean first = true;
             //for (String eventId : er.reports.keySet()) {
             // keep the reports in eventId order
-            for (Event event : events) {
+            for (Event event : selectedEvents) {
                 String eventId = event.getEventId();
                 if (first)
                     first = false;

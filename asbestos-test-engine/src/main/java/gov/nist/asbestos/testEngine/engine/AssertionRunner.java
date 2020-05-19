@@ -55,8 +55,11 @@ public class AssertionRunner {
         if (sourceOverride != null)
             return sourceOverride;
         FixtureComponent sourceFixture = as.hasSourceId() ? fixtureMgr.get(as.getSourceId()) : fixtureMgr.get(fixtureMgr.getLastOp());
-//        if (sourceFixture == null)
-//            Reporter.reportError(val, assertReport, type, label, "no source available for comparison.");
+        return sourceFixture;
+    }
+
+    private FixtureComponent getCompareToSourceIfAvailable(TestScript.SetupActionAssertComponent as) {
+        FixtureComponent sourceFixture = as.hasCompareToSourceId() ? fixtureMgr.get(as.getCompareToSourceId()) : fixtureMgr.get(fixtureMgr.getLastOp());
         return sourceFixture;
     }
 
@@ -151,6 +154,10 @@ public class AssertionRunner {
 
         assertReport.setResult(TestReport.TestReportActionResult.PASS);  // may be overwritten
 
+        FixtureComponent source = getSourceIfAvailable(as);
+        if (source == null)
+            source = getCompareToSourceIfAvailable(as);
+
         // add context to report
         new ActionReporter()
                 .setTestCollectionId(testCollectionId)
@@ -160,7 +167,7 @@ public class AssertionRunner {
                         fixtureMgr,
                         variableMgr,
                         new Reporter(val, assertReport, "", ""),
-                        getSourceIfAvailable(as)
+                        source
                 );
 
         label = as.getLabel();
@@ -415,7 +422,8 @@ public class AssertionRunner {
             Reporter.reportError(val, assertReport, type, label,"Fixture referenced <" + sourceFixture.getId()  + "> has no resource.");
             return false;
         }
-        String expression = as.getExpression();
+        String rawExpression = as.getExpression();
+        String expression = variableMgr.updateReference(rawExpression);
         boolean ok;
         try {
             ok = FhirPathEngineBuilder.evalForBoolean(sourceResource, expression);

@@ -71,7 +71,7 @@ class ActionReporter {
         for (String key : fixtureMgr.keySet()) {
 
             // Establish additional labels (keys) for this fixture.
-            // If it was referenced as either sourceId or reponseId for this action
+            // If it was referenced as either sourceId or responseId for this action
             // it should be displayed that way.
             Set<String> additionalKey = new HashSet<>();
             boolean sourceId = false;

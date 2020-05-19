@@ -1,39 +1,78 @@
 <TestScript xmlns="http://hl7.org/fhir">
-    <id value="singleDoc"/>
-    <name value="singleDoc"/>
-    <description value="Send valid Provide Document Bundle transaction containing a single DocumentReference. This does not require Comprehensive Metadata."/>
-    <!--
-      These fixtures will be inserted by the TestEngine:
-        request - the input resource
-        response - the response resource (could be OperationOutcome)
-    -->
+    <id value="twoDoc"/>
+    <name value="twoDoc"/>
+    <description value="Send valid Provide Document Bundle transaction containing two DocumentReferences. Minimal metadata is required."/>
+    
+        <fixture id="referenceDocumentReference">
+        <autocreate value="false"/>
+        <autodelete value="false"/>
+        <resource>
+            <reference value="Internal/Minimal/DocumentReference/reference"/>
+        </resource>
+    </fixture>
+    <fixture id="referenceDocumentManifest">
+        <autocreate value="false"/>
+        <autodelete value="false"/>
+        <resource>
+            <reference value="Internal/Minimal/DocumentManifest/reference"/>
+        </resource>
+    </fixture>
+    <fixture id="documentManifest">
+        <autocreate value="false"/>
+        <autodelete value="false"/>
+        <extension url="urn:subFixture">
+          <extension url="urn:fhirPath">
+            <valueString value="Bundle.entry.where(resource.is(FHIR.DocumentManifest))"/>
+          </extension>
+          <extension url="urn:sourceId">
+            <valueString value="request"/>
+          </extension>
+      </extension>
+    </fixture>
+    <fixture id="documentReference1">
+        <autocreate value="false"/>
+        <autodelete value="false"/>
+        <extension url="urn:subFixture">
+          <extension url="urn:fhirPath">
+            <valueString value="Bundle.entry.where(resource.is(FHIR.DocumentReference))[0]"/>
+          </extension>
+          <extension url="urn:sourceId">
+            <valueString value="request"/>
+          </extension>
+      </extension>
+    </fixture>
+    <fixture id="documentReference2">
+        <autocreate value="false"/>
+        <autodelete value="false"/>
+        <extension url="urn:subFixture">
+          <extension url="urn:fhirPath">
+            <valueString value="Bundle.entry.where(resource.is(FHIR.DocumentReference))[1]"/>
+          </extension>
+          <extension url="urn:sourceId">
+            <valueString value="request"/>
+          </extension>
+      </extension>
+    </fixture>
 
-    <variable>
-        <name value="DocRefFullUrl1"/>
-        <description value="Bundle.entry.fullUrl of first DocumentReference"/>
-        <expression value="Bundle.entry.where(resource is DocumentReference).fullUrl.item(0)"/>
-        <sourceId value="request"/>
-    </variable>
-    <variable>
-        <name value="DocRefFullUrl2"/>
-        <expression value="Bundle.entry.where(resource is DocumentReference).fullUrl.item(1)"/>
-        <sourceId value="request"/>
-    </variable>
+
     <test>
-        <name value="Evaluations"/>
-        <description value="Test specific validations."/>
-
+      <description value="Transaction request."/>
         <action>
-            <assert>
-                <description value="Test: Request includes two DocumentReferences"/>
-                <compareToSourceId value="request"/>
-                <compareToSourceExpression value="Bundle.entry.where(resource.is(FHIR.DocumentReference)).count() = 2"/>
-                <warningOnly value="false"/>
-            </assert>
-        </action>
+            <operation>
+                
+                <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
+                    <extension url="component">
+                        <valueString value="../../Library/TransactionRequestEval.xml"/>
+                    </extension>
+                    <extension url="urn:fixture-in">
+                        <valueString  value="request"/>
+                    </extension>
+                </modifierExtension>
+            </operation>
+        </action>    
     </test>
     <test>
-      <description value="Generic PDB Request validations."/>
+      <description value="PDB request."/>
         <action>
             <operation>
                 
@@ -43,6 +82,70 @@
                     </extension>
                     <extension url="urn:fixture-in">
                         <valueString  value="request"/>
+                    </extension>
+                </modifierExtension>
+            </operation>
+        </action>    
+    </test>
+    <test>
+        <name value="Evaluations"/>
+        <description value="Test specific."/>
+
+        <action>
+          <assert>
+              <description value="Transaction labeled as Minimal metadata profile."/>
+              <compareToSourceId value="request"/>
+              <compareToSourceExpression value="Bundle.meta.profile='http://ihe.net/fhir/StructureDefinition/IHE_MHD_Provide_Minimal_DocumentBundle'"/>
+              <warningOnly value="false"/>
+          </assert>
+        </action>
+        <action>
+            <assert>
+                <description value="Request includes two DocumentReferences."/>
+                <compareToSourceId value="request"/>
+                <compareToSourceExpression value="Bundle.entry.where(resource.is(FHIR.DocumentReference)).count() = 2"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
+            <assert>
+                <description value="DocumentManifest qualifies as Minimal Metadata."/>
+                <sourceId value="documentManifest"/>
+                <minimumId value="referenceDocumentManifest"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
+            <assert>
+                <description value="DocumentReference 1 qualifies as Minimal Metadata."/>
+                <sourceId value="documentReference1"/>
+                <minimumId value="referenceDocumentReference"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
+            <assert>
+                <description value="DocumentReference 2 qualifies as Minimal Metadata."/>
+                <sourceId value="documentReference2"/>
+                <minimumId value="referenceDocumentReference"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+    </test>
+    <test>
+      <description value="Transaction response."/>
+        <action>
+            <operation>
+                
+                <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
+                    <extension url="component">
+                        <valueString value="../../Library/TransactionResponseEval.xml"/>
+                    </extension>
+                    <extension url="urn:fixture-in">
+                        <valueString  value="request"/>
+                    </extension>
+                    <extension url="urn:fixture-in">
+                        <valueString  value="response"/>
                     </extension>
                 </modifierExtension>
             </operation>

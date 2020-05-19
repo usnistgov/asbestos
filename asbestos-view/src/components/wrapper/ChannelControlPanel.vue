@@ -93,8 +93,8 @@
             channel: {
                 set(name) {
                     if (name !== this.$store.state.base.channelId) {
-                        this.$store.commit('setChannelId', name)
-                        this.$store.dispatch('loadChannel', this.$store.getters.getFullChannelId)
+                        this.$store.commit('setChannelId', name);
+                        this.$store.dispatch('loadChannel', this.$store.getters.getFullChannelId);
                     }
                 },
                 get() {

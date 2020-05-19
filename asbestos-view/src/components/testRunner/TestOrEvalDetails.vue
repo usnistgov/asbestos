@@ -56,10 +56,17 @@
             },
         },
         methods: {
+            async loadEventSummariesAndReRun() {
+                await this.$store.dispatch('loadEventSummaries', {session: this.sessionId, channel: this.channelId})
+                await this.$store.dispatch('runEval', this.testId);
+            },
             async loadTestScript() {
                 if (this.$store.state.testRunner.testScripts[this.testId] === null)
                     await this.$store.dispatch('loadTestScript', {testCollection: this.testCollection, testId: this.testId});
             }
+        },
+        watch: {
+            '$store.state.base.channelId': 'loadEventSummariesAndReRun'
         },
         props: [
             'sessionId', 'channelId', 'testCollection', 'testId'

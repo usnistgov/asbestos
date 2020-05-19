@@ -113,7 +113,10 @@ public class ResourceCacheMgr {
 
     public ResourceWrapper getResource(Ref fullUrl) {
         Objects.requireNonNull(fullUrl);
-        CacheBundle cache = caches.get(fullUrl.getBase());
+        Ref base = fullUrl.getBase();
+        CacheBundle cache = caches.get(base);
+        if (cache == null)
+            cache = caches.get(new Ref(""));
         if (cache == null)
             return null;
         return cache.getResource(fullUrl);

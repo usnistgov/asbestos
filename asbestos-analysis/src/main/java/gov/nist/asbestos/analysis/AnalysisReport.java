@@ -48,7 +48,7 @@ public class AnalysisReport {
     private List<String> codingErrors = new ArrayList<>();
     private List<String> generalErrors = new ArrayList<>();
     private List<String> generalWarnings = new ArrayList<>();
-    private FhirClient fhirClient = new FhirClient();
+    private FhirClient fhirClient = new FhirClient().setSupportRequest(true);
     private String source;
     private EC ec;
     private CodesValidation codesValidation;
@@ -177,7 +177,7 @@ public class AnalysisReport {
         boolean gzip = true;
         String resourceType = resource.getClass().getSimpleName();
         String validationServer = ServiceProperties.getInstance().getPropertyOrStop(ServicePropertiesEnum.FHIR_VALIDATION_SERVER);
-        FhirClient fhirClient = new FhirClient()
+        FhirClient fhirClient = new FhirClient().setSupportRequest(true)
                 .sendGzip(gzip)
                 .requestGzip(gzip);
         ResourceWrapper wrapper = fhirClient.writeResource(resource,
@@ -551,7 +551,7 @@ public class AnalysisReport {
         resourceRef = (useProxy) ? baseRef : translateToProxyServerSide(baseRef);
         if (resourceRef == null)
             return;
-        baseObj = new FhirClient().requestGzip(useGzip).readResource(resourceRef);
+        baseObj = new FhirClient().setSupportRequest(true).requestGzip(useGzip).readResource(resourceRef);
         if (resourceRef.hasAnchor()) {
             BaseResource baseResource = baseObj.getResource();
             if (baseResource instanceof DomainResource) {

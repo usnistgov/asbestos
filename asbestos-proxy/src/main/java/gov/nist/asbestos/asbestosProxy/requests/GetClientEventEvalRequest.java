@@ -59,7 +59,7 @@ public class GetClientEventEvalRequest {
 
         GetClientTestEvalRequest getClientTestEvalRequest = new GetClientTestEvalRequest(request);
 
-        StringBuilder buf = getClientTestEvalRequest.evalClientTest(testDirs, testSession, Collections.singletonList(event));
+        StringBuilder buf = getClientTestEvalRequest.evalClientTest(testDirs, testSession, Collections.singletonList(event), 1);
 
         String myStr = buf.toString();
 

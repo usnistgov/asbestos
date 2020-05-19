@@ -174,7 +174,7 @@ export const testRunnerStore = {
         },
         setClientTestResult(state, parms) {     // { testId: testId, result: result }
             Vue.set(state.clientTestResult, parms.testId, parms.reports)
-        }
+        },
     },
     getters: {
         testReportNames(state) {
@@ -315,6 +315,19 @@ export const testRunnerStore = {
                 })
             await combinedPromises
         },
+        async loadTestReport({commit, rootState}, parms) {
+            const testCollectionId = parms.testCollectionId
+            const testId = parms.testId
+            const url = `testReport/${rootState.base.session}__${rootState.base.channelId}/${testCollectionId}/${testId}`
+            let report = ""
+            const promise = ENGINE.get(url)
+            promise.then(result => {
+                report = result.data
+            })
+            await promise
+            commit('setCombinedTestReports', report)
+            return report
+        },
         async loadTestScript({commit}, parms) {
             const testCollectionId = parms.testCollection
             const testId = parms.testId
@@ -331,19 +344,6 @@ export const testRunnerStore = {
             await promise
             commit('setTestScript', script)
             return script
-        },
-        async loadTestReport({commit, rootState}, parms) {
-            const testCollectionId = parms.testCollectionId
-            const testId = parms.testId
-            const url = `testReport/${rootState.base.session}__${rootState.base.channelId}/${testCollectionId}/${testId}`
-            let report = ""
-            const promise = ENGINE.get(url)
-            promise.then(result => {
-                    report = result.data
-                })
-            await promise
-            commit('setCombinedTestReports', report)
-            return report
         },
         runTest({commit, rootState, state}, testId) {
             console.log(`run ${testId}`)
