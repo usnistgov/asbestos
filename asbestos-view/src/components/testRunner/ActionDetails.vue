@@ -141,7 +141,6 @@
     import ScriptDisplay from "./ScriptDisplay"
     import VueMarkdown from 'vue-markdown'
     import colorizeTestReports from "../../mixins/colorizeTestReports";
-    import TestStatusEventWrapper from "./TestStatusEventWrapper";
     import TestStatus from "./TestStatus";
 
     export default {
@@ -298,7 +297,6 @@
             InspectEvent,
             VueMarkdown,
             TestStatus,
-            TestStatusEventWrapper,
         },
         mixins: [colorizeTestReports],
         name: "ActionDetails"
