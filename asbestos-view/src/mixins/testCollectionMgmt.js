@@ -29,7 +29,9 @@ export default {
             if (!testName)
                 return
             this.running = true
+            this.$store.commit('setCurrentTest', null)
             await this.$store.dispatch('runTest', testName)
+            this.$store.commit('setCurrentTest', testName)
             this.running = false
         },
         async doEval(testName) {  // client tests

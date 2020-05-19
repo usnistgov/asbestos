@@ -92,6 +92,9 @@ public class AnalysisReport {
         report.errors = new ArrayList<>(generalErrors);
         report.warnings = new ArrayList<>(generalWarnings);
 
+        if (comprehensiveErrors == null)
+            comprehensiveErrors = new ArrayList<>();
+
         if (baseObj != null && baseObj.getResource() != null && !isSearchSet()) {
             report.base = new RelatedReport(baseObj, "");
             report.base.comprehensiveErrors = comprehensiveChecked == null ? new ArrayList<>() : comprehensiveChecked.report.missing; //comprehensiveErrors;
@@ -221,6 +224,10 @@ public class AnalysisReport {
     // for tests only
     AnalysisReport() {}
 
+    public AnalysisReport(OperationOutcome oo) {
+        baseObj = new ResourceWrapper(oo);
+    }
+
     public AnalysisReport withGzip(boolean value) {
         useGzip = value;
         return this;
@@ -274,6 +281,9 @@ public class AnalysisReport {
                     contextResource != null &&
                     !(contextResource instanceof Bundle)) {
                 baseObj = new ResourceWrapper(contextResource);
+            } else if (baseObj != null) {
+                buildAtts();
+                return buildReport();
             }
             buildRelated();
             comprehensiveEval();

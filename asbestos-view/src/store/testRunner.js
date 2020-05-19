@@ -145,7 +145,7 @@ export const testRunnerStore = {
             state.moduleTestReports = reports
         },
         setCombinedTestReports(state, reportData) {
-            console.log(`setCombinedTestReports`)
+          //  console.log(`setCombinedTestReports`)
             for (let testName in reportData) {
                 const report = reportData[testName]
                 if (report && report.resourceType === 'TestReport') {
@@ -335,7 +335,7 @@ export const testRunnerStore = {
             let script = ""
             const promise = ENGINE.get(url)
             promise.then(result => {
-                console.log(`test script loaded`)
+           //     console.log(`test script loaded`)
                 script = result.data
             })
                 .catch(function(error) {
@@ -346,7 +346,7 @@ export const testRunnerStore = {
             return script
         },
         runTest({commit, rootState, state}, testId) {
-            console.log(`run ${testId}`)
+           // console.log(`run ${testId}`)
             //commit('setCurrentTest', testId)
             const url = `testrun/${rootState.base.session}__${rootState.base.channelId}/${state.currentTestCollectionName}/${testId}?_format=${state.useJson ? 'json' : 'xml'};_gzip=${state.gzip}`
             const promise = ENGINE.post(url)

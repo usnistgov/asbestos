@@ -434,10 +434,10 @@ public class BundleToRegistryObjectList implements IVal {
 
         tr = vale.add(new ValE("content.attachment.contentType is [1..1]").addIheRequirement(DRTable));
         tr.add(new ValE("content.attachment.contentType to mimeType").asTranslation());
-//        if (content.getAttachment().getContentType() == null)
-//            tr.add(new ValE("content.attachment.contentType not present").asError());
-//        else
-//            eo.setMimeType(content.getAttachment().getContentType());
+        if (content.getAttachment().getContentType() == null)
+            tr.add(new ValE("content.attachment.contentType not present").asError());
+        else
+            eo.setMimeType(content.getAttachment().getContentType());
 
         if (dr.getDate() != null) {
             vale.addTr(new ValE("creationTime"));
@@ -713,7 +713,7 @@ public class BundleToRegistryObjectList implements IVal {
         String extra = "DocumentReference.context.sourcePatientInfo must reference Contained Patient resource with Patient.identifier.use element set to 'usual'";
         Optional <ResourceWrapper> loadedPatient = rMgr.resolveReference(resource, new Ref(sourcePatient.getReference()), new ResolverConfig().containedRequired());
         if (!loadedPatient.isPresent() || loadedPatient.get().getResource() == null) {
-            val.add(new ValE("Cannot load resource at ${loadedPatient.url}").asError());
+            val.add(new ValE("Cannot resolve sourcePatient.reference: " + sourcePatient.getReference()).asError());
             return;
         }
 
@@ -958,7 +958,7 @@ public class BundleToRegistryObjectList implements IVal {
                     Attachment a = cc.getAttachment();
                     String url = a.getUrl();
                     if (!bundleContains(bundle, url)) {
-                        val.add(new ValE("DocumentReference references Binary outside of Bundle").asError()
+                        val.add(new ValE("Cannot resolve Binary reference from DocumentReference: " + url).asError()
                                 .add(new ValE("3.65.4.1.2.1 Bundle Resources").asDoc()));
                     }
                 }
@@ -967,6 +967,8 @@ public class BundleToRegistryObjectList implements IVal {
     }
 
     private boolean bundleContains(Bundle bundle, String fullUrl) {
+        if (fullUrl == null)
+            return false;
         for (Bundle.BundleEntryComponent comp : bundle.getEntry()) {
             String aFullUrl = comp.getFullUrl();
             if (fullUrl.equals(aFullUrl))
