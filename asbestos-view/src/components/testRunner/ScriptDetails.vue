@@ -25,12 +25,9 @@
 
             <div v-if="script.setup">
                 <ul class="noListStyle">
-                    <li
+                    <debuggable-list-item
                             :key="'Setup0'"
-                            v-bind:class="{
-                                'breakpoint-indicator': showSetupBreakpointIndicator(testScriptIndex, 0),
-                                'breakpoint-hit-indicator': isBreakpointHit(testScriptIndex, 'setup', 0),
-                            }"
+                            :breakpoint-index="getBreakpointIndex('setup',0)"
                     >
                     <test-details
                         :script="script.setup"
@@ -38,15 +35,10 @@
                         :label="'Setup'"
                         :script-contained="script.contained"
                         :report-contained="report ? report.contained : null"
-                        :test-script-index="testScriptIndex"
                         :test-type="'setup'"
                         :test-index="0"
-                        :test-level-debug-title="debugTitle(testScriptIndex, 'setup', 0)"
-                        @onStatusMouseOver="hoverSetupLevelIndex = 0"
-                        @onStatusMouseLeave="hoverSetupLevelIndex = -1"
-                        @onStatusClick="toggleBreakpointIndex(testScriptIndex, 'setup', 0)"
                     ></test-details>
-                    </li>
+                    </debuggable-list-item>
                 </ul>
             </div>
 
@@ -65,28 +57,20 @@
 
             <div v-if="script.test">
                     <ul class="noListStyle">
-                        <li
-                           v-for="(test, testi) in tests"
-                           :key="'Test' + testi"
-                           v-bind:class="{
-                                'breakpoint-indicator': showTestBreakpointIndicator(testScriptIndex, 'test', testi),
-                                'breakpoint-hit-indicator': isBreakpointHit(testScriptIndex, 'test', testi),
-                            }"
+                       <debuggable-list-item
+                               v-for="(test, testi) in tests"
+                               :key="'Test' + testi"
+                               :breakpoint-index="getBreakpointIndex('test',testi)"
                         >
-                            <test-details
+                        <test-details
                                 :script="script.test[testi]"
                                 :report="report && report.test  ? report.test[testi] : null"
                                 :script-contained="script.contained"
                                 :report-contained="report ? report.contained : null"
-                                :test-script-index="testScriptIndex"
                                 :test-type="'test'"
                                 :test-index="testi"
-                                :test-level-debug-title="debugTitle(testScriptIndex, 'test', testi)"
-                                @onStatusMouseOver="hoverTestLevelIndex = testi"
-                                @onStatusMouseLeave="hoverTestLevelIndex = -1"
-                                @onStatusClick="toggleBreakpointIndex(testScriptIndex, 'test', testi)"
                             ></test-details>
-                        </li>
+                       </debuggable-list-item>
                     </ul>
             </div>
 
@@ -99,59 +83,18 @@
 <script>
     import errorHandlerMixin from '../../mixins/errorHandlerMixin'
     import TestDetails from "./TestDetails";
-    // import ActionDetails from "./ActionDetails";
+    import DebuggableListItem from "./debugger/DebuggableListItem";
+    import debugTestScriptMixin from "../../mixins/debugTestScript";
     import VueMarkdown from "vue-markdown";
+
 
     export default {
         data() {
             return {
                 displayDetail: false,
-                hoverTestLevelIndex: -1,
-                hoverSetupLevelIndex: -1,
             }
         },
         methods: {
-            async toggleBreakpointIndex(testScriptIndex, testType, testIndex) {
-                // console.log("enter toggleBreakpointIndex")
-                let obj = {testScriptIndex: testScriptIndex, breakpointIndex: testType + testIndex }
-                if (! this.$store.getters.hasBreakpoint(obj)) {
-
-                    if (testType === 'test') {
-                        this.hoverTestLevelIndex = testIndex // Restore the hoverActionIndex when toggle on the same item goes from on(#)-off(-1)-on(#)
-                    } else if (testType === 'setup') {
-                        this.hoverSetupLevelIndex = testIndex
-                    }
-                    await this.$store.dispatch('addBreakpoint', obj)
-                } else {
-                    if (testType === 'test') {
-                        this.hoverTestLevelIndex = -1 // Immediately remove the debug indicator while the mouse hover is still active but without having to wait for the mouseLeave event
-                    } else if (testType === 'setup') {
-                        this.hoverSetupLevelIndex = -1
-                    }
-                    // remove breakpoint
-                    await this.$store.dispatch('removeBreakpoint', obj)
-                }
-            },
-            debugTitle(testScriptIndex, testType, testIndex) {
-                let obj = {testScriptIndex: testScriptIndex, breakpointIndex: testType + testIndex }
-                return this.$store.getters.getDebugTitle(obj);
-            },
-            showSetupBreakpointIndicator(testScriptIndex, setupIndex) {
-                let obj = {testScriptIndex: testScriptIndex, breakpointIndex: 'setup0' }
-                let hasBreakpoint = this.$store.getters.hasBreakpoint(obj)
-                let isHover = setupIndex === this.hoverSetupLevelIndex
-                let isBreakpointHit = this.isBreakpointHit(testScriptIndex, 'setup', 0)
-                return (hasBreakpoint || isHover) && ! isBreakpointHit // Vue Reactivity seems to work better when boolean logic is written like this. Otherwise this whole method showSetup... does not even get called for unknown reason.
-            },
-            showTestBreakpointIndicator(testScriptIndex, testType, testIndex) {
-                // console.log('calling showTestBreakpointIndicator ' + this.hoverTestLevelIndex)
-                let obj = {testScriptIndex: testScriptIndex, breakpointIndex: testType + testIndex }
-                return (this.$store.getters.hasBreakpoint(obj) || this.hoverTestLevelIndex === testIndex) && ! this.isBreakpointHit(testScriptIndex, testType, testIndex)
-            },
-            isBreakpointHit(testScriptIndex, testType, testIndex) {
-                let obj = {testScriptIndex: testScriptIndex, breakpointIndex: testType + testIndex}
-                return this.$store.getters.isBreakpointHit(obj)
-            },
         },
         computed: {
             systemError() {
@@ -184,14 +127,14 @@
         },
         watch: {
         },
-        mixins: [ errorHandlerMixin ],
+        mixins: [ errorHandlerMixin, DebuggableListItem, ],
         props: [
             'script', 'report',  // TestScript and TestReport
             'testScriptIndex',
         ],
         components: {
             TestDetails,
-            // ActionDetails,
+            DebuggableListItem,
             VueMarkdown,
         },
         name: "ScriptDetails"
@@ -206,28 +149,8 @@
         font-weight: bold;
     }
     .value {
-
     }
 
 </style>
 <style>
-
-    /*
-    .test-margins {
-        margin-left: 0px;
-        margin-right: 0px;
-    }
-    .action-margins {
-        margin-left: 20px;
-        margin-right: 20px;
-    }
-    .conditional-margins {
-        margin-left: 40px;
-        margin-right: 40px;
-    }
-    .script-description-margins {
-        margin-left: 30px;
-        margin-right: 30px;
-    }
-     */
 </style>

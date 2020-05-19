@@ -9,12 +9,13 @@
              'error-plain': isError && !colorful,
              'not-run':   isNotRun && colorful,
              'not-run-plain-detail' : isNotRun && ! colorful,
+             'breakpointHitBkg' : $parent && $parent.isBreakpointHit,
             }"  class="test-margins" @click.stop="toggleDisplay()">
 
-            <test-status-event-wrapper v-if="!statusRight"
+            <test-status v-if="!statusRight"
                          :status-on-right="statusRight"
                          :report="report"
-            > </test-status-event-wrapper>
+            > </test-status>
 
             <span v-if="displayOpen">
                 <img src="../../assets/arrow-down.png">
@@ -85,9 +86,8 @@
     import ActionDetails from './ActionDetails'
     import ScriptDetailsContained from "./ScriptDetailsContained";
     import colorizeTestReports from "../../mixins/colorizeTestReports";
-   // import TestStatus from "./TestStatus";
+   import TestStatus from "./TestStatus";
    // import importMixin from "../../mixins/importMixin";
-    import TestStatusEventWrapper from "./TestStatusEventWrapper";
     import ComponentScript from "./ComponentScript";
     import DebuggableListItem from "./debugger/DebuggableListItem";
     import debugTestScriptMixin from "../../mixins/debugTestScript";
@@ -174,14 +174,13 @@
             'script', 'report',
             'scriptContained', 'reportContained', // contained section of the TestScript and TestReport
             'label',
-            'testScriptIndex', 'testIndex', 'testType',
-            'testLevelDebugTitle',
+            'testIndex', 'testType',
         ],
         components: {
             ActionDetails,
             ScriptDetailsContained,
-            TestStatusEventWrapper,
             ComponentScript,
+            TestStatus,
             DebuggableListItem,
         },
         mixins: [

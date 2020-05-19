@@ -24,9 +24,7 @@
             <template v-if="hasBreakpoint">
                &#x1F6D1; <!-- Stop sign -->
             </template>
-            <template v-else>
-               &nbsp;&nbsp;
-            </template>
+            <template v-else>&nbsp;&nbsp;</template>
         </span>
 <!--        <span v-if="isBreakpointHit" class="breakpointGutterOption evalBtn" @click.stop="doDebugEvalMode($store.state.testRunner.currentTest)">Eval.</span>-->
         <slot></slot>
@@ -127,11 +125,12 @@
         border: lightgray solid 1px;
         horiz-align: center;
         text-align: center;
+        font-size: x-small;
     }
 
     span.breakpointControlOn {
+        font-size: xx-small;
         border : none;
-        font-size: x-small;
     }
 
     span.breakpointControlOff:hover {

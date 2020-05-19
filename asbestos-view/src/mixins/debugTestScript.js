@@ -42,7 +42,7 @@ export default {
             await this.$store.dispatch('doDebugEvalMode')
         },
         getBreakpointIndex(testType, testIndex, actionIndex) {
-            return testType + testIndex + "." + actionIndex
+            return testType + testIndex + (actionIndex !== undefined ?   "." + actionIndex : "")
         },
         getBreakpointObj(breakpointIndex) {
             let obj = {testScriptIndex: this.currentMapKey, breakpointIndex: breakpointIndex}
