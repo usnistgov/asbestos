@@ -135,4 +135,10 @@
         border-radius: 25px;
         font-weight: bold;
     }
+    .debugFeatureOptionButton {
+        margin-left: 7px;
+        border-radius: 3px;
+        background-color: #FFC83D;
+       font-size: x-small;
+    }
 </style>

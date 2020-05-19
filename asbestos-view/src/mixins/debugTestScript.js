@@ -38,8 +38,8 @@ export default {
                 return
             await this.$store.dispatch('debugTestScript', testName)
         },
-        async doDebugEvalMode(testName) {
-            await this.$store.dispatch('doDebugEvalMode', testName)
+        async doDebugEvalMode() {
+            await this.$store.dispatch('doDebugEvalMode')
         },
         getBreakpointIndex(testType, testIndex, actionIndex) {
             return testType + testIndex + "." + actionIndex

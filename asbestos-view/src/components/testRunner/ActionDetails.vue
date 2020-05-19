@@ -11,6 +11,7 @@
                 'error-plain': isError && !colorful,
                 fail: isFail && colorful,
                 'fail-plain-detail': isFail && !colorful,
+                'breakpointHitBkg' : $parent && $parent.isBreakpointHit,
             }"
                     @click.stop="toggleMessageDisplay()">
 
@@ -37,6 +38,7 @@
                 <span>
                     {{ description }}
                 </span>
+                <span v-if="$parent && $parent.isBreakpointHit" class="breakpointFeatureBkg"><button class="debugFeatureOptionButton" @click.stop="$parent.doDebugEvalMode()">Eval.</button></span>
 
                 <test-status v-if="statusRight"
                              :status-on-right="statusRight"
@@ -290,7 +292,7 @@
         },
         props: [
             // parts representing a single action
-            'script', 'report', 'debugTitle',
+            'script', 'report',
         ],
         components: {
             ScriptDisplay,

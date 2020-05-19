@@ -221,15 +221,6 @@
     .align-left {
         text-align: left;
     }
-    .breakpoint-indicator {
-        list-style-type: "\1F6D1"; /* Stop sign */
-    }
-    .breakpoint-hit-indicator {
-        list-style-type: "\1F449"; /* Index finger pointing right */
-        background: yellow;
-        /*transition: background-color 500ms ease-in-out;*/
-        /* 27A1 = Right arrow */
-    }
     .noTopMargin {
         margin-top: 0px;
     }

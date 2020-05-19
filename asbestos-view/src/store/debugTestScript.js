@@ -155,7 +155,8 @@ export const debugTestScriptStore = {
                 console.log('debugKill '+ mapKey + ' failed: WebSocket is null!')
             }
         },
-        async doDebugEvalMode({commit, state, rootState, getters}, testId) {
+        async doDebugEvalMode({commit, state, rootState, getters}) {
+            let testId = rootState.testRunner.currentTest
             console.log('In doDebugEvalMode: ' + testId)
             const mapKey = getters.getMapKey(testId)
             const breakpointIndex = state.showDebugButton[mapKey].breakpointIndex
@@ -236,7 +237,7 @@ export const debugTestScriptStore = {
                             if (rootState.debugAssertionEval.showModal === true) {
                                // Auto-refresh the modal if already evalMode is already displaying the modal
                                //  state.doDebugEvalMode({commit: commit, state: state, rootState: rootState, getters: getters}, testId)
-                                dispatch('doDebugEvalMode', testId)
+                                dispatch('doDebugEvalMode')
                             }
                         }
                     } else if (returnData.messageType === 'original-assertion') {

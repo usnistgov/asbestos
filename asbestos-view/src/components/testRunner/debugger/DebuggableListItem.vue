@@ -25,10 +25,10 @@
                &#x1F6D1; <!-- Stop sign -->
             </template>
             <template v-else>
-                &nbsp;&nbsp;
+               &nbsp;&nbsp;
             </template>
         </span>
-        <span v-if="isBreakpointHit" class="breakpointGutterOption evalBtn" @click.stop="doDebugEvalMode($store.state.testRunner.currentTest)">Eval.</span>
+<!--        <span v-if="isBreakpointHit" class="breakpointGutterOption evalBtn" @click.stop="doDebugEvalMode($store.state.testRunner.currentTest)">Eval.</span>-->
         <slot></slot>
     </li>
 
@@ -60,7 +60,7 @@
                         if (displayOn)
                             nobj.classList.add(className)
                         else
-                            nobj.classList.remove('breakpointBorderFocusOn')
+                            nobj.classList.remove(className)
                     }  else {
                         console.log('nobj is null!')
                     }
@@ -135,7 +135,7 @@
     }
 
     span.breakpointControlOff:hover {
-        border: red dotted 1px;
+        border: red dotted 2px;
     }
 
 
@@ -146,7 +146,9 @@
     }
     .breakpointHit {
         list-style-type: "\1F449"; /* Index finger pointing right */
-        background-color: yellow;
+        /*background-color: yellow;*/
+        /*transition: background-color 500ms ease-in-out;*/
+        /* 27A1 = Right arrow */
     }
     .evalBtn {
         cursor: pointer;
@@ -155,5 +157,11 @@
     }
     .evalBtn:hover {
         text-decoration: underline;
+    }
+    .breakpointHitBkg {
+        background-color: yellow;
+    }
+    .breakpointFeatureBkg {
+        background-color: white;
     }
 </style>
