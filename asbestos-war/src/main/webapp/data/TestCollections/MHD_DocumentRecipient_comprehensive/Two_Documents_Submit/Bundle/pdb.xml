@@ -175,9 +175,7 @@
                     <div xmlns="http://www.w3.org/1999/xhtml">Comment</div>
                     <status value="empty"/>
                 </text>
-                <!--   Many XDS systems do not track any id for the author. When systems don't do this,
-                  the only option is for the author information to be contained in the Document Reference
-                   -->
+                
 
                 <masterIdentifier>
                     <system value="urn:ietf:rfc:3986"/>

@@ -5,5 +5,5 @@ actor.
 
 **Metadata contents**: The DocumentReference.identifier is labeled with use="official" and the value is not a UUID. DocumentReference.masterIdentifier is given unique values before the transaction is sent.
 
-**Expected Outcome**: Transaction will fail with status 400 and no contents will be persisted to the server. MHD Table 4.5.1.1-1 stipulates that if an identifier is specified with use="official" than the value shall
+**Expected Outcome**: Transaction will fail with status 400 and no contents will be persisted to the server. An OperationOutcome resource will be returned. MHD Table 4.5.1.1-1 stipulates that if an identifier is specified with use="official" than the value shall
 carry the entryUUID (be in UUID format).

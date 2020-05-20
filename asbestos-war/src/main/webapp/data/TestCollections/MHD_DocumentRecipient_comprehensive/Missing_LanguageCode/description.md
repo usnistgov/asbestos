@@ -8,4 +8,4 @@ linkage between DocumentManifest and DocumentReference and between DocumentRefer
  Metadata except that DocumentReference.attachment.language is missing.   DocumentManifest.masterIdentifier and
 DocumentReference.masterIdentifier are are given unique values before the transaction is sent.
 
-**Expected Outcome**: Transaction will succeed with status 200 and the contents will be persisted to the server.
+**Expected Outcome**: Transaction will fail with status 400 and no contents will be persisted to the server. An OperationOutcome resource will be returned.
