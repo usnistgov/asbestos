@@ -1,23 +1,25 @@
 <template>
     <div>
         <div v-if="script">
-            <span v-bind:class="{
-                'not-run-plain-detail': isNotRun,
-                'pass-plain-detail': isPass,
-                'error-plain': isError,
-                'fail-plain-detail': isFail,
+            <span
+                    v-bind:class="{
+                'not-run': isNotRun && colorful,
+                'not-run-plain-detail': isNotRun && !colorful,
+                'pass-plain-detail': isPass && !colorful,
+                pass : isPass && colorful,
+                error: isError && colorful,
+                'error-plain': isError && !colorful,
+                fail: isFail && colorful,
+                'fail-plain-detail': isFail && !colorful,
+                'breakpointHitBkg' : $parent && $parent.isBreakpointHit,
             }"
                     @click.stop="toggleMessageDisplay()">
 
-                <test-status-event-wrapper v-if="!statusRight"
+                <test-status v-if="!statusRight"
                                            :status-on-right="statusRight"
                                            :script="script"
                                            :report="report"
-                                           :debug-title="debugTitle"
-                                           @onStatusMouseOver="$emit('onStatusMouseOver')"
-                                           @onStatusMouseLeave="$emit('onStatusMouseLeave')"
-                                           @onStatusClick="$emit('onStatusClick')"
-                > </test-status-event-wrapper>
+                > </test-status>
 
                 <span v-if="displayMessage">
                     <img src="../../assets/arrow-down.png">
@@ -36,6 +38,7 @@
                 <span>
                     {{ description }}
                 </span>
+                <span v-if="$parent && $parent.isBreakpointHit" class="breakpointFeatureBkg"><button class="debugFeatureOptionButton" @click.stop="$parent.doDebugEvalMode()">Eval.</button></span>
 
                 <test-status v-if="statusRight"
                              :status-on-right="statusRight"
@@ -140,7 +143,6 @@
     import ScriptDisplay from "./ScriptDisplay"
     import VueMarkdown from 'vue-markdown'
     import colorizeTestReports from "../../mixins/colorizeTestReports";
-    import TestStatusEventWrapper from "./TestStatusEventWrapper";
     import TestStatus from "./TestStatus";
 
     export default {
@@ -292,14 +294,13 @@
         },
         props: [
             // parts representing a single action
-            'script', 'report', 'debugTitle',
+            'script', 'report',
         ],
         components: {
             ScriptDisplay,
             InspectEvent,
             VueMarkdown,
             TestStatus,
-            TestStatusEventWrapper,
         },
         mixins: [colorizeTestReports],
         name: "ActionDetails"

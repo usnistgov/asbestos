@@ -28,7 +28,6 @@
             }
         },
         methods: {
-
             hasSuccessfulEvent(testId) {
                 if (testId === null)
                     return false
@@ -42,7 +41,6 @@
                 }
                 return false
             },
-
             testReport(testName) {
                 if (!testName)
                     return null
@@ -76,14 +74,6 @@
         background-color: lightgray;
         text-align: left;
     }
-    .debugTestScriptButton {
-        /*padding-bottom: 5px;*/
-        margin-left: 10px;
-        background-color: cornflowerblue;
-        cursor: pointer;
-        border-radius: 25px;
-        font-weight: bold;
-    }
     .configurationError {
         color: red;
     }
@@ -114,6 +104,17 @@
     }
     .conformance-tests-header {
         background-color: #DBD9BE;
+    }
+    .debugKillTestScriptButton {
+        /*padding-bottom: 5px;*/
+        margin-left: 10px;
+        background-color: red;
+        cursor: pointer;
+        border-radius: 25px;
+        font-weight: bold;
+    }
+    .configurationError {
+        color: red;
     }
     .noListStyle {
         list-style-type: none;
@@ -160,7 +161,7 @@
     .fail-plain {
         /*background-color: lightgray;*/
         text-align: left;
-        border-top: 1px solid black;
+        /*border-top: 1px solid black;*/
         /*border-bottom: 1px solid black;*/
         cursor: pointer;
         /*border-radius: 25px;*/
@@ -185,7 +186,7 @@
     .error-plain {
         /*background-color: cornflowerblue;*/
         text-align: left;
-        border-top: 1px solid black;
+        /*border-top: 1px solid black;*/
         cursor: pointer;
         /*border-radius: 25px;*/
     }
@@ -220,12 +221,6 @@
     .align-left {
         text-align: left;
     }
-    .breakpoint-indicator {
-        list-style-type: "\1F6D1"; /* Stop sign */
-    }
-    .debug-hint {
-        list-style-type: "\1F41E"; /* Lady bug */
-    }
     .noTopMargin {
         margin-top: 0px;
     }
@@ -238,5 +233,4 @@
     .inlineDiv {
         display: inline;
     }
-
 </style>

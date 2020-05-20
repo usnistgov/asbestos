@@ -33,11 +33,8 @@
                         :report="conditionReport ? conditionReport.test[testi] : null"
                         :description="description(testi)"
                 ></test-details-contained>
-
             </div>
-
             <!-- add TEARDOWN here -->
-
         </div>
     </span>
 </template>
