@@ -887,6 +887,7 @@ public class BundleToRegistryObjectList implements IVal {
 //    }
 
     private static String unURN(String uuid) {
+        if (uuid == null) return null;
         if (uuid.startsWith("urn:uuid:")) return uuid.substring(9);
         if (uuid.startsWith("urn:oid:")) return uuid.substring(8);
         return uuid;
