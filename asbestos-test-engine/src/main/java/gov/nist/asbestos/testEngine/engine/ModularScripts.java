@@ -3,13 +3,11 @@ package gov.nist.asbestos.testEngine.engine;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import gov.nist.asbestos.client.Base.EC;
 import gov.nist.asbestos.client.Base.ProxyBase;
 import gov.nist.asbestos.client.client.Format;
 import org.apache.commons.io.FileUtils;
 import org.hl7.fhir.r4.model.BaseResource;
 import org.hl7.fhir.r4.model.Extension;
-import org.hl7.fhir.r4.model.TestReport;
 import org.hl7.fhir.r4.model.TestScript;
 
 import java.io.File;
@@ -104,7 +102,7 @@ public class ModularScripts {
                     File componentFile = new File(componentPath);
                     TestScript componentScript = (TestScript) ProxyBase.parse(componentFile);
                     String componentId = fileName(componentFile);
-                    String fullComponentId = testId + File.separator + componentId;
+                    String fullComponentId = testId + '/' + componentId;
                     componentScript.setName(fullComponentId);
                     String componentJson = ProxyBase.encode(componentScript, Format.JSON);
                     scripts.put(fullComponentId, componentJson);
