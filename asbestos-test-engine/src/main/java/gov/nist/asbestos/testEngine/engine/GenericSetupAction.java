@@ -100,7 +100,7 @@ abstract class GenericSetupAction {
             }
             sourceFixture.setReferencedByActionReference(actionReference);
             resourceToSend = sourceFixture.getResourceResource();
-            resourceToSend = updateResourceToSend(resourceToSend);
+            resourceToSend = updateResourceToSend(sourceFixture);
         }
         if (op.hasRequestHeader())
             handleRequestHeader(requestHeader, op, variableMgr);
@@ -117,10 +117,14 @@ abstract class GenericSetupAction {
         return targetUrl != null;
     }
 
-    public BaseResource updateResourceToSend(BaseResource resource) {
+    public BaseResource updateResourceToSend(FixtureComponent toSend) {
+        ResourceWrapper wrapper = toSend.getResourceWrapper();
+        BaseResource resource = wrapper.getResource();
         String resourceString = ProxyBase.encode(resource, Format.JSON);
         String updatedResourceString = variableMgr.updateReference(resourceString);
-        return ProxyBase.parse(updatedResourceString, Format.JSON);
+        resource = ProxyBase.parse(updatedResourceString, Format.JSON);
+        wrapper.setResource(resource);
+        return resource;
     }
 
     UIEvent getUIEvent(ResourceWrapper wrapper) {
@@ -140,7 +144,7 @@ abstract class GenericSetupAction {
             String expectedResourceType = resourceTypeToBeReturned();
             if (expectedResourceType != null && !receivedResourceType.equals(expectedResourceType)) {
                 reporter.reportError("Expected resource of type " +  expectedResourceType + " received " + receivedResourceType + " instead");
-                return;
+                //return;
             }
         }
 

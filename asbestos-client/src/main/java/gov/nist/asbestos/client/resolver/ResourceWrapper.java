@@ -154,9 +154,10 @@ public class ResourceWrapper {
     }
 
     public String getResourceType() {
-        if (resource == null)
+        BaseResource thisResource = getResource();
+        if (thisResource == null)
             return null;
-        return resource.getClass().getSimpleName();
+        return thisResource.getClass().getSimpleName();
     }
 
     @Override
@@ -177,7 +178,16 @@ public class ResourceWrapper {
     }
 
     public BaseResource getResource() {
-        return resource;
+        if (resource != null)
+            return resource;
+        if (httpBase != null && httpBase instanceof HttpGet) {
+            HttpGet getter = (HttpGet) httpBase;
+            if (getter.getResponse() != null) {
+                resource = ProxyBase.parse(getter.getResponse(), Format.fromContentType(getter.getResponseContentType()));
+                return resource;
+            }
+        }
+        return null;
     }
 
     public Map<Ref, ResourceWrapper> getContained() {
@@ -274,7 +284,14 @@ public class ResourceWrapper {
     }
 
     public boolean hasResource() {
-        return resource != null;
+        if (resource != null)
+            return true;
+        if (httpBase != null && httpBase instanceof HttpGet) {
+            HttpGet getter = (HttpGet) httpBase;
+            if (getter.getResponse() != null)
+                return true;
+        }
+        return false;
     }
 
     public String getAssignedUid() {

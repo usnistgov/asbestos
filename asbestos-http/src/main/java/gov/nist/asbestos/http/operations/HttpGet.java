@@ -36,11 +36,12 @@ public class HttpGet extends HttpBase {
 //                setResponse(IOUtils.toByteArray(connection.getInputStream()));
 //            }
             try {
-                InputStream is = connection.getInputStream();
+                InputStream is = status < 400 ? connection.getInputStream() : connection.getErrorStream();
                 setResponseHeadersList(connection.getHeaderFields());
                 setResponse(IOUtils.toByteArray(is));
             } catch (Throwable t) {
-                    // ok - won't always be available
+                // ok - won't always be available
+                //System.out.println(t.getMessage());
             }
         } catch (Throwable t) {
             throw new Error("GET " + uri + "\n" + t.getMessage(), t);

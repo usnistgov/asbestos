@@ -214,7 +214,7 @@ public class ProxyServlet extends HttpServlet {
             logResponse(backSideTask, requestOut);
 
             // transform backend service response for client
-            HttpBase responseOut = transformResponse(clientTask, requestOut, channel, hostport, null);
+            HttpBase responseOut = transformResponse(clientTask, requestOut, channel, hostport, null, null);
 
 
             respond(resp, responseOut, inHeaders, clientTask, responseOut.getStatus());
@@ -359,6 +359,8 @@ public class ProxyServlet extends HttpServlet {
 
         inHeaders.add(new Header("x-client-addr", req.getRemoteAddr()));
 
+        boolean isSearch = !new Ref(uri).hasId();
+
         try {
 
             String channelType = simStore.getChannelConfig().getChannelType();
@@ -412,8 +414,10 @@ public class ProxyServlet extends HttpServlet {
 
             // transform backend service response for client
             if (requestOut.isSuccess()) {
-                String requestedType = new Ref(uri).getResourceType();
-                HttpBase responseOut = transformResponse(backSideTask, requestOut, channel, hostport, requestedType);
+                Ref ref = new Ref(uri);
+                String requestedType;
+                requestedType = ref.getResourceType();
+                HttpBase responseOut = transformResponse(backSideTask, requestOut, channel, hostport, requestedType, uri.toString());
                 respond(resp, responseOut, inHeaders, clientTask, 200);
             } else {
                 respondWithError(req, resp, "backend call failed", inHeaders, clientTask);
@@ -424,7 +428,7 @@ public class ProxyServlet extends HttpServlet {
             resp.setStatus(resp.SC_OK);
         } catch (Throwable t) {
             respondWithError(req, resp, t, inHeaders, clientTask);
-            resp.setStatus(resp.SC_OK);
+            //resp.setStatus(resp.SC_INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -473,8 +477,8 @@ public class ProxyServlet extends HttpServlet {
         log.error(ExceptionUtils.getStackTrace(t));
         Ref ref = new Ref(Common.buildURI(req));
         if (ref.isQuery()) {
-            Bundle bundle = wrapInBundle(wrapInOutcome(t));
-            respond(resp, bundle, inHeaders, clientTask, 200);
+//            Bundle bundle = wrapInBundle(wrapInOutcome(t));
+            respond(resp, wrapInOutcome(t), inHeaders, clientTask, 403);
         } else {
             OperationOutcome oo = wrapInOutcome(t);
             respond(resp, oo, inHeaders, clientTask, 400);
@@ -738,9 +742,9 @@ public class ProxyServlet extends HttpServlet {
         return channelTransform.transformRequestUrl(headers.getPathInfo().getPath(), requestIn);
     }
 
-    static HttpBase transformResponse(ITask task, HttpBase responseIn, IBaseChannel channelTransform, String proxyHostPort, String requestedType) {
+    static HttpBase transformResponse(ITask task, HttpBase responseIn, IBaseChannel channelTransform, String proxyHostPort, String requestedType, String search) {
         HttpBase responseOut = new HttpGet();  // here GET vs POST does not matter
-        channelTransform.transformResponse(responseIn, responseOut, proxyHostPort, requestedType);
+        channelTransform.transformResponse(responseIn, responseOut, proxyHostPort, requestedType, search);
         //responseOut.setStatus(responseIn.getStatus());
         return responseOut;
     }

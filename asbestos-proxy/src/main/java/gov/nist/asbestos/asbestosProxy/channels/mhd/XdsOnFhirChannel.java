@@ -3,6 +3,7 @@ package gov.nist.asbestos.asbestosProxy.channels.mhd;
 import gov.nist.asbestos.asbestosProxy.channel.BaseChannel;
 import gov.nist.asbestos.asbestosProxy.channels.passthrough.PassthroughChannel;
 import gov.nist.asbestos.asbestosProxy.util.XdsActorMapper;
+import gov.nist.asbestos.client.resolver.*;
 import gov.nist.asbestos.mhd.SubmittedObject;
 import gov.nist.asbestos.mhd.exceptions.TransformException;
 import gov.nist.asbestos.client.Base.ProxyBase;
@@ -10,10 +11,6 @@ import gov.nist.asbestos.client.client.FhirClient;
 import gov.nist.asbestos.client.client.Format;
 import gov.nist.asbestos.client.events.Event;
 import gov.nist.asbestos.client.events.ITask;
-import gov.nist.asbestos.client.resolver.IdBuilder;
-import gov.nist.asbestos.client.resolver.Ref;
-import gov.nist.asbestos.client.resolver.ResourceCacheMgr;
-import gov.nist.asbestos.client.resolver.ResourceMgr;
 import gov.nist.asbestos.http.headers.Header;
 import gov.nist.asbestos.http.headers.Headers;
 import gov.nist.asbestos.http.operations.*;
@@ -31,8 +28,6 @@ import gov.nist.asbestos.simapi.validation.Val;
 import gov.nist.asbestos.simapi.validation.ValE;
 import gov.nist.asbestos.utilities.*;
 import ihe.iti.xds_b._2007.ProvideAndRegisterDocumentSetRequestType;
-import ihe.iti.xds_b._2007.RetrieveDocumentSetRequestType;
-import ihe.iti.xds_b._2007.RetrieveDocumentSetResponseType;
 import oasis.names.tc.ebxml_regrep.xsd.lcm._3.SubmitObjectsRequest;
 import oasis.names.tc.ebxml_regrep.xsd.rim._3.*;
 import oasis.names.tc.ebxml_regrep.xsd.rs._3.RegistryResponseType;
@@ -48,8 +43,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.util.*;
-
-import static gov.nist.asbestos.mhd.translation.search.FhirSq.documentEntryByUidQuery;
 
 // TODO - honor the Prefer header - http://hl7.org/fhir/http.html#ops
 public class XdsOnFhirChannel extends BaseChannel /*implements IBaseChannel*/ {
@@ -253,6 +246,9 @@ public class XdsOnFhirChannel extends BaseChannel /*implements IBaseChannel*/ {
             if (resourceType.equals("DocumentReference")) {
                 sender = FhirSq.docRefQuery(params, toAddr, task);
                 returnAhqrResults(requestOut);
+            } else if (resourceType.equals("DocumentManifest")) {
+                    sender = FhirSq.docManQuery(params, toAddr, task);
+                    returnAhqrResults(requestOut);
             } else {
                 throw new RuntimeException("SEARCH " + resourceType + " not supported");
             }
@@ -316,6 +312,7 @@ public class XdsOnFhirChannel extends BaseChannel /*implements IBaseChannel*/ {
         String encoded = ProxyBase.encode(oo, format);
         resp.setResponseText(encoded);
         resp.getResponseHeaders().add(new Header("Content-Type", format.getContentType()));
+        resp.setStatus(500);
     }
 
 
@@ -423,10 +420,10 @@ public class XdsOnFhirChannel extends BaseChannel /*implements IBaseChannel*/ {
     }
 
     @Override
-    public void transformResponse(HttpBase responseIn, HttpBase responseOut, String proxyHostPort, String requestedType) {
+    public void transformResponse(HttpBase responseIn, HttpBase responseOut, String proxyHostPort, String requestedType, String search) {
         if (sender != null) {
             // there is a query response to transform
-            transformDSResponse(sender, responseOut, requestedType);
+            transformDSResponse(sender, responseOut, requestedType, search);
             return;
         }
         if (requestedType != null && requestedType.equals("Binary")) {
@@ -508,138 +505,78 @@ public class XdsOnFhirChannel extends BaseChannel /*implements IBaseChannel*/ {
         }
     }
 
-    private void transformDSResponse(AhqrSender sender, HttpBase responseOut, String requestedType) {
+    private void transformDSResponse(AhqrSender sender, HttpBase responseOut, String requestedType, String search) {
         String  newBase = ServiceProperties.getInstance().getPropertyOrStop(ServicePropertiesEnum.FHIR_TOOLKIT_BASE) + "/proxy/default__default";
+        Ref searchRef = new Ref(search);
+        boolean isSearch = !searchRef.hasId();
         if (responseOut.getVerb().equals(Verb.GET.toString())) {  // FHIR READ
             if (sender.hasErrors()) {
                 OperationOutcome oo = regErrorListAsOperationOutcome(sender.getErrorList());
                 returnOperationOutcome(responseOut, oo);
-            } else if (sender.getContents().size() == 1 || requestedType != null) {
-                Val val = new Val();
-                CodeTranslator codeTranslator;
-                try {
-                    codeTranslator = new CodeTranslator(Installation.instance().getCodesFile(channelConfig.getEnvironment()));
-                } catch (Exception e) {
-                    throw new RuntimeException("Cannot load codes file for environment " + channelConfig.getEnvironment(), e);
-                }
-                ResourceCacheMgr resourceCacheMgr = new ResourceCacheMgr(getExternalCache());
-                FhirClient fhirClient = new FhirClient()
-                        .setResourceCacheMgr(resourceCacheMgr);
+            } else if (isSearch) {
                 if (requestedType.equals("DocumentReference")) {
-                    DocumentEntryToDocumentReference trans = new DocumentEntryToDocumentReference();
-                    trans
-                            .setContainedIdAllocator(new ContainedIdAllocator())
-                            .setResourceCacheMgr(resourceCacheMgr)
-                            .setCodeTranslator(codeTranslator)
-                            .setFhirClient(fhirClient)
-                            .setVal(val);
-
-                    DocumentReference dr = trans.getDocumentReference((ExtrinsicObjectType) sender.getContents().get(0), channelConfig);
-
-                    if (dr.hasSubject()) {
-                        Reference reference = dr.getSubject();
-                        Ref ref = new Ref(reference.getReference());
-                        ref = ref.rebase(newBase);
-                        reference.setReference(ref.toString());
-                    }
-
-                    if (val.hasErrors()) {
-                        OperationOutcome oo = new OperationOutcome();
-                        for (ValE err : val.getErrors())
-                            addErrorToOperationOutcome(oo, err.getMsg());
-                        returnOperationOutcome(responseOut, oo);
-                        return;
-                    }
-
-
-                    responseOut.setResponseText(ProxyBase.encode(dr, returnFormatType));
-                    responseOut.setResponseContentType(returnFormatType.getContentType());
-                } else if (requestedType.equals("DocumentManifest")) {
-                    SubmissionSetToDocumentManifest trans = new SubmissionSetToDocumentManifest();
-                    trans
-                            .setContainedIdAllocator(new ContainedIdAllocator())
-                            .setResourceCacheMgr(resourceCacheMgr)
-                            .setCodeTranslator(codeTranslator)
-                            .setFhirClient(fhirClient)
-                            .setVal(val);
-
-                    RegistryPackageType ss = null;
-                    List<AssociationType1> assocs = new ArrayList<>();
-                    List<ExtrinsicObjectType> eos = new ArrayList<>();
-                    for (IdentifiableType identifiableType : sender.getContents()) {
-                        if (identifiableType instanceof RegistryPackageType) {
-                            RegistryPackageType rpt = (RegistryPackageType) identifiableType;
-                            for (ClassificationType classificationType : rpt.getClassification()) {
-                                if ("urn:uuid:a54d6aa5-d40d-43f9-88c5-b4633d873bdd".equals(classificationType.getClassificationNode()) ) {
-                                    ss = rpt;
-                                }
+                    List<ResourceWrapper> results = new ArrayList<>();
+                    for (IdentifiableType identifiableType  : sender.getContents()) {
+                        if (identifiableType instanceof ExtrinsicObjectType) {
+                            BaseResource resource = toFhir((ExtrinsicObjectType) identifiableType);
+                            if (resource instanceof OperationOutcome) {
+                                responseOut.setResponseText(ProxyBase.encode(resource, returnFormatType));
+                                responseOut.setResponseContentType(returnFormatType.getContentType());
+                                responseOut.setStatus(500);
+                                return;
                             }
-                        } else if (identifiableType instanceof AssociationType1) {
-                            assocs.add((AssociationType1) identifiableType);
-                        } else if (identifiableType instanceof ExtrinsicObjectType) {
-                            eos.add((ExtrinsicObjectType) identifiableType);
+                            ResourceWrapper wrapper = new ResourceWrapper(resource);
+                            if (resource.getId() != null) {
+                                Ref ref = searchRef.withNewId(resource.getId());
+                                wrapper.setRef(ref);
+                            }
+                            results.add(wrapper);
                         }
                     }
-
-//                    RegistryPackageType registryPackage = null;
-//                    List<AssociationType1> assocations = new ArrayList<>();
-//
-//                    List<IdentifiableType> objs = sender.getContents();
-//                    for (IdentifiableType obj : objs) {
-//                        if (obj instanceof RegistryPackageType)
-//                            registryPackage = (RegistryPackageType) obj;
-//                        else if (obj instanceof AssociationType1)
-//                            assocations.add((AssociationType1) obj);
-//                    }
-
-                    DocumentManifest dm = null;
-                    if (ss != null)
-                        dm = trans.getDocumentManifest(ss, assocs, channelConfig);
-
-                    if (dm.hasSubject()) {
-                        Reference reference = dm.getSubject();
-                        Ref ref = new Ref(reference.getReference());
-                        ref.rebase(newBase);
-                        reference.setReference(ref.toString());
-                    }
-
-                    if (ss == null) {
-                        val.add(new ValE("No SubmissionSet in query response.").asError());
-//                    } else {
-//                        for (AssociationType1 assoc : assocs) {
-//                            if (assoc.getAssociationType().endsWith("HasMember")) {
-//                                String target = assoc.getTargetObject();
-//                                for (ExtrinsicObjectType eo : eos) {
-//                                    String id = eo.getId();
-//                                    if (id != null && id.equals(target)) {
-//                                            String fhirBase = ServiceProperties.getInstance().getPropertyOrStop(ServicePropertiesEnum.FHIR_TOOLKIT_BASE) + "/proxy/" + channelConfig.asFullId();
-//                                            dm.addContent(new Reference(new Ref(fhirBase, "DocumentReference", id).toString()));
-//                                    }
-//                                }
-//                            }
-//                        }
-                    }
-
-                    if (val.hasErrors()) {
-                        OperationOutcome oo = new OperationOutcome();
-                        for (ValE err : val.getErrors())
-                            addErrorToOperationOutcome(oo, err.getMsg());
-                        returnOperationOutcome(responseOut, oo);
+                    responseOut.setResponseText(ProxyBase.encode(buildSearchResult(results, search), returnFormatType));
+                    responseOut.setResponseContentType(returnFormatType.getContentType());
+                } else if (requestedType.equals("DocumentManifest")) {
+                    // this assumes a single manifest - must be extended to get more
+                    BaseResource resource = ssToFhir();
+                    if (resource == null) {
+                        responseOut.setStatus(404);
                         return;
                     }
-
-
-                    responseOut.setResponseText(ProxyBase.encode(dm, returnFormatType));
-                    responseOut.setResponseContentType(returnFormatType.getContentType());
+                    if (resource instanceof OperationOutcome) {
+                        responseOut.setResponseText(ProxyBase.encode(resource, returnFormatType));
+                        responseOut.setResponseContentType(returnFormatType.getContentType());
+                        responseOut.setStatus(500);
+                    } else {
+                        ResourceWrapper wrapper = new ResourceWrapper(resource);
+                        if (resource.getId() != null) {
+                            Ref ref = searchRef.withNewId(resource.getId());
+                            wrapper.setRef(ref);
+                        }
+                        responseOut.setResponseText(ProxyBase.encode(buildSearchResult(Collections.singletonList(wrapper), search), returnFormatType));
+                        responseOut.setResponseContentType(returnFormatType.getContentType());
+                    }
                 }
-
-            } else if (sender.getContents().size() > 1){
-                OperationOutcome oo = wrapErrorInOperationOutcome("XDS Query returned " + sender.getContents().size() + " objects");
-                responseOut.setResponseText(ProxyBase.encode(oo, returnFormatType));
-                responseOut.setResponseContentType(returnFormatType.getContentType());
-            } else { // no contents
-                responseOut.setResponseContentType(returnFormatType.getContentType());
-                responseOut.setStatus(404);
+            } else {
+                 if (sender.getContents().size() == 1 && requestedType != null) {
+                     BaseResource resource = requestedType.equals("DocumentReference")
+                        ? toFhir((ExtrinsicObjectType) sender.getContents().get(0))
+                        : ssToFhir();
+                     if (resource == null) {
+                         responseOut.setStatus(404);
+                         return;
+                     }
+                     responseOut.setResponseText(ProxyBase.encode(resource, returnFormatType));
+                     responseOut.setResponseContentType(returnFormatType.getContentType());
+                 }
+                 else if (sender.getContents().size() > 1) {
+                     OperationOutcome oo = wrapErrorInOperationOutcome("XDS Query returned " + sender.getContents().size() + " objects");
+                     responseOut.setStatus(500);
+                     responseOut.setResponseText(ProxyBase.encode(oo, returnFormatType));
+                     responseOut.setResponseContentType(returnFormatType.getContentType());
+                 } else { // no contents
+                     responseOut.setResponseContentType(returnFormatType.getContentType());
+                     responseOut.setStatus(404);
+                 }
             }
         } else {
             // TODO when is AhqrSender used and verb is not GET?
@@ -665,7 +602,107 @@ public class XdsOnFhirChannel extends BaseChannel /*implements IBaseChannel*/ {
                 }
             }
         }
+    }
 
+    private void withNewBase(Reference reference) {
+        String newBase = ServiceProperties.getInstance().getPropertyOrStop(ServicePropertiesEnum.FHIR_TOOLKIT_BASE) + "/proxy/default__default";
+        Ref ref = new Ref(reference.getReference());
+        ref = ref.rebase(newBase);
+        reference.setReference(ref.toString());
+    }
+
+    private CodeTranslator getCodeTranslator() {
+        CodeTranslator codeTranslator;
+        try {
+            codeTranslator = new CodeTranslator(Installation.instance().getCodesFile(channelConfig.getEnvironment()));
+            return codeTranslator;
+        } catch (Exception e) {
+            throw new RuntimeException("Cannot load codes file for environment " + channelConfig.getEnvironment(), e);
+        }
+    }
+
+    private BaseResource toFhir(ExtrinsicObjectType eo) {
+        Objects.requireNonNull(eo);
+        Val val = new Val();
+        CodeTranslator codeTranslator = getCodeTranslator();
+
+        ResourceCacheMgr resourceCacheMgr = new ResourceCacheMgr(getExternalCache());
+        FhirClient fhirClient = new FhirClient()
+                .setResourceCacheMgr(resourceCacheMgr);
+
+        DocumentEntryToDocumentReference trans = new DocumentEntryToDocumentReference();
+        trans
+                .setContainedIdAllocator(new ContainedIdAllocator())
+                .setResourceCacheMgr(resourceCacheMgr)
+                .setCodeTranslator(codeTranslator)
+                .setFhirClient(fhirClient)
+                .setVal(val);
+
+        DocumentReference dr = trans.getDocumentReference(eo, channelConfig);
+
+        if (dr.hasSubject())
+            withNewBase(dr.getSubject());
+
+        if (val.hasErrors())
+            return operationOutcomefromVal(val);
+
+        return dr;
+    }
+
+    private OperationOutcome operationOutcomefromVal(Val val) {
+        OperationOutcome oo = new OperationOutcome();
+        for (ValE err : val.getErrors())
+            addErrorToOperationOutcome(oo, err.getMsg());
+        return oo;
+    }
+
+    // assumes sender contains zero or one SubmissionSets
+    private BaseResource ssToFhir() {
+        Val val = new Val();
+        CodeTranslator codeTranslator = getCodeTranslator();
+
+        ResourceCacheMgr resourceCacheMgr = new ResourceCacheMgr(getExternalCache());
+        FhirClient fhirClient = new FhirClient()
+                .setResourceCacheMgr(resourceCacheMgr);
+        SubmissionSetToDocumentManifest trans = new SubmissionSetToDocumentManifest();
+        trans
+                .setContainedIdAllocator(new ContainedIdAllocator())
+                .setResourceCacheMgr(resourceCacheMgr)
+                .setCodeTranslator(codeTranslator)
+                .setFhirClient(fhirClient)
+                .setVal(val);
+
+        RegistryPackageType ss = null;
+        List<AssociationType1> assocs = new ArrayList<>();
+        List<ExtrinsicObjectType> eos = new ArrayList<>();
+        for (IdentifiableType identifiableType : sender.getContents()) {
+            if (identifiableType instanceof RegistryPackageType) {
+                RegistryPackageType rpt = (RegistryPackageType) identifiableType;
+                for (ClassificationType classificationType : rpt.getClassification()) {
+                    if ("urn:uuid:a54d6aa5-d40d-43f9-88c5-b4633d873bdd".equals(classificationType.getClassificationNode())) {
+                        ss = rpt;
+                    }
+                }
+            } else if (identifiableType instanceof AssociationType1) {
+                assocs.add((AssociationType1) identifiableType);
+            } else if (identifiableType instanceof ExtrinsicObjectType) {
+                eos.add((ExtrinsicObjectType) identifiableType);
+            }
+        }
+        DocumentManifest dm = null;
+        if (ss != null)
+            dm = trans.getDocumentManifest(ss, assocs, channelConfig);
+
+        if (dm != null && dm.hasSubject())
+            withNewBase(dm.getSubject());
+
+        if (ss == null)
+            val.add(new ValE("No SubmissionSet in query response.").asError());
+
+        if (val.hasErrors())
+            return operationOutcomefromVal(val);
+
+        return dm;
     }
 
     private boolean isWhite(char c) {
@@ -782,5 +819,21 @@ public class XdsOnFhirChannel extends BaseChannel /*implements IBaseChannel*/ {
 
     public void setReturnFormatType(Format returnFormatType) {
         this.returnFormatType = returnFormatType;
+    }
+
+    private Bundle buildSearchResult(List<ResourceWrapper> wrappers, String search) {
+        Bundle bundle = new Bundle();
+        bundle.setType(Bundle.BundleType.SEARCHSET);
+        bundle.setTotal(wrappers.size());
+        bundle.setLink(Collections.singletonList(
+                new Bundle.BundleLinkComponent()
+                .setRelationElement(new StringType("self"))
+                .setUrl(search)));
+        for (ResourceWrapper wrapper : wrappers) {
+            Bundle.BundleEntryComponent entry = new Bundle.BundleEntryComponent().setResource((Resource) wrapper.getResource());
+            entry.setFullUrl(wrapper.getRef().toString());
+            bundle.addEntry(entry);
+        }
+        return bundle;
     }
 }

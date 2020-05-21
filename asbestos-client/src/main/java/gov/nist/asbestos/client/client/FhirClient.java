@@ -251,6 +251,9 @@ public class FhirClient {
         if (theWrapper.hasResource() && theWrapper.getResource() instanceof Patient && patientCacheMgr != null) {
             patientCacheMgr.add(theWrapper);
         }
+        if (theWrapper.hasRef() && theWrapper.getRef().hasId() && theWrapper.hasResource() && theWrapper.getResource().getId() == null) {
+            theWrapper.getResource().setId(theWrapper.getRef().getId());
+        }
         return theWrapper;
     }
 

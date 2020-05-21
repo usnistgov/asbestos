@@ -95,7 +95,7 @@ public class AnalysisReport {
         if (comprehensiveErrors == null)
             comprehensiveErrors = new ArrayList<>();
 
-        if (baseObj != null && baseObj.getResource() != null && !isSearchSet()) {
+        if (baseObj != null && baseObj.getResource() != null && (!isSearchSet() || isSearchSetSingleResult())) {
             report.base = new RelatedReport(baseObj, "");
             report.base.comprehensiveErrors = comprehensiveChecked == null ? new ArrayList<>() : comprehensiveChecked.report.missing; //comprehensiveErrors;
             report.base.comprehensiveErrors.addAll(comprehensiveErrors);
@@ -224,8 +224,8 @@ public class AnalysisReport {
     // for tests only
     AnalysisReport() {}
 
-    public AnalysisReport(OperationOutcome oo) {
-        baseObj = new ResourceWrapper(oo);
+    public AnalysisReport(ResourceWrapper wrapper) {
+        baseObj = wrapper;
     }
 
     public AnalysisReport withGzip(boolean value) {
@@ -506,6 +506,15 @@ public class AnalysisReport {
         if (contextResource instanceof Bundle) {
             Bundle bundle = (Bundle) contextResource;
             return bundle.getType().equals(Bundle.BundleType.SEARCHSET);
+        }
+        return false;
+    }
+
+    private boolean isSearchSetSingleResult() {
+        if (contextResource == null) return false;
+        if (contextResource instanceof Bundle) {
+            Bundle bundle = (Bundle) contextResource;
+            return bundle.getType().equals(Bundle.BundleType.SEARCHSET) && bundle.getEntry().size() == 1;
         }
         return false;
     }

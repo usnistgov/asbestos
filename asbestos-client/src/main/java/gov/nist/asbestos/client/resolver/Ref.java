@@ -222,12 +222,10 @@ public class Ref {
             return null;
         int i = getResourceTypeIndex();
         if (i == -1) return "";
-        return parts[i];
-//        for (int i=0; i<parts.length; i++) {
-//            if (resourceNames.contains(parts[i]))
-//                return parts[i];
-//        }
-//        return "";
+        String type = parts[i];
+        if (type.contains("?"))
+            type = type.substring(0, type.indexOf("?"));
+        return type;
     }
 
     public int getResourceTypeIndex() {
@@ -261,6 +259,8 @@ public class Ref {
 
     public Ref getBase() {
         String path = uri.toString();
+        if (path.contains("?"))
+            path = path.substring(0, path.indexOf("?"));
         List<String> parts = Arrays.asList(path.split("/"));
         for (int i=0; i<parts.size(); i++) {
             if (resourceNames.contains(parts.get(i)))

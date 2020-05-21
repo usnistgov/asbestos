@@ -9,30 +9,30 @@ import java.util.*;
  */
 class DocRefSQParamTranslator {
     // DocumentEntry SQ parameters
-    static String statusKey = "$XDSDocumentEntryStatus";
-    static String patientIdKey = "$XDSDocumentEntryPatientId";
-    static String creationFromKey = "$XDSDocumentEntryCreationTimeFrom";
-    static String creationToKey = "$XDSDocumentEntryCreationTimeTo";
-    static String classKey = "$XDSDocumentEntryClassCode";
-    static String typeKey = "$XDSDocumentEntryTypeCode";
-    static String settingKey = "$XDSDocumentEntryPracticeSettingCode";
-    static String serviceStartFromKey = "$XDSDocumentEntryServiceStartTimeFrom";
-    static String serviceStartToKey = "$XDSDocumentEntryServiceStartTimeTo";
-    static String serviceStopFromKey = "$XDSDocumentEntryServiceStopTimeFrom";
-    static String serviceStopToKey = "$XDSDocumentEntryServiceStopTimeTo";
-    static String facilityKey = "$XDSDocumentEntryHealthcareFacilityTypeCode";
-    static String eventKey = "$XDSDocumentEntryEventCodeList";
-    static String confKey = "$XDSDocumentEntryConfidentialityCode";
-    static String formatKey = "$XDSDocumentEntryFormatCode";
-    static String relatedKey = "$XDSDocumentEntryReferenceIdList";
-    static String authorKey = "$XDSDocumentEntryAuthorPerson";
-    static String entryUUID = "$XDSDocumentEntryEntryUUID";
-    static String queryType = "QueryType";
+    static final String statusKey = "$XDSDocumentEntryStatus";
+    static final String patientIdKey = "$XDSDocumentEntryPatientId";
+    static final String creationFromKey = "$XDSDocumentEntryCreationTimeFrom";
+    static final String creationToKey = "$XDSDocumentEntryCreationTimeTo";
+    static final String classKey = "$XDSDocumentEntryClassCode";
+    static final String typeKey = "$XDSDocumentEntryTypeCode";
+    static final String settingKey = "$XDSDocumentEntryPracticeSettingCode";
+    static final String serviceStartFromKey = "$XDSDocumentEntryServiceStartTimeFrom";
+    static final String serviceStartToKey = "$XDSDocumentEntryServiceStartTimeTo";
+    static final String serviceStopFromKey = "$XDSDocumentEntryServiceStopTimeFrom";
+    static final String serviceStopToKey = "$XDSDocumentEntryServiceStopTimeTo";
+    static final String facilityKey = "$XDSDocumentEntryHealthcareFacilityTypeCode";
+    static final String eventKey = "$XDSDocumentEntryEventCodeList";
+    static final String confKey = "$XDSDocumentEntryConfidentialityCode";
+    static final String formatKey = "$XDSDocumentEntryFormatCode";
+    static final String relatedKey = "$XDSDocumentEntryReferenceIdList";
+    static final String authorKey = "$XDSDocumentEntryAuthorPerson";
+    static final String entryUUID = "$XDSDocumentEntryEntryUUID";
+    static final String queryType = "QueryType";
 
     static String docEntryUniqueId = "$XDSDocumentEntryUniqueId";
 
     // coded types
-    public static List<String> codedTypes = Arrays.asList(
+    public final static List<String> codedTypes = Arrays.asList(
             classKey,
             typeKey,
             settingKey,
@@ -44,7 +44,7 @@ class DocRefSQParamTranslator {
             docEntryUniqueId
     );
 
-    static List<String> acceptsMultiple = Arrays.asList(
+    static final List<String> acceptsMultiple = Arrays.asList(
             classKey,
             typeKey,
             settingKey,
@@ -58,9 +58,9 @@ class DocRefSQParamTranslator {
     );
 
     // Query Types
-    static String FindDocsKey = "urn:uuid:14d4debf-8f97-4251-9a74-a90016b0af0d";
-    static String FindDocsByRefIdKey = "urn:uuid:12941a89-e02e-4be5-967c-ce4bfc8fe492";
-    static String GetDocs = "urn:uuid:5c4f972b-d56b-40ac-a5fc-c8ca9b40b9d4";
+    static final String FindDocsKey = "urn:uuid:14d4debf-8f97-4251-9a74-a90016b0af0d";
+    static final String FindDocsByRefIdKey = "urn:uuid:12941a89-e02e-4be5-967c-ce4bfc8fe492";
+    static final String GetDocs = "urn:uuid:5c4f972b-d56b-40ac-a5fc-c8ca9b40b9d4";
 
     // shows default query - may be upgraded to FindDocsByRefIdKey if related-id is used
     static Map<String, List<String>> result = new HashMap<>();

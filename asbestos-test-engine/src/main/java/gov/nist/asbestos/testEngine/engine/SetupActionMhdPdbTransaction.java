@@ -1,6 +1,8 @@
 package gov.nist.asbestos.testEngine.engine;
 
 import gov.nist.asbestos.client.resolver.IdBuilder;
+import gov.nist.asbestos.client.resolver.ResourceWrapper;
+import gov.nist.asbestos.testEngine.engine.fixture.FixtureComponent;
 import gov.nist.asbestos.testEngine.engine.fixture.FixtureMgr;
 import org.hl7.fhir.r4.model.*;
 
@@ -17,8 +19,10 @@ public class SetupActionMhdPdbTransaction extends SetupActionTransaction {
     }
 
     @Override
-    public BaseResource updateResourceToSend(BaseResource baseResource) {
-        baseResource = super.updateResourceToSend(baseResource);
+    public BaseResource updateResourceToSend(FixtureComponent toSend) {
+        super.updateResourceToSend(toSend);
+        ResourceWrapper wrapper = toSend.getResourceWrapper();
+        BaseResource baseResource = wrapper.getResource();
         if (! (baseResource instanceof Bundle))
             return baseResource;
         Bundle bundle = (Bundle) baseResource;
@@ -44,6 +48,7 @@ public class SetupActionMhdPdbTransaction extends SetupActionTransaction {
                 }
             }
         }
+        wrapper.setResource(baseResource);
         return baseResource;
     }
 

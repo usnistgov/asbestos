@@ -37,8 +37,9 @@ public class FhirSq {
         return run(new DocRefSQParamTranslator().run(queryParams), "urn:uuid:14d4debf-8f97-4251-9a74-a90016b0af0d" /* FindDocuments */, toAddr, true, task);
     }
 
-    public static AhqrSender docManQuery(List<String> queryParams, URI toAddr, ITask task) {
-
+    public static AhqrSender docManQuery(String httpQueryString, URI toAddr, ITask task) {
+        Map<String, List<String>> model = new HashMap<>();
+        return run(new DocManSQParamTranslator().run(httpQueryString), DocManSQParamTranslator.GetSubmissionSetAndContentsKey, toAddr, true, task);
     }
 
     public static AhqrSender documentEntryByUidQuery(String uid, URI toAddr, ITask task)  {

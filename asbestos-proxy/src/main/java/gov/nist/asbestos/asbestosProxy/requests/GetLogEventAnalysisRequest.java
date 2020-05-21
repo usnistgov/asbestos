@@ -10,6 +10,7 @@ import gov.nist.asbestos.client.client.Format;
 import gov.nist.asbestos.client.events.ProxyEvent;
 import gov.nist.asbestos.client.events.UIEvent;
 import gov.nist.asbestos.client.resolver.Ref;
+import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import gov.nist.asbestos.http.headers.Headers;
 import net.sf.saxon.regex.Operation;
 import org.apache.log4j.Logger;
@@ -166,6 +167,10 @@ public class GetLogEventAnalysisRequest {
             BaseResource baseResource;
             try {
                 baseResource = ProxyBase.parse(analysisSource, Format.fromContentType(responseHeaders.getContentType().getValue()));
+                if (!(baseResource instanceof Bundle) &&  baseResource.getId() == null) {
+                    Ref ref = new Ref(requestHeaders.getPathInfo());
+                    baseResource.setId(ref.getId());
+                }
             } catch (Exception e) {
                 returnReport(new Report("No content in " + (requestFocus ? "Request" : "Response") + " message"));
                 return;
@@ -185,10 +190,10 @@ public class GetLogEventAnalysisRequest {
             } else if (responseHeaders.hasHeader("Content-Location")) {
                 Ref ref = new Ref(responseHeaders.get("Content-Location").getValue());
                 runAndReturnReport(ref, "link taken from response Content-location header", false, false, false, runValidation, requestBundle);
-            } else if (baseResource instanceof OperationOutcome) {
-                runAndReturnReport((OperationOutcome) baseResource);
             } else {
-                returnReport(new Report("Do not understand event"));
+                runAndReturnReport(new ResourceWrapper(baseResource));
+//            } else {
+//                returnReport(new Report("Do not understand event"));
             }
         } else {   // url
             String query = request.req.getQueryString();
@@ -355,10 +360,10 @@ public class GetLogEventAnalysisRequest {
         returnReport(report);
     }
 
-    private void runAndReturnReport(OperationOutcome oo) {
+    private void runAndReturnReport(ResourceWrapper wrapper) {
         Report report;
         try {
-            report = new AnalysisReport(oo).run();
+            report = new AnalysisReport(wrapper).run();
         } catch (Throwable t) {
             report = new Report(t.getMessage());
             returnReport(report);
