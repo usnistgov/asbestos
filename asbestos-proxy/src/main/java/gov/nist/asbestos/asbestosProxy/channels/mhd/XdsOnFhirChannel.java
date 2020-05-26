@@ -539,7 +539,8 @@ public class XdsOnFhirChannel extends BaseChannel /*implements IBaseChannel*/ {
                     // this assumes a single manifest - must be extended to get more
                     BaseResource resource = ssToFhir();
                     if (resource == null) {
-                        responseOut.setStatus(404);
+                        // No error just no response (empty SearchSet)
+                        responseOut.setResponseText(ProxyBase.encode(buildSearchResult(Collections.EMPTY_LIST, search), returnFormatType));
                         return;
                     }
                     if (resource instanceof OperationOutcome) {
@@ -696,8 +697,8 @@ public class XdsOnFhirChannel extends BaseChannel /*implements IBaseChannel*/ {
         if (dm != null && dm.hasSubject())
             withNewBase(dm.getSubject());
 
-        if (ss == null)
-            val.add(new ValE("No SubmissionSet in query response.").asError());
+//        if (ss == null)
+//            val.add(new ValE("No SubmissionSet in query response.").asError());
 
         if (val.hasErrors())
             return operationOutcomefromVal(val);
@@ -832,6 +833,7 @@ public class XdsOnFhirChannel extends BaseChannel /*implements IBaseChannel*/ {
         for (ResourceWrapper wrapper : wrappers) {
             Bundle.BundleEntryComponent entry = new Bundle.BundleEntryComponent().setResource((Resource) wrapper.getResource());
             entry.setFullUrl(wrapper.getRef().toString());
+            entry.setSearch(new Bundle.BundleEntrySearchComponent().setMode(Bundle.SearchEntryMode.MATCH));
             bundle.addEntry(entry);
         }
         return bundle;

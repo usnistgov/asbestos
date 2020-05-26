@@ -830,6 +830,10 @@ public class TestEngine  {
     }
 
     private void handleImport(Extension extension, TestScript.SetupActionOperationComponent opScript, TestReport.SetupActionOperationComponent opReport) {
+
+        /*
+            Validate and align request input fixtures and variables
+         */
         ComponentReference componentReference = new ComponentReference(testDef, Collections.singletonList(extension));
 
         TestScript module = componentReference.getComponent();
@@ -872,6 +876,7 @@ public class TestEngine  {
             externalVariables.put(innerName, value);
         }
 
+        // if variables and fixtures don't align, report it out into the caller's TestReport
         if (engineVal.hasErrors()) {
             new ActionReporter()
                     .setTestEngine(this)
@@ -887,6 +892,9 @@ public class TestEngine  {
             return;
         }
 
+        /*
+            Call module
+         */
         TestEngine testEngine1 = sut == null
                 ? new TestEngine(componentReference.getComponentRef())
                 : new TestEngine(componentReference.getComponentRef(), this.sut);
@@ -906,6 +914,12 @@ public class TestEngine  {
         testEngine1.parent = this;
         testEngine1.runTest();
 
+        /*
+            Assign moduleName and moduleId in caller's TestReport.
+            moduleName is the name of the module.
+            moduleId is the same name with a numeric suffix to make this call unique.
+            The module call is identified as moduleName/moduleId in the logs
+         */
         String moduleName = simpleName(componentReference.getComponentRef());
         String moduleId = assignModuleId(moduleName);
         opReport.addModifierExtension(new Extension(ExtensionDef.moduleId, new StringType(moduleId)));
@@ -913,12 +927,14 @@ public class TestEngine  {
         testEngine1.getTestReport().addExtension(ExtensionDef.moduleId, new StringType(moduleId));
         testEngine1.getTestReport().addExtension(ExtensionDef.moduleName, new StringType(moduleName));
 
+        // Report overall module call status into caller's TestReport.operation
         ErrorReport errorReport = getErrorMessage(testEngine1.getTestReport());
         if (errorReport != null) {
             opReport.setResult(errorReport.type);
             opReport.setMessage(errorReport.message);
         }
 
+        // Pass module output variables and fixtures back to caller
         FixtureMgr innerFixtures = testEngine1.fixtureMgr;
         Map<String, FixtureComponent> outFixturesForComponent = new HashMap<>();
         for (Parameter parm : componentReference.getFixturesOut()) {
@@ -936,6 +952,7 @@ public class TestEngine  {
         String result = testEngine1.getTestReport().getResult().toCode();
         opReport.setResult(TestReport.TestReportActionResult.fromCode(result));
 
+        // If module call reported failure then overall script reports failure.
         if (testEngine1.getTestReport().getResult() == TestReport.TestReportResult.FAIL)
             getTestReport().setResult(TestReport.TestReportResult.FAIL);
     }

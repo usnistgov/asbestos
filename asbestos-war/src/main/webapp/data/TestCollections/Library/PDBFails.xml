@@ -1,0 +1,55 @@
+<TestScript xmlns="http://hl7.org/fhir">
+    <modifierExtension url="urn:module">
+        <extension url="urn:fixture-in">
+            <valueString  value="pdb-bundle"/>
+        </extension>
+    </modifierExtension>
+    
+    <url value=""/>
+    <name value="PDBFails"/>
+    <status value="active"/>
+
+    <variable>
+      <name value="manifestMasterIdentifier"/>
+      <expression value="Bundle.entry.select(resource as DocumentManifest).masterIdentifier.value"/>
+      <sourceId value="pdb-bundle"/>
+    </variable>
+    <variable>
+      <name value="referenceMasterIdentifier"/>
+      <expression value="Bundle.entry.select(resource as DocumentReference).masterIdentifier.value"/>
+      <sourceId value="pdb-bundle"/>
+    </variable>
+
+    <test>
+        <description value="Submit."/>
+        <action>
+            <operation>
+                <!-- references patient from resourceCache in EC -->
+                <description value="send PDB."/>
+                <label value="create"/>
+                <type>
+                    <system value="https://github.com/usnistgov/asbestos/wiki/Testscript-Operation-Codes"/>
+                    <code value="mhd-pdb-transaction"/>
+                </type>
+                <sourceId value="pdb-bundle"/>
+                <responseId value="pdb-response-bundle"/>
+            </operation>
+        </action>
+        <action>
+            <assert>
+                <description value="Fails."/>
+                <response value="bad"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
+          <assert>
+            <description value="Returns OperationOutcome."/>
+            <compareToSourceId value="pdb-response-bundle"/>
+            <compareToSourceExpression value="OperationOutcome.count() = 1"/>
+            <warningOnly value="false"/>
+          </assert>
+        </action>
+    </test>
+
+</TestScript>

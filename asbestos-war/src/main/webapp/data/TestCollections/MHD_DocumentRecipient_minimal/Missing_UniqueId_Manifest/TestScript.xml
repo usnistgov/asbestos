@@ -16,32 +16,76 @@
             <reference value="Patient/Alex_Alder"/>
         </resource>
     </fixture>
-    <variable>   <!-- referenced in pdb -->
+    <variable>   
+    	<name value="requestPatientRef"/>
+    	<expression value="Bundle.entry.fullUrl"/>
+      <sourceId value="patient_bundle"/>
+    </variable>
+    <variable>   
     	<name value="patientResourceId"/>
     	<expression value="Bundle.entry.fullUrl"/>
-        <sourceId value="patient_bundle"/>
+      <sourceId value="patient_bundle"/>
     </variable>
+    <variable>
+      <name value="manifestMasterIdentifier"/>
+      <expression value="Bundle.entry.select(resource as DocumentManifest).masterIdentifier.value"/>
+      <sourceId value="pdb-bundle"/>
+    </variable>
+    <variable>
+      <name value="referenceMasterIdentifier"/>
+      <expression value="Bundle.entry.select(resource as DocumentReference).masterIdentifier.value"/>
+      <sourceId value="pdb-bundle"/>
+    </variable>
+    
     <test>
         <description value="Submit."/>
         <action>
             <operation>
-                <!-- references patient from resourceCache in EC -->
-                <description value="send PDB."/>
-                <label value="create"/>
-                <type>
-                    <system value="https://github.com/usnistgov/asbestos/wiki/Testscript-Operation-Codes"/>
-                    <code value="mhd-pdb-transaction"/>
-                </type>
-                <sourceId value="pdb-bundle"/>
-                <responseId value="pdb-response-bundle"/>
+                <description value="Submit Provide Document Bundle to MHD Document Recipient."/>
+                <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
+                    <extension url="component">
+                        <valueString value="../../Library/PDBFails.xml"/>
+                    </extension>
+                    <extension url="urn:fixture-in">
+                        <valueString  value="pdb-bundle"/>
+                    </extension>
+                    <extension url="urn:variable-in-no-translation">
+                        <valueString value="patientResourceId"/>
+                    </extension>
+                </modifierExtension>
             </operation>
         </action>
-        <action>
-            <assert>
-                <description value="Must fail."/>
-                <response value="bad"/>
-                <warningOnly value="false"/>
-            </assert>
-        </action>
     </test>
+    <test>
+      <description value="Verify no updates to server."/>
+      <action>
+        <operation>
+				  <description value="for DocumentReference."/>
+				  <type>
+					  <code value="search"/>
+				  </type>
+				  <resource value="DocumentReference"/> 
+				  <contentType value="json"/>
+				  <params value="?identifier=${referenceMasterIdentifier}"/> 
+				  <responseId value="reference-search"/>
+			  </operation>
+      </action>
+      <action>
+        <assert>
+          <description value="Returns 200."/>
+          <sourceId value="reference-search"/>
+          <response value="okay"/>
+          <warningOnly value="false"/>
+        </assert>
+      </action>
+      <action>
+        <assert>
+          <description value="No manifest returned."/>
+          <compareToSourceId value="reference-search"/>
+          <compareToSourceExpression value="Bundle.total = 0"/>
+          <warningOnly value="false"/>
+        </assert>
+      </action>
+    </test>
+
 </TestScript>

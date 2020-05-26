@@ -19,29 +19,57 @@
     <variable>   <!-- referenced in pdb -->
     	<name value="patientResourceId"/>
     	<expression value="Bundle.entry.fullUrl"/>
-        <sourceId value="patient_bundle"/>
+      <sourceId value="patient_bundle"/>
     </variable>
+    <variable>
+      <name value="manifestMasterIdentifier"/>
+      <expression value="Bundle.entry.select(resource as DocumentManifest).masterIdentifier.value"/>
+      <sourceId value="pdb-bundle"/>
+    </variable>
+    <variable>
+      <name value="referenceMasterIdentifier"/>
+      <expression value="Bundle.entry.select(resource as DocumentReference).masterIdentifier.value"/>
+      <sourceId value="pdb-bundle"/>
+    </variable>
+    
     <test>
         <description value="Submit."/>
         <action>
             <operation>
-                <!-- references patient from resourceCache in EC -->
-                <description value="send PDB."/>
-                <label value="create"/>
-                <type>
-                    <system value="https://github.com/usnistgov/asbestos/wiki/Testscript-Operation-Codes"/>
-                    <code value="mhd-pdb-transaction"/>
-                </type>
-                <sourceId value="pdb-bundle"/>
-                <responseId value="pdb-response-bundle"/>
+                <description value="Submit Provide Document Bundle to MHD Document Recipient."/>
+                <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
+                    <extension url="component">
+                        <valueString value="../../Library/PDBFails.xml"/>
+                    </extension>
+                    <extension url="urn:fixture-in">
+                        <valueString  value="pdb-bundle"/>
+                    </extension>
+                    <extension url="urn:variable-in-no-translation">
+                        <valueString value="patientResourceId"/>
+                    </extension>
+                </modifierExtension>
             </operation>
         </action>
+    </test>
+    <test>
+        <description value="Verify no updates to server."/>
         <action>
-            <assert>
-                <description value="Must fail."/>
-                <response value="bad"/>
-                <warningOnly value="false"/>
-            </assert>
+            <operation>
+                <description value="Verify no updates to server."/>
+                <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
+                    <extension url="component">
+                        <valueString value="../../Library/NoUpdateOneDoc.xml"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString  value="manifestMasterIdentifier"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="referenceMasterIdentifier"/>
+                    </extension>
+                </modifierExtension>
+            </operation>
         </action>
     </test>
+
+
 </TestScript>

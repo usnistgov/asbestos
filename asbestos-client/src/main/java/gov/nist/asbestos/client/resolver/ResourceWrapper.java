@@ -182,7 +182,9 @@ public class ResourceWrapper {
             return resource;
         if (httpBase != null && httpBase instanceof HttpGet) {
             HttpGet getter = (HttpGet) httpBase;
-            if (getter.getResponse() != null) {
+            if (getter.getStatus() == 404)
+                return null;
+            if (getter.getResponseText() != null) {
                 resource = ProxyBase.parse(getter.getResponse(), Format.fromContentType(getter.getResponseContentType()));
                 return resource;
             }

@@ -116,8 +116,12 @@ class SetupActionRead extends GenericSetupAction {
         boolean encodeRequestUrl = true;
         if (op.hasEncodeRequestUrl())
             encodeRequestUrl = op.getEncodeRequestUrl();
-        String rawParms = op.getParams();
-        rawParms = variableMgr.updateReference(rawParms);
+        String rawParms1 = op.getParams();
+        String rawParms = variableMgr.updateReference(rawParms1);
+        if (rawParms == null) {
+            reporter.reportError("Cannot resolve variable references in " + rawParms1);
+            return null;
+        }
         if (rawParms.startsWith("/"))
             rawParms = rawParms.substring(1);  // should only be ID and _format (this is a READ)
         try {

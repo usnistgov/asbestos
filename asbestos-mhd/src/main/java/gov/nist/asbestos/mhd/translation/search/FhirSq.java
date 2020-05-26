@@ -12,6 +12,7 @@ import oasis.names.tc.ebxml_regrep.xsd.rim._3.AdhocQueryType;
 import oasis.names.tc.ebxml_regrep.xsd.rim._3.QueryExpressionType;
 import oasis.names.tc.ebxml_regrep.xsd.rim._3.SlotType1;
 
+import javax.swing.*;
 import java.net.URI;
 import java.util.*;
 
@@ -26,11 +27,20 @@ public class FhirSq {
      */
     private static Map<String, List<String>> docRefQueryToSQModel(String query) {
         List<String> params = Arrays.asList(query.split(";"));
+        params = new ArrayList<>(params);  // make update-able
         return new DocRefSQParamTranslator().run(params);
     }
 
     public static AhqrSender docRefQuery(String httpQueryString, URI toAddr, ITask task) {
-        return run(docRefQueryToSQModel(httpQueryString), "urn:uuid:14d4debf-8f97-4251-9a74-a90016b0af0d" /* FindDocuments */, toAddr, true, task);
+        String sqid;
+        Map<String, List<String>> params = docRefQueryToSQModel(httpQueryString);
+        Set<String> names = params.keySet();
+        if (names.contains(DocRefSQParamTranslator.entryUUIDKey) || names.contains(DocRefSQParamTranslator.uniqueIdKey))
+            sqid = "urn:uuid:5c4f972b-d56b-40ac-a5fc-c8ca9b40b9d4"; /* GetDocuments */
+        else
+            sqid = "urn:uuid:14d4debf-8f97-4251-9a74-a90016b0af0d"; /* FindDocuments */
+
+        return run(params, sqid, toAddr, true, task);
     }
 
     public static AhqrSender docRefQuery(List<String> queryParams, URI toAddr, ITask task) {

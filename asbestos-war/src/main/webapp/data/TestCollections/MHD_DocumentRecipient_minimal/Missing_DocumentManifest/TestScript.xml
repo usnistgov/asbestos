@@ -1,5 +1,4 @@
 <TestScript xmlns="http://hl7.org/fhir">
-    <description value="Submit Provide Document Bundle to MHD Document Recipient. The DocumentManifest is missing so the transaction must fail (400)."/>
     <fixture id="pdb-bundle">
         <autocreate value="false"/>
         <autodelete value="false"/>
@@ -14,50 +13,79 @@
         <autocreate value="false"/>
         <autodelete value="false"/>
         <resource>
-            <reference value="Patient/Alex_Alder.json"/>
+            <reference value="Patient/Alex_Alder"/>
         </resource>
     </fixture>
-    <variable>
-        <name value="DocRefUrl"/>
-        <expression value="Bundle.entry[0].response.location"/>
-        <sourceId value="pdb-response"/>
+    <variable>   
+    	<name value="requestPatientRef"/>
+    	<expression value="Bundle.entry.fullUrl"/>
+      <sourceId value="patient_bundle"/>
     </variable>
-    <variable>  <!-- referenced in pdb -->
-        <name value="requestPatientRef"/>
-        <expression value="Bundle.entry.fullUrl"/>
-        <sourceId value="patient_bundle"/>
-    </variable>
-    <variable>
+    <variable>   
     	<name value="patientResourceId"/>
     	<expression value="Bundle.entry.fullUrl"/>
-        <sourceId value="patient_bundle"/>
+      <sourceId value="patient_bundle"/>
     </variable>
     <variable>
-        <name value="readbackPatientId"/>
-        <expression value="Patient.identifier.value"/>
-        <sourceId value="read-back"/>
+      <name value="manifestMasterIdentifier"/>
+      <expression value="Bundle.entry.select(resource as DocumentManifest).masterIdentifier.value"/>
+      <sourceId value="pdb-bundle"/>
     </variable>
+    <variable>
+      <name value="referenceMasterIdentifier"/>
+      <expression value="Bundle.entry.select(resource as DocumentReference).masterIdentifier.value"/>
+      <sourceId value="pdb-bundle"/>
+    </variable>
+    
     <test>
         <description value="Submit."/>
         <action>
             <operation>
-                <!-- references patient from resourceCache in EC -->
-                <description value="send PDB."/>
-                <label value="create"/>
-                <type>
-                    <system value="https://github.com/usnistgov/asbestos/wiki/Testscript-Operation-Codes"/>
-                    <code value="mhd-pdb-transaction"/>
-                </type>
-                <sourceId value="pdb-bundle"/>
-                <responseId value="pdb-response"/>
+                <description value="Submit Provide Document Bundle to MHD Document Recipient."/>
+                <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
+                    <extension url="component">
+                        <valueString value="../../Library/PDBFails.xml"/>
+                    </extension>
+                    <extension url="urn:fixture-in">
+                        <valueString  value="pdb-bundle"/>
+                    </extension>
+                    <extension url="urn:variable-in-no-translation">
+                        <valueString value="requestPatientRef"/>
+                    </extension>
+                </modifierExtension>
             </operation>
         </action>
-        <action>
-            <assert>
-                <description value="... fails."/>
-                <response value="bad"/>
-                <warningOnly value="false"/>
-            </assert>
-        </action>
     </test>
+    <test>
+      <description value="Verify no updates to server."/>
+      <action>
+        <operation>
+				  <description value="for DocumentReference."/>
+				  <type>
+					  <code value="search"/>
+				  </type>
+				  <resource value="DocumentReference"/> 
+				  <contentType value="json"/>
+				  <params value="?identifier=${referenceMasterIdentifier}"/> 
+				  <responseId value="reference-search"/>
+			  </operation>
+      </action>
+      <action>
+        <assert>
+          <description value="Returns 200."/>
+          <sourceId value="reference-search"/>
+          <response value="okay"/>
+          <warningOnly value="false"/>
+        </assert>
+      </action>
+      <action>
+        <assert>
+          <description value="No manifest returned."/>
+          <compareToSourceId value="reference-search"/>
+          <compareToSourceExpression value="Bundle.total = 0"/>
+          <warningOnly value="false"/>
+        </assert>
+      </action>
+    </test>
+
 </TestScript>

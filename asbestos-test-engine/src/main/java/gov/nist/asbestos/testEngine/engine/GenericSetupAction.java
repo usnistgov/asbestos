@@ -122,6 +122,10 @@ abstract class GenericSetupAction {
         BaseResource resource = wrapper.getResource();
         String resourceString = ProxyBase.encode(resource, Format.JSON);
         String updatedResourceString = variableMgr.updateReference(resourceString);
+        if (updatedResourceString == null) {
+            reporter.reportError("Update to Fixture " + toSend.getId() + " failed");
+            return resource;
+        }
         resource = ProxyBase.parse(updatedResourceString, Format.JSON);
         wrapper.setResource(resource);
         return resource;

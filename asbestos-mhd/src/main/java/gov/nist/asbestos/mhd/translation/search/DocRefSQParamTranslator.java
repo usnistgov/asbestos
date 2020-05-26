@@ -26,7 +26,8 @@ class DocRefSQParamTranslator {
     static final String formatKey = "$XDSDocumentEntryFormatCode";
     static final String relatedKey = "$XDSDocumentEntryReferenceIdList";
     static final String authorKey = "$XDSDocumentEntryAuthorPerson";
-    static final String entryUUID = "$XDSDocumentEntryEntryUUID";
+    static final String entryUUIDKey = "$XDSDocumentEntryEntryUUID";
+    static final String uniqueIdKey = "$XDSDocumentEntryUniqueId";
     static final String queryType = "QueryType";
 
     static String docEntryUniqueId = "$XDSDocumentEntryUniqueId";
@@ -54,7 +55,7 @@ class DocRefSQParamTranslator {
             authorKey,
             formatKey,
             statusKey,
-            entryUUID
+            entryUUIDKey
     );
 
     // Query Types
@@ -171,9 +172,9 @@ class DocRefSQParamTranslator {
         for (String param : params) {
             if (param.startsWith("status"))
                 found = true;
-            if (!found)
-                params.add("status=current");
         }
+        if (!found)
+            params.add("status=current");
         return params;
     }
 
@@ -222,12 +223,6 @@ class DocRefSQParamTranslator {
                 date = value.substring(2);
                 dtm = DateTransform.fhirToDtm(date);
                 addTerms(param, op, serviceStartFromKey, serviceStopToKey, dtm);
-                break;
-
-            case "author.given":   // TODO - not implemented yet
-                break;
-
-            case "author.family":   // TODO - not implemented yet
                 break;
 
             case "class":
@@ -304,8 +299,15 @@ class DocRefSQParamTranslator {
                     cannotTranslateFhir(param);
                 break;
 
+            case "identifier":
+                if (value != null && value.startsWith("urn:uuid:"))
+                    addResult(entryUUIDKey, value);
+                else
+                    addResult(uniqueIdKey, value);
+                break;
+
             default:
-                throw new RuntimeException("Query parameter ${name} cannot be translated into Stored Query parameters.");
+                throw new RuntimeException("Query parameter " + name + " cannot be translated into Stored Query parameters.");
 
         }
         return result;
