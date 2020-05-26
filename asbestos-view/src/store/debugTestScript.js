@@ -35,6 +35,11 @@ export const debugTestScriptStore = {
 
             if (obj.testScriptIndex in state.showDebugButton === false) { // Only add it the first time where the showDebugButton object is missing the scriptIndex property
                 Vue.set(state.showDebugButton, obj.testScriptIndex, {breakpointIndex: null, debugButtonLabel: "Debug"}) // Add property using Vue.set to nudge reactivity
+            } else {
+                let valObj = state.showDebugButton[obj.testScriptIndex]
+                if (valObj !== undefined) {
+                    Vue.set(state.showDebugButton, obj.testScriptIndex, {breakpointIndex: valObj.breakpointIndex, debugButtonLabel: valObj.debugButtonLabel}) // set the same value to nudge reactivity
+                }
             }
         },
         removeBreakpoint(state, obj) {
@@ -53,6 +58,11 @@ export const debugTestScriptStore = {
                                 }
                             }
                             // console.log(obj.testScriptIndex + "removed" + obj.breakpointIndex)
+                        }
+                    } else {
+                        let valObj = state.showDebugButton[obj.testScriptIndex]
+                        if (valObj != undefined) {
+                            Vue.set(state.showDebugButton, obj.testScriptIndex, {breakpointIndex: valObj.breakpointIndex, debugButtonLabel: valObj.debugButtonLabel}) // set the same value to nudge reactivit
                         }
                     }
                 }
@@ -219,7 +229,14 @@ export const debugTestScriptStore = {
                     console.log('done.')
                 }
                 state.testScriptDebuggerWebSocket.onmessage = event => {
-                    console.log('onMessage: ' + (event.data.length < 500 ?  event.data : 'message too long.'))
+                    let messageStrLimit = 500
+                    if (event && event.data) {
+                        console.log('onMessage: ' + (event.data.length < messageStrLimit ?
+                            event.data
+                            : 'Message too long. Showing first ' + messageStrLimit + " characters: " + event.data.substr(0, messageStrLimit) + ' TRUNCATED.'))
+                    } else {
+                        console.log('event data is missing!')
+                    }
                     let returnData = JSON.parse(event.data)
                     if (returnData.messageType === 'final-report') {
                         state.waitingForBreakpoint = false

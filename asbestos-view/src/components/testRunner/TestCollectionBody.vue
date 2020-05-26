@@ -35,6 +35,9 @@
                     <script-status v-if="!statusRight" :status-right="statusRight" :name="name"> </script-status>
 
                     <span v-if="$store.state.testRunner.currentTest === name">
+                            <template v-if="isDebuggable(i)">
+                                <span class="breakpointColumnHeader" title="Breakpoint Column Header">{{getBreakpointCount(i)}} BKPTs.</span>
+                            </template>
                             <img src="../../assets/arrow-down.png">
                         </span>
                     <span v-else>
@@ -128,6 +131,12 @@
 <style scoped>
 </style>
 <style>
+    .breakpointColumnHeader {
+        position: absolute;
+        left: 2px;
+        font-size: 8px;
+        text-decoration: underline;
+    }
     .debugTestScriptButton {
         margin-left: 10px;
         background-color: cornflowerblue;

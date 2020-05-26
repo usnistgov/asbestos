@@ -1,11 +1,11 @@
 <template>
     <div class="inlineDiv">
         <span v-bind:class="{
-            pass:         isPass  && colorful,
+            'pass':         isPass  && colorful,
             'pass-plain-detail': isPass  && !colorful,
-            fail:         isFail  && colorful,
+            'fail':         isFail  && colorful,
             'fail-plain-detail': isFail  && !colorful,
-             error:       isError && colorful,
+             'error':       isError && colorful,
              'error-plain': isError && !colorful,
              'not-run':   isNotRun && colorful,
              'not-run-plain-detail' : isNotRun && ! colorful,
@@ -51,33 +51,32 @@
                     v-for="(action, actioni) in script.action"
                     :key="'Action' + actioni"
                     :breakpoint-index="getBreakpointIndex(testType, testIndex, actioni)"
+                    :is-import-header="scriptImport(action).result.hasImport"
             >
-                <!--
-                    If attempt to call test component fails (component not called)
-                    No extension/import will be shown in report
-                -->
-                <div v-if="report && report.action && report.action[actioni] && reportContainsError(report.action[actioni])">
-                    <action-details
-                            :script="action"
-                            :report="report && report.action ? report.action[actioni] : null"
-                    >
-                    </action-details>
-                </div>
-                <!-- a successful call to a module is reported here.
-                    The action may fail but at least the module call was good
-                    -->
-                <div v-else-if="scriptContainsImport(action)">
-                    <component-script
-                        :action-script="action"
-                        :action-report="report && report.action ? report.action[actioni] : null"> </component-script>
-                </div>
-                <div v-else class="has-cursor">
-                    <action-details
-                        :script="action"
-                        :report="report && report.action ? report.action[actioni] : null"
-                    >
-                    </action-details>
-                </div>
+                    <div v-for="(resultObj, resultKey) in scriptImport(action)" :key="resultKey">
+                        <div v-if="report && report.action && report.action[actioni] && reportContainsError(report.action[actioni])">
+                            <action-details
+                                :script="action"
+                                :report="report && report.action ? report.action[actioni] : null"
+                                >
+                            </action-details>
+                        </div>
+                        <div v-else-if="'hasImport' in resultObj && resultObj.hasImport">
+                            <component-script
+                               :action-script="action"
+                               :action-report="report && report.action ? report.action[actioni] : null"
+                               :action-component-name="resultObj.componentName"
+                               :parent-index="getBreakpointIndex(testType, testIndex, actioni)"
+                            ></component-script>
+                        </div>
+                        <div v-else class="has-cursor">
+                            <action-details
+                               :script="action"
+                               :report="report && report.action ? report.action[actioni] : null"
+                            >
+                           </action-details>
+                        </div>
+                    </div>
             </debuggable-list-item>
         </ul>
     </div>
@@ -92,6 +91,7 @@
     import ComponentScript from "./ComponentScript";
     import DebuggableListItem from "./debugger/DebuggableListItem";
     import debugTestScriptMixin from "../../mixins/debugTestScript";
+    const path = require('path')
 
     export default {
         data() {
@@ -118,15 +118,29 @@
                 if (!reportAction.operation) return false
                 if (!reportAction.operation.modifierExtension) return false
             },
-            scriptContainsImport(action) {
-                if (!action.operation) return false;
-                if (!action.operation.modifierExtension) return false;
-                let hasImport = false;
+            scriptImport(action) {
+                if (!action.operation) return {'result' : {'hasImport' : false}}
+                if (!action.operation.modifierExtension) return {'result' : {'hasImport' : false}}
+                let hasImport = false
+                let componentName = ''
+
                 action.operation.modifierExtension.forEach(extension => {
-                    if (extension.url === 'https://github.com/usnistgov/asbestos/wiki/TestScript-Import')
+                    if (extension.url === 'https://github.com/usnistgov/asbestos/wiki/TestScript-Import') {
                         hasImport = true
+                        if (extension.modifierExtension) {
+                            extension.modifierExtension.forEach(extension => {
+                                if (extension.url === 'component') {
+                                    let filePath = extension.valueString
+                                    let fileDotExtension = path.extname(filePath)
+                                    componentName = path.basename(filePath, fileDotExtension)
+                                }
+                            })
+                        }
+
+                    }
                 })
-                return hasImport
+                let resultObj = {'result' :{'hasImport' : hasImport, 'componentName' : componentName}}
+                return resultObj
             },
             toggleDisplay() {
                 this.displayOpen = !this.displayOpen

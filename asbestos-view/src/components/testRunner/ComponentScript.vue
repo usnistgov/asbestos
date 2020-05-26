@@ -1,21 +1,23 @@
 <template>
-    <div>
-        <div v-for="(caction, cactioni) in scriptActions"
-             :key="'CAction' + cactioni">
-            {{cactioni}}
-<!--            <action-details-->
-<!--                    :script="caction"-->
-<!--                    :report="reportActions ? reportActions[cactioni] : null"-->
-<!--                    >-->
-<!--            </action-details>-->
-        </div>
-    </div>
+    <ul class="importedTestScriptList">
+        <debuggable-list-item
+                v-for="(caction, cactioni) in scriptActions"
+                :key="'CAction' + cactioni"
+                :breakpoint-index="parentIndex + '/' + getBreakpointIndex('test', 0, cactioni)">
+
+            <action-details
+                    :script="caction"
+                    :report="reportActions ? reportActions[cactioni] : null"
+                    >
+            </action-details>
+        </debuggable-list-item>
+    </ul>
 </template>
 
 <script>
 import ActionDetails from "./ActionDetails";
-
-    const path = require('path')
+import DebuggableListItem from "./debugger/DebuggableListItem";
+import debugTestScriptMixin from "../../mixins/debugTestScript";
 
     export default {
         data() {
@@ -31,13 +33,13 @@ import ActionDetails from "./ActionDetails";
                 if (this.actionReport === null) return null;
                 const moduleName = this.moduleName;
                 if (!moduleName) return null;
-                return this.testId + path.sep + moduleName;
+                return this.testId + '/' + moduleName;
             },
             componentId() {
                 if (this.actionReport === null) return null;
                 const moduleId = this.moduleId;
                 if (!moduleId) return null;
-                return this.testId + path.sep + moduleId;
+                return this.testId + '/' + moduleId;
             },
             moduleId() {
                 if (!this.actionReport) return null;
@@ -62,8 +64,9 @@ import ActionDetails from "./ActionDetails";
                 return moduleName;
             },
             scriptActions() {   // component has no setup and a single test
-                if (this.componentName === null) return null
-                const script = this.$store.state.testRunner.moduleTestScripts[this.componentName]
+                // if (this.componentName === null) return null
+                const myModuleId = this.testId + '/' + this.actionComponentName
+                const script = this.$store.state.testRunner.moduleTestScripts[myModuleId]
                 if (!script || !script.test || !script.test[0]) return null
                 return script.test[0].action
             },
@@ -80,14 +83,26 @@ import ActionDetails from "./ActionDetails";
             },
         },
         props: [
-            'actionScript', 'actionReport'
+            'actionScript',
+             'actionReport',
+            'actionComponentName',
+            'parentIndex',
         ],
         components: {
-            ActionDetails
-        }
+            ActionDetails,
+            DebuggableListItem,
+        },
+        mixins: [
+            debugTestScriptMixin,
+        ],
     }
 </script>
 
 <style scoped>
-
+</style>
+<style>
+    .importedTestScriptList {
+        list-style:none;
+        padding-left: 0px;
+    }
 </style>

@@ -183,9 +183,9 @@ public class TestScriptDebugState {
 
     public String getCurrentExecutionIndex() {
         if (parentExecutionIndex != null) {
-            String parentIndex = String.join(".", parentExecutionIndex);
+            String parentIndex = String.join("/", parentExecutionIndex);
             if (! parentIndex.equals("")) {
-                return parentIndex + "." + currentExecutionIndex;
+                return parentIndex + "/" + currentExecutionIndex;
             }
         }
         return currentExecutionIndex;

@@ -282,7 +282,7 @@ export const testRunnerStore = {
                         if (scriptData) {
                             for (let testName in scriptData) {
                                 const script = scriptData[testName]
-                                if (testName.includes("/"))
+                                if (testName.includes('/'))
                                     moduleScripts[testName] = script
                                 else
                                     scripts[testName] = script

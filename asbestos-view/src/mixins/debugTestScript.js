@@ -24,7 +24,16 @@ export default {
                 return "X"
             }
         },
-        isEvaluable(testScriptIndex) {
+         getBreakpointCount(testScriptIndex) {
+             const key = this.getTestScriptIndexKey(testScriptIndex)
+             if (key in this.$store.state.debugTestScript.showDebugButton) {
+                 const breakpointSet = this.$store.state.debugTestScript.breakpointMap.get(key)
+                 if (breakpointSet)
+                    return breakpointSet.size
+             }
+             return 0
+         },
+         isEvaluable(testScriptIndex) {
             return (this.getDebugActionButtonLabel(testScriptIndex) === 'Resume') && this.$store.state.debugTestScript.evalMode
         },
         isDebugKillable(testScriptIndex) {

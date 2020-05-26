@@ -13,7 +13,7 @@
         <span
                 :class="{
                     'breakpointGutter' : true,
-                    'breakpointControlOff' : ! hasBreakpoint,
+                    'breakpointControlOff' : ! hasBreakpoint && ! isImportHeader,
                     'breakpointControlOn' : hasBreakpoint,
               }"
                 :title="hasBreakpoint ? 'Remove breakpoint' : 'Set breakpoint'"
@@ -52,15 +52,24 @@
             },
             doFocusHint(event, displayOn) {
                 if (event) {
-                    let nobj = event.target.parentNode.querySelector('span:nth-child(3)')
-                    if (nobj) {
+                    let nobj = event.target.parentNode
+                    // querySelector: 3=span action-type, 4=span action-description
+                    let childTarget = nobj.querySelector('span:nth-child(3)')
+                    if (! childTarget) {
+                        childTarget = nobj.querySelector('span:nth-child(4)')
+                        if (! childTarget) {
+                            childTarget = nobj // fallback to parent if child not found
+                            // parentNode = the parent span
+                        }
+                    }
+                    if (childTarget) {
                         let className = 'breakpointBorderFocusOn'
                         if (displayOn)
-                            nobj.classList.add(className)
+                            childTarget.classList.add(className)
                         else
-                            nobj.classList.remove(className)
+                            childTarget.classList.remove(className)
                     }  else {
-                        console.log('nobj is null!')
+                        console.log('childTarget is not found!')
                     }
                 }
 
@@ -73,6 +82,9 @@
             },
         },
         computed: {
+            isNested() {
+                return this.breakpointIndex.includes('/')
+            },
             indexObj() {
                 if (this.isUpdated) {this.isUpdated.valueOf()}
                return this.getBreakpointObj(this.breakpointIndex)
@@ -96,7 +108,7 @@
             }
         },
         props: [
-            'breakpointIndex',
+            'breakpointIndex', 'isImportHeader',
         ],
         mixins: [
             debugTestScriptMixin,
@@ -121,11 +133,13 @@
     span.breakpointControlOn,
     span.breakpointControlOff {
         cursor: pointer;
-        /*border: gray dotted 1px;*/
-        border: lightgray solid 1px;
+        border-left: gray solid 1px;
+        border-right: gray solid 1px;
+        background-color: #f5f5f5;
         horiz-align: center;
         text-align: center;
         font-size: x-small;
+        width: 10px;
     }
 
     span.breakpointControlOn {

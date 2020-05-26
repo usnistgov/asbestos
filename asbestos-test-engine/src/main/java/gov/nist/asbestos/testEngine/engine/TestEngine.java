@@ -1614,14 +1614,35 @@ public class TestEngine  {
         this.testScriptDebugState = state;
         if (state != null) {
             this.testScriptDebugState.setDebugInterface(new TestScriptDebugInterface() {
+                public ModularEngine getMyModularEngine() {
+                    ModularEngine me = getModularEngine();
+                    if (me == null) {
+                        if (parent != null && parent.getModularEngine() !=null) {
+                            me = parent.getModularEngine();
+                        }
+                    }
+                    return me;
+                }
                 @Override
                 public void onBreakpoint() {
-                    getModularEngine().saveLogs(); // Without this getTestReportsAsJson is empty
+                    ModularEngine me = this.getMyModularEngine();
+                    if (me != null) {
+                        me.saveLogs(); // Without this getTestReportsAsJson is empty
+                    } else {
+                        log.error("getModularEngine is null: log cannot be saved!");
+                    }
                 }
 
                 @Override
                 public String getLogAtBreakpoint() {
-                    return getModularEngine().reportsAsJson();
+                    ModularEngine me = this.getMyModularEngine();
+                    if (me != null) {
+                        return me.reportsAsJson();
+                    } else {
+                        log.error("getModularEngine is null!");
+                        testScriptDebugState.sendUnexpectedError();
+                        return "";
+                    }
                 }
             });
         }
