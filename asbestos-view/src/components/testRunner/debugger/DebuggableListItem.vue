@@ -21,9 +21,7 @@
               @mouseleave="onBkptSwitchMouseLeave"
               @click.stop="doToggle()"
         >
-            <template v-if="hasBreakpoint">
-               &#x1F6D1; <!-- Stop sign -->
-            </template>
+            <template v-if="hasBreakpoint"><span class="stopSignClass">&#x1F6D1;&nbsp;</span></template><!-- Stop sign -->
             <template v-else>&nbsp;&nbsp;</template>
         </span>
 <!--        <span v-if="isBreakpointHit" class="breakpointGutterOption evalBtn" @click.stop="doDebugEvalMode($store.state.testRunner.currentTest)">Eval.</span>-->
@@ -138,16 +136,21 @@
         background-color: #f5f5f5;
         horiz-align: center;
         text-align: center;
-        font-size: x-small;
-        width: 10px;
+        width: 14px;
+        text-align: left;
     }
 
     span.breakpointControlOn {
-        font-size: xx-small;
-        border : none;
+        border-top : none;
+        border-bottom: none;
     }
 
-    span.breakpointControlOff:hover {
+    span.stopSignClass {
+        font-size: x-small;
+    }
+
+    span.breakpointControlOff:hover,
+    span.breakpointControlOn:hover {
         border: red dotted 2px;
     }
 
