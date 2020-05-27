@@ -649,7 +649,7 @@ public class ProxyServlet extends HttpServlet {
                         task.putResponseBodyText(txt);
                     }
                 }
-            } else {
+            } else if (!encodings.isEmpty()){
                 String encoding = encodings.get(0);
                 if (encoding != null && encoding.equalsIgnoreCase("gzip")) {
                     if (bytes != null) {
@@ -791,7 +791,11 @@ public class ProxyServlet extends HttpServlet {
 
         simStore = new SimStore(externalCache, simId);
 
-        if (!uriParts.isEmpty()) {
+        String uriString = uri.toString();
+        if (uriString.contains("?")) {
+            // This is a search - should be resource type Bundle
+            simStore.setResource("Bundle");
+        } else if (!uriParts.isEmpty()) {
             simStore.setResource(uriParts.get(0));
             uriParts.remove(0);
         } else {

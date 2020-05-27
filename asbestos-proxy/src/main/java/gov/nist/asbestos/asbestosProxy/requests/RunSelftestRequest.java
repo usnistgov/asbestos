@@ -7,18 +7,24 @@ package gov.nist.asbestos.asbestosProxy.requests;
 // 4 - channelName (testSession__channelId)
 // 5 - testCollectionId
 // 6 - "run" or "status"
+// 7 - number of events to evaluate (client tests only)
 
-// "run"  reruns the tests
-// "status" returns status of last run
+// For server tests:
+// "run"  reruns the tests and returns status of last run
+// "status" just returns status of last run
 
-// returns LastTime class
+// For client tests, always runs
+
+// return is LastTime class
 // and 200 status
 
 import gov.nist.asbestos.asbestosProxy.servlet.ChannelConnector;
 import gov.nist.asbestos.client.Base.ProxyBase;
 import gov.nist.asbestos.client.client.FhirClient;
 import gov.nist.asbestos.client.client.Format;
+import gov.nist.asbestos.client.events.Event;
 import gov.nist.asbestos.sharedObjects.ChannelConfig;
+import gov.nist.asbestos.simapi.simCommon.SimId;
 import gov.nist.asbestos.simapi.validation.Val;
 import gov.nist.asbestos.testEngine.engine.ModularEngine;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -27,7 +33,11 @@ import org.hl7.fhir.r4.model.TestReport;
 
 import java.io.File;
 import java.net.URI;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Properties;
+import java.util.stream.Collectors;
 
 public class RunSelftestRequest {
     private static Logger log = Logger.getLogger(RunSelftestRequest.class);
@@ -42,7 +52,7 @@ public class RunSelftestRequest {
     }
 
     public static boolean isRequest(Request request) {
-        return request.uriParts.size() == 7 && request.uriParts.get(3).equals("selftest");
+        return (request.uriParts.size() == 7 || request.uriParts.size() == 8)  && request.uriParts.get(3).equals("selftest");
     }
 
     public RunSelftestRequest(Request request) {
@@ -69,7 +79,25 @@ public class RunSelftestRequest {
             return;
         }
 
-        if (isRun) {
+        boolean client = isClientTestCollection(testCollection);
+
+        if (client) {
+            List<File> testDirs = request.ec.getTests(testCollection);
+            String testSession = channelConfig.getTestSession();
+            int eventsToEvaluate = client ? Integer.parseInt(request.uriParts.get(7)) : 0;
+            SimId simId = SimId.buildFromRawId(channelName);
+
+            GetClientTestEvalRequest clientEval = new GetClientTestEvalRequest(request);
+            List<Event> events = clientEval.getEvents(simId);
+
+            clientEval.evalClientTest(testDirs, testSession, events, eventsToEvaluate);
+
+            GetClientTestEvalRequest.Summary summary = clientEval.buildSummary();
+            lastTime.time = summary.time;
+            lastTime.hasError = !summary.allPass;
+            Returns.returnObject(request.resp, lastTime);
+            request.resp.setStatus(request.resp.SC_OK);
+        } else if (isRun) {
             URI proxy = channelConfig.proxyURI();
 
             File patientCacheDir = request.ec.getTestLogCacheDir(channelName);
@@ -142,5 +170,10 @@ public class RunSelftestRequest {
             Returns.returnObject(request.resp, lastTime);
             request.resp.setStatus(request.resp.SC_OK);
         }
+    }
+
+    private boolean isClientTestCollection(String testCollectionId) {
+        Properties props  = request.ec.getTestCollectionProperties(testCollectionId);
+        return props.getProperty("TestType") != null && (props.getProperty("TestType").equalsIgnoreCase("Client"));
     }
 }

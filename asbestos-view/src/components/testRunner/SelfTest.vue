@@ -45,6 +45,7 @@
                 allRun: false,
                 earliestRunTime: null,
                 hasNoRuns: true,
+                eventsForClientCollections: 30,
             }
         },
         methods: {
@@ -54,7 +55,7 @@
                 this.running = false;
             },
             async loadStatus(type) {
-                const url = `selftest/${this.sessionId}__${this.channelId}/${this.testCollection}/${type}`;
+                const url = `selftest/${this.sessionId}__${this.channelId}/${this.testCollection}/${type}/${this.eventsForClientCollections}`;
                 const promise = ENGINE.get(url);
                 promise
                     .then(response => {
@@ -80,13 +81,14 @@
             },
         },
         created() {
-            this.loadStatus("status");
+            if (this.autoLoad)
+                this.loadStatus("status");
             //this.channel = this.channelId;
         },
         mixins: [ colorizeTestReports, testCollectionMgmt ],
         name: "SelfTest",
         props: [
-            'sessionId', 'channelId', 'testCollection',
+            'sessionId', 'channelId', 'testCollection', 'autoLoad'
         ],
         components: {
         }

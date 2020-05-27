@@ -31,9 +31,9 @@ import java.util.stream.Collectors;
 // 2 - "engine"
 // 3 - "clienteval"
 // 4 - channelName   testSession__channelId
-// 5 - "marker" or number of events to evaluate
+// 5 - number of events to evaluate
 // 6 - testCollectionId
-// 7 - testId
+// 7 - testId  (optional - if missing eval all tests in collection)
 // Run a client test
 
 public class GetClientTestEvalRequest {
@@ -51,25 +51,71 @@ public class GetClientTestEvalRequest {
         this.request = request;
     }
 
+    class Summary {
+        boolean allPass;
+        String time;
+    }
+
+    public Summary buildSummary() {
+        return result.buildSummary();
+    }
+
     class Result {
         Map<String, EventResult> results = new HashMap<>(); // testId -> EventResult
+        boolean allPass = true;
+        String time;
+
+        Summary buildSummary() {
+            for (EventResult eventResult : results.values()) {
+                // one iteration per testId
+                eventResult.buildSummary();
+                if (!eventResult.pass)
+                    allPass = false;
+                if (time == null)
+                    time = eventResult.oldestEventTime;
+                else if (time.compareTo(eventResult.oldestEventTime) < 0)
+                    time = eventResult.oldestEventTime;
+            }
+            Summary summary = new Summary();
+            summary.allPass = allPass;
+            summary.time = time;
+            return summary;
+        }
     }
 
     class EventResult {
         Map<String, List<TestReport>> reports = new HashMap<>(); // eventId -> TestReport
+
+        // summary
+        String oldestEventTime;
+        boolean pass;  // there is one eventId that passes
+
+        void buildSummary() {
+            oldestEventTime = null;
+            pass = false;
+            for (String eventId : reports.keySet()) {
+                for (TestReport report : reports.get(eventId)) {
+                    if (report.getResult().equals(TestReport.TestReportResult.PASS))
+                        pass = true;
+                    String time = report.getIssued().toString();
+                    if (oldestEventTime == null)
+                        oldestEventTime = time;
+                    else if (time.compareTo(oldestEventTime) < 0)
+                        oldestEventTime = time;
+                    break;  // only look at top TestReport (final answer)
+                }
+            }
+        }
     }
 
     public void run() {
         log.info("GetClientTestEval");
         request.parseChannelName(4);
         String testCollection = request.uriParts.get(6);
-        boolean useMarker = false;
         int eventsToEvaluate = 0;
 
-        if (request.uriParts.get(5).equals("marker"))
-            useMarker = true;
-        else
-            eventsToEvaluate = Integer.parseInt(request.uriParts.get(5));
+
+        eventsToEvaluate = Integer.parseInt(request.uriParts.get(5));
 
         List<File> testDirs = new ArrayList<>();
         if (request.uriParts.size() == 7)  // no testID specified - do all
@@ -80,19 +126,10 @@ public class GetClientTestEvalRequest {
                 testDirs = Collections.singletonList(dir);
         }
 
-
-        String marker = useMarker ?
-                request.ec.getLastMarker(request.testSession, request.channelId)
-                : null;
         SimId simId = SimId.buildFromRawId(request.uriParts.get(4));
         String testSession = simId.getTestSession().getValue();
 
-        List<File> eventDirsSinceMarker = request.ec.getEventsSince(simId, marker);
-        eventDirsSinceMarker.sort(Comparator.comparing(File::getName).reversed());
-        List<Event> events = eventDirsSinceMarker.stream().map(Event::new).sorted().collect(Collectors.toList());
-        Collections.reverse(events);
-//        if (!useMarker)
-//            events = events.subList(0, Math.min(events.size(), eventsToEvaluate));
+        List<Event> events = getEvents(simId);
 
         File testLogDir = request.ec.getTestLogCollectionDir(request.fullChannelId(), testCollection);
 
@@ -100,7 +137,9 @@ public class GetClientTestEvalRequest {
         String testId = request.uriParts.get(7);
 
 
-        StringBuilder buf = evalClientTest(testDirs, testSession, events, eventsToEvaluate);
+         evalClientTest(testDirs, testSession, events, eventsToEvaluate);
+
+        StringBuilder buf = buildJson(testId);
 
         String myStr = buf.toString();
         try {
@@ -111,6 +150,83 @@ public class GetClientTestEvalRequest {
 
         Returns.returnString(request.resp, myStr);
     }
+
+    public List<Event> getEvents(SimId simId) {
+        List<File> eventDirsSinceMarker = request.ec.getEventsSince(simId, null);
+        eventDirsSinceMarker.sort(Comparator.comparing(File::getName).reversed());
+        List<Event> events = eventDirsSinceMarker.stream().map(Event::new).sorted().collect(Collectors.toList());
+        Collections.reverse(events);
+        return events;
+    }
+
+    List<Event> selectedEvents = new ArrayList<>();
+    Result result = new Result();
+
+    // testDirs always has single entry
+    // returns JSON response to client
+    public void evalClientTest(List<File> testDirs, String testSession, List<Event> events, int eventsToEvaluate) {
+        Map<String, File> testIds = testDirs.stream().collect(Collectors.toMap(File::getName, x -> x));
+        //String testId = testDirs.get(0).getName();
+
+        // testId -> testScript
+        Map<String, TestScript> testScripts = testDirs.stream().collect(
+                Collectors.toMap(File::getName, TestEngine::loadTestScript)
+        );
+
+        File testCollectionsBase = request.ec.getTestCollectionsBase();
+
+        for (String theTestId : testIds.keySet()) {
+            File testDir = testIds.get(theTestId);
+            TestScript testScript = testScripts.get(theTestId);
+            int eventCount = 0;
+            // Since we may be filtering events, collect the ones that are actually
+            // evaluated.
+            int testGoodCount = 0;
+            String lastGoodEvent = null;
+            for (Event event : events) {
+                if (eventCount >= eventsToEvaluate)
+                    break;
+                if (event.isSupportEvent())
+                    continue;
+                selectedEvents.add(eventCount, event);
+                eventCount++;
+                try {
+                    ModularEngine modularEngine = new ModularEngine(testDir, testScript);
+                    FixtureMgr fm = modularEngine.getFixtureMgr();
+                    fm.setTestId(theTestId);
+                    fm.setTestCollectionId("Inspector");
+                    modularEngine.setTestId(theTestId);
+                    modularEngine.setTestCollection("Inspector");
+                    modularEngine.setChannelId(request.fullChannelId());
+                    modularEngine.addCache(testCollectionsBase);
+                    modularEngine.setVal(new Val());
+                    modularEngine.setTestSession(testSession);
+                    modularEngine.setExternalCache(request.externalCache);
+                    ResourceWrapper requestResource = getRequestResource(event);
+                    ResourceWrapper responseResource = getResponseResource(event);
+                    modularEngine.runEval(requestResource, responseResource);
+                    EventResult eventResult = result.results.get(theTestId); //new EventResult();
+                    if (eventResult == null)
+                        eventResult = new EventResult();
+                    List<TestReport> thisReports = modularEngine.getTestReports();
+                    eventResult.reports.put(event.getEventId(), thisReports);
+                    if (!thisReports.isEmpty()) {
+                        if (thisReports.get(0).getResult().toCode().equalsIgnoreCase("pass")) {
+                            testGoodCount++;
+                            lastGoodEvent = event.getEventId();
+                        }
+                    }
+                    result.results.put(theTestId, eventResult);
+                } catch (Throwable t) {
+                    log.error(ExceptionUtils.getStackTrace(t));
+                    throw t;
+                }
+            }
+            if (testGoodCount > 0)
+                System.out.println("now");
+        }
+    }
+
 
     private ResourceWrapper getRequestResource(Event event) {
         ITask task = event.getClientTask();
@@ -153,112 +269,14 @@ public class GetClientTestEvalRequest {
             wrapper.setHttpBase(base);
             return wrapper;
         } catch (Throwable t) {
+            System.err.println("Event " + event.getEventId() + ":");
             t.printStackTrace();
             throw new Error(t);
         }
     }
 
-    // testDirs always has single entry
-    // returns JSON response to client
-    public StringBuilder evalClientTest(List<File> testDirs, String testSession, List<Event> events, int eventsToEvaluate) {
-        Map<String, File> testIds = testDirs.stream().collect(Collectors.toMap(File::getName, x -> x));
-        String testId = testDirs.get(0).getName();
 
-        // testId -> testScript
-        Map<String, TestScript> testScripts = testDirs.stream().collect(
-                Collectors.toMap(File::getName, TestEngine::loadTestScript)
-        );
-
-//        Map<Event, ResourceWrapper> requestResources = new HashMap<>();
-//        Map<Event, ResourceWrapper> responseResources = new HashMap<>();
-//        for (Event event : events) {
-//            ITask task = event.getClientTask();
-//
-//            // request
-//            try {
-//                String requestContentType = event.getClientTask().getRequestHeader().getContentType().getValue();
-//                Format format = Format.fromContentType(requestContentType);
-//                String requestString = task.getRequestBodyAsString();
-//                ResourceWrapper wrapper;
-//                if (requestString == null) {
-//                    wrapper = new ResourceWrapper();
-//                } else {
-//                    BaseResource resource = ProxyBase.parse(requestString, format);
-//                    wrapper = new ResourceWrapper(resource);
-//                }
-//                HttpBase base = task.getHttpBase();
-//                wrapper.setHttpBase(base);
-//                requestResources.put(event, wrapper);
-//            } catch (Throwable t) {
-//                t.printStackTrace();
-//            }
-//
-//            // response
-//            try {
-//                String responseString = event.getClientTask().getResponseBodyAsString();
-//                String responseContentType = event.getClientTask().getResponseHeader().getContentType().getValue();
-//                Format rformat = Format.fromContentType(responseContentType);
-//                ResourceWrapper wrapper;
-//                if (responseString == null) {
-//                    wrapper = new ResourceWrapper();
-//                } else {
-//                    BaseResource rresource = ProxyBase.parse(responseString, rformat);
-//                    wrapper = new ResourceWrapper(rresource);
-//                }
-//                HttpBase base = task.getHttpBase();
-//                wrapper.setHttpBase(base);
-//                responseResources.put(event, wrapper);
-//            } catch (Throwable t) {
-//                t.printStackTrace();
-//            }
-//        }
-        //File base = request.ec.getTestCollectionsBase();
-        //List<File> cacheDirs = new ArrayList<>();
-        //cacheDirs.add(new File(base, "Internal"));
-        File testCollectionsBase = request.ec.getTestCollectionsBase();
-
-        Result result = new Result();
-        List<Event> selectedEvents = new ArrayList<>();
-        for (String theTestId : testIds.keySet()) {
-            File testDir = testIds.get(theTestId);
-            TestScript testScript = testScripts.get(theTestId);
-            int eventCount = 0;
-            // Since we may be filtering events, collect the ones that are actually
-            // evaluated.
-            for (Event event : events) {
-                if (eventCount >= eventsToEvaluate)
-                    break;
-                if (event.isSupportEvent())
-                    continue;
-                selectedEvents.add(eventCount, event);
-                eventCount++;
-                try {
-                    ModularEngine modularEngine = new ModularEngine(testDir, testScript);
-                    FixtureMgr fm = modularEngine.getFixtureMgr();
-                    fm.setTestId(theTestId);
-                    fm.setTestCollectionId("Inspector");
-                    modularEngine.setTestId(theTestId);
-                    modularEngine.setTestCollection("Inspector");
-                    modularEngine.setChannelId(request.fullChannelId());
-                    modularEngine.addCache(testCollectionsBase);
-                    modularEngine.setVal(new Val());
-                    modularEngine.setTestSession(testSession);
-                    modularEngine.setExternalCache(request.externalCache);
-                    ResourceWrapper requestResource = getRequestResource(event);
-                    ResourceWrapper responseResource = getResponseResource(event);
-                    modularEngine.runEval(requestResource, responseResource);
-                    EventResult eventResult = result.results.get(theTestId); //new EventResult();
-                    if (eventResult == null)
-                        eventResult = new EventResult();
-                    eventResult.reports.put(event.getEventId(), modularEngine.getTestReports());
-                    result.results.put(theTestId, eventResult);
-                } catch (Throwable t) {
-                    log.error(ExceptionUtils.getStackTrace(t));
-                    throw t;
-                }
-            }
-        }
-
+    StringBuilder buildJson(String testId) {
 
         StringBuilder buf = new StringBuilder();
         buf.append('{').append('"').append(testId).append('"').append(':').append("\n ");

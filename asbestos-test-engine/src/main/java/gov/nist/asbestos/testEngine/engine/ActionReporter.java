@@ -100,16 +100,24 @@ class ActionReporter {
                 label = key;
             }
 
+            if (label == null) {
+                label = key;
+                if (key.equals("request"))
+                    tail = "/req";
+                if (key.equals("response"))
+                    tail = "/resp";
+            }
+
             FixtureComponent fixtureComponent = fixtureMgr.get(key);
 
             HttpBase httpBase = fixtureComponent.getHttpBase();  // http operation of fixtureComponent.wrapper
             ResourceWrapper wrapper1 = fixtureComponent.getResourceWrapper();
-
+            String refStrRaw = null;
             if (httpBase != null) {  // fixtureComponent created by operation
                 Headers responseHeaders = httpBase.getResponseHeaders();
                 String eventUrl = responseHeaders.getProxyEvent();
                 if (eventUrl != null) {
-                    String refStrRaw = EventLinkToUILink.get(eventUrl, tail);
+                    refStrRaw = EventLinkToUILink.get(eventUrl, tail);
                     reference = "<a href=\"" +  refStrRaw + "\"" + " target=\"_blank\">" +
                             ((label == null) ? refStrRaw : "Open in Inspector") +
                             "</a>";
@@ -117,7 +125,6 @@ class ActionReporter {
             } else if (wrapper1 != null) {   // static fixtureComponent
                 Ref ref = wrapper1.getRef();
                 if (ref != null) {
-                    String refStrRaw;
                     UIEvent uiEvent = fixtureComponent.getCreatedByUIEvent();
                     if (uiEvent == null)
                         refStrRaw = null;
@@ -133,7 +140,7 @@ class ActionReporter {
                             "</a>";
                 }
             }
-            if (label != null && reference != null)
+            if (refStrRaw != null && label != null)
                 fixtures.put(label, reference);
         }
 

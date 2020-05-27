@@ -59,7 +59,9 @@ public class GetClientEventEvalRequest {
 
         GetClientTestEvalRequest getClientTestEvalRequest = new GetClientTestEvalRequest(request);
 
-        StringBuilder buf = getClientTestEvalRequest.evalClientTest(testDirs, testSession, Collections.singletonList(event), 1);
+        getClientTestEvalRequest.evalClientTest(testDirs, testSession, Collections.singletonList(event), 1);
+
+        StringBuilder buf = getClientTestEvalRequest.buildJson(testId);
 
         String myStr = buf.toString();
 

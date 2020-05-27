@@ -220,8 +220,8 @@ public class ModularEngine {
         return this;
     }
 
-    public ModularEngine runEval(ResourceWrapper wrapper, ResourceWrapper wrapper1) {
-        getMainTestEngine().runEval(wrapper, wrapper1);
+    public ModularEngine runEval(ResourceWrapper request, ResourceWrapper response) {
+        getMainTestEngine().runEval(request, response);
         installModuleNames();
         return this;
     }

@@ -95,6 +95,7 @@ abstract public class HttpBase {
 
     public void setResponse(byte[] bytes) {
         _response = bytes;
+       // _responseText = new String(bytes);
     }
 
     public void setResponseText(String txt) {

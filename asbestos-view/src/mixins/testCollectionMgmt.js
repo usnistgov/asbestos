@@ -4,7 +4,7 @@ export default {
             running: false,
             channelObj: null,  // channel object
             testOpen: false,
-            evalCount: 5,
+            evalCount: 30,
         }
     },
     methods: {

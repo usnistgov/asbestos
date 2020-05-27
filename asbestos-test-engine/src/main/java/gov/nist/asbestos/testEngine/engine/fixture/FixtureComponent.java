@@ -143,15 +143,19 @@ public class FixtureComponent {
     }
 
     public ResourceWrapper getResourceWrapper() {
-        if (resourceWrapper == null && staticRef != null) {
-            loadStatic();
-        }
-        if (resourceWrapper != null)
-            return resourceWrapper;
-        if (fixtureSub != null) {
-            ResourceWrapper wrapper = fixtureSub.get();
-            resourceWrapper = wrapper;
-            return resourceWrapper;
+        try {
+            if (resourceWrapper == null && staticRef != null) {
+                loadStatic();
+            }
+            if (resourceWrapper != null)
+                return resourceWrapper;
+            if (fixtureSub != null) {
+                ResourceWrapper wrapper = fixtureSub.get();
+                resourceWrapper = wrapper;
+                return resourceWrapper;
+            }
+        } catch (Throwable t) {
+            // ignore
         }
         return null;
     }

@@ -506,6 +506,7 @@ public class XdsOnFhirChannel extends BaseChannel /*implements IBaseChannel*/ {
     }
 
     private void transformDSResponse(AhqrSender sender, HttpBase responseOut, String requestedType, String search) {
+        responseOut.setResponseContentType(returnFormatType.getContentType());
         String  newBase = ServiceProperties.getInstance().getPropertyOrStop(ServicePropertiesEnum.FHIR_TOOLKIT_BASE) + "/proxy/default__default";
         Ref searchRef = new Ref(search);
         boolean isSearch = !searchRef.hasId();
