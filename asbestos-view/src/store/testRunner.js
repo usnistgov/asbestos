@@ -282,7 +282,7 @@ export const testRunnerStore = {
                         if (scriptData) {
                             for (let testName in scriptData) {
                                 const script = scriptData[testName]
-                                if (testName.includes("/"))
+                                if (testName.includes('/'))
                                     moduleScripts[testName] = script
                                 else
                                     scripts[testName] = script
@@ -348,7 +348,7 @@ export const testRunnerStore = {
         runTest({commit, rootState, state}, testId) {
            // console.log(`run ${testId}`)
             //commit('setCurrentTest', testId)
-            const url = `testrun/${rootState.base.session}__${rootState.base.channelId}/${state.currentTestCollectionName}/${testId}?_format=${state.useJson ? 'json' : 'xml'};_gzip=${state.gzip}`
+            const url = `testrun/${rootState.base.session}__${rootState.base.channelId}/${state.currentTestCollectionName}/${testId}?_format=${state.useJson ? 'json' : 'xml'};_gzip=${state.useGzip}`
             const promise = ENGINE.post(url)
             promise.then(result => {
                 const reports = result.data

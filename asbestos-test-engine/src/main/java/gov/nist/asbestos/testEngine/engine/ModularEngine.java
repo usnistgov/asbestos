@@ -4,6 +4,7 @@ import gov.nist.asbestos.client.Base.EC;
 import gov.nist.asbestos.client.Base.ProxyBase;
 import gov.nist.asbestos.client.client.FhirClient;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
+import gov.nist.asbestos.sharedObjects.TestScriptDebugState;
 import gov.nist.asbestos.simapi.validation.Val;
 import gov.nist.asbestos.testEngine.engine.fixture.FixtureMgr;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -32,6 +33,7 @@ public class ModularEngine {
     private boolean saveLogs = false;
     private String testName;
     private Map<String, String> reports = new HashMap<>();   // name => TestReport json
+    private TestScriptDebugState testScriptDebugState;
 
     public ModularEngine(File testDefDir) {
         this(testDefDir, (URI) null);
@@ -43,8 +45,13 @@ public class ModularEngine {
     }
 
     public ModularEngine(File testDefDir, URI sut) {
+        this(testDefDir, sut, null);
+    }
+
+    public ModularEngine(File testDefDir, URI sut, TestScriptDebugState state) {
         nameFromTestDefDir(testDefDir);
         TestEngine testEngine = sut == null ? new TestEngine(testDefDir) : new TestEngine(testDefDir, sut);
+        testEngine.setTestScriptDebugState(state);
         engines.add(testEngine);
         testEngine.setModularEngine(this);
     }
@@ -107,7 +114,7 @@ public class ModularEngine {
         }
     }
 
-    private void saveLogs() {
+    void saveLogs() {
         boolean first = true;
         String channelId = getMainTestEngine().getChannelId();
         String testCollection = getMainTestEngine().getTestCollection();

@@ -1,54 +1,31 @@
 <template>
-    <div>
-        <div v-for="(caction, cactioni) in scriptActions"
-             :key="'CAction' + cactioni">
+    <ul class="importedTestScriptList">
+        <debuggable-list-item
+                v-for="(caction, cactioni) in scriptActions"
+                :key="'CAction' + cactioni"
+                :breakpoint-index="parentIndex + '/' + getBreakpointIndex('test', 0, cactioni)">
+
             <action-details
                     :script="caction"
                     :report="reportActions ? reportActions[cactioni] : null"
-                    :debug-title="debugTitle(cactioni)"
-                    @onStatusMouseOver="hoverActionIndex = cactioni"
-                    @onStatusMouseLeave="hoverActionIndex = -1"
-                    @onStatusClick="toggleBreakpointIndex(cactioni)"></action-details>
-        </div>
-    </div>
+                    >
+            </action-details>
+        </debuggable-list-item>
+    </ul>
 </template>
 
 <script>
 import ActionDetails from "./ActionDetails";
-    const path = require('path')
+import DebuggableListItem from "./debugger/DebuggableListItem";
+import debugTestScriptMixin from "../../mixins/debugTestScript";
 
     export default {
         data() {
             return {
-                breakpointIndex: [],
             }
         },
         name: "ComponentScript",
         methods: {
-            debugTitle(idx) {
-                if (! this.breakpointIndex[idx]) {
-                    return "Set breakpoint"
-                } else {
-                    return "Remove breakpoint"
-                }
-            },
-            isBreakpoint(actionIdx) {
-                return Boolean(this.breakpointIndex[actionIdx]) || ! this.breakpointIndex[actionIdx] && this.hoverActionIndex === actionIdx
-            },
-            toggleBreakpointIndex(actionIndex) {
-                if (this.breakpointIndex[actionIndex]) {
-                    this.hoverActionIndex = -1
-                }
-                this.breakpointIndex[actionIndex] = ! this.breakpointIndex[actionIndex]
-                if (this.breakpointIndex[actionIndex]) {
-                    this.hoverActionIndex = actionIndex
-                    // console.log("calling dispatch" + this.testScriptIndex + " breakpointIndex: " + this.testIndex + "." + actionIndex)
-                    this.$store.dispatch('addBreakpoint', {testScriptIndex: this.testScriptIndex, breakpointIndex: this.testIndex + "." + actionIndex})
-                } else {
-                    // remove breakpoint
-                    this.$store.dispatch('removeBreakpoint', {testScriptIndex: this.testScriptIndex, breakpointIndex: this.testIndex + "." + actionIndex})
-                }
-            },
         },
         computed: {
             // if a component is used multiple times then the componentName is the same and the componentId is different
@@ -56,13 +33,13 @@ import ActionDetails from "./ActionDetails";
                 if (this.actionReport === null) return null;
                 const moduleName = this.moduleName;
                 if (!moduleName) return null;
-                return this.testId + path.sep + moduleName;
+                return this.testId + '/' + moduleName;
             },
             componentId() {
                 if (this.actionReport === null) return null;
                 const moduleId = this.moduleId;
                 if (!moduleId) return null;
-                return this.testId + path.sep + moduleId;
+                return this.testId + '/' + moduleId;
             },
             moduleId() {
                 if (!this.actionReport) return null;
@@ -87,8 +64,9 @@ import ActionDetails from "./ActionDetails";
                 return moduleName;
             },
             scriptActions() {   // component has no setup and a single test
-                if (this.componentName === null) return null
-                const script = this.$store.state.testRunner.moduleTestScripts[this.componentName]
+                // if (this.componentName === null) return null
+                const myModuleId = this.testId + '/' + this.actionComponentName
+                const script = this.$store.state.testRunner.moduleTestScripts[myModuleId]
                 if (!script || !script.test || !script.test[0]) return null
                 return script.test[0].action
             },
@@ -105,14 +83,26 @@ import ActionDetails from "./ActionDetails";
             },
         },
         props: [
-            'actionScript', 'actionReport'
+            'actionScript',
+             'actionReport',
+            'actionComponentName',
+            'parentIndex',
         ],
         components: {
-            ActionDetails
-        }
+            ActionDetails,
+            DebuggableListItem,
+        },
+        mixins: [
+            debugTestScriptMixin,
+        ],
     }
 </script>
 
 <style scoped>
-
+</style>
+<style>
+    .importedTestScriptList {
+        list-style:none;
+        padding-left: 0px;
+    }
 </style>

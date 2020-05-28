@@ -1,5 +1,9 @@
 <template>
-    <span @mouseover="onStatusMouseOver" @mouseleave="onStatusMouseLeave" @click.stop="onStatusClick" :title="debugTitle">
+    <span
+            @mouseover="onStatusMouseOver"
+            @mouseleave="onStatusMouseLeave"
+            @click.stop="onStatusClick"
+            :title="debugTitle">
              <test-status
                           :status-on-right="false"
                           :script="script"
@@ -14,7 +18,6 @@
     export default {
         data() {
             return {
-                displayBreakpointTitle: false,
             }
         },
         methods: {
@@ -22,7 +25,6 @@
                 this.$emit('onStatusMouseOver')
             },
             onStatusMouseLeave() {
-                this.titleText = ''
                 this.$emit('onStatusMouseLeave')
             },
             onStatusClick() {

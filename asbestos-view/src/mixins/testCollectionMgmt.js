@@ -38,13 +38,6 @@ export default {
             if (testName)
                 await this.$store.dispatch('runEval', testName)
         },
-        async doDebug(testName) {  // server tests
-            if (!testName)
-                return
-            this.running = true
-            await this.$store.dispatch('runTest', testName)
-            this.running = false
-        },
         // run all tests in collection
         async doRunAll()  {
             this.running = true

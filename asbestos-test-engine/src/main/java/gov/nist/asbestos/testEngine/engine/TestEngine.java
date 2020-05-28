@@ -1,6 +1,7 @@
 package gov.nist.asbestos.testEngine.engine;
 
 import ca.uhn.fhir.parser.IParser;
+import com.google.gson.Gson;
 import gov.nist.asbestos.client.Base.EC;
 import gov.nist.asbestos.client.Base.ProxyBase;
 import gov.nist.asbestos.client.client.FhirClient;
@@ -9,6 +10,8 @@ import gov.nist.asbestos.client.events.UIEvent;
 import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.client.resolver.ResourceCacheMgr;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
+import gov.nist.asbestos.sharedObjects.TestScriptDebugInterface;
+import gov.nist.asbestos.sharedObjects.TestScriptDebugState;
 import gov.nist.asbestos.simapi.validation.Val;
 import gov.nist.asbestos.simapi.validation.ValE;
 import gov.nist.asbestos.testEngine.engine.fixture.FixtureComponent;
@@ -67,6 +70,10 @@ public class TestEngine  {
 
     private ModularEngine modularEngine = null;
     private Map<String, String> externalVariables = new HashMap<>();
+    /**
+     * If testScriptDebugState is null, then TestScript is being run normally. ie., TestScript is not being debugged.
+     */
+    private TestScriptDebugState testScriptDebugState;
 
     /**
      *
@@ -635,19 +642,23 @@ public class TestEngine  {
         }
     }
 
+
     private void doSetup() {
         boolean reportAsConditional = false;  // upgrade this when conditional execution comes to setup
         if (testScript.hasSetup()) {
+            ifDebuggingPauseIfBreakpoint("setup", 0); // There is only one TestScript.Setup so parent index is always 0
             TestScript.TestScriptSetupComponent comp = testScript.getSetup();
             ValE fVal = new ValE(engineVal).setMsg("Setup");
             TestReport.TestReportSetupComponent setupReportComponent = testReport.getSetup();
             if (comp.hasAction()) {
                 String typePrefix = "setup.action";
+                int actionIndex = 0;
                 for (TestScript.SetupActionComponent action : comp.getAction()) {
                     TestReport.SetupActionComponent actionReportComponent = setupReportComponent.addAction();
                     if (invalidAction(action, actionReportComponent, fVal))
                         return;
                     if (action.hasOperation()) {
+                        ifDebuggingPauseIfBreakpoint("setup", 0, actionIndex);
                         doOperation(new ActionReference(testScript, action), typePrefix, action.getOperation(), actionReportComponent.getOperation());
                         TestReport.SetupActionOperationComponent opReport = actionReportComponent.getOperation();
                         if (opReport.getResult() == TestReport.TestReportActionResult.ERROR) {
@@ -657,6 +668,7 @@ public class TestEngine  {
                         }
                     }
                     if (action.hasAssert()) {
+                        ifDebuggingPauseIfBreakpoint("setup", 0, action.getAssert(), actionIndex);
                         TestReport.SetupActionAssertComponent actionReport = actionReportComponent.getAssert();
                         doAssert(typePrefix, action.getAssert(), actionReport);
                         if (actionReport == null)
@@ -679,6 +691,7 @@ public class TestEngine  {
                     }
                     if (hasError())
                         return;
+                    actionIndex++;
                 }
             }
         }
@@ -754,7 +767,8 @@ public class TestEngine  {
             try {
                 int testCounter = 1;
                 for (TestScript.TestScriptTestComponent test : testScript.getTest()) {
-
+                    int testIndex = testScript.getTest().indexOf(test);
+                    ifDebuggingPauseIfBreakpoint("test", testIndex);
                     // if noErrors extension present and script has already hit an error then bail out
                     // and don't run actions in this test
                     if (getExtension(test.getModifierExtension(), ExtensionDef.noErrors) != null) {
@@ -769,7 +783,6 @@ public class TestEngine  {
                     testCounter++;
                     ValE tVal = new ValE(fVal).setMsg(testName);
                     TestReport.TestReportTestComponent testReportComponent = testReport.addTest();
-
 
                     //
                     //  handle modifier extensions
@@ -788,7 +801,7 @@ public class TestEngine  {
                             isConditional = true;
                             boolean conditionalResult = handleConditionalTest(test, testReportComponent, extension);
                             if (conditionalResult) {
-                                doTestPart(test, testReportComponent, testReport);
+                                doTestPart(test, testReportComponent, testReport, false);
                             } else {
                                 reportSkip(testReportComponent);   // for the then part
                             }
@@ -803,9 +816,7 @@ public class TestEngine  {
                     }
 
                     if (!isConditional)
-                        doTestPart(test, testReportComponent, testReport);
-
-
+                        doTestPart(test, testReportComponent, testReport, false);
                 }
             } catch (Throwable t) {
                 String msg = t.getMessage();
@@ -895,6 +906,9 @@ public class TestEngine  {
         /*
             Call module
          */
+        if (hasDebugState())
+            testScriptDebugState.pushParentExecutionIndex();
+
         TestEngine testEngine1 = sut == null
                 ? new TestEngine(componentReference.getComponentRef())
                 : new TestEngine(componentReference.getComponentRef(), this.sut);
@@ -909,6 +923,7 @@ public class TestEngine  {
                 .setChannelId(channelId)
                 .setTestCollection(testCollection)
                 .setTestId(testId)
+                .setTestScriptDebugState(this.testScriptDebugState)
                 ;
         modularEngine.add(testEngine1);
         testEngine1.parent = this;
@@ -920,6 +935,9 @@ public class TestEngine  {
             moduleId is the same name with a numeric suffix to make this call unique.
             The module call is identified as moduleName/moduleId in the logs
          */
+        if (hasDebugState())
+            testScriptDebugState.popParentExecutionIndex();
+
         String moduleName = simpleName(componentReference.getComponentRef());
         String moduleId = assignModuleId(moduleName);
         opReport.addModifierExtension(new Extension(ExtensionDef.moduleId, new StringType(moduleId)));
@@ -1068,7 +1086,7 @@ public class TestEngine  {
         // basic operation and validation
         TestScript.TestScriptTestComponent basicOperationTest = tests.get(0);
         TestReport.TestReportTestComponent containedTestReportComponent = containedTestReport.addTest();
-        boolean conditionalTestResult = doTestPart(basicOperationTest, containedTestReportComponent, containedTestReport);
+        boolean conditionalTestResult = doTestPart(basicOperationTest, containedTestReportComponent, containedTestReport, false);
 
         if (!conditionalTestResult) {
             //failOverride = true;
@@ -1082,7 +1100,7 @@ public class TestEngine  {
 
         containedTestReportComponent = containedTestReport.addTest();
 
-        conditionalResult = doTestPart(conditionalTest, containedTestReportComponent, containedTestReport);
+        conditionalResult = doTestPart(conditionalTest, containedTestReportComponent, containedTestReport, true);
 
         if (containedTestReport.getResult() == TestReport.TestReportResult.FAIL)
             return false;
@@ -1096,21 +1114,24 @@ public class TestEngine  {
         setupActionOperationComponent.setMessage("skipped");
     }
 
-    private boolean doTestPart(TestScript.TestScriptTestComponent testScriptElement, TestReport.TestReportTestComponent testReportComponent, TestReport testReport) {
+    private boolean doTestPart(TestScript.TestScriptTestComponent testScriptElement, TestReport.TestReportTestComponent testReportComponent, TestReport testReport, boolean reportAsConditional) {
+        int testIndex = testScript.getTest().indexOf(testScriptElement);
         ValE fVal = new ValE(engineVal).setMsg("Test");
+
         if (testScriptElement.hasAction()) {
             String typePrefix = "contained.action";
 
             boolean multiErrorsAllowed = getExtension(testScriptElement.getModifierExtension(), ExtensionDef.multiErrors) != null;
 
-            for (int i=0; i<testScriptElement.getAction().size(); i++) {
-                TestScript.TestActionComponent action = testScriptElement.getAction().get(i);
+            for (int testPartIndex=0; testPartIndex<testScriptElement.getAction().size(); testPartIndex++) {
+                TestScript.TestActionComponent action = testScriptElement.getAction().get(testPartIndex);
                 Extension conditional = getExtension(action.getModifierExtension(), ExtensionDef.ts_conditional);
                 boolean isConditional = conditional != null;
                 TestReport.TestActionComponent actionReportComponent = testReportComponent.addAction();
                 if (invalidAction(action, actionReportComponent, fVal))
                     return false;
                 if (action.hasOperation()) {
+                    ifDebuggingPauseIfBreakpoint("test", testIndex, testPartIndex);
                     TestReport.SetupActionOperationComponent reportOp = actionReportComponent.getOperation();
                     doOperation(new ActionReference(testScript, action), typePrefix, action.getOperation(), reportOp);
                     TestReport.SetupActionOperationComponent opReport = actionReportComponent.getOperation();
@@ -1125,8 +1146,8 @@ public class TestEngine  {
                         return false;
                     }
                     // an operation not followed by an assert that fails causes test to fail
-                    if (i + 1 < testScriptElement.getAction().size()) {
-                        TestScript.TestActionComponent nextAction = testScriptElement.getAction().get(i+1);
+                    if (testPartIndex + 1 < testScriptElement.getAction().size()) {
+                        TestScript.TestActionComponent nextAction = testScriptElement.getAction().get(testPartIndex+1);
                         if (!nextAction.hasAssert() && actionReportComponent.getOperation().getResult().equals(TestReport.TestReportActionResult.FAIL)) {
                             testReport.setStatus(TestReport.TestReportStatus.COMPLETED);
                             testReport.setResult(TestReport.TestReportResult.FAIL);
@@ -1136,8 +1157,10 @@ public class TestEngine  {
                     }
                 }
                 if (action.hasAssert()) {
+                    TestScript.SetupActionAssertComponent assertComponent = action.getAssert();
+                    ifDebuggingPauseIfBreakpoint("test", testIndex, assertComponent, testPartIndex);
                     TestReport.SetupActionAssertComponent actionReport = actionReportComponent.getAssert();
-                    doAssert(typePrefix, action.getAssert(), actionReport);
+                    doAssert(typePrefix, assertComponent, actionReport);
                     if (actionReport == null)
                         return false;
                     if ("fail".equals(actionReport.getResult().toCode())) {
@@ -1553,6 +1576,10 @@ public class TestEngine  {
         return this;
     }
 
+    public ModularEngine getModularEngine() {
+        return modularEngine;
+    }
+
     public String getTestScriptName() {
         return testScriptName;
     }
@@ -1600,7 +1627,127 @@ public class TestEngine  {
         return parts[1];
     }
 
+    // used for debugging
+    public TestEngine setTestScriptDebugState(TestScriptDebugState state) {
+        this.testScriptDebugState = state;
+        if (state != null) {
+            this.testScriptDebugState.setDebugInterface(new TestScriptDebugInterface() {
+                public ModularEngine getMyModularEngine() {
+                    ModularEngine me = getModularEngine();
+                    if (me == null) {
+                        if (parent != null && parent.getModularEngine() !=null) {
+                            me = parent.getModularEngine();
+                        }
+                    }
+                    return me;
+                }
+                @Override
+                public void onBreakpoint() {
+                    ModularEngine me = this.getMyModularEngine();
+                    if (me != null) {
+                        me.saveLogs(); // Without this getTestReportsAsJson is empty
+                    } else {
+                        log.error("getModularEngine is null: log cannot be saved!");
+                    }
+                }
+
+                @Override
+                public String getLogAtBreakpoint() {
+                    ModularEngine me = this.getMyModularEngine();
+                    if (me != null) {
+                        return me.reportsAsJson();
+                    } else {
+                        log.error("getModularEngine is null!");
+                        testScriptDebugState.sendUnexpectedError();
+                        return "";
+                    }
+                }
+            });
+        }
+        return this;
+    }
+
+
     public URI getSut() {
         return sut;
     }
+
+    public boolean hasDebugState() {
+        return testScriptDebugState != null;
+    }
+
+    private void ifDebuggingPauseIfBreakpoint(final String parentType, final Integer parentIndex, final TestScript.SetupActionAssertComponent assertComponent, final Integer childPartIndex) {
+        if (! hasDebugState()) {
+           return;
+        }
+           testScriptDebugState.setCurrentExecutionIndex(parentType, parentIndex, childPartIndex);
+
+            boolean isBreakpoint = testScriptDebugState.isBreakpoint();
+            if (isBreakpoint) {
+                testScriptDebugState.getDebugInterface().onBreakpoint();
+                testScriptDebugState.sendBreakpointHit(true);
+                do {
+                    // Must pause first before Eval
+                    testScriptDebugState.waitOnBreakpoint(); // if eval, exit pause
+                    if (testScriptDebugState.getDebugEvaluateModeWasRequested().get()) { // Only assertion-eval is supported for now. Need to address Operations later
+                        testScriptDebugState.resetEvalModeWasRequested();
+                        String evalJsonString = testScriptDebugState.getEvalJsonString();
+                        if (evalJsonString == null) {
+                            // If evalJsonString is empty, Send original assertion as a template for the user to edit an assertion
+                            String assertionJsonStr = new Gson().toJson(assertComponent);
+                            testScriptDebugState.sendAssertionStr(assertionJsonStr);
+                        } else {
+                            // Eval
+                            Map<String, String> myMap = new Gson().fromJson(evalJsonString, Map.class);
+                            TestScript.SetupActionAssertComponent copy = assertComponent.copy();
+                            copy.setLabel(myMap.get("label"));
+                            copy.setDescription(myMap.get("description"));
+                            copy.setDirection(TestScript.AssertionDirectionType.fromCode(myMap.get("direction")));
+                            copy.setCompareToSourceId(myMap.get("compareToSourceId"));
+                            copy.setCompareToSourceExpression(myMap.get("compareToSourceExpression"));
+                            copy.setCompareToSourcePath(myMap.get("compareToSourcePath"));
+                            copy.setContentType(myMap.get("contentType"));
+                            copy.setExpression(myMap.get("expression"));
+                            copy.setHeaderField(myMap.get("headerField"));
+                            copy.setMinimumId(myMap.get("minimumId"));
+                            copy.setNavigationLinks(new Boolean(myMap.get("navigationLinks")).booleanValue());
+                            copy.setOperator(TestScript.AssertionOperatorType.fromCode(myMap.get("operator")));
+                            copy.setPath(myMap.get("path"));
+                            copy.setRequestMethod(TestScript.TestScriptRequestMethodCode.fromCode(myMap.get("requestMethod")));
+                            copy.setRequestURL(myMap.get("requestURL"));
+                            copy.setResource(myMap.get("resource"));
+                            copy.setResponse(TestScript.AssertionResponseTypes.fromCode(myMap.get("response")));
+                            copy.setResponseCode(myMap.get("responseCode"));
+                            copy.setSourceId(myMap.get("sourceId"));
+                            copy.setValidateProfileId(myMap.get("validateProfileId"));
+                            copy.setValue(myMap.get("value"));
+                            copy.setWarningOnly(new Boolean(myMap.get("warningOnly")));
+
+                            String typePrefix = "contained.action";
+                            TestReport.SetupActionAssertComponent actionReport = new TestReport.SetupActionAssertComponent();
+                            doAssert(typePrefix, copy, actionReport);
+                            String code = actionReport.getResult().toCode();
+                            if ("fail".equals(code)) {
+                                log.info("copy eval failed.");
+                            } else if ("error".equals(code)) {
+                                log.info("copy eval error.");
+                            }
+                            testScriptDebugState.sendDebugAssertionEvalResultStr(code, actionReport.getMessage());
+                        }
+                    }
+                } while (! testScriptDebugState.getResume().get() && ! testScriptDebugState.getKill().get());
+            }
+     }
+
+     private void ifDebuggingPauseIfBreakpoint(String parentType, Integer parentIndex) {
+        ifDebuggingPauseIfBreakpoint(parentType, parentIndex, null);
+     }
+
+    private void ifDebuggingPauseIfBreakpoint(String parentType, Integer parentIndex, Integer childPartIndex) {
+        if (hasDebugState()) {
+            testScriptDebugState.setCurrentExecutionIndex(parentType, parentIndex, childPartIndex);
+            testScriptDebugState.pauseIfBreakpoint();
+        }
+    }
+
 }

@@ -1,18 +1,22 @@
 <template>
     <div class="inlineDiv">
-        <div class="pre-test-gap"></div>
         <span v-bind:class="{
-            'pass-plain-detail': isPass,
-            'fail-plain-detail': isFail,
-             'error-plain': isError,
-             'not-run-plain-detail' : isNotRun,
-            }"  class="test-margins" @click.stop="toggleDisplay()">
+            'pass':         isPass  && colorful,
+            'pass-plain-detail': isPass  && !colorful,
+            'fail':         isFail  && colorful,
+            'fail-plain-detail': isFail  && !colorful,
+             'error':       isError && colorful,
+             'error-plain': isError && !colorful,
+             'not-run':   isNotRun && colorful,
+             'not-run-plain-detail' : isNotRun && ! colorful,
+             'breakpointHitBkg' : $parent && $parent.isBreakpointHit,
+            }"  @click.stop="toggleDisplay()">
 
-            <test-status-event-wrapper v-if="!statusRight"
-                                       :status-on-right="statusRight"
-                                       :script="script"
-                                       :report="report"
-            > </test-status-event-wrapper>
+            <test-status v-if="!statusRight"
+                         :status-on-right="statusRight"
+                         :script="script"
+                         :report="report"
+            > </test-status>
 
             <span v-if="displayOpen">
                 <img src="../../assets/arrow-down.png">
@@ -43,47 +47,37 @@
             isConditional ==> then is displayed by default
         -->
         <ul v-if="isConditional || (!isConditional && displayOpen)" class="noListStyle">
-            <li v-for="(action, actioni) in script.action"
-                v-bind:class="{
-                    'action-margins': true,
-                    'breakpoint-indicator': isBreakpoint(actioni),
-                }"
-                 :key="'Action' + actioni">
-                <!--
-                    If attempt to call test component fails (component not called)
-                    No extension/import will be shown in report
-                -->
-                <div v-if="report && report.action && report.action[actioni] && reportContainsError(report.action[actioni])">
-                    <action-details
-                            :script="action"
-                            :report="report && report.action ? report.action[actioni] : null"
-                            :debug-title="debugTitle(actioni)"
-                            @onStatusMouseOver="hoverActionIndex = actioni"
-                            @onStatusMouseLeave="hoverActionIndex = -1"
-                            @onStatusClick="toggleBreakpointIndex(actioni)"
-                    >
-                    </action-details>
-                </div>
-                <!-- a successful call to a module is reported here.
-                    The action may fail but at least the module call was good
-                    -->
-                <div v-else-if="scriptContainsImport(action)">
-                    <component-script
-                        :action-script="action"
-                        :action-report="report && report.action ? report.action[actioni] : null"> </component-script>
-                </div>
-                <div v-else class="has-cursor">
-                    <action-details
-                        :script="action"
-                        :report="report && report.action ? report.action[actioni] : null"
-                        :debug-title="debugTitle(actioni)"
-                        @onStatusMouseOver="hoverActionIndex = actioni"
-                        @onStatusMouseLeave="hoverActionIndex = -1"
-                        @onStatusClick="toggleBreakpointIndex(actioni)"
-                    >
-                    </action-details>
-                </div>
-            </li>
+            <debuggable-list-item
+                    v-for="(action, actioni) in script.action"
+                    :key="'Action' + actioni"
+                    :breakpoint-index="getBreakpointIndex(testType, testIndex, actioni)"
+                    :is-import-header="scriptImport(action).result.hasImport"
+            >
+                    <div v-for="(resultObj, resultKey) in scriptImport(action)" :key="resultKey">
+                        <div v-if="report && report.action && report.action[actioni] && reportContainsError(report.action[actioni])">
+                            <action-details
+                                :script="action"
+                                :report="report && report.action ? report.action[actioni] : null"
+                                >
+                            </action-details>
+                        </div>
+                        <div v-else-if="'hasImport' in resultObj && resultObj.hasImport">
+                            <component-script
+                               :action-script="action"
+                               :action-report="report && report.action ? report.action[actioni] : null"
+                               :action-component-name="resultObj.componentName"
+                               :parent-index="getBreakpointIndex(testType, testIndex, actioni)"
+                            ></component-script>
+                        </div>
+                        <div v-else class="has-cursor">
+                            <action-details
+                               :script="action"
+                               :report="report && report.action ? report.action[actioni] : null"
+                            >
+                           </action-details>
+                        </div>
+                    </div>
+            </debuggable-list-item>
         </ul>
     </div>
 </template>
@@ -92,17 +86,17 @@
     import ActionDetails from './ActionDetails'
     import ScriptDetailsContained from "./ScriptDetailsContained";
     import colorizeTestReports from "../../mixins/colorizeTestReports";
-   // import TestStatus from "./TestStatus";
+   import TestStatus from "./TestStatus";
    // import importMixin from "../../mixins/importMixin";
-    import TestStatusEventWrapper from "./TestStatusEventWrapper";
     import ComponentScript from "./ComponentScript";
+    import DebuggableListItem from "./debugger/DebuggableListItem";
+    import debugTestScriptMixin from "../../mixins/debugTestScript";
+    const path = require('path')
 
     export default {
         data() {
             return {
                 displayOpen: false,
-                hoverActionIndex: -1,
-                breakpointIndex: [],  // sunil - this is present here and in ComponentScript.vue - should be in store
             }
         },
         methods: {
@@ -124,44 +118,34 @@
                 if (!reportAction.operation) return false
                 if (!reportAction.operation.modifierExtension) return false
             },
-            scriptContainsImport(action) {
-                if (!action.operation) return false;
-                if (!action.operation.modifierExtension) return false;
-                let hasImport = false;
+            scriptImport(action) {
+                if (!action.operation) return {'result' : {'hasImport' : false}}
+                if (!action.operation.modifierExtension) return {'result' : {'hasImport' : false}}
+                let hasImport = false
+                let componentName = ''
+
                 action.operation.modifierExtension.forEach(extension => {
-                    if (extension.url === 'https://github.com/usnistgov/asbestos/wiki/TestScript-Import')
+                    if (extension.url === 'https://github.com/usnistgov/asbestos/wiki/TestScript-Import') {
                         hasImport = true
+                        if (extension.modifierExtension) {
+                            extension.modifierExtension.forEach(extension => {
+                                if (extension.url === 'component') {
+                                    let filePath = extension.valueString
+                                    let fileDotExtension = path.extname(filePath)
+                                    componentName = path.basename(filePath, fileDotExtension)
+                                }
+                            })
+                        }
+
+                    }
                 })
-                return hasImport
+                let resultObj = {'result' :{'hasImport' : hasImport, 'componentName' : componentName}}
+                return resultObj
             },
             toggleDisplay() {
                 this.displayOpen = !this.displayOpen
             },
-            // sunil - these  methods are present here and in ComponentScript.vue.  Should be store getters so they can be shared
-            toggleBreakpointIndex(actionIndex) {
-                if (this.breakpointIndex[actionIndex]) {
-                    this.hoverActionIndex = -1
-                }
-                this.breakpointIndex[actionIndex] = ! this.breakpointIndex[actionIndex]
-                if (this.breakpointIndex[actionIndex]) {
-                    this.hoverActionIndex = actionIndex
-                    // console.log("calling dispatch" + this.testScriptIndex + " breakpointIndex: " + this.testIndex + "." + actionIndex)
-                    this.$store.dispatch('addBreakpoint', {testScriptIndex: this.testScriptIndex, breakpointIndex: this.testIndex + "." + actionIndex})
-                } else {
-                   // remove breakpoint
-                    this.$store.dispatch('removeBreakpoint', {testScriptIndex: this.testScriptIndex, breakpointIndex: this.testIndex + "." + actionIndex})
-                }
-            },
-            debugTitle(idx) {
-                if (! this.breakpointIndex[idx]) {
-                    return "Set breakpoint"
-                } else {
-                    return "Remove breakpoint"
-                }
-            },
-            isBreakpoint(actionIdx) {
-                return Boolean(this.breakpointIndex[actionIdx]) || ! this.breakpointIndex[actionIdx] && this.hoverActionIndex === actionIdx
-            }
+
         },
         computed: {
             scriptConditional() { // TestScript representing conditional
@@ -205,16 +189,18 @@
             'script', 'report',
             'scriptContained', 'reportContained', // contained section of the TestScript and TestReport - used in conditional
             'label',
-            'testScriptIndex', 'testIndex',   // used by debugger
+            'testIndex', 'testType',
         ],
         components: {
             ActionDetails,
             ScriptDetailsContained,
-            TestStatusEventWrapper,
             ComponentScript,
+            TestStatus,
+            DebuggableListItem,
         },
         mixins: [
             colorizeTestReports,
+            debugTestScriptMixin,
         //    importMixin
         ],
         name: "TestDetails"
