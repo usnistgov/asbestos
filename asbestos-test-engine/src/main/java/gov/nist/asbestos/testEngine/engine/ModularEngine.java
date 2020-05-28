@@ -1,6 +1,5 @@
 package gov.nist.asbestos.testEngine.engine;
 
-import com.sun.org.apache.xpath.internal.operations.Mod;
 import gov.nist.asbestos.client.Base.EC;
 import gov.nist.asbestos.client.Base.ProxyBase;
 import gov.nist.asbestos.client.client.FhirClient;
@@ -19,7 +18,11 @@ import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.regex.Pattern;
 
 public class ModularEngine {
@@ -99,7 +102,7 @@ public class ModularEngine {
             }
             String moduleName = first ? null : scriptReportName;
 
-            report.setName(this.testName + (moduleName == null ? "" : File.separator + moduleName));
+            report.setName(this.testName + (moduleName == null ? "" : '/' + moduleName));
             first = false;
         }
     }
@@ -123,7 +126,7 @@ public class ModularEngine {
             }
             String moduleName = first ? null : scriptReportName;
 
-            report.setName(this.testName + (moduleName == null ? "" : File.separator + moduleName));
+            report.setName(this.testName + (moduleName == null ? "" : '/' + moduleName));
             String json = ProxyBase.getFhirContext().newJsonParser().setPrettyPrint(true).encodeResourceToString(report);
             reports.put(report.getName(), json);
 
