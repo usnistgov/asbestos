@@ -476,13 +476,12 @@ public class ProxyServlet extends HttpServlet {
         clientTask) {
         log.error(ExceptionUtils.getStackTrace(t));
         Ref ref = new Ref(Common.buildURI(req));
-        if (ref.isQuery()) {
-//            Bundle bundle = wrapInBundle(wrapInOutcome(t));
-            respond(resp, wrapInOutcome(t), inHeaders, clientTask, 403);
-        } else {
+//        if (ref.isQuery()) {
+//            respond(resp, wrapInOutcome(t), inHeaders, clientTask, 403);
+//        } else {
             OperationOutcome oo = wrapInOutcome(t);
             respond(resp, oo, inHeaders, clientTask, 400);
-        }
+//        }
     }
 
     private void respondWithError(HttpServletRequest req, HttpServletResponse resp, String msg, Headers inHeaders, ITask

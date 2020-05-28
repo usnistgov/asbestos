@@ -250,7 +250,7 @@ public class XdsOnFhirChannel extends BaseChannel /*implements IBaseChannel*/ {
                     sender = FhirSq.docManQuery(params, toAddr, task);
                     returnAhqrResults(requestOut);
             } else {
-                throw new RuntimeException("SEARCH " + resourceType + " not supported");
+                throw new RuntimeException("SEARCH " + resourceType + " not supported on this channel");
             }
         } else {
             // GET
@@ -354,7 +354,10 @@ public class XdsOnFhirChannel extends BaseChannel /*implements IBaseChannel*/ {
                 actorType = "rep";
                 transType = "ret";
             } else {
-                return new Ref(channelConfig.getFhirBase()).withResource(resourceType).getUri();
+                String fhirBase = channelConfig.getFhirBase();
+                if (fhirBase == null)
+                    return null;
+                return new Ref(fhirBase).withResource(resourceType).getUri();
             }
 
             return  new XdsActorMapper().getEndpoint(channelConfig.getXdsSiteName(), actorType, transType, false);
