@@ -33,6 +33,23 @@ export default {
              }
              return 0
          },
+         getBreakpointsInDetails(obj) {
+             let retObj = {'key': obj.breakpointIndex, 'childCount' : 0}
+             const breakpointMap = this.$store.state.debugTestScript.breakpointMap
+             if (breakpointMap.has(obj.testScriptIndex)) {
+                 const breakpointSet = breakpointMap.get(obj.testScriptIndex)
+
+                 var searchFn = function mySearchFn(currentVal /*, currentKey, set */) {
+                     if (currentVal) {
+                         if (currentVal.startsWith(this.key) && currentVal.length > this.key.length) {
+                             this.childCount++
+                         }
+                     }
+                 }
+                 breakpointSet.forEach(searchFn, retObj /* retObj becomes 'this' inside the searchFn*/)
+             }
+             return retObj.childCount
+         },
          isEvaluable(testScriptIndex) {
             return (this.getDebugActionButtonLabel(testScriptIndex) === 'Resume') && this.$store.state.debugTestScript.evalMode
         },
@@ -79,7 +96,17 @@ export default {
         closeModal() {
             this.$store.commit('setShowDebugEvalModal', false)
         },
-    },
+        displayAdditionalIndexLabel(isDisplayOpen, breakpointIndex) {
+            let bkptOptionEl = document.querySelector("span.breakpointGutterOption[data-breakpoint-index='"+ breakpointIndex + "']")
+            if (bkptOptionEl) {
+                if (isDisplayOpen) {
+                    bkptOptionEl.classList.add('breakpointOptionHidden')
+                } else {
+                    bkptOptionEl.classList.remove('breakpointOptionHidden')
+                }
+            }
+        },
+     },
     computed: {
         currentMapKey()  {
             const testId = this.$store.state.testRunner.currentTest

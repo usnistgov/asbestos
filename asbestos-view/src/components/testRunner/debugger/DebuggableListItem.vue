@@ -21,10 +21,11 @@
               @mouseleave="onBkptSwitchMouseLeave"
               @click.stop="doToggle()"
         >
-            <template v-if="hasBreakpoint"><span class="stopSignClass">&#x1F6D1;&nbsp;</span></template><!-- Stop sign -->
+            <template v-if="hasBreakpoint"><span class="breakpointIndicatorClass">&#x1F6D1;&nbsp;</span></template><!-- Stop sign -->
             <template v-else>&nbsp;&nbsp;</template>
         </span>
 <!--        <span v-if="isBreakpointHit" class="breakpointGutterOption evalBtn" @click.stop="doDebugEvalMode($store.state.testRunner.currentTest)">Eval.</span>-->
+            <span v-if="getBreakpointsInDetails(indexObj) > 0" class="breakpointGutterOption" title="Additional breakpoints exist in details" :data-breakpoint-index="breakpointIndex">+ {{getBreakpointsInDetails(indexObj)}} Bk.</span>
         <slot></slot>
     </li>
 
@@ -91,20 +92,12 @@
                 let retVal = this.$store.getters.hasBreakpoint(this.indexObj)
                 return retVal
             },
-            showBreakpointIndicator() {
-                return this.$store.getters.hasBreakpoint(this.indexObj) && ! this.isBreakpointHit
-            },
             isBreakpointHit() {
                 return this.$store.getters.isBreakpointHit(this.indexObj)
             },
-            breakpointSwitchStatus() {
-                if (this.hasBreakpoint) {
-                    return "ON"
-                } else {
-                    return  "OFF"
-                }
-            }
         },
+        // watch: {
+        // },
         props: [
             'breakpointIndex', 'isImportHeader',
         ],
@@ -118,12 +111,15 @@
 </script>
 
 <style scoped>
+</style>
+<style>
 
     span.breakpointGutter {
         position: absolute;
         left: 5px;
     }
     span.breakpointGutterOption {
+        font-size: 8px;
         position: absolute;
         left: 25px;
     }
@@ -145,7 +141,7 @@
         border-bottom: none;
     }
 
-    span.stopSignClass {
+    span.breakpointIndicatorClass {
         font-size: x-small;
     }
 
@@ -155,8 +151,6 @@
     }
 
 
-</style>
-<style>
     .breakpointBorderFocusOn {
         border: red dotted 2px;
     }
@@ -179,5 +173,8 @@
     }
     .breakpointFeatureBkg {
         background-color: white;
+    }
+    .breakpointOptionHidden {
+        visibility: hidden;
     }
 </style>
