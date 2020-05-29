@@ -28,6 +28,7 @@
                     <debuggable-list-item
                             :key="'Setup0'"
                             :breakpoint-index="getBreakpointIndex('setup',0)"
+                            :has-gutter-options="true"
                     >
                         <test-details
                                 :script="script.setup"
@@ -47,6 +48,7 @@
                             v-for="(test, testi) in tests"
                             :key="'Test' + testi"
                             :breakpoint-index="getBreakpointIndex('test',testi)"
+                            :has-gutter-options="true"
                     >
                         <test-details
                                 :script="script.test[testi]"

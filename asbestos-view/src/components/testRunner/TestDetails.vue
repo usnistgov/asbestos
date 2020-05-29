@@ -142,7 +142,7 @@
                 let resultObj = {'result' :{'hasImport' : hasImport, 'componentName' : componentName}}
                 return resultObj
             },
-            toggleDisplay(event) {
+            toggleDisplay() {
                 this.displayOpen = !this.displayOpen
                 this.displayAdditionalIndexLabel(this.displayOpen, this.getBreakpointIndex(this.testType, this.testIndex))
             },

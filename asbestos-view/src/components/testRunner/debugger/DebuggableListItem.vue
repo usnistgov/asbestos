@@ -1,9 +1,9 @@
 <template>
 
     <li
-            :class="{
-                    'breakpointHit': isBreakpointHit,
-            }"
+        :class="{
+                'breakpointHit': isBreakpointHit,
+        }"
         :data-breakpoint-index="breakpointIndex"
     >
         <!--
@@ -24,8 +24,12 @@
             <template v-if="hasBreakpoint"><span class="breakpointIndicatorClass">&#x1F6D1;&nbsp;</span></template><!-- Stop sign -->
             <template v-else>&nbsp;&nbsp;</template>
         </span>
-<!--        <span v-if="isBreakpointHit" class="breakpointGutterOption evalBtn" @click.stop="doDebugEvalMode($store.state.testRunner.currentTest)">Eval.</span>-->
-            <span v-if="getBreakpointsInDetails(indexObj) > 0" class="breakpointGutterOption" title="Additional breakpoints exist in details" :data-breakpoint-index="breakpointIndex">+ {{getBreakpointsInDetails(indexObj)}} Bk.</span>
+        <!-- Initially, when this component is created, either hide or display the gutter option span label. -->
+        <span v-show="hasGutterOptions"
+                  :class="{'breakpointGutterOption' : true,
+                    'breakpointOptionHidden' : isOptionInitiallyHidden,
+                   }"
+                  title="Additional breakpoints exist in details" :data-breakpoint-index="breakpointIndex">{{getGutterOptionDisplayString()}}</span>
         <slot></slot>
     </li>
 
@@ -39,7 +43,12 @@
         data() {
             return {
                 isUpdated: false, // Only to nudge Vue reactivity
+                isOptionInitiallyHidden: false,
             }
+        },
+        created() {
+            /* assuming initially the testscript-test-level display is collapsed, hide the label if no breakpoints exist in test-details */
+           this.isOptionInitiallyHidden = (this.getBreakpointsInDetails(this.indexObj) === 0)
         },
         methods: {
             doToggle() {
@@ -79,6 +88,14 @@
             onBkptSwitchMouseLeave(event) {
                 this.doFocusHint(event, false)
             },
+            getGutterOptionDisplayString() {
+                let ct = this.getBreakpointsInDetails(this.indexObj)
+                if (ct > 0) {
+                    return '+' + ct + '.'
+                } else {
+                    return ''
+                }
+            },
         },
         computed: {
             isNested() {
@@ -99,7 +116,7 @@
         // watch: {
         // },
         props: [
-            'breakpointIndex', 'isImportHeader',
+            'breakpointIndex', 'isImportHeader', 'hasGutterOptions',
         ],
         mixins: [
             debugTestScriptMixin,
@@ -127,30 +144,24 @@
     span.breakpointControlOn,
     span.breakpointControlOff {
         cursor: pointer;
-        border-left: gray solid 1px;
-        border-right: gray solid 1px;
+        border: gray dotted 1px;
         background-color: #f5f5f5;
         horiz-align: center;
         text-align: center;
         width: 14px;
         text-align: left;
     }
-
     span.breakpointControlOn {
-        border-top : none;
-        border-bottom: none;
+        /*border-top : none;*/
+        /*border-bottom: none;*/
     }
-
     span.breakpointIndicatorClass {
         font-size: x-small;
     }
-
     span.breakpointControlOff:hover,
     span.breakpointControlOn:hover {
         border: red dotted 2px;
     }
-
-
     .breakpointBorderFocusOn {
         border: red dotted 2px;
     }
@@ -177,4 +188,9 @@
     .breakpointOptionHidden {
         visibility: hidden;
     }
+    /*span.breakpointGutter:first-of-type {*/
+    /*    border-top: gray solid 1px;*/
+    /*    border-bottom: gray solid 1px;*/
+    /*}*/
+
 </style>
