@@ -44,11 +44,6 @@
                     (this.channelId ? `/${this.channelId}`: ''))
             },
             updateChannelIdsFromState() {
-                // const channelNames = this.$store.state.base.channelIds
-                // this.channels.length = 0
-                // channelNames.forEach(id => {
-                //     this.channels.push({ value: id, text: id })
-                // })
                 const ius = this.$store.state.base.channelURLs   // { id:  ... , url: ... }
                 this.channels.length = 0
                 if (this.show === 'id') {
@@ -60,15 +55,10 @@
                         this.channels.push({value: iu.id, text: iu.url ? iu.url : iu.site })
                     })
                 }
-//                this.channels.sort()
             },
             updateChannelIdFromState() {
-                //this.channel = this.$store.state.base.channelId
                 if (this.channel === null)
                     return
-                // if (this.channelId !== this.channel) {
-                //     this.$router.push(`/session/${this.session}/channels/${this.channel}`)
-                // }
                 this.channelId = this.channel
             },
             updateChannelFromUI() {
@@ -95,6 +85,19 @@
                     if (name !== this.$store.state.base.channelId) {
                         this.$store.commit('setChannelId', name);
                         this.$store.dispatch('loadChannel', this.$store.getters.getFullChannelId);
+                        const current = this.$router.currentRoute.path;
+                        const parts = current.split("/");
+                        const size = parts.length;
+                        let i;
+                        for (i=0; i<size; i++) {
+                            if (parts[i] === 'channel' && i<size+1) {
+                                i++;
+                                parts[i] = name;  // insert new channelId
+                                const newRoute = parts.join('/');
+                                this.$router.push(newRoute);
+                                break;
+                            }
+                        }
                     }
                 },
                 get() {

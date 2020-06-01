@@ -93,9 +93,8 @@
         watch: {
             'evalCount': 'setEvalCount',
             'testCollection': 'load',
-            'channelId': function(newVal) {
-                if (this.channel !== newVal)
-                    this.channel = newVal
+            'channelId': function() {
+                this.loadAChannel(`${this.sessionId}__${this.channelId}`);
             },
         },
         mixins: [ testCollectionMgmt ],

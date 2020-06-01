@@ -49,6 +49,10 @@ export default {
             }
             this.running = false
         },
+        async loadAChannel(channelId) {
+            let promise = this.$store.dispatch('loadChannel', channelId);
+            this.channelObj = await promise;
+        },
         async loadTestCollection(testCollection) {
             this.$store.commit('setTestCollectionName', testCollection)
             await this.$store.dispatch('loadCurrentTestCollection')
@@ -57,10 +61,11 @@ export default {
             if (requiredChannel) {
                 this.$store.commit('setChannelId', requiredChannel)
             }
-            this.$store.dispatch('loadChannel', this.fullChannelId)
-                .then(channel => {
-                    this.channelObj = channel
-                })
+            this.loadAChannel(this.fullChannelId);
+            // this.$store.dispatch('loadChannel', this.fullChannelId)
+            //     .then(channel => {
+            //         this.channelObj = channel
+            //     })
             const promises = []
             promises.push(this.$store.dispatch('loadTestScripts', this.$store.state.testRunner.testScriptNames))
             if (!this.$store.state.testRunner.isClientTest)
@@ -139,6 +144,7 @@ export default {
         channel: {
             set(name) {
                 if (name !== this.$store.state.base.channelId) {
+                    console.log(`really`);
                     this.$store.commit('setChannelId', name)
                 }
             },
