@@ -52,6 +52,14 @@ public class EC {
         this.externalCache = externalCache;
     }
 
+    // channelId is testSession__channelName
+    public File getCache(String channelId, String resourceType) {
+        File cacheBase = new File(new File(new File(externalCache, "FhirTestLogs"), channelId), "cache");
+        File typeBase = new File(cacheBase, resourceType);
+        typeBase.mkdirs();
+        return  typeBase;
+    }
+
      public List<String> getTestCollectionNames() {
         return getTestCollections().stream().map(File::getName).collect(Collectors.toList());
     }

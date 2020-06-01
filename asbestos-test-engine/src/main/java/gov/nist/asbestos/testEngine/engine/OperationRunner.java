@@ -77,8 +77,11 @@ public class OperationRunner {
                 }
             }
             if (!itsOk) {
-                reporter.reportError( "has multiple of sourceId, targetId, params, url - only one is allowed");
-                return;
+                // this one breaks the rules
+                if (!(op.hasType() && op.getType().getCode().equals("save-to-cache"))) {
+                    reporter.reportError("has multiple of sourceId, targetId, params, url - only one is allowed");
+                    return;
+                }
             }
         }
         if (!op.hasType()) {
@@ -198,6 +201,17 @@ public class OperationRunner {
                             .setVal(val)
                             .setOpReport(operationReport));
             setupActionTransaction.run(op, operationReport);
+        } else if ("save-to-cache".equals(code)) {
+            SaveToCache saveToCache = new SaveToCache(actionReference, fixtureMgr);
+            saveToCache
+                    .setVal(val)
+                    .setTestEngine(testEngine);
+            saveToCache.setVariableMgr(
+                    new VariableMgr(testScript, fixtureMgr)
+                            .setExternalVariables(externalVariables)
+                            .setVal(val)
+                            .setOpReport(operationReport));
+            saveToCache.run(op, operationReport);
         } else {
             reporter.reportError("do not understand code.code of " + code);
         }

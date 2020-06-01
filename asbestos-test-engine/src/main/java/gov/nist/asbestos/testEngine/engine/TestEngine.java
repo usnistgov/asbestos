@@ -1118,7 +1118,10 @@ public class TestEngine  {
         int testIndex = testScript.getTest().indexOf(testScriptElement);
         ValE fVal = new ValE(engineVal).setMsg("Test");
 
-        if (testScriptElement.hasAction()) {
+        if (!testScriptElement.hasAction()) {
+            reportTerminalFailure("Action must contain operation or assert.");
+            return false;
+        }
             String typePrefix = "contained.action";
 
             boolean multiErrorsAllowed = getExtension(testScriptElement.getModifierExtension(), ExtensionDef.multiErrors) != null;
@@ -1128,8 +1131,10 @@ public class TestEngine  {
                 Extension conditional = getExtension(action.getModifierExtension(), ExtensionDef.ts_conditional);
                 boolean isConditional = conditional != null;
                 TestReport.TestActionComponent actionReportComponent = testReportComponent.addAction();
-                if (invalidAction(action, actionReportComponent, fVal))
+                if (invalidAction(action, actionReportComponent, fVal)) {
+                    reportTerminalFailure("Action must contain operation or assert.");
                     return false;
+                }
                 if (action.hasOperation()) {
                     ifDebuggingPauseIfBreakpoint("test", testIndex, testPartIndex);
                     TestReport.SetupActionOperationComponent reportOp = actionReportComponent.getOperation();
@@ -1184,7 +1189,7 @@ public class TestEngine  {
                     }
                 }
             }
-        }
+
         return true;
     }
 
@@ -1208,7 +1213,12 @@ public class TestEngine  {
     private boolean invalidAction(TestScript.SetupActionComponent action, TestReport.SetupActionComponent actionReportComponent, ValE fVal) {
         if (action.hasOperation() && action.hasAssert()) {
             Reporter reporter = new Reporter(fVal, actionReportComponent.getOperation(), "", "");
-            reporter.reportError( "action has both operation and assertion");
+            reporter.reportError( "Action has both operation and assertion");
+            return true;
+        }
+        if (!action.hasOperation() && !action.hasAssert()) {
+            Reporter reporter = new Reporter(fVal, actionReportComponent.getOperation(), "", "");
+            reporter.reportError( "Action must have operation or assertion");
             return true;
         }
         return false;
@@ -1217,7 +1227,12 @@ public class TestEngine  {
     private boolean invalidAction(TestScript.TestActionComponent action, TestReport.TestActionComponent actionReportComponent, ValE fVal) {
         if (action.hasOperation() && action.hasAssert()) {
             Reporter reporter = new Reporter(fVal, actionReportComponent.getOperation(), "", "");
-            reporter.reportError( "action has both operation and assertion");
+            reporter.reportError( "Action has both operation and assertion");
+            return true;
+        }
+        if (!action.hasOperation() && !action.hasAssert()) {
+            Reporter reporter = new Reporter(fVal, actionReportComponent.getOperation(), "", "");
+            reporter.reportError( "Action must have operation or assertion");
             return true;
         }
         return false;
@@ -1253,89 +1268,7 @@ public class TestEngine  {
         }
     }
 
-    // build cache entry if testscript has property cache=true
     private void doPostProcessing() {
-        if (testCollection == null)
-            return;
-        if (sut == null)
-            return;
-        EC ec = new  EC(externalCache);
-        Properties tcProperties = ec.getTestCollectionProperties(testCollection);
-        String useCache = tcProperties.getProperty("cache");
-        if (useCache == null || !useCache.equals("true"))
-            return;
-
-        for (TestReport.TestReportTestComponent testComponent : testReport.getTest()) {
-
-
-            for (TestReport.TestActionComponent actionResult : testComponent.getAction()) {
-                if (!actionResult.hasOperation())
-                    continue;
-                TestReport.SetupActionOperationComponent op = actionResult.getOperation();
-                buildCacheEntry(op, ec);
-            }
-        }
-
-        TestScript.TestActionComponent foo;
-
-    }
-
-    private void buildCacheEntry(TestReport.SetupActionOperationComponent op, EC ec) {
-        if ("pass".equals(op.getResult().toCode())) {
-            //if (op.getMessage().startsWith("GET") || op.getMessage().startsWith("CREATE")) {
-            if (op.getDetail() == null)
-                throw new Error("Error building cache entry - op.detail is null");
-            URI uri;
-            try {
-                uri = new URI(op.getDetail());
-            } catch (URISyntaxException e) {
-                throw new Error("Error building cache entry - " + e.getMessage());
-            }
-            UIEvent uiEvent = new UIEvent(ec).fromURI(uri);
-            buildCacheEntry(uiEvent, ec);
-            // }
-        }
-    }
-
-    private void buildCacheEntry(UIEvent uiEvent, EC ec) {
-        if (uiEvent != null) {
-            // add to cache
-            File cacheDir = ec.getTestLogCacheDir(channelId);
-            String responseBody = uiEvent.getClientTask().getResponseBody();
-            BaseResource baseResource = ProxyBase.parse(responseBody, Format.fromContent(responseBody));
-            if (baseResource instanceof Bundle) {
-                Bundle bundle = (Bundle) baseResource;
-                for (Bundle.BundleEntryComponent comp : bundle.getEntry()) {
-                    if (comp.getResource() instanceof Patient) {
-                        String fullUrl = comp.getFullUrl();
-                        if (fullUrl != null && !fullUrl.equals("") && bundle.getTotal() == 1)
-                            buildCacheEntry(cacheDir, bundle, (Patient) comp.getResource());
-                    }
-                }
-            }
-        }
-    }
-
-    private void buildCacheEntry(File cacheDir, Bundle bundle, Patient patient) {
-        File resourceTypeFile = new File(cacheDir, "Patient");
-        resourceTypeFile.mkdirs();
-
-        String given;
-        try {
-            given = patient.getNameFirstRep().getGiven().get(0).toString();
-        } catch (Throwable t) {
-            given = "Missing";
-        }
-        String family;
-        try {
-            family = patient.getNameFirstRep().getFamily();
-        } catch (Throwable t) {
-            family = "Person";
-        }
-        if (given != null &&!given.equals("") && family != null && !family.equals("")) {
-            log.info("Writing cache entry to " + resourceTypeFile + " for " + given + "_" + family);
-            ProxyBase.toFile(bundle, resourceTypeFile, given + "_" + family, Format.JSON);
-        }
     }
 
     public TestEngine addCache(File cacheDir) {
@@ -1385,20 +1318,8 @@ public class TestEngine  {
         throw new RuntimeException("Cannot load TestScript (.xml or .json) from " + testDefDir + " or " + testDefDir + "/..");
     }
 
-    private boolean isFixtureDefined(String id) {
-        return fixtureMgr.containsKey(id);
-    }
-
     FixtureMgr getFixtures() {
         return fixtureMgr;
-    }
-
-    private boolean fixturesOk() {
-        for (FixtureComponent fixtureComp : fixtureMgr.values()) {
-            if (!fixtureComp.IsOk())
-                return false;
-        }
-        return true;
     }
 
     /**
@@ -1586,6 +1507,10 @@ public class TestEngine  {
 
     public File getExternalCache() {
         return externalCache;
+    }
+
+    public EC getEC() {
+        return new EC(getExternalCache());
     }
 
 //    public String getChannelId() {
