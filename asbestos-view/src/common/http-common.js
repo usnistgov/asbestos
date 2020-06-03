@@ -30,7 +30,10 @@ export const UtilFunctions = {
     },
     isHttpsMode: function() {
         return toolkitBaseToUse === HTTPSFHIRTOOLKITBASEURL
-    }
+    },
+    getWssBase: function() {
+        return HTTPSFHIRTOOLKITBASEURL.replace("https","wss")
+    },
 }
 
 export async function getServiceProperties() {

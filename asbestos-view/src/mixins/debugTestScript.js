@@ -13,6 +13,15 @@ export default {
             const key = this.getTestScriptIndexKey(testScriptIndex)
             return key in this.$store.state.debugTestScript.showDebugButton && Boolean(this.$store.state.debugTestScript.showDebugButton[key])
         },
+        isBeingDebugged(testScriptIndex) {
+            const key = this.getTestScriptIndexKey(testScriptIndex)
+            // this.$store.dispatch('debugMgmt')
+            const indexList = this.$store.state.debugTestScript.debugMgmtIndexList
+            if (indexList !== null || indexList !== undefined) {
+                return  indexList.includes(key)
+            }
+            return false
+        },
         getDebugActionButtonLabel(testScriptIndex) {
             const key = this.getTestScriptIndexKey(testScriptIndex)
             if (key in this.$store.state.debugTestScript.showDebugButton) {

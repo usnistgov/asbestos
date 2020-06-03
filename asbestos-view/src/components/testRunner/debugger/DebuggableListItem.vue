@@ -188,9 +188,5 @@
     .breakpointOptionHidden {
         visibility: hidden;
     }
-    /*span.breakpointGutter:first-of-type {*/
-    /*    border-top: gray solid 1px;*/
-    /*    border-bottom: gray solid 1px;*/
-    /*}*/
 
 </style>

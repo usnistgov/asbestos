@@ -34,6 +34,10 @@
 
                     <script-status v-if="!statusRight" :status-right="statusRight" :name="name"> </script-status>
 
+                    <template v-if="isBeingDebugged(i)">
+                        <span class="breakpointColumnHeader" title="">&#x1F41E;</span> <!-- &#x1F51B; on! symbol -->
+                    </template>
+
                     <span v-if="$store.state.testRunner.currentTest === name">
                             <img src="../../assets/arrow-down.png">
                     </span>
