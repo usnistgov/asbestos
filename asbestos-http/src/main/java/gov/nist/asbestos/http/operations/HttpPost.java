@@ -16,7 +16,9 @@ import java.util.Objects;
 public class HttpPost  extends HttpBase {
     private Header locationHeader = null;
 
+    // content is unzipped
     private void post(URI uri, Map<String, String> headers, byte[] content) throws IOException {
+        String stringContent = new String(content);
         HttpURLConnection connection = null;
 
         try {
@@ -31,7 +33,10 @@ public class HttpPost  extends HttpBase {
             connection.setDoInput(true);
             // TODO use proper charset (from input)
             if (content != null) {
-                connection.getOutputStream().write(content);
+                if (isRequestGzipEncoded())
+                    connection.getOutputStream().write(Gzip.compressGZIP(content));
+                else
+                    connection.getOutputStream().write(content);
             }
             status = connection.getResponseCode();
             try {
@@ -41,34 +46,20 @@ public class HttpPost  extends HttpBase {
                     is = connection.getErrorStream();
                 else
                     is = connection.getInputStream();
-                setResponse(IOUtils.toByteArray(is));
-//                try {
-//                    _responseText = new String(_response);
-//                } catch (Throwable t) {
-//
-//                }
+                byte[] bytes = IOUtils.toByteArray(is);
+                if (isResponseGzipEncoded())
+                    setResponse(Gzip.decompressGZIP(bytes));
+                else
+                    setResponse(bytes);
             } catch (Throwable t) {
                 // ok - won't always be available
             }
-//            if (status == HttpURLConnection.HTTP_OK || status == HttpURLConnection.HTTP_CREATED) {
-//                //connection.getHeaderFields()
-//                setResponseHeadersList(connection.getHeaderFields());
-//            }
-//            if (status >= 400)
-//                return;
-//            byte[] bb = IOUtils.toByteArray(connection.getInputStream());
-//            setResponse(bb);
         } finally {
             if (connection != null)
                 connection.disconnect();
         }
         if (getResponseHeaders() != null)
             locationHeader = getResponseHeaders().get("Location");
-//        try {
-//            setResponseText(new String(getResponse()));
-//        } catch (Throwable t) {
-//            // ignore
-//        }
     }
 
     public HttpPost post() {

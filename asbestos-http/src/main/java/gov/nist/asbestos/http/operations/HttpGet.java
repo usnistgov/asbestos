@@ -1,6 +1,7 @@
 package gov.nist.asbestos.http.operations;
 
 
+import gov.nist.asbestos.http.util.Gzip;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
@@ -17,12 +18,6 @@ public class HttpGet extends HttpBase {
         this.uri = uri;
         HttpURLConnection connection = null;
         try {
-//            if (!uri.isAbsolute()) {
-//                String query = uri.getQuery();
-//                URI newUri = new URI(uri.getScheme(), uri.getAuthority(), uri.getPath(), null, uri.getFragment());
-//                connection = (HttpURLConnection) newUri.toURL().openConnection();
-//
-//            }
             connection = (HttpURLConnection) uri.toURL().openConnection();
             connection.setRequestMethod("GET");
             if (_requestHeaders != null)
@@ -31,18 +26,27 @@ public class HttpGet extends HttpBase {
                 addHeaders(connection, headers);
             requestHeadersList = connection.getRequestProperties();
             status = connection.getResponseCode();
-//            if (status == HttpURLConnection.HTTP_OK || status == HttpURLConnection.HTTP_CREATED) {
-//                setResponseHeadersList(connection.getHeaderFields());
-//                setResponse(IOUtils.toByteArray(connection.getInputStream()));
-//            }
-            try {
-                InputStream is = status < 400 ? connection.getInputStream() : connection.getErrorStream();
-                setResponseHeadersList(connection.getHeaderFields());
-                setResponse(IOUtils.toByteArray(is));
-            } catch (Throwable t) {
-                // ok - won't always be available
-                //System.out.println(t.getMessage());
+//            try {
+            InputStream is = status < 400 ? connection.getInputStream() : connection.getErrorStream();
+            setResponseHeadersList(connection.getHeaderFields());
+            byte[] bytes = null;
+            if (status >= 400) {
+                try {
+                    bytes = IOUtils.toByteArray(is);
+                } catch (Throwable t) {
+                    // ignore
+                }
+            } else {
+                bytes = IOUtils.toByteArray(is);
             }
+            if (isResponseGzipEncoded())
+                setResponse(Gzip.decompressGZIP(bytes));
+            else
+                setResponse(bytes);
+//            } catch (Throwable t) {
+            // ok - won't always be available
+            //System.out.println(t.getMessage());
+//            }
         } catch (Throwable t) {
             throw new Error("GET " + uri + "\n" + t.getMessage(), t);
         } finally {
@@ -76,9 +80,6 @@ public class HttpGet extends HttpBase {
         headers.put("accept", contentType);
         headers.put("accept-charset", "utf-8");
         get(uri, headers);
-//        if (getResponse() != null) {
-//            setResponseText(new String(getResponse()));
-//        }
         return this;
     }
 

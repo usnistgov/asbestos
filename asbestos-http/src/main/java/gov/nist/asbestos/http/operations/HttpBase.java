@@ -49,7 +49,13 @@ abstract public class HttpBase {
     }
 
     public boolean isResponseGzipEncoded() {
+        if (_responseHeaders == null) return false;
         return _responseHeaders.isZipped();
+    }
+
+    public boolean isRequestGzipEncoded() {
+        if (_requestHeaders == null) return false;
+        return _requestHeaders.isZipped();
     }
 
     public static String parameterMapToString(Map<String, List<String>> parameterMap) {
@@ -95,7 +101,11 @@ abstract public class HttpBase {
 
     public void setResponse(byte[] bytes) {
         _response = bytes;
-       // _responseText = new String(bytes);
+//        if (isResponseGzipEncoded())
+//            _responseText = Gzip.decompressGZIPToString(bytes);
+//        else
+        if (bytes != null)
+            _responseText = new String(bytes);
     }
 
     public void setResponseText(String txt) {
@@ -109,9 +119,9 @@ abstract public class HttpBase {
     }
 
     public void setRequest(byte[] bytes) {
-        if (sendZip) {
-            bytes = Gzip.compressGZIP(bytes);
-        }
+//        if (sendZip) {
+//            bytes = Gzip.compressGZIP(bytes);
+//        }
         _request = bytes;
     }
 
@@ -122,6 +132,8 @@ abstract public class HttpBase {
     public byte[] getRequest() {
         if (_request == null && _requestText != null)
             return _requestText.getBytes();
+//        if (isRequestGzipEncoded())
+//            return Gzip.decompressGZIP(_request);
         return _request;
     }
 
@@ -146,9 +158,9 @@ abstract public class HttpBase {
                 //contentEncodingHeader != null && contentEncodingHeader.getValue().contains("gzip");
 
         if (_responseText == null && _response != null) {
-            if (zipped) {
-                    _responseText = Gzip.decompressGZIPToString(_response);
-            } else
+//            if (zipped) {
+//                    _responseText = Gzip.decompressGZIPToString(_response);
+//            } else
                 _responseText = new String(_response);
         }
         return _responseText;

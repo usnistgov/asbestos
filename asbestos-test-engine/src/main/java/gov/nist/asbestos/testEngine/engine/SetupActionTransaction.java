@@ -15,8 +15,8 @@ import java.util.Objects;
 
 public class SetupActionTransaction extends GenericSetupAction {
 
-    SetupActionTransaction(ActionReference actionReference, FixtureMgr fixtureMgr) {
-        super(actionReference);
+    SetupActionTransaction(ActionReference actionReference, FixtureMgr fixtureMgr, boolean isFollowedByAssert) {
+        super(actionReference,isFollowedByAssert);
         Objects.requireNonNull(fixtureMgr);
         this.fixtureMgr = fixtureMgr;
     }
@@ -27,7 +27,7 @@ public class SetupActionTransaction extends GenericSetupAction {
 
         ResourceWrapper wrapper = getFhirClient().writeResource(resourceToSend, targetUrl, fhirClient.getFormat(), requestHeader);
 
-        postExecute(wrapper);
+        postExecute(wrapper, operationReport, isFollowedByAssert);
     }
 
     @Override

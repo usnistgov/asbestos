@@ -17,6 +17,7 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.channels.Channel;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -33,17 +34,14 @@ public class Response500IT {
 
     @Test
     void expect500() throws URISyntaxException, IOException {
-        URI fhirBase500 = new URI("http://localhost:" + ITConfig.getProxyPort()  + "/asbestos/gen500");
-        ChannelConfig channelConfig = ChannelsForTests.create("default", "g500", fhirBase500);
-        URI channelBase = getChannelBase(channelConfig);
+        Ref channelRef = ChannelsForTests.gen500();
         FhirClient fhirClient = new FhirClient();
-        ResourceWrapper responseWrapper = fhirClient.writeResource(new DocumentReference(),  new Ref(channelBase), Format.JSON, new Headers().withContentType(Format.JSON.getContentType()));
+        ResourceWrapper responseWrapper = fhirClient.writeResource(new DocumentReference(),  channelRef, Format.JSON, new Headers().withContentType(Format.JSON.getContentType()));
         int status = responseWrapper.getStatus();
-        assertEquals(500, status, "URI is " + fhirBase500);
+        assertEquals(500, status, "URI is " + channelRef.toString());
     }
     public static URI getChannelBase(ChannelConfig channelConfig) {
         String fhirToolkitBase = "http://localhost:" +  ITConfig.getProxyPort() + "/asbestos";
-                //ServiceProperties.getInstance().getPropertyOrStop(ServicePropertiesEnum.FHIR_TOOLKIT_BASE);
         try {
             return new URI(fhirToolkitBase + "/proxy/" + channelConfig.asFullId());
         } catch (URISyntaxException e) {

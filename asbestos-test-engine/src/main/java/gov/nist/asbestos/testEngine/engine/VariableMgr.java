@@ -67,9 +67,13 @@ public class VariableMgr {
     }
 
     public Map<String, String> getVariables() {
+        return getVariables(true);
+    }
+
+    public Map<String, String> getVariables(boolean errorAsValue) {
         Map<String, String> vars = new HashMap<>();
         for (String name : getVariableNames()) {
-            String value = eval(name, true);
+            String value = eval(name, errorAsValue);
             vars.put(name, value);
         }
         return vars;
@@ -182,7 +186,7 @@ public class VariableMgr {
         if (var.hasSourceId()) {
             sourceId = var.getSourceId();
         } else if (!var.hasDefaultValue()){
-            String error = "Variable " + variableName + " does not have a sourceId and does not define a defaultValue";
+            String error = "Variable " + variableName + " does not have a source and does not define a defaultValue";
             if (errorAsValue)
                 return error;
             reporter.reportError(error);
@@ -191,7 +195,7 @@ public class VariableMgr {
 
 
         if (!fixtureMgr.containsKey(sourceId)) {
-            String error = "Variable " + variableName + " references sourceId " + sourceId + " which does  not exist";
+            String error = "Variable " + variableName + " references source " + sourceId + " which does not exist";
             if (errorAsValue)
                 return error;
             reporter.reportError(error);
@@ -201,7 +205,7 @@ public class VariableMgr {
 
         if (var.hasHeaderField()) {
             if (!fixture.hasHttpBase()) {
-                String error = "Variable " + variableName + " sourceId " + sourceId + " does not have a HTTP header behind it";
+                String error = "Variable " + variableName + " source " + sourceId + " does not have a HTTP header behind it";
                 if (errorAsValue)
                     return error;
                 reporter.reportError(error);

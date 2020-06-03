@@ -180,17 +180,19 @@ public class XdsOnFhirChannel extends BaseChannel /*implements IBaseChannel*/ {
     @Override
     public void transformRequest(HttpPost requestIn, HttpPost requestOut)  {
         Objects.requireNonNull(channelConfig);
-        OperationOutcome oo = new OperationOutcome();
-        Headers headers  = requestIn.getRequestHeaders();
         byte[] request = requestIn.getRequest();
         String contentType = requestIn.getRequestContentType();
         IBaseResource resource;
-        boolean isXml = true;
         if (contentType == null)
             throw new RuntimeException("No Content Type");
         if (contentType.startsWith("application/fhir+json")) {
-            isXml = false;
-            resource = ProxyBase.getFhirContext().newJsonParser().parseResource(new String(request));
+            try {
+                String requestString = new String(request);
+                resource = ProxyBase.getFhirContext().newJsonParser().parseResource(requestString);
+            } catch (Throwable t) {
+                returnErrorInOperationOutcome("Failed to parse request", t, requestIn);
+                return;
+            }
         } else if (contentType.startsWith("application/fhir+xml")) {
             resource = ProxyBase.getFhirContext().newXmlParser().parseResource(new String(request));
         } else
@@ -210,7 +212,8 @@ public class XdsOnFhirChannel extends BaseChannel /*implements IBaseChannel*/ {
 
         String soapString = transformPDBToPNR(bundle, toAddr, getTask());
         if (soapString == null) {
-            // OperationOutcome is loaded with errors to return
+            OperationOutcome oo = new OperationOutcome();
+            //  huh?
             throw new TransformException(oo);
         }
         requestOut.setRequestText(soapString);

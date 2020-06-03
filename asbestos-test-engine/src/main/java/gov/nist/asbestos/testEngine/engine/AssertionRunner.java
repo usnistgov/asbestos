@@ -274,6 +274,10 @@ public class AssertionRunner {
 
         BaseResource miniR = miniFixture.getResourceResource();   // reference
         BaseResource sourceR = sourceFixture.getResourceResource();  // sut
+        if (sourceR == null) {
+            Reporter.reportFail(val, assertReport, type, label, "No source", warningOnly);
+            return false;
+        }
 
 //        Class<?> miniClass = miniR.getClass();
         Class<?> sourceClass = sourceR.getClass();

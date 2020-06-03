@@ -12,8 +12,8 @@ public class SetupActionMhdPdbTransaction extends SetupActionTransaction {
     private IdBuilder idBuilder = new IdBuilder(true);
     private int counter = 1;
 
-    SetupActionMhdPdbTransaction(ActionReference actionReference, FixtureMgr fixtureMgr) {
-        super(actionReference, fixtureMgr);
+    SetupActionMhdPdbTransaction(ActionReference actionReference, FixtureMgr fixtureMgr, boolean isFollowedByAssert) {
+        super(actionReference, fixtureMgr, isFollowedByAssert);
         Objects.requireNonNull(fixtureMgr);
         this.fixtureMgr = fixtureMgr;
     }

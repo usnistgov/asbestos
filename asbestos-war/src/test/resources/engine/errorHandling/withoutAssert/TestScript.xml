@@ -1,0 +1,43 @@
+<TestScript>
+
+    <fixture id="thePatient">
+        <autocreate value="false"/>
+        <autodelete value="false"/>
+        <resource>
+            <reference value="Patient/patient.xml"/>
+        </resource>
+    </fixture>
+    <variable>
+        <name value="FirstName"/>
+        <expression value="Patient.name.given"/>
+        <sourceId value="thePatient"/>
+    </variable>
+    <variable>
+        <name value="LastName"/>
+        <expression value="Patient.name.family"/>
+        <sourceId value="thePatient"/>
+    </variable>
+    <variable>
+        <name value="birthDate"/>
+        <expression value="Patient.birthDate"/>
+        <sourceId value="thePatient"/>
+    </variable>
+
+    <test>
+
+        <action>
+            <operation>
+                <description value="search for patient."/>
+                <type>
+                    <code value="search"/>
+                </type>
+                <resource value="Patient"> </resource>
+                <contentType value="json"> </contentType>
+                <params value="?given=${FirstName}&amp;family=${LastName}&amp;birthdate=${birthDate}"> </params>
+                <responseId value="patient1-search"/>
+            </operation>
+        </action>
+
+    </test>
+
+</TestScript>

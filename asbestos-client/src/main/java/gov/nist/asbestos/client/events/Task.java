@@ -105,16 +105,35 @@ public class Task implements ITask {
         }
     }
 
+    public static byte[] unzip(byte[] in) {
+        try {
+            byte[] un = Gzip.decompressGZIP(in);
+            return un;
+        } catch (Exception e) {
+            return in;
+        }
+    }
+
+    public static String unzip(String in) {
+        try {
+            String un = Gzip.decompressGZIPToString(in.getBytes());
+            return un;
+        } catch (Exception e) {
+            return in;
+        }
+    }
+
     @Override
     public void putRequestBody(byte[] body) {
         Objects.requireNonNull(_requestHeaders);
         _requestRawBody = body;
         initTask();
         if (body != null) {
-            if (_requestHeaders.isZipped())
-                _requestBody = Gzip.decompressGZIPToString(body);
-            else
-                _requestBody = new String(body);
+            _requestBody = new String(unzip(body));
+//            if (_requestHeaders.isZipped())
+//                _requestBody = Gzip.decompressGZIPToString(body);
+//            else
+//                _requestBody = new String(body);
             if (body.length > 0) {
                 try {
                     try (FileOutputStream stream = new FileOutputStream(event.getRequestBodyFile(taskIndex))) {
@@ -141,14 +160,14 @@ public class Task implements ITask {
             } catch (Exception e) {
             }
             if (_requestRawBody != null) {
-                if (_requestHeaders.isZipped())
-                    _requestBody = Gzip.decompressGZIPToString(_requestRawBody);
-                else
+//                if (_requestHeaders.isZipped())
+//                    _requestBody = Gzip.decompressGZIPToString(_requestRawBody);
+//                else
                     _requestBody = new String(_requestRawBody);
             }
         }
-        if (_requestHeaders.isZipped())
-            return Gzip.decompressGZIP(_requestRawBody);
+//        if (_requestHeaders.isZipped())
+//            return Gzip.decompressGZIP(_requestRawBody);
         if (_requestBody == null && _requestRawBody != null)
             _requestBody = new String(_requestRawBody);
         return _requestRawBody;
@@ -300,17 +319,17 @@ public class Task implements ITask {
         //Objects.requireNonNull(_responseHeaders);
         if (_responseRawBody == null) {
             if (_responseBody != null) {
-                if (_responseHeaders.isZipped())
-                    _responseRawBody = Gzip.compressGZIP(_responseBody.getBytes());
-                else
+//                if (_responseHeaders.isZipped())
+//                    _responseRawBody = Gzip.compressGZIP(_responseBody.getBytes());
+//                else
                     _responseRawBody = _responseBody.getBytes();
                 return _responseRawBody;
             }
             try {
                 _responseRawBody = Files.readAllBytes(event.getResponseBodyFile(taskIndex).toPath());
-                if (_responseHeaders.isZipped())
-                    _responseBody = Gzip.decompressGZIPToString(_responseRawBody);
-                else
+//                if (_responseHeaders.isZipped())
+//                    _responseBody = Gzip.decompressGZIPToString(_responseRawBody);
+//                else
                     _responseBody = new String(_responseRawBody);
             } catch (Exception e) {
 

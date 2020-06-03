@@ -23,8 +23,8 @@ import java.net.URI;
 public class SaveToCache extends GenericSetupAction {
     private FixtureMgr fixtureMgr;
 
-    SaveToCache(ActionReference actionReference, FixtureMgr fixtureMgr) {
-        super(actionReference);
+    SaveToCache(ActionReference actionReference, FixtureMgr fixtureMgr, boolean isFollowedByAssert) {
+        super(actionReference,isFollowedByAssert);
         this.fixtureMgr = fixtureMgr;
     }
 

@@ -19,8 +19,8 @@ import java.util.Objects;
 
 class SetupActionDelete extends GenericSetupAction {
 
-    SetupActionDelete(ActionReference actionReference, FixtureMgr fixtureMgr) {
-        super(actionReference);
+    SetupActionDelete(ActionReference actionReference, FixtureMgr fixtureMgr, boolean isFollowedByAssert) {
+        super(actionReference, isFollowedByAssert);
         Objects.requireNonNull(fixtureMgr);
         this.fixtureMgr = fixtureMgr;
     }

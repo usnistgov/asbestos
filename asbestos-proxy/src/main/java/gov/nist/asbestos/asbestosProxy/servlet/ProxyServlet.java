@@ -10,10 +10,7 @@ import gov.nist.asbestos.asbestosProxy.channels.capabilitystatement.FhirToolkitC
 import gov.nist.asbestos.client.Base.EC;
 import gov.nist.asbestos.client.Base.ProxyBase;
 import gov.nist.asbestos.client.client.Format;
-import gov.nist.asbestos.client.events.Event;
-import gov.nist.asbestos.client.events.ITask;
-import gov.nist.asbestos.client.events.NoOpTask;
-import gov.nist.asbestos.client.events.UIEvent;
+import gov.nist.asbestos.client.events.*;
 import gov.nist.asbestos.client.log.SimStore;
 import gov.nist.asbestos.client.resolver.ChannelUrl;
 import gov.nist.asbestos.client.resolver.Ref;
@@ -185,6 +182,8 @@ public class ProxyServlet extends HttpServlet {
             channel.setReturnFormatType(Format.resultContentType(inHeaders));
 
             byte[] inBody = getRequestBody(req);
+//            if (inHeaders.isZipped())
+//                inBody = Gzip.decompressGZIP(inBody);
             String inBodyStr = new String(inBody);
 
             HttpPost requestIn = (HttpPost) logClientRequestIn(clientTask, inHeaders, inBody, Verb.POST);
@@ -419,10 +418,10 @@ public class ProxyServlet extends HttpServlet {
                 requestedType = ref.getResourceType();
                 HttpBase responseOut = transformResponse(backSideTask, requestOut, channel, hostport, requestedType, uri.toString());
                 respond(resp, responseOut, inHeaders, clientTask, 200);
+                resp.setStatus(resp.SC_OK);
             } else {
                 respondWithError(req, resp, "backend call failed", inHeaders, clientTask);
             }
-            resp.setStatus(resp.SC_OK);
         } catch (TransformException e) {
             respond(resp, e.getResponse(), inHeaders, clientTask, 400);
             resp.setStatus(resp.SC_OK);
@@ -486,13 +485,13 @@ public class ProxyServlet extends HttpServlet {
 
     private void respondWithError(HttpServletRequest req, HttpServletResponse resp, String msg, Headers inHeaders, ITask
         clientTask) {
-        if (new Ref(Common.buildURI(req)).isQuery()) {
-            Bundle bundle = wrapInBundle(wrapInOutcome(msg));
-            respond(resp, bundle, inHeaders, clientTask, 200);
-        } else {
+//        if (new Ref(Common.buildURI(req)).isQuery()) {
+//            Bundle bundle = wrapInBundle(wrapInOutcome(msg));
+//            respond(resp, bundle, inHeaders, clientTask, 200);
+//        } else {
             OperationOutcome oo = wrapInOutcome(msg);
             respond(resp, oo, inHeaders, clientTask, 400);
-        }
+//        }
     }
 
     private void respond(HttpServletResponse resp, BaseResource resource, Headers inHeaders, ITask clientTask, int status) {
@@ -522,7 +521,10 @@ public class ProxyServlet extends HttpServlet {
 
             transferHeaders(responseOut.getResponseHeaders(), resp);
             if (responseOut.getResponse() != null && responseOut.getResponse().length != 0) {
-                resp.getOutputStream().write(responseOut.getResponse());
+                byte[] content = responseOut.getResponse();
+                if (inHeaders.requestsZip())
+                    content = Gzip.compressGZIP(content);
+                resp.getOutputStream().write(content);
             }
         } catch (Exception e) {
             log.error(ExceptionUtils.getStackTrace(e));
@@ -556,12 +558,13 @@ public class ProxyServlet extends HttpServlet {
 
         task.putRequestBody(body);
         base.setRequest(body);
-        String encoding = (headers.getContentEncoding().getAllValues().isEmpty()) ? "" : headers.getContentEncoding().getAllValues().get(0);
-        if (encoding.equalsIgnoreCase("gzip")) {
-            String txt = Gzip.decompressGZIPToString(body);
-            task.putRequestBodyText(txt);
-            base.setRequestText(txt);
-        } else if (headers.getContentType().getAllValues().get(0).equalsIgnoreCase("text/html")) {
+//        String encoding = (headers.getContentEncoding().getAllValues().isEmpty()) ? "" : headers.getContentEncoding().getAllValues().get(0);
+//        if (encoding.equalsIgnoreCase("gzip")) {
+//            String txt = new String(Task.unzip(body)); // Gzip.decompressGZIPToString(body);
+//            task.putRequestBodyText(txt);
+//            base.setRequestText(txt);
+//        } else
+            if (headers.getContentType().getAllValues().get(0).equalsIgnoreCase("text/html")) {
             task.putRequestHTMLBody(body);
             base.setRequestText(new String(body));
         } else if (isStringType(headers.getContentType().getAllValues().get(0))) {
@@ -598,9 +601,12 @@ public class ProxyServlet extends HttpServlet {
     }
 
     static byte[] getRequestBody(HttpServletRequest req) {
+        Headers inHeaders = Common.getRequestHeaders(req, Verb.POST);
         byte[] bytes;
         try {
             bytes = IOUtils.toByteArray(req.getInputStream());
+            if (inHeaders.isZipped())
+                bytes = Gzip.decompressGZIP(bytes);
         } catch (Exception e) {
             throw new  RuntimeException(e);
         }
@@ -616,12 +622,13 @@ public class ProxyServlet extends HttpServlet {
         }
         task.putRequestBody(bytes);
         http.setRequest(bytes);
-        String encoding = headers.getContentEncoding().getAllValues().get(0);
-        if (encoding.equalsIgnoreCase("gzip")) {
-            String txt = Gzip.decompressGZIPToString(bytes);
-            task.putRequestBodyText(txt);
-            http.setRequest(txt.getBytes());
-        } else if (headers.getContentType().getAllValues().get(0).equalsIgnoreCase("text/html")) {
+//        String encoding = headers.getContentEncoding().getAllValues().get(0);
+//        if (encoding.equalsIgnoreCase("gzip")) {
+//            String txt = Gzip.decompressGZIPToString(bytes);
+//            task.putRequestBodyText(txt);
+//            http.setRequest(txt.getBytes());
+//        } else
+            if (headers.getContentType().getAllValues().get(0).equalsIgnoreCase("text/html")) {
             task.putRequestHTMLBody(bytes);
             http.setRequestText(new String(bytes));
         } else if (isStringType(headers.getContentType().getAllValues().get(0))) {
@@ -649,14 +656,15 @@ public class ProxyServlet extends HttpServlet {
                     }
                 }
             } else if (!encodings.isEmpty()){
-                String encoding = encodings.get(0);
-                if (encoding != null && encoding.equalsIgnoreCase("gzip")) {
-                    if (bytes != null) {
-                        String txt = http.getResponseText(); //Gzip.decompressGZIP(bytes);
-                        task.putResponseBodyText(txt);
-                        //http.setResponseText(txt);
-                    }
-                } else if (headers.getContentType().getAllValues().get(0).equalsIgnoreCase("text/html")) {
+//                String encoding = encodings.get(0);
+//                if (encoding != null && encoding.equalsIgnoreCase("gzip")) {
+//                    if (bytes != null) {
+//                        String txt = http.getResponseText(); //Gzip.decompressGZIP(bytes);
+//                        task.putResponseBodyText(txt);
+//                        //http.setResponseText(txt);
+//                    }
+//                } else
+                    if (headers.getContentType().getAllValues().get(0).equalsIgnoreCase("text/html")) {
                     task.putResponseHTMLBody(bytes);
                     //if (bytes != null)
                        // http.setResponseText(new String(bytes));
@@ -683,12 +691,13 @@ public class ProxyServlet extends HttpServlet {
             }
         }
         else {
-            String encoding = encodings.get(0);
-            if (encoding != null && encoding.equalsIgnoreCase("gzip")) {
-                String txt = Gzip.decompressGZIPToString(bytes);
-                task.putRequestBodyText(txt);
-                http.setRequestText(txt);
-            } else if (headers.getContentType().getAllValues().get(0).equalsIgnoreCase("text/html")) {
+//            String encoding = encodings.get(0);
+//            if (encoding != null && encoding.equalsIgnoreCase("gzip")) {
+//                String txt = Gzip.decompressGZIPToString(bytes);
+//                task.putRequestBodyText(txt);
+//                http.setRequestText(txt);
+//            } else
+            if (headers.getContentType().getAllValues().get(0).equalsIgnoreCase("text/html")) {
                 task.putRequestHTMLBody(bytes);
                 http.setRequestText(new String(bytes));
             } else if (isStringType(headers.getContentType().getAllValues().get(0))) {
@@ -791,10 +800,11 @@ public class ProxyServlet extends HttpServlet {
         simStore = new SimStore(externalCache, simId);
 
         String uriString = uri.toString();
-        if (uriString.contains("?")) {
-            // This is a search - should be resource type Bundle
-            simStore.setResource("Bundle");
-        } else if (!uriParts.isEmpty()) {
+//        if (uriString.contains("?")) {
+//            // This is a search - should be resource type Bundle
+//            simStore.setResource("Bundle");
+//        } else
+        if (!uriParts.isEmpty()) {
             simStore.setResource(uriParts.get(0));
             uriParts.remove(0);
         } else {

@@ -11,8 +11,8 @@ import java.net.URI;
 class SetupActionSearch extends SetupActionRead {
 
 
-    SetupActionSearch(ActionReference actionReference, FixtureMgr fixtureMgr) {
-        super(actionReference, fixtureMgr);
+    SetupActionSearch(ActionReference actionReference, FixtureMgr fixtureMgr, boolean isFollowedByAssert) {
+        super(actionReference, fixtureMgr, isFollowedByAssert);
     }
 
     @Override
