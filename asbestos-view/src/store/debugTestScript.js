@@ -1,5 +1,6 @@
 import Vue from "vue";
 import Vuex from "vuex";
+import {UtilFunctions} from "../common/http-common";
 
 Vue.use(Vuex)
 
@@ -16,6 +17,8 @@ export const debugTestScriptStore = {
             Value (Set) = String.format("%d.%d", testIndex, actionIndex) [0..*] */
             breakpointMap: new Map(),
             testScriptDebuggerWebSocket: null,
+            debugMgmtWebSocket: null,
+            debugMgmtIndexList: [],
         }
     },
     mutations: {
@@ -162,7 +165,7 @@ export const debugTestScriptStore = {
                 //     valObj.debugButtonLabel = "Debug"
                 // }
             } else {
-                console.log('debugKill '+ mapKey + ' failed: WebSocket is null!')
+                console.log('debugKill ' + mapKey + ' failed: WebSocket is null!')
             }
         },
         async doDebugEvalMode({commit, state, rootState, getters}) {
@@ -171,9 +174,9 @@ export const debugTestScriptStore = {
             const mapKey = getters.getMapKey(testId)
             const breakpointIndex = state.showDebugButton[mapKey].breakpointIndex
             if (rootState.debugAssertionEval.assertionEvalBreakpointIndex === breakpointIndex) {
-               commit('setShowDebugEvalModal', true)
+                commit('setShowDebugEvalModal', true)
             } else {
-               commit('setAssertionEvalBreakpointIndex', breakpointIndex)
+                commit('setAssertionEvalBreakpointIndex', breakpointIndex)
                 let sendData = `{"requestOriginalAssertion":"true","testScriptIndex":"${mapKey}"}`
 
                 console.log('Requesting original-assertion ' + breakpointIndex)
@@ -182,7 +185,7 @@ export const debugTestScriptStore = {
         },
         async doDebugEvalAssertion({state}, assertionDataBase64) {
             let sendData = `{"debugEvalAssertion":"true", "base64String":"${assertionDataBase64}"}`
-           state.testScriptDebuggerWebSocket.send(sendData)
+            state.testScriptDebuggerWebSocket.send(sendData)
         },
         async debugTestScript({commit, rootState, state, getters, dispatch}, testId) {
             console.log('in debug' + testId + ' isGettersUndefined: ' + (getters === undefined).valueOf())
@@ -191,27 +194,31 @@ export const debugTestScriptStore = {
 
             commit('setCurrentTest', testId)
             const mapKey = this.getters.getMapKey(testId)
+            const testSessionId = rootState.base.session
 
             // Technically it is possible to run many debugger web sockets but the test display only allows "opening" one active Test bar at a time since the previous test bar is automatically closed.
 
             if (state.testScriptDebuggerWebSocket === null) {
-                state.testScriptDebuggerWebSocket = new WebSocket('wss://fhirtoolkit.test:9743/asbestos/debugTestScript/developer/'+mapKey) // TODO: Replace https off the HTTPS TOOLKIT BASE and append the Endpoint
+                const wssBase = UtilFunctions.getWssBase()
+                const channelId = rootState.base.channelId
+                const wssSocketUrl = `${wssBase}/debugTestScript/developer?ftkTestSessionId=${testSessionId}&channelId=${channelId}&testScriptIndex=${mapKey}`
+                state.testScriptDebuggerWebSocket = new WebSocket(wssSocketUrl)
                 state.testScriptDebuggerWebSocket.onopen = event => {
                     state.waitingForBreakpoint = true
                     // Disable Run button
                     console.log('In socket onOpen. event: ' + (event === undefined).valueOf())
                     // clear log 1?
                     commit('clearTestReports')
-                    let uri = `debug-testscript/${rootState.base.session}__${rootState.base.channelId}/${this.state.testRunner.currentTestCollectionName}/${testId}?_format=${this.state.testRunner.useJson ? 'json' : 'xml'};_gzip=${this.state.testRunner.useGzip}`
+                    let uri = `debug-testscript/${testSessionId}__${channelId}/${this.state.testRunner.currentTestCollectionName}/${testId}?_format=${this.state.testRunner.useJson ? 'json' : 'xml'};_gzip=${this.state.testRunner.useGzip}`
                     let indexOfTestId = getters.getIndexOfTestId(testId)
                     if (indexOfTestId > -1) {
                         const breakpointSet = state.breakpointMap.get(mapKey) // Follow proper key format
                         let breakpointArrayString = JSON.stringify([...breakpointSet])
                         let sendData = `{"uri":"${uri}","testScriptIndex":"${mapKey}","breakpointList":${breakpointArrayString}}`
-                        console.log('Sending: ' + sendData)
+                        // console.log('Sending: ' + sendData)
                         state.testScriptDebuggerWebSocket.send(sendData)
                     } else {
-                        console.log(indexOfTestId + ": index not found for testId:  " + testId)
+                        // console.log(indexOfTestId + ": index not found for testId:  " + testId)
                         return
                     }
                 }
@@ -220,13 +227,17 @@ export const debugTestScriptStore = {
                     state.waitingForBreakpoint = false
                     // Enable Run button
                     if (event != null && event != undefined) {
-                        console.log('onclose data: ' + event.returnData)
+                        // console.log('onclose data: ' + event.returnData)
                     }
-                    let actionData = {testScriptIndex: this.getters.getActivelyDebuggingTestScriptIndex, breakpointIndex: null, debugButtonLabel: 'Debug'}
+                    let actionData = {
+                        testScriptIndex: this.getters.getActivelyDebuggingTestScriptIndex,
+                        breakpointIndex: null,
+                        debugButtonLabel: 'Debug'
+                    }
                     commit('setDebugButtonLabel', actionData)
-                    console.log('In socket onClose. Setting socket to null...')
+                    // console.log('In socket onClose. Setting socket to null...')
                     state.testScriptDebuggerWebSocket = null
-                    console.log('done.')
+                    // console.log('done.')
                 }
                 state.testScriptDebuggerWebSocket.onmessage = event => {
                     let messageStrLimit = 500
@@ -246,14 +257,14 @@ export const debugTestScriptStore = {
                     } else if (returnData.messageType === 'breakpoint-hit') {
                         state.waitingForBreakpoint = false
                         // clear log 2?
-                       console.log('breakpoint hit: ' + returnData.breakpointIndex) //  This needs to be {key: x, breakpointIndex: x}
-                       commit('setDebugButtonLabel', returnData)
-                       commit('setCombinedTestReports', returnData.testReport)
+                        // console.log('breakpoint hit: ' + returnData.breakpointIndex) //  This needs to be {key: x, breakpointIndex: x}
+                        commit('setDebugButtonLabel', returnData)
+                        commit('setCombinedTestReports', returnData.testReport)
                         if (('isEvaluable' in returnData) && returnData.isEvaluable === 'true') {
-                           state.evalMode = true
+                            state.evalMode = true
                             if (rootState.debugAssertionEval.showModal === true) {
-                               // Auto-refresh the modal if already evalMode is already displaying the modal
-                               //  state.doDebugEvalMode({commit: commit, state: state, rootState: rootState, getters: getters}, testId)
+                                // Auto-refresh the modal if already evalMode is already displaying the modal
+                                //  state.doDebugEvalMode({commit: commit, state: state, rootState: rootState, getters: getters}, testId)
                                 dispatch('doDebugEvalMode')
                             }
                         }
@@ -262,7 +273,7 @@ export const debugTestScriptStore = {
                         // rootState.testScriptAssertionEval.
                         commit('updateAssertionEvalObj', returnData.assertionJson)
                     } else if (returnData.messageType === 'eval-assertion-result') {
-                       commit('setDebugAssertionEvalResult', returnData)
+                        commit('setDebugAssertionEvalResult', returnData)
                     } else if (returnData.messageType === 'killed') {
                         alert('Debug: Killed')
                         state.testScriptDebuggerWebSocket.close()
@@ -271,7 +282,7 @@ export const debugTestScriptStore = {
                         state.testScriptDebuggerWebSocket.close()
                     }
                 }
-                state.testScriptDebuggerWebSocket.onerror = function(event) {
+                state.testScriptDebuggerWebSocket.onerror = function (event) {
                     state.waitingForBreakpoint = false
                     if (event != null && event != undefined) {
                         alert('Error: ' + event.data)
@@ -285,10 +296,53 @@ export const debugTestScriptStore = {
                 let breakpointArrayString = JSON.stringify([...breakpointSet])
                 let sendData = `{"resumeBreakpoint":"true","testScriptIndex":"${mapKey}","breakpointList":${breakpointArrayString}}`
 
-                console.log('Resuming from ' + state.showDebugButton[mapKey].breakpointIndex)
+                // console.log('Resuming from ' + state.showDebugButton[mapKey].breakpointIndex)
                 state.testScriptDebuggerWebSocket.send(sendData)
                 state.showDebugButton[mapKey].breakpointIndex = null // Clear flag
             }
         },
-    }
+        async isDebuggerOn({rootState, state}) {
+            console.log('isDebuggerOn was called' )
+        },
+        async debugMgmt({rootState, state}) {
+            // console.log('in debugMgmt. ')
+
+            if (state.debugMgmtWebSocket === null) {
+                const wssBase = UtilFunctions.getWssBase()
+                const wssSocketUrl = `${wssBase}/debugTestScript/developer`
+                state.debugMgmtWebSocket = new WebSocket(wssSocketUrl)
+                state.debugMgmtWebSocket.onopen = event => {
+                    if (event) {
+                        console.log('In debugMgmt socket onOpen. event: ' + (event === undefined).valueOf())
+                    }
+                    const testSessionId = rootState.base.session
+                    const channelId = rootState.base.channelId
+                    const sendData = `{"getExistingDebuggerList":"true","ftkTestSessionId":"${testSessionId}","channelId":"${channelId}"}`
+                    state.debugMgmtWebSocket.send(sendData)
+                }
+                state.debugMgmtWebSocket.onmessage = event => {
+                    // console.log('debugMgmt onMessage: ' + (event.data))
+                    let returnData = JSON.parse(event.data)
+                    if (returnData.messageType === 'existingDebuggersList') {
+                        if (returnData.indexList && returnData.length > 0) {
+                            state.debugMgmtIndexList = returnData.indexList
+                        }
+                        // console.log('closing debugMgmt socket and setting socket to null')
+                        // state.debugMgmtWebSocket.close()
+                        // state.debugMgmtWebSocket = null
+                    }
+                }
+                state.debugMgmtWebSocket.onerror = function (event) {
+                    if (event != null && event != undefined) {
+                        alert('debugMgmt Error: ' + event.data)
+                    }
+                }
+                state.debugMgmtWebSocket.onclose = event => {
+                    if (event != null && event != undefined) {
+                        // console.log('debugMgmt onclose data: ' + event.returnData)
+                    }
+                }
+            }
+        },
+    },
 }

@@ -1,9 +1,9 @@
 <template>
 
     <li
-            :class="{
-                    'breakpointHit': isBreakpointHit,
-            }"
+        :class="{
+                'breakpointHit': isBreakpointHit,
+        }"
         :data-breakpoint-index="breakpointIndex"
     >
         <!--
@@ -21,12 +21,15 @@
               @mouseleave="onBkptSwitchMouseLeave"
               @click.stop="doToggle()"
         >
-            <template v-if="hasBreakpoint">
-               &#x1F6D1; <!-- Stop sign -->
-            </template>
+            <template v-if="hasBreakpoint"><span class="breakpointIndicatorClass">&#x1F6D1;&nbsp;</span></template><!-- Stop sign -->
             <template v-else>&nbsp;&nbsp;</template>
         </span>
-<!--        <span v-if="isBreakpointHit" class="breakpointGutterOption evalBtn" @click.stop="doDebugEvalMode($store.state.testRunner.currentTest)">Eval.</span>-->
+        <!-- Initially, when this component is created, either hide or display the gutter option span label. -->
+        <span v-show="hasGutterOptions"
+                  :class="{'breakpointGutterOption' : true,
+                    'breakpointOptionHidden' : isOptionInitiallyHidden,
+                   }"
+                  title="Additional breakpoints exist in details" :data-breakpoint-index="breakpointIndex">{{getGutterOptionDisplayString()}}</span>
         <slot></slot>
     </li>
 
@@ -40,7 +43,12 @@
         data() {
             return {
                 isUpdated: false, // Only to nudge Vue reactivity
+                isOptionInitiallyHidden: false,
             }
+        },
+        created() {
+            /* assuming initially the testscript-test-level display is collapsed, hide the label if no breakpoints exist in test-details */
+           this.isOptionInitiallyHidden = (this.getBreakpointsInDetails(this.indexObj) === 0)
         },
         methods: {
             doToggle() {
@@ -80,6 +88,14 @@
             onBkptSwitchMouseLeave(event) {
                 this.doFocusHint(event, false)
             },
+            getGutterOptionDisplayString() {
+                let ct = this.getBreakpointsInDetails(this.indexObj)
+                if (ct > 0) {
+                    return '+' + ct + '.'
+                } else {
+                    return ''
+                }
+            },
         },
         computed: {
             isNested() {
@@ -93,22 +109,14 @@
                 let retVal = this.$store.getters.hasBreakpoint(this.indexObj)
                 return retVal
             },
-            showBreakpointIndicator() {
-                return this.$store.getters.hasBreakpoint(this.indexObj) && ! this.isBreakpointHit
-            },
             isBreakpointHit() {
                 return this.$store.getters.isBreakpointHit(this.indexObj)
             },
-            breakpointSwitchStatus() {
-                if (this.hasBreakpoint) {
-                    return "ON"
-                } else {
-                    return  "OFF"
-                }
-            }
         },
+        // watch: {
+        // },
         props: [
-            'breakpointIndex', 'isImportHeader',
+            'breakpointIndex', 'isImportHeader', 'hasGutterOptions',
         ],
         mixins: [
             debugTestScriptMixin,
@@ -120,12 +128,15 @@
 </script>
 
 <style scoped>
+</style>
+<style>
 
     span.breakpointGutter {
         position: absolute;
         left: 5px;
     }
     span.breakpointGutterOption {
+        font-size: 8px;
         position: absolute;
         left: 25px;
     }
@@ -133,27 +144,24 @@
     span.breakpointControlOn,
     span.breakpointControlOff {
         cursor: pointer;
-        border-left: gray solid 1px;
-        border-right: gray solid 1px;
+        border: gray dotted 1px;
         background-color: #f5f5f5;
         horiz-align: center;
         text-align: center;
-        font-size: x-small;
-        width: 10px;
+        width: 14px;
+        text-align: left;
     }
-
     span.breakpointControlOn {
-        font-size: xx-small;
-        border : none;
+        /*border-top : none;*/
+        /*border-bottom: none;*/
     }
-
-    span.breakpointControlOff:hover {
+    span.breakpointIndicatorClass {
+        font-size: x-small;
+    }
+    span.breakpointControlOff:hover,
+    span.breakpointControlOn:hover {
         border: red dotted 2px;
     }
-
-
-</style>
-<style>
     .breakpointBorderFocusOn {
         border: red dotted 2px;
     }
@@ -177,4 +185,8 @@
     .breakpointFeatureBkg {
         background-color: white;
     }
+    .breakpointOptionHidden {
+        visibility: hidden;
+    }
+
 </style>

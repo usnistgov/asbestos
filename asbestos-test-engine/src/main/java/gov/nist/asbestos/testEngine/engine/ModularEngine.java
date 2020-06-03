@@ -4,7 +4,7 @@ import gov.nist.asbestos.client.Base.EC;
 import gov.nist.asbestos.client.Base.ProxyBase;
 import gov.nist.asbestos.client.client.FhirClient;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
-import gov.nist.asbestos.sharedObjects.TestScriptDebugState;
+import gov.nist.asbestos.sharedObjects.debug.TestScriptDebugState;
 import gov.nist.asbestos.simapi.validation.Val;
 import gov.nist.asbestos.testEngine.engine.fixture.FixtureMgr;
 import org.apache.commons.lang3.exception.ExceptionUtils;

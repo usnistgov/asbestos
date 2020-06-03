@@ -13,6 +13,15 @@ export default {
             const key = this.getTestScriptIndexKey(testScriptIndex)
             return key in this.$store.state.debugTestScript.showDebugButton && Boolean(this.$store.state.debugTestScript.showDebugButton[key])
         },
+        isBeingDebugged(testScriptIndex) {
+            const key = this.getTestScriptIndexKey(testScriptIndex)
+            // this.$store.dispatch('debugMgmt')
+            const indexList = this.$store.state.debugTestScript.debugMgmtIndexList
+            if (indexList !== null || indexList !== undefined) {
+                return  indexList.includes(key)
+            }
+            return false
+        },
         getDebugActionButtonLabel(testScriptIndex) {
             const key = this.getTestScriptIndexKey(testScriptIndex)
             if (key in this.$store.state.debugTestScript.showDebugButton) {
@@ -32,6 +41,23 @@ export default {
                     return breakpointSet.size
              }
              return 0
+         },
+         getBreakpointsInDetails(obj) {
+             let retObj = {'key': obj.breakpointIndex, 'childCount' : 0}
+             const breakpointMap = this.$store.state.debugTestScript.breakpointMap
+             if (breakpointMap.has(obj.testScriptIndex)) {
+                 const breakpointSet = breakpointMap.get(obj.testScriptIndex)
+
+                 var searchFn = function mySearchFn(currentVal /*, currentKey, set */) {
+                     if (currentVal) {
+                         if (currentVal.startsWith(this.key) && currentVal.length > this.key.length) {
+                             this.childCount++
+                         }
+                     }
+                 }
+                 breakpointSet.forEach(searchFn, retObj /* retObj becomes 'this' inside the searchFn*/)
+             }
+             return retObj.childCount
          },
          isEvaluable(testScriptIndex) {
             return (this.getDebugActionButtonLabel(testScriptIndex) === 'Resume') && this.$store.state.debugTestScript.evalMode
@@ -58,17 +84,10 @@ export default {
             return obj
         },
         toggleBreakpointIndex(obj) {
-            // console.log("enter toggleBreakpointIndex")
-            // let obj = {testScriptIndex: testScriptIndex, breakpointIndex: testType + testIndex + "." + actionIndex}
             if (! this.$store.getters.hasBreakpoint(obj)) {
-                // this.hoverActionIndex = actionIndex // Restore the hoverActionIndex when toggle on the same item goes from on(#)-off(-1)-on(#)
-                // console.log("calling dispatch" + testScriptIndex + " breakpointIndex: " + testIndex + "." + actionIndex)
                 return this.$store.dispatch('addBreakpoint', obj)
 
             } else {
-                // this.hoverActionIndex = -1 // Immediately remove the debug indicator while the mouse hover is still active but without having to wait for the mouseLeave event
-                // remove breakpoint
-                //  console.log("calling removeBreakpoint dispatch" + testScriptIndex + " breakpointIndex: " + testIndex + "." + actionIndex)
                 return this.$store.dispatch('removeBreakpoint', obj)
             }
         },
@@ -79,7 +98,17 @@ export default {
         closeModal() {
             this.$store.commit('setShowDebugEvalModal', false)
         },
-    },
+        displayAdditionalIndexLabel(isDisplayOpen, breakpointIndex) {
+            let bkptOptionEl = document.querySelector("span.breakpointGutterOption[data-breakpoint-index='"+ breakpointIndex + "']")
+            if (bkptOptionEl) {
+                if (isDisplayOpen) {
+                    bkptOptionEl.classList.add('breakpointOptionHidden')
+                } else {
+                    bkptOptionEl.classList.remove('breakpointOptionHidden')
+                }
+            }
+        },
+     },
     computed: {
         currentMapKey()  {
             const testId = this.$store.state.testRunner.currentTest

@@ -34,15 +34,16 @@
 
                     <script-status v-if="!statusRight" :status-right="statusRight" :name="name"> </script-status>
 
+                    <template v-if="isBeingDebugged(i)">
+                        <span class="breakpointColumnHeader" title="">&#x1F41E;</span> <!-- &#x1F51B; on! symbol -->
+                    </template>
+
                     <span v-if="$store.state.testRunner.currentTest === name">
-                            <template v-if="isDebuggable(i)">
-                                <span class="breakpointColumnHeader" title="Breakpoint Column Header">{{getBreakpointCount(i)}} BKPTs.</span>
-                            </template>
                             <img src="../../assets/arrow-down.png">
-                        </span>
+                    </span>
                     <span v-else>
                             <img src="../../assets/arrow-right.png"/>
-                        </span>
+                    </span>
                     <span class="large-text">{{ cleanTestName(name) }}</span>
 
                     <span v-if="isClient">

@@ -34,6 +34,7 @@ export const debugAssertionEvalStore = {
                 value: '',
                 warningOnly: '',
             },
+            collapsibleDisplayEventObj: {displayOpen: false, breakpointObj: null},
         }
     },
     mutations: {

@@ -10,7 +10,7 @@
              'not-run':   isNotRun && colorful,
              'not-run-plain-detail' : isNotRun && ! colorful,
              'breakpointHitBkg' : $parent && $parent.isBreakpointHit,
-            }"  @click.stop="toggleDisplay()">
+            }"  @click.stop="toggleDisplay">
 
             <test-status v-if="!statusRight"
                          :status-on-right="statusRight"
@@ -144,8 +144,8 @@
             },
             toggleDisplay() {
                 this.displayOpen = !this.displayOpen
+                this.displayAdditionalIndexLabel(this.displayOpen, this.getBreakpointIndex(this.testType, this.testIndex))
             },
-
         },
         computed: {
             scriptConditional() { // TestScript representing conditional

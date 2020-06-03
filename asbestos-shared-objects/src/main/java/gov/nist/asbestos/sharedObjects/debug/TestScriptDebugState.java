@@ -1,4 +1,4 @@
-package gov.nist.asbestos.sharedObjects;
+package gov.nist.asbestos.sharedObjects.debug;
 
 import org.apache.log4j.Logger;
 
@@ -14,10 +14,16 @@ public class TestScriptDebugState {
     private AtomicBoolean resume;
     private AtomicBoolean kill;
     private AtomicBoolean evaluateMode;
-    private String testScriptIndex; /* TestCollectionIndex + TestScriptIndex */
+    /**
+     * Debug Instance
+     */
+    private DebugTestSessionId debugTestSessionId;
+    /**
+     * TestCollectionIndex + TestScriptIndex
+     */
+    private String testScriptIndex;
     private ConcurrentSkipListSet breakpointSet;
     private Session session;
-    private String userType;
     private String evalJsonString;
     private String currentExecutionIndex;
     private List<String> parentExecutionIndex = new ArrayList<>();
@@ -26,7 +32,7 @@ public class TestScriptDebugState {
     private static Logger log = Logger.getLogger(TestScriptDebugState.class);
 
 
-    public TestScriptDebugState(Session session, String userType, String testScriptIndex, ConcurrentSkipListSet breakpointSet) {
+    public TestScriptDebugState(Session session, DebugTestSessionId debugTestSessionId, String testScriptIndex, ConcurrentSkipListSet breakpointSet) {
         this.lock = new Object();
         this.testScriptIndex = testScriptIndex;
         this.resume = new AtomicBoolean();
@@ -34,7 +40,7 @@ public class TestScriptDebugState {
         this.evaluateMode = new AtomicBoolean();
         this.breakpointSet = breakpointSet;
         this.session = session;
-        this.userType = userType;
+        this.debugTestSessionId = debugTestSessionId;
     }
 
     public String getTestScriptIndex() {
@@ -226,5 +232,16 @@ public class TestScriptDebugState {
 
     public void setDebugInterface(TestScriptDebugInterface debugInterface) {
         this.debugInterface = debugInterface;
+    }
+
+
+    public static void sendDebuggingTestScriptIndexes(Session session, String indexes) {
+        session.getAsyncRemote().sendText(
+                "{\"messageType\":\"existingDebuggersList\""
+                        + ",\"indexList\":[" + indexes + "]}");
+    }
+
+    public DebugTestSessionId getDebugTestSessionId() {
+        return debugTestSessionId;
     }
 }
