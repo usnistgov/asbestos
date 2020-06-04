@@ -1,10 +1,14 @@
 package gov.nist.asbestos.sharedObjects.debug;
 
-public class DebugTestSessionId {
+import java.util.Objects;
+
+public class DebugTestSessionId implements Comparable<DebugTestSessionId> {
     private String ftkTestSessionId;
     private String channelId;
 
     public DebugTestSessionId(String ftkTestSessionId, String channelId) {
+        Objects.requireNonNull(ftkTestSessionId);
+        Objects.requireNonNull(channelId);
         this.ftkTestSessionId = ftkTestSessionId;
         this.channelId = channelId;
     }
@@ -33,5 +37,11 @@ public class DebugTestSessionId {
         int result = ftkTestSessionId.hashCode();
         result = 31 * result + channelId.hashCode();
         return result;
+    }
+
+    @Override
+    public int compareTo(DebugTestSessionId o) {
+        int result = this.ftkTestSessionId.compareTo(o.ftkTestSessionId);
+        return result == 0 ? this.channelId.compareTo(o.channelId) : result;
     }
 }

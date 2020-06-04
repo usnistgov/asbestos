@@ -10,6 +10,7 @@ import gov.nist.asbestos.client.events.UIEvent;
 import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.client.resolver.ResourceCacheMgr;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
+import gov.nist.asbestos.sharedObjects.debug.StopDebugTestScriptException;
 import gov.nist.asbestos.sharedObjects.debug.TestScriptDebugInterface;
 import gov.nist.asbestos.sharedObjects.debug.TestScriptDebugState;
 import gov.nist.asbestos.simapi.validation.Val;
@@ -293,7 +294,9 @@ public class TestEngine  {
             if (errorOut()) return;
             doSetup();
             if (errorOut()) return;
-            doTest();
+            try {
+                doTest();
+            } catch (StopDebugTestScriptException ex) {}
             if (errorOut()) return;
             doTearDown();
             fillInSkips();

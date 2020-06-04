@@ -63,7 +63,7 @@ public class TestScriptDebugState {
         return breakpointSet;
     }
 
-    Session getSession() {
+    public Session getSession() {
         return session;
     }
 
@@ -180,7 +180,8 @@ public class TestScriptDebugState {
             if (getResume().get()) {
                 log.info("Resuming " +  getSession().getId());
             } else if (getKill().get()) {
-                throw new Error("KILL session: " + getSession().getId()); // This needs to throw a custom exception that does not show up in the test report
+//                throw new Error("KILL session: " + getSession().getId()); // This needs to throw a custom exception that does not show up in the test report
+                throw new StopDebugTestScriptException("KILL debug session: " + getSession().getId());
             } else if (getDebugEvaluateModeWasRequested().get()) {
                 log.info("Eval mode is true.");
             }
@@ -244,4 +245,9 @@ public class TestScriptDebugState {
     public DebugTestSessionId getDebugTestSessionId() {
         return debugTestSessionId;
     }
+
+    public void sendCompleted() {
+        getSession().getAsyncRemote().sendText("{\"messageType\":\"completed\", \"testReport\":{}}");
+    }
+
 }

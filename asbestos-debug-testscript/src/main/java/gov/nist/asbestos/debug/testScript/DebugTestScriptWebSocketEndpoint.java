@@ -21,6 +21,8 @@ import java.io.IOException;
 import java.util.Base64;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.ExecutorService;
@@ -47,7 +49,7 @@ public class DebugTestScriptWebSocketEndpoint {
      * Key=DebugTestSessionId
      * Value=TestScript List
      */
-    ConcurrentHashMap<DebugTestSessionId, ConcurrentSkipListSet<DebugWsSessionId>> instanceMap = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<DebugTestSessionId, ConcurrentSkipListSet<DebugWsSessionId>> instanceMap = new ConcurrentHashMap<>();
 
     @OnOpen
     public void onOpen(@PathParam("userType") String userType /* Required */,
@@ -67,7 +69,7 @@ public class DebugTestScriptWebSocketEndpoint {
                     instanceMap.put(instanceId, new ConcurrentSkipListSet<>());
                 }
 
-                ConcurrentSkipListSet mySet = instanceMap.get(instanceId);
+                ConcurrentSkipListSet<DebugWsSessionId> mySet = instanceMap.get(instanceId);
                 DebugWsSessionId wsSessionId = new DebugWsSessionId(sessionId, testScriptIndex);
                 if (mySet.contains(wsSessionId)) {
                     // Only one debug request for the channel/testCollection/testScript is allowed
@@ -89,60 +91,102 @@ public class DebugTestScriptWebSocketEndpoint {
 
     @OnMessage
     public void onMessage(String message, Session session) throws Exception {
+        Objects.requireNonNull(message);
+
         log.info("raw onMessage: " + message);
+        Map<String /* Request Type */, Object> myMap = new Gson().fromJson(message, Map.class);
+
+        String cmd = (String) myMap.get("cmd");
+        if (cmd == null || "".equals(cmd))
+            return;
+
+        if (cmd.equals("getExistingDebuggerList")) {
+            sendExistingDebuggerList(session, myMap);
+            return;
+        } else if (cmd.equals("removeDebugger")) {
+            DebugTestSessionId instanceId = new DebugTestSessionId(
+                    (String) myMap.get("ftkTestSessionId"),
+                    (String) myMap.get("channelId"));
+            if (instanceMap.containsKey(instanceId)) {
+                DebugWsSessionId wsSessionId = new DebugWsSessionId((String)myMap.get("testScriptIndex"));
+                final ConcurrentSkipListSet<DebugWsSessionId> scriptIds = instanceMap.get(instanceId);
+
+                Optional<DebugWsSessionId> realSessionId = scriptIds.stream()
+                        .filter(s -> s.equals(wsSessionId))
+                        .findFirst();
+                if (realSessionId.isPresent()) {
+                    TestScriptDebugState debugState = debugStateMap.get(realSessionId.get().getWsSessionId());
+                    if (debugState != null) {
+                        killSession(debugState);
+                        debugState.getSession().close(new CloseReason(CloseReason.CloseCodes.CLOSED_ABNORMALLY, "Remove debug session requested by test session user"));
+                        sendExistingDebuggerList(session, myMap); // Return an updated debugger list
+                    } else {
+                        log.error("removeDebugger error: debugState could not be found!");
+                    }
+                }
+
+            }
+            return;
+        }
+
 
         TestScriptDebugState state = debugStateMap.get(session.getId());
-        if (message != null) {
-            Map<String /* Request Type */, Object> myMap = new Gson().fromJson(message, Map.class);
-
-            if (myMap.get("uri") != null) {
-                String uriString = (String) myMap.get("uri");
-                if (uriString != null) {
-                    if (myMap.get("breakpointList") != null) {
-                        List<String> myList = (List<String>) myMap.get("breakpointList");
-//                        String testScriptIndex = (String) myMap.get("testScriptIndex");
-                        state.getBreakpointSet().addAll(myList);
-                        startDebuggerThread(state, uriString);
-                    } else {
-                        String exception = "breakpointList is empty.";
-                        log.error(exception);
-                        throw new RuntimeException(exception);
-                    }
-                }
-            } else if (myMap.get("resumeBreakpoint") != null) {
-                List<String> updateList = (List<String>) myMap.get("breakpointList");
-                doResumeBreakpoint(state, updateList);
-            } else if (myMap.get("killDebug") != null) {
-                killSession(state);
-                // Create new exception for Kill because the next Test is run and the KILL exception is shown in the next Test.
-                // - See how failures in Setup are handled. The Kill should act that way.
-            } else if (myMap.get("requestOriginalAssertion") != null) {
-                doRequestOriginalAssertion(state);
-            } else if (myMap.get("debugEvalAssertion") != null) {
-                String base64String = (String)myMap.get("base64String");
-                doDebugEvaluate(state, base64String);
-            } else if (myMap.get("getExistingDebuggerList") != null) {
-                DebugTestSessionId instanceId = new DebugTestSessionId(
-                        (String)myMap.get("ftkTestSessionId"),
-                        (String)myMap.get("channelId"));
-                if (instanceMap.containsKey(instanceId)) {
-                    final ConcurrentSkipListSet<DebugWsSessionId> scriptIds = instanceMap.get(instanceId);
-                    if (scriptIds != null && scriptIds.size() > 0) {
-                        List<String> myList =
-                            scriptIds
-                                .stream()
-                                .map(DebugWsSessionId::getQuotedIdentifier)
-                                .collect(Collectors.toList());
-                        String myString = String.join(",", myList);
-                        TestScriptDebugState.sendDebuggingTestScriptIndexes(session, myString);
-                        return;
-                    }
-                }
-                TestScriptDebugState.sendDebuggingTestScriptIndexes(session, "");
-            }
-            // else if stepOver
-            // else if Restart
+        if (state == null) {
+            log.error("debugState was not established.");
+            return;
         }
+
+
+        if (cmd.equals("beginDebug")) {
+            String uriString = (String) myMap.get("uri");
+            if (uriString != null) {
+                if (myMap.get("breakpointList") != null) {
+                    List<String> myList = (List<String>) myMap.get("breakpointList");
+//                        String testScriptIndex = (String) myMap.get("testScriptIndex");
+                    state.getBreakpointSet().addAll(myList);
+                    startDebuggerThread(state, uriString);
+                } else {
+                    String exception = "breakpointList is empty.";
+                    log.error(exception);
+                    throw new RuntimeException(exception);
+                }
+            }
+        } else if (cmd.equals("resumeBreakpoint")) {
+            List<String> updateList = (List<String>) myMap.get("breakpointList");
+            doResumeBreakpoint(state, updateList);
+        } else if (cmd.equals("killDebug")) {
+            killSession(state);
+            // Create new exception for Kill because the next Test is run and the KILL exception is shown in the next Test.
+            // - See how failures in Setup are handled. The Kill should act that way.
+        } else if (cmd.equals("requestOriginalAssertion")) {
+            doRequestOriginalAssertion(state);
+        } else if (cmd.equals("debugEvalAssertion")) {
+            String base64String = (String)myMap.get("base64String");
+            doDebugEvaluate(state, base64String);
+        }
+
+        // else if stepOver
+        // else if Restart
+    }
+
+    private void sendExistingDebuggerList(Session session, Map<String, Object> myMap) {
+        DebugTestSessionId instanceId = new DebugTestSessionId(
+                (String)myMap.get("ftkTestSessionId"),
+                (String)myMap.get("channelId"));
+        if (instanceMap.containsKey(instanceId)) {
+            final ConcurrentSkipListSet<DebugWsSessionId> scriptIds = instanceMap.get(instanceId);
+            if (scriptIds != null && scriptIds.size() > 0) {
+                List<String> myList =
+                    scriptIds
+                        .stream()
+                        .map(DebugWsSessionId::getQuotedIdentifier)
+                        .collect(Collectors.toList());
+                String myString = String.join(",", myList);
+                TestScriptDebugState.sendDebuggingTestScriptIndexes(session, myString);
+                return;
+            }
+        }
+        TestScriptDebugState.sendDebuggingTestScriptIndexes(session, "");
     }
 
 
@@ -155,7 +199,7 @@ public class DebugTestScriptWebSocketEndpoint {
             ExecutorService service = debugExecutorMap.get(sessionId);
             if (debugStateMap.get(sessionId).getKill().get()) {
                 try {
-                    service.awaitTermination(2, TimeUnit.SECONDS);
+                    service.awaitTermination(5, TimeUnit.SECONDS);
                 } catch (Throwable t) {
                 } finally {
                     log.info(String.format("Session %s was terminated: %s", sessionId, service.isTerminated()));
@@ -234,7 +278,7 @@ public class DebugTestScriptWebSocketEndpoint {
      * Causes an exception thrown inside the TestEngine which stop test execution where it was paused at.
      * @param state
      */
-    private void killSession(TestScriptDebugState state) {
+    private static void killSession(TestScriptDebugState state) {
         String sessionId = state.getSessionId();
         log.info("killSession: " + sessionId);
         synchronized (state.getLock()) {

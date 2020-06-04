@@ -1,11 +1,33 @@
 package gov.nist.asbestos.sharedObjects.debug;
 
-public class DebugWsSessionId {
+import java.util.Objects;
+
+public class DebugWsSessionId implements Comparable<DebugWsSessionId> {
+    /**
+     * Optional
+     */
     private String wsSessionId;
+    /**
+     * Required
+     */
     private String testScriptIndex;
 
+    /**
+     *
+     * @param wsSessionId
+     * @param testScriptIndex
+     */
     public DebugWsSessionId(String wsSessionId, String testScriptIndex) {
+        this(testScriptIndex);
         this.wsSessionId = wsSessionId;
+    }
+
+    /**
+     *
+     * @param testScriptIndex
+     */
+    public DebugWsSessionId(String testScriptIndex) {
+        Objects.requireNonNull(testScriptIndex);
         this.testScriptIndex = testScriptIndex;
     }
 
@@ -42,5 +64,11 @@ public class DebugWsSessionId {
 
     public String getQuotedIdentifier() {
        return "\"" + getTestScriptIndex() + "\"";
+    }
+
+
+    @Override
+    public int compareTo(DebugWsSessionId o) {
+        return this.testScriptIndex.compareTo(o.testScriptIndex);
     }
 }

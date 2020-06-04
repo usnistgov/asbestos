@@ -15,13 +15,17 @@ export default {
         },
         isBeingDebugged(testScriptIndex) {
             const key = this.getTestScriptIndexKey(testScriptIndex)
-            // this.$store.dispatch('debugMgmt')
             const indexList = this.$store.state.debugTestScript.debugMgmtIndexList
             if (indexList !== null || indexList !== undefined) {
-                return  indexList.includes(key)
+                // return  indexList.filter(o => o.testScriptIndex === key).length === 1
+                return indexList.includes(key)
             }
             return false
         },
+         async removeDebugger(testScriptIndex) {
+             const key = this.getTestScriptIndexKey(testScriptIndex)
+             await this.$store.dispatch('debugMgmt', {'cmd':'removeDebugger','testScriptIndex':key})
+         },
         getDebugActionButtonLabel(testScriptIndex) {
             const key = this.getTestScriptIndexKey(testScriptIndex)
             if (key in this.$store.state.debugTestScript.showDebugButton) {

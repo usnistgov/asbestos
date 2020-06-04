@@ -81,6 +81,11 @@ export const debugTestScriptStore = {
             } else {
                 alert(' failed: ' + obj.testScriptIndex)
             }
+        },
+        setBeingDebuggedList(state, ar) {
+            if (Array.isArray(ar)) {
+                state.debugMgmtIndexList = ar
+            }
         }
     },
     getters: {
@@ -157,7 +162,7 @@ export const debugTestScriptStore = {
         },
         async debugKill({state}, mapKey) {
             if (state.testScriptDebuggerWebSocket != null) {
-                state.testScriptDebuggerWebSocket.send('{"killDebug":"true"}')
+                state.testScriptDebuggerWebSocket.send('{"cmd":"killDebug"}')
                 // let valObj = state.showDebugButton[mapKey]
                 // if (valObj != undefined) {
                 //     console.log('Killing from ' + valObj.breakpointIndex)
@@ -177,14 +182,14 @@ export const debugTestScriptStore = {
                 commit('setShowDebugEvalModal', true)
             } else {
                 commit('setAssertionEvalBreakpointIndex', breakpointIndex)
-                let sendData = `{"requestOriginalAssertion":"true","testScriptIndex":"${mapKey}"}`
+                let sendData = `{"cmd":"requestOriginalAssertion","testScriptIndex":"${mapKey}"}`
 
                 console.log('Requesting original-assertion ' + breakpointIndex)
                 state.testScriptDebuggerWebSocket.send(sendData)
             }
         },
         async doDebugEvalAssertion({state}, assertionDataBase64) {
-            let sendData = `{"debugEvalAssertion":"true", "base64String":"${assertionDataBase64}"}`
+            let sendData = `{"cmd":"debugEvalAssertion", "base64String":"${assertionDataBase64}"}`
             state.testScriptDebuggerWebSocket.send(sendData)
         },
         async debugTestScript({commit, rootState, state, getters, dispatch}, testId) {
@@ -214,7 +219,7 @@ export const debugTestScriptStore = {
                     if (indexOfTestId > -1) {
                         const breakpointSet = state.breakpointMap.get(mapKey) // Follow proper key format
                         let breakpointArrayString = JSON.stringify([...breakpointSet])
-                        let sendData = `{"uri":"${uri}","testScriptIndex":"${mapKey}","breakpointList":${breakpointArrayString}}`
+                        let sendData = `{"cmd":"beginDebug","uri":"${uri}","testScriptIndex":"${mapKey}","breakpointList":${breakpointArrayString}}`
                         // console.log('Sending: ' + sendData)
                         state.testScriptDebuggerWebSocket.send(sendData)
                     } else {
@@ -294,43 +299,48 @@ export const debugTestScriptStore = {
                 state.waitingForBreakpoint = true
                 const breakpointSet = state.breakpointMap.get(mapKey) // Follow proper key format
                 let breakpointArrayString = JSON.stringify([...breakpointSet])
-                let sendData = `{"resumeBreakpoint":"true","testScriptIndex":"${mapKey}","breakpointList":${breakpointArrayString}}`
+                let sendData = `{"cmd":"resumeBreakpoint","testScriptIndex":"${mapKey}","breakpointList":${breakpointArrayString}}`
 
                 // console.log('Resuming from ' + state.showDebugButton[mapKey].breakpointIndex)
                 state.testScriptDebuggerWebSocket.send(sendData)
                 state.showDebugButton[mapKey].breakpointIndex = null // Clear flag
             }
         },
-        async isDebuggerOn({rootState, state}) {
-            console.log('isDebuggerOn was called' )
-        },
-        async debugMgmt({rootState, state}) {
-            // console.log('in debugMgmt. ')
-
+        async debugMgmt({commit, rootState, state}, fn) {
+            if (fn === undefined || fn === null )
+                return
             if (state.debugMgmtWebSocket === null) {
                 const wssBase = UtilFunctions.getWssBase()
                 const wssSocketUrl = `${wssBase}/debugTestScript/developer`
                 state.debugMgmtWebSocket = new WebSocket(wssSocketUrl)
                 state.debugMgmtWebSocket.onopen = event => {
-                    if (event) {
+                    if (event === false) {
                         console.log('In debugMgmt socket onOpen. event: ' + (event === undefined).valueOf())
                     }
                     const testSessionId = rootState.base.session
                     const channelId = rootState.base.channelId
-                    const sendData = `{"getExistingDebuggerList":"true","ftkTestSessionId":"${testSessionId}","channelId":"${channelId}"}`
-                    state.debugMgmtWebSocket.send(sendData)
+                    const cmd = fn.cmd
+                    if ('getExistingDebuggerList' === cmd) {
+                        const sendData = `{"cmd":"${cmd}","ftkTestSessionId":"${testSessionId}","channelId":"${channelId}"}`
+                        state.debugMgmtWebSocket.send(sendData)
+                    } else if ('removeDebugger' === cmd) {
+                        const sendData = `{"cmd":"${cmd}","ftkTestSessionId":"${testSessionId}","channelId":"${channelId}","testScriptIndex":"${fn.testScriptIndex}"}`
+                        state.debugMgmtWebSocket.send(sendData)
+                    }
                 }
                 state.debugMgmtWebSocket.onmessage = event => {
-                    // console.log('debugMgmt onMessage: ' + (event.data))
+                    console.log('debugMgmt onMessage: ' + (event.data))
                     let returnData = JSON.parse(event.data)
-                    if (returnData.messageType === 'existingDebuggersList') {
-                        if (returnData.indexList && returnData.length > 0) {
-                            state.debugMgmtIndexList = returnData.indexList
+                    const messageType = returnData.messageType
+                    if (messageType === 'existingDebuggersList' || messageType === 'removedDebugger') {
+                        if (returnData.indexList && returnData.indexList.length > 0) {
+                            commit('setBeingDebuggedList', returnData.indexList)
+                        } else {
+                            commit('setBeingDebuggedList', [])
                         }
-                        // console.log('closing debugMgmt socket and setting socket to null')
-                        // state.debugMgmtWebSocket.close()
-                        // state.debugMgmtWebSocket = null
                     }
+                    state.debugMgmtWebSocket.close()
+                    state.debugMgmtWebSocket = null
                 }
                 state.debugMgmtWebSocket.onerror = function (event) {
                     if (event != null && event != undefined) {
@@ -343,6 +353,8 @@ export const debugTestScriptStore = {
                     }
                 }
             }
+
+
         },
     },
 }
