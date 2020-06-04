@@ -75,11 +75,13 @@ public class FhirClient {
             post.acceptGzip();
         post.setRequestHeaders(theHeaders);
         post.setUri(ref.getUri());
-        byte[] content;
-        if (format == Format.JSON)
-            content = ProxyBase.getFhirContext().newJsonParser().encodeResourceToString(resource).getBytes();
-        else
-            content = ProxyBase.getFhirContext().newXmlParser().encodeResourceToString(resource).getBytes();
+        byte[] content = null;
+        if (resource != null) {
+            if (format == Format.JSON)
+                content = ProxyBase.getFhirContext().newJsonParser().encodeResourceToString(resource).getBytes();
+            else
+                content = ProxyBase.getFhirContext().newXmlParser().encodeResourceToString(resource).getBytes();
+        }
 
         post.setRequest(content);
 

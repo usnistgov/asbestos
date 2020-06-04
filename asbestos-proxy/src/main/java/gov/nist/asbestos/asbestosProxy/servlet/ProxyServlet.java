@@ -692,12 +692,13 @@ public class ProxyServlet extends HttpServlet {
             }
         }
         else {
-            String encoding = encodings.get(0);
-            if (encoding != null && encoding.equalsIgnoreCase("gzip")) {
-                String txt = Gzip.decompressGZIPToString(bytes);
-                task.putRequestBodyText(txt);
-                http.setRequestText(txt);
-            } else if (headers.getContentType().getAllValues().get(0).equalsIgnoreCase("text/html")) {
+//            String encoding = encodings.get(0);
+//            if (encoding != null && encoding.equalsIgnoreCase("gzip")) {
+//                String txt = Gzip.decompressGZIPToString(bytes);
+//                task.putRequestBodyText(txt);
+//                http.setRequestText(txt);
+//            } else
+                if (headers.getContentType().getAllValues().get(0).equalsIgnoreCase("text/html")) {
                 task.putRequestHTMLBody(bytes);
                 http.setRequestText(new String(bytes));
             } else if (isStringType(headers.getContentType().getAllValues().get(0))) {

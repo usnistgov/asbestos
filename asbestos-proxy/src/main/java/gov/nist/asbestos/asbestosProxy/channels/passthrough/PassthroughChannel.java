@@ -138,8 +138,8 @@ public class PassthroughChannel extends BaseChannel /*implements IBaseChannel*/ 
             }
             if (updated) {
                 byte[] encoded = ProxyBase.encode(bundle, format).getBytes();
-                if (responseOut.isResponseGzipEncoded())
-                    encoded = Gzip.compressGZIP(encoded);
+//                if (responseOut.isResponseGzipEncoded())
+//                    encoded = Gzip.compressGZIP(encoded);
                 rawResponse = encoded;
             }
         }

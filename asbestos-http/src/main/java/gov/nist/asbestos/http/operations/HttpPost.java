@@ -18,7 +18,7 @@ public class HttpPost  extends HttpBase {
 
     // content is unzipped
     private void post(URI uri, Map<String, String> headers, byte[] content) throws IOException {
-        String stringContent = new String(content);
+        //String stringContent = new String(content);
         HttpURLConnection connection = null;
 
         try {
@@ -77,7 +77,7 @@ public class HttpPost  extends HttpBase {
     public HttpPost postJson(URI uri, String json) throws IOException {
         Map<String, String> headers = new HashMap<>();
         headers.put("content-type", "application/json");
-        post(uri, headers, json.getBytes());
+        post(uri, headers, json == null ? null : json.getBytes());
         return this;
     }
 
