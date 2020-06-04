@@ -154,7 +154,7 @@ abstract public class HttpBase {
 
     public String getResponseText() {
         //Header contentEncodingHeader = getResponseHeaders().get("Content-Encoding");
-        boolean zipped = getResponseHeaders().isZipped();
+        //boolean zipped = getResponseHeaders().isZipped();
                 //contentEncodingHeader != null && contentEncodingHeader.getValue().contains("gzip");
 
         if (_responseText == null && _response != null) {

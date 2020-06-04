@@ -210,6 +210,7 @@ public class Task implements ITask {
 
     @Override
     public void putResponseBody(byte[] body) {
+        body = unzip(body);  // just in case
         _responseRawBody = body;
         initTask();
         if (body != null && body.length >  0) {
@@ -267,9 +268,9 @@ public class Task implements ITask {
         initTask();
         putResponseBody(body);
         String bodyString;
-        if (_responseHeaders.isZipped())
-            bodyString = Gzip.decompressGZIPToString(body);
-        else
+//        if (_responseHeaders.isZipped())
+//            bodyString = Gzip.decompressGZIPToString(body);
+//        else
             bodyString = new String(body);
         putResponseBodyText(bodyString);
         try {
@@ -287,9 +288,9 @@ public class Task implements ITask {
         initTask();
         putRequestBody(body);
         String bodyString;
-        if (_requestHeaders.isZipped())
-            bodyString = Gzip.decompressGZIPToString(body);
-        else
+//        if (_requestHeaders.isZipped())
+//            bodyString = Gzip.decompressGZIPToString(body);
+//        else
             bodyString = new String(body);
         putRequestBodyText(bodyString);
         try {

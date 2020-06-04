@@ -519,11 +519,14 @@ public class ProxyServlet extends HttpServlet {
                 addEventHeader(responseOut, getHostPort(inHeaders), clientTask);
             logResponse(clientTask, responseOut);
 
+            if (inHeaders.requestsZip() && !responseOut.isResponseGzipEncoded())
+                responseOut.getResponseHeaders().add(new Header("Content-Encoding", "gzip"));
             transferHeaders(responseOut.getResponseHeaders(), resp);
             if (responseOut.getResponse() != null && responseOut.getResponse().length != 0) {
                 byte[] content = responseOut.getResponse();
-                if (inHeaders.requestsZip())
+                if (inHeaders.requestsZip()) {
                     content = Gzip.compressGZIP(content);
+                }
                 resp.getOutputStream().write(content);
             }
         } catch (Exception e) {
