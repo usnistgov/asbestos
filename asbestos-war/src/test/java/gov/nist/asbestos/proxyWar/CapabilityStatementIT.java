@@ -11,6 +11,7 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Resource;
+import org.junit.Ignore;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -78,9 +79,9 @@ public class CapabilityStatementIT {
     }
 
     /**
-     * This test executes the client API in search of a bogus patient for the purpose of testing the FHIR client behaviour towards silent-retrieval of the capability statement.
+     * Executes the client API in search of a bogus patient for the purpose of testing the FHIR client behaviour towards silent-retrieval of the capability statement.
      */
-    @Test
+    @Ignore
     void searchBogusPatient() {
         // Perform a search
         // FHIR Client 3.7.0 silently executes a GET metadata request.

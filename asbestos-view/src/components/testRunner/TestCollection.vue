@@ -47,6 +47,7 @@
                 return this.$store.state.testRunner.testReports[testName]
             },
             load() {
+                console.log('tc loaded')
                 this.loadTestCollection(this.testCollection)
             },
         },

@@ -34,22 +34,29 @@
 
                     <script-status v-if="!statusRight" :status-right="statusRight" :name="name"> </script-status>
 
+                    <template v-if="isBeingDebugged(i)">
+                        <span class="breakpointColumnHeader" title="A debugger is running for this TestScript.">&#x1F41E;</span> <!-- &#x1F51B; is the ON! symbol -->
+                    </template>
+
                     <span v-if="$store.state.testRunner.currentTest === name">
-                            <template v-if="isDebuggable(i)">
-                                <span class="breakpointColumnHeader" title="Breakpoint Column Header">{{getBreakpointCount(i)}} BKPTs.</span>
-                            </template>
                             <img src="../../assets/arrow-down.png">
-                        </span>
+                    </span>
                     <span v-else>
                             <img src="../../assets/arrow-right.png"/>
-                        </span>
+                    </span>
                     <span class="large-text">{{ cleanTestName(name) }}</span>
 
                     <span v-if="isClient">
                             <button class="runallbutton" @click="doEval(name)">Run</button>
                         </span>
                     <span v-else>
-                            <button class="runallbutton" @click.stop="doRun(name)">Run</button>
+                              <template v-if="isBeingDebugged(i)">
+                                    <button
+                                            class="debugKillTestScriptButton"
+                                            @click.stop="removeDebugger(i)">Remove Debugger</button>
+                                </template>
+                                <template v-else>
+                                    <button class="runallbutton" @click.stop="doRun(name)">Run</button>
                             <template v-if="$store.state.testRunner.currentTest === name">
                                 <button v-if="isDebuggable(i)"
                                         class="debugTestScriptButton"
@@ -62,6 +69,7 @@
                                         @click.stop="doDebugKill(i)">Kill</button>
                                 <span v-if="$store.state.debugTestScript.waitingForBreakpoint">&nbsp;&nbsp;&#x23F1;</span> <!-- Display a stopwatch if waiting for breakpoint to be hit -->
                             </template>
+                                </template>
                     </span>
                     <span v-if="! $store.state.debugTestScript.waitingForBreakpoint && ! $store.state.testRunner.isClientTest"> --  {{ testTime(name) }}</span>
                 </div>
@@ -83,6 +91,7 @@
         methods: {
             load() {
                 this.loadTestCollection(this.testCollection)
+                this.$store.dispatch('debugMgmt', {'cmd':'getExistingDebuggerList'})
             },
             openTest(name) {
                 if (!name)

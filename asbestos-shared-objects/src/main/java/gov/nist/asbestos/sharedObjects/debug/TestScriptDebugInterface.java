@@ -1,4 +1,4 @@
-package gov.nist.asbestos.sharedObjects;
+package gov.nist.asbestos.sharedObjects.debug;
 
 public interface TestScriptDebugInterface {
     void onBreakpoint();

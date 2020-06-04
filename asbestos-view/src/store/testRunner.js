@@ -387,12 +387,19 @@ export const testRunnerStore = {
                         theResponse = response.data
                 })
                 await promise
-                commit('setTestScriptNames', theResponse.testNames)  // sets testScriptNames
-                const isClient = !theResponse.isServerTest
-                commit('setRequiredChannel', theResponse.requiredChannel)  // sets requiredChannel
-                const description = theResponse.description
-                commit('setCollectionDescription', description)  // sets collectionDescription
-                commit('setIsClientTest', isClient)   // sets isClientTest
+                if ('testNames' in theResponse)
+                    commit('setTestScriptNames', theResponse.testNames)  // sets testScriptNames
+                if ('requiredChannel' in theResponse)
+                    commit('setRequiredChannel', theResponse.requiredChannel)  // sets requiredChannel
+                if ('description' in theResponse) {
+                    const description = theResponse.description
+                    commit('setCollectionDescription', description)  // sets collectionDescription
+                }
+                if ('isServerTest' in theResponse) {
+                    const isClient =  ! theResponse.isServerTest
+                    commit('setIsClientTest', isClient)   // sets isClientTest
+                }
+
             } catch (error) {
                 commit('setError', url + ': ' + error)
             }
