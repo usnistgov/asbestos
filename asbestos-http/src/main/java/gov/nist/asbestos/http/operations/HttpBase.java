@@ -123,6 +123,8 @@ abstract public class HttpBase {
 //            bytes = Gzip.compressGZIP(bytes);
 //        }
         _request = bytes;
+        if (bytes != null)
+            _responseText = new String(bytes);
     }
 
     public void setRequestText(String txt) {
@@ -130,6 +132,9 @@ abstract public class HttpBase {
     }
 
     public byte[] getRequest() {
+        String rr;
+        if (_request != null)
+            rr = new String(_request);
         if (_request == null && _requestText != null)
             return _requestText.getBytes();
 //        if (isRequestGzipEncoded())

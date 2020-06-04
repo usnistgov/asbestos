@@ -10,10 +10,7 @@ import gov.nist.asbestos.asbestosProxy.channels.capabilitystatement.FhirToolkitC
 import gov.nist.asbestos.client.Base.EC;
 import gov.nist.asbestos.client.Base.ProxyBase;
 import gov.nist.asbestos.client.client.Format;
-import gov.nist.asbestos.client.events.Event;
-import gov.nist.asbestos.client.events.ITask;
-import gov.nist.asbestos.client.events.NoOpTask;
-import gov.nist.asbestos.client.events.UIEvent;
+import gov.nist.asbestos.client.events.*;
 import gov.nist.asbestos.client.log.SimStore;
 import gov.nist.asbestos.client.resolver.ChannelUrl;
 import gov.nist.asbestos.client.resolver.Ref;
@@ -185,8 +182,8 @@ public class ProxyServlet extends HttpServlet {
             channel.setReturnFormatType(Format.resultContentType(inHeaders));
 
             byte[] inBody = getRequestBody(req);
-//            if (inHeaders.isZipped())
-//                inBody = Gzip.decompressGZIP(inBody);
+            if (inHeaders.isZipped())
+                inBody = Gzip.decompressGZIP(inBody);
             String inBodyStr = new String(inBody);
 
             HttpPost requestIn = (HttpPost) logClientRequestIn(clientTask, inHeaders, inBody, Verb.POST);
@@ -566,17 +563,18 @@ public class ProxyServlet extends HttpServlet {
         base.setRequest(body);
 //        String encoding = (headers.getContentEncoding().getAllValues().isEmpty()) ? "" : headers.getContentEncoding().getAllValues().get(0);
 //        if (encoding.equalsIgnoreCase("gzip")) {
-//            String txt = new String(Task.unzip(body)); // Gzip.decompressGZIPToString(body);
+//            String txt = Gzip.decompressGZIPToString(body);
 //            task.putRequestBodyText(txt);
 //            base.setRequestText(txt);
-//        } else
+//        }
+//        else
             if (headers.getContentType().getAllValues().get(0).equalsIgnoreCase("text/html")) {
             task.putRequestHTMLBody(body);
             base.setRequestText(new String(body));
         } else if (isStringType(headers.getContentType().getAllValues().get(0))) {
             task.putRequestBodyText(new String(body));
             base.setRequestText(new String(body));
-        } else {
+        } else if (body != null){
             task.putRequestBodyText(new String(body));
             base.setRequestText(new String(body));
         }
@@ -584,7 +582,7 @@ public class ProxyServlet extends HttpServlet {
         try {
             // try to get input formatted
             Format format = Format.fromContentType(headers.getContentType().getValue());
-            BaseResource resource = ProxyBase.parse(body, format);
+            BaseResource resource = ProxyBase.parse(task.getRequestBodyAsString(), format);
             String text = ProxyBase.encode(resource, format);
             task.putRequestBodyText(text);
         } catch (Throwable t) {
@@ -613,6 +611,8 @@ public class ProxyServlet extends HttpServlet {
         } catch (Exception e) {
             throw new  RuntimeException(e);
         }
+        if (bytes.length == 0)
+            return null;
         return bytes;
     }
 
@@ -685,7 +685,7 @@ public class ProxyServlet extends HttpServlet {
         List<String> encodings = headers.getContentEncoding().getAllValues();
         if (encodings.isEmpty()) {
             String contentType = headers.getContentType().getAllValues().get(0);
-            if (isStringType(contentType) || "".equals(contentType)) {
+            if (isStringType(contentType) || "".equals(contentType) && bytes != null && bytes.length != 0) {
                 String txt = new String(bytes);
                 http.setRequestText(txt);
                 task.putRequestBodyText(txt);
