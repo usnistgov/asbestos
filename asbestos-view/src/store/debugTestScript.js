@@ -329,7 +329,7 @@ export const debugTestScriptStore = {
                     }
                 }
                 state.debugMgmtWebSocket.onmessage = event => {
-                    console.log('debugMgmt onMessage: ' + (event.data))
+                    // console.log('debugMgmt onMessage: ' + (event.data))
                     let returnData = JSON.parse(event.data)
                     const messageType = returnData.messageType
                     if (messageType === 'existingDebuggersList' || messageType === 'removedDebugger') {
