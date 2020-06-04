@@ -1,5 +1,6 @@
 package gov.nist.asbestos.proxyWar;
 
+import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.testEngine.engine.ExtensionDef;
 import gov.nist.asbestos.testEngine.engine.TestEngine;
 import org.hl7.fhir.r4.model.TestReport;
@@ -19,14 +20,16 @@ class SetupIT {
     private static String proxyPort = ITConfig.getProxyPort();
 
     private static URI base;
+    private static Ref base500;
 
     @BeforeAll
     static void createTheChannel() throws IOException, URISyntaxException {
         base = new URI(Utility.createChannel(testSession, channelId, fhirPort, proxyPort));
+        base500 = ChannelsForTests.gen500();
     }
 
     @Test
-    void setupTest() throws URISyntaxException {
+    void assertTest() throws URISyntaxException {
         TestEngine engine = Utility.run(base, "/engine/setup/TestScript.xml");
 
         // no failure
@@ -40,6 +43,24 @@ class SetupIT {
 
         // test.action must be skipped because of setup failure
         assertEquals(TestReport.TestReportActionResult.SKIP, engine.getTestReport().getTest().get(0).getAction().get(0).getAssert().getResult());
+
+    }
+
+    @Test
+    void opTest() throws URISyntaxException {
+        TestEngine engine = Utility.run(base500.getUri(), "/engine/setup2/TestScript.xml");
+
+        // no top-level script failure
+        assertEquals(0, engine.getTestReport().getExtensionsByUrl(ExtensionDef.failure).size());
+
+        // op in setup failed - no assert after - op must report error
+        assertEquals(TestReport.TestReportActionResult.ERROR, engine.getTestReport().getSetup().getAction().get(0).getOperation().getResult());
+
+        // test must fail because of setup failure
+        assertEquals(TestReport.TestReportResult.FAIL, engine.getTestReport().getResult());
+
+        // test.action must be skipped because of setup failure
+        assertEquals(TestReport.TestReportActionResult.SKIP, engine.getTestReport().getTest().get(0).getAction().get(0).getOperation().getResult());
 
     }
 }

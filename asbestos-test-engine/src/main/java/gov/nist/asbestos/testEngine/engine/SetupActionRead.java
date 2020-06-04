@@ -17,8 +17,8 @@ import java.net.URI;
 
 class SetupActionRead extends GenericSetupAction {
 
-    SetupActionRead(ActionReference actionReference, FixtureMgr fixtureMgr) {
-        super(actionReference);
+    SetupActionRead(ActionReference actionReference, FixtureMgr fixtureMgr, boolean isFollowedByAssert) {
+        super(actionReference, isFollowedByAssert);
         this.fixtureMgr = fixtureMgr;
     }
 
@@ -28,7 +28,7 @@ class SetupActionRead extends GenericSetupAction {
             return;
 
         ResourceWrapper wrapper = fhirClient.readResource(targetUrl, requestHeader);
-        postExecute(wrapper);
+        postExecute(wrapper, opReport, isFollowedByAssert);
     }
 
     // key difference between read and search

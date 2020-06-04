@@ -42,11 +42,13 @@ abstract class GenericSetupAction {
     private TestEngine testEngine = null;
     ActionReference actionReference = null;
     String channelId = null;
+    boolean isFollowedByAssert;
 
     abstract String resourceTypeToSend();
 
-    GenericSetupAction(ActionReference actionReference) {
+    GenericSetupAction(ActionReference actionReference, boolean isFollowedByAssert) {
         this.actionReference = actionReference;
+        this.isFollowedByAssert = isFollowedByAssert;
         Objects.requireNonNull(actionReference);
     }
 
@@ -140,15 +142,24 @@ abstract class GenericSetupAction {
                         wrapper.getEventId());
     }
 
-    void postExecute(ResourceWrapper wrapper) {
+    void postExecute(ResourceWrapper wrapper, TestReport.SetupActionOperationComponent operationReport, boolean isFollowedByAssert) {
         Objects.requireNonNull(testEngine);
 
-        if (wrapper.hasResource()) {
-            String receivedResourceType = wrapper.getResource().getClass().getSimpleName();
-            String expectedResourceType = resourceTypeToBeReturned();
-            if (expectedResourceType != null && !receivedResourceType.equals(expectedResourceType)) {
-                reporter.reportError("Expected resource of type " +  expectedResourceType + " received " + receivedResourceType + " instead");
-                //return;
+        if (!isFollowedByAssert) {
+            if (wrapper.isOk()) {
+                reporter.report("CREATE " + wrapper.getRef(), wrapper);
+            } else {
+                reporter.report("create to " + targetUrl + " failed with status " + wrapper.getHttpBase().getStatus(), wrapper);
+                operationReport.setResult(TestReport.TestReportActionResult.FAIL);
+            }
+
+            if (wrapper.hasResource()) {
+                String receivedResourceType = wrapper.getResource().getClass().getSimpleName();
+                String expectedResourceType = resourceTypeToBeReturned();
+                if (expectedResourceType != null && !receivedResourceType.equals(expectedResourceType)) {
+                    reporter.reportError("Expected resource of type " + expectedResourceType + " received " + receivedResourceType + " instead");
+                    //return;
+                }
             }
         }
 

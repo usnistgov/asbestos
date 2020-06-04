@@ -22,8 +22,8 @@ import java.util.Objects;
 
 class SetupActionCreate extends GenericSetupAction {
 
-    SetupActionCreate(ActionReference actionReference, FixtureMgr fixtureMgr) {
-        super(actionReference);
+    SetupActionCreate(ActionReference actionReference, FixtureMgr fixtureMgr, boolean isFollowedByAssert) {
+        super(actionReference, isFollowedByAssert);
         Objects.requireNonNull(fixtureMgr);
         this.fixtureMgr = fixtureMgr;
     }
@@ -80,13 +80,8 @@ class SetupActionCreate extends GenericSetupAction {
         }
 
         ResourceWrapper wrapper = getFhirClient().writeResource(resourceToSend, targetUrl, format, requestHeader);
-        if (wrapper.isOk()) {
-            reporter.report("CREATE " + wrapper.getRef(), wrapper);
-        } else {
-            reporter.report("create to " + targetUrl + " failed with status " + wrapper.getHttpBase().getStatus(), wrapper);
-            operationReport.setResult(TestReport.TestReportActionResult.FAIL);
-        }
-        postExecute(wrapper);
+
+        postExecute(wrapper, operationReport, isFollowedByAssert);
     }
 
 

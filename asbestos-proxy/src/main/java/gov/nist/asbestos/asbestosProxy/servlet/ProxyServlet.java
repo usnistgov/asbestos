@@ -185,6 +185,8 @@ public class ProxyServlet extends HttpServlet {
             channel.setReturnFormatType(Format.resultContentType(inHeaders));
 
             byte[] inBody = getRequestBody(req);
+//            if (inHeaders.isZipped())
+//                inBody = Gzip.decompressGZIP(inBody);
             String inBodyStr = new String(inBody);
 
             HttpPost requestIn = (HttpPost) logClientRequestIn(clientTask, inHeaders, inBody, Verb.POST);
@@ -419,10 +421,10 @@ public class ProxyServlet extends HttpServlet {
                 requestedType = ref.getResourceType();
                 HttpBase responseOut = transformResponse(backSideTask, requestOut, channel, hostport, requestedType, uri.toString());
                 respond(resp, responseOut, inHeaders, clientTask, 200);
+                resp.setStatus(resp.SC_OK);
             } else {
                 respondWithError(req, resp, "backend call failed", inHeaders, clientTask);
             }
-            resp.setStatus(resp.SC_OK);
         } catch (TransformException e) {
             respond(resp, e.getResponse(), inHeaders, clientTask, 400);
             resp.setStatus(resp.SC_OK);
@@ -486,13 +488,13 @@ public class ProxyServlet extends HttpServlet {
 
     private void respondWithError(HttpServletRequest req, HttpServletResponse resp, String msg, Headers inHeaders, ITask
         clientTask) {
-        if (new Ref(Common.buildURI(req)).isQuery()) {
-            Bundle bundle = wrapInBundle(wrapInOutcome(msg));
-            respond(resp, bundle, inHeaders, clientTask, 200);
-        } else {
+//        if (new Ref(Common.buildURI(req)).isQuery()) {
+//            Bundle bundle = wrapInBundle(wrapInOutcome(msg));
+//            respond(resp, bundle, inHeaders, clientTask, 200);
+//        } else {
             OperationOutcome oo = wrapInOutcome(msg);
             respond(resp, oo, inHeaders, clientTask, 400);
-        }
+//        }
     }
 
     private void respond(HttpServletResponse resp, BaseResource resource, Headers inHeaders, ITask clientTask, int status) {
@@ -520,9 +522,15 @@ public class ProxyServlet extends HttpServlet {
                 addEventHeader(responseOut, getHostPort(inHeaders), clientTask);
             logResponse(clientTask, responseOut);
 
+            if (inHeaders.requestsZip() && !responseOut.isResponseGzipEncoded())
+                responseOut.getResponseHeaders().add(new Header("Content-Encoding", "gzip"));
             transferHeaders(responseOut.getResponseHeaders(), resp);
             if (responseOut.getResponse() != null && responseOut.getResponse().length != 0) {
-                resp.getOutputStream().write(responseOut.getResponse());
+                byte[] content = responseOut.getResponse();
+                if (inHeaders.requestsZip()) {
+                    content = Gzip.compressGZIP(content);
+                }
+                resp.getOutputStream().write(content);
             }
         } catch (Exception e) {
             log.error(ExceptionUtils.getStackTrace(e));
@@ -558,7 +566,7 @@ public class ProxyServlet extends HttpServlet {
         base.setRequest(body);
 //        String encoding = (headers.getContentEncoding().getAllValues().isEmpty()) ? "" : headers.getContentEncoding().getAllValues().get(0);
 //        if (encoding.equalsIgnoreCase("gzip")) {
-//            String txt = Gzip.decompressGZIPToString(body);
+//            String txt = new String(Task.unzip(body)); // Gzip.decompressGZIPToString(body);
 //            task.putRequestBodyText(txt);
 //            base.setRequestText(txt);
 //        } else

@@ -144,7 +144,7 @@ class ActionReporter {
                 fixtures.put(label, reference);
         }
 
-        Map<String, String> variables = variableMgr.getVariables();
+        Map<String, String> variables = variableMgr.getVariables(true);
 
         String path = "## Module\n" + testEngine.getTestEnginePath();
 

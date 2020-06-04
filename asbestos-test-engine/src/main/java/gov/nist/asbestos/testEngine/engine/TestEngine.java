@@ -590,7 +590,7 @@ public class TestEngine  {
 //                        TestReport.SetupActionOperationComponent operationReport = actionReport.getOperation();
                         TestReport.SetupActionOperationComponent operationReport = new TestReport.SetupActionOperationComponent();
                         operationReport.setResult(TestReport.TestReportActionResult.PASS);  // may be overwritten
-                        SetupActionCreate create = new SetupActionCreate(new ActionReference(testScript, comp), fixtureMgr)
+                        SetupActionCreate create = new SetupActionCreate(new ActionReference(testScript, comp), fixtureMgr, false)
                                 .setFhirClient(fhirClient)
                                 .setSut(sut)
                                 .setType("fixture.autocreate")
@@ -624,7 +624,7 @@ public class TestEngine  {
                         String resourceType = resource.getType();
                         TestReport.SetupActionOperationComponent operationReport = new TestReport.SetupActionOperationComponent(); //actionReport.getOperation();
                         operationReport.setResult(TestReport.TestReportActionResult.PASS);  // may be overwritten
-                        SetupActionDelete delete = new SetupActionDelete(new ActionReference(testScript, comp), fixtureMgr)
+                        SetupActionDelete delete = new SetupActionDelete(new ActionReference(testScript, comp), fixtureMgr, false)
                                 .setFhirClient(fhirClient)
                                 .setSut(sut)
                                 .setType("fixture.autodelete")
@@ -658,8 +658,16 @@ public class TestEngine  {
                     if (invalidAction(action, actionReportComponent, fVal))
                         return;
                     if (action.hasOperation()) {
+                        boolean isFollowedByAssert = false;
+                        if (actionIndex+1 < comp.getAction().size()) {
+                            // there is a following action
+                            TestScript.SetupActionComponent nextAction = comp.getAction().get(actionIndex+1);
+                            if (nextAction.hasAssert())
+                                isFollowedByAssert = true;
+                        }
+
                         ifDebuggingPauseIfBreakpoint("setup", 0, actionIndex);
-                        doOperation(new ActionReference(testScript, action), typePrefix, action.getOperation(), actionReportComponent.getOperation());
+                        doOperation(new ActionReference(testScript, action), typePrefix, action.getOperation(), actionReportComponent.getOperation(), isFollowedByAssert);
                         TestReport.SetupActionOperationComponent opReport = actionReportComponent.getOperation();
                         if (opReport.getResult() == TestReport.TestReportActionResult.ERROR) {
                             testReport.setStatus(TestReport.TestReportStatus.COMPLETED);
@@ -697,7 +705,7 @@ public class TestEngine  {
         }
     }
 
-    private void doOperation(ActionReference actionReference, String typePrefix, TestScript.SetupActionOperationComponent operation, TestReport.SetupActionOperationComponent report) {
+    private void doOperation(ActionReference actionReference, String typePrefix, TestScript.SetupActionOperationComponent operation, TestReport.SetupActionOperationComponent report, boolean isFollowedByAssert) {
         Objects.requireNonNull(channelId);
         if (operation.hasType()) {
             try {
@@ -711,7 +719,7 @@ public class TestEngine  {
                         .setTestCollectionId(testCollection)
                         .setTestId(testId);
                 runner.setTestEngine(this);
-                runner.run(operation, report);
+                runner.run(operation, report, isFollowedByAssert);
             } catch (Throwable t) {
                 report.setMessage(ExceptionUtils.getStackTrace(t));
                 report.setResult(TestReport.TestReportActionResult.ERROR);
@@ -1136,9 +1144,16 @@ public class TestEngine  {
                     return false;
                 }
                 if (action.hasOperation()) {
+                    boolean isFollowedByAssert = false;
+                    if (testPartIndex+1 < testScriptElement.getAction().size()) {
+                        // there is a following action
+                        TestScript.TestActionComponent nextAction = testScriptElement.getAction().get(testPartIndex+1);
+                        if (nextAction.hasAssert())
+                            isFollowedByAssert = true;
+                    }
                     ifDebuggingPauseIfBreakpoint("test", testIndex, testPartIndex);
                     TestReport.SetupActionOperationComponent reportOp = actionReportComponent.getOperation();
-                    doOperation(new ActionReference(testScript, action), typePrefix, action.getOperation(), reportOp);
+                    doOperation(new ActionReference(testScript, action), typePrefix, action.getOperation(), reportOp, isFollowedByAssert);
                     TestReport.SetupActionOperationComponent opReport = actionReportComponent.getOperation();
                     if (opReport.getResult() == TestReport.TestReportActionResult.ERROR) {
                         testReport.setStatus(TestReport.TestReportStatus.COMPLETED);
@@ -1258,7 +1273,7 @@ public class TestEngine  {
                     if (action.hasOperation()) {
                         TestScript.SetupActionOperationComponent setupActionOperationComponent = action.getOperation();
                         if (action.hasOperation())
-                            doOperation(new ActionReference(testScript, action), typePrefix, action.getOperation(), actionReport.getOperation());
+                            doOperation(new ActionReference(testScript, action), typePrefix, action.getOperation(), actionReport.getOperation(), false);
 
                         if (hasError())
                             return;

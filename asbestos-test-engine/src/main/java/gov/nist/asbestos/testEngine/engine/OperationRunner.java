@@ -37,7 +37,7 @@ public class OperationRunner {
         this.actionReference = actionReference;
     }
 
-    void run(TestScript.SetupActionOperationComponent op, TestReport.SetupActionOperationComponent operationReport) {
+    void run(TestScript.SetupActionOperationComponent op, TestReport.SetupActionOperationComponent operationReport, boolean isFollowedByAssert) {
         Objects.requireNonNull(typePrefix);
         Objects.requireNonNull(val);
         Objects.requireNonNull(fhirClient);
@@ -102,7 +102,7 @@ public class OperationRunner {
             fhirClient.setFormat(Format.JSON);
 
         if ("read".equals(code)) {
-            SetupActionRead setupActionRead = new SetupActionRead(actionReference, fixtureMgr)
+            SetupActionRead setupActionRead = new SetupActionRead(actionReference, fixtureMgr, isFollowedByAssert)
                     .setVal(val)
                     .setFhirClient(fhirClient)
                     .setSut(sut)
@@ -119,7 +119,7 @@ public class OperationRunner {
                     .setTestEngine(testEngine);
             setupActionRead.run(op, operationReport);
         } else if ("search".equals(code)) {
-            SetupActionSearch setupActionSearch = new SetupActionSearch(actionReference, fixtureMgr)
+            SetupActionSearch setupActionSearch = new SetupActionSearch(actionReference, fixtureMgr, isFollowedByAssert)
                     .setVal(val)
                     .setFhirClient(fhirClient)
                     .setSut(sut)
@@ -138,7 +138,7 @@ public class OperationRunner {
             setupActionSearch.run(op, operationReport);
         } else if ("create".equals(code)) {
             SetupActionCreate setupActionCreate =
-                    new SetupActionCreate(actionReference, fixtureMgr)
+                    new SetupActionCreate(actionReference, fixtureMgr, isFollowedByAssert)
                             .setFhirClient(fhirClient)
                             .setType(type + ".create")
                             .setSut(sut)
@@ -155,7 +155,7 @@ public class OperationRunner {
             setupActionCreate.run(op, operationReport);
         } else if ("delete".equals(code)) {
             SetupActionDelete setupActionDelete =
-                    new SetupActionDelete(actionReference, fixtureMgr)
+                    new SetupActionDelete(actionReference, fixtureMgr, isFollowedByAssert)
                             .setSut(sut)
                             .setFhirClient(fhirClient)
                             .setType(type + ".delete")
@@ -170,7 +170,7 @@ public class OperationRunner {
             setupActionDelete.run(op, operationReport);
         } else if ("transaction".equals(code)) {
             SetupActionTransaction setupActionTransaction =
-                    new SetupActionTransaction(actionReference, fixtureMgr)
+                    new SetupActionTransaction(actionReference, fixtureMgr,isFollowedByAssert)
                             .setSut(sut)
                             .setFhirClient(fhirClient)
                             .setType(type + ".transaction")
@@ -185,7 +185,7 @@ public class OperationRunner {
             setupActionTransaction.run(op, operationReport);
         } else if ("mhd-pdb-transaction".equals(code)) {
             SetupActionMhdPdbTransaction setupActionTransaction =
-                    new SetupActionMhdPdbTransaction(actionReference, fixtureMgr);
+                    new SetupActionMhdPdbTransaction(actionReference, fixtureMgr, isFollowedByAssert);
             setupActionTransaction
                     .setSut(sut)
                     .setFhirClient(fhirClient)
@@ -202,7 +202,7 @@ public class OperationRunner {
                             .setOpReport(operationReport));
             setupActionTransaction.run(op, operationReport);
         } else if ("save-to-cache".equals(code)) {
-            SaveToCache saveToCache = new SaveToCache(actionReference, fixtureMgr);
+            SaveToCache saveToCache = new SaveToCache(actionReference, fixtureMgr, isFollowedByAssert);
             saveToCache
                     .setVal(val)
                     .setTestEngine(testEngine);

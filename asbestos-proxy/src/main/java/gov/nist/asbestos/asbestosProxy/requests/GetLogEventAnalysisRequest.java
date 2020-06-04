@@ -299,8 +299,6 @@ public class GetLogEventAnalysisRequest {
         request.resp.setStatus(request.resp.SC_OK);
     }
 
-
-
     private void runAndReturnReport(Ref ref, String source, boolean gzip, boolean useProxy, boolean ignoreBadRefs, boolean withValidation, BaseResource contextBundle) {
         AnalysisReport analysisReport = new AnalysisReport(ref, source, request.ec)
                 .withGzip(gzip)
@@ -328,7 +326,6 @@ public class GetLogEventAnalysisRequest {
                         Ref ref1 = new Ref(url);
                         if (!ref1.hasResource())
                             continue;
-
                     }
                 }
                 newErrors.add(error);

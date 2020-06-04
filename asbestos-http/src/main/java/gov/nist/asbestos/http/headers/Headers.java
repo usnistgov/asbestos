@@ -31,6 +31,11 @@ public class Headers {
         return contentEncodingHeader != null && contentEncodingHeader.getValue().contains("gzip");
     }
 
+    public boolean requestsZip() {
+        Header contentEncodingHeader = get("Accept-Encoding");
+        return contentEncodingHeader != null && contentEncodingHeader.getValue().contains("gzip");
+    }
+
     public Headers withContentType(String type) {
         Header ct = new Header("Content-Type", type);
         headers.add(ct);

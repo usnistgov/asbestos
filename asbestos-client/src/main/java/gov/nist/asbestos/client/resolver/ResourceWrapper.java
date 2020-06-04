@@ -225,10 +225,13 @@ public class ResourceWrapper {
                         BaseResource resource = getResponseResource();
                         if (resource == null)
                             return false;
-//                        if (ref.isQuery()) {
-//                            if (!resource.getClass().getSimpleName().equals("Bundle"))
-//                                return false;
-//                        } else
+                        if (ref.isQuery()) {
+                            if (resource.getClass().getSimpleName().equals("Bundle"))
+                                return true;
+                            if (resource.getClass().getSimpleName().equals(resourceType))
+                                return true;
+                            return false;
+                        } else
                             if (!resource.getClass().getSimpleName().equals(resourceType))
                             return false;
                     }
