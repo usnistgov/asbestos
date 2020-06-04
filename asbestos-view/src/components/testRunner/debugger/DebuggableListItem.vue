@@ -16,7 +16,7 @@
                     'breakpointControlOff' : ! hasBreakpoint && ! isImportHeader,
                     'breakpointControlOn' : hasBreakpoint,
               }"
-                :title="hasBreakpoint ? 'Remove breakpoint' : 'Set breakpoint'"
+                :title="hasBreakpoint ? 'Remove breakpoint.' : 'Set breakpoint.'"
               @mouseover="onBkptSwitchMouseOver"
               @mouseleave="onBkptSwitchMouseLeave"
               @click.stop="doToggle()"
@@ -91,7 +91,7 @@
             getGutterOptionDisplayString() {
                 let ct = this.getBreakpointsInDetails(this.indexObj)
                 if (ct > 0) {
-                    return '+' + ct + '.'
+                    return '+' + ct + ' BP.'
                 } else {
                     return ''
                 }
@@ -136,7 +136,7 @@
         left: 5px;
     }
     span.breakpointGutterOption {
-        font-size: 8px;
+        font-size: 10px;
         position: absolute;
         left: 25px;
     }
