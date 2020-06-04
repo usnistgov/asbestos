@@ -556,12 +556,13 @@ public class ProxyServlet extends HttpServlet {
 
         task.putRequestBody(body);
         base.setRequest(body);
-        String encoding = (headers.getContentEncoding().getAllValues().isEmpty()) ? "" : headers.getContentEncoding().getAllValues().get(0);
-        if (encoding.equalsIgnoreCase("gzip")) {
-            String txt = Gzip.decompressGZIPToString(body);
-            task.putRequestBodyText(txt);
-            base.setRequestText(txt);
-        } else if (headers.getContentType().getAllValues().get(0).equalsIgnoreCase("text/html")) {
+//        String encoding = (headers.getContentEncoding().getAllValues().isEmpty()) ? "" : headers.getContentEncoding().getAllValues().get(0);
+//        if (encoding.equalsIgnoreCase("gzip")) {
+//            String txt = Gzip.decompressGZIPToString(body);
+//            task.putRequestBodyText(txt);
+//            base.setRequestText(txt);
+//        } else
+            if (headers.getContentType().getAllValues().get(0).equalsIgnoreCase("text/html")) {
             task.putRequestHTMLBody(body);
             base.setRequestText(new String(body));
         } else if (isStringType(headers.getContentType().getAllValues().get(0))) {
