@@ -576,11 +576,19 @@ public class XdsOnFhirChannel extends BaseChannel /*implements IBaseChannel*/ {
                      responseOut.setResponseText(ProxyBase.encode(resource, returnFormatType));
                      responseOut.setResponseContentType(returnFormatType.getContentType());
                  }
-                 else if (sender.getContents().size() > 1) {
-                     OperationOutcome oo = wrapErrorInOperationOutcome("XDS Query returned " + sender.getContents().size() + " objects");
-                     responseOut.setStatus(500);
-                     responseOut.setResponseText(ProxyBase.encode(oo, returnFormatType));
+                 else if (requestedType != null && requestedType.equals("DocumentManifest")) {
+                     BaseResource manifest = ssToFhir();
                      responseOut.setResponseContentType(returnFormatType.getContentType());
+                     if (manifest == null) {
+                         responseOut.setStatus(404);
+                     } else if (manifest instanceof DocumentManifest) {
+                         responseOut.setStatus(200);
+                         responseOut.setResponseText(ProxyBase.encode(manifest, returnFormatType));
+                     } else {
+                         // OperationOutcome
+                         responseOut.setStatus(500);
+                         responseOut.setResponseText(ProxyBase.encode(manifest, returnFormatType));
+                     }
                  } else { // no contents
                      responseOut.setResponseContentType(returnFormatType.getContentType());
                      responseOut.setStatus(404);

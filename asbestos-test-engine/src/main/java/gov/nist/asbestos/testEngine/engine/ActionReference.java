@@ -3,6 +3,8 @@ package gov.nist.asbestos.testEngine.engine;
 import org.hl7.fhir.r4.model.TestReport;
 import org.hl7.fhir.r4.model.TestScript;
 
+import javax.swing.*;
+import java.util.List;
 import java.util.Objects;
 
 // Action addressing within TestScript/TestReport.
@@ -56,6 +58,15 @@ public class ActionReference {
         else
             build(testScript, comp.getAssert());
     }
+
+    public ActionReference(TestScript testScript, TestScript.SetupActionOperationComponent comp) {
+        build(testScript, comp);
+    }
+
+    public ActionReference(TestScript testScript, TestScript.SetupActionAssertComponent as) {
+        build(testScript, as);
+    }
+
     public void build(TestScript testScript, TestScript.SetupActionOperationComponent comp) {
         Objects.requireNonNull(comp);
         TestScript.TestScriptSetupComponent setup = testScript.getSetup();
@@ -85,6 +96,23 @@ public class ActionReference {
                 return;
             }
             actionI++;
+        }
+        int testI = 0;
+        for (TestScript.TestScriptTestComponent test : testScript.getTest()) {
+            int actionI2 = 0;
+            for (TestScript.TestActionComponent actionComponent : test.getAction()) {
+                TestScript.SetupActionAssertComponent anAssert = actionComponent.getAssert();
+                if (anAssert != null && anAssert.equals(comp)) {
+                    section = ActionSection.TEST;
+                    type = ActionType.EITHER;
+                    actionIndex = actionI2;
+                    testIndex = testI;
+                    anAssertion = true;
+                    return;
+                }
+                actionI2++;
+            }
+            testI++;
         }
         throw new Error("Setup component not found in Script");
     }

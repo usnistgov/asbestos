@@ -18,6 +18,11 @@ class ActionReporter {
     private String testId = null;
     private TestEngine testEngine = null;
     private FixtureComponent assertionSource = null;
+    private ActionReference actionReference;
+
+    ActionReporter(ActionReference actionReference) {
+        this.actionReference = actionReference;
+    }
 
     void reportOperation(ResourceWrapper wrapper, FixtureMgr fixtureMgr, VariableMgr variableMgr, Reporter reporter, TestScript.SetupActionOperationComponent op) {
         String request = wrapper == null ? "" : "### " + wrapper.getHttpBase().getVerb() + " " + wrapper.getHttpBase().getUri() + "\n";
@@ -80,15 +85,15 @@ class ActionReporter {
             String label = null;
             if (key != null && assertionSource != null && key.equals(assertionSource.getId())) {
                 sourceId = true;
-                label = "sourceId";
+                label = "sourceId (" + key + ")";
             }
             if (key != null && op != null && op.hasResponseId() && key.equals(op.getResponseId())) {
                 responseId = true;
-                label = "responseId";
+                label = "responseId (" + key + ")";
             }
             if (key != null && op != null && op.hasSourceId() && key.equals(op.getSourceId())) {
                 sourceId = true;
-                label = "sourceId";
+                label = "sourceId (" + key + ")";
             }
             String tail = "";
             if (sourceId)
@@ -146,10 +151,12 @@ class ActionReporter {
 
         Map<String, String> variables = variableMgr.getVariables(true);
 
-        String path = "## Module\n" + testEngine.getTestEnginePath();
+        String path = "## Test\n"
+                //+ actionReference.toString()
+                + testEngine.getTestEnginePath();
 
         String markdown = path + "\n" +
-                request
+                "## Action\n" + request
                 + asMarkdown(fixtures, "Fixtures")
                 + "\n"
                 + asMarkdown(variables, "Variables");

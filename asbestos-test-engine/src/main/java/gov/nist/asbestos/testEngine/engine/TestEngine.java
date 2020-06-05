@@ -900,7 +900,7 @@ public class TestEngine  {
 
         // if variables and fixtures don't align, report it out into the caller's TestReport
         if (engineVal.hasErrors()) {
-            new ActionReporter()
+            new ActionReporter(new ActionReference(testScript, opScript))
                     .setTestEngine(this)
                     .setTestCollectionId(testCollection)
                     .setTestId(testId)
@@ -1541,17 +1541,12 @@ public class TestEngine  {
 
     String getTestEnginePath() {
         if (parent != null) {
-            String parentPath = parent.getTestEnginePath();
-            if (parentPath.endsWith(":"))
-                return parentPath + " " + testScriptName;
-            return parentPath + "/" + testScriptName;
+            String libraryName = testDef.getName();
+            return parent.getTestEnginePath()
+                    + "**Module**: " + testScriptName + " (" + libraryName + ")\n";
         }
-        return "/" + testCollection + "/" + testId + ":";
+        return "**Script**: " + testId + " (" + testCollection + ")\n";
     }
-
-//    public String getTestSession() {
-//        return testSession;
-//    }
 
     public String getChannelId() {  // testSession __ channelName
         return channelId;

@@ -56,7 +56,7 @@ abstract class GenericSetupAction {
         Objects.requireNonNull(testCollectionId);
         Objects.requireNonNull(testId);
         Objects.requireNonNull(testEngine);
-        new ActionReporter()
+        new ActionReporter(actionReference)
                 .setTestEngine(testEngine)
                 .setTestCollectionId(testCollectionId)
                 .setTestId(testId)

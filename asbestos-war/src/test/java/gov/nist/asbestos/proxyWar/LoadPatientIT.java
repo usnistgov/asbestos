@@ -21,21 +21,10 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class LoadPatientIT {
-    private static String testSession = "default";
-    private static String channelId = "IT";
-    private static String fhirPort = ITConfig.getFhirPort();
-    private static String proxyPort = ITConfig.getProxyPort();
-
-    private static URI base;
-
-    static {
-        try {
-            base = new URI("http://localhost:" + proxyPort + "/asbestos/proxy/default__default");
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-            fail();
-        }
-    }
+    private static final String testSession = "default";
+    private static final String channelId = "IT";
+    private static final String fhirPort = ITConfig.getFhirPort();
+    private static final String proxyPort = ITConfig.getProxyPort();
 
     @Test
     void nonZip() throws URISyntaxException, IOException {
@@ -47,7 +36,7 @@ public class LoadPatientIT {
         assertEquals(200, poster.getStatus());
 
         Map<String, Map<String, String>> myMap = new Gson().fromJson(poster.getResponseText(), Map.class);
-        assertTrue(myMap.size() == 1);
+        assertEquals(1, myMap.size());
 
         Map<String, String> testReport = myMap.get("Bob_Bangle");
         assertTrue(testReport.size() > 3);
@@ -65,7 +54,7 @@ public class LoadPatientIT {
         assertEquals(200, poster.getStatus());
 
         Map<String, Map<String, String>> myMap = new Gson().fromJson(poster.getResponseText(), Map.class);
-        assertTrue(myMap.size() == 1);
+        assertEquals(1, myMap.size());
 
         Map<String, String> testReport = myMap.get("Bob_Bangle");
         assertTrue(testReport.size() > 3);
