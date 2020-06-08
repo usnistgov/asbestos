@@ -10,6 +10,13 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import javax.websocket.Session;
 
 public class TestScriptDebugState {
+    private static final String STEP_OVER_BKPT = "stepOverBkpt";
+    /**
+     * /test0 =
+     / = nested test script separator.
+     test0 = This is the imported test header which has no UI representation: skip this.
+    */
+    private static final String IMPORTED_TEST_HEADER = "/test0";
     private Object lock;
     private AtomicBoolean resume;
     private AtomicBoolean stopDebug;
@@ -26,6 +33,7 @@ public class TestScriptDebugState {
     private Session session;
     private String evalJsonString;
     private String currentExecutionIndex;
+    private boolean hasImportExtension;
     private List<String> parentExecutionIndex = new ArrayList<>();
     TestScriptDebugInterface debugInterface = null;
 
@@ -113,7 +121,11 @@ public class TestScriptDebugState {
     }
 
     public void sendFinalReport(String testReport) {
-        getSession().getAsyncRemote().sendText("{\"messageType\":\"final-report\", \"testReport\":" + testReport +"}");
+        if (getSession() != null && getSession().isOpen()) {
+            getSession().getAsyncRemote().sendText("{\"messageType\":\"final-report\", \"testReport\":" + testReport + "}");
+        } else {
+            log.error("sendFinalReport: session was already closed!");
+        }
     }
 
     public void sendAssertionStr(String assertionJson) {
@@ -155,7 +167,22 @@ public class TestScriptDebugState {
     }
 
     public boolean isBreakpoint(String breakpointIndex) {
-        return getBreakpointSet().contains(breakpointIndex);
+        boolean hasNormalBreakpoint = getBreakpointSet().contains(breakpointIndex);
+        if (! hasNormalBreakpoint) {
+            if (stepOverBkpt(breakpointIndex)) return true;
+        }
+        return hasNormalBreakpoint;
+    }
+
+    private boolean stepOverBkpt(String breakpointIndex) {
+        /* skip the test parts which have no UI representation */
+        if (! hasImportExtension  && ! breakpointIndex.endsWith(IMPORTED_TEST_HEADER) ) {
+            if (getBreakpointSet().contains(STEP_OVER_BKPT)) {
+                getBreakpointSet().remove(STEP_OVER_BKPT);
+                return true;
+            }
+        }
+        return false;
     }
 
     private boolean isWait() {
@@ -250,4 +277,7 @@ public class TestScriptDebugState {
         getSession().getAsyncRemote().sendText("{\"messageType\":\"completed\", \"testReport\":{}}");
     }
 
+    public void setHasImportExtension(boolean hasImportExtension) {
+        this.hasImportExtension = hasImportExtension;
+    }
 }

@@ -293,18 +293,32 @@ export const debugTestScriptStore = {
                         alert('Error: ' + event.data)
                     }
                 }
-
-            } else if (mapKey in state.showDebugButton && state.showDebugButton[mapKey].debugButtonLabel === 'Resume') {
-                state.evalMode = false
-                state.waitingForBreakpoint = true
+            } else {
+                // The Debug button changes to Resume when the socket is active, so one button does two jobs.
                 const breakpointSet = state.breakpointMap.get(mapKey) // Follow proper key format
                 let breakpointArrayString = JSON.stringify([...breakpointSet])
+                dispatch('doResumeBreakpoint', breakpointArrayString)
+            }
+        },
+        async doResumeBreakpoint({rootState, state}, breakpointArrayString) {
+            const testId = rootState.testRunner.currentTest
+            if (state.testScriptDebuggerWebSocket === null) {
+                console.log('doResumeBreakpoint: socket is null!')
+                return
+            }
+            const mapKey = this.getters.getMapKey(testId)
+            if (mapKey in state.showDebugButton && state.showDebugButton[mapKey].debugButtonLabel === 'Resume') {
+                state.evalMode = false
+                state.waitingForBreakpoint = true
                 let sendData = `{"cmd":"resumeBreakpoint","testScriptIndex":"${mapKey}","breakpointList":${breakpointArrayString}}`
 
                 // console.log('Resuming from ' + state.showDebugButton[mapKey].breakpointIndex)
                 state.testScriptDebuggerWebSocket.send(sendData)
                 state.showDebugButton[mapKey].breakpointIndex = null // Clear flag
             }
+        },
+        async doStepOver({dispatch}) {
+           dispatch('doResumeBreakpoint', '["stepOverBkpt"]')
         },
         async debugMgmt({commit, rootState, state}, fn) {
             if (fn === undefined || fn === null )

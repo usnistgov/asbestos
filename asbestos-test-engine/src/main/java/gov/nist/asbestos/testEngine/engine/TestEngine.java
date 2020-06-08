@@ -667,7 +667,7 @@ public class TestEngine  {
                                 isFollowedByAssert = true;
                         }
 
-                        ifDebuggingPauseIfBreakpoint("setup", 0, actionIndex);
+                        ifDebuggingPauseIfBreakpoint("setup", 0, actionIndex, hasImportModifierExtension(action.getOperation()));
                         doOperation(new ActionReference(testScript, action), typePrefix, action.getOperation(), actionReportComponent.getOperation(), isFollowedByAssert);
                         TestReport.SetupActionOperationComponent opReport = actionReportComponent.getOperation();
                         if (opReport.getResult() == TestReport.TestReportActionResult.ERROR) {
@@ -1152,7 +1152,7 @@ public class TestEngine  {
                         if (nextAction.hasAssert())
                             isFollowedByAssert = true;
                     }
-                    ifDebuggingPauseIfBreakpoint("test", testIndex, testPartIndex);
+                    ifDebuggingPauseIfBreakpoint("test", testIndex, testPartIndex, hasImportModifierExtension(action.getOperation()));
                     TestReport.SetupActionOperationComponent reportOp = actionReportComponent.getOperation();
                     doOperation(new ActionReference(testScript, action), typePrefix, action.getOperation(), reportOp, isFollowedByAssert);
                     TestReport.SetupActionOperationComponent opReport = actionReportComponent.getOperation();
@@ -1681,14 +1681,25 @@ public class TestEngine  {
      }
 
      private void ifDebuggingPauseIfBreakpoint(String parentType, Integer parentIndex) {
-        ifDebuggingPauseIfBreakpoint(parentType, parentIndex, null);
+        ifDebuggingPauseIfBreakpoint(parentType, parentIndex, null, false);
      }
 
-    private void ifDebuggingPauseIfBreakpoint(String parentType, Integer parentIndex, Integer childPartIndex) {
+    private void ifDebuggingPauseIfBreakpoint(String parentType, Integer parentIndex, Integer childPartIndex, boolean hasImportExtension) {
         if (hasDebugState()) {
+            testScriptDebugState.setHasImportExtension(hasImportExtension);
             testScriptDebugState.setCurrentExecutionIndex(parentType, parentIndex, childPartIndex);
             testScriptDebugState.pauseIfBreakpoint();
         }
     }
 
+    private boolean hasImportModifierExtension(TestScript.SetupActionOperationComponent operation) {
+        if (operation.hasModifierExtension()) {
+            Optional<Extension> extension = operation.getModifierExtension()
+                    .stream()
+                    .filter(s -> ExtensionDef.ts_import.equals(s.getUrl()))
+                    .findFirst();
+            return extension.isPresent();
+        }
+        return false;
+    }
 }

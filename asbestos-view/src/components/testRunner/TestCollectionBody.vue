@@ -58,21 +58,25 @@
                             <template v-else>
                                 <button :disabled="isDebugging(i)" @click.stop="doRun(name)" class="runallbutton">Run</button>
                                 <template v-if="$store.state.testRunner.currentTest === name">
-                                    <button @click.stop="doDebug(name)"
+                                    <button :disabled="isWaitingForBreakpoint"
+                                            @click.stop="doDebug(name)"
                                         class="debugTestScriptButton"
                                         v-if="isDebuggable(i)">{{getDebugActionButtonLabel(i)}}</button>
-                                <!--                                <button v-if="isEvaluable(i)"-->
-                                <!--                                        class="debugTestScriptButton"-->
-                                <!--                                        @click.stop="doDebugEvalMode(name)">Eval</button>-->
-                                    <button v-if="isDebugging(i)"
+                                    <button :disabled="isWaitingForBreakpoint"
+                                            v-if="isDebugging(i)"
+                                            @click.stop="doStepOver(i)"
+                                            class="debugTestScriptButton"
+                                        >Step Over</button>
+                                    <button :disabled="isWaitingForBreakpoint"
+                                            v-if="isDebugging(i)"
                                             @click.stop="stopDebugging(i)"
                                         class="stopDebugTestScriptButton">Stop</button>
-                                    <span v-if="$store.state.debugTestScript.waitingForBreakpoint">&nbsp;&nbsp;&#x23F1;</span>
+                                    <span v-if="isWaitingForBreakpoint">&nbsp;&nbsp;&#x23F1;</span>
                                     <!-- Display a stopwatch if waiting for breakpoint to be hit -->
                                 </template>
                             </template>
                     </span>
-                    <span v-if="! $store.state.debugTestScript.waitingForBreakpoint && ! $store.state.testRunner.isClientTest"> --  {{ testTime(name) }}</span>
+                    <span v-if="! isWaitingForBreakpoint && ! $store.state.testRunner.isClientTest"> --  {{ testTime(name) }}</span>
                 </div>
                 <debug-assertion-eval v-if="isEvaluable(i)" :show="$store.state.debugAssertionEval.showModal" @close="closeModal()" @resume="doDebug(name)"></debug-assertion-eval>
                 <router-view v-if="selected === name"></router-view>  <!--  opens TestOrEvalDetails   -->

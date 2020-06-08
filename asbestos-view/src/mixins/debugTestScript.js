@@ -76,6 +76,9 @@ export default {
                 return
             await this.$store.dispatch('debugTestScript', testName)
         },
+        async doStepOver(testScriptIndex) {
+           await this.$store.dispatch('doStepOver', testScriptIndex)
+        },
         async doDebugEvalMode() {
             await this.$store.dispatch('doDebugEvalMode')
         },
@@ -118,5 +121,8 @@ export default {
             const mapKey = this.$store.getters.getMapKey(testId)
             return mapKey
         },
+        isWaitingForBreakpoint() {
+            return this.$store.state.debugTestScript.waitingForBreakpoint
+        }
     }
 }
