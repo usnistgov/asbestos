@@ -109,8 +109,8 @@ public class DebugTestScriptRequest implements Runnable {
 
         } catch (Throwable t) {
             log.error(ExceptionUtils.getStackTrace(t));
-            if (state.getKill().get()) {
-                state.sendKilled();
+            if (state.getStopDebug().get()) {
+                state.sendStopped();
             } else {
                 state.sendUnexpectedError();
             }

@@ -13,7 +13,7 @@ export default {
             const key = this.getTestScriptIndexKey(testScriptIndex)
             return key in this.$store.state.debugTestScript.showDebugButton && Boolean(this.$store.state.debugTestScript.showDebugButton[key])
         },
-        isBeingDebugged(testScriptIndex) {
+        isPreviousDebuggerStillAttached(testScriptIndex) {
             const key = this.getTestScriptIndexKey(testScriptIndex)
             const indexList = this.$store.state.debugTestScript.debugMgmtIndexList
             if (indexList !== null || indexList !== undefined) {
@@ -33,9 +33,8 @@ export default {
                 if (valObj != undefined) {
                     return valObj.debugButtonLabel
                 }
-                // return "Debug"
-                return "X"
             }
+            return "X"
         },
          getBreakpointCount(testScriptIndex) {
              const key = this.getTestScriptIndexKey(testScriptIndex)
@@ -66,11 +65,11 @@ export default {
          isEvaluable(testScriptIndex) {
             return (this.getDebugActionButtonLabel(testScriptIndex) === 'Resume') && this.$store.state.debugTestScript.evalMode
         },
-        isDebugKillable(testScriptIndex) {
+        isDebugging(testScriptIndex) {
             return (this.getDebugActionButtonLabel(testScriptIndex) === 'Resume')
         },
-        async doDebugKill(testScriptIndex) {
-            await this.$store.dispatch('debugKill', this.getTestScriptIndexKey(testScriptIndex))
+        async stopDebugging(testScriptIndex) {
+            await this.$store.dispatch('stopDebugTs', this.getTestScriptIndexKey(testScriptIndex))
         },
         async doDebug(testName) {  // server tests
             if (!testName)

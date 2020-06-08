@@ -34,7 +34,7 @@
 
                     <script-status v-if="!statusRight" :status-right="statusRight" :name="name"> </script-status>
 
-                    <template v-if="isBeingDebugged(i)">
+                    <template v-if="isPreviousDebuggerStillAttached(i)">
                         <span class="breakpointColumnHeader" title="A debugger is running for this TestScript.">&#x1F41E;</span> <!-- &#x1F51B; is the ON! symbol -->
                     </template>
 
@@ -50,26 +50,27 @@
                             <button class="runallbutton" @click="doEval(name)">Run</button>
                         </span>
                     <span v-else>
-                              <template v-if="isBeingDebugged(i)">
-                                    <button
-                                            class="debugKillTestScriptButton"
-                                            @click.stop="removeDebugger(i)">Remove Debugger</button>
-                                </template>
-                                <template v-else>
-                                    <button class="runallbutton" @click.stop="doRun(name)">Run</button>
-                            <template v-if="$store.state.testRunner.currentTest === name">
-                                <button v-if="isDebuggable(i)"
-                                        class="debugTestScriptButton"
-                                        @click.stop="doDebug(name)">{{getDebugActionButtonLabel(i)}}</button>
-<!--                                <button v-if="isEvaluable(i)"-->
-<!--                                        class="debugTestScriptButton"-->
-<!--                                        @click.stop="doDebugEvalMode(name)">Eval</button>-->
-                                <button v-if="isDebugKillable(i)"
-                                        class="debugKillTestScriptButton"
-                                        @click.stop="doDebugKill(i)">Kill</button>
-                                <span v-if="$store.state.debugTestScript.waitingForBreakpoint">&nbsp;&nbsp;&#x23F1;</span> <!-- Display a stopwatch if waiting for breakpoint to be hit -->
+                          <template v-if="isPreviousDebuggerStillAttached(i)">
+                                <button
+                                        @click.stop="removeDebugger(i)"
+                                        class="stopDebugTestScriptButton">Remove Debugger</button>
                             </template>
+                            <template v-else>
+                                <button :disabled="isDebugging(i)" @click.stop="doRun(name)" class="runallbutton">Run</button>
+                                <template v-if="$store.state.testRunner.currentTest === name">
+                                    <button @click.stop="doDebug(name)"
+                                        class="debugTestScriptButton"
+                                        v-if="isDebuggable(i)">{{getDebugActionButtonLabel(i)}}</button>
+                                <!--                                <button v-if="isEvaluable(i)"-->
+                                <!--                                        class="debugTestScriptButton"-->
+                                <!--                                        @click.stop="doDebugEvalMode(name)">Eval</button>-->
+                                    <button v-if="isDebugging(i)"
+                                            @click.stop="stopDebugging(i)"
+                                        class="stopDebugTestScriptButton">Stop</button>
+                                    <span v-if="$store.state.debugTestScript.waitingForBreakpoint">&nbsp;&nbsp;&#x23F1;</span>
+                                    <!-- Display a stopwatch if waiting for breakpoint to be hit -->
                                 </template>
+                            </template>
                     </span>
                     <span v-if="! $store.state.debugTestScript.waitingForBreakpoint && ! $store.state.testRunner.isClientTest"> --  {{ testTime(name) }}</span>
                 </div>

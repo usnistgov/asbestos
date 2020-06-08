@@ -160,9 +160,9 @@ export const debugTestScriptStore = {
             commit('removeBreakpoint', value)
             return true
         },
-        async debugKill({state}, mapKey) {
+        async stopDebugTs({state}, mapKey) {
             if (state.testScriptDebuggerWebSocket != null) {
-                state.testScriptDebuggerWebSocket.send('{"cmd":"killDebug"}')
+                state.testScriptDebuggerWebSocket.send('{"cmd":"stopDebug"}')
                 // let valObj = state.showDebugButton[mapKey]
                 // if (valObj != undefined) {
                 //     console.log('Killing from ' + valObj.breakpointIndex)
@@ -170,7 +170,7 @@ export const debugTestScriptStore = {
                 //     valObj.debugButtonLabel = "Debug"
                 // }
             } else {
-                console.log('debugKill ' + mapKey + ' failed: WebSocket is null!')
+                console.log('stopDebugTs ' + mapKey + ' failed: WebSocket is null!')
             }
         },
         async doDebugEvalMode({commit, state, rootState, getters}) {
@@ -279,8 +279,8 @@ export const debugTestScriptStore = {
                         commit('updateAssertionEvalObj', returnData.assertionJson)
                     } else if (returnData.messageType === 'eval-assertion-result') {
                         commit('setDebugAssertionEvalResult', returnData)
-                    } else if (returnData.messageType === 'killed') {
-                        alert('Debug: Killed')
+                    } else if (returnData.messageType === 'stoppedDebugging') {
+                        // alert('Debugging was stopped.')
                         state.testScriptDebuggerWebSocket.close()
                     } else if (returnData.messageType === 'unexpected-error') {
                         alert('Debug: Unexpected error.')

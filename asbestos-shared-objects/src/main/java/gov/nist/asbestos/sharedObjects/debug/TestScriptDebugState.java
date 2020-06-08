@@ -12,7 +12,7 @@ import javax.websocket.Session;
 public class TestScriptDebugState {
     private Object lock;
     private AtomicBoolean resume;
-    private AtomicBoolean kill;
+    private AtomicBoolean stopDebug;
     private AtomicBoolean evaluateMode;
     /**
      * Debug Instance
@@ -36,7 +36,7 @@ public class TestScriptDebugState {
         this.lock = new Object();
         this.testScriptIndex = testScriptIndex;
         this.resume = new AtomicBoolean();
-        this.kill = new AtomicBoolean();
+        this.stopDebug = new AtomicBoolean();
         this.evaluateMode = new AtomicBoolean();
         this.breakpointSet = breakpointSet;
         this.session = session;
@@ -55,8 +55,8 @@ public class TestScriptDebugState {
         return resume;
     }
 
-    public AtomicBoolean getKill() {
-        return kill;
+    public AtomicBoolean getStopDebug() {
+        return stopDebug;
     }
 
     public ConcurrentSkipListSet getBreakpointSet() {
@@ -104,8 +104,8 @@ public class TestScriptDebugState {
        this.evaluateMode.set(false);
     }
 
-    public void sendKilled() {
-        getSession().getAsyncRemote().sendText("{\"messageType\":\"killed\", \"testReport\":{}}");
+    public void sendStopped() {
+        getSession().getAsyncRemote().sendText("{\"messageType\":\"stoppedDebugging\", \"testReport\":{}}");
     }
 
     public void sendUnexpectedError() {
@@ -159,7 +159,7 @@ public class TestScriptDebugState {
     }
 
     private boolean isWait() {
-        boolean isWait = ! getKill().get();
+        boolean isWait = ! getStopDebug().get();
         isWait = isWait && ! getResume().get();
         isWait = isWait && ! getDebugEvaluateModeWasRequested().get();
 
@@ -179,7 +179,7 @@ public class TestScriptDebugState {
             }
             if (getResume().get()) {
                 log.info("Resuming " +  getSession().getId());
-            } else if (getKill().get()) {
+            } else if (getStopDebug().get()) {
 //                throw new Error("KILL session: " + getSession().getId()); // This needs to throw a custom exception that does not show up in the test report
                 throw new StopDebugTestScriptException("KILL debug session: " + getSession().getId());
             } else if (getDebugEvaluateModeWasRequested().get()) {

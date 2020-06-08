@@ -106,7 +106,7 @@
     .conformance-tests-header {
         background-color: #DBD9BE;
     }
-    .debugKillTestScriptButton {
+    .stopDebugTestScriptButton {
         /*padding-bottom: 5px;*/
         margin-left: 10px;
         background-color: red;

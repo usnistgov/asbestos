@@ -6,7 +6,6 @@ import gov.nist.asbestos.client.Base.EC;
 import gov.nist.asbestos.client.Base.ProxyBase;
 import gov.nist.asbestos.client.client.FhirClient;
 import gov.nist.asbestos.client.client.Format;
-import gov.nist.asbestos.client.events.UIEvent;
 import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.client.resolver.ResourceCacheMgr;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
@@ -29,7 +28,6 @@ import org.hl7.fhir.r4.model.*;
 
 import java.io.*;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
@@ -1678,7 +1676,7 @@ public class TestEngine  {
                             testScriptDebugState.sendDebugAssertionEvalResultStr(code, actionReport.getMessage());
                         }
                     }
-                } while (! testScriptDebugState.getResume().get() && ! testScriptDebugState.getKill().get());
+                } while (! testScriptDebugState.getResume().get() && ! testScriptDebugState.getStopDebug().get());
             }
      }
 

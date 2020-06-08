@@ -82,9 +82,7 @@ public class DebugTestScriptWebSocketEndpoint {
         } else if ("admin".equals(userType)) {
             // TODO: Should be protected by a servlet filter
             // Admin does not use other parameters other than the userType
-            // TODO: handle kill all debug threads request
-//            } else if (myMap.get("count") != null) {
-//            } else if (myMap.get("killAllDebuggers") != null) {
+            // TODO: handle stop all debug threads request
             // map may not contain sessionId when session is automatically closed!
         }
     }
@@ -117,7 +115,7 @@ public class DebugTestScriptWebSocketEndpoint {
                 if (realSessionId.isPresent()) {
                     TestScriptDebugState debugState = debugStateMap.get(realSessionId.get().getWsSessionId());
                     if (debugState != null) {
-                        killSession(debugState);
+                        stopDebuggingTs(debugState);
                         debugState.getSession().close(new CloseReason(CloseReason.CloseCodes.CLOSED_ABNORMALLY, "Remove debug session requested by test session user"));
                         sendExistingDebuggerList(session, myMap); // Return an updated debugger list
                     } else {
@@ -154,10 +152,8 @@ public class DebugTestScriptWebSocketEndpoint {
         } else if (cmd.equals("resumeBreakpoint")) {
             List<String> updateList = (List<String>) myMap.get("breakpointList");
             doResumeBreakpoint(state, updateList);
-        } else if (cmd.equals("killDebug")) {
-            killSession(state);
-            // Create new exception for Kill because the next Test is run and the KILL exception is shown in the next Test.
-            // - See how failures in Setup are handled. The Kill should act that way.
+        } else if (cmd.equals("stopDebug")) {
+            stopDebuggingTs(state);
         } else if (cmd.equals("requestOriginalAssertion")) {
             doRequestOriginalAssertion(state);
         } else if (cmd.equals("debugEvalAssertion")) {
@@ -197,7 +193,7 @@ public class DebugTestScriptWebSocketEndpoint {
 
         if (debugStateMap.containsKey(sessionId)) {
             ExecutorService service = debugExecutorMap.get(sessionId);
-            if (debugStateMap.get(sessionId).getKill().get()) {
+            if (debugStateMap.get(sessionId).getStopDebug().get()) {
                 try {
                     service.awaitTermination(5, TimeUnit.SECONDS);
                 } catch (Throwable t) {
@@ -278,13 +274,13 @@ public class DebugTestScriptWebSocketEndpoint {
      * Causes an exception thrown inside the TestEngine which stop test execution where it was paused at.
      * @param state
      */
-    private static void killSession(TestScriptDebugState state) {
+    private static void stopDebuggingTs(TestScriptDebugState state) {
         String sessionId = state.getSessionId();
-        log.info("killSession: " + sessionId);
+        log.info("stopDebuggingTs Session: " + sessionId);
         synchronized (state.getLock()) {
             state.cancelResumeMode();
             state.resetEvalModeWasRequested();
-            state.getKill().set(true);
+            state.getStopDebug().set(true);
             state.getLock().notify();
         }
     }
