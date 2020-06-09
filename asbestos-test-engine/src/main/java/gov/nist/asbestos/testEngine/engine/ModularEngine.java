@@ -4,6 +4,7 @@ import gov.nist.asbestos.client.Base.EC;
 import gov.nist.asbestos.client.Base.ProxyBase;
 import gov.nist.asbestos.client.client.FhirClient;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
+import gov.nist.asbestos.sharedObjects.debug.StopDebugTestScriptException;
 import gov.nist.asbestos.sharedObjects.debug.TestScriptDebugState;
 import gov.nist.asbestos.simapi.validation.Val;
 import gov.nist.asbestos.testEngine.engine.fixture.FixtureMgr;
@@ -204,8 +205,13 @@ public class ModularEngine {
     }
 
     public ModularEngine runTest() {
-        getMainTestEngine().runTest();
-        saveLogs();
+        try {
+            getMainTestEngine().runTest();
+        } catch (StopDebugTestScriptException sdex) {
+            throw sdex;
+        } finally {
+            saveLogs();
+        }
         return this;
     }
 

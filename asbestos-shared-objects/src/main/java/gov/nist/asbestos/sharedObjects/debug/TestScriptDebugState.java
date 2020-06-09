@@ -208,7 +208,7 @@ public class TestScriptDebugState {
                 log.info("Resuming " +  getSession().getId());
             } else if (getStopDebug().get()) {
 //                throw new Error("KILL session: " + getSession().getId()); // This needs to throw a custom exception that does not show up in the test report
-                throw new StopDebugTestScriptException("KILL debug session: " + getSession().getId());
+                throw new StopDebugTestScriptException("STOP debug session: " + getSession().getId());
             } else if (getDebugEvaluateModeWasRequested().get()) {
                 log.info("Eval mode is true.");
             }
@@ -279,5 +279,9 @@ public class TestScriptDebugState {
 
     public void setHasImportExtension(boolean hasImportExtension) {
         this.hasImportExtension = hasImportExtension;
+    }
+
+    public boolean hasParentExecutionIndex() {
+        return this.parentExecutionIndex.size() > 0;
     }
 }

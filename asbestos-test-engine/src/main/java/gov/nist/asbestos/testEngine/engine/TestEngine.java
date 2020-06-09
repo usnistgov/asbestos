@@ -154,7 +154,12 @@ public class TestEngine  {
         }
         try {
             doWorkflow();
-        } catch (Throwable t) {
+        }
+        catch (StopDebugTestScriptException sdex) {
+            if (testScriptDebugState.hasParentExecutionIndex())
+                throw sdex;
+        }
+        catch (Throwable t) {
             reportTerminalFailure(t);
         }
         //returnTestReport();
@@ -292,9 +297,7 @@ public class TestEngine  {
             if (errorOut()) return;
             doSetup();
             if (errorOut()) return;
-            try {
                 doTest();
-            } catch (StopDebugTestScriptException ex) {}
             if (errorOut()) return;
             doTearDown();
             fillInSkips();
@@ -827,7 +830,12 @@ public class TestEngine  {
                     if (!isConditional)
                         doTestPart(test, testReportComponent, testReport, false);
                 }
-            } catch (Throwable t) {
+            }
+            catch (StopDebugTestScriptException sdex) {
+               failOverride = true;
+               throw sdex;
+            }
+            catch (Throwable t) {
                 String msg = t.getMessage();
                 if (msg == null || msg.equals(""))
                     msg = ExceptionUtils.getStackTrace(t);
@@ -936,7 +944,11 @@ public class TestEngine  {
                 ;
         modularEngine.add(testEngine1);
         testEngine1.parent = this;
-        testEngine1.runTest();
+        try {
+            testEngine1.runTest();
+        } catch (StopDebugTestScriptException sdex) {
+           throw sdex;
+        }
 
         /*
             Assign moduleName and moduleId in caller's TestReport.
