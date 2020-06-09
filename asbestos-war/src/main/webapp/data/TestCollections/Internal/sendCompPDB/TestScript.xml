@@ -1,0 +1,35 @@
+<TestScript>
+    <fixture id="original-bundle">
+        <autocreate value="false"/>
+        <autodelete value="false"/>
+        <resource>
+            <reference value="Bundle/pdb.xml"/>
+        </resource>
+    </fixture>
+    <fixture id="patient_bundle">
+        <autocreate value="false"/>
+        <autodelete value="false"/>
+        <resource>
+            <reference value="Patient/Chip_Carr.json"/>
+        </resource>
+    </fixture>
+    <variable>
+        <name value="patientResourceId"/>
+        <expression value="Bundle.entry.fullUrl"/>
+        <sourceId value="patient_bundle"/>
+    </variable>
+    <test>
+        <action>
+            <operation>
+                <description value="send PDB."/>
+                <label value="create"/>
+                <type>
+                    <system value="https://github.com/usnistgov/asbestos/wiki/Testscript-Operation-Codes"/>
+                    <code value="mhd-pdb-transaction"/>
+                </type>
+                <sourceId value="original-bundle"/>
+                <responseId value="original-response"/>
+            </operation>
+        </action>
+    </test>
+</TestScript>
