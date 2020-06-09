@@ -17,10 +17,11 @@ public class FhirClientBuilder {
         EC ec = new EC(externalCache);
 
         File alternatePatientCacheDir = ec.getTestLogCacheDir("default__default");
-        ResourceCacheMgr cmgr = new ResourceCacheMgr(alternatePatientCacheDir, new Ref(""));
-        alternatePatientCacheDir.mkdirs();
-        fhirClient.setResourceCacheMgr(cmgr);
-
+        if (alternatePatientCacheDir.exists()) {
+            ResourceCacheMgr cmgr = new ResourceCacheMgr(alternatePatientCacheDir, new Ref(""));
+            alternatePatientCacheDir.mkdirs();
+            fhirClient.setResourceCacheMgr(cmgr);
+        }
         if (channelId != null) {
             File patientCacheDir = ec.getTestLogCacheDir(channelId);
             patientCacheDir.mkdirs();

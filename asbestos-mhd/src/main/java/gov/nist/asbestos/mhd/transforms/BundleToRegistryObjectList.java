@@ -93,7 +93,7 @@ public class BundleToRegistryObjectList implements IVal {
     private List<SubmittedObject> submittedObjects = new ArrayList<>();
     private ITask task = null;
     private URI sqEndpoint = null;
-    private File externalCache = Installation.instance().externalCache();
+//    private File externalCache = Installation.instance().externalCache();
     private ChannelConfig channelConfig;
     private boolean isMinimalMetadata = false;
 
@@ -405,7 +405,10 @@ public class BundleToRegistryObjectList implements IVal {
         else if (isMinimalMetadata) {
             // Patient is optional in minimal metadata - add reference to No_Patient to make XDS Toolkit happy
             // Adds resource cache to configuration
-            FhirClient fhirClient = FhirClientBuilder.get(channelConfig.getChannelId());
+            FhirClient fhirClient =
+                    channelConfig == null
+                            ? FhirClientBuilder.get(null)
+                            : FhirClientBuilder.get(channelConfig.getChannelId());
 
             Optional<ResourceWrapper>  patient = fhirClient.readCachedResource(new Ref("Patient/No_Patient"));
             if (patient.isPresent()) {
@@ -574,7 +577,10 @@ public class BundleToRegistryObjectList implements IVal {
         if (!dr.hasSubject() || !dr.getSubject().hasReference() && isMinimalMetadata) {
             // Patient is optional in minimal metadata - add reference to No_Patient to make XDS Toolkit happy
             // Adds resource cache to configuration
-            FhirClient fhirClient = FhirClientBuilder.get(channelConfig.getChannelId());
+            FhirClient fhirClient =
+                    channelConfig == null
+                            ? FhirClientBuilder.get(null)
+                            : FhirClientBuilder.get(channelConfig.getChannelId());
 
             Optional<ResourceWrapper>  patient = fhirClient.readCachedResource(new Ref("Patient/No_Patient"));
             if (patient.isPresent()) {

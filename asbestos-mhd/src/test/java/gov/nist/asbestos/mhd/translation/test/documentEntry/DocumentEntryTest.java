@@ -180,6 +180,8 @@ class DocumentEntryTest {
 
         if (!val.ignore("masterIdentifier not present"))
             fail("Error did not occur");
+        if (!val.ignore("Internal error - cannot locate Patient/No_Patient"))
+            fail("Error did not occur");
 //        if ( !val.ignore("subject not present or has no reference"))
 //            fail("Error did not occur");
 
@@ -204,6 +206,9 @@ class DocumentEntryTest {
 
         run(documentReference, null, false);
 
+        if (!val.ignore("Internal error - cannot locate Patient/No_Patient"))
+            fail("Error did not occur");
+
 //        if (!val.ignore("subject not present or has no reference"))
 //            fail("Error did not occur");
 
@@ -227,6 +232,9 @@ class DocumentEntryTest {
         DocumentReference documentReference = withMasterIdentifierAndExtension();
 
         run(documentReference, null, false);
+
+        if (!val.ignore("Internal error - cannot locate Patient/No_Patient"))
+            fail("Error did not occur");
 
 //        if (!val.ignore("subject not present or has no reference"))
 //            fail("Error did not occur");
@@ -256,6 +264,9 @@ class DocumentEntryTest {
         expected.getIdentifier().remove(1);  // second (almost official) will not be processed
 
         run(documentReference, expected, false);
+
+        if (!val.ignore("Internal error - cannot locate Patient/No_Patient"))
+            fail("Error did not occur");
 
         if (!val.ignore("DocumentReference.identifier is UUID but not labeled as official"))
             fail("Error did not occur");
@@ -327,6 +338,9 @@ class DocumentEntryTest {
 
         run(documentReference, expected, false);
 
+        if (!val.ignore("Internal error - cannot locate Patient/No_Patient"))
+            fail("Error did not occur");
+
 //        if (!val.ignore("subject not present or has no reference"))
 //            fail("Error did not occur");
 
@@ -366,6 +380,9 @@ class DocumentEntryTest {
 
         run(documentReference, expected, false);
 
+        if (!val.ignore("Internal error - cannot locate Patient/No_Patient"))
+            fail("Error did not occur");
+
 //        if (!val.ignore("subject not present or has no reference"))
 //            fail("Error did not occur");
 
@@ -404,6 +421,9 @@ class DocumentEntryTest {
 
         run(documentReference, expected, false);
 
+        if (!val.ignore("Internal error - cannot locate Patient/No_Patient"))
+            fail("Error did not occur");
+
 //        if (!val.ignore("subject not present or has no reference"))
 //            fail("Error did not occur");
 
@@ -441,6 +461,9 @@ class DocumentEntryTest {
         DocumentReference expected = x.get(1);
 
         run(documentReference, expected, false);
+
+        if (!val.ignore("Internal error - cannot locate Patient/No_Patient"))
+            fail("Error did not occur");
 
 //        if (!val.ignore("subject not present or has no reference"))
 //            fail("Error did not occur");
@@ -501,6 +524,9 @@ class DocumentEntryTest {
 
         run(documentReference, expected, false);
 
+        if (!val.ignore("Internal error - cannot locate Patient/No_Patient"))
+            fail("Error did not occur");
+
 //        if (!val.ignore("subject not present or has no reference"))
 //            fail("Error did not occur");
 
@@ -539,6 +565,9 @@ class DocumentEntryTest {
         DocumentReference expected = x.get(1);
 
         run(documentReference, expected, false);
+
+        if (!val.ignore("Internal error - cannot locate Patient/No_Patient"))
+            fail("Error did not occur");
 
 //        if (!val.ignore("subject not present or has no reference"))
 //            fail("Error did not occur");
@@ -581,6 +610,9 @@ class DocumentEntryTest {
         DocumentReference expected = x.get(1);
 
         run(documentReference, expected, false);
+
+        if (!val.ignore("Internal error - cannot locate Patient/No_Patient"))
+            fail("Error did not occur");
 
 //        if (!val.ignore("subject not present or has no reference"))
 //            fail("Error did not occur");
@@ -629,6 +661,9 @@ class DocumentEntryTest {
 
         run(documentReference, expected, false);
 
+        if (!val.ignore("Internal error - cannot locate Patient/No_Patient"))
+            fail("Error did not occur");
+
 //        if (!val.ignore("subject not present or has no reference"))
 //            fail("Error did not occur");
 
@@ -671,6 +706,9 @@ class DocumentEntryTest {
         DocumentReference expected = x.get(1);
 
         run(documentReference, expected, false);
+
+        if (!val.ignore("Internal error - cannot locate Patient/No_Patient"))
+            fail("Error did not occur");
 
 //        if (!val.ignore("subject not present or has no reference"))
 //            fail("Error did not occur");
@@ -718,6 +756,9 @@ class DocumentEntryTest {
 
         run(documentReference, expected, false);
 
+        if (!val.ignore("Internal error - cannot locate Patient/No_Patient"))
+            fail("Error did not occur");
+
 //        if (!val.ignore("subject not present or has no reference"))
 //            fail("Error did not occur");
 
@@ -751,6 +792,9 @@ class DocumentEntryTest {
         DocumentReference expected = x.get(1);
 
         run(documentReference, expected, false);
+
+        if (!val.ignore("Internal error - cannot locate Patient/No_Patient"))
+            fail("Error did not occur");
 
 //        if (!val.ignore("subject not present or has no reference"))
 //            fail("Error did not occur");
@@ -789,6 +833,9 @@ class DocumentEntryTest {
         DocumentReference expected = x.get(1);
 
         run(documentReference, expected, false);
+
+        if (!val.ignore("Internal error - cannot locate Patient/No_Patient"))
+            fail("Error did not occur");
 
 //        if ( !val.ignore("subject not present or has no reference"))
 //            fail("Error did not occur");
@@ -834,6 +881,9 @@ class DocumentEntryTest {
         DocumentReference expected = x.get(1);
 
         run(documentReference, expected, false);
+
+        if (!val.ignore("Internal error - cannot locate Patient/No_Patient"))
+            fail("Error did not occur");
 
 //        if ( !val.ignore("subject not present or has no reference"))
 //            fail("Error did not occur");
