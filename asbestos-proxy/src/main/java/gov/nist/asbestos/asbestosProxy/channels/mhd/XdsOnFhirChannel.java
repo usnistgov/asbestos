@@ -49,7 +49,7 @@ public class XdsOnFhirChannel extends BaseChannel /*implements IBaseChannel*/ {
     private Bundle requestBundle = null;
     private String serverBase;
     private String proxyBase;
-    private BundleToRegistryObjectList bundleToRegistryObjectList = new BundleToRegistryObjectList();
+    private BundleToRegistryObjectList bundleToRegistryObjectList;
     private AhqrSender sender = null;
     private Binary binary = null;
 
@@ -180,6 +180,7 @@ public class XdsOnFhirChannel extends BaseChannel /*implements IBaseChannel*/ {
     @Override
     public void transformRequest(HttpPost requestIn, HttpPost requestOut)  {
         Objects.requireNonNull(channelConfig);
+        bundleToRegistryObjectList = new BundleToRegistryObjectList(channelConfig);
         byte[] request = requestIn.getRequest();
         String contentType = requestIn.getRequestContentType();
         IBaseResource resource;

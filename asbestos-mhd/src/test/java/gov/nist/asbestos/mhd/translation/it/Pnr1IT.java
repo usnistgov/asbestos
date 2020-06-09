@@ -78,7 +78,7 @@ class Pnr1IT {
         rMgr.setVal(val);
         rMgr.setFhirClient(fhirClient);
 
-        bundleToRegistryObjectList = new BundleToRegistryObjectList();
+        bundleToRegistryObjectList = new BundleToRegistryObjectList(null);
         bundleToRegistryObjectList.setVal(val);
         bundleToRegistryObjectList.setCodeTranslator(codeTranslator);
         bundleToRegistryObjectList.setResourceMgr(rMgr);

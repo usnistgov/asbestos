@@ -8,6 +8,7 @@ import org.hl7.fhir.r4.model.Patient;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.FileSystemException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
@@ -75,7 +76,11 @@ public class ResourceCacheMgr {
     public void addCache(File dir) {
         //if (caches.get(new Ref("")) == null)
 
-        caches.get(new Ref("")).file.addCache(dir);
+        CacheBundle cacheBundle = caches.get(new Ref(""));
+        if (cacheBundle != null) {
+            FileSystemResourceCache resourceCache = cacheBundle.file;
+            resourceCache.addCache(dir);
+        }
     }
 
     public List<Ref> getCachedServers() {

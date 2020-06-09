@@ -79,14 +79,17 @@ public class DocumentEntryToDocumentReference implements IVal {
                         .setPatientid(ei.getValue())
                         .setFhirClient(fhirClient)
                         .setResourceCacheMgr(resourceCacheMgr);
-                patientId.setVal(val);
-                Optional<Reference> reference = patientId.getFhirReference();
-                if (reference.isPresent()) {
-                    dr.setSubject(reference.get());
-                } else {
-                    val.add(new ValE("DocumentEntryToDocumentReference: Cannot find Patient reference for pid " + ei.getValue()).asError());
+                // TEST-1000-XXX is No_Patient - fake patient used when Minimal Metadata has not Patient reference
+                if (!"TEST-1000-XXX".equals(patientId.getId())) {
+                    patientId.setVal(val);
+                    Optional<Reference> reference = patientId.getFhirReference();
+                    if (reference.isPresent()) {
+                        dr.setSubject(reference.get());
+                    } else {
+                        val.add(new ValE("DocumentEntryToDocumentReference: Cannot find Patient reference for pid " + ei.getValue()).asError());
+                    }
+                    reference.ifPresent(dr::setSubject);
                 }
-                reference.ifPresent(dr::setSubject);
             } else if ("urn:uuid:2e82c1f6-a085-4c72-9da3-8640a32e42ab".equals(scheme)) {
                 // Unique ID
                 Identifier idr = new Identifier();

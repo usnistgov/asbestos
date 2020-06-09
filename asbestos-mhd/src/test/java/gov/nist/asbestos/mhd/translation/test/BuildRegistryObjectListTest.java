@@ -90,7 +90,7 @@ class BuildRegistryObjectListTest {
         rMgr.setBundle(bundle);
         rMgr.getResourceMgrConfig().internalOnly();
 
-        BundleToRegistryObjectList xlate = new BundleToRegistryObjectList();
+        BundleToRegistryObjectList xlate = new BundleToRegistryObjectList(null);
         xlate
                 .setCodeTranslator(codeTranslator)
                 .setResourceMgr(rMgr)

@@ -51,9 +51,12 @@ public class SubmissionSetToDocumentManifest implements IVal {
                         .setPatientid(ei.getValue())
                         .setResourceCacheMgr(resourceCacheMgr)
                         .setFhirClient(fhirClient);
-                patientId.setVal(val);
-                Optional<Reference> reference = patientId.getFhirReference();
-                reference.ifPresent(dm::setSubject);
+                // TEST-1000-XXX is No_Patient - fake patient used when Minimal Metadata has not Patient reference
+                if (!"TEST-1000-XXX".equals(patientId.getId())) {
+                    patientId.setVal(val);
+                    Optional<Reference> reference = patientId.getFhirReference();
+                    reference.ifPresent(dm::setSubject);
+                }
             } else if ("urn:uuid:96fdda7c-d067-4183-912e-bf5ee74998a8".equals(scheme)) {
                 // Unique ID
                 Identifier idr = new Identifier();

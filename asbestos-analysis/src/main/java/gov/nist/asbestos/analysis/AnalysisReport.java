@@ -224,8 +224,11 @@ public class AnalysisReport {
     // for tests only
     AnalysisReport() {}
 
-    public AnalysisReport(ResourceWrapper wrapper) {
+    public AnalysisReport(EC ec, ResourceWrapper wrapper) {
+        this.ec = ec;
+        this.codesValidation = new CodesValidation(ec);
         baseObj = wrapper;
+        baseRef = baseObj.getRef();
     }
 
     public AnalysisReport withGzip(boolean value) {
@@ -283,7 +286,7 @@ public class AnalysisReport {
                 baseObj = new ResourceWrapper(contextResource);
             } else if (baseObj != null) {
                 buildAtts();
-                return buildReport();
+             //   return buildReport();
             }
             buildRelated();
             comprehensiveEval();
@@ -369,6 +372,7 @@ public class AnalysisReport {
     }
 
     private TestEngine comprehensiveEval(ResourceWrapper wrapper) {
+        Objects.requireNonNull(ec);
         String type = wrapper.getResourceType();
         File testDef = new File(new File(new File(ec.externalCache, "FhirTestCollections"), "Internal"), "Comprehensive_" + type);
 //        if (!testDef.isDirectory())
@@ -902,7 +906,7 @@ public class AnalysisReport {
                 if (domainResource.hasContained()) {
                     DomainResource contained = (DomainResource) getResourceById(domainResource.getContained(), anchor);
                     ResourceWrapper wrapper = new ResourceWrapper(contained);
-                    if (ref.isRelative())
+                    if (ref.isRelative() && baseRef != null)
                         wrapper.setRef(ref.rebase(baseRef));
                     else
                         wrapper.setRef(ref);

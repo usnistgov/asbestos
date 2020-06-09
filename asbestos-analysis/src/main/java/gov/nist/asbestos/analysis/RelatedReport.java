@@ -44,4 +44,28 @@ public class RelatedReport {
     public String toString() {
         return url;
     }
+
+    public String getName() {
+        return name;
+    }
+
+    public boolean isMinimal() {
+        return isMinimal;
+    }
+
+    public boolean isComprehensive() {
+        return isComprehensive;
+    }
+
+    public List<String> getMinimalChecked() {
+        return minimalChecked;
+    }
+
+    public List<String> getComprehensiveErrors() {
+        return comprehensiveErrors;
+    }
+
+    public OperationOutcome getValidationResult() {
+        return validationResult;
+    }
 }

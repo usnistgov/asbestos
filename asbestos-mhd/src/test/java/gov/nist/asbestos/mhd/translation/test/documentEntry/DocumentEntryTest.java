@@ -107,7 +107,7 @@ class DocumentEntryTest {
 
 
         // Translate DocRef to XDS
-        BundleToRegistryObjectList bundleToRegistryObjectList = new BundleToRegistryObjectList();
+        BundleToRegistryObjectList bundleToRegistryObjectList = new BundleToRegistryObjectList(null);
         bundleToRegistryObjectList.setVal(val);
         bundleToRegistryObjectList.setCodeTranslator(codeTranslator);
         bundleToRegistryObjectList.setResourceMgr(rMgr);

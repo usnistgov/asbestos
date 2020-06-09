@@ -301,6 +301,11 @@ public class Ref {
         if (newBase.toString().startsWith("urn:uuid:")) {
             return new Ref(newBase.toString()).withAnchor(getAnchor());
         }
+        String resourceType = getResourceType();
+        if (resourceType == null || resourceType.equals(""))
+            resourceType = newBase.getResourceType();
+        if (resourceType == null || resourceType.equals(""))
+            throw new Error("Cannot rebase " + toString() + "  to " + newBase.toString() + " - cannot determine resourceType");
         Ref newRef = new Ref(newBase.getBase(), getResourceType(), getId(), getVersion()).httpizeTo(uri);
         newRef.withAnchor(this.getAnchor());
         return newRef;

@@ -1,5 +1,6 @@
 package gov.nist.asbestos.proxyWar;
 
+import gov.nist.asbestos.client.Base.EC;
 import gov.nist.asbestos.client.client.FhirClient;
 import gov.nist.asbestos.http.operations.HttpPost;
 import gov.nist.asbestos.sharedObjects.ChannelConfig;
@@ -39,8 +40,15 @@ public class Utility {
     }
 
     static TestEngine run(URI serverBase, String testScriptLocation) throws URISyntaxException {
+        EC ec = new EC(ExternalCache.getExternalCache());
         Val val = new Val();
         File test1 = Paths.get(ConditionalIT.class.getResource(testScriptLocation).toURI()).getParent().toFile();
+
+        File patientCacheDir = ec.getTestLogCacheDir("default__default");
+        File alternatePatientCacheDir = ec.getTestLogCacheDir("default__default");
+        patientCacheDir.mkdirs();
+        alternatePatientCacheDir.mkdirs();
+
 
         ModularEngine modularEngine = new ModularEngine(test1, serverBase).setSaveLogs(true);
         TestEngine mainTestEngine = modularEngine.getMainTestEngine();
@@ -50,6 +58,8 @@ public class Utility {
                 .setChannelId("default__default")
                 .setExternalCache(ExternalCache.getExternalCache())
                 .setFhirClient(new FhirClient())
+                .addCache(patientCacheDir)
+                .addCache(alternatePatientCacheDir)
                 .runTest();
         int i = 0;
         for (TestEngine engine : modularEngine.getTestEngines()) {

@@ -191,7 +191,8 @@ public class GetLogEventAnalysisRequest {
                 Ref ref = new Ref(responseHeaders.get("Content-Location").getValue());
                 runAndReturnReport(ref, "link taken from response Content-location header", false, false, false, runValidation, requestBundle);
             } else {
-                runAndReturnReport(new ResourceWrapper(baseResource));
+                Ref ref = new Ref("http://" + requestHeaders.getHeaderValue("host") + requestHeaders.getPathInfo());
+                runAndReturnReport(new ResourceWrapper(baseResource).setRef(ref));
 //            } else {
 //                returnReport(new Report("Do not understand event"));
             }
@@ -360,7 +361,7 @@ public class GetLogEventAnalysisRequest {
     private void runAndReturnReport(ResourceWrapper wrapper) {
         Report report;
         try {
-            report = new AnalysisReport(wrapper).run();
+            report = new AnalysisReport(request.ec, wrapper).run();
         } catch (Throwable t) {
             report = new Report(t.getMessage());
             returnReport(report);

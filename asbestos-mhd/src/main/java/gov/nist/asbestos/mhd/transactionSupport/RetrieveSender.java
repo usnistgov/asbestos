@@ -73,11 +73,11 @@ public class RetrieveSender {
 
             task.putRequestBodyText(output);
             poster.setUri(new URI(toAddr));
-            poster.setRequestContentType("application/soap+xml");
             requestHeaders.add(new Header("Content-Type", getMTOMContentType()));
             requestHeaders.setVerb(Verb.POST.name());
             requestHeaders.setPathInfo(new URI(toAddr));
             poster.setRequestHeaders(requestHeaders);
+//            poster.setRequestContentType("application/soap+xml"); // won't override
             task.putRequestHeader(requestHeaders);
             poster.post();
             int status = poster.getStatus();

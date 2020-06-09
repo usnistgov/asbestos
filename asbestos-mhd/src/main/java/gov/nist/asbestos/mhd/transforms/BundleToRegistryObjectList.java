@@ -3,6 +3,8 @@ package gov.nist.asbestos.mhd.transforms;
 
 import gov.nist.asbestos.asbestorCodesJaxb.Code;
 import gov.nist.asbestos.client.Base.IVal;
+import gov.nist.asbestos.client.client.FhirClient;
+import gov.nist.asbestos.client.client.FhirClientBuilder;
 import gov.nist.asbestos.client.events.ITask;
 import gov.nist.asbestos.client.resolver.IdBuilder;
 import gov.nist.asbestos.client.resolver.Ref;
@@ -19,6 +21,8 @@ import gov.nist.asbestos.mhd.translation.attribute.AuthorRole;
 import gov.nist.asbestos.mhd.translation.attribute.DateTransform;
 import gov.nist.asbestos.mhd.translation.attribute.EntryUuid;
 import gov.nist.asbestos.mhd.translation.search.FhirSq;
+import gov.nist.asbestos.sharedObjects.ChannelConfig;
+import gov.nist.asbestos.simapi.tk.installation.Installation;
 import gov.nist.asbestos.simapi.validation.Val;
 import gov.nist.asbestos.simapi.validation.ValE;
 import oasis.names.tc.ebxml_regrep.xsd.rim._3.*;
@@ -30,6 +34,7 @@ import javax.xml.bind.DatatypeConverter;
 import javax.xml.bind.JAXBElement;
 import javax.xml.namespace.QName;
 import javax.xml.transform.TransformerException;
+import java.io.File;
 import java.net.URI;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -88,6 +93,14 @@ public class BundleToRegistryObjectList implements IVal {
     private List<SubmittedObject> submittedObjects = new ArrayList<>();
     private ITask task = null;
     private URI sqEndpoint = null;
+    private File externalCache = Installation.instance().externalCache();
+    private ChannelConfig channelConfig;
+    private boolean isMinimalMetadata = false;
+
+
+    public BundleToRegistryObjectList(ChannelConfig channelConfig) {
+        this.channelConfig = channelConfig;
+    }
 
     public SubmittedObject findSubmittedObject(BaseResource resource) {
         for (SubmittedObject submittedObject : submittedObjects) {
@@ -389,6 +402,26 @@ public class BundleToRegistryObjectList implements IVal {
             addExternalIdentifier(ss, CodeTranslator.SS_SOURCEID, unURN(dm.getMasterIdentifier().getValue()), rMgr.allocateSymbolicId(), resource.getAssignedId(), "XDSSubmissionSet.sourceId", null);
         if (dm.hasSubject() && dm.getSubject().hasReference())
             addSubject(ss, resource,  new Ref(dm.getSubject()), CodeTranslator.SS_PID, "XDSSubmissionSet.patientId", vale);
+        else if (isMinimalMetadata) {
+            // Patient is optional in minimal metadata - add reference to No_Patient to make XDS Toolkit happy
+            // Adds resource cache to configuration
+            FhirClient fhirClient = FhirClientBuilder.get(channelConfig.getChannelId());
+
+            Optional<ResourceWrapper>  patient = fhirClient.readCachedResource(new Ref("Patient/No_Patient"));
+            if (patient.isPresent()) {
+                ResourceWrapper thePatient = patient.get();
+                Bundle patientBundle;
+                if (thePatient.getResource() instanceof Bundle) {
+                    patientBundle = (Bundle) thePatient.getResource();
+                    Ref patRef = new Ref(patientBundle.getEntry().get(0).getFullUrl());  // this must be turned into fullURL (not relative)
+                    addSubject(ss, resource, patRef , CodeTranslator.SS_PID, "XDSSubmissionSet.patientId", vale);
+                } else {
+                    val.add(new ValE("Internal error - Lookup of Patient/No_Patient returned " + thePatient.getResource().getClass().getSimpleName() + " instead of Bundle").asError());
+                }
+            } else {
+                val.add(new ValE("Internal error - cannot locate Patient/No_Patient").asError());
+            }
+        }
         return ss;
     }
 
@@ -538,8 +571,26 @@ public class BundleToRegistryObjectList implements IVal {
         }
 
         tr = vale.add(new ValE("DocumentReference.subject is [1..1]").addIheRequirement(DRTable));
-        if (!dr.hasSubject() || !dr.getSubject().hasReference()) {
-            //tr.add(new ValE("subject not present or has no reference").asError());
+        if (!dr.hasSubject() || !dr.getSubject().hasReference() && isMinimalMetadata) {
+            // Patient is optional in minimal metadata - add reference to No_Patient to make XDS Toolkit happy
+            // Adds resource cache to configuration
+            FhirClient fhirClient = FhirClientBuilder.get(channelConfig.getChannelId());
+
+            Optional<ResourceWrapper>  patient = fhirClient.readCachedResource(new Ref("Patient/No_Patient"));
+            if (patient.isPresent()) {
+                ResourceWrapper thePatient = patient.get();
+                Bundle patientBundle;
+                if (thePatient.getResource() instanceof Bundle) {
+                    patientBundle = (Bundle) thePatient.getResource();
+                    Ref patRef = new Ref(patientBundle.getEntry().get(0).getFullUrl());  // this must be turned into fullURL (not relative)
+                    addSubject(eo, resource, patRef , CodeTranslator.DE_PID, "XDSDocumentEntry.patientId", vale);
+                } else {
+                    val.add(new ValE("Internal error - Lookup of Patient/No_Patient returned " + thePatient.getResource().getClass().getSimpleName() + " instead of Bundle").asError());
+                }
+            } else {
+                val.add(new ValE("Internal error - cannot locate Patient/No_Patient").asError());
+            }
+
         } else {
             vale.add(new ValE("subject to Patient Id").asTranslation());
             addSubject(eo, resource,  new Ref(dr.getSubject()), CodeTranslator.DE_PID, "XDSDocumentEntry.patientId", tr);
@@ -902,6 +953,8 @@ public class BundleToRegistryObjectList implements IVal {
             if (!profiles.contains(bundleProfile.asStringValue()))
                 val.add(new ValE("Do not understand profile declared in bundle - " + bundleProfile).asError()
                         .add(new ValE("3.65.4.1.2.1 Bundle Resources").asDoc()));
+            if (bundleProfile.asStringValue().equals(minimalMetadataProfile))
+                isMinimalMetadata = true;
         } catch (Throwable e) {
             val.add(new ValE("Bundle.meta.profile missing").asError()
                     .add(new ValE("3.65.4.1.2.1 Bundle Resources").asDoc()));

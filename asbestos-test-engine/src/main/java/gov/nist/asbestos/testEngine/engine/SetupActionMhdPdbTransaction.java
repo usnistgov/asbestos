@@ -22,6 +22,8 @@ public class SetupActionMhdPdbTransaction extends SetupActionTransaction {
     public BaseResource updateResourceToSend(FixtureComponent toSend) {
         super.updateResourceToSend(toSend);
         ResourceWrapper wrapper = toSend.getResourceWrapper();
+        if (wrapper == null)
+            return null;
         BaseResource baseResource = wrapper.getResource();
         if (! (baseResource instanceof Bundle))
             return baseResource;

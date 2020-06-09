@@ -39,7 +39,7 @@ class AttributesTest {
         CodeTranslator codeTranslator = CodeTranslatorBuilder.read(is2);
 
         ExtrinsicObjectType eo = new ExtrinsicObjectType();
-        BundleToRegistryObjectList brol = new BundleToRegistryObjectList();
+        BundleToRegistryObjectList brol = new BundleToRegistryObjectList(null);
         Val val = new Val();
         brol.setVal(val);
         brol.setCodeTranslator(codeTranslator);
@@ -64,7 +64,7 @@ class AttributesTest {
     @Test
     void addExternalIdentifier()  throws JAXBException {
         ExtrinsicObjectType eo = new ExtrinsicObjectType();
-        BundleToRegistryObjectList brol = new BundleToRegistryObjectList();
+        BundleToRegistryObjectList brol = new BundleToRegistryObjectList(null);
         brol.setVal(new Val());
 
         brol.addExternalIdentifier(eo, "scheme", "value", "id", "registryObject", "name", null);
@@ -80,7 +80,7 @@ class AttributesTest {
     @Test
     void addSlot() throws JAXBException {
         ExtrinsicObjectType eo = new ExtrinsicObjectType();
-        BundleToRegistryObjectList brol = new BundleToRegistryObjectList();
+        BundleToRegistryObjectList brol = new BundleToRegistryObjectList(null);
 
         brol.addSlot(eo,"foo", "bar");
 
@@ -98,7 +98,7 @@ class AttributesTest {
     @Test
     void addSlot2() throws JAXBException {
         ExtrinsicObjectType eo = new ExtrinsicObjectType();
-        BundleToRegistryObjectList brol = new BundleToRegistryObjectList();
+        BundleToRegistryObjectList brol = new BundleToRegistryObjectList(null);
 
         brol.addSlot(eo,"foo", Arrays.asList("bar", "xuy"));
 
@@ -116,7 +116,7 @@ class AttributesTest {
     @Test
     void addName() throws JAXBException {
         ExtrinsicObjectType eo = new ExtrinsicObjectType();
-        BundleToRegistryObjectList brol = new BundleToRegistryObjectList();
+        BundleToRegistryObjectList brol = new BundleToRegistryObjectList(null);
 
         brol.addName(eo, "MyName");
 
@@ -131,7 +131,7 @@ class AttributesTest {
     @Test
     void createAssociation() throws JAXBException {
         Val val = new Val();
-        BundleToRegistryObjectList brol = new BundleToRegistryObjectList();
+        BundleToRegistryObjectList brol = new BundleToRegistryObjectList(null);
         ResourceMgr rMgr = new ResourceMgr();
         rMgr.setVal(val);
         brol.setResourceMgr(rMgr);

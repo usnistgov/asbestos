@@ -102,6 +102,10 @@ abstract class GenericSetupAction {
             }
             sourceFixture.setReferencedByActionReference(actionReference);
             resourceToSend = sourceFixture.getResourceResource();
+            if (resourceToSend == null) {
+                reporter.reportError("sourceId " + sourceFixture.getId() + "  does not reference a resource");
+                return false;
+            }
             resourceToSend = updateResourceToSend(sourceFixture);
         }
         if (op.hasRequestHeader())
@@ -121,6 +125,10 @@ abstract class GenericSetupAction {
 
     public BaseResource updateResourceToSend(FixtureComponent toSend) {
         ResourceWrapper wrapper = toSend.getResourceWrapper();
+        if (wrapper == null) {
+            reporter.reportError("Update to Fixture " + toSend.getId() + " - contains no resource");
+            return null;
+        }
         BaseResource resource = wrapper.getResource();
         String resourceString = ProxyBase.encode(resource, Format.JSON);
         String updatedResourceString = variableMgr.updateReference(resourceString);

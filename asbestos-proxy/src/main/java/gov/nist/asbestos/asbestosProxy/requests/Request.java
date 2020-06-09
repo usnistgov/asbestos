@@ -82,7 +82,9 @@ public class Request {
     }
 
     public String getParm(String name) {
-        String query = this.query; //req.getQueryString();
+        String query = this.query;
+        if (query == null)//req.getQueryString();
+            return null;
         try {
             query = URLDecoder.decode(query, StandardCharsets.UTF_8.toString());
         } catch (UnsupportedEncodingException e) {

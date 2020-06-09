@@ -14,7 +14,7 @@
 <!--                <div class="divider"></div>-->
 <!--                <div class="divider"></div>-->
 <!--                <div class="divider"></div>-->
-                <span v-if="attList && attList.indexOf(err) < 0" class="red">{{ err }}</span>
+<!--                <span v-if="attList && attList.indexOf(err) < 0" class="red">{{ err }}</span>-->
             </div>
         </div>
 
