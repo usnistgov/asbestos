@@ -13,7 +13,7 @@
             &lt;asbestos>/tomcat/Toolkits/FhirToolkit/conf/service.properties.  Link to HAPI is hapiFhirBase.
             Link to XDS is xdsToolkitBase. Changes to service.properties require toolkit restart (Tomcat).</p>
 
-        <p>XDS Toolkit is only required for testing XDSonFHIR option.</p>
+        <p>XDS Toolkit is required for testing XDSonFHIR option and for running self tests in Setup.</p>
 
         <div class="selectable" @click="selfTest()">Run</div>
         <div v-if="$store.state.log.loaded">
@@ -51,15 +51,17 @@
 
         <h2>Setup</h2>
         <p>When this toolkit is first installed it must be initialized.  Go to the Setup page (top menu ribbon)
-            and follow the directions there.</p>
+            and follow the directions there. All above listed services must show green checks
+        before Setup can be usefully run.</p>
 
         <h2>FHIR Toolkit structure</h2>
 
         <p>FHIR Tookit uses four main components: the <span class="bold">Test Engine</span> sends messages and validates
-        responses, the <span class="bold">Proxy</span> acts as an intermediary between components, logs messages, and performs
+        responses, the <span class="bold">Proxy</span> (a recording proxy) acts as an intermediary between components,
+            logs messages, and performs
         translation between MHD and XDS formats, the <span class="bold">XDS Toolkit</span> validates XDS format messages
         once they have been transformed by the Proxy, and the <span class="bold">HAPI FHIR Server</span> is used to hold
-        Patient resources.</p>
+        Patient resources by default.</p>
 
         <p>Details about how this structure is used to perform testing is discussed on the Configurations page (see top menu bar).</p>
 
@@ -77,17 +79,18 @@ kinds of channels: FHIR - data passed without modification and MHD - translation
         <br />
 
         <span class="bold">Events</span>
-        - list the events for a chosen Channel.  Full details of an event can be displayed by selecting it.
+        - list the events for a chosen Channel.  Each message through the Proxy generates an event. Full details of
+        an event can be displayed by selecting it.
         <br />
 
         <span class="bold">Test Collections</span>
-        - There are two types of Test Collections: client and server.  Client tests are used to evaluate an
+        - All tests reside in a Test Collection. There are two types of Test Collections: client and server.  Client tests are used to evaluate an
         SUT that initiates a transaction such as a Document Source. Server tests evaluate SUTs that accept transactions such as a
         Document Recipient. Each Test Collection targets a particular actor.
 
         <h2>Patient Management</h2>
-        All Document Sharing tests depend on a reference to a Patient resource. This toolit manages patients by
-        loading a small set of Patient resources into the support HAPI server.  This procedure is handled in
+        Document Sharing tests may depend on a reference to a Patient resource. This toolkit manages patients by
+        loading a small set of Patient resources into the support HAPI server (by default).  This procedure is handled in
         the Setup section above.
 
         <h2>Predefined Channels</h2>
@@ -101,6 +104,7 @@ kinds of channels: FHIR - data passed without modification and MHD - translation
         - a placeholder for your System Under Test. This is used for server testing only.
         Use the Channel Editor (Config in the Channels Control panel) to
             configure the FHIR Base Address of your System Under Test before using.
+        <br /><br />
 
         <span class="bold">xds</span>
         - leads to a Repository/Registry simulator in XDS Toolkit. The Channel Configuration contains the XDS Site Name.
@@ -115,15 +119,18 @@ kinds of channels: FHIR - data passed without modification and MHD - translation
 
         <span class="bold">limited</span>
         - leads to a Repository/Registry simulator in XDS Toolkit.  Within the Channel Configuration, the XDS Site Name
-        is configured. On my system it is default__limited which is the default Test Session and the simulator limited.
+        is configured.
 
         This simulator must have <span class="bold">Validate Against Patient Identity Feed</span> unchecked as we do not
             send Patient Identity Feed messages to the simulator.
             This simulator must have <span class="bold">Metadata Limited</span> checked so validation is done using the
                 rules for Metadata Limited messages.
 
+        DocumentReference.subject and DocumentManifest.subject are optional in Minimal Metadata. For the translation
+        to XDS, a patient named No Patient is inserted to create valid XDS metadata.  This reference is removed on
+        queries so it is transparent to FHIR resource processing.
 
-        This Channel is used for validating MHD Minimal metadeata.
+        This Channel is used for validating MHD Minimal metadata.
 
         <br /><br />
         <span class="bold">selftest_comprehensive</span>
@@ -132,6 +139,10 @@ kinds of channels: FHIR - data passed without modification and MHD - translation
         <br /><br />
         <span class="bold">selftest_minimal</span>
         - leads to a Repository/Registry simulator in XDS Toolkit and is used for self tests on the Setup page.
+        <br /><br />
+
+        Only <span class="bold">sut</span> is intended to be edited by the user.  Altering other pre-installed channels
+        may disable some processing within toolkit. New channels can always be added.
 
         <h2>FHIR Toolkit Configuration</h2>
         For details about configuration look in the <a href="https://github.com/usnistgov/asbestos/wiki/Configuration" target="_blank">wiki</a>.

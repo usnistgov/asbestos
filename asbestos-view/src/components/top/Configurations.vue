@@ -1,5 +1,6 @@
 <template>
     <div class="left">
+
         <h2>Client testing configuration</h2>
 
         <p>In this mode, FHIR Toolkit accepts messages from a client-style actor such as the MHD Document Source and
@@ -9,8 +10,8 @@
         <h3>Processing</h3>
         <ol>
             <li>Tool is put in client testing mode by selecting a Client test collection.</li>
-            <li>SUT sends one or more transactions to satisfy demands of on-screen documentation. The FHIRBASE
-                to send to is displayed on-screen. This FHIRBASE leads to the Proxy.</li>
+            <li>SUT sends one or more transactions to satisfy demands of on screen documentation. The FHIRBASE
+                to send to is displayed on screen. This FHIRBASE leads to the Proxy.</li>
             <li>Messages received by the proxy are recorded for later viewing and forwarded on to a pre-configured
                 service.</li>
             <li>Messages passing through the proxy use one of several Channels. The channel configuration controls

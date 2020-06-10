@@ -196,6 +196,10 @@ public class FhirClient {
             if (iBaseResource instanceof BaseResource)
                 resource = (BaseResource) iBaseResource;
         }
+
+        Ref theRef = wrapper.getRef();
+        if (theRef.hasId())
+            resource.setId(theRef.getId());
 //        if (getter.isSearch()) {
 //            if (!(resource instanceof Bundle)) {
 //                throw new Error("Search must return Bundle - received " + resource.getClass().getSimpleName() + " instead");

@@ -84,7 +84,7 @@
                 capStmt: null,
                 reValidation: 0,
                 validation: null,
-                inspection: true,
+                inspection: false,
                 resourceText: "",
             }
         },

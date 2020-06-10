@@ -5,6 +5,15 @@
 
         <h3>MHD Document Source - Minimal</h3>
 
+        <h4>Instructions</h4>
+        <ol>
+            <li>Choose Channel - limited.  Configuration shows FHIRBASE to send to.</li>
+            <li>Select Test Collection. Send messages to satisfy test requirements listed.</li>
+            <li>Run test to run validations.  It will search recent messages for requirements match.</li>
+            <li>Alter number of recent events to evaluate as necessary.</li>
+        </ol>
+
+        <h4>Operation</h4>
         Document Source (SUT) sends Provide Document Bundle transactions to FHIRBase specified in the Limited Channel.
         Validation happens in three parts:
 
@@ -13,40 +22,69 @@
             <li>Metadata is translated into XDS format and forwarded to XDS Toolkit for evaluation (Repository/Registry simulator
                 configured for Metadata Limited validation). Outcome is relayed in
             the response message.</li>
-            <li>Test specific evaluations are run from the Toolkit UI.  These are reported on screen and are not included in
+            <li>Additional evaluations are run from the Toolkit UI.  These are reported on screen and are not included in
             the response message.</li>
         </ol>
 
-        <div class="selectable" @click="configureMinimalDocumentSource()">Configure the tool and go to the tests</div>
+
+<!--        <div class="selectable" @click="configureMinimalDocumentSource()">Configure the tool and go to the tests</div>-->
 
 
         <h3>MHD Document Source - Comprehensive (Option)</h3>
-        Document Source (SUT) sends Provide Document Bundle transactions to FHIRBase specified in the XDS Channel.
+
+        <h4>Instructions</h4>
+        <ol>
+            <li>Choose Channel - xds.  Configuration shows FHIRBASE to send to.</li>
+            <li>Select Test Collection. Send messages to satisfy test requirements listed.</li>
+            <li>Run test to run validations.  It will search recent messages for requirements match.</li>
+            <li>Alter number of recent events to evaluate as necessary.</li>
+        </ol>
+
+        <h4>Operation</h4>
+        Document Source (SUT) sends Provide Document Bundle transactions to FHIRBase specified in the xds Channel.
         Validation happens in three parts:
 
         <ol>
-            <li>Upon receipt at the XDS Channel, the Bundle is evaluated and errors are returned in the response message.</li>
-            <li>Metadata is translated into XDS format and forwarded to XDS Toolkit for evaluation.
-                (Repository/Registry simulator
-                configured for normal validation). Outcome is relayed in
+            <li>Upon receipt at the Limited Channel, the Bundle structure is evaluated and errors are returned in the response message.</li>
+            <li>Metadata is translated into XDS format and forwarded to XDS Toolkit for evaluation (Repository/Registry simulator
+                configured for Metadata Limited validation). Outcome is relayed in
                 the response message.</li>
-            <li>Test specific evaluations are run from the Toolkit UI.  These are reported on screen and are not included in
+            <li>Additional evaluations are run from the Toolkit UI.  These are reported on screen and are not included in
                 the response message.</li>
         </ol>
 
-        <div class="selectable" @click="configureComprehensiveDocumentSource()">Configure the tool and go to the tests</div>
+<!--        <div class="selectable" @click="configureComprehensiveDocumentSource()">Configure the tool and go to the tests</div>-->
 
         <h3>MHD Document Recipient - Minimal</h3>
-        FHIR Toolkit sends Provide Document Bundle transactions to the FHIRBase specified in the SUT Channel.
+
+        <h4>Instructions</h4>
+        <ol>
+            <li>Configure channel for your server.  sut is available for that purpose or create your own.</li>
+            <li>Choose Channel.</li>
+            <li>Select Test Collection.</li>
+            <li>Run tests individually or as a group (runall).</li>
+        </ol>
+
+        FHIR Toolkit sends Provide Document Bundle transactions to the FHIRBase specified in the selected Channel.
         The response is validated.
 
-        <div class="selectable" @click="configureMinimalDocumentRecipient()">Configure the tool and go to the tests</div>
+<!--        <div class="selectable" @click="configureMinimalDocumentRecipient()">Configure the tool and go to the tests</div>-->
 
 
         <h3>MHD Document Recipient - Comprehensive (Option)</h3>
+
+        <h4>Instructions</h4>
+        <ol>
+            <li>Configure channel for your server.  sut is available for that purpose or create your own.</li>
+            <li>Choose Channel.</li>
+            <li>Select Test Collection.</li>
+            <li>Run tests individually or as a group (runall).</li>
+        </ol>
+
         FHIR Toolkit sends Provide Document Bundle transactions to the FHIRBase specified in the SUT Channel.
         The response is validated.
-        <div class="selectable" @click="configureComprehensiveDocumentRecipient()">Configure the tool and go to the tests</div>
+
+<!--        <div class="selectable" @click="configureComprehensiveDocumentRecipient()">Configure the tool and go to the tests</div>-->
 
 
         <h3>MHD Document Consumer</h3>
@@ -57,9 +95,9 @@
         Tests under development
 
         <h2>Inspector</h2>
-        The Inspector is a tool for viewing the Proxy logs in raw mode (as they were sent on the wire) or tabular
+        The Inspector is a tool for viewing the Proxy logs in raw mode (as they were sent on the wire) or graphical
         form.  The contents of a Provide Document Bundle can be displayed as well as the related content extracted
-        from the server.  Also their is a PDB Validator that validates the PDB Request and Response message.
+        from the server.
 
         The Inspector can be entered:
 

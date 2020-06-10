@@ -112,45 +112,71 @@
     <test>
         <description value="Read back DocumentReference 1."/>
         <action>
-                <operation>
-                    <description value="Read back the DocumentReference and validate."/>
-                    <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
-                        <extension url="component">
-                            <valueString value="../../Library/ReadValidateDocRef.xml"/>
-                        </extension>
-                        <extension url="urn:fixture-in">
-                            <valueString  value="submittedDocRef1"/>
-                        </extension>
-                        <extension url="urn:variable-in">
-                            <valueString value="DocRefUrl1"/>
-                        </extension>
-                        <extension url="urn:variable-in">
-                            <valueString value="patientResourceId"/>
-                        </extension>
-                    </modifierExtension>
-                </operation>
+            <operation>
+                <description value="DocumentReference."/>
+                <label value="read-back"/>
+                <type>
+                    <code value="read"/>
+                </type>
+                <url value="${DocRefUrl1}"/>
+                <responseId value="readBackResponse"/>
+            </operation>
+        </action>
+        <action>
+            <assert>
+                <description value="... was successful."/>
+                <response value="okay"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
+            <assert>
+                <description value="... returned a DocumentReference."/>
+                <resource value="DocumentReference"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
+            <assert>
+                <description value="... check server copy against submitted copy. Any attributes missing?"/>
+                <minimumId value="submittedDocRef1"/>
+                <warningOnly value="false"/>
+            </assert>
         </action>
     </test>
     <test>
         <description value="Read back DocumentReference 2."/>
         <action>
             <operation>
-                <description value="Read back the DocumentReference and validate."/>
-                <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
-                    <extension url="component">
-                        <valueString value="../../Library/ReadValidateDocRef.xml"/>
-                    </extension>
-                    <extension url="urn:fixture-in">
-                        <valueString  value="submittedDocRef2"/>
-                    </extension>
-                    <extension url="urn:variable-in">
-                        <valueString value="DocRefUrl2"/>
-                    </extension>
-                    <extension url="urn:variable-in">
-                        <valueString value="patientResourceId"/>
-                    </extension>
-                </modifierExtension>
+                <description value="DocumentReference."/>
+                <label value="read-back"/>
+                <type>
+                    <code value="read"/>
+                </type>
+                <url value="${DocRefUrl2}"/>
+                <responseId value="readBackResponse"/>
             </operation>
+        </action>
+        <action>
+            <assert>
+                <description value="... was successful."/>
+                <response value="okay"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
+            <assert>
+                <description value="... returned a DocumentReference."/>
+                <resource value="DocumentReference"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
+            <assert>
+                <description value="... check server copy against submitted copy. Any attributes missing?"/>
+                <minimumId value="submittedDocRef2"/>
+                <warningOnly value="false"/>
+            </assert>
         </action>
     </test>
 </TestScript>

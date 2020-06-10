@@ -155,14 +155,21 @@ public class RunSelftestRequest {
                     continue;
                 }
                 aRun = true;
-                TestReport report = (TestReport) ProxyBase.parse(testLogFile);
-                if (report.getResult() == TestReport.TestReportResult.FAIL)
+                TestReport report = null;
+                try {
+                    report = (TestReport) ProxyBase.parse(testLogFile);
+                } catch (ca.uhn.fhir.parser.DataFormatException e) {
                     lastTime.hasError = true;
-                String time = report.getIssued().toString();
-                if (lastTime.time == null)
-                    lastTime.time = time;
-                else if (time.compareTo(lastTime.time) < 0)
-                    lastTime.time = time;
+                }
+                if (!lastTime.hasError) {
+                    if (report.getResult() == TestReport.TestReportResult.FAIL)
+                        lastTime.hasError = true;
+                    String time = report.getIssued().toString();
+                    if (lastTime.time == null)
+                        lastTime.time = time;
+                    else if (time.compareTo(lastTime.time) < 0)
+                        lastTime.time = time;
+                }
             }
             lastTime.noRuns = !aRun;
             if (lastTime.noRuns)

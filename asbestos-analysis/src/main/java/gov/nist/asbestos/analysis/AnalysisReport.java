@@ -770,15 +770,20 @@ public class AnalysisReport {
             // sourcePatientInfo - contained only
             if (documentReference.getContext().hasSourcePatientInfo()) {
 //                Related related = load(new Ref(documentReference.getContext().getSourcePatientInfo()), "SourcePatientInfo", documentReference);
-                Ref spi = new Ref(documentReference.getId()).withAnchor(documentReference.getContext().getSourcePatientInfo().getReference());
-                Related related = load(spi,
-                        "SourcePatientInfo",
-                        documentReference);
-                if (related != null && !related.contained)
-                    generalErrors.add("DocumentReference.context.sourcePatientInfo must be contained");
-                if (related != null && related.wrapper.hasResource()) {
-                    if (!related.wrapper.getResource().getClass().getSimpleName().equals("Patient"))
-                        generalErrors.add("DocumentReference: " + related.wrapper.getResource().getClass().getSimpleName() + " is not a valid context/sourcePatientInfo resource");
+                if (documentReference.hasId() && !documentReference.getId().equals("null")) {
+                    Ref spi = new Ref(documentReference.getId())
+                            .withAnchor(documentReference.getContext()
+                                    .getSourcePatientInfo()
+                                    .getReference());
+                    Related related = load(spi,
+                            "SourcePatientInfo",
+                            documentReference);
+                    if (related != null && !related.contained)
+                        generalErrors.add("DocumentReference.context.sourcePatientInfo must be contained");
+                    if (related != null && related.wrapper.hasResource()) {
+                        if (!related.wrapper.getResource().getClass().getSimpleName().equals("Patient"))
+                            generalErrors.add("DocumentReference: " + related.wrapper.getResource().getClass().getSimpleName() + " is not a valid context/sourcePatientInfo resource");
+                    }
                 }
             }
             // context/related
