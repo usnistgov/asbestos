@@ -1,0 +1,55 @@
+<TestScript  xmlns="http://hl7.org/fhir">
+    <modifierExtension url="urn:module">
+        <extension url="urn:variable-in">
+            <valueString  value="DocRefUrl"/>
+        </extension>
+        <extension url="urn:variable-in">
+            <valueString  value="patientResourceId"/>
+        </extension>
+        <extension url="urn:fixture-in">
+            <valueString value="submittedDocRef"/>
+        </extension>
+    </modifierExtension>
+
+    <url value=""/>
+    <name value="ReadValidateDocRef"/>
+    <status value="active"/>
+    <description value="Read DocumentReference and validate against what was sent."/>
+
+    <test>
+        <description value="Read back the DocumentReference and validate."/>
+        <action>
+            <operation>
+                <description value="DocumentReference."/>
+                <label value="read-back"/>
+                <type>
+                    <code value="read"/>
+                </type>
+                <url value="${DocRefUrl}"/>
+                <responseId value="readBackResponse"/>
+            </operation>
+        </action>
+        <action>
+            <assert>
+                <description value="... was successful."/>
+                <response value="okay"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
+            <assert>
+                <description value="... returned a DocumentReference."/>
+                <resource value="DocumentReference"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
+            <assert>
+                <description value="... check server copy against submitted copy. Any attributes missing?"/>
+                <minimumId value="submittedDocRef"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+
+    </test>
+</TestScript>

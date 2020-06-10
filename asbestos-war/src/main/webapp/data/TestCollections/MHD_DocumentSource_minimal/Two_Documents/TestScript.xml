@@ -78,7 +78,7 @@
                 
                 <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
                     <extension url="component">
-                        <valueString value="../../Library/PDBRequestEval.xml"/>
+                        <valueString value="../../Library/PDBRequestMinEval.xml"/>
                     </extension>
                     <extension url="urn:fixture-in">
                         <valueString  value="request"/>

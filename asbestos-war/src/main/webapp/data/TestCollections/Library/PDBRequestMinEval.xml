@@ -1,0 +1,156 @@
+<TestScript xmlns="http://hl7.org/fhir">
+    <modifierExtension url="urn:module">
+        <extension url="urn:fixture-in">
+            <valueString  value="request"/>
+        </extension>
+    </modifierExtension>
+
+    <url value=""/>
+    <name value="PDBRequestEval"/>
+    <status value="active"/>
+
+    <variable>
+      <name value="manifestPatientReference"/>
+      <expression value="Bundle.entry.resource.where(is(FHIR.DocumentManifest)).subject.reference"/>
+      <sourceId value="request"/>
+    </variable>
+
+    <test>
+        <description value="PDB Request validations."/>
+        <action>
+            <assert>
+                <description value="PDB: Verb is POST.|MHDPDBUsesPost"/>
+                <requestMethod value="post"/>
+                <sourceId value="request"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
+            <assert>
+                <description value="PDB: Request contains one DocumentManifest.|MHDPDBOneDocumentManifest"/>
+                <compareToSourceId value="request"/>
+                <compareToSourceExpression value="Bundle.entry.resource.where(is(FHIR.DocumentManifest)).count() = 1"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
+            <assert>
+                <description value="PDB: Request contains one or more DocumentReference.|MHDPDBOneDocumentManifest"/>
+                <compareToSourceId value="request"/>
+                <compareToSourceExpression value="Bundle.entry.resource.where(is(FHIR.DocumentManifest)).count() >= 1"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
+            <assert>
+                <description value="PDB: Comprehensive or Minimal metadata identified in profile.|MHDPDBMetadataType"/>
+                <compareToSourceId value="request"/>
+                <compareToSourceExpression value="Bundle.meta.profile = 'http://ihe.net/fhir/StructureDefinition/IHE_MHD_Provide_Comprehensive_DocumentBundle' or Bundle.meta.profile='http://ihe.net/fhir/StructureDefinition/IHE_MHD_Provide_Minimal_DocumentBundle'"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
+            <assert>
+                <description value="PDB: All DocumentReferences in bundle link to DocumentManifest."/>
+                <compareToSourceId value="request"/>
+                <compareToSourceExpression value="Bundle.entry.where(resource.is(FHIR.DocumentReference)).fullUrl = Bundle.entry.resource.where(is(FHIR.DocumentManifest)).content.reference"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
+            <assert>
+                <description value="PDB: DocumentManifest links to only DocumentReferences that are in Bundle"/>
+                <compareToSourceId value="request"/>
+                <compareToSourceExpression value="Bundle.entry.resource.where(is(FHIR.DocumentManifest)).content.reference in Bundle.entry.where(resource.is(FHIR.DocumentReference)).fullUrl"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
+            <assert>
+                <description value="PDB: {DocumentReference, DocumentManifest, List}.subject.reference (if it exists) is absolute external reference.|MHDPDBPatientReference"/>
+                <compareToSourceId value="request"/>
+                <compareToSourceExpression value="Bundle.entry.resource.where(is(FHIR.DocumentReference) or is(FHIR.DocumentManifest) or is(FHIR.List)).subject.all($this.exists().not() or $this.reference.startsWith('http'))"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
+            <assert>
+                <description value="PDB: if DocumentReference.identifier carries the entryUUID then it shall be labeled official."/>
+                <compareToSourceId value="request"/>
+                <compareToSourceExpression value="Bundle.entry.resource.(is(FHIR.DocumentReference) and identifier.use = 'official' implies identifier.value.startsWith('urn:uuid:'))"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
+            <assert>
+                <description value="DocumentReference: DocumentReference has single content element."/>
+                <compareToSourceId value="request"/>
+                <compareToSourceExpression value="Bundle.entry.resource.(is(FHIR.DocumentReference) implies content.count() = 1)"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
+            <assert>
+                <description value="DocumentReference: DocumentReference has content.attachment.url.|MHDPDBDocRefHasAttachment"/>
+                <compareToSourceId value="request"/>
+                <compareToSourceExpression value="Bundle.entry.resource.where(is(FHIR.DocumentReference)).content.attachment.url.empty().not()"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
+            <assert>
+                <description value="DocumentReference: DocumentReference.content.attachment has contentType."/>
+                <compareToSourceId value="request"/>
+                <compareToSourceExpression value="Bundle.entry.resource.where(is(FHIR.DocumentReference)).content.attachment.contentType.empty().not()"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
+            <assert>
+                <description value="DocumentReference: DocumentReference.content.attachment.data is not allowed."/>
+                <compareToSourceId value="request"/>
+                <compareToSourceExpression value="Bundle.entry.resource.where(is(FHIR.DocumentReference)).content.attachment.data.exists().not()"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+
+        <action>
+            <assert>
+                <description value="DocumentReference: DocumentReference links to Binary through content.attachment.url.|MHDPDBBinaryInBundle"/>
+                <compareToSourceId value="request"/>
+                <compareToSourceExpression value="Bundle.entry.where(resource.is(FHIR.Binary)).fullUrl = Bundle.entry.where(resource.is(FHIR.DocumentReference)).resource.content.attachment.url"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+
+        <action>
+            <assert>
+                <description value="DocumentReference: sourcePatientInfo, if it exists, is a reference to a contained Patient Resource.|MHDPDBSourcePatientInfoIsContained"/>
+                <compareToSourceId value="request"/>
+                <compareToSourceExpression value="Bundle.entry.resource.((is(FHIR.DocumentReference) and context.sourcePatientInfo.exists()) implies (context.sourcePatientInfo.reference in contained.Patient.id))"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        
+        <action>
+            <assert>
+                <description value="DocumentReference: author, if it exists, is a reference to a contained Practitioner, PractitionerRole, Organization, Device, Patient, RelatedPerson Resource."/>
+                <compareToSourceId value="request"/>
+                <compareToSourceExpression value="Bundle.entry.resource.((is(FHIR.DocumentReference) and author.exists()) implies (author.reference in contained.(Practitioner.id | PractitionerRole.id | Organization.id | Device.id | Patient.id | RelatedPerson.id)))"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
+            <assert>
+                <description value="DocumentReference: authenticator, if it exists, is a reference to a contained Practitioner, PractitionerRole, Organization Resource."/>
+                <compareToSourceId value="request"/>
+                <compareToSourceExpression value="Bundle.entry.resource.((is(FHIR.DocumentReference) and author.exists()) implies (author.reference in contained.(Practitioner.id | PractitionerRole.id | Organization.id)))"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+
+    </test>
+
+
+
+</TestScript>
