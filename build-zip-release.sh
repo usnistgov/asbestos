@@ -10,4 +10,5 @@ cd /opt
 zip -r -q asbestos.zip asbestos
 
 echo "ZIP IS /OPT/ASBESTOS.ZIP"
+echo "Expanded ZIP is /opt/asbestos"
 
