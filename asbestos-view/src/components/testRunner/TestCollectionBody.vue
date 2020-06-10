@@ -35,7 +35,10 @@
                     <script-status v-if="!statusRight" :status-right="statusRight" :name="name"> </script-status>
 
                     <template v-if="isPreviousDebuggerStillAttached(i)">
-                        <span class="breakpointColumnHeader" title="A debugger is running for this TestScript.">&#x1F41E;</span> <!-- &#x1F51B; is the ON! symbol -->
+                        <span class="breakpointColumnHeader" title="A debugger is running for this TestScript.">&#x1F41E;</span> <!-- lady beetle icon -->
+                    </template>
+                    <template v-else-if="$store.state.testRunner.currentTest === name && ! isDebuggable(i)">
+                        <span class="breakpointColumnHeader" title="Add at least one breakpoint in the column below to enable debugging.">&#x2139;</span> <!-- the "i" Information icon -->
                     </template>
 
                     <span v-if="$store.state.testRunner.currentTest === name">
@@ -157,9 +160,10 @@
     .breakpointColumnHeader {
         position: absolute;
         left: 5px;
-        font-size: 10px;
+        font-size: 14px;
         font-weight: normal;
-        text-decoration: underline;
+        text-decoration: none;
+        cursor: default;
     }
     .debugTestScriptButtonNormal,
     .debugTestScriptButton {
