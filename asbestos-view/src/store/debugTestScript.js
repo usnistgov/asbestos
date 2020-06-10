@@ -246,6 +246,7 @@ export const debugTestScriptStore = {
                 state.testScriptDebuggerWebSocket = new WebSocket(wssSocketUrl)
                 state.testScriptDebuggerWebSocket.onopen = event => {
                     state.waitingForBreakpoint = true
+                    state.evalMode = false
                     // Disable Run button
                     console.log('In socket onOpen. event: ' + (event === undefined).valueOf())
                     // clear log 1?
