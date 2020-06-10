@@ -160,6 +160,9 @@ export const debugTestScriptStore = {
             let indexOfTestId = rootState.testRunner.testScriptNames.indexOf(testId)
             return indexOfTestId
         },
+        getIndexOfCurrentTest: (state, getters, rootState) => {
+            return getters.getIndexOfTestId(rootState.testRunner.currentTest)
+        },
         getMapKey: (state, getters, rootState)  => (testId) => {
             let testCollectionName = rootState.testRunner.currentTestCollectionName
             const testCollectionIndex = rootState.testRunner.serverTestCollectionNames.indexOf(testCollectionName)
@@ -356,6 +359,9 @@ export const debugTestScriptStore = {
         },
         async doStepOver({dispatch}) {
            dispatch('doResumeBreakpoint', '["stepOverBkpt"]')
+        },
+        async doFinishRun({dispatch}) {
+            dispatch('doResumeBreakpoint', '[]')
         },
         async debugMgmt({commit, rootState, state}, fn) {
             if (fn === undefined || fn === null )

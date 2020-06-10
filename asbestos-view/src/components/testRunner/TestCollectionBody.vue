@@ -37,8 +37,11 @@
                     <template v-if="isPreviousDebuggerStillAttached(i)">
                         <span class="breakpointColumnHeader" title="A debugger is running for this TestScript.">&#x1F41E;</span> <!-- lady beetle icon -->
                     </template>
-                    <template v-else-if="$store.state.testRunner.currentTest === name && ! isDebuggable(i)">
-                        <span class="breakpointColumnHeader" title="Add at least one breakpoint in the column below to enable debugging.">&#x2139;</span> <!-- the "i" Information icon -->
+                    <template v-else-if="$store.state.testRunner.currentTest === name && ! isDebuggable(i) && ! isResumable(i)">
+                        <span class="breakpointColumnHeader infoIcon" title="Add at least one breakpoint in the column below to enable debugging.">&nbsp;&#x2139;</span> <!-- the "i" Information icon -->
+                    </template>
+                    <template v-else-if="$store.state.testRunner.currentTest === name && (isDebuggable(i) || isResumable(i))">
+                        <span class="breakpointColumnHeader clickableColumnHeader" title="Clear all breakpoints." @click.stop="removeAllBreakpoints(i)">&#x1F191;</span> <!-- the "i" Information icon -->
                     </template>
 
                     <span v-if="$store.state.testRunner.currentTest === name">
@@ -59,9 +62,9 @@
                                         class="stopDebugTestScriptButton">Remove Debugger</button>
                             </template>
                             <template v-else>
-                                <button v-if="! isResumable(i)" @click.stop="doRun(name)" class="runallbutton">Run</button>
+                                <button v-if="! isResumable(i) && ! isWaitingForBreakpoint" @click.stop="doRun(name)" class="runallbutton">Run</button>
                                 <template v-if="$store.state.testRunner.currentTest === name">
-                                    <button v-if="isDebuggable(i)"
+                                    <button v-if="isDebuggable(i) && ! isWaitingForBreakpoint"
                                             @click.stop="doDebug(name)"
                                             class="debugTestScriptButton"
                                             >Debug</button>
@@ -75,11 +78,11 @@
                                             @click.stop="doStepOver(i)"
                                             class="debugTestScriptButtonNormal"
                                         >&#x2935; Step Over</button>
-                                    <button v-if="isDebuggable(i) || isResumable(i)"
-                                            :disabled="isWaitingForBreakpoint"
-                                            title="Clear all breakpoints."
-                                            @click.stop="removeAllBreakpoints(i)"
-                                            class="debugTestScriptButtonNormal">&#x274E; Clear BPs.</button> <!-- &#x1F191; CL button -->
+                                     <button v-if="isResumable(i)"
+                                             :disabled="isWaitingForBreakpoint"
+                                             title="Run through and skip all breakpoints."
+                                             @click.stop="doFinish(i)"
+                                             class="debugTestScriptButtonNormal">&#x23E9; Skip All BPs.</button>
                                     <button v-if="isResumable(i)"
                                             :disabled="isWaitingForBreakpoint"
                                             @click.stop="stopDebugging(i)"
@@ -91,7 +94,7 @@
                     </span>
                     <span v-if="! isWaitingForBreakpoint && ! $store.state.testRunner.isClientTest"> --  {{ testTime(name) }}</span>
                 </div>
-                <debug-assertion-eval v-if="isEvaluable(i)" :show="$store.state.debugAssertionEval.showModal" @close="closeModal()" @resume="doDebug(name)"></debug-assertion-eval>
+                <debug-assertion-eval v-if="isEvaluableAction(i)" :show="$store.state.debugAssertionEval.showModal" @close="closeModal()" @resume="doDebug(name)"></debug-assertion-eval>
                 <router-view v-if="selected === name"></router-view>  <!--  opens TestOrEvalDetails   -->
             </div>
         </div>
@@ -157,6 +160,8 @@
 <style scoped>
 </style>
 <style>
+    .clickableColumnHeader,
+    .infoIcon,
     .breakpointColumnHeader {
         position: absolute;
         left: 5px;
@@ -164,6 +169,13 @@
         font-weight: normal;
         text-decoration: none;
         cursor: default;
+    }
+    .infoIcon {
+        width: 14px;
+       border: blue 1px solid;
+    }
+    .clickableColumnHeader {
+        cursor: pointer;
     }
     .debugTestScriptButtonNormal,
     .debugTestScriptButton {

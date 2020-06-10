@@ -4,14 +4,19 @@ export default {
         }
     },
      methods: {
-        getTestScriptIndexKey(testScriptIndex) {
+         /**
+          *
+          * @param testScriptIndex - Only the index
+          * @returns {string} - The fully qualified index including the test collection plus the test script index
+          */
+        getFqTestScriptIndexKey(testScriptIndex) {
             const testCollectionIndex = this.$store.state.testRunner.serverTestCollectionNames.indexOf(this.testCollection)
             const key = testCollectionIndex + '.' + testScriptIndex // Follow proper key format
             return key
         },
         isDebuggable(testScriptIndex) {
             const hasDebugLabel = 'Debug' === this.getDebugActionButtonLabel(testScriptIndex)
-            const key = this.getTestScriptIndexKey(testScriptIndex)
+            const key = this.getFqTestScriptIndexKey(testScriptIndex)
             const hasBreakpoints = this.$store.getters.hasBreakpoints(key)
             return (hasBreakpoints && hasDebugLabel)
         },
@@ -19,7 +24,7 @@ export default {
              return 'Resume' === this.getDebugActionButtonLabel(testScriptIndex)
         },
         isPreviousDebuggerStillAttached(testScriptIndex) {
-            const key = this.getTestScriptIndexKey(testScriptIndex)
+            const key = this.getFqTestScriptIndexKey(testScriptIndex)
             const indexList = this.$store.state.debugTestScript.debugMgmtIndexList
             if (indexList !== null || indexList !== undefined) {
                 // return  indexList.filter(o => o.testScriptIndex === key).length === 1
@@ -28,13 +33,13 @@ export default {
             return false
         },
          async removeDebugger(testScriptIndex) {
-             const key = this.getTestScriptIndexKey(testScriptIndex)
+             const key = this.getFqTestScriptIndexKey(testScriptIndex)
              await this.$store.dispatch('debugMgmt', {'cmd':'removeDebugger','testScriptIndex':key})
          },
         getDebugActionButtonLabel(testScriptIndex) {
-            const key = this.getTestScriptIndexKey(testScriptIndex)
-            if (key in this.$store.state.debugTestScript.showDebugButton) {
-                let valObj = this.$store.state.debugTestScript.showDebugButton[key]
+            const fqTsIndex = this.getFqTestScriptIndexKey(testScriptIndex)
+            if (fqTsIndex in this.$store.state.debugTestScript.showDebugButton) {
+                let valObj = this.$store.state.debugTestScript.showDebugButton[fqTsIndex]
                 if (valObj != undefined) {
                     return valObj.debugButtonLabel
                 }
@@ -42,7 +47,7 @@ export default {
             return "X"
         },
          getBreakpointCount(testScriptIndex) {
-             const key = this.getTestScriptIndexKey(testScriptIndex)
+             const key = this.getFqTestScriptIndexKey(testScriptIndex)
              if (key in this.$store.state.debugTestScript.showDebugButton) {
                  const breakpointSet = this.$store.state.debugTestScript.breakpointMap.get(key)
                  if (breakpointSet)
@@ -67,11 +72,12 @@ export default {
              }
              return retObj.childCount
          },
-         isEvaluable(testScriptIndex) {
-            return (this.getDebugActionButtonLabel(testScriptIndex) === 'Resume') && this.$store.state.debugTestScript.evalMode
+         isEvaluableAction(testScriptIndex) {
+            const isCurrentTest = (testScriptIndex === this.$store.getters.getIndexOfCurrentTest)
+            return isCurrentTest && this.$store.state.debugTestScript.evalMode
         },
         async stopDebugging(testScriptIndex) {
-            await this.$store.dispatch('stopDebugTs', this.getTestScriptIndexKey(testScriptIndex))
+            await this.$store.dispatch('stopDebugTs', this.getFqTestScriptIndexKey(testScriptIndex))
         },
         async doDebug(testName) {  // server tests
             if (!testName)
@@ -80,6 +86,9 @@ export default {
         },
         async doStepOver(testScriptIndex) {
            await this.$store.dispatch('doStepOver', testScriptIndex)
+        },
+        async doFinish(testScriptIndex) {
+            await this.$store.dispatch('doFinishRun', testScriptIndex)
         },
         async doDebugEvalMode() {
             await this.$store.dispatch('doDebugEvalMode')

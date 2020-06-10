@@ -56,7 +56,7 @@ public class DebugTestScriptWebSocketEndpoint {
                        Session session) throws IOException {
         String sessionId = session.getId();
         log.info(String.format("New session Id: %s. userType: %s.", sessionId, userType));
-        log.info(String.format("Open session(s): %d. stateMap size: %d. executorMap size: %d.", session.getOpenSessions().size(), debugStateMap.size(), debugExecutorMap.size()));
+        log.info(String.format("Open WS session(s): %d. stateMap size: %d. executorMap size: %d.", session.getOpenSessions().size(), debugStateMap.size(), debugExecutorMap.size()));
         final Map<String, List<String>> myMap = session.getRequestParameterMap();
         String ftkTestSessionId /* ExclusivelyOptional */ = myMap.containsKey("ftkTestSessionId") ? myMap.get("ftkTestSessionId").get(0) : null;
         String testScriptIndex /* ExclusivelyOptional */ = myMap.containsKey("testScriptIndex") ? myMap.get("testScriptIndex").get(0) : null;

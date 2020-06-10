@@ -112,6 +112,14 @@
             isBreakpointHit() {
                 return this.$store.getters.isBreakpointHit(this.indexObj)
             },
+            canEvaluateAction() {
+                const tsIndex = this.$store.getters.getIndexOfCurrentTest
+                if (tsIndex !== null) {
+                    const isEval = this.isEvaluableAction(tsIndex)
+                    return isEval
+                }
+                return false
+            },
         },
         // watch: {
         // },
