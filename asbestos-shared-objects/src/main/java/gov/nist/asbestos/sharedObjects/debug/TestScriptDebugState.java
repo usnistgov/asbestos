@@ -12,9 +12,9 @@ import javax.websocket.Session;
 public class TestScriptDebugState {
     private static final String STEP_OVER_BKPT = "stepOverBkpt";
     /**
-     * /test0 =
-     / = nested test script separator.
-     test0 = This is the imported test header which has no UI representation: skip this.
+     "/test0" =
+     "/" = nested test script separator.
+     "test0" = This is the imported test header which has no UI representation: skip this.
     */
     private static final String IMPORTED_TEST_HEADER = "/test0";
     private Object lock;

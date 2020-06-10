@@ -9,7 +9,7 @@ export const debugTestScriptStore = {
         return {
             waitingForBreakpoint: false,
             evalMode: false,
-            /* keyProperty{testScriptIndex}=value{breakpointIndex,debugButtonLabel}
+            /* keyProperty{testScriptIndex}=value{breakpointIndex: this is only used for the breakpoint hit index, debugButtonLabel: ''}
              debugButtonLabel exists inside of showDebugButton because there are multiple testscripts and it is necessary to keep showing the Debug button labels for other test scripts.
             If a single button label variable was used then all of the Debug buttons would be become changed to Resume when a breakpoint is hit */
             showDebugButton: {},
@@ -19,6 +19,24 @@ export const debugTestScriptStore = {
             testScriptDebuggerWebSocket: null,
             debugMgmtWebSocket: null,
             debugMgmtIndexList: [],
+            doCleanupBreakpoints: function(state, fqTestScriptIndex) {
+                if (fqTestScriptIndex in state.showDebugButton === true) {
+                    // Vue.set(state.showDebugButton, obj.testScriptIndex, false) // Add property using Vue.set to nudge reactivity
+                    let valObj = state.showDebugButton[fqTestScriptIndex]
+                    if (valObj !== undefined) {
+                        if (valObj.debugButtonLabel === 'Debug') { // Only remove when Debug hasn't started yet
+                            Vue.delete(state.showDebugButton, fqTestScriptIndex)
+                        }
+                    }
+                    // console.log(obj.testScriptIndex + "removed" + obj.breakpointIndex)
+                }
+            },
+            reapplyBkptChange: function(state, obj) {
+                let valObj = state.showDebugButton[obj.testScriptIndex]
+                if (valObj !== null && valObj !== undefined) {
+                    Vue.set(state.showDebugButton, obj.testScriptIndex, {breakpointIndex: valObj.breakpointIndex, debugButtonLabel: valObj.debugButtonLabel}) // set the same value to nudge reactivity
+                }
+            },
         }
     },
     mutations: {
@@ -39,29 +57,17 @@ export const debugTestScriptStore = {
             if (obj.testScriptIndex in state.showDebugButton === false) { // Only add it the first time where the showDebugButton object is missing the scriptIndex property
                 Vue.set(state.showDebugButton, obj.testScriptIndex, {breakpointIndex: null, debugButtonLabel: "Debug"}) // Add property using Vue.set to nudge reactivity
             } else {
-                let valObj = state.showDebugButton[obj.testScriptIndex]
-                if (valObj !== undefined) {
-                    Vue.set(state.showDebugButton, obj.testScriptIndex, {breakpointIndex: valObj.breakpointIndex, debugButtonLabel: valObj.debugButtonLabel}) // set the same value to nudge reactivity
-                }
+                state.reapplyBkptChange(state, obj)
             }
         },
         removeBreakpoint(state, obj) {
             if (state.breakpointMap.has(obj.testScriptIndex)) {
-                var breakpointSet = state.breakpointMap.get(obj.testScriptIndex)
+                let breakpointSet = state.breakpointMap.get(obj.testScriptIndex)
                 if (breakpointSet.has(obj.breakpointIndex)) {
                     breakpointSet.delete(obj.breakpointIndex)
 
                     if (breakpointSet.size == 0) {// When all breakpoints were removed while in Resume activity, then still allow to Resume so when breakpointList is empty
-                        if (obj.testScriptIndex in state.showDebugButton === true) {
-                            // Vue.set(state.showDebugButton, obj.testScriptIndex, false) // Add property using Vue.set to nudge reactivity
-                            let valObj = state.showDebugButton[obj.testScriptIndex]
-                            if (valObj != undefined) {
-                                if (valObj.debugButtonLabel === 'Debug') { // Only remove when Debug hasn't started yet
-                                    Vue.delete(state.showDebugButton, obj.testScriptIndex)
-                                }
-                            }
-                            // console.log(obj.testScriptIndex + "removed" + obj.breakpointIndex)
-                        }
+                        state.doCleanupBreakpoints(state, obj.testScriptIndex)
                     } else {
                         let valObj = state.showDebugButton[obj.testScriptIndex]
                         if (valObj != undefined) {
@@ -71,10 +77,22 @@ export const debugTestScriptStore = {
                 }
             }
         },
+        removeAllBreakpoints(state, obj) {
+            if (state.breakpointMap.has(obj.testScriptIndex)) {
+                let breakpointSet = state.breakpointMap.get(obj.testScriptIndex)
+                if (breakpointSet !== null && breakpointSet !== undefined) {
+                    breakpointSet.clear()
+                    Vue.delete(state.breakpointMap, obj.testScriptIndex)
+                    // Vue.set(state.breakpointMap, obj.testScriptIndex, new Set())
+                    state.doCleanupBreakpoints(state, obj.testScriptIndex)
+                    state.reapplyBkptChange(state, obj)
+                }
+            }
+        },
         setDebugButtonLabel(state, obj) {
             if (obj.testScriptIndex in state.showDebugButton) {
                 let valObj = state.showDebugButton[obj.testScriptIndex]
-                if (valObj != undefined) {
+                if (valObj !== undefined) {
                     valObj.breakpointIndex = obj.breakpointIndex
                     valObj.debugButtonLabel = obj.debugButtonLabel // "Resume"
                 }
@@ -92,8 +110,19 @@ export const debugTestScriptStore = {
         hasBreakpoint: (state) => (obj) => {
             if (state.breakpointMap.has(obj.testScriptIndex)) {
                 const breakpointSet = state.breakpointMap.get(obj.testScriptIndex)
-                const retVal = breakpointSet.has(obj.breakpointIndex)
-                return retVal
+                if (breakpointSet) {
+                    const retVal = breakpointSet.has(obj.breakpointIndex)
+                    return retVal
+                }
+            }
+            return false
+        },
+        hasBreakpoints: (state) => (testScriptIndex) => {
+            if (state.breakpointMap.has(testScriptIndex)) {
+                const breakpointSet = state.breakpointMap.get(testScriptIndex)
+                if (breakpointSet) {
+                    return breakpointSet.size > 0
+                }
             }
             return false
         },
@@ -158,6 +187,10 @@ export const debugTestScriptStore = {
         },
         removeBreakpoint({commit}, value) {
             commit('removeBreakpoint', value)
+            return true
+        },
+        async removeAllBreakpoints({commit}, value) {
+            commit('removeAllBreakpoints', value)
             return true
         },
         async stopDebugTs({state}, mapKey) {
@@ -234,12 +267,16 @@ export const debugTestScriptStore = {
                     if (event != null && event != undefined) {
                         // console.log('onclose data: ' + event.returnData)
                     }
+                    // Breakpoints could have been cleared so only reset the label to Debug
                     let actionData = {
                         testScriptIndex: this.getters.getActivelyDebuggingTestScriptIndex,
                         breakpointIndex: null,
                         debugButtonLabel: 'Debug'
                     }
                     commit('setDebugButtonLabel', actionData)
+                    if (! getters.hasBreakpoints(actionData.testScriptIndex)) {
+                        state.doCleanupBreakpoints(state, actionData.testScriptIndex)
+                    }
                     // console.log('In socket onClose. Setting socket to null...')
                     state.testScriptDebuggerWebSocket = null
                     // console.log('done.')

@@ -48,7 +48,7 @@
 
                     <span v-if="isClient">
                             <button class="runallbutton" @click="doEval(name)">Run</button>
-                        </span>
+                    </span>
                     <span v-else>
                           <template v-if="isPreviousDebuggerStillAttached(i)">
                                 <button
@@ -56,21 +56,31 @@
                                         class="stopDebugTestScriptButton">Remove Debugger</button>
                             </template>
                             <template v-else>
-                                <button :disabled="isDebugging(i)" @click.stop="doRun(name)" class="runallbutton">Run</button>
+                                <button v-if="! isResumable(i)" @click.stop="doRun(name)" class="runallbutton">Run</button>
                                 <template v-if="$store.state.testRunner.currentTest === name">
-                                    <button :disabled="isWaitingForBreakpoint"
+                                    <button v-if="isDebuggable(i)"
                                             @click.stop="doDebug(name)"
-                                        class="debugTestScriptButton"
-                                        v-if="isDebuggable(i)">{{getDebugActionButtonLabel(i)}}</button>
-                                    <button :disabled="isWaitingForBreakpoint"
-                                            v-if="isDebugging(i)"
-                                            @click.stop="doStepOver(i)"
                                             class="debugTestScriptButton"
-                                        >Step Over</button>
-                                    <button :disabled="isWaitingForBreakpoint"
-                                            v-if="isDebugging(i)"
+                                            >Debug</button>
+                                    <button v-if="isResumable(i)"
+                                            :disabled="isWaitingForBreakpoint"
+                                            @click.stop="doDebug(name)"
+                                            class="debugTestScriptButtonNormal"
+                                            >&#x25B6;&nbsp;Resume</button>
+                                    <button v-if="isResumable(i)"
+                                            :disabled="isWaitingForBreakpoint"
+                                            @click.stop="doStepOver(i)"
+                                            class="debugTestScriptButtonNormal"
+                                        >&#x2935; Step Over</button>
+                                    <button v-if="isDebuggable(i) || isResumable(i)"
+                                            :disabled="isWaitingForBreakpoint"
+                                            title="Clear all breakpoints."
+                                            @click.stop="removeAllBreakpoints(i)"
+                                            class="debugTestScriptButtonNormal">&#x274E; Clear BPs.</button> <!-- &#x1F191; CL button -->
+                                    <button v-if="isResumable(i)"
+                                            :disabled="isWaitingForBreakpoint"
                                             @click.stop="stopDebugging(i)"
-                                        class="stopDebugTestScriptButton">Stop</button>
+                                        class="debugTestScriptButtonNormal">&#x1F7E5; Stop</button> <!-- &#x270B; -->
                                     <span v-if="isWaitingForBreakpoint">&nbsp;&nbsp;&#x23F1;</span>
                                     <!-- Display a stopwatch if waiting for breakpoint to be hit -->
                                 </template>
@@ -146,16 +156,21 @@
 <style>
     .breakpointColumnHeader {
         position: absolute;
-        left: 2px;
-        font-size: 8px;
+        left: 5px;
+        font-size: 10px;
+        font-weight: normal;
         text-decoration: underline;
     }
+    .debugTestScriptButtonNormal,
     .debugTestScriptButton {
         margin-left: 10px;
         background-color: cornflowerblue;
         cursor: pointer;
         border-radius: 25px;
         font-weight: bold;
+    }
+    .debugTestScriptButtonNormal {
+        font-weight: normal;
     }
     .debugFeatureOptionButton {
         margin-left: 7px;

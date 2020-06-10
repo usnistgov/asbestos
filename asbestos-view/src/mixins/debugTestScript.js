@@ -10,8 +10,13 @@ export default {
             return key
         },
         isDebuggable(testScriptIndex) {
+            const hasDebugLabel = 'Debug' === this.getDebugActionButtonLabel(testScriptIndex)
             const key = this.getTestScriptIndexKey(testScriptIndex)
-            return key in this.$store.state.debugTestScript.showDebugButton && Boolean(this.$store.state.debugTestScript.showDebugButton[key])
+            const hasBreakpoints = this.$store.getters.hasBreakpoints(key)
+            return (hasBreakpoints && hasDebugLabel)
+        },
+        isResumable(testScriptIndex) {
+             return 'Resume' === this.getDebugActionButtonLabel(testScriptIndex)
         },
         isPreviousDebuggerStillAttached(testScriptIndex) {
             const key = this.getTestScriptIndexKey(testScriptIndex)
@@ -65,9 +70,6 @@ export default {
          isEvaluable(testScriptIndex) {
             return (this.getDebugActionButtonLabel(testScriptIndex) === 'Resume') && this.$store.state.debugTestScript.evalMode
         },
-        isDebugging(testScriptIndex) {
-            return (this.getDebugActionButtonLabel(testScriptIndex) === 'Resume')
-        },
         async stopDebugging(testScriptIndex) {
             await this.$store.dispatch('stopDebugTs', this.getTestScriptIndexKey(testScriptIndex))
         },
@@ -96,6 +98,9 @@ export default {
             } else {
                 return this.$store.dispatch('removeBreakpoint', obj)
             }
+        },
+        removeAllBreakpoints(obj) {
+            return this.$store.dispatch('removeAllBreakpoints', this.getBreakpointObj(obj))
         },
         debugTitle(testScriptIndex, testType, testIndex, actionIndex) {
             let obj = {testScriptIndex: testScriptIndex, breakpointIndex: testType + testIndex + "." + actionIndex}
