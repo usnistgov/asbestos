@@ -80,7 +80,7 @@
                                         >&#x2935; Step Over</button>
                                      <button v-if="isResumable(i)"
                                              :disabled="isWaitingForBreakpoint"
-                                             title="Run through and skip all breakpoints."
+                                             title="Continue running and skip all breakpoints."
                                              @click.stop="doFinish(i)"
                                              class="debugTestScriptButtonNormal">&#x23E9; Skip All BPs.</button>
                                     <button v-if="isResumable(i)"
