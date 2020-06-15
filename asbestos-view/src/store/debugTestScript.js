@@ -7,8 +7,17 @@ Vue.use(Vuex)
 export const debugTestScriptStore = {
     state() {
         return {
+            /**
+            If isDebugTsFeatureEnabled is false, all of the debugging UI features will be hidden from the user.
+             */
             isDebugTsFeatureEnabled: true,
+            /**
+             * The flag that shows the timer icon and enables/disables some features.
+             */
             waitingForBreakpoint: false,
+            /**
+             * Enables the test-script test action assertion evaluation feature.
+             */
             evalMode: false,
             /* keyProperty{testScriptIndex}=value{breakpointIndex: this is only used for the breakpoint hit index, debugButtonLabel: ''}
              debugButtonLabel exists inside of showDebugButton because there are multiple testscripts and it is necessary to keep showing the Debug button labels for other test scripts.
@@ -17,9 +26,20 @@ export const debugTestScriptStore = {
             /* Key = String.format("%d.%d", testCollectionIndex , testScriptIndex).
             Value (Set) = String.format("%d.%d", testIndex, actionIndex) [0..*] */
             breakpointMap: new Map(),
+            /**
+             * This websocket is for the debugging the test script.
+             */
             testScriptDebuggerWebSocket: null,
+            /**
+             * This websocket gets collects information when the test collection body is loaded to see if any debuggers might already be running for a given combination of fhir-toolkit-test-session + channel + test collection.
+             */
             debugMgmtWebSocket: null,
             debugMgmtIndexList: [],
+            /**
+             * Re-usable function.
+             * @param state
+             * @param fqTestScriptIndex
+             */
             doCleanupBreakpoints: function(state, fqTestScriptIndex) {
                 if (fqTestScriptIndex in state.showDebugButton === true) {
                     // Vue.set(state.showDebugButton, obj.testScriptIndex, false) // Add property using Vue.set to nudge reactivity
@@ -32,6 +52,11 @@ export const debugTestScriptStore = {
                     // console.log(obj.testScriptIndex + "removed" + obj.breakpointIndex)
                 }
             },
+            /**
+             * Nudges Vue reactivity.
+             * @param state
+             * @param obj
+             */
             reapplyBkptChange: function(state, obj) {
                 let valObj = state.showDebugButton[obj.testScriptIndex]
                 if (valObj !== null && valObj !== undefined) {
