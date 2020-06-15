@@ -1,14 +1,10 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import TopLayout from "../components/wrapper/TopLayout";
-// import TestPanel from '@/components/TestPanel.vue'
-// import VariableEdit from '@/components/VariableEdit.vue'
 import ChannelsView from "../components/channelEditor/ChannelsView";
-//import ChannelNav from "../components/ChannelNav";
 import SessionView from "../components/SessionView";
 import ChannelView from "../components/channelEditor/ChannelView";
 import LogsView from "../components/LogsView"
-//import ChannelLogList from "../components/ChannelLogList"
 import LogList from "../components/logViewer/LogList"
 import InspectEvent from "../components/logViewer/InspectEvent"
 import TestCollection from "../components/testRunner/TestCollection"
@@ -23,6 +19,7 @@ import Getter from "../components/getter/Getter"
 import Admin from "../components/wrapper/Admin";
 import StaticFixtureDisplay from "../components/testRunner/StaticFixtureDisplay";
 import Setup from "../components/top/Setup";
+import ScriptView from "../components/scriptViewer/ScriptView";
 
 Vue.use( VueRouter )
 
@@ -136,12 +133,17 @@ export const routes = [
                                                         props: true,
                                                     }
                                                 ]
-                                            }
+                                            },
+
                                         ]
                                     },
                                 ],
                             },
-
+                            {
+                                path: 'collection/:testCollection/test/:testId/scriptView',
+                                component: ScriptView,
+                                props: true,
+                            }
                         ]
                     },
 

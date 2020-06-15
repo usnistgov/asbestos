@@ -197,6 +197,9 @@
         /*cursor: pointer;*/
         /*text-decoration: underline;*/
     }
+    .underline {
+        text-decoration: underline;
+    }
     .divider{
         width:5px;
         height:auto;

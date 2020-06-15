@@ -1,6 +1,9 @@
 <template>
     <div>
     <ul class="noTopMargin">
+
+        <div class="selectable instruction underline" @click="viewScript()">View Script</div>
+
         <li v-if="$store.state.testRunner.isClientTest">
             <div v-if="testScript">
                 <div class="instruction">
@@ -56,6 +59,17 @@
             },
         },
         methods: {
+            viewScript() {
+                const routeData = this.$router.resolve({
+                    sessionId: this.sessionId,
+                    channelId: this.channelId,
+                    testCollection: this.testCollection,
+                    testId: this.testId
+                });
+                const theUrl = routeData.href + '/scriptView';
+                // console.log(theUrl);
+                window.open(theUrl, '_blank');
+            },
             async loadEventSummariesAndReRun() {
                 await this.$store.dispatch('loadEventSummaries', {session: this.sessionId, channel: this.channelId})
                 await this.$store.dispatch('runEval', this.testId);
