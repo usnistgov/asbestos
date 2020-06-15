@@ -34,14 +34,16 @@
 
                     <script-status v-if="!statusRight" :status-right="statusRight" :name="name"> </script-status>
 
-                    <template v-if="isPreviousDebuggerStillAttached(i)">
-                        <span class="breakpointColumnHeader" title="A debugger is running for this TestScript.">&#x1F41E;</span> <!-- lady beetle icon -->
-                    </template>
-                    <template v-else-if="$store.state.testRunner.currentTest === name && ! isDebuggable(i) && ! isResumable(i)">
-                        <span class="breakpointColumnHeader infoIcon" title="Add at least one breakpoint in the column below to enable debugging.">&nbsp;&#x2139;</span> <!-- the "i" Information icon -->
-                    </template>
-                    <template v-else-if="$store.state.testRunner.currentTest === name && (isDebuggable(i) || isResumable(i))">
-                        <span class="breakpointColumnHeader clickableColumnHeader" title="Clear all breakpoints." @click.stop="removeAllBreakpoints(i)">&#x1F191;</span> <!-- the "i" Information icon -->
+                    <template v-if="isDebugFeatureEnabled">
+                        <template v-if="isPreviousDebuggerStillAttached(i)">
+                            <span class="breakpointColumnHeader" title="A debugger is running for this TestScript.">&#x1F41E;</span> <!-- lady beetle icon -->
+                        </template>
+                        <template v-else-if="$store.state.testRunner.currentTest === name && ! isDebuggable(i) && ! isResumable(i)">
+                            <span class="breakpointColumnHeader infoIcon" title="Add at least one breakpoint in the column below to enable debugging.">&nbsp;&#x2139;</span> <!-- the "i" Information icon -->
+                        </template>
+                        <template v-else-if="$store.state.testRunner.currentTest === name && (isDebuggable(i) || isResumable(i))">
+                            <span class="breakpointColumnHeader clickableColumnHeader" title="Clear all breakpoints." @click.stop="removeAllBreakpoints(i)">&#x1F191;</span> <!-- the "i" Information icon -->
+                        </template>
                     </template>
 
                     <span v-if="$store.state.testRunner.currentTest === name">
@@ -51,11 +53,11 @@
                             <img src="../../assets/arrow-right.png"/>
                     </span>
                     <span class="large-text">{{ cleanTestName(name) }}</span>
-
+                    &nbsp;
                     <span v-if="isClient">
                             <button class="runallbutton" @click="doEval(name)">Run</button>
                     </span>
-                    <span v-else>
+                    <span v-else-if="isDebugFeatureEnabled">
                           <template v-if="isPreviousDebuggerStillAttached(i)">
                                 <button
                                         @click.stop="removeDebugger(i)"
@@ -92,9 +94,12 @@
                                 </template>
                             </template>
                     </span>
+                    <span v-else>
+                          <button @click.stop="doRun(name)" class="runallbutton">Run</button>
+                    </span>
                     <span v-if="! isWaitingForBreakpoint && ! $store.state.testRunner.isClientTest"> --  {{ testTime(name) }}</span>
                 </div>
-                <debug-assertion-eval v-if="isEvaluableAction(i)" :show="$store.state.debugAssertionEval.showModal" @close="closeModal()" @resume="doDebug(name)"></debug-assertion-eval>
+                <debug-assertion-eval v-if="isDebugFeatureEnabled && isEvaluableAction(i)" :show="$store.state.debugAssertionEval.showModal" @close="closeModal()" @resume="doDebug(name)"></debug-assertion-eval>
                 <router-view v-if="selected === name"></router-view>  <!--  opens TestOrEvalDetails   -->
             </div>
         </div>

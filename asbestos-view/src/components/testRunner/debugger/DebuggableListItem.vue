@@ -10,7 +10,7 @@
         :data-map-key="currentMapKey"
               {{breakpointSwitchStatus}}
                   -->
-        <span
+        <span v-if="isDebugFeatureEnabled"
                 :class="{
                     'breakpointGutter' : true,
                     'breakpointControlOff' : ! hasBreakpoint(indexObj) && ! isImportHeader,
@@ -25,7 +25,8 @@
             <template v-else>&nbsp;&nbsp;</template>
         </span>
         <!-- Initially, when this component is created, either hide or display the gutter option span label. -->
-        <span v-show="hasGutterOptions"
+        <span v-if="isDebugFeatureEnabled"
+                v-show="hasGutterOptions"
                   :class="{'breakpointGutterOption' : true,
                     'breakpointOptionHidden' : isOptionInitiallyHidden,
                    }"

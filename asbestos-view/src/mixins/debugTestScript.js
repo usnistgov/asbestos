@@ -130,6 +130,9 @@ export default {
         },
      },
     computed: {
+        isDebugFeatureEnabled() {
+            return this.$store.getters.isDebugFeatureEnabled
+        },
         currentMapKey()  {
             const testId = this.$store.state.testRunner.currentTest
             const mapKey = this.$store.getters.getMapKey(testId)

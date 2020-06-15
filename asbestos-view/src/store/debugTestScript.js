@@ -7,6 +7,7 @@ Vue.use(Vuex)
 export const debugTestScriptStore = {
     state() {
         return {
+            isDebugTsFeatureEnabled: true,
             waitingForBreakpoint: false,
             evalMode: false,
             /* keyProperty{testScriptIndex}=value{breakpointIndex: this is only used for the breakpoint hit index, debugButtonLabel: ''}
@@ -100,10 +101,13 @@ export const debugTestScriptStore = {
                 alert(' failed: ' + obj.testScriptIndex)
             }
         },
-        setBeingDebuggedList(state, ar) {
-            if (Array.isArray(ar)) {
-                state.debugMgmtIndexList = ar
+        setBeingDebuggedList(state, arr) {
+            if (Array.isArray(arr)) {
+                state.debugMgmtIndexList = arr
             }
+        },
+        setIsDebugTsFeatureEnabled(state, isTrue) {
+            state.isDebugTsFeatureEnabled = Boolean(isTrue).valueOf()
         }
     },
     getters: {
@@ -136,6 +140,9 @@ export const debugTestScriptStore = {
                 }
             }
             return false
+        },
+        isDebugFeatureEnabled: state => {
+            return state.isDebugTsFeatureEnabled
         },
         getDebugTitle: (state, getters) => (obj) => {
             if (getters.hasBreakpoint(obj)) {
@@ -229,6 +236,9 @@ export const debugTestScriptStore = {
             state.testScriptDebuggerWebSocket.send(sendData)
         },
         async debugTestScript({commit, rootState, state, getters, dispatch}, testId) {
+            if (! state.isDebugTsFeatureEnabled) {
+                return
+            }
             console.log('in debug' + testId + ' isGettersUndefined: ' + (getters === undefined).valueOf())
             // commit('setTestReport',{name: testId, testReport: null})
             // console.log('log cleared for ' + testId)
@@ -331,7 +341,7 @@ export const debugTestScriptStore = {
                 state.testScriptDebuggerWebSocket.onerror = function (event) {
                     state.waitingForBreakpoint = false
                     if (event != null && event != undefined) {
-                        alert('Error: ' + event.data)
+                        alert('Error: ' + event)
                     }
                 }
             } else {
@@ -359,12 +369,15 @@ export const debugTestScriptStore = {
             }
         },
         async doStepOver({dispatch}) {
-           dispatch('doResumeBreakpoint', '["stepOverBkpt"]')
+           dispatch('doResumeBreakpoint', '["stepOverBkpt"]') // stepOverBkpt is a special breakpoint that stops at every setup/test action part
         },
         async doFinishRun({dispatch}) {
-            dispatch('doResumeBreakpoint', '[]')
+            dispatch('doResumeBreakpoint', '[]') // Empty array means no breakpoints
         },
         async debugMgmt({commit, rootState, state}, fn) {
+            if (! state.isDebugTsFeatureEnabled) {
+               return
+            }
             if (fn === undefined || fn === null )
                 return
             if (state.debugMgmtWebSocket === null) {
@@ -400,9 +413,16 @@ export const debugTestScriptStore = {
                     state.debugMgmtWebSocket.close()
                     state.debugMgmtWebSocket = null
                 }
-                state.debugMgmtWebSocket.onerror = function (event) {
+                state.debugMgmtWebSocket.onerror = (event) => {
+                    /*
+                    If there is an error with the initial debugMgmt websocket call, it could mean that there is a chance of the same error happening with the debugTestScript websocket so turn off the debug feature altogether from this point on.
+                    Browser needs to be refreshed to reset the isDebugTs flag.
+                     */
+                    const errorMessage = `DebugMgmt Error. WebSocket url: ${wssSocketUrl}. Debug TestScript feature flag is disabled. Refresh browser to reset the flag.`
+                    console.log(errorMessage)
+                    commit('setIsDebugTsFeatureEnabled', false)
                     if (event != null && event != undefined) {
-                        alert('debugMgmt Error: ' + event.data)
+                        console.log('Error Event: ' + event )
                     }
                 }
                 state.debugMgmtWebSocket.onclose = event => {
