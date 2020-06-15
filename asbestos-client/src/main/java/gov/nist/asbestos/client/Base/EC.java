@@ -78,7 +78,12 @@ public class EC {
         return collections;
     }
 
-     public List<String> getTestsInCollection(String collectionName) {
+    public boolean isClientTestCollection(String testCollectionId) {
+        Properties props  = getTestCollectionProperties(testCollectionId);
+        return props.getProperty("TestType") != null && (props.getProperty("TestType").equalsIgnoreCase("Client"));
+    }
+
+    public List<String> getTestsInCollection(String collectionName) {
         return getTests(collectionName).stream().map(File::getName).collect(Collectors.toList());
     }
 

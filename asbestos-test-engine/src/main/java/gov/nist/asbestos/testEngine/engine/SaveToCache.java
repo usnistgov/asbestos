@@ -21,7 +21,6 @@ import java.io.PrintStream;
 import java.net.URI;
 
 public class SaveToCache extends GenericSetupAction {
-    private FixtureMgr fixtureMgr;
 
     SaveToCache(ActionReference actionReference, FixtureMgr fixtureMgr, boolean isFollowedByAssert) {
         super(actionReference,isFollowedByAssert);
@@ -29,7 +28,9 @@ public class SaveToCache extends GenericSetupAction {
     }
 
     void run(TestScript.SetupActionOperationComponent op, TestReport.SetupActionOperationComponent operationReport) {
-        Reporter reporter = new Reporter(val, operationReport, "", "");
+
+        if (!preExecute(op, operationReport))
+            return;
 
         String channelId = getTestEngine().getChannelId();
         if (!op.hasSourceId()) {
@@ -81,6 +82,7 @@ public class SaveToCache extends GenericSetupAction {
             reporter.reportError("Write to cache failed: cannot write to " + outFile);
         }
 
+        postExecute(wrapper, operationReport, isFollowedByAssert);
     }
 
     @Override
@@ -90,7 +92,7 @@ public class SaveToCache extends GenericSetupAction {
 
     @Override
     Ref buildTargetUrl() {
-        return null;
+        return new Ref("");  // never user, must pass non-null test
     }
 
     SaveToCache setVal(ValE val) {

@@ -210,7 +210,9 @@ public class OperationRunner {
                     new VariableMgr(testScript, fixtureMgr)
                             .setExternalVariables(externalVariables)
                             .setVal(val)
-                            .setOpReport(operationReport));
+                            .setOpReport(operationReport))
+                            .setTestCollectionId(testCollectionId)
+                            .setTestId(testId);
             saveToCache.run(op, operationReport);
         } else {
             reporter.reportError("do not understand code.code of " + code);

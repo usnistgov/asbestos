@@ -79,7 +79,7 @@ public class RunSelftestRequest {
             return;
         }
 
-        boolean client = isClientTestCollection(testCollection);
+        boolean client = request.ec.isClientTestCollection(testCollection);
 
         if (client) {
             List<File> testDirs = request.ec.getTests(testCollection);
@@ -179,8 +179,4 @@ public class RunSelftestRequest {
         }
     }
 
-    private boolean isClientTestCollection(String testCollectionId) {
-        Properties props  = request.ec.getTestCollectionProperties(testCollectionId);
-        return props.getProperty("TestType") != null && (props.getProperty("TestType").equalsIgnoreCase("Client"));
-    }
 }
