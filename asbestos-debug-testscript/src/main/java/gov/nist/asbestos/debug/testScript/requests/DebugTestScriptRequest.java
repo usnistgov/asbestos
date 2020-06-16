@@ -7,6 +7,7 @@ import gov.nist.asbestos.client.log.SimStore;
 import gov.nist.asbestos.serviceproperties.ServiceProperties;
 import gov.nist.asbestos.serviceproperties.ServicePropertiesEnum;
 import gov.nist.asbestos.sharedObjects.ChannelConfig;
+import gov.nist.asbestos.sharedObjects.debug.StopDebugTestScriptException;
 import gov.nist.asbestos.sharedObjects.debug.TestScriptDebugState;
 import gov.nist.asbestos.simapi.simCommon.SimId;
 import gov.nist.asbestos.simapi.validation.Val;
@@ -91,7 +92,7 @@ public class DebugTestScriptRequest implements Runnable {
                 .sendGzip(request.isGzip)
                 .requestGzip(request.isGzip);
         TestReport report;
-        ModularEngine modularEngine;
+        ModularEngine modularEngine = null;
         try {
             modularEngine = new ModularEngine(testDir, proxy, state).setSaveLogs(true);
             report = modularEngine
@@ -107,18 +108,20 @@ public class DebugTestScriptRequest implements Runnable {
                     .runTest()
                     .getTestReport();
 
-        } catch (Throwable t) {
+        }
+        catch (StopDebugTestScriptException sdex) {
+            log.info("caught StopDebug...");
+        }
+        catch (Throwable t) {
             log.error(ExceptionUtils.getStackTrace(t));
-            if (state.getKill().get()) {
-                state.sendKilled();
-            } else {
-                state.sendUnexpectedError();
-            }
             throw t;
+        } finally {
+            if (modularEngine != null && state != null) {
+                String json = modularEngine.reportsAsJson();
+                String testReport = ((json != null) ? json : "{}");
+                state.sendFinalReport(testReport);
+            }
         }
 
-        String json = modularEngine.reportsAsJson();
-        String testReport = ((json != null)?json:"{}");
-        state.sendFinalReport(testReport);
     }
 }

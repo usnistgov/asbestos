@@ -10,22 +10,23 @@
         :data-map-key="currentMapKey"
               {{breakpointSwitchStatus}}
                   -->
-        <span
+        <span v-if="isDebugFeatureEnabled"
                 :class="{
                     'breakpointGutter' : true,
-                    'breakpointControlOff' : ! hasBreakpoint && ! isImportHeader,
-                    'breakpointControlOn' : hasBreakpoint,
+                    'breakpointControlOff' : ! hasBreakpoint(indexObj) && ! isImportHeader,
+                    'breakpointControlOn' : hasBreakpoint(indexObj),
               }"
-                :title="hasBreakpoint ? 'Remove breakpoint.' : 'Set breakpoint.'"
+                :title="hasBreakpoint(indexObj) ? 'Remove breakpoint.' : 'Set breakpoint.'"
               @mouseover="onBkptSwitchMouseOver"
               @mouseleave="onBkptSwitchMouseLeave"
               @click.stop="doToggle()"
         >
-            <template v-if="hasBreakpoint"><span class="breakpointIndicatorClass">&#x1F6D1;&nbsp;</span></template><!-- Stop sign -->
+            <template v-if="hasBreakpoint(indexObj)"><span class="breakpointIndicatorClass">&#x1F6D1;&nbsp;</span></template><!-- Stop sign -->
             <template v-else>&nbsp;&nbsp;</template>
         </span>
         <!-- Initially, when this component is created, either hide or display the gutter option span label. -->
-        <span v-show="hasGutterOptions"
+        <span v-if="isDebugFeatureEnabled"
+                v-show="hasGutterOptions"
                   :class="{'breakpointGutterOption' : true,
                     'breakpointOptionHidden' : isOptionInitiallyHidden,
                    }"
@@ -96,21 +97,29 @@
                     return ''
                 }
             },
+            hasBreakpoint(obj) {
+                let retVal = this.$store.getters.hasBreakpoint(obj)
+                return retVal
+            },
         },
         computed: {
             isNested() {
                 return this.breakpointIndex.includes('/')
             },
             indexObj() {
-                if (this.isUpdated) {this.isUpdated.valueOf()}
+                // if (this.isUpdated) {this.isUpdated.valueOf()}
                return this.getBreakpointObj(this.breakpointIndex)
-            },
-            hasBreakpoint() {
-                let retVal = this.$store.getters.hasBreakpoint(this.indexObj)
-                return retVal
             },
             isBreakpointHit() {
                 return this.$store.getters.isBreakpointHit(this.indexObj)
+            },
+            canEvaluateAction() {
+                const tsIndex = this.$store.getters.getIndexOfCurrentTest
+                if (tsIndex !== null) {
+                    const isEval = this.isEvaluableAction(tsIndex)
+                    return isEval
+                }
+                return false
             },
         },
         // watch: {

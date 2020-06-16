@@ -10,9 +10,16 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import javax.websocket.Session;
 
 public class TestScriptDebugState {
+    private static final String STEP_OVER_BKPT = "stepOverBkpt";
+    /**
+     "/test0" =
+     "/" = nested test script separator.
+     "test0" = This is the imported test header which has no UI representation: skip this.
+    */
+    private static final String IMPORTED_TEST_HEADER = "/test0";
     private Object lock;
     private AtomicBoolean resume;
-    private AtomicBoolean kill;
+    private AtomicBoolean stopDebug;
     private AtomicBoolean evaluateMode;
     /**
      * Debug Instance
@@ -26,6 +33,7 @@ public class TestScriptDebugState {
     private Session session;
     private String evalJsonString;
     private String currentExecutionIndex;
+    private boolean hasImportExtension;
     private List<String> parentExecutionIndex = new ArrayList<>();
     TestScriptDebugInterface debugInterface = null;
 
@@ -36,7 +44,7 @@ public class TestScriptDebugState {
         this.lock = new Object();
         this.testScriptIndex = testScriptIndex;
         this.resume = new AtomicBoolean();
-        this.kill = new AtomicBoolean();
+        this.stopDebug = new AtomicBoolean();
         this.evaluateMode = new AtomicBoolean();
         this.breakpointSet = breakpointSet;
         this.session = session;
@@ -55,8 +63,8 @@ public class TestScriptDebugState {
         return resume;
     }
 
-    public AtomicBoolean getKill() {
-        return kill;
+    public AtomicBoolean getStopDebug() {
+        return stopDebug;
     }
 
     public ConcurrentSkipListSet getBreakpointSet() {
@@ -104,8 +112,8 @@ public class TestScriptDebugState {
        this.evaluateMode.set(false);
     }
 
-    public void sendKilled() {
-        getSession().getAsyncRemote().sendText("{\"messageType\":\"killed\", \"testReport\":{}}");
+    public void sendStopped() {
+        getSession().getAsyncRemote().sendText("{\"messageType\":\"stoppedDebugging\", \"testReport\":{}}");
     }
 
     public void sendUnexpectedError() {
@@ -113,7 +121,11 @@ public class TestScriptDebugState {
     }
 
     public void sendFinalReport(String testReport) {
-        getSession().getAsyncRemote().sendText("{\"messageType\":\"final-report\", \"testReport\":" + testReport +"}");
+        if (getSession() != null && getSession().isOpen()) {
+            getSession().getAsyncRemote().sendText("{\"messageType\":\"final-report\", \"testReport\":" + testReport + "}");
+        } else {
+            log.error("sendFinalReport: session was already closed!");
+        }
     }
 
     public void sendAssertionStr(String assertionJson) {
@@ -155,11 +167,26 @@ public class TestScriptDebugState {
     }
 
     public boolean isBreakpoint(String breakpointIndex) {
-        return getBreakpointSet().contains(breakpointIndex);
+        boolean hasNormalBreakpoint = getBreakpointSet().contains(breakpointIndex);
+        if (! hasNormalBreakpoint) {
+            if (stepOverBkpt(breakpointIndex)) return true;
+        }
+        return hasNormalBreakpoint;
+    }
+
+    private boolean stepOverBkpt(String breakpointIndex) {
+        /* skip the test parts which have no UI representation */
+        if (! hasImportExtension  && ! breakpointIndex.endsWith(IMPORTED_TEST_HEADER) ) {
+            if (getBreakpointSet().contains(STEP_OVER_BKPT)) {
+                getBreakpointSet().remove(STEP_OVER_BKPT);
+                return true;
+            }
+        }
+        return false;
     }
 
     private boolean isWait() {
-        boolean isWait = ! getKill().get();
+        boolean isWait = ! getStopDebug().get();
         isWait = isWait && ! getResume().get();
         isWait = isWait && ! getDebugEvaluateModeWasRequested().get();
 
@@ -179,9 +206,9 @@ public class TestScriptDebugState {
             }
             if (getResume().get()) {
                 log.info("Resuming " +  getSession().getId());
-            } else if (getKill().get()) {
+            } else if (getStopDebug().get()) {
 //                throw new Error("KILL session: " + getSession().getId()); // This needs to throw a custom exception that does not show up in the test report
-                throw new StopDebugTestScriptException("KILL debug session: " + getSession().getId());
+                throw new StopDebugTestScriptException("STOP debug session: " + getSession().getId());
             } else if (getDebugEvaluateModeWasRequested().get()) {
                 log.info("Eval mode is true.");
             }
@@ -250,4 +277,11 @@ public class TestScriptDebugState {
         getSession().getAsyncRemote().sendText("{\"messageType\":\"completed\", \"testReport\":{}}");
     }
 
+    public void setHasImportExtension(boolean hasImportExtension) {
+        this.hasImportExtension = hasImportExtension;
+    }
+
+    public boolean hasParentExecutionIndex() {
+        return this.parentExecutionIndex.size() > 0;
+    }
 }

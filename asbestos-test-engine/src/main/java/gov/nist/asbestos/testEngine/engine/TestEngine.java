@@ -6,7 +6,6 @@ import gov.nist.asbestos.client.Base.EC;
 import gov.nist.asbestos.client.Base.ProxyBase;
 import gov.nist.asbestos.client.client.FhirClient;
 import gov.nist.asbestos.client.client.Format;
-import gov.nist.asbestos.client.events.UIEvent;
 import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.client.resolver.ResourceCacheMgr;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
@@ -29,7 +28,6 @@ import org.hl7.fhir.r4.model.*;
 
 import java.io.*;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
@@ -156,7 +154,12 @@ public class TestEngine  {
         }
         try {
             doWorkflow();
-        } catch (Throwable t) {
+        }
+        catch (StopDebugTestScriptException sdex) {
+            if (testScriptDebugState.hasParentExecutionIndex())
+                throw sdex;
+        }
+        catch (Throwable t) {
             reportTerminalFailure(t);
         }
         //returnTestReport();
@@ -294,9 +297,7 @@ public class TestEngine  {
             if (errorOut()) return;
             doSetup();
             if (errorOut()) return;
-            try {
                 doTest();
-            } catch (StopDebugTestScriptException ex) {}
             if (errorOut()) return;
             doTearDown();
             fillInSkips();
@@ -669,7 +670,7 @@ public class TestEngine  {
                                 isFollowedByAssert = true;
                         }
 
-                        ifDebuggingPauseIfBreakpoint("setup", 0, actionIndex);
+                        ifDebuggingPauseIfBreakpoint("setup", 0, actionIndex, hasImportModifierExtension(action.getOperation()));
                         doOperation(new ActionReference(testScript, action), typePrefix, action.getOperation(), actionReportComponent.getOperation(), isFollowedByAssert);
                         TestReport.SetupActionOperationComponent opReport = actionReportComponent.getOperation();
                         if (opReport.getResult() == TestReport.TestReportActionResult.ERROR) {
@@ -829,7 +830,12 @@ public class TestEngine  {
                     if (!isConditional)
                         doTestPart(test, testReportComponent, testReport, false);
                 }
-            } catch (Throwable t) {
+            }
+            catch (StopDebugTestScriptException sdex) {
+               failOverride = true;
+               throw sdex;
+            }
+            catch (Throwable t) {
                 String msg = t.getMessage();
                 if (msg == null || msg.equals(""))
                     msg = ExceptionUtils.getStackTrace(t);
@@ -938,7 +944,11 @@ public class TestEngine  {
                 ;
         modularEngine.add(testEngine1);
         testEngine1.parent = this;
-        testEngine1.runTest();
+        try {
+            testEngine1.runTest();
+        } catch (StopDebugTestScriptException sdex) {
+           throw sdex;
+        }
 
         /*
             Assign moduleName and moduleId in caller's TestReport.
@@ -1154,7 +1164,7 @@ public class TestEngine  {
                         if (nextAction.hasAssert())
                             isFollowedByAssert = true;
                     }
-                    ifDebuggingPauseIfBreakpoint("test", testIndex, testPartIndex);
+                    ifDebuggingPauseIfBreakpoint("test", testIndex, testPartIndex, hasImportModifierExtension(action.getOperation()));
                     TestReport.SetupActionOperationComponent reportOp = actionReportComponent.getOperation();
                     doOperation(new ActionReference(testScript, action), typePrefix, action.getOperation(), reportOp, isFollowedByAssert);
                     TestReport.SetupActionOperationComponent opReport = actionReportComponent.getOperation();
@@ -1673,19 +1683,30 @@ public class TestEngine  {
                             testScriptDebugState.sendDebugAssertionEvalResultStr(code, actionReport.getMessage());
                         }
                     }
-                } while (! testScriptDebugState.getResume().get() && ! testScriptDebugState.getKill().get());
+                } while (! testScriptDebugState.getResume().get() && ! testScriptDebugState.getStopDebug().get());
             }
      }
 
      private void ifDebuggingPauseIfBreakpoint(String parentType, Integer parentIndex) {
-        ifDebuggingPauseIfBreakpoint(parentType, parentIndex, null);
+        ifDebuggingPauseIfBreakpoint(parentType, parentIndex, null, false);
      }
 
-    private void ifDebuggingPauseIfBreakpoint(String parentType, Integer parentIndex, Integer childPartIndex) {
+    private void ifDebuggingPauseIfBreakpoint(String parentType, Integer parentIndex, Integer childPartIndex, boolean hasImportExtension) {
         if (hasDebugState()) {
+            testScriptDebugState.setHasImportExtension(hasImportExtension);
             testScriptDebugState.setCurrentExecutionIndex(parentType, parentIndex, childPartIndex);
             testScriptDebugState.pauseIfBreakpoint();
         }
     }
 
+    private boolean hasImportModifierExtension(TestScript.SetupActionOperationComponent operation) {
+        if (operation.hasModifierExtension()) {
+            Optional<Extension> extension = operation.getModifierExtension()
+                    .stream()
+                    .filter(s -> ExtensionDef.ts_import.equals(s.getUrl()))
+                    .findFirst();
+            return extension.isPresent();
+        }
+        return false;
+    }
 }

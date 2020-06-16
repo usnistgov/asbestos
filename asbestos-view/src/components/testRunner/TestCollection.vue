@@ -106,13 +106,13 @@
     .conformance-tests-header {
         background-color: #DBD9BE;
     }
-    .debugKillTestScriptButton {
+    .stopDebugTestScriptButton {
         /*padding-bottom: 5px;*/
         margin-left: 10px;
         background-color: red;
         cursor: pointer;
         border-radius: 25px;
-        font-weight: bold;
+        font-weight: normal;
     }
     .configurationError {
         color: red;

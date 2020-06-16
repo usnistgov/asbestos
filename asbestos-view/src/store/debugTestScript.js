@@ -7,18 +7,62 @@ Vue.use(Vuex)
 export const debugTestScriptStore = {
     state() {
         return {
+            /**
+            If isDebugTsFeatureEnabled is false, all of the debugging UI features will be hidden from the user.
+             */
+            isDebugTsFeatureEnabled: true,
+            /**
+             * The flag that shows the timer icon and enables/disables some features.
+             */
             waitingForBreakpoint: false,
+            /**
+             * Enables the test-script test action assertion evaluation feature.
+             */
             evalMode: false,
-            /* keyProperty{testScriptIndex}=value{breakpointIndex,debugButtonLabel}
+            /* keyProperty{testScriptIndex}=value{breakpointIndex: this is only used for the breakpoint hit index, debugButtonLabel: ''}
              debugButtonLabel exists inside of showDebugButton because there are multiple testscripts and it is necessary to keep showing the Debug button labels for other test scripts.
             If a single button label variable was used then all of the Debug buttons would be become changed to Resume when a breakpoint is hit */
             showDebugButton: {},
             /* Key = String.format("%d.%d", testCollectionIndex , testScriptIndex).
             Value (Set) = String.format("%d.%d", testIndex, actionIndex) [0..*] */
             breakpointMap: new Map(),
+            /**
+             * This websocket is for the debugging the test script.
+             */
             testScriptDebuggerWebSocket: null,
+            /**
+             * This websocket gets collects information when the test collection body is loaded to see if any debuggers might already be running for a given combination of fhir-toolkit-test-session + channel + test collection.
+             */
             debugMgmtWebSocket: null,
             debugMgmtIndexList: [],
+            /**
+             * Re-usable function.
+             * @param state
+             * @param fqTestScriptIndex
+             */
+            doCleanupBreakpoints: function(state, fqTestScriptIndex) {
+                if (fqTestScriptIndex in state.showDebugButton === true) {
+                    // Vue.set(state.showDebugButton, obj.testScriptIndex, false) // Add property using Vue.set to nudge reactivity
+                    let valObj = state.showDebugButton[fqTestScriptIndex]
+                    if (valObj !== undefined) {
+                        if (valObj.debugButtonLabel === 'Debug') { // Only remove when Debug hasn't started yet
+                            Vue.delete(state.showDebugButton, fqTestScriptIndex)
+                        }
+                    }
+                    // console.log(obj.testScriptIndex + "removed" + obj.breakpointIndex)
+                }
+            },
+            /**
+             * Nudges Vue reactivity.
+             * @param state
+             * @param obj
+             */
+            reapplyBkptChange: function(state, obj) {
+                let valObj = state.showDebugButton[obj.testScriptIndex]
+                if (valObj !== null && valObj !== undefined) {
+                    Vue.set(state.showDebugButton, obj.testScriptIndex, {breakpointIndex: valObj.breakpointIndex, debugButtonLabel: valObj.debugButtonLabel}) // set the same value to nudge reactivity
+                }
+            },
         }
     },
     mutations: {
@@ -39,29 +83,17 @@ export const debugTestScriptStore = {
             if (obj.testScriptIndex in state.showDebugButton === false) { // Only add it the first time where the showDebugButton object is missing the scriptIndex property
                 Vue.set(state.showDebugButton, obj.testScriptIndex, {breakpointIndex: null, debugButtonLabel: "Debug"}) // Add property using Vue.set to nudge reactivity
             } else {
-                let valObj = state.showDebugButton[obj.testScriptIndex]
-                if (valObj !== undefined) {
-                    Vue.set(state.showDebugButton, obj.testScriptIndex, {breakpointIndex: valObj.breakpointIndex, debugButtonLabel: valObj.debugButtonLabel}) // set the same value to nudge reactivity
-                }
+                state.reapplyBkptChange(state, obj)
             }
         },
         removeBreakpoint(state, obj) {
             if (state.breakpointMap.has(obj.testScriptIndex)) {
-                var breakpointSet = state.breakpointMap.get(obj.testScriptIndex)
+                let breakpointSet = state.breakpointMap.get(obj.testScriptIndex)
                 if (breakpointSet.has(obj.breakpointIndex)) {
                     breakpointSet.delete(obj.breakpointIndex)
 
                     if (breakpointSet.size == 0) {// When all breakpoints were removed while in Resume activity, then still allow to Resume so when breakpointList is empty
-                        if (obj.testScriptIndex in state.showDebugButton === true) {
-                            // Vue.set(state.showDebugButton, obj.testScriptIndex, false) // Add property using Vue.set to nudge reactivity
-                            let valObj = state.showDebugButton[obj.testScriptIndex]
-                            if (valObj != undefined) {
-                                if (valObj.debugButtonLabel === 'Debug') { // Only remove when Debug hasn't started yet
-                                    Vue.delete(state.showDebugButton, obj.testScriptIndex)
-                                }
-                            }
-                            // console.log(obj.testScriptIndex + "removed" + obj.breakpointIndex)
-                        }
+                        state.doCleanupBreakpoints(state, obj.testScriptIndex)
                     } else {
                         let valObj = state.showDebugButton[obj.testScriptIndex]
                         if (valObj != undefined) {
@@ -71,10 +103,22 @@ export const debugTestScriptStore = {
                 }
             }
         },
+        removeAllBreakpoints(state, obj) {
+            if (state.breakpointMap.has(obj.testScriptIndex)) {
+                let breakpointSet = state.breakpointMap.get(obj.testScriptIndex)
+                if (breakpointSet !== null && breakpointSet !== undefined) {
+                    breakpointSet.clear()
+                    Vue.delete(state.breakpointMap, obj.testScriptIndex)
+                    // Vue.set(state.breakpointMap, obj.testScriptIndex, new Set())
+                    state.doCleanupBreakpoints(state, obj.testScriptIndex)
+                    state.reapplyBkptChange(state, obj)
+                }
+            }
+        },
         setDebugButtonLabel(state, obj) {
             if (obj.testScriptIndex in state.showDebugButton) {
                 let valObj = state.showDebugButton[obj.testScriptIndex]
-                if (valObj != undefined) {
+                if (valObj !== undefined) {
                     valObj.breakpointIndex = obj.breakpointIndex
                     valObj.debugButtonLabel = obj.debugButtonLabel // "Resume"
                 }
@@ -82,18 +126,32 @@ export const debugTestScriptStore = {
                 alert(' failed: ' + obj.testScriptIndex)
             }
         },
-        setBeingDebuggedList(state, ar) {
-            if (Array.isArray(ar)) {
-                state.debugMgmtIndexList = ar
+        setBeingDebuggedList(state, arr) {
+            if (Array.isArray(arr)) {
+                state.debugMgmtIndexList = arr
             }
+        },
+        setIsDebugTsFeatureEnabled(state, isTrue) {
+            state.isDebugTsFeatureEnabled = Boolean(isTrue).valueOf()
         }
     },
     getters: {
         hasBreakpoint: (state) => (obj) => {
             if (state.breakpointMap.has(obj.testScriptIndex)) {
                 const breakpointSet = state.breakpointMap.get(obj.testScriptIndex)
-                const retVal = breakpointSet.has(obj.breakpointIndex)
-                return retVal
+                if (breakpointSet) {
+                    const retVal = breakpointSet.has(obj.breakpointIndex)
+                    return retVal
+                }
+            }
+            return false
+        },
+        hasBreakpoints: (state) => (testScriptIndex) => {
+            if (state.breakpointMap.has(testScriptIndex)) {
+                const breakpointSet = state.breakpointMap.get(testScriptIndex)
+                if (breakpointSet) {
+                    return breakpointSet.size > 0
+                }
             }
             return false
         },
@@ -107,6 +165,9 @@ export const debugTestScriptStore = {
                 }
             }
             return false
+        },
+        isDebugFeatureEnabled: state => {
+            return state.isDebugTsFeatureEnabled
         },
         getDebugTitle: (state, getters) => (obj) => {
             if (getters.hasBreakpoint(obj)) {
@@ -130,6 +191,9 @@ export const debugTestScriptStore = {
         getIndexOfTestId: (state, getters, rootState) => (testId) => {
             let indexOfTestId = rootState.testRunner.testScriptNames.indexOf(testId)
             return indexOfTestId
+        },
+        getIndexOfCurrentTest: (state, getters, rootState) => {
+            return getters.getIndexOfTestId(rootState.testRunner.currentTest)
         },
         getMapKey: (state, getters, rootState)  => (testId) => {
             let testCollectionName = rootState.testRunner.currentTestCollectionName
@@ -160,9 +224,13 @@ export const debugTestScriptStore = {
             commit('removeBreakpoint', value)
             return true
         },
-        async debugKill({state}, mapKey) {
+        async removeAllBreakpoints({commit}, value) {
+            commit('removeAllBreakpoints', value)
+            return true
+        },
+        async stopDebugTs({state}, mapKey) {
             if (state.testScriptDebuggerWebSocket != null) {
-                state.testScriptDebuggerWebSocket.send('{"cmd":"killDebug"}')
+                state.testScriptDebuggerWebSocket.send('{"cmd":"stopDebug"}')
                 // let valObj = state.showDebugButton[mapKey]
                 // if (valObj != undefined) {
                 //     console.log('Killing from ' + valObj.breakpointIndex)
@@ -170,7 +238,7 @@ export const debugTestScriptStore = {
                 //     valObj.debugButtonLabel = "Debug"
                 // }
             } else {
-                console.log('debugKill ' + mapKey + ' failed: WebSocket is null!')
+                console.log('stopDebugTs ' + mapKey + ' failed: WebSocket is null!')
             }
         },
         async doDebugEvalMode({commit, state, rootState, getters}) {
@@ -193,6 +261,9 @@ export const debugTestScriptStore = {
             state.testScriptDebuggerWebSocket.send(sendData)
         },
         async debugTestScript({commit, rootState, state, getters, dispatch}, testId) {
+            if (! state.isDebugTsFeatureEnabled) {
+                return
+            }
             console.log('in debug' + testId + ' isGettersUndefined: ' + (getters === undefined).valueOf())
             // commit('setTestReport',{name: testId, testReport: null})
             // console.log('log cleared for ' + testId)
@@ -210,6 +281,7 @@ export const debugTestScriptStore = {
                 state.testScriptDebuggerWebSocket = new WebSocket(wssSocketUrl)
                 state.testScriptDebuggerWebSocket.onopen = event => {
                     state.waitingForBreakpoint = true
+                    state.evalMode = false
                     // Disable Run button
                     console.log('In socket onOpen. event: ' + (event === undefined).valueOf())
                     // clear log 1?
@@ -234,12 +306,16 @@ export const debugTestScriptStore = {
                     if (event != null && event != undefined) {
                         // console.log('onclose data: ' + event.returnData)
                     }
+                    // Breakpoints could have been cleared so only reset the label to Debug
                     let actionData = {
                         testScriptIndex: this.getters.getActivelyDebuggingTestScriptIndex,
                         breakpointIndex: null,
                         debugButtonLabel: 'Debug'
                     }
                     commit('setDebugButtonLabel', actionData)
+                    if (! getters.hasBreakpoints(actionData.testScriptIndex)) {
+                        state.doCleanupBreakpoints(state, actionData.testScriptIndex)
+                    }
                     // console.log('In socket onClose. Setting socket to null...')
                     state.testScriptDebuggerWebSocket = null
                     // console.log('done.')
@@ -279,8 +355,8 @@ export const debugTestScriptStore = {
                         commit('updateAssertionEvalObj', returnData.assertionJson)
                     } else if (returnData.messageType === 'eval-assertion-result') {
                         commit('setDebugAssertionEvalResult', returnData)
-                    } else if (returnData.messageType === 'killed') {
-                        alert('Debug: Killed')
+                    } else if (returnData.messageType === 'stoppedDebugging') {
+                        // alert('Debugging was stopped.')
                         state.testScriptDebuggerWebSocket.close()
                     } else if (returnData.messageType === 'unexpected-error') {
                         alert('Debug: Unexpected error.')
@@ -290,15 +366,26 @@ export const debugTestScriptStore = {
                 state.testScriptDebuggerWebSocket.onerror = function (event) {
                     state.waitingForBreakpoint = false
                     if (event != null && event != undefined) {
-                        alert('Error: ' + event.data)
+                        alert('Error: ' + event)
                     }
                 }
-
-            } else if (mapKey in state.showDebugButton && state.showDebugButton[mapKey].debugButtonLabel === 'Resume') {
-                state.evalMode = false
-                state.waitingForBreakpoint = true
+            } else {
+                // The Debug button changes to Resume when the socket is active, so one button does two jobs.
                 const breakpointSet = state.breakpointMap.get(mapKey) // Follow proper key format
                 let breakpointArrayString = JSON.stringify([...breakpointSet])
+                dispatch('doResumeBreakpoint', breakpointArrayString)
+            }
+        },
+        async doResumeBreakpoint({rootState, state}, breakpointArrayString) {
+            const testId = rootState.testRunner.currentTest
+            if (state.testScriptDebuggerWebSocket === null) {
+                console.log('doResumeBreakpoint: socket is null!')
+                return
+            }
+            const mapKey = this.getters.getMapKey(testId)
+            if (mapKey in state.showDebugButton && state.showDebugButton[mapKey].debugButtonLabel === 'Resume') {
+                state.evalMode = false
+                state.waitingForBreakpoint = true
                 let sendData = `{"cmd":"resumeBreakpoint","testScriptIndex":"${mapKey}","breakpointList":${breakpointArrayString}}`
 
                 // console.log('Resuming from ' + state.showDebugButton[mapKey].breakpointIndex)
@@ -306,7 +393,16 @@ export const debugTestScriptStore = {
                 state.showDebugButton[mapKey].breakpointIndex = null // Clear flag
             }
         },
+        async doStepOver({dispatch}) {
+           dispatch('doResumeBreakpoint', '["stepOverBkpt"]') // stepOverBkpt is a special breakpoint that stops at every setup/test action part
+        },
+        async doFinishRun({dispatch}) {
+            dispatch('doResumeBreakpoint', '[]') // Empty array means no breakpoints
+        },
         async debugMgmt({commit, rootState, state}, fn) {
+            if (! state.isDebugTsFeatureEnabled) {
+               return
+            }
             if (fn === undefined || fn === null )
                 return
             if (state.debugMgmtWebSocket === null) {
@@ -342,9 +438,16 @@ export const debugTestScriptStore = {
                     state.debugMgmtWebSocket.close()
                     state.debugMgmtWebSocket = null
                 }
-                state.debugMgmtWebSocket.onerror = function (event) {
+                state.debugMgmtWebSocket.onerror = (event) => {
+                    /*
+                    If there is an error with the initial debugMgmt websocket call, it could mean that there is a chance of the same error happening with the debugTestScript websocket so turn off the debug feature altogether from this point on.
+                    Browser needs to be refreshed to reset the isDebugTs flag.
+                     */
+                    const errorMessage = `DebugMgmt Error. WebSocket url: ${wssSocketUrl}. Debug TestScript feature flag is disabled. Refresh browser to reset the flag.`
+                    console.log(errorMessage)
+                    commit('setIsDebugTsFeatureEnabled', false)
                     if (event != null && event != undefined) {
-                        alert('debugMgmt Error: ' + event.data)
+                        console.log('Error Event: ' + event )
                     }
                 }
                 state.debugMgmtWebSocket.onclose = event => {
