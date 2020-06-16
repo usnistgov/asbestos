@@ -2,6 +2,7 @@ package gov.nist.asbestos.client.resolver;
 
 import gov.nist.asbestos.simapi.tk.installation.Installation;
 
+import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
@@ -36,9 +37,15 @@ public class IdBuilder {
             while (ee.hasMoreElements())
             {
                 InetAddress i = (InetAddress) ee.nextElement();
-                String x = i.getHostAddress();
-                if (!x.equals("127.0.0.1") && !containsAlpha(x))
-                    ip = x;
+                /*
+                Ipv6 format contains colon characters which is not usable in composing an OID.
+                Select the Ipv4 interface because it blends in with an OID format.
+                 */
+                if (i instanceof Inet4Address) {
+                    String x = i.getHostAddress();
+                    if (! x.equals("127.0.0.1") && ! containsAlpha(x))
+                        ip = x;
+                }
             }
         }
         return ip;
