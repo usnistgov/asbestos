@@ -116,6 +116,12 @@
     export default {
         methods: {
             load() {
+                /*
+                 All tests details will be collapsed when loaded.
+                 The following setCurrentTest to null will reset the expanded arrow indicator
+                 otherwise the arrow indicator is incorrect when navigating out of the test collection and back into to the same test collection after a test was previously opened.
+                 */
+                this.$store.commit('setCurrentTest', null)
                 this.loadTestCollection(this.testCollection)
                 this.$store.dispatch('debugMgmt', {'cmd':'getExistingDebuggerList'})
             },
