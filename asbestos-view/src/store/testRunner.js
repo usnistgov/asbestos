@@ -118,8 +118,8 @@ export const testRunnerStore = {
         },
         clearTestReport(state, testNameToRemove) {
             if (state.testReports !== null && state.testReports !== undefined && Array.isArray(state.testReports) && state.testReports.length > 0) {
-                for (let testName in reportData) {
-                    const report = reportData[testName]
+                for (let testName in state.testReports) {
+                    const report = state.testReports[testName]
                     if (report && report.resourceType === 'TestReport') {
                         if (testName === testNameToRemove) {
                             state.testReports.splice(testName, 1)
