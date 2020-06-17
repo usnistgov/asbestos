@@ -264,7 +264,7 @@ export const debugTestScriptStore = {
             if (! state.isDebugTsFeatureEnabled) {
                 return
             }
-            console.log('in debug' + testId + ' isGettersUndefined: ' + (getters === undefined).valueOf())
+            // console.log('in debug' + testId + ' isGettersUndefined: ' + (getters === undefined).valueOf())
             // commit('setTestReport',{name: testId, testReport: null})
             // console.log('log cleared for ' + testId)
 
@@ -285,7 +285,8 @@ export const debugTestScriptStore = {
                     // Disable Run button
                     console.log('In socket onOpen. event: ' + (event === undefined).valueOf())
                     // clear log 1?
-                    commit('clearTestReports')
+                    // commit('clearTestReports')
+                    commit('clearTestReport', testId)
                     let uri = `debug-testscript/${testSessionId}__${channelId}/${this.state.testRunner.currentTestCollectionName}/${testId}?_format=${this.state.testRunner.useJson ? 'json' : 'xml'};_gzip=${this.state.testRunner.useGzip}`
                     let indexOfTestId = getters.getIndexOfTestId(testId)
                     if (indexOfTestId > -1) {
@@ -321,13 +322,20 @@ export const debugTestScriptStore = {
                     // console.log('done.')
                 }
                 state.testScriptDebuggerWebSocket.onmessage = event => {
+                    /**
+                     * Message limit: -1 is full content, otherwise truncate message length to a number > 0.
+                      */
                     let messageStrLimit = 500
                     if (event && event.data) {
-                        console.log('onMessage: ' + (event.data.length < messageStrLimit ?
-                            event.data
-                            : 'Message too long. Showing first ' + messageStrLimit + " characters: " + event.data.substr(0, messageStrLimit) + ' TRUNCATED.'))
+                        if (messageStrLimit === -1) {
+                            console.log('onMessage: ' + event.data)
+                        } else {
+                            console.log('onMessage: ' + (event.data.length < messageStrLimit ?
+                                event.data
+                                : 'Message too long. Showing first ' + messageStrLimit + " characters: " + event.data.substr(0, messageStrLimit) + ' TRUNCATED.'))
+                        }
                     } else {
-                        console.log('event data is missing!')
+                        console.log('onmessage event data is missing!')
                     }
                     let returnData = JSON.parse(event.data)
                     if (returnData.messageType === 'final-report') {
@@ -366,7 +374,7 @@ export const debugTestScriptStore = {
                 state.testScriptDebuggerWebSocket.onerror = function (event) {
                     state.waitingForBreakpoint = false
                     if (event != null && event != undefined) {
-                        alert('Error: ' + event)
+                        alert('Error: ' + JSON.stringify(event))
                     }
                 }
             } else {
@@ -447,7 +455,7 @@ export const debugTestScriptStore = {
                     console.log(errorMessage)
                     commit('setIsDebugTsFeatureEnabled', false)
                     if (event != null && event != undefined) {
-                        console.log('Error Event: ' + event )
+                        console.log('Error Event: ' + JSON.stringify(event))
                     }
                 }
                 state.debugMgmtWebSocket.onclose = event => {
