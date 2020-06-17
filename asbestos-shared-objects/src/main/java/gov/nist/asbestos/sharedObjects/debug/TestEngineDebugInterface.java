@@ -1,6 +1,6 @@
 package gov.nist.asbestos.sharedObjects.debug;
 
-public interface TestScriptDebugInterface {
+public interface TestEngineDebugInterface {
     void onBreakpoint();
     String getLogAtBreakpoint();
 }

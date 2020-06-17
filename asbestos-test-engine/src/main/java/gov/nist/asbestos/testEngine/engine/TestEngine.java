@@ -10,7 +10,7 @@ import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.client.resolver.ResourceCacheMgr;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import gov.nist.asbestos.sharedObjects.debug.StopDebugTestScriptException;
-import gov.nist.asbestos.sharedObjects.debug.TestScriptDebugInterface;
+import gov.nist.asbestos.sharedObjects.debug.TestEngineDebugInterface;
 import gov.nist.asbestos.sharedObjects.debug.TestScriptDebugState;
 import gov.nist.asbestos.simapi.validation.Val;
 import gov.nist.asbestos.simapi.validation.ValE;
@@ -944,6 +944,15 @@ public class TestEngine  {
                 ;
         modularEngine.add(testEngine1);
         testEngine1.parent = this;
+
+        String moduleName = simpleName(componentReference.getComponentRef());
+        String moduleId = assignModuleId(moduleName);
+        opReport.addModifierExtension(new Extension(ExtensionDef.moduleId, new StringType(moduleId)));
+        opReport.addModifierExtension(new Extension(ExtensionDef.moduleName, new StringType(moduleName)));
+        opReport.setResult(TestReport.TestReportActionResult.PASS); // may be overwritten
+        testEngine1.getTestReport().addExtension(ExtensionDef.moduleId, new StringType(moduleId));
+        testEngine1.getTestReport().addExtension(ExtensionDef.moduleName, new StringType(moduleName));
+
         try {
             testEngine1.runTest();
         } catch (StopDebugTestScriptException sdex) {
@@ -959,12 +968,6 @@ public class TestEngine  {
         if (hasDebugState())
             testScriptDebugState.popParentExecutionIndex();
 
-        String moduleName = simpleName(componentReference.getComponentRef());
-        String moduleId = assignModuleId(moduleName);
-        opReport.addModifierExtension(new Extension(ExtensionDef.moduleId, new StringType(moduleId)));
-        opReport.addModifierExtension(new Extension(ExtensionDef.moduleName, new StringType(moduleName)));
-        testEngine1.getTestReport().addExtension(ExtensionDef.moduleId, new StringType(moduleId));
-        testEngine1.getTestReport().addExtension(ExtensionDef.moduleName, new StringType(moduleName));
 
         // Report overall module call status into caller's TestReport.operation
         ErrorReport errorReport = getErrorMessage(testEngine1.getTestReport());
@@ -1579,7 +1582,7 @@ public class TestEngine  {
     public TestEngine setTestScriptDebugState(TestScriptDebugState state) {
         this.testScriptDebugState = state;
         if (state != null) {
-            this.testScriptDebugState.setDebugInterface(new TestScriptDebugInterface() {
+            this.testScriptDebugState.setDebugInterface(new TestEngineDebugInterface() {
                 public ModularEngine getMyModularEngine() {
                     ModularEngine me = getModularEngine();
                     if (me == null) {

@@ -35,7 +35,7 @@ public class TestScriptDebugState {
     private String currentExecutionIndex;
     private boolean hasImportExtension;
     private List<String> parentExecutionIndex = new ArrayList<>();
-    TestScriptDebugInterface debugInterface = null;
+    TestEngineDebugInterface debugInterface = null;
 
     private static Logger log = Logger.getLogger(TestScriptDebugState.class);
 
@@ -254,11 +254,11 @@ public class TestScriptDebugState {
         }
     }
 
-    public TestScriptDebugInterface getDebugInterface() {
+    public TestEngineDebugInterface getDebugInterface() {
         return debugInterface;
     }
 
-    public void setDebugInterface(TestScriptDebugInterface debugInterface) {
+    public void setDebugInterface(TestEngineDebugInterface debugInterface) {
         this.debugInterface = debugInterface;
     }
 
