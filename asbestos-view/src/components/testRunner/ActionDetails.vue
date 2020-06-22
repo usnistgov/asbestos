@@ -38,7 +38,7 @@
                 <span>
                     {{ description }}
                 </span>
-                <span v-if="$parent && $parent.isBreakpointHit" class="breakpointFeatureBkg"><button class="debugFeatureOptionButton" @click.stop="$parent.doDebugEvalMode()">Eval.</button></span>
+                <span v-if="$parent && $parent.isBreakpointHit && $parent.canEvaluateAction" class="breakpointFeatureBkg"><button class="debugFeatureOptionButton" @click.stop="$parent.doDebugEvalMode()">Eval.</button></span>
 
                 <test-status v-if="statusRight"
                              :status-on-right="statusRight"

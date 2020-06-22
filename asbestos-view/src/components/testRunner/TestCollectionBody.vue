@@ -34,8 +34,16 @@
 
                     <script-status v-if="!statusRight" :status-right="statusRight" :name="name"> </script-status>
 
-                    <template v-if="isBeingDebugged(i)">
-                        <span class="breakpointColumnHeader" title="A debugger is running for this TestScript.">&#x1F41E;</span> <!-- &#x1F51B; is the ON! symbol -->
+                    <template v-if="isDebugFeatureEnabled">
+                        <template v-if="isPreviousDebuggerStillAttached(i)">
+                            <span class="breakpointColumnHeader" title="A debugger is running for this TestScript.">&#x1F41E;</span> <!-- lady beetle icon -->
+                        </template>
+                        <template v-else-if="$store.state.testRunner.currentTest === name && ! isDebuggable(i) && ! isResumable(i)">
+                            <span class="breakpointColumnHeader infoIcon" title="Add at least one breakpoint in the column below to enable debugging.">&nbsp;&#x2139;</span> <!-- the "i" Information icon -->
+                        </template>
+                        <template v-else-if="$store.state.testRunner.currentTest === name && (isDebuggable(i) || isResumable(i))">
+                            <span class="breakpointColumnHeader clickableColumnHeader" title="Clear all breakpoints." @click.stop="removeAllBreakpoints(i)">&#x1F191;</span> <!-- the "i" Information icon -->
+                        </template>
                     </template>
 
                     <span v-if="$store.state.testRunner.currentTest === name">
@@ -45,35 +53,53 @@
                             <img src="../../assets/arrow-right.png"/>
                     </span>
                     <span class="large-text">{{ cleanTestName(name) }}</span>
-
+                    &nbsp;
                     <span v-if="isClient">
                             <button class="runallbutton" @click="doEval(name)">Run</button>
-                        </span>
-                    <span v-else>
-                              <template v-if="isBeingDebugged(i)">
-                                    <button
-                                            class="debugKillTestScriptButton"
-                                            @click.stop="removeDebugger(i)">Remove Debugger</button>
-                                </template>
-                                <template v-else>
-                                    <button class="runallbutton" @click.stop="doRun(name)">Run</button>
-                            <template v-if="$store.state.testRunner.currentTest === name">
-                                <button v-if="isDebuggable(i)"
-                                        class="debugTestScriptButton"
-                                        @click.stop="doDebug(name)">{{getDebugActionButtonLabel(i)}}</button>
-<!--                                <button v-if="isEvaluable(i)"-->
-<!--                                        class="debugTestScriptButton"-->
-<!--                                        @click.stop="doDebugEvalMode(name)">Eval</button>-->
-                                <button v-if="isDebugKillable(i)"
-                                        class="debugKillTestScriptButton"
-                                        @click.stop="doDebugKill(i)">Kill</button>
-                                <span v-if="$store.state.debugTestScript.waitingForBreakpoint">&nbsp;&nbsp;&#x23F1;</span> <!-- Display a stopwatch if waiting for breakpoint to be hit -->
-                            </template>
-                                </template>
                     </span>
-                    <span v-if="! $store.state.debugTestScript.waitingForBreakpoint && ! $store.state.testRunner.isClientTest"> --  {{ testTime(name) }}</span>
+                    <span v-else-if="isDebugFeatureEnabled">
+                          <template v-if="isPreviousDebuggerStillAttached(i)">
+                                <button
+                                        @click.stop="removeDebugger(i)"
+                                        class="stopDebugTestScriptButton">Remove Debugger</button>
+                            </template>
+                            <template v-else>
+                                <button v-if="! isResumable(i) && ! isWaitingForBreakpoint" @click.stop="doRun(name)" class="runallbutton">Run</button>
+                                <template v-if="$store.state.testRunner.currentTest === name">
+                                    <button v-if="isDebuggable(i) && ! isWaitingForBreakpoint"
+                                            @click.stop="doDebug(name)"
+                                            class="debugTestScriptButton"
+                                            >Debug</button>
+                                    <button v-if="isResumable(i)"
+                                            :disabled="isWaitingForBreakpoint"
+                                            @click.stop="doDebug(name)"
+                                            class="debugTestScriptButtonNormal"
+                                            >&#x25B6;&nbsp;Resume</button>
+                                    <button v-if="isResumable(i)"
+                                            :disabled="isWaitingForBreakpoint"
+                                            @click.stop="doStepOver(i)"
+                                            class="debugTestScriptButtonNormal"
+                                        >&#x2935; Step Over</button>
+                                     <button v-if="isResumable(i)"
+                                             :disabled="isWaitingForBreakpoint"
+                                             title="Continue running and skip all breakpoints."
+                                             @click.stop="doFinish(i)"
+                                             class="debugTestScriptButtonNormal">&#x23E9; Skip All BPs.</button>
+                                    <button v-if="isResumable(i)"
+                                            :disabled="isWaitingForBreakpoint"
+                                            @click.stop="stopDebugging(i)"
+                                        class="debugTestScriptButtonNormal">&#x1F7E5; Stop</button> <!-- &#x270B; -->
+                                    <span v-if="isWaitingForBreakpoint">&nbsp;&nbsp;&#x23F1;</span>
+                                    <!-- Display a stopwatch if waiting for breakpoint to be hit -->
+                                </template>
+                            </template>
+                    </span>
+                    <span v-else>
+                          <button @click.stop="doRun(name)" class="runallbutton">Run</button>
+                    </span>
+                    <span v-if="! isWaitingForBreakpoint && ! $store.state.testRunner.isClientTest"> --  {{ testTime(name) }}</span>
                 </div>
-                <debug-assertion-eval v-if="isEvaluable(i)" :show="$store.state.debugAssertionEval.showModal" @close="closeModal()" @resume="doDebug(name)"></debug-assertion-eval>
+                <debug-assertion-eval v-if="isDebugFeatureEnabled && isEvaluableAction(i)" :show="$store.state.debugAssertionEval.showModal" @close="closeModal()" @resume="doDebug(name)"></debug-assertion-eval>
                 <router-view v-if="selected === name"></router-view>  <!--  opens TestOrEvalDetails   -->
             </div>
         </div>
@@ -139,18 +165,33 @@
 <style scoped>
 </style>
 <style>
+    .clickableColumnHeader,
+    .infoIcon,
     .breakpointColumnHeader {
         position: absolute;
-        left: 2px;
-        font-size: 8px;
-        text-decoration: underline;
+        left: 5px;
+        font-size: 14px;
+        font-weight: normal;
+        text-decoration: none;
+        cursor: default;
     }
+    .infoIcon {
+        width: 14px;
+       border: blue 1px solid;
+    }
+    .clickableColumnHeader {
+        cursor: pointer;
+    }
+    .debugTestScriptButtonNormal,
     .debugTestScriptButton {
         margin-left: 10px;
         background-color: cornflowerblue;
         cursor: pointer;
         border-radius: 25px;
         font-weight: bold;
+    }
+    .debugTestScriptButtonNormal {
+        font-weight: normal;
     }
     .debugFeatureOptionButton {
         margin-left: 7px;
