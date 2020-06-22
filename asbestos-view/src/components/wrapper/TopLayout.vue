@@ -269,6 +269,11 @@
     .has-cursor {
         cursor: pointer;
     }
+    .work-box {
+        text-align: left;
+        padding-top: 5px;
+        padding-bottom: 5px;
+    }
     .instruction {
         text-align: left;
         padding-top: 5px;
