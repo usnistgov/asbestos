@@ -143,9 +143,6 @@
         height:auto;
         display:inline-block;
     }
-    .larger {
-        font-size: larger;
-    }
     .grid-container {
         display: grid;
         grid-template-columns: minmax(0, 1fr) 250px;
@@ -184,6 +181,12 @@
     }
     .control-panel-font {
         font-size: small;
+    }
+    .larger {
+        font-size: larger;
+    }
+    .smaller {
+        font-size: smaller;
     }
     .bold {
         font-weight: bold;
@@ -262,6 +265,9 @@
     .selectable {
         cursor: pointer;
         /*text-decoration: underline;*/
+    }
+    .title-box {
+        background-color: lightgray;
     }
     .pointer-cursor {
         cursor: pointer;

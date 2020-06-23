@@ -1,13 +1,10 @@
 <template>
     <div>
-    <div class="instruction">
-        <div class="big-bold">Script</div>
-        <div>{{label}}</div>
+    <div class="instruction title-box">
+        <span class="big-bold">{{scriptOrModule}}</span>
+        <span>{{label}}</span>
     </div>
     <div>
-<!--        <div class="script bold">Script</div>-->
-<!--        <div class="report bold">Report</div>-->
-
         <div v-if="script">
             <div class="selectable" @click.stop="toggleFixturesOpen()">
                 <span v-if="fixturesOpen" >
@@ -47,26 +44,35 @@
                 <div class="big-bold">Setup</div>
             </div>
 
-            <div class="container">
-                <div v-for="(setup, setup_i) in script.setup" :key="'Setup'+setup_i">
+            <div>
+                <div class="container">
                     <div class="script bold">Script</div>
                     <div class="report bold">Report</div>
+                </div>
+                <div v-for="(setup, setup_i) in script.setup.action" :key="'Setup'+setup_i" class="container">
                     <div class="script soft-boxed">
                         <pretty-view
                             :data="setup"
-                            :show-action="showAction"> </pretty-view>
+                            :deep-view="deepSetupView['Setup'+setup_i]"> </pretty-view>
                     </div>
-                    <div v-if="report && report.setup && report.setup[setup_i]" class="report soft-boxed" >
-                        <div class="report soft-boxed">
-                            <pretty-view
-                                :data="report.setup[setup_i]"
-                                :show-action="showAction"> </pretty-view>
-                        </div>
+
+                    <span class="gully smaller">
+                            <input type="checkbox" v-model="deepSetupView['Setup'+setup_i]">Expand
+                    </span>
+
+                    <div v-if="report &&
+                                report.setup &&
+                                report.setup.action &&
+                                report.setup.action[setup_i]"
+                         class="report soft-boxed" >
+                        <pretty-view
+                                :data="report.setup.action[setup_i]"
+                                :deep-view="deepSetupView['Setup'+setup_i]"> </pretty-view>
                     </div>
-                    <div v-else class="soft-boxed">
+                    <div v-else class="report soft-boxed">
                         <pretty-view
                             :data="null"
-                            :show-action="showAction"> </pretty-view>
+                            :deep-view="deepSetupView['Setup'+setup_i]"> </pretty-view>
                     </div>
                 </div>
             </div>
@@ -78,11 +84,15 @@
                     <div class="report bold">Report</div>
                 </div>
                     <div v-for="(action, action_i) in test.action" :key="'Test'+test_i+'Action'+action_i"
-                    class="container">
-                            <pretty-view
-                                    :data="action"
-                                    :show-action="showAction"
-                                    class="script"> </pretty-view>
+                            class="container">
+                        <pretty-view
+                                :data="action"
+                                :deep-view="deepTestView['Test'+test_i+'Action'+action_i]"
+                                class="script"> </pretty-view>
+
+                        <span class="gully smaller">
+                            <input type="checkbox" v-model="deepTestView['Test'+test_i+'Action'+action_i]">Expand
+                        </span>
 
                         <div class="report">
                             <div v-if="report &&
@@ -92,13 +102,13 @@
                                     report.test[test_i].action[action_i]">
                                 <pretty-view
                                         :data="report.test[test_i].action[action_i]"
-                                        :show-action="showAction"> </pretty-view>
+                                        :deep-view="deepTestView['Test'+test_i+'Action'+action_i]"> </pretty-view>
 
                             </div>
                             <div v-else>
                                 <pretty-view
                                         :data="null"
-                                        :show-action="showAction"> </pretty-view>
+                                        :deep-view="deepTestView['Test'+test_i+'Action'+action_i]"> </pretty-view>
                             </div>
                         </div>
                     </div>
@@ -117,6 +127,13 @@
             return {
                 fixturesOpen: false,
                 variablesOpen: false,
+                deepTestView: {},
+                deepSetupView: {},
+            }
+        },
+        computed: {
+            scriptOrModule() {
+                return this.isModule ? 'Module:  ' : 'Script:  ';
             }
         },
         methods: {
@@ -128,7 +145,7 @@
             },
         },
         props: [
-            'script', 'report', 'showAction', 'label'
+            'script', 'report', 'deepView', 'label', 'isModule'
         ],
         components: {
             VueJsonPretty,
@@ -141,7 +158,7 @@
 <style scoped>
     .container {
         display: grid;
-        grid-template-columns: 50% 50%;
+        grid-template-columns: 45% 10% 45%;
     }
     .script-header {
         grid-column: 1;
@@ -155,11 +172,12 @@
     }
     .script {
         grid-column: 1;
-        /*grid-row: 2;*/
+    }
+    .gully {
+        grid-column: 2;
     }
     .report {
-        grid-column: 2;
-        /*grid-row: 2;*/
+        grid-column: 3;
     }
 
 </style>

@@ -2,23 +2,24 @@
 
     <div class="work-box">
 
-        <input type="checkbox" v-model="showAction">Show Action Wrappers
+        <input type="checkbox" v-model="deepView">Expand All
         <div>
             <module-view
                 :script="script"
                 :report="report"
-                :show-action="showAction"
+                :deep-view="deepView"
                 :label="testCollection + '/' + testId"></module-view>
 
-            <div class="big-bold">Modules</div>
+<!--            <div class="big-bold">Modules</div>-->
 
             <div v-for="(module, module_i) in moduleScripts"
                  :key="'Module'+module_i">
                 <module-view
                     :script="module"
                     :report="moduleReport(module_i)"
-                    :show-action="showAction"
-                    :label="testCollection + '/' + testId"></module-view>
+                    :deep-view="deepView"
+                    :is-module="true"
+                    :label="moduleName(module.name)"></module-view>
             </div>
         </div>
     </div>
@@ -32,7 +33,7 @@
             return {
                 fixturesOpen: false,
                 variablesOpen: false,
-                showAction: false,
+                deepView: false,
             }
         },
         computed: {
@@ -52,6 +53,12 @@
             }
         },
         methods: {
+            moduleName(fullName) {
+                  const parts = fullName.split('/');
+                  if (parts.length > 1)
+                      return parts[1];
+                  return fullName;
+            },
             moduleReport(i) {
                 if (this.moduleReports && this.moduleReports[i])
                     return this.moduleReports[i];
