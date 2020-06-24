@@ -959,12 +959,15 @@ public class TestEngine  {
         if (hasDebugState())
             testScriptDebugState.popParentExecutionIndex();
 
+        TestReport innerReport = testEngine1.getTestReport();
+        TestReport outerReport = testReport;
+
         String moduleName = simpleName(componentReference.getComponentRef());
         String moduleId = assignModuleId(moduleName);
         opReport.addModifierExtension(new Extension(ExtensionDef.moduleId, new StringType(moduleId)));
         opReport.addModifierExtension(new Extension(ExtensionDef.moduleName, new StringType(moduleName)));
-        testEngine1.getTestReport().addExtension(ExtensionDef.moduleId, new StringType(moduleId));
-        testEngine1.getTestReport().addExtension(ExtensionDef.moduleName, new StringType(moduleName));
+        innerReport.addExtension(ExtensionDef.moduleId, new StringType(moduleId));
+        innerReport.addExtension(ExtensionDef.moduleName, new StringType(moduleName));
 
         // Report overall module call status into caller's TestReport.operation
         ErrorReport errorReport = getErrorMessage(testEngine1.getTestReport());
@@ -976,6 +979,8 @@ public class TestEngine  {
         // Pass module output variables and fixtures back to caller
         FixtureMgr innerFixtures = testEngine1.fixtureMgr;
         Map<String, FixtureComponent> outFixturesForComponent = new HashMap<>();
+        Extension outFixtures = innerReport.addExtension();
+        outFixtures.setUrl(ExtensionDef.fixtureOut);
         for (Parameter parm : componentReference.getFixturesOut()) {
             if (parm.isVariable())
                 throw new RuntimeException("Script import with output variables not supported");
@@ -986,6 +991,9 @@ public class TestEngine  {
                 if (fixtureComponent == null)
                     throw new RuntimeException("Script import - " + componentReference.getComponentRef() + " did not produce Fixture " + innerName);
                 fixtureMgr.put(outerName, fixtureComponent);
+
+                if (fixtureComponent.getCreatedByUIEvent() != null)
+                    outFixtures.addExtension(innerName, new StringType(EventLinkToUILink.get(fixtureComponent.getCreatedByUIEvent())));
             }
         }
         String result = testEngine1.getTestReport().getResult().toCode();

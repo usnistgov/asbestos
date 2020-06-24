@@ -11,6 +11,8 @@ public class ExtensionDef {
     public static final String sourceId = "urn:sourceId";
     public static final String moduleId = "urn:moduleId";
     public static final String moduleName = "urn:moduleName";
+    public static final String fixtureIn = "urn:fixture-in";
+    public static final String fixtureOut = "urn:fixture-out";
     public static final String ts_import = "https://github.com/usnistgov/asbestos/wiki/TestScript-Import";
     public static final String ts_conditional = "https://github.com/usnistgov/asbestos/wiki/TestScript-Conditional";
 }

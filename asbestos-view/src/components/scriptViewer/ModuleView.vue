@@ -16,9 +16,18 @@
                 <span class="big-bold">Fixtures</span>
             </div>
             <div v-if="fixturesOpen">
-                <div v-for="(fixture, fixture_i) in script.fixture" :key="'Fixture'+fixture_i">
-                    <div class="soft-boxed">
-                        <vue-json-pretty :data="fixture"></vue-json-pretty>
+                <div v-if="isModule">
+                    <div v-if="Object.getOwnPropertyNames(fixturesOut).length > 0" class="bold">Out</div>
+                    <div v-else>None</div>
+                    <div v-for="(fixtureName, fixtureName_i) in Object.getOwnPropertyNames(fixturesOut)" :key="'FixtureOut'+fixtureName_i">
+                        <div class="selectable underline" @click="inNewTab(fixturesOut[fixtureName])">{{fixtureName}}</div>
+                    </div>
+                </div>
+                <div v-else>
+                    <div v-for="(fixture, fixture_i) in script.fixture" :key="'Fixture'+fixture_i">
+                        <div class="soft-boxed">
+                            <vue-json-pretty :data="fixture"></vue-json-pretty>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -42,9 +51,6 @@
 
             <div v-if="script.setup">
                 <div class="big-bold">Setup</div>
-            </div>
-
-            <div>
                 <div class="container">
                     <div class="script bold">Script</div>
                     <div class="report bold">Report</div>
@@ -134,9 +140,28 @@
         computed: {
             scriptOrModule() {
                 return this.isModule ? 'Module:  ' : 'Script:  ';
-            }
+            },
+            fixturesOut() {
+                const fixtures = {};  // name => url
+                if (!this.report.extension) {
+                    return fixtures;
+                }
+                this.report.extension.forEach(function (ext) {
+                    if (ext.url === 'urn:fixture-out') {
+                        for (let i=0; i<ext.extension.length; i++) {
+                            if (ext.extension[i].url && ext.extension[i].valueString)
+                                fixtures[ext.extension[i].url] = ext.extension[i].valueString;
+                        }
+                    }
+                })
+                return fixtures;
+            },
         },
         methods: {
+            inNewTab(url) {
+                console.log(`open ${url}`);
+                window.open(url, "_blank");
+            },
             toggleFixturesOpen() {
                 this.fixturesOpen = !this.fixturesOpen;
             },

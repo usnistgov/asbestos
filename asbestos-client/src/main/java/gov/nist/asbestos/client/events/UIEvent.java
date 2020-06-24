@@ -143,6 +143,16 @@ public class UIEvent {
         this.channelId = channelId;
     }
 
+    public void setChannelName(String channelName) {
+        String[] parts = channelName.split("__");
+        if (parts.length == 2) {
+            this.testSession = parts[0];
+            this.channelId = parts[1];
+        } else {
+            this.channelId = channelName;
+        }
+    }
+
     public UITask getClientTask() {
         return tasks.get(0);
     }

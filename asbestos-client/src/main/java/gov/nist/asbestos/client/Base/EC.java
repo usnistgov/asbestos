@@ -285,6 +285,8 @@ public class EC {
         UIEvent uiEvent = new UIEvent(new EC(externalCache)).fromEventDir(eventDir);
         uiEvent.setEventName(eventName);
         uiEvent.setResourceType(resourceType);
+        uiEvent.setChannelName(channelId);
+        uiEvent.setTestSession(testSession);
         return uiEvent;
     }
 

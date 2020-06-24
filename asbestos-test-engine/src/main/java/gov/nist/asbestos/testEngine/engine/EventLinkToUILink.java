@@ -1,5 +1,6 @@
 package gov.nist.asbestos.testEngine.engine;
 
+import gov.nist.asbestos.client.events.UIEvent;
 import gov.nist.asbestos.serviceproperties.ServiceProperties;
 import gov.nist.asbestos.serviceproperties.ServicePropertiesEnum;
 
@@ -36,5 +37,9 @@ public class EventLinkToUILink {
 
     static public String get(String eventURL) {
         return get(eventURL, "");
+    }
+
+    static public String get(UIEvent event) {
+        return get(event.getURI().toString(), "");
     }
 }

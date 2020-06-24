@@ -1,7 +1,18 @@
 <template>
     <div class="soft-boxed">
-<!--        <input type="checkbox" name="expander" id="expander" v-model="expanded">-->
-<!--        <label for="expander">Expand</label>-->
+        <div v-if="data && data.operation && data.operation.modifierExtension">
+            <div v-for="(mext, mext_i) in data.operation.modifierExtension"
+                 :key="'mext'+mext_i">
+                <div v-for="(extension, extension_i) in mext.modifierExtension"
+                     :key="'PrettyExt'+extension_i">
+                    <div v-if="extension.url === 'component'">
+                        Call {{extension.valueString}}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
         <vue-json-pretty
                 :data="data"
                 :deep="depth"
@@ -31,7 +42,7 @@
             }
         },
         props: [
-          'data',  // script or report "section"
+          'data',  // script or report //  operation or assert
             'deepView',
         ],
         components: {
