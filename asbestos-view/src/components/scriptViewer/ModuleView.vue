@@ -1,33 +1,55 @@
 <template>
     <div>
+        <a v-bind:id="label"> </a>
     <div class="instruction title-box">
         <span class="big-bold">{{scriptOrModule}}</span>
         <span>{{label}}</span>
     </div>
     <div>
         <div v-if="script">
-            <div class="selectable" @click.stop="toggleFixturesOpen()">
-                <span v-if="fixturesOpen" >
-                    <img src="../../assets/arrow-down.png">
-                </span>
-                <span v-else>
-                    <img src="../../assets/arrow-right.png"/>
-                </span>
-                <span class="big-bold">Fixtures</span>
-            </div>
-            <div v-if="fixturesOpen">
-                <div v-if="isModule">
-                    <div v-if="Object.getOwnPropertyNames(fixturesOut).length > 0" class="bold">Out</div>
-                    <div v-else>None</div>
-                    <div v-for="(fixtureName, fixtureName_i) in Object.getOwnPropertyNames(fixturesOut)" :key="'FixtureOut'+fixtureName_i">
-                        <div class="selectable underline" @click="inNewTab(fixturesOut[fixtureName])">{{fixtureName}}</div>
+            <div class="container">
+                <div class="script">
+                    <div class="selectable" @click.stop="toggleFixturesOpen()">
+                        <span v-if="fixturesOpen" >
+                            <img src="../../assets/arrow-down.png">
+                        </span>
+                        <span v-else>
+                            <img src="../../assets/arrow-right.png"/>
+                        </span>
+                        <span class="big-bold">Fixtures</span>
+                    </div>
+                    <div v-if="fixturesOpen">
+                        <div v-if="isModule">
+                            <div v-if="Object.getOwnPropertyNames(fixturesOut).length > 0" class="bold">Out</div>
+                            <div v-else>None</div>
+                            <div v-for="(fixtureName, fixtureName_i) in Object.getOwnPropertyNames(fixturesOut)" :key="'FixtureOut'+fixtureName_i">
+                                <div class="selectable underline" @click="inNewTab(fixturesOut[fixtureName])">{{fixtureName}}</div>
+                            </div>
+                        </div>
+                        <div v-else>
+                            <div v-for="(fixture, fixture_i) in script.fixture" :key="'Fixture'+fixture_i">
+                                <div class="soft-boxed">
+                                    <vue-json-pretty :data="fixture"></vue-json-pretty>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <div v-else>
-                    <div v-for="(fixture, fixture_i) in script.fixture" :key="'Fixture'+fixture_i">
-                        <div class="soft-boxed">
-                            <vue-json-pretty :data="fixture"></vue-json-pretty>
-                        </div>
+
+                <div v-if="header" class="report">
+                    <div class="selectable" @click.stop="toggleHeaderOpen()">
+                        <span v-if="headerOpen">
+                            <img src="../../assets/arrow-down.png">
+                        </span>
+                        <span v-else>
+                            <img src="../../assets/arrow-right.png"/>
+                        </span>
+                        <span class="big-bold selectable">Header</span>
+                    </div>
+                </div>
+                <div v-if="headerOpen" class="report">
+                    <div class="soft-boxed">
+                        <vue-json-pretty :data="header"> </vue-json-pretty>
                     </div>
                 </div>
             </div>
@@ -57,9 +79,20 @@
                 </div>
                 <div v-for="(setup, setup_i) in script.setup.action" :key="'Setup'+setup_i" class="container">
                     <div class="script soft-boxed">
-                        <pretty-view
-                            :data="setup"
-                            :deep-view="deepSetupView['Setup'+setup_i]"> </pretty-view>
+                        <div v-if="report &&
+                                report.setup &&
+                                report.setup.action &&
+                                report.setup.action[setup_i]">
+                            <pretty-view
+                                    :data="setup"
+                                    :report="report.setup.action[setup_i].operation"
+                                    :deep-view="deepSetupView['Setup'+setup_i]"> </pretty-view>
+                        </div>
+                        <div v-else>
+                            <pretty-view
+                                :data="setup"
+                                :deep-view="deepSetupView['Setup'+setup_i]"> </pretty-view>
+                        </div>
                     </div>
 
                     <span class="gully smaller">
@@ -91,10 +124,23 @@
                 </div>
                     <div v-for="(action, action_i) in test.action" :key="'Test'+test_i+'Action'+action_i"
                             class="container">
-                        <pretty-view
+                        <div v-if="report &&
+                                    report.test &&
+                                    report.test[test_i] &&
+                                    report.test[test_i].action &&
+                                    report.test[test_i].action[action_i]">
+                            <pretty-view
                                 :data="action"
                                 :deep-view="deepTestView['Test'+test_i+'Action'+action_i]"
+                                :report="report.test[test_i].action[action_i].operation"
                                 class="script"> </pretty-view>
+                        </div>
+                        <div v-else>
+                            <pretty-view
+                                    :data="action"
+                                    :deep-view="deepTestView['Test'+test_i+'Action'+action_i]"
+                                    class="script"> </pretty-view>
+                        </div>
 
                         <span class="gully smaller">
                             <input type="checkbox" v-model="deepTestView['Test'+test_i+'Action'+action_i]">Expand
@@ -133,6 +179,7 @@
             return {
                 fixturesOpen: false,
                 variablesOpen: false,
+                headerOpen: false,
                 deepTestView: {},
                 deepSetupView: {},
             }
@@ -158,6 +205,20 @@
             },
         },
         methods: {
+            moduleIdFromModularReport(report) {  // report for an operation
+                let id;
+                if (report) {
+                    const extensions = report.modifierExtension;
+                    if (extensions) {
+                        for (let i = 0; i < extensions.length; i++) {
+                            const extension = extensions[i];
+                            if (extension.url === 'urn:moduleId')
+                                id = extension.valueString;
+                        }
+                    }
+                }
+                return id;
+            },
             inNewTab(url) {
                 console.log(`open ${url}`);
                 window.open(url, "_blank");
@@ -168,9 +229,12 @@
             toggleVariablesOpen() {
                 this.variablesOpen = !this.variablesOpen;
             },
+            toggleHeaderOpen() {
+                this.headerOpen = !this.headerOpen;
+            }
         },
         props: [
-            'script', 'report', 'deepView', 'label', 'isModule'
+            'script', 'report', 'deepView', 'label', 'isModule', 'header'
         ],
         components: {
             VueJsonPretty,

@@ -6,6 +6,7 @@ import com.google.gson.JsonObject;
 import gov.nist.asbestos.client.Base.EC;
 import gov.nist.asbestos.client.Base.ProxyBase;
 import org.apache.commons.io.FileUtils;
+import org.apache.log4j.Logger;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.TestReport;
 
@@ -18,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 
 public class ModularReports {
+    private static Logger log = Logger.getLogger(ModularReports.class);
     private Map<String, String> reports = new HashMap<>();  // name => TestReport json
 
     public ModularReports(EC ec, String channelId, String testCollection, String testName) throws IOException {
@@ -50,6 +52,7 @@ public class ModularReports {
         } catch (IOException e) {
             return;
         }
+        //log.info("Report: " + file.toString());
         reports.put(report.getName(), json);
     }
 

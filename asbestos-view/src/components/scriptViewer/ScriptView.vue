@@ -3,24 +3,34 @@
     <div class="work-box">
 
         <input type="checkbox" v-model="deepView">Expand All
-        <div>
-            <module-view
+        <module-view
                 :script="script"
                 :report="report"
                 :deep-view="deepView"
-                :label="testCollection + '/' + testId"></module-view>
+                :label="testCollection + '/' + testId"
+                :header="reportHeader(report)"></module-view>
 
-<!--            <div class="big-bold">Modules</div>-->
+        <div v-if="moduleReports">
+            <!--  script is modular and reports are available -->
 
-            <div v-for="(module, module_i) in moduleScripts"
-                 :key="'Module'+module_i">
-                <module-view
-                    :script="module"
-                    :report="moduleReport(module_i)"
-                    :deep-view="deepView"
-                    :is-module="true"
-                    :label="moduleName(module.name)"></module-view>
+            <div v-for="(mreport, mreport_i) in moduleReports"
+                 :key="'Mreport'+mreport_i">
+
+                <div v-if="mreport.name.startsWith(testId)">
+
+                    <module-view
+                        :script="moduleScripts[testId + '/' + moduleNameFromModularReport(mreport)]"
+                        :report="mreport"
+                        :deep-view="deepView"
+                        :is-module="true"
+                        :label="moduleIdFromModularReport(mreport)"
+                        :header="reportHeader(mreport)"></module-view>
+                </div>
             </div>
+        </div>
+        <div v-else-if="moduleScripts">
+            <!-- script is modular but reports are not available -->
+
         </div>
     </div>
 </template>
@@ -53,11 +63,64 @@
             }
         },
         methods: {
+            moduleNameFromModularReport(report) {
+                let name;
+                const extensions = report.extension;
+                for (let i=0; i<extensions.length; i++) {
+                    const extension = extensions[i];
+                    if (extension.url === 'urn:moduleName')
+                        name = extension.valueString;
+                }
+                return name;
+            },
+            moduleIdFromModularReport(report) {
+                let id;
+                const extensions = report.extension;
+                if (extensions) {
+                    for (let i = 0; i < extensions.length; i++) {
+                        const extension = extensions[i];
+                        if (extension.url === 'urn:moduleId')
+                            id = extension.valueString;
+                    }
+                }
+                return id;
+            },
+            reportHeader(report) {
+                if (!report)
+                    return null;
+                let header = {};
+                if (report.extension)
+                    header.extension = report.extension;
+                if (report.modifierExtension)
+                    header.modifierExtension = report.modifierExtension;
+                if (report.name)
+                    header.name = report.name;
+                if (report.status)
+                    header.status = report.status;
+                if (report.testScript)
+                    header.testScript = report.testScript;
+                if (report.result)
+                    header.result = report.result;
+                if (report.issued)
+                    header.issued = report.issued;
+                return header;
+            },
             moduleName(fullName) {
                   const parts = fullName.split('/');
                   if (parts.length > 1)
                       return parts[1];
                   return fullName;
+            },
+            moduleId(i) {
+                const report = this.moduleReport(i);
+                if (!report || !report.extension)
+                    return null;
+                for (let j=0; j<report.extension.length; j++) {
+                    const extension = report.extension[j];
+                    if (extension.url === 'urn:moduleId')
+                        return extension.valueString;
+                }
+                return null;
             },
             moduleReport(i) {
                 if (this.moduleReports && this.moduleReports[i])

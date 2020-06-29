@@ -6,7 +6,12 @@
                 <div v-for="(extension, extension_i) in mext.modifierExtension"
                      :key="'PrettyExt'+extension_i">
                     <div v-if="extension.url === 'component'">
-                        Call {{extension.valueString}}
+                        <div v-if="moduleId" class="pointer-cursor underline">
+                            <a v-bind:href="moduleRef">Call {{extension.valueString}}</a>
+                        </div>
+                        <div v-else>
+                            Call {{extension.valueString}}
+                        </div>
                     </div>
                 </div>
             </div>
@@ -32,9 +37,25 @@
             }
         },
         computed: {
+            moduleRef() {
+                return '#' + this.moduleId;
+            },
             depth() {
                 return this.deepView || this.expanded ? 10 : 2;
-            }
+            },
+            moduleId() {
+                if (this.report) {
+                    const extensions = this.report.modifierExtension;
+                    if (extensions) {
+                        for (let i = 0; i < extensions.length; i++) {
+                            const extension = extensions[i];
+                            if (extension.url === 'urn:moduleId')
+                                return extension.valueString;
+                        }
+                    }
+                }
+                return null;
+            },
         },
         methods: {
             click(path, data) {
@@ -44,6 +65,8 @@
         props: [
           'data',  // script or report //  operation or assert
             'deepView',
+            'report'  // corresponding report (operation or assert)
+                    // when data is script (only used when script has calls to modules)
         ],
         components: {
             VueJsonPretty
