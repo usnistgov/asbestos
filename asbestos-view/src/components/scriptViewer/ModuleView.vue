@@ -152,6 +152,7 @@
                                     report.test[test_i] &&
                                     report.test[test_i].action &&
                                     report.test[test_i].action[action_i]">
+                                <action-context :action="report.test[test_i].action[action_i]"></action-context>
                                 <pretty-view
                                         :data="report.test[test_i].action[action_i]"
                                         :deep-view="deepTestView['Test'+test_i+'Action'+action_i]"> </pretty-view>
@@ -174,6 +175,7 @@
 <script>
     import VueJsonPretty from 'vue-json-pretty'
     import PrettyView from "./PrettyView";
+    import ActionContext from "../testRunner/ActionContext";
     export default {
         data() {
             return {
@@ -238,7 +240,8 @@
         ],
         components: {
             VueJsonPretty,
-            PrettyView
+            PrettyView,
+            ActionContext,
         },
         name: "ModuleView"
     }

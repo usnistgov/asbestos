@@ -7,10 +7,10 @@
                      :key="'PrettyExt'+extension_i">
                     <div v-if="extension.url === 'component'">
                         <div v-if="moduleId" class="pointer-cursor underline">
-                            <a v-bind:href="moduleRef">Call {{extension.valueString}}</a>
+                            <a v-bind:href="moduleRef">Call {{stripDotDot(extension.valueString)}}</a>
                         </div>
                         <div v-else>
-                            Call {{extension.valueString}}
+                            Call {{stripDotDot(extension.valueString)}}
                         </div>
                     </div>
                 </div>
@@ -60,6 +60,14 @@
         methods: {
             click(path, data) {
                 console.log(`click: path=${path}  data=${data}`)
+            },
+            stripDotDot(path) {
+                let work = path;
+                while (work.startsWith('../'))
+                    work = work.substr(3);
+                if (work.startsWith('/'))
+                    work = work.substr(1);
+                return work;
             }
         },
         props: [

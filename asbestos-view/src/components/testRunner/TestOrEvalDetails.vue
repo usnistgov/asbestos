@@ -2,7 +2,7 @@
     <div>
     <ul class="noTopMargin">
 
-        <div class="selectable instruction underline" @click="viewScript()">View Script</div>
+        <div class="selectable instruction underline" @click="viewScript()">View full Script/Report</div>
 
         <li v-if="$store.state.testRunner.isClientTest">
             <div v-if="testScript">
