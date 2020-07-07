@@ -23,10 +23,6 @@ import gov.nist.asbestos.testEngine.engine.assertion.MinimumId;
 import gov.nist.asbestos.utilities.ResourceHasMethodsFilter;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.log4j.Logger;
-import org.hl7.fhir.r4.hapi.ctx.DefaultProfileValidationSupport;
-import org.hl7.fhir.r4.hapi.validation.FhirInstanceValidator;
-import org.hl7.fhir.r4.hapi.validation.PrePopulatedValidationSupport;
-import org.hl7.fhir.r4.hapi.validation.ValidationSupportChain;
 import org.hl7.fhir.r4.model.*;
 
 import java.io.File;

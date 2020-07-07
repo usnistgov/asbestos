@@ -7,30 +7,24 @@ import gov.nist.asbestos.client.log.SimStore;
 import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import gov.nist.asbestos.simapi.simCommon.SimId;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.log4j.Logger;
+import org.hl7.fhir.common.hapi.validation.support.PrePopulatedValidationSupport;
 import org.hl7.fhir.r4.hapi.ctx.HapiWorkerContext;
-import org.hl7.fhir.r4.hapi.validation.PrePopulatedValidationSupport;
-import org.hl7.fhir.r4.model.Base;
-import org.hl7.fhir.r4.model.BaseResource;
-import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.Resource;
+import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.utils.FHIRPathEngine;
 
 import javax.servlet.http.HttpServletResponse;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
+import javax.xml.bind.JAXBException;
+import java.io.*;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Properties;
+import java.nio.file.Path;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static gov.nist.asbestos.client.Base.Dirs.listOfDirectories;
@@ -420,7 +414,7 @@ public class EC {
 
     // these utilities duplicated from FhirPathEngineBuilder
     private FHIRPathEngine build() {
-        return new FHIRPathEngine(new HapiWorkerContext(ProxyBase.getFhirContext(), new PrePopulatedValidationSupport()));
+        return new FHIRPathEngine(new HapiWorkerContext(ProxyBase.getFhirContext(), new PrePopulatedValidationSupport(ProxyBase.getFhirContext())));
     }
 
     private Resource evalForResource(Resource resourceIn, String expression) {
@@ -489,5 +483,46 @@ public class EC {
             return null;
         }
         return wrapper;
+    }
+
+    public boolean mhdValueSetsNeedBuilding(String environment) {
+        return new MhdValueSets(externalCache, environment).needsBuilding();
+    }
+
+    /**
+     * Build ValueSet(s) from codes.xml and save into ec/environment/<environment>/valuesets
+     * @param environment
+     */
+    public void buildMhdValueSets(String environment) {
+        try {
+            new MhdValueSets(externalCache, environment).build(this);
+        } catch (FileNotFoundException | JAXBException e) {
+            log.error(ExceptionUtils.getStackTrace(e));
+            throw new RuntimeException(e);
+        }
+    }
+
+    public List<ValueSet> getMhdValueSets(String environment) {
+        return new MhdValueSets(externalCache, environment).load();
+    }
+
+    public Map<String, ValueSet> getMhdValueSetsAsMap(String environment) {
+        Map<String, ValueSet> map = new HashMap<String, ValueSet>();
+
+        for (ValueSet vs : getMhdValueSets(environment)) {
+            map.put(vs.getUrl(), vs);
+        }
+
+        return map;
+    }
+
+    public void writeToFile(File where, String content) {
+        Path path = where.toPath();
+        try (BufferedWriter writer = Files.newBufferedWriter(path)) {
+            writer.write(content);
+        } catch (IOException e) {
+            log.error(ExceptionUtils.getStackTrace(e));
+            throw new RuntimeException(e);
+        }
     }
 }
