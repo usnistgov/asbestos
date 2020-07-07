@@ -34,15 +34,17 @@
 
                     <script-status v-if="!statusRight" :status-right="statusRight" :name="name"> </script-status>
 
-                    <template v-if="isDebugFeatureEnabled">
-                        <template v-if="isPreviousDebuggerStillAttached(i)">
-                            <span class="breakpointColumnHeader" title="A debugger is running for this TestScript.">&#x1F41E;</span> <!-- lady beetle icon -->
-                        </template>
-                        <template v-else-if="$store.state.testRunner.currentTest === name && ! isDebuggable(i) && ! isResumable(i)">
-                            <span class="breakpointColumnHeader infoIcon" title="Add at least one breakpoint in the column below to enable debugging.">&nbsp;&#x2139;</span> <!-- the "i" Information icon -->
-                        </template>
-                        <template v-else-if="$store.state.testRunner.currentTest === name && (isDebuggable(i) || isResumable(i))">
-                            <span class="breakpointColumnHeader clickableColumnHeader" title="Clear all breakpoints." @click.stop="removeAllBreakpoints(i)">&#x1F191;</span> <!-- the "i" Information icon -->
+                    <template v-if="! isClient">
+                        <template v-if="isDebugFeatureEnabled">
+                            <template v-if="isPreviousDebuggerStillAttached(i)">
+                                <span class="breakpointColumnHeader" title="A debugger is running for this TestScript.">&#x1F41E;</span> <!-- lady beetle icon -->
+                            </template>
+                            <template v-else-if="$store.state.testRunner.currentTest === name && ! isDebuggable(i) && ! isResumable(i)">
+                                <span class="breakpointColumnHeader infoIcon" title="Add at least one breakpoint in the column below to enable debugging.">&nbsp;&#x2139;</span> <!-- the "i" Information icon -->
+                            </template>
+                            <template v-else-if="$store.state.testRunner.currentTest === name && (isDebuggable(i) || isResumable(i))">
+                                <span class="breakpointColumnHeader clickableColumnHeader" title="Clear all breakpoints." @click.stop="removeAllBreakpoints(i)">&#x1F191;</span> <!-- the "i" Information icon -->
+                            </template>
                         </template>
                     </template>
 
@@ -123,7 +125,9 @@
                  */
                 this.$store.commit('setCurrentTest', null)
                 this.loadTestCollection(this.testCollection)
-                this.$store.dispatch('debugMgmt', {'cmd':'getExistingDebuggerList'})
+                if (! this.isClient) {
+                    this.$store.dispatch('debugMgmt', {'cmd': 'getExistingDebuggerList'})
+                }
             },
             openTest(name) {
                 if (!name)
