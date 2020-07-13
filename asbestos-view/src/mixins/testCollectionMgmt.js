@@ -25,7 +25,7 @@ export default {
             }
         },
         // run testName of testCollection
-        async doRun(testName) {  // server tests
+        async doRun(testName, testRoutePath) {  // server tests
             if (!testName)
                 return
             this.running = true
@@ -33,6 +33,11 @@ export default {
             await this.$store.dispatch('runTest', testName)
             this.$store.commit('setCurrentTest', testName)
             this.running = false
+            const currentRoutePath = this.$router.currentRoute.path
+            const testRoutePathToBe = `${testRoutePath}/${testName}`
+            if (currentRoutePath !== testRoutePathToBe) {
+                this.$router.push(testRoutePathToBe)
+            }
         },
         async doEval(testName) {  // client tests
             if (testName)

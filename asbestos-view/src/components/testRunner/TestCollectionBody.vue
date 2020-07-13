@@ -66,7 +66,7 @@
                                         class="stopDebugTestScriptButton">Remove Debugger</button>
                             </template>
                             <template v-else>
-                                <button v-if="! isResumable(i) && ! isWaitingForBreakpoint" @click.stop="doRun(name)" class="runallbutton">Run</button>
+                                <button v-if="! isResumable(i) && ! isWaitingForBreakpoint" @click.stop="doRun(name, testRoutePath)" class="runallbutton">Run</button>
                                 <template v-if="$store.state.testRunner.currentTest === name">
                                     <button v-if="isDebuggable(i) && ! isWaitingForBreakpoint"
                                             @click.stop="doDebug(name)"
@@ -97,7 +97,7 @@
                             </template>
                     </span>
                     <span v-else>
-                          <button @click.stop="doRun(name)" class="runallbutton">Run</button>
+                          <button @click.stop="doRun(name, testRoutePath)" class="runallbutton">Run</button>
                     </span>
                     <span v-if="! isWaitingForBreakpoint && ! $store.state.testRunner.isClientTest"> --  {{ testTime(name) }}</span>
                 </div>
@@ -139,13 +139,17 @@
                     return
                 }
                 this.$store.commit('setCurrentTest', name)
-                const route = `/session/${this.sessionId}/channel/${this.channelId}/collection/${this.testCollection}/test/${name}`
-                this.$router.push(route)
+                const selectedRoutePath = `${this.testRoutePath}/${this.selected}`
+                this.$router.push(selectedRoutePath)
             },
         },
         computed: {
             selected() {
                 return this.$store.state.testRunner.currentTest
+            },
+            testRoutePath() {
+                const route = `/session/${this.sessionId}/channel/${this.channelId}/collection/${this.testCollection}/test`
+                return route
             },
         },
         created() {
