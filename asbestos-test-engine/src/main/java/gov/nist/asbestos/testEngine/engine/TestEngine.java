@@ -1661,7 +1661,7 @@ public class TestEngine  {
                             copy.setExpression(myMap.get("expression"));
                             copy.setHeaderField(myMap.get("headerField"));
                             copy.setMinimumId(myMap.get("minimumId"));
-                            copy.setNavigationLinks(new Boolean(myMap.get("navigationLinks")).booleanValue());
+                            copy.setNavigationLinks(Boolean.parseBoolean(myMap.get("navigationLinks")));
                             copy.setOperator(TestScript.AssertionOperatorType.fromCode(myMap.get("operator")));
                             copy.setPath(myMap.get("path"));
                             copy.setRequestMethod(TestScript.TestScriptRequestMethodCode.fromCode(myMap.get("requestMethod")));
@@ -1672,7 +1672,7 @@ public class TestEngine  {
                             copy.setSourceId(myMap.get("sourceId"));
                             copy.setValidateProfileId(myMap.get("validateProfileId"));
                             copy.setValue(myMap.get("value"));
-                            copy.setWarningOnly(new Boolean(myMap.get("warningOnly")));
+                            copy.setWarningOnly(Boolean.parseBoolean(myMap.get("warningOnly")));
 
                             String typePrefix = "contained.action";
                             TestReport.SetupActionAssertComponent actionReport = new TestReport.SetupActionAssertComponent();
