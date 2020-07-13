@@ -116,8 +116,12 @@ public class DebugTestScriptWebSocketEndpoint {
                     TestScriptDebugState debugState = debugStateMap.get(realSessionId.get().getWsSessionId());
                     if (debugState != null) {
                         stopDebuggingTs(debugState);
-                        debugState.getSession().close(new CloseReason(CloseReason.CloseCodes.CLOSED_ABNORMALLY, "Remove debug session requested by test session user"));
-                        sendExistingDebuggerList(session, myMap); // Return an updated debugger list
+                        debugState.setOnStop(s -> sendExistingDebuggerList(session, myMap)); // Return an updated debugger list
+                        if (debugState.getSession().isOpen()) {
+                            debugState.getSession().close(new CloseReason(CloseReason.CloseCodes.CLOSED_ABNORMALLY, "Remove debug session requested by test session user"));
+                        } else {
+                            removeFromStateTracking(debugState);
+                        }
                     } else {
                         log.error("removeDebugger error: debugState could not be found!");
                     }
@@ -193,29 +197,36 @@ public class DebugTestScriptWebSocketEndpoint {
 
         if (debugStateMap.containsKey(sessionId)) {
             ExecutorService service = debugExecutorMap.get(sessionId);
-            if (debugStateMap.get(sessionId).getStopDebug().get()) {
-                try {
-                    service.awaitTermination(5, TimeUnit.SECONDS);
-                } catch (Throwable t) {
-                } finally {
-                    log.info(String.format("Session %s was terminated: %s", sessionId, service.isTerminated()));
-
+            TestScriptDebugState debugState = debugStateMap.get(sessionId);
+            if (debugState != null) {
+                if (debugState.getStopDebug().get()) {
+                    try {
+                        service.awaitTermination(5, TimeUnit.SECONDS);
+                    } catch (Throwable t) {
+                    } finally {
+                        log.info(String.format("Session %s was terminated: %s", sessionId, service.isTerminated()));
+                    }
+                }
+                log.info("is service terminated? " + service.isTerminated() + ". is shutdown? " + service.isShutdown());
+                if (service.isTerminated()) {
+                    removeFromStateTracking(debugState);
                 }
             }
-
-            log.info("is service terminated? " + service.isTerminated() + ". is shutdown? " + service.isShutdown());
-            if (service.isTerminated()) {
-                TestScriptDebugState state = debugStateMap.get(sessionId);
-                String testScriptIndex = state.getTestScriptIndex();
-                DebugTestSessionId instanceId = state.getDebugTestSessionId();
-                DebugWsSessionId wsSessionId = new DebugWsSessionId(sessionId, testScriptIndex);
-
-                instanceMap.get(instanceId).remove(wsSessionId);
-                debugExecutorMap.remove(sessionId);
-                debugStateMap.remove(sessionId);
-            }
-
         }
+    }
+
+    private void removeFromStateTracking(TestScriptDebugState debugState) {
+        String sessionId = debugState.getSessionId();
+        String testScriptIndex = debugState.getTestScriptIndex();
+        DebugTestSessionId instanceId = debugState.getDebugTestSessionId();
+        DebugWsSessionId wsSessionId = new DebugWsSessionId(sessionId, testScriptIndex);
+
+        instanceMap.get(instanceId).remove(wsSessionId);
+        if (debugState.getOnStop() != null) {
+            debugState.getOnStop().accept(Optional.empty());
+        }
+        debugExecutorMap.remove(sessionId);
+        debugStateMap.remove(sessionId);
     }
 
     @OnError

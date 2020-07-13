@@ -159,7 +159,13 @@ public class AssertionRunner {
             source = getCompareToSourceIfAvailable(as);
 
         // add context to report
-        new ActionReporter(new ActionReference(testScript, as))
+        ActionReference actionReference = null;
+        if (! testEngine.hasDebugState()) {
+           actionReference = new ActionReference(testScript, as);
+        } else {
+            // actionReference is not used. When it is used by ActionReporter, use information from testengine debugstate getCurrentExecutionIndex.
+        }
+        new ActionReporter(actionReference)
                 .setTestCollectionId(testCollectionId)
                 .setTestId(testId)
                 .setTestEngine(testEngine)

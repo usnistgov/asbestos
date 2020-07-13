@@ -5,8 +5,10 @@ import org.apache.log4j.Logger;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
 import javax.websocket.Session;
 
 public class TestScriptDebugState {
@@ -36,6 +38,7 @@ public class TestScriptDebugState {
     private boolean hasImportExtension;
     private List<String> parentExecutionIndex = new ArrayList<>();
     TestEngineDebugInterface debugInterface = null;
+    Consumer<Optional<String>> onStop;
 
     private static Logger log = Logger.getLogger(TestScriptDebugState.class);
 
@@ -132,9 +135,9 @@ public class TestScriptDebugState {
         getSession().getAsyncRemote().sendText("{\"messageType\":\"original-assertion\", \"assertionJson\":" + assertionJson +"}");
     }
 
-    public void sendDebugAssertionEvalResultStr(String str, String markdownMessage) {
+    public void sendDebugAssertionEvalResultStr(String resultMessage, String markdownMessage) {
         String base64 = (markdownMessage != null && markdownMessage.length() > 0) ? Base64.getEncoder().encodeToString(markdownMessage.getBytes()) : "";
-        getSession().getAsyncRemote().sendText("{\"messageType\":\"eval-assertion-result\", \"resultMessage\":\"" + str +"\","
+        getSession().getAsyncRemote().sendText("{\"messageType\":\"eval-assertion-result\", \"resultMessage\":\"" + resultMessage +"\","
                 + "\"markdownMessage\":\"" + base64 + "\"}");
     }
 
@@ -154,6 +157,13 @@ public class TestScriptDebugState {
 
     }
 
+    /**
+     *
+     * @param parentType
+     * @param parentIndex
+     * @param childPartIndex
+     * @return ParentTypeParentIndex.ChildPartIndex
+     */
     public static String getBreakpointIndex(String parentType, Integer parentIndex, Integer childPartIndex) {
         String breakpointIndex = String.format("%s%d", parentType, parentIndex);
         if (childPartIndex != null) {
@@ -215,6 +225,10 @@ public class TestScriptDebugState {
         }
     }
 
+    /**
+     * A string is returned in this format: ParentTypeParentIndex.ChildPartIndex
+     * @return
+     */
     public String getCurrentExecutionIndex() {
         if (parentExecutionIndex != null) {
             String parentIndex = String.join("/", parentExecutionIndex);
@@ -283,5 +297,13 @@ public class TestScriptDebugState {
 
     public boolean hasParentExecutionIndex() {
         return this.parentExecutionIndex.size() > 0;
+    }
+
+    public Consumer<Optional<String>> getOnStop() {
+        return onStop;
+    }
+
+    public void setOnStop(Consumer<Optional<String>> onStop) {
+        this.onStop = onStop;
     }
 }
