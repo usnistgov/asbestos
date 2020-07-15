@@ -1,5 +1,6 @@
 package gov.nist.asbestos.asbestosProxy.channel;
 
+import gov.nist.asbestos.asbestosProxy.requests.XdsHeartbeat;
 import gov.nist.asbestos.client.Base.EC;
 import gov.nist.asbestos.client.log.SimStore;
 import gov.nist.asbestos.serviceproperties.ServiceProperties;
@@ -10,12 +11,14 @@ import gov.nist.toolkit.toolkitApi.SimulatorBuilder;
 import gov.nist.toolkit.toolkitApi.ToolkitServiceException;
 import gov.nist.toolkit.toolkitServicesCommon.SimConfig;
 import gov.nist.toolkit.toolkitServicesCommon.resource.SimIdResource;
+import org.apache.log4j.Logger;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.Optional;
 
 public class XdsToolkitConnection {
+    private static Logger log = Logger.getLogger(XdsToolkitConnection.class);
     private File externalChannels;
     private String xdsToolkitBase = null;
 
@@ -46,6 +49,7 @@ public class XdsToolkitConnection {
                 SimConfig simConfig = xdsSimApi.get(simIdResource);
                 return Optional.ofNullable(simConfig);
             } catch (Exception e) {
+                log.error("Cannot reach XDS Toolkit at " + xdsToolkitBase);
                 return Optional.empty();
             }
         } else {

@@ -16,9 +16,14 @@
         <jdk.version>1.8</jdk.version>
         <mavenCompilerPluginVersion>3.3</mavenCompilerPluginVersion>
         <mavenWarPluginVersion>3.2.2</mavenWarPluginVersion>
-        <hapi.version>4.1.0</hapi.version>
-        <jackson.version>2.6.3</jackson.version>
-        <jersey.version>2.22.1</jersey.version>
+        <hapi.version>5.0.2</hapi.version>   <!--   4.1.0  -->
+        <jersey.version>2.26</jersey.version>
+        <jackson.version>2.11.0</jackson.version>   <!--  2.6.3   -->
+        <!-- https://eclipse-ee4j.github.io/jersey.github.io/release-notes/2.26.html   -->
+
+        <!-- jersey inherited through toolkit-api -->
+<!--        <jersey.hk2.version>2.26</jersey.hk2.version>-->
+<!--        <jersey.version>2.26</jersey.version>    &lt;!&ndash;  2.22.1   &ndash;&gt;-->
     </properties>
 
     <profiles>
@@ -29,7 +34,7 @@
             </activation>
             <properties>
                 <build.profile.id>Bill</build.profile.id>
-                <toolkitApiVersion>7.3.0</toolkitApiVersion>
+                <toolkitApiVersion>7.5.0</toolkitApiVersion>
                 <itTestsExternalCache>/Users/bill/ec</itTestsExternalCache>
             </properties>
         </profile>
@@ -87,12 +92,18 @@
     </dependencyManagement>
 
     <dependencies>
+<!--        <dependency>-->
+<!--            <groupId>org.glassfish.jersey.inject</groupId>-->
+<!--            <artifactId>jersey-hk2</artifactId>-->
+<!--            <version>${jersey.version}</version>-->
+<!--        </dependency>-->
+
         <!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-databind -->
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
             <!-- NOTE: Needs to match XDS Toolkit "jackson.version" maven property since introducing the SimulatorBuilder API into Asbestos. Otherwise, fasterxml errors will be thrown due to mismatch libraries. -->
-            <version>2.6.3</version>
+            <version>${jackson.version}</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-annotations -->
 
@@ -166,6 +177,22 @@
             <version>1.1</version>
             <scope>provided</scope>
         </dependency>
+
+        <dependency>
+            <groupId>org.glassfish.jersey.inject</groupId>
+            <artifactId>jersey-hk2</artifactId>
+            <version>${jersey.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish.jersey.media</groupId>
+            <artifactId>jersey-media-json-jackson</artifactId>
+            <version>${jersey.version}</version>
+        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>org.glassfish.jersey.bundles.repackaged</groupId>-->
+<!--            <artifactId>jersey-guava</artifactId>-->
+<!--            <version>${jersey.version}</version>-->
+<!--        </dependency>-->
     </dependencies>
 
     <build>

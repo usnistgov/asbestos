@@ -29,8 +29,19 @@
         </dependency>
         <dependency>
             <groupId>gov.nist.asbestos</groupId>
+            <artifactId>asbestos-codes-jaxb</artifactId>
+            <version>2.1.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>gov.nist.asbestos</groupId>
             <artifactId>service-properties</artifactId>
             <version>2.1.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>gov.nist.asbestos</groupId>
+            <artifactId>asbestos-codes-jaxb</artifactId>
+            <version>2.1.0-SNAPSHOT</version>
+            <scope>compile</scope>
         </dependency>
     </dependencies>
 
