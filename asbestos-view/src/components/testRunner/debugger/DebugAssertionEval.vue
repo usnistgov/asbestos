@@ -1,29 +1,49 @@
 <template>
-    <div name="modal">
+    <div name="modal" @dragover="drag_over" @drop="drop">
         <div class="modal-mask" @click="close" v-show="show">
-            <div class="modal-container" @click.stop>
-                <div class="modal-header">
-                    <h3>Eval</h3>
-                </div>
-                <div class="modal-body">
-                    <div v-for="(val, propKey) in $store.state.debugAssertionEval.evalObj" :key="propKey" >
-                        <div><label  class="form-label"  :for="propKey">{{propKey}}</label><span @click.stop="openHelp(propKey)" class="inputLabelInformation">&#x2139;</span></div>
-<!--                            <textarea  rows="5" class="form-control" :id="propKey"  :value="getPropVal(propKey)" @input="onEvalObjPropUpdate"/>-->
-                            <input class="form-control" :id="propKey"  :value="getPropVal(propKey)" @input="onEvalObjPropUpdate">&nbsp;
-                            <button class="modal-button" @click="doEval(propKey)">Eval</button>&nbsp;
-                            <button class="modal-button" @click="doResume()" title="Resume execution or resume until next breakpoint">Resume</button>&nbsp;
-                            <div v-if="getPropKey() === propKey"
-                                 v-bind:class="{
-                                'evalNotPassed': getResultCode().valueOf() !== 'pass',
-                            }">
-                                <span class="form-block">{{getResultCode()}}</span> <!-- TestReport.SetupActionAssertComponent getResult code -->
-                                <vue-markdown v-bind:source="$store.state.debugAssertionEval.debugAssertionEvalResult.markdownMessage"></vue-markdown>
-                            </div>
+            <div class="modalFlexContainer">
+                <div class="modal-container" @click.stop id="debugAssertionEvalModal" draggable="true"
+                     @dragstart="drag_start">
+                    <div class="modal-header">
+                        <span style="font-size: small; text-align: right; position: relative; left: 50%; cursor: pointer"
+                              title="Close" @click="close">&#x274c;</span>
+                        <h3>Eval</h3>
                     </div>
-                </div>
+                    <div class="modal-body">
+                        <!--
+                        <div v-for="(val, propKey) in $store.state.debugAssertionEval.evalObj" :key="propKey" >
+                            <div><label  class="form-label"  :for="propKey">{{propKey}}</label><span @click.stop="openHelp(propKey)" class="inputLabelInformation">&#x2139;</span></div>
+                                <input class="form-control" :id="propKey"  :value="getPropVal(propKey)" @input="onEvalObjPropUpdate">&nbsp;
+                                <button class="modal-button" @click="doEval(propKey)">Eval</button>&nbsp;
+                                <button class="modal-button" @click="doResume()" title="Resume execution or resume until next breakpoint">Resume</button>&nbsp;
+                                <div v-if="getPropKey() === propKey"
+                                     v-bind:class="{
+                                    'evalNotPassed': getResultCode().valueOf() !== 'pass',
+                                }">
+                                    <span class="form-block">{{getResultCode()}}</span>
+                                    <vue-markdown v-bind:source="$store.state.debugAssertionEval.debugAssertionEvalResult.markdownMessage"></vue-markdown>
+                                </div>
+                        </div>
+                        -->
 
-<!--                <div class="modal-footer text-right">-->
-<!--                </div>-->
+                        <div class="flexContainer">
+                            <div v-for="(val, propKey) in $store.state.debugAssertionEval.evalObj" :key="propKey">
+                                <div>
+                                    <div><label :for="propKey">{{propKey}}</label><span @click.stop="openHelp(propKey)"
+                                                                                        class="inputLabelInformation"
+                                                                                        title="TestScript Element - Detailed Description">&#x2139;</span>
+                                    </div>
+                                    <div><textarea class="form-control-textarea" :id="propKey"
+                                                   :value="getPropVal(propKey)" @input="onEvalObjPropUpdate"/></div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!--                <div class="modal-footer text-right">-->
+                    <!--                </div>-->
+                </div>
             </div>
         </div>
     </div>
@@ -35,16 +55,17 @@
     export default {
         data() {
             return {
+                drag_pos_left: 0,
+                drag_pos_top: 0,
             }
         },
         mounted() {
         },
         props: ['show'],
-        computed: {
-        },
+        computed: {},
         methods: {
             openHelp(propKey) {
-              window.open("http://hl7.org/fhir/testscript-definitions.html#TestScript.setup.action.assert."+propKey, "_blank")
+                window.open("http://hl7.org/fhir/testscript-definitions.html#TestScript.setup.action.assert." + propKey, "_blank")
             },
             getResultCode() {
                 return this.$store.state.debugAssertionEval.debugAssertionEvalResult.resultMessage
@@ -53,11 +74,11 @@
                 return this.$store.state.debugAssertionEval.debugAssertionEvalResult.propKey
             },
             getPropVal(key) {
-               return this.$store.state.debugAssertionEval.evalObj[key]
+                return this.$store.state.debugAssertionEval.evalObj[key]
             },
             onEvalObjPropUpdate(e) {
                 // console.log('onEvalObjProp.. was called.')
-             this.$store.commit('setEvalObjProperty', {propKey: e.target.id, propVal: e.target.value})
+                this.$store.commit('setEvalObjProperty', {propKey: e.target.id, propVal: e.target.value})
             },
             close: function () {
                 this.$store.commit('setDebugAssertionEvalPropKey', '')
@@ -66,17 +87,41 @@
             doEval(propKey) {
                 this.$store.commit('setDebugAssertionEvalPropKey', propKey)
                 let assertDataString = JSON.stringify(this.$store.state.debugAssertionEval.evalObj)
-               console.log('before base64: ' + assertDataString)
+                console.log('before base64: ' + assertDataString)
                 this.$store.dispatch('doDebugEvalAssertion', window.btoa(assertDataString))
                 // this.close()
             },
-            doResume: function() {
+            doResume: function () {
                 this.$store.commit('setDebugAssertionEvalPropKey', '')
                 this.$emit('resume')
             },
-            doAdd: function() {
+            doAdd: function () {
 
-            }
+            },
+            drag_start: function (event) {
+                try {
+                    if (event.target.parentNode.classList.contains('modalFlexContainer'))
+                        event.target.parentNode.classList.remove('modalFlexContainer') // remove the flex box centering so that we can apply a custom Left property
+                    var rect = event.target.getBoundingClientRect();
+                    this.drag_pos_left = rect.left - event.clientX
+                    this.drag_pos_top = rect.top - event.clientY
+                } catch (e) {
+                }
+            },
+            drop: function drop(event) {
+                try {
+                    var el = document.getElementById('debugAssertionEvalModal')
+                    el.style.position = 'fixed'
+                    el.style.left = parseInt(this.drag_pos_left + event.clientX) + 'px'
+                    el.style.top = parseInt(this.drag_pos_top + event.clientY) + 'px'
+                    event.preventDefault();
+                } catch (e) {}
+                return false;
+            },
+            drag_over: function (event) {
+                event.preventDefault();
+                return false;
+            },
         },
         components: {
             VueMarkdown
@@ -88,14 +133,29 @@
 
 
 <style scoped>
+    .modalFlexContainer {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .flexContainer {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        width: auto;
+        height: 50%;
+    }
+
     * {
         box-sizing: border-box;
     }
 
     .inputLabelInformation {
-       cursor: pointer;
-        font-size: larger;
-         margin-left: 4px;
+        vertical-align: top;
+        font-size: small;
+        cursor: pointer;
+        margin-left: 4px;
         margin-bottom: 4px;
     }
 
@@ -111,7 +171,7 @@
     }
 
     .modal-container {
-        width: 40%;
+        width: 30%;
         max-height: 70%;
         overflow-y: auto;
         margin: 40px auto 0;
@@ -121,9 +181,11 @@
         box-shadow: 0 2px 10px rgba(0, 0, 0, .33);
         /*transition: all 500ms ease;*/
         font-family: Helvetica, Arial, sans-serif;
+        resize: both;
     }
 
     .modal-header h3 {
+        cursor: move;
         margin-top: 0;
         color: #42b983;
     }
@@ -155,6 +217,14 @@
         line-height: 1.5;
         border: 1px solid #ddd;
         margin-bottom: 1em;
+    }
+
+    .form-control-textarea {
+        margin-left: 5px;
+        margin-right: 5px;
+        height: 2em;
+        columns: 30em;
+        resize: both;
     }
 
     /*
