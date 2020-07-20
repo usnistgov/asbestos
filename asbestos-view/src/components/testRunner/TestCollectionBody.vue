@@ -191,7 +191,7 @@
     }
     .infoIcon {
         width: 14px;
-       border: blue 1px solid;
+       border: lightgray 1px solid;
     }
     .clickableColumnHeader {
         cursor: pointer;

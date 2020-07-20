@@ -15,13 +15,14 @@
                     'breakpointGutter' : true,
                     'breakpointControlOff' : ! hasBreakpoint(indexObj) && ! isImportHeader,
                     'breakpointControlOn' : hasBreakpoint(indexObj),
+                    'breakpointIndicatorClass' : hasBreakpoint(indexObj),
               }"
-                :title="hasBreakpoint(indexObj) ? 'Remove breakpoint.' : 'Set breakpoint.'"
+                :title="hasBreakpoint(indexObj) ? 'Remove breakpoint.' : 'Add breakpoint.'"
               @mouseover="onBkptSwitchMouseOver"
               @mouseleave="onBkptSwitchMouseLeave"
               @click.stop="doToggle()"
         >
-            <template v-if="hasBreakpoint(indexObj)"><span class="breakpointIndicatorClass">&#x1F6D1;&nbsp;</span></template><!-- Stop sign -->
+            <template v-if="hasBreakpoint(indexObj)">&#x1F534;</template><!-- 1F6D1 Stop sign -->
             <template v-else>&nbsp;&nbsp;</template>
         </span>
         <!-- Initially, when this component is created, either hide or display the gutter option span label. -->
@@ -153,19 +154,19 @@
     span.breakpointControlOn,
     span.breakpointControlOff {
         cursor: pointer;
-        border: gray dotted 1px;
+        border: lightgray dotted 1px;
         background-color: #f5f5f5;
-        horiz-align: center;
+        vertical-align: middle;
         text-align: center;
         width: 14px;
-        text-align: left;
+        height: 12px;
     }
     span.breakpointControlOn {
         /*border-top : none;*/
         /*border-bottom: none;*/
     }
     span.breakpointIndicatorClass {
-        font-size: x-small;
+        font-size: xx-small;
     }
     span.breakpointControlOff:hover,
     span.breakpointControlOn:hover {
