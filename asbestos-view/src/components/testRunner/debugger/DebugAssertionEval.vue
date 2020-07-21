@@ -4,12 +4,13 @@
             <div class="modalFlexContainer">
                 <div class="modal-container" @click.stop id="debugAssertionEvalModal" draggable="true"
                      @dragstart="drag_start">
-                    <div class="modal-header">
+                    <div>
+                        <div class="modal-header">
                         <span style="font-size: small; text-align: right; position: relative; left: 50%; cursor: pointer"
                               title="Close" @click="close">&#x274c;</span>
                         <h3>Eval</h3>
                     </div>
-                    <div class="modal-body">
+                        <div class="modal-body">
                         <!--
                         <div v-for="(val, propKey) in $store.state.debugAssertionEval.evalObj" :key="propKey" >
                             <div><label  class="form-label"  :for="propKey">{{propKey}}</label><span @click.stop="openHelp(propKey)" class="inputLabelInformation">&#x2139;</span></div>
@@ -43,6 +44,7 @@
 
                     <!--                <div class="modal-footer text-right">-->
                     <!--                </div>-->
+                    </div>
                 </div>
             </div>
         </div>
@@ -100,26 +102,43 @@
             },
             drag_start: function (event) {
                 try {
-                    if (event.target.parentNode.classList.contains('modalFlexContainer'))
-                        event.target.parentNode.classList.remove('modalFlexContainer') // remove the flex box centering so that we can apply a custom Left property
-                    var rect = event.target.getBoundingClientRect();
+                    var el = event.target
+                    if (el.parentNode.classList.contains('modalFlexContainer'))
+                        el.parentNode.classList.remove('modalFlexContainer') // remove the flex box centering so that we can apply a custom Left property
+                    var rect = el.getBoundingClientRect();
                     this.drag_pos_left = rect.left - event.clientX
                     this.drag_pos_top = rect.top - event.clientY
+                    el.style.opacity = ".1"
+                    el.style.border = "1px solid blue"
+                    el.firstChild.style.opacity = "0"
+                    el.firstChild.style.visibility = "hidden"
                 } catch (e) {
+                    console.log(e)
                 }
             },
             drop: function drop(event) {
-                try {
-                    var el = document.getElementById('debugAssertionEvalModal')
-                    el.style.position = 'fixed'
-                    el.style.left = parseInt(this.drag_pos_left + event.clientX) + 'px'
-                    el.style.top = parseInt(this.drag_pos_top + event.clientY) + 'px'
-                    event.preventDefault();
-                } catch (e) {}
+                var el = document.getElementById('debugAssertionEvalModal')
+                if (el) {
+                    el.style.opacity = "1"
+                    el.style.border = "none"
+                    el.firstChild.style.opacity = "1"
+                    el.firstChild.style.visibility = "visible"
+                }
+                event.preventDefault();
                 return false;
             },
             drag_over: function (event) {
-                event.preventDefault();
+                try {
+                    var el = document.getElementById('debugAssertionEvalModal')
+                    if (el) {
+                        el.style.position = 'fixed'
+                        el.style.left = parseInt(this.drag_pos_left + event.clientX) + 'px'
+                        el.style.top = parseInt(this.drag_pos_top + event.clientY) + 'px'
+                    }
+                    event.preventDefault();
+                } catch (e) {
+                   console.log(e)
+                }
                 return false;
             },
         },
@@ -171,23 +190,24 @@
     }
 
     .modal-container {
-        width: 30%;
+        width: 40%;
         max-height: 70%;
         overflow-y: auto;
         margin: 40px auto 0;
         padding: 20px 30px;
-        background-color: #fff;
+        background-color: #ffffff;
         border-radius: 2px;
         box-shadow: 0 2px 10px rgba(0, 0, 0, .33);
-        /*transition: all 500ms ease;*/
         font-family: Helvetica, Arial, sans-serif;
         resize: both;
+        transition: opacity 100ms linear;
     }
 
     .modal-header h3 {
-        cursor: move;
         margin-top: 0;
         color: #42b983;
+        background-color: #f5f5f5;
+        width: 100%;
     }
 
     .modal-body {
@@ -223,8 +243,9 @@
         margin-left: 5px;
         margin-right: 5px;
         height: 2em;
-        columns: 30em;
+        width: 16em;
         resize: both;
+        border-radius: 6px;
     }
 
     /*
