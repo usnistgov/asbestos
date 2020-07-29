@@ -4,7 +4,6 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
-import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.validation.*;
 import gov.nist.asbestos.client.Base.EC;
 import gov.nist.asbestos.client.Base.MhdValueSets;
@@ -86,7 +85,7 @@ class StructureDefinitionITx {
     // Default formatCodes list http://hl7.org/fhir/ValueSet/formatcodes
 
     ValidationSupportChain validationSupportChain;
-    ValidationSupportContext validationSupportContext;
+//    ValidationSupportContext validationSupportContext;
     static DefaultProfileValidationSupport def;
     PrePopulatedValidationSupport prepop;
 
@@ -101,7 +100,7 @@ class StructureDefinitionITx {
                 inMem,
                 common
         );
-        validationSupportContext = new ValidationSupportContext(validationSupportChain);
+//        validationSupportContext = new ValidationSupportContext(validationSupportChain);
     }
 
     @BeforeAll
@@ -216,7 +215,7 @@ class StructureDefinitionITx {
         CachingValidationSupport cache = new CachingValidationSupport(validationSupportChain);
 
         IValidationSupport.CodeValidationResult result = cache.validateCode(
-                validationSupportContext,
+                validationSupportChain,
                 new ConceptValidationOptions().setInferSystem(true),
                 "http://loinc.org",
                 "34895-3",
@@ -231,7 +230,7 @@ class StructureDefinitionITx {
     @Test
     void validateCode() {
         IValidationSupport.CodeValidationResult result = validationSupportChain.validateCode(
-                validationSupportContext,
+                validationSupportChain,
                 new ConceptValidationOptions().setInferSystem(true),          // ConceptValidationOptions
                 "http://loinc.org",                              // theCodeSystem
                 "34895-3",                                            // theCode
