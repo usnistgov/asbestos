@@ -10,7 +10,8 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.fail;
+
 
 public class ChannelsForTests {
     public static ChannelConfig create(String testSession, String channelId, URI fhirBase) throws URISyntaxException, IOException {

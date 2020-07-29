@@ -1,7 +1,6 @@
 package gov.nist.asbestos.proxyWar;
 
 import groovy.transform.SelfType;
-import org.junit.Before;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 

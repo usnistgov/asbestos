@@ -17,13 +17,8 @@
         <mavenCompilerPluginVersion>3.3</mavenCompilerPluginVersion>
         <mavenWarPluginVersion>3.2.2</mavenWarPluginVersion>
         <hapi.version>5.0.2</hapi.version>   <!--   4.1.0  -->
-        <jersey.version>2.26</jersey.version>
+        <jersey.version>2.30</jersey.version>   <!--     must align with xdstoolkit -->
         <jackson.version>2.11.0</jackson.version>   <!--  2.6.3   -->
-        <!-- https://eclipse-ee4j.github.io/jersey.github.io/release-notes/2.26.html   -->
-
-        <!-- jersey inherited through toolkit-api -->
-<!--        <jersey.hk2.version>2.26</jersey.hk2.version>-->
-<!--        <jersey.version>2.26</jersey.version>    &lt;!&ndash;  2.22.1   &ndash;&gt;-->
     </properties>
 
     <profiles>
@@ -162,9 +157,21 @@
         </dependency>
         <dependency>
             <groupId>ca.uhn.hapi.fhir</groupId>
+            <artifactId>hapi-fhir-structures-r5</artifactId>
+            <version>${hapi.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>ca.uhn.hapi.fhir</groupId>
             <artifactId>hapi-fhir-validation</artifactId>
             <version>${hapi.version}</version>
         </dependency>
+        <dependency>
+            <groupId>ca.uhn.hapi.fhir</groupId>
+            <artifactId>hapi-fhir-validation-resources-r4</artifactId>
+            <version>${hapi.version}</version>
+        </dependency>
+
+
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>servlet-api</artifactId>
@@ -188,11 +195,6 @@
             <artifactId>jersey-media-json-jackson</artifactId>
             <version>${jersey.version}</version>
         </dependency>
-<!--        <dependency>-->
-<!--            <groupId>org.glassfish.jersey.bundles.repackaged</groupId>-->
-<!--            <artifactId>jersey-guava</artifactId>-->
-<!--            <version>${jersey.version}</version>-->
-<!--        </dependency>-->
     </dependencies>
 
     <build>

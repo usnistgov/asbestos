@@ -28,8 +28,8 @@ class MultipartIT {
 
     @BeforeAll
     static void beforeAll() {
-        fhirPort = System.getProperty("fhir.port", "8080");
-        proxyPort = System.getProperty("proxy.port", "8081");
+        fhirPort = ITConfig.getFhirPort();
+        proxyPort = ITConfig.getProxyPort();
     }
 
     @Test
