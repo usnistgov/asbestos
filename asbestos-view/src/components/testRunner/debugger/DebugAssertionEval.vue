@@ -2,10 +2,9 @@
     <div name="modal" @dragover="drag_over" @drop="drop">
         <div class="modal-mask" @click="close" v-show="show">
             <div class="modalFlexContainer">
-                <div class="modal-container" @click.stop id="debugAssertionEvalModal" draggable="true"
-                     @dragstart="drag_start">
+                <div class="modal-container" @click.stop id="debugAssertionEvalModal" >
                     <div>
-                        <div class="modal-header">
+                        <div class="modal-header" draggable="true" @dragstart="drag_start">
                         <span style="font-size: small; text-align: right; position: relative; left: 50%; cursor: pointer"
                               title="Close" @click="close">&#x274c;</span>
                         <h3>Eval</h3>
@@ -34,13 +33,35 @@
                                                                                         class="inputLabelInformation"
                                                                                         title="TestScript Element - Detailed Description">&#x2139;</span>
                                     </div>
-                                    <div><textarea class="form-control-textarea" :id="propKey"
-                                                   :value="getPropVal(propKey)" @input="onEvalObjPropUpdate"/></div>
+                                    <div>
+                                        <template v-if="isPropertyAnEnumType(propKey)">
+                                            <select class="form-control-select" :title="getEnumTypeFormalDefinition(propKey)" > <!-- TODO: Remove title and make a new span below the label. -->
+                                                <option v-for="option in getEnumTypeArray(propKey)" :value="option.codeValue" :title="option.definition" :key="option.codeValue">
+                                                    {{ option.displayName }}
+                                                </option>
+                                            </select>
+                                        </template>
+                                        <template v-else>
+                                             <textarea
+                                                v-bind:class="{
+                                                'form-control-textarea-error': getResultCode().valueOf() !== 'pass' && getPropKey() === propKey,
+                                                'form-control-textarea' : true,
+                                                }"
+                                                   :id="propKey"
+                                                   :value="getPropVal(propKey)" @input="onEvalObjPropUpdate" @keyup="evalOnKeyUp"/>
+                                        </template>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-
-                    </div>
+                        <div
+                             v-bind:class="{
+                                'evalNotPassed': getResultCode().valueOf() !== 'pass',
+                            }">
+                            <span class="form-block">{{getResultCode()}}</span>
+                            <vue-markdown v-bind:source="$store.state.debugAssertionEval.debugAssertionEvalResult.markdownMessage"></vue-markdown>
+                        </div>
+                        </div>
 
                     <!--                <div class="modal-footer text-right">-->
                     <!--                </div>-->
@@ -59,6 +80,7 @@
             return {
                 drag_pos_left: 0,
                 drag_pos_top: 0,
+                evalTimer: null,
             }
         },
         mounted() {
@@ -78,6 +100,18 @@
             getPropVal(key) {
                 return this.$store.state.debugAssertionEval.evalObj[key]
             },
+            getEnumTypeFormalDefinition(propKey) {
+                return this.$store.state.debugAssertionEval.enumValueTypes[propKey].formalDefinition
+            },
+            getEnumTypeArray(propKey) {
+                return this.$store.state.debugAssertionEval.enumValueTypes[propKey].values
+            },
+            isPropertyAnEnumType(propKey) {
+                if (this.$store.state.debugAssertionEval.enumValueTypes  !== null && propKey in this.$store.state.debugAssertionEval.enumValueTypes) {
+                    return true
+                }
+                return false
+            },
             onEvalObjPropUpdate(e) {
                 // console.log('onEvalObjProp.. was called.')
                 this.$store.commit('setEvalObjProperty', {propKey: e.target.id, propVal: e.target.value})
@@ -89,9 +123,8 @@
             doEval(propKey) {
                 this.$store.commit('setDebugAssertionEvalPropKey', propKey)
                 let assertDataString = JSON.stringify(this.$store.state.debugAssertionEval.evalObj)
-                console.log('before base64: ' + assertDataString)
+                // console.log('before base64: ' + assertDataString)
                 this.$store.dispatch('doDebugEvalAssertion', window.btoa(assertDataString))
-                // this.close()
             },
             doResume: function () {
                 this.$store.commit('setDebugAssertionEvalPropKey', '')
@@ -102,7 +135,7 @@
             },
             drag_start: function (event) {
                 try {
-                    var el = event.target
+                    var el = document.getElementById('debugAssertionEvalModal')
                     if (el.parentNode.classList.contains('modalFlexContainer'))
                         el.parentNode.classList.remove('modalFlexContainer') // remove the flex box centering so that we can apply a custom Left property
                     var rect = el.getBoundingClientRect();
@@ -141,6 +174,15 @@
                 }
                 return false;
             },
+           evalOnKeyUp: function (event) {
+               if (this.evalTimer) {
+                   clearTimeout(this.evalTimer);
+                   this.evalTimer = null;
+               }
+               this.evalTimer = setTimeout(() => {
+                   this.doEval(event.target.id)
+               }, 800);
+           },
         },
         components: {
             VueMarkdown
@@ -191,7 +233,7 @@
 
     .modal-container {
         width: 40%;
-        max-height: 70%;
+        max-height: 80%;
         overflow-y: auto;
         margin: 40px auto 0;
         padding: 20px 30px;
@@ -206,8 +248,9 @@
     .modal-header h3 {
         margin-top: 0;
         color: #42b983;
-        background-color: #f5f5f5;
+        background-color: lavender;
         width: 100%;
+        cursor: move;
     }
 
     .modal-body {
@@ -239,6 +282,8 @@
         margin-bottom: 1em;
     }
 
+    .form-control-select,
+    .form-control-textarea-error,
     .form-control-textarea {
         margin-left: 5px;
         margin-right: 5px;
@@ -246,6 +291,14 @@
         width: 16em;
         resize: both;
         border-radius: 6px;
+    }
+
+    .form-control-select {
+        resize: none;
+    }
+
+    .form-control-textarea-error {
+        border: 2px solid red;
     }
 
     /*

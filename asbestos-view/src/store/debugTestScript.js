@@ -52,6 +52,27 @@ export const debugTestScriptStore = {
                     // console.log(obj.testScriptIndex + "removed" + obj.breakpointIndex)
                 }
             },
+            doCloseDebugSession: function(state, commit, getters, callingMethod) {
+                console.log('*** in doCloseDebugSession *** : ' + callingMethod)
+                // console.log('In socket onClose. Setting socket to null...')
+                commit('resetDebuggingWebsocket')
+                commit('resetWaitingForBreakpoint')
+                commit('setAssertionEvalBreakpointIndex', '') // Reset the Eval state on Close so original assertion is requested next time it is run
+                // Enable Run button
+                // Breakpoints could have been cleared so only reset the label to Debug, if the label is not already labelled as Debug
+                var currentActiveIndex = getters.getActivelyDebuggingTestScriptIndex
+                if (currentActiveIndex !== null) {
+                    // console.log(currentActiveIndex)
+                    let actionData = {
+                        testScriptIndex: currentActiveIndex, // this.getters ??
+                        breakpointIndex: null,
+                        debugButtonLabel: 'Debug'
+                    }
+                    commit('setDebugButtonLabel', actionData)
+
+                }
+                // console.log('done.')
+            },
             /**
              * Nudges Vue reactivity.
              * @param state
@@ -123,7 +144,7 @@ export const debugTestScriptStore = {
                     valObj.debugButtonLabel = obj.debugButtonLabel // "Resume"
                 }
             } else {
-                alert(' failed: ' + obj.testScriptIndex)
+                console.log(' setDebugButtonLabel failed for testScriptIndex: ' + obj.testScriptIndex)
             }
         },
         setBeingDebuggedList(state, arr) {
@@ -133,7 +154,13 @@ export const debugTestScriptStore = {
         },
         setIsDebugTsFeatureEnabled(state, isTrue) {
             state.isDebugTsFeatureEnabled = Boolean(isTrue).valueOf()
-        }
+        },
+        resetDebuggingWebsocket(state) {
+            state.testScriptDebuggerWebSocket = null
+        },
+        resetWaitingForBreakpoint(state) {
+            state.waitingForBreakpoint = false
+        },
     },
     getters: {
         hasBreakpoint: (state) => (obj) => {
@@ -250,7 +277,9 @@ export const debugTestScriptStore = {
                 commit('setShowDebugEvalModal', true)
             } else {
                 commit('setAssertionEvalBreakpointIndex', breakpointIndex)
-                let sendData = `{"cmd":"requestOriginalAssertion","testScriptIndex":"${mapKey}"}`
+                const requestAnnotations = (rootState.debugAssertionEval.enumValueTypes === null)
+                // needsStaticValueCaching is True when enumeration types and the assertion field descriptions need to be cached
+                let sendData = `{"cmd":"requestOriginalAssertion","testScriptIndex":"${mapKey}","requestAnnotations":"${requestAnnotations}"}`
 
                 console.log('Requesting original-assertion ' + breakpointIndex)
                 state.testScriptDebuggerWebSocket.send(sendData)
@@ -301,25 +330,10 @@ export const debugTestScriptStore = {
                     }
                 }
                 state.testScriptDebuggerWebSocket.onclose = event => {
-                    commit('setAssertionEvalBreakpointIndex', '') // Reset the Eval state on Close so original assertion is requested next time it is run
-                    state.waitingForBreakpoint = false
-                    // Enable Run button
+                    state.doCloseDebugSession(state, commit, getters, 'onclose')
                     if (event != null && event != undefined) {
                         // console.log('onclose data: ' + event.returnData)
                     }
-                    // Breakpoints could have been cleared so only reset the label to Debug
-                    let actionData = {
-                        testScriptIndex: this.getters.getActivelyDebuggingTestScriptIndex,
-                        breakpointIndex: null,
-                        debugButtonLabel: 'Debug'
-                    }
-                    commit('setDebugButtonLabel', actionData)
-                    if (! getters.hasBreakpoints(actionData.testScriptIndex)) {
-                        state.doCleanupBreakpoints(state, actionData.testScriptIndex)
-                    }
-                    // console.log('In socket onClose. Setting socket to null...')
-                    state.testScriptDebuggerWebSocket = null
-                    // console.log('done.')
                 }
                 state.testScriptDebuggerWebSocket.onmessage = event => {
                     /**
@@ -361,20 +375,24 @@ export const debugTestScriptStore = {
                         // alert(JSON.stringify(returnData.assertionJson))
                         // rootState.testScriptAssertionEval.
                         commit('updateAssertionEvalObj', returnData.assertionJson)
+                        if (rootState.debugAssertionEval.enumValueTypes === null && 'valueTypes' in returnData) {
+                            commit('setEnumValueTypes', returnData.valueTypes)
+                        }
                     } else if (returnData.messageType === 'eval-assertion-result') {
                         commit('setDebugAssertionEvalResult', returnData)
                     } else if (returnData.messageType === 'stoppedDebugging') {
-                        // alert('Debugging was stopped.')
+                        console.log('Debugging was stopped.')
                         state.testScriptDebuggerWebSocket.close()
+
                     } else if (returnData.messageType === 'unexpected-error') {
-                        alert('Debug: Unexpected error.')
-                        state.testScriptDebuggerWebSocket.close()
+                        console.log('Debug: unexpected-error.')
+                        state.doCloseDebugSession(state, commit, getters, 'unexpected-error')
                     }
                 }
                 state.testScriptDebuggerWebSocket.onerror = function (event) {
-                    state.waitingForBreakpoint = false
+                    state.doCloseDebugSession(state, commit, getters, 'onerror' )
                     if (event != null && event != undefined) {
-                        alert('Error: ' + JSON.stringify(event))
+                        // console.log('onclose data: ' + event.returnData)
                     }
                 }
             } else {

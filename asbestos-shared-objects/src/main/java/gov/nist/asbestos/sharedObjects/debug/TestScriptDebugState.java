@@ -16,13 +16,14 @@ public class TestScriptDebugState {
     /**
      "/test0" =
      "/" = nested test script separator.
-     "test0" = This is the imported test header which has no UI representation: skip this.
+     "test0" = This is the imported test header which has no UI representation: skip this. If this was not skipped, there would be an extra layer in the index mapping.
     */
     private static final String IMPORTED_TEST_HEADER = "/test0";
     private Object lock;
     private AtomicBoolean resume;
     private AtomicBoolean stopDebug;
     private AtomicBoolean evaluateMode;
+    private AtomicBoolean requestAnnotations;
     /**
      * Debug Instance
      */
@@ -49,6 +50,7 @@ public class TestScriptDebugState {
         this.resume = new AtomicBoolean();
         this.stopDebug = new AtomicBoolean();
         this.evaluateMode = new AtomicBoolean();
+        this.requestAnnotations = new AtomicBoolean();
         this.breakpointSet = breakpointSet;
         this.session = session;
         this.debugTestSessionId = debugTestSessionId;
@@ -131,13 +133,17 @@ public class TestScriptDebugState {
         }
     }
 
-    public void sendAssertionStr(String assertionJson) {
-        getSession().getAsyncRemote().sendText("{\"messageType\":\"original-assertion\", \"assertionJson\":" + assertionJson +"}");
+    public void sendAssertionStr(String assertionJson, String valueTypes) {
+        getSession().getAsyncRemote().sendText("{\"messageType\":\"original-assertion\" "
+                + ", \"valueTypes\": " + valueTypes
+                + ", \"assertionJson\":" + assertionJson +"}");
     }
 
-    public void sendDebugAssertionEvalResultStr(String resultMessage, String markdownMessage) {
+    public void sendDebugAssertionEvalResultStr(String resultMessage, String markdownMessage, String exceptionPropKey) {
         String base64 = (markdownMessage != null && markdownMessage.length() > 0) ? Base64.getEncoder().encodeToString(markdownMessage.getBytes()) : "";
-        getSession().getAsyncRemote().sendText("{\"messageType\":\"eval-assertion-result\", \"resultMessage\":\"" + resultMessage +"\","
+        getSession().getAsyncRemote().sendText("{\"messageType\":\"eval-assertion-result\", "
+                + ((exceptionPropKey != null && exceptionPropKey != "")?"\"exceptionPropKey\": \"" + exceptionPropKey + "\",":"")
+                + " \"resultMessage\":\"" + resultMessage +"\","
                 + "\"markdownMessage\":\"" + base64 + "\"}");
     }
 
@@ -195,7 +201,7 @@ public class TestScriptDebugState {
         return false;
     }
 
-    private boolean isWait() {
+    public boolean isWait() {
         boolean isWait = ! getStopDebug().get();
         isWait = isWait && ! getResume().get();
         isWait = isWait && ! getDebugEvaluateModeWasRequested().get();
@@ -305,5 +311,25 @@ public class TestScriptDebugState {
 
     public void setOnStop(Consumer<Optional<String>> onStop) {
         this.onStop = onStop;
+    }
+
+    public static String quoteString(String myValue) {
+        return "\"" + myValue + "\"";
+    }
+
+    public static String formatAsSelectOptionData(String displayName, String codeValue, String definition) {
+        return "{"
+                + quoteString("displayName") + ":" + quoteString(displayName)
+                + "," + quoteString("codeValue") + ":" + quoteString(codeValue)
+                + "," + quoteString("definition") + ":" + quoteString(definition)
+                + "}";
+    }
+
+    public AtomicBoolean getRequestAnnotations() {
+        return requestAnnotations;
+    }
+
+    public void setRequestAnnotations(AtomicBoolean requestAnnotations) {
+        this.requestAnnotations = requestAnnotations;
     }
 }

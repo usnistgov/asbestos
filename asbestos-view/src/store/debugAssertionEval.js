@@ -3,6 +3,36 @@ import Vuex from "vuex";
 
 Vue.use(Vuex)
 
+function EvalAssertionObj() {
+    /*
+    When the original assertion properties are initially requested from the backend, empty properties are not included by JSON serialization.
+    Since this field-list is used to auto create the input text boxes, a full representation is missing. A complete list is required
+    to be known on the client side.
+    */
+    this.label = ''
+    this.description = ''
+    this.direction = ''
+    this.compareToSourceId = ''
+    this.compareToSourceExpression = ''
+    this.compareToSourcePath = ''
+    this.contentType = ''
+    this.expression = ''
+    this.headerField = ''
+    this.minimumId = ''
+    this.navigationLinks = ''
+    this.operator = ''
+    this.path = ''
+    this.requestMethod = ''
+    this.requestURL = ''
+    this.resource = ''
+    this.response = ''
+    this.responseCode = ''
+    this.sourceId = ''
+    this.validateProfileId = ''
+    this.value = ''
+    this.warningOnly = ''
+}
+
 export const debugAssertionEvalStore = {
     state() {
         return {
@@ -10,31 +40,16 @@ export const debugAssertionEvalStore = {
             showModal: false,
             isEvalObjUpdated: false,
             debugAssertionEvalResult: {propKey: '', resultMessage: '', markdownMessage: ''},
-            evalObj: {
-                label: '',
-                description: '',
-                direction: '',
-                compareToSourceId: '',
-                compareToSourceExpression: '',
-                compareToSourcePath: '',
-                contentType: '',
-                expression: '',
-                headerField: '',
-                minimumId: '',
-                navigationLinks: '',
-                operator: '',
-                path: '',
-                requestMethod: '',
-                requestURL: '',
-                resource: '',
-                response: '',
-                responseCode: '',
-                sourceId: '',
-                validateProfileId: '',
-                value: '',
-                warningOnly: '',
-            },
+            evalObj: new EvalAssertionObj(),
+            evalObjTODO: {
+                    patternType:
+                        {
+                            genericType: {dataObj: new EvalAssertionObj()},
+                            compareToSourceId: {dataObj: new EvalAssertionObj(), fieldList: ['compareToSourceId','compareToSourceExpression','warningOnly']}
+                        }
+                    },
             collapsibleDisplayEventObj: {displayOpen: false, breakpointObj: null},
+            enumValueTypes : null,
         }
     },
     mutations: {
@@ -56,6 +71,11 @@ export const debugAssertionEvalStore = {
         },
         setDebugAssertionEvalResult(state, obj) {
            state.debugAssertionEvalResult.resultMessage = obj.resultMessage
+            if ('exceptionPropKey' in obj) {
+                state.debugAssertionEvalResult.propKey = obj.exceptionPropKey
+            } else {
+                state.debugAssertionEvalResult.propKey = ''
+            }
             let mkdwnMsg = ''
             if ('markdownMessage' in obj) {
                 if (obj.markdownMessage.valueOf().length > 0) {
@@ -85,6 +105,9 @@ export const debugAssertionEvalStore = {
               state.isEvalObjUpdated = true
            }
            state.showModal = true
+        },
+        setEnumValueTypes(state, obj /* object containing an array of other value types */) {
+           state.enumValueTypes = obj
         },
     },
     actions: {

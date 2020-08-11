@@ -62,9 +62,6 @@ public class DebugWsSessionId implements Comparable<DebugWsSessionId> {
                 '}';
     }
 
-    public String getQuotedIdentifier() {
-       return "\"" + getTestScriptIndex() + "\"";
-    }
 
 
     @Override
