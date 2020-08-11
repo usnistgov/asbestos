@@ -23,6 +23,7 @@ import Getter from "../components/getter/Getter"
 import Admin from "../components/wrapper/Admin";
 import StaticFixtureDisplay from "../components/testRunner/StaticFixtureDisplay";
 import Setup from "../components/top/Setup";
+import LogAnalysisReport from "@/components/logViewer/LogAnalysisReport";
 
 Vue.use( VueRouter )
 
@@ -108,6 +109,11 @@ export const routes = [
                             {
                                 path: 'lognav/:eventId/:reqresp',
                                 component: InspectEvent,
+                                props: true,
+                            },
+                            {
+                                path: 'inspurl',
+                                component: LogAnalysisReport,
                                 props: true,
                             },
                             {

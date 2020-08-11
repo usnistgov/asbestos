@@ -21,6 +21,21 @@ public class ValE {
         this.msg = msg;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ValE valE = (ValE) o;
+        return Objects.equals(types, valE.types) &&
+                Objects.equals(msg, valE.msg) &&
+                Objects.equals(ele, valE.ele);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(types, msg, ele);
+    }
+
     public String toString() {
         StringBuilder buf = new StringBuilder();
 
@@ -66,7 +81,8 @@ public class ValE {
     }
 
     public ValE add(ValE ele) {
-        this.ele.add(ele);
+        if (!this.ele.contains(ele))
+            this.ele.add(ele);
         return this;
     }
 

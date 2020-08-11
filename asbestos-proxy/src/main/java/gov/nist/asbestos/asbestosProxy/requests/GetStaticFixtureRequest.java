@@ -45,7 +45,7 @@ public class GetStaticFixtureRequest {
             return;
         }
         String fhirPath = request.getParm("fhirPath");
-        ResourceWrapper wrapper = request.ec.getStaticFixture(testCollectionId, testId, fixturePath, fhirPath, url);
+        ResourceWrapper wrapper = request.ec.getStaticFixture(testCollectionId, testId, request.channelId, fixturePath, fhirPath, url);
         if (wrapper == null) {
             request.resp.setStatus(request.resp.SC_BAD_REQUEST);
             return;

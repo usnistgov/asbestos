@@ -61,7 +61,7 @@ public class ChannelControlGuardFilter implements Filter {
 
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
-        log.info("ChannelControlGuardFilter init");
+       // log.info("ChannelControlGuardFilter init");
 
 
         try {
@@ -84,7 +84,7 @@ public class ChannelControlGuardFilter implements Filter {
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
-        log.info("ChannelControlGuardFilter enter");
+     //   log.info("ChannelControlGuardFilter enter");
         if (request instanceof HttpServletRequest) {
 
             HttpServletRequest httpServletRequest = (HttpServletRequest) request;
@@ -158,7 +158,7 @@ public class ChannelControlGuardFilter implements Filter {
     public void setExternalCache(File externalCache) {
         this.externalCache = externalCache;
         Installation.instance().setExternalCache(externalCache);
-        log.debug("Asbestos Proxy init EC is " + externalCache.getPath());
+     //   log.debug("Asbestos Proxy init EC is " + externalCache.getPath());
     }
 
 }

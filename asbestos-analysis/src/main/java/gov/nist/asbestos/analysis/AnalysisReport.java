@@ -377,8 +377,8 @@ public class AnalysisReport {
                 .setVal(new Val())
                 .setTestSession("default")
                 .setExternalCache(ec.externalCache)
-                .setTestCollection("Inspector")
-                .setTestId("Inspector")
+                .setTestCollection("Analysis")
+                .setTestId("Analysis")
                 .runEval(wrapper, null);
         return testEngine;
     }
@@ -413,8 +413,8 @@ public class AnalysisReport {
 //            return null;
         TestEngine testEngine = new TestEngine(testDef)
                 .setVal(new Val())
-                .setTestCollection("Inspector")
-                .setTestId("Inspector")
+                .setTestCollection("Analysis")
+                .setTestId("Analysis")
                 .setTestSession("default")
                 .setExternalCache(ec.externalCache)
                 .runEval(wrapper, null);
@@ -539,13 +539,19 @@ public class AnalysisReport {
 
     private Resource resourceFromBundle(Bundle bundle, Ref fullUrl) {
         Objects.requireNonNull(fullUrl);
+        Map<String, String> urlParms = fullUrl.getParametersAsMap();
+        String url = urlParms.get("url");
+        String fullUrlString = fullUrl.asString();
         for( Bundle.BundleEntryComponent comp : bundle.getEntry()) {
             // asString is used in case there is an anchor in the fullUrl
-            if (fullUrl.asString().equals(comp.getFullUrl())) {
+            if (fullUrlString.equals(comp.getFullUrl())) {
                 if (fullUrl.hasAnchor()) {
                     if (comp.getResource() instanceof DomainResource)
                         return findResourceInContained((DomainResource) comp.getResource(), fullUrl);
                 }
+                return comp.getResource();
+            }
+            if (url != null && url.equals(comp.getFullUrl())) {
                 return comp.getResource();
             }
         }
@@ -616,6 +622,7 @@ public class AnalysisReport {
             return;
         }
         errorReporter.requireNonNull(baseObj, "baseObject is null");
+        errorReporter.requireNonNull(baseObj.getResource(), "baseObject references null resource");
         BaseResource baseResource = baseObj.getResource();
         if (baseResource instanceof DomainResource) {
             DomainResource domainResource = (DomainResource) baseResource;

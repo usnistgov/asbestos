@@ -179,8 +179,11 @@ public class VariableMgr {
             var.setDefaultValue(newUUID);
         }
 
-        if (var.hasDefaultValue())
-            return var.getDefaultValue();
+        if (var.hasDefaultValue()) {
+            String value =  var.getDefaultValue();
+            value = updateReference(value);
+            return value;
+        }
 
         String sourceId = null;
         if (var.hasSourceId()) {

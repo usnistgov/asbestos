@@ -65,12 +65,13 @@ public class SaveToCache extends GenericSetupAction {
             return;
         }
         Bundle bundle = (Bundle) wrapper.getResource();
-        if (bundle.getTotal() != 1) {
-            reporter.reportError("SaveToCache: Bundle must have one entry");
-            return;
+        String resourceType;
+        if (bundle.getTotal() == 1) {
+            Resource resource = bundle.getEntry().get(0).getResource();
+            resourceType = resource.getClass().getSimpleName();
+        } else {
+            resourceType = "Bundle";
         }
-        Resource resource = bundle.getEntry().get(0).getResource();
-        String resourceType = resource.getClass().getSimpleName();
 
         File typeBase = ec.getCache(channelId, resourceType);
         File outFile = new File(typeBase, url + ".json");

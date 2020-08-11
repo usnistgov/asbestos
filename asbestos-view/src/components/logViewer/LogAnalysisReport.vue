@@ -115,6 +115,7 @@
                 </div>
             </div>
         </div>
+      <router-view></router-view>
     </div>
 </template>
 
@@ -231,9 +232,9 @@
                     other: defined.indexOf(resource.name) < 0
                 }
             },
-            urlAnalysis() {
-                console.log(`LogAnalysisReport url is ${this.theUrl}`)
-                this.loadAnalysisForObject(this.theUrl)
+            urlAnalysis(url) {
+                console.log(`LogAnalysisReport url is ${url}`)
+                this.loadAnalysisForObject(url)
             }
         },
         computed: {
@@ -246,9 +247,14 @@
             },
         },
         created() {
+          console.log(`created`)
             if (this.theUrl) {
                 console.log(`created with url`)
-                this.urlAnalysis()
+                this.urlAnalysis(this.theUrl);
+            }
+            else if (this.$route.query.url) {
+              console.log(`created with log from param`)
+              this.urlAnalysis(this.$route.query.url)
             }
             else
                 this.loadAnalysis()
@@ -260,7 +266,9 @@
             'theUrl': 'urlAnalysis'
         },
         props: [  // pass eventId OR theUrl
-            'sessionId', 'channelId', 'eventId', 'theUrl', 'gzip', 'useProxy', "requestOrResponse", "ignoreBadRefs",
+            'sessionId', 'channelId', 'eventId',
+          'theUrl', // this is the URL of a Resource inside a Bundle
+          'gzip', 'useProxy', "requestOrResponse", "ignoreBadRefs",
             'initiallyClosed', 'noInspectLabel',
         ],
         components: { LogObjectDisplay },

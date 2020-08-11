@@ -90,9 +90,24 @@
   </servlet>
 
   <servlet>
+    <servlet-name>StaticResource</servlet-name>
+    <servlet-class>gov.nist.asbestos.asbestosProxy.servlet.StaticResourceServlet</servlet-class>
+  </servlet>
+
+  <servlet>
     <servlet-name>Gen500</servlet-name>
     <servlet-class>gov.nist.asbestos.asbestosProxy.servlet.Gen500Servlet</servlet-class>
   </servlet>
+
+  <servlet-mapping>
+    <servlet-name>StaticResource</servlet-name>
+    <url-pattern>/static/*</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>StaticResource</servlet-name>
+    <url-pattern>/static</url-pattern>
+  </servlet-mapping>
 
   <servlet-mapping>
     <servlet-name>ProxyService</servlet-name>

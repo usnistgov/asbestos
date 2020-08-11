@@ -130,16 +130,25 @@ class ActionReporter {
             } else if (wrapper1 != null) {   // static fixtureComponent
                 Ref ref = wrapper1.getRef();
                 if (ref != null) {
+                    String base = ServiceProperties.getInstance().getPropertyOrStop(ServicePropertiesEnum.FHIR_TOOLKIT_UI_HOME_PAGE);
+                    String server = ServiceProperties.getInstance().getPropertyOrStop(ServicePropertiesEnum.FHIR_TOOLKIT_BASE);
                     UIEvent uiEvent = fixtureComponent.getCreatedByUIEvent();
-                    if (uiEvent == null)
-                        refStrRaw = null;
-                    else {
-                        String base = ServiceProperties.getInstance().getPropertyOrStop(ServicePropertiesEnum.FHIR_TOOLKIT_UI_HOME_PAGE);
+                    if (uiEvent == null) {
+                        String url = server + "/static/"
+                                + testCollectionId
+                                + "/" + testId
+                                + "/" + wrapper1.getRef().asString();
+                        refStrRaw = base + "/session/" + testEngine.getTestSession()
+                                + "/channel/" + testEngine.getChannelName()
+                                + "/inspurl&url=" + url;
+                    } else {
                         refStrRaw = base + "/session/" + testEngine.getTestSession()
                                 + "/channel/" + testEngine.getChannelName()
                                 + "/lognav/" + uiEvent.getEventName()
                         + tail;
                     }
+
+                    // referenced to UIEvent for display in inspector
                     reference = "<a href=\"" +  refStrRaw + "\"" + " target=\"_blank\">" +
                             ((label == null) ? refStrRaw : "Open in Inspector") +
                             "</a>";
@@ -159,7 +168,7 @@ class ActionReporter {
                 "## Action\n" + request
                 + asMarkdown(fixtures, "Fixtures")
                 + "\n"
-                + asMarkdown(variables, "Variables");
+                + asMarkdown(variables, "Variables (evaluated after action)");
 
         reporter.report(markdown, wrapper);
     }

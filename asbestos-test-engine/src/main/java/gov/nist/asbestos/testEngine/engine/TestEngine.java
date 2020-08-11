@@ -547,7 +547,7 @@ public class TestEngine  {
                     if (fix.hasResource()) {
                         Ref ref = new Ref(fix.getResource().getReference());
                         fixtureMgr.add(id)
-                                .setStaticRef(ref)
+                                .setStaticRef(ref)   // static means defined in this test
                                 .setVal(fVal)
                         //        .setCreatedBy(new Action(testScript, fix))
                         ;

@@ -69,9 +69,9 @@ public class ActionReference {
 
     public void build(TestScript testScript, TestScript.SetupActionOperationComponent comp) {
         Objects.requireNonNull(comp);
-        TestScript.TestScriptSetupComponent setup = testScript.getSetup();
+        //TestScript.TestScriptSetupComponent setup = testScript.getSetup();
         int actionI = 0;
-        for (TestScript.SetupActionComponent actionComponent : setup.getAction()) {
+        for (TestScript.SetupActionComponent actionComponent : testScript.getSetup().getAction()) {
             if (comp.equals(actionComponent.getOperation())) {
                 section = ActionSection.SETUP;
                 type = ActionType.EITHER;
@@ -80,6 +80,19 @@ public class ActionReference {
                 return;
             }
             actionI++;
+        }
+        actionI = 0;
+        for (TestScript.TestScriptTestComponent testComponent : testScript.getTest()) {
+            for (TestScript.TestActionComponent actionComponent : testComponent.getAction()) {
+                if (comp.equals(actionComponent.getOperation())) {
+                    section = ActionSection.TEST;
+                    type = ActionType.EITHER;
+                    actionIndex = actionI;
+                    anAssertion = false;
+                    return;
+                }
+                actionI++;
+            }
         }
         throw new Error("Setup component not found in Script");
     }

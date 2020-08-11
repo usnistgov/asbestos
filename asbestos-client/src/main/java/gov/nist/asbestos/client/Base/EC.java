@@ -1,6 +1,7 @@
 package gov.nist.asbestos.client.Base;
 
 import com.google.gson.Gson;
+import gov.nist.asbestos.client.client.FhirClient;
 import gov.nist.asbestos.client.events.EventSummary;
 import gov.nist.asbestos.client.events.UIEvent;
 import gov.nist.asbestos.client.log.SimStore;
@@ -432,11 +433,11 @@ public class EC {
     }
 
 
-    public ResourceWrapper getStaticFixture(String testCollectionId, String testId, String fixturePath, String fhirPath, URL url) {
+    public ResourceWrapper getStaticFixture(String testCollectionId, String testId, String channelId, String fixturePath, String fhirPath, URL url) {
         if (fixturePath == null || fixturePath.startsWith("/") || fixturePath.startsWith("."))
             return null;
         File testDir = getTest(testCollectionId, testId);
-        if (!testDir.exists() || !testDir.isDirectory())
+        if (testDir == null || !testDir.exists() || !testDir.isDirectory())
             return null;
         if (fixturePath.contains("?")) {
             String[] parts = fixturePath.split("\\?");
@@ -455,32 +456,40 @@ public class EC {
 
 
         File file = new File(testDir, fixturePath);
-        if (!file.exists() || !file.isFile())
-            return null;
-        BaseResource resource;
-        try {
-            resource = ProxyBase.parse(file);
-        } catch (Exception e) {
-            return null;
+        BaseResource resource = null;
+        ResourceWrapper wrapper = null;
+
+        // look in test definition
+        if (file.exists() && file.isFile()) {
+            try {
+                resource = ProxyBase.parse(file);
+                URI uri = url.toURI();
+                Ref ref = new Ref(uri);
+                wrapper = new ResourceWrapper();
+                wrapper.setResource(resource);
+                wrapper.setRef(ref);
+            } catch (Exception e) {
+                // ignore and try next approach
+                wrapper = null;
+            }
         }
-        URI uri;
-        try {
-            uri = url.toURI();
-        } catch (URISyntaxException e) {
-            return null;
+
+        // look in caches
+        if (wrapper == null) {
+            FhirClient fhirClient = FhirSearchPath.getFhirClient(this, testDir, channelId);
+            Optional<ResourceWrapper> owrapper = fhirClient.readCachedResource(new Ref(fixturePath));
+            if (!owrapper.isPresent())
+                return null;
+            wrapper = owrapper.get();
+            resource = wrapper.getResource();
         }
-        ResourceWrapper wrapper = new ResourceWrapper();
-        wrapper.setRef(new Ref(uri));
-        if (fhirPath == null) {
-            wrapper.setResource(resource);
-        } else if (resource instanceof Bundle) {
+
+        if (resource instanceof Bundle && fhirPath != null) {
             Bundle bundle = (Bundle) resource;
             Resource resource1 = evalForResource(bundle, fhirPath);
-            if (resource1 == null)
+            if (resource1 == null)  // resource not found in bundle
                 return null;
             wrapper.setResource(resource1);
-        } else {
-            return null;
         }
         return wrapper;
     }
