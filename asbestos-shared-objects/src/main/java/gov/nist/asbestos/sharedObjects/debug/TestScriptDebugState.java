@@ -38,7 +38,6 @@ public class TestScriptDebugState {
     private String currentExecutionIndex;
     private boolean hasImportExtension;
     private List<String> parentExecutionIndex = new ArrayList<>();
-    TestEngineDebugInterface debugInterface = null;
     Consumer<Optional<String>> onStop;
 
     private static Logger log = Logger.getLogger(TestScriptDebugState.class);
@@ -107,7 +106,7 @@ public class TestScriptDebugState {
      * Reset Resume: will resume the normal program flow until the next breakpoint
      */
     public void cancelResumeMode() {
-       this.resume.set(false);
+        getResume().set(false);
     }
 
     /**
@@ -147,21 +146,6 @@ public class TestScriptDebugState {
                 + "\"markdownMessage\":\"" + base64 + "\"}");
     }
 
-    public void sendBreakpointHit(boolean isEvaluable) {
-        if (! hasInterface())
-            return;
-        String reportsAsJson = debugInterface.getLogAtBreakpoint();
-        String breakpointIndex = getCurrentExecutionIndex();
-        log.info("pausing at " + breakpointIndex);
-        getSession().getAsyncRemote().sendText(
-                "{\"messageType\":\"breakpoint-hit\""
-                        + ",\"testScriptIndex\":\"" + getTestScriptIndex() + "\""
-                        + ",\"breakpointIndex\":\"" + breakpointIndex + "\""
-                        + ",\"debugButtonLabel\":\"Resume\""
-                        + ",\"isEvaluable\":\""+ isEvaluable +"\""
-                        + ",\"testReport\":" + reportsAsJson  + "}"); // getModularEngine().reportsAsJson()
-
-    }
 
     /**
      *
@@ -210,26 +194,6 @@ public class TestScriptDebugState {
     }
 
 
-    public void waitOnBreakpoint() {
-        cancelResumeMode();
-
-        synchronized (getLock()) {
-            while (isWait()) { // Condition must be false to exit the wait and to protect from spurious wake-ups
-                try {
-                    getLock().wait(); // Release the lock and wait for getResume to be True
-                } catch (InterruptedException ie) {
-                }
-            }
-            if (getResume().get()) {
-                log.info("Resuming " +  getSession().getId());
-            } else if (getStopDebug().get()) {
-//                throw new Error("KILL session: " + getSession().getId()); // This needs to throw a custom exception that does not show up in the test report
-                throw new StopDebugTestScriptException("STOP debug session: " + getSession().getId());
-            } else if (getDebugEvaluateModeWasRequested().get()) {
-                log.info("Eval mode is true.");
-            }
-        }
-    }
 
     /**
      * A string is returned in this format: ParentTypeParentIndex.ChildPartIndex
@@ -259,28 +223,6 @@ public class TestScriptDebugState {
        return parentExecutionIndex.remove(parentExecutionIndex.size()-1);
     }
 
-    public boolean hasInterface() {
-        return debugInterface != null;
-    }
-
-    public void pauseIfBreakpoint() {
-        boolean isBreakpoint = isBreakpoint();
-        if (isBreakpoint) {
-            if (hasInterface()) {
-                debugInterface.onBreakpoint();
-                sendBreakpointHit(false);
-                waitOnBreakpoint();
-            }
-        }
-    }
-
-    public TestEngineDebugInterface getDebugInterface() {
-        return debugInterface;
-    }
-
-    public void setDebugInterface(TestEngineDebugInterface debugInterface) {
-        this.debugInterface = debugInterface;
-    }
 
 
     public static void sendDebuggingTestScriptIndexes(Session session, String indexes) {

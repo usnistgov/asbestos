@@ -160,7 +160,7 @@ public class AssertionRunner {
 
         // add context to report
         ActionReference actionReference = null;
-        if (! testEngine.hasDebugState()) {
+        if (! testEngine.hasDebugger()) {
            actionReference = new ActionReference(testScript, as);
         } else {
             // actionReference is not used. When it is used by ActionReporter, use information from testengine debugstate getCurrentExecutionIndex.
