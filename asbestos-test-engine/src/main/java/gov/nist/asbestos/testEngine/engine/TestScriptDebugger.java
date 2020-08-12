@@ -2,6 +2,8 @@ package gov.nist.asbestos.testEngine.engine;
 
 import ca.uhn.fhir.model.api.annotation.Description;
 import com.google.gson.Gson;
+import gov.nist.asbestos.sharedObjects.debug.AssertionFieldDescription;
+import gov.nist.asbestos.sharedObjects.debug.AssertionFieldValueDescription;
 import gov.nist.asbestos.sharedObjects.debug.StopDebugTestScriptException;
 import gov.nist.asbestos.sharedObjects.debug.TestScriptDebugInterface;
 import gov.nist.asbestos.sharedObjects.debug.TestScriptDebugState;
@@ -11,12 +13,17 @@ import org.hl7.fhir.r4.model.Enumeration;
 import org.hl7.fhir.r4.model.TestReport;
 import org.hl7.fhir.r4.model.TestScript;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static gov.nist.asbestos.sharedObjects.debug.TestScriptDebugState.quoteString;
@@ -104,46 +111,57 @@ public class TestScriptDebugger implements TestScriptDebugInterface {
                     if (evalJsonString == null) {
                         // Prepare user-selectable type information
                         // "valueTypes" : {"direction" : [{"codeValue":"req","displayName":"","definition":""},...],
-                        try {
-                            Map<String,String> enumeratedTypeValues = new HashMap<>();
-                            Field f = TestScript.SetupActionAssertComponent.class.getDeclaredField("direction");
-                            if (f != null) {
-                                String formalDefinition = f.getAnnotation(Description.class).formalDefinition();
-                                if (f.getType().isAssignableFrom(Enumeration.class)) {
-                                    Enumeration fhirEnum = ((Enumeration)f.get(TestScript.SetupActionAssertComponent.class));
-                                    Object e = fhirEnum.getValue(); // enum class implicitly extends java.lang.Enum
-                                    if (e != null) {
-                                        if (e.getClass().getEnumConstants() != null) {
-                                            List<String> quotedValueTypes =
-                                                    Arrays.stream((Enum[])e.getClass().getEnumConstants())
-                                                            .filter(e1 -> ! e1.name().equals("NULL"))
-                                                            .map(new TsEnumerationCodeExtractor())
-                                                            .collect(Collectors.toList());
-                                            if (! quotedValueTypes.isEmpty()) {
-                                                enumeratedTypeValues.put("direction", quotedValueTypes.get(0));
+                        List<AssertionFieldDescription> fieldDescriptions = new ArrayList<>();
+                        if (state.getRequestAnnotations().get()) {
+                            try {
+                                for (String eStr : evalElementList) {
+                                    String formalDefinition = "";
+                                    List<AssertionFieldValueDescription> fieldValueTypes = new ArrayList<>();
+                                    // Property names must exist in evalElementList
+                                    Field f = TestScript.SetupActionAssertComponent.class.getDeclaredField(eStr);
+                                    if (f != null) {
+                                        Annotation annotation = f.getAnnotation(Description.class);
+                                        if (annotation != null) {
+                                            formalDefinition = ((Description) annotation).formalDefinition();
+                                        }
+                                        if (f.getType().isAssignableFrom(Enumeration.class)) {
+                                            Type type = f.getGenericType();
+                                            if (type instanceof ParameterizedType) {
+                                                ParameterizedType paramType = (ParameterizedType)type;
+                                                if (paramType.getActualTypeArguments().length == 1) {
+                                                    String typeArg = paramType.getActualTypeArguments()[0].getTypeName();
+                                                    if (typeArg != null && ! "".equals(typeArg)) {
+                                                        Optional<Class<?>> optionalClass = Arrays.asList(TestScript.class.getDeclaredClasses()).stream()
+                                                                .filter(s -> s.getName().equals(typeArg))
+                                                                .findFirst();
+                                                        if (optionalClass.isPresent()) {
+                                                            for (Object o : optionalClass.get().getEnumConstants()) {
+                                                                if (o instanceof Enum) {
+                                                                    if (! ((Enum) o).name().equals("NULL")) {
+                                                                        fieldValueTypes.add(new TsEnumerationCodeExtractor().apply(o));
+                                                                    }
+                                                                }
+                                                            }
+
+                                                        }
+                                                    }
+                                                }
                                             }
 
                                         }
-
                                     }
+                                    fieldDescriptions.add(new AssertionFieldDescription(eStr, formalDefinition, fieldValueTypes));
                                 }
-                            }
 
-                        } catch (Exception ex) {
-                            // formalDefinition = "Not available.";
+                            } catch (Exception ex) {
+                                // formalDefinition = "Not available.";
+                            }
                         }
-                        List<String> quotedValueTypes =
-                                Arrays.stream(TestScript.AssertionDirectionType.values())
-                                        .filter(s -> ! s.equals(TestScript.AssertionDirectionType.NULL))
-                                        .map(s -> TestScriptDebugState.formatAsSelectOptionData(s.getDisplay(), s.toCode(), s.getDefinition()))
-                                        .collect(Collectors.toList());
-                        // Property names must exist in evalElementList
-                        String valueTypes = String.format("{\"direction\": {"
-                                + quoteString("formalDefinition") + ":"+ quoteString("formal def. place holder")
-                                +", \"values\":[%s] } }", String.join(",", quotedValueTypes));
+
                         // If evalJsonString is empty, Send original assertion as a template for the user to edit an assertion
                         String assertionJsonStr = new Gson().toJson(assertComponent);
-                        state.sendAssertionStr(assertionJsonStr, valueTypes);
+                        String valueTypesJsonStr = new Gson().toJson(fieldDescriptions);
+                        state.sendAssertionStr(assertionJsonStr, valueTypesJsonStr);
                     } else {
                         // Eval
                         ListIterator<String> it = evalElementList.listIterator();

@@ -49,7 +49,7 @@ export const debugAssertionEvalStore = {
                         }
                     },
             collapsibleDisplayEventObj: {displayOpen: false, breakpointObj: null},
-            enumValueTypes : null,
+            fieldValueTypes : null,
         }
     },
     mutations: {
@@ -106,8 +106,8 @@ export const debugAssertionEvalStore = {
            }
            state.showModal = true
         },
-        setEnumValueTypes(state, obj /* object containing an array of other value types */) {
-           state.enumValueTypes = obj
+        setFieldValueTypes(state, obj /* object containing an array of other value types */) {
+           state.fieldValueTypes = obj
         },
     },
     actions: {

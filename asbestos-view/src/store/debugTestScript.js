@@ -277,7 +277,7 @@ export const debugTestScriptStore = {
                 commit('setShowDebugEvalModal', true)
             } else {
                 commit('setAssertionEvalBreakpointIndex', breakpointIndex)
-                const requestAnnotations = (rootState.debugAssertionEval.enumValueTypes === null)
+                const requestAnnotations = (rootState.debugAssertionEval.fieldValueTypes === null)
                 // needsStaticValueCaching is True when enumeration types and the assertion field descriptions need to be cached
                 let sendData = `{"cmd":"requestOriginalAssertion","testScriptIndex":"${mapKey}","requestAnnotations":"${requestAnnotations}"}`
 
@@ -372,11 +372,11 @@ export const debugTestScriptStore = {
                             }
                         }
                     } else if (returnData.messageType === 'original-assertion') {
-                        // alert(JSON.stringify(returnData.assertionJson))
+                        // console.log(JSON.stringify(returnData))
                         // rootState.testScriptAssertionEval.
                         commit('updateAssertionEvalObj', returnData.assertionJson)
-                        if (rootState.debugAssertionEval.enumValueTypes === null && 'valueTypes' in returnData) {
-                            commit('setEnumValueTypes', returnData.valueTypes)
+                        if (rootState.debugAssertionEval.fieldValueTypes === null && 'valueTypes' in returnData) {
+                            commit('setFieldValueTypes', returnData.valueTypes)
                         }
                     } else if (returnData.messageType === 'eval-assertion-result') {
                         commit('setDebugAssertionEvalResult', returnData)

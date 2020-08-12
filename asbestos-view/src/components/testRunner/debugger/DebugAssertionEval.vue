@@ -29,13 +29,13 @@
                         <div class="flexContainer">
                             <div v-for="(val, propKey) in $store.state.debugAssertionEval.evalObj" :key="propKey">
                                 <div>
-                                    <div><label :for="propKey">{{propKey}}</label><span @click.stop="openHelp(propKey)"
+                                    <div><label style="text-align: left" :for="propKey">{{propKey}}</label><span @click.stop="openHelp(propKey)"
                                                                                         class="inputLabelInformation"
-                                                                                        title="TestScript Element - Detailed Description">&#x2139;</span>
+                                                                                        title="Click to open TestScript Element - Detailed Description">&#x2139;</span>
                                     </div>
                                     <div>
                                         <template v-if="isPropertyAnEnumType(propKey)">
-                                            <select class="form-control-select" :title="getEnumTypeFormalDefinition(propKey)" > <!-- TODO: Remove title and make a new span below the label. -->
+                                            <select class="form-control-select">
                                                 <option v-for="option in getEnumTypeArray(propKey)" :value="option.codeValue" :title="option.definition" :key="option.codeValue">
                                                     {{ option.displayName }}
                                                 </option>
@@ -50,6 +50,7 @@
                                                    :id="propKey"
                                                    :value="getPropVal(propKey)" @input="onEvalObjPropUpdate" @keyup="evalOnKeyUp"/>
                                         </template>
+                                        <span class="smallText">{{getEnumTypeFormalDefinition(propKey)}}</span>
                                     </div>
                                 </div>
                             </div>
@@ -100,15 +101,33 @@
             getPropVal(key) {
                 return this.$store.state.debugAssertionEval.evalObj[key]
             },
+            getFieldFromValueType(propKey) {
+              let arr =  this.$store.state.debugAssertionEval.fieldValueTypes
+                if (arr !== null) {
+                    let results = arr.filter(item => item.name === propKey)
+                    if (results.length === 1) {
+                        return results[0]
+                    }
+                }
+                return null
+            },
             getEnumTypeFormalDefinition(propKey) {
-                return this.$store.state.debugAssertionEval.enumValueTypes[propKey].formalDefinition
+                let propObj = this.getFieldFromValueType(propKey)
+                if (propObj !== null) {
+                   return propObj.formalDefinition
+                }
+                return ''
             },
             getEnumTypeArray(propKey) {
-                return this.$store.state.debugAssertionEval.enumValueTypes[propKey].values
+                let propObj = this.getFieldFromValueType(propKey)
+                if (propObj !== null) {
+                    return propObj.values
+                }
             },
             isPropertyAnEnumType(propKey) {
-                if (this.$store.state.debugAssertionEval.enumValueTypes  !== null && propKey in this.$store.state.debugAssertionEval.enumValueTypes) {
-                    return true
+                let propObj = this.getFieldFromValueType(propKey)
+                if (propObj !== null) {
+                   return (propObj.values.length > 0)
                 }
                 return false
             },
@@ -194,6 +213,11 @@
 
 
 <style scoped>
+    .smallText {
+        font-size: xx-small;
+        display: inline-block;
+        width: 16em;
+    }
     .modalFlexContainer {
         display: flex;
         align-items: center;
@@ -218,6 +242,7 @@
         cursor: pointer;
         margin-left: 4px;
         margin-bottom: 4px;
+        text-align: left;
     }
 
     .modal-mask {
