@@ -5,11 +5,34 @@ import org.junit.jupiter.api.Test;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 class RefTest {
+
+    @Test
+    void parameters() {
+        Ref ref;
+        Map<String, String> parms;
+
+        ref = new Ref("http://localhost/foo");
+        assertFalse(ref.isQuery());
+
+        ref = new Ref("http://localhost/foo?a=b");
+        assertTrue(ref.isQuery());
+        parms = ref.getParametersAsMap();
+        assertEquals(1, parms.size());
+
+        ref = new Ref("http://localhost/foo");
+        ref.addParameter("name", "George");
+        assertTrue(ref.isQuery());
+        parms = ref.getParametersAsMap();
+        assertEquals(1, parms.size());
+        ref.addParameter("type", "Monkey");
+        parms = ref.getParametersAsMap();
+        assertEquals(2, parms.size());
+    }
 
     @Test
     void rebase() throws URISyntaxException {

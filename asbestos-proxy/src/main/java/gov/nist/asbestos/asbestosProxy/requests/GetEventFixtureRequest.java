@@ -4,7 +4,7 @@ package gov.nist.asbestos.asbestosProxy.requests;
 // 0 - empty
 // 1 - appContext
 // 2 - "engine"
-// 3 - "staticFixture"
+// 3 - "eventFixture"
 // 4 - testCollectionId
 // 5 - testId
 // 6 - resourceType
@@ -20,21 +20,24 @@ import org.apache.log4j.Logger;
 import java.io.IOException;
 import java.net.URL;
 
-public class GetStaticFixtureRequest {
-    private static Logger log = Logger.getLogger(GetStaticFixtureRequest.class);
+public class GetEventFixtureRequest {
+    private static Logger log = Logger.getLogger(GetEventFixtureRequest.class);
 
     private Request request;
 
     public static boolean isRequest(Request request) {
-        return request.uriParts.size() == 7 && request.uriParts.get(3).equals("staticFixture");
+        return request.uriParts.size() == 7 && request.uriParts.get(3).equals("eventFixture");
     }
 
-    public GetStaticFixtureRequest(Request request) {
+    public GetEventFixtureRequest(Request request) {
         this.request = request;
     }
 
     public void run() {
-        log.info("GetStaticFixtureRequest");
+        log.info("GetEventFixtureRequest");
+
+        if (1 ==1)
+            throw new RuntimeException("GetEventFixtureRequest: Conflict in params to getStaticFixture - thought this was obsolete");
 
         String testCollectionId = request.uriParts.get(4);
         String testId = request.uriParts.get(5);

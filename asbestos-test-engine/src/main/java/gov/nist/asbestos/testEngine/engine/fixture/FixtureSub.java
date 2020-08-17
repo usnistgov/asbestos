@@ -62,7 +62,7 @@ public class FixtureSub {
     public Ref getRef(String resourceType, String fixturePath, String fhirPath) {
         Objects.requireNonNull(getTestCollectionId());
         Objects.requireNonNull(getTestId());
-        return FixtureComponent.generateStaticFixtureRef(resourceType, fixturePath, fhirPath, getTestCollectionId(), getTestId());
+        return FixtureComponent.generateStaticResourceRef(resourceType, fixturePath, fhirPath, getTestCollectionId(), getTestId());
     }
 
     public String getSourceId() {

@@ -1,5 +1,6 @@
 package gov.nist.asbestos.testEngine.engine.fixture;
 
+import com.google.common.base.Strings;
 import gov.nist.asbestos.client.client.FhirClient;
 import gov.nist.asbestos.client.events.UIEvent;
 import gov.nist.asbestos.client.resolver.Ref;
@@ -160,20 +161,20 @@ public class FixtureComponent {
         return null;
     }
 
-    public static Ref generateStaticFixtureRef(String resourceType, String fixturePath, String fhirPath, String testCollectionId, String testId) {
+    public static Ref generateStaticResourceRef(String resourceType, String fixturePath, String fhirPath, String testCollectionId, String testId) {
         URI uri = null;
         try {
             uri = new URI(ServiceProperties.getInstance().getPropertyOrStop(ServicePropertiesEnum.FHIR_TOOLKIT_BASE)
-                    + "/engine/staticFixture/" + testCollectionId + "/" + testId);
+                    + "/static/staticResource/" + testCollectionId + "/" + testId);
         } catch (URISyntaxException e) {
             return null;
         }
-        String searchString = "?url=" + fixturePath;
-        if (fhirPath != null && !fhirPath.equals(""))
+        String searchString = "?fixturePath=" + fixturePath;
+        if (!Strings.isNullOrEmpty(fhirPath))
             searchString = searchString + ";fhirPath=" + fhirPath;
         SearchParms searchParms = new SearchParms();
         try {
-            searchParms.setParms(searchString, true);
+            searchParms.setParms(searchString, true);  // encoding needed to escape bundle references
         } catch (UnsupportedEncodingException e) {
             return null;
         }
@@ -198,7 +199,7 @@ public class FixtureComponent {
         Objects.requireNonNull(getTestId());
         this.resourceWrapper = resource;
         if (resource.hasRef() && resource.getRef().isRelative()) {
-            Ref ref = generateStaticFixtureRef(resource.getResource().getClass().getSimpleName(),
+            Ref ref = generateStaticResourceRef(resource.getResource().getClass().getSimpleName(),
                     resource.getRef().toString(),
                     null,
                     getTestCollectionId(),

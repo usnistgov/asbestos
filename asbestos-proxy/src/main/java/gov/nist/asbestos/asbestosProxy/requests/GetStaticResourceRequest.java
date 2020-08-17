@@ -3,27 +3,28 @@ package gov.nist.asbestos.asbestosProxy.requests;
 // 0 - empty
 // 1 - app context
 // 2 - "static"
-// 3 - testCollectionId
-// 4 - testId
-// 5 - resourceType
-// 6 - fileName
+// 3 - "staticResource"
+// 4 - testCollectionId
+// 5 - testId
+// 6 - resourceType
+// 7 - fileName
 
 
-import gov.nist.asbestos.client.Base.FhirSearchPath;
-import gov.nist.asbestos.client.client.FhirClient;
+import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import org.apache.log4j.Logger;
 
-import java.io.File;
 import java.net.URL;
+import java.util.Map;
 
 public class GetStaticResourceRequest {
-    private static Logger log = Logger.getLogger(GetStaticResourceRequest.class);
+    private static final Logger log = Logger.getLogger(GetStaticResourceRequest.class);
 
-    private Request request;
+    private final Request request;
 
     public static boolean isRequest(Request request) {
-        return request.uriParts.size() == 7;
+        return request.uriParts.size() >= 6
+                && request.uriParts.get(3).equals("staticResource");
     }
 
     public GetStaticResourceRequest(Request request) {
@@ -32,24 +33,27 @@ public class GetStaticResourceRequest {
 
     public void run() {
         log.info("GetStaticResourceRequest");
-        String testCollectionId = request.uriParts.get(3);
-        String testId = request.uriParts.get(4);
-        String resourceType = request.uriParts.get(5);
-        String fileName = request.uriParts.get(6);
+        String testCollectionId = request.uriParts.get(4);
+        String testId = request.uriParts.get(5);
+        String resourceType = request.uriParts.get(6);
+        String fileName = request.uriParts.size() > 7 ? request.uriParts.get(7) : null;
         URL url = request.getFullUrl();
-
-        File testDef = request.ec.getTest(testCollectionId, testId);
-
-        FhirClient fhirClient = FhirSearchPath.getFhirClient(request.ec, testDef, request.channelId);
+        Map<String, String> parmMap = new Ref(url).getParametersAsMap();
+        String fixturePath = parmMap.containsKey("fixturePath") ? parmMap.get("fixturePath") : resourceType + "/" + fileName;
+        String fhirPath = parmMap.getOrDefault("fhirPath", null);
 
         ResourceWrapper wrapper = request.ec.getStaticFixture(
                 testCollectionId,
                 testId,
                 request.channelId,
-                resourceType + "/" + fileName,
-                null,
+                fixturePath,
+                fhirPath,
                 url);
 
+        if (wrapper == null) {
+            request.resp.setStatus(request.resp.SC_NOT_FOUND);
+            return;
+        }
         Returns.returnResource(request.resp, wrapper.getResource());
     }
 }

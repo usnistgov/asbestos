@@ -121,12 +121,13 @@ export const logStore = {
         async getLogEventAnalysisForObject({commit}, parms) {
             const ignoreBadRefs = parms.ignoreBadRefs
             let resourceUrl = parms.resourceUrl
+            console.log(`resourceUrl = ${resourceUrl}`)
             if (resourceUrl)
                resourceUrl = resourceUrl.trim()
             const gzip = parms.gzip
             const eventId = parms.eventId ? parms.eventId : ""
             try {
-                const url = `analysis/url/?url=${resourceUrl};gzip=${gzip};ignoreBadRefs=${ignoreBadRefs};eventId=${eventId}`
+                const url = `analysis/url?url=${resourceUrl};gzip=${gzip};ignoreBadRefs=${ignoreBadRefs};eventId=${eventId}`
                 console.log(`getAnalysis ${url}`)
                 const result = await LOG.get(url)
                 commit('setAnalysis', result.data)

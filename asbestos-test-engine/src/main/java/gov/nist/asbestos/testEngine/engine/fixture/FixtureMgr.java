@@ -18,6 +18,7 @@ public class FixtureMgr {
     private String testId = null;
     private FhirClient fhirClient = null;
 
+
     public FixtureMgr() {
 
     }

@@ -39,4 +39,6 @@ public class SearchParms {
     public boolean isSearch() {
         return parms != null && parms.contains("?");
     }
+
+    public String toString() { return parms; }
 }

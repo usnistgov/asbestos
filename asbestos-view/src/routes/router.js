@@ -23,7 +23,9 @@ import Getter from "../components/getter/Getter"
 import Admin from "../components/wrapper/Admin";
 import StaticFixtureDisplay from "../components/testRunner/StaticFixtureDisplay";
 import Setup from "../components/top/Setup";
-import LogAnalysisReport from "@/components/logViewer/LogAnalysisReport";
+//import LogAnalysisReport from "@/components/logViewer/LogAnalysisReport";
+import InspectUrl from "@/components/logViewer/InspectUrl";
+//import Tester from "@/components/testRunner/Tester";
 
 Vue.use( VueRouter )
 
@@ -65,6 +67,14 @@ export const routes = [
                 components: {
                     default: Admin
                 }
+            },
+            {
+                path: 'inspectUrl',
+                component: InspectUrl,
+                props: (route) => ({
+                    dataObject: route.query.dataObject,
+                    fhirPath: route.query.fhirPath
+                })
             },
             {
                 path: 'session/:sessionId',
@@ -109,11 +119,6 @@ export const routes = [
                             {
                                 path: 'lognav/:eventId/:reqresp',
                                 component: InspectEvent,
-                                props: true,
-                            },
-                            {
-                                path: 'inspurl',
-                                component: LogAnalysisReport,
                                 props: true,
                             },
                             {

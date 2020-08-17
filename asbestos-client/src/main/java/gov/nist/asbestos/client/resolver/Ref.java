@@ -1,12 +1,11 @@
 package gov.nist.asbestos.client.resolver;
 
+import com.google.common.base.Strings;
 import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
+import java.net.*;
 import java.util.*;
 
 public class Ref {
@@ -16,6 +15,10 @@ public class Ref {
     public Ref(URI uri) {
         Objects.requireNonNull(uri);
         this.uri = httpize(uri);
+    }
+
+    public Ref(URL url) {
+        this(url.toString());
     }
 
     public Ref(String ref)  {
@@ -60,7 +63,7 @@ public class Ref {
 
     public Ref(Ref base, String resourceType, String id, String version, String parameters)  {
         Ref ref = new Ref(base, resourceType, id, version);
-        if (parameters == null || parameters.equals("")) {
+        if (Strings.isNullOrEmpty(parameters)) {
             uri = ref.getUri();
             return;
         }
@@ -96,10 +99,47 @@ public class Ref {
         }
     }
 
+    public Ref addParameter(String name, String value) {
+        String query = uri.getQuery();
+        try {
+            if (Strings.isNullOrEmpty(query)) {
+                uri = new URI(asString() + "?" + name + "=" + value);
+            } else {
+                uri = new URI(asString() + ";" + name + "=" + value);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Cannot construct URI (Ref) with new parameter: name=" + name + " value=" + value );
+        }
+        return this;
+    }
+
     public String getParameters() {
         if (uri == null)
             return null;
-        return uri.getQuery();
+        String query = uri.getQuery();
+        if (query == null)
+            return null;
+        return urlDecode(uri.getQuery());
+    }
+
+//    public static Map<String, String> parseParameters(String paramString) {
+//        paramString = paramString.trim();
+//        if (!paramString.startsWith("?"))
+//            paramString = "?" + paramString;
+//        String aFullUrl = "http://example.com" + paramString;
+//        return new Ref(aFullUrl).getParametersAsMap();
+//    }
+
+    public static Map<String, String> parseParameters(String parms) {
+        Map<String, String> map = new HashMap<>();
+        String[] parts = parms.split(";");
+        for (int i = 0; i < parts.length; i++) {
+            String parm = parts[i];
+            List<String> namevalue = Arrays.asList(parm.split("=", 2));
+            if (!namevalue.get(0).equals(""))
+                map.put(namevalue.get(0), namevalue.get(1));
+        }
+        return map;
     }
 
     public Map<String, String> getParametersAsMap() {
@@ -108,14 +148,23 @@ public class Ref {
         String parms = getParameters();
         if (parms == null)
             return map;
+        String[]  theParts = parms.split("\\?");
+        if (theParts.length == 2)
+            parms = theParts[1];
         String[] parts = parms.split(";");
-        for (int i=0; i<parts.length; i++) {
+        for (int i = 0; i < parts.length; i++) {
             String parm = parts[i];
             List<String> namevalue = Arrays.asList(parm.split("=", 2));
             if (!namevalue.get(0).equals(""))
                 map.put(namevalue.get(0), namevalue.get(1));
         }
+
         return map;
+    }
+
+    public List<String> getParameterNames() {
+        Map<String, String> map = getParametersAsMap();
+        return new ArrayList<>(map.keySet());
     }
 
     private URI httpize(URI theUri) {
@@ -360,6 +409,23 @@ public class Ref {
 
     public String asString() { return uri.toString(); }
 
+    public String urlEncode() {
+        try {
+            String x = URLEncoder.encode(asString(), "utf-8");
+            return x;
+        } catch (Exception e) {
+            throw new RuntimeException("Cannot URL encode " + asString(), e);
+        }
+    }
+
+    public static String urlDecode(String s) {
+        try {
+            return URLDecoder.decode(s, "utf-8");
+        } catch (Exception e) {
+            throw new RuntimeException("Cannot URL decode " + s, e);
+        }
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -405,7 +471,17 @@ public class Ref {
         return anchor != null;
     }
 
-    static private List<String> resourceNames = Arrays.asList(
+    static public List<String> getResourceNames() {
+        return resourceNames;
+    }
+
+    static private List<String> resourceNames;
+
+    {
+        Collections.sort(rawResourceNames);
+        resourceNames = rawResourceNames;
+    }
+    static private List<String> rawResourceNames = Arrays.asList(
             "CapabilityStatement",
             "StructureDefinition",
             "ImplementationGuide",

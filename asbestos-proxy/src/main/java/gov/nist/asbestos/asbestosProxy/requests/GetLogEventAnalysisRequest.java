@@ -1,5 +1,6 @@
 package gov.nist.asbestos.asbestosProxy.requests;
 
+import com.google.common.base.Strings;
 import com.google.gson.Gson;
 import gov.nist.asbestos.analysis.AnalysisReport;
 import gov.nist.asbestos.analysis.RelatedReport;
@@ -17,11 +18,14 @@ import org.apache.log4j.Logger;
 import org.checkerframework.checker.units.qual.A;
 import org.hl7.fhir.r4.model.*;
 
+import javax.naming.ldap.HasControls;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 // 0 - empty
@@ -54,7 +58,7 @@ import java.util.Objects;
 // 1 - app context  (asbestos)
 // 2 - "log"
 // 3 - "analysis"
-// 4 - "static"
+// 4 - "static" or "url" or "event"
 // 5 - testCollectionId
 // 6 - testId
 // ?url=reference
@@ -74,12 +78,12 @@ public class GetLogEventAnalysisRequest {
                 && "analysis".equalsIgnoreCase(request.uriParts.get(3))
                 && "event".equalsIgnoreCase(request.uriParts.get(4))
 
-        ||
+                ||
 
-        request.uriParts.size() == 5
-                && "log".equalsIgnoreCase(request.uriParts.get(2))
-                && "analysis".equalsIgnoreCase(request.uriParts.get(3))
-                && "url".equalsIgnoreCase(request.uriParts.get(4))
+                request.uriParts.size() == 5
+                        && "log".equalsIgnoreCase(request.uriParts.get(2))
+                        && "analysis".equalsIgnoreCase(request.uriParts.get(3))
+                        && "url".equalsIgnoreCase(request.uriParts.get(4))
 
                 ||
 
@@ -106,35 +110,46 @@ public class GetLogEventAnalysisRequest {
         return requestOrResponse.equals("request");
     }
 
+    private File testDir = null;
+
+    private File getTestDir(String testCollectionId, String testId) {
+        File testDir = null;
+        if (testCollectionId != null && testId != null) {
+            testDir = request.ec.getTest(testCollectionId, testId);
+            if (testDir == null || !testDir.exists() || !testDir.isDirectory()) {
+                request.resp.setStatus(request.resp.SC_NOT_FOUND);
+                return null;
+            }
+        }
+        return testDir;
+    }
+
     public void run() {
         log.info("GetLogEventAnalysisRequest");
 
+        testDir = getTestDir(request.segment(5), request.segment(6));
+
         if (request.uriParts.get(4).equalsIgnoreCase("static")) {
             // load static fixture from test definition
-            String testCollectionId = request.uriParts.get(5);
-            String testId = request.uriParts.get(6);
             String ref = request.getParm("url");
-            if (ref == null) {
-                request.resp.setStatus(request.resp.SC_BAD_REQUEST);
+//            if (ref == null) {
+//                request.resp.setStatus(request.resp.SC_BAD_REQUEST);
+//                return;
+//            }
+//            File file = new File(testDir, ref);
+//            if (!file.exists() || !file.isFile()) {
+//                request.resp.setStatus(request.resp.SC_NOT_FOUND);
+//                return;
+//            }
+            BaseResource resource = getResourceFromTestDefinition(testDir, ref);
+            if (resource == null)
                 return;
-            }
-            File testDir = request.ec.getTest(testCollectionId, testId);
-            if (!testDir.exists() || !testDir.isDirectory()) {
-                request.resp.setStatus(request.resp.SC_NOT_FOUND);
-                return;
-            }
-            File file = new File(testDir, ref);
-            if (!file.exists() || !file.isFile()) {
-                request.resp.setStatus(request.resp.SC_NOT_FOUND);
-                return;
-            }
-            BaseResource resource;
-            try {
-                resource = ProxyBase.parse(file);
-            } catch (Exception e) {
-                returnReport(new Report("Not found or not a resource: " + file));
-                return;
-            }
+//            try {
+//                resource = ProxyBase.parse(file);
+//            } catch (Exception e) {
+//                returnReport(new Report("Not found or not a resource: " + file));
+//                return;
+//            }
             analyseResource(resource, null, true);
 
         } else if (request.uriParts.get(4).equalsIgnoreCase("event")) {
@@ -193,46 +208,92 @@ public class GetLogEventAnalysisRequest {
             } else {
                 Ref ref = new Ref("http://" + requestHeaders.getHeaderValue("host") + requestHeaders.getPathInfo());
                 runAndReturnReport(new ResourceWrapper(baseResource).setRef(ref));
-//            } else {
-//                returnReport(new Report("Do not understand event"));
             }
-        } else {   // url
+        } else if (request.uriParts.get(4).equalsIgnoreCase("url")) {   // url
             String query = request.req.getQueryString();
             if (query != null) {
-                boolean gzip = false;
-                boolean useProxy = true;
-                boolean ignoreBadRefs = false;
-                String eventId = null;
-                if (query.contains("gzip=true"))
-                    gzip = true;
-                if (query.contains("ignoreBadRefs=true"))
-                    ignoreBadRefs = true;
-                if (query.contains("eventId=")) {
-                    int index = query.indexOf("eventId=");
-                    index = query.indexOf("=", index);
-                    index++;
-                    int index2 = query.indexOf(";", index);
-                    if (index2 == -1)
-                        index2 = query.length() -1;
-                    if (index2 > index)  // event=  is a possibility
-                        eventId = query.substring(index, index2);
+                String url = null;
+                if (!query.startsWith("url=")) {
+                    request.resp.setStatus(request.resp.SC_BAD_REQUEST);
+                    return;
                 }
-                if (query.contains("url=http")){
-                    int urlIndex = query.indexOf("url=http") + 4;
-                    int urlEndIndex = query.indexOf(";", urlIndex);
-                    String url = query.substring(urlIndex, urlEndIndex);
+                url = query.substring(4);
+                if (!url.contains("?") && url.contains(";")) {
+                    url = url.substring(0, url.indexOf(';'));
+                }
+                Request target;
+                try {
+                    target = new Request(url, request.externalCache);
+                } catch (URISyntaxException e) {
+                    request.resp.setStatus(request.resp.SC_BAD_REQUEST);
+                    return;
+                }
+                File testDir = getTestDir(target.segment(4), target.segment(5));
+                if (testDir == null) {
+                    request.resp.setStatus(request.resp.SC_BAD_REQUEST);
+                    return;
+                }
+                Map<String, String> queryParams = Ref.parseParameters(query);
+                boolean gzip = queryParams.containsKey("gzip") && "true".equals(queryParams.get("gzip"));
+                boolean useProxy = queryParams.containsKey("useProxy") && "true".equals(queryParams.get("useProxy"));;
+                boolean ignoreBadRefs = queryParams.containsKey("ignoreBadRefs") && "true".equals(queryParams.get("ignoreBadRefs"));
+                String eventId = queryParams.getOrDefault("eventId", null);
+                String fixturePath = queryParams.get("fixturePath");
+                String fhirPath = queryParams.get("fhirPath");
+                //String url = queryParams.getOrDefault("url", null);
+                if (url != null) {
                     Ref ref = new Ref(url);
-                    if (eventId != null) {
+                    BaseResource resource = null;
+                    if (!Strings.isNullOrEmpty(eventId)) {
                         try {
                             eventContext = new EventContext(ProxyEvent.eventFromEventURI(new URI(url)));
                         } catch (Exception e) {
                             throw new RuntimeException("URI " + url + " cannot be translated into an event");
                         }
+                    } else if (!Strings.isNullOrEmpty(fixturePath)) {
+                        resource = getResourceFromTestDefinition(testDir, fixturePath);
+                        if (resource == null) {
+                            request.resp.setStatus(request.resp.SC_BAD_REQUEST);
+                            return;
+                        }
                     }
-                    runAndReturnReport(ref, "By Request", gzip, useProxy, ignoreBadRefs, false, null);
+                    //Ref theRef = new Ref(fhirPath);
+                    // too early - ref = new Ref(Ref.urlDecode(ref.asString()));
+                    runAndReturnReport(
+                            ref,
+                            "By Request",
+                            gzip,
+                            useProxy,
+                            ignoreBadRefs,
+                            false,
+                            resource);
                 }
             }
         }
+    }
+
+    BaseResource getResourceFromTestDefinition(File testDir, String ref) {
+        if (Strings.isNullOrEmpty(ref)) {
+            request.resp.setStatus(request.resp.SC_BAD_REQUEST);
+            return null;
+        }
+        if (testDir == null) {
+            request.resp.setStatus(request.resp.SC_NOT_FOUND);
+            return null;
+        }
+        File file = new File(testDir, ref);
+        if (!file.exists() || !file.isFile()) {
+            request.resp.setStatus(request.resp.SC_NOT_FOUND);
+            return null;
+        }
+        BaseResource resource;
+        try {
+            resource = ProxyBase.parse(file);
+        } catch (Exception e) {
+            returnReport(new Report("Not found or not a resource: " + file));
+            return null;
+        }
+        return resource;
     }
 
     void analyseBundle(String focusUrl, boolean requestFocus, boolean runValidation, Bundle bundle /*, Bundle requestBundle */) {

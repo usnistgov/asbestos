@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ValidationOptions;
 import ca.uhn.fhir.validation.ValidationResult;
+import com.google.common.base.Strings;
 import gov.nist.asbestos.client.Base.DocumentCache;
 import gov.nist.asbestos.client.Base.EC;
 import gov.nist.asbestos.client.Base.ProxyBase;
@@ -11,13 +12,16 @@ import gov.nist.asbestos.client.client.FhirClient;
 import gov.nist.asbestos.client.client.Format;
 import gov.nist.asbestos.client.reporting.IErrorReporter;
 import gov.nist.asbestos.client.resolver.ChannelUrl;
+import gov.nist.asbestos.client.resolver.FhirPath;
 import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import gov.nist.asbestos.http.headers.Headers;
+import gov.nist.asbestos.http.headers.WhiteSpace;
 import gov.nist.asbestos.serviceproperties.ServiceProperties;
 import gov.nist.asbestos.serviceproperties.ServicePropertiesEnum;
 import gov.nist.asbestos.simapi.validation.Val;
 import gov.nist.asbestos.testEngine.engine.AssertionRunner;
+import gov.nist.asbestos.testEngine.engine.FhirPathEngineBuilder;
 import gov.nist.asbestos.testEngine.engine.TestEngine;
 import gov.nist.asbestos.testEngine.engine.assertion.MinimumId;
 import gov.nist.asbestos.utilities.ResourceHasMethodsFilter;
@@ -139,37 +143,6 @@ public class AnalysisReport {
 
         return report;
     }
-
-//    // https://hapifhir.io/hapi-fhir/docs/validation/validation_support_modules.html
-//    private OperationOutcome runLocalValidation(BaseResource resource) {
-//        FhirContext ctx = ProxyBase.getFhirContext();
-//
-//        // Create a validation support chain
-//        ValidationSupportChain supportChain = new ValidationSupportChain();
-//        supportChain.addValidationSupport(new DefaultProfileValidationSupport());
-//
-//        PrePopulatedValidationSupport prePopulatedSupport = new PrePopulatedValidationSupport();
-//        prePopulatedSupport.addStructureDefinition(someStructureDefnition);
-//
-//
-//        // Create a FhirInstanceValidator and register it to a validator
-//        FhirValidator validator = ctx.newValidator();
-//        FhirInstanceValidator instanceValidator = new FhirInstanceValidator(supportChain);
-//        validator.registerValidatorModule(instanceValidator);
-//
-//        /*
-//         * If you want, you can configure settings on the validator to adjust
-//         * its behaviour during validation
-//         */
-//        instanceValidator.setAnyExtensionsAllowed(true);
-//
-//        // Validate
-//        ValidationResult result = validator.validateWithResult(resource,
-//                new ValidationOptions().addProfile("http://myprofile.com")
-//        );
-//
-//        return (OperationOutcome) result.toOperationOutcome();
-//    }
 
     private OperationOutcome runValidation(BaseResource resource) {
         List<String> errors = new ArrayList<>();
@@ -422,13 +395,21 @@ public class AnalysisReport {
     }
 
     private Ref translateToProxyServerSide(Ref theRef) {
+        Objects.requireNonNull(theRef);
+        ServiceProperties serviceProperties = ServiceProperties.getInstance();
+        String proxyAddrPrefix = serviceProperties.getPropertyOrStop(ServicePropertiesEnum.FHIR_TOOLKIT_UI_HOME_PAGE);
+
+        if (!theRef.asString().startsWith(proxyAddrPrefix))
+            return theRef;
         Ref resourceRef;
         Ref baseRefRelative = theRef.getRelative();
         try {
             fhirBase = new Ref(new ChannelUrl(ec.externalCache).getFhirBase(theRef.getUri()));
-            if (fhirBase.toString().equals("")) {
+            if (Strings.isNullOrEmpty(fhirBase.toString())) {
                 generalWarnings.add("No FHIRBASE registered for this channel. This may be an MHD channel. Directing queries to channel.");
                 resourceRef = theRef;
+            } else if (Strings.isNullOrEmpty(theRef.getResourceType())) {
+                return fhirBase;
             } else {
                 resourceRef = baseRefRelative.rebase(fhirBase);
             }
@@ -446,15 +427,17 @@ public class AnalysisReport {
         errorReporter.requireNonNull(baseRef, "baseRef must be non-null in AnalysisReport.loadBaseFromContext");
         errorReporter.requireNonNull(contextResource, "contextResource must be non-null in AnalysisReport.loadBaseFromContext");
         errorReporter.requireNull(baseObj, "baseObj must be null in AnalysisReport.loadBaseFromContext");
-        Resource resource = resourceFromBundle((Bundle)contextResource, baseRef);
+
+        Map<String, String> params = baseRef.getParametersAsMap();
+        Resource resource;
+        if (params.containsKey("fhirPath")) {
+            FhirPath fhirPath = new FhirPath(params.get("fhirPath"));
+            resource = resourceFromBundle((Bundle) contextResource, fhirPath);
+        } else {
+            resource = resourceFromBundle((Bundle) contextResource, baseRef);
+        }
         if (resource != null)
             baseObj = new ResourceWrapper(resource).setRef(baseRef);
-        // load all bundle parts into related so they are found without pinging a server
-//        if (contextResource instanceof Bundle) {
-//            Bundle context = (Bundle) contextResource;
-//            loadRelatedFromPDB(context);
-//        }
- //       errorReporter.requireNonNull(baseObj, "baseObj must be loaded by AnalysisReport.loadBaseFromContext");
     }
 
     private void loadRelatedFromPDB(Bundle context) {
@@ -537,13 +520,17 @@ public class AnalysisReport {
         }
     }
 
+    private Resource resourceFromBundle(Bundle bundle, FhirPath fhirPath) {
+        return FhirPathEngineBuilder.evalForResource(bundle, fhirPath.getValue());
+    }
+
     private Resource resourceFromBundle(Bundle bundle, Ref fullUrl) {
         Objects.requireNonNull(fullUrl);
         Map<String, String> urlParms = fullUrl.getParametersAsMap();
         String url = urlParms.get("url");
         String fullUrlString = fullUrl.asString();
         for( Bundle.BundleEntryComponent comp : bundle.getEntry()) {
-            // asString is used in case there is an anchor in the fullUrl
+            // asString is used in case there is an anchor in the fullUrl, it should be included
             if (fullUrlString.equals(comp.getFullUrl())) {
                 if (fullUrl.hasAnchor()) {
                     if (comp.getResource() instanceof DomainResource)
@@ -678,7 +665,8 @@ public class AnalysisReport {
             }
         }
 
-        fhirBase = translateToProxyServerSide(fhirBase);
+        if (fhirBase != null)
+            fhirBase = translateToProxyServerSide(fhirBase);
 
         for (Bundle.BundleEntryComponent entryComponent : bundle.getEntry()) {
             if (entryComponent.hasResponse()) {
@@ -687,6 +675,11 @@ public class AnalysisReport {
                     String rawLocation = responseComponent.getLocation();
                     load(new Ref(rawLocation), "component", bundle);
                 }
+            } else { // show request
+                Resource request  = entryComponent.getResource();
+                ResourceWrapper wrapper = new ResourceWrapper(request);
+                Related rel = new Related(wrapper, "In Bundle");
+                related.add(rel);
             }
         }
     }
@@ -946,6 +939,7 @@ public class AnalysisReport {
             }
             ResourceWrapper wrapper;
             try {
+                log.info("Read " + ref.asString());
                 wrapper = fhirClient.readResource(ref);
             } catch (Throwable e) {
                 generalErrors.add(e.getMessage());

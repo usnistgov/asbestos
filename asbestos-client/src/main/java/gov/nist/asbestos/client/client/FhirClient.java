@@ -1,5 +1,6 @@
 package gov.nist.asbestos.client.client;
 
+import com.google.common.base.Strings;
 import gov.nist.asbestos.client.Base.EC;
 import gov.nist.asbestos.client.Base.ProxyBase;
 import gov.nist.asbestos.client.events.ProxyEvent;
@@ -180,7 +181,7 @@ public class FhirClient {
         }
 
         String resourceText = getter.getResponseText();
-        if (resourceText == null || resourceText.equals("")) {
+        if (Strings.isNullOrEmpty(resourceText)) {
             if (getter.isSearch())
                 throw new Error("Search must return Bundle - received nothing instead");
             return wrapper;
@@ -212,11 +213,12 @@ public class FhirClient {
                 if (!returnedResourceType.equals("OperationOutcome")) {
                     if (!expectedResourceType.equals("metadata") && !returnedResourceType.equals("CapabilityStatement")) {
                         if (!returnedResourceType.equals(expectedResourceType)) {
-                            if (getter.isSearch() && returnedResourceType.equals("Bundle")) {
+                            if (/*getter.isSearch() && */returnedResourceType.equals("Bundle")) {
                                 Bundle bundle = (Bundle) resource;
                                 if (bundle.hasEntry()) {
                                     if (!bundle.getEntry().get(0).getResource().getClass().getSimpleName().equals(expectedResourceType))
                                         throw new Error("Search returned bundle containing " + bundle.getEntry().get(0).getResource().getClass().getSimpleName() + " instead of " + expectedResourceType);
+                                    resource = bundle.getEntry().get(0).getResource();
                                 }
                             } else
                                 throw new Error("Read must return " + expectedResourceType + " - received " + resource.getClass().getSimpleName() + " instead");

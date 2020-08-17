@@ -123,4 +123,10 @@ public class Request {
         }
     }
 
+    public String segment(int i) {
+        if (i >= uriParts.size())
+            return null;
+        return uriParts.get(i);
+    }
+
 }
