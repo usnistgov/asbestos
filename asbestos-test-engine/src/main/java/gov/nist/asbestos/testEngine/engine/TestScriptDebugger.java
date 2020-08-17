@@ -115,6 +115,7 @@ public class TestScriptDebugger implements TestScriptDebugInterface {
                         if (state.getRequestAnnotations().get()) {
                             try {
                                 for (String eStr : evalElementList) {
+                                    String shortDefinition = "";
                                     String formalDefinition = "";
                                     List<AssertionFieldValueDescription> fieldValueTypes = new ArrayList<>();
                                     // Property names must exist in evalElementList
@@ -122,6 +123,7 @@ public class TestScriptDebugger implements TestScriptDebugInterface {
                                     if (f != null) {
                                         Annotation annotation = f.getAnnotation(Description.class);
                                         if (annotation != null) {
+                                            shortDefinition = ((Description) annotation).shortDefinition();
                                             formalDefinition = ((Description) annotation).formalDefinition();
                                         }
                                         if (f.getType().isAssignableFrom(Enumeration.class)) {
@@ -150,7 +152,7 @@ public class TestScriptDebugger implements TestScriptDebugInterface {
 
                                         }
                                     }
-                                    fieldDescriptions.add(new AssertionFieldDescription(eStr, formalDefinition, fieldValueTypes));
+                                    fieldDescriptions.add(new AssertionFieldDescription(eStr, shortDefinition, formalDefinition, fieldValueTypes));
                                 }
 
                             } catch (Exception ex) {

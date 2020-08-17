@@ -113,7 +113,7 @@
     import colorizeTestReports from "../../mixins/colorizeTestReports";
     import debugTestScriptMixin from "../../mixins/debugTestScript";
     import ScriptStatus from "./ScriptStatus";
-    import DebugAssertionEval from "./debugger/DebugAssertionEval";
+    import DebugAssertionEval from "./debugger/DebugAssertionModal";
 
     export default {
         methods: {

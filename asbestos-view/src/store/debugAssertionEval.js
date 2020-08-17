@@ -33,19 +33,25 @@ function EvalAssertionObj() {
     this.warningOnly = ''
 }
 
+function EvalResultObj() {
+    this.propKey = ''
+    this.resultMessage = ''
+    this.markdownMessage = ''
+}
+
 export const debugAssertionEvalStore = {
     state() {
         return {
             assertionEvalBreakpointIndex: '',
             showModal: false,
             isEvalObjUpdated: false,
-            debugAssertionEvalResult: {propKey: '', resultMessage: '', markdownMessage: ''},
-            evalObj: new EvalAssertionObj(),
-            evalObjTODO: {
-                    patternType:
+            // debugAssertionEvalResult: {propKey: '', resultMessage: '', markdownMessage: ''},
+            // evalObj: new EvalAssertionObj(),
+            evalObjByPattern: {
+                    patternTypes:
                         {
-                            genericType: {dataObj: new EvalAssertionObj()},
-                            compareToSourceId: {dataObj: new EvalAssertionObj(), fieldList: ['compareToSourceId','compareToSourceExpression','warningOnly']}
+                            compareToSourceId: {dataObj: new EvalAssertionObj(), resultObj: new EvalResultObj(), displayFieldList: ['compareToSourceId','compareToSourceExpression','warningOnly']},
+                            originalAssertion: {dataObj: new EvalAssertionObj(), resultObj: new EvalResultObj(), displayFieldList: ['compareToSourceId','warningOnly']}
                         }
                     },
             collapsibleDisplayEventObj: {displayOpen: false, breakpointObj: null},
@@ -57,24 +63,27 @@ export const debugAssertionEvalStore = {
          state.assertionEvalBreakpointIndex = val
         },
         setEvalObjProperty(state, obj) {
+            let dataRef = state.evalObjByPattern.patternTypes[obj.patternTypeId].dataObj
             if ('propKey' in obj) {
-                if (obj.propKey in state.evalObj) {
-                    state.evalObj[obj.propKey] = obj.propVal
+                if (obj.propKey in dataRef) {
+                    dataRef[obj.propKey] = obj.propVal
                 }
             }
         },
         setShowDebugEvalModal(state, bVal) {
             state.showModal = Boolean(bVal)
         },
-        setDebugAssertionEvalPropKey(state, key) {
-            state.debugAssertionEvalResult.propKey = key
+        setDebugAssertionEvalPropKey(state, obj) {
+            let resultRef = state.evalObjByPattern.patternTypes[obj.patternTypeId].resultObj
+            resultRef.propKey = obj.propKey
         },
         setDebugAssertionEvalResult(state, obj) {
-           state.debugAssertionEvalResult.resultMessage = obj.resultMessage
+            let resultRef = state.evalObjByPattern.patternTypes[obj.patternTypeId].resultObj
+            resultRef.resultMessage = obj.resultMessage
             if ('exceptionPropKey' in obj) {
-                state.debugAssertionEvalResult.propKey = obj.exceptionPropKey
+                resultRef.propKey = obj.exceptionPropKey
             } else {
-                state.debugAssertionEvalResult.propKey = ''
+                resultRef.propKey = ''
             }
             let mkdwnMsg = ''
             if ('markdownMessage' in obj) {
@@ -82,23 +91,24 @@ export const debugAssertionEvalStore = {
                     mkdwnMsg = window.atob(obj.markdownMessage)
                 }
             }
-            state.debugAssertionEvalResult.markdownMessage = mkdwnMsg
+            resultRef.markdownMessage = mkdwnMsg
         },
         updateAssertionEvalObj(state, obj) {
            let atLeastOnePropertyWasUpdated = false
-           for (let propKey in state.evalObj) {
+           let dataRef = state.evalObjByPattern.patternTypes['originalAssertion'].dataObj
+            for (let propKey in dataRef) {
              if (propKey in obj) {
                  if (typeof obj[propKey] === 'string') {
-                     state.evalObj[propKey] = obj[propKey]
+                     dataRef[propKey] = obj[propKey]
                  } else if ('myStringValue' in obj[propKey]) {
-                    state.evalObj[propKey] = obj[propKey].myStringValue
+                    dataRef[propKey] = obj[propKey].myStringValue
                  }
                  if (atLeastOnePropertyWasUpdated === false) {
                      atLeastOnePropertyWasUpdated = true
                      // console.log('propKey: ' + propKey + ' was set to: ' + state.evalObj[propKey] + '. inprop? ' + Boolean('myStringValue' in obj[propKey])) // obj[propKey].myStringValue
                  }
              } else {
-                 state.evalObj[propKey] = ''
+                 dataRef[propKey] = ''
              }
             }
            if (atLeastOnePropertyWasUpdated) {
