@@ -6,20 +6,30 @@
                     <div>
                         <div>
                         <span class="eval-modal-header" draggable="true" @dragstart="drag_start">
-                            <h3>Eval<span style="position: relative; display: inline-block;  left: 45%; text-align: right; cursor: pointer; font-size: small; margin-top: 2px; vertical-align: text-top" title="Close" @click="close">&#x274c;
+                            <h3>Eval<span class="closeXIcon" title="Close" @click="close">&#x274c;
                             </span></h3>
                         </span>
                         </div>
 
                         <div class="modal-body">
-                            <div class="flexContainer">
-                                <div v-for="(val, patternType) in $store.state.debugAssertionEval.evalObjByPattern.patternTypes"
-                                     :key="patternType">
-                                    <div class="patternHeader">Pattern: {{patternType}}</div>
-                                    <!-- $store.state.debugAssertionEval.evalObjByPattern.patternType[patternType] -->
-                                    <debug-assertion-form :pattern-type-id="patternType"/>
-                                </div>
+                            <div class="patternHeader">Select a Pattern:</div>
+                            <div style="display: flex;  flex-direction: row;  flex-wrap: wrap;  width: auto; vertical-align: middle">
+                            <div v-for="(val, patternType) in $store.state.debugAssertionEval.evalObjByPattern.patternTypes"
+                                 :key="patternType">
+                            <div
+                                    v-bind:class="{
+                                            'selectedPatternType': isSelectedPatternType(patternType),
+                                            'selectPatternType' : true,
+                                            }"
+                                    @click="doSelectPatternTypeId(patternType)">{{patternType}}</div>
                             </div>
+                        </div>
+                            <div style="margin: 6px" v-for="(val, patternType) in $store.state.debugAssertionEval.evalObjByPattern.patternTypes"
+                                     :key="patternType">
+                                    <template v-if="isSelectedPatternType(patternType)">
+                                        <debug-assertion-form :pattern-type-id="selectedPatternTypeId"/>
+                                    </template>
+                                </div>
                         </div>
 
                         <!--   <div class="modal-footer text-right">-->
@@ -37,6 +47,7 @@
     export default {
         data() {
             return {
+                selectedPatternTypeId: 'originalAssertion', // load the original assertion as the default view
                 drag_pos_left: 0,
                 drag_pos_top: 0,
                 evalTimer: null,
@@ -47,6 +58,12 @@
         props: ['show'],
         computed: {},
         methods: {
+            isSelectedPatternType(patternTypeId) {
+               return (this.selectedPatternTypeId === patternTypeId)
+            },
+            doSelectPatternTypeId(patternTypeId) {
+               this.selectedPatternTypeId = patternTypeId
+            },
             close: function () {
                 this.$store.commit('setDebugAssertionEvalPropKey', {patternTypeId: 'originalAssertion', propKey: ''})
                 this.$emit('close')
@@ -107,6 +124,43 @@
 
 
 <style scoped>
+    .selectedPatternType,
+    .selectPatternType {
+        border: 1px solid gray;
+        display: inline-block;
+        cursor: pointer;
+        background-color: lavender;
+        font-weight: bolder;
+        margin: 5px;
+        text-align: left;
+    }
+    .selectedPatternType {
+        border: 1px solid darkorchid;
+        background-color: plum;
+        border-style: groove;
+    }
+    .closeXIcon {
+        position: relative;
+        display: inline-block;
+        left: 45%;
+        text-align: right;
+        cursor: pointer;
+        font-size: small;
+        margin-top: 2px;
+        vertical-align: text-top;
+    }
+    .patternSeparator {
+        border: 1px solid #f5f5f5;
+        visibility: hidden;
+    }
+
+    .patternHeader {
+        text-align: left;
+        display: block;
+        font-weight: bolder;
+        margin: 4px;
+        background-color: inherit;
+    }
 
     .modalFlexContainer {
         display: flex;
@@ -114,13 +168,6 @@
         justify-content: space-evenly;
     }
 
-    .flexContainer {
-        display: flex;
-        flex-direction: row;
-        flex-wrap: wrap;
-        width: auto;
-        height: 50%;
-    }
 
     * {
         box-sizing: border-box;
@@ -161,7 +208,7 @@
     }
 
     .modal-body {
-        margin: 20px 0;
+        margin-bottom: 20px;
     }
 
 

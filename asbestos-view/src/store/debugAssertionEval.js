@@ -50,8 +50,8 @@ export const debugAssertionEvalStore = {
             evalObjByPattern: {
                     patternTypes:
                         {
+                            originalAssertion: {dataObj: new EvalAssertionObj(), resultObj: new EvalResultObj(), displayFieldList: ['compareToSourceId','warningOnly']},
                             compareToSourceId: {dataObj: new EvalAssertionObj(), resultObj: new EvalResultObj(), displayFieldList: ['compareToSourceId','compareToSourceExpression','warningOnly']},
-                            originalAssertion: {dataObj: new EvalAssertionObj(), resultObj: new EvalResultObj(), displayFieldList: ['compareToSourceId','warningOnly']}
                         }
                     },
             collapsibleDisplayEventObj: {displayOpen: false, breakpointObj: null},

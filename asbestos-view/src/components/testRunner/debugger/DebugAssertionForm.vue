@@ -1,6 +1,6 @@
 <template>
-    <div>
-     <div v-for="(propKey, keyIndex) in getPatternTypeObj().displayFieldList" :key="keyIndex">
+        <div class="flexContainer">
+            <div v-for="(propKey, keyIndex) in getPatternTypeObj().displayFieldList" :key="keyIndex">
         <div>
             <div style="text-align: left">
                 <label :for="getFormInputId(propKey)" :title="getEnumTypeShortDefinition(propKey)">{{propKey}}</label>
@@ -151,6 +151,14 @@
 </script>
 
 <style scoped>
+    .flexContainer {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        width: auto;
+        height: 50%;
+    }
+
     .infoIconLink {
         vertical-align: top;
         font-size: small;
@@ -160,18 +168,6 @@
         text-align: left;
     }
 
-    .patternSeparator {
-        border: 1px solid #f5f5f5;
-        visibility: hidden;
-    }
-
-    .patternHeader {
-        text-align: left;
-        display: block;
-        font-weight: bolder;
-        margin: 4px;
-        background-color: lavender;
-    }
 
     .smallText {
         text-align: left;

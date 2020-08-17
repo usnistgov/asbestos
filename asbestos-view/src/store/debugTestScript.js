@@ -53,7 +53,7 @@ export const debugTestScriptStore = {
                 }
             },
             doCloseDebugSession: function(state, commit, getters, callingMethod) {
-                console.log('*** in doCloseDebugSession *** : ' + callingMethod)
+                // console.log('*** in doCloseDebugSession *** : ' + callingMethod)
                 // console.log('In socket onClose. Setting socket to null...')
                 commit('resetDebuggingWebsocket')
                 commit('resetWaitingForBreakpoint')
