@@ -45,17 +45,28 @@ export const debugAssertionEvalStore = {
             assertionEvalBreakpointIndex: '',
             showModal: false,
             isEvalObjUpdated: false,
-            // debugAssertionEvalResult: {propKey: '', resultMessage: '', markdownMessage: ''},
-            // evalObj: new EvalAssertionObj(),
+            selectedPatternTypeId: 'OriginalAssertion', // load the original assertion as the default view
             evalObjByPattern: {
                     patternTypes:
                         {
-                            originalAssertion: {dataObj: new EvalAssertionObj(), resultObj: new EvalResultObj(), displayFieldList: ['compareToSourceId','warningOnly']},
-                            compareToSourceId: {dataObj: new EvalAssertionObj(), resultObj: new EvalResultObj(), displayFieldList: ['compareToSourceId','compareToSourceExpression','warningOnly']},
+                            OriginalAssertion: {dataObj: new EvalAssertionObj(), resultObj: new EvalResultObj(), displayFieldList: ['label','description','direction'
+                                    ,'compareToSourceId','compareToSourceExpression','compareToSourcePath','contentType','expression','headerField','minimumId',
+                                    'navigationLinks','operator','path','requestMethod','requestURL','resource','response','responseCode','sourceId','validateProfileId','value','warningOnly']},
+                            CompareToSourceId: {dataObj: new EvalAssertionObj(), resultObj: new EvalResultObj(), displayFieldList: ['compareToSourceId','compareToSourceExpression','warningOnly']},
+                            MinimumId: {dataObj: new EvalAssertionObj(), resultObj: new EvalResultObj(), displayFieldList: ['minimumId','warningOnly']},
+                            ResourceType: {dataObj: new EvalAssertionObj(), resultObj: new EvalResultObj(), displayFieldList: ['resource','warningOnly']},
+                            ContentType: {dataObj: new EvalAssertionObj(), resultObj: new EvalResultObj(), displayFieldList: ['contentType','warningOnly']},
+                            HeaderField: {dataObj: new EvalAssertionObj(), resultObj: new EvalResultObj(), displayFieldList: ['headerField','warningOnly']},
+                            Response: {dataObj: new EvalAssertionObj(), resultObj: new EvalResultObj(), displayFieldList: ['sourceId','response','warningOnly']},
+                            ResponseCode: {dataObj: new EvalAssertionObj(), resultObj: new EvalResultObj(), displayFieldList: ['responseCode','operator','warningOnly']},
+                            Expression: {dataObj: new EvalAssertionObj(), resultObj: new EvalResultObj(), displayFieldList: ['sourceId','expression','warningOnly']},
+                            ExpressionValue: {dataObj: new EvalAssertionObj(), resultObj: new EvalResultObj(), displayFieldList: ['sourceId','expression','value','warningOnly']},
+                            RequestMethod: {dataObj: new EvalAssertionObj(), resultObj: new EvalResultObj(), displayFieldList: ['sourceId','requestMethod','warningOnly']},
+
                         }
                     },
             collapsibleDisplayEventObj: {displayOpen: false, breakpointObj: null},
-            fieldValueTypes : null,
+            fieldValueTypes : null, // This is where the static values for the drop down controls is stored.
         }
     },
     mutations: {
@@ -63,8 +74,8 @@ export const debugAssertionEvalStore = {
          state.assertionEvalBreakpointIndex = val
         },
         setEvalObjProperty(state, obj) {
-            let dataRef = state.evalObjByPattern.patternTypes[obj.patternTypeId].dataObj
             if ('propKey' in obj) {
+                let dataRef = state.evalObjByPattern.patternTypes[obj.patternTypeId].dataObj
                 if (obj.propKey in dataRef) {
                     dataRef[obj.propKey] = obj.propVal
                 }
@@ -77,8 +88,11 @@ export const debugAssertionEvalStore = {
             let resultRef = state.evalObjByPattern.patternTypes[obj.patternTypeId].resultObj
             resultRef.propKey = obj.propKey
         },
+        setSelectedPatternTypeId(state, patternTypeId) {
+           state.selectedPatternTypeId = patternTypeId
+        },
         setDebugAssertionEvalResult(state, obj) {
-            let resultRef = state.evalObjByPattern.patternTypes[obj.patternTypeId].resultObj
+            let resultRef = state.evalObjByPattern.patternTypes[state.selectedPatternTypeId].resultObj
             resultRef.resultMessage = obj.resultMessage
             if ('exceptionPropKey' in obj) {
                 resultRef.propKey = obj.exceptionPropKey
@@ -95,7 +109,7 @@ export const debugAssertionEvalStore = {
         },
         updateAssertionEvalObj(state, obj) {
            let atLeastOnePropertyWasUpdated = false
-           let dataRef = state.evalObjByPattern.patternTypes['originalAssertion'].dataObj
+           let dataRef = state.evalObjByPattern.patternTypes['OriginalAssertion'].dataObj
             for (let propKey in dataRef) {
              if (propKey in obj) {
                  if (typeof obj[propKey] === 'string') {

@@ -14,22 +14,19 @@
                         <div class="modal-body">
                             <div class="patternHeader">Select a Pattern:</div>
                             <div style="display: flex;  flex-direction: row;  flex-wrap: wrap;  width: auto; vertical-align: middle">
-                            <div v-for="(val, patternType) in $store.state.debugAssertionEval.evalObjByPattern.patternTypes"
+                                <div v-for="(val, patternType) in $store.state.debugAssertionEval.evalObjByPattern.patternTypes"
                                  :key="patternType">
-                            <div
+                                    <div
                                     v-bind:class="{
                                             'selectedPatternType': isSelectedPatternType(patternType),
                                             'selectPatternType' : true,
                                             }"
                                     @click="doSelectPatternTypeId(patternType)">{{patternType}}</div>
-                            </div>
-                        </div>
-                            <div style="margin: 6px" v-for="(val, patternType) in $store.state.debugAssertionEval.evalObjByPattern.patternTypes"
-                                     :key="patternType">
-                                    <template v-if="isSelectedPatternType(patternType)">
-                                        <debug-assertion-form :pattern-type-id="selectedPatternTypeId"/>
-                                    </template>
                                 </div>
+                            </div>
+                            <div style="margin: 6px">
+                                 <debug-assertion-form :pattern-type-id="selectedPatternTypeId" :is-shown="show"/>
+                            </div>
                         </div>
 
                         <!--   <div class="modal-footer text-right">-->
@@ -47,7 +44,6 @@
     export default {
         data() {
             return {
-                selectedPatternTypeId: 'originalAssertion', // load the original assertion as the default view
                 drag_pos_left: 0,
                 drag_pos_top: 0,
                 evalTimer: null,
@@ -56,20 +52,24 @@
         mounted() {
         },
         props: ['show'],
-        computed: {},
+        computed: {
+            selectedPatternTypeId() {
+               return this.$store.state.debugAssertionEval.selectedPatternTypeId
+            }
+        },
         methods: {
             isSelectedPatternType(patternTypeId) {
                return (this.selectedPatternTypeId === patternTypeId)
             },
             doSelectPatternTypeId(patternTypeId) {
-               this.selectedPatternTypeId = patternTypeId
+                this.$store.commit('setSelectedPatternTypeId', patternTypeId)
             },
             close: function () {
-                this.$store.commit('setDebugAssertionEvalPropKey', {patternTypeId: 'originalAssertion', propKey: ''})
+                this.$store.commit('setDebugAssertionEvalPropKey', {patternTypeId: 'OriginalAssertion', propKey: ''})
                 this.$emit('close')
             },
             doResume: function () {
-                this.$store.commit('setDebugAssertionEvalPropKey', {patternTypeId: 'originalAssertion', propKey: ''})
+                this.$store.commit('setDebugAssertionEvalPropKey', {patternTypeId: 'OriginalAssertion', propKey: ''})
                 this.$emit('resume')
             },
             drag_start: function (event) {
@@ -135,9 +135,7 @@
         text-align: left;
     }
     .selectedPatternType {
-        border: 1px solid darkorchid;
         background-color: plum;
-        border-style: groove;
     }
     .closeXIcon {
         position: relative;
@@ -185,9 +183,13 @@
     }
 
     .eval-modal-container {
-        width: 43%;
+        width: auto;
+        height: auto;
         max-height: 80%;
-        overflow-y: auto;
+        /*width: 42%;*/
+        /*height: 60%;*/
+        overflow-x: scroll;
+        overflow-y: scroll;
         margin: 40px auto 0;
         padding: 20px 30px;
         background-color: #ffffff;
@@ -205,6 +207,7 @@
         background-color: lavender;
         width: 100%;
         cursor: move;
+        text-align: center;
     }
 
     .modal-body {

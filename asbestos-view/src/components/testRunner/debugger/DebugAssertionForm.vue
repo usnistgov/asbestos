@@ -1,17 +1,18 @@
 <template>
-        <div class="flexContainer">
-            <div v-for="(propKey, keyIndex) in getPatternTypeObj().displayFieldList" :key="keyIndex">
+   <div class="dafFlexContainer">
+     <div class="dafFlexItem" v-for="(propKey, keyIndex) in displayFieldList" :key="keyIndex">
         <div>
-            <div style="text-align: left">
+            <div >
                 <label :for="getFormInputId(propKey)" :title="getEnumTypeShortDefinition(propKey)">{{propKey}}</label>
                     <span
                     @click.stop="openHelp(propKey)"
                     class="infoIconLink"
-                    :title="`Click to open the TestScript ${propKey} Element Detailed Description in a new browser tab. `">&#x2139;</span> <!-- &#x1f4d6; &#x2139; -->
+                    :title="`Click to open the ${propKey} assert element detailed description in a new browser tab.`">&#x2139;</span> <!-- &#x1f4d6; &#x2139; -->
             </div>
             <div>
                 <template v-if="isPropertyAnEnumType(propKey)">
                     <select class="form-control-select"
+                            :id="getFormInputId(propKey)"
                             :value="getPropVal(propKey)"
                             :data-prop-key="propKey"
                             @change="onEvalObjPropUpdate">
@@ -35,8 +36,8 @@
                              @keyup="evalOnKeyUp"
                      />
                 </template>
-                <span class="smallText">{{getEnumTypeFormalDefinition(propKey)}}</span>
             </div>
+            <div class="smallText">{{getEnumTypeFormalDefinition(propKey)}}</div>
         </div>
      </div>
         <div v-bind:class="{
@@ -45,8 +46,9 @@
         <span class="form-block">{{getResultCode()}}</span>
         <vue-markdown
                 v-bind:source="getResultMessage()"></vue-markdown>
-    </div>
-    </div>
+            <button @click="resizeContents">resize</button>
+  </div>
+ </div>
 </template>
 
 <script>
@@ -59,8 +61,76 @@
                 type: String,
                 required: true
             },
+            isShown: {
+                type: Boolean,
+                required: true
+            }
+        },
+        created: function() {
+           // this.resizeContents()
+        },
+        computed: {
+            displayFieldList() {
+                return this.getPatternTypeObj().displayFieldList
+            }
+        },
+        watch: {
+           'isShown': 'resizeContents'
         },
         methods: {
+            resizeContents() {
+                if (! this.isShown)
+                    return
+                console.log('in resizeContents')
+                try {
+                    let flexItemWidth = 10
+                    let flexItemHeight = 10
+                    const elementCount = this.displayFieldList.length
+                    // for (const fieldName of this.displayFieldList) {
+                        let elList = document.querySelectorAll('div.dafFlexItem')
+                        console.log(`elList length: ${elList.length}`)
+                        if (elList !== null) {
+                            for (let el of elList) {
+                                console.log(`clientWidth is ${el.classList.contains('dafFlexItem')}, clientHeight is ${el.classList}`)
+                                if (flexItemWidth < el.clientWidth) {
+                                    flexItemWidth = el.clientWidth
+                                }
+                                if (flexItemHeight < el.clientHeight) {
+                                    flexItemHeight = el.clientHeight
+                                }
+                            }
+                        }
+                    // }
+                    let minFormHeight = flexItemHeight * 6
+                    const singleColumnHeight = (flexItemHeight * elementCount)
+                    if (singleColumnHeight < 500) {
+                        minFormHeight = singleColumnHeight
+                    }
+                    const estimateWidth = Math.round((elementCount / (minFormHeight / flexItemHeight)) * flexItemWidth)
+                    console.log(`length: ${elementCount}, flexItemWidth: ${flexItemWidth}, flexItemHeight: ${flexItemHeight}, minFormHeight: ${minFormHeight}, estimateWidth: ${estimateWidth}`)
+                    let containerEl = document.querySelector('div.eval-modal-container') //('div.dafFlexContainer') // div.eval-modal-container
+                    if (containerEl !== null) {
+                        const outerShellHeight = 200
+                        const outerShellWidth = 54
+                        console.log(`setting el height to  ${minFormHeight}`)
+                        containerEl.style.height = (outerShellHeight+minFormHeight) + 'px'
+                        containerEl.style.width = (54+estimateWidth) + 'px'
+                        // tracer
+                        // containerEl.style.border = '1px solid red'
+                    }
+                    containerEl = document.querySelector('div.dafFlexContainer') //('div.dafFlexContainer') // div.eval-modal-container
+                    if (containerEl !== null) {
+                        console.log(`setting el height to  ${minFormHeight}`)
+                        containerEl.style.height = (minFormHeight) + 'px'
+                        containerEl.style.width = estimateWidth + 'px'
+                        // tracer
+                        // containerEl.style.border = '1px solid red'
+                    }
+                } catch(err) {
+                    console.log('error: ' + err)
+                }
+
+            },
             openHelp(propKey) {
                 window.open("http://hl7.org/fhir/testscript-definitions.html#TestScript.setup.action.assert." + propKey, "_blank")
             },
@@ -127,7 +197,7 @@
                 this.$store.commit('setEvalObjProperty', {patternTypeId: this.patternTypeId, propKey: e.target.getAttribute('data-prop-key'), propVal: e.target.value})
             },
             doEval(propKey) {
-                this.$store.commit('setDebugAssertionEvalPropKey', {patternTypeId: this.patternTypeId, propKey: propKey})
+                this.$store.commit('setDebugAssertionEvalPropKey', {patternTypeId: this.patternTypeId, propKey: propKey}) // Just to track what changed field was updated in the last attempt so the error hint may be applied to this field
                 let assertDataString = JSON.stringify(this.getPatternTypeObj().dataObj)
                 // console.log('before base64: ' + assertDataString)
                 this.$store.dispatch('doDebugEvalAssertion', window.btoa(assertDataString))
@@ -138,7 +208,7 @@
                     this.evalTimer = null;
                 }
                 this.evalTimer = setTimeout(() => {
-                    this.doEval(event.target.id)
+                    this.doEval(event.target.getAttribute('data-prop-key'))
                 }, 800);
             },
 
@@ -151,12 +221,22 @@
 </script>
 
 <style scoped>
-    .flexContainer {
+    .dafFlexContainer {
         display: flex;
-        flex-direction: row;
+        flex-direction: column;
         flex-wrap: wrap;
         width: auto;
-        height: 50%;
+        height: 400px;
+        text-align: left;
+    }
+
+    .dafFlexItem {
+        /*width: 16em;*/
+        /*flex: 1; * shorthand. to be expanded by css. */
+        /*height: 100px;*/
+        margin-top: 4px;
+        flex-basis: min-content ;
+
     }
 
     .infoIconLink {
@@ -173,7 +253,10 @@
         text-align: left;
         font-size: xx-small;
         display: inline-block;
-        width: 16em;
+        width: 24em;
+        color: gray;
+        padding: 0.5em 1em;
+
     }
     .text-right {
         text-align: right;
