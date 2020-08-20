@@ -6,8 +6,9 @@
                     <div>
                         <div>
                         <span class="eval-modal-header" draggable="true" @dragstart="drag_start">
-                            <h3>Eval<span class="closeXIcon" title="Close" @click="close">&#x274c;
-                            </span></h3>
+                            <h3>Eval
+                                <span class="closeXIcon" @click="doResizeForm">&#x1F504;</span>
+                                <span class="closeXIcon" title="Close" @click="close">&#x274c;</span></h3>
                         </span>
                         </div>
 
@@ -25,7 +26,7 @@
                                 </div>
                             </div>
                             <div style="margin: 6px">
-                                 <debug-assertion-form :pattern-type-id="selectedPatternTypeId" :is-shown="show"/>
+                                 <debug-assertion-form :pattern-type-id="selectedPatternTypeId" :is-shown="resizeForm"/>
                             </div>
                         </div>
 
@@ -47,6 +48,7 @@
                 drag_pos_left: 0,
                 drag_pos_top: 0,
                 evalTimer: null,
+                resizeForm: false,
             }
         },
         mounted() {
@@ -58,6 +60,9 @@
             }
         },
         methods: {
+            doResizeForm() {
+              this.resizeForm = true
+            },
             isSelectedPatternType(patternTypeId) {
                return (this.selectedPatternTypeId === patternTypeId)
             },
@@ -65,11 +70,13 @@
                 this.$store.commit('setSelectedPatternTypeId', patternTypeId)
             },
             close: function () {
-                this.$store.commit('setDebugAssertionEvalPropKey', {patternTypeId: 'OriginalAssertion', propKey: ''})
+                const defaultPatternTypeId = this.$store.state.debugAssertionEval.defaultPatternTypeId
+                this.$store.commit('setDebugAssertionEvalPropKey', {patternTypeId: defaultPatternTypeId, propKey: ''})
                 this.$emit('close')
             },
             doResume: function () {
-                this.$store.commit('setDebugAssertionEvalPropKey', {patternTypeId: 'OriginalAssertion', propKey: ''})
+                const defaultPatternTypeId = this.$store.state.debugAssertionEval.defaultPatternTypeId
+                this.$store.commit('setDebugAssertionEvalPropKey', {patternTypeId: defaultPatternTypeId, propKey: ''})
                 this.$emit('resume')
             },
             drag_start: function (event) {
@@ -145,6 +152,7 @@
         cursor: pointer;
         font-size: small;
         margin-top: 2px;
+        margin-left: 2px;
         vertical-align: text-top;
     }
     .patternSeparator {
@@ -185,7 +193,7 @@
     .eval-modal-container {
         width: auto;
         height: auto;
-        max-height: 80%;
+        max-height: 92%;
         /*width: 42%;*/
         /*height: 60%;*/
         overflow-x: scroll;
@@ -238,8 +246,5 @@
     /*    transform: scale(1.1);*/
     /*}*/
 
-    .evalNotPassed {
-        color: red;
-    }
 
 </style>

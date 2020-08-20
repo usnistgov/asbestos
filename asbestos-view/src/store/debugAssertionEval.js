@@ -45,7 +45,8 @@ export const debugAssertionEvalStore = {
             assertionEvalBreakpointIndex: '',
             showModal: false,
             isEvalObjUpdated: false,
-            selectedPatternTypeId: 'OriginalAssertion', // load the original assertion as the default view
+            selectedPatternTypeId: 'OriginalAssertion', // Initial string contains default pattern
+            defaultPatternTypeId: 'OriginalAssertion',
             evalObjByPattern: {
                     patternTypes:
                         {
@@ -66,7 +67,12 @@ export const debugAssertionEvalStore = {
                         }
                     },
             collapsibleDisplayEventObj: {displayOpen: false, breakpointObj: null},
-            fieldValueTypes : null, // This is where the static values for the drop down controls is stored.
+            fieldSupport: {
+                         // Mostly static content
+                        fieldValueTypes : null, // This is where the static FHIR enumerated values for the drop down controls is stored.
+                        overrideFieldTypes: null, // used for dropdown values related to: resource, contentType
+            },
+            fixtureIds: null,
         }
     },
     mutations: {
@@ -109,7 +115,8 @@ export const debugAssertionEvalStore = {
         },
         updateAssertionEvalObj(state, obj) {
            let atLeastOnePropertyWasUpdated = false
-           let dataRef = state.evalObjByPattern.patternTypes['OriginalAssertion'].dataObj
+            const defaultPatternTypeId = state.defaultPatternTypeId
+            let dataRef = state.evalObjByPattern.patternTypes[defaultPatternTypeId].dataObj
             for (let propKey in dataRef) {
              if (propKey in obj) {
                  if (typeof obj[propKey] === 'string') {
@@ -130,9 +137,16 @@ export const debugAssertionEvalStore = {
            }
            state.showModal = true
         },
-        setFieldValueTypes(state, obj /* object containing an array of other value types */) {
-           state.fieldValueTypes = obj
+        setFieldSupportValueTypes(state, obj /* object containing an array of fhir enumerated types */) {
+           state.fieldSupport.fieldValueTypes = obj
         },
+        setFieldSupportOverrides(state, obj) {
+            // Use this space to treat object values here if needed
+            state.fieldSupport.overrideFieldTypes  = obj
+        },
+        setFixtureIds(state, obj) {
+            state.fixtureIds = obj
+        }
     },
     actions: {
     },

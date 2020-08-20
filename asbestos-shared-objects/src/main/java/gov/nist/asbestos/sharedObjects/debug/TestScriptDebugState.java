@@ -132,9 +132,10 @@ public class TestScriptDebugState {
         }
     }
 
-    public void sendAssertionStr(String assertionJson, String valueTypes) {
+    public void sendAssertionStr(String assertionJson, String fieldSupportJson, String fixtureIdsJson) {
         getSession().getAsyncRemote().sendText("{\"messageType\":\"original-assertion\" "
-                + ", \"valueTypes\": " + valueTypes
+                + ", \"fixtureIds\": " + fixtureIdsJson
+                + ((fieldSupportJson != null) ? ", \"fieldSupport\": " + fieldSupportJson : "")
                 + ", \"assertionJson\":" + assertionJson +"}");
     }
 

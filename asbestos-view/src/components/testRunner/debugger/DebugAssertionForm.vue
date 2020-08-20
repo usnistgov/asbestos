@@ -15,7 +15,7 @@
                             :id="getFormInputId(propKey)"
                             :value="getPropVal(propKey)"
                             :data-prop-key="propKey"
-                            @change="onEvalObjPropUpdate">
+                            @change="onEvalObjPropSelect">
                         <option v-for="option in getEnumTypeArray(propKey)"
                                 :value="option.codeValue" :title="option.definition"
                                 :key="option.codeValue">
@@ -46,7 +46,6 @@
         <span class="form-block">{{getResultCode()}}</span>
         <vue-markdown
                 v-bind:source="getResultMessage()"></vue-markdown>
-            <button @click="resizeContents">resize</button>
   </div>
  </div>
 </template>
@@ -114,7 +113,7 @@
                         const outerShellWidth = 54
                         console.log(`setting el height to  ${minFormHeight}`)
                         containerEl.style.height = (outerShellHeight+minFormHeight) + 'px'
-                        containerEl.style.width = (54+estimateWidth) + 'px'
+                        containerEl.style.width = (outerShellWidth+estimateWidth) + 'px'
                         // tracer
                         // containerEl.style.border = '1px solid red'
                     }
@@ -156,7 +155,11 @@
                 return this.getPatternTypeObj().dataObj[propKey]
             },
             getFieldFromValueType(propKey) {
-                let arr = this.$store.state.debugAssertionEval.fieldValueTypes
+                let arr = this.$store.state.debugAssertionEval.fieldSupport.fieldValueTypes
+                let result = this.searchField(arr, propKey)
+                return result
+            },
+            searchField(arr, propKey) {
                 if (arr !== null) {
                     let results = arr.filter(item => item.name === propKey) // Find the first matching item
                     if (results.length === 1) { // Should be the only one in the result
@@ -164,6 +167,7 @@
                     }
                 }
                 return null
+
             },
             getEnumTypeShortDefinition(propKey) {
                 let propObj = this.getFieldFromValueType(propKey)
@@ -182,15 +186,47 @@
             getEnumTypeArray(propKey) {
                 let propObj = this.getFieldFromValueType(propKey)
                 if (propObj !== null) {
-                    return propObj.values
+                    if (propObj.values.length > 0) {
+                        return propObj.values
+                    } else {
+                        let overrideObj = this.getOverrideType(propKey)
+                        if (overrideObj !== null && overrideObj.values.length > 0) {
+                            return overrideObj.values
+                        }
+                    }
                 }
             },
+            getOverrideType(propKey) {
+                let result = null
+                // Add a condition to exclude pattern types to automatically override field some field types
+                // if (this.patternTypeId !== this.$store.state.debugAssertionEval.defaultPatternTypeId) {
+                    // Map fixtureId to sourceId
+                    if (propKey === 'sourceId' || propKey === 'compareToSourceId' || propKey === 'minimumId') {
+                        result = this.$store.state.debugAssertionEval.fixtureIds
+                    } else {
+                        let arr = this.$store.state.debugAssertionEval.fieldSupport.overrideFieldTypes
+                        result = this.searchField(arr, propKey)
+                    }
+                // }
+                return result
+            },
             isPropertyAnEnumType(propKey) {
-                let propObj = this.getFieldFromValueType(propKey)
-                if (propObj !== null) {
-                    return (propObj.values.length > 0)
+                let result = this.getFieldFromValueType(propKey)
+                if (result !== null) {
+                    let noValues = (result.values.length === 0)
+                    if (noValues) {
+                        // Allow override for non-default pattern type form. Maybe it is useful to have free-text entry in the default form type.
+                        result = this.getOverrideType(propKey)
+                    }
+                    if (result !== null)
+                        return result.values.length > 0
                 }
                 return false
+            },
+            onEvalObjPropSelect(e) {
+              this.onEvalObjPropUpdate(e)
+                let propKey = e.target.getAttribute('data-prop-key')
+                this.doEval(propKey)
             },
             onEvalObjPropUpdate(e) {
                 // console.log('onEvalObjProp.. was called.')
@@ -225,8 +261,8 @@
         display: flex;
         flex-direction: column;
         flex-wrap: wrap;
-        width: auto;
-        height: 400px;
+        width: auto; /* auto; */
+        height: 400px; /* 400px; */
         text-align: left;
     }
 
@@ -248,6 +284,9 @@
         text-align: left;
     }
 
+    .evalNotPassed {
+        color: red;
+    }
 
     .smallText {
         text-align: left;

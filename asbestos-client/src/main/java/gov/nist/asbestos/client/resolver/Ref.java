@@ -551,4 +551,8 @@ public class Ref {
             "SubstanceSpecification",
             "metadata"
     );
+
+    public static List<String> getResourceNames() {
+        return resourceNames;
+    }
 }

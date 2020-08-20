@@ -277,7 +277,7 @@ export const debugTestScriptStore = {
                 commit('setShowDebugEvalModal', true)
             } else {
                 commit('setAssertionEvalBreakpointIndex', breakpointIndex)
-                const requestAnnotations = (rootState.debugAssertionEval.fieldValueTypes === null)
+                const requestAnnotations = (rootState.debugAssertionEval.fieldSupport.fieldValueTypes === null)
                 // needsStaticValueCaching is True when enumeration types and the assertion field descriptions need to be cached
                 let sendData = `{"cmd":"requestOriginalAssertion","testScriptIndex":"${mapKey}","requestAnnotations":"${requestAnnotations}"}`
 
@@ -375,8 +375,16 @@ export const debugTestScriptStore = {
                         // console.log(JSON.stringify(returnData))
                         // rootState.testScriptAssertionEval.
                         commit('updateAssertionEvalObj', returnData.assertionJson)
-                        if (rootState.debugAssertionEval.fieldValueTypes === null && 'valueTypes' in returnData) {
-                            commit('setFieldValueTypes', returnData.valueTypes)
+                        // Load static content if not yet loaded
+                        if (rootState.debugAssertionEval.fieldSupport.fieldValueTypes === null && 'fieldSupport' in returnData) {
+                            commit('setFieldSupportValueTypes', returnData.fieldSupport.fhirEnumerationTypes)
+                            // Load overrides
+                            if ('overrideFieldTypes' in returnData.fieldSupport) {
+                                commit('setFieldSupportOverrides', returnData.fieldSupport.overrideFieldTypes)
+                            }
+                        }
+                        if ('fixtureIds' in returnData) {
+                            commit('setFixtureIds', returnData.fixtureIds)
                         }
                     } else if (returnData.messageType === 'eval-assertion-result') {
                         commit('setDebugAssertionEvalResult', returnData)
