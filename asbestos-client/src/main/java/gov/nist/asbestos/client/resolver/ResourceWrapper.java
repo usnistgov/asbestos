@@ -3,6 +3,7 @@ package gov.nist.asbestos.client.resolver;
 
 import gov.nist.asbestos.client.Base.ProxyBase;
 import gov.nist.asbestos.client.client.Format;
+import gov.nist.asbestos.client.events.UIEvent;
 import gov.nist.asbestos.http.headers.Header;
 import gov.nist.asbestos.http.headers.Headers;
 import gov.nist.asbestos.http.operations.HttpBase;
@@ -13,9 +14,11 @@ import gov.nist.asbestos.simapi.validation.Val;
 import gov.nist.asbestos.simapi.validation.ValE;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.BaseResource;
+import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.OperationOutcome;
 
 
+import java.io.File;
 import java.util.*;
 
 public class ResourceWrapper {
@@ -31,6 +34,10 @@ public class ResourceWrapper {
     // also relevant is
     // https://www.hl7.org/fhir/resource.html#id
     private Map<Ref, ResourceWrapper> contained = new HashMap<>();
+    private Bundle context = null;
+    private File file = null;
+    private UIEvent event = null;
+    private boolean eventRequest;  // did content come from event "request" or "response"
 
 
     public ResourceWrapper(BaseResource resource) {
@@ -63,6 +70,26 @@ public class ResourceWrapper {
         return httpBase.getResponseHeaders().getHeaderValue("x-proxy-event");
     }
 
+    public ResourceWrapper setEvent(UIEvent event, boolean isRequest) {
+        this.event = event;
+        this.eventRequest = isRequest;
+        if (event != null && ref == null)
+            this.setRef(new Ref(event.getURI()));
+        return this;
+    }
+
+    public boolean isRequest() {
+        return eventRequest;
+    }
+
+    public UIEvent getEvent() {
+        return event;
+    }
+
+    public boolean hasEvent() {
+        return getEvent() != null;
+    }
+
     public void setResource(BaseResource resource) {
         this.resource = resource;
     }
@@ -82,6 +109,11 @@ public class ResourceWrapper {
 
     public ResourceWrapper setRef(Ref ref) {
         this.ref = ref;
+        return this;
+    }
+
+    public ResourceWrapper setContext(Bundle context) {
+        this.context = context;
         return this;
     }
 
@@ -309,5 +341,14 @@ public class ResourceWrapper {
 
     public boolean hasRef() {
         return ref != null;
+    }
+
+    public File getFile() {
+        return file;
+    }
+
+    public ResourceWrapper setFile(File file) {
+        this.file = file;
+        return this;
     }
 }

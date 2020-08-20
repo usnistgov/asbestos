@@ -13,6 +13,7 @@ import gov.nist.asbestos.analysis.Report;
 import gov.nist.asbestos.client.Base.EventContext;
 import gov.nist.asbestos.client.Base.ProxyBase;
 import gov.nist.asbestos.client.client.Format;
+import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 import org.hl7.fhir.r4.model.BaseResource;
@@ -38,7 +39,7 @@ public class AnalyseResourceRequest {
     }
 
     public void run() throws IOException {
-        log.info("AnalyseResourceRequest");
+        log.info("*** AnalyseResourceRequest");
 
         String contentType = request.req.getHeader("Content-Type");
         InputStream input = request.req.getInputStream();
@@ -56,6 +57,7 @@ public class AnalyseResourceRequest {
                     .returnReport(new Report("Cannot parse - " + e.getMessage()));
             return;
         }
-        new GetLogEventAnalysisRequest(request).analyseResource(baseResource, eventContext, true);
+        ResourceWrapper wrapper = new ResourceWrapper(baseResource);
+        new GetLogEventAnalysisRequest(request).analyseResource(wrapper, eventContext, true);
     }
 }

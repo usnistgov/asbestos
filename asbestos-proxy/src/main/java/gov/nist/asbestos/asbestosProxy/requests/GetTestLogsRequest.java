@@ -32,13 +32,14 @@ public class GetTestLogsRequest {
         this.request = request;
     }
 
-    public void run() {
-        log.info("GetTestLogs");
+    public void run() throws IOException {
+        request.announce("GetTestLogs");
         String channelId = request.uriParts.get(4);
         String testCollection = request.uriParts.get(5);
 
         ChannelConfig channelConfig = ChannelConnector.getChannelConfig(request.resp, request.externalCache, channelId);
-        if (channelConfig == null) throw new Error("Channel does not exist");
+        if (channelConfig == null)
+            throw new RuntimeException("Channel does not exist");
 
         StringBuilder buf = new StringBuilder();
         buf.append("{\n");
@@ -48,20 +49,15 @@ public class GetTestLogsRequest {
             String name = testLog.getName();
             name = name.split("\\.")[0];
             String json;
-            try {
-                if (!first)
-                    buf.append(",\n");
-                json = new String(Files.readAllBytes(Paths.get(testLog.toString())));
-                buf.append("\"").append(name).append("\": ").append(json);
-                first = false;
-            } catch (IOException e) {
-                log.error(ExceptionUtils.getStackTrace(e));
-                throw new RuntimeException(e);
-            }
+            if (!first)
+                buf.append(",\n");
+            json = new String(Files.readAllBytes(Paths.get(testLog.toString())));
+            buf.append("\"").append(name).append("\": ").append(json);
+            first = false;
         }
         buf.append("\n}");
         String theString = buf.toString();
-        Returns.returnString(request.resp, theString);
-        log.info("OK");
+        request.returnString(theString);
+        request.ok();
     }
 }

@@ -97,6 +97,7 @@ export const routes = [
                         props: { default: true},
                         children: [
                             {
+                                // Obsolete
                                 path: 'logsold',
                                 components: { default: LogsView },
                                 props: { default: true }

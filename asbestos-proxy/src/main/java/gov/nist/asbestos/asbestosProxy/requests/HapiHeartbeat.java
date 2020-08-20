@@ -54,6 +54,6 @@ public class HapiHeartbeat {
         } catch (Throwable e) {
             heartBeat.responding = false;
         }
-        Returns.returnObject(request.resp, heartBeat);
+        request.returnObject(heartBeat);
     }
 }

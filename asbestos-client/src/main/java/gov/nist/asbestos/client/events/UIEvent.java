@@ -4,6 +4,8 @@ import gov.nist.asbestos.client.Base.EC;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import gov.nist.asbestos.http.headers.Header;
 import gov.nist.asbestos.http.headers.Headers;
+import gov.nist.asbestos.serviceproperties.ServiceProperties;
+import gov.nist.asbestos.serviceproperties.ServicePropertiesEnum;
 import org.hl7.fhir.r4.model.Resource;
 
 import java.io.File;
@@ -25,6 +27,15 @@ public class UIEvent {
 
     public UIEvent(EC ec) {
         this.ec = ec;
+        hostPort = defaultHostPort();
+    }
+
+    private String defaultHostPort() {
+        String value = ServiceProperties.getInstance().getPropertyOrStop(ServicePropertiesEnum.FHIR_TOOLKIT_BASE);
+        int index = value.indexOf("/asbestos");
+        value = value.substring(0, index);
+        value = value.substring("http://".length());
+        return value;
     }
 
     public UIEvent fromEventDir(File eventDir) {

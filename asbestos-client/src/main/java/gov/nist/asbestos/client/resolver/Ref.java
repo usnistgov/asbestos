@@ -78,6 +78,10 @@ public class Ref {
         uri = build(reference.getReference());
     }
 
+    public Ref copy() {
+        return new Ref(uri).withAnchor(anchor);
+    }
+
     public Ref withAnchor(String anchor) {
         if (anchor == null)
             return this;

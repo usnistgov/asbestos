@@ -36,7 +36,7 @@ public class GetClientEventEvalRequest {
     }
 
     public void run() {
-        log.info("GetClientEventEvalRequest");
+        request.announce("GetClientEventEvalRequest");
         request.parseChannelName(4);
         String testCollection = request.uriParts.get(5);
         String testId = request.uriParts.get(6);
@@ -45,12 +45,6 @@ public class GetClientEventEvalRequest {
 
         File testDir = request.ec.getTest(testCollection, testId);
         List<File> testDirs = Collections.singletonList(testDir);
-
-//        Map<String, File> testIds = testDirs.stream().collect(Collectors.toMap(File::getName, x -> x));
-//        // testId -> testScript
-//        Map<String, TestScript> testScripts = testDirs.stream().collect(
-//                Collectors.toMap(File::getName, TestEngine::loadTestScript)
-//        );
 
         SimId simId = SimId.buildFromRawId(channelName);
         String testSession = simId.getTestSession().getValue();
@@ -70,9 +64,11 @@ public class GetClientEventEvalRequest {
             Files.write(Paths.get(new File(testLogDir, testId + ".json").toString()), myStr.getBytes());
         } catch (IOException e) {
             e.printStackTrace();
+            request.serverError();
+            return;
         }
 
-        Returns.returnString(request.resp, myStr);
+        request.returnString(myStr);
 
     }
 }

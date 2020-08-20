@@ -61,16 +61,17 @@ export const logStore = {
             commit('setLogSession', session)
             if (!rootState.base.session) {
                 commit('setError', 'Session not set in logStore.loadEventSummaries')
-                console.error('Session not set')
+                console.error('Session not set for logStore.loadEventSummaries')
                 return
             }
             if (!rootState.base.channelId) {
                 commit('setError', 'Channel not set in logStore.loadEventSummaries')
-                console.error('Channel not set')
+                console.error('Channel not set in logStore.loadEventSummaries')
                 return
             }
+            const url = `${rootState.base.session}/${rootState.base.channelId}`
             try {
-                const rawSummaries = await LOG.get(`${rootState.base.session}/${rootState.base.channelId}`, {
+                const rawSummaries = await LOG.get(url, {
                     params: {
                         summaries: 'true'
                     }
@@ -81,8 +82,8 @@ export const logStore = {
                 })
                 commit('setEventSummaries', eventSummaries)
             } catch (error) {
-                commit('setError', error)
-                console.error(error)
+                commit('setError', `${error} for LOG/${url}`)
+                console.error(`${error} for ${url}`)
             }
         },
         async getLogEventAnalysis({commit}, parms) {
@@ -107,15 +108,15 @@ export const logStore = {
             if (!anchor)
                 anchor = ""
 
+            const url = `analysis/event/${session}/${channel}/${eventId}/${requestOrResponse}?validation=true;focusUrl=${focusUrl};focusAnchor=${anchor}`
             try {
-                const url = `analysis/event/${session}/${channel}/${eventId}/${requestOrResponse}?validation=true;focusUrl=${focusUrl};focusAnchor=${anchor}`
                 const result = await LOG.get(url)
                 //const data = {analysis: result.data, eventId: eventId}
                 commit('setAnalysis', result.data)
                 //console.log(`analysis available`)
             } catch (error) {
-                commit('setError', error)
-                console.error(error)
+                commit('setError', `${error} for LOG/${url}`)
+                console.error(`${error} for ${url}`)
             }
         },
         async getLogEventAnalysisForObject({commit}, parms) {
@@ -126,45 +127,45 @@ export const logStore = {
                resourceUrl = resourceUrl.trim()
             const gzip = parms.gzip
             const eventId = parms.eventId ? parms.eventId : ""
+            const url = `analysis/url?url=${resourceUrl};gzip=${gzip};ignoreBadRefs=${ignoreBadRefs};eventId=${eventId}`
             try {
-                const url = `analysis/url?url=${resourceUrl};gzip=${gzip};ignoreBadRefs=${ignoreBadRefs};eventId=${eventId}`
                 console.log(`getAnalysis ${url}`)
                 const result = await LOG.get(url)
                 commit('setAnalysis', result.data)
             } catch (error) {
-                commit('setError', error)
-                console.error(error)
+                commit('setError', `${error}  for LOG/${url}`)
+                console.error(`${error} for ${url}`)
             }
         },
         async analyseResource({commit}, resourceString) {
+            const url= `analysis/text`
             try {
-                const url= `analysis/text`
                 const result = await LOG.post(url, {string: resourceString})
                 commit('setAnalysis', result.data)
             }   catch (error) {
-                commit('setError', error)
+                commit('setError', `${error} for LOG/${url}`)
                 console.error(error)
             }
         },
         async getValidationServer({commit}) {
+            const url = `ValidationServer`
             try {
-                const url = `ValidationServer`
                 const result = await LOG.get(url)
                 commit('setValidationServer', result.data.value)
             } catch (error) {
-                commit('setError', error)
+                commit('setError', `${error}  for LOG/${url}`)
                 console.error(error)
             }
         },
         async getValidation({commit}, parms) {
             const resourceType = parms.resourceType
             const qurl = parms.url
+            const url = `Validation/${resourceType}?url=${qurl}`
             try {
-                const url = `Validation/${resourceType}?url=${qurl}`
                 const result = await LOG.get(url)
                 commit('setValidationResult', result.data)
             } catch (error) {
-                commit('setError', error)
+                commit('setError', `${error}  for LOG/${url}`)
                 console.error(error)
             }
         }

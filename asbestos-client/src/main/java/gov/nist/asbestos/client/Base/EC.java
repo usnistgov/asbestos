@@ -237,7 +237,7 @@ public class EC {
         return new File(fhir, resourceType);
     }
 
-    public void buildJsonListingOfEvent(HttpServletResponse resp, String testSession, String channelId, String resourceType, String eventName) {
+    public void buildEventJson(HttpServletResponse resp, String testSession, String channelId, String resourceType, String eventName) {
         UIEvent uiEvent = getEvent(testSession, channelId, resourceType, eventName);
         if (uiEvent == null) {
             resp.setStatus(resp.SC_NOT_FOUND);
@@ -253,6 +253,10 @@ public class EC {
         }
 
         resp.setStatus(resp.SC_OK);
+    }
+
+    public UIEvent eventFromJson(String json) {
+        return new Gson().fromJson(json, UIEvent.class);
     }
 
     public UIEvent getEvent(EventContext eventContext) {
@@ -280,6 +284,8 @@ public class EC {
         UIEvent uiEvent = new UIEvent(new EC(externalCache)).fromEventDir(eventDir);
         uiEvent.setEventName(eventName);
         uiEvent.setResourceType(resourceType);
+        uiEvent.setTestSession(testSession);
+        uiEvent.setChannelId(channelId);
         return uiEvent;
     }
 
@@ -323,11 +329,9 @@ public class EC {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-
-        resp.setStatus(resp.SC_OK);
     }
 
-    public void buildJsonListingOfEventSummaries(HttpServletResponse resp, String testSession, String channelId) {
+    public void buildJsonListingOfEventSummaries(HttpServletResponse resp, String testSession, String channelId) throws IOException {
         File fhir = new EC(externalCache).fhirDir(testSession, channelId);
         List<String> resourceTypes = Dirs.dirListingAsStringList(fhir);
         List<EventSummary> eventSummaries = new ArrayList<>();
@@ -344,13 +348,7 @@ public class EC {
         }
         String json = new Gson().toJson(eventSummaries);
         resp.setContentType("application/json");
-        try {
-            resp.getOutputStream().print(json);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        resp.setStatus(resp.SC_OK);
+        resp.getOutputStream().print(json);
     }
 
     public void buildJsonListingOfResourceTypes(HttpServletResponse resp, String testSession, String channelId) {

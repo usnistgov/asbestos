@@ -4,6 +4,10 @@ import gov.nist.asbestos.client.Base.EC;
 import gov.nist.asbestos.http.support.Common;
 import gov.nist.asbestos.serviceproperties.ServiceProperties;
 import gov.nist.asbestos.serviceproperties.ServicePropertiesEnum;
+import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.apache.log4j.Logger;
+import org.hl7.fhir.r4.model.BaseResource;
+import org.hl7.fhir.r4.model.Resource;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -29,6 +33,7 @@ public class Request {
     public boolean isJson = true;
     public boolean isGzip = false;
     private String query = null;
+    private static final Logger log = Logger.getLogger(Request.class);
 
     public Request(HttpServletRequest req, HttpServletResponse resp, File externalCache) {
         this.req = req;
@@ -127,6 +132,43 @@ public class Request {
         if (i >= uriParts.size())
             return null;
         return uriParts.get(i);
+    }
+
+    void setStatus(int status) { log.info(status); resp.setStatus(status); }
+
+    public void badRequest() {
+        log.error("Do not understand " + uri.toString());
+        setStatus(resp.SC_BAD_REQUEST);
+    }
+
+    public void badRequest(String msg) {
+        log.error(msg);
+        setStatus(resp.SC_BAD_REQUEST);
+    }
+
+    public void notFound() {  setStatus(resp.SC_NOT_FOUND);}
+
+    public void serverError() { setStatus(resp.SC_INTERNAL_SERVER_ERROR);}
+
+    public void serverError(Throwable t) {
+        log.error(ExceptionUtils.getStackTrace(t));
+        setStatus(resp.SC_INTERNAL_SERVER_ERROR);
+    }
+
+    public void ok() { setStatus(resp.SC_OK); }
+
+    void returnResource(BaseResource resource) { Returns.returnResource(resp, resource); ok(); }
+
+    void returnString(String str) { Returns.returnString(resp, str); }
+
+    void returnObject(Object o) { Returns.returnObject(resp, o); }
+
+    void returnValue(String value) { Returns.returnValue(resp, value); }
+
+    void returnList(List<String> list) {  Returns.returnList(resp, list); }
+
+    void announce(String name) {
+        log.info("*** " + name + " " + uri.toString());
     }
 
 }

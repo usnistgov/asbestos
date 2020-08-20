@@ -27,9 +27,10 @@ public class GetValidationServerRequest {
     }
 
     public void run() {
-        log.info("GetValidationServerRequest");
+        request.announce("GetValidationServerRequest");
         String base = ServiceProperties.getInstance().getPropertyOrStop(ServicePropertiesEnum.FHIR_VALIDATION_SERVER);
-        Returns.returnValue(request.resp, base);
+        request.returnValue(base);
+        request.ok();
     }
 
 }

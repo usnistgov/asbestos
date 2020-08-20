@@ -42,21 +42,15 @@ public class RunTestRequest {
         this.request = request;
     }
 
-    public void run() {
-        log.info("RunTest");
+    public void run() throws URISyntaxException {
+        request.announce("RunTest");
         String channelId = request.uriParts.get(4);
         String testCollection = request.uriParts.get(5);
         String testName = request.uriParts.get(6);
 
-        ChannelConfig channelConfig;
-        try {
-            channelConfig =  ChannelConnector.getChannelConfig(request.resp, request.externalCache, channelId);
-        } catch (Throwable e) {
-            request.resp.setStatus(request.resp.SC_NOT_FOUND);
-            return;
-        }
+        ChannelConfig channelConfig = ChannelConnector.getChannelConfig(request.resp, request.externalCache, channelId);
         if (channelConfig == null) {
-            request.resp.setStatus(request.resp.SC_NOT_FOUND);
+            request.badRequest("Channel not found");
             return;
         }
         String testSession = channelConfig.getTestSession();
@@ -65,12 +59,7 @@ public class RunTestRequest {
         proxyStr = ServiceProperties.getInstance().getPropertyOrStop(key);
         proxyStr += "/proxy/" + channelId;
         URI proxy = null;
-        try {
-            proxy = new URI(proxyStr);
-        } catch (URISyntaxException e) {
-            throw new RuntimeException(e);
-        }
-
+        proxy = new URI(proxyStr);
         File testDir = request.ec.getTest(testCollection, testName);
 
         File patientCacheDir = request.ec.getTestLogCacheDir(channelId);
@@ -82,29 +71,23 @@ public class RunTestRequest {
                 .setFormat(request.isJson ? Format.JSON : Format.XML)
                 .sendGzip(request.isGzip)
                 .requestGzip(request.isGzip);
-        TestReport report;
         ModularEngine modularEngine;
-        try {
-            modularEngine = new ModularEngine(testDir, proxy).setSaveLogs(true);
-            report = modularEngine
-                    //.getLastTestEngine()
-                    .setTestSession(testSession)
-                    .setChannelId(channelId)
-                    .setExternalCache(request.externalCache)
-                    .setVal(new Val())
-                    .setFhirClient(fhirClient)
-                    .setTestCollection(testCollection)
-                    .addCache(patientCacheDir)
-                    .addCache(alternatePatientCacheDir)
-                    .runTest()
-                    .getTestReport();
+        modularEngine = new ModularEngine(testDir, proxy).setSaveLogs(true);
+        modularEngine
+                .setTestSession(testSession)
+                .setChannelId(channelId)
+                .setExternalCache(request.externalCache)
+                .setVal(new Val())
+                .setFhirClient(fhirClient)
+                .setTestCollection(testCollection)
+                .addCache(patientCacheDir)
+                .addCache(alternatePatientCacheDir)
+                .runTest()
+                .getTestReport();
 
-        } catch (Throwable t) {
-            log.error(ExceptionUtils.getStackTrace(t));
-            throw t;
-        }
 
         String json = modularEngine.reportsAsJson();
-        Returns.returnString(request.resp, json);
+        request.returnString(json);
+        request.ok();
     }
 }

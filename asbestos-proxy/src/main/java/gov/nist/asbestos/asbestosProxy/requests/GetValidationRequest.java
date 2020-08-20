@@ -1,6 +1,8 @@
 package gov.nist.asbestos.asbestosProxy.requests;
 
 
+// TODO - this request seems not to follow any of the rules.  Does it work?
+
 // 0 - empty
 // 1 - app context  (asbestos)
 // 2 - "validate"
@@ -37,10 +39,10 @@ public class GetValidationRequest {
     }
 
     public void run() {
-        log.info("GetValidationRequest");
+        request.announce("GetValidationRequest");
         String resourceType = request.uriParts.get(3);
         String base = ServiceProperties.getInstance().getPropertyOrStop(ServicePropertiesEnum.FHIR_VALIDATION_SERVER);
-        Returns.returnValue(request.resp, base);
+        request.returnValue(base);
 
         String query = request.req.getQueryString();
         if (query == null) {
@@ -96,7 +98,7 @@ public class GetValidationRequest {
             return;
         }
         if ("OperationOutcome".equals(wrapper.getResponseResource().getClass().getSimpleName())) {
-            Returns.returnResource(request.resp, wrapper.getResponseResource());
+            request.returnResource(wrapper.getResponseResource());
             return;
         }
         Returns.returnOperationOutcome(request.resp,

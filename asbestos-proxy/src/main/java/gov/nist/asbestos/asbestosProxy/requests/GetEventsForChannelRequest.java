@@ -6,6 +6,8 @@ import gov.nist.asbestos.http.operations.Verb;
 import gov.nist.asbestos.http.support.Common;
 import org.apache.log4j.Logger;
 
+import java.io.IOException;
+
 // 0 - empty
 // 1 - app context  (asbestos)
 // 2 - "log"
@@ -29,15 +31,14 @@ public class GetEventsForChannelRequest {
         this.request = request;
     }
 
-    public void run() {
-        log.info("GetEventsForChannelRequest");
+    public void run() throws IOException {
+        request.announce("GetEventsForChannelRequest");
         String query = request.req.getQueryString();
-        if (query != null && query.contains("summaries=true")) {
+        if (query != null && query.contains("summaries=true"))
             request.ec.buildJsonListingOfEventSummaries(request.resp, request.uriParts.get(3), request.uriParts.get(4));
-            return;
-        }
-        // JSON listing of resourceTypes in channelId
-        request.ec.buildJsonListingOfResourceTypes(request.resp, request.uriParts.get(3), request.uriParts.get(4));
+        else
+            request.ec.buildJsonListingOfResourceTypes(request.resp, request.uriParts.get(3), request.uriParts.get(4));
+        request.ok();
     }
 
 }

@@ -35,7 +35,7 @@ public class GetTestCollectionRequest {
     }
 
     public void run() {
-        log.info("GetTestCollection");
+        request.announce("GetTestCollection");
         String collectionName = request.uriParts.get(4);
 
         TestCollection tc = new TestCollection();
@@ -45,7 +45,7 @@ public class GetTestCollectionRequest {
         tc.testNames = request.ec.getTestsInCollection(collectionName);
         tc.requiredChannel = props.getProperty("Channel");
 
-        Returns.returnObject(request.resp, tc);
-        log.info("OK");
+        request.returnObject(tc);
+        request.ok();
     }
 }

@@ -34,28 +34,24 @@ public class LockChannelRequest {
     }
 
     public void run() throws IOException {
-        log.info("LockChannel");
+        request.announce("LockChannel");
         String string = IOUtils.toString(request.req.getInputStream(), Charset.defaultCharset());   // json
-        try {
-            ChannelConfig channelConfigInRequest = ChannelConfigFactory.convert(string);
+        ChannelConfig channelConfigInRequest = ChannelConfigFactory.convert(string);
 
-            ChannelConfig channelConfig = ChannelControl.channelConfigFromChannelId(request.externalCache, channelConfigInRequest.asFullId());
-            if (channelConfig.isWriteLocked() != channelConfigInRequest.isWriteLocked()) {
-                channelConfig.setWriteLocked(channelConfigInRequest.isWriteLocked());
-                SimStore simStore = new SimStore(request.externalCache,
-                        new SimId(new TestSession(channelConfig.getTestSession()),
-                                channelConfig.getChannelId(),
-                                channelConfig.getActorType(),
-                                channelConfig.getEnvironment(),
-                                true));
-                simStore.create(channelConfig);
-                log.info("Channel " + simStore.getChannelId().toString() + " write protect updated to: '" + channelConfig.isWriteLocked() + "'" );
-            } else {
-                log.info("Write protection was not modified because the configuration value is already the same.");
-            }
-        } catch (Exception e ) {
-            throw new RuntimeException(e);
+        ChannelConfig channelConfig = ChannelControl.channelConfigFromChannelId(request.externalCache, channelConfigInRequest.asFullId());
+        if (channelConfig.isWriteLocked() != channelConfigInRequest.isWriteLocked()) {
+            channelConfig.setWriteLocked(channelConfigInRequest.isWriteLocked());
+            SimStore simStore = new SimStore(request.externalCache,
+                    new SimId(new TestSession(channelConfig.getTestSession()),
+                            channelConfig.getChannelId(),
+                            channelConfig.getActorType(),
+                            channelConfig.getEnvironment(),
+                            true));
+            simStore.create(channelConfig);
+            log.info("Channel " + simStore.getChannelId().toString() + " write protect updated to: '" + channelConfig.isWriteLocked() + "'" );
+        } else {
+            log.info("Write protection was not modified because the configuration value is already the same.");
         }
-        log.info("OK");
+        request.ok();
     }
 }

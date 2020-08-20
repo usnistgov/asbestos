@@ -29,80 +29,20 @@ public class GetTestReportRequest {
         this.request = request;
     }
 
-//    static class NoReport {
-//        String value = "No Report";
-//    }
-
-    public void run() {
-        log.info("GetTestReportRequest");
+    public void run() throws IOException {
+        request.announce("GetTestReportRequest");
         String channelId = request.uriParts.get(4);
         String testCollection = request.uriParts.get(5);
         String testName = request.uriParts.get(6);
 
         ChannelConfig channelConfig = ChannelConnector.getChannelConfig(request.resp, request.externalCache, channelId);
-        if (channelConfig == null) throw new Error("Channel " + channelId + " does not exist");
-
-        try {
-            String json = new ModularReports(request.ec, channelId, testCollection, testName).asJson();
-            Returns.returnString(request.resp, json);
-//            log.info("ModuleLogs:");
-//            log.info(json);
-        } catch (IOException e) {
-            Returns.returnString(request.resp, new ModularReports().asJson());
+        if (channelConfig == null) {
+            request.badRequest("Channel " + channelId + " does not exist");
+            return;
         }
-
-//        //File testLog = request.ec.getTestLog(channelId, testCollection, testName);
-//        List<String> moduleNames = request.ec.getTestLogModules(channelId, testCollection, testName);
-//        for (String moduleName : moduleNames) {
-//            File moduleReportFile = request.ec.getTestLog(channelId, testCollection, testName, moduleName);
-//
-//        }
-//
-//        byte[] bytes;
-//        try {
-//            bytes = FileUtils.readFileToByteArray(testLog);
-//        } catch (IOException e) {
-//            String json = new Gson().toJson(new NoReport());
-//            Returns.returnString(request.resp, json);
-//            return;
-//        }
-//
-//        BaseResource resource = ProxyBase.parse(bytes, Format.fromContentType(testLog.getName()));
-//        TestReport testReport = (TestReport) resource;
-//
-//        List<TestReport.TestReportTestComponent> testComponents = testReport.getTest();
-//        int index = 0;
-//        int testComponentCount = testComponents.size();
-//
-//        for (; index < testComponentCount; ) {
-//            TestReport.TestReportTestComponent test = testComponents.get(index);
-//            if (test.hasModifierExtension() && test.getModifierExtension().get(0).hasValue()) {
-//                TestReport containedTestReport = getContainedTestReport(testReport, test.getModifierExtension().get(0).getValue().toString());
-//                if (containedTestReport != null) {
-//                    if (!containedTestReport.hasName() && containedTestReport.hasId())
-//                        containedTestReport.setName(containedTestReport.getId());
-//                }
-//            }
-//            index++;
-//        }
-//
-//        testReport.setName(testName);
-//
-//        String json = ProxyBase.getFhirContext().newJsonParser().setPrettyPrint(true).encodeResourceToString(testReport);
-//        Returns.returnString(request.resp, json);
+        String json = new ModularReports(request.ec, channelId, testCollection, testName).asJson();
+        request.returnString(json);
+        request.ok();
     }
-
-//    private TestReport getContainedTestReport(TestReport testReport, String id) {
-//        List<Resource> containeds = testReport.getContained();
-//        for (Resource contained : containeds) {
-//            if (contained instanceof TestReport) {
-//                TestReport containedTestReport = (TestReport) contained;
-//                if (contained.hasId() && contained.getId().equals(id)) {
-//                    return containedTestReport;
-//                }
-//            }
-//        }
-//        return null;
-//    }
 
 }

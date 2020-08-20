@@ -34,7 +34,7 @@ public class GetTestCollectionNamesRequest {
     }
 
     public void run() throws IOException {
-        log.info("GetTestCollectionNames");
+        request.announce("GetTestCollectionNames");
         List<Collection> collections = new ArrayList<>();
         List<String> names = request.ec.getTestCollectionNames();
         for (String name : names) {
@@ -49,9 +49,6 @@ public class GetTestCollectionNamesRequest {
         String json = new Gson().toJson(collections);
         request.resp.setContentType("application/json");
         request.resp.getOutputStream().print(json);
-
-        request.resp.setStatus(request.resp.SC_OK);
-
-        log.info("OK");
+        request.ok();
     }
 }

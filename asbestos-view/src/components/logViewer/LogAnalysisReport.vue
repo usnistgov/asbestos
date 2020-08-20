@@ -91,7 +91,11 @@
                                 {{ resource.name }} ({{ resource.relation }})
                                 <span class="tooltip">
                                     <!--   loadAnalysisForObjectAndAddHistory(report.objects[resourcei].url, resourcei)    -->
-                                    <img id="focus" class="selectable" src="../../assets/focus.png" @click.stop="loadAnalysisFromEventContext(report.objects[resourcei].url, report.objects[resourcei].eventContext, true)">
+                                    <img id="focus" class="selectable" src="../../assets/focus.png"
+                                         @click.stop="loadAnalysisFromEventContext(
+                                             report.objects[resourcei].url,
+                                             report.objects[resourcei].eventContext,
+                                             true)">
                                     <span class="tooltiptext">Focus</span>
                                 </span>
                             </span>
@@ -192,9 +196,6 @@
             async loadAnalyisFromEventId(url, eventId, addToHistory) {
                 console.log(`loadAnalyisFromEventContext for ${eventId}`)
                 console.log(`url=${url}`)
-                // if (url.startsWith('http'))
-                //     await this.loadAnalysisForObject(url)
-                // else
                 await this.$store.dispatch('getLogEventAnalysis', {channel: this.channelId, session: this.sessionId, eventId: eventId, requestOrResponse: this.requestOrResponse, url: url})
                 if (addToHistory)
                     this.historyPush(url, eventId)

@@ -27,9 +27,10 @@ public class GetProxyBaseRequest {
     }
 
     public void run() {
-        log.info("GetProxyBaseRequest");
+        request.announce("GetProxyBaseRequest");
         String base = ServiceProperties.getInstance().getPropertyOrStop(ServicePropertiesEnum.FHIR_TOOLKIT_BASE) + "/proxy";
-        Returns.returnValue(request.resp, base);
+        request.returnValue(base);
+        request.ok();
     }
 
 }

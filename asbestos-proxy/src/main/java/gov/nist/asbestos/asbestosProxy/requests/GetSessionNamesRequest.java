@@ -25,9 +25,9 @@ public class GetSessionNamesRequest {
     }
 
     public void run()  {
-        log.info("GetSessionNames");
+        request.announce("GetSessionNames");
         List<String> names = Dirs.dirListingAsStringList(new File(request.externalCache, "FhirChannels"));
-        Returns.returnList(request.resp, names);
-        log.info("OK");
+        request.returnList(names);
+        request.ok();
     }
 }

@@ -55,6 +55,8 @@ class ActionReporter {
         Objects.requireNonNull(testEngine);
         Map<String, String> fixtures = new HashMap<>();
 
+        log.info("Report request: " + request.trim());
+
         // report assertion source (only for assertions)
         if (assertionSource != null) {
             HttpBase httpBase = assertionSource.getHttpBase();
@@ -166,15 +168,18 @@ class ActionReporter {
                         + tail;
                     }
 
-                    log.info("Fixture Reference: " + label + " => " + refStrRaw);
-                    // referenced to UIEvent for display in inspector
-                    reference = "<a href=\"" +  refStrRaw + "\"" + " target=\"_blank\">" +
-                            ((label == null) ? refStrRaw : "Open in Inspector") +
-                            "</a>";
                 }
             }
-            if (refStrRaw != null && label != null)
+            if (refStrRaw != null && label != null) {
+                // referenced to UIEvent for display in inspector
+                reference = "<a href=\"" +  refStrRaw + "\"" + " target=\"_blank\">" +
+                        ((label == null) ? refStrRaw : "Open in Inspector") +
+                        "</a>";
+                if (!fixtures.containsKey(label) //|| !reference.equals(fixtures.get(label))
+                )
+                    log.info("Fixture Reference: " + label + " => " + refStrRaw);
                 fixtures.put(label, reference);
+            }
         }
 
         Map<String, String> variables = variableMgr.getVariables(true);

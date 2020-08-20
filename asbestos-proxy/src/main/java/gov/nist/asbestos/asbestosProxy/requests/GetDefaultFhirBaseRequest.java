@@ -35,7 +35,7 @@ public class GetDefaultFhirBaseRequest {
     }
 
     public void run() throws IOException {
-        log.info("GetDefaultFhirBase");
+        request.announce("GetDefaultFhirBase");
 
         FhirBase fhirBase = new FhirBase(ServiceProperties.getInstance().getProperty(ServicePropertiesEnum.HAPI_FHIR_BASE).get());
 
@@ -44,6 +44,6 @@ public class GetDefaultFhirBaseRequest {
         request.resp.setContentType("application/json");
         request.resp.getOutputStream().print(json);
 
-        request.resp.setStatus(request.resp.SC_OK);
+        request.ok();
     }
 }

@@ -25,7 +25,6 @@ public class StaticResourceServlet extends HttpServlet {
         super.init(config);
         Object ec = config.getServletContext().getAttribute("ExternalCache");
         if (ec != null) {
-            log.info("StaticResourceServlet - Got External Cache from ProxyServlet");
             externalCache = new File((String) ec);
         } else {
             log.fatal("StaticResourceServlet - Proxy not started");
@@ -35,19 +34,12 @@ public class StaticResourceServlet extends HttpServlet {
     @Override
     public void doGet(HttpServletRequest req, HttpServletResponse resp) {
         Request request = new Request(req, resp, externalCache);
-        log.info("Static resource GET " + request.uri);
 
         try {
             if (GetStaticResourceRequest.isRequest(request)) new GetStaticResourceRequest(request).run();
-        } catch (RuntimeException e) {
-            log.error(ExceptionUtils.getStackTrace(e));
-            resp.setStatus(resp.SC_INTERNAL_SERVER_ERROR);
-        } catch (Exception e) {
-            log.error(ExceptionUtils.getStackTrace(e));
-            resp.setStatus(resp.SC_BAD_REQUEST);
-        } catch (Throwable e) {
-            log.error(ExceptionUtils.getStackTrace(e));
-            resp.setStatus(resp.SC_INTERNAL_SERVER_ERROR);
+            else request.badRequest();
+        } catch (Throwable t) {
+            request.serverError(t);
         }
     }
 }

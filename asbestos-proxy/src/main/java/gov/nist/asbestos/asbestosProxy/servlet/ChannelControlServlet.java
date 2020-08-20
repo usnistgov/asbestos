@@ -35,7 +35,7 @@ public class ChannelControlServlet extends HttpServlet {
         SimStore simStore = new SimStore(externalCache, channelId);
         simStore.getStore(true);
         if (!simStore.exists()) {
-            log.info("Creating default Channel in the default TestSession");
+            //log.info("Creating default Channel in the default TestSession");
             String hapiFhirBase = null;
             ServicePropertiesEnum key = ServicePropertiesEnum.HAPI_FHIR_BASE;
             hapiFhirBase = ServiceProperties.getInstance().getPropertyOrStop(key);
@@ -48,13 +48,13 @@ public class ChannelControlServlet extends HttpServlet {
                     .setFhirBase(hapiFhirBase);
             simStore.create(cconfig);
         }
-        log.info("ChannelControlServlet init done");
+        //log.info("ChannelControlServlet init done");
     }
 
     @Override
     public void doPost(HttpServletRequest req, HttpServletResponse resp)  {
         Request request = new Request(req, resp, externalCache);
-        log.info("Channel Control POST " + request.uri);
+        //log.info("Channel Control POST " + request.uri);
 
         try {
             if (CreateChannelRequest.isRequest(request))        new CreateChannelRequest(request).run();
@@ -62,21 +62,17 @@ public class ChannelControlServlet extends HttpServlet {
             else if (EvalRequest.isRequest(request))            new EvalRequest(request).run();
             else if (CancelEvalRequest.isRequest(request))      new CancelEvalRequest(request).run();
             else if (LockChannelRequest.isRequest(request))      new LockChannelRequest(request).run();
-            else throw new Exception("Invalid request - do not understand URI " + request.uri);
+            else  request.badRequest();
 
-        } catch (IOException e) {
-            log.error(ExceptionUtils.getStackTrace(e));
-            resp.setStatus(resp.SC_INTERNAL_SERVER_ERROR);
-        } catch (Throwable e) {
-            log.error(ExceptionUtils.getStackTrace(e));
-            resp.setStatus(resp.SC_BAD_REQUEST);
+        } catch (Throwable t) {
+            request.serverError(t);
         }
     }
 
     @Override
     public void doGet(HttpServletRequest req, HttpServletResponse resp)  {
         Request request = new Request(req, resp, externalCache);
-        log.info("Channel Control GET " + request.uri);
+        //log.info("Channel Control GET " + request.uri);
 
         try {
 
@@ -85,14 +81,10 @@ public class ChannelControlServlet extends HttpServlet {
             else if (GetSessionNamesRequest.isRequest(request)) new GetSessionNamesRequest(request).run();
             else if (GetChannelConfigRequest.isRequest(request)) new GetChannelConfigRequest(request).run();
             else if (GetSignInRequest.isRequest(request)) new GetSignInRequest(request).run();
-            else throw new Exception("Invalid request - do not understand URI " + request.uri);
+            else request.badRequest();
 
-        } catch (IOException e) {
-            log.error(ExceptionUtils.getStackTrace(e));
-            resp.setStatus(resp.SC_INTERNAL_SERVER_ERROR);
-        } catch (Exception e) {
-            log.error(ExceptionUtils.getStackTrace(e));
-            resp.setStatus(resp.SC_BAD_REQUEST);
+        } catch (Throwable t) {
+            request.serverError(t);
         }
     }
 
@@ -104,14 +96,10 @@ public class ChannelControlServlet extends HttpServlet {
         try {
 
             if (DeleteChannelRequest.isRequest(request)) new DeleteChannelRequest(request).run();
-            else throw new Exception("Invalid request - do not understand URI " + request.uri);
+            else request.badRequest();
 
-        } catch (IOException e) {
-            log.error(ExceptionUtils.getStackTrace(e));
-            resp.setStatus(resp.SC_INTERNAL_SERVER_ERROR);
-        } catch (Exception e) {
-            log.error(ExceptionUtils.getStackTrace(e));
-            resp.setStatus(resp.SC_BAD_REQUEST);
+        } catch (Throwable t) {
+            request.serverError(t);
         }
     }
 

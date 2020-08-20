@@ -27,13 +27,13 @@ public class EvalRequest {
     }
 
     public void run() {
-        log.info("EvalRequest");
+        request.announce("EvalRequest");
         String channelId = request.uriParts.get(4);
         ChannelConnector.connect(request.resp, request.externalCache, channelId); // no exception => channel exists
         String testCollectionId = request.uriParts.get(5);
         String testId = request.uriParts.get(6);
         if (testCollectionId.isEmpty() || testId.isEmpty()) {
-            request.resp.setStatus(request.resp.SC_BAD_REQUEST);
+            request.badRequest();
             return;
         }
         String test = testCollectionId + "/" + testId;
@@ -45,6 +45,6 @@ public class EvalRequest {
             request.getSession().setAttribute(NEXT_CLIENT_TEST, test);
             log.info("Client test is " + test);
         }
-        request.resp.setStatus(request.resp.SC_OK);
+        request.ok();
     }
 }

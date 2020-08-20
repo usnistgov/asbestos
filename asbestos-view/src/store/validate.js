@@ -25,12 +25,13 @@ export const logStore = {
             const urlOfResource = parms.url
             const gzip = parms.gzip
             const useProxy = parms.useProxy
+            const url = `${resourceType}?url=${urlOfResource};gzip=${gzip};useProxy=${useProxy}`
             try {
-                const result = await VALIDATE.post(`${resourceType}?url=${urlOfResource};gzip=${gzip};useProxy=${useProxy}`)
+                const result = await VALIDATE.post(url)
                 commit('setOperationOutcome', result.data)
             } catch (error) {
-                commit('setError', error)
-                console.error(error)
+                commit('setError', `${error} for ${url}`)
+                console.error(`${error} for ${url}`)
             }
         }
     }

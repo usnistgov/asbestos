@@ -161,8 +161,8 @@ public class FixtureComponent {
         return null;
     }
 
-    public static Ref generateStaticResourceRef(String resourceType, String fixturePath, String fhirPath, String testCollectionId, String testId) {
-        URI uri = null;
+    public static Ref generateStaticResourceRef(ResourceWrapper wrapper, String fixturePath, String fhirPath, String testCollectionId, String testId) {
+        URI uri;
         try {
             uri = new URI(ServiceProperties.getInstance().getPropertyOrStop(ServicePropertiesEnum.FHIR_TOOLKIT_BASE)
                     + "/static/staticResource/" + testCollectionId + "/" + testId);
@@ -178,7 +178,7 @@ public class FixtureComponent {
         } catch (UnsupportedEncodingException e) {
             return null;
         }
-        return new Ref(uri, resourceType, searchParms);
+        return new Ref(uri, wrapper.getResourceType(), searchParms);
     }
 
     public String getResponseType() {
@@ -199,8 +199,9 @@ public class FixtureComponent {
         Objects.requireNonNull(getTestId());
         this.resourceWrapper = resource;
         if (resource.hasRef() && resource.getRef().isRelative()) {
-            Ref ref = generateStaticResourceRef(resource.getResource().getClass().getSimpleName(),
-                    resource.getRef().toString(),
+            Ref ref = generateStaticResourceRef(
+                    resource,
+                    resource.getRef().toString(),  // fixturePath
                     null,
                     getTestCollectionId(),
                     getTestId());

@@ -39,7 +39,7 @@ public class GetChannelIdAndURLRequest {
     }
 
     public void run() throws IOException {
-        log.info("GetChannelIdAndURLRequest");
+        request.announce("GetChannelIdAndURLRequest");
         SimStore simStore = new SimStore(request.externalCache);
         List<String> ids = simStore.getChannelIds();
         List<IdandURL> idsAndUrls = new ArrayList<>();
@@ -53,7 +53,7 @@ public class GetChannelIdAndURLRequest {
                 idu.site = channelConfig.getXdsSiteName();
                 idsAndUrls.add(idu);
             } catch (Throwable e) {
-                request.resp.setStatus(request.resp.SC_NOT_FOUND);
+                request.notFound();
                 return;
             }
         }
@@ -61,7 +61,6 @@ public class GetChannelIdAndURLRequest {
 
         request.resp.setContentType("application/json");
         request.resp.getOutputStream().print(json);
-
-        request.resp.setStatus(request.resp.SC_OK);
+        request.ok();
     }
 }

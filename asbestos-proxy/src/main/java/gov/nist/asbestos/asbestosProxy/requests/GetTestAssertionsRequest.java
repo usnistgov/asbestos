@@ -29,17 +29,17 @@ public class GetTestAssertionsRequest {
     }
 
     public void run() {
-        log.info("GetTestAssertionsRequest");
+        request.announce("GetTestAssertionsRequest");
 
         File assertsFile = this.request.ec.getTestAssertionsFile();
-        String jsonString;
+        String jsonString = null;
         try {
             jsonString = new String(Files.readAllBytes(assertsFile.toPath()));
         } catch (IOException e) {
-            throw new Error(e);
+            request.serverError(e);
         }
 
-        Returns.returnString(request.resp, jsonString);
-        log.info("OK");
+        request.returnString(jsonString);
+        request.ok();
     }
 }

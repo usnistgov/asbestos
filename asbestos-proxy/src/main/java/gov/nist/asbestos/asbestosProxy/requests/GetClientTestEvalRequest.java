@@ -108,8 +108,8 @@ public class GetClientTestEvalRequest {
         }
     }
 
-    public void run() {
-        log.info("GetClientTestEval");
+    public void run() throws IOException {
+        request.announce("GetClientTestEval");
         request.parseChannelName(4);
         String testCollection = request.uriParts.get(6);
         int eventsToEvaluate = 0;
@@ -142,13 +142,9 @@ public class GetClientTestEvalRequest {
         StringBuilder buf = buildJson(testId);
 
         String myStr = buf.toString();
-        try {
-            Files.write(Paths.get(new File(testLogDir, testId + ".json").toString()), myStr.getBytes());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        Files.write(Paths.get(new File(testLogDir, testId + ".json").toString()), myStr.getBytes());
 
-        Returns.returnString(request.resp, myStr);
+        request.returnString(myStr);
     }
 
     public List<Event> getEvents(SimId simId) {
@@ -246,8 +242,7 @@ public class GetClientTestEvalRequest {
             wrapper.setHttpBase(base);
             return wrapper;
         } catch (Throwable t) {
-            t.printStackTrace();
-            throw new Error(t);
+            throw new RuntimeException(t);
         }
     }
 
@@ -271,7 +266,7 @@ public class GetClientTestEvalRequest {
         } catch (Throwable t) {
             System.err.println("Event " + event.getEventId() + ":");
             t.printStackTrace();
-            throw new Error(t);
+            throw new RuntimeException(t);
         }
     }
 

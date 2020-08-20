@@ -49,64 +49,40 @@ public class ProxyLogServlet extends HttpServlet {
     @Override
     public void doGet(HttpServletRequest req, HttpServletResponse resp) {
 
-        if (externalCache == null) {
-            resp.setStatus(resp.SC_INTERNAL_SERVER_ERROR);
-            return;
-        }
-
         Request request = new Request(req, resp, externalCache);
-        log.info("Log GET " + request.uri);
 
         try {
+            if (externalCache == null)
+                throw new Exception("External Cache not set");
 
             if (GetLogEventAnalysisRequest.isRequest(request)) new GetLogEventAnalysisRequest(request).run();
             else if (GetEventRequest.isRequest(request)) new GetEventRequest(request).run();
             else if (GetDocumentRequest.isRequest(request)) new GetDocumentRequest(request).run();
             else if (GetProxyBaseRequest.isRequest(request)) new GetProxyBaseRequest(request).run();
             else if (GetValidationServerRequest.isRequest(request)) new GetValidationServerRequest(request).run();
-            //else if (GetValidationRequest.isRequest(request)) new GetValidationRequest(request).run();
-            //else if (GetChannelMarkerRequest.isRequest(request)) new GetChannelMarkerRequest(request).run();
             else if (GetEventForResourceTypeRequest.isRequest(request)) new GetEventForResourceTypeRequest(request).run();
             else if (GetEventsForChannelRequest.isRequest(request)) new GetEventsForChannelRequest(request).run();
-            else throw new Exception("Invalid request - do not understand URI " + request.uri);
+            else request.badRequest();
 
-        } catch (RuntimeException e) {
-            log.error(ExceptionUtils.getStackTrace(e));
-            resp.setStatus(resp.SC_INTERNAL_SERVER_ERROR);
-        } catch (Exception e) {
-            log.error(ExceptionUtils.getStackTrace(e));
-            resp.setStatus(resp.SC_BAD_REQUEST);
-        } catch (Throwable e) {
-            log.error(ExceptionUtils.getStackTrace(e));
-            resp.setStatus(resp.SC_INTERNAL_SERVER_ERROR);
+        } catch (Throwable t) {
+            request.serverError(t);
         }
     }
 
     @Override
     public void doPost(HttpServletRequest req, HttpServletResponse resp) {
 
-        if (externalCache == null) {
-            resp.setStatus(resp.SC_INTERNAL_SERVER_ERROR);
-            return;
-        }
-
         Request request = new Request(req, resp, externalCache);
-        log.info("Log POST " + request.uri);
 
         try {
+            if (externalCache == null)
+                throw new Exception("External Cache not set");
             if (AnalyseResourceRequest.isRequest(request)) new AnalyseResourceRequest(request).run();
             else
-                throw new Exception("Invalid request - do not understand URI " + request.uri);
+                request.badRequest();
 
-        } catch (RuntimeException e) {
-            log.error(ExceptionUtils.getStackTrace(e));
-            resp.setStatus(resp.SC_INTERNAL_SERVER_ERROR);
-        } catch (Exception e) {
-            log.error(ExceptionUtils.getStackTrace(e));
-            resp.setStatus(resp.SC_BAD_REQUEST);
-        } catch (Throwable e) {
-            log.error(ExceptionUtils.getStackTrace(e));
-            resp.setStatus(resp.SC_INTERNAL_SERVER_ERROR);
+        } catch (Throwable t) {
+            request.serverError(t);
         }
     }
 

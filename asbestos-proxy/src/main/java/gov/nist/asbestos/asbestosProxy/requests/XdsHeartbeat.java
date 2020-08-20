@@ -67,7 +67,7 @@ public class XdsHeartbeat {
             heartBeat.responding = false;
             //msg(e.getMessage());
         }
-        Returns.returnObject(request.resp, heartBeat);
+        request.returnObject(heartBeat);
     }
 
     private void msg(String msg)  {

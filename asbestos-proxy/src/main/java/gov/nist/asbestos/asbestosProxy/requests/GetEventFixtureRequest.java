@@ -33,37 +33,24 @@ public class GetEventFixtureRequest {
         this.request = request;
     }
 
-    public void run() {
-        log.info("GetEventFixtureRequest");
-
-        if (1 ==1)
-            throw new RuntimeException("GetEventFixtureRequest: Conflict in params to getStaticFixture - thought this was obsolete");
+    public void run() throws IOException {
+        request.announce("GetEventFixtureRequest");
 
         String testCollectionId = request.uriParts.get(4);
         String testId = request.uriParts.get(5);
         String fixturePath = request.getParm("url");
         URL url = request.getFullUrl();
-        if (url == null) {
-            request.resp.setStatus(request.resp.SC_BAD_REQUEST);
-            return;
-        }
+        if (url == null)
+            throw new RuntimeException("url is a required parameter");
         String fhirPath = request.getParm("fhirPath");
         ResourceWrapper wrapper = request.ec.getStaticFixture(testCollectionId, testId, request.channelId, fixturePath, fhirPath, url);
-        if (wrapper == null) {
-            request.resp.setStatus(request.resp.SC_BAD_REQUEST);
-            return;
-        }
-        //Returns.returnResource(request.resp, wrapper.getResource());
+        if (wrapper == null)
+            throw new RuntimeException("Cannot find content");
         UIEvent uiEvent = new UIEvent(request.ec).fromResource(wrapper);
 
         String json = new Gson().toJson(uiEvent);
         request.resp.setContentType("application/json");
-        try {
-            request.resp.getOutputStream().write(json.getBytes());
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        request.resp.setStatus(request.resp.SC_OK);
+        request.resp.getOutputStream().write(json.getBytes());
+        request.ok();
     }
 }

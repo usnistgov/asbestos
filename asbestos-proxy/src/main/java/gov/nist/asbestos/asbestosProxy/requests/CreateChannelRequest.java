@@ -33,7 +33,7 @@ public class CreateChannelRequest {
     }
 
     public void run() throws IOException {
-        log.info("CreateChannel");
+        request.announce("CreateChannel");
         String rawRequest = IOUtils.toString(request.req.getInputStream(), Charset.defaultCharset());   // json
         log.debug("CREATE Channel " + rawRequest);
         ChannelConfig channelConfig = ChannelConfigFactory.convert(rawRequest);
@@ -55,7 +55,6 @@ public class CreateChannelRequest {
         request.resp.setContentType("application/json");
         request.resp.getOutputStream().print(rawRequest);
 
-        request.resp.setStatus((simStore.isNewlyCreated() ? request.resp.SC_CREATED : request.resp.SC_OK));
-        log.info("OK");
+        request.setStatus((simStore.isNewlyCreated() ? request.resp.SC_CREATED : request.resp.SC_OK));
     }
 }

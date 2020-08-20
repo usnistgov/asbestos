@@ -36,7 +36,6 @@ public class TestEngineServlet extends HttpServlet {
     @Override
     public void doGet(HttpServletRequest req, HttpServletResponse resp)  {
         Request request = new Request(req, resp, externalCache);
-        log.info("Test Engine GET " + request.uri);
 
         try {
             if (GetTestCollectionNamesRequest.isRequest(request)) new GetTestCollectionNamesRequest(request).run();
@@ -52,37 +51,25 @@ public class TestEngineServlet extends HttpServlet {
             else if (GetClientEventEvalRequest.isRequest(request)) new GetClientEventEvalRequest(request).run();
             else if (HapiHeartbeat.isRequest(request)) new HapiHeartbeat(request).run();
             else if (XdsHeartbeat.isRequest(request)) new XdsHeartbeat(request).run();
-            else throw new Exception("Invalid request - do not understand URI " + request.uri);
+            else request.badRequest();
 
-        } catch (RuntimeException e) {
-            log.error(ExceptionUtils.getStackTrace(e));
-            resp.setStatus(resp.SC_INTERNAL_SERVER_ERROR);
-        } catch (Exception e) {
-            log.error(ExceptionUtils.getStackTrace(e));
-            resp.setStatus(resp.SC_BAD_REQUEST);
         } catch (Throwable e) {
-            log.error(ExceptionUtils.getStackTrace(e));
-            resp.setStatus(resp.SC_INTERNAL_SERVER_ERROR);
+            request.serverError(e);
         }
     }
 
     @Override
     public void doPost(HttpServletRequest req, HttpServletResponse resp) {
         Request request = new Request(req, resp, externalCache);
-        log.info("Test Engine POST " + request.uri);
 
         try {
 
             if (RunTestRequest.isRequest(request)) new RunTestRequest(request).run();
             else if (EvalRequest.isRequest(request)) new EvalRequest(request).run();
-            else throw new Exception("Invalid request - do not understand URI " + request.uri);
+            else request.badRequest();
 
-        } catch (IOException e) {
-            log.error(ExceptionUtils.getStackTrace(e));
-            resp.setStatus(resp.SC_INTERNAL_SERVER_ERROR);
-        } catch (Throwable e) {
-            log.error(ExceptionUtils.getStackTrace(e));
-            resp.setStatus(resp.SC_BAD_REQUEST);
+        } catch (Throwable t) {
+            request.serverError(t);
         }
 
     }

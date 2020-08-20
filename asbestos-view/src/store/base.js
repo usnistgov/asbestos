@@ -96,7 +96,7 @@ export const baseStore = {
                 })
                 .catch(function (error) {
                     commit('setError', url + ': ' + error)
-                    console.error(error)
+                    console.error(`${error} for ${url}`)
                 })
 //            commit('setSessions', ['default'])
         },
@@ -115,7 +115,7 @@ export const baseStore = {
                 })
                 .catch(function (error) {
                     commit('setError', url + ': ' + error)
-                    console.error(error)
+                    console.error(`${error} for ${url}`)
                 })
         },
         loadChannelNamesAndURLs({commit}) {

@@ -34,30 +34,27 @@ public class GetEventRequest {
         this.request = request;
     }
 
-    public void run() {
-        log.info("GetEventRequest");
+    public void run() throws IOException {
+        request.announce("GetEventRequest");
         Headers headers = Common.getRequestHeaders(request.req, Verb.GET);
         Header acceptHeader = headers.getAccept();
-        boolean htmlOk = acceptHeader.getValue().contains("text/html");
         boolean jsonOk = acceptHeader.getValue().contains("json");
         if (request.uriParts.size() == 7) {  // includes event
             if (jsonOk) {
-                request.ec.buildJsonListingOfEvent(
+                request.ec.buildEventJson(
                         request.resp,
                         request.uriParts.get(3),
                         request.uriParts.get(4),
                         request.uriParts.get(5),
                         request.uriParts.get(6));
-                return;
-            } else if (htmlOk) {
+            } else  {
                 buildFullHtmlListing(request.resp, request.uriParts);
-                return;
             }
         }
-        request.resp.setStatus(request.resp.SC_BAD_REQUEST);
+        request.ok();
     }
 
-    private void buildFullHtmlListing(HttpServletResponse resp, List<String> uriParts) {
+    private void buildFullHtmlListing(HttpServletResponse resp, List<String> uriParts) throws IOException {
         String testSession = uriParts.get(3);
         String channelId = uriParts.get(4);
         String resourcetype = uriParts.get(5);
@@ -90,11 +87,7 @@ public class GetEventRequest {
 
         b.append("</body></html>");
 
-        try {
-            resp.getOutputStream().write(b.toString().getBytes());
-        } catch (IOException e) {
-            resp.setStatus(resp.SC_INTERNAL_SERVER_ERROR);
-        }
+        resp.getOutputStream().write(b.toString().getBytes());
     }
 
     private void displayEvent(StringBuilder b, File theEvent, String label) {

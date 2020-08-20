@@ -1,6 +1,7 @@
 package gov.nist.asbestos.analysis;
 
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
+import org.hl7.fhir.r4.model.Bundle;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,10 +18,17 @@ class Related {
     Map atts;
     boolean contained = false;
     String binaryUrl;
+    Bundle contextResource = null;
 
     Related(ResourceWrapper wrapper, String howRelated) {
         this.wrapper = wrapper;
         this.howRelated = howRelated;
+    }
+
+    Related(ResourceWrapper wrapper, Bundle contextResource, String howRelated) {
+        this.wrapper = wrapper;
+        this.howRelated = howRelated;
+        this.contextResource = contextResource;
     }
 
     Related contained() {

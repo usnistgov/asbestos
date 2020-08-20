@@ -32,7 +32,7 @@ public class GetStaticResourceRequest {
     }
 
     public void run() {
-        log.info("GetStaticResourceRequest");
+        request.announce("GetStaticResourceRequest");
         String testCollectionId = request.uriParts.get(4);
         String testId = request.uriParts.get(5);
         String resourceType = request.uriParts.get(6);
@@ -51,9 +51,9 @@ public class GetStaticResourceRequest {
                 url);
 
         if (wrapper == null) {
-            request.resp.setStatus(request.resp.SC_NOT_FOUND);
+            request.notFound();
             return;
         }
-        Returns.returnResource(request.resp, wrapper.getResource());
+        request.returnResource(wrapper.getResource());
     }
 }

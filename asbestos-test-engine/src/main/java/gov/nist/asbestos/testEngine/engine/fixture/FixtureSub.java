@@ -8,9 +8,9 @@ import org.hl7.fhir.r4.model.*;
 import java.util.Objects;
 
 public class FixtureSub {
-    private  FixtureMgr fixtureMgr;
-    private String sourceId;
-    private String fhirPath;
+    private final FixtureMgr fixtureMgr;
+    private final String sourceId;
+    private final String fhirPath;
 
     public FixtureSub(FixtureMgr fixtureMgr, String sourceId, String fhirPath) {
         this.fixtureMgr = fixtureMgr;
@@ -53,16 +53,16 @@ public class FixtureSub {
         if (resource1 != null) {
             Ref fixturePathRef = fixtureComponent.getResourceWrapper().getRef();
             String fixturePath = fixturePathRef == null ? null : fixturePathRef.toString();
-            Ref ref = getRef(resource1.getClass().getSimpleName(), fixturePath, fhirPath);
+            Ref ref = getRef(wrapper, fixturePath, fhirPath);
             wrapper.setRef(ref);
         }
         return wrapper;
     }
 
-    public Ref getRef(String resourceType, String fixturePath, String fhirPath) {
+    public Ref getRef(ResourceWrapper wrapper, String fixturePath, String fhirPath) {
         Objects.requireNonNull(getTestCollectionId());
         Objects.requireNonNull(getTestId());
-        return FixtureComponent.generateStaticResourceRef(resourceType, fixturePath, fhirPath, getTestCollectionId(), getTestId());
+        return FixtureComponent.generateStaticResourceRef(wrapper, fixturePath, fhirPath, getTestCollectionId(), getTestId());
     }
 
     public String getSourceId() {

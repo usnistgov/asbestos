@@ -28,21 +28,20 @@ public class GetChannelConfigRequest {
     }
 
     public void run() throws IOException {
-        log.info("GetChannelConfig");
+        request.announce("GetChannelConfig");
         String channelId = request.uriParts.get(3);
         ChannelConfig channelConfig;
 
         try {
             channelConfig = ChannelControl.channelConfigFromChannelId(request.externalCache, channelId);
         } catch (Throwable e) {
-            request.resp.setStatus(request.resp.SC_NOT_FOUND);
+            request.notFound();
             return;
         }
         String configString = ChannelConfigFactory.convert(channelConfig);
 
         request.resp.setContentType("application/json");
         request.resp.getOutputStream().print(configString);
-
-        request.resp.setStatus(request.resp.SC_OK);
+        request.ok();
     }
 }

@@ -38,19 +38,11 @@ public class ValidationServlet  extends HttpServlet {
         }
 
         Request request = new Request(req, resp, externalCache);
-        log.info("Log GET " + request.uri);
 
         try {
             if (GetValidationRequest.isRequest(request)) new GetValidationRequest(request).run();
-        } catch (RuntimeException e) {
-            log.error(ExceptionUtils.getStackTrace(e));
-            resp.setStatus(resp.SC_INTERNAL_SERVER_ERROR);
-        } catch (Exception e) {
-            log.error(ExceptionUtils.getStackTrace(e));
-            resp.setStatus(resp.SC_BAD_REQUEST);
-        } catch (Throwable e) {
-            log.error(ExceptionUtils.getStackTrace(e));
-            resp.setStatus(resp.SC_INTERNAL_SERVER_ERROR);
+        } catch (Throwable t) {
+            request.serverError(t);
         }
     }
 
@@ -63,19 +55,11 @@ public class ValidationServlet  extends HttpServlet {
         }
 
         Request request = new Request(req, resp, externalCache);
-        log.info("Log POST " + request.uri);
 
         try {
 
-        } catch (RuntimeException e) {
-            log.error(ExceptionUtils.getStackTrace(e));
-            resp.setStatus(resp.SC_INTERNAL_SERVER_ERROR);
-        } catch (Exception e) {
-            log.error(ExceptionUtils.getStackTrace(e));
-            resp.setStatus(resp.SC_BAD_REQUEST);
-        } catch (Throwable e) {
-            log.error(ExceptionUtils.getStackTrace(e));
-            resp.setStatus(resp.SC_INTERNAL_SERVER_ERROR);
+        } catch (Throwable t) {
+            request.serverError(t);
         }
     }
 }

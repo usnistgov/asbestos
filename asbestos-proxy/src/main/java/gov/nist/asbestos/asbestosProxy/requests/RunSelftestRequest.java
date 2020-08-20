@@ -63,19 +63,13 @@ public class RunSelftestRequest {
         String channelName = request.uriParts.get(4);
         String testCollection = request.uriParts.get(5);
         boolean isRun = request.uriParts.get(6).equals("run");
-        log.info("Selftest - " + testCollection);
+        request.announce("RunSelftestRequest");
 
         LastTime lastTime = new LastTime();
 
-        ChannelConfig channelConfig;
-        try {
-            channelConfig =  ChannelConnector.getChannelConfig(request.resp, request.externalCache, channelName);
-        } catch (Throwable e) {
-            request.resp.setStatus(request.resp.SC_NOT_FOUND);
-            return;
-        }
+        ChannelConfig channelConfig = ChannelConnector.getChannelConfig(request.resp, request.externalCache, channelName);
         if (channelConfig == null) {
-            request.resp.setStatus(request.resp.SC_NOT_FOUND);
+            request.badRequest("Channel not found");
             return;
         }
 
@@ -95,7 +89,7 @@ public class RunSelftestRequest {
             GetClientTestEvalRequest.Summary summary = clientEval.buildSummary();
             lastTime.time = summary.time;
             lastTime.hasError = !summary.allPass;
-            Returns.returnObject(request.resp, lastTime);
+            request.returnObject(lastTime);
             request.resp.setStatus(request.resp.SC_OK);
         } else if (isRun) {
             URI proxy = channelConfig.proxyURI();
@@ -144,8 +138,8 @@ public class RunSelftestRequest {
                     lastTime.hasError = true;
                 }
             }
-            Returns.returnObject(request.resp, lastTime);
-            request.resp.setStatus(request.resp.SC_OK);
+            request.returnObject(lastTime);
+            request.ok();
         } else {  // status
             List<File> testLogFiles = request.ec.getTestLogs(channelName, testCollection);
             boolean aRun = false;
@@ -174,8 +168,8 @@ public class RunSelftestRequest {
             lastTime.noRuns = !aRun;
             if (lastTime.noRuns)
                 lastTime.allRun = false;
-            Returns.returnObject(request.resp, lastTime);
-            request.resp.setStatus(request.resp.SC_OK);
+            request.returnObject(lastTime);
+            request.ok();
         }
     }
 

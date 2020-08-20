@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
-import {ENGINE} from '../common/http-common'
+import {ENGINE, LOG} from '../common/http-common'
 //import {FHIRTOOLKITBASEURL} from "../common/http-common";
 
 Vue.use(Vuex)
@@ -236,7 +236,7 @@ export const testRunnerStore = {
                     commit('setTestAssertions', response.data)
                 })
                 .catch(function (error) {
-                    commit('setError', url + ': ' + error)
+                    commit('setError', ENGINE.baseURL  + url + ': ' + error)
                 })
         },
         runEval({commit, state, rootState}, testId) {
@@ -247,7 +247,7 @@ export const testRunnerStore = {
                     commit('setClientTestResult', { testId: testId, reports: reports[testId]} )
                 })
                 .catch(function (error) {
-                    commit('setError', url + ': ' + error)
+                    commit('setError', LOG.baseURL + url + ': ' + error)
                 })
         },
         runSingleEventEval({commit, rootState}, parms) {
@@ -262,7 +262,7 @@ export const testRunnerStore = {
                     commit('setTestReport', results[testId][eventId] )
                 })
                 .catch(function (error) {
-                    commit('setError', url + ': ' + error)
+                    commit('setError', ENGINE.baseURL + url + ': ' + error)
                 })
         },
         loadTestScripts({commit, state}, scriptNames) {
@@ -401,7 +401,7 @@ export const testRunnerStore = {
                 }
 
             } catch (error) {
-                commit('setError', url + ': ' + error)
+                commit('setError', ENGINE.baseURL + url + ': ' + error)
             }
         },
         // this exists because loadCurrentTestCollection updates currentTestCollectionName
@@ -424,7 +424,7 @@ export const testRunnerStore = {
                 commit('setCollectionDescription', description)  // sets collectionDescription
                 commit('setIsClientTest', isClient)   // sets isClientTest
             } catch (error) {
-                commit('setError', url + ': ' + error)
+                commit('setError', ENGINE.baseURL + url + ': ' + error)
             }
         },
 

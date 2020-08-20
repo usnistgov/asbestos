@@ -21,11 +21,10 @@ public class GetSignInRequest {
     }
 
     public void run() throws IOException {
-        log.info("GetSignIn");
+        request.announce("GetSignIn");
 
         request.resp.setContentType("application/json");
         request.resp.getOutputStream().print("{\"status\":\"ok\"}");
-
-        request.resp.setStatus(request.resp.SC_OK);
+        request.ok();
     }
 }

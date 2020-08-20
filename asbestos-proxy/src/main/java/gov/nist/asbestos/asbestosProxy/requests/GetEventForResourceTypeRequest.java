@@ -31,12 +31,13 @@ public class GetEventForResourceTypeRequest {
     }
 
     public void run() {
-        log.info("GetEventForResourceTypeRequest");
+        request.announce("GetEventForResourceTypeRequest");
         request.ec.buildJsonListingOfEvents(
                 request.resp,
                 request.uriParts.get(3),
                 request.uriParts.get(4),
                 request.uriParts.get(5));
+        request.ok();
     }
 
 }

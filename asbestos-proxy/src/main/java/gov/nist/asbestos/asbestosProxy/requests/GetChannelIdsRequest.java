@@ -31,7 +31,7 @@ public class GetChannelIdsRequest {
     }
 
     public void run() throws IOException {
-        log.info("GetChannelIds");
+        request.announce("GetChannelIds");
         SimStore simStore = new SimStore(request.externalCache);
         List<String> ids = simStore.getChannelIds();
 
@@ -39,8 +39,6 @@ public class GetChannelIdsRequest {
 
         request.resp.setContentType("application/json");
         request.resp.getOutputStream().print(json);
-
-        request.resp.setStatus(request.resp.SC_OK);
-        log.info("OK");
+        request.ok();
     }
 }

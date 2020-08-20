@@ -1,11 +1,11 @@
 package gov.nist.asbestos.asbestosProxy.requests;
 
-// Client Testing - schedule testCollection/testId for testSession/channel
+// Client Testing - un-schedule testCollection/testId for testSession/channel
 // 0 - empty
 // 1 - app context
 // 2 - "canceleval"
 // 3   testSession__channelId
-// Prepare the channel for an evaluation (client test)
+// Cancel pending evaluation (client test)
 // payload is ignored
 
 import gov.nist.asbestos.asbestosProxy.servlet.ChannelConnector;
@@ -24,10 +24,10 @@ public class CancelEvalRequest {
     }
 
     public void run() {
-        log.info("CancelEval");
+        request.announce("CancelEval");
         String channelId = request.uriParts.get(3);
         ChannelConnector.connect(request.resp, request.externalCache, channelId); // no exception => channel exists
         request.getSession().removeAttribute(EvalRequest.NEXT_CLIENT_TEST);
-        request.resp.setStatus(request.resp.SC_OK);
+        request.ok();
     }
 }

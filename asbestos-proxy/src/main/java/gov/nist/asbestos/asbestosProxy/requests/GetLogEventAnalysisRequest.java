@@ -117,39 +117,25 @@ public class GetLogEventAnalysisRequest {
         if (testCollectionId != null && testId != null) {
             testDir = request.ec.getTest(testCollectionId, testId);
             if (testDir == null || !testDir.exists() || !testDir.isDirectory()) {
-                request.resp.setStatus(request.resp.SC_NOT_FOUND);
+                log.info(testDir + " does not exist or is not directory");
+                request.notFound();
                 return null;
             }
         }
         return testDir;
     }
 
-    public void run() {
-        log.info("GetLogEventAnalysisRequest");
+    public void run() throws IOException {
+        request.announce("GetLogEventAnalysisRequest");
 
-        testDir = getTestDir(request.segment(5), request.segment(6));
 
         if (request.uriParts.get(4).equalsIgnoreCase("static")) {
+            testDir = getTestDir(request.segment(5), request.segment(6));
             // load static fixture from test definition
             String ref = request.getParm("url");
-//            if (ref == null) {
-//                request.resp.setStatus(request.resp.SC_BAD_REQUEST);
-//                return;
-//            }
-//            File file = new File(testDir, ref);
-//            if (!file.exists() || !file.isFile()) {
-//                request.resp.setStatus(request.resp.SC_NOT_FOUND);
-//                return;
-//            }
-            BaseResource resource = getResourceFromTestDefinition(testDir, ref);
+            ResourceWrapper resource = getResourceFromTestDefinition(testDir, ref);
             if (resource == null)
-                return;
-//            try {
-//                resource = ProxyBase.parse(file);
-//            } catch (Exception e) {
-//                returnReport(new Report("Not found or not a resource: " + file));
-//                return;
-//            }
+                throw new RuntimeException("Resource not found");
             analyseResource(resource, null, true);
 
         } else if (request.uriParts.get(4).equalsIgnoreCase("event")) {
@@ -160,7 +146,7 @@ public class GetLogEventAnalysisRequest {
             String focusAnchor = request.getParm("focusAnchor");
             if (focusUrl != null && focusAnchor != null)
                 focusUrl = focusUrl + "#" + focusAnchor;
-            boolean requestFocus = analysisTargetIsRequest();
+            boolean requestFocus = analysisTargetIsRequest();  // focus on request (or response)?
             eventContext = new EventContext(testSession, channelId, eventId, requestFocus);
 
             UIEvent event = request.ec.getEvent(eventContext);
@@ -191,20 +177,28 @@ public class GetLogEventAnalysisRequest {
                 return;
             }
 
-
+            ResourceWrapper sourceWrapper = new ResourceWrapper(baseResource)
+                    .setEvent(event, requestFocus);
 
             BaseResource requestResource = null;
             if (requestBodyString.length() > 0)
                 requestResource = ProxyBase.parse(requestBodyString, Format.fromContentType(requestHeaders.getContentType().getValue()));
-            Bundle requestBundle = null;
+            ResourceWrapper requestBundle = null;
             if (requestResource instanceof Bundle)
-                requestBundle = (Bundle) requestResource;
+                requestBundle = new ResourceWrapper(requestResource);
 
             if (baseResource instanceof Bundle) {
-                analyseBundle(focusUrl, requestFocus, runValidation, (Bundle) baseResource /*, requestBundle */);
+                analyseBundle(focusUrl, requestFocus, runValidation, sourceWrapper /*, requestBundle */);
             } else if (responseHeaders.hasHeader("Content-Location")) {
                 Ref ref = new Ref(responseHeaders.get("Content-Location").getValue());
-                runAndReturnReport(ref, "link taken from response Content-location header", false, false, false, runValidation, requestBundle);
+                runAndReturnReport(
+                        ref,
+                        "link taken from response Content-location header",
+                        false,
+                        false,
+                        false,
+                        runValidation,
+                        requestBundle);
             } else {
                 Ref ref = new Ref("http://" + requestHeaders.getHeaderValue("host") + requestHeaders.getPathInfo());
                 runAndReturnReport(new ResourceWrapper(baseResource).setRef(ref));
@@ -214,7 +208,7 @@ public class GetLogEventAnalysisRequest {
             if (query != null) {
                 String url = null;
                 if (!query.startsWith("url=")) {
-                    request.resp.setStatus(request.resp.SC_BAD_REQUEST);
+                    request.badRequest();
                     return;
                 }
                 url = query.substring(4);
@@ -225,12 +219,12 @@ public class GetLogEventAnalysisRequest {
                 try {
                     target = new Request(url, request.externalCache);
                 } catch (URISyntaxException e) {
-                    request.resp.setStatus(request.resp.SC_BAD_REQUEST);
+                    request.badRequest();
                     return;
                 }
                 File testDir = getTestDir(target.segment(4), target.segment(5));
                 if (testDir == null) {
-                    request.resp.setStatus(request.resp.SC_BAD_REQUEST);
+                    request.badRequest();
                     return;
                 }
                 Map<String, String> queryParams = Ref.parseParameters(query);
@@ -239,53 +233,44 @@ public class GetLogEventAnalysisRequest {
                 boolean ignoreBadRefs = queryParams.containsKey("ignoreBadRefs") && "true".equals(queryParams.get("ignoreBadRefs"));
                 String eventId = queryParams.getOrDefault("eventId", null);
                 String fixturePath = queryParams.get("fixturePath");
-                String fhirPath = queryParams.get("fhirPath");
-                //String url = queryParams.getOrDefault("url", null);
-                if (url != null) {
-                    Ref ref = new Ref(url);
-                    BaseResource resource = null;
-                    if (!Strings.isNullOrEmpty(eventId)) {
-                        try {
-                            eventContext = new EventContext(ProxyEvent.eventFromEventURI(new URI(url)));
-                        } catch (Exception e) {
-                            throw new RuntimeException("URI " + url + " cannot be translated into an event");
-                        }
-                    } else if (!Strings.isNullOrEmpty(fixturePath)) {
-                        resource = getResourceFromTestDefinition(testDir, fixturePath);
-                        if (resource == null) {
-                            request.resp.setStatus(request.resp.SC_BAD_REQUEST);
-                            return;
-                        }
+                Ref ref = new Ref(url);
+                ResourceWrapper resource = null;
+                if (!Strings.isNullOrEmpty(eventId)) {
+                    try {
+                        eventContext = new EventContext(ProxyEvent.eventFromEventURI(new URI(url)));
+                    } catch (Exception e) {
+                        throw new RuntimeException("URI " + url + " cannot be translated into an event");
                     }
-                    //Ref theRef = new Ref(fhirPath);
-                    // too early - ref = new Ref(Ref.urlDecode(ref.asString()));
-                    runAndReturnReport(
-                            ref,
-                            "By Request",
-                            gzip,
-                            useProxy,
-                            ignoreBadRefs,
-                            false,
-                            resource);
+                } else if (!Strings.isNullOrEmpty(fixturePath)) {
+                    resource = getResourceFromTestDefinition(testDir, fixturePath);
+                    if (resource == null) {
+                        request.badRequest();
+                        return;
+                    }
                 }
+                //Ref theRef = new Ref(fhirPath);
+                // too early - ref = new Ref(Ref.urlDecode(ref.asString()));
+                runAndReturnReport(
+                        ref,
+                        "By Request",
+                        gzip,
+                        useProxy,
+                        ignoreBadRefs,
+                        false,
+                        resource);
             }
         }
     }
 
-    BaseResource getResourceFromTestDefinition(File testDir, String ref) {
-        if (Strings.isNullOrEmpty(ref)) {
-            request.resp.setStatus(request.resp.SC_BAD_REQUEST);
-            return null;
-        }
-        if (testDir == null) {
-            request.resp.setStatus(request.resp.SC_NOT_FOUND);
-            return null;
-        }
+    ResourceWrapper getResourceFromTestDefinition(File testDir, String ref) throws IOException {
+        if (Strings.isNullOrEmpty(ref))
+            throw new RuntimeException("Bad path to fixture");
+
+        if (testDir == null)
+            throw new RuntimeException("Test not found");
         File file = new File(testDir, ref);
-        if (!file.exists() || !file.isFile()) {
-            request.resp.setStatus(request.resp.SC_NOT_FOUND);
-            return null;
-        }
+        if (!file.exists() || !file.isFile())
+            throw new RuntimeException("File within fixture not found");
         BaseResource resource;
         try {
             resource = ProxyBase.parse(file);
@@ -293,10 +278,15 @@ public class GetLogEventAnalysisRequest {
             returnReport(new Report("Not found or not a resource: " + file));
             return null;
         }
-        return resource;
+        ResourceWrapper wrapper = new ResourceWrapper(resource);
+        wrapper.setFile(file);
+        return wrapper;
     }
 
-    void analyseBundle(String focusUrl, boolean requestFocus, boolean runValidation, Bundle bundle /*, Bundle requestBundle */) {
+    void analyseBundle(String focusUrl, boolean requestFocus, boolean runValidation, ResourceWrapper bundleWrapper /*, Bundle requestBundle */) throws IOException {
+        if (!"Bundle".equals(bundleWrapper.getResourceType()))
+            throw new RuntimeException("Not a Bundle");
+        Bundle bundle = (Bundle) bundleWrapper.getResource();
         String focusReference = (focusUrl == null || focusUrl.equals("") || focusUrl.equals("null")) ? getManifestLocation(bundle) : focusUrl;
         boolean isSearchSet = bundle.hasType() && bundle.getType() == Bundle.BundleType.SEARCHSET;
         if (focusReference != null)
@@ -306,18 +296,11 @@ public class GetLogEventAnalysisRequest {
                     true,
                     false,
                     runValidation,
-                    analysisTargetIsRequest() ? bundle : null);
+                    analysisTargetIsRequest() ? bundleWrapper : null);
         else if (isSearchSet) {
-            List<Ref> refs = new ArrayList<>();
-            for (Bundle.BundleEntryComponent component : bundle.getEntry()) {
-                String url = component.getFullUrl();
-                if (url != null && !url.equals(""))
-                    refs.add(new Ref(url));
-            }
-            runAndReturnReport(bundle, "A Bundle", requestFocus);
-            //returnReport(new Report("Do not understand event"));
+            runAndReturnReport(bundleWrapper, "A Bundle", requestFocus);
         } else {
-            runAndReturnReport(bundle,
+            runAndReturnReport(bundleWrapper,
                     "Static Bundle",
                     requestFocus,
                     false,
@@ -329,7 +312,7 @@ public class GetLogEventAnalysisRequest {
         }
     }
 
-    void analyseResource(BaseResource baseResource, EventContext eventContext, boolean runValidation) {
+    void analyseResource(ResourceWrapper baseResource, EventContext eventContext, boolean runValidation) throws IOException {
         Report report = new AnalysisReport((Ref)null, "User", request.ec)
                 .withContextResource(baseResource)
                 .withValidation(runValidation)
@@ -337,11 +320,11 @@ public class GetLogEventAnalysisRequest {
         returnReport(report, request, eventContext);
     }
 
-    void returnReport(Report report) {
+    void returnReport(Report report) throws IOException {
         returnReport(report, request, eventContext);
     }
 
-    public void returnReport(Report report, Request request, EventContext eventContext) {
+    public void returnReport(Report report, Request request, EventContext eventContext) throws IOException {
         Objects.requireNonNull(report);
         if (!report.hasErrors()) {
             if (report.getBase() != null) {
@@ -353,15 +336,11 @@ public class GetLogEventAnalysisRequest {
         }
         String json = new Gson().toJson(report);
         request.resp.setContentType("application/json");
-        try {
-            request.resp.getOutputStream().print(json);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        request.resp.setStatus(request.resp.SC_OK);
+        request.resp.getOutputStream().print(json);
+        request.ok();
     }
 
-    private void runAndReturnReport(Ref ref, String source, boolean gzip, boolean useProxy, boolean ignoreBadRefs, boolean withValidation, BaseResource contextBundle) {
+    private void runAndReturnReport(Ref ref, String source, boolean gzip, boolean useProxy, boolean ignoreBadRefs, boolean withValidation, ResourceWrapper contextBundle) throws IOException {
         AnalysisReport analysisReport = new AnalysisReport(ref, source, request.ec)
                 .withGzip(gzip)
                 .withProxy(useProxy)
@@ -398,13 +377,15 @@ public class GetLogEventAnalysisRequest {
         returnReport(report);
     }
 
-    private void runAndReturnReport(Bundle bundle, String source, boolean isRequest, boolean gzip, boolean useProxy, boolean ignoreBadRefs, boolean withValidation) {
-        Ref manifestFullUrl = getManifestFullUrl(bundle);
+    private void runAndReturnReport(ResourceWrapper bundleWrapper, String source, boolean isRequest, boolean gzip, boolean useProxy, boolean ignoreBadRefs, boolean withValidation) throws IOException {
+        if (!"Bundle".equals(bundleWrapper.getResourceType()))
+            throw new RuntimeException("Not a Bundle");
+        Ref manifestFullUrl = getManifestFullUrl(bundleWrapper);
         AnalysisReport analysisReport = new AnalysisReport(manifestFullUrl, source, request.ec)
                 .withGzip(gzip)
                 .withProxy(useProxy)
                 .withValidation(withValidation)
-                .withContextResource(bundle)
+                .withContextResource(bundleWrapper)
                 .analyseRequest(isRequest);
 
         Report report;
@@ -419,7 +400,7 @@ public class GetLogEventAnalysisRequest {
         returnReport(report);
     }
 
-    private void runAndReturnReport(ResourceWrapper wrapper) {
+    private void runAndReturnReport(ResourceWrapper wrapper) throws IOException {
         Report report;
         try {
             report = new AnalysisReport(request.ec, wrapper).run();
@@ -431,10 +412,10 @@ public class GetLogEventAnalysisRequest {
         returnReport(report);
     }
 
-    private void runAndReturnReport(Bundle bundle, String source, boolean isRequest) {
-        Ref manifestFullUrl = getManifestFullUrl(bundle);
+    private void runAndReturnReport(ResourceWrapper bundleWrapper, String source, boolean isRequest) throws IOException {
+        Ref manifestFullUrl = getManifestFullUrl(bundleWrapper);
         AnalysisReport analysisReport = new AnalysisReport(manifestFullUrl, source, request.ec);
-        analysisReport.withContextResource(bundle);
+        analysisReport.withContextResource(bundleWrapper);
         analysisReport.analyseRequest(isRequest);
 
         Report report;
@@ -449,10 +430,17 @@ public class GetLogEventAnalysisRequest {
         returnReport(report);
     }
 
-    private Ref getManifestFullUrl(Bundle bundle) {
+    private Ref getManifestFullUrl(ResourceWrapper wrapper) {
+        Bundle bundle = (Bundle) wrapper.getResource();
         for( Bundle.BundleEntryComponent comp : bundle.getEntry()) {
             if (comp.getResource() instanceof DocumentManifest) {
-                return new Ref(comp.getFullUrl());
+                String url = comp.getFullUrl();
+                if (url != null && url.startsWith("urn:uuid") && wrapper.getRef().asString().startsWith("http")) {
+                    Ref ref = wrapper.getRef().copy();
+                    ref.addParameter("focusUrl", url);
+                    return ref;
+                }
+                return new Ref(url);
             }
         }
         return null;

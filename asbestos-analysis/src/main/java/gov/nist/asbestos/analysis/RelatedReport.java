@@ -2,6 +2,7 @@ package gov.nist.asbestos.analysis;
 
 import gov.nist.asbestos.client.Base.EventContext;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
+import org.apache.log4j.Logger;
 import org.hl7.fhir.r4.model.OperationOutcome;
 
 import java.util.ArrayList;
@@ -9,9 +10,15 @@ import java.util.List;
 import java.util.Map;
 
 public class RelatedReport {
+    private static final Logger log = Logger.getLogger(RelatedReport.class);
+
+    // basics
     String name;
     String relation;
-    String url;
+    String url; // link for UI to pull related FHIR object
+    EventContext eventContext;
+
+    // evaluation
     boolean isMinimal;
     boolean isComprehensive;
     List<String> minimalErrors;
@@ -20,7 +27,6 @@ public class RelatedReport {
     List<String> minimalChecked;
     List<String> comprehensiveChecked;
     OperationOutcome validationResult;
-    EventContext eventContext;
 
     Map atts;
     String binaryUrl;
@@ -35,6 +41,7 @@ public class RelatedReport {
             this.url = "Contained";
         else
             this.url = wrapper.getRef().toString();
+        log.info("Related Object url=" + this.url);
     }
 
     public void setEventContext(EventContext eventContext) {

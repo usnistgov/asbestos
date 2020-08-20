@@ -28,11 +28,12 @@ public class DeleteChannelRequest {
     }
 
     public void run() throws IOException {
-        log.info("DeleteChannel");
+        request.announce("DeleteChannel");
         String channelId = request.uriParts.get(3);
 
         SimId simId = SimId.buildFromRawId(channelId);
         SimStore simStore = new SimStore(request.externalCache, simId);
         simStore.deleteSim();
+        request.ok();
     }
 }
