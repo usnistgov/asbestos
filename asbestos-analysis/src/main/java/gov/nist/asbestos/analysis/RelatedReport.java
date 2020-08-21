@@ -41,6 +41,10 @@ public class RelatedReport {
             this.url = "Contained";
         else
             this.url = wrapper.getRef().toString();
+
+        if (wrapper.hasEvent())
+            eventContext = new EventContext(wrapper.getEvent());
+
         log.info("Related Object url=" + this.url);
     }
 

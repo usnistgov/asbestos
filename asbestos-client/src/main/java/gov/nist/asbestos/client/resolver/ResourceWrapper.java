@@ -64,6 +64,16 @@ public class ResourceWrapper {
         this.ref = ref;
     }
 
+    public ResourceWrapper newWithContext() {
+        ResourceWrapper newWrapper = new ResourceWrapper();
+        newWrapper.ref = ref.copy();
+        newWrapper.context = context;
+        newWrapper.file = file;
+        newWrapper.event = event;
+        newWrapper.eventRequest = eventRequest;
+        return newWrapper;
+    }
+
     public String logLink() {
         if (httpBase == null)
             return null;
@@ -90,8 +100,9 @@ public class ResourceWrapper {
         return getEvent() != null;
     }
 
-    public void setResource(BaseResource resource) {
+    public ResourceWrapper setResource(BaseResource resource) {
         this.resource = resource;
+        return this;
     }
 
     public ResourceWrapper relativeTo(ResourceWrapper reference) {

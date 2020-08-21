@@ -631,18 +631,18 @@ public class AnalysisReport {
         if (baseResource instanceof DomainResource) {
             DomainResource domainResource = (DomainResource) baseResource;
             try {
-                buildRelated(domainResource);
+                buildRelated(new ResourceWrapper(domainResource));
             } catch (Throwable t) {
                 generalErrors.add("Do not know how to load DomainResource " + domainResource.getClass().getName() + " - " + t.getMessage());
             }
         }  else if (baseResource instanceof Binary) {
             try {
-                buildRelated(baseResource);
+                buildRelated(baseObj);
             } catch (Throwable t) {
                 generalErrors.add("Do not know how to load BaseResource " + baseResource.getClass().getName());
             }
         } else if (baseResource instanceof Bundle) {
-            buildRelated(baseResource);
+            buildRelated(baseObj);
         } else {
             buildRelatedOther(baseResource);
             //generalErrors.add("Do not know how to load BaseResource " + baseResource.getClass().getName());
@@ -674,7 +674,8 @@ public class AnalysisReport {
         }
     }
 
-    private void buildRelated(Bundle bundle) {
+    private void buildRelatedBundle(ResourceWrapper wrapper) {
+        Bundle bundle = (Bundle) wrapper.getResource();
         if (bundle.hasLink()) {
             Bundle.BundleLinkComponent bundleLinkComponent = bundle.getLink("self");
             if (bundleLinkComponent.hasUrl()) {
@@ -693,15 +694,17 @@ public class AnalysisReport {
                     load(new Ref(rawLocation), "component", bundle);
                 }
             } else { // show request
-                Resource request  = entryComponent.getResource();
-                ResourceWrapper wrapper = new ResourceWrapper(request).setContext(bundle);
-                Related rel = new Related(wrapper, "In Bundle");
+                BaseResource request  = entryComponent.getResource();
+                ResourceWrapper wrapper1 = wrapper.newWithContext().setResource(request);
+                wrapper1.getRef().withFocusUrl(entryComponent.getFullUrl());
+                Related rel = new Related(wrapper1, "In Bundle");
                 related.add(rel);
             }
         }
     }
 
-    private void buildRelated(DocumentManifest documentManifest) {
+    private void buildRelatedDocumentManifest(ResourceWrapper wrapper) {
+        DocumentManifest documentManifest = (DocumentManifest) wrapper.getResource();
         log.info("buildRelated DocumentManifest");
         // subject
         if (documentManifest.hasSubject()) {
@@ -742,7 +745,8 @@ public class AnalysisReport {
         }
     }
 
-    private void buildRelated(DocumentReference documentReference) {
+    private void buildRelatedDocumentReference(ResourceWrapper wrapper) {
+        DocumentReference documentReference = (DocumentReference) wrapper.getResource();
         log.info("buildRelated DocumentReference");
         // author - contained only
         if (documentReference.hasAuthor()) {
@@ -816,18 +820,20 @@ public class AnalysisReport {
                 if (related != null && related.wrapper.hasResource()) {
                     if (!related.wrapper.getResource().getClass().getSimpleName().equals("Binary"))
                         generalErrors.add("DocumentReference: " + related.wrapper.getResource().getClass().getSimpleName() + " is not a valid content/attachment resource");
-                    buildRelated((Binary) related.wrapper.getResource());
+                    buildRelatedBinary(related.wrapper);
                 }
             }
         }
 
     }
 
-    private void buildRelated(Patient patient) {
+    private void buildRelatedPatient(ResourceWrapper wrapper) {
+        Patient patient = (Patient) wrapper.getResource();
         log.info("buildRelated Patient");
     }
 
-    private void buildRelated(ListResource list) {
+    private void buildRelatedListResource(ResourceWrapper wrapper) {
+        ListResource list = (ListResource) wrapper.getResource();
         log.info("buildRelated List");
         // subject
         if (list.hasSubject()) {
@@ -847,7 +853,8 @@ public class AnalysisReport {
         }
     }
 
-    private void buildRelated(Binary binary) {
+    private void buildRelatedBinary(ResourceWrapper wrapper) {
+        Binary binary = (Binary) wrapper.getResource();
         log.info("buildRelated Binary");
     }
 
@@ -865,15 +872,16 @@ public class AnalysisReport {
         return url;
     }
 
-    private void buildRelated(BaseResource baseResource) {
-        if (baseResource instanceof DocumentManifest) buildRelated((DocumentManifest) baseResource);
-        else if (baseResource instanceof DocumentReference) buildRelated((DocumentReference) baseResource);
-        else if (baseResource instanceof ListResource) buildRelated((ListResource) baseResource);
-        else if (baseResource instanceof Binary) buildRelated((Binary) baseResource);
-        else if (baseResource instanceof Patient) buildRelated((Patient) baseResource);
-        else if (baseResource instanceof Bundle) buildRelated((Bundle) baseResource);
+    private void buildRelated(ResourceWrapper wrapper) {
+        BaseResource resource = wrapper.getResource();
+        if (resource instanceof DocumentManifest) buildRelatedDocumentManifest(wrapper);
+        else if (resource instanceof DocumentReference) buildRelatedDocumentReference(wrapper);
+        else if (resource instanceof ListResource) buildRelatedListResource(wrapper);
+        else if (resource instanceof Binary) buildRelatedBinary(wrapper);
+        else if (resource instanceof Patient) buildRelatedPatient(wrapper);
+        else if (resource instanceof Bundle) buildRelatedBundle(wrapper);
         else
-            buildRelatedOther(baseResource);
+            buildRelatedOther(resource);
     }
 
     private Related getFromRelated(Ref ref) {

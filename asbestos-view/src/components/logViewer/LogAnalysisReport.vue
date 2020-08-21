@@ -189,9 +189,12 @@
                 }
             },
             async loadAnalysisFromEventContext(url, eventContext, addToHistory) {
-                console.log(`loadAnalysisFromEventContext url=${url} eventContext.eventId=${eventContext.eventId}`)
-                const eventId = eventContext ? eventContext.eventId : null
-                await this.loadAnalyisFromEventId(url, eventId, addToHistory)
+              const eventId = eventContext ? eventContext.eventId : null
+                console.log(`loadAnalysisFromEventContext url=${url} eventContext.eventId=${eventId}`)
+              if (eventId)
+                  await this.loadAnalyisFromEventId(url, eventId, addToHistory)
+              else
+                await this.loadAnalysisForObject(url)
             },
             async loadAnalyisFromEventId(url, eventId, addToHistory) {
                 console.log(`loadAnalyisFromEventContext for ${eventId}`)

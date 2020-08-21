@@ -82,6 +82,11 @@ public class Ref {
         return new Ref(uri).withAnchor(anchor);
     }
 
+    public Ref withFocusUrl(String focusUrl) {
+        addParameter("focusUrl", focusUrl);
+        return this;
+    }
+
     public Ref withAnchor(String anchor) {
         if (anchor == null)
             return this;
@@ -103,16 +108,22 @@ public class Ref {
         }
     }
 
+    private String uriWithoutParams() {
+        String theUri = uri.toString();
+        int quest = theUri.indexOf("?");
+        if (quest == -1)
+            return theUri;
+        return theUri.substring(0, quest);
+    }
+
     public Ref addParameter(String name, String value) {
-        String query = uri.getQuery();
+        Map<String, String> parmMap = getParametersAsMap();
+        parmMap.put(name, value);
+        String newUri = uriWithoutParams() + theQuery();
         try {
-            if (Strings.isNullOrEmpty(query)) {
-                uri = new URI(asString() + "?" + name + "=" + value);
-            } else {
-                uri = new URI(asString() + ";" + name + "=" + value);
-            }
-        } catch (Exception e) {
-            throw new RuntimeException("Cannot construct URI (Ref) with new parameter: name=" + name + " value=" + value );
+            this.uri = new URI(newUri);
+        } catch (URISyntaxException e) {
+            throw new RuntimeException("Cannot URI parse " + newUri);
         }
         return this;
     }
@@ -126,14 +137,6 @@ public class Ref {
         return urlDecode(uri.getQuery());
     }
 
-//    public static Map<String, String> parseParameters(String paramString) {
-//        paramString = paramString.trim();
-//        if (!paramString.startsWith("?"))
-//            paramString = "?" + paramString;
-//        String aFullUrl = "http://example.com" + paramString;
-//        return new Ref(aFullUrl).getParametersAsMap();
-//    }
-
     public static Map<String, String> parseParameters(String parms) {
         Map<String, String> map = new HashMap<>();
         String[] parts = parms.split(";");
@@ -144,6 +147,25 @@ public class Ref {
                 map.put(namevalue.get(0), namevalue.get(1));
         }
         return map;
+    }
+
+    private String theQuery() {
+        Map<String, String> parms = getParametersAsMap();
+        if (parms.isEmpty())
+            return "";
+
+        StringBuilder buf = new StringBuilder();
+        buf.append("?");
+        boolean isFirst = true;
+        for (String key : parms.keySet()) {
+            String value = parms.get(key);
+            if (isFirst)
+                isFirst = false;
+            else
+                buf.append(";");
+            buf.append(key).append("=").append(value);
+        }
+        return buf.toString();
     }
 
     public Map<String, String> getParametersAsMap() {
