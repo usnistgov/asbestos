@@ -54,7 +54,7 @@
     import VueMarkdown from 'vue-markdown'
 
     export default {
-        name: "DebugAssertionForm",
+        name: "DebugAssertionEvalForm",
         props: {
             patternTypeId: {
                 type: String,

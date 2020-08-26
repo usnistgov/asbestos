@@ -26,7 +26,7 @@
                                 </div>
                             </div>
                             <div style="margin: 6px">
-                                 <debug-assertion-form :pattern-type-id="selectedPatternTypeId" :is-shown="resizeForm"/>
+                                 <debug-assertion-eval-form :pattern-type-id="selectedPatternTypeId" :is-shown="resizeForm"/>
                             </div>
                         </div>
 
@@ -40,7 +40,7 @@
 </template>
 
 <script>
-    import DebugAssertionForm from "./DebugAssertionForm";
+    import DebugAssertionEvalForm from "./DebugAssertionEvalForm";
 
     export default {
         data() {
@@ -122,9 +122,9 @@
             },
         },
         components: {
-            DebugAssertionForm
+            DebugAssertionEvalForm,
         },
-        name: "DebugAssertionEval"
+        name: "DebugAssertionEvalModal"
     }
 
 </script>

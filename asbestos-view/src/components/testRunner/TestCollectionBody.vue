@@ -101,7 +101,7 @@
                     </span>
                     <span v-if="! isWaitingForBreakpoint && ! $store.state.testRunner.isClientTest"> --  {{ testTime(name) }}</span>
                 </div>
-                <debug-assertion-eval v-if="isDebugFeatureEnabled && isEvaluableAction(i)" :show="$store.state.debugAssertionEval.showModal" @close="closeModal()" @resume="doDebug(name)"></debug-assertion-eval>
+                <debug-assertion-eval-modal v-if="isDebugFeatureEnabled && isEvaluableAction(i)" :show="$store.state.debugAssertionEval.showModal" @close="closeModal()" @resume="doDebug(name)"></debug-assertion-eval-modal>
                 <router-view v-if="selected === name"></router-view>  <!--  opens TestOrEvalDetails   -->
             </div>
         </div>
@@ -113,7 +113,7 @@
     import colorizeTestReports from "../../mixins/colorizeTestReports";
     import debugTestScriptMixin from "../../mixins/debugTestScript";
     import ScriptStatus from "./ScriptStatus";
-    import DebugAssertionEval from "./debugger/DebugAssertionModal";
+    import DebugAssertionEvalModal from "./debugger/DebugAssertionEvalModal";
 
     export default {
         methods: {
@@ -171,7 +171,7 @@
         ],
         components: {
             ScriptStatus,
-            DebugAssertionEval
+            DebugAssertionEvalModal
         }
     }
 </script>
