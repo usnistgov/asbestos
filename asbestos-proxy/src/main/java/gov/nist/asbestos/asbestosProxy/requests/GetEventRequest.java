@@ -1,5 +1,6 @@
 package gov.nist.asbestos.asbestosProxy.requests;
 
+import gov.nist.asbestos.client.Base.Request;
 import gov.nist.asbestos.client.events.UITask;
 import gov.nist.asbestos.http.headers.Header;
 import gov.nist.asbestos.http.headers.Headers;
@@ -42,11 +43,12 @@ public class GetEventRequest {
         if (request.uriParts.size() == 7) {  // includes event
             if (jsonOk) {
                 request.ec.buildEventJson(
-                        request.resp,
+                        request,
                         request.uriParts.get(3),
                         request.uriParts.get(4),
                         request.uriParts.get(5),
                         request.uriParts.get(6));
+                return;
             } else  {
                 buildFullHtmlListing(request.resp, request.uriParts);
             }

@@ -19,6 +19,7 @@ import gov.nist.asbestos.testEngine.engine.FhirPathEngineBuilder;
 import gov.nist.asbestos.testEngine.engine.TestEngine;
 import gov.nist.asbestos.testEngine.engine.assertion.MinimumId;
 import gov.nist.asbestos.utilities.ResourceHasMethodsFilter;
+import ihe.iti.xds_b._2007.ProvideAndRegisterDocumentSetRequestType;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.log4j.Logger;
 import org.hl7.fhir.r4.model.*;
@@ -26,6 +27,7 @@ import org.hl7.fhir.r4.model.*;
 import java.io.File;
 import java.net.URISyntaxException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class AnalysisReport {
     private static final Logger log = Logger.getLogger(AnalysisReport.class);
@@ -237,6 +239,24 @@ public class AnalysisReport {
     }
 
     public Report run() {
+        Report report = establishBase();
+        if (report != null)
+            return report;
+        try {
+            buildRelated();
+            comprehensiveEval();
+            minimalEval();
+            codingEval();
+            buildAtts();
+            binaryEval();
+            return buildReport();
+        } catch (Throwable t) {
+            generalErrors.add(ExceptionUtils.getStackTrace(t));
+            return buildReport();
+        }
+    }
+
+    private Report establishBase() {
         try {
             if (baseRef != null && baseObj == null && contextResourceBundle != null) {
                 loadBaseFromContext();
@@ -253,28 +273,20 @@ public class AnalysisReport {
                     getContextBundle().getType().equals(Bundle.BundleType.SEARCHSET)) {
                 Bundle bundle = (Bundle) getContextBundle();
                 loadSearchSetFromContext(bundle);
-            } else if (baseRef == null &&
-                    getContextBundle() != null &&
-                    !(getContextBundle() instanceof Bundle)) {
+            } else if (baseRef == null && getContextBundle() != null) {
                 baseObj = contextResourceBundle;
             } else if (baseObj != null) {
                 buildAtts();
-             //   return buildReport();
+                //   return buildReport();
             }
             if (baseObj != null && !baseObj.hasEvent() && contextResourceBundle != null) {
                 baseObj.setEvent(contextResourceBundle.getEvent(), contextResourceBundle.isRequest());
             }
-            buildRelated();
-            comprehensiveEval();
-            minimalEval();
-            codingEval();
-            buildAtts();
-            binaryEval();
-            return buildReport();
         } catch (Throwable t) {
             generalErrors.add(ExceptionUtils.getStackTrace(t));
             return buildReport();
         }
+        return null;
     }
 
 
@@ -435,15 +447,72 @@ public class AnalysisReport {
         errorReporter.requireNull(baseObj, "baseObj must be null in AnalysisReport.loadBaseFromContext");
 
         Map<String, String> params = baseRef.getParametersAsMap();
-        Resource resource;
-        if (params.containsKey("fhirPath")) {
+        BaseResource resource = null;
+        if (params.containsKey("focusUrl")) {
+            String focusUrl = params.get("focusUrl");
+            ResourceWrapper wrapper = findResourceInBundle(getContextBundle(), focusUrl);
+            resource = wrapper.getResource();
+        } else if (params.containsKey("fhirPath")) {
             FhirPath fhirPath = new FhirPath(params.get("fhirPath"));
-            resource = resourceFromBundle((Bundle)contextResourceBundle.getResource(), fhirPath);
+            resource = resourceFromBundle((Bundle) contextResourceBundle.getResource(), fhirPath);
+        } else if ("Bundle".equals(baseRef.getResourceType()) &&"Bundle".equals(contextResourceBundle.getResourceType())){
+            Bundle bundle = (Bundle) contextResourceBundle.getResource();
+            resource = isPDB(bundle) ?
+                findDocumentManifest(bundle) : bundle;
+
+            //resource = resourceFromBundle((Bundle) contextResourceBundle.getResource(), baseRef);
         } else {
-            resource = resourceFromBundle((Bundle) contextResourceBundle.getResource(), baseRef);
+            load(baseRef, null);
         }
         if (resource != null)
-            baseObj = new ResourceWrapper(resource).setRef(baseRef).setContext((Bundle)contextResourceBundle.getResource());
+            baseObj = new ResourceWrapper(resource)
+                    .setRef(baseRef)
+                    .setContext((Bundle)contextResourceBundle.getResource());
+    }
+
+    private static List<String> pdbProfles = Arrays.asList(
+            "IHE_MHD_Provide_Minimal_DocumentBundle",
+            "IHE_MHD_Provide_Comprehensive_DocumentBundle"
+    );
+
+    public static boolean isPDB(ResourceWrapper wrapper) {
+        if (!wrapper.hasResource()) return false;
+        if (!wrapper.getResourceType().equals("Bundle"))
+            return false;
+        return isPDB((Bundle)wrapper.getResource());
+    }
+
+    public static boolean isPDB(Bundle bundle) {
+        List<String> types = new ArrayList<>();
+        if (bundle.hasMeta() && bundle.getMeta().hasProfile()) {
+            for (CanonicalType type : bundle.getMeta().getProfile()) {
+                String theType = trueType(type.asStringValue());
+                types.add(theType);
+            }
+        }
+        return hasIntersection(pdbProfles, types);
+    }
+
+    private static String trueType(String theType) {
+        String[] parts =  theType.split(("/"));
+        if (parts.length > 0) {
+            return parts[parts.length - 1];
+        }
+        return theType;
+    }
+
+    private static boolean hasIntersection(List<String> l1, List<String> l2) {
+        return l1.stream()
+                .filter(l2::contains).count() > 0;
+    }
+
+    private DocumentManifest findDocumentManifest(Bundle bundle) {
+        for (Bundle.BundleEntryComponent bundleEntryComponent : bundle.getEntry()) {
+            Resource componentResource = bundleEntryComponent.getResource();
+            if (componentResource instanceof DocumentManifest)
+                return (DocumentManifest) componentResource;
+        }
+        return null;
     }
 
     private void loadRelatedFromPDB(Bundle context) {
@@ -594,6 +663,7 @@ public class AnalysisReport {
         }
         baseObjectEventId = baseObj.getEventId();
         baseObjectResourceType = baseObj.getResponseResourceType();
+        if (baseObjectResourceType == null) baseObjectResourceType = baseObj.getResourceType();
         if (baseObj.getStatus() != 200) {
             generalErrors.add("Status " + baseObj.getStatus());
         } else if (baseObj.getResource() instanceof OperationOutcome) {
@@ -693,12 +763,11 @@ public class AnalysisReport {
                     String rawLocation = responseComponent.getLocation();
                     load(new Ref(rawLocation), "component", bundle);
                 }
-            } else { // show request
+            } else {
                 BaseResource request  = entryComponent.getResource();
                 ResourceWrapper wrapper1 = wrapper.newWithContext().setResource(request);
                 wrapper1.getRef().withFocusUrl(entryComponent.getFullUrl());
-                Related rel = new Related(wrapper1, "In Bundle");
-                related.add(rel);
+                addRelated(wrapper1, "In Bundle", false);
             }
         }
     }
@@ -743,6 +812,8 @@ public class AnalysisReport {
         } else {
             generalErrors.add("DocumentManifest has no content resources - shall have DocumentReference");
         }
+        if (hasContextBundle())
+            buildRelatedBundle(contextResourceBundle);
     }
 
     private void buildRelatedDocumentReference(ResourceWrapper wrapper) {
@@ -874,12 +945,18 @@ public class AnalysisReport {
 
     private void buildRelated(ResourceWrapper wrapper) {
         BaseResource resource = wrapper.getResource();
-        if (resource instanceof DocumentManifest) buildRelatedDocumentManifest(wrapper);
-        else if (resource instanceof DocumentReference) buildRelatedDocumentReference(wrapper);
-        else if (resource instanceof ListResource) buildRelatedListResource(wrapper);
-        else if (resource instanceof Binary) buildRelatedBinary(wrapper);
-        else if (resource instanceof Patient) buildRelatedPatient(wrapper);
-        else if (resource instanceof Bundle) buildRelatedBundle(wrapper);
+        if (resource instanceof DocumentManifest)
+            buildRelatedDocumentManifest(wrapper);
+        else if (resource instanceof DocumentReference)
+            buildRelatedDocumentReference(wrapper);
+        else if (resource instanceof ListResource)
+            buildRelatedListResource(wrapper);
+        else if (resource instanceof Binary)
+            buildRelatedBinary(wrapper);
+        else if (resource instanceof Patient)
+            buildRelatedPatient(wrapper);
+        else if (resource instanceof Bundle)
+            buildRelatedBundle(wrapper);
         else
             buildRelatedOther(resource);
     }
@@ -897,12 +974,14 @@ public class AnalysisReport {
 
     private Related load(Ref ref, List<Class> types) {
         List<String> names = new ArrayList<>();
-        for (Class c : types)
-            names.add(c.getSimpleName());
+        if (types != null) {
+            for (Class c : types)
+                names.add(c.getSimpleName());
+        }
         Related rel = load(ref, "", null);
-        if (rel.wrapper != null && rel.wrapper.hasResource()) {
+        if (rel != null && rel.wrapper != null && rel.wrapper.hasResource()) {
             Class theClass = rel.wrapper.getResource().getClass();
-            if (!types.contains(theClass))
+            if (types != null && !types.contains(theClass))
                 generalErrors.add("Trying to load one of " + names + " but got a " + theClass.getSimpleName());
         }
         return rel;
@@ -916,6 +995,19 @@ public class AnalysisReport {
         return null;
     }
 
+    private Related addRelated(ResourceWrapper wrapper, String howRelated, boolean contained) {
+        if (baseRef.equals(wrapper.getRef()))
+            return null;
+        Related rel = getRelated(wrapper.getRef());
+        if (rel != null)
+            return rel;
+        rel = new Related(wrapper, howRelated);
+        if (contained)
+            rel.contained();
+        related.add(rel);
+        return rel;
+    }
+
     private Related load(Ref ref, String howRelated, BaseResource parent) {
         if (hasContextBundle()) {
             ResourceWrapper wrapper = findResourceInBundle(getContextBundle(), ref.toString());
@@ -925,9 +1017,7 @@ public class AnalysisReport {
                     theRef.addParameter("focusUrl", ref.toString());
                     wrapper.setRef(theRef);
                 }
-                Related rel = new Related(wrapper, howRelated);
-                related.add(rel);
-                return rel;
+                return addRelated(wrapper, howRelated, false);
             }
         }
         if (ref.hasAnchor()) {
@@ -941,10 +1031,7 @@ public class AnalysisReport {
                         wrapper.setRef(ref.rebase(baseRef));
                     else
                         wrapper.setRef(ref);
-                    Related rel = new Related(wrapper, howRelated + "/contained");
-                    rel.contained();
-                    related.add(rel);
-                    return rel;
+                    return addRelated(wrapper, howRelated + "/contained", true);
                 }
             }
             if (!ref.asString().endsWith("html"))
@@ -954,10 +1041,8 @@ public class AnalysisReport {
         Related rel = getFromRelated(ref);
         if (rel == null) {
             if (ref.isContained() && (parent instanceof DomainResource)) {
-                Related rel2 = new Related(new ResourceWrapper(ref.getContained((DomainResource) parent)).setContext((Bundle)contextResourceBundle.getResource()), howRelated + "/contained").contained();
-                //rel2.wrapper.setRef(new Ref());
-                related.add(rel2);
-                return rel2;
+                ResourceWrapper wrapper = new ResourceWrapper(ref.getContained((DomainResource) parent)).setContext((Bundle)contextResourceBundle.getResource());
+                return addRelated(wrapper, howRelated + "/contained", true);
             }
             if (ref.isRelative()) {
                 if (fhirBase != null)
@@ -974,20 +1059,24 @@ public class AnalysisReport {
             } catch (Throwable e) {
                 generalErrors.add(e.getMessage());
                 wrapper = new ResourceWrapper(ref).setContext((Bundle)contextResourceBundle.getResource());
-                Related rel2 = new Related(wrapper, howRelated);
-                related.add(rel2);
-                return rel2;
+                return addRelated(wrapper, howRelated, false);
             }
             if (fhirClient.getStatus() == 200) {
-                Related rel2 = new Related(wrapper, howRelated);
-                related.add(rel2);
-                return rel2;
+                return addRelated(wrapper, howRelated, false);
             } else {
                 generalErrors.add("Cannot load " + ref + " status was " + fhirClient.getStatus());
                 return null;
             }
         }
         return rel;
+    }
+
+    private Related getRelated(Ref ref) {
+        for (Related rel1 : related) {
+            if (rel1.wrapper.getRef().equals(ref))
+                return rel1;
+        }
+        return null;
     }
 
     private Resource getContained(DomainResource resource, Reference reference) {

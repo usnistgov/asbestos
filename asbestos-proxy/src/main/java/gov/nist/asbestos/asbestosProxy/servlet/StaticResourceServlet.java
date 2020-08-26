@@ -1,8 +1,7 @@
 package gov.nist.asbestos.asbestosProxy.servlet;
 
 import gov.nist.asbestos.asbestosProxy.requests.GetStaticResourceRequest;
-import gov.nist.asbestos.asbestosProxy.requests.Request;
-import org.apache.commons.lang3.exception.ExceptionUtils;
+import gov.nist.asbestos.client.Base.Request;
 import org.apache.log4j.Logger;
 
 import javax.servlet.ServletConfig;

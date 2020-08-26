@@ -1,25 +1,11 @@
 package gov.nist.asbestos.asbestosProxy.requests;
 
 import gov.nist.asbestos.asbestosProxy.channel.XdsToolkitConnection;
-import gov.nist.asbestos.asbestosProxy.servlet.ChannelConnector;
-import gov.nist.asbestos.client.client.Format;
-import gov.nist.asbestos.client.log.SimStore;
-import gov.nist.asbestos.http.operations.HttpGet;
-import gov.nist.asbestos.serviceproperties.ServiceProperties;
-import gov.nist.asbestos.serviceproperties.ServicePropertiesEnum;
-import gov.nist.asbestos.sharedObjects.ChannelConfig;
-import gov.nist.asbestos.sharedObjects.ChannelConfigFactory;
-import gov.nist.toolkit.toolkitApi.DocumentRegRep;
-import gov.nist.toolkit.toolkitApi.SimulatorBuilder;
-import gov.nist.toolkit.toolkitApi.ToolkitServiceException;
+import gov.nist.asbestos.client.Base.Request;
 import gov.nist.toolkit.toolkitServicesCommon.SimConfig;
-import gov.nist.toolkit.toolkitServicesCommon.resource.SimIdResource;
-import org.apache.http.HttpStatus;
 import org.apache.log4j.Logger;
 
-import java.io.File;
 import java.io.IOException;
-import java.net.URI;
 import java.util.Optional;
 
 // 0 - empty

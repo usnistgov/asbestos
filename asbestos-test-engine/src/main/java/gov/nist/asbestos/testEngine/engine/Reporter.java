@@ -67,6 +67,10 @@ class Reporter {
         this.label = label;
     }
 
+    TestReport.SetupActionOperationComponent getOpReport() {
+        return report.opReport;
+    }
+
     void reportError(String msg, ResourceWrapper wrapper) {
         if (wrapper != null)
             report.setDetail(wrapper.logLink());

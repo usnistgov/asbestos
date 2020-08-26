@@ -20,6 +20,7 @@ package gov.nist.asbestos.asbestosProxy.requests;
 
 import gov.nist.asbestos.asbestosProxy.servlet.ChannelConnector;
 import gov.nist.asbestos.client.Base.ProxyBase;
+import gov.nist.asbestos.client.Base.Request;
 import gov.nist.asbestos.client.client.FhirClient;
 import gov.nist.asbestos.client.client.Format;
 import gov.nist.asbestos.client.events.Event;
@@ -33,11 +34,7 @@ import org.hl7.fhir.r4.model.TestReport;
 
 import java.io.File;
 import java.net.URI;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
-import java.util.Properties;
-import java.util.stream.Collectors;
 
 public class RunSelftestRequest {
     private static Logger log = Logger.getLogger(RunSelftestRequest.class);

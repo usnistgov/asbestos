@@ -1,7 +1,7 @@
 package gov.nist.asbestos.debug.testScript;
 
 
-import gov.nist.asbestos.asbestosProxy.requests.Request;
+import gov.nist.asbestos.client.Base.Request;
 import gov.nist.asbestos.sharedObjects.debug.DebugTestSessionId;
 import gov.nist.asbestos.sharedObjects.debug.DebugWsSessionId;
 import gov.nist.asbestos.sharedObjects.debug.TestScriptDebugState;

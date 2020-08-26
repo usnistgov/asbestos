@@ -42,7 +42,6 @@
                                   @click="selectedResourceIndex = resourcei">
                                 {{ resource.name }} ({{ resource.relation }})
                                 <span class="tooltip">
-                                    <!--   loadAnalysisForObjectAndAddHistory(report.objects[resourcei].url, resourcei)    -->
                                     <img id="focus" class="selectable" src="../../assets/focus.png" @click.stop="loadAnalysisFromEventContext(report.objects[resourcei].url, report.objects[resourcei].eventContext, true)">
                                     <span class="tooltiptext">Focus</span>
                                 </span>
@@ -85,13 +84,6 @@
             left() {  // make previous object the focus
                 if (this.moreToTheLeft()) {
                     this.pop()
-                    // const history = this.peek()
-                    // if (!history)
-                    //     this.loadAnalysis()
-                    // else if (history.eventId)
-                    //     this.loadAnalyisFromEventId(history.url, history.eventId, false)
-                    // else
-                    //     this.loadAnalysis()
                 }
             },
             peek() {

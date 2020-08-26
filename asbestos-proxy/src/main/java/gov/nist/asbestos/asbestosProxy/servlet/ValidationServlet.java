@@ -1,9 +1,8 @@
 package gov.nist.asbestos.asbestosProxy.servlet;
 
 import gov.nist.asbestos.asbestosProxy.requests.GetValidationRequest;
-import gov.nist.asbestos.asbestosProxy.requests.Request;
+import gov.nist.asbestos.client.Base.Request;
 import gov.nist.asbestos.simapi.tk.installation.Installation;
-import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.log4j.Logger;
 
 import javax.servlet.ServletConfig;

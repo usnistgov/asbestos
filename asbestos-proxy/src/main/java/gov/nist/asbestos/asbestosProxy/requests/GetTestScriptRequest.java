@@ -8,21 +8,11 @@ package gov.nist.asbestos.asbestosProxy.requests;
 // 5 - testId
 // returns a TestScript
 
-import gov.nist.asbestos.client.Base.ProxyBase;
-import gov.nist.asbestos.client.client.Format;
+import gov.nist.asbestos.client.Base.Request;
 import gov.nist.asbestos.testEngine.engine.ModularScripts;
-import gov.nist.asbestos.testEngine.engine.TestEngine;
-import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
-import org.hl7.fhir.r4.model.BaseResource;
-import org.hl7.fhir.r4.model.Resource;
-import org.hl7.fhir.r4.model.TestReport;
-import org.hl7.fhir.r4.model.TestScript;
 
 import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 public class GetTestScriptRequest {
     private static Logger log = Logger.getLogger(GetTestScriptRequest.class);

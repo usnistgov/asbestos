@@ -11,6 +11,7 @@ package gov.nist.asbestos.asbestosProxy.requests;
 // 7 - eventId
 // Run a client eval against single event
 
+import gov.nist.asbestos.client.Base.Request;
 import gov.nist.asbestos.client.events.Event;
 import gov.nist.asbestos.simapi.simCommon.SimId;
 import org.apache.log4j.Logger;

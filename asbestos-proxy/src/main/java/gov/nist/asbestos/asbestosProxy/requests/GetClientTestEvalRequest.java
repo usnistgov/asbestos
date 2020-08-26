@@ -1,13 +1,12 @@
 package gov.nist.asbestos.asbestosProxy.requests;
 
 import gov.nist.asbestos.client.Base.ProxyBase;
+import gov.nist.asbestos.client.Base.Request;
 import gov.nist.asbestos.client.client.Format;
 import gov.nist.asbestos.client.events.Event;
 import gov.nist.asbestos.client.events.ITask;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import gov.nist.asbestos.http.operations.HttpBase;
-import gov.nist.asbestos.http.operations.HttpGet;
-import gov.nist.asbestos.http.operations.HttpPost;
 import gov.nist.asbestos.simapi.simCommon.SimId;
 import gov.nist.asbestos.simapi.validation.Val;
 import gov.nist.asbestos.testEngine.engine.ModularEngine;

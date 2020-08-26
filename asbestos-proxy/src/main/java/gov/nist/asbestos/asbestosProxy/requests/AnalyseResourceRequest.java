@@ -12,6 +12,7 @@ import com.google.gson.Gson;
 import gov.nist.asbestos.analysis.Report;
 import gov.nist.asbestos.client.Base.EventContext;
 import gov.nist.asbestos.client.Base.ProxyBase;
+import gov.nist.asbestos.client.Base.Request;
 import gov.nist.asbestos.client.client.Format;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import org.apache.commons.io.IOUtils;

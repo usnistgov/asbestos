@@ -1,8 +1,8 @@
 package gov.nist.asbestos.asbestosProxy.requests;
 
 import gov.nist.asbestos.asbestosProxy.servlet.ChannelConnector;
+import gov.nist.asbestos.client.Base.Request;
 import gov.nist.asbestos.sharedObjects.ChannelConfig;
-import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.log4j.Logger;
 
 import java.io.File;

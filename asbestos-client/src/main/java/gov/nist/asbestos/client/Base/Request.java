@@ -1,13 +1,11 @@
-package gov.nist.asbestos.asbestosProxy.requests;
+package gov.nist.asbestos.client.Base;
 
-import gov.nist.asbestos.client.Base.EC;
 import gov.nist.asbestos.http.support.Common;
 import gov.nist.asbestos.serviceproperties.ServiceProperties;
 import gov.nist.asbestos.serviceproperties.ServicePropertiesEnum;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.log4j.Logger;
 import org.hl7.fhir.r4.model.BaseResource;
-import org.hl7.fhir.r4.model.Resource;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -134,7 +132,7 @@ public class Request {
         return uriParts.get(i);
     }
 
-    void setStatus(int status) { log.info(status); resp.setStatus(status); }
+    public void setStatus(int status) { log.info(status); resp.setStatus(status); }
 
     public void badRequest() {
         log.error("Do not understand " + uri.toString());
@@ -157,17 +155,17 @@ public class Request {
 
     public void ok() { setStatus(resp.SC_OK); }
 
-    void returnResource(BaseResource resource) { Returns.returnResource(resp, resource); ok(); }
+    public void returnResource(BaseResource resource) { Returns.returnResource(resp, resource); ok(); }
 
-    void returnString(String str) { Returns.returnString(resp, str); }
+    public void returnString(String str) { Returns.returnString(resp, str); }
 
-    void returnObject(Object o) { Returns.returnObject(resp, o); }
+    public void returnObject(Object o) { Returns.returnObject(resp, o); }
 
-    void returnValue(String value) { Returns.returnValue(resp, value); }
+    public void returnValue(String value) { Returns.returnValue(resp, value); }
 
-    void returnList(List<String> list) {  Returns.returnList(resp, list); }
+    public void returnList(List<String> list) {  Returns.returnList(resp, list); }
 
-    void announce(String name) {
+    public void announce(String name) {
         log.info("*** " + name + " " + uri.toString());
     }
 

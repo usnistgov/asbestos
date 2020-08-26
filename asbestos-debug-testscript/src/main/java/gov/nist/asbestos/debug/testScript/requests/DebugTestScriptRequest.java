@@ -1,6 +1,6 @@
 package gov.nist.asbestos.debug.testScript.requests;
 
-import gov.nist.asbestos.asbestosProxy.requests.Request;
+import gov.nist.asbestos.client.Base.Request;
 import gov.nist.asbestos.client.client.FhirClient;
 import gov.nist.asbestos.client.client.Format;
 import gov.nist.asbestos.client.log.SimStore;

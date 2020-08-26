@@ -1,5 +1,6 @@
 package gov.nist.asbestos.asbestosProxy.requests;
 
+import gov.nist.asbestos.client.Base.Request;
 import org.apache.log4j.Logger;
 
 import java.io.IOException;

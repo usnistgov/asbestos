@@ -119,7 +119,9 @@ public class Ref {
     public Ref addParameter(String name, String value) {
         Map<String, String> parmMap = getParametersAsMap();
         parmMap.put(name, value);
-        String newUri = uriWithoutParams() + theQuery();
+        String uriWithoutParams = uriWithoutParams();
+        String theQuery = queryFromParameters(parmMap);
+        String newUri = uriWithoutParams + theQuery;
         try {
             this.uri = new URI(newUri);
         } catch (URISyntaxException e) {
@@ -147,6 +149,22 @@ public class Ref {
                 map.put(namevalue.get(0), namevalue.get(1));
         }
         return map;
+    }
+
+    public static String queryFromParameters(Map<String, String> parms) {
+        if (parms.isEmpty())
+            return "";
+        StringBuilder buf = new StringBuilder();
+        buf.append("?");
+        boolean first = true;
+        for (String name : parms.keySet()) {
+            String value = parms.get(name);
+            if (!first)
+                buf.append(";");
+            buf.append(name).append("=").append(value);
+            first = false;
+        }
+        return buf.toString();
     }
 
     private String theQuery() {

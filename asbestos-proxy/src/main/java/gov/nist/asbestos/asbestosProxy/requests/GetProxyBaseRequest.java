@@ -7,11 +7,10 @@ package gov.nist.asbestos.asbestosProxy.requests;
 // 3 - "ProxyBase"
 
 
+import gov.nist.asbestos.client.Base.Request;
 import gov.nist.asbestos.serviceproperties.ServiceProperties;
 import gov.nist.asbestos.serviceproperties.ServicePropertiesEnum;
 import org.apache.log4j.Logger;
-
-import java.io.IOException;
 
 public class GetProxyBaseRequest {
     private static Logger log = Logger.getLogger(GetEventRequest.class);

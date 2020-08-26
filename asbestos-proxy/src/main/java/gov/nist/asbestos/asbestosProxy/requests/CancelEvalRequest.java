@@ -9,6 +9,7 @@ package gov.nist.asbestos.asbestosProxy.requests;
 // payload is ignored
 
 import gov.nist.asbestos.asbestosProxy.servlet.ChannelConnector;
+import gov.nist.asbestos.client.Base.Request;
 import org.apache.log4j.Logger;
 
 public class CancelEvalRequest {

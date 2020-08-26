@@ -237,22 +237,21 @@ public class EC {
         return new File(fhir, resourceType);
     }
 
-    public void buildEventJson(HttpServletResponse resp, String testSession, String channelId, String resourceType, String eventName) {
+    public void buildEventJson(Request request, String testSession, String channelId, String resourceType, String eventName) {
         UIEvent uiEvent = getEvent(testSession, channelId, resourceType, eventName);
         if (uiEvent == null) {
-            resp.setStatus(resp.SC_NOT_FOUND);
+            request.notFound();
             return;
         }
 
         String json = new Gson().toJson(uiEvent);
-        resp.setContentType("application/json");
+        request.resp.setContentType("application/json");
         try {
-            resp.getOutputStream().write(json.getBytes());
+            request.resp.getOutputStream().write(json.getBytes());
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-
-        resp.setStatus(resp.SC_OK);
+        request.ok();
     }
 
     public UIEvent eventFromJson(String json) {

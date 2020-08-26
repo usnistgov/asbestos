@@ -13,7 +13,8 @@ package gov.nist.asbestos.asbestosProxy.requests;
 // returns OperationOutcome
 
 
-import gov.nist.asbestos.client.Base.ProxyBase;
+import gov.nist.asbestos.client.Base.Request;
+import gov.nist.asbestos.client.Base.Returns;
 import gov.nist.asbestos.client.client.FhirClient;
 import gov.nist.asbestos.client.client.Format;
 import gov.nist.asbestos.client.resolver.Ref;

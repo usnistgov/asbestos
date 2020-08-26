@@ -1,4 +1,4 @@
-package gov.nist.asbestos.asbestosProxy.requests;
+package gov.nist.asbestos.client.Base;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -61,7 +61,7 @@ public class Returns {
         }
     }
 
-    static void returnOperationOutcome(HttpServletResponse resp, OperationOutcome.IssueSeverity severity, OperationOutcome.IssueType issueType, String diagnostics) {
+    public static void returnOperationOutcome(HttpServletResponse resp, OperationOutcome.IssueSeverity severity, OperationOutcome.IssueType issueType, String diagnostics) {
         OperationOutcome oo = new OperationOutcome();
         OperationOutcome.OperationOutcomeIssueComponent comp = oo.addIssue();
         comp.setSeverity(severity);

@@ -33,7 +33,6 @@
                 </span>
                 <span v-else>
                     <span v-if="isConditional">if: </span>
-<!--                    <span v-else>assert: </span>-->
                 </span>
                 <span>
                     {{ description }}
@@ -88,9 +87,6 @@
                     </div>
                 </ul>
             </div>
-<!--            <div v-else>-->
-<!--                No Evaluation-->
-<!--            </div>-->
 
             <!--  Inspect-->
             <div v-if="script.operation">
@@ -124,7 +120,6 @@
                 </span>
                 <span class="selectable" @click.stop="toggleScriptDisplayed()">Test Script/Report</span>
                 <span v-if="displayScript">
-<!--                    <vue-markdown v-if="message">{{message}}</vue-markdown>-->
                     <hr />
                     <vue-markdown v-if="actionContext">{{actionContext}}</vue-markdown>
                     <script-display

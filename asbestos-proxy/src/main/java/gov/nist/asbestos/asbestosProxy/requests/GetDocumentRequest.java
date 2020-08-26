@@ -7,6 +7,7 @@ package gov.nist.asbestos.asbestosProxy.requests;
 // 4 - id
 
 import gov.nist.asbestos.client.Base.DocumentCache;
+import gov.nist.asbestos.client.Base.Request;
 import gov.nist.asbestos.serviceproperties.ServiceProperties;
 import gov.nist.asbestos.serviceproperties.ServicePropertiesEnum;
 import org.apache.log4j.Logger;

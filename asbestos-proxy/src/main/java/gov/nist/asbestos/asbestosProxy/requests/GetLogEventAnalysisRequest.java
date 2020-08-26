@@ -7,18 +7,16 @@ import gov.nist.asbestos.analysis.RelatedReport;
 import gov.nist.asbestos.analysis.Report;
 import gov.nist.asbestos.client.Base.EventContext;
 import gov.nist.asbestos.client.Base.ProxyBase;
+import gov.nist.asbestos.client.Base.Request;
 import gov.nist.asbestos.client.client.Format;
 import gov.nist.asbestos.client.events.ProxyEvent;
 import gov.nist.asbestos.client.events.UIEvent;
 import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import gov.nist.asbestos.http.headers.Headers;
-import net.sf.saxon.regex.Operation;
 import org.apache.log4j.Logger;
-import org.checkerframework.checker.units.qual.A;
 import org.hl7.fhir.r4.model.*;
 
-import javax.naming.ldap.HasControls;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
@@ -70,9 +68,9 @@ import java.util.Objects;
 public class GetLogEventAnalysisRequest {
     private static Logger log = Logger.getLogger(GetLogEventAnalysisRequest.class);
     private EventContext eventContext;
-    private Request request;
+    private gov.nist.asbestos.client.Base.Request request;
 
-    public static boolean isRequest(Request request) {
+    public static boolean isRequest(gov.nist.asbestos.client.Base.Request request) {
         return request.uriParts.size() == 9
                 && "log".equalsIgnoreCase(request.uriParts.get(2))
                 && "analysis".equalsIgnoreCase(request.uriParts.get(3))
@@ -96,7 +94,7 @@ public class GetLogEventAnalysisRequest {
 
     }
 
-    public GetLogEventAnalysisRequest(Request request) {
+    public GetLogEventAnalysisRequest(gov.nist.asbestos.client.Base.Request request) {
         this.request = request;
     }
 
@@ -215,9 +213,9 @@ public class GetLogEventAnalysisRequest {
                 if (!url.contains("?") && url.contains(";")) {
                     url = url.substring(0, url.indexOf(';'));
                 }
-                Request target;
+                gov.nist.asbestos.client.Base.Request target;
                 try {
-                    target = new Request(url, request.externalCache);
+                    target = new gov.nist.asbestos.client.Base.Request(url, request.externalCache);
                 } catch (URISyntaxException e) {
                     request.badRequest();
                     return;
@@ -380,8 +378,9 @@ public class GetLogEventAnalysisRequest {
     private void runAndReturnReport(ResourceWrapper bundleWrapper, String source, boolean isRequest, boolean gzip, boolean useProxy, boolean ignoreBadRefs, boolean withValidation) throws IOException {
         if (!"Bundle".equals(bundleWrapper.getResourceType()))
             throw new RuntimeException("Not a Bundle");
-        Ref manifestFullUrl = getManifestFullUrl(bundleWrapper);
-        AnalysisReport analysisReport = new AnalysisReport(manifestFullUrl, source, request.ec)
+        Ref focusRef = AnalysisReport.isPDB(bundleWrapper)
+                ? getManifestFullUrl(bundleWrapper) : bundleWrapper.getRef();
+        AnalysisReport analysisReport = new AnalysisReport(focusRef, source, request.ec)
                 .withGzip(gzip)
                 .withProxy(useProxy)
                 .withValidation(withValidation)

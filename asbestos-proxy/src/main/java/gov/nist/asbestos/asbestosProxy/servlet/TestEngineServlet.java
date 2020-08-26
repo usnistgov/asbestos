@@ -1,7 +1,7 @@
 package gov.nist.asbestos.asbestosProxy.servlet;
 
 import gov.nist.asbestos.asbestosProxy.requests.*;
-import org.apache.commons.lang3.exception.ExceptionUtils;
+import gov.nist.asbestos.client.Base.Request;
 import org.apache.log4j.Logger;
 
 import javax.servlet.ServletConfig;
@@ -10,7 +10,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
-import java.io.IOException;
 
 public class TestEngineServlet extends HttpServlet {
     private static Logger log = Logger.getLogger(TestEngineServlet.class);

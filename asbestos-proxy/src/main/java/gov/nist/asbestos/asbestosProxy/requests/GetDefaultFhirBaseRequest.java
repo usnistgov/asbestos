@@ -9,6 +9,7 @@ package gov.nist.asbestos.asbestosProxy.requests;
 
 
 import com.google.gson.Gson;
+import gov.nist.asbestos.client.Base.Request;
 import gov.nist.asbestos.serviceproperties.ServiceProperties;
 import gov.nist.asbestos.serviceproperties.ServicePropertiesEnum;
 import org.apache.log4j.Logger;

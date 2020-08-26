@@ -10,6 +10,7 @@ package gov.nist.asbestos.asbestosProxy.requests;
 // 7 - fileName
 
 
+import gov.nist.asbestos.client.Base.Request;
 import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import org.apache.log4j.Logger;

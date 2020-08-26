@@ -13,6 +13,7 @@ package gov.nist.asbestos.asbestosProxy.requests;
 // returns UIEvent as JSON
 
 import com.google.gson.Gson;
+import gov.nist.asbestos.client.Base.Request;
 import gov.nist.asbestos.client.events.UIEvent;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import org.apache.log4j.Logger;

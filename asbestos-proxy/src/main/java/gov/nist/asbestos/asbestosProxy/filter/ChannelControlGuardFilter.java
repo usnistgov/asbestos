@@ -2,7 +2,7 @@ package gov.nist.asbestos.asbestosProxy.filter;
 
 import gov.nist.asbestos.asbestosProxy.requests.CreateChannelRequest;
 import gov.nist.asbestos.asbestosProxy.requests.DeleteChannelRequest;
-import gov.nist.asbestos.asbestosProxy.requests.Request;
+import gov.nist.asbestos.client.Base.Request;
 import gov.nist.asbestos.client.log.SimStore;
 import gov.nist.asbestos.serviceproperties.ServiceProperties;
 import gov.nist.asbestos.sharedObjects.ChannelConfig;
