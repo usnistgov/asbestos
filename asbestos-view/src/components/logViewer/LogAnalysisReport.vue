@@ -173,7 +173,6 @@
                 await this.loadAnalysis2()
                 this.selectedResourceIndex = -1
                 this.historyClear()
-                //console.log(`using analysis`)
                 this.historyPush(this.report.base.url, null)
             },
             async loadAnalysis2() {
