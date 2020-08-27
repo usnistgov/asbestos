@@ -7,14 +7,14 @@
                         <div>
                         <span class="eval-modal-header" draggable="true" @dragstart="drag_start">
                             <h3>Eval
-                                <span class="closeXIcon" @click="doResizeForm">&#x1F504;</span>
+<!--                                <span class="closeXIcon" @click="doResizeForm">&#x1F504;</span>-->
                                 <span class="closeXIcon" title="Close" @click="close">&#x274c;</span></h3>
                         </span>
                         </div>
 
                         <div class="modal-body">
                             <div class="patternHeader">Select a Pattern:</div>
-                            <div style="display: flex;  flex-direction: row;  flex-wrap: wrap;  width: auto; vertical-align: middle">
+                            <div class="patternHeaderButtons">
                                 <div v-for="(val, patternType) in $store.state.debugAssertionEval.evalObjByPattern.patternTypes"
                                  :key="patternType">
                                     <div
@@ -26,7 +26,7 @@
                                 </div>
                             </div>
                             <div style="margin: 6px">
-                                 <debug-assertion-eval-form :pattern-type-id="selectedPatternTypeId" :is-shown="resizeForm"/>
+                                 <debug-assertion-eval-form :pattern-type-id="selectedPatternTypeId" />
                             </div>
                         </div>
 
@@ -48,7 +48,7 @@
                 drag_pos_left: 0,
                 drag_pos_top: 0,
                 evalTimer: null,
-                resizeForm: false,
+                // resizeForm: false,
             }
         },
         mounted() {
@@ -60,9 +60,9 @@
             }
         },
         methods: {
-            doResizeForm() {
-              this.resizeForm = true
-            },
+            // doResizeForm() {
+            //   this.resizeForm = true
+            // },
             isSelectedPatternType(patternTypeId) {
                return (this.selectedPatternTypeId === patternTypeId)
             },
@@ -168,6 +168,14 @@
         background-color: inherit;
     }
 
+    .patternHeaderButtons {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        width: auto;
+        vertical-align: middle
+    }
+
     .modalFlexContainer {
         display: flex;
         align-items: center;
@@ -191,9 +199,9 @@
     }
 
     .eval-modal-container {
-        width: auto;
-        height: auto;
-        max-height: 92%;
+        /*width: auto;*/
+        /*height: auto;*/
+        /*max-height: 92%;*/
         /*width: 42%;*/
         /*height: 60%;*/
         overflow-x: scroll;

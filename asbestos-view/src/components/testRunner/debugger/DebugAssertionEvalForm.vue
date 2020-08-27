@@ -40,13 +40,14 @@
             <div class="smallText">{{getEnumTypeFormalDefinition(propKey)}}</div>
         </div>
      </div>
-        <div v-bind:class="{
-                        'evalNotPassed': getResultCode().valueOf() !== 'pass',
-                        }">
+     <div v-bind:class="{
+                    'evalNotPassed': getResultCode().valueOf() !== 'pass',
+                    }">
         <span class="form-block">{{getResultCode()}}</span>
         <vue-markdown
-                v-bind:source="getResultMessage()"></vue-markdown>
-  </div>
+            v-bind:source="getResultMessage()"></vue-markdown>
+     </div>
+       <template v-if="resizeContents()"><!-- form_resized --></template>
  </div>
 </template>
 
@@ -55,17 +56,24 @@
 
     export default {
         name: "DebugAssertionEvalForm",
+        data() {
+            return {
+                isResized: false,
+            }
+        },
         props: {
             patternTypeId: {
                 type: String,
                 required: true
             },
-            isShown: {
-                type: Boolean,
-                required: true
-            }
+            // isShown: {
+            //     type: Boolean,
+            //     required: true
+            // }
         },
         created: function() {
+            // Reset the resize flag
+            this.isResized = false
            // this.resizeContents()
         },
         computed: {
@@ -74,23 +82,28 @@
             }
         },
         watch: {
-           'isShown': 'resizeContents'
+           // 'isShown': 'resizeContents'
         },
         methods: {
+            /*
+            Works best when the pattern type with the most objects, such as the All Parameters, is displayed first.
+             */
             resizeContents() {
-                if (! this.isShown)
+                if (this.isResized)
+                    return false
+                let containerEl = document.querySelector('div.dafFlexContainer')
+                if (containerEl === null)
                     return
-                console.log('in resizeContents')
                 try {
-                    let flexItemWidth = 10
-                    let flexItemHeight = 10
+                    let flexItemWidth = 230
+                    let flexItemHeight = 114
                     const elementCount = this.displayFieldList.length
                     // for (const fieldName of this.displayFieldList) {
                         let elList = document.querySelectorAll('div.dafFlexItem')
-                        console.log(`elList length: ${elList.length}`)
+                        // console.log(`elList length: ${elList.length}`)
                         if (elList !== null) {
                             for (let el of elList) {
-                                console.log(`clientWidth is ${el.classList.contains('dafFlexItem')}, clientHeight is ${el.classList}`)
+                                // console.log(`clientWidth is ${el.classList.contains('dafFlexItem')}, clientHeight is ${el.classList}`)
                                 if (flexItemWidth < el.clientWidth) {
                                     flexItemWidth = el.clientWidth
                                 }
@@ -98,37 +111,56 @@
                                     flexItemHeight = el.clientHeight
                                 }
                             }
-                        }
+                        } /* else {
+                            // console.log("Element was not found. Using default for resize calculations.")
+                        } */
+                    if (flexItemWidth > 300)
+                        flexItemWidth = 230
+                    if (flexItemHeight > 400)
+                        flexItemHeight = 114
                     // }
-                    let minFormHeight = flexItemHeight * 6
-                    const singleColumnHeight = (flexItemHeight * elementCount)
-                    if (singleColumnHeight < 500) {
-                        minFormHeight = singleColumnHeight
-                    }
-                    const estimateWidth = Math.round((elementCount / (minFormHeight / flexItemHeight)) * flexItemWidth)
-                    console.log(`length: ${elementCount}, flexItemWidth: ${flexItemWidth}, flexItemHeight: ${flexItemHeight}, minFormHeight: ${minFormHeight}, estimateWidth: ${estimateWidth}`)
-                    let containerEl = document.querySelector('div.eval-modal-container') //('div.dafFlexContainer') // div.eval-modal-container
+                    const maxFieldsPerColumn = 6
+                    const fieldsPerColumn = (elementCount > maxFieldsPerColumn)? maxFieldsPerColumn : elementCount
+                    let minFormHeight = flexItemHeight * fieldsPerColumn // Default to 6 fields per column
+                    // Enable the singleColumnHeight if form should by dynamically sized if fewer than 6 columns may be present
+                    // const singleColumnHeight = (flexItemHeight * elementCount)
+                    // if (singleColumnHeight < 500) {
+                    //     minFormHeight = singleColumnHeight
+                    // }
+                    const estimateWidth = Math.round((elementCount / fieldsPerColumn) * flexItemWidth) // Math.round((elementCount / (minFormHeight / flexItemHeight)) * flexItemWidth)
+                    // console.log(`length: ${elementCount}, flexItemWidth: ${flexItemWidth}, flexItemHeight: ${flexItemHeight}, minFormHeight: ${minFormHeight}, estimateWidth: ${estimateWidth}`)
+                    containerEl = document.querySelector('div.eval-modal-container') //('div.dafFlexContainer') // div.eval-modal-container
                     if (containerEl !== null) {
-                        const outerShellHeight = 200
-                        const outerShellWidth = 54
-                        console.log(`setting el height to  ${minFormHeight}`)
-                        containerEl.style.height = (outerShellHeight+minFormHeight) + 'px'
+                        /* outerShell... to compensate for the pattern type menu buttons */
+                        let outerShellHeight = 200
+                        let outerShellWidth = 53
+                        let buttonsContainerEl = document.querySelector('div.patternHeaderButtons')
+                        if (buttonsContainerEl !== null) {
+                            outerShellHeight = 163 /* Eval header banner and Select a pattern message */ + buttonsContainerEl.clientHeight
+                            // console.log(' ' + outerShellHeight)
+                        }
+                        // console.log(`setting el height to  ${minFormHeight}`)
+                        const finalOuterContainerHeight = (outerShellHeight+minFormHeight)
+                        containerEl.style.height = finalOuterContainerHeight + 'px'
                         containerEl.style.width = (outerShellWidth+estimateWidth) + 'px'
                         // tracer
+                        // console.log('outerContainerFinalHeight: ' + finalOuterContainerHeight)
                         // containerEl.style.border = '1px solid red'
                     }
                     containerEl = document.querySelector('div.dafFlexContainer') //('div.dafFlexContainer') // div.eval-modal-container
                     if (containerEl !== null) {
-                        console.log(`setting el height to  ${minFormHeight}`)
+                        this.isResized = true // This element is not rendered at the time resize is run
+                        // console.log(`setting el height to  ${minFormHeight}`)
                         containerEl.style.height = (minFormHeight) + 'px'
-                        containerEl.style.width = estimateWidth + 'px'
+                        containerEl.style.width = (estimateWidth) + 'px'
                         // tracer
-                        // containerEl.style.border = '1px solid red'
+                        // containerEl.style.border = '1px dashed black'
                     }
                 } catch(err) {
                     console.log('error: ' + err)
                 }
-
+                console.log('Form was resized.')
+                return this.isResized
             },
             openHelp(propKey) {
                 window.open("http://hl7.org/fhir/testscript-definitions.html#TestScript.setup.action.assert." + propKey, "_blank")
@@ -262,7 +294,7 @@
         flex-direction: column;
         flex-wrap: wrap;
         width: auto; /* auto; */
-        height: 400px; /* 400px; */
+        /*height: 400px; !* 400px; *!*/
         text-align: left;
     }
 

@@ -268,6 +268,9 @@ export const debugTestScriptStore = {
                 console.log('stopDebugTs ' + mapKey + ' failed: WebSocket is null!')
             }
         },
+        /*
+        This method gets called when the Eval button is clicked from the ActionDetails vue component.
+         */
         async doDebugEvalMode({commit, state, rootState, getters}) {
             let testId = rootState.testRunner.currentTest
             console.log('In doDebugEvalMode: ' + testId)
