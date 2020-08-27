@@ -25,6 +25,7 @@ import StaticFixtureDisplay from "../components/testRunner/StaticFixtureDisplay"
 import Setup from "../components/top/Setup";
 //import LogAnalysisReport from "@/components/logViewer/LogAnalysisReport";
 import InspectUrl from "@/components/logViewer/InspectUrl";
+import DisplayTestSource from "@/components/testRunner/DisplayTestSource";
 //import Tester from "@/components/testRunner/Tester";
 
 Vue.use( VueRouter )
@@ -148,7 +149,7 @@ export const routes = [
                                                         props: true,
                                                     }
                                                 ]
-                                            }
+                                            },
                                         ]
                                     },
                                 ],
@@ -166,6 +167,14 @@ export const routes = [
                 path: 'collection/:testCollection/test/:testId/fixture/:path',
                 component: StaticFixtureDisplay,
                 props: true
+            }, {
+                path: 'script/collection/:testCollection/test/:testId/:scriptId',
+                component: DisplayTestSource,
+                props: true,
+            }, {
+                path: 'script/collection/:testCollection/test/:testId/:scriptId/:moduleId',
+                component: DisplayTestSource,
+                props: true,
             }
         ]
     },

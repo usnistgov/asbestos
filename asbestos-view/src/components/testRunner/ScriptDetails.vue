@@ -1,7 +1,9 @@
 <template>
     <div>
-        <div v-if="script" class="script">
-            <div v-if="script.description && script.description !== ''" class="script-description-margins">
+
+      <div v-if="script" class="script">
+
+          <div v-if="script.description && script.description !== ''" class="script-description-margins">
                 <vue-markdown>{{ description }}</vue-markdown>
             </div>
             <div v-else class="grayText">
@@ -84,7 +86,7 @@
         },
         methods: {},
         computed: {
-            systemError() {
+          systemError() {
                 if (!this.report) return null;
                 if (!this.report.extension) return null;
                 let error = null

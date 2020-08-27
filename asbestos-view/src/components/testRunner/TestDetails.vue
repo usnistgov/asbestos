@@ -28,12 +28,11 @@
             <span class="has-cursor">
                 <span v-if="label">{{label}}: </span>
                 <span v-else-if="isConditional" class="bold">If: </span>
-<!--                <span v-else class="bold">Test: </span>-->
                 {{ description }}
             </span>
         </span>
 
-        <div v-if="displayOpen &&  isConditional" class="conditional-margins">
+      <div v-if="displayOpen &&  isConditional" class="conditional-margins">
             <div>  <!-- enter contained test script with conditional test -->
                 <script-details-contained
                         :conditionScript="scriptConditional"
@@ -146,9 +145,14 @@
                 this.displayOpen = !this.displayOpen
                 this.displayAdditionalIndexLabel(this.displayOpen, this.getBreakpointIndex(this.testType, this.testIndex))
             },
+          // async loadFullScript() { // not used - script loaded earlier
+          //   //this.$store.commit('setTestCollectionName', this.testCollection)
+          //   await this.$store.dispatch('loadTestScripts', [this.$store.state.testRunner.currentTest]);
+          //   this.script = this.$store.state.testRunner.testScripts[this.testId]
+          // },
         },
         computed: {
-            scriptConditional() { // TestScript representing conditional
+          scriptConditional() { // TestScript representing conditional
                 if (!this.scriptConditionalRef) return null
                 let conditional = null
                 this.scriptContained.forEach(contained => {

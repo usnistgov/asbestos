@@ -267,9 +267,11 @@ export const testRunnerStore = {
         },
         loadTestScripts({commit, state}, scriptNames) {
             commit('clearTestScripts')
+            console.log(`scriptNames = ${scriptNames}`)
             const promises = []
             scriptNames.forEach(name => {
                 const url = `testScript/${state.currentTestCollectionName}/${name}`
+                console.log(`loadTestScripts ${url}`)
                 const promise = ENGINE.get(url)
                 promises.push(promise)
             })
@@ -335,7 +337,6 @@ export const testRunnerStore = {
             let script = ""
             const promise = ENGINE.get(url)
             promise.then(result => {
-           //     console.log(`test script loaded`)
                 script = result.data
             })
                 .catch(function(error) {

@@ -64,7 +64,6 @@ public class TestEngine  {
     private String testCollection = null;
     private String testId = null;
     private boolean isRequest = false;  // running an eval on a request message?  alternative is regular server test
-
     public static final String LAST_OP = "_LAST_OP_";
 
     private ModularEngine modularEngine = null;
@@ -889,12 +888,16 @@ public class TestEngine  {
         VariableMgr varMgr = new VariableMgr(testScript, fixtureMgr)
                 .setVal(engineVal)
                 .setOpReport(opReport);
+        if (engineVal.hasErrors())
+            log.info("errors");
         for (Parameter parm : componentReference.getVariablesIn()) {
             String outerName = parm.getCallerName();
             String innerName = parm.getLocalName();
             String value = varMgr.eval(outerName, false);
             externalVariables.put(innerName, value);
         }
+        if (engineVal.hasErrors())
+            log.info("errors");
         for (Parameter parm : componentReference.getVariablesInNoTranslation()) {
             String outerName = parm.getCallerName();
             String innerName = parm.getLocalName();
@@ -1709,4 +1712,6 @@ public class TestEngine  {
         }
         return false;
     }
+
+
 }

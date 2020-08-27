@@ -1,6 +1,22 @@
 <template>
     <div>
-    <ul class="noTopMargin">
+
+      <div>
+        <div class="vdivider"></div>
+        <div class="vdivider"></div>
+        <div class="vdivider"></div>
+        <div class="vdivider"></div>
+        <div class="vdivider"></div>
+        <div class="vdivider"></div>
+        <span class="bold">Script:</span>
+        <span class="panel selectable underline"  @click="openScriptDisplay(testId)">{{ testId }}</span>
+        <span v-for="(name, namei) in Object.getOwnPropertyNames(testModules)"
+             :key="'TestModule' + namei">
+          <span class="panel selectable underline" @click="openScriptDisplay(name)">{{ name }}</span>
+        </span>
+      </div>
+
+      <ul class="noTopMargin">
         <li v-if="$store.state.testRunner.isClientTest">
             <div v-if="testScript">
                 <div class="instruction">
@@ -41,7 +57,19 @@
     import VueMarkdown from "vue-markdown";
     export default {
         computed: {
-            description() {
+          testModules() {
+            const modules = {};
+            const allModules = this.$store.state.testRunner.moduleTestScripts;
+            const currentTest = this.testId;
+            const prefix = currentTest + "/";
+            for (const name in allModules) {
+              if (name.startsWith(prefix)) {
+                modules[name] = allModules[name];
+              }
+            }
+            return modules;
+          },
+          description() {
                 if (!this.$store.state.testRunner.testScripts) return null
                 if (!this.$store.state.testRunner.testScripts[this.testId].description) return null
                 return this.$store.state.testRunner.testScripts[this.testId].description.replace(/\n/g, "<br />")
@@ -56,6 +84,10 @@
             },
         },
         methods: {
+          openScriptDisplay(name) {
+              console.log(`Open ${name}`)
+            window.open(`http://localhost:8082/script/collection/${this.testCollection}/test/${this.testId}/${name}`, "_blank");
+          },
             async loadEventSummariesAndReRun() {
                 await this.$store.dispatch('loadEventSummaries', {session: this.sessionId, channel: this.channelId})
                 await this.$store.dispatch('runEval', this.testId);
@@ -65,6 +97,10 @@
                     await this.$store.dispatch('loadTestScript', {testCollection: this.testCollection, testId: this.testId});
             }
         },
+      created() {
+        // this.$store.commit('setCurrentTest', this.testId);
+        // this.$store.commit('setCurrentTestCollection', this.testCollection);
+      },
         watch: {
             '$store.state.base.channelId': 'loadEventSummariesAndReRun'
         },

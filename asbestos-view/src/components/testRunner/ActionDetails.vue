@@ -1,7 +1,8 @@
 <template>
     <div>
         <div v-if="script">
-            <span
+
+          <span
                     v-bind:class="{
                 'not-run': isNotRun && colorful,
                 'not-run-plain-detail': isNotRun && !colorful,
@@ -45,7 +46,7 @@
                 > </test-status>
             </span>
 
-            <div v-if="displayMessage && assertions">
+          <div v-if="displayMessage && assertions">
                 <div v-for="(ref, refi) in references"
                     :key="'Ref' + refi" class="assert">
                     <div v-if="assertions && assertions[ref]">
@@ -74,7 +75,6 @@
         </div>
 
         <div v-if="displayMessage">
-
             <div v-if="message && message.indexOf('#') === -1">
                 <ul>
                     <div v-for="(line, linei) in translateNL(message)" :key="'msgDisp' + linei">
@@ -87,6 +87,7 @@
                     </div>
                 </ul>
             </div>
+
 
             <!--  Inspect-->
             <div v-if="script.operation">

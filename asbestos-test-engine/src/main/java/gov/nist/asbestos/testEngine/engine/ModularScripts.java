@@ -21,7 +21,7 @@ import java.util.Map;
 public class ModularScripts {
     // testId => TestScript json
     // testId/componentId => TestScript.json
-    private Map<String, String> scripts = new HashMap<>();
+    private final Map<String, String> scripts = new HashMap<>();
 
     public ModularScripts(File testDef) {
         // fill the script Map with the base script and all referenced component scripts

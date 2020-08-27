@@ -256,9 +256,11 @@
         font-size: larger;
         text-align: left;
     }
+    .underline {
+      text-decoration: underline;
+    }
     .selectable {
         cursor: pointer;
-        /*text-decoration: underline;*/
     }
     .pointer-cursor {
         cursor: pointer;
