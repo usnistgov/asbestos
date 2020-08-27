@@ -159,7 +159,7 @@ public class AssertionRunner {
             source = getCompareToSourceIfAvailable(as);
 
         // add context to report
-        new ActionReporter(new ActionReference(testScript, as))
+        new ActionReporter()
                 .setTestCollectionId(testCollectionId)
                 .setTestId(testId)
                 .setTestEngine(testEngine)

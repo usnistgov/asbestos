@@ -23,12 +23,12 @@ class ActionReporter {
     private String testId = null;
     private TestEngine testEngine = null;
     private FixtureComponent assertionSource = null;
-    private ActionReference actionReference;
+    //private ActionReference actionReference;
     private String prefixMarkdown = "";
     private String postfixMarkdown = "";
 
-    ActionReporter(ActionReference actionReference) {
-        this.actionReference = actionReference;
+    ActionReporter() {
+
     }
 
     void reportOperation(ResourceWrapper wrapper, FixtureMgr fixtureMgr, VariableMgr variableMgr, Reporter reporter, TestScript.SetupActionOperationComponent op) {

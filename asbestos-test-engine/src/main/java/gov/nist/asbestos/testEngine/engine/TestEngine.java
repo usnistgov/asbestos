@@ -909,17 +909,17 @@ public class TestEngine  {
 
         // if variables and fixtures don't align, report it out into the caller's TestReport
         if (engineVal.hasErrors()) {
-            new ActionReporter(new ActionReference(testScript, opScript))
+            new ActionReporter()
                     .setTestEngine(this)
                     .setTestCollectionId(testCollection)
                     .setTestId(testId)
                     .reportOperation(
                     null,
-                    fixtureMgr,
-                    varMgr,
-                    new Reporter(new ValE(engineVal), opReport, "", ""),
-                    opScript
-            );
+                        fixtureMgr,
+                        varMgr,
+                        new Reporter(new ValE(engineVal), opReport, "", ""),
+                        opScript
+                    );
             return;
         }
 
