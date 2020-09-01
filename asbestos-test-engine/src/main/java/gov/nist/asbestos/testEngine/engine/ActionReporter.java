@@ -41,7 +41,11 @@ class ActionReporter {
     }
 
     ActionReporter reportOperation(ResourceWrapper wrapper, FixtureMgr fixtureMgr, VariableMgr variableMgr, Reporter reporter, TestScript.SetupActionOperationComponent op) {
-        String request = wrapper == null ? "" : "### " + wrapper.getHttpBase().getVerb() + " " + wrapper.getHttpBase().getUri() + "\n";
+        String request = "";
+        if (wrapper != null) {
+            String url = wrapper.getHttpBase().getUri().toString();
+            request = "### " + wrapper.getHttpBase().getVerb() + " [" + url + "](" + url + ")";
+        }
 
         if (!variableMgr.hasReporter())
             variableMgr.setReporter(reporter);
@@ -64,7 +68,8 @@ class ActionReporter {
     class FixtureLabels {
         boolean sourceId = false;
         boolean responseId = false;
-        String reference;
+        String rawReference;
+        String referenceLabel;
         String label = null;
         String tail = "";
 
@@ -99,6 +104,12 @@ class ActionReporter {
             }
         }
 
+        String getReference() {
+            return "<a href=\"" + rawReference + "\"" + " target=\"_blank\">" +
+                    referenceLabel +
+                    "</a>";
+        }
+
     }
 
     /**
@@ -121,6 +132,8 @@ class ActionReporter {
         // report assertion source (only for assertions)
         reportAssertionSource(fixtures);
 
+        FixtureLabels requestLabels = null;
+        FixtureLabels responseLabels = null;
         for (String key : fixtureMgr.keySet()) {
             FixtureLabels labels = new FixtureLabels(op, key);
 
@@ -136,26 +149,41 @@ class ActionReporter {
             }
             if (refStrRaw != null && labels.label != null) {
                 // referenced to UIEvent for display in inspector
-                labels.reference = "<a href=\"" +  refStrRaw + "\"" + " target=\"_blank\">" +
-                        "Open in Inspector" +
-                        "</a>";
+                labels.rawReference = refStrRaw;
+                labels.referenceLabel = "Open in Inspector";
                 log.info("Fixture Reference: " + labels.label + " => " + refStrRaw);
-                fixtures.put(labels.label, labels.reference);
+                fixtures.put(labels.label, labels.getReference());
+
+                if (labels.sourceId) {
+                    requestLabels = labels;
+                    requestLabels.referenceLabel = "Request";
+                }
+                if (labels.responseId) {
+                    responseLabels = labels;
+                    responseLabels.referenceLabel = "Response";
+                }
             }
         }
 
         String markdown = "## " + testNotation()
                 + testEngine.getTestEnginePath() + "\n"
+                + "\n"
+                + (imAParent ? "" : request
+                + " (  " + (requestLabels == null ? "--" : requestLabels.getReference()) + " ) => "
+                + (responseLabels == null ? "--" : responseLabels.getReference())
+        )
+                + "\n"
                 + errorDisplay(reporter.getOpReport())
-                + asMarkdown(fixtures, "Fixtures")
+                + asMarkdown(fixtures, "TestScript Fixtures")
                 + "\n"
-                + asMarkdown(variableMgr.getVariables(true), "Variables (evaluated after action)")
+                + asMarkdown(variableMgr.getVariables(true), "TestScript Variables (evaluated after action)")
                 + "\n"
-                + (imAParent ? "## Call " : "## Action ")
+                + (imAParent ? "## Call " : "")
                 + "\n"
-                + (isModule && !testEngine.getCallFixtureMap().isEmpty()? asMarkdown(testEngine.getCallFixtureMap(), "Fixture Translation", "Name in caller", "Name in module") + "\n" : "")
+                + (isModule && !testEngine.getCallFixtureMap().isEmpty() ? asMarkdown(testEngine.getCallFixtureMap(), "Fixture Translation", "Name in caller", "Name in module") + "\n" : "")
                 + (isModule && !testEngine.getCallVariableMap().isEmpty() ? asMarkdown(testEngine.getCallVariableMap(), "Variable Translation", "Name in caller", "Name in module") + "\n" : "")
-                + (imAParent ? "" : request);
+
+                ;
 
         if (isModule)
             reporter.setModuleActionContext(markdown, wrapper);
@@ -213,9 +241,8 @@ class ActionReporter {
         String eventUrl = responseHeaders.getProxyEvent();
         if (eventUrl != null) {
             refStrRaw = EventLinkToUILink.get(eventUrl, labels.tail);
-            labels.reference = "<a href=\"" + refStrRaw + "\"" + " target=\"_blank\">" +
-                    ((labels.label == null) ? refStrRaw : "Open in Inspector") +
-                    "</a>";
+            labels.referenceLabel = (labels.label == null) ? refStrRaw : "Open in Inspector";
+            labels.rawReference = refStrRaw;
         }
         return refStrRaw;
     }
@@ -262,11 +289,11 @@ class ActionReporter {
         buf.append("### ").append(title).append("\n");
         boolean first = true;
         for (String key : table.keySet()) {
-            if (!first)
+            //if (!first)
                 buf.append("\n");
             first = false;
             String value = table.get(key);
-            buf.append("**").append(key).append("**: ").append(value);
+            buf.append("* **").append(key).append("**: ").append(value);
         }
         return buf.toString();
     }

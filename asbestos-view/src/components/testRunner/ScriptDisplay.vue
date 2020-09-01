@@ -72,7 +72,8 @@
           },
             filteredReport() {
               let clone = JSON.parse(JSON.stringify(this.report));
-              clone.operation.extension = undefined;
+              if (clone.operation)
+                clone.operation.extension = undefined;
               return clone;
             }
         },

@@ -88,28 +88,28 @@
                 </ul>
             </div>
 
-
+            <div class="indent">
             <!--  Inspect-->
-            <div v-if="script.operation">
+<!--            <div v-if="script.operation">-->
 
-                <span v-if="eventDisplayed && eventId">
-                    <img src="../../assets/arrow-down.png" @click.stop="toggleEventDisplayed()">
-                </span>
-                <span v-else>
-                    <span v-if="eventId">
-                        <img src="../../assets/arrow-right.png" @click.stop="toggleEventDisplayed()">
-                    </span>
-                </span>
-                <span v-if="eventId" class="selectable" @click.stop="toggleEventDisplayed()">Inspect</span>
-                <span v-if="eventDisplayed && eventId">
-                    <inspect-event
-                        :sessionId="$store.state.base.session"
-                        :channelId="$store.state.base.channelId"
-                        :eventId="eventId"
-                        :noNav="true">
-                    </inspect-event>
-                </span>
-            </div>
+<!--                <span v-if="eventDisplayed && eventId">-->
+<!--                    <img src="../../assets/arrow-down.png" @click.stop="toggleEventDisplayed()">-->
+<!--                </span>-->
+<!--                <span v-else>-->
+<!--                    <span v-if="eventId">-->
+<!--                        <img src="../../assets/arrow-right.png" @click.stop="toggleEventDisplayed()">-->
+<!--                    </span>-->
+<!--                </span>-->
+<!--                <span v-if="eventId" class="selectable" @click.stop="toggleEventDisplayed()">Inspect</span>-->
+<!--                <span v-if="eventDisplayed && eventId">-->
+<!--                    <inspect-event-->
+<!--                        :sessionId="$store.state.base.session"-->
+<!--                        :channelId="$store.state.base.channelId"-->
+<!--                        :eventId="eventId"-->
+<!--                        :noNav="true">-->
+<!--                    </inspect-event>-->
+<!--                </span>-->
+<!--            </div>-->
 
             <!-- Test Script/Report -->
             <div>
@@ -120,7 +120,7 @@
                     <img src="../../assets/arrow-right.png" @click.stop="toggleScriptDisplayed()">
                 </span>
                 <span class="selectable" @click.stop="toggleScriptDisplayed()">Test Script/Report</span>
-                <span v-if="displayScript">
+                <span v-if="displayScript" class="indent2">
                     <hr />
                     <vue-markdown v-if="actionContext">{{actionContext}}</vue-markdown>
                     <vue-markdown v-if="moduleActionContext" class="indent boxed">{{moduleActionContext}}</vue-markdown>
@@ -133,13 +133,14 @@
                     <hr />
                 </span>
             </div>
+            </div>
         </div>
     </div>
 </template>
 
 <script>
-    import InspectEvent from "../logViewer/InspectEvent"
-    import ScriptDisplay from "./ScriptDisplay"
+    // import InspectEvent from "../logViewer/InspectEvent"
+    // import ScriptDisplay from "./ScriptDisplay"
     import VueMarkdown from 'vue-markdown'
     import colorizeTestReports from "../../mixins/colorizeTestReports";
     import TestStatus from "./TestStatus";
@@ -303,8 +304,8 @@
             'script', 'report', 'callingScript', 'moduleScript'
         ],
         components: {
-            ScriptDisplay,
-            InspectEvent,
+            // ScriptDisplay,
+            // InspectEvent,
             VueMarkdown,
             TestStatus,
         },

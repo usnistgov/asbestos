@@ -495,6 +495,13 @@ public class Ref {
         try {
             URI uri = new URI(ref);
             return httpize(uri);
+        } catch (URISyntaxException e) {
+            try {
+                URI uri = new URI(URLEncoder.encode(ref, "UTF-8"));
+                return httpize(uri);
+            } catch (Exception e1) {
+                throw new Error(e1);
+            }
         } catch (Exception e) {
             throw new Error(e);
         }

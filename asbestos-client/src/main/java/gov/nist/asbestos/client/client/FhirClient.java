@@ -305,24 +305,27 @@ public class FhirClient {
             if (stopAtFirst && !list.isEmpty())
                 return list;
         }
+        String x = "http://localhost:8081/asbestos/proxy/default__default/Patient?identifier=urn:oid:1.3.6.1.4.1.21367.13.20.1000|TEST-1000-1";
+        char char109 = x.charAt(109);
 
         URI query = QueryBuilder.buildUrl(base, resourceType, params);
         ResourceWrapper wrapper = readResource(new Ref(query));
         if (wrapper.getResource() == null)
             return new ArrayList<>();
-        assert wrapper.getResource() instanceof Bundle;
-        Bundle bundle = (Bundle) wrapper.getResource();
+        if (wrapper.getResource() instanceof  Bundle) {
+            Bundle bundle = (Bundle) wrapper.getResource();
 
-        for (Bundle.BundleEntryComponent comp : bundle.getEntry()) {
-            String fullUrl = comp.getFullUrl();
-            Resource resource = comp.getResource();
-            ResourceWrapper wrapper1 = new ResourceWrapper();
-            wrapper1.setResource(resource);
-            wrapper1.setRef(new Ref(fullUrl));
-            list.add(wrapper1);
+            for (Bundle.BundleEntryComponent comp : bundle.getEntry()) {
+                String fullUrl = comp.getFullUrl();
+                Resource resource = comp.getResource();
+                ResourceWrapper wrapper1 = new ResourceWrapper();
+                wrapper1.setResource(resource);
+                wrapper1.setRef(new Ref(fullUrl));
+                list.add(wrapper1);
+            }
+            return list;
         }
-
-        return list;
+            return Collections.singletonList(wrapper);
     }
 
     public List<ResourceWrapper> searchCache(Ref base, Class<?> resourceType, List<String> params, boolean stopAtFirst) {
