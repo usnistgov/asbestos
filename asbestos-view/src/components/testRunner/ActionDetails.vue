@@ -123,9 +123,12 @@
                 <span v-if="displayScript">
                     <hr />
                     <vue-markdown v-if="actionContext">{{actionContext}}</vue-markdown>
+                    <vue-markdown v-if="moduleActionContext" class="indent boxed">{{moduleActionContext}}</vue-markdown>
                     <script-display
                         :script="script"
-                        :report="report">
+                        :report="report"
+                        :calling-script="callingScript"
+                    :module-script="moduleScript">
                     </script-display>
                     <hr />
                 </span>
@@ -236,6 +239,13 @@
                     ? this.getExtensionValue(this.report.assert, "urn:action-context")
                     : this.getExtensionValue(this.report.operation, "urn:action-context");
             },
+          moduleActionContext() {
+            if (!this.report)
+              return null;
+            return this.report.assert
+                ? this.getExtensionValue(this.report.assert, "urn:module-action-context")
+                : this.getExtensionValue(this.report.operation, "urn:module-action-context");
+          },
             detail() {
                 if (!this.report)
                     return null
@@ -290,7 +300,7 @@
         },
         props: [
             // parts representing a single action
-            'script', 'report',
+            'script', 'report', 'callingScript', 'moduleScript'
         ],
         components: {
             ScriptDisplay,

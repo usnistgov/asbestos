@@ -1,15 +1,19 @@
 package gov.nist.asbestos.testEngine.engine;
 
+import gov.nist.asbestos.client.Base.ProxyBase;
+import gov.nist.asbestos.client.client.Format;
 import gov.nist.asbestos.client.events.UIEvent;
 import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import gov.nist.asbestos.http.headers.Headers;
 import gov.nist.asbestos.http.operations.HttpBase;
+import gov.nist.asbestos.http.operations.HttpPost;
 import gov.nist.asbestos.serviceproperties.ServiceProperties;
 import gov.nist.asbestos.serviceproperties.ServicePropertiesEnum;
 import gov.nist.asbestos.testEngine.engine.fixture.FixtureComponent;
 import gov.nist.asbestos.testEngine.engine.fixture.FixtureMgr;
 import org.apache.log4j.Logger;
+import org.hl7.fhir.r4.model.BaseResource;
 import org.hl7.fhir.r4.model.TestReport;
 import org.hl7.fhir.r4.model.TestScript;
 
@@ -21,36 +25,39 @@ class ActionReporter {
 
     private String testCollectionId = null;
     private String testId = null;
+    private String parentTestCollectionId = null;
+    private String parentTestId = null;
+    private TestEngine parentTestEngine = null;
     private TestEngine testEngine = null;
     private FixtureComponent assertionSource = null;
     //private ActionReference actionReference;
     private String prefixMarkdown = "";
     private String postfixMarkdown = "";
+    private boolean imAParent = false;
+    private boolean isModule = false;
 
     ActionReporter() {
 
     }
 
-    void reportOperation(ResourceWrapper wrapper, FixtureMgr fixtureMgr, VariableMgr variableMgr, Reporter reporter, TestScript.SetupActionOperationComponent op) {
+    ActionReporter reportOperation(ResourceWrapper wrapper, FixtureMgr fixtureMgr, VariableMgr variableMgr, Reporter reporter, TestScript.SetupActionOperationComponent op) {
         String request = wrapper == null ? "" : "### " + wrapper.getHttpBase().getVerb() + " " + wrapper.getHttpBase().getUri() + "\n";
 
+        if (!variableMgr.hasReporter())
+            variableMgr.setReporter(reporter);
+
         report(wrapper, fixtureMgr, variableMgr, reporter, request, op);
-    }
-
-    void reportAssertion(FixtureMgr fixtureMgr, VariableMgr variableMgr, Reporter reporter, FixtureComponent assertionSource) {
-        this.assertionSource = assertionSource;
-        String request = "";
-
-        report(null, fixtureMgr, variableMgr, reporter, request, null);
-    }
-
-    ActionReporter withPrefixMarkdown(String md) {
-        this.prefixMarkdown = md;
         return this;
     }
 
-    ActionReporter withPostfixMarkdown(String md) {
-        this.postfixMarkdown = md;
+    ActionReporter reportAssertion(FixtureMgr fixtureMgr, VariableMgr variableMgr, Reporter reporter, FixtureComponent assertionSource) {
+        this.assertionSource = assertionSource;
+        String request = "";
+
+        if (!variableMgr.hasReporter())
+            variableMgr.setReporter(reporter);
+
+        report(null, fixtureMgr, variableMgr, reporter, request, null);
         return this;
     }
 
@@ -137,17 +144,29 @@ class ActionReporter {
             }
         }
 
-        String markdown = "## Test\n"
+        String markdown = "## " + testNotation()
                 + testEngine.getTestEnginePath() + "\n"
-                + "## Action\n" + request
-                + prefixMarkdown
                 + errorDisplay(reporter.getOpReport())
                 + asMarkdown(fixtures, "Fixtures")
                 + "\n"
                 + asMarkdown(variableMgr.getVariables(true), "Variables (evaluated after action)")
-                + postfixMarkdown;
+                + "\n"
+                + (imAParent ? "## Call " : "## Action ")
+                + "\n"
+                + (isModule && !testEngine.getCallFixtureMap().isEmpty()? asMarkdown(testEngine.getCallFixtureMap(), "Fixture Translation", "Name in caller", "Name in module") + "\n" : "")
+                + (isModule && !testEngine.getCallVariableMap().isEmpty() ? asMarkdown(testEngine.getCallVariableMap(), "Variable Translation", "Name in caller", "Name in module") + "\n" : "")
+                + (imAParent ? "" : request);
 
-        reporter.report(markdown, wrapper);
+        if (isModule)
+            reporter.setModuleActionContext(markdown, wrapper);
+        else
+            reporter.setActionContext(markdown, wrapper);
+    }
+
+    private String testNotation() {
+        if (!isModule)
+            return "Test:  ";
+        return "Called Module:  ";
     }
 
     private String staticFixtureReport(FixtureLabels labels, FixtureComponent fixtureComponent, ResourceWrapper wrapper1, String refStrRaw) {
@@ -252,6 +271,44 @@ class ActionReporter {
         return buf.toString();
     }
 
+    private String asMarkdown(Map<String, String> table, String title, String header1, String header2) {
+        StringBuilder buf = new StringBuilder();
+
+        //buf.append("<div class=\"indent2\">");
+        buf.append("\n**").append(title).append("**\n");
+        buf.append("<table class=\"indent2\">\n");
+        buf.append("\n<tr>");
+        buf.append("\n<th>").append(header1).append("</th>");
+        buf.append("\n<th>").append(header2).append("</th>");
+        buf.append("\n</tr>");
+        for (String name : table.keySet()) {
+            String value = table.get(name);
+            buf.append("\n<tr>");
+            buf.append("\n<td>").append(name).append("</td>");
+            buf.append("\n<td>").append(value).append("</td>");
+            buf.append("\n</tr>");
+        }
+        buf.append("\n</table>\n");
+        //buf.append("</div>");
+
+        return buf.toString();
+    }
+
+    private int columnWidth = 40;
+    private String center(String in) {
+        int size = in.length();
+        int border = size / 2;
+        return spaces(border) + border;
+    }
+    private String spaces(int count) {
+        StringBuilder val = new StringBuilder();
+        while (count > 0) {
+            val.append(" ");
+            count--;
+        }
+        return val.toString();
+    }
+
     public ActionReporter setTestCollectionId(String testCollectionId) {
         this.testCollectionId = testCollectionId;
         return this;
@@ -267,4 +324,28 @@ class ActionReporter {
         return this;
     }
 
+    public ActionReporter setParentTestCollectionId(String parentTestCollectionId) {
+        this.parentTestCollectionId = parentTestCollectionId;
+        return this;
+    }
+
+    public ActionReporter setParentTestId(String parentTestId) {
+        this.parentTestId = parentTestId;
+        return this;
+    }
+
+    public ActionReporter setParentTestEngine(TestEngine parentTestEngine) {
+        this.parentTestEngine = parentTestEngine;
+        return this;
+    }
+
+    public ActionReporter setModule(boolean module) {
+        isModule = module;
+        return this;
+    }
+
+    public ActionReporter setImAParent(boolean imAParent) {
+        this.imAParent = imAParent;
+        return this;
+    }
 }

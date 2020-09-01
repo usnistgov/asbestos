@@ -51,7 +51,7 @@ class SetupActionSearch extends SetupActionRead {
     }
 
     public SetupActionSearch setVariableMgr(VariableMgr variableMgr) {
-        this.variableMgr = variableMgr;
+        super.setVariableMgr(variableMgr);
         return this;
     }
 

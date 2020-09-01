@@ -56,11 +56,13 @@ abstract class GenericSetupAction {
         Objects.requireNonNull(testCollectionId);
         Objects.requireNonNull(testId);
         Objects.requireNonNull(testEngine);
-        new ActionReporter()
-                .setTestEngine(testEngine)
-                .setTestCollectionId(testCollectionId)
-                .setTestId(testId)
-                .reportOperation(wrapper, fixtureMgr, variableMgr, reporter, op);
+
+        testEngine.reportOperation(wrapper, reporter, op);
+//        new ActionReporter()
+//                .setTestEngine(testEngine)
+//                .setTestCollectionId(testCollectionId)
+//                .setTestId(testId)
+//                .reportOperation(wrapper, fixtureMgr, variableMgr, reporter, op);
     }
 
     abstract Ref buildTargetUrl();
@@ -226,6 +228,11 @@ abstract class GenericSetupAction {
 
     public GenericSetupAction setChannelId(String channelId) {
         this.channelId = channelId;
+        return this;
+    }
+
+    public GenericSetupAction setVariableMgr(VariableMgr variableMgr) {
+        this.variableMgr = variableMgr;
         return this;
     }
 }

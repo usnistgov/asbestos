@@ -13,8 +13,8 @@ import org.hl7.fhir.r4.model.TestScript;
 import java.util.*;
 
 public class VariableMgr {
-    private TestScript testScript;
-    private FixtureMgr fixtureMgr;  // variables reference fixtures so this is needed
+    private final TestScript testScript;
+    private final FixtureMgr fixtureMgr;  // variables reference fixtures so this is needed
     private ValE val;
     //private TestReport.SetupActionOperationComponent opReport;
     private Reporter reporter;
@@ -264,6 +264,15 @@ public class VariableMgr {
 
     public VariableMgr setExternalVariables(Map<String, String> variables) {
         this.externalVariables = variables;
+        return this;
+    }
+
+    public boolean hasReporter() {
+        return reporter != null;
+    }
+
+    public VariableMgr setReporter(Reporter reporter) {
+        this.reporter = reporter;
         return this;
     }
 }

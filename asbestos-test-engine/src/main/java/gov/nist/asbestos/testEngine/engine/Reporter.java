@@ -35,6 +35,11 @@ class Reporter {
             extension.setUrl("urn:action-context");
             extension.setValue(new StringType(s));
         }
+        void setModuleActionContext(String s) {
+            Extension extension = opReport == null ? asReport.addExtension() : opReport.addExtension();
+            extension.setUrl("urn:module-action-context");
+            extension.setValue(new StringType(s));
+        }
         String getMessage() {
             if (opReport == null) return asReport.getMessage();
             return opReport.getMessage();
@@ -111,6 +116,20 @@ class Reporter {
             report.setDetail(wrapper.logLink());
         }
         report.setActionContext(msg);
+    }
+
+    void setActionContext(String msg, ResourceWrapper wrapper) {
+        if (wrapper != null) {
+            report.setDetail(wrapper.logLink());
+        }
+        report.setActionContext(msg);
+    }
+
+    void setModuleActionContext(String msg, ResourceWrapper wrapper) {
+        if (wrapper != null) {
+            report.setDetail(wrapper.logLink());
+        }
+        report.setModuleActionContext(msg);
     }
 
     static String formatMsg(String type, String id, String msg) {

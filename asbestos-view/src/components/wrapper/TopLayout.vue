@@ -177,6 +177,12 @@
 </style>
 // these are shared across the tool
 <style>
+.indent {
+  text-indent: 50px;
+}
+.indent2 {
+  text-indent: 100px;
+}
     .system-error {
         font-weight: bold;
         font-size: larger;

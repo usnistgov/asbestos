@@ -1,7 +1,38 @@
 <template>
+  <div>
+    <span v-if="displayTestScript">
+      <img src="../../assets/arrow-down.png">
+    </span>
+    <span v-else>
+      <img src="../../assets/arrow-right.png"/>
+    </span>
+    <span class="selectable" @click.stop="toggleDisplay">View TestScript</span>
+
+    <div v-if="displayTestScript">
     <div class="container">
+      <div v-if="callingScript">
         <div class="script-header">
+          Calling Script
+        </div>
+        <div class="script">
+          <vue-json-pretty :data="callingScript"></vue-json-pretty>
+        </div>
+      </div>
+      <div v-if="moduleScript">
+        <div class="script-header">
+          Module Script Header
+        </div>
+        <div class="script">
+          <vue-json-pretty :data="moduleScriptHeader"></vue-json-pretty>
+        </div>
+      </div>
+        <div class="script-header">
+          <div v-if="callingScript">
+            Module Script
+          </div>
+          <div v-else>
             Script
+          </div>
         </div>
         <div class="report-header">
             Report
@@ -13,38 +44,41 @@
             <vue-json-pretty :data="filteredReport"></vue-json-pretty>
         </div>
     </div>
+  </div>
+  </div>
 </template>
 
 <script>
     import VueJsonPretty from 'vue-json-pretty'
     export default {
+      data() {
+          return {
+            displayTestScript: false
+          }
+      },
         methods: {
-
+          toggleDisplay() {
+            this.displayTestScript = !this.displayTestScript;
+          }
         },
         computed: {
+          hasModuleScriptHeader() {
+              return this.moduleScript && this.moduleScript.modifierExtension
+          },
+          moduleScriptHeader() {
+            //  if (this.moduleScript && this.moduleScript.modifierExtension)
+                return this.moduleScript.modifierExtension[0];
+          //  return null;
+          },
             filteredReport() {
-                return this.report
-            //     if (!this.report) return null;
-            //     const copy = JSON.parse(JSON.stringify(this.report))
-            //     if (copy.operation && copy.operation.extension) {
-            //         const extension = copy.operation.extension;
-            //         for (let i=0; i<extension.length; i++) {
-            //             if (extension[i].url  === 'urn:action-context')
-            //                 extension[i].url = 'Removed by UI';
-            //         }
-            //     }
-            // //     if (copy.operation &&
-            // //         copy.operation.extension &&
-            // //         copy.operation.extension[0] &&
-            // //         copy.operation.extension[0].url === 'urn:action-context'
-            // // )
-            // //         copy.operation.extension[0] = 'Removed by UI';
-            //     return copy
+              let clone = JSON.parse(JSON.stringify(this.report));
+              clone.operation.extension = undefined;
+              return clone;
             }
         },
         props: [
             // parts representing a single action
-            'script', 'report',
+            'script', 'report', 'callingScript', 'moduleScript'
         ],
         components: {
             VueJsonPretty

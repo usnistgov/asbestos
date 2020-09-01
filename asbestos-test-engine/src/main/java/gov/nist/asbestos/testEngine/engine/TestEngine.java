@@ -47,17 +47,17 @@ public class TestEngine  {
     // current script and report
     private TestScript testScript = null;
     private TestReport testReport = new TestReport();
-    // all scripts an reports.  [0] is top level, all others are called modules
-    private List<TestScript> testScripts = new ArrayList<>();
-    private List<TestReport> testReports = new ArrayList<>();
+    // all scripts and reports.  [0] is top level, all others are called modules
+    private final List<TestScript> testScripts = new ArrayList<>();
+    private final List<TestReport> testReports = new ArrayList<>();
 
     private boolean failOverride = false;
-    private FixtureMgr fixtureMgr = new FixtureMgr();
+    private final FixtureMgr fixtureMgr = new FixtureMgr();
     private Val val;
     private ValE engineVal;
-    private FhirClient fhirClientForFixtures;
-    private List<String> errors;
     private FhirClient fhirClient = null;
+    private final FhirClient fhirClientForFixtures;
+    private List<String> errors;
     private String testSession = null;
     private String channelId = null;   // testSession __ channelName
     private File externalCache = null;
@@ -67,6 +67,8 @@ public class TestEngine  {
     public static final String LAST_OP = "_LAST_OP_";
 
     private ModularEngine modularEngine = null;
+    private Map<String, String> callFixtureMap = new HashMap<>();
+    private Map<String, String> callVariableMap = new HashMap<>();
     private Map<String, String> externalVariables = new HashMap<>();
     /**
      * If testScriptDebugState is null, then TestScript is being run normally. ie., TestScript is not being debugged.
@@ -869,9 +871,11 @@ public class TestEngine  {
 
         // align fixtures for module
         Map<String, FixtureComponent> inFixturesForComponent = new HashMap<>();
+        Map<String, String> fixtureNameMap = new HashMap<>();
         for (Parameter parm : componentReference.getFixturesIn()) {
             String outerName = parm.getCallerName();
             String innnerName = parm.getLocalName();
+            fixtureNameMap.put(outerName, innnerName);
             FixtureComponent fixtureComponent = fixtureMgr.get(outerName);
             if (fixtureComponent != null && fixtureComponent.getFixtureSub() != null) {
                 // create temporary FixtureComponent containing the translations
@@ -885,6 +889,7 @@ public class TestEngine  {
 
         // align variables for module
         Map<String, String> externalVariables = new HashMap<>();
+        Map<String, String> variableNameMap = new HashMap<>();
         VariableMgr varMgr = new VariableMgr(testScript, fixtureMgr)
                 .setVal(engineVal)
                 .setOpReport(opReport);
@@ -893,6 +898,7 @@ public class TestEngine  {
         for (Parameter parm : componentReference.getVariablesIn()) {
             String outerName = parm.getCallerName();
             String innerName = parm.getLocalName();
+            variableNameMap.put(outerName, innerName);
             String value = varMgr.eval(outerName, false);
             externalVariables.put(innerName, value);
         }
@@ -944,6 +950,8 @@ public class TestEngine  {
                 .setTestCollection(testCollection)
                 .setTestId(testId)
                 .setTestScriptDebugState(this.testScriptDebugState)
+                .setCallFixtureMap(fixtureNameMap)
+                .setCallVariableMap(variableNameMap)
                 ;
         modularEngine.add(testEngine1);
         testEngine1.parent = this;
@@ -1555,10 +1563,10 @@ public class TestEngine  {
     String getTestEnginePath() {
         if (parent != null) {
             String libraryName = testDef.getName();
-            return parent.getTestEnginePath()
-                    + "**Module**: " + testScriptName + " (" + libraryName + ")\n";
+            return /* parent.getTestEnginePath() + */
+                     /*"**Module**: " + */ testScriptName + " (" + libraryName + ")\n";
         }
-        return "**Script**: " + testId + " (" + testCollection + ")\n";
+        return /* "**Script**: " + */ testCollection + " / " + testId + "\n";
     }
 
     public String getChannelId() {  // testSession __ channelName
@@ -1713,5 +1721,77 @@ public class TestEngine  {
         return false;
     }
 
+    void reportOperation(ResourceWrapper wrapper, Reporter reporter, TestScript.SetupActionOperationComponent op) {
+        if (parent != null) {
+            new ActionReporter()
+                    .setModule(false)
+                    .setImAParent(true)
+                    .setTestEngine(parent)
+                    .setTestCollectionId(parent.getTestCollection())
+                    .setTestId(parent.getTestId())
+                    .reportOperation(wrapper,
+                            parent.getFixtureMgr(),
+                            new VariableMgr(parent.getTestScript(), parent.getFixtureMgr()),
+                            reporter,
+                            op);
+        }
+        new ActionReporter()
+                .setModule(parent != null)
+                .setTestEngine(this)
+                .setTestCollectionId(testCollection)
+                .setTestId(testId)
+                .reportOperation(wrapper,
+                        fixtureMgr,
+                        new VariableMgr(getTestScript(), getFixtureMgr()),
+                        reporter,
+                        op);
+    }
 
+    void reportAssertion(Reporter reporter, TestReport.SetupActionAssertComponent assertReport, FixtureComponent source) {
+        if (parent != null) {
+            new ActionReporter()
+                    .setModule(false)
+                    .setImAParent(true)
+                    .setTestEngine(parent)
+                    .setTestCollectionId(parent.getTestCollection())
+                    .setTestId(parent.getTestId())
+                    .reportAssertion(
+                            parent.getFixtureMgr(),
+                            new VariableMgr(parent.getTestScript(), parent.getFixtureMgr()),
+                            reporter,
+                            source);
+        }
+        new ActionReporter()
+                .setModule(parent != null)
+                .setTestEngine(this)
+                .setTestCollectionId(testCollection)
+                .setTestId(testId)
+                .reportAssertion(
+                        fixtureMgr,
+                        new VariableMgr(getTestScript(), getFixtureMgr()),
+                        reporter,
+                        source);
+    }
+
+    public String getTestId() {
+        return testId;
+    }
+
+    public TestEngine setCallFixtureMap(Map<String, String> callFixtureMap) {
+        this.callFixtureMap = callFixtureMap;
+        return this;
+    }
+
+    public TestEngine setCallVariableMap(Map<String, String> callVariableMap) {
+        this.callVariableMap = callVariableMap;
+        return this;
+    }
+
+    public Map<String, String> getCallFixtureMap() {
+        return callFixtureMap;
+    }
+
+    public Map<String, String> getCallVariableMap() {
+        return callVariableMap;
+    }
 }

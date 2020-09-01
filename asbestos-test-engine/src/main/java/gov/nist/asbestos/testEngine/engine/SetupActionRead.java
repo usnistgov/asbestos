@@ -173,7 +173,7 @@ class SetupActionRead extends GenericSetupAction {
     }
 
     public SetupActionRead setVariableMgr(VariableMgr variableMgr) {
-        this.variableMgr = variableMgr;
+        super.setVariableMgr(variableMgr);
         return this;
     }
 

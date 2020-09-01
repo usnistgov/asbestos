@@ -102,7 +102,7 @@ public class SaveToCache extends GenericSetupAction {
     }
 
     public SaveToCache setVariableMgr(VariableMgr variableMgr) {
-        this.variableMgr = variableMgr;
+        super.setVariableMgr(variableMgr);
         return this;
     }
 }

@@ -125,7 +125,7 @@ public class SetupActionTransaction extends GenericSetupAction {
     }
 
     public SetupActionTransaction setVariableMgr(VariableMgr variableMgr) {
-        this.variableMgr = variableMgr;
+        super.setVariableMgr(variableMgr);
         return this;
     }
 

@@ -159,16 +159,17 @@ public class AssertionRunner {
             source = getCompareToSourceIfAvailable(as);
 
         // add context to report
-        new ActionReporter()
-                .setTestCollectionId(testCollectionId)
-                .setTestId(testId)
-                .setTestEngine(testEngine)
-                .reportAssertion(
-                        fixtureMgr,
-                        variableMgr,
-                        new Reporter(val, assertReport, "", ""),
-                        source
-                );
+        testEngine.reportAssertion(new Reporter(val, assertReport, "", ""), assertReport, source);
+//        new ActionReporter()
+//                .setTestCollectionId(testCollectionId)
+//                .setTestId(testId)
+//                .setTestEngine(testEngine)
+//                .reportAssertion(
+//                        fixtureMgr,
+//                        variableMgr,
+//                        new Reporter(val, assertReport, "", ""),
+//                        source
+//                );
 
         label = as.getLabel();
         type = typePrefix + ".assert";

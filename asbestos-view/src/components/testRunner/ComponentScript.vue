@@ -8,6 +8,8 @@
             <action-details
                     :script="caction"
                     :report="reportActions ? reportActions[cactioni] : null"
+                    :calling-script="actionScript"
+                    :module-script="moduleScript"
                     >
             </action-details>
         </debuggable-list-item>
@@ -28,6 +30,11 @@ import debugTestScriptMixin from "../../mixins/debugTestScript";
         methods: {
         },
         computed: {
+          moduleScript() {
+            if (this.componentName)
+              return this.$store.state.testRunner.moduleTestScripts[this.componentName];
+            return null;
+          },
             // if a component is used multiple times then the componentName is the same and the componentId is different
             componentName() {
                 if (this.actionReport === null) return null;

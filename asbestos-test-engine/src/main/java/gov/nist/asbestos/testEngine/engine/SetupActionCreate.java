@@ -117,7 +117,7 @@ class SetupActionCreate extends GenericSetupAction {
     }
 
     public SetupActionCreate setVariableMgr(VariableMgr variableMgr) {
-        this.variableMgr = variableMgr;
+        super.setVariableMgr(variableMgr);
         return this;
     }
 

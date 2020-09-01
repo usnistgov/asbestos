@@ -158,8 +158,8 @@ class SetupActionDelete extends GenericSetupAction {
         return fhirClient;
     }
 
-    SetupActionDelete setVariableMgr(VariableMgr variableMgr) {
-        this.variableMgr = variableMgr;
+    public SetupActionDelete setVariableMgr(VariableMgr variableMgr) {
+        super.setVariableMgr(variableMgr);
         return this;
     }
 
