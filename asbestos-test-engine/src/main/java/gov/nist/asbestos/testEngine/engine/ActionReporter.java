@@ -1,23 +1,18 @@
 package gov.nist.asbestos.testEngine.engine;
 
-import gov.nist.asbestos.client.Base.ProxyBase;
-import gov.nist.asbestos.client.client.Format;
 import gov.nist.asbestos.client.events.UIEvent;
 import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import gov.nist.asbestos.http.headers.Headers;
 import gov.nist.asbestos.http.operations.HttpBase;
-import gov.nist.asbestos.http.operations.HttpPost;
 import gov.nist.asbestos.serviceproperties.ServiceProperties;
 import gov.nist.asbestos.serviceproperties.ServicePropertiesEnum;
 import gov.nist.asbestos.testEngine.engine.fixture.FixtureComponent;
 import gov.nist.asbestos.testEngine.engine.fixture.FixtureMgr;
 import org.apache.log4j.Logger;
-import org.hl7.fhir.r4.model.BaseResource;
 import org.hl7.fhir.r4.model.TestReport;
 import org.hl7.fhir.r4.model.TestScript;
 
-import javax.swing.*;
 import java.util.*;
 
 class ActionReporter {
@@ -40,7 +35,8 @@ class ActionReporter {
 
     }
 
-    ActionReporter reportOperation(ResourceWrapper wrapper, FixtureMgr fixtureMgr, VariableMgr variableMgr, Reporter reporter, TestScript.SetupActionOperationComponent op) {
+    ActionReporter reportOperation(ResourceWrapper wrapper, FixtureMgr fixtureMgr, VariableMgr variableMgr,
+                                   Reporter reporter, TestScript.SetupActionOperationComponent op) {
         String request = "";
         if (wrapper != null) {
             String url = wrapper.getHttpBase().getUri().toString();
@@ -54,62 +50,17 @@ class ActionReporter {
         return this;
     }
 
-    ActionReporter reportAssertion(FixtureMgr fixtureMgr, VariableMgr variableMgr, Reporter reporter, FixtureComponent assertionSource) {
+    ActionReporter reportAssertion(FixtureMgr fixtureMgr, VariableMgr variableMgr, Reporter reporter,
+                                   FixtureComponent assertionSource,
+                                   TestScript.SetupActionAssertComponent assertReport) {
         this.assertionSource = assertionSource;
         String request = "";
 
         if (!variableMgr.hasReporter())
             variableMgr.setReporter(reporter);
 
-        report(null, fixtureMgr, variableMgr, reporter, request, null);
+        report((ResourceWrapper) null, fixtureMgr, variableMgr, reporter, request, assertReport);
         return this;
-    }
-
-    class FixtureLabels {
-        boolean sourceId = false;
-        boolean responseId = false;
-        String rawReference;
-        String referenceLabel;
-        String label = null;
-        String tail = "";
-
-        FixtureLabels(TestScript.SetupActionOperationComponent op, String key) {
-            if (key != null && assertionSource != null && key.equals(assertionSource.getId())) {
-                sourceId = true;
-                label = "sourceId (" + key + ")";
-            }
-            if (key != null && op != null && op.hasResponseId() && key.equals(op.getResponseId())) {
-                responseId = true;
-                label = "responseId (" + key + ")";
-            }
-            if (key != null && op != null && op.hasSourceId() && key.equals(op.getSourceId())) {
-                sourceId = true;
-                label = "sourceId (" + key + ")";
-            }
-            if (sourceId)
-                tail = "/req";
-            else if (responseId)
-                tail = "/resp";
-            else if (key != null && key.equals("lastOperation")) {
-                tail = "/resp";
-                label = key;
-            }
-
-            if (label == null) {
-                label = key;
-                if (key.equals("request"))
-                    tail = "/req";
-                if (key.equals("response"))
-                    tail = "/resp";
-            }
-        }
-
-        String getReference() {
-            return "<a href=\"" + rawReference + "\"" + " target=\"_blank\">" +
-                    referenceLabel +
-                    "</a>";
-        }
-
     }
 
     /**
@@ -135,7 +86,77 @@ class ActionReporter {
         FixtureLabels requestLabels = null;
         FixtureLabels responseLabels = null;
         for (String key : fixtureMgr.keySet()) {
-            FixtureLabels labels = new FixtureLabels(op, key);
+            FixtureLabels labels = new FixtureLabels(this, op, key);
+
+            FixtureComponent fixtureComponent = fixtureMgr.get(key);
+            HttpBase httpBase = fixtureComponent.getHttpBase();  // http operation of fixtureComponent.wrapper
+            ResourceWrapper wrapper1 = fixtureComponent.getResourceWrapper();
+            String refStrRaw = null;
+
+            if (httpBase != null) {  // fixtureComponent created by operation
+                refStrRaw = operationReport(labels, httpBase, refStrRaw);
+            } else if (wrapper1 != null) {   // static fixtureComponent
+                refStrRaw = staticFixtureReport(labels, fixtureComponent, wrapper1, refStrRaw);
+            }
+            if (refStrRaw != null && labels.label != null) {
+                // referenced to UIEvent for display in inspector
+                labels.rawReference = refStrRaw;
+                labels.referenceLabel = "Open in Inspector";
+                log.info("Fixture Reference: " + labels.label + " => " + refStrRaw);
+                fixtures.put(labels.label, labels.getReference());
+
+                if (labels.sourceId) {
+                    requestLabels = labels;
+                    requestLabels.referenceLabel = "Request";
+                }
+                if (labels.responseId) {
+                    responseLabels = labels;
+                    responseLabels.referenceLabel = "Response";
+                }
+            }
+        }
+
+        String markdown = "## " + testNotation()
+                + testEngine.getTestEnginePath() + "\n"
+                + "\n"
+                + (imAParent ? "" : request
+                + " (  " + (requestLabels == null ? "--" : requestLabels.getReference()) + " ) => "
+                + (responseLabels == null ? "--" : responseLabels.getReference())
+        )
+                + "\n"
+                + errorDisplay(reporter.getOpReport())
+                + asMarkdown(fixtures, "TestScript Fixtures")
+                + "\n"
+                + asMarkdown(variableMgr.getVariables(true), "TestScript Variables (evaluated after action)")
+                + "\n"
+                + (imAParent ? "## Call " : "")
+                + "\n"
+                + (isModule && !testEngine.getCallFixtureMap().isEmpty() ? asMarkdown(testEngine.getCallFixtureMap(), "Fixture Translation", "Name in caller", "Name in module") + "\n" : "")
+                + (isModule && !testEngine.getCallVariableMap().isEmpty() ? asMarkdown(testEngine.getCallVariableMap(), "Variable Translation", "Name in caller", "Name in module") + "\n" : "")
+
+                ;
+
+        if (isModule)
+            reporter.setModuleActionContext(markdown, wrapper);
+        else
+            reporter.setActionContext(markdown, wrapper);
+    }
+
+    private void report(ResourceWrapper wrapper, FixtureMgr fixtureMgr, VariableMgr variableMgr, Reporter reporter, String request, TestScript.SetupActionAssertComponent assrt) {
+        Objects.requireNonNull(testCollectionId);
+        Objects.requireNonNull(testId);
+        Objects.requireNonNull(testEngine);
+        Map<String, String> fixtures = new HashMap<>();
+
+        log.info("Report request: " + request.trim());
+
+        // report assertion source (only for assertions)
+        reportAssertionSource(fixtures);
+
+        FixtureLabels requestLabels = null;
+        FixtureLabels responseLabels = null;
+        for (String key : fixtureMgr.keySet()) {
+            FixtureLabels labels = new FixtureLabels(this, assrt, key);
 
             FixtureComponent fixtureComponent = fixtureMgr.get(key);
             HttpBase httpBase = fixtureComponent.getHttpBase();  // http operation of fixtureComponent.wrapper
@@ -247,6 +268,14 @@ class ActionReporter {
         return refStrRaw;
     }
 
+    public String uiLinkToEvent(String eventUrl, String urlTail) {
+        FixtureLabels labels = new FixtureLabels(this);
+        labels.tail = urlTail;
+        String refStrRaw = EventLinkToUILink.get(eventUrl, labels.tail);
+        labels.referenceLabel = (labels.label == null) ? refStrRaw : "Open in Inspector";
+        labels.rawReference = refStrRaw;
+        return labels.getReference();
+    }
 
     private void reportAssertionSource(Map<String, String> fixtures) {
         if (assertionSource != null) {
@@ -374,5 +403,9 @@ class ActionReporter {
     public ActionReporter setImAParent(boolean imAParent) {
         this.imAParent = imAParent;
         return this;
+    }
+
+    public FixtureComponent getAssertionSource() {
+        return assertionSource;
     }
 }

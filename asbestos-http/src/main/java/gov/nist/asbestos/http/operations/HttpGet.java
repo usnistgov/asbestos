@@ -8,17 +8,26 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.*;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
 public class HttpGet extends HttpBase {
     // TODO GET parameters in the body
-    void get(URI uri, Map<String, String> headers) {
-        this.uri = uri;
+    void get(URI theUri, Map<String, String> headers) {
+        this.uri = theUri;
+        URL url;
+        try {
+            url = theUri.toURL();
+//            String x = URLDecoder.decode(theUri.toString(), "UTF-8");
+//            this.uri = new URI(x);
+        } catch (Exception e) {
+            throw new RuntimeException("Cannot decode URI " + theUri);
+        }
         HttpURLConnection connection = null;
         try {
-            connection = (HttpURLConnection) uri.toURL().openConnection();
+            connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("GET");
             if (_requestHeaders != null)
                 addHeaders(connection, _requestHeaders);

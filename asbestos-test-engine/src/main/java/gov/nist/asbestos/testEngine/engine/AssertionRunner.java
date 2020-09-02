@@ -159,7 +159,7 @@ public class AssertionRunner {
             source = getCompareToSourceIfAvailable(as);
 
         // add context to report
-        testEngine.reportAssertion(new Reporter(val, assertReport, "", ""), assertReport, source);
+        testEngine.reportAssertion(new Reporter(val, assertReport, "", ""), as, source);
 //        new ActionReporter()
 //                .setTestCollectionId(testCollectionId)
 //                .setTestId(testId)
@@ -250,6 +250,13 @@ public class AssertionRunner {
             Reporter.reportError(val, assertReport, type, label,"Error evaluating expression: " + expression + "\n" + e.getMessage());
             return false;
         }
+
+        String uiLink = EventLinkToUILink.get(sourceFixture.getCreatedByUIEvent(), "resp");
+        FixtureLabels fixtureLabels = new FixtureLabels(new ActionReporter());
+        fixtureLabels.rawReference = uiLink;
+        fixtureLabels.referenceLabel = sourceFixture.getId() == null ? "Open in Inspector" : sourceFixture.getId();
+
+        reportAssertion(assertReport, expression, fixtureLabels);
         if ("true".equals(found))
             return Reporter.reportPass(val, assertReport, type, label, expression);
 
@@ -320,6 +327,32 @@ public class AssertionRunner {
 
     }
 
+    private void reportAssertion(TestReport.SetupActionAssertComponent assertReport, String desc, String expected, String found) {
+        Reporter.assertDescription(assertReport, "**" + desc + "**: " +
+                "**Expected** " + expected + " , **Found** " + found);
+    }
+
+    private void reportAssertion(TestReport.SetupActionAssertComponent assertReport, String desc, String expected, String operator, String found) {
+        Reporter.assertDescription(assertReport, "**" + desc + "**: " +
+                "**Expected** " + expected + " , **Operator** " + operator + " **Found** " + found);
+    }
+
+    private void reportAssertion(TestReport.SetupActionAssertComponent assertReport, String desc, String value, String expected, String operator, String found) {
+        Reporter.assertDescription(assertReport, "**" + desc + "**: " + value +
+                " **Expected** " + expected + " , **Operator** is " + operator + " **Found** " + found);
+    }
+
+    private void reportAssertion(TestReport.SetupActionAssertComponent assertReport, String descHdr, String raw, String expanded, boolean result) {
+        Reporter.assertDescription(assertReport,
+                (descHdr == null ? "" : "**" + descHdr + "**:" )+
+                        "\n**Raw expression** " + raw + "\n**Expanded Expression** " + expanded +
+                "\n**Result** " + result);
+    }
+
+    private void reportAssertion(TestReport.SetupActionAssertComponent assertReport, String expression, FixtureLabels fixtureLabels) {
+        Reporter.assertDescription(assertReport, "**Eval** " + expression + " **against** " + fixtureLabels.getReference());
+    }
+
     private boolean instResource(TestScript.SetupActionAssertComponent as, TestReport.SetupActionAssertComponent assertReport, boolean warningOnly) {
         FixtureComponent sourceFixture = getSource(as, assertReport);
         if (sourceFixture == null) return false;
@@ -327,14 +360,17 @@ public class AssertionRunner {
             Reporter.reportError(val, assertReport, type, label, "sourceId or lastOperation references no resource.");
             return false;
         }
+        reportAssertion(assertReport, "Resource type", as.getResource(), sourceFixture.getResponseType());
         if (!as.getResource().equals(sourceFixture.getResponseType()))
             return Reporter.reportFail(val, assertReport, type, label, "expected " + as.getResource() + " found " + sourceFixture.getResponseType(), warningOnly);
         return Reporter.reportPass(val, assertReport, type, label, "resource type comparison (" + sourceFixture.getResponseType() + ")" );
     }
 
+    // TODO: this and instResource cannot both be right, sourceFixture.getResponseType() ?
     private boolean instContentType(TestScript.SetupActionAssertComponent as, TestReport.SetupActionAssertComponent assertReport, boolean warningOnly) {
         FixtureComponent sourceFixture = getSource(as, assertReport);
         if (sourceFixture == null) return false;
+        reportAssertion(assertReport, "Content type", as.getContentType(), sourceFixture.getResponseType());
         if (!as.getContentType().equalsIgnoreCase(sourceFixture.getResponseType()))
             return Reporter.reportFail(val, assertReport, type, label, "expecting " + as.getContentType() + " found " + sourceFixture.getResponseType(), warningOnly);
         return Reporter.reportPass(val, assertReport, type, label, as.getContentType() + " = " + sourceFixture.getResponseType());
@@ -346,6 +382,7 @@ public class AssertionRunner {
         String sourceHeaderFieldValue = sourceFixture.getHttpBase().getResponseHeaders().getValue(as.getHeaderField());
         if (sourceHeaderFieldValue == null)
             sourceHeaderFieldValue = "";
+        reportAssertion(assertReport, "Header field " + as.getHeaderField(), as.getValue(), sourceHeaderFieldValue);
         if (!sourceHeaderFieldValue.equalsIgnoreCase(as.getValue()))
             return Reporter.reportFail(val, assertReport, type, label, sourceHeaderFieldValue + " != " + as.hasValue(), warningOnly);
         return Reporter.reportPass(val, assertReport, type, label, sourceHeaderFieldValue + " = " + as.getValue());
@@ -358,6 +395,8 @@ public class AssertionRunner {
         String found = responseCodeAsString(codeFound);
         String expected = as.getResponse().toCode();
         String operator = as.hasOperator() ? as.getOperator().toCode() : "equals";
+
+        reportAssertion(assertReport, "Response:", expected, operator, found);
         if (!compare(val, assertReport, found, expected, operator, warningOnly, type, label))
             return false;
         return Reporter.reportPass(val, assertReport, type, label, found + " " + operator + " " + expected);
@@ -370,6 +409,8 @@ public class AssertionRunner {
         String found = String.valueOf(codeFound);
         String expected = as.getResponseCode();
         String operator = as.hasOperator() ? as.getOperator().toCode() : "equals";
+
+        reportAssertion(assertReport, "Response: ", expected, operator, found);
         if (!compare(val, assertReport, found, expected, operator, warningOnly, type, label))
             return false;
         return Reporter.reportPass(val, assertReport, type, label, found + " " + operator + " " + expected);
@@ -414,6 +455,9 @@ public class AssertionRunner {
 
         String expected = variableMgr.updateReference(as.getValue());
         String operator = as.hasOperator() ? as.getOperator().toCode() : "equals";
+
+        reportAssertion(assertReport, "Eval expression" , expression,
+                expected, operator, found);
         if (!compare(val, assertReport, found, expected, operator, warningOnly, type, label))
             return false;
         return Reporter.reportPass(val, assertReport, type, label, expression);
@@ -436,9 +480,12 @@ public class AssertionRunner {
             Reporter.reportError(val, assertReport, type, label,"Error evaluating expression: " + expression + "\n" + e.getMessage());
             return false;
         }
+
+        reportAssertion(assertReport, null,
+                rawExpression,  expression,
+                ok);
         if (ok)
             return Reporter.reportPass(val, assertReport, type, label, expression);
-
         return Reporter.reportFail(val, assertReport, type, label, "expression " + as.getExpression()  +  " failed.", warningOnly);
     }
 
@@ -447,6 +494,8 @@ public class AssertionRunner {
         String requestedMethod = as.getRequestMethod().toCode();
         if (sourceFixture == null) return false;
         String method = sourceFixture.getResourceWrapper().getHttpBase().getVerb();
+
+        reportAssertion(assertReport, "Request Method", requestedMethod, method);
         if (requestedMethod.equalsIgnoreCase(method)) {
             Reporter.reportPass(val, assertReport, type, label, "Method " + requestedMethod + " found");
             return true;

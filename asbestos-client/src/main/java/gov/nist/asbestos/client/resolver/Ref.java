@@ -1,6 +1,9 @@
 package gov.nist.asbestos.client.resolver;
 
 import com.google.common.base.Strings;
+import gov.nist.asbestos.client.Base.EC;
+import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.apache.log4j.Logger;
 import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
@@ -9,6 +12,8 @@ import java.net.*;
 import java.util.*;
 
 public class Ref {
+    private static Logger log = Logger.getLogger(Ref.class);
+
     private URI uri;
     private String anchor = null;
 
@@ -451,7 +456,15 @@ public class Ref {
         return uri.toString() + anchor;
     }
 
-    public String asString() { return uri.toString(); }
+    public String asString() {
+        try {
+            return uri.toASCIIString();
+            //return URLDecoder.decode(uri.toString(), "UTF-8");
+        } catch (Exception e) {
+            log.error(uri + " : " + ExceptionUtils.getStackTrace(e));
+            return uri.toString();
+        }
+    }
 
     public String urlEncode() {
         try {

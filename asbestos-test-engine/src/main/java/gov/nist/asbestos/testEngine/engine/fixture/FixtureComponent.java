@@ -291,6 +291,10 @@ public class FixtureComponent {
 
     public FixtureComponent setCreatedByUIEvent(UIEvent createdByUIEvent) {
         this.createdByUIEvent = createdByUIEvent;
+
+//        if (resourceWrapper != null && !resourceWrapper.hasRef()) {
+//            createdByUIEvent.
+//        }
         return this;
     }
 }

@@ -1747,7 +1747,8 @@ public class TestEngine  {
                         op);
     }
 
-    void reportAssertion(Reporter reporter, TestReport.SetupActionAssertComponent assertReport, FixtureComponent source) {
+    void reportAssertion(Reporter reporter, TestScript.SetupActionAssertComponent asrt,
+                         FixtureComponent source) {
         if (parent != null) {
             new ActionReporter()
                     .setModule(false)
@@ -1759,7 +1760,8 @@ public class TestEngine  {
                             parent.getFixtureMgr(),
                             new VariableMgr(parent.getTestScript(), parent.getFixtureMgr()),
                             reporter,
-                            source);
+                            source,
+                            asrt);
         }
         new ActionReporter()
                 .setModule(parent != null)
@@ -1770,7 +1772,8 @@ public class TestEngine  {
                         fixtureMgr,
                         new VariableMgr(getTestScript(), getFixtureMgr()),
                         reporter,
-                        source);
+                        source,
+                        asrt);
     }
 
     public String getTestId() {

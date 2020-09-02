@@ -268,6 +268,11 @@ public class EC {
     }
 
     public UIEvent getEvent(String testSession, String channelId, String resourceType, String eventName) {
+        if (channelId.contains("__")) {
+            String[] parts = channelId.split("__");
+            if (parts.length == 2)
+                channelId = parts[1];
+        }
         File fhir = fhirDir(testSession, channelId);
         if (resourceType.equals("null")) {
             resourceType = resourceTypeForEvent(fhir, eventName);

@@ -16,6 +16,7 @@
             }"
                     @click.stop="toggleMessageDisplay()">
 
+
                 <test-status v-if="!statusRight"
                                            :status-on-right="statusRight"
                                            :script="script"
@@ -75,18 +76,23 @@
         </div>
 
         <div v-if="displayMessage">
-            <div v-if="message && message.indexOf('#') === -1">
-                <ul>
-                    <div v-for="(line, linei) in translateNL(message)" :key="'msgDisp' + linei">
-                        <li>
-                        <span v-if="isError">
-                            <img src="../../assets/yellow-error.png">
-                        </span>
-                            {{ line }}
-                        </li>
-                    </div>
-                </ul>
-            </div>
+
+          <div class="indent">
+            <vue-markdown>{{resultDescription}}</vue-markdown>
+          </div>
+
+<!--            <div v-if="message && message.indexOf('#') === -1">-->
+<!--                <ul>-->
+<!--                    <div v-for="(line, linei) in translateNL(message)" :key="'msgDisp' + linei">-->
+<!--                        <li>-->
+<!--                        <span v-if="isError">-->
+<!--                            <img src="../../assets/yellow-error.png">-->
+<!--                        </span>-->
+<!--                            {{ line }}-->
+<!--                        </li>-->
+<!--                    </div>-->
+<!--                </ul>-->
+<!--            </div>-->
 
             <div class="indent">
             <!--  Inspect-->
@@ -285,6 +291,20 @@
             descriptionAtt() {
                 return this.script.operation ? this.script.operation.description : this.script.assert.description
             },
+          resultDescription() {
+              if (!this.report)
+                return null;
+              if (!this.report.assert)
+                return null;
+              if (!this.report.assert.extension)
+                return null;
+              let desc = null;
+              this.report.assert.extension.forEach(ele => {
+                if (ele.url === "urn:resultDescription")
+                  desc = ele.valueString;
+              })
+              return desc;
+          },
         },
         created() {
 

@@ -16,6 +16,7 @@ import gov.nist.asbestos.client.resolver.ResourceCacheMgr;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import gov.nist.asbestos.http.operations.HttpPost;
 import gov.nist.asbestos.simapi.tk.installation.Installation;
+import org.apache.log4j.Logger;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.BaseResource;
 import org.hl7.fhir.r4.model.Bundle;
@@ -26,6 +27,8 @@ import java.net.URI;
 import java.util.*;
 
 public class FhirClient {
+    private static Logger log = Logger.getLogger(FhirClient.class);
+
     private Format format = Format.JSON;
     private ResourceCacheMgr resourceCacheMgr = null;
     private HttpBase httpBase = null;
@@ -176,6 +179,8 @@ public class FhirClient {
     }
 
     private ResourceWrapper gobbleGetResponse(HttpGet getter, ResourceWrapper wrapper, Format format) {
+        if (getter.getUri() == null)
+            log.info("oops");
         if (getter.getStatus() != 200) {
             return wrapper;
         }

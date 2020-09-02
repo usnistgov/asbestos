@@ -172,4 +172,8 @@ class Reporter {
         return true;
     }
 
+    static void assertDescription(TestReport.SetupActionAssertComponent assertReport, String description) {
+        assertReport.addExtension("urn:resultDescription", new StringType(description));
+    }
+
 }

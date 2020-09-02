@@ -1,5 +1,6 @@
 package gov.nist.asbestos.testEngine.engine;
 
+import gov.nist.asbestos.client.events.UIEvent;
 import gov.nist.asbestos.serviceproperties.ServiceProperties;
 import gov.nist.asbestos.serviceproperties.ServicePropertiesEnum;
 
@@ -12,7 +13,6 @@ public class EventLinkToUILink {
     // to
     // http://localhost:8082/session/default/channel/xds/lognav/2020_02_26_17_15_02_417
     static public String get(String eventURL, String tail) {
-        String base = ServiceProperties.getInstance().getPropertyOrStop(ServicePropertiesEnum.FHIR_TOOLKIT_UI_HOME_PAGE);
         List<String> parts = Arrays.asList(eventURL.split("/"));
         String channel = null;
         String testSession = null;
@@ -23,15 +23,25 @@ public class EventLinkToUILink {
                 channel = parts.get(i + 2);
                 eventId = parts.get(i + 4);
 
-                return base + "/" +
-                        "session/" +
-                        testSession + "/channel/" +
-                        channel + "/lognav/" +
-                        eventId +
-                        tail;
+                return get(testSession, channel, eventId, tail);
             }
         }
         return null;
+    }
+
+    static public String get(String testSession, String channel, String eventId, String tail) {
+        String base = ServiceProperties.getInstance().getPropertyOrStop(ServicePropertiesEnum.FHIR_TOOLKIT_UI_HOME_PAGE);
+        return base + "/" +
+                "session/" +
+                testSession + "/channel/" +
+                channel + "/lognav/" +
+                eventId + "/" +
+                tail;
+
+    }
+
+    static public String get(UIEvent event, String tail) {
+        return get(event.getTestSession(), event.getChannelId(), event.getEventName(), tail);
     }
 
     static public String get(String eventURL) {
