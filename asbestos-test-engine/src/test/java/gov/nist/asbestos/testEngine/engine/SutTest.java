@@ -4,7 +4,7 @@ import gov.nist.asbestos.client.client.FhirClient;
 import gov.nist.asbestos.client.client.Format;
 import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
-import gov.nist.asbestos.http.operations.HttpGet;
+import gov.nist.asbestos.http.operations.HttpGetter;
 import gov.nist.asbestos.http.operations.HttpPost;
 import gov.nist.asbestos.simapi.validation.Val;
 import org.hl7.fhir.r4.model.BaseResource;
@@ -237,7 +237,7 @@ class SutTest {
         poster.setLocation(url);
         wrapper.setRef(new Ref(url));
 
-        HttpGet getter = new HttpGet();
+        HttpGetter getter = new HttpGetter();
         getter.setStatus(200);
         ResourceWrapper getWrapper = new ResourceWrapper();
         getWrapper.setResource(patient);

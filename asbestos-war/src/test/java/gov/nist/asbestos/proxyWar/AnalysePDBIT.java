@@ -1,7 +1,7 @@
 package gov.nist.asbestos.proxyWar;
 
 import com.google.gson.Gson;
-import gov.nist.asbestos.http.operations.HttpGet;
+import gov.nist.asbestos.http.operations.HttpGetter;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -39,7 +39,7 @@ public class AnalysePDBIT {
         String eventId = parts[8];
         String analyseUrl = "http://localhost:" + proxyPort + "/asbestos/log/analysis/event/default/"
                 + channelId + "/" + eventId + "/request?validation=false";
-        HttpGet getter = new HttpGet();
+        HttpGetter getter = new HttpGetter();
         getter.get(analyseUrl);
         assertEquals(200, getter.getStatus());
         Map<String, Object> result = new Gson().fromJson(getter.getResponseText(), Map.class);
@@ -56,7 +56,7 @@ public class AnalysePDBIT {
         String eventId = parts[8];
         String analyseUrl = "http://localhost:" + proxyPort + "/asbestos/log/analysis/event/default/"
                 + channelId + "/" + eventId + "/request?validation=false";
-        HttpGet getter = new HttpGet();
+        HttpGetter getter = new HttpGetter();
         getter.get(analyseUrl);
         assertEquals(200, getter.getStatus());
         Map<String, Object> result = new Gson().fromJson(getter.getResponseText(), Map.class);
@@ -97,7 +97,7 @@ public class AnalysePDBIT {
     static void loadCaches() throws URISyntaxException {
         String url = "http://localhost:" + proxyPort + "/asbestos/engine/selftest/default__default/Test_Patients/run";
 
-        HttpGet getter = new HttpGet();
+        HttpGetter getter = new HttpGetter();
         getter.get(url);
         assertEquals(200, getter.getStatus());
     }

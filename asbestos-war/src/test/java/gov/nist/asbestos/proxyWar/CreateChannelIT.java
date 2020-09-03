@@ -3,7 +3,7 @@ package gov.nist.asbestos.proxyWar;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import gov.nist.asbestos.http.operations.HttpDelete;
-import gov.nist.asbestos.http.operations.HttpGet;
+import gov.nist.asbestos.http.operations.HttpGetter;
 import gov.nist.asbestos.http.operations.HttpPost;
 import gov.nist.asbestos.sharedObjects.ChannelConfig;
 import gov.nist.asbestos.sharedObjects.ChannelConfigFactory;
@@ -15,7 +15,6 @@ import java.lang.reflect.Type;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 
@@ -49,7 +48,7 @@ class CreateChannelIT {
             fail("200 or 201 required - returned " + status);
 
         // verify
-        HttpGet getter = new HttpGet();
+        HttpGetter getter = new HttpGetter();
         getter.getJson(new URI("http://localhost:" + proxyPort + "/asbestos/channel/default__test"));
         status = getter.getStatus();
         if (!(status == 200))
@@ -77,7 +76,7 @@ class CreateChannelIT {
         //assertEquals(200, deleter.getStatus(), deleter.getResponseHeaders().toString());
 
         // verify
-        HttpGet getter = new HttpGet();
+        HttpGetter getter = new HttpGetter();
         getter.getJson(new URI("http://localhost:"+ proxyPort + "/asbestos/channel/default__test"));
         assertEquals(404, getter.getStatus());
 
@@ -113,7 +112,7 @@ class CreateChannelIT {
 
         HttpDelete deleter;
         HttpPost poster;
-        HttpGet getter;
+        HttpGetter getter;
         int status;
 
         deleter = new HttpDelete();
@@ -139,7 +138,7 @@ class CreateChannelIT {
         poster.postJson(new URI("http://localhost:"+ proxyPort + "/asbestos/channel"), channelConfig1);
         assertEquals(200, poster.getStatus());
 
-        getter = new HttpGet();
+        getter = new HttpGetter();
         getter.get("http://localhost:"+ proxyPort + "/asbestos/channel");
         assertEquals(200, getter.getStatus());
         String response = getter.getResponseText();

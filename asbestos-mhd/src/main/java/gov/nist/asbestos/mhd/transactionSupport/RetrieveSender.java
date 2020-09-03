@@ -99,12 +99,13 @@ public class RetrieveSender {
                     // 2 - content type
                     content = parts.get(1);
                     contentType = parts.get(2);
-
+                } else if (parts.size() == 2) {
+                    contentType = parts.get(1);
                 }
 
 //                ByteArrayInputStream is = new ByteArrayInputStream(responseText.getBytes());
 //                RetrieveDocumentSetResponseType response = new RetrieveResponseBuilder().fromInputStream(is);
-                return new RetrieveContent(contentType, content.getBytes());
+                return new RetrieveContent(contentType, content == null ? "".getBytes() : content.getBytes());
 //                AdhocQueryResponseBuilder builder = new AdhocQueryResponseBuilder();
 //                AdhocQueryResponse response = builder.fromInputStream(is);
 //                RegErrorList errorList = AdhocQueryResponseBuilder.asErrorList(response);

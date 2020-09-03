@@ -156,8 +156,8 @@ public class AnalysisReport {
         FhirClient fhirClient = new FhirClient().setSupportRequest(true)
                 .sendGzip(gzip)
                 .requestGzip(gzip);
-        ResourceWrapper wrapper = fhirClient.writeResource(resource,
-                new Ref(validationServer + "/" + resourceType + "/$validate?profile=http://hl7.org/fhir/StructureDefinition/" + resourceType),
+        Ref valRef = new Ref(validationServer + "/" + resourceType + "/$validate?profile=http://hl7.org/fhir/StructureDefinition/" + resourceType);
+        ResourceWrapper wrapper = fhirClient.writeResource(resource, valRef,
                 Format.JSON,
                 new Headers().withContentType(Format.JSON.getContentType()));
         if (wrapper.getResponseResource() == null) {

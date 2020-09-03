@@ -4,7 +4,7 @@ import gov.nist.asbestos.client.client.FhirClient;
 import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import gov.nist.asbestos.client.resolver.SearchParms;
-import gov.nist.asbestos.http.operations.HttpGet;
+import gov.nist.asbestos.http.operations.HttpGetter;
 import gov.nist.asbestos.http.operations.HttpPost;
 import gov.nist.asbestos.simapi.validation.ValE;
 import gov.nist.asbestos.testEngine.engine.fixture.FixtureComponent;
@@ -141,7 +141,7 @@ class SetupActionRead extends GenericSetupAction {
             String location = null;
             if (fixture.getHttpBase() instanceof HttpPost) {
                 location = ((HttpPost) fixture.getHttpBase()).getLocationHeader().getValue();
-            } else if (fixture.getHttpBase() instanceof HttpGet) {
+            } else if (fixture.getHttpBase() instanceof HttpGetter) {
                 location = fixture.getHttpBase().getUri().toString();
             }
             if (location == null) {

@@ -5,23 +5,19 @@ import gov.nist.asbestos.http.util.Gzip;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.net.*;
-import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-public class HttpGet extends HttpBase {
+public class HttpGetter extends HttpBase {
     // TODO GET parameters in the body
-    void get(URI theUri, Map<String, String> headers) {
+    private void get(URI theUri, Map<String, String> headers) {
         this.uri = theUri;
         URL url;
         try {
             url = theUri.toURL();
-//            String x = URLDecoder.decode(theUri.toString(), "UTF-8");
-//            this.uri = new URI(x);
         } catch (Exception e) {
             throw new RuntimeException("Cannot decode URI " + theUri);
         }
@@ -70,7 +66,7 @@ public class HttpGet extends HttpBase {
     }
 
     public void get(String url) throws URISyntaxException {
-        get(new URI(url), (Map<String, String>) null);
+        get(new CustomUriBuilder(url).build(), (Map<String, String>) null);
     }
 
     public void get() {
@@ -84,7 +80,7 @@ public class HttpGet extends HttpBase {
         }
     }
 
-    public HttpGet get(URI uri, String contentType)  {
+    public HttpGetter get(URI uri, String contentType)  {
         Map<String, String> headers = new HashMap<>();
         headers.put("accept", contentType);
         headers.put("accept-charset", "utf-8");
@@ -92,22 +88,22 @@ public class HttpGet extends HttpBase {
         return this;
     }
 
-    public HttpGet getJson(String url) throws URISyntaxException {
+    public HttpGetter getJson(String url) throws URISyntaxException {
         Map<String, String> headers = new HashMap<>();
         headers.put("accept", "application/json");
         headers.put("accept-charset", "utf-8");
-        get(new URI(url), headers);
+        get(new CustomUriBuilder(url).build(), headers);
         if (getResponse() != null)
             setResponseText(new String(getResponse()));
         return this;
     }
 
-    public HttpGet getJson(URI uri)  {
+    public HttpGetter getJson(URI uri)  {
         get(uri, "application/json");
         return this;
     }
 
-    public HttpGet run()  {
+    public HttpGetter run()  {
         Objects.requireNonNull(uri);
         get(uri, getRequestHeaders().getAll());
         return this;

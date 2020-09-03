@@ -2,7 +2,7 @@ package gov.nist.asbestos.asbestosProxy.servlet;
 
 import gov.nist.asbestos.client.Base.EC;
 import gov.nist.asbestos.client.log.SimStore;
-import gov.nist.asbestos.http.operations.HttpGet;
+import gov.nist.asbestos.http.operations.HttpGetter;
 import gov.nist.asbestos.serviceproperties.ServiceProperties;
 import gov.nist.asbestos.serviceproperties.ServicePropertiesEnum;
 import gov.nist.asbestos.sharedObjects.ChannelConfig;
@@ -75,7 +75,7 @@ public class TestInstallerServlet  extends HttpServlet {
 
     private void verifyCodesXml() throws URISyntaxException, IOException {
         String url = ServiceProperties.getInstance().getProperty(ServicePropertiesEnum.XDS_TOOLKIT_BASE.toString()) + "/sim/codes/default";
-        HttpGet getter = new HttpGet();
+        HttpGetter getter = new HttpGetter();
         getter.get(new URI(url), "text/xml");
         String xdsCodes = getter.getResponseText();
 

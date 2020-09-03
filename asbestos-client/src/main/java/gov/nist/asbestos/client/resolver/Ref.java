@@ -2,6 +2,7 @@ package gov.nist.asbestos.client.resolver;
 
 import com.google.common.base.Strings;
 import gov.nist.asbestos.client.Base.EC;
+import gov.nist.asbestos.http.operations.CustomUriBuilder;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.log4j.Logger;
 import org.hl7.fhir.r4.model.DomainResource;
@@ -128,7 +129,7 @@ public class Ref {
         String theQuery = queryFromParameters(parmMap);
         String newUri = uriWithoutParams + theQuery;
         try {
-            this.uri = new URI(newUri);
+            this.uri = new CustomUriBuilder(newUri).build();
         } catch (URISyntaxException e) {
             throw new RuntimeException("Cannot URI parse " + newUri);
         }
@@ -220,7 +221,7 @@ public class Ref {
         String s = theUri.toString();
         try {
             if (s.startsWith("https"))
-                theUri = new URI(s.replace("https", "http"));
+                theUri = new CustomUriBuilder(s.replace("https", "http")).build();
         } catch (Exception e) {
             throw new Error(e);
         }
@@ -228,7 +229,7 @@ public class Ref {
     }
 
     public Ref httpizeTo(URI reference) {
-        try {
+//        try {
             String port;
             if (reference.getPort() == -1) {
                 if (this.uri.getPort() == -1) {
@@ -244,15 +245,27 @@ public class Ref {
                 query = "?" + query;
             if (query == null)
                 query = "";
-            return new Ref(new URI((reference.getScheme() == null ? "http" : reference.getScheme())
-                    + "://"
-                    + ((reference.getHost() == null) ? this.uri.getHost() : reference.getHost())
-                    + port
-                    + uri.getPath()
-                    + query));
-        } catch (URISyntaxException e) {
-            throw new Error(e);
-        }
+            return new Ref(
+
+                    new CustomUriBuilder()
+                    .setScheme(reference.getScheme() == null ? "http" : reference.getScheme())
+                    .setAuthority(((reference.getHost() == null) ? this.uri.getHost() : reference.getHost())
+                            + port)
+                    .setPath(uri.getPath())
+                    .setQuery(query)
+                    .build()
+
+//                    new URI((reference.getScheme() == null ? "http" : reference.getScheme())
+//                    + "://"
+//                    + ((reference.getHost() == null) ? this.uri.getHost() : reference.getHost())
+//                    + port
+//                    + uri.getPath()
+//                    + query)
+
+            );
+//        } catch (URISyntaxException e) {
+//            throw new Error(e);
+//        }
     }
 
     public Ref withHostPort(String hostPort) {
@@ -263,16 +276,27 @@ public class Ref {
         if (hp.length == 2) {
             String host = hp[0];
             String port = hp[1];
-            try {
-                return new Ref(new URI(scheme
-                        + "://"
-                        + host
-                        + ":"
-                        + port
-                        + uri.getPath()));
-            } catch (URISyntaxException e) {
-                throw new Error(e);
-            }
+//            try {
+
+                return new Ref(new CustomUriBuilder()
+                        .setAuthority(host + ":" + port)
+                        .setPath(uri.getPath())
+                        .setScheme(uri.getScheme())
+                        .setQuery(uri.getQuery())
+                        .setFragment(uri.getFragment())
+                        .build()
+                );
+
+
+//                return new Ref(new URI(scheme
+//                        + "://"
+//                        + host
+//                        + ":"
+//                        + port
+//                        + uri.getPath()));
+//            } catch (URISyntaxException e) {
+//                throw new Error(e);
+//            }
         }
         return this;  // oops
     }
@@ -506,15 +530,16 @@ public class Ref {
             ref = ref.substring(0, anchori);
         }
         try {
-            URI uri = new URI(ref);
+            URI uri = new CustomUriBuilder(ref).build();
             return httpize(uri);
-        } catch (URISyntaxException e) {
-            try {
-                URI uri = new URI(URLEncoder.encode(ref, "UTF-8"));
-                return httpize(uri);
-            } catch (Exception e1) {
-                throw new Error(e1);
-            }
+//        }
+//        catch (URISyntaxException e) {
+//            try {
+//                URI uri = new URI(URLEncoder.encode(ref, "UTF-8"));
+//                return httpize(uri);
+//            } catch (Exception e1) {
+//                throw new Error(e1);
+//            }
         } catch (Exception e) {
             throw new Error(e);
         }

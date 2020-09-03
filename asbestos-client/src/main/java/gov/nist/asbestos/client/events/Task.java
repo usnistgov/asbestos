@@ -4,7 +4,7 @@ package gov.nist.asbestos.client.events;
 import gov.nist.asbestos.http.headers.Headers;
 import gov.nist.asbestos.http.operations.HttpBase;
 import gov.nist.asbestos.http.operations.HttpDelete;
-import gov.nist.asbestos.http.operations.HttpGet;
+import gov.nist.asbestos.http.operations.HttpGetter;
 import gov.nist.asbestos.http.operations.HttpPost;
 import gov.nist.asbestos.http.util.Gzip;
 
@@ -38,7 +38,7 @@ public class Task implements ITask {
         HttpBase base = null;
         String verb = getVerb();
         if ("GET".equalsIgnoreCase(verb))
-            base = new HttpGet();
+            base = new HttpGetter();
         else if ("POST".equalsIgnoreCase(verb))
             base = new HttpPost();
         else if ("DELETE".equalsIgnoreCase(verb))

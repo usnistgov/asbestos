@@ -18,7 +18,7 @@ import gov.nist.asbestos.http.headers.Header;
 import gov.nist.asbestos.http.headers.Headers;
 import gov.nist.asbestos.http.operations.HttpBase;
 import gov.nist.asbestos.http.operations.HttpDelete;
-import gov.nist.asbestos.http.operations.HttpGet;
+import gov.nist.asbestos.http.operations.HttpGetter;
 import gov.nist.asbestos.http.operations.HttpPost;
 import gov.nist.asbestos.http.operations.Verb;
 import gov.nist.asbestos.http.support.Common;
@@ -392,8 +392,8 @@ public class ProxyServlet extends HttpServlet {
             // transform input request for backend service
             HttpBase requestOut;
             channel.setTask(backSideTask);
-            if (requestIn instanceof HttpGet)
-                requestOut = transformRequest(backSideTask, (HttpGet) requestIn, outURI, channel);
+            if (requestIn instanceof HttpGetter)
+                requestOut = transformRequest(backSideTask, (HttpGetter) requestIn, outURI, channel);
             else if (requestIn instanceof HttpPost)
                 requestOut = transformRequest(backSideTask, (HttpPost) requestIn, outURI, channel);
             else
@@ -502,7 +502,7 @@ public class ProxyServlet extends HttpServlet {
     }
 
     private void respond(HttpServletResponse resp, byte[] content, Headers inHeaders, ITask clientTask, int status) {
-        HttpBase responseOut = new HttpGet();
+        HttpBase responseOut = new HttpGetter();
         Format format = Format.resultContentType(inHeaders);
         responseOut.getResponseHeaders().add(new Header("Content-Type", format.getContentType()));
         responseOut.setResponse(content);
@@ -555,7 +555,7 @@ public class ProxyServlet extends HttpServlet {
     }
 
     static HttpBase logClientRequestIn(ITask task, Headers headers, byte[] body, Verb verb) {
-        HttpBase base = (verb == Verb.GET) ? new HttpGet() : (verb == Verb.DELETE ? new HttpDelete() : new HttpPost());
+        HttpBase base = (verb == Verb.GET) ? new HttpGetter() : (verb == Verb.DELETE ? new HttpDelete() : new HttpPost());
         task.putRequestHeader(headers);
         base.setRequestHeaders(headers);
 
@@ -720,8 +720,8 @@ public class ProxyServlet extends HttpServlet {
         return requestOut;
     }
 
-    static HttpBase transformRequest(ITask task, HttpGet requestIn, URI newURI, IBaseChannel channelTransform) {
-        HttpGet requestOut = new HttpGet();
+    static HttpBase transformRequest(ITask task, HttpGetter requestIn, URI newURI, IBaseChannel channelTransform) {
+        HttpGetter requestOut = new HttpGetter();
 
         channelTransform.transformRequest(requestIn, requestOut);
 
@@ -752,7 +752,7 @@ public class ProxyServlet extends HttpServlet {
     }
 
     static HttpBase transformResponse(ITask task, HttpBase responseIn, IBaseChannel channelTransform, String proxyHostPort, String requestedType, String search) {
-        HttpBase responseOut = new HttpGet();  // here GET vs POST does not matter
+        HttpBase responseOut = new HttpGetter();  // here GET vs POST does not matter
         channelTransform.transformResponse(responseIn, responseOut, proxyHostPort, requestedType, search);
         //responseOut.setStatus(responseIn.getStatus());
         return responseOut;

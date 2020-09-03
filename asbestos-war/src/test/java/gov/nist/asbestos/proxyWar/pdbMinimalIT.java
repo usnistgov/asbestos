@@ -1,25 +1,17 @@
 package gov.nist.asbestos.proxyWar;
 
-import ca.uhn.fhir.context.FhirContext;
-import com.google.gson.Gson;
 import gov.nist.asbestos.analysis.RelatedReport;
 import gov.nist.asbestos.analysis.Report;
 import gov.nist.asbestos.client.Base.ProxyBase;
 import gov.nist.asbestos.client.client.Format;
 import gov.nist.asbestos.client.events.UIEvent;
 import gov.nist.asbestos.client.events.UITask;
-import gov.nist.asbestos.client.resolver.Ref;
-import gov.nist.asbestos.http.operations.HttpGet;
-import gov.nist.asbestos.http.operations.HttpPost;
-import gov.nist.asbestos.testEngine.engine.TestEngine;
+import gov.nist.asbestos.http.operations.HttpGetter;
 import org.hl7.fhir.r4.model.Bundle;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import java.io.IOException;
-import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -66,7 +58,7 @@ class pdbMinimalIT {
         Bundle.BundleEntryResponseComponent response = entry.getResponse();
         String binaryUrl = response.getLocation();
 
-        HttpGet getter = new HttpGet();
+        HttpGetter getter = new HttpGetter();
         getter.getJson(binaryUrl);
         assertEquals(200, getter.getStatus());
 

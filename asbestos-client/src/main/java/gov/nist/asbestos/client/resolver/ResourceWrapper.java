@@ -8,7 +8,7 @@ import gov.nist.asbestos.http.headers.Header;
 import gov.nist.asbestos.http.headers.Headers;
 import gov.nist.asbestos.http.operations.HttpBase;
 import gov.nist.asbestos.http.operations.HttpDelete;
-import gov.nist.asbestos.http.operations.HttpGet;
+import gov.nist.asbestos.http.operations.HttpGetter;
 import gov.nist.asbestos.http.operations.HttpPost;
 import gov.nist.asbestos.simapi.validation.Val;
 import gov.nist.asbestos.simapi.validation.ValE;
@@ -223,8 +223,8 @@ public class ResourceWrapper {
     public BaseResource getResource() {
         if (resource != null)
             return resource;
-        if (httpBase != null && httpBase instanceof HttpGet) {
-            HttpGet getter = (HttpGet) httpBase;
+        if (httpBase != null && httpBase instanceof HttpGetter) {
+            HttpGetter getter = (HttpGetter) httpBase;
             if (getter.getStatus() == 404)
                 return null;
             if (getter.getResponseText() != null) {
@@ -261,7 +261,7 @@ public class ResourceWrapper {
 
     public boolean isOk() {
         if (httpBase != null) {
-            if ((httpBase instanceof HttpGet) || (httpBase instanceof HttpDelete)) {
+            if ((httpBase instanceof HttpGetter) || (httpBase instanceof HttpDelete)) {
                 if (ref != null && httpBase != null && httpBase.getResponse() != null) {
                     String resourceType = ref.getResourceType();
                     if (!resourceType.equals("")) {
@@ -334,8 +334,8 @@ public class ResourceWrapper {
     public boolean hasResource() {
         if (resource != null)
             return true;
-        if (httpBase != null && httpBase instanceof HttpGet) {
-            HttpGet getter = (HttpGet) httpBase;
+        if (httpBase != null && httpBase instanceof HttpGetter) {
+            HttpGetter getter = (HttpGetter) httpBase;
             if (getter.getResponse() != null)
                 return true;
         }

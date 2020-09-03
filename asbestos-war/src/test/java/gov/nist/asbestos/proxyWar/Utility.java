@@ -7,7 +7,7 @@ import gov.nist.asbestos.client.Base.ProxyBase;
 import gov.nist.asbestos.client.client.FhirClient;
 import gov.nist.asbestos.client.client.Format;
 import gov.nist.asbestos.client.events.UIEvent;
-import gov.nist.asbestos.http.operations.HttpGet;
+import gov.nist.asbestos.http.operations.HttpGetter;
 import gov.nist.asbestos.http.operations.HttpPost;
 import gov.nist.asbestos.sharedObjects.ChannelConfig;
 import gov.nist.asbestos.sharedObjects.ChannelConfigFactory;
@@ -15,9 +15,7 @@ import gov.nist.asbestos.simapi.validation.Val;
 import gov.nist.asbestos.testEngine.engine.ModularEngine;
 import gov.nist.asbestos.testEngine.engine.TestEngine;
 import org.hl7.fhir.r4.model.BaseResource;
-import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.TestReport;
-import org.junit.jupiter.api.BeforeAll;
 
 import java.io.File;
 import java.io.IOException;
@@ -46,7 +44,7 @@ public class Utility {
     static void loadCaches() throws URISyntaxException {
         String url = "http://localhost:" + proxyPort + "/asbestos/engine/selftest/default__default/Test_Patients/run";
 
-        HttpGet getter = new HttpGet();
+        HttpGetter getter = new HttpGetter();
         getter.get(url);
         assertEquals(200, getter.getStatus());
     }
@@ -123,7 +121,7 @@ public class Utility {
                 + "/null"
                 + "/" + eventId;
 
-        HttpGet getter = new HttpGet();
+        HttpGetter getter = new HttpGetter();
         getter.getJson(url);
         assertEquals(200, getter.getStatus());
 
@@ -138,7 +136,7 @@ public class Utility {
                 + "/" + eventId
                 + "/" + request_or_response;
 
-        HttpGet getter = new HttpGet();
+        HttpGetter getter = new HttpGetter();
         getter.get(url);
         assertEquals(200, getter.getStatus());
         return new Gson().fromJson(getter.getResponseText(), Report.class);

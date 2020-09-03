@@ -6,14 +6,13 @@ import gov.nist.asbestos.client.client.Format;
 import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.http.headers.Header;
 import gov.nist.asbestos.http.operations.HttpDelete;
-import gov.nist.asbestos.http.util.Gzip;
 import gov.nist.asbestos.serviceproperties.ServiceProperties;
 import gov.nist.asbestos.serviceproperties.ServicePropertiesEnum;
 import gov.nist.asbestos.sharedObjects.ChannelConfig;
 import gov.nist.asbestos.client.events.Event;
 import gov.nist.asbestos.http.headers.Headers;
 import gov.nist.asbestos.http.operations.HttpBase;
-import gov.nist.asbestos.http.operations.HttpGet;
+import gov.nist.asbestos.http.operations.HttpGetter;
 import gov.nist.asbestos.http.operations.HttpPost;
 import org.hl7.fhir.r4.model.BaseResource;
 import org.hl7.fhir.r4.model.Bundle;
@@ -61,7 +60,7 @@ public class PassthroughChannel extends BaseChannel /*implements IBaseChannel*/ 
     }
 
     @Override
-    public void transformRequest(HttpGet requestIn, HttpGet requestOut) {
+    public void transformRequest(HttpGetter requestIn, HttpGetter requestOut) {
         passHeaders(requestIn, requestOut);
 
         requestOut.setRequest(requestIn.getRequest());

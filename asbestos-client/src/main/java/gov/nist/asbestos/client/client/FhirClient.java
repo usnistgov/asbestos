@@ -1,7 +1,6 @@
 package gov.nist.asbestos.client.client;
 
 import com.google.common.base.Strings;
-import gov.nist.asbestos.client.Base.EC;
 import gov.nist.asbestos.client.Base.ProxyBase;
 import gov.nist.asbestos.client.events.ProxyEvent;
 import gov.nist.asbestos.client.events.UIEvent;
@@ -10,12 +9,11 @@ import gov.nist.asbestos.http.headers.Header;
 import gov.nist.asbestos.http.headers.Headers;
 import gov.nist.asbestos.http.operations.HttpBase;
 import gov.nist.asbestos.http.operations.HttpDelete;
-import gov.nist.asbestos.http.operations.HttpGet;
+import gov.nist.asbestos.http.operations.HttpGetter;
 import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.client.resolver.ResourceCacheMgr;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import gov.nist.asbestos.http.operations.HttpPost;
-import gov.nist.asbestos.simapi.tk.installation.Installation;
 import org.apache.log4j.Logger;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.BaseResource;
@@ -143,7 +141,7 @@ public class FhirClient {
 
 
     public ResourceWrapper readResource(Ref ref, Format format) {
-        HttpGet getter = new HttpGet();
+        HttpGetter getter = new HttpGetter();
         if (requestGzip)
             getter.acceptGzip();
         httpBase = getter;
@@ -178,7 +176,7 @@ public class FhirClient {
         return Format.NONE;
     }
 
-    private ResourceWrapper gobbleGetResponse(HttpGet getter, ResourceWrapper wrapper, Format format) {
+    private ResourceWrapper gobbleGetResponse(HttpGetter getter, ResourceWrapper wrapper, Format format) {
         if (getter.getUri() == null)
             log.info("oops");
         if (getter.getStatus() != 200) {
@@ -245,7 +243,7 @@ public class FhirClient {
             if (item != null)
                 return item.getWrapper();
         }
-        HttpGet getter = new HttpGet();
+        HttpGetter getter = new HttpGetter();
         if (requestGzip)
             getter.acceptGzip();
         ResourceWrapper wrapper = new ResourceWrapper();

@@ -4,7 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import gov.nist.asbestos.http.operations.HttpDelete;
-import gov.nist.asbestos.http.operations.HttpGet;
+import gov.nist.asbestos.http.operations.HttpGetter;
 import gov.nist.asbestos.http.operations.HttpPost;
 import gov.nist.asbestos.sharedObjects.ChannelConfig;
 import gov.nist.asbestos.sharedObjects.ChannelConfigFactory;
@@ -35,7 +35,7 @@ class PassthroughIT {
    // @Test
     void deleteChannelsTest() throws URISyntaxException, IOException {
         deleteChannels();
-        assertEquals(404, new HttpGet().getJson(new URI("http://localhost:" + fhirPort + "/asbestos/channel/default__fhirpass")).getStatus());
+        assertEquals(404, new HttpGetter().getJson(new URI("http://localhost:" + fhirPort + "/asbestos/channel/default__fhirpass")).getStatus());
     }
 
     private void deleteChannels() {

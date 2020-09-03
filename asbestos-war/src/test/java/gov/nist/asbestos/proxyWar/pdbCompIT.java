@@ -1,14 +1,11 @@
 package gov.nist.asbestos.proxyWar;
 
 import com.google.gson.Gson;
-import gov.nist.asbestos.client.resolver.Ref;
-import gov.nist.asbestos.http.operations.HttpGet;
+import gov.nist.asbestos.http.operations.HttpGetter;
 import gov.nist.asbestos.http.operations.HttpPost;
-import gov.nist.asbestos.testEngine.engine.TestEngine;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Map;
@@ -36,7 +33,7 @@ class pdbCompIT {
     static void loadCaches() throws URISyntaxException {
         String url = "http://localhost:" + proxyPort + "/asbestos/engine/selftest/default__default/Test_Patients/run";
 
-        HttpGet getter = new HttpGet();
+        HttpGetter getter = new HttpGetter();
         getter.get(url);
         assertEquals(200, getter.getStatus());
     }

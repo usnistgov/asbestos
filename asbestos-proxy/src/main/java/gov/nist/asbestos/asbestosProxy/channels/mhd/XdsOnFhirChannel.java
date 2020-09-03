@@ -83,7 +83,7 @@ public class XdsOnFhirChannel extends BaseChannel /*implements IBaseChannel*/ {
         bundleToRegistryObjectList.setTask(task);
 
         try {
-            HttpGet requestIn = new HttpGet();
+            HttpGetter requestIn = new HttpGetter();
             // only resource type is important
             requestIn.setRequestHeaders(new Headers().setPathInfo(new URI("DocumentReference/1")));
             bundleToRegistryObjectList.setSqEndpoint(transformRequestUrl(null, requestIn));
@@ -233,7 +233,7 @@ public class XdsOnFhirChannel extends BaseChannel /*implements IBaseChannel*/ {
     // TODO - expand support for search
     // TODO - add RetrieveDocument
     @Override
-    public void transformRequest(HttpGet requestIn, HttpGet requestOut) {
+    public void transformRequest(HttpGetter requestIn, HttpGetter requestOut) {
         Ref ref = new Ref(requestIn.getRequestHeaders().getPathInfo());
         String resourceType = ref.getResourceType();
         if (resourceType == null)
@@ -305,7 +305,7 @@ public class XdsOnFhirChannel extends BaseChannel /*implements IBaseChannel*/ {
         return i;
     }
 
-    private void returnAhqrResults(HttpGet requestOut) {
+    private void returnAhqrResults(HttpGetter requestOut) {
         requestOut.setRequestHeaders(sender.getRequestHeaders());
         requestOut.setRequestText(sender.getRequestBody());
     }
@@ -344,7 +344,7 @@ public class XdsOnFhirChannel extends BaseChannel /*implements IBaseChannel*/ {
                 fhir = fhir.withResource(resourceType);
                 return fhir.getUri();
             }
-        } else if (requestIn instanceof  HttpGet) {
+        } else if (requestIn instanceof HttpGetter) {
             String actorType;
             String transType;
 

@@ -3,7 +3,7 @@ package gov.nist.asbestos.proxyWar;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import gov.nist.asbestos.http.operations.HttpDelete;
-import gov.nist.asbestos.http.operations.HttpGet;
+import gov.nist.asbestos.http.operations.HttpGetter;
 import gov.nist.asbestos.http.operations.HttpPost;
 import gov.nist.asbestos.sharedObjects.ChannelConfig;
 import gov.nist.asbestos.sharedObjects.ChannelConfigFactory;
@@ -63,7 +63,7 @@ public class CapabilityStatementIT {
         //assertEquals(200, deleter.getStatus(), deleter.getResponseHeaders().toString());
 
         // verify
-        HttpGet getter = new HttpGet();
+        HttpGetter getter = new HttpGetter();
         getter.getJson(new URI("http://localhost:"+ proxyPort + "/asbestos/channel/default__" + channelId));
         assertEquals(404, getter.getStatus());
 
@@ -112,7 +112,7 @@ public class CapabilityStatementIT {
 
     @Test
     void getCapabilityStatementWithoutLoggingEvent() throws Exception {
-        HttpGet getter = new HttpGet();
+        HttpGetter getter = new HttpGetter();
         getter.getJson(new URI("http://localhost:"+ proxyPort + "/asbestos/proxy/default__" + channelIdWithoutCsLog + "/metadata"));
         assertEquals(200, getter.getStatus());
         assert getter.getResponseHeaders().getHeaderValue("x-proxy-event") == null;
@@ -120,7 +120,7 @@ public class CapabilityStatementIT {
 
     @Test
     void getCapabilityStatementWithLoggingEvent() throws Exception {
-        HttpGet getter = new HttpGet();
+        HttpGetter getter = new HttpGetter();
         getter.getJson(new URI("http://localhost:"+ proxyPort + "/asbestos/proxy/default__" + channelIdWithCsLog + "/metadata"));
         assertEquals(200, getter.getStatus());
         String xProxyEvent = getter.getResponseHeaders().getHeaderValue("x-proxy-event");
