@@ -15,7 +15,7 @@ import org.hl7.fhir.r4.model.TestScript;
 
 import java.util.*;
 
-class ActionReporter {
+class ActionReporter implements TestDef {
     private static Logger log = Logger.getLogger(ActionReporter.class);
 
     private String testCollectionId = null;
@@ -190,8 +190,7 @@ class ActionReporter {
                 + testEngine.getTestEnginePath() + "\n"
                 + "\n"
                 + (imAParent ? "" : request
-                + " (  " + (requestLabels == null ? "--" : requestLabels.getReference()) + " ) => "
-                + (responseLabels == null ? "--" : responseLabels.getReference())
+                + callGraph(requestLabels, responseLabels)
         )
                 + "\n"
                 + errorDisplay(reporter.getOpReport())
@@ -210,6 +209,12 @@ class ActionReporter {
             reporter.setModuleActionContext(markdown, wrapper);
         else
             reporter.setActionContext(markdown, wrapper);
+    }
+
+    String callGraph(FixtureLabels requestLabels, FixtureLabels responseLabels) {
+        return "";
+//        return " (  " + (requestLabels == null ? "--" : requestLabels.getReference()) + " ) => "
+//                + (responseLabels == null ? "--" : responseLabels.getReference());
     }
 
     private String testNotation() {
@@ -407,5 +412,25 @@ class ActionReporter {
 
     public FixtureComponent getAssertionSource() {
         return assertionSource;
+    }
+
+    @Override
+    public String getTestId() {
+        return testId;
+    }
+
+    @Override
+    public String getTestCollectionId() {
+        return testCollectionId;
+    }
+
+    @Override
+    public String getTestSessionId() {
+        return testEngine.getTestSession();
+    }
+
+    @Override
+    public String getChannelId() {
+        return testEngine.getChannelId();
     }
 }

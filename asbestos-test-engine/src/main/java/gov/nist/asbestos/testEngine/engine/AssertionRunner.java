@@ -160,16 +160,6 @@ public class AssertionRunner {
 
         // add context to report
         testEngine.reportAssertion(new Reporter(val, assertReport, "", ""), as, source);
-//        new ActionReporter()
-//                .setTestCollectionId(testCollectionId)
-//                .setTestId(testId)
-//                .setTestEngine(testEngine)
-//                .reportAssertion(
-//                        fixtureMgr,
-//                        variableMgr,
-//                        new Reporter(val, assertReport, "", ""),
-//                        source
-//                );
 
         label = as.getLabel();
         type = typePrefix + ".assert";
@@ -252,11 +242,11 @@ public class AssertionRunner {
         }
 
         String uiLink = EventLinkToUILink.get(sourceFixture.getCreatedByUIEvent(), "resp");
-        FixtureLabels fixtureLabels = new FixtureLabels(new ActionReporter());
+        FixtureLabels fixtureLabels = new FixtureLabels(testEngine);
         fixtureLabels.rawReference = uiLink;
         fixtureLabels.referenceLabel = sourceFixture.getId() == null ? "Open in Inspector" : sourceFixture.getId();
 
-        reportAssertion(assertReport, expression, fixtureLabels);
+        reportAssertion(assertReport, expression, fixtureLabels, sourceFixture);
         if ("true".equals(found))
             return Reporter.reportPass(val, assertReport, type, label, expression);
 
@@ -327,40 +317,47 @@ public class AssertionRunner {
 
     }
 
-    private void reportAssertion(TestReport.SetupActionAssertComponent assertReport, String desc, String expected, String found) {
+    private void reportAssertion(TestReport.SetupActionAssertComponent assertReport, String desc, String expected, String found, FixtureComponent fixture, FixtureLabels fixtureLabels) {
         Reporter.assertDescription(assertReport, "**" + desc + "**: " +
-                "**Expected** " + expected + " , **Found** " + found);
+                "**Expected** " + expected + " , **Found** " + found +
+                        " (**Source** " + fixtureLabels.getReference() + ")",
+                fixture);
     }
 
-    private void reportAssertion(TestReport.SetupActionAssertComponent assertReport, String desc, String expected, String operator, String found) {
+    private void reportAssertion(TestReport.SetupActionAssertComponent assertReport, String desc, String expected, String operator, String found, FixtureComponent fixture, FixtureLabels fixtureLabels) {
+        Objects.requireNonNull(fixtureLabels);
+        fixtureLabels.referenceLabel = "Response";
         Reporter.assertDescription(assertReport, "**" + desc + "**: " +
-                "**Expected** " + expected + " , **Operator** " + operator + " **Found** " + found);
+                "**Expected** " + expected + " , **Operator** " + operator + " **Found** " + found +
+                        " (**Source** " + fixtureLabels.getReference() + ")",
+                fixture);
     }
 
-    private void reportAssertion(TestReport.SetupActionAssertComponent assertReport, String desc, String value, String expected, String operator, String found) {
+    private void reportAssertion(TestReport.SetupActionAssertComponent assertReport, String desc, String value, String expected, String operator, String found, FixtureComponent fixture, FixtureLabels fixtureLabels) {
         Reporter.assertDescription(assertReport, "**" + desc + "**: " + value +
-                " **Expected** " + expected + " , **Operator** is " + operator + " **Found** " + found);
+                " **Expected** " + expected + " , **Operator** is " + operator + " **Found** " + found, fixture);
     }
 
-    private void reportAssertion(TestReport.SetupActionAssertComponent assertReport, String descHdr, String raw, String expanded, boolean result) {
+    private void reportAssertion(TestReport.SetupActionAssertComponent assertReport, String descHdr, String raw, String expanded, boolean result, FixtureComponent fixture, FixtureLabels fixtureLabels) {
         Reporter.assertDescription(assertReport,
                 (descHdr == null ? "" : "**" + descHdr + "**:" )+
                         "\n**Raw expression** " + raw + "\n**Expanded Expression** " + expanded +
-                "\n**Result** " + result);
+                "\n**Result** " + result, fixture);
     }
 
-    private void reportAssertion(TestReport.SetupActionAssertComponent assertReport, String expression, FixtureLabels fixtureLabels) {
-        Reporter.assertDescription(assertReport, "**Eval** " + expression + " **against** " + fixtureLabels.getReference());
+    private void reportAssertion(TestReport.SetupActionAssertComponent assertReport, String expression, FixtureLabels fixtureLabels, FixtureComponent fixture) {
+        Reporter.assertDescription(assertReport, "**Eval** " + expression + " **against** " + fixtureLabels.getReference(), fixture);
     }
 
     private boolean instResource(TestScript.SetupActionAssertComponent as, TestReport.SetupActionAssertComponent assertReport, boolean warningOnly) {
         FixtureComponent sourceFixture = getSource(as, assertReport);
         if (sourceFixture == null) return false;
+        FixtureLabels fixtureLabels = new FixtureLabels(testEngine, sourceFixture, FixtureLabels.Source.SOURCE);
         if (sourceFixture.getResponseType() == null) {
             Reporter.reportError(val, assertReport, type, label, "sourceId or lastOperation references no resource.");
             return false;
         }
-        reportAssertion(assertReport, "Resource type", as.getResource(), sourceFixture.getResponseType());
+        reportAssertion(assertReport, "Resource type", as.getResource(), sourceFixture.getResponseType(), sourceFixture, fixtureLabels);
         if (!as.getResource().equals(sourceFixture.getResponseType()))
             return Reporter.reportFail(val, assertReport, type, label, "expected " + as.getResource() + " found " + sourceFixture.getResponseType(), warningOnly);
         return Reporter.reportPass(val, assertReport, type, label, "resource type comparison (" + sourceFixture.getResponseType() + ")" );
@@ -370,7 +367,8 @@ public class AssertionRunner {
     private boolean instContentType(TestScript.SetupActionAssertComponent as, TestReport.SetupActionAssertComponent assertReport, boolean warningOnly) {
         FixtureComponent sourceFixture = getSource(as, assertReport);
         if (sourceFixture == null) return false;
-        reportAssertion(assertReport, "Content type", as.getContentType(), sourceFixture.getResponseType());
+        FixtureLabels fixtureLabels = new FixtureLabels(testEngine, sourceFixture, FixtureLabels.Source.SOURCE);
+        reportAssertion(assertReport, "Content type", as.getContentType(), sourceFixture.getResponseType(), sourceFixture, fixtureLabels);
         if (!as.getContentType().equalsIgnoreCase(sourceFixture.getResponseType()))
             return Reporter.reportFail(val, assertReport, type, label, "expecting " + as.getContentType() + " found " + sourceFixture.getResponseType(), warningOnly);
         return Reporter.reportPass(val, assertReport, type, label, as.getContentType() + " = " + sourceFixture.getResponseType());
@@ -379,10 +377,11 @@ public class AssertionRunner {
     private boolean instHeaderFieldValue(TestScript.SetupActionAssertComponent as, TestReport.SetupActionAssertComponent assertReport,boolean warningOnly) {
         FixtureComponent sourceFixture = getSource(as, assertReport);
         if (sourceFixture == null) return false;
+        FixtureLabels fixtureLabels = new FixtureLabels(testEngine, sourceFixture, FixtureLabels.Source.SOURCE);
         String sourceHeaderFieldValue = sourceFixture.getHttpBase().getResponseHeaders().getValue(as.getHeaderField());
         if (sourceHeaderFieldValue == null)
             sourceHeaderFieldValue = "";
-        reportAssertion(assertReport, "Header field " + as.getHeaderField(), as.getValue(), sourceHeaderFieldValue);
+        reportAssertion(assertReport, "Header field " + as.getHeaderField(), as.getValue(), sourceHeaderFieldValue, sourceFixture, fixtureLabels);
         if (!sourceHeaderFieldValue.equalsIgnoreCase(as.getValue()))
             return Reporter.reportFail(val, assertReport, type, label, sourceHeaderFieldValue + " != " + as.hasValue(), warningOnly);
         return Reporter.reportPass(val, assertReport, type, label, sourceHeaderFieldValue + " = " + as.getValue());
@@ -391,12 +390,13 @@ public class AssertionRunner {
     private boolean instResponse(TestScript.SetupActionAssertComponent as, TestReport.SetupActionAssertComponent assertReport, boolean warningOnly) {
         FixtureComponent sourceFixture = getSource(as, assertReport);
         if (sourceFixture == null) return false;
+        FixtureLabels fixtureLabels = new FixtureLabels(testEngine, sourceFixture, FixtureLabels.Source.SOURCE);
         int codeFound = sourceFixture.getResourceWrapper().getHttpBase().getStatus();
         String found = responseCodeAsString(codeFound);
         String expected = as.getResponse().toCode();
         String operator = as.hasOperator() ? as.getOperator().toCode() : "equals";
 
-        reportAssertion(assertReport, "Response:", expected, operator, found);
+        reportAssertion(assertReport, "Response:", expected, operator, found, sourceFixture, fixtureLabels);
         if (!compare(val, assertReport, found, expected, operator, warningOnly, type, label))
             return false;
         return Reporter.reportPass(val, assertReport, type, label, found + " " + operator + " " + expected);
@@ -405,12 +405,13 @@ public class AssertionRunner {
     private boolean instResponseCode(TestScript.SetupActionAssertComponent as, TestReport.SetupActionAssertComponent assertReport, boolean warningOnly) {
         FixtureComponent sourceFixture = getSource(as, assertReport);
         if (sourceFixture == null) return false;
+        FixtureLabels fixtureLabels = new FixtureLabels(testEngine, sourceFixture, FixtureLabels.Source.SOURCE);
         int codeFound = sourceFixture.getResourceWrapper().getHttpBase().getStatus();
         String found = String.valueOf(codeFound);
         String expected = as.getResponseCode();
         String operator = as.hasOperator() ? as.getOperator().toCode() : "equals";
 
-        reportAssertion(assertReport, "Response: ", expected, operator, found);
+        reportAssertion(assertReport, "Response: ", expected, operator, found, sourceFixture, fixtureLabels);
         if (!compare(val, assertReport, found, expected, operator, warningOnly, type, label))
             return false;
         return Reporter.reportPass(val, assertReport, type, label, found + " " + operator + " " + expected);
@@ -419,6 +420,7 @@ public class AssertionRunner {
     private boolean instExpressionValue(TestScript.SetupActionAssertComponent as,  TestReport.SetupActionAssertComponent assertReport, boolean warningOnly) {
         FixtureComponent sourceFixture = getSource(as, assertReport);
         if (sourceFixture == null) return false;
+        FixtureLabels fixtureLabels = new FixtureLabels(testEngine, sourceFixture, FixtureLabels.Source.SOURCE);
         BaseResource sourceResource = sourceFixture.getResourceResource();
         if (sourceResource == null) {
             Reporter.reportError(val, assertReport, type, label,"Fixture referenced <" + sourceFixture.getId()  + "> has no resource");
@@ -457,7 +459,7 @@ public class AssertionRunner {
         String operator = as.hasOperator() ? as.getOperator().toCode() : "equals";
 
         reportAssertion(assertReport, "Eval expression" , expression,
-                expected, operator, found);
+                expected, operator, found, sourceFixture, fixtureLabels);
         if (!compare(val, assertReport, found, expected, operator, warningOnly, type, label))
             return false;
         return Reporter.reportPass(val, assertReport, type, label, expression);
@@ -466,6 +468,7 @@ public class AssertionRunner {
     private boolean instExpression(TestScript.SetupActionAssertComponent as,  TestReport.SetupActionAssertComponent assertReport, boolean warningOnly) {
         FixtureComponent sourceFixture = getSource(as, assertReport);
         if (sourceFixture == null) return false;
+        FixtureLabels fixtureLabels = new FixtureLabels(testEngine, sourceFixture, FixtureLabels.Source.SOURCE);
         BaseResource sourceResource = sourceFixture.getResourceResource();
         if (sourceResource == null) {
             Reporter.reportError(val, assertReport, type, label,"Fixture referenced <" + sourceFixture.getId()  + "> has no resource.");
@@ -483,7 +486,7 @@ public class AssertionRunner {
 
         reportAssertion(assertReport, null,
                 rawExpression,  expression,
-                ok);
+                ok, sourceFixture, fixtureLabels);
         if (ok)
             return Reporter.reportPass(val, assertReport, type, label, expression);
         return Reporter.reportFail(val, assertReport, type, label, "expression " + as.getExpression()  +  " failed.", warningOnly);
@@ -493,9 +496,10 @@ public class AssertionRunner {
         FixtureComponent sourceFixture = getSource(as, assertReport);
         String requestedMethod = as.getRequestMethod().toCode();
         if (sourceFixture == null) return false;
+        FixtureLabels fixtureLabels = new FixtureLabels(testEngine, sourceFixture, FixtureLabels.Source.SOURCE);
         String method = sourceFixture.getResourceWrapper().getHttpBase().getVerb();
 
-        reportAssertion(assertReport, "Request Method", requestedMethod, method);
+        reportAssertion(assertReport, "Request Method", requestedMethod, method, sourceFixture, fixtureLabels);
         if (requestedMethod.equalsIgnoreCase(method)) {
             Reporter.reportPass(val, assertReport, type, label, "Method " + requestedMethod + " found");
             return true;

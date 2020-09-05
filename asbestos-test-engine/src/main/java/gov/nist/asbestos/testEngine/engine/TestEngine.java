@@ -36,7 +36,7 @@ import java.util.regex.Pattern;
 /**
  * See http://hl7.org/fhir/testing.html
  */
-public class TestEngine  {
+public class TestEngine  implements TestDef {
     private static Logger log = Logger.getLogger(TestEngine.class);
 
     private File testDef = null; // directory holding test definition
@@ -1778,6 +1778,16 @@ public class TestEngine  {
 
     public String getTestId() {
         return testId;
+    }
+
+    @Override
+    public String getTestCollectionId() {
+        return testCollection;
+    }
+
+    @Override
+    public String getTestSessionId() {
+        return testSession;
     }
 
     public TestEngine setCallFixtureMap(Map<String, String> callFixtureMap) {

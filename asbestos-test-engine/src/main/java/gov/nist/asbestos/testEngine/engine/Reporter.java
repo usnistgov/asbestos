@@ -2,13 +2,14 @@ package gov.nist.asbestos.testEngine.engine;
 
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import gov.nist.asbestos.simapi.validation.ValE;
+import gov.nist.asbestos.testEngine.engine.fixture.FixtureComponent;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.TestReport;
 
 import java.util.Objects;
 
-class Reporter {
+public class Reporter {
 
     private static class Report {
         private TestReport.SetupActionOperationComponent opReport = null;
@@ -172,7 +173,7 @@ class Reporter {
         return true;
     }
 
-    static void assertDescription(TestReport.SetupActionAssertComponent assertReport, String description) {
+    static void assertDescription(TestReport.SetupActionAssertComponent assertReport, String description, FixtureComponent fixture) {
         assertReport.addExtension("urn:resultDescription", new StringType(description));
     }
 

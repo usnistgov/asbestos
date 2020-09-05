@@ -30,13 +30,16 @@ public class EventLinkToUILink {
     }
 
     static public String get(String testSession, String channel, String eventId, String tail) {
+        if (tail != null && tail.startsWith("/"))
+            tail = tail.substring(1);
         String base = ServiceProperties.getInstance().getPropertyOrStop(ServicePropertiesEnum.FHIR_TOOLKIT_UI_HOME_PAGE);
         return base + "/" +
                 "session/" +
                 testSession + "/channel/" +
                 channel + "/lognav/" +
-                eventId + "/" +
-                tail;
+                eventId
+                + (tail.equals("") ? "" : "/")
+                + tail;
 
     }
 
