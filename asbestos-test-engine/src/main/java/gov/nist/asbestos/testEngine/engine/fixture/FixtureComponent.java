@@ -48,7 +48,7 @@ public class FixtureComponent {
         setResource(new ResourceWrapper(baseResource));
     }
 
-    FixtureComponent() {
+    public FixtureComponent() {
         //setResource(resourceWrapper);
     }
 
@@ -207,6 +207,9 @@ public class FixtureComponent {
                     getTestId());
             resource.setRef(ref);
         }
+        if (resource.getEvent() == null && resource.hasRef() && resource.getRef().isEvent()) {
+            createdByUIEvent = new UIEvent(Ref.getEC()).fromResource(resourceWrapper);
+        }
         return this;
     }
 
@@ -291,10 +294,6 @@ public class FixtureComponent {
 
     public FixtureComponent setCreatedByUIEvent(UIEvent createdByUIEvent) {
         this.createdByUIEvent = createdByUIEvent;
-
-//        if (resourceWrapper != null && !resourceWrapper.hasRef()) {
-//            createdByUIEvent.
-//        }
         return this;
     }
 }

@@ -14,6 +14,7 @@ import java.util.*;
 
 public class Ref {
     private static Logger log = Logger.getLogger(Ref.class);
+    private static EC externalCache;
 
     private URI uri;
     private String anchor = null;
@@ -82,6 +83,16 @@ public class Ref {
     public Ref(Reference reference) {
         Objects.requireNonNull(reference);
         uri = build(reference.getReference());
+    }
+
+    public boolean isEvent() {
+        String[] parts = uri.toString().split("/");
+        for (String part : parts) {
+            if (part.equals("log")) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public Ref copy() {
@@ -515,7 +526,6 @@ public class Ref {
         String refUri = ref.uri.toString();
         String theUri = uri.toString();
         return Objects.equals(refUri, theUri);
-//        return Objects.equals(uri, ref.uri);
     }
 
     @Override
@@ -532,14 +542,6 @@ public class Ref {
         try {
             URI uri = new CustomUriBuilder(ref).build();
             return httpize(uri);
-//        }
-//        catch (URISyntaxException e) {
-//            try {
-//                URI uri = new URI(URLEncoder.encode(ref, "UTF-8"));
-//                return httpize(uri);
-//            } catch (Exception e1) {
-//                throw new Error(e1);
-//            }
         } catch (Exception e) {
             throw new Error(e);
         }
@@ -570,6 +572,16 @@ public class Ref {
         Collections.sort(rawResourceNames);
         resourceNames = rawResourceNames;
     }
+
+    static public void setEC(EC ec) {
+        externalCache = ec;
+    }
+
+    // general reference to the EC
+    static public EC getEC() {
+        return externalCache;
+    }
+
     static private List<String> rawResourceNames = Arrays.asList(
             "CapabilityStatement",
             "StructureDefinition",

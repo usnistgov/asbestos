@@ -70,18 +70,19 @@ class SetupActionCreate extends GenericSetupAction {
 
     }
 
-    void run(TestScript.SetupActionOperationComponent op, TestReport.SetupActionOperationComponent operationReport) {
+    ResourceWrapper run(TestScript.SetupActionOperationComponent op, TestReport.SetupActionOperationComponent operationReport) {
         if (!preExecute(op, operationReport))
-            return;
+            return null;
 
         if (resourceToSend == null) {
             reporter.reportError("sourceId " + op.getSourceId() + " does not have a response resource to send");
-            return;
+            return null;
         }
 
         ResourceWrapper wrapper = getFhirClient().writeResource(resourceToSend, targetUrl, format, requestHeader);
 
         postExecute(wrapper, operationReport, isFollowedByAssert);
+        return wrapper;
     }
 
 

@@ -9,6 +9,7 @@ import gov.nist.asbestos.http.operations.HttpBase;
 import gov.nist.asbestos.serviceproperties.ServiceProperties;
 import gov.nist.asbestos.serviceproperties.ServicePropertiesEnum;
 import gov.nist.asbestos.testEngine.engine.fixture.FixtureComponent;
+import org.checkerframework.checker.guieffect.qual.UI;
 import org.hl7.fhir.r4.model.TestScript;
 
 import java.util.Objects;
@@ -18,7 +19,7 @@ public class FixtureLabels {
     boolean sourceId = false;
     boolean responseId = false;
     String rawReference;
-    String referenceLabel;
+    public String referenceLabel;
     String label = null;
     String tail = "";
 
@@ -35,7 +36,15 @@ public class FixtureLabels {
         testDef = actionReporter;
     }
 
-    FixtureLabels(TestDef testDef, FixtureComponent assertionSource, Source source) {
+    public FixtureLabels referenceWrapper(ResourceWrapper wrapper) {
+        HttpBase httpBase = wrapper.getHttpBase();
+        if (httpBase != null) {
+            operationReport(this, httpBase);
+        }
+        return this;
+    }
+
+    public FixtureLabels(TestDef testDef, FixtureComponent assertionSource, Source source) {
         this.testDef = testDef;
         if (source == Source.SOURCE) {
             sourceId = true;
@@ -51,13 +60,14 @@ public class FixtureLabels {
         String refStrRaw = null;
 
         if (httpBase != null) {  // fixtureComponent created by operation
-            refStrRaw = operationReport(this, httpBase, refStrRaw);
+            refStrRaw = operationReport(this, httpBase);
         } else if (wrapper1 != null) {   // static fixtureComponent
             refStrRaw = staticFixtureReport(this, assertionSource, wrapper1, refStrRaw);
         }
     }
 
-    private String operationReport(FixtureLabels labels, HttpBase httpBase, String refStrRaw) {
+    private String operationReport(FixtureLabels labels, HttpBase httpBase) {
+        String refStrRaw = null;
         Headers responseHeaders = httpBase.getResponseHeaders();
         String eventUrl = responseHeaders.getProxyEvent();
         if (eventUrl != null) {
@@ -126,6 +136,8 @@ public class FixtureLabels {
     }
 
     private void assignAttributes(String key) {
+        if (key == null)
+            key ="";
         if (sourceId)
             tail = "/req";
         else if (responseId)
@@ -144,7 +156,7 @@ public class FixtureLabels {
         }
     }
 
-    String getReference() {
+    public String getReference() {
         String label = referenceLabel;
         if (Strings.isNullOrEmpty(label))
             label = rawReference;
@@ -154,4 +166,16 @@ public class FixtureLabels {
                 "</a>";
     }
 
+    public FixtureLabels setRawReference(String rawReference) {
+        this.rawReference = rawReference;
+        return this;
+    }
+
+    public void setReference(FixtureComponent fixtureComponent) {
+        UIEvent event = fixtureComponent.getCreatedByUIEvent();
+        if (event == null) return;
+        String uiLink = EventLinkToUILink.get(event, "");
+        setRawReference(uiLink);
+        referenceLabel = fixtureComponent.getId() == null ? "Open in Inspector" : fixtureComponent.getId();
+    }
 }

@@ -57,7 +57,6 @@ import java.util.stream.IntStream;
 public class ProxyServlet extends HttpServlet {
     private static Logger log = Logger.getLogger(ProxyServlet.class);
     private static File externalCache = null;
-
     private Map<String, IChannelBuilder> proxyMap = new HashMap<>();
 
     public ProxyServlet() {
@@ -74,6 +73,7 @@ public class ProxyServlet extends HttpServlet {
         if (externalCache == null) {
             String ec = (String) config.getServletContext().getAttribute("ExternalCache");
             externalCache = new File(ec);
+            Ref.setEC(new EC(externalCache));
         }
 
     }

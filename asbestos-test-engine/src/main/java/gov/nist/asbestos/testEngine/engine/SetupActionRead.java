@@ -7,6 +7,7 @@ import gov.nist.asbestos.client.resolver.SearchParms;
 import gov.nist.asbestos.http.operations.HttpGetter;
 import gov.nist.asbestos.http.operations.HttpPost;
 import gov.nist.asbestos.simapi.validation.ValE;
+import gov.nist.asbestos.testEngine.engine.assertion.ResponseCodeAssertion;
 import gov.nist.asbestos.testEngine.engine.fixture.FixtureComponent;
 import gov.nist.asbestos.testEngine.engine.fixture.FixtureMgr;
 import org.hl7.fhir.r4.model.TestReport;
@@ -22,13 +23,14 @@ class SetupActionRead extends GenericSetupAction {
         this.fixtureMgr = fixtureMgr;
     }
 
-    void run(TestScript.SetupActionOperationComponent op, TestReport.SetupActionOperationComponent opReport) {
+    ResourceWrapper run(TestScript.SetupActionOperationComponent op, TestReport.SetupActionOperationComponent opReport) {
 
         if (!preExecute(op, opReport))
-            return;
+            return null;
 
         ResourceWrapper wrapper = fhirClient.readResource(targetUrl, requestHeader);
         postExecute(wrapper, opReport, isFollowedByAssert);
+        return wrapper;
     }
 
     // key difference between read and search

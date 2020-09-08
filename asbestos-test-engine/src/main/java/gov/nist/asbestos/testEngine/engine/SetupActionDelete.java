@@ -54,7 +54,7 @@ class SetupActionDelete extends GenericSetupAction {
         }
     }
 
-    void run(TestScript.SetupActionOperationComponent op, TestReport.SetupActionOperationComponent operationReport) {
+    ResourceWrapper run(TestScript.SetupActionOperationComponent op, TestReport.SetupActionOperationComponent operationReport) {
         Objects.requireNonNull(val);
         Objects.requireNonNull(operationReport);
         Objects.requireNonNull(variableMgr);
@@ -65,11 +65,11 @@ class SetupActionDelete extends GenericSetupAction {
 
         if (op.hasTargetId() && op.hasUrl()) {
             reporter.reportError("both targetId and url specified");
-            return;
+            return null;
         }
         if (!op.hasTargetId() && !op.hasUrl()) {
             reporter.reportError("targetId or url must be specified");
-            return;
+            return null;
         }
 
         Ref targetUrl = sut == null ? null : new Ref(sut);
@@ -77,7 +77,7 @@ class SetupActionDelete extends GenericSetupAction {
             FixtureComponent targetFixture = fixtureMgr.get(op.getTargetId());
             if (targetFixture == null) {
                 reporter.reportError("targetId " + op.getTargetId() + "does not exist");
-                return;
+                return null;
             }
             if (targetFixture.hasHttpBase()) {
                 HttpBase base = targetFixture.getHttpBase();
@@ -85,7 +85,7 @@ class SetupActionDelete extends GenericSetupAction {
                 targetUrl = new Ref(uri);
             } else {
                 reporter.reportError("targetId " + op.getTargetId() + "has not been run");
-                return;
+                return null;
             }
         }
         if (op.hasUrl()) {
@@ -93,7 +93,7 @@ class SetupActionDelete extends GenericSetupAction {
         }
         if (targetUrl == null) {
             reporter.reportError("target URL not available");
-            return;
+            return null;
         }
 
         Map<String, String> requestHeader = new HashMap<>();
@@ -107,11 +107,7 @@ class SetupActionDelete extends GenericSetupAction {
         else {
             reporter.reportFail(wrapper.getRef() + " not deleted", wrapper);
         }
-//        String fixtureId = op.hasResponseId() ? op.getResponseId() : FixtureComponent.getNewId();
-//        fixtureComponent =  new FixtureComponent(fixtureId)
-//                .setResource(servlet)
-//                .setHttpBase(servlet.getHttpBase());
-//        fixtureMgr.put(fixtureId, fixtureComponent);
+        return wrapper;
     }
 
     @Override

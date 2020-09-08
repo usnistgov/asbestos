@@ -2,6 +2,7 @@ package gov.nist.asbestos.testEngine.engine;
 
 import gov.nist.asbestos.client.client.FhirClient;
 import gov.nist.asbestos.client.client.Format;
+import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import gov.nist.asbestos.simapi.validation.ValE;
 import gov.nist.asbestos.testEngine.engine.fixture.FixtureComponent;
 import gov.nist.asbestos.testEngine.engine.fixture.FixtureMgr;
@@ -117,7 +118,12 @@ public class OperationRunner {
                     .setTestCollectionId(testCollectionId)
                     .setTestId(testId)
                     .setTestEngine(testEngine);
-            setupActionRead.run(op, operationReport);
+            ResourceWrapper responseWrapper = setupActionRead.run(op, operationReport);
+            if (responseWrapper != null) {
+                FixtureLabels labels = new FixtureLabels(new ActionReporter(), op, null)
+                        .referenceWrapper(responseWrapper);
+                Reporter.operationDescription(operationReport, "**Request/Response** " + labels.getReference());
+            }
         } else if ("search".equals(code)) {
             SetupActionSearch setupActionSearch = new SetupActionSearch(actionReference, fixtureMgr, isFollowedByAssert)
                     .setVal(val)
@@ -135,7 +141,12 @@ public class OperationRunner {
             setupActionSearch.setTestEngine(testEngine);
             setupActionSearch.setTestCollectionId(testCollectionId);
             setupActionSearch.setTestId(testId);
-            setupActionSearch.run(op, operationReport);
+            ResourceWrapper responseWrapper = setupActionSearch.run(op, operationReport);
+            if (responseWrapper != null) {
+                FixtureLabels labels = new FixtureLabels(new ActionReporter(), op, null)
+                        .referenceWrapper(responseWrapper);
+                Reporter.operationDescription(operationReport, "**Request/Response** " + labels.getReference());
+            }
         } else if ("create".equals(code)) {
             SetupActionCreate setupActionCreate =
                     new SetupActionCreate(actionReference, fixtureMgr, isFollowedByAssert)
@@ -152,7 +163,12 @@ public class OperationRunner {
             setupActionCreate
                     .setTestCollectionId(testCollectionId)
                     .setTestId(testId);
-            setupActionCreate.run(op, operationReport);
+            ResourceWrapper responseWrapper = setupActionCreate.run(op, operationReport);
+            if (responseWrapper != null) {
+                FixtureLabels labels = new FixtureLabels(new ActionReporter(), op, null)
+                        .referenceWrapper(responseWrapper);
+                Reporter.operationDescription(operationReport, "**Request/Response** " + labels.getReference());
+            }
         } else if ("delete".equals(code)) {
             SetupActionDelete setupActionDelete =
                     new SetupActionDelete(actionReference, fixtureMgr, isFollowedByAssert)
@@ -167,7 +183,12 @@ public class OperationRunner {
                             .setExternalVariables(externalVariables)
                             .setVal(val)
                             .setOpReport(operationReport));
-            setupActionDelete.run(op, operationReport);
+            ResourceWrapper responseWrapper = setupActionDelete.run(op, operationReport);
+            if (responseWrapper != null) {
+                FixtureLabels labels = new FixtureLabels(new ActionReporter(), op, null)
+                        .referenceWrapper(responseWrapper);
+                Reporter.operationDescription(operationReport, "**Request/Response** " + labels.getReference());
+            }
         } else if ("transaction".equals(code)) {
             SetupActionTransaction setupActionTransaction =
                     new SetupActionTransaction(actionReference, fixtureMgr,isFollowedByAssert)
@@ -182,7 +203,12 @@ public class OperationRunner {
                             .setExternalVariables(externalVariables)
                             .setVal(val)
                             .setOpReport(operationReport));
-            setupActionTransaction.run(op, operationReport);
+            ResourceWrapper responseWrapper = setupActionTransaction.run(op, operationReport);
+            if (responseWrapper != null) {
+                FixtureLabels labels = new FixtureLabels(new ActionReporter(), op, null)
+                        .referenceWrapper(responseWrapper);
+                Reporter.operationDescription(operationReport, "**Request/Response** " + labels.getReference());
+            }
         } else if ("mhd-pdb-transaction".equals(code)) {
             SetupActionMhdPdbTransaction setupActionTransaction =
                     new SetupActionMhdPdbTransaction(actionReference, fixtureMgr, isFollowedByAssert);
@@ -200,7 +226,12 @@ public class OperationRunner {
                             .setExternalVariables(externalVariables)
                             .setVal(val)
                             .setOpReport(operationReport));
-            setupActionTransaction.run(op, operationReport);
+            ResourceWrapper responseWrapper = setupActionTransaction.run(op, operationReport);
+            if (responseWrapper != null) {
+                FixtureLabels labels = new FixtureLabels(new ActionReporter(), op, null)
+                        .referenceWrapper(responseWrapper);
+                Reporter.operationDescription(operationReport, "**Request/Response** " + labels.getReference());
+            }
         } else if ("save-to-cache".equals(code)) {
             SaveToCache saveToCache = new SaveToCache(actionReference, fixtureMgr, isFollowedByAssert);
             saveToCache

@@ -100,7 +100,7 @@ public class VariableMgr {
         return count;
     }
 
-    String updateReference(String reference) {
+    public String updateReference(String reference) {
         if (reference == null)
             return null;
         int variableCount = variableCount(reference);

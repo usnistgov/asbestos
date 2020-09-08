@@ -68,12 +68,13 @@
           moduleScriptHeader() {
             //  if (this.moduleScript && this.moduleScript.modifierExtension)
                 return this.moduleScript.modifierExtension[0];
-          //  return null;
           },
             filteredReport() {
               let clone = JSON.parse(JSON.stringify(this.report));
               if (clone.operation)
                 clone.operation.extension = undefined;
+              if (clone.assert)
+                clone.assert.extension = undefined;
               return clone;
             }
         },

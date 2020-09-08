@@ -21,13 +21,14 @@ public class SetupActionTransaction extends GenericSetupAction {
         this.fixtureMgr = fixtureMgr;
     }
 
-    void run(TestScript.SetupActionOperationComponent op, TestReport.SetupActionOperationComponent operationReport) {
+    ResourceWrapper run(TestScript.SetupActionOperationComponent op, TestReport.SetupActionOperationComponent operationReport) {
         if (!preExecute(op, operationReport))
-            return;
+            return null;
 
         ResourceWrapper wrapper = getFhirClient().writeResource(resourceToSend, targetUrl, fhirClient.getFormat(), requestHeader);
 
         postExecute(wrapper, operationReport, isFollowedByAssert);
+        return wrapper;
     }
 
     @Override

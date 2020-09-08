@@ -81,41 +81,7 @@
             <vue-markdown>{{resultDescription}}</vue-markdown>
           </div>
 
-<!--            <div v-if="message && message.indexOf('#') === -1">-->
-<!--                <ul>-->
-<!--                    <div v-for="(line, linei) in translateNL(message)" :key="'msgDisp' + linei">-->
-<!--                        <li>-->
-<!--                        <span v-if="isError">-->
-<!--                            <img src="../../assets/yellow-error.png">-->
-<!--                        </span>-->
-<!--                            {{ line }}-->
-<!--                        </li>-->
-<!--                    </div>-->
-<!--                </ul>-->
-<!--            </div>-->
-
             <div class="indent">
-            <!--  Inspect-->
-<!--            <div v-if="script.operation">-->
-
-<!--                <span v-if="eventDisplayed && eventId">-->
-<!--                    <img src="../../assets/arrow-down.png" @click.stop="toggleEventDisplayed()">-->
-<!--                </span>-->
-<!--                <span v-else>-->
-<!--                    <span v-if="eventId">-->
-<!--                        <img src="../../assets/arrow-right.png" @click.stop="toggleEventDisplayed()">-->
-<!--                    </span>-->
-<!--                </span>-->
-<!--                <span v-if="eventId" class="selectable" @click.stop="toggleEventDisplayed()">Inspect</span>-->
-<!--                <span v-if="eventDisplayed && eventId">-->
-<!--                    <inspect-event-->
-<!--                        :sessionId="$store.state.base.session"-->
-<!--                        :channelId="$store.state.base.channelId"-->
-<!--                        :eventId="eventId"-->
-<!--                        :noNav="true">-->
-<!--                    </inspect-event>-->
-<!--                </span>-->
-<!--            </div>-->
 
             <!-- Test Script/Report -->
             <div>
@@ -125,7 +91,7 @@
                 <span v-else>
                     <img src="../../assets/arrow-right.png" @click.stop="toggleScriptDisplayed()">
                 </span>
-                <span class="selectable" @click.stop="toggleScriptDisplayed()">Test Script/Report</span>
+                <span class="selectable" @click.stop="toggleScriptDisplayed()">Script/Report Details</span>
                 <span v-if="displayScript" class="indent2">
                     <hr />
                     <vue-markdown v-if="actionContext">{{actionContext}}</vue-markdown>
@@ -134,7 +100,7 @@
                         :script="script"
                         :report="report"
                         :calling-script="callingScript"
-                    :module-script="moduleScript">
+                        :module-script="moduleScript">
                     </script-display>
                     <hr />
                 </span>
@@ -146,7 +112,7 @@
 
 <script>
     // import InspectEvent from "../logViewer/InspectEvent"
-    // import ScriptDisplay from "./ScriptDisplay"
+    import ScriptDisplay from "./ScriptDisplay"
     import VueMarkdown from 'vue-markdown'
     import colorizeTestReports from "../../mixins/colorizeTestReports";
     import TestStatus from "./TestStatus";
@@ -156,7 +122,7 @@
             return {
                 // message: null,
                 displayMessage: false,
-                displayScript: true,
+                displayScript: false,
                 displayDetails: false,
                 status: [],   // testName => undefined, 'pass', 'fail', 'error'
                 eventLogUrl: null,
@@ -294,16 +260,26 @@
           resultDescription() {
               if (!this.report)
                 return null;
-              if (!this.report.assert)
+              if (this.report.assert) {
+                if (!this.report.assert.extension)
+                  return null;
+                let desc = null;
+                this.report.assert.extension.forEach(ele => {
+                  if (ele.url === "urn:resultDescription")
+                    desc = ele.valueString;
+                })
+                return desc;
+              } else if (this.report.operation) {
+                if (!this.report.operation.extension)
+                  return null;
+                let desc = null;
+                this.report.operation.extension.forEach(ele => {
+                  if (ele.url === "urn:resultDescription")
+                    desc = ele.valueString;
+                })
+                return desc;
+              } else
                 return null;
-              if (!this.report.assert.extension)
-                return null;
-              let desc = null;
-              this.report.assert.extension.forEach(ele => {
-                if (ele.url === "urn:resultDescription")
-                  desc = ele.valueString;
-              })
-              return desc;
           },
         },
         created() {
@@ -324,7 +300,7 @@
             'script', 'report', 'callingScript', 'moduleScript'
         ],
         components: {
-            // ScriptDisplay,
+            ScriptDisplay,
             // InspectEvent,
             VueMarkdown,
             TestStatus,

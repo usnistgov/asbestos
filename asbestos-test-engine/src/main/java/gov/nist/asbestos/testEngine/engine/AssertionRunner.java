@@ -1,9 +1,8 @@
 package gov.nist.asbestos.testEngine.engine;
 
-import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import gov.nist.asbestos.simapi.validation.ValE;
-import gov.nist.asbestos.testEngine.engine.assertion.MinimumId;
+import gov.nist.asbestos.testEngine.engine.assertion.*;
 import gov.nist.asbestos.testEngine.engine.fixture.FixtureComponent;
 import gov.nist.asbestos.testEngine.engine.fixture.FixtureMgr;
 import gov.nist.asbestos.testEngine.engine.fixture.UnregisteredFixtureComponent;
@@ -13,15 +12,13 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
-public class AssertionRunner {
+public class AssertionRunner implements AssertionContext {
     private String label;
     private String type;
     private String typePrefix;
     private ValE val;
     private TestScript testScript = null;
-    private FixtureMgr fixtureMgr;
-    //private TestReport.SetupActionAssertComponent assertReport;
-    //private TestReport testReport = null;
+    private final FixtureMgr fixtureMgr;
     private VariableMgr variableMgr = null;
     private boolean isRequest = false;  // is assertion being run on request message?
     private String testCollectionId = null;
@@ -38,23 +35,29 @@ public class AssertionRunner {
         return this;
     }
 
+    public boolean isRequest() {
+        return isRequest;
+    }
+
     AssertionRunner setVariableMgr(VariableMgr variableMgr) {
         this.variableMgr = variableMgr;
         return this;
     }
 
     private UnregisteredFixtureComponent sourceOverride = null;
-    private FixtureComponent getSource(TestScript.SetupActionAssertComponent as,  TestReport.SetupActionAssertComponent assertReport) {
-        FixtureComponent sourceFixture = getSourceIfAvailable(as);
+
+    public FixtureComponent getSource() {
+        FixtureComponent sourceFixture = getSourceIfAvailable();
         if (sourceFixture == null)
-            Reporter.reportError(val, assertReport, type, label, "no source available for comparison.");
+            Reporter.reportError(this, "no source available for comparison.");
         return sourceFixture;
     }
 
-    private FixtureComponent getSourceIfAvailable(TestScript.SetupActionAssertComponent as) {
+    private FixtureComponent getSourceIfAvailable() {
+        Objects.requireNonNull(currentAssert);
         if (sourceOverride != null)
             return sourceOverride;
-        FixtureComponent sourceFixture = as.hasSourceId() ? fixtureMgr.get(as.getSourceId()) : fixtureMgr.get(fixtureMgr.getLastOp());
+        FixtureComponent sourceFixture = currentAssert.hasSourceId() ? fixtureMgr.get(currentAssert.getSourceId()) : fixtureMgr.get(fixtureMgr.getLastOp());
         return sourceFixture;
     }
 
@@ -71,9 +74,9 @@ public class AssertionRunner {
 
         boolean reported = false;
 
-        FixtureComponent source = getSourceIfAvailable(as);
-//        if (source == null)
-//            return assertReport;
+        currentAssert = as;
+
+        FixtureComponent source = getSourceIfAvailable();
 
 
         if (source != null && "Bundle".equals(source.getResponseType())) {
@@ -82,12 +85,11 @@ public class AssertionRunner {
                 if (as.hasExpression() && as.getExpression().trim().startsWith("Bundle")) {
                     BaseResource sourceResource = source.getResourceResource();
                     if (!(sourceResource instanceof Bundle)) {
-                        Reporter.reportError(val, assertReport, type, label, "expression targets a Bundle but sourceId points to a " + sourceResource.getClass().getSimpleName());
+                        Reporter.reportError(this, "expression targets a Bundle but sourceId points to a " + sourceResource.getClass().getSimpleName());
                         return;
                     }
                     Bundle bundle = (Bundle) sourceResource;
                     for (Bundle.BundleEntryComponent component : bundle.getEntry()) {
-//                        assertReport = new TestReport.SetupActionAssertComponent();
                         if (component.hasResource()) {
                             sourceOverride = new UnregisteredFixtureComponent(component.getResource());
                             reported = true;
@@ -96,32 +98,26 @@ public class AssertionRunner {
                             }
                         }
                     }
-  //                  assertReport = new TestReport.SetupActionAssertComponent();
-                    Reporter.reportError(val, assertReport, type, label, "no resource in Bundle matches assertion.");
+                    Reporter.reportError(this, "no resource in Bundle matches assertion.");
                     return;
                 } else {
                     sourceOverride = null;
-    //                assertReport = new TestReport.SetupActionAssertComponent();
-                    reported = true;
                     run2(as, assertReport);
                     return;
                 }
             } else if (as.hasModifierExtension()) {
                 Extension extension = as.getModifierExtension().isEmpty() ? null : as.getModifierExtension().get(0);
                 if (extension == null) {
-      //              assertReport = new TestReport.SetupActionAssertComponent();
-                    Reporter.reportError(val, assertReport, type, label, "Found no stringValue in modifierExtension.");
+                    Reporter.reportError(this, "Found no stringValue in modifierExtension.");
                     return;
                 }
                 String resourceType = extension.getValue().toString();
                 BaseResource sourceResource = source.getResourceResource();
-//                assertReport = null;
                 Bundle bundle = (Bundle) sourceResource;
                 int i=0;
                 for (Bundle.BundleEntryComponent component : bundle.getEntry()) {
                     Resource resource = component.getResource();
                     if (resource.getClass().getSimpleName().equals(resourceType)) {
-              //          assertReport = new TestReport.SetupActionAssertComponent();
                         ResourceWrapper savedSource = source.getResourceWrapper();  // new value (from Bundle) for FixtureComponent
                         source.setResource(new ResourceWrapper(resource));  // so it applies to the in-bundle resource
                         source.setId(resourceType + " #" + i);
@@ -130,31 +126,46 @@ public class AssertionRunner {
                         source.setResource(savedSource);  // restore FixtureComponent
                         if (!success)
                             break;
-                        //assertReport = null;
                     }
                 }
                 if (reported)
                     return;
-                Reporter.reportError(val, assertReport, type, label, "Found no " + resourceType + " resources in Bundle.");
+                Reporter.reportError(this, "Found no " + resourceType + " resources in Bundle.");
             }
         } else {
             run2(as, assertReport);
             return;
         }
 
-      //  assertReport = new TestReport.SetupActionAssertComponent();
-        if (!reported)
-            run2(as, assertReport);
+        run2(as, assertReport);
+    }
+
+    TestScript.SetupActionAssertComponent currentAssert;
+    TestReport.SetupActionAssertComponent currentAssertReport;
+
+    public TestScript.SetupActionAssertComponent getCurrentAssert() {
+        return currentAssert;
+    }
+
+    public TestReport.SetupActionAssertComponent getCurrentAssertReport() {
+        return currentAssertReport;
+    }
+
+    boolean warningOnly;
+
+    public boolean getWarningOnly() {
+        return warningOnly;
     }
 
     // success?
     boolean run2(TestScript.SetupActionAssertComponent as, TestReport.SetupActionAssertComponent assertReport) {
         Objects.requireNonNull(variableMgr);
-        //this.assertReport = assertReport;
+        currentAssert = as;
+        currentAssertReport = assertReport;
 
         assertReport.setResult(TestReport.TestReportActionResult.PASS);  // may be overwritten
 
-        FixtureComponent source = getSourceIfAvailable(as);
+        FixtureComponent source = getSourceIfAvailable();
         if (source == null)
             source = getCompareToSourceIfAvailable(as);
 
@@ -164,434 +175,127 @@ public class AssertionRunner {
         label = as.getLabel();
         type = typePrefix + ".assert";
 
-        boolean warningOnly;
         if (as.hasWarningOnly())
             warningOnly = as.getWarningOnly();
         else {
-            Reporter.reportError(val, assertReport, type, label, "warningOnly is required but missing");
+            Reporter.reportError(this, "warningOnly is required but missing");
             return false;
         }
 
         if (as.hasCompareToSourcePath() && as.hasCompareToSourceExpression()) {
-            Reporter.reportError(val, assertReport, type, label, "has both compareToSourcePath and compareToSourceExpression");
+            Reporter.reportError(this, "has both compareToSourcePath and compareToSourceExpression");
             return false;
         }
 
         if (as.hasCompareToSourceId()) {
             if (!as.hasCompareToSourceExpression() && !as.hasCompareToSourcePath()) {
-                Reporter.reportError(val, assertReport, type, label, "has compareToSourceId and nether compareToSourcePath nor compareToSourceExpression are defined");
+                Reporter.reportError(this, "has compareToSourceId and nether compareToSourcePath nor compareToSourceExpression are defined");
                 return false;
             }
         }
 
 //        INSTRUCTIONS
 
-        if (as.hasCompareToSourceId() && as.hasCompareToSourceExpression()) return instSourceIdSourceExpression(as, assertReport, warningOnly);
+        if (as.hasCompareToSourceId() && as.hasCompareToSourceExpression())
+            return SourceIdSourceExpressionAssertion.run(this);
 
-        if (as.hasMinimumId()) return instMinimumId(as, assertReport, warningOnly);
+        if (as.hasMinimumId()) return MinimumIdAssertion.run(this);
 
         // resource type pattern
         // resource type specified sourceId or lastOperation must have returned that resource type
-        if (as.hasResource()) return instResource(as, assertReport, warningOnly);
+        if (as.hasResource()) return ResourceAssertion.run(this);
 
         // contentType pattern
         // compares against sourceId or return of lastOperation
-        if (as.hasContentType()) return instContentType(as, assertReport, warningOnly);
+        if (as.hasContentType()) return ContentTypeAssertion.run(this);
 
         // headerField/value comparison pattern
         // compares against sourceId or return of lastOperation
-        if (as.hasHeaderField() && as.hasValue()) return instHeaderFieldValue(as, assertReport, warningOnly);
+        if (as.hasHeaderField() && as.hasValue()) return HeaderFieldAssertion.run(this);
 
         // response pattern
-        if (as.hasResponse()) return instResponse(as, assertReport, warningOnly);
+        if (as.hasResponse()) return ResponseAssertion.run(this);
 
         // responseCodePattern
-        if (as.hasResponseCode()) return instResponseCode(as, assertReport, warningOnly);
+        if (as.hasResponseCode()) return ResponseCodeAssertion.run(this);
 
         // expression and value pattern
-        if (as.hasExpression() && as.hasValue()) return instExpressionValue(as, assertReport, warningOnly);
+        if (as.hasExpression() && as.hasValue()) return ExpressionValueAssertion.run(this);
 
         // expression
-        if (as.hasExpression()) return instExpression(as, assertReport, warningOnly);
+        if (as.hasExpression()) return ExpressionAssertion.run(this);
 
-        if (as.hasRequestMethod()) return instRequestMethod(as, assertReport, warningOnly);
+        if (as.hasRequestMethod()) return RequestMethodAssertion.run(this);
 
-        Reporter.reportError(val, assertReport, type, label, "No assertion.");
+        Reporter.reportError(this, "No assertion.");
         return false;
     }
 
-    private boolean instSourceIdSourceExpression(TestScript.SetupActionAssertComponent as, TestReport.SetupActionAssertComponent assertReport, boolean warningOnly) {
-        FixtureComponent  sourceFixture = fixtureMgr.get(as.getCompareToSourceId());
-        if (sourceFixture == null) {
-            Reporter.reportError(val, assertReport, type, label, "compareToSourceId references " + as.getCompareToSourceId() + " which cannot be found.");
-            return false;
-        }
-
-        BaseResource sourceResource = sourceFixture.getResourceResource();
-        if (sourceResource == null) {
-            Reporter.reportError(val, assertReport, type, label,"Fixture referenced <" + sourceFixture.getId()  + "> has no resource.");
-            return false;
-        }
-        String expression = variableMgr.updateReference(as.getCompareToSourceExpression());
-        String found;
-        try {
-            found = FhirPathEngineBuilder.evalForString(sourceResource, expression);
-        } catch (Throwable e) {
-            Reporter.reportError(val, assertReport, type, label,"Error evaluating expression: " + expression + "\n" + e.getMessage());
-            return false;
-        }
-
-        String uiLink = EventLinkToUILink.get(sourceFixture.getCreatedByUIEvent(), "resp");
-        FixtureLabels fixtureLabels = new FixtureLabels(testEngine);
-        fixtureLabels.rawReference = uiLink;
-        fixtureLabels.referenceLabel = sourceFixture.getId() == null ? "Open in Inspector" : sourceFixture.getId();
-
-        reportAssertion(assertReport, expression, fixtureLabels, sourceFixture);
-        if ("true".equals(found))
-            return Reporter.reportPass(val, assertReport, type, label, expression);
-
-        return Reporter.reportFail(val, assertReport, type, label, "assertion failed - " + expression + " ==> " + found, warningOnly);
-    }
-
-    static private List<String> hide = Arrays.asList("Description", "Id", "Meta", "Text");
+    //static private List<String> hide = Arrays.asList("Description", "Id", "Meta", "Text");
 
     static public final String EVALUATING_TYPE = "Evaluating type";
     static public final String SCRIPT = "Script";
     static public final String RAW_REPORT = "Raw Report";
-//    static public final String ATTS_NOT_FOUND = "Atts Not Found";
-
-    private boolean instMinimumId(TestScript.SetupActionAssertComponent as, TestReport.SetupActionAssertComponent assertReport, boolean warningOnly) {
-        FixtureComponent sourceFixture = getSource(as, assertReport);
-        if (sourceFixture == null) return false;
-
-        FixtureComponent miniFixture  = fixtureMgr.get(as.getMinimumId());
-        if (miniFixture == null) {
-            Reporter.reportError(val, assertReport, type, label, "minimumId references fixture " + as.getMinimumId() + " which cannot be found.");
-            return false;
-        }
-
-        BaseResource miniR = miniFixture.getResourceResource();   // reference
-        BaseResource sourceR = sourceFixture.getResourceResource();  // sut
-        if (sourceR == null) {
-            Reporter.reportFail(val, assertReport, type, label, "No source", warningOnly);
-            return false;
-        }
-
-//        Class<?> miniClass = miniR.getClass();
-        Class<?> sourceClass = sourceR.getClass();
-
-        assertReport.setUserData(EVALUATING_TYPE, sourceClass.getSimpleName());   // resource type being evaluated
-        assertReport.setUserData(SCRIPT, as.getLabel());   // assert label (documentation only - nothing computed)
-
-//        if (!miniClass.equals(sourceClass)) {
-//            assertReport.setUserData("No Comparison", "minimumId: cannot compare " + miniClass.getName() + " and " + sourceClass.getName());
-//            assertReport.setResult(TestReport.TestReportActionResult.SKIP);
-//            return false;
-//        }
-
-        MinimumId.Report report = new MinimumId().run(miniR, sourceR, isRequest);
-        if (!report.errors.isEmpty()) {
-            assertReport.setUserData("No Comparison", report.errors.get(0));
-//            assertReport.setResult(TestReport.TestReportActionResult.SKIP);
-            Reporter.reportFail(val, assertReport, type, label, report.errors.get(0), warningOnly);
-            return false;
-        }
-
-        // This UserData is a properties style list for private transport between components
-        // It is used here to pass back the raw MinimumId.Report to the caller which might be AnalysisReport.java
-        assertReport.setUserData(RAW_REPORT, report);
-
-        assertReport.setDetail(
-                "[" +
-                        String.join(", ", report.expected)
-                + "]"
-        );
-        if (report.missing.isEmpty()) {
-            Reporter.reportPass(val, assertReport, type, label, "pass");
-            return true;
-        } else {
-            String atts = String.join(", ", report.missing);
-            Reporter.reportFail(val, assertReport, type, label, "attributes [" + atts + "] not found ", warningOnly);
-            return false;
-        }
-
-    }
-
-    private void reportAssertion(TestReport.SetupActionAssertComponent assertReport, String desc, String expected, String found, FixtureComponent fixture, FixtureLabels fixtureLabels) {
-        Reporter.assertDescription(assertReport, "**" + desc + "**: " +
-                "**Expected** " + expected + " , **Found** " + found +
-                        " (**Source** " + fixtureLabels.getReference() + ")",
-                fixture);
-    }
-
-    private void reportAssertion(TestReport.SetupActionAssertComponent assertReport, String desc, String expected, String operator, String found, FixtureComponent fixture, FixtureLabels fixtureLabels) {
-        Objects.requireNonNull(fixtureLabels);
-        fixtureLabels.referenceLabel = "Response";
-        Reporter.assertDescription(assertReport, "**" + desc + "**: " +
-                "**Expected** " + expected + " , **Operator** " + operator + " **Found** " + found +
-                        " (**Source** " + fixtureLabels.getReference() + ")",
-                fixture);
-    }
-
-    private void reportAssertion(TestReport.SetupActionAssertComponent assertReport, String desc, String value, String expected, String operator, String found, FixtureComponent fixture, FixtureLabels fixtureLabels) {
-        Reporter.assertDescription(assertReport, "**" + desc + "**: " + value +
-                " **Expected** " + expected + " , **Operator** is " + operator + " **Found** " + found, fixture);
-    }
-
-    private void reportAssertion(TestReport.SetupActionAssertComponent assertReport, String descHdr, String raw, String expanded, boolean result, FixtureComponent fixture, FixtureLabels fixtureLabels) {
-        Reporter.assertDescription(assertReport,
-                (descHdr == null ? "" : "**" + descHdr + "**:" )+
-                        "\n**Raw expression** " + raw + "\n**Expanded Expression** " + expanded +
-                "\n**Result** " + result, fixture);
-    }
-
-    private void reportAssertion(TestReport.SetupActionAssertComponent assertReport, String expression, FixtureLabels fixtureLabels, FixtureComponent fixture) {
-        Reporter.assertDescription(assertReport, "**Eval** " + expression + " **against** " + fixtureLabels.getReference(), fixture);
-    }
-
-    private boolean instResource(TestScript.SetupActionAssertComponent as, TestReport.SetupActionAssertComponent assertReport, boolean warningOnly) {
-        FixtureComponent sourceFixture = getSource(as, assertReport);
-        if (sourceFixture == null) return false;
-        FixtureLabels fixtureLabels = new FixtureLabels(testEngine, sourceFixture, FixtureLabels.Source.SOURCE);
-        if (sourceFixture.getResponseType() == null) {
-            Reporter.reportError(val, assertReport, type, label, "sourceId or lastOperation references no resource.");
-            return false;
-        }
-        reportAssertion(assertReport, "Resource type", as.getResource(), sourceFixture.getResponseType(), sourceFixture, fixtureLabels);
-        if (!as.getResource().equals(sourceFixture.getResponseType()))
-            return Reporter.reportFail(val, assertReport, type, label, "expected " + as.getResource() + " found " + sourceFixture.getResponseType(), warningOnly);
-        return Reporter.reportPass(val, assertReport, type, label, "resource type comparison (" + sourceFixture.getResponseType() + ")" );
-    }
-
-    // TODO: this and instResource cannot both be right, sourceFixture.getResponseType() ?
-    private boolean instContentType(TestScript.SetupActionAssertComponent as, TestReport.SetupActionAssertComponent assertReport, boolean warningOnly) {
-        FixtureComponent sourceFixture = getSource(as, assertReport);
-        if (sourceFixture == null) return false;
-        FixtureLabels fixtureLabels = new FixtureLabels(testEngine, sourceFixture, FixtureLabels.Source.SOURCE);
-        reportAssertion(assertReport, "Content type", as.getContentType(), sourceFixture.getResponseType(), sourceFixture, fixtureLabels);
-        if (!as.getContentType().equalsIgnoreCase(sourceFixture.getResponseType()))
-            return Reporter.reportFail(val, assertReport, type, label, "expecting " + as.getContentType() + " found " + sourceFixture.getResponseType(), warningOnly);
-        return Reporter.reportPass(val, assertReport, type, label, as.getContentType() + " = " + sourceFixture.getResponseType());
-    }
-
-    private boolean instHeaderFieldValue(TestScript.SetupActionAssertComponent as, TestReport.SetupActionAssertComponent assertReport,boolean warningOnly) {
-        FixtureComponent sourceFixture = getSource(as, assertReport);
-        if (sourceFixture == null) return false;
-        FixtureLabels fixtureLabels = new FixtureLabels(testEngine, sourceFixture, FixtureLabels.Source.SOURCE);
-        String sourceHeaderFieldValue = sourceFixture.getHttpBase().getResponseHeaders().getValue(as.getHeaderField());
-        if (sourceHeaderFieldValue == null)
-            sourceHeaderFieldValue = "";
-        reportAssertion(assertReport, "Header field " + as.getHeaderField(), as.getValue(), sourceHeaderFieldValue, sourceFixture, fixtureLabels);
-        if (!sourceHeaderFieldValue.equalsIgnoreCase(as.getValue()))
-            return Reporter.reportFail(val, assertReport, type, label, sourceHeaderFieldValue + " != " + as.hasValue(), warningOnly);
-        return Reporter.reportPass(val, assertReport, type, label, sourceHeaderFieldValue + " = " + as.getValue());
-    }
-
-    private boolean instResponse(TestScript.SetupActionAssertComponent as, TestReport.SetupActionAssertComponent assertReport, boolean warningOnly) {
-        FixtureComponent sourceFixture = getSource(as, assertReport);
-        if (sourceFixture == null) return false;
-        FixtureLabels fixtureLabels = new FixtureLabels(testEngine, sourceFixture, FixtureLabels.Source.SOURCE);
-        int codeFound = sourceFixture.getResourceWrapper().getHttpBase().getStatus();
-        String found = responseCodeAsString(codeFound);
-        String expected = as.getResponse().toCode();
-        String operator = as.hasOperator() ? as.getOperator().toCode() : "equals";
-
-        reportAssertion(assertReport, "Response:", expected, operator, found, sourceFixture, fixtureLabels);
-        if (!compare(val, assertReport, found, expected, operator, warningOnly, type, label))
-            return false;
-        return Reporter.reportPass(val, assertReport, type, label, found + " " + operator + " " + expected);
-    }
-
-    private boolean instResponseCode(TestScript.SetupActionAssertComponent as, TestReport.SetupActionAssertComponent assertReport, boolean warningOnly) {
-        FixtureComponent sourceFixture = getSource(as, assertReport);
-        if (sourceFixture == null) return false;
-        FixtureLabels fixtureLabels = new FixtureLabels(testEngine, sourceFixture, FixtureLabels.Source.SOURCE);
-        int codeFound = sourceFixture.getResourceWrapper().getHttpBase().getStatus();
-        String found = String.valueOf(codeFound);
-        String expected = as.getResponseCode();
-        String operator = as.hasOperator() ? as.getOperator().toCode() : "equals";
-
-        reportAssertion(assertReport, "Response: ", expected, operator, found, sourceFixture, fixtureLabels);
-        if (!compare(val, assertReport, found, expected, operator, warningOnly, type, label))
-            return false;
-        return Reporter.reportPass(val, assertReport, type, label, found + " " + operator + " " + expected);
-    }
-
-    private boolean instExpressionValue(TestScript.SetupActionAssertComponent as,  TestReport.SetupActionAssertComponent assertReport, boolean warningOnly) {
-        FixtureComponent sourceFixture = getSource(as, assertReport);
-        if (sourceFixture == null) return false;
-        FixtureLabels fixtureLabels = new FixtureLabels(testEngine, sourceFixture, FixtureLabels.Source.SOURCE);
-        BaseResource sourceResource = sourceFixture.getResourceResource();
-        if (sourceResource == null) {
-            Reporter.reportError(val, assertReport, type, label,"Fixture referenced <" + sourceFixture.getId()  + "> has no resource");
-            return false;
-        }
-        String expression = variableMgr.updateReference(as.getExpression());
-        String found;
-        try {
-            found = FhirPathEngineBuilder.evalForString(sourceResource, expression);
-        } catch (Throwable e) {
-            Reporter.reportError(val, assertReport, type, label,"Error evaluating expression: " + expression + "\n" + e.getMessage());
-            return false;
-        }
-
-        if (found != null && found.contains("/")) {
-            Ref foundRef = new Ref(found);
-            if (foundRef.getBase().toString().equals("")) {
-                String contentLocation = sourceFixture.getHttpBase().getContentLocation();
-                if (contentLocation != null && !contentLocation.equals("")) {
-                    Ref locationRef = new Ref(contentLocation);
-                    foundRef = foundRef.rebase(locationRef);
-                    found = foundRef.toString();
-                }
-            }
-        }
-
-        // remove semantic name from status for comparison
-        if (expression.endsWith("response.status")) {
-            String[] parts = found.split(" ");
-            if (parts.length > 1) {
-                found = parts[0];
-            }
-        }
-
-        String expected = variableMgr.updateReference(as.getValue());
-        String operator = as.hasOperator() ? as.getOperator().toCode() : "equals";
-
-        reportAssertion(assertReport, "Eval expression" , expression,
-                expected, operator, found, sourceFixture, fixtureLabels);
-        if (!compare(val, assertReport, found, expected, operator, warningOnly, type, label))
-            return false;
-        return Reporter.reportPass(val, assertReport, type, label, expression);
-    }
-
-    private boolean instExpression(TestScript.SetupActionAssertComponent as,  TestReport.SetupActionAssertComponent assertReport, boolean warningOnly) {
-        FixtureComponent sourceFixture = getSource(as, assertReport);
-        if (sourceFixture == null) return false;
-        FixtureLabels fixtureLabels = new FixtureLabels(testEngine, sourceFixture, FixtureLabels.Source.SOURCE);
-        BaseResource sourceResource = sourceFixture.getResourceResource();
-        if (sourceResource == null) {
-            Reporter.reportError(val, assertReport, type, label,"Fixture referenced <" + sourceFixture.getId()  + "> has no resource.");
-            return false;
-        }
-        String rawExpression = as.getExpression();
-        String expression = variableMgr.updateReference(rawExpression);
-        boolean ok;
-        try {
-            ok = FhirPathEngineBuilder.evalForBoolean(sourceResource, expression);
-        } catch (Throwable e) {
-            Reporter.reportError(val, assertReport, type, label,"Error evaluating expression: " + expression + "\n" + e.getMessage());
-            return false;
-        }
-
-        reportAssertion(assertReport, null,
-                rawExpression,  expression,
-                ok, sourceFixture, fixtureLabels);
-        if (ok)
-            return Reporter.reportPass(val, assertReport, type, label, expression);
-        return Reporter.reportFail(val, assertReport, type, label, "expression " + as.getExpression()  +  " failed.", warningOnly);
-    }
-
-    private boolean instRequestMethod(TestScript.SetupActionAssertComponent as,  TestReport.SetupActionAssertComponent assertReport, boolean warningOnly) {
-        FixtureComponent sourceFixture = getSource(as, assertReport);
-        String requestedMethod = as.getRequestMethod().toCode();
-        if (sourceFixture == null) return false;
-        FixtureLabels fixtureLabels = new FixtureLabels(testEngine, sourceFixture, FixtureLabels.Source.SOURCE);
-        String method = sourceFixture.getResourceWrapper().getHttpBase().getVerb();
-
-        reportAssertion(assertReport, "Request Method", requestedMethod, method, sourceFixture, fixtureLabels);
-        if (requestedMethod.equalsIgnoreCase(method)) {
-            Reporter.reportPass(val, assertReport, type, label, "Method " + requestedMethod + " found");
-            return true;
-        }
-        Reporter.reportFail(val, assertReport, type, label, "Expected method " + requestedMethod + " found " + method, warningOnly);
-        return false;
-    }
 
     private boolean hasNoFixtureResource(FixtureComponent fixture, TestReport.SetupActionAssertComponent assertReport, String msg) {
         if (fixture == null) {
-            Reporter.reportError(val, assertReport, type, label, msg + " - no fixture is referenced.");
+            Reporter.reportError(this, msg + " - no fixture is referenced.");
             return true;
         }
         if (!fixture.hasResource()) {
-            Reporter.reportError(val, assertReport, type, label, msg + "referenced fixture " + fixture.getId() + " has no response.");
+            Reporter.reportError(this, msg + "referenced fixture " + fixture.getId() + " has no response.");
             return true;
         }
         return false;
     }
 
-    private String responseCodeAsString(int code) {
-        switch (code) {
-            case 200: return "okay";
-            case 201: return "created";
-            case 204: return "noContent";
-            case 304: return "notModified";
-            case 400: return "bad";
-            case 403: return "forbidden";
-            case 404: return "notFound";
-            case 405: return "methodNotAllowed";
-            case 409: return "conflict";
-            case 410: return "gone";
-            case 412: return "preconditionFailed";
-            case 422: return "unprocessable";
-            case 500: return "server failure";
-            default: return "CODE_NOT_UNDERSTOOD";
-        }
-    }
-
-    private boolean compare(ValE val, TestReport.SetupActionAssertComponent assertReport, String found, String expected, String operator, boolean warningOnly, String type, String id) {
+    public static boolean compare(AssertionContext ctx, String found, String expected, String operator) {
         if (found == null)
-            return Reporter.reportFail(val, assertReport, type, operator,"Operator is " + operator + "\nexpected is " + expected + "\nfound is " + found, warningOnly);
+            return Reporter.reportFail(ctx,"Operator is " + operator + "\nexpected is " + expected + "\nfound is " + found);
         if (operator.equals("equals"))
-            return Reporter.report(found.equals(expected), val, assertReport, type, operator,"Operator is " + operator + "\nexpected is " + expected + "\nfound is " + found, warningOnly);
+            return Reporter.report(ctx, found.equals(expected),"Operator is " + operator + "\nexpected is " + expected + "\nfound is " + found);
         if (operator.equals("notEquals"))
-            return Reporter.report(!found.equals(expected), val, assertReport, type, operator,"Operator is " + operator + "\nexpected is " + expected + "\nfound is " + found, warningOnly);
+            return Reporter.report(ctx, !found.equals(expected),"Operator is " + operator + "\nexpected is " + expected + "\nfound is " + found);
         if (operator.equals("in")) {
             String[] values = expected.split(",");
             for (String value : values) {
                 if (value.equals(found))
-                    return Reporter.report(true, val, assertReport, type, operator,"Operator is " + operator + "\nexpected is " + expected + "\nfound is " + found, warningOnly);
+                    return Reporter.report(ctx, true, "Operator is " + operator + "\nexpected is " + expected + "\nfound is " + found);
             }
-            return Reporter.report(false, val, assertReport, type, operator,"Operator is " + operator + "\nexpected is " + expected + "\nfound is " + found, warningOnly);
+            return Reporter.report(ctx, false, "Operator is " + operator + "\nexpected is " + expected + "\nfound is " + found);
         }
         if (operator.equals("notIn")) {
             String[] values = expected.split(",");
             for (String value : values) {
                 if (value.equals(found))
-                    return Reporter.report(false, val, assertReport, type, operator,"Operator is " + operator + "\nexpected is " + expected + "\nfound is " + found, warningOnly);
+                    return Reporter.report(ctx, false, "Operator is " + operator + "\nexpected is " + expected + "\nfound is " + found);
             }
-            return Reporter.report(true, val, assertReport, type, operator,"Operator is " + operator, warningOnly);
+            return Reporter.report(ctx, true, "Operator is " + operator);
         }
         if (operator.equals("greaterThan")) {
             int iExpected = Integer.parseInt(expected);
             int iFound = Integer.parseInt(found);
-            return Reporter.report(iFound > iExpected, val, assertReport, type, operator,"Operator is " + operator + "\nexpected is " + expected + "\nfound is " + found, warningOnly);
+            return Reporter.report(ctx, iFound > iExpected,"Operator is " + operator + "\nexpected is " + expected + "\nfound is " + found);
         }
         if (operator.equals("lessThan")) {
             int iExpected = Integer.parseInt(expected);
             int iFound = Integer.parseInt(found);
-            return Reporter.report(iFound < iExpected, val, assertReport, type, operator,"Operator is " + operator + "\nexpected is " + expected + "\nfound is " + found, warningOnly);
+            return Reporter.report(ctx, iFound < iExpected, "Operator is " + operator + "\nexpected is " + expected + "\nfound is " + found);
         }
         if (operator.equals("empty")) {
-            return Reporter.report("".equals(found), val, assertReport, type, operator,"Operator is " + operator + "\nexpected is " + expected + "\nfound is " + found, warningOnly);
+            return Reporter.report(ctx, "".equals(found), "Operator is " + operator + "\nexpected is " + expected + "\nfound is " + found);
         }
         if (operator.equals("notEmpty")) {
-            return Reporter.report(!"".equals(found), val, assertReport, type, operator,"Operator is " + operator + "\nexpected is " + expected + "\nfound is " + found, warningOnly);
+            return Reporter.report(ctx, !"".equals(found), "Operator is " + operator + "\nexpected is " + expected + "\nfound is " + found);
         }
         if (operator.equals("contains")) {
-            return Reporter.report(found.contains(expected), val, assertReport, type, operator,"Operator is " + operator + "\nexpected is " + expected + "\nfound is " + found, warningOnly);
+            return Reporter.report(ctx, found.contains(expected), "Operator is " + operator + "\nexpected is " + expected + "\nfound is " + found);
         }
         if (operator.equals("notContains")) {
-            return Reporter.report(!found.contains(expected), val, assertReport, type, operator, "Operator is " + operator + "\nexpected is " + expected + "\nfound is " + found, warningOnly);
+            return Reporter.report(ctx, !found.contains(expected), "Operator is " + operator + "\nexpected is " + expected + "\nfound is " + found);
         }
-        return Reporter.report(false, val, assertReport, type, id, "Do not understand operator " + operator + "\nexpected is " + expected + "\nfound is " + found, warningOnly);
+        return Reporter.report(ctx, false, "Do not understand operator " + operator + "\nexpected is " + expected + "\nfound is " + found);
     }
-
-
-//    private boolean noFailures(TestReport.SetupActionAssertComponent assertReport) {
-//        return assertReport.getResult() != TestReport.TestReportActionResult.FAIL;
-//    }
-
 
     AssertionRunner setTypePrefix(String typePrefix) {
         this.typePrefix = typePrefix;
@@ -618,14 +322,50 @@ public class AssertionRunner {
         return this;
     }
 
-    //    public AssertionRunner setTestReport(TestReport testReport) {
-//        this.testReport = testReport;
-//        return this;
-//    }
-
-
     public AssertionRunner setTestEngine(TestEngine testEngine) {
         this.testEngine = testEngine;
         return this;
+    }
+
+    public TestDef getTestDef() {
+        return testEngine;
+    }
+
+    public ValE getVal() {
+        return val;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public String getLabel() {
+        return label;
+    }
+
+    @Override
+    public FixtureLabels getFixtureLabels() {
+        FixtureComponent sourceFixture = getSource();
+        if (sourceFixture == null)
+            return null;
+        if (sourceFixture.getResponseType() == null) {
+            Reporter.reportError(this, "sourceId or lastOperation references no resource.");
+            return null;
+        }
+
+        return new FixtureLabels(
+                getTestDef(),
+                getSource(),
+                FixtureLabels.Source.SOURCE);
+    }
+
+    @Override
+    public VariableMgr getVariableMgr() {
+        return variableMgr;
+    }
+
+    @Override
+    public FixtureMgr getFixtureMgr() {
+        return fixtureMgr;
     }
 }

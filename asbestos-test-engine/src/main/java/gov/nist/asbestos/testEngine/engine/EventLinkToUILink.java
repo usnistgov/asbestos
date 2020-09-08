@@ -6,6 +6,7 @@ import gov.nist.asbestos.serviceproperties.ServicePropertiesEnum;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 public class EventLinkToUILink {
 
@@ -44,6 +45,8 @@ public class EventLinkToUILink {
     }
 
     static public String get(UIEvent event, String tail) {
+        Objects.requireNonNull(event);
+        Objects.requireNonNull(tail);
         return get(event.getTestSession(), event.getChannelId(), event.getEventName(), tail);
     }
 

@@ -2,6 +2,7 @@ package gov.nist.asbestos.testEngine.engine;
 
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import gov.nist.asbestos.simapi.validation.ValE;
+import gov.nist.asbestos.testEngine.engine.assertion.AssertionContext;
 import gov.nist.asbestos.testEngine.engine.fixture.FixtureComponent;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.StringType;
@@ -106,17 +107,35 @@ public class Reporter {
         report.setMessage(debug ? theMsg : msg);
     }
 
-    private void report(String msg) {
+    public static boolean reportFail(AssertionContext ctx, String msg) {
+        boolean warningOnly = ctx.getWarningOnly();
+        String theMsg = formatMsg(ctx.getType(), ctx.getLabel(), msg);
+        ctx.getVal().add(new ValE(theMsg).asError());
+        ctx.getCurrentAssertReport().setResult(warningOnly? TestReport.TestReportActionResult.WARNING : TestReport.TestReportActionResult.FAIL);
+        String existing = ctx.getCurrentAssertReport().getMessage();
+        ctx.getCurrentAssertReport().setMessage(existing == null ? (debug ? theMsg : msg) : existing + "\n" + (debug ? theMsg : msg));
+        return false;
+    }
+
+    public void report(String msg) {
         String theMsg = formatMsg(type, label, msg);
         String existing = report.getMessage();
         report.setMessage(existing == null ? (debug ? theMsg : msg) : existing + "\n" + (debug ? theMsg : msg));
     }
 
-    void report(String msg, ResourceWrapper wrapper) {
+    public void report(String msg, ResourceWrapper wrapper) {
         if (wrapper != null) {
             report.setDetail(wrapper.logLink());
         }
         report.setActionContext(msg);
+    }
+
+    public static boolean report(AssertionContext ctx, boolean ok, String msg) {
+        if (ok)
+            reportPass(ctx, msg);
+        else
+            reportFail(ctx, msg);
+        return ok;
     }
 
     void setActionContext(String msg, ResourceWrapper wrapper) {
@@ -137,44 +156,31 @@ public class Reporter {
         return type + " : " + id + " : " + msg;
     }
 
-    static TestReport.SetupActionAssertComponent reportError(ValE val, TestReport.SetupActionAssertComponent assertReport, String type, String id, String msg) {
-        String theMsg = formatMsg(type, id, msg);
-        val.add(new ValE(theMsg).asError());
-        assertReport.setResult(TestReport.TestReportActionResult.ERROR);
-        String existing = assertReport.getMessage();
-        assertReport.setMessage(existing == null ? (debug ? theMsg : msg) : existing + "\n" + (debug ? theMsg : msg));
+    public static TestReport.SetupActionAssertComponent reportError(AssertionContext ctx, String msg) {
+        String theMsg = formatMsg(ctx.getType(), ctx.getLabel(), msg);
+        ctx.getVal().add(new ValE(theMsg).asError());
+        ctx.getCurrentAssertReport().setResult(TestReport.TestReportActionResult.ERROR);
+        String existing = ctx.getCurrentAssertReport().getMessage();
+        ctx.getCurrentAssertReport().setMessage(existing == null ? (debug ? theMsg : msg) : existing + "\n" + (debug ? theMsg : msg));
         //assertReport.setMessage(theMsg);
-        return assertReport;
+        return ctx.getCurrentAssertReport();
     }
 
-    static boolean report(boolean ok, ValE val, TestReport.SetupActionAssertComponent assertReport, String type, String id, String msg, boolean warningOnly) {
-        if (ok)
-            reportPass(val, assertReport, type, id, msg);
-        else
-            reportFail(val, assertReport, type, id, msg, warningOnly);
-        return ok;
-    }
-
-    static boolean reportFail(ValE val, TestReport.SetupActionAssertComponent assertReport, String type, String id, String msg, boolean warningOnly) {
-        String theMsg = formatMsg(type, id, msg);
-        val.add(new ValE(theMsg).asError());
-        assertReport.setResult(warningOnly? TestReport.TestReportActionResult.WARNING : TestReport.TestReportActionResult.FAIL);
-        String existing = assertReport.getMessage();
-        assertReport.setMessage(existing == null ? (debug ? theMsg : msg) : existing + "\n" + (debug ? theMsg : msg));
-        return false;
-    }
-
-    static boolean reportPass(ValE val, TestReport.SetupActionAssertComponent assertReport, String type, String id, String msg) {
-        String theMsg = formatMsg(type, id, msg);
-        val.add(new ValE(theMsg));
-        assertReport.setResult(TestReport.TestReportActionResult.PASS);
-        String existing = assertReport.getMessage();
-        assertReport.setMessage(existing == null ? (debug ? theMsg : msg) : existing + "\n" + (debug ? theMsg : msg));
+    public static boolean reportPass(AssertionContext ctx, String msg) {
+        String theMsg = formatMsg(ctx.getType(), ctx.getLabel(), msg);
+        ctx.getVal().add(new ValE(theMsg));
+        ctx.getCurrentAssertReport().setResult(TestReport.TestReportActionResult.PASS);
+        String existing = ctx.getCurrentAssertReport().getMessage();
+        ctx.getCurrentAssertReport().setMessage(existing == null ? (debug ? theMsg : msg) : existing + "\n" + (debug ? theMsg : msg));
         return true;
     }
 
-    static void assertDescription(TestReport.SetupActionAssertComponent assertReport, String description, FixtureComponent fixture) {
+    public static void assertDescription(TestReport.SetupActionAssertComponent assertReport, String description) {
         assertReport.addExtension("urn:resultDescription", new StringType(description));
+    }
+
+    public static void operationDescription(TestReport.SetupActionOperationComponent  opComponent, String description) {
+        opComponent.addExtension("urn:resultDescription", new StringType(description));
     }
 
 }

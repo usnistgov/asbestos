@@ -812,7 +812,7 @@ public class AnalysisReport {
         } else {
             generalErrors.add("DocumentManifest has no content resources - shall have DocumentReference");
         }
-        if (hasContextBundle())
+        if (related.isEmpty() && hasContextBundle())
             buildRelatedBundle(contextResourceBundle);
     }
 
