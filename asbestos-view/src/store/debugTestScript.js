@@ -97,7 +97,7 @@ export const debugTestScriptStore = {
             breakpointSet = state.breakpointMap.get(obj.testScriptIndex)
 
             breakpointSet.add(obj.breakpointIndex)
-            console.log(obj.testScriptIndex + " added " + obj.breakpointIndex)
+            console.log("testCollectionIndex.testScriptIndex:" + obj.testScriptIndex + ", added Test part: " + obj.breakpointIndex)
 
             // Sync showDebugButton because Vue does not support reactivity on Map or Set
 
@@ -277,12 +277,14 @@ export const debugTestScriptStore = {
             const mapKey = getters.getMapKey(testId)
             const breakpointIndex = state.showDebugButton[mapKey].breakpointIndex
             if (rootState.debugAssertionEval.assertionEvalBreakpointIndex === breakpointIndex) {
+                // IF the button was pushed nth time, just toggle the modal display property
                 commit('setShowDebugEvalModal', true)
             } else {
+                // If the button was pushed the first time
                 commit('setAssertionEvalBreakpointIndex', breakpointIndex)
                 const requestAnnotations = (rootState.debugAssertionEval.fieldSupport.fieldValueTypes === null)
                 // needsStaticValueCaching is True when enumeration types and the assertion field descriptions need to be cached
-                let sendData = `{"cmd":"requestOriginalAssertion","testScriptIndex":"${mapKey}","requestAnnotations":"${requestAnnotations}"}`
+                let sendData = `{"cmd":"requestAllParameters","testScriptIndex":"${mapKey}","requestAnnotations":"${requestAnnotations}"}`
 
                 console.log('Requesting original-assertion ' + breakpointIndex)
                 state.testScriptDebuggerWebSocket.send(sendData)
@@ -368,7 +370,7 @@ export const debugTestScriptStore = {
                         commit('setCombinedTestReports', returnData.testReport)
                         if (('isEvaluable' in returnData) && returnData.isEvaluable === 'true') {
                             state.evalMode = true
-                            if (rootState.debugAssertionEval.showModal === true) {
+                            if (rootState.debugAssertionEval.showEvalModalDialog === true) {
                                 // Auto-refresh the modal if already evalMode is already displaying the modal
                                 //  state.doDebugEvalMode({commit: commit, state: state, rootState: rootState, getters: getters}, testId)
                                 dispatch('doDebugEvalMode')
@@ -377,18 +379,23 @@ export const debugTestScriptStore = {
                     } else if (returnData.messageType === 'original-assertion') {
                         // console.log(JSON.stringify(returnData))
                         // rootState.testScriptAssertionEval.
-                        commit('updateAssertionEvalObj', returnData.assertionJson)
-                        // Load static content if not yet loaded
-                        if (rootState.debugAssertionEval.fieldSupport.fieldValueTypes === null && 'fieldSupport' in returnData) {
-                            commit('setFieldSupportValueTypes', returnData.fieldSupport.fhirEnumerationTypes)
-                            // Load overrides
-                            if ('overrideFieldTypes' in returnData.fieldSupport) {
-                                commit('setFieldSupportOverrides', returnData.fieldSupport.overrideFieldTypes)
+                        try {
+                            commit('updateAssertionEvalObj', returnData.assertionJson)
+                            // Load static content if not yet loaded
+                            if (rootState.debugAssertionEval.fieldSupport.fieldValueTypes === null && 'fieldSupport' in returnData) {
+                                commit('setFieldSupportValueTypes', returnData.fieldSupport.fhirEnumerationTypes)
+                                // Load overrides
+                                if ('overrideFieldTypes' in returnData.fieldSupport) {
+                                    commit('setFieldSupportOverrides', returnData.fieldSupport.overrideFieldTypes)
+                                }
                             }
+                            if ('fixtureIds' in returnData) {
+                                commit('setFixtureIds', returnData.fixtureIds)
+                            }
+                        } catch (e) {
+                            console.log('error in all-parameters: ' + e)
                         }
-                        if ('fixtureIds' in returnData) {
-                            commit('setFixtureIds', returnData.fixtureIds)
-                        }
+                        commit('setShowDebugEvalModal', true)
                     } else if (returnData.messageType === 'eval-assertion-result') {
                         commit('setDebugAssertionEvalResult', returnData)
                     } else if (returnData.messageType === 'stoppedDebugging') {

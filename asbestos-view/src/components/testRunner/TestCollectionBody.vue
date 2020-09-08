@@ -101,7 +101,7 @@
                     </span>
                     <span v-if="! isWaitingForBreakpoint && ! $store.state.testRunner.isClientTest"> --  {{ testTime(name) }}</span>
                 </div>
-                <debug-assertion-eval-modal v-if="isDebugFeatureEnabled && isEvaluableAction(i)" :show="$store.state.debugAssertionEval.showModal" @close="closeModal()" @resume="doDebug(name)"></debug-assertion-eval-modal>
+                <debug-assertion-eval-modal v-if="isDebugFeatureEnabled && isEvaluableAction(i)" :show="$store.state.debugAssertionEval.showEvalModalDialog" @close="closeModal()" @resume="doDebug(name)"></debug-assertion-eval-modal>
                 <router-view v-if="selected === name"></router-view>  <!--  opens TestOrEvalDetails   -->
             </div>
         </div>

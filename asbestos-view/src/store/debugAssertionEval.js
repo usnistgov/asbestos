@@ -43,27 +43,31 @@ export const debugAssertionEvalStore = {
     state() {
         return {
             assertionEvalBreakpointIndex: '',
-            showModal: false,
+            showEvalModalDialog: false,
+            modalElPreviousClientWidth: 0,
+            modalElCurrentClientWidth: 0,
             isEvalObjUpdated: false,
-            selectedPatternTypeId: 'OriginalAssertion', // Initial string contains default pattern
-            defaultPatternTypeId: 'OriginalAssertion',
+            selectedPatternTypeId: 'AllParameters', // Initial string contains default pattern
+            defaultPatternTypeId: 'AllParameters',
             evalObjByPattern: {
                     patternTypes:
                         {
-                            OriginalAssertion: {dataObj: new EvalAssertionObj(), resultObj: new EvalResultObj(), displayFieldList: ['label','description','direction'
+                            AllParameters: {dataObj: new EvalAssertionObj(), resultObj: new EvalResultObj(), displayFieldList: ['label','description','direction'
                                     ,'compareToSourceId','compareToSourceExpression','compareToSourcePath','contentType','expression','headerField','minimumId',
                                     'navigationLinks','operator','path','requestMethod','requestURL','resource','response','responseCode','sourceId','validateProfileId','value','warningOnly']},
+                          /*
+                            Asbestos Test Engine does not support the compareToSourcePath element part of the CompareToSourceId pattern type.
+                           */
                             CompareToSourceId: {dataObj: new EvalAssertionObj(), resultObj: new EvalResultObj(), displayFieldList: ['compareToSourceId','compareToSourceExpression','warningOnly']},
-                            MinimumId: {dataObj: new EvalAssertionObj(), resultObj: new EvalResultObj(), displayFieldList: ['minimumId','warningOnly']},
-                            ResourceType: {dataObj: new EvalAssertionObj(), resultObj: new EvalResultObj(), displayFieldList: ['resource','warningOnly']},
                             ContentType: {dataObj: new EvalAssertionObj(), resultObj: new EvalResultObj(), displayFieldList: ['contentType','warningOnly']},
-                            HeaderField: {dataObj: new EvalAssertionObj(), resultObj: new EvalResultObj(), displayFieldList: ['headerField','warningOnly']},
-                            Response: {dataObj: new EvalAssertionObj(), resultObj: new EvalResultObj(), displayFieldList: ['sourceId','response','warningOnly']},
-                            ResponseCode: {dataObj: new EvalAssertionObj(), resultObj: new EvalResultObj(), displayFieldList: ['responseCode','operator','warningOnly']},
                             Expression: {dataObj: new EvalAssertionObj(), resultObj: new EvalResultObj(), displayFieldList: ['sourceId','expression','warningOnly']},
                             ExpressionValue: {dataObj: new EvalAssertionObj(), resultObj: new EvalResultObj(), displayFieldList: ['sourceId','expression','value','warningOnly']},
+                            HeaderField: {dataObj: new EvalAssertionObj(), resultObj: new EvalResultObj(), displayFieldList: ['headerField','warningOnly']},
+                            MinimumId: {dataObj: new EvalAssertionObj(), resultObj: new EvalResultObj(), displayFieldList: ['minimumId','warningOnly']},
                             RequestMethod: {dataObj: new EvalAssertionObj(), resultObj: new EvalResultObj(), displayFieldList: ['sourceId','requestMethod','warningOnly']},
-
+                            ResourceType: {dataObj: new EvalAssertionObj(), resultObj: new EvalResultObj(), displayFieldList: ['resource','warningOnly']},
+                            Response: {dataObj: new EvalAssertionObj(), resultObj: new EvalResultObj(), displayFieldList: ['sourceId','response','warningOnly']},
+                            ResponseCode: {dataObj: new EvalAssertionObj(), resultObj: new EvalResultObj(), displayFieldList: ['responseCode','operator','warningOnly']},
                         }
                     },
             collapsibleDisplayEventObj: {displayOpen: false, breakpointObj: null},
@@ -76,8 +80,16 @@ export const debugAssertionEvalStore = {
         }
     },
     mutations: {
+        setModalElPreviousClientWidth(state, inPx) {
+            // console.log(`setting previous clientWidth: ${inPx}`)
+           state.modalElPreviousClientWidth = inPx
+        },
+        setModalElCurrentClientWidth(state, inPx) {
+            // console.log(`setting current clientWidth: ${inPx}`)
+            state.modalElCurrentClientWidth = inPx
+        },
         setAssertionEvalBreakpointIndex(state, val) {
-         state.assertionEvalBreakpointIndex = val
+            state.assertionEvalBreakpointIndex = val
         },
         setEvalObjProperty(state, obj) {
             if ('propKey' in obj) {
@@ -88,7 +100,7 @@ export const debugAssertionEvalStore = {
             }
         },
         setShowDebugEvalModal(state, bVal) {
-            state.showModal = Boolean(bVal)
+            state.showEvalModalDialog = Boolean(bVal)
         },
         setDebugAssertionEvalPropKey(state, obj) {
             let resultRef = state.evalObjByPattern.patternTypes[obj.patternTypeId].resultObj
@@ -135,7 +147,6 @@ export const debugAssertionEvalStore = {
            if (atLeastOnePropertyWasUpdated) {
               state.isEvalObjUpdated = true
            }
-           state.showModal = true
         },
         setFieldSupportValueTypes(state, obj /* object containing an array of fhir enumerated types */) {
            state.fieldSupport.fieldValueTypes = obj

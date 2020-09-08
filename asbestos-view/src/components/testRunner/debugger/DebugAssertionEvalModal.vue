@@ -1,14 +1,14 @@
 <template>
     <div name="modal" @dragover="drag_over" @drop="drop">
-        <div class="modal-mask" @click="close" v-show="show">
-            <div class="modalFlexContainer">
-                <div class="eval-modal-container" @click.stop id="debugAssertionEvalModal">
+        <div class="modal-mask" @click.stop="close" v-show="show" >
+            <div class="modalFlexContainer" >
+                <div class="eval-modal-container" @click.stop  id="debugAssertionEvalModal"> <!-- @click.stop="shouldResize()" @mousedown="shouldResize" @mouseup="endResize"  -->
                     <div>
                         <div>
                         <span class="eval-modal-header" draggable="true" @dragstart="drag_start">
                             <h3>Eval
-<!--                                <span class="closeXIcon" @click="doResizeForm">&#x1F504;</span>-->
-                                <span class="closeXIcon" title="Close" @click="close">&#x274c;</span></h3>
+<!--                                <span class="closeXIcon" @click.stop="doResizeForm()">&#x1F504;</span>-->
+                                <span class="closeXIcon" title="Close" @click.stop="close()">&#x274c;</span></h3>
                         </span>
                         </div>
 
@@ -45,10 +45,11 @@
     export default {
         data() {
             return {
+                isDragging: false,
                 drag_pos_left: 0,
                 drag_pos_top: 0,
-                evalTimer: null,
-                // resizeForm: false,
+                resizeObTimer: null,
+                resizeOb: null,
             }
         },
         mounted() {
@@ -60,55 +61,73 @@
             }
         },
         methods: {
-            // doResizeForm() {
-            //   this.resizeForm = true
-            // },
             isSelectedPatternType(patternTypeId) {
                return (this.selectedPatternTypeId === patternTypeId)
             },
             doSelectPatternTypeId(patternTypeId) {
                 this.$store.commit('setSelectedPatternTypeId', patternTypeId)
+                // this.doResizeForm()
             },
-            close: function () {
+            // doResizeForm() {
+            //    this.$store.commit('setRestoreModalSize', true)
+            // },
+            close()  {
+                if (this.resizeOb !== null) {
+                    try {
+                        let modalEl = document.querySelector('div#debugAssertionEvalModal.eval-modal-container')
+                        this.resizeOb.unobserve(modalEl)
+                        if (this.resizeObTimer !== null) {
+                            clearTimeout(this.resizeObTimer)
+                            this.resizeObTimer = null
+                        }
+                        this.resizeOb = null
+                    } catch (e) {
+                       // May not be supported in all browsers, like I.E.
+                    }
+                }
                 const defaultPatternTypeId = this.$store.state.debugAssertionEval.defaultPatternTypeId
                 this.$store.commit('setDebugAssertionEvalPropKey', {patternTypeId: defaultPatternTypeId, propKey: ''})
                 this.$emit('close')
             },
-            doResume: function () {
+            doResume() {
                 const defaultPatternTypeId = this.$store.state.debugAssertionEval.defaultPatternTypeId
                 this.$store.commit('setDebugAssertionEvalPropKey', {patternTypeId: defaultPatternTypeId, propKey: ''})
                 this.$emit('resume')
             },
             drag_start: function (event) {
+                this.isDragging = true
                 try {
                     var el = document.getElementById('debugAssertionEvalModal')
                     if (el.parentNode.classList.contains('modalFlexContainer'))
                         el.parentNode.classList.remove('modalFlexContainer') // remove the flex box centering so that we can apply a custom Left property
                     var rect = el.getBoundingClientRect();
+                    const margin_top = 40 /* Drag and drop ghosting was fixed by using the exact top including this margin and separating the body and the header part as separate divs instead of one big container. Top margin is defined in the css for the eval-modal-container style */
                     this.drag_pos_left = rect.left - event.clientX
-                    this.drag_pos_top = rect.top - event.clientY
-                    el.style.opacity = ".1"
-                    el.style.border = "1px solid blue"
-                    el.firstChild.style.opacity = "0"
-                    el.firstChild.style.visibility = "hidden"
+                    this.drag_pos_top = rect.top - event.clientY - margin_top
+                    // el.style.opacity = ".1"
+                    el.style.border = "2px dashed blue"
+                    // el.firstChild.style.opacity = "0" // This is helpful to avoid foreground image ghosting
+                    // el.firstChild.style.visibility = "hidden" // This is helpful to avoid foreground image ghosting
                 } catch (e) {
                     console.log(e)
                 }
             },
             drop: function drop(event) {
-                var el = document.getElementById('debugAssertionEvalModal')
+                this.isDragging = false
+                let el = document.getElementById('debugAssertionEvalModal')
                 if (el) {
-                    el.style.opacity = "1"
+                    // el.style.opacity = "1"
                     el.style.border = "none"
-                    el.firstChild.style.opacity = "1"
-                    el.firstChild.style.visibility = "visible"
+                    // el.firstChild.style.opacity = "1"
+                    // el.firstChild.style.visibility = "visible"
                 }
                 event.preventDefault();
                 return false;
             },
             drag_over: function (event) {
+                this.isDragging = false
                 try {
-                    var el = document.getElementById('debugAssertionEvalModal')
+                    let el = document.getElementById('debugAssertionEvalModal')
                     if (el) {
                         el.style.position = 'fixed'
                         el.style.left = parseInt(this.drag_pos_left + event.clientX) + 'px'
@@ -199,11 +218,9 @@
     }
 
     .eval-modal-container {
-        /*width: auto;*/
-        /*height: auto;*/
-        /*max-height: 92%;*/
-        /*width: 42%;*/
-        /*height: 60%;*/
+        /*max-height: 98%;*/
+        width: 760px; /* setting width seems to avoid ghosting problem when drag-n-drop is used for moving window */
+        height: 854px;
         overflow-x: scroll;
         overflow-y: scroll;
         margin: 40px auto 0;
@@ -213,7 +230,8 @@
         box-shadow: 0 2px 10px rgba(0, 0, 0, .33);
         font-family: Helvetica, Arial, sans-serif;
         resize: both;
-        transition: opacity 100ms linear;
+        /*transition: opacity 100ms linear; */ /* This is helpful when drag and drop is used to move the dialog window */
+        visibility: visible; /* future: This is controlled by the showEvalModalDialog Vue store property */
     }
 
     .eval-modal-header h3 {

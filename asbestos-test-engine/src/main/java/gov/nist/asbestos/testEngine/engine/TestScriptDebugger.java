@@ -112,7 +112,9 @@ public class TestScriptDebugger implements TestScriptDebugInterface {
                         // Original assertion was requested
                         // Prepare user-selectable type information
                         // "valueTypes" : {"direction" : [{"codeValue":"req","displayName":"","definition":""},...],
+                        // Field descriptions are the standard FHIR fields based on assertion class annotation
                         List<AssertionFieldDescription> fieldDescriptions = new ArrayList<>();
+                        // Override fields are used to inject dropdowns into a text-only field
                         List<AssertionFieldDescription> overrideFields = new ArrayList<>();
                         AssertionFieldSupport fieldSupport = new AssertionFieldSupport();
                         if (state.getRequestAnnotations().get()) {
@@ -125,6 +127,7 @@ public class TestScriptDebugger implements TestScriptDebugInterface {
                             List<String> contentTypeList = new ArrayList<String>(Format.getFormats());
                             Collections.sort(contentTypeList);
                             overrideFields.add(formatField("contentType", contentTypeList));
+                            overrideFields.add(formatField("warningOnly", Arrays.asList("false","true")));
                             fieldSupport.setOverrideFieldTypes(overrideFields);
                         }
                         Set<String> fixtureIds = te.getFixtureMgr().keySet();

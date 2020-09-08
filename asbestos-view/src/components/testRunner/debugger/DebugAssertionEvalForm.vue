@@ -1,6 +1,6 @@
 <template>
    <div class="dafFlexContainer">
-     <div class="dafFlexItem" v-for="(propKey, keyIndex) in displayFieldList" :key="keyIndex">
+     <div class="dafFlexItem" v-for="(propKey, keyIndex) in displayFieldList" :key="keyIndex" :data-flex-item="propKey">
         <div>
             <div >
                 <label :for="getFormInputId(propKey)" :title="getEnumTypeShortDefinition(propKey)">{{propKey}}</label>
@@ -47,7 +47,6 @@
         <vue-markdown
             v-bind:source="getResultMessage()"></vue-markdown>
      </div>
-       <template v-if="resizeContents()"><!-- form_resized --></template>
  </div>
 </template>
 
@@ -59,6 +58,7 @@
         data() {
             return {
                 isResized: false,
+                evalTimer: null,
             }
         },
         props: {
@@ -74,94 +74,21 @@
         created: function() {
             // Reset the resize flag
             this.isResized = false
-           // this.resizeContents()
         },
         computed: {
             displayFieldList() {
                 return this.getPatternTypeObj().displayFieldList
+            },
+            defaultDisplayFieldList() {
+               return this.getDefaultPatternTypeObj().displayFieldList
             }
         },
-        watch: {
-           // 'isShown': 'resizeContents'
+        created() {
+            const elFlexContainer = document.querySelector('div.dafFlexContainer')
+            const elDialogWindow = document.querySelector('div#debugAssertionEvalModal.eval-modal-container')
+            console.log(`In pattern ${this.patternTypeId}, created: elFlexContainer exists?: ${elFlexContainer !== null}, elDiallogWindow exists? ${elDialogWindow !== null}`)
         },
         methods: {
-            /*
-            Works best when the pattern type with the most objects, such as the All Parameters, is displayed first.
-             */
-            resizeContents() {
-                if (this.isResized)
-                    return false
-                let containerEl = document.querySelector('div.dafFlexContainer')
-                if (containerEl === null)
-                    return
-                try {
-                    let flexItemWidth = 230
-                    let flexItemHeight = 114
-                    const elementCount = this.displayFieldList.length
-                    // for (const fieldName of this.displayFieldList) {
-                        let elList = document.querySelectorAll('div.dafFlexItem')
-                        // console.log(`elList length: ${elList.length}`)
-                        if (elList !== null) {
-                            for (let el of elList) {
-                                // console.log(`clientWidth is ${el.classList.contains('dafFlexItem')}, clientHeight is ${el.classList}`)
-                                if (flexItemWidth < el.clientWidth) {
-                                    flexItemWidth = el.clientWidth
-                                }
-                                if (flexItemHeight < el.clientHeight) {
-                                    flexItemHeight = el.clientHeight
-                                }
-                            }
-                        } /* else {
-                            // console.log("Element was not found. Using default for resize calculations.")
-                        } */
-                    if (flexItemWidth > 300)
-                        flexItemWidth = 230
-                    if (flexItemHeight > 400)
-                        flexItemHeight = 114
-                    // }
-                    const maxFieldsPerColumn = 6
-                    const fieldsPerColumn = (elementCount > maxFieldsPerColumn)? maxFieldsPerColumn : elementCount
-                    let minFormHeight = flexItemHeight * fieldsPerColumn // Default to 6 fields per column
-                    // Enable the singleColumnHeight if form should by dynamically sized if fewer than 6 columns may be present
-                    // const singleColumnHeight = (flexItemHeight * elementCount)
-                    // if (singleColumnHeight < 500) {
-                    //     minFormHeight = singleColumnHeight
-                    // }
-                    const estimateWidth = Math.round((elementCount / fieldsPerColumn) * flexItemWidth) // Math.round((elementCount / (minFormHeight / flexItemHeight)) * flexItemWidth)
-                    // console.log(`length: ${elementCount}, flexItemWidth: ${flexItemWidth}, flexItemHeight: ${flexItemHeight}, minFormHeight: ${minFormHeight}, estimateWidth: ${estimateWidth}`)
-                    containerEl = document.querySelector('div.eval-modal-container') //('div.dafFlexContainer') // div.eval-modal-container
-                    if (containerEl !== null) {
-                        /* outerShell... to compensate for the pattern type menu buttons */
-                        let outerShellHeight = 200
-                        let outerShellWidth = 53
-                        let buttonsContainerEl = document.querySelector('div.patternHeaderButtons')
-                        if (buttonsContainerEl !== null) {
-                            outerShellHeight = 163 /* Eval header banner and Select a pattern message */ + buttonsContainerEl.clientHeight
-                            // console.log(' ' + outerShellHeight)
-                        }
-                        // console.log(`setting el height to  ${minFormHeight}`)
-                        const finalOuterContainerHeight = (outerShellHeight+minFormHeight)
-                        containerEl.style.height = finalOuterContainerHeight + 'px'
-                        containerEl.style.width = (outerShellWidth+estimateWidth) + 'px'
-                        // tracer
-                        // console.log('outerContainerFinalHeight: ' + finalOuterContainerHeight)
-                        // containerEl.style.border = '1px solid red'
-                    }
-                    containerEl = document.querySelector('div.dafFlexContainer') //('div.dafFlexContainer') // div.eval-modal-container
-                    if (containerEl !== null) {
-                        this.isResized = true // This element is not rendered at the time resize is run
-                        // console.log(`setting el height to  ${minFormHeight}`)
-                        containerEl.style.height = (minFormHeight) + 'px'
-                        containerEl.style.width = (estimateWidth) + 'px'
-                        // tracer
-                        // containerEl.style.border = '1px dashed black'
-                    }
-                } catch(err) {
-                    console.log('error: ' + err)
-                }
-                console.log('Form was resized.')
-                return this.isResized
-            },
             openHelp(propKey) {
                 window.open("http://hl7.org/fhir/testscript-definitions.html#TestScript.setup.action.assert." + propKey, "_blank")
             },
@@ -172,6 +99,11 @@
                 let obj = this.$store.state.debugAssertionEval.evalObjByPattern.patternTypes[this.patternTypeId]
                 // console.log('got ' + this.patternTypeId)
                 // console.log('field list length: ' + obj.displayFieldList.length)
+                return obj
+            },
+            getDefaultPatternTypeObj() {
+                const defaultPatternTypeId = this.$store.state.debugAssertionEval.defaultPatternTypeId
+                let obj = this.$store.state.debugAssertionEval.evalObjByPattern.patternTypes[defaultPatternTypeId]
                 return obj
             },
             getResultCode() {
@@ -272,8 +204,8 @@
             },
             evalOnKeyUp: function (event) {
                 if (this.evalTimer) {
-                    clearTimeout(this.evalTimer);
-                    this.evalTimer = null;
+                    clearTimeout(this.evalTimer)
+                    this.evalTimer = null
                 }
                 this.evalTimer = setTimeout(() => {
                     this.doEval(event.target.getAttribute('data-prop-key'))
@@ -294,7 +226,7 @@
         flex-direction: column;
         flex-wrap: wrap;
         width: auto; /* auto; */
-        /*height: 400px; !* 400px; *!*/
+        height: 754px; /* A definite pixel limit is needed for the flex mode column wrap */
         text-align: left;
     }
 

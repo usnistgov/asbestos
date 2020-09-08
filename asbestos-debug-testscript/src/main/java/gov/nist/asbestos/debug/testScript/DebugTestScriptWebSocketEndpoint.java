@@ -157,10 +157,10 @@ public class DebugTestScriptWebSocketEndpoint {
                 doResumeBreakpoint(state, updateList);
             } else if (cmd.equals("stopDebug")) {
                 stopDebuggingTs(state);
-            } else if (cmd.equals("requestOriginalAssertion")) {
+            } else if (cmd.equals("requestAllParameters")) {
                 String requestAnnotationsStr = (String)myMap.get("requestAnnotations");
                 boolean isRequestAnnotations = Boolean.parseBoolean(requestAnnotationsStr);
-                doRequestOriginalAssertion(state, isRequestAnnotations);
+                doRequestAllParameters(state, isRequestAnnotations);
             } else if (cmd.equals("debugEvalAssertion")) {
                 String base64String = (String)myMap.get("base64String");
                 doDebugEvaluate(state, base64String);
@@ -282,7 +282,7 @@ public class DebugTestScriptWebSocketEndpoint {
         }
     }
 
-    private void doRequestOriginalAssertion(TestScriptDebugState state, boolean requestAnnotations) {
+    private void doRequestAllParameters(TestScriptDebugState state, boolean requestAnnotations) {
         synchronized (state.getLock()) {
             state.resetEvalJsonString();
             state.getRequestAnnotations().set(requestAnnotations);
