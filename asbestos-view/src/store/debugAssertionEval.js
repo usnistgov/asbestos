@@ -44,8 +44,6 @@ export const debugAssertionEvalStore = {
         return {
             assertionEvalBreakpointIndex: '',
             showEvalModalDialog: false,
-            modalElPreviousClientWidth: 0,
-            modalElCurrentClientWidth: 0,
             isEvalObjUpdated: false,
             selectedPatternTypeId: 'AllParameters', // Initial string contains default pattern
             defaultPatternTypeId: 'AllParameters',
@@ -80,14 +78,6 @@ export const debugAssertionEvalStore = {
         }
     },
     mutations: {
-        setModalElPreviousClientWidth(state, inPx) {
-            // console.log(`setting previous clientWidth: ${inPx}`)
-           state.modalElPreviousClientWidth = inPx
-        },
-        setModalElCurrentClientWidth(state, inPx) {
-            // console.log(`setting current clientWidth: ${inPx}`)
-            state.modalElCurrentClientWidth = inPx
-        },
         setAssertionEvalBreakpointIndex(state, val) {
             state.assertionEvalBreakpointIndex = val
         },
