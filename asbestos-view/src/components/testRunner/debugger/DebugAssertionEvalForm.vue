@@ -1,4 +1,11 @@
 <template>
+    <!--
+    Notes on the Debug assertion Eval window (and running an assertion in general):
+    Each assertion property is evaluated in an arbitrary order. The implication of this is that when Eval is executed for the entire assert object,
+    an error could have occurred in other place than the most recent place of change.
+    Example: prop1=true, prop2='OperationOutcome.count() = 0', Now if prop1 was actually false, the assertion runner will stop at the first failure.
+    AssertionRunner does not point the offending assert element in the TestReport.
+    -->
    <div class="dafFlexContainer">
      <div class="dafFlexItem" v-for="(propKey, keyIndex) in displayFieldList" :key="keyIndex" :data-flex-item="propKey">
         <div>

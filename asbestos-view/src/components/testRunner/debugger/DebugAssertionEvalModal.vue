@@ -2,30 +2,31 @@
     <div name="modal" @dragover="drag_over" @drop="drop">
         <div class="modal-mask" @click.stop="close" v-show="show" >
             <div class="modalFlexContainer" >
-                <div class="eval-modal-container" @click.stop  id="debugAssertionEvalModal"> <!-- @click.stop="shouldResize()" @mousedown="shouldResize" @mouseup="endResize"  -->
+                <div id="debugAssertionEvalModal" class="eval-modal-container" @click.stop  > <!-- @click.stop="shouldResize()" @mousedown="shouldResize" @mouseup="endResize"  -->
                     <div>
-                        <div>
-                        <span class="eval-modal-header" draggable="true" @dragstart="drag_start">
-                            <h3>Eval
-<!--                                <span class="closeXIcon" @click.stop="doResizeForm()">&#x1F504;</span>-->
-                                <span class="closeXIcon" title="Close" @click.stop="close()">&#x274c;</span></h3>
-                        </span>
-                        </div>
-
-                        <div class="modal-body">
-                            <div class="patternHeader">Select a Pattern:</div>
-                            <div class="patternHeaderButtons">
-                                <div v-for="(val, patternType) in $store.state.debugAssertionEval.evalObjByPattern.patternTypes"
-                                 :key="patternType">
-                                    <div
-                                    v-bind:class="{
+                        <div id="daemHeader">
+                            <span class="eval-modal-header" draggable="true" @dragstart="drag_start">
+                                <h3>Eval
+<!--                                <span class="closeXIcon" @click.stop="f()">&#x1F504;</span>-->
+                                    <span class="closeXIcon" title="Close" @click.stop="close()">&#x274c;</span></h3>
+                            </span>
+                            <div class="patternHeaderContainer">
+                                <div class="patternHeader">Select a Pattern:</div>
+                                <div class="patternHeaderButtons">
+                                    <div v-for="(val, patternType) in $store.state.debugAssertionEval.evalObjByPattern.patternTypes"
+                                         :key="patternType">
+                                        <div
+                                                v-bind:class="{
                                             'selectedPatternType': isSelectedPatternType(patternType),
                                             'selectPatternType' : true,
                                             }"
-                                    @click="doSelectPatternTypeId(patternType)">{{patternType}}</div>
+                                                @click="doSelectPatternTypeId(patternType)">{{patternType}}</div>
+                                    </div>
                                 </div>
                             </div>
-                            <div style="margin: 6px">
+                        </div>
+                        <div id="daemBody" class="modal-body">
+                            <div>
                                  <debug-assertion-eval-form :pattern-type-id="selectedPatternTypeId" />
                             </div>
                         </div>
@@ -65,6 +66,7 @@
                return (this.selectedPatternTypeId === patternTypeId)
             },
             doSelectPatternTypeId(patternTypeId) {
+                document.querySelector('div#debugAssertionEvalModal').scrollTop = 0
                 this.$store.commit('setSelectedPatternTypeId', patternTypeId)
                 // this.doResizeForm()
             },
@@ -179,6 +181,18 @@
         visibility: hidden;
     }
 
+    div#daemHeader {
+        position: -webkit-sticky;
+        position: sticky;
+        background-color: white;
+        width: 100%;
+        top: 0;
+        padding: 10px 10px 10px 10px;
+    }
+
+    .patternHeaderContainer {
+        padding: 5px;
+    }
     .patternHeader {
         text-align: left;
         display: block;
@@ -195,12 +209,14 @@
         vertical-align: middle
     }
 
+    /**
+     This style centers the modal dialog on the screen (behind its modal mask)
+     */
     .modalFlexContainer {
         display: flex;
         align-items: center;
         justify-content: space-evenly;
     }
-
 
     * {
         box-sizing: border-box;
@@ -218,20 +234,19 @@
     }
 
     .eval-modal-container {
-        /*max-height: 98%;*/
         width: 760px; /* setting width seems to avoid ghosting problem when drag-n-drop is used for moving window */
         height: 854px;
         overflow-x: scroll;
         overflow-y: scroll;
-        margin: 40px auto 0;
-        padding: 20px 30px;
+        margin: 40px auto 0px;
+        /*padding: 20px 30px;*/
         background-color: #ffffff;
         border-radius: 2px;
         box-shadow: 0 2px 10px rgba(0, 0, 0, .33);
         font-family: Helvetica, Arial, sans-serif;
         resize: both;
-        /*transition: opacity 100ms linear; */ /* This is helpful when drag and drop is used to move the dialog window */
-        visibility: visible; /* future: This is controlled by the showEvalModalDialog Vue store property */
+        /*transition: opacity 100ms linear; */ /* This was helpful when drag and drop is used to move the dialog window before the ghosting was fixed */
+        visibility: visible;
     }
 
     .eval-modal-header h3 {
@@ -245,7 +260,8 @@
     }
 
     .modal-body {
-        margin-bottom: 20px;
+        margin: 20px;
+        /*margin-bottom: 20px;*/
     }
 
 
