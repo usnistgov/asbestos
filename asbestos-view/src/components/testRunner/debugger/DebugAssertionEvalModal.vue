@@ -30,9 +30,13 @@
                                  <debug-assertion-eval-form :pattern-type-id="selectedPatternTypeId" />
                             </div>
                         </div>
-
-                        <!--   <div class="modal-footer text-right">-->
-                        <!--   </div>-->
+                        <div id="daemFooter" v-if="footerList">
+                            <div class="modal-footer text-right">
+                                <p v-for="(msgObj, msgKey) in footerList" :key="msgKey">
+                                    {{msgObj.message}}
+                                </p>
+                             </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -59,14 +63,32 @@
         computed: {
             selectedPatternTypeId() {
                return this.$store.state.debugAssertionEval.selectedPatternTypeId
+            },
+            footerList() {
+                let obj = this.$store.state.debugAssertionEval.evalObjByPattern.patternTypes[this.selectedPatternTypeId]
+                if ('footerList' in obj) {
+                   return obj.footerList
+                } else {
+                    return null
+                }
             }
+
         },
         methods: {
             isSelectedPatternType(patternTypeId) {
                return (this.selectedPatternTypeId === patternTypeId)
             },
             doSelectPatternTypeId(patternTypeId) {
-                document.querySelector('div#debugAssertionEvalModal').scrollTop = 0
+                // This is needed so when the selector is switched from a longer display to a smaller one (ie, one that contains fewer assert elements, the top portion is not hidden
+                // document.querySelector('div#debugAssertionEvalModal').scrollTop = 0
+                // Unset the height property so that the footer is not hidden at the bottom
+                const elFlexContainer = document.querySelector('div.dafFlexContainer')
+                const defaultPatternTypeId = this.$store.state.debugAssertionEval.defaultPatternTypeId
+                if (defaultPatternTypeId !== patternTypeId) {
+                    elFlexContainer.style.height = "auto"
+                } else {
+                    elFlexContainer.style.height = "754px"
+                }
                 this.$store.commit('setSelectedPatternTypeId', patternTypeId)
                 // this.doResizeForm()
             },
@@ -107,7 +129,7 @@
                     this.drag_pos_left = rect.left - event.clientX
                     this.drag_pos_top = rect.top - event.clientY - margin_top
                     // el.style.opacity = ".1"
-                    el.style.border = "2px dashed blue"
+                    // el.style.border = "2px dashed blue" // This caused inner contents to shift due to the extra 2px border
                     // el.firstChild.style.opacity = "0" // This is helpful to avoid foreground image ghosting
                     // el.firstChild.style.visibility = "hidden" // This is helpful to avoid foreground image ghosting
                 } catch (e) {

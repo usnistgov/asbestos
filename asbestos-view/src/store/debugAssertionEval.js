@@ -3,6 +3,10 @@ import Vuex from "vuex";
 
 Vue.use(Vuex)
 
+function XpathNotSupportedFooter() {
+    this.message = 'Note: FHIR Toolkit does not support XPath/JSONPath.'
+}
+
 function EvalAssertionObj() {
     /*
     When the original assertion properties are initially requested from the backend, empty properties are not included by JSON serialization.
@@ -22,7 +26,7 @@ function EvalAssertionObj() {
     this.navigationLinks = ''
     this.operator = ''
     this.path = ''
-    this.requestMethod = ''
+    this.requestMethod = 'get' // default to HTTP GET
     this.requestURL = ''
     this.resource = ''
     this.response = ''
@@ -52,17 +56,19 @@ export const debugAssertionEvalStore = {
                         {
                             AllParameters: {dataObj: new EvalAssertionObj(), resultObj: new EvalResultObj(), displayFieldList: ['label','description','direction'
                                     ,'compareToSourceId','compareToSourceExpression','compareToSourcePath','contentType','expression','headerField','minimumId',
-                                    'navigationLinks','operator','path','requestMethod','requestURL','resource','response','responseCode','sourceId','validateProfileId','value','warningOnly']},
+                                    'navigationLinks','operator','path','requestMethod','requestURL','resource','response','responseCode','sourceId','validateProfileId','value','warningOnly']
+                                    , footerList: [new XpathNotSupportedFooter()]},
                           /*
                             Asbestos Test Engine does not support the compareToSourcePath element part of the CompareToSourceId pattern type.
                            */
-                            CompareToSourceId: {dataObj: new EvalAssertionObj(), resultObj: new EvalResultObj(), displayFieldList: ['compareToSourceId','compareToSourceExpression','warningOnly']},
+                            CompareToSourceId: {dataObj: new EvalAssertionObj(), resultObj: new EvalResultObj(), displayFieldList: ['compareToSourceId','compareToSourceExpression','warningOnly'],footerList: [new XpathNotSupportedFooter()] },
                             ContentType: {dataObj: new EvalAssertionObj(), resultObj: new EvalResultObj(), displayFieldList: ['contentType','warningOnly']},
-                            Expression: {dataObj: new EvalAssertionObj(), resultObj: new EvalResultObj(), displayFieldList: ['sourceId','expression','warningOnly']},
-                            ExpressionValue: {dataObj: new EvalAssertionObj(), resultObj: new EvalResultObj(), displayFieldList: ['sourceId','expression','value','warningOnly']},
+                            Expression: {dataObj: new EvalAssertionObj(), resultObj: new EvalResultObj(), displayFieldList: ['sourceId','expression','warningOnly'], footerList: [new XpathNotSupportedFooter()]},
+                            ExpressionValue: {dataObj: new EvalAssertionObj(), resultObj: new EvalResultObj(), displayFieldList: ['sourceId','expression','value','warningOnly'], footerList: [new XpathNotSupportedFooter()]},
+                            FHIRPathExpression: {dataObj: new EvalAssertionObj(), resultObj: new EvalResultObj(), displayFieldList: ['sourceId','expression','value','warningOnly'], footerList: [new XpathNotSupportedFooter()]},
                             HeaderField: {dataObj: new EvalAssertionObj(), resultObj: new EvalResultObj(), displayFieldList: ['headerField','warningOnly']},
                             MinimumId: {dataObj: new EvalAssertionObj(), resultObj: new EvalResultObj(), displayFieldList: ['minimumId','warningOnly']},
-                            RequestMethod: {dataObj: new EvalAssertionObj(), resultObj: new EvalResultObj(), displayFieldList: ['sourceId','requestMethod','warningOnly']},
+                            RequestMethod: {dataObj: new EvalAssertionObj(), resultObj: new EvalResultObj(), displayFieldList: ['sourceId','requestMethod','warningOnly'], footerList: [new XpathNotSupportedFooter()]},
                             ResourceType: {dataObj: new EvalAssertionObj(), resultObj: new EvalResultObj(), displayFieldList: ['resource','warningOnly']},
                             Response: {dataObj: new EvalAssertionObj(), resultObj: new EvalResultObj(), displayFieldList: ['sourceId','response','warningOnly']},
                             ResponseCode: {dataObj: new EvalAssertionObj(), resultObj: new EvalResultObj(), displayFieldList: ['responseCode','operator','warningOnly']},
@@ -130,9 +136,10 @@ export const debugAssertionEvalStore = {
                      atLeastOnePropertyWasUpdated = true
                      // console.log('propKey: ' + propKey + ' was set to: ' + state.evalObj[propKey] + '. inprop? ' + Boolean('myStringValue' in obj[propKey])) // obj[propKey].myStringValue
                  }
-             } else {
-                 dataRef[propKey] = ''
-             }
+             } /* else {
+                 // Keep defaults in dataRef if obj.propKey is null/unspecified/or empty
+                 // dataRef[propKey] = ''
+             } */
             }
            if (atLeastOnePropertyWasUpdated) {
               state.isEvalObjUpdated = true
