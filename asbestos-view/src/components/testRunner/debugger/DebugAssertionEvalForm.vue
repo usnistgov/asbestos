@@ -64,7 +64,6 @@
         name: "DebugAssertionEvalForm",
         data() {
             return {
-                isResized: false,
                 evalTimer: null,
             }
         },
@@ -78,10 +77,6 @@
             //     required: true
             // }
         },
-        created: function() {
-            // Reset the resize flag
-            this.isResized = false
-        },
         computed: {
             displayFieldList() {
                 return this.getPatternTypeObj().displayFieldList
@@ -89,11 +84,6 @@
             defaultDisplayFieldList() {
                return this.getDefaultPatternTypeObj().displayFieldList
             }
-        },
-        created() {
-            const elFlexContainer = document.querySelector('div.dafFlexContainer')
-            const elDialogWindow = document.querySelector('div#debugAssertionEvalModal.eval-modal-container')
-            console.log(`In pattern ${this.patternTypeId}, created: elFlexContainer exists?: ${elFlexContainer !== null}, elDiallogWindow exists? ${elDialogWindow !== null}`)
         },
         methods: {
             openHelp(propKey) {
