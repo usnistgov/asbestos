@@ -203,51 +203,41 @@ public class GetLogEventAnalysisRequest {
             }
         } else if (request.uriParts.get(4).equalsIgnoreCase("url")) {   // url
             String query = request.req.getQueryString();
-            if (query != null) {
-                String url = null;
-                if (!query.startsWith("url=")) {
+            if (Strings.isNullOrEmpty(query)) {
+                request.badRequest();
+                return;
+            }
+            if (!query.startsWith("url=")) {
+                request.badRequest();
+                return;
+            }
+            String url = query.substring(4);
+            if (!url.contains("?") && url.contains(";")) {
+                url = url.substring(0, url.indexOf(';'));
+            }
+            Map<String, String> queryParams = Ref.parseParameters(query);
+            boolean gzip = queryParams.containsKey("gzip") && "true".equals(queryParams.get("gzip"));
+            boolean useProxy = queryParams.containsKey("useProxy") && "true".equals(queryParams.get("useProxy"));;
+            boolean ignoreBadRefs = queryParams.containsKey("ignoreBadRefs") && "true".equals(queryParams.get("ignoreBadRefs"));
+            String eventId = queryParams.getOrDefault("eventId", null);
+            String fixturePath = queryParams.get("fixturePath");
+            Ref ref = new Ref(url);
+            gov.nist.asbestos.client.Base.Request target;
+            try {
+                target = new gov.nist.asbestos.client.Base.Request(url, request.externalCache);
+            } catch (URISyntaxException e) {
+                request.badRequest();
+                return;
+            }
+            File testDir = getTestDir(target.segment(4), target.segment(5));  // testCollectionId, testId
+
+            ResourceWrapper resource = null;
+            if (testDir != null && !Strings.isNullOrEmpty(fixturePath)) {
+                resource = getResourceFromTestDefinition(testDir, fixturePath);
+                if (resource == null) {
                     request.badRequest();
                     return;
                 }
-                url = query.substring(4);
-                if (!url.contains("?") && url.contains(";")) {
-                    url = url.substring(0, url.indexOf(';'));
-                }
-                gov.nist.asbestos.client.Base.Request target;
-                try {
-                    target = new gov.nist.asbestos.client.Base.Request(url, request.externalCache);
-                } catch (URISyntaxException e) {
-                    request.badRequest();
-                    return;
-                }
-                File testDir = getTestDir(target.segment(4), target.segment(5));
-                if (testDir == null) {
-                    request.badRequest();
-                    return;
-                }
-                Map<String, String> queryParams = Ref.parseParameters(query);
-                boolean gzip = queryParams.containsKey("gzip") && "true".equals(queryParams.get("gzip"));
-                boolean useProxy = queryParams.containsKey("useProxy") && "true".equals(queryParams.get("useProxy"));;
-                boolean ignoreBadRefs = queryParams.containsKey("ignoreBadRefs") && "true".equals(queryParams.get("ignoreBadRefs"));
-                String eventId = queryParams.getOrDefault("eventId", null);
-                String fixturePath = queryParams.get("fixturePath");
-                Ref ref = new Ref(url);
-                ResourceWrapper resource = null;
-                if (!Strings.isNullOrEmpty(eventId)) {
-                    try {
-                        eventContext = new EventContext(ProxyEvent.eventFromEventURI(new URI(url)));
-                    } catch (Exception e) {
-                        throw new RuntimeException("URI " + url + " cannot be translated into an event");
-                    }
-                } else if (!Strings.isNullOrEmpty(fixturePath)) {
-                    resource = getResourceFromTestDefinition(testDir, fixturePath);
-                    if (resource == null) {
-                        request.badRequest();
-                        return;
-                    }
-                }
-                //Ref theRef = new Ref(fhirPath);
-                // too early - ref = new Ref(Ref.urlDecode(ref.asString()));
                 runAndReturnReport(
                         ref,
                         "By Request",
@@ -256,8 +246,37 @@ public class GetLogEventAnalysisRequest {
                         ignoreBadRefs,
                         false,
                         resource);
+                return;
             }
-        }
+            runAndReturnReport(
+                    ref,
+                    "By Request",
+                    gzip,
+                    useProxy,
+                    ignoreBadRefs,
+                    false,
+                    resource);
+//            if (!Strings.isNullOrEmpty(eventId)) {
+//                try {
+//                    eventContext = new EventContext(ProxyEvent.eventFromEventURI(new URI(url)));
+//                } catch (Exception e) {
+//                    throw new RuntimeException("URI " + url + " cannot be translated into an event");
+//                }
+//            } else if (!Strings.isNullOrEmpty(fixturePath)) {
+//
+//            }
+//            //Ref theRef = new Ref(fhirPath);
+//            // too early - ref = new Ref(Ref.urlDecode(ref.asString()));
+//            runAndReturnReport(
+//                    ref,
+//                    "By Request",
+//                    gzip,
+//                    useProxy,
+//                    ignoreBadRefs,
+//                    false,
+//                    resource);
+//
+       }
     }
 
     ResourceWrapper getResourceFromTestDefinition(File testDir, String ref) throws IOException {

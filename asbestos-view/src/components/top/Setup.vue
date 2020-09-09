@@ -4,7 +4,7 @@
         <p>These are steps that must be completed when NIST FHIR Toolkit is installed. They can
         be re-run later to verify operation.</p>
 
-        <h3>Load static resources</h3>
+        <h3>Build static resources</h3>
         <p>These resources are referenced in tests and must be loaded for tests to operate. They are loaded
             into the supporting HAPI server (default channel) and to a cache in FHIR Toolkit located in the External Cache.
             This initialization can be re-run at any time.
@@ -19,12 +19,33 @@
             default channel cache is checked second.
         </p>
 
+      <h3>Static resource lookup</h3>
+      <p>Static fixtures are defined with &lt;fixture>&lt;/fixture> declaration in a TestScript.
+        Inside this declaration is a reference to the content:</p>
+      <pre>
+    &lt;resource>
+       &lt;reference value="Bundle/binary_bundle.xml"/>
+    &lt;/resource>
+      </pre>
+      The search path for this content is:
+        <ol>
+      <li>The test definition (sub-directory Bundle, file binary_bundle.xml)</li>
+      <li>Resource cache for the current channel (EXTERNAL_CACHE/FhirTestLogs/default__CHANNEL/cache : sub-directory Bundle, file binary_bundle.xml)</li>
+      <li>Resource cache for the default channel (EXTERNAL_CACHE/FhirTestLogs/default__default/cache : sub-directory Bundle, file binary_bundle.xml)</li>
+    </ol>
+
+
         <!--  SelfTest is an alternate test runner   -->
         <self-test
             :session-id="'default'"
             :channel-id="'default'"
             :auto-load="true"
             :test-collection="'Test_Patients'"> </self-test>
+      <self-test
+          :session-id="'default'"
+          :channel-id="'default'"
+          :auto-load="true"
+          :test-collection="'Test_Documents'"> </self-test>
 
         <h3>Self Tests</h3>
         <p>The following Test Collections are run against internal simulators to verify both the

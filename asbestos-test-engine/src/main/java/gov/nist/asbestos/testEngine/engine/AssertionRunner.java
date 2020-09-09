@@ -48,8 +48,8 @@ public class AssertionRunner implements AssertionContext {
 
     public FixtureComponent getSource() {
         FixtureComponent sourceFixture = getSourceIfAvailable();
-        if (sourceFixture == null)
-            Reporter.reportError(this, "no source available for comparison.");
+//        if (sourceFixture == null)
+//            Reporter.reportError(this, "no source available for comparison.");
         return sourceFixture;
     }
 

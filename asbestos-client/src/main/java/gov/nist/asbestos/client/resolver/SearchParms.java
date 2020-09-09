@@ -18,7 +18,7 @@ public class SearchParms {
                 startWithQuestion = true;
                 parms = parms.substring(1);
             }
-            this.parms = URLEncoder.encode(parms, StandardCharsets.UTF_8.toString());
+            this.parms = parms; //URLEncoder.encode(parms, StandardCharsets.UTF_8.toString());
             if (startWithQuestion)
                 this.parms = "?" + this.parms;
         } else {

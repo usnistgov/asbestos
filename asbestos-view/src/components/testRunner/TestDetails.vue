@@ -28,9 +28,18 @@
             <span class="has-cursor">
                 <span v-if="label">{{label}}: </span>
                 <span v-else-if="isConditional" class="bold">If: </span>
-                {{ description }}
+              <span v-if="name">{{name}}</span>
+              <span v-else>{{description}}</span>
+
             </span>
         </span>
+
+      <div v-if="displayOpen && documentation" class="indent">
+        <vue-markdown>{{ documentation }}</vue-markdown>
+      </div>
+      <div v-if="displayOpen && name && description" class="indent">
+        {{ description }}
+      </div>
 
       <div v-if="displayOpen &&  isConditional" class="conditional-margins">
             <div>  <!-- enter contained test script with conditional test -->
@@ -86,7 +95,9 @@
     import ScriptDetailsContained from "./ScriptDetailsContained";
     import colorizeTestReports from "../../mixins/colorizeTestReports";
    import TestStatus from "./TestStatus";
-   // import importMixin from "../../mixins/importMixin";
+    import VueMarkdown from "vue-markdown";
+
+    // import importMixin from "../../mixins/importMixin";
     import ComponentScript from "./ComponentScript";
     import DebuggableListItem from "./debugger/DebuggableListItem";
     import debugTestScriptMixin from "../../mixins/debugTestScript";
@@ -185,6 +196,17 @@
                 if (!this.script) return ""
                 return this.script.description
             },
+          name() {
+            if (!this.script) return ""
+            return this.script.name
+          },
+          documentation() {
+            if (!this.script.extension) return "";
+            if (this.script.extension[0].url === 'urn:documentation') {
+              return this.script.extension[0].valueString;
+            }
+            return "";
+          }
         },
         created() {
         },
@@ -201,6 +223,7 @@
             ComponentScript,
             TestStatus,
             DebuggableListItem,
+          VueMarkdown,
         },
         mixins: [
             colorizeTestReports,

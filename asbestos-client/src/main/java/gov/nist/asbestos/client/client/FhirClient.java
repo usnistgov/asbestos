@@ -221,7 +221,8 @@ public class FhirClient {
                                 if (bundle.hasEntry()) {
                                     if (!bundle.getEntry().get(0).getResource().getClass().getSimpleName().equals(expectedResourceType))
                                         throw new Error("Search returned bundle containing " + bundle.getEntry().get(0).getResource().getClass().getSimpleName() + " instead of " + expectedResourceType);
-                                    resource = bundle.getEntry().get(0).getResource();
+                                    if (!getter.isSearch())
+                                        resource = bundle.getEntry().get(0).getResource();
                                 }
                             } else
                                 throw new Error("Read must return " + expectedResourceType + " - received " + resource.getClass().getSimpleName() + " instead");

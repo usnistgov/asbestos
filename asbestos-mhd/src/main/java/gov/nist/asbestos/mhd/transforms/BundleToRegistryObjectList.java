@@ -1010,20 +1010,20 @@ public class BundleToRegistryObjectList implements IVal {
             }
         }
 
-        for (ResourceWrapper wrapper : rMgr.getBundleResources()) {
-            if (wrapper.getResource() instanceof DocumentReference) {
-                DocumentReference documentReference = (DocumentReference) wrapper.getResource();
-                List<DocumentReference.DocumentReferenceContentComponent> ccs = documentReference.getContent();
-                for (DocumentReference.DocumentReferenceContentComponent cc : ccs) {
-                    Attachment a = cc.getAttachment();
-                    String url = a.getUrl();
-                    if (!bundleContains(bundle, url)) {
-                        val.add(new ValE("Cannot resolve Binary reference from DocumentReference: " + url).asError()
-                                .add(new ValE("3.65.4.1.2.1 Bundle Resources").asDoc()));
-                    }
-                }
-            }
-        }
+//        for (ResourceWrapper wrapper : rMgr.getBundleResources()) {
+//            if (wrapper.getResource() instanceof DocumentReference) {
+//                DocumentReference documentReference = (DocumentReference) wrapper.getResource();
+//                List<DocumentReference.DocumentReferenceContentComponent> ccs = documentReference.getContent();
+//                for (DocumentReference.DocumentReferenceContentComponent cc : ccs) {
+//                    Attachment a = cc.getAttachment();
+//                    String url = a.getUrl();
+//                    if (!bundleContains(bundle, url)) {
+//                        val.add(new ValE("Cannot resolve Binary reference from DocumentReference: " + url).asError()
+//                                .add(new ValE("3.65.4.1.2.1 Bundle Resources").asDoc()));
+//                    }
+//                }
+//            }
+//        }
     }
 
     private boolean bundleContains(Bundle bundle, String fullUrl) {

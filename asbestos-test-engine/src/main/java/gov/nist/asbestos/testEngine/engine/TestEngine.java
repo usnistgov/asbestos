@@ -547,12 +547,10 @@ public class TestEngine  implements TestDef {
 
                     if (fix.hasResource()) {
                         Ref ref = new Ref(fix.getResource().getReference());
-                        fixtureMgr.add(id)
+                        FixtureComponent fixtureComponent = fixtureMgr.add(id)
                                 .setStaticRef(ref)   // static means defined in this test
-                                .setVal(fVal)
-                        //        .setCreatedBy(new Action(testScript, fix))
-                        ;
-
+                                .setVal(fVal);
+                        fixtureComponent.getResourceResource();
                     } else if (fix.hasExtension(ExtensionDef.subFixture)) {
                         Extension subfix = fix.getExtensionByUrl(ExtensionDef.subFixture);
 

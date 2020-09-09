@@ -156,7 +156,7 @@ public class FixtureComponent {
                 return resourceWrapper;
             }
         } catch (Throwable t) {
-            // ignore
+            throw t;
         }
         return null;
     }
