@@ -8,10 +8,10 @@ import gov.nist.asbestos.testEngine.engine.fixture.FixtureComponent;
 public class ResponseCodeAssertion {
 
     public static boolean run(AssertionContext ctx) {
+        if (!ctx.validate())
+            return false;
         FixtureComponent sourceFixture = ctx.getSource();
-        if (sourceFixture == null) return false;
         FixtureLabels fixtureLabels = ctx.getFixtureLabels();
-        if (fixtureLabels == null) return false;
 
         int codeFound = sourceFixture.getResourceWrapper().getHttpBase().getStatus();
         String found = String.valueOf(codeFound);

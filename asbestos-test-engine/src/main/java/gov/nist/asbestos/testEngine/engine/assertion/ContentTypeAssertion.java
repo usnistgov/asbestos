@@ -3,15 +3,16 @@ package gov.nist.asbestos.testEngine.engine.assertion;
 import gov.nist.asbestos.testEngine.engine.FixtureLabels;
 import gov.nist.asbestos.testEngine.engine.Reporter;
 import gov.nist.asbestos.testEngine.engine.fixture.FixtureComponent;
+import org.hl7.fhir.r4.model.BaseResource;
 
 public class ContentTypeAssertion {
 
     // TODO: this and instResource cannot both be right, sourceFixture.getResponseType() ?
     public static boolean run(AssertionContext ctx) {
+        if (!ctx.validate())
+            return false;
         FixtureComponent sourceFixture = ctx.getSource();
-        if (sourceFixture == null) return false;
         FixtureLabels fixtureLabels = ctx.getFixtureLabels();
-        if (fixtureLabels == null) return false;
         AssertionReport.build(ctx.getCurrentAssertReport(),
                 "Content type",
                 ctx.getCurrentAssert().getContentType(),

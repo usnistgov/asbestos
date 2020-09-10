@@ -4,14 +4,15 @@ import gov.nist.asbestos.testEngine.engine.AssertionRunner;
 import gov.nist.asbestos.testEngine.engine.FixtureLabels;
 import gov.nist.asbestos.testEngine.engine.Reporter;
 import gov.nist.asbestos.testEngine.engine.fixture.FixtureComponent;
+import org.hl7.fhir.r4.model.BaseResource;
 
 public class ResponseAssertion {
 
     public static boolean run(AssertionContext ctx) {
+        if (!ctx.validate())
+            return false;
         FixtureComponent sourceFixture = ctx.getSource();
-        if (sourceFixture == null) return false;
         FixtureLabels fixtureLabels = ctx.getFixtureLabels();
-        if (fixtureLabels == null) return false;
 
         int codeFound = sourceFixture.getResourceWrapper().getHttpBase().getStatus();
         String found = responseCodeAsString(codeFound);

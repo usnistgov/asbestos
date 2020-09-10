@@ -39,6 +39,19 @@ public class AssertionRunner implements AssertionContext {
         return isRequest;
     }
 
+    @Override
+    public boolean validate() {
+        if (getSource() == null)
+            return false;
+        if (getFixtureLabels() == null)
+            return false;
+        if (getSource().getResourceResource() == null) {
+            Reporter.reportError(this, "Fixture referenced <" + getSource().getId()  + "> has no resource.");
+            return false;
+        }
+        return true;
+    }
+
     AssertionRunner setVariableMgr(VariableMgr variableMgr) {
         this.variableMgr = variableMgr;
         return this;
@@ -58,6 +71,14 @@ public class AssertionRunner implements AssertionContext {
         if (sourceOverride != null)
             return sourceOverride;
         FixtureComponent sourceFixture = currentAssert.hasSourceId() ? fixtureMgr.get(currentAssert.getSourceId()) : fixtureMgr.get(fixtureMgr.getLastOp());
+        return sourceFixture;
+    }
+
+    public FixtureComponent getCompareToSource() {
+        Objects.requireNonNull(currentAssert);
+        if (sourceOverride != null)
+            return sourceOverride;
+        FixtureComponent sourceFixture = currentAssert.hasCompareToSourceId() ? fixtureMgr.get(currentAssert.getCompareToSourceId()) : fixtureMgr.get(fixtureMgr.getLastOp());
         return sourceFixture;
     }
 
@@ -356,6 +377,21 @@ public class AssertionRunner implements AssertionContext {
         return new FixtureLabels(
                 getTestDef(),
                 getSource(),
+                FixtureLabels.Source.SOURCE);
+    }
+
+    public FixtureLabels getCompareToFixtureLabels() {
+        FixtureComponent sourceFixture = getCompareToSource();
+        if (sourceFixture == null)
+            return null;
+        if (sourceFixture.getResponseType() == null) {
+            Reporter.reportError(this, "compareToSourceId or lastOperation references no resource.");
+            return null;
+        }
+
+        return new FixtureLabels(
+                getTestDef(),
+                getCompareToSource(),
                 FixtureLabels.Source.SOURCE);
     }
 

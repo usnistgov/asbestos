@@ -9,15 +9,11 @@ import org.hl7.fhir.r4.model.BaseResource;
 public class ExpressionAssertion {
 
     public static boolean run(AssertionContext ctx) {
-        FixtureComponent sourceFixture = ctx.getSource();
-        if (sourceFixture == null) return false;
-        FixtureLabels fixtureLabels = ctx.getFixtureLabels();
-        if (fixtureLabels == null) return false;
-        BaseResource sourceResource = sourceFixture.getResourceResource();
-        if (sourceResource == null) {
-            Reporter.reportError(ctx, "Fixture referenced <" + sourceFixture.getId()  + "> has no resource.");
+        if (!ctx.validate())
             return false;
-        }
+        FixtureComponent sourceFixture = ctx.getSource();
+        FixtureLabels fixtureLabels = ctx.getFixtureLabels();
+        BaseResource sourceResource = sourceFixture.getResourceResource();
         String rawExpression = ctx.getCurrentAssert().getExpression();
         String expression = ctx.getVariableMgr().updateReference(rawExpression);
         boolean ok;

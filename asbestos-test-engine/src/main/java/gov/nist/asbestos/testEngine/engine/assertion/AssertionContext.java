@@ -12,6 +12,7 @@ import org.hl7.fhir.r4.model.TestScript;
 public interface AssertionContext {
     TestDef getTestDef();
     FixtureComponent getSource();
+    FixtureComponent getCompareToSource();
     boolean getWarningOnly();
     TestScript.SetupActionAssertComponent getCurrentAssert();
     TestReport.SetupActionAssertComponent getCurrentAssertReport();
@@ -19,7 +20,10 @@ public interface AssertionContext {
     String getType();
     String getLabel();
     FixtureLabels getFixtureLabels();
+    FixtureLabels getCompareToFixtureLabels();
     VariableMgr getVariableMgr();
     FixtureMgr getFixtureMgr();
     boolean isRequest();
+
+    boolean validate();
 }

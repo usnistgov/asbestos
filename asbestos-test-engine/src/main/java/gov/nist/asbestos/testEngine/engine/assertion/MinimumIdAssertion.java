@@ -10,10 +10,9 @@ import static gov.nist.asbestos.testEngine.engine.AssertionRunner.*;
 public class MinimumIdAssertion {
 
     public static boolean run(AssertionContext ctx) {
+        if (!ctx.validate())
+            return false;
         FixtureComponent sourceFixture = ctx.getSource();
-        if (sourceFixture == null) return false;
-        FixtureLabels fixtureLabels = ctx.getFixtureLabels();
-        if (fixtureLabels == null) return false;
 
         FixtureComponent miniFixture  = ctx.getFixtureMgr().get(ctx.getCurrentAssert().getMinimumId());
         if (miniFixture == null) {
