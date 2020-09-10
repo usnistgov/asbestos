@@ -25,9 +25,11 @@ public class SourceIdSourceExpressionAssertion {
             return false;
         }
 
-        String uiLink = EventLinkToUILink.get(sourceFixture.getCreatedByUIEvent(), "resp");
-        fixtureLabels.setRawReference(uiLink);
-        fixtureLabels.referenceLabel = sourceFixture.getId() == null ? "Open in Inspector" : sourceFixture.getId();
+        if (sourceFixture.getCreatedByUIEvent() != null) {
+            String uiLink = EventLinkToUILink.get(sourceFixture.getCreatedByUIEvent(), "resp");
+            fixtureLabels.setRawReference(uiLink);
+            fixtureLabels.referenceLabel = sourceFixture.getId() == null ? "Open in Inspector" : sourceFixture.getId();
+        }
 
         AssertionReport.build(ctx.getCurrentAssertReport(), expression, fixtureLabels, sourceFixture);
         if ("true".equals(found))

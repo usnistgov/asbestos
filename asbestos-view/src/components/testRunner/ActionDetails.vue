@@ -247,13 +247,27 @@
                 const parts = attr.split('|')
                 return parts[0]
             },
-            references() {
+            referencesOld() {
                 if (!this.descriptionAtt || !this.descriptionAtt.includes('|')) return '';
                 const attr = this.descriptionAtt
                 let parts = attr.split('|')
                 parts.shift()
                 return parts
             },
+          references() {
+              const scriptExtensions = this.scriptExtensions;
+              let references = [];
+              if (scriptExtensions) {
+                scriptExtensions.forEach(extension => {
+                  if (extension.url === 'urn:reference')
+                    references.push(extension.valueString);
+                });
+              }
+              return references;
+          },
+          scriptExtensions() {
+              return this.script.operation ? this.script.operation.extension : this.script.assert.extension;
+          },
             descriptionAtt() {
                 return this.script.operation ? this.script.operation.description : this.script.assert.description
             },

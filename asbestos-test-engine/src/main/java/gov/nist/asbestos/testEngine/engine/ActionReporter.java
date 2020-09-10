@@ -102,7 +102,7 @@ class ActionReporter implements TestDef {
                 // referenced to UIEvent for display in inspector
                 labels.rawReference = refStrRaw;
                 labels.referenceLabel = "Open in Inspector";
-                log.info("Fixture Reference: " + labels.label + " => " + refStrRaw);
+                // log.info("Fixture Reference: " + labels.label + " => " + refStrRaw);
                 fixtures.put(labels.label, labels.getReference());
 
                 if (labels.sourceId) {
@@ -148,7 +148,7 @@ class ActionReporter implements TestDef {
         Objects.requireNonNull(testEngine);
         Map<String, String> fixtures = new HashMap<>();
 
-        log.info("Report request: " + request.trim());
+        // log.info("Report request: " + request.trim());
 
         // report assertion source (only for assertions)
         reportAssertionSource(fixtures);
@@ -172,7 +172,7 @@ class ActionReporter implements TestDef {
                 // referenced to UIEvent for display in inspector
                 labels.rawReference = refStrRaw;
                 labels.referenceLabel = "Open in Inspector";
-                log.info("Fixture Reference: " + labels.label + " => " + refStrRaw);
+                // log.info("Fixture Reference: " + labels.label + " => " + refStrRaw);
                 fixtures.put(labels.label, labels.getReference());
 
                 if (labels.sourceId) {

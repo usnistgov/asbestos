@@ -206,7 +206,7 @@
               return this.script.extension[0].valueString;
             }
             return "";
-          }
+          },
         },
         created() {
         },
