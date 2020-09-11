@@ -23,6 +23,7 @@ public class TestScriptDebugState {
     private AtomicBoolean resume;
     private AtomicBoolean stopDebug;
     private AtomicBoolean evaluateMode;
+    private AtomicBoolean evaluateForResourceMode;
     private AtomicBoolean requestAnnotations;
     /**
      * Debug Instance
@@ -49,6 +50,7 @@ public class TestScriptDebugState {
         this.resume = new AtomicBoolean();
         this.stopDebug = new AtomicBoolean();
         this.evaluateMode = new AtomicBoolean();
+        this.evaluateForResourceMode = new AtomicBoolean();
         this.requestAnnotations = new AtomicBoolean();
         this.breakpointSet = breakpointSet;
         this.session = session;
@@ -116,6 +118,14 @@ public class TestScriptDebugState {
        this.evaluateMode.set(false);
     }
 
+    public void resetEvalForResourceMode() {
+        this.evaluateForResourceMode.set(false);
+    }
+
+    public AtomicBoolean getDebugEvaluateForResourceMode() {
+        return evaluateForResourceMode;
+    }
+
     public void sendStopped() {
         getSession().getAsyncRemote().sendText("{\"messageType\":\"stoppedDebugging\", \"testReport\":{}}");
     }
@@ -146,6 +156,17 @@ public class TestScriptDebugState {
                 + " \"resultMessage\":\"" + resultMessage +"\","
                 + "\"markdownMessage\":\"" + base64 + "\"}");
     }
+
+    public void sendEvalForResourcesResult(String resultMessage, String markdownMessage, String exceptionPropKey, String resourceList) {
+        String base64 = (markdownMessage != null && markdownMessage.length() > 0) ? Base64.getEncoder().encodeToString(markdownMessage.getBytes()) : "";
+        getSession().getAsyncRemote().sendText("{\"messageType\":\"eval-for-resources-result\", "
+                + ((exceptionPropKey != null && exceptionPropKey != "")?"\"exceptionPropKey\": \"" + exceptionPropKey + "\",":"")
+                + " \"resultMessage\":\"" + resultMessage +"\","
+                + "\"markdownMessage\":\"" + base64 + "\""
+                + ", \"resourceList\": [" +  resourceList + "]"
+                + "}");
+    }
+
 
 
     /**
@@ -190,6 +211,7 @@ public class TestScriptDebugState {
         boolean isWait = ! getStopDebug().get();
         isWait = isWait && ! getResume().get();
         isWait = isWait && ! getDebugEvaluateModeWasRequested().get();
+        isWait = isWait && ! getDebugEvaluateForResourceMode().get();
 
         return isWait;
     }
@@ -258,14 +280,6 @@ public class TestScriptDebugState {
 
     public static String quoteString(String myValue) {
         return "\"" + myValue + "\"";
-    }
-
-    public static String formatAsSelectOptionData(String displayName, String codeValue, String definition) {
-        return "{"
-                + quoteString("displayName") + ":" + quoteString(displayName)
-                + "," + quoteString("codeValue") + ":" + quoteString(codeValue)
-                + "," + quoteString("definition") + ":" + quoteString(definition)
-                + "}";
     }
 
     public AtomicBoolean getRequestAnnotations() {

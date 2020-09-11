@@ -7,12 +7,16 @@ import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.sharedObjects.debug.AssertionFieldDescription;
 import gov.nist.asbestos.sharedObjects.debug.AssertionFieldSupport;
 import gov.nist.asbestos.sharedObjects.debug.AssertionFieldValueDescription;
+import gov.nist.asbestos.sharedObjects.debug.DebugCopyAssertException;
 import gov.nist.asbestos.sharedObjects.debug.StopDebugTestScriptException;
 import gov.nist.asbestos.sharedObjects.debug.TestScriptDebugInterface;
 import gov.nist.asbestos.sharedObjects.debug.TestScriptDebugState;
 import gov.nist.asbestos.sharedObjects.debug.TsEnumerationCodeExtractor;
 import org.apache.log4j.Logger;
+import org.hl7.fhir.r4.model.Base;
+import org.hl7.fhir.r4.model.BaseResource;
 import org.hl7.fhir.r4.model.Enumeration;
+import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.TestReport;
 import org.hl7.fhir.r4.model.TestScript;
 
@@ -27,6 +31,7 @@ import java.util.ListIterator;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class TestScriptDebugger implements TestScriptDebugInterface {
     private static Logger log = Logger.getLogger(TestScriptDebugger.class);
@@ -113,84 +118,147 @@ public class TestScriptDebugger implements TestScriptDebugInterface {
                         // Prepare user-selectable type information
                         // "valueTypes" : {"direction" : [{"codeValue":"req","displayName":"","definition":""},...],
                         // Field descriptions are the standard FHIR fields based on assertion class annotation
-                        List<AssertionFieldDescription> fieldDescriptions = new ArrayList<>();
-                        // Override fields are used to inject dropdowns into a text-only field
-                        List<AssertionFieldDescription> overrideFields = new ArrayList<>();
-                        AssertionFieldSupport fieldSupport = new AssertionFieldSupport();
-                        if (state.getRequestAnnotations().get()) {
-                            // gather static FHIR enumeration values and other field support values as requested only the first time around
-                            setAssertionEnumerationTypes(evalElementList, fieldDescriptions);
-                            fieldSupport.setFhirEnumerationTypes(fieldDescriptions);
-                            List<String> resourceNames = new ArrayList<String>(Ref.getResourceNames());
-                            Collections.sort(resourceNames);
-                            overrideFields.add(formatField("resource", new ArrayList<String>(resourceNames)));
-                            List<String> contentTypeList = new ArrayList<String>(Format.getFormats());
-                            Collections.sort(contentTypeList);
-                            overrideFields.add(formatField("contentType", contentTypeList));
-                            overrideFields.add(formatField("warningOnly", Arrays.asList("false","true")));
-                            fieldSupport.setOverrideFieldTypes(overrideFields);
-                        }
-                        Set<String> fixtureIds = te.getFixtureMgr().keySet();
-                        AssertionFieldDescription fixtureIdsDesc = formatField("sourceId", new ArrayList<String>(fixtureIds));
-
-                        // When the evalJsonString is empty, Send original assertion as a template for the user to edit an assertion
-                        String assertionJsonStr = new Gson().toJson(assertComponent);
-                        String fieldSupportStr = new Gson().toJson(fieldSupport);
-                        String fixtureIdsStr = new Gson().toJson(fixtureIdsDesc);
-
-                        state.sendAssertionStr(assertionJsonStr, fieldSupportStr, fixtureIdsStr);
+                        sendOriginalAssert(assertComponent, state, evalElementList);
                     } else {
                         // Eval was requested
-                        ListIterator<String> it = evalElementList.listIterator();
-                        TestScript.SetupActionAssertComponent copy = null;
-                        boolean copyException = false;
-                        try {
-                            Map<String, String> myMap = new Gson().fromJson(evalJsonString, Map.class);
-                            if (! myMap.keySet().containsAll(evalElementList)) {
-                                throw new RuntimeException("myMap does not contain all the required keys");
-                            }
-                            copy = assertComponent.copy();
-                            copy.setLabel(myMap.get(it.next()));
-                            copy.setDescription(myMap.get(it.next()));
-                            copy.setDirection(TestScript.AssertionDirectionType.fromCode(myMap.get(it.next())));
-                            copy.setCompareToSourceId(myMap.get(it.next()));
-                            copy.setCompareToSourceExpression(myMap.get(it.next()));
-                            copy.setCompareToSourcePath(myMap.get(it.next()));
-                            copy.setContentType(myMap.get(it.next()));
-                            copy.setExpression(myMap.get(it.next()));
-                            copy.setHeaderField(myMap.get(it.next()));
-                            copy.setMinimumId(myMap.get(it.next()));
-                            copy.setNavigationLinks(Boolean.parseBoolean(myMap.get(it.next())));
-                            copy.setOperator(TestScript.AssertionOperatorType.fromCode(myMap.get(it.next())));
-                            copy.setPath(myMap.get(it.next()));
-                            copy.setRequestMethod(TestScript.TestScriptRequestMethodCode.fromCode(myMap.get(it.next())));
-                            copy.setRequestURL(myMap.get(it.next()));
-                            copy.setResource(myMap.get(it.next()));
-                            copy.setResponse(TestScript.AssertionResponseTypes.fromCode(myMap.get(it.next())));
-                            copy.setResponseCode(myMap.get(it.next()));
-                            copy.setSourceId(myMap.get(it.next()));
-                            copy.setValidateProfileId(myMap.get(it.next()));
-                            copy.setValue(myMap.get(it.next()));
-                            copy.setWarningOnly(Boolean.parseBoolean(myMap.get(it.next())));
-                        } catch (Exception ex) {
-                            copyException = true;
-                            state.sendDebugAssertionEvalResultStr("Exception: ", ex.getMessage(), (it.hasPrevious()?it.previous():""));
-                        }
-                        if (copy != null && ! copyException) {
-                            String typePrefix = "contained.action";
-                            TestReport.SetupActionAssertComponent actionReport = new TestReport.SetupActionAssertComponent();
-                            te.doAssert(typePrefix, copy, actionReport);
-                            String code = actionReport.getResult().toCode();
-                            if ("fail".equals(code)) {
-                                log.info("copy eval failed.");
-                            } else if ("error".equals(code)) {
-                                log.info("copy eval error.");
-                            }
-                            state.sendDebugAssertionEvalResultStr(code, actionReport.getMessage(), "");
-                        }
+                        doEval(assertComponent, state, evalElementList, evalJsonString);
                     }
+                } else if (state.getDebugEvaluateForResourceMode().get()) {
+                   state.resetEvalForResourceMode();
+                   String evalJsonString = state.getEvalJsonString();
+                    doEvalForResource(assertComponent, state, evalElementList, evalJsonString);
                 }
             } while (! state.getResume().get() && ! state.getStopDebug().get());
+        }
+    }
+
+    private void sendOriginalAssert(TestScript.SetupActionAssertComponent assertComponent, TestScriptDebugState state, List<String> evalElementList) {
+        List<AssertionFieldDescription> fieldDescriptions = new ArrayList<>();
+        // Override fields are used to inject dropdowns into a text-only field
+        List<AssertionFieldDescription> overrideFields = new ArrayList<>();
+        AssertionFieldSupport fieldSupport = new AssertionFieldSupport();
+        if (state.getRequestAnnotations().get()) {
+            // gather static FHIR enumeration values and other field support values as requested only the first time around
+            setAssertionEnumerationTypes(evalElementList, fieldDescriptions);
+            fieldSupport.setFhirEnumerationTypes(fieldDescriptions);
+            List<String> resourceNames = new ArrayList<String>(Ref.getResourceNames());
+            Collections.sort(resourceNames);
+            overrideFields.add(formatField("resource", new ArrayList<String>(resourceNames)));
+            List<String> contentTypeList = new ArrayList<String>(Format.getFormats());
+            Collections.sort(contentTypeList);
+            overrideFields.add(formatField("contentType", contentTypeList));
+            overrideFields.add(formatField("warningOnly", Arrays.asList("false","true")));
+            fieldSupport.setOverrideFieldTypes(overrideFields);
+        }
+        Set<String> fixtureIds = te.getFixtureMgr().keySet();
+        AssertionFieldDescription fixtureIdsDesc = formatField("sourceId", new ArrayList<String>(fixtureIds));
+
+        // When the evalJsonString is empty, Send original assertion as a template for the user to edit an assertion
+        String assertionJsonStr = new Gson().toJson(assertComponent);
+        String fieldSupportStr = new Gson().toJson(fieldSupport);
+        String fixtureIdsStr = new Gson().toJson(fixtureIdsDesc);
+
+        state.sendAssertionStr(assertionJsonStr, fieldSupportStr, fixtureIdsStr);
+    }
+
+
+    private void doEvalForResource(TestScript.SetupActionAssertComponent assertComponent, TestScriptDebugState state, List<String> evalElementList, String evalJsonString) {
+        TestScript.SetupActionAssertComponent copy = null;
+        try {
+            copy = makeAssert(assertComponent, state, evalElementList, evalJsonString);
+            if (copy != null) {
+                String typePrefix = "contained.action";
+                TestReport.SetupActionAssertComponent actionReport = new TestReport.SetupActionAssertComponent();
+                te.doAssert(typePrefix, copy, actionReport);
+                String code = actionReport.getResult().toCode();
+                if ("fail".equals(code)) {
+                    log.info("copy eval failed.");
+                } else if ("error".equals(code)) {
+                    log.info("copy eval error.");
+                } else {
+                    String fixtureId = copy.getSourceId();
+                    String fhirPath = copy.getExpression();
+                    BaseResource resource = te.getFixtures().get(fixtureId).getResourceResource();
+                    List<Base> resources = FhirPathEngineBuilder.evalForResources(resource, fhirPath);
+                    List<String> baseNames = new ArrayList<>();
+                    if (resources != null) {
+                        for (Base b : resources) {
+                            baseNames.add(b.fhirType());
+                        }
+                        List<String> myList =
+                                baseNames
+                                        .stream()
+                                        .map(TestScriptDebugState::quoteString)
+                                        .collect(Collectors.toList());
+                        String myString = String.join(",", myList);
+                        state.sendEvalForResourcesResult(code, actionReport.getMessage(), "", myString);
+                    } else {
+                        String emptyStr = TestScriptDebugState.quoteString("");
+                        state.sendEvalForResourcesResult(code, actionReport.getMessage(), "", emptyStr);
+                    }
+                    return;
+                }
+                state.sendDebugAssertionEvalResultStr(code, actionReport.getMessage(), "");
+            }
+        } catch (DebugCopyAssertException ex) {
+        }
+    }
+
+    private void doEval(TestScript.SetupActionAssertComponent assertComponent, TestScriptDebugState state, List<String> evalElementList, String evalJsonString) {
+        TestScript.SetupActionAssertComponent copy = null;
+        try {
+            copy = makeAssert(assertComponent, state, evalElementList, evalJsonString);
+            if (copy != null) {
+                String typePrefix = "contained.action";
+                TestReport.SetupActionAssertComponent actionReport = new TestReport.SetupActionAssertComponent();
+                te.doAssert(typePrefix, copy, actionReport);
+                String code = actionReport.getResult().toCode();
+                if ("fail".equals(code)) {
+                    log.info("copy eval failed.");
+                } else if ("error".equals(code)) {
+                    log.info("copy eval error.");
+                }
+                state.sendDebugAssertionEvalResultStr(code, actionReport.getMessage(), "");
+            }
+        } catch (DebugCopyAssertException ex) {
+        }
+    }
+
+    private TestScript.SetupActionAssertComponent makeAssert(TestScript.SetupActionAssertComponent assertComponent, TestScriptDebugState state, List<String> evalElementList, String evalJsonString) throws DebugCopyAssertException  {
+        ListIterator<String> it = evalElementList.listIterator();
+        TestScript.SetupActionAssertComponent copy = null;
+        try {
+            Map<String, String> myMap = new Gson().fromJson(evalJsonString, Map.class);
+            if (! myMap.keySet().containsAll(evalElementList)) {
+                throw new RuntimeException("myMap does not contain all the required keys");
+            }
+            copy = assertComponent.copy();
+            copy.setLabel(myMap.get(it.next()));
+            copy.setDescription(myMap.get(it.next()));
+            copy.setDirection(TestScript.AssertionDirectionType.fromCode(myMap.get(it.next())));
+            copy.setCompareToSourceId(myMap.get(it.next()));
+            copy.setCompareToSourceExpression(myMap.get(it.next()));
+            copy.setCompareToSourcePath(myMap.get(it.next()));
+            copy.setContentType(myMap.get(it.next()));
+            copy.setExpression(myMap.get(it.next()));
+            copy.setHeaderField(myMap.get(it.next()));
+            copy.setMinimumId(myMap.get(it.next()));
+            copy.setNavigationLinks(Boolean.parseBoolean(myMap.get(it.next())));
+            copy.setOperator(TestScript.AssertionOperatorType.fromCode(myMap.get(it.next())));
+            copy.setPath(myMap.get(it.next()));
+            copy.setRequestMethod(TestScript.TestScriptRequestMethodCode.fromCode(myMap.get(it.next())));
+            copy.setRequestURL(myMap.get(it.next()));
+            copy.setResource(myMap.get(it.next()));
+            copy.setResponse(TestScript.AssertionResponseTypes.fromCode(myMap.get(it.next())));
+            copy.setResponseCode(myMap.get(it.next()));
+            copy.setSourceId(myMap.get(it.next()));
+            copy.setValidateProfileId(myMap.get(it.next()));
+            copy.setValue(myMap.get(it.next()));
+            copy.setWarningOnly(Boolean.parseBoolean(myMap.get(it.next())));
+            return copy;
+        } catch (Exception ex) {
+            state.sendDebugAssertionEvalResultStr("Exception: ", ex.getMessage(), (it.hasPrevious()?it.previous():""));
+            throw new DebugCopyAssertException(ex.toString());
         }
     }
 

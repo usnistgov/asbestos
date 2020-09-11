@@ -23,6 +23,7 @@
                             :value="getPropVal(propKey)"
                             :data-prop-key="propKey"
                             @change="onEvalObjPropSelect">
+                        <option v-if="getPropVal(propKey) === ''" disabled value="">Please select one</option>
                         <option v-for="option in getEnumTypeArray(propKey)"
                                 :value="option.codeValue" :title="option.definition"
                                 :key="option.codeValue">
@@ -48,11 +49,29 @@
         </div>
      </div>
      <div v-bind:class="{
+                    'resultBox': true,
                     'evalNotPassed': getResultCode().valueOf() !== 'pass',
                     }">
         <span class="form-block">{{getResultCode()}}</span>
         <vue-markdown
             v-bind:source="getResultMessage()"></vue-markdown>
+         <div v-if="getResourceList()" >
+             <template v-if="getResourceList().length > 0">
+                <select size="5"  >
+                 <option v-for="rName in getResourceList()"
+                         :value="rName"
+                         :key="rName">
+                     {{ rName}}
+                 </option>
+              </select>
+             <div>
+                <button class="resultBox">Inspect</button>
+             </div>
+            </template>
+             <template v-else>
+                 No resources found.
+             </template>
+         </div>
      </div>
  </div>
 </template>
@@ -108,6 +127,13 @@
             },
             getResultMessage() {
                 return this.getPatternTypeObj().resultObj.markdownMessage
+            },
+            getResourceList() {
+               const obj = this.getPatternTypeObj()
+               if ('resourceList' in obj) {
+                  return obj.resourceList
+               }
+               return null
             },
             getResultPropKey() {
                 return this.getPatternTypeObj().resultObj.propKey
@@ -197,7 +223,12 @@
                 this.$store.commit('setDebugAssertionEvalPropKey', {patternTypeId: this.patternTypeId, propKey: propKey}) // Just to track what changed field was updated in the last attempt so the error hint may be applied to this field
                 let assertDataString = JSON.stringify(this.getPatternTypeObj().dataObj)
                 // console.log('before base64: ' + assertDataString)
-                this.$store.dispatch('doDebugEvalAssertion', window.btoa(assertDataString))
+                const patternTypeObj = this.getPatternTypeObj()
+                if ('evalAction' in patternTypeObj) {
+                    this.$store.dispatch(patternTypeObj.evalAction, window.btoa(assertDataString))
+                } else {
+                    this.$store.dispatch('doDebugEvalAssertion', window.btoa(assertDataString))
+                }
             },
             evalOnKeyUp: function (event) {
                 if (this.evalTimer) {
@@ -247,6 +278,10 @@
 
     .evalNotPassed {
         color: red;
+    }
+
+    .resultBox {
+        margin-top: 5px;
     }
 
     .smallText {

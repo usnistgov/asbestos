@@ -294,6 +294,10 @@ export const debugTestScriptStore = {
             let sendData = `{"cmd":"debugEvalAssertion", "base64String":"${assertionDataBase64}"}`
             state.testScriptDebuggerWebSocket.send(sendData)
         },
+        async doDebugEvalForResources({state}, assertionDataBase64) {
+            let sendData = `{"cmd":"debugEvalForResources", "base64String":"${assertionDataBase64}"}`
+            state.testScriptDebuggerWebSocket.send(sendData)
+        },
         async debugTestScript({commit, rootState, state, getters, dispatch}, testId) {
             if (! state.isDebugTsFeatureEnabled) {
                 return
@@ -398,6 +402,9 @@ export const debugTestScriptStore = {
                         commit('setShowDebugEvalModal', true)
                     } else if (returnData.messageType === 'eval-assertion-result') {
                         commit('setDebugAssertionEvalResult', returnData)
+                    } else if (returnData.messageType === 'eval-for-resources-result') {
+                        commit('setDebugAssertionEvalResult', returnData)
+                        commit('setEvalForResourcesResult', returnData)
                     } else if (returnData.messageType === 'stoppedDebugging') {
                         console.log('Debugging was stopped.')
                         state.testScriptDebuggerWebSocket.close()

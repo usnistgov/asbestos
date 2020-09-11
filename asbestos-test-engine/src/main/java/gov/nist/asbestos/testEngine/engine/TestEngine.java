@@ -22,7 +22,6 @@ import gov.nist.asbestos.testEngine.engine.fixture.FixtureSub;
 import gov.nist.asbestos.testEngine.engine.translator.ComponentDefinition;
 import gov.nist.asbestos.testEngine.engine.translator.ComponentReference;
 import gov.nist.asbestos.testEngine.engine.translator.Parameter;
-import static gov.nist.asbestos.sharedObjects.debug.TestScriptDebugState.quoteString;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.log4j.Logger;
 import org.hl7.fhir.instance.model.api.IBaseResource;

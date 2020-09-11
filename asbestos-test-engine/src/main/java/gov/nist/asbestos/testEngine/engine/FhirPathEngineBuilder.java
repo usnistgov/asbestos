@@ -33,6 +33,13 @@ public class FhirPathEngineBuilder {
         return true;
     }
 
+    public static List<Base> evalForResources(Base resourceIn, String expression) {
+        if (resourceIn == null)
+            return null;
+        List<Base> results = build().evaluate(resourceIn, expression);
+        return results;
+    }
+
     public static Resource evalForResource(Resource resourceIn, String expression) {
         if (resourceIn == null)
             return null;

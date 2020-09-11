@@ -164,6 +164,9 @@ public class DebugTestScriptWebSocketEndpoint {
             } else if (cmd.equals("debugEvalAssertion")) {
                 String base64String = (String)myMap.get("base64String");
                 doDebugEvaluate(state, base64String);
+            } else if (cmd.equals("debugEvalForResources")) {
+                String base64String = (String)myMap.get("base64String");
+                doDebugEvaluateForResource(state, base64String);
             }
 
             // else if stepOver
@@ -300,6 +303,17 @@ public class DebugTestScriptWebSocketEndpoint {
             }
         }
     }
+
+    private void doDebugEvaluateForResource(TestScriptDebugState state, String base64String) {
+        if (base64String != null) {
+            state.setEvalJsonString(new String(Base64.getDecoder().decode(base64String)));
+            synchronized (state.getLock()) {
+                state.getDebugEvaluateForResourceMode().set(true);
+                state.getLock().notify();
+            }
+        }
+    }
+
 
 
     /**
