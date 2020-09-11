@@ -37,17 +37,17 @@ function EvalAssertionObj() {
     this.warningOnly = 'false' // Default everywhere
 }
 
+function resetDataStateObj(obj, pristineObj) {
+    for (let propKey in obj) {
+        obj[propKey] = pristineObj[propKey]
+    }
+}
+
 function EvalResultObj() {
     this.propKey = ''
     this.resultMessage = ''
     this.markdownMessage = ''
     this.wasEvaluatedAtleastOnce = false
-}
-
-function getRequestMethodDataObj() {
-    const dataObj = new EvalAssertionObj()
-    dataObj.requestMethod = 'get' // default to HTTP GET
-    return dataObj
 }
 
 export const debugAssertionEvalStore = {
@@ -89,9 +89,13 @@ export const debugAssertionEvalStore = {
                                 , displayFieldList: ['headerField','warningOnly']},
                             MinimumId: {dataObj: new EvalAssertionObj(), resultObj: new EvalResultObj()
                                 , displayFieldList: ['minimumId','warningOnly']},
-                            RequestMethod: {dataObj: getRequestMethodDataObj(), resultObj: new EvalResultObj()
+                            RequestMethod: {dataObj: new EvalAssertionObj(), resultObj: new EvalResultObj()
                                 , displayFieldList: ['sourceId','requestMethod','warningOnly']
-                                , footerList: [new XpathNotSupportedFooter()]},
+                                , footerList: [new XpathNotSupportedFooter()]
+                                , applyDataObjDefaults: function(dataObj) {
+                                    dataObj.requestMethod = 'get' // default to HTTP GET
+                                }
+                            },
                             ResourceType: {dataObj: new EvalAssertionObj(), resultObj: new EvalResultObj()
                                 , displayFieldList: ['resource','warningOnly']},
                             Response: {dataObj: new EvalAssertionObj(), resultObj: new EvalResultObj()
@@ -135,6 +139,7 @@ export const debugAssertionEvalStore = {
             try {
                 let patternObj = state.evalObjByPattern.patternTypes[state.selectedPatternTypeId]
                 let resultRef = patternObj.resultObj
+
                 if (! resultRef.wasEvaluatedAtleastOnce) {
                     resultRef.wasEvaluatedAtleastOnce = true
                 }
@@ -174,7 +179,24 @@ export const debugAssertionEvalStore = {
         updateAssertionEvalObj(state, obj) {
            let atLeastOnePropertyWasUpdated = false
             const defaultPatternTypeId = state.defaultPatternTypeId
-            let dataRef = state.evalObjByPattern.patternTypes[defaultPatternTypeId].dataObj
+            const patternObj = state.evalObjByPattern.patternTypes[defaultPatternTypeId]
+            let dataRef = patternObj.dataObj
+
+            // Reset the current selected pattern type to default
+            state.selectedPatternTypeId = state.defaultPatternTypeId
+            
+            // Clear all existing pattern types' dataObj and resultObj before reloading original assertion
+            for (let patternTypeName in state.evalObjByPattern.patternTypes) {
+                let patternObj1 = state.evalObjByPattern.patternTypes[patternTypeName]
+                resetDataStateObj(patternObj1.dataObj, new EvalAssertionObj())
+                // apply defaults if applicable
+                if ('applyDataObjDefaults' in patternObj1) {
+                    patternObj1.applyDataObjDefaults(patternObj1.dataObj)
+                }
+                // clear existing result
+                resetDataStateObj(patternObj1.resultObj, new EvalResultObj())
+            }
+
             for (let propKey in dataRef) {
              if (propKey in obj) {
                  if (typeof obj[propKey] === 'string') {
@@ -186,10 +208,7 @@ export const debugAssertionEvalStore = {
                      atLeastOnePropertyWasUpdated = true
                      // console.log('propKey: ' + propKey + ' was set to: ' + state.evalObj[propKey] + '. inprop? ' + Boolean('myStringValue' in obj[propKey])) // obj[propKey].myStringValue
                  }
-             } /* else {
-                 // Keep defaults in dataRef if obj.propKey is null/unspecified/or empty
-                 // dataRef[propKey] = ''
-             } */
+             }
             }
            if (atLeastOnePropertyWasUpdated) {
               state.isEvalObjUpdated = true
