@@ -48,6 +48,7 @@
             <div class="smallText">{{getEnumTypeFormalDefinition(propKey)}}</div>
         </div>
      </div>
+       <button class="evalButton" @click="doEval('')">Evaluate</button>
      <div v-bind:class="{
                     'resultBox': true,
                     'evalNotPassed': getResultCode().valueOf() !== 'pass',
@@ -338,4 +339,11 @@
         border: 2px solid red;
     }
 
+    .evalButton {
+        margin: 10px;
+        border-radius: 3px;
+        background-color: lavender; /* #FFC83D; */
+        font-size: x-small;
+        width: 20em;
+    }
 </style>

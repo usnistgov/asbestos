@@ -41,9 +41,10 @@ function EvalResultObj() {
     this.propKey = ''
     this.resultMessage = ''
     this.markdownMessage = ''
+    this.wasEvaluatedAtleastOnce = false
 }
 
-function RequestMethodDataObj() {
+function getRequestMethodDataObj() {
     const dataObj = new EvalAssertionObj()
     dataObj.requestMethod = 'get' // default to HTTP GET
     return dataObj
@@ -88,7 +89,7 @@ export const debugAssertionEvalStore = {
                                 , displayFieldList: ['headerField','warningOnly']},
                             MinimumId: {dataObj: new EvalAssertionObj(), resultObj: new EvalResultObj()
                                 , displayFieldList: ['minimumId','warningOnly']},
-                            RequestMethod: {dataObj: new RequestMethodDataObj(), resultObj: new EvalResultObj()
+                            RequestMethod: {dataObj: getRequestMethodDataObj(), resultObj: new EvalResultObj()
                                 , displayFieldList: ['sourceId','requestMethod','warningOnly']
                                 , footerList: [new XpathNotSupportedFooter()]},
                             ResourceType: {dataObj: new EvalAssertionObj(), resultObj: new EvalResultObj()
@@ -134,6 +135,9 @@ export const debugAssertionEvalStore = {
             try {
                 let patternObj = state.evalObjByPattern.patternTypes[state.selectedPatternTypeId]
                 let resultRef = patternObj.resultObj
+                if (! resultRef.wasEvaluatedAtleastOnce) {
+                    resultRef.wasEvaluatedAtleastOnce = true
+                }
                 resultRef.resultMessage = obj.resultMessage
                 if ('exceptionPropKey' in obj) {
                     resultRef.propKey = obj.exceptionPropKey
@@ -154,9 +158,12 @@ export const debugAssertionEvalStore = {
             try {
                 let patternObj = state.evalObjByPattern.patternTypes[state.selectedPatternTypeId]
 
-                if (patternObj.resourceList.length > 0)
+                // Remove all array elements
+                if (patternObj.resourceList.length > 0) {
                     patternObj.resourceList.splice(0, patternObj.resourceList.length)
+                }
 
+                // Reload elements from the result object into the pattern type
                 if ('resourceList' in obj && 'resourceList' in patternObj) {
                     for (let r of obj.resourceList) {
                         patternObj.resourceList.push(r)

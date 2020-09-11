@@ -210,7 +210,7 @@
     .debugFeatureOptionButton {
         margin-left: 7px;
         border-radius: 3px;
-        background-color: #FFC83D;
-       font-size: x-small;
+        background-color: lavender; /* #FFC83D; */
+        font-size: x-small;
     }
 </style>

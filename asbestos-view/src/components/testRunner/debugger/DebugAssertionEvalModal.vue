@@ -2,7 +2,7 @@
     <div name="modal" @dragover="drag_over" @drop="drop">
         <div class="modal-mask" @click.stop="close" v-show="show" >
             <div class="modalFlexContainer" >
-                <div id="debugAssertionEvalModal" class="eval-modal-container" @click.stop  > <!-- @click.stop="shouldResize()" @mousedown="shouldResize" @mouseup="endResize"  -->
+                <div id="debugAssertionEvalModal" class="eval-modal-container" @click.stop @scroll.self.stop> <!-- @click.stop="shouldResize()" @mousedown="shouldResize" @mouseup="endResize"  -->
                     <div>
                         <div id="daemHeader">
                             <span class="eval-modal-header" draggable="true" @dragstart="drag_start">
@@ -30,11 +30,14 @@
                                  <debug-assertion-eval-form :pattern-type-id="selectedPatternTypeId" />
                             </div>
                         </div>
-                        <div id="daemFooter" v-if="footerList">
+                        <div id="daemFooter" >
                             <div class="modal-footer text-right">
-                                <p v-for="(msgObj, msgKey) in footerList" :key="msgKey">
-                                    {{msgObj.message}}
-                                </p>
+                                <p v-if="! wasEvaluatedAtLeastOnce">Contents have not yet been evaluated. Evaluation is automatically triggered when the data is changed by the user or when the Evaluate button is clicked.</p>
+                                <template v-if="footerList">
+                                    <p v-for="(msgObj, msgKey) in footerList" :key="msgKey">
+                                        {{msgObj.message}}
+                                    </p>
+                                </template>
                              </div>
                         </div>
                     </div>
@@ -64,13 +67,21 @@
             selectedPatternTypeId() {
                return this.$store.state.debugAssertionEval.selectedPatternTypeId
             },
-            footerList() {
+            getSelectedPatternTypeObj() {
                 let obj = this.$store.state.debugAssertionEval.evalObjByPattern.patternTypes[this.selectedPatternTypeId]
+                return obj
+            },
+            footerList() {
+                let obj = this.getSelectedPatternTypeObj
                 if ('footerList' in obj) {
                    return obj.footerList
                 } else {
                     return null
                 }
+            },
+            wasEvaluatedAtLeastOnce() {
+                let obj = this.getSelectedPatternTypeObj
+                return obj.resultObj.wasEvaluatedAtleastOnce
             }
 
         },
@@ -281,6 +292,7 @@
         text-align: center;
     }
 
+    .modal-footer,
     .modal-body {
         margin: 20px;
         /*margin-bottom: 20px;*/
