@@ -56,7 +56,7 @@
         <span class="form-block">{{getResultCode()}}</span>
         <vue-markdown
             v-bind:source="getResultMessage()"></vue-markdown>
-         <div v-if="getResourceList()" >
+         <div v-if="getPatternTypeObj.resultObj.wasEvaluatedAtleastOnce" >
              <template v-if="getResourceList().length > 0">
                 <select size="5"  >
                  <option v-for="rName in getResourceList()"
@@ -98,8 +98,14 @@
             // }
         },
         computed: {
+            getPatternTypeObj() {
+                let obj = this.$store.state.debugAssertionEval.evalObjByPattern.patternTypes[this.patternTypeId]
+                // console.log('got ' + this.patternTypeId)
+                // console.log('field list length: ' + obj.displayFieldList.length)
+                return obj
+            },
             displayFieldList() {
-                return this.getPatternTypeObj().displayFieldList
+                return this.getPatternTypeObj.displayFieldList
             },
             defaultDisplayFieldList() {
                return this.getDefaultPatternTypeObj().displayFieldList
@@ -112,35 +118,29 @@
             getFormInputId(propKey) {
                return this.patternTypeId + '_' + propKey;
             },
-            getPatternTypeObj() {
-                let obj = this.$store.state.debugAssertionEval.evalObjByPattern.patternTypes[this.patternTypeId]
-                // console.log('got ' + this.patternTypeId)
-                // console.log('field list length: ' + obj.displayFieldList.length)
-                return obj
-            },
             getDefaultPatternTypeObj() {
                 const defaultPatternTypeId = this.$store.state.debugAssertionEval.defaultPatternTypeId
                 let obj = this.$store.state.debugAssertionEval.evalObjByPattern.patternTypes[defaultPatternTypeId]
                 return obj
             },
             getResultCode() {
-                return this.getPatternTypeObj().resultObj.resultMessage
+                return this.getPatternTypeObj.resultObj.resultMessage
             },
             getResultMessage() {
-                return this.getPatternTypeObj().resultObj.markdownMessage
+                return this.getPatternTypeObj.resultObj.markdownMessage
             },
             getResourceList() {
-               const obj = this.getPatternTypeObj()
+               const obj = this.getPatternTypeObj
                if ('resourceList' in obj) {
                   return obj.resourceList
                }
                return null
             },
             getResultPropKey() {
-                return this.getPatternTypeObj().resultObj.propKey
+                return this.getPatternTypeObj.resultObj.propKey
             },
             getPropVal(propKey) {
-                return this.getPatternTypeObj().dataObj[propKey]
+                return this.getPatternTypeObj.dataObj[propKey]
             },
             getFieldFromValueType(propKey) {
                 let arr = this.$store.state.debugAssertionEval.fieldSupport.fieldValueTypes
@@ -222,9 +222,9 @@
             },
             doEval(propKey) {
                 this.$store.commit('setDebugAssertionEvalPropKey', {patternTypeId: this.patternTypeId, propKey: propKey}) // Just to track what changed field was updated in the last attempt so the error hint may be applied to this field
-                let assertDataString = JSON.stringify(this.getPatternTypeObj().dataObj)
+                let assertDataString = JSON.stringify(this.getPatternTypeObj.dataObj)
                 // console.log('before base64: ' + assertDataString)
-                const patternTypeObj = this.getPatternTypeObj()
+                const patternTypeObj = this.getPatternTypeObj
                 if ('evalAction' in patternTypeObj) {
                     this.$store.dispatch(patternTypeObj.evalAction, window.btoa(assertDataString))
                 } else {

@@ -184,7 +184,7 @@ export const debugAssertionEvalStore = {
 
             // Reset the current selected pattern type to default
             state.selectedPatternTypeId = state.defaultPatternTypeId
-            
+
             // Clear all existing pattern types' dataObj and resultObj before reloading original assertion
             for (let patternTypeName in state.evalObjByPattern.patternTypes) {
                 let patternObj1 = state.evalObjByPattern.patternTypes[patternTypeName]

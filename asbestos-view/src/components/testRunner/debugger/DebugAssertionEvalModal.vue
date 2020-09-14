@@ -2,7 +2,7 @@
     <div name="modal" @dragover="drag_over" @drop="drop">
         <div class="modal-mask" @click.stop="close" v-show="show" >
             <div class="modalFlexContainer" >
-                <div id="debugAssertionEvalModal" class="eval-modal-container" @click.stop @scroll.self.stop> <!-- @click.stop="shouldResize()" @mousedown="shouldResize" @mouseup="endResize"  -->
+                <div id="debugAssertionEvalModal" class="eval-modal-container" @click.stop>
                     <div>
                         <div id="daemHeader">
                             <span class="eval-modal-header" draggable="true" @dragstart="drag_start">
@@ -32,7 +32,7 @@
                         </div>
                         <div id="daemFooter" >
                             <div class="modal-footer text-right">
-                                <p v-if="! wasEvaluatedAtLeastOnce">Contents have not yet been evaluated. Evaluation is automatically triggered when the data is changed by the user or when the Evaluate button is clicked.</p>
+                                <p v-if="! wasEvaluatedAtLeastOnce">Contents have not yet been evaluated. Evaluation is automatically triggered when an input value is changed by the user or when the Evaluate button is clicked.</p>
                                 <template v-if="footerList">
                                     <p v-for="(msgObj, msgKey) in footerList" :key="msgKey">
                                         {{msgObj.message}}
