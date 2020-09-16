@@ -19,7 +19,6 @@ import gov.nist.asbestos.testEngine.engine.FhirPathEngineBuilder;
 import gov.nist.asbestos.testEngine.engine.TestEngine;
 import gov.nist.asbestos.testEngine.engine.assertion.MinimumId;
 import gov.nist.asbestos.utilities.ResourceHasMethodsFilter;
-import ihe.iti.xds_b._2007.ProvideAndRegisterDocumentSetRequestType;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.log4j.Logger;
 import org.hl7.fhir.r4.model.*;
@@ -27,7 +26,6 @@ import org.hl7.fhir.r4.model.*;
 import java.io.File;
 import java.net.URISyntaxException;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class AnalysisReport {
     private static final Logger log = Logger.getLogger(AnalysisReport.class);
@@ -457,14 +455,23 @@ public class AnalysisReport {
             resource = resourceFromBundle((Bundle) contextResourceBundle.getResource(), fhirPath);
         } else if ("Bundle".equals(baseRef.getResourceType()) &&"Bundle".equals(contextResourceBundle.getResourceType())){
             Bundle bundle = (Bundle) contextResourceBundle.getResource();
-            resource = isPDB(bundle) ?
-                findDocumentManifest(bundle) : bundle;
-
-            //resource = resourceFromBundle((Bundle) contextResourceBundle.getResource(), baseRef);
+            if (isPDBRequest(bundle)) {
+                baseObj = findDocumentManifest(bundle);
+                if (baseObj != null) {
+                    Ref baseObjRef = baseObj.getRef();
+                    baseObj.setContext(bundle);
+                    baseRef.addParameter("focusUrl", baseObjRef.toString());
+                    baseObj.setRef(baseRef);
+                }
+            } else {
+                baseObj = new ResourceWrapper(bundle)
+                        .setRef(baseRef)
+                        .setContext((Bundle)contextResourceBundle.getResource());
+            }
         } else {
             load(baseRef, null);
         }
-        if (resource != null)
+        if (resource != null && baseObj == null)
             baseObj = new ResourceWrapper(resource)
                     .setRef(baseRef)
                     .setContext((Bundle)contextResourceBundle.getResource());
@@ -475,15 +482,17 @@ public class AnalysisReport {
             "IHE_MHD_Provide_Comprehensive_DocumentBundle"
     );
 
-    public static boolean isPDB(ResourceWrapper wrapper) {
+    public static boolean isPDBRequest(ResourceWrapper wrapper) {
         if (!wrapper.hasResource()) return false;
         if (!wrapper.getResourceType().equals("Bundle"))
             return false;
-        return isPDB((Bundle)wrapper.getResource());
+        return isPDBRequest((Bundle)wrapper.getResource());
     }
 
-    public static boolean isPDB(Bundle bundle) {
+    public static boolean isPDBRequest(Bundle bundle) {
         List<String> types = new ArrayList<>();
+        if (bundle.getType() != Bundle.BundleType.TRANSACTION)
+            return false;
         if (bundle.hasMeta() && bundle.getMeta().hasProfile()) {
             for (CanonicalType type : bundle.getMeta().getProfile()) {
                 String theType = trueType(type.asStringValue());
@@ -506,11 +515,27 @@ public class AnalysisReport {
                 .filter(l2::contains).count() > 0;
     }
 
-    private DocumentManifest findDocumentManifest(Bundle bundle) {
+    private ResourceWrapper findDocumentManifest(Bundle bundle) {
         for (Bundle.BundleEntryComponent bundleEntryComponent : bundle.getEntry()) {
             Resource componentResource = bundleEntryComponent.getResource();
-            if (componentResource instanceof DocumentManifest)
-                return (DocumentManifest) componentResource;
+            if (componentResource instanceof DocumentManifest) {
+                ResourceWrapper wrapper = new ResourceWrapper(componentResource);
+                String fullUrl = bundleEntryComponent.getFullUrl();
+                if (!Strings.isNullOrEmpty(fullUrl)) {
+                    Ref ref = new Ref(fullUrl);
+//                    if (fullUrl.startsWith("urn:uuid:")) {
+//                        ref.addParameter("focusUrl", fullUrl);
+//                    } else {
+                        Bundle.BundleLinkComponent bundleLinkComponent = bundle.getLink("self");
+                        if (bundleLinkComponent != null && bundleLinkComponent.hasUrl()) {
+                            String url = bundleLinkComponent.getUrl();
+                            ref = ref.rebase(url);
+                        }
+//                    }
+                    wrapper.setRef(ref);
+                }
+                return wrapper;
+            }
         }
         return null;
     }
@@ -1035,7 +1060,9 @@ public class AnalysisReport {
                 }
             }
             if (!ref.asString().endsWith("html"))
-                generalErrors.add("Do not understand address " + anchor + " relative to parent id " + parent.getId());
+                generalErrors.add("Do not understand address " + anchor +
+                                (parent == null ? "" : " relative to parent id " + parent.getId())
+                );
             return null;
         }
         Related rel = getFromRelated(ref);

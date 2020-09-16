@@ -37,7 +37,7 @@ public class ResourceWrapper {
     private Bundle context = null;
     private File file = null;
     private UIEvent event = null;
-    private boolean eventRequest;  // did content come from event "request" or "response"
+    private boolean isRequest;  // did content come from event "request" or "response"
 
 
     public ResourceWrapper(BaseResource resource) {
@@ -70,7 +70,7 @@ public class ResourceWrapper {
         newWrapper.context = context;
         newWrapper.file = file;
         newWrapper.event = event;
-        newWrapper.eventRequest = eventRequest;
+        newWrapper.isRequest = isRequest;
         return newWrapper;
     }
 
@@ -82,14 +82,14 @@ public class ResourceWrapper {
 
     public ResourceWrapper setEvent(UIEvent event, boolean isRequest) {
         this.event = event;
-        this.eventRequest = isRequest;
+        this.isRequest = isRequest;
         if (event != null && ref == null)
             this.setRef(new Ref(event.getURI()));
         return this;
     }
 
     public boolean isRequest() {
-        return eventRequest;
+        return isRequest;
     }
 
     public UIEvent getEvent() {

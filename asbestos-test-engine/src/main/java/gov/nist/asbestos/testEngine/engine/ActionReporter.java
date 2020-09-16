@@ -253,8 +253,8 @@ class ActionReporter implements TestDef {
                 refStrRaw = base
                         + "/inspectUrl?dataObject=" + url;
             } else {
-                refStrRaw = base + "/session/" + testEngine.getTestSession()
-                        + "/channel/" + testEngine.getChannelName()
+                refStrRaw = base + "/session/" + uiEvent.getTestSession()
+                        + "/channel/" + uiEvent.getChannelId()
                         + "/lognav/" + uiEvent.getEventName()
                 + labels.tail;
             }

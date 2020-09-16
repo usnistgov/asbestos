@@ -9,7 +9,6 @@ import gov.nist.asbestos.client.Base.EventContext;
 import gov.nist.asbestos.client.Base.ProxyBase;
 import gov.nist.asbestos.client.Base.Request;
 import gov.nist.asbestos.client.client.Format;
-import gov.nist.asbestos.client.events.ProxyEvent;
 import gov.nist.asbestos.client.events.UIEvent;
 import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
@@ -19,7 +18,6 @@ import org.hl7.fhir.r4.model.*;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
@@ -74,21 +72,8 @@ public class GetLogEventAnalysisRequest {
         return request.uriParts.size() == 9
                 && "log".equalsIgnoreCase(request.uriParts.get(2))
                 && "analysis".equalsIgnoreCase(request.uriParts.get(3))
-                && "event".equalsIgnoreCase(request.uriParts.get(4))
-
-                ||
-
-                request.uriParts.size() == 5
-                        && "log".equalsIgnoreCase(request.uriParts.get(2))
-                        && "analysis".equalsIgnoreCase(request.uriParts.get(3))
-                        && "url".equalsIgnoreCase(request.uriParts.get(4))
-
-                ||
-
-                request.uriParts.size() == 7
-                        && "log".equalsIgnoreCase(request.uriParts.get(2))
-                        && "analysis".equalsIgnoreCase(request.uriParts.get(3))
-                        && "static".equalsIgnoreCase(request.uriParts.get(4));
+                && "event".equalsIgnoreCase(request.uriParts.get(4)
+                );
 
 
 
@@ -126,7 +111,14 @@ public class GetLogEventAnalysisRequest {
     public void run() throws IOException {
         request.announce("GetLogEventAnalysisRequest");
 
+        if ("event".equalsIgnoreCase(request.uriParts.get(4))) {
+            fromEventURL();
+        } else {
+            request.badRequest();
+        }
+    }
 
+    private void oldRun() throws IOException {
         if (request.uriParts.get(4).equalsIgnoreCase("static")) {
             testDir = getTestDir(request.segment(5), request.segment(6));
             // load static fixture from test definition
@@ -219,12 +211,13 @@ public class GetLogEventAnalysisRequest {
             boolean gzip = queryParams.containsKey("gzip") && "true".equals(queryParams.get("gzip"));
             boolean useProxy = queryParams.containsKey("useProxy") && "true".equals(queryParams.get("useProxy"));;
             boolean ignoreBadRefs = queryParams.containsKey("ignoreBadRefs") && "true".equals(queryParams.get("ignoreBadRefs"));
-            String eventId = queryParams.getOrDefault("eventId", null);
             String fixturePath = queryParams.get("fixturePath");
             Ref ref = new Ref(url);
+            UIEvent uiEvent;
             gov.nist.asbestos.client.Base.Request target;
             try {
                 target = new gov.nist.asbestos.client.Base.Request(url, request.externalCache);
+                uiEvent = new UIEvent(target.ec).fromURI(target.uri);
             } catch (URISyntaxException e) {
                 request.badRequest();
                 return;
@@ -248,6 +241,7 @@ public class GetLogEventAnalysisRequest {
                         resource);
                 return;
             }
+
             runAndReturnReport(
                     ref,
                     "By Request",
@@ -255,7 +249,8 @@ public class GetLogEventAnalysisRequest {
                     useProxy,
                     ignoreBadRefs,
                     false,
-                    resource);
+                    resource    // contextBundle
+            );
 //            if (!Strings.isNullOrEmpty(eventId)) {
 //                try {
 //                    eventContext = new EventContext(ProxyEvent.eventFromEventURI(new URI(url)));
@@ -277,6 +272,90 @@ public class GetLogEventAnalysisRequest {
 //                    resource);
 //
        }
+    }
+
+    // 0 - empty
+    // 1 - app context  (asbestos)
+    // 2 - "log"
+    // 3 - "analysis"
+    // 4 - "event"
+    // 5 - testSession
+    // 6 - channelId
+    // 7 - eventId
+    // 8 - "request" or "response"
+
+    // optional parameters
+    // validation (true|false (default))
+    // focusUrl (used with Bundles to focus on resource within)
+    // gzip (true|false) - use gzip when issuing queries
+    // useProxy (true|false) - issue queries through proxy (or bypass and go directly to server)
+
+    void fromEventURL() throws IOException {
+        Map<String, String> queryParams = request.getParametersMap();
+        boolean gzip = queryParams.containsKey("gzip") && "true".equals(queryParams.get("gzip"));
+        boolean useProxy = queryParams.containsKey("useProxy") && "true".equals(queryParams.get("useProxy"));;
+        boolean ignoreBadRefs = queryParams.containsKey("ignoreBadRefs") && "true".equals(queryParams.get("ignoreBadRefs"));
+        String fixturePath = queryParams.get("fixturePath");
+        request.testSession = request.uriParts.get(5);
+        request.channelId = request.uriParts.get(6);
+        String eventId = request.uriParts.get(7);
+        String resourceType = request.ec.resourceTypeForEvent(
+                request.ec.fhirDir(request.testSession, request.channelId),
+                eventId);
+        UIEvent uiEvent = new UIEvent(request.ec).fromParms(
+                request.testSession,
+                request.channelId,
+                resourceType,
+                eventId);
+
+        if (uiEvent == null) {
+            request.badRequest();
+            return;
+        }
+
+        boolean focusOnRequest = "request".equals(request.uriParts.get(8));
+        // this is for the log object.  The request (above) has its own syntax that is different
+        Ref ref = new Ref(uiEvent.getURI());
+
+        if (queryParams.containsKey(Ref.FOCUSURL))
+            ref.setFocusUrl(queryParams.get(Ref.FOCUSURL));
+
+        ResourceWrapper contextBundle = getResourceFromEvent(uiEvent, focusOnRequest);
+
+        runAndReturnReport(
+                ref,
+                "By Request",
+                gzip,
+                useProxy,
+                ignoreBadRefs,
+                false,
+                contextBundle    // contextBundle
+        );
+
+    }
+
+    ResourceWrapper getResourceFromEvent(UIEvent event, boolean focusOnRequest) {
+        String requestBodyString = event.getRequestBody();
+        Headers requestHeaders = event.getRequestHeader();
+        String responseBodyString = event.getResponseBody();
+        Headers responseHeaders = event.getResponseHeader();
+        String analysisSource = focusOnRequest ? requestBodyString : responseBodyString;
+
+        BaseResource baseResource;
+        try {
+            baseResource = ProxyBase.parse(analysisSource, Format.fromContentType(responseHeaders.getContentType().getValue()));
+            if (!(baseResource instanceof Bundle) &&  baseResource.getId() == null) {
+                Ref ref = new Ref(requestHeaders.getPathInfo());
+                baseResource.setId(ref.getId());
+            }
+        } catch (Exception e) {
+            //returnReport(new Report("No content in " + (focusOnRequest ? "Request" : "Response") + " message"));
+            return null;
+        }
+
+        ResourceWrapper wrapper = new ResourceWrapper(baseResource)
+                .setEvent(event, focusOnRequest);
+        return wrapper;
     }
 
     ResourceWrapper getResourceFromTestDefinition(File testDir, String ref) throws IOException {
@@ -397,7 +476,7 @@ public class GetLogEventAnalysisRequest {
     private void runAndReturnReport(ResourceWrapper bundleWrapper, String source, boolean isRequest, boolean gzip, boolean useProxy, boolean ignoreBadRefs, boolean withValidation) throws IOException {
         if (!"Bundle".equals(bundleWrapper.getResourceType()))
             throw new RuntimeException("Not a Bundle");
-        Ref focusRef = AnalysisReport.isPDB(bundleWrapper)
+        Ref focusRef = AnalysisReport.isPDBRequest(bundleWrapper)
                 ? getManifestFullUrl(bundleWrapper) : bundleWrapper.getRef();
         AnalysisReport analysisReport = new AnalysisReport(focusRef, source, request.ec)
                 .withGzip(gzip)

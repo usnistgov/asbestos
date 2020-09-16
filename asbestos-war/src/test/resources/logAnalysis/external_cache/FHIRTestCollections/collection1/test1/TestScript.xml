@@ -1,0 +1,24 @@
+<TestScript xmlns="http://hl7.org/fhir">
+    <fixture id="pdb-bundle">
+        <autocreate value="false"/>
+        <autodelete value="false"/>
+        <resource>
+            <reference value="Bundle/pdb.xml"/>
+        </resource>
+    </fixture>
+
+    <test>
+    <action>
+        <operation>
+            <description value="send PDB."/>
+            <label value="create"/>
+            <type>
+                <system value="https://github.com/usnistgov/asbestos/wiki/Testscript-Operation-Codes"/>
+                <code value="mhd-pdb-transaction"/>
+            </type>
+            <sourceId value="pdb-bundle"/>
+            <responseId value="pdb-response-bundle"/>
+        </operation>
+    </action>
+    </test>
+</TestScript>

@@ -1,5 +1,6 @@
 package gov.nist.asbestos.client.Base;
 
+import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.http.support.Common;
 import gov.nist.asbestos.serviceproperties.ServiceProperties;
 import gov.nist.asbestos.serviceproperties.ServicePropertiesEnum;
@@ -18,6 +19,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 public class Request {
     public HttpServletRequest req;
@@ -31,6 +33,7 @@ public class Request {
     public boolean isJson = true;
     public boolean isGzip = false;
     private String query = null;
+    private Map<String, String> parametersMap;
     private static final Logger log = Logger.getLogger(Request.class);
 
     public Request(HttpServletRequest req, HttpServletResponse resp, File externalCache) {
@@ -40,6 +43,7 @@ public class Request {
         setOptions(qstring);
         setExternalCache(externalCache);
         uri = Common.buildURI(req);
+        parametersMap = new Ref(uri).getParametersAsMap(qstring);
         setUriParts(uri);
         query  = uri.getQuery();
     }
@@ -48,6 +52,7 @@ public class Request {
        setOptions(url);
        setExternalCache(externalCache);
        uri = new URI(url);
+       parametersMap = new Ref(uri).getParametersAsMap();
        setUriParts(uri);
     }
 
@@ -169,4 +174,7 @@ public class Request {
         log.info("*** " + name + " " + uri.toString());
     }
 
+    public Map<String, String> getParametersMap() {
+        return parametersMap;
+    }
 }

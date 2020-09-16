@@ -2,6 +2,8 @@ package gov.nist.asbestos.client.Base;
 
 import gov.nist.asbestos.client.events.UIEvent;
 
+import java.net.URI;
+
 public class EventContext {
     private String testSession;
     private String channelId;
@@ -13,6 +15,10 @@ public class EventContext {
         this.channelId = channelId;
         this.eventId = eventId;
         this.requestFocus = requestFocus;
+    }
+
+    public EventContext(EC ec, URI uri) {
+        this(new UIEvent(ec).fromURI(uri));
     }
 
     public EventContext(UIEvent event) {

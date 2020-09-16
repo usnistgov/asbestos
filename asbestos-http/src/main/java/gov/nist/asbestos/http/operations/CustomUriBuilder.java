@@ -1,5 +1,7 @@
 package gov.nist.asbestos.http.operations;
 
+import com.google.common.base.Strings;
+
 import java.net.URI;
 import java.net.URISyntaxException;
 
@@ -73,6 +75,8 @@ public class CustomUriBuilder {
     }
 
     public URI build() {
+        if (scheme == null && !Strings.isNullOrEmpty(authority) && !Strings.isNullOrEmpty(path))
+            scheme = "http";
         try {
             URI uri = new URI(scheme, authority, path, query, fragment);
             String uriString = uri.toString();

@@ -153,7 +153,8 @@ public class Ref {
         String query = uri.getQuery();
         if (query == null)
             return null;
-        return urlDecode(uri.getQuery());
+        query = urlDecode(query);
+        return query;
     }
 
     public static Map<String, String> parseParameters(String parms) {
@@ -204,9 +205,13 @@ public class Ref {
     }
 
     public Map<String, String> getParametersAsMap() {
+        String parms = getParameters();
+        return getParametersAsMap(parms);
+    }
+
+    public Map<String, String> getParametersAsMap(String parms) {
         Map<String, String> map = new HashMap<>();
 
-        String parms = getParameters();
         if (parms == null)
             return map;
         String[]  theParts = parms.split("\\?");
@@ -221,6 +226,25 @@ public class Ref {
         }
 
         return map;
+    }
+
+    public static final String FOCUSURL = "focusUrl";
+
+    public String getFocusUrl() {
+        return getParameter(FOCUSURL);
+    }
+
+    public boolean hasFocusUrl() {
+        return !Strings.isNullOrEmpty(getParameter(FOCUSURL));
+    }
+
+    public Ref setFocusUrl(String url) {
+        addParameter(FOCUSURL, url);
+        return this;
+    }
+
+    public String getParameter(String name) {
+        return getParametersAsMap().get(name);
     }
 
     public List<String> getParameterNames() {
@@ -329,6 +353,8 @@ public class Ref {
 
     public String getId() {
         String path = uri.getPath();
+        if (path == null)
+            return "";
         if (!path.contains("/")) return path;
         String[] parts = path.split("/");
         for (int i=0; i<parts.length-1; i++) {
@@ -426,7 +452,8 @@ public class Ref {
         String id = getId();
         String version = getVersion();
         String params = getParameters();
-        return new Ref(theBase, resourceType, id, version, params);//.httpizeTo(uri);
+        Ref newRef = new Ref(theBase, resourceType, id, version, params);//.httpizeTo(uri);
+        return newRef;
     }
 
     public Ref rebase(Ref newBase) {

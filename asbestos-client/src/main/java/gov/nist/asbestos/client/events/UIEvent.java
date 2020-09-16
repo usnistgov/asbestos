@@ -52,9 +52,11 @@ public class UIEvent {
 
     public UIEvent fromResource(ResourceWrapper wrapper) {
         Objects.requireNonNull(wrapper);
+
+        UIEvent eventFromWrapper = fromURI(wrapper.getRef().getUri());
         hostPort = "";
-        testSession = "";
-        channelId = "";
+        testSession = eventFromWrapper.getTestSession();
+        channelId = eventFromWrapper.getChannelId();
         eventName = "";
         resourceType = wrapper.getResourceType();
         UITask task = new UITask(wrapper);
@@ -76,7 +78,7 @@ public class UIEvent {
         return this;
     }
 
-    UIEvent fromParms(String testSession, String channelId, String resourceType, String eventName) {
+    public UIEvent fromParms(String testSession, String channelId, String resourceType, String eventName) {
         File fhir = ec.fhirDir(testSession, channelId);
         if (resourceType.equals("null")) {
             resourceType = ec.resourceTypeForEvent(fhir, eventName);
