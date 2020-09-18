@@ -7,7 +7,7 @@ function XpathNotSupportedFooter() {
     this.message = 'Note: FHIR Toolkit does not support XPath/JSONPath.'
 }
 
-function EvalAssertionObj() {
+function AssertionEvalObj() {
     /*
     When the original assertion properties are initially requested from the backend, empty properties are not included by JSON serialization.
     Since this field-list is used to auto create the input text boxes, a full representation is missing. A complete list is required
@@ -50,6 +50,15 @@ function EvalResultObj() {
     this.wasEvaluatedAtleastOnce = false
 }
 
+function FhirPathContextObj() {
+    this.dataObj = new AssertionEvalObj()
+    this.resultObj = new EvalResultObj()
+    this.resourceList = []
+    this.displayFieldList = ['sourceId','expression','value']
+    this.footerList = [new XpathNotSupportedFooter()]
+    this.evalAction = 'doDebugEvalForResources'
+}
+
 export const debugAssertionEvalStore = {
     state() {
         return {
@@ -58,49 +67,61 @@ export const debugAssertionEvalStore = {
             isEvalObjUpdated: false,
             selectedPatternTypeId: 'AllParameters', // Initial string contains default pattern
             defaultPatternTypeId: 'AllParameters',
+            defaultEvalOptionTab: 'assertionTab',
+            tabMap: {assertionTab: {label: 'Assertion'}
+                    ,fhirPathTab: {label: 'FHIRPath Expression Editor'}},
             evalObjByPattern: {
+                    defaultEvalAction: 'doDebugEvalAssertion',
                     patternTypes:
                         {
-                            AllParameters: {dataObj: new EvalAssertionObj(), resultObj: new EvalResultObj(), displayFieldList: ['label','description','direction'
+                            AllParameters: {dataObj: new AssertionEvalObj(), resultObj: new EvalResultObj(), displayFieldList: ['label','description','direction'
                                     ,'compareToSourceId','compareToSourceExpression','compareToSourcePath','contentType','expression','headerField','minimumId',
                                     'navigationLinks','operator','path','requestMethod','requestURL','resource','response','responseCode','sourceId','validateProfileId','value','warningOnly']
+                                    , fhirPathContextObj: new FhirPathContextObj()
+                                    , selectedEvalOptionTab: ''
                                     , footerList: [new XpathNotSupportedFooter()]
                                     },
                           /*
                             Asbestos Test Engine does not support the compareToSourcePath element part of the CompareToSourceId pattern type.
                            */
-                            CompareToSourceId: {dataObj: new EvalAssertionObj(), resultObj: new EvalResultObj()
+                            CompareToSourceId: {dataObj: new AssertionEvalObj(), resultObj: new EvalResultObj()
                                 , displayFieldList: ['compareToSourceId','compareToSourceExpression','warningOnly']
-                                ,footerList: [new XpathNotSupportedFooter()] },
-                            ContentType: {dataObj: new EvalAssertionObj(), resultObj: new EvalResultObj()
+                                , fhirPathContextObj: new FhirPathContextObj()
+                                , selectedEvalOptionTab: ''
+                                , footerList: [new XpathNotSupportedFooter()] },
+                            ContentType: {dataObj: new AssertionEvalObj(), resultObj: new EvalResultObj()
                                 , displayFieldList: ['contentType','warningOnly']},
-                            Expression: {dataObj: new EvalAssertionObj(), resultObj: new EvalResultObj()
+                            Expression: {dataObj: new AssertionEvalObj(), resultObj: new EvalResultObj()
                                 , displayFieldList: ['sourceId','expression','warningOnly']
+                                , fhirPathContextObj: new FhirPathContextObj()
+                                , selectedEvalOptionTab: ''
                                 , footerList: [new XpathNotSupportedFooter()]},
-                            ExpressionValue: {dataObj: new EvalAssertionObj(), resultObj: new EvalResultObj()
+                            ExpressionValue: {dataObj: new AssertionEvalObj(), resultObj: new EvalResultObj()
                                 , displayFieldList: ['sourceId','expression','value','warningOnly']
+                                , fhirPathContextObj: new FhirPathContextObj()
+                                , selectedEvalOptionTab: ''
                                 , footerList: [new XpathNotSupportedFooter()]},
-                            FHIRPathExpression: {dataObj: new EvalAssertionObj(), resultObj: new EvalResultObj()
-                                , resourceList: []
-                                , displayFieldList: ['sourceId','expression','value','warningOnly']
-                                , footerList: [new XpathNotSupportedFooter()]
-                                , evalAction: 'doDebugEvalForResources'},
-                            HeaderField: {dataObj: new EvalAssertionObj(), resultObj: new EvalResultObj()
+                            HeaderField: {dataObj: new AssertionEvalObj(), resultObj: new EvalResultObj()
                                 , displayFieldList: ['headerField','warningOnly']},
-                            MinimumId: {dataObj: new EvalAssertionObj(), resultObj: new EvalResultObj()
+                            MinimumId: {dataObj: new AssertionEvalObj(), resultObj: new EvalResultObj()
                                 , displayFieldList: ['minimumId','warningOnly']},
-                            RequestMethod: {dataObj: new EvalAssertionObj(), resultObj: new EvalResultObj()
+                            RequestMethod: {dataObj: new AssertionEvalObj(), resultObj: new EvalResultObj()
                                 , displayFieldList: ['sourceId','requestMethod','warningOnly']
+                                , fhirPathContextObj: new FhirPathContextObj()
+                                , selectedEvalOptionTab: ''
                                 , footerList: [new XpathNotSupportedFooter()]
-                                , applyDataObjDefaults: function(dataObj) {
+                                , applyDataObjDefaults: function(dataObj) { // To be called by resetDataState
                                     dataObj.requestMethod = 'get' // default to HTTP GET
                                 }
                             },
-                            ResourceType: {dataObj: new EvalAssertionObj(), resultObj: new EvalResultObj()
+                            ResourceType: {dataObj: new AssertionEvalObj(), resultObj: new EvalResultObj()
                                 , displayFieldList: ['resource','warningOnly']},
-                            Response: {dataObj: new EvalAssertionObj(), resultObj: new EvalResultObj()
-                                , displayFieldList: ['sourceId','response','warningOnly']},
-                            ResponseCode: {dataObj: new EvalAssertionObj(), resultObj: new EvalResultObj()
+                            Response: {dataObj: new AssertionEvalObj(), resultObj: new EvalResultObj()
+                                , displayFieldList: ['sourceId','response','warningOnly']
+                                , fhirPathContextObj: new FhirPathContextObj()
+                                , selectedEvalOptionTab: ''
+                            },
+                            ResponseCode: {dataObj: new AssertionEvalObj(), resultObj: new EvalResultObj()
                                 , displayFieldList: ['responseCode','operator','warningOnly']},
                         }
                     },
@@ -119,7 +140,13 @@ export const debugAssertionEvalStore = {
         },
         setEvalObjProperty(state, obj) {
             if ('propKey' in obj) {
-                let dataRef = state.evalObjByPattern.patternTypes[obj.patternTypeId].dataObj
+                let patternObj = state.evalObjByPattern.patternTypes[obj.patternTypeId]
+                let dataRef = patternObj.dataObj
+                if ('selectedEvalOptionTab' in patternObj) {
+                    if (patternObj.selectedEvalOptionTab === 'fhirPathTab') {
+                        dataRef = patternObj.fhirPathContextObj.dataObj
+                    }
+                }
                 if (obj.propKey in dataRef) {
                     dataRef[obj.propKey] = obj.propVal
                 }
@@ -129,15 +156,32 @@ export const debugAssertionEvalStore = {
             state.showEvalModalDialog = Boolean(bVal)
         },
         setDebugAssertionEvalPropKey(state, obj) {
-            let resultRef = state.evalObjByPattern.patternTypes[obj.patternTypeId].resultObj
+            let patternObj = state.evalObjByPattern.patternTypes[obj.patternTypeId]
+            let resultRef = patternObj.resultObj
+            if ('selectedEvalOptionTab' in patternObj) {
+                if (patternObj.selectedEvalOptionTab === 'fhirPathTab') {
+                    resultRef = patternObj.fhirPathContextObj.resultObj
+                }
+            }
             resultRef.propKey = obj.propKey
         },
         setSelectedPatternTypeId(state, patternTypeId) {
            state.selectedPatternTypeId = patternTypeId
         },
+        setSelectedEvalOptionTab(state, tabId) {
+            let patternTypeObj = state.evalObjByPattern.patternTypes[state.selectedPatternTypeId]
+            if ('selectedEvalOptionTab' in patternTypeObj) {
+               patternTypeObj.selectedEvalOptionTab = tabId
+            }
+        },
         setDebugAssertionEvalResult(state, obj) {
             try {
                 let patternObj = state.evalObjByPattern.patternTypes[state.selectedPatternTypeId]
+                if ('selectedEvalOptionTab' in patternObj) {
+                   if (patternObj.selectedEvalOptionTab === 'fhirPathTab') {
+                      patternObj = patternObj.fhirPathContextObj
+                   }
+                }
                 let resultRef = patternObj.resultObj
 
                 if (! resultRef.wasEvaluatedAtleastOnce) {
@@ -156,25 +200,25 @@ export const debugAssertionEvalStore = {
                     }
                 }
                 resultRef.markdownMessage = mkdwnMsg
-            } catch (e) {}
+            } catch (e) {console.log(e.toString())}
 
         },
         setEvalForResourcesResult(state, obj) {
             try {
-                let patternObj = state.evalObjByPattern.patternTypes[state.selectedPatternTypeId]
+                let contextObj = state.evalObjByPattern.patternTypes[state.selectedPatternTypeId].fhirPathContextObj
 
                 // Remove all array elements
-                if (patternObj.resourceList.length > 0) {
-                    patternObj.resourceList.splice(0, patternObj.resourceList.length)
+                if (contextObj.resourceList.length > 0) {
+                    contextObj.resourceList.splice(0, contextObj.resourceList.length)
                 }
 
                 // Reload elements from the result object into the pattern type
-                if ('resourceList' in obj && 'resourceList' in patternObj) {
+                if ('resourceList' in obj && 'resourceList' in contextObj) {
                     for (let r of obj.resourceList) {
-                        patternObj.resourceList.push(r)
+                        contextObj.resourceList.push(r)
                     }
                 }
-            } catch (e) {}
+            } catch (e) {console.log(e.toString())}
         },
         updateAssertionEvalObj(state, obj) {
            let atLeastOnePropertyWasUpdated = false
@@ -188,13 +232,23 @@ export const debugAssertionEvalStore = {
             // Clear all existing pattern types' dataObj and resultObj before reloading original assertion
             for (let patternTypeName in state.evalObjByPattern.patternTypes) {
                 let patternObj1 = state.evalObjByPattern.patternTypes[patternTypeName]
-                resetDataStateObj(patternObj1.dataObj, new EvalAssertionObj())
+                resetDataStateObj(patternObj1.dataObj, new AssertionEvalObj())
                 // apply defaults if applicable
                 if ('applyDataObjDefaults' in patternObj1) {
                     patternObj1.applyDataObjDefaults(patternObj1.dataObj)
                 }
                 // clear existing result
                 resetDataStateObj(patternObj1.resultObj, new EvalResultObj())
+
+                if ('fhirPathContextObj' in patternObj1) {
+                    let fhirPathObj = patternObj1.fhirPathContextObj
+                   resetDataStateObj(fhirPathObj.dataObj, new AssertionEvalObj())
+                   resetDataStateObj(fhirPathObj.resultObj, new EvalResultObj())
+                }
+
+                if ('selectedEvalOptionTab' in patternObj1) {
+                    patternObj1.selectedEvalOptionTab = state.defaultEvalOptionTab
+                }
             }
 
             for (let propKey in dataRef) {

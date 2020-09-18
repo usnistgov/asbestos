@@ -17,16 +17,18 @@
                     :title="`Click to open the ${propKey} assert element detailed description in a new browser tab.`">&#x2139;</span> <!-- &#x1f4d6; &#x2139; -->
             </div>
             <div>
-                <template v-if="isPropertyAnEnumType(propKey)">
+                <template v-if="isPropertyAnEnumType(propKey)"> <!--  -->
                     <select class="form-control-select"
                             :id="getFormInputId(propKey)"
-                            :value="getPropVal(propKey)"
                             :data-prop-key="propKey"
-                            @change="onEvalObjPropSelect">
-                        <option v-if="getPropVal(propKey) === ''" disabled value="">Please select one</option>
-                        <option v-for="option in getEnumTypeArray(propKey)"
-                                :value="option.codeValue" :title="option.definition"
-                                :key="option.codeValue">
+                            :value="getPropVal(propKey)"
+                            @change="onEvalObjPropSelect"
+                            >
+                        <option v-for="(option,idx) in getEnumTypeArray(propKey)"
+                                :value="option.codeValue"
+                                :title="option.definition"
+                                :disabled="option.codeValue===''"
+                                :key="idx">
                             {{ option.displayName }}
                         </option>
                     </select>
@@ -56,15 +58,16 @@
         <span class="form-block">{{getResultCode()}}</span>
         <vue-markdown
             v-bind:source="getResultMessage()"></vue-markdown>
-         <div v-if="getPatternTypeObj.resultObj.wasEvaluatedAtleastOnce" >
-             <template v-if="getResourceList().length > 0">
+         <div v-if="getPatternTypeObj.resultObj.wasEvaluatedAtleastOnce && getResultCode() === 'pass'" >
+             <template v-if="getResourceList() && getResourceList().length > 0">
                 <select size="5"  >
-                 <option v-for="rName in getResourceList()"
+                 <option v-for="(rName,rKey) in getResourceList()"
                          :value="rName"
-                         :key="rName">
+                         :key="rKey">
                      {{ rName}}
                  </option>
               </select>
+              <div class="form-label">{{getResourceList().length}} resource(s) were returned.</div>
              <div>
                 <button class="resultBox">Inspect</button>
              </div>
@@ -88,10 +91,18 @@
             }
         },
         props: {
+            patternTypeObj: {
+               type: Object,
+               required: true
+            },
             patternTypeId: {
                 type: String,
                 required: true
             },
+            optionType: {
+                type: String,
+                required: true
+            }
             // isShown: {
             //     type: Boolean,
             //     required: true
@@ -99,24 +110,28 @@
         },
         computed: {
             getPatternTypeObj() {
-                let obj = this.$store.state.debugAssertionEval.evalObjByPattern.patternTypes[this.patternTypeId]
+                return this.patternTypeObj
+                // let obj = this.$store.state.debugAssertionEval.evalObjByPattern.patternTypes[this.patternTypeId]
+                // if (this.optionType === 'fhirPathTab') {
+                //    obj = obj.fhirPathContextObj
+                // }
                 // console.log('got ' + this.patternTypeId)
                 // console.log('field list length: ' + obj.displayFieldList.length)
-                return obj
+                // return obj
             },
             displayFieldList() {
                 return this.getPatternTypeObj.displayFieldList
             },
             defaultDisplayFieldList() {
                return this.getDefaultPatternTypeObj().displayFieldList
-            }
+            },
         },
         methods: {
             openHelp(propKey) {
                 window.open("http://hl7.org/fhir/testscript-definitions.html#TestScript.setup.action.assert." + propKey, "_blank")
             },
             getFormInputId(propKey) {
-               return this.patternTypeId + '_' + propKey;
+               return this.patternTypeId + '_' + this.optionType + '_' + propKey;
             },
             getDefaultPatternTypeObj() {
                 const defaultPatternTypeId = this.$store.state.debugAssertionEval.defaultPatternTypeId
@@ -140,7 +155,10 @@
                 return this.getPatternTypeObj.resultObj.propKey
             },
             getPropVal(propKey) {
-                return this.getPatternTypeObj.dataObj[propKey]
+                let val = this.getPatternTypeObj.dataObj[propKey]
+                // console.log(`patternType is ${this.patternTypeId}, optionType is ${this.optionType}, reading key ${propKey}, and the value is '${val}'.`)
+                // console.log(`value is empty? ${val===''}`)
+                return val
             },
             getFieldFromValueType(propKey) {
                 let arr = this.$store.state.debugAssertionEval.fieldSupport.fieldValueTypes
@@ -173,16 +191,23 @@
             },
             getEnumTypeArray(propKey) {
                 let propObj = this.getFieldFromValueType(propKey)
+                let valuesObj = null
                 if (propObj !== null) {
                     if (propObj.values.length > 0) {
-                        return propObj.values
+                        valuesObj = propObj.values
                     } else {
                         let overrideObj = this.getOverrideType(propKey)
                         if (overrideObj !== null && overrideObj.values.length > 0) {
-                            return overrideObj.values
+                            valuesObj = overrideObj.values
                         }
                     }
                 }
+                if (valuesObj != null && valuesObj.length > 0) {
+                   let disabledOptionArr = [{displayName: 'Please select one', codeValue: '', definition:''}]
+                    return disabledOptionArr.concat(valuesObj) // Need to return a new array without disturbing the static copy
+                }
+                return valuesObj
+
             },
             getOverrideType(propKey) {
                 let result = null
@@ -212,9 +237,9 @@
                 return false
             },
             onEvalObjPropSelect(e) {
-              this.onEvalObjPropUpdate(e)
-                let propKey = e.target.getAttribute('data-prop-key')
-                this.doEval(propKey)
+               this.onEvalObjPropUpdate(e)
+               let propKey = e.target.getAttribute('data-prop-key')
+               this.doEval(propKey)
             },
             onEvalObjPropUpdate(e) {
                 // console.log('onEvalObjProp.. was called.')
@@ -224,12 +249,12 @@
                 this.$store.commit('setDebugAssertionEvalPropKey', {patternTypeId: this.patternTypeId, propKey: propKey}) // Just to track what changed field was updated in the last attempt so the error hint may be applied to this field
                 let assertDataString = JSON.stringify(this.getPatternTypeObj.dataObj)
                 // console.log('before base64: ' + assertDataString)
-                const patternTypeObj = this.getPatternTypeObj
-                if ('evalAction' in patternTypeObj) {
-                    this.$store.dispatch(patternTypeObj.evalAction, window.btoa(assertDataString))
-                } else {
-                    this.$store.dispatch('doDebugEvalAssertion', window.btoa(assertDataString))
+                const evalContextObj = this.getPatternTypeObj
+                let evalAction = this.$store.state.debugAssertionEval.evalObjByPattern.defaultEvalAction
+                if ('evalAction' in evalContextObj) {
+                    evalAction = evalContextObj.evalAction
                 }
+                this.$store.dispatch(evalAction, window.btoa(assertDataString))
             },
             evalOnKeyUp: function (event) {
                 if (this.evalTimer) {

@@ -11,14 +11,14 @@
                                     <span class="closeXIcon" title="Close" @click.stop="close()">&#x274c;</span></h3>
                             </span>
                             <div class="patternHeaderContainer">
-                                <div class="patternHeader">Select a Pattern:</div>
+                                <div class="patternHeader">Select an Assertion Pattern:</div>
                                 <div class="patternHeaderButtons">
                                     <div v-for="(val, patternType) in $store.state.debugAssertionEval.evalObjByPattern.patternTypes"
                                          :key="patternType">
                                         <div
                                                 v-bind:class="{
                                             'selectedPatternType': isSelectedPatternType(patternType),
-                                            'selectPatternType' : true,
+                                            'selectPatternType' : ! isSelectedPatternType(patternType),
                                             }"
                                                 @click="doSelectPatternTypeId(patternType)">{{patternType}}</div>
                                     </div>
@@ -26,8 +26,20 @@
                             </div>
                         </div>
                         <div id="daemBody" class="modal-body">
+                            <template v-if="hasFhirPathExpression">
+                                <div>
+                                    <div class="evalOptionTabHeader">
+                                        <!-- tabKey is the tabObject name -->
+                                        <div v-for="(tabObj, tabKey) in tabMap" :key="tabKey"
+                                             :class="{'selectedEvalOptionTab':isSelectedOptionTab(tabKey),'evalOptionTab':!isSelectedOptionTab(tabKey)}"
+                                              @click="doSelectEvalOptionTab(tabKey)">
+                                            {{tabObj.label}}
+                                        </div>
+                                    </div>
+                                </div>
+                            </template>
                             <div>
-                                 <debug-assertion-eval-form :pattern-type-id="selectedPatternTypeId" />
+                                <debug-assertion-eval-form :pattern-type-obj="getSelectedObj" :pattern-type-id="selectedPatternTypeId" :option-type="selectedEvalOptionTab" />
                             </div>
                         </div>
                         <div id="daemFooter" >
@@ -56,8 +68,8 @@
                 isDragging: false,
                 drag_pos_left: 0,
                 drag_pos_top: 0,
-                resizeObTimer: null,
-                resizeOb: null,
+                // resizeObTimer: null,
+                // resizeOb: null,
             }
         },
         mounted() {
@@ -80,33 +92,65 @@
                 }
             },
             wasEvaluatedAtLeastOnce() {
-                let obj = this.getSelectedPatternTypeObj
+                // let obj = this.getSelectedPatternTypeObj
+                let obj = this.getSelectedObj
                 return obj.resultObj.wasEvaluatedAtleastOnce
+            },
+            hasFhirPathExpression() {
+                return ('fhirPathContextObj' in this.getSelectedPatternTypeObj)
+            },
+            getSelectedObj() {
+                if (this.hasFhirPathExpression && this.isFhirPathTabSelected) {
+                    return this.getSelectedPatternTypeObj.fhirPathContextObj
+                } else {
+                    return this.getSelectedPatternTypeObj
+                }
+            },
+            isFhirPathTabSelected() {
+                return this.selectedEvalOptionTab === 'fhirPathTab'
+            },
+            selectedEvalOptionTab() {
+                if ('selectedEvalOptionTab' in this.getSelectedPatternTypeObj) {
+                    const selectedOptionTab = this.getSelectedPatternTypeObj.selectedEvalOptionTab
+                    if (selectedOptionTab !== '')
+                        return selectedOptionTab
+                }
+                return this.$store.state.debugAssertionEval.defaultEvalOptionTab
+            },
+            tabMap() {
+                return this.$store.state.debugAssertionEval.tabMap
             }
-
         },
         methods: {
             isSelectedPatternType(patternTypeId) {
                return (this.selectedPatternTypeId === patternTypeId)
             },
+            isSelectedOptionTab(tabId) {
+               return (this.selectedEvalOptionTab === tabId)
+            },
+            doSelectEvalOptionTab(tabId) {
+                this.$store.commit('setSelectedEvalOptionTab', tabId)
+            },
             doSelectPatternTypeId(patternTypeId) {
+                this.$store.commit('setSelectedPatternTypeId', patternTypeId)
+                // If initial selection, then set optionTab to Assertion when pattern selection changes
+                if ('selectedEvalOptionTab' in this.getSelectedPatternTypeObj)
+                    if (this.getSelectedPatternTypeObj.selectedEvalOptionTab === '') {
+                        this.$store.commit('setSelectedEvalOptionTab', this.$store.state.debugAssertionEval.defaultEvalOptionTab)
+                    }
                 // This is needed so when the selector is switched from a longer display to a smaller one (ie, one that contains fewer assert elements, the top portion is not hidden
                 // document.querySelector('div#debugAssertionEvalModal').scrollTop = 0
                 // Unset the height property so that the footer is not hidden at the bottom
                 const elFlexContainer = document.querySelector('div.dafFlexContainer')
                 const defaultPatternTypeId = this.$store.state.debugAssertionEval.defaultPatternTypeId
-                if (defaultPatternTypeId !== patternTypeId) {
-                    elFlexContainer.style.height = "auto"
-                } else {
+                if (patternTypeId === defaultPatternTypeId) {
                     elFlexContainer.style.height = "754px"
+                } else {
+                    elFlexContainer.style.height = "auto"
                 }
-                this.$store.commit('setSelectedPatternTypeId', patternTypeId)
-                // this.doResizeForm()
             },
-            // doResizeForm() {
-            //    this.$store.commit('setRestoreModalSize', true)
-            // },
             close()  {
+                /*
                 if (this.resizeOb !== null) {
                     try {
                         let modalEl = document.querySelector('div#debugAssertionEvalModal.eval-modal-container')
@@ -120,6 +164,7 @@
                        // May not be supported in all browsers, like I.E.
                     }
                 }
+                */
                 const defaultPatternTypeId = this.$store.state.debugAssertionEval.defaultPatternTypeId
                 this.$store.commit('setDebugAssertionEvalPropKey', {patternTypeId: defaultPatternTypeId, propKey: ''})
                 this.$emit('close')
@@ -185,6 +230,29 @@
 
 
 <style scoped>
+    .evalOptionTabHeader {
+        text-align: left;
+        border-bottom: inset;
+        margin-bottom: 10px;
+    }
+    .selectedEvalOptionTab,
+    .evalOptionTab {
+        background-color: lavenderblush;
+        cursor: pointer;
+        border-top-left-radius: 12px;
+        border-top-right-radius: 12px;
+        font-size: smaller;
+        display: inline-block;
+        margin-right: 10px;
+        text-align: left;
+        padding: 4px;
+    }
+
+    .selectedEvalOptionTab {
+        background-color: plum;
+        font-weight: bold;
+    }
+
     .selectedPatternType,
     .selectPatternType {
         border: 1px solid gray;
@@ -220,7 +288,7 @@
         background-color: white;
         width: 100%;
         top: 0;
-        padding: 10px 10px 10px 10px;
+        padding: 10px 10px 5px 10px;
     }
 
     .patternHeaderContainer {
