@@ -9,6 +9,7 @@ import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 
+import java.io.UnsupportedEncodingException;
 import java.net.*;
 import java.util.*;
 
@@ -217,12 +218,18 @@ public class Ref {
         String[]  theParts = parms.split("\\?");
         if (theParts.length == 2)
             parms = theParts[1];
-        String[] parts = parms.split(";");
+        String[] parts = parms.split("&");
         for (int i = 0; i < parts.length; i++) {
             String parm = parts[i];
             List<String> namevalue = Arrays.asList(parm.split("=", 2));
-            if (!namevalue.get(0).equals(""))
-                map.put(namevalue.get(0), namevalue.get(1));
+            if (!namevalue.get(0).equals("")) {
+                try {
+                    String value = URLDecoder.decode(namevalue.get(1), "UTF-8");
+                    map.put(namevalue.get(0), value);
+                } catch (UnsupportedEncodingException e) {
+                    map.put(namevalue.get(0), namevalue.get(1));
+                }
+            }
         }
 
         return map;

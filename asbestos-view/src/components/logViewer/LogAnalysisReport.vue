@@ -196,15 +196,14 @@
                 await this.loadAnalysisForObject(url)
             },
             async loadAnalyisFromEventId(url, eventId, addToHistory) {
-                console.log(`loadAnalyisFromEventContext for ${eventId}`)
-                console.log(`url=${url}`)
+                console.log(`loadAnalyisFromEventContext for ${eventId} and ${url}`)
                 await this.$store.dispatch('getLogEventAnalysis', {channel: this.channelId, session: this.sessionId, eventId: eventId, requestOrResponse: this.requestOrResponse, url: url})
                 if (addToHistory)
                     this.historyPush(url, eventId)
                 this.index = this.history.length - 1
             },
             loadAnalysisForObject(resourceUrl) {
-                console.log(`loadAnalysisForObject ${resourceUrl}`)
+                console.log(`loadAnalysisForObject ${resourceUrl} eventId= ${this.eventId}`)
                 this.$store.dispatch('getLogEventAnalysisForObject', {
                     resourceUrl: resourceUrl,
                     gzip: this.gzip,
@@ -212,6 +211,8 @@
                     eventId: this.eventId
                 })
                 this.selectedResourceIndex = -1
+              if (this.eventId)
+                this.historyPush(resourceUrl, this.eventId);
             },
             loadAnalysisForObjectAndAddHistory(resourceUrl, index) {
                 if (this.report.objects[index].url === 'Contained') {

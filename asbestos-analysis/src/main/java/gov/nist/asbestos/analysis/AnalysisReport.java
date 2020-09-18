@@ -11,6 +11,7 @@ import gov.nist.asbestos.client.resolver.FhirPath;
 import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import gov.nist.asbestos.http.headers.Headers;
+import gov.nist.asbestos.http.operations.HttpGetter;
 import gov.nist.asbestos.serviceproperties.ServiceProperties;
 import gov.nist.asbestos.serviceproperties.ServicePropertiesEnum;
 import gov.nist.asbestos.simapi.validation.Val;
@@ -446,22 +447,32 @@ public class AnalysisReport {
 
         Map<String, String> params = baseRef.getParametersAsMap();
         BaseResource resource = null;
-        if (params.containsKey("focusUrl")) {
+        if (params.containsKey("focusUrl") && !Strings.isNullOrEmpty(params.get("focusUrl"))) {
             String focusUrl = params.get("focusUrl");
             ResourceWrapper wrapper = findResourceInBundle(getContextBundle(), focusUrl);
             resource = wrapper.getResource();
-        } else if (params.containsKey("fhirPath")) {
+        } else if (params.containsKey("fhirPath")&& !Strings.isNullOrEmpty(params.get("fhirPath"))) {
             FhirPath fhirPath = new FhirPath(params.get("fhirPath"));
             resource = resourceFromBundle((Bundle) contextResourceBundle.getResource(), fhirPath);
         } else if ("Bundle".equals(baseRef.getResourceType()) &&"Bundle".equals(contextResourceBundle.getResourceType())){
             Bundle bundle = (Bundle) contextResourceBundle.getResource();
             if (isPDBRequest(bundle)) {
-                baseObj = findDocumentManifest(bundle);
+                baseObj = findDocumentManifestInRequestBundle(bundle);
                 if (baseObj != null) {
                     Ref baseObjRef = baseObj.getRef();
                     baseObj.setContext(bundle);
                     baseRef.addParameter("focusUrl", baseObjRef.toString());
                     baseObj.setRef(baseRef);
+                }
+            } else if (isPDBResponse(bundle)) {
+                String uriBase = bundle.getLink("self").getUrl();
+                Ref documentManifestLocation = findDocumentManifestInResponseBundle(bundle);
+                if (uriBase != null && documentManifestLocation != null) {
+                    Ref dmRef = documentManifestLocation.rebase(uriBase);
+                    FhirClient fhirClient = new FhirClient();
+                    ResourceWrapper dm = fhirClient.readResource(dmRef);
+                    baseObj = dm;
+                    baseRef = dmRef;
                 }
             } else {
                 baseObj = new ResourceWrapper(bundle)
@@ -502,6 +513,10 @@ public class AnalysisReport {
         return hasIntersection(pdbProfles, types);
     }
 
+    public static boolean isPDBResponse(Bundle bundle) {
+        return bundle.getType() == Bundle.BundleType.TRANSACTIONRESPONSE;
+    }
+
     private static String trueType(String theType) {
         String[] parts =  theType.split(("/"));
         if (parts.length > 0) {
@@ -515,7 +530,19 @@ public class AnalysisReport {
                 .filter(l2::contains).count() > 0;
     }
 
-    private ResourceWrapper findDocumentManifest(Bundle bundle) {
+    private Ref findDocumentManifestInResponseBundle(Bundle bundle) {
+        for (Bundle.BundleEntryComponent bundleEntryComponent : bundle.getEntry()) {
+            Bundle.BundleEntryResponseComponent bundleEntryResponseComponent = bundleEntryComponent.getResponse();
+            String location = bundleEntryResponseComponent.getLocation();
+            if (!Strings.isNullOrEmpty(location)) {
+                if (location.contains("DocumentManifest"))
+                    return new Ref(location);
+            }
+        }
+        return null;
+    }
+
+    private ResourceWrapper findDocumentManifestInRequestBundle(Bundle bundle) {
         for (Bundle.BundleEntryComponent bundleEntryComponent : bundle.getEntry()) {
             Resource componentResource = bundleEntryComponent.getResource();
             if (componentResource instanceof DocumentManifest) {

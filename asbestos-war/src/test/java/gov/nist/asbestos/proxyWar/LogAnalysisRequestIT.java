@@ -1,27 +1,44 @@
 package gov.nist.asbestos.proxyWar;
 
 import com.google.gson.Gson;
+import gov.nist.asbestos.client.Base.EC;
+import gov.nist.asbestos.client.Base.ProxyBase;
+import gov.nist.asbestos.client.client.Format;
+import gov.nist.asbestos.client.events.UIEvent;
 import gov.nist.asbestos.client.resolver.Ref;
+import gov.nist.asbestos.http.headers.Headers;
 import gov.nist.asbestos.http.operations.HttpGetter;
 import gov.nist.asbestos.testEngine.engine.TestEngine;
+import org.hl7.fhir.r4.model.BaseResource;
+import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.TestReport;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import static org.junit.Assert.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+
+/**
+ * Integration Tests for the LogAnalysis back end supporting the Inspector front end.
+ * These tests mimic getLogEventAnalysis and getLogEventAnalysisForObject found in
+ * https://github.com/usnistgov/asbestos/blob/master/asbestos-view/src/store/log.js
+ */
 
 public class LogAnalysisRequestIT {
     private static String testSession = "default";
     private static String channelId = "IT";
     private static String fhirPort = ITConfig.getFhirPort();
     private static String proxyPort = ITConfig.getProxyPort();
+    private static EC ec;
 
     static URI base;
     static TestReport theReport;
@@ -50,6 +67,18 @@ public class LogAnalysisRequestIT {
     }
 
     @BeforeAll
+    static void getEc() throws URISyntaxException {
+        HttpGetter getter = new HttpGetter();
+        getter.get(logBase + "/ec");
+        assertEquals(200, getter.getStatus());
+        String ecDirName = getter.getResponseText();
+        File ecDir = new File(ecDirName);
+        assertTrue(ecDir.exists());
+        assertTrue(ecDir.isDirectory());
+        ec = new EC(ecDir);
+    }
+
+    @BeforeAll
     static void runATest() throws IOException, URISyntaxException {
         base = new URI(Utility.createChannel(testSession, channelId, fhirPort, proxyPort));
 
@@ -72,10 +101,80 @@ public class LogAnalysisRequestIT {
         analysisBuilder.setEventId(getEventId());
     }
 
+    // Get analysis of DocumentReference Resource based on its server URL.
     @Test
-    void eventRequest() throws URISyntaxException {
+    void serverResource() throws URISyntaxException {
+        String eventId = analysisBuilder.eventId;
+        assertNotNull(eventId);
+        UIEvent uiEvent = new UIEvent(ec).fromParms(
+                testSession,
+                channelId,
+                "Bundle",
+                eventId);
+        assertNotNull(uiEvent);
+        List<Ref> locations = getLocationsFromEvent(uiEvent);
+        assertTrue(locations.size() == 3);
+
+        Ref docRefRef = null;
+        for (Ref location : locations) {
+            if (location.toString().contains("DocumentReference"))
+                docRefRef = location;
+        }
+        assertNotNull(docRefRef);
+
+        String analysisUrl = analysisBuilder.getObjectAnalysis(docRefRef);
         HttpGetter getter = new HttpGetter();
-        getter.get(analysisBuilder.getEventRequestAnalysis(null));
+        getter.get(analysisUrl);
+
+        assertEquals(200, getter.getStatus());
+        Map<String, Object>  response = new Gson().fromJson(getter.getResponseText(), Map.class);
+        assertEquals("DocumentReference",
+                ((Map)response.get("base"))
+                        .get("name")
+        );
+        List objectList = (List) response.get("objects");
+        assertEquals(2,
+                objectList.size()
+        );
+        Map<String, Object> object1 = (Map<String, Object>) objectList.get(0);
+        Map<String, Object> object2 = (Map<String, Object>) objectList.get(1);
+        Map<String, Object> binary = "Binary".equals(object1.get("name")) ? object1 : object2;
+        Map<String, Object> patient = "Patient".equals(object1.get("name")) ? object1 : object2;
+        assertEquals("Binary", binary.get("name"));
+        // this patient is sourcePatient which is contained within DocumentReference
+        assertEquals("Patient", patient.get("name"));
+    }
+
+    List<Ref> getLocationsFromEvent(UIEvent event) {
+        List<Ref> locations = new ArrayList<>();
+        String responseBodyString = event.getResponseBody();
+        Headers responseHeaders = event.getResponseHeader();
+
+        BaseResource baseResource;
+        baseResource = ProxyBase.parse(responseBodyString, Format.fromContentType(responseHeaders.getContentType().getValue()));
+        assertTrue(baseResource instanceof Bundle);
+        Bundle bundle = (Bundle) baseResource;
+
+        Bundle.BundleLinkComponent bundleLinkComponent = bundle.getLink("self");
+        assertTrue(bundleLinkComponent.hasUrl());
+        String baseUrl = bundleLinkComponent.getUrl();
+        assertNotNull(baseUrl);
+        for( Bundle.BundleEntryComponent bundleEntryComponent : bundle.getEntry()) {
+            String componentUrl = bundleEntryComponent.getResponse().getLocation();
+            assertNotNull(componentUrl);
+            Ref url = new Ref(componentUrl).rebase(baseUrl);
+            locations.add(url);
+        }
+
+        return locations;
+    }
+
+    // Analyse the request (static) message without offering a focusUrl so the focus defaults to the DocumentManifest
+    // The analysis should find a DocumentManifest and a DocumentReference.
+    @Test
+    void eventNoFocusRequest() throws URISyntaxException {
+        HttpGetter getter = new HttpGetter();
+        getter.get(analysisBuilder.getEventRequestAnalysis(null, true, false, false));
         assertEquals(200, getter.getStatus());
         Map<String, Object>  response = new Gson().fromJson(getter.getResponseText(), Map.class);
         assertEquals("DocumentManifest",
@@ -98,11 +197,13 @@ public class LogAnalysisRequestIT {
     String documentManifestRequestUrl = "urn:uuid:3fdc72f4-a11d-4a9d-9260-a9f745779e02";
     String documentReferenceRequestUrl = "urn:uuid:1e404af3-077f-4bee-b7a6-a9be97e1ce01";
 
+    // Analyse the request with a focus on the DocumentManifest.  Should find the DocumentManifect
+    // and DocumentReference.
     @Test
     void eventWithDocumentManifestFocusUrlRequest() throws URISyntaxException {
         HttpGetter getter = new HttpGetter();
 
-        getter.get(analysisBuilder.getEventRequestAnalysis(documentManifestRequestUrl));
+        getter.get(analysisBuilder.getEventRequestAnalysis(documentManifestRequestUrl, true, false, false));
         assertEquals(200, getter.getStatus());
         Map<String, Object>  response = new Gson().fromJson(getter.getResponseText(), Map.class);
         Map<String, Object> base = (Map)response.get("base");
@@ -128,10 +229,12 @@ public class LogAnalysisRequestIT {
         assertEquals(documentReferenceRequestUrl, dr.getFocusUrl());
     }
 
+    // Analyse the request with a focus on the DocumentReference.  Should find the DocumentReference,
+    // Binary, and Patient.
     @Test
     void eventWithDocumentReferenceFocusUrlRequest() throws URISyntaxException {
         HttpGetter getter = new HttpGetter();
-        getter.get(analysisBuilder.getEventRequestAnalysis(documentReferenceRequestUrl));
+        getter.get(analysisBuilder.getEventRequestAnalysis(documentReferenceRequestUrl, true, false, false));
         assertEquals(200, getter.getStatus());
         Map<String, Object>  response = new Gson().fromJson(getter.getResponseText(), Map.class);
         assertEquals("DocumentReference",
@@ -153,8 +256,9 @@ public class LogAnalysisRequestIT {
         assertEquals("Patient", patient.get("name"));
     }
 
+    // Analyse a response with a default focus (DocumentManifest).
     @Test
-    void eventResponse() throws URISyntaxException {
+    void eventNoFocusResponse() throws URISyntaxException {
         HttpGetter getter = new HttpGetter();
 
         getter.get(analysisBuilder.getEventResponseAnalysis());
@@ -162,46 +266,21 @@ public class LogAnalysisRequestIT {
         Map<String, Object>  response = new Gson().fromJson(getter.getResponseText(), Map.class);
         Map<String, Object> base = (Map)response.get("base");
 
-        assertEquals("Bundle", base.get("name"));
+        assertEquals("DocumentManifest", base.get("name"));
         String dmUrl = (String) base.get("url");
         assertTrue(dmUrl.startsWith("http"));
         Ref dm = new Ref(dmUrl);
-        assertTrue(dm.toString().contains("asbestos/log"));
+        assertTrue(dm.toString().contains("asbestos/proxy"));
         assertEquals(0, dm.getParameterNames().size());
         List objectList = (List) response.get("objects");
-        assertEquals(3, objectList.size());
+        assertEquals(1, objectList.size());
 
 
         Map<String, Object> object1 = (Map<String, Object>) objectList.get(0);
-        Map<String, Object> object2 = (Map<String, Object>) objectList.get(1);
-        Map<String, Object> object3 = (Map<String, Object>) objectList.get(2);
         String name1 = (String) object1.get("name");
-        String name2 = (String) object2.get("name");
-        String name3 = (String) object3.get("name");
 
-        Map<String, Object> binary = "Binary".equals(name1) ? object1 : "Binary".equals(name2) ? object2 : object3;
-        Map<String, Object> docRef = "DocumentReference".equals(name1) ? object1 : "DocumentReference".equals(name2) ? object2 : object3;
-        Map<String, Object> docMan = "DocumentManifest".equals(name1) ? object1 : "DocumentManifest".equals(name2) ? object2 : object3;
-        assertEquals("Binary", binary.get("name"));
-        assertEquals("DocumentReference", docRef.get("name"));
-        assertEquals("DocumentManifest", docMan.get("name"));
-    }
-
-    @Test
-    void urlRequest() throws URISyntaxException {
-        HttpGetter getter = new HttpGetter();
-        String analysisUrl = analysisBuilder.getUrlAnalysis(eventUrl) + "/request";
-        getter.get(analysisUrl);
-        assertEquals(200, getter.getStatus());
-        Map<String, Object>  response = new Gson().fromJson(getter.getResponseText(), Map.class);
-        assertEquals("DocumentManifest",
-                ((Map)response.get("base"))
-                        .get("name")
-        );
-    }
-
-    enum AnalysisType {
-        STATIC, URL, EVENT;
+        Map<String, Object> docRef = "DocumentReference".equals(name1) ? object1 : null;
+        assertNotNull(docRef);
     }
 
     static class AnalysisBuilder {
@@ -210,14 +289,13 @@ public class LogAnalysisRequestIT {
         String testCollectionId = null;
         String testId = null;
         String url = null;
-        AnalysisType analysisType = null;
         String focusUrl = null;
         String eventId = null;
         String fixturePath = null;
         boolean useProxy = false;
         boolean ignoreBadRefs = false;
 
-        public String getEventRequestAnalysis(String focusUrl) {
+        public String getEventRequestAnalysis(String focusUrl, boolean useProxy, boolean useGzip, boolean ignoreBadRefs) {
             String url =
                     logBase
                             + "/" + "analysis"
@@ -232,6 +310,7 @@ public class LogAnalysisRequestIT {
             return url;
         }
 
+        // focusUrl is usable on response.  Just hard to setup test data for IT test.
         public String getEventResponseAnalysis() {
             String url =
                     logBase
@@ -244,12 +323,13 @@ public class LogAnalysisRequestIT {
             return url;
         }
 
-        public String getUrlAnalysis(String url) {
-            return
+        public String getObjectAnalysis(Ref ref) {
+            String url =
                     logBase
                     + "/" + "analysis"
                     + "/" + "url"
-                    + "?url=" + url;
+                    + "?url=" + ref.toString();
+            return url;
         }
 
         public String getTestSession() {
@@ -294,15 +374,6 @@ public class LogAnalysisRequestIT {
 
         public AnalysisBuilder setUrl(String url) {
             this.url = url;
-            return this;
-        }
-
-        public AnalysisType getAnalysisType() {
-            return analysisType;
-        }
-
-        public AnalysisBuilder setAnalysisType(AnalysisType analysisType) {
-            this.analysisType = analysisType;
             return this;
         }
 

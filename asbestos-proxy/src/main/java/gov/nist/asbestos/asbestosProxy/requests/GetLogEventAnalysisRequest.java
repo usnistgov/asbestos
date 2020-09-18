@@ -24,59 +24,21 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-// 0 - empty
-// 1 - app context  (asbestos)
-// 2 - "log"
-// 3 - "analysis"
-// 4 - "event"
-// 5 - testSession
-// 6 - channelId
-// 7 - eventId
-// 8 - "request" or "response"
-// ?validation=true
-// focusUrl=url (may be null) - for private bundles this is the internal UUID
-//             for contained it is ID#anchor
-// Returns Report
-
-// OR
-
-// 0 - empty
-// 1 - app context  (asbestos)
-// 2 - "log"
-// 3 - "analysis"
-// 4 - "url"
-// ?url=TheUrlOfAFHIRResource;gzip=boolean
-// Returns Report
-
-// OR
-
-// 0 - empty
-// 1 - app context  (asbestos)
-// 2 - "log"
-// 3 - "analysis"
-// 4 - "static" or "url" or "event"
-// 5 - testCollectionId
-// 6 - testId
-// ?url=reference
-// Returns Report
-
-
-
-
 public class GetLogEventAnalysisRequest {
     private static Logger log = Logger.getLogger(GetLogEventAnalysisRequest.class);
     private EventContext eventContext;
     private gov.nist.asbestos.client.Base.Request request;
 
     public static boolean isRequest(gov.nist.asbestos.client.Base.Request request) {
-        return request.uriParts.size() == 9
+        return (request.uriParts.size() == 9
                 && "log".equalsIgnoreCase(request.uriParts.get(2))
                 && "analysis".equalsIgnoreCase(request.uriParts.get(3))
-                && "event".equalsIgnoreCase(request.uriParts.get(4)
+                && "event".equalsIgnoreCase(request.uriParts.get(4))
+                ||
+                ("log".equalsIgnoreCase(request.uriParts.get(2))
+                && "analysis".equalsIgnoreCase(request.uriParts.get(3))
+                && "url".equalsIgnoreCase(request.uriParts.get(4)))
                 );
-
-
-
     }
 
     public GetLogEventAnalysisRequest(gov.nist.asbestos.client.Base.Request request) {
@@ -113,6 +75,8 @@ public class GetLogEventAnalysisRequest {
 
         if ("event".equalsIgnoreCase(request.uriParts.get(4))) {
             fromEventURL();
+        } else if ("url".equalsIgnoreCase(request.uriParts.get(4))) {
+            fromPassedURL();
         } else {
             request.badRequest();
         }
@@ -251,27 +215,44 @@ public class GetLogEventAnalysisRequest {
                     false,
                     resource    // contextBundle
             );
-//            if (!Strings.isNullOrEmpty(eventId)) {
-//                try {
-//                    eventContext = new EventContext(ProxyEvent.eventFromEventURI(new URI(url)));
-//                } catch (Exception e) {
-//                    throw new RuntimeException("URI " + url + " cannot be translated into an event");
-//                }
-//            } else if (!Strings.isNullOrEmpty(fixturePath)) {
-//
-//            }
-//            //Ref theRef = new Ref(fhirPath);
-//            // too early - ref = new Ref(Ref.urlDecode(ref.asString()));
-//            runAndReturnReport(
-//                    ref,
-//                    "By Request",
-//                    gzip,
-//                    useProxy,
-//                    ignoreBadRefs,
-//                    false,
-//                    resource);
-//
        }
+    }
+
+    // 0 - empty
+    // 1 - app context  (asbestos)
+    // 2 - "log"
+    // 3 - "analysis"
+    // 4 - "url"
+    // ?url=TheUrlOfAFHIRResource
+    // Returns Report
+
+    // the url can point to any accessible resource
+
+    // optional parameters
+    // validation (true|false (default)) (accepted but ignored)
+    // gzip (true|false) - use gzip when issuing queries
+    // eventId - don't understand how this works - session and channel are needed to use this
+
+    void fromPassedURL() throws IOException {
+        Map<String, String> queryParams = request.getParametersMap();
+        String url = queryParams.get("url");
+        if (Strings.isNullOrEmpty(url)) {
+            request.badRequest();
+            return;
+        }
+        boolean gzip = queryParams.containsKey("gzip") && "true".equals(queryParams.get("gzip"));
+        boolean ignoreBadRefs = queryParams.containsKey("ignoreBadRefs") && "true".equals(queryParams.get("ignoreBadRefs"));
+        Ref ref = new Ref(url);
+        runAndReturnReport(
+                ref,
+                "By Request",
+                gzip,
+                false,
+                ignoreBadRefs,
+                false,
+                null    // contextBundle
+        );
+
     }
 
     // 0 - empty
@@ -285,7 +266,7 @@ public class GetLogEventAnalysisRequest {
     // 8 - "request" or "response"
 
     // optional parameters
-    // validation (true|false (default))
+    // validation (true|false (default)) (accepted but ignored)
     // focusUrl (used with Bundles to focus on resource within)
     // gzip (true|false) - use gzip when issuing queries
     // useProxy (true|false) - issue queries through proxy (or bypass and go directly to server)
@@ -295,7 +276,6 @@ public class GetLogEventAnalysisRequest {
         boolean gzip = queryParams.containsKey("gzip") && "true".equals(queryParams.get("gzip"));
         boolean useProxy = queryParams.containsKey("useProxy") && "true".equals(queryParams.get("useProxy"));;
         boolean ignoreBadRefs = queryParams.containsKey("ignoreBadRefs") && "true".equals(queryParams.get("ignoreBadRefs"));
-        String fixturePath = queryParams.get("fixturePath");
         request.testSession = request.uriParts.get(5);
         request.channelId = request.uriParts.get(6);
         String eventId = request.uriParts.get(7);
@@ -333,6 +313,7 @@ public class GetLogEventAnalysisRequest {
         );
 
     }
+
 
     ResourceWrapper getResourceFromEvent(UIEvent event, boolean focusOnRequest) {
         String requestBodyString = event.getRequestBody();

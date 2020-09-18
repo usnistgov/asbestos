@@ -86,6 +86,8 @@ export const logStore = {
                 console.error(`${error} for ${url}`)
             }
         },
+
+        // focusAnchor and validation are never used.  Validation is always done.
         async getLogEventAnalysis({commit}, parms) {
             const channel = parms.channel
             const session = parms.session
@@ -122,14 +124,38 @@ export const logStore = {
         async getLogEventAnalysisForObject({commit}, parms) {
             const ignoreBadRefs = parms.ignoreBadRefs
             let resourceUrl = parms.resourceUrl
+            const urlObj = new URL(resourceUrl);
+            const urlObjParams = urlObj.searchParams;
             console.log(`resourceUrl = ${resourceUrl}`)
             if (resourceUrl)
                resourceUrl = resourceUrl.trim()
             const gzip = parms.gzip
-            const eventId = parms.eventId ? parms.eventId : ""
-            const url = `analysis/url?url=${resourceUrl};gzip=${gzip};ignoreBadRefs=${ignoreBadRefs};eventId=${eventId}`
+            const eventId = parms.eventId ? parms.eventId : "";
+            // Using new URL() to parse parameters, it must have an absolute path so "phony" is added.
+            // It is removed below.
+            const phony = 'http://localhost';
+            let url = new URL(`${phony}/analysis/url`);
+            console.log(`getAnalysis ${url}`)
+            //?url=${resourceUrl};gzip=${gzip};ignoreBadRefs=${ignoreBadRefs};eventId=${eventId}`);
+            //url.searchParams.append(urlObjParams.get("focusUrl"));
+            for (let key in urlObjParams.keys()) {
+                const value = urlObjParams.get(key);
+                console.log(`key=${key} value=${value}`);
+                if (value)
+                    url.searchParams.append(key, value);
+            }
+            console.log(`url1 is ${url}`);
+            if (gzip)
+                url.searchParams.append('gzip', gzip);
+            if (eventId)
+                url.searchParams.append('eventId', eventId);
+            if (ignoreBadRefs)
+                url.searchParams.append('ignoreBadRefs', ignoreBadRefs);
+            if (resourceUrl)
+                url.searchParams.append('url', resourceUrl);
+            url = url.toString().split(phony + "/", 2)[1];
+            console.log(`final url is ${url}`);
             try {
-                console.log(`getAnalysis ${url}`)
                 const result = await LOG.get(url)
                 commit('setAnalysis', result.data)
             } catch (error) {
