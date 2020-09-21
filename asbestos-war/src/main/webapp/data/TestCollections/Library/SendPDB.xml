@@ -46,7 +46,10 @@
         </action>
         <action>
             <assert>
-                <description value="... returned Bundle.|FHIRTransReturnsBundle"/>
+                <description value="... returned Bundle."/>
+                <extension url="urn:reference">
+                  <valueString value="FHIRTransReturnsBundle"/>
+                </extension>
                 <compareToSourceId value="pdb-response-bundle"/>
                 <compareToSourceExpression value="Bundle.exists()"/>
                 <warningOnly value="false"/>
@@ -54,7 +57,10 @@
         </action>
         <action>
             <assert>
-                <description value="... Bundle is type transaction-response|FHIRTransReturnsBundle."/>
+                <description value="... Bundle is type transaction-response."/>
+                <extension url="urn:reference">
+                  <valueString value="FHIRTransReturnsBundle"/>
+                </extension>
                 <compareToSourceId value="pdb-response-bundle"/>
                 <compareToSourceExpression value="Bundle.type = 'transaction-response'"/>
                 <warningOnly value="false"/>
@@ -62,7 +68,10 @@
         </action>
         <action>
             <assert>
-                <description value="... Bundle does not contain OperationOutcome.|FHIRTransReturnsBundle"/>
+                <description value="... Bundle does not contain OperationOutcome."/>
+                <extension url="urn:reference">
+                  <valueString value="FHIRTransReturnsBundle"/>
+                </extension>
                 <compareToSourceId value="pdb-response-bundle"/>
                 <compareToSourceExpression value="Bundle.entry.response.outcome.where(OperationOutcome).exists().not()"/>
                 <warningOnly value="false"/>
@@ -70,7 +79,10 @@
         </action>
         <action>
             <assert>
-                <description value="... response contains one entry for each entry in request.|FHIRTransReturnsBundle"/>
+                <description value="... response contains one entry for each entry in request."/>
+                <extension url="urn:reference">
+                  <valueString value="FHIRTransReturnsBundle"/>
+                </extension>
                 <expression value="Bundle.entry.count()"/>
                 <value value="${requestEntryCount}"/>
                 <warningOnly value="false"/>
@@ -78,7 +90,10 @@
         </action>
         <action>
             <assert>
-                <description value="... all entries of transaction successful.|FHIRTransReturns201"/>
+                <description value="... all entries of transaction successful."/>
+                <extension url="urn:reference">
+                  <valueString value="FHIRTransReturns201"/>
+                </extension>
                 <expression value="Bundle.entry.response.all(status.startsWith(201))"/>
                 <warningOnly value="false"/>
             </assert>

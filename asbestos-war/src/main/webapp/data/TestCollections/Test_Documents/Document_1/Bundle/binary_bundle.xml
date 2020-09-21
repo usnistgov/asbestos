@@ -1,0 +1,80 @@
+<Bundle xmlns="http://hl7.org/fhir">
+    <id value="xds"/>
+    <meta>
+        <lastUpdated value="2013-07-01T13:11:33Z"/>
+        <profile value="http://ihe.net/fhir/StructureDefinition/IHE_MHD_Provide_Minimal_DocumentBundle"/>
+    </meta>
+    <type value="transaction"/>
+    <entry>
+        <fullUrl value="urn:uuid:3fdc72f4-a11d-4a9d-9260-a9f745779e03"/>
+        <resource>
+            <Binary>
+                <meta>
+                    <lastUpdated value="2013-07-01T13:11:33Z"/>
+                </meta>
+                <contentType value="text/plain"/>
+                <data value="Zm9vYmFy"/>
+            </Binary>
+        </resource>
+        <request>
+            <method value="POST"/>
+            <url value="urn:uuid:3fdc72f4-a11d-4a9d-9260-a9f745779e03"/>
+        </request>
+    </entry>
+    <entry>
+        <fullUrl value="urn:uuid:1e404af3-077f-4bee-b7a6-a9be97e1ce01"/>
+        <resource>
+            <DocumentReference>
+                <masterIdentifier>
+                    <system value="urn:ietf:rfc:3986"/>
+                    <value value="urn:oid:1.2.129.6.58.92.88336.4"/>
+                </masterIdentifier>
+                <subject>
+                    <reference value="${patientResourceId}"/>
+                </subject>
+                <status value="current"/>
+                <date value="2015-02-07T13:28:17.239+02:00"/>
+                <content>
+                    <attachment>
+                        <contentType value="text/plain"/>
+                        <url value="urn:uuid:3fdc72f4-a11d-4a9d-9260-a9f745779e03"/>
+                    </attachment>
+                </content>
+            </DocumentReference>
+        </resource>
+        <request>
+            <method value="POST"/>
+            <url value="urn:uuid:1e404af3-077f-4bee-b7a6-a9be97e1ce01"/>
+        </request>
+    </entry>
+    <entry>
+        <fullUrl value="urn:uuid:3fdc72f4-a11d-4a9d-9260-a9f745779e02"/>
+        <resource>
+            <DocumentManifest xmlns="http://hl7.org/fhir">
+                <text>
+                    <div xmlns="http://www.w3.org/1999/xhtml">Comment</div>
+                    <status value="empty"/>
+                </text>
+
+                <masterIdentifier>
+                    <system value="urn:ietf:rfc:3986"/>
+                    <value value="urn:oid:1.2.129.6.58.92.88337.4"/>
+                </masterIdentifier>
+                <subject>
+                    <reference value="${patientResourceId}"/>
+                </subject>
+                <status value="current"/>
+                <created value="2004-12-25T23:50:50-05:00"/>
+                <source value="urn:oid:1.3.6.1.4.1.21367.2009.1.2.1"/>
+                <description value="Physical"/>
+                <content>
+                    <reference value="urn:uuid:1e404af3-077f-4bee-b7a6-a9be97e1ce01"/>
+                </content>
+            </DocumentManifest>
+        </resource>
+        <request>
+            <method value="POST"/>
+            <url value="urn:uuid:3fdc72f4-a11d-4a9d-9260-a9f745779e02"/>
+        </request>
+    </entry>
+</Bundle>

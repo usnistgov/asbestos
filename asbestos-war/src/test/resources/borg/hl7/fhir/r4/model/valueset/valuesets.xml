@@ -1,0 +1,115 @@
+<Bundle xmlns="http://hl7.org/fhir">
+    <id value="valuesets"/>
+    <meta>
+        <lastUpdated value="2019-11-01T09:29:23.356+11:00"/>
+    </meta>
+    <type value="collection"/>
+
+    <entry>
+        <fullUrl value="http://hl7.org/fhir/CodeSystem/narrative-status"/>
+        <resource>
+            <CodeSystem xmlns="http://hl7.org/fhir">
+                <id value="narrative-status"/>
+                <meta>
+                    <lastUpdated value="2019-11-01T09:29:23.356+11:00"/>
+                </meta>
+                <url value="http://hl7.org/fhir/narrative-status"/>
+                <identifier>
+                    <system value="urn:ietf:rfc:3986"/>
+                    <value value="urn:oid:2.16.840.1.113883.4.642.4.56"/>
+                </identifier>
+                <version value="4.0.1"/>
+                <name value="NarrativeStatus"/>
+                <title value="NarrativeStatus"/>
+                <status value="draft"/>
+                <experimental value="false"/>
+                <date value="2019-11-01T09:29:23+11:00"/>
+                <publisher value="HL7 (FHIR Project)"/>
+                <contact>
+                    <telecom>
+                        <system value="url"/>
+                        <value value="http://hl7.org/fhir"/>
+                    </telecom>
+                    <telecom>
+                        <system value="email"/>
+                        <value value="fhir@lists.hl7.org"/>
+                    </telecom>
+                </contact>
+                <description value="The status of a resource narrative."/>
+                <caseSensitive value="true"/>
+                <valueSet value="http://hl7.org/fhir/ValueSet/narrative-status"/>
+                <content value="complete"/>
+                <concept>
+                    <code value="generated"/>
+                    <display value="Generated"/>
+                    <definition
+                            value="The contents of the narrative are entirely generated from the core elements in the content."/>
+                </concept>
+                <concept>
+                    <code value="extensions"/>
+                    <display value="Extensions"/>
+                    <definition
+                            value="The contents of the narrative are entirely generated from the core elements in the content and some of the content is generated from extensions. The narrative SHALL reflect the impact of all modifier extensions."/>
+                </concept>
+                <concept>
+                    <code value="additional"/>
+                    <display value="Additional"/>
+                    <definition
+                            value="The contents of the narrative may contain additional information not found in the structured data. Note that there is no computable way to determine what the extra information is, other than by human inspection."/>
+                </concept>
+                <concept>
+                    <code value="empty"/>
+                    <display value="Empty"/>
+                    <definition
+                            value="The contents of the narrative are some equivalent of &quot;No human-readable text provided in this case&quot;."/>
+                </concept>
+            </CodeSystem>
+        </resource>
+    </entry>
+
+    <entry>
+        <fullUrl value="http://hl7.org/fhir/ValueSet/narrative-status"/>
+        <resource>
+            <ValueSet xmlns="http://hl7.org/fhir">
+                <id value="narrative-status"/>
+                <meta>
+                    <lastUpdated value="2019-11-01T09:29:23.356+11:00"/>
+                    <profile value="http://hl7.org/fhir/StructureDefinition/shareablevalueset"/>
+                </meta>
+                <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-wg">
+                    <valueCode value="fhir"/>
+                </extension>
+                <url value="http://hl7.org/fhir/ValueSet/narrative-status"/>
+                <identifier>
+                    <system value="urn:ietf:rfc:3986"/>
+                    <value value="urn:oid:2.16.840.1.113883.4.642.3.55"/>
+                </identifier>
+                <version value="4.0.1"/>
+                <name value="NarrativeStatus"/>
+                <title value="NarrativeStatus"/>
+                <status value="draft"/>
+                <experimental value="false"/>
+                <date value="2019-11-01T09:29:23+11:00"/>
+                <publisher value="HL7 (FHIR Project)"/>
+                <contact>
+                    <telecom>
+                        <system value="url"/>
+                        <value value="http://hl7.org/fhir"/>
+                    </telecom>
+                    <telecom>
+                        <system value="email"/>
+                        <value value="fhir@lists.hl7.org"/>
+                    </telecom>
+                </contact>
+                <description value="The status of a resource narrative."/>
+                <immutable value="true"/>
+                <compose>
+                    <include>
+                        <system value="http://hl7.org/fhir/narrative-status"/>
+                    </include>
+                </compose>
+            </ValueSet>
+        </resource>
+    </entry>
+
+</Bundle>

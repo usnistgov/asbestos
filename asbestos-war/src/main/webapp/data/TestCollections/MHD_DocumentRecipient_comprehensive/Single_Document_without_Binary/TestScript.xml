@@ -1,0 +1,136 @@
+<TestScript xmlns="http://hl7.org/fhir">
+    <!--  Bundle with Binary - will be submitted via PDB -->
+
+    <!-- PDB referencing above Binary -->
+    <fixture id="pdb-bundle">
+        <autocreate value="false"/>
+        <autodelete value="false"/>
+        <resource>
+            <reference value="Bundle/pdb.xml"/>
+        </resource>
+    </fixture>
+    <fixture id="submittedDocRef">
+        <autocreate value="false"/>
+        <autodelete value="false"/>
+        <extension url="urn:subFixture">
+            <extension url="urn:fhirPath">
+                <valueString value="Bundle.entry[0]"/>
+            </extension>
+            <extension url="urn:sourceId">
+                <valueString value="pdb-bundle"/>
+            </extension>
+        </extension>
+    </fixture>
+    <fixture id="patient_bundle">
+        <!--
+           This patient comes out of the test Patient cache
+        -->
+        <autocreate value="false"/>
+        <autodelete value="false"/>
+        <resource>
+            <reference value="Patient/Alex_Alder.json"/>
+        </resource>
+    </fixture>
+
+    <!-- These three variables build the link to the Binary -->
+    <fixture id="binary-bundle">
+        <autocreate value="false"/>
+        <autodelete value="false"/>
+        <resource>
+            <reference value="Bundle/doc1.json"/>
+        </resource>
+    </fixture>
+    <variable>
+        <name value="binary_bundle_url"/>
+        <expression value="Bundle.link.url"/>
+        <sourceId value="binary-bundle"/>
+    </variable>
+    <variable>
+        <name value="binary_entry_location"/>
+        <expression value="Bundle.entry[0].response.location"/>
+        <sourceId value="binary-bundle"/>
+    </variable>
+    <variable>
+        <name value="binary_reference"/>
+        <defaultValue value="${binary_bundle_url}/${binary_entry_location}"/>
+    </variable>
+
+    <variable>
+        <name value="DocRefUrl"/>
+        <expression value="Bundle.entry[0].response.location"/>
+        <sourceId value="pdb-response"/>
+    </variable>
+    <variable>  <!-- referenced in pdb -->
+        <name value="requestPatientRef"/>
+        <expression value="Bundle.entry.fullUrl"/>
+        <sourceId value="patient_bundle"/>
+    </variable>
+    <variable>
+    	<name value="patientResourceId"/>
+    	<expression value="Bundle.entry.fullUrl"/>
+        <sourceId value="patient_bundle"/>
+    </variable>
+    <variable>
+        <name value="readbackPatientId"/>
+        <expression value="Patient.identifier.value"/>
+        <sourceId value="read-back"/>
+    </variable>
+    <variable>
+        <name value="requestEntryCount"/>
+        <expression value="Bundle.entry.count()"/>
+        <sourceId value="pdb-bundle"/>
+    </variable>
+    
+    <test>
+        <name value="Submit PDB referencing Binary resource."/>
+ <!--       <description value="The Binary resource was submitted as a managed resource by the setup page of this tool. Its server url is referenced by the DocumentEntry in this submission."/>
+       <extension url="urn:documentation">
+          <valueString value="**BOO**"/>
+        </extension> -->
+        <action>
+            <operation>
+                <description value="Submit Provide Document Bundle to MHD Document Recipient."/>
+                <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
+                    <extension url="component">
+                        <valueString value="../../Library/SendPDB.xml"/>
+                    </extension>
+                    <extension url="urn:fixture-in">
+                        <valueString  value="pdb-bundle"/>
+                    </extension>
+                    <extension url="urn:variable-in-no-translation">
+                        <valueString value="binary_reference"/>
+                    </extension>
+                    <extension url="urn:variable-in-no-translation">
+                        <valueString value="patientResourceId"/>
+                    </extension>
+                    <extension url="urn:fixture-out">
+                        <valueString value="pdb-response"/>
+                    </extension>
+                </modifierExtension>
+            </operation>
+        </action>
+    </test>
+    <test>
+      <modifierExtension url="urn:noErrors"/>
+        <name value="Read back the DocumentReference and validate."/>
+        <action>
+            <operation>
+                <description value="Read back the DocumentReference and validate."/>
+                <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
+                    <extension url="component">
+                        <valueString value="../../Library/ReadValidateDocRef.xml"/>
+                    </extension>
+                    <extension url="urn:fixture-in">
+                        <valueString  value="submittedDocRef"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="DocRefUrl"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="patientResourceId"/>
+                    </extension>
+                </modifierExtension>
+            </operation>
+        </action>
+    </test>
+</TestScript>

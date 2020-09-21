@@ -1,0 +1,67 @@
+<!--
+	This script works for all binaries in the local directories.
+-->
+
+
+<TestScript xmlns="http://hl7.org/fhir">
+  <description value="Load Binary resource if not already present."/>
+	<fixture id="binary-bundle">
+		<autocreate value="false"/>
+		<autodelete value="false"/>
+		<resource>
+			<reference value="Bundle/binary_bundle.xml"/>
+		</resource>
+	</fixture>
+	<fixture id="patient_bundle">
+		<!--
+           This patient comes out of the test Patient cache
+        -->
+		<autocreate value="false"/>
+		<autodelete value="false"/>
+		<resource>
+			<reference value="Patient/Alex_Alder.json"/>
+		</resource>
+	</fixture>
+
+	<variable>
+		<name value="patientResourceId"/>
+		<expression value="Bundle.entry.fullUrl"/>
+		<sourceId value="patient_bundle"/>
+	</variable>
+
+
+	<test>
+		<description value="Submit Binary as part of PDB"/>
+		<action>
+			<operation>
+				<!-- references patient from resourceCache in EC -->
+				<description value="send PDB."/>
+				<label value="create"/>
+				<type>
+					<system value="https://github.com/usnistgov/asbestos/wiki/Testscript-Operation-Codes"/>
+					<code value="mhd-pdb-transaction"/>
+				</type>
+				<sourceId value="binary-bundle"/>
+				<responseId value="binary-response-bundle"/>
+			</operation>
+		</action>
+		<action>
+			<assert>
+				<description value="... successful."/>
+				<response value="okay"/>
+				<warningOnly value="false"/>
+			</assert>
+		</action>
+		<action>
+			<operation>
+				<description value="Save to cache."/>
+				<type>
+					<system value="https://github.com/usnistgov/asbestos/wiki/Testscript-Operation-Codes"/>
+					<code value="save-to-cache"/>
+				</type>
+				<url value="doc1"/>
+				<sourceId value="binary-response-bundle"/>
+			</operation>
+		</action>
+	</test>
+</TestScript>

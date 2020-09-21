@@ -88,12 +88,12 @@
         </action>    
     </test>
     <test>
-        <name value="Evaluations"/>
-        <description value="Test specific."/>
+<!--        <name value="Evaluations"/> -->
+        <description value="Test specific evaluations."/>
 
         <action>
           <assert>
-              <description value="Transaction labeled as Minimal metadata profile."/>
+              <description value="Transaction labeled as Comprehensive metadata profile."/>
               <compareToSourceId value="request"/>
               <compareToSourceExpression value="Bundle.meta.profile='http://ihe.net/fhir/StructureDefinition/IHE_MHD_Provide_Comprehensive_DocumentBundle'"/>
               <warningOnly value="false"/>

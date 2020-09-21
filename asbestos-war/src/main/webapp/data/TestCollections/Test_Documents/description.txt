@@ -1,0 +1,18 @@
+Utility loader for Binary resources that server tests depend on.
+Each test listed below controls the loading of a single Binary resource.
+Before submitting the Binary to the server, the server is queried and the Binary is only submitted
+if it does not exist in that server.  This query uses a business identifier attached to the Binary.
+<br />
+<br />
+This framework keeps a cache of all Binaries loaded and the server they were loaded on. The
+server used for Binaries can be different from the MHD system under test.
+<br />
+<br />
+These Binary resources are not used for client testing (MHD Document Source for example). Test definitions 
+(for servers)
+reference Binaries through the cache. If the cache is deleted then this Test Collection can be re-run to reload 
+the cache.
+<br />
+<br />
+Binaries should be loaded using the default channel.  Other channels know to look there for the cached
+resources.
