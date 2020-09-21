@@ -55,7 +55,8 @@ public class ProxyLogServlet extends HttpServlet {
             if (externalCache == null)
                 throw new Exception("External Cache not set");
 
-            if (GetLogEventAnalysisRequest.isRequest(request)) new GetLogEventAnalysisRequest(request).run();
+            if (GetLogEventAnalysisByEventRequest.isRequest(request)) new GetLogEventAnalysisByEventRequest(request).run();
+            else if (GetLogEventAnalysisByURLRequest.isRequest(request)) new GetLogEventAnalysisByURLRequest(request).run();
             else if (GetEventRequest.isRequest(request)) new GetEventRequest(request).run();
             else if (GetDocumentRequest.isRequest(request)) new GetDocumentRequest(request).run();
             else if (GetProxyBaseRequest.isRequest(request)) new GetProxyBaseRequest(request).run();

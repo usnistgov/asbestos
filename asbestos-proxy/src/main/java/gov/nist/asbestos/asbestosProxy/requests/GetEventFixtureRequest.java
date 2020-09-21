@@ -14,6 +14,7 @@ package gov.nist.asbestos.asbestosProxy.requests;
 
 import com.google.gson.Gson;
 import gov.nist.asbestos.client.Base.Request;
+import gov.nist.asbestos.client.Base.Returns;
 import gov.nist.asbestos.client.events.UIEvent;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import org.apache.log4j.Logger;
@@ -30,28 +31,44 @@ public class GetEventFixtureRequest {
         return request.uriParts.size() == 7 && request.uriParts.get(3).equals("eventFixture");
     }
 
+    static class Model {
+        Request request;
+        String testCollectionId;
+        String testId;
+        String fhirPath;
+        String fixturePath;
+
+        Model(Request request) {
+            this.request = request;
+            testCollectionId = request.uriParts.get(4);
+            testId = request.uriParts.get(5);
+            fhirPath = request.getParm("fhirPath");
+            fixturePath = request.getParm("url");
+        }
+    }
+
+    Model model;
+
     public GetEventFixtureRequest(Request request) {
-        this.request = request;
+        model = new Model(request);
     }
 
     public void run() throws IOException {
         request.announce("GetEventFixtureRequest");
 
-        String testCollectionId = request.uriParts.get(4);
-        String testId = request.uriParts.get(5);
-        String fixturePath = request.getParm("url");
         URL url = request.getFullUrl();
         if (url == null)
             throw new RuntimeException("url is a required parameter");
-        String fhirPath = request.getParm("fhirPath");
-        ResourceWrapper wrapper = request.ec.getStaticFixture(testCollectionId, testId, request.channelId, fixturePath, fhirPath, url);
+
+        ResourceWrapper wrapper = request.ec.getStaticFixture(model.testCollectionId, model.testId, request.channelId, model.fixturePath, model.fhirPath, url);
         if (wrapper == null)
             throw new RuntimeException("Cannot find content");
         UIEvent uiEvent = new UIEvent(request.ec).fromResource(wrapper);
+        Returns.returnObject(request.resp, uiEvent);
 
-        String json = new Gson().toJson(uiEvent);
-        request.resp.setContentType("application/json");
-        request.resp.getOutputStream().write(json.getBytes());
-        request.ok();
+//        String json = new Gson().toJson(uiEvent);
+//        request.resp.setContentType("application/json");
+//        request.resp.getOutputStream().write(json.getBytes());
+//        request.ok();
     }
 }

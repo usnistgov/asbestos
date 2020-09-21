@@ -50,11 +50,11 @@ public class Returns {
            return returnObject(resp, new ValueHolder(value));
     }
 
-    static String returnObject(HttpServletResponse resp, Object o) {
+    public static String returnObject(HttpServletResponse resp, Object o) {
         String json = new Gson().toJson(o);
         resp.setContentType("application/json");
         try {
-            resp.getOutputStream().print(json);
+            resp.getOutputStream().write(json.getBytes());
             return json;
         } catch (IOException e) {
             throw new RuntimeException(e);
