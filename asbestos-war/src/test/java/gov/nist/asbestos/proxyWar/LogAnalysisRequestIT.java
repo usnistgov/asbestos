@@ -2,7 +2,7 @@ package gov.nist.asbestos.proxyWar;
 
 import com.google.gson.Gson;
 import gov.nist.asbestos.client.Base.EC;
-import gov.nist.asbestos.client.Base.ProxyBase;
+import gov.nist.asbestos.client.Base.ParserBase;
 import gov.nist.asbestos.client.client.Format;
 import gov.nist.asbestos.client.events.UIEvent;
 import gov.nist.asbestos.client.resolver.Ref;
@@ -151,7 +151,7 @@ public class LogAnalysisRequestIT {
         Headers responseHeaders = event.getResponseHeader();
 
         BaseResource baseResource;
-        baseResource = ProxyBase.parse(responseBodyString, Format.fromContentType(responseHeaders.getContentType().getValue()));
+        baseResource = ParserBase.parse(responseBodyString, Format.fromContentType(responseHeaders.getContentType().getValue()));
         assertTrue(baseResource instanceof Bundle);
         Bundle bundle = (Bundle) baseResource;
 

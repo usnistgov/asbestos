@@ -2,7 +2,7 @@ package gov.nist.asbestos.proxyWar;
 
 import gov.nist.asbestos.analysis.RelatedReport;
 import gov.nist.asbestos.analysis.Report;
-import gov.nist.asbestos.client.Base.ProxyBase;
+import gov.nist.asbestos.client.Base.ParserBase;
 import gov.nist.asbestos.client.client.Format;
 import gov.nist.asbestos.client.events.UIEvent;
 import gov.nist.asbestos.client.events.UITask;
@@ -53,7 +53,7 @@ class pdbMinimalIT {
         UIEvent event = Utility.getEvent(channelId, eventId);
         UITask task = event.getClientTask();
         String returnBundleString = task.getResponseBody();
-        Bundle bundle = (Bundle) ProxyBase.parse(returnBundleString, Format.JSON);
+        Bundle bundle = (Bundle) ParserBase.parse(returnBundleString, Format.JSON);
         Bundle.BundleEntryComponent entry = bundle.getEntry().get(2);
         Bundle.BundleEntryResponseComponent response = entry.getResponse();
         String binaryUrl = response.getLocation();

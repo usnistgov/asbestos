@@ -7,13 +7,12 @@ import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.validation.*;
 import gov.nist.asbestos.client.Base.EC;
 import gov.nist.asbestos.client.Base.MhdValueSets;
-import gov.nist.asbestos.client.Base.ProxyBase;
+import gov.nist.asbestos.client.Base.ParserBase;
 import gov.nist.asbestos.client.Base.CodesToValueSets;
 import org.hl7.fhir.common.hapi.validation.support.*;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.*;
-import org.hl7.fhir.r4.utils.IResourceValidator;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,7 +20,6 @@ import org.junit.jupiter.api.Test;
 import javax.xml.bind.JAXBException;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -67,7 +65,7 @@ class StructureDefinitionITx {
     void runSimpleValidator() {
         FhirValidator validator = ctx.newValidator();
 
-        IValidatorModule module = new FhirInstanceValidator(ProxyBase.getFhirContext());
+        IValidatorModule module = new FhirInstanceValidator(ParserBase.getFhirContext());
         validator.registerValidatorModule(module);
 
         Patient resource = new Patient();
@@ -187,7 +185,7 @@ class StructureDefinitionITx {
         FhirInstanceValidator validatorModule = new FhirInstanceValidator(cache);
         FhirValidator validator = ctx.newValidator().registerValidatorModule(validatorModule);
 
-        DocumentReference input = (DocumentReference) ProxyBase.parse(new File(externalCache, "docRef1.json"));
+        DocumentReference input = (DocumentReference) ParserBase.parse(new File(externalCache, "docRef1.json"));
         assertNotNull(input);
 
         ValidationResult result = validator.validateWithResult(input);
@@ -257,7 +255,7 @@ class StructureDefinitionITx {
 
         validator.registerValidatorModule(instanceValidator);
 
-        DocumentReference docRef = (DocumentReference) ProxyBase.parse(new File(externalCache, "docRef1.json"));
+        DocumentReference docRef = (DocumentReference) ParserBase.parse(new File(externalCache, "docRef1.json"));
         assertNotNull(docRef);
 
         ValidationResult result = validator.validateWithResult(docRef);
@@ -274,10 +272,10 @@ class StructureDefinitionITx {
     void runValidatorWithLoadedStructureDefinition() {
         ValidationSupportChain supportChain = new ValidationSupportChain();
 
-        DefaultProfileValidationSupport defaultSupport = new DefaultProfileValidationSupport(ProxyBase.getFhirContext());
+        DefaultProfileValidationSupport defaultSupport = new DefaultProfileValidationSupport(ParserBase.getFhirContext());
         //supportChain.addValidationSupport(defaultSupport);
 
-        PrePopulatedValidationSupport prePopulatedSupport = new PrePopulatedValidationSupport(ProxyBase.getFhirContext());
+        PrePopulatedValidationSupport prePopulatedSupport = new PrePopulatedValidationSupport(ParserBase.getFhirContext());
         prePopulatedSupport.addStructureDefinition(loadStructureDefinition("structuredefinition-IHE_MHD_Provide_Minimal_DocumentReference.xml"));
 
         Map<String, ValueSet> valueSets = ec.getMhdValueSetsAsMap("default");
@@ -305,7 +303,7 @@ class StructureDefinitionITx {
         FhirValidator validator = ctx.newValidator();
         validator.registerValidatorModule(validatorModule);
 
-        DocumentReference docRef = (DocumentReference) ProxyBase.parse(new File(externalCache, "docRef1.json"));
+        DocumentReference docRef = (DocumentReference) ParserBase.parse(new File(externalCache, "docRef1.json"));
         assertNotNull(docRef);
 
         ValidationResult validationResult = validator.validateWithResult(docRef);
@@ -345,7 +343,7 @@ class StructureDefinitionITx {
         assertTrue(fsdFile.exists());
         File sdFile = new File(fsdFile, name);
         assertTrue(sdFile.exists());
-        StructureDefinition sd = (StructureDefinition) ProxyBase.parse(sdFile);
+        StructureDefinition sd = (StructureDefinition) ParserBase.parse(sdFile);
         return sd;
     }
 }

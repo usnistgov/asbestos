@@ -1,6 +1,6 @@
 package gov.nist.asbestos.asbestosProxy.requests;
 
-import gov.nist.asbestos.client.Base.ProxyBase;
+import gov.nist.asbestos.client.Base.ParserBase;
 import gov.nist.asbestos.client.Base.Request;
 import gov.nist.asbestos.client.client.Format;
 import gov.nist.asbestos.client.events.Event;
@@ -234,7 +234,7 @@ public class GetClientTestEvalRequest {
             if (requestString == null) {
                 wrapper = new ResourceWrapper();
             } else {
-                BaseResource resource = ProxyBase.parse(requestString, format);
+                BaseResource resource = ParserBase.parse(requestString, format);
                 wrapper = new ResourceWrapper(resource);
             }
             HttpBase base = task.getHttpBase();
@@ -256,7 +256,7 @@ public class GetClientTestEvalRequest {
             if (responseString == null) {
                 wrapper = new ResourceWrapper();
             } else {
-                BaseResource rresource = ProxyBase.parse(responseString, rformat);
+                BaseResource rresource = ParserBase.parse(responseString, rformat);
                 wrapper = new ResourceWrapper(rresource);
             }
             HttpBase base = task.getHttpBase();
@@ -298,7 +298,7 @@ public class GetClientTestEvalRequest {
                     if (!isFirst)
                         buf.append(",");
                     isFirst = false;
-                    buf.append(ProxyBase.encode(testReport, Format.JSON));
+                    buf.append(ParserBase.encode(testReport, Format.JSON));
                 }
                 buf.append("]\n");
             }

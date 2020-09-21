@@ -2,7 +2,7 @@ package gov.nist.asbestos.client.resolver;
 
 
 import com.google.common.base.Strings;
-import gov.nist.asbestos.client.Base.ProxyBase;
+import gov.nist.asbestos.client.Base.ParserBase;
 import gov.nist.asbestos.client.client.Format;
 import gov.nist.asbestos.client.events.UIEvent;
 import gov.nist.asbestos.http.headers.Header;
@@ -229,7 +229,7 @@ public class ResourceWrapper {
             if (getter.getStatus() == 404)
                 return null;
             if (getter.getResponseText() != null) {
-                resource = ProxyBase.parse(getter.getResponse(), Format.fromContentType(getter.getResponseContentType()));
+                resource = ParserBase.parse(getter.getResponse(), Format.fromContentType(getter.getResponseContentType()));
                 return resource;
             }
         }
@@ -237,7 +237,7 @@ public class ResourceWrapper {
             String body = isRequest ? getEvent().getRequestBody() : getEvent().getResponseBody();
             if (Strings.isNullOrEmpty(body))
                 return null;
-            resource = ProxyBase.parse(body, Format.fromContent(body));
+            resource = ParserBase.parse(body, Format.fromContent(body));
             return resource;
         }
         return null;
@@ -310,7 +310,7 @@ public class ResourceWrapper {
             Format format = Format.fromContentType(contentType);
             if (format == null)
                 return null;
-            return ProxyBase.parse(responseString, format);
+            return ParserBase.parse(responseString, format);
         }
         return null;
     }

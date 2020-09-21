@@ -19,7 +19,7 @@ package gov.nist.asbestos.asbestosProxy.requests;
 // and 200 status
 
 import gov.nist.asbestos.asbestosProxy.servlet.ChannelConnector;
-import gov.nist.asbestos.client.Base.ProxyBase;
+import gov.nist.asbestos.client.Base.ParserBase;
 import gov.nist.asbestos.client.Base.Request;
 import gov.nist.asbestos.client.client.FhirClient;
 import gov.nist.asbestos.client.client.Format;
@@ -148,7 +148,7 @@ public class RunSelftestRequest {
                 aRun = true;
                 TestReport report = null;
                 try {
-                    report = (TestReport) ProxyBase.parse(testLogFile);
+                    report = (TestReport) ParserBase.parse(testLogFile);
                 } catch (ca.uhn.fhir.parser.DataFormatException e) {
                     lastTime.hasError = true;
                 }

@@ -5,7 +5,7 @@ import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import gov.nist.asbestos.client.Base.ProxyBase;
+import gov.nist.asbestos.client.Base.ParserBase;
 import gov.nist.asbestos.mhd.translation.attribute.Author;
 import gov.nist.asbestos.mhd.translation.ContainedIdAllocator;
 import gov.nist.asbestos.simapi.validation.Val;
@@ -29,7 +29,7 @@ class AuthorTest {
 
     @BeforeAll
     static void beforeAll() {
-        fhirContext = ProxyBase.getFhirContext();
+        fhirContext = ParserBase.getFhirContext();
     }
 
     @BeforeEach

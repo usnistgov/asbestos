@@ -4,7 +4,6 @@ import gov.nist.asbestos.client.client.Format;
 import gov.nist.asbestos.serviceproperties.ServiceProperties;
 import gov.nist.asbestos.serviceproperties.ServicePropertiesEnum;
 import org.hl7.fhir.r4.model.ValueSet;
-import sun.awt.SunHints;
 
 import javax.xml.bind.JAXBException;
 import java.io.File;
@@ -31,7 +30,7 @@ public class MhdValueSets {
         for (String name : valueSetMap.keySet()) {
             ValueSet value = valueSetMap.get(name);
             value.setUrl(getUrl(name));
-            String json = ProxyBase.encode(value, Format.JSON);
+            String json = ParserBase.encode(value, Format.JSON);
             ec.writeToFile(new File(dir, name + ".json"), json);
         }
     }
@@ -49,7 +48,7 @@ public class MhdValueSets {
             return valueSets;
 
         for (File file : files) {
-            ValueSet valueSet = (ValueSet) ProxyBase.parse(file);
+            ValueSet valueSet = (ValueSet) ParserBase.parse(file);
             valueSets.add(valueSet);
         }
 

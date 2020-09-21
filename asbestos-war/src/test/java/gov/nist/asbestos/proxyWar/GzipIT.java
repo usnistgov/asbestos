@@ -1,6 +1,6 @@
 package gov.nist.asbestos.proxyWar;
 
-import gov.nist.asbestos.client.Base.ProxyBase;
+import gov.nist.asbestos.client.Base.ParserBase;
 import gov.nist.asbestos.client.client.FhirClient;
 import gov.nist.asbestos.client.client.Format;
 import gov.nist.asbestos.client.resolver.Ref;
@@ -107,7 +107,7 @@ class GzipIT {
             BaseResource result = write.getResource();
             if (result instanceof OperationOutcome) {
                 OperationOutcome oo = (OperationOutcome) result;
-                System.out.println(ProxyBase.encode(oo, Format.JSON));
+                System.out.println(ParserBase.encode(oo, Format.JSON));
                 assert false;
             }
         }
@@ -149,7 +149,7 @@ class GzipIT {
             BaseResource result = write.getResource();
             if (result instanceof OperationOutcome) {
                 OperationOutcome oo = (OperationOutcome) result;
-                System.out.println(ProxyBase.encode(oo, Format.JSON));
+                System.out.println(ParserBase.encode(oo, Format.JSON));
                 assert false;
             }
         }

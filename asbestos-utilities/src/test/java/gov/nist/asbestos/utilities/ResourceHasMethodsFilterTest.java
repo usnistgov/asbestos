@@ -1,6 +1,6 @@
 package gov.nist.asbestos.utilities;
 
-import gov.nist.asbestos.client.Base.ProxyBase;
+import gov.nist.asbestos.client.Base.ParserBase;
 import org.hl7.fhir.r4.model.BaseResource;
 import org.hl7.fhir.r4.model.DocumentReference;
 import org.hl7.fhir.r4.model.Enumerations;
@@ -112,7 +112,7 @@ class ResourceHasMethodsFilterTest {
        File file = Paths.get(ResourceHasMethodsFilterTest.class.getResource("/").toURI()).resolve(fileName).toFile();
        if (file != null && file.exists()) {
            // Parse resource to model using FHIR Parser
-            baseResource = ProxyBase.parse(file);
+            baseResource = ParserBase.parse(file);
        }
 
        assert  baseResource != null;

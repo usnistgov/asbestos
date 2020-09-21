@@ -11,7 +11,7 @@ package gov.nist.asbestos.asbestosProxy.requests;
 import com.google.gson.Gson;
 import gov.nist.asbestos.analysis.Report;
 import gov.nist.asbestos.client.Base.EventContext;
-import gov.nist.asbestos.client.Base.ProxyBase;
+import gov.nist.asbestos.client.Base.ParserBase;
 import gov.nist.asbestos.client.Base.Request;
 import gov.nist.asbestos.client.client.Format;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
@@ -51,7 +51,7 @@ public class AnalyseResourceRequest {
         String resourceString = in.string;
         BaseResource baseResource;
         try {
-            baseResource = ProxyBase.parse(resourceString, Format.fromContent(resourceString));
+            baseResource = ParserBase.parse(resourceString, Format.fromContent(resourceString));
         } catch (Exception e) {
             new GetLogEventAnalysisRequest(request)
                     .setEventContext(eventContext)

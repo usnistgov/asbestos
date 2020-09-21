@@ -2,7 +2,7 @@ package gov.nist.asbestos.client.resolver;
 
 
 import gov.nist.asbestos.client.Base.IVal;
-import gov.nist.asbestos.client.Base.ProxyBase;
+import gov.nist.asbestos.client.Base.ParserBase;
 import gov.nist.asbestos.client.client.FhirClient;
 import gov.nist.asbestos.client.client.Format;
 import gov.nist.asbestos.client.events.ITask;
@@ -248,7 +248,7 @@ public class ResourceMgr implements IVal {
         if (base == null) {
             task.putRequestHeader(new Headers().withVerb("GET").withPathInfo(wrapper.getRef().getUri()));
             BaseResource resource = wrapper.getResource();
-            String txt = ProxyBase.encode(resource, Format.XML);
+            String txt = ParserBase.encode(resource, Format.XML);
             task.putResponseBodyText(txt);
         } else {
             task.putRequestHeader(base.getRequestHeaders());

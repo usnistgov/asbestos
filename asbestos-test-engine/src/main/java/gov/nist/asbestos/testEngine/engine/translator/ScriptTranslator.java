@@ -1,6 +1,6 @@
 package gov.nist.asbestos.testEngine.engine.translator;
 
-import gov.nist.asbestos.client.Base.ProxyBase;
+import gov.nist.asbestos.client.Base.ParserBase;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.TestScript;
 import org.jaxen.util.SingletonList;
@@ -17,7 +17,7 @@ public class ScriptTranslator {
 
     public ScriptTranslator(File testDef) {
         this.testDef = testDef;
-        this.script = (TestScript) ProxyBase.parse(new File(testDef, "script.xml"));
+        this.script = (TestScript) ParserBase.parse(new File(testDef, "script.xml"));
     }
 
     // Compiles script and returns resulting TestScript

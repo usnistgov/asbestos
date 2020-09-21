@@ -12,7 +12,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static gov.nist.asbestos.client.Base.ProxyBase.getFhirContext;
+import static gov.nist.asbestos.client.Base.ParserBase.getFhirContext;
 
 public class ResourceHasMethodsFilter {
 

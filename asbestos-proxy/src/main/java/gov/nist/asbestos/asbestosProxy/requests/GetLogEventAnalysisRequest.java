@@ -6,7 +6,7 @@ import gov.nist.asbestos.analysis.AnalysisReport;
 import gov.nist.asbestos.analysis.RelatedReport;
 import gov.nist.asbestos.analysis.Report;
 import gov.nist.asbestos.client.Base.EventContext;
-import gov.nist.asbestos.client.Base.ProxyBase;
+import gov.nist.asbestos.client.Base.ParserBase;
 import gov.nist.asbestos.client.Base.Request;
 import gov.nist.asbestos.client.client.Format;
 import gov.nist.asbestos.client.events.UIEvent;
@@ -121,7 +121,7 @@ public class GetLogEventAnalysisRequest {
 
             BaseResource baseResource;
             try {
-                baseResource = ProxyBase.parse(analysisSource, Format.fromContentType(responseHeaders.getContentType().getValue()));
+                baseResource = ParserBase.parse(analysisSource, Format.fromContentType(responseHeaders.getContentType().getValue()));
                 if (!(baseResource instanceof Bundle) &&  baseResource.getId() == null) {
                     Ref ref = new Ref(requestHeaders.getPathInfo());
                     baseResource.setId(ref.getId());
@@ -136,7 +136,7 @@ public class GetLogEventAnalysisRequest {
 
             BaseResource requestResource = null;
             if (requestBodyString.length() > 0)
-                requestResource = ProxyBase.parse(requestBodyString, Format.fromContentType(requestHeaders.getContentType().getValue()));
+                requestResource = ParserBase.parse(requestBodyString, Format.fromContentType(requestHeaders.getContentType().getValue()));
             ResourceWrapper requestBundle = null;
             if (requestResource instanceof Bundle)
                 requestBundle = new ResourceWrapper(requestResource);
@@ -330,7 +330,7 @@ public class GetLogEventAnalysisRequest {
 
         BaseResource baseResource;
         try {
-            baseResource = ProxyBase.parse(analysisSource, Format.fromContentType(responseHeaders.getContentType().getValue()));
+            baseResource = ParserBase.parse(analysisSource, Format.fromContentType(responseHeaders.getContentType().getValue()));
             if (!(baseResource instanceof Bundle) &&  baseResource.getId() == null) {
                 Ref ref = new Ref(requestHeaders.getPathInfo());
                 baseResource.setId(ref.getId());
@@ -356,7 +356,7 @@ public class GetLogEventAnalysisRequest {
             throw new RuntimeException("File within fixture not found");
         BaseResource resource;
         try {
-            resource = ProxyBase.parse(file);
+            resource = ParserBase.parse(file);
         } catch (Exception e) {
             returnReport(new Report("Not found or not a resource: " + file));
             return null;

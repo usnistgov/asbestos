@@ -6,7 +6,7 @@ import gov.nist.asbestos.asbestosProxy.util.XdsActorMapper;
 import gov.nist.asbestos.client.resolver.*;
 import gov.nist.asbestos.mhd.SubmittedObject;
 import gov.nist.asbestos.mhd.exceptions.TransformException;
-import gov.nist.asbestos.client.Base.ProxyBase;
+import gov.nist.asbestos.client.Base.ParserBase;
 import gov.nist.asbestos.client.client.FhirClient;
 import gov.nist.asbestos.client.client.Format;
 import gov.nist.asbestos.client.events.Event;
@@ -189,13 +189,13 @@ public class XdsOnFhirChannel extends BaseChannel /*implements IBaseChannel*/ {
         if (contentType.startsWith("application/fhir+json")) {
             try {
                 String requestString = new String(request);
-                resource = ProxyBase.getFhirContext().newJsonParser().parseResource(requestString);
+                resource = ParserBase.getFhirContext().newJsonParser().parseResource(requestString);
             } catch (Throwable t) {
                 returnErrorInOperationOutcome("Failed to parse request", t, requestIn);
                 return;
             }
         } else if (contentType.startsWith("application/fhir+xml")) {
-            resource = ProxyBase.getFhirContext().newXmlParser().parseResource(new String(request));
+            resource = ParserBase.getFhirContext().newXmlParser().parseResource(new String(request));
         } else
             throw new RuntimeException("Do not understand Content-Type " + contentType);
 
@@ -313,7 +313,7 @@ public class XdsOnFhirChannel extends BaseChannel /*implements IBaseChannel*/ {
     private void returnOperationOutcome(HttpBase resp, OperationOutcome oo) {
         Headers responseHeaders = new Headers();
         Format format = getReturnFormatType();
-        String encoded = ProxyBase.encode(oo, format);
+        String encoded = ParserBase.encode(oo, format);
         resp.setResponseText(encoded);
         resp.getResponseHeaders().add(new Header("Content-Type", format.getContentType()));
         resp.setStatus(500);
@@ -437,7 +437,7 @@ public class XdsOnFhirChannel extends BaseChannel /*implements IBaseChannel*/ {
             if (binary != null) {
                 responseOut.setStatus(200);;
                 responseOut.setResponseContentType(returnFormatType.getContentType());
-                responseOut.setResponse(ProxyBase.encode(binary, returnFormatType).getBytes());
+                responseOut.setResponse(ParserBase.encode(binary, returnFormatType).getBytes());
                 return;
             }
         }
@@ -528,7 +528,7 @@ public class XdsOnFhirChannel extends BaseChannel /*implements IBaseChannel*/ {
                         if (identifiableType instanceof ExtrinsicObjectType) {
                             BaseResource resource = toFhir((ExtrinsicObjectType) identifiableType);
                             if (resource instanceof OperationOutcome) {
-                                responseOut.setResponseText(ProxyBase.encode(resource, returnFormatType));
+                                responseOut.setResponseText(ParserBase.encode(resource, returnFormatType));
                                 responseOut.setResponseContentType(returnFormatType.getContentType());
                                 responseOut.setStatus(500);
                                 return;
@@ -541,18 +541,18 @@ public class XdsOnFhirChannel extends BaseChannel /*implements IBaseChannel*/ {
                             results.add(wrapper);
                         }
                     }
-                    responseOut.setResponseText(ProxyBase.encode(buildSearchResult(results, search), returnFormatType));
+                    responseOut.setResponseText(ParserBase.encode(buildSearchResult(results, search), returnFormatType));
                     responseOut.setResponseContentType(returnFormatType.getContentType());
                 } else if (requestedType.equals("DocumentManifest")) {
                     // this assumes a single manifest - must be extended to get more
                     BaseResource resource = ssToFhir();
                     if (resource == null) {
                         // No error just no response (empty SearchSet)
-                        responseOut.setResponseText(ProxyBase.encode(buildSearchResult(Collections.EMPTY_LIST, search), returnFormatType));
+                        responseOut.setResponseText(ParserBase.encode(buildSearchResult(Collections.EMPTY_LIST, search), returnFormatType));
                         return;
                     }
                     if (resource instanceof OperationOutcome) {
-                        responseOut.setResponseText(ProxyBase.encode(resource, returnFormatType));
+                        responseOut.setResponseText(ParserBase.encode(resource, returnFormatType));
                         responseOut.setResponseContentType(returnFormatType.getContentType());
                         responseOut.setStatus(500);
                     } else {
@@ -561,7 +561,7 @@ public class XdsOnFhirChannel extends BaseChannel /*implements IBaseChannel*/ {
                             Ref ref = searchRef.withNewId(resource.getId());
                             wrapper.setRef(ref);
                         }
-                        responseOut.setResponseText(ProxyBase.encode(buildSearchResult(Collections.singletonList(wrapper), search), returnFormatType));
+                        responseOut.setResponseText(ParserBase.encode(buildSearchResult(Collections.singletonList(wrapper), search), returnFormatType));
                         responseOut.setResponseContentType(returnFormatType.getContentType());
                     }
                 }
@@ -574,7 +574,7 @@ public class XdsOnFhirChannel extends BaseChannel /*implements IBaseChannel*/ {
                          responseOut.setStatus(404);
                          return;
                      }
-                     responseOut.setResponseText(ProxyBase.encode(resource, returnFormatType));
+                     responseOut.setResponseText(ParserBase.encode(resource, returnFormatType));
                      responseOut.setResponseContentType(returnFormatType.getContentType());
                  }
                  else if (requestedType != null && requestedType.equals("DocumentManifest")) {
@@ -584,11 +584,11 @@ public class XdsOnFhirChannel extends BaseChannel /*implements IBaseChannel*/ {
                          responseOut.setStatus(404);
                      } else if (manifest instanceof DocumentManifest) {
                          responseOut.setStatus(200);
-                         responseOut.setResponseText(ProxyBase.encode(manifest, returnFormatType));
+                         responseOut.setResponseText(ParserBase.encode(manifest, returnFormatType));
                      } else {
                          // OperationOutcome
                          responseOut.setStatus(500);
-                         responseOut.setResponseText(ProxyBase.encode(manifest, returnFormatType));
+                         responseOut.setResponseText(ParserBase.encode(manifest, returnFormatType));
                      }
                  } else { // no contents
                      responseOut.setResponseContentType(returnFormatType.getContentType());
@@ -767,7 +767,7 @@ public class XdsOnFhirChannel extends BaseChannel /*implements IBaseChannel*/ {
         }
         if (returnFormatType == null)
             returnFormatType = Format.XML;
-        responseOut.setResponseText(ProxyBase.encode(returnResource, returnFormatType));
+        responseOut.setResponseText(ParserBase.encode(returnResource, returnFormatType));
         responseOut.setResponseContentType(returnFormatType.getContentType());
         if (oo == null)
             responseOut.setStatus(200);

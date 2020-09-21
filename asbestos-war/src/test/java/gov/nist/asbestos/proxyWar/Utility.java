@@ -3,7 +3,7 @@ package gov.nist.asbestos.proxyWar;
 import com.google.gson.Gson;
 import gov.nist.asbestos.analysis.Report;
 import gov.nist.asbestos.client.Base.EC;
-import gov.nist.asbestos.client.Base.ProxyBase;
+import gov.nist.asbestos.client.Base.ParserBase;
 import gov.nist.asbestos.client.client.FhirClient;
 import gov.nist.asbestos.client.client.Format;
 import gov.nist.asbestos.client.events.UIEvent;
@@ -165,7 +165,7 @@ public class Utility {
         Object reportObj = tests.get(testName);
         String json = new Gson().toJson(reportObj);
 
-        BaseResource resource = ProxyBase.parse(json, Format.JSON);
+        BaseResource resource = ParserBase.parse(json, Format.JSON);
         assertTrue(resource instanceof TestReport);
         TestReport report = (TestReport) resource;
         String url2 = report.getTest().get(0).getAction().get(0).getOperation().getDetail();

@@ -3,7 +3,7 @@ package gov.nist.asbestos.testEngine.engine;
 import ca.uhn.fhir.parser.IParser;
 import com.google.gson.Gson;
 import gov.nist.asbestos.client.Base.EC;
-import gov.nist.asbestos.client.Base.ProxyBase;
+import gov.nist.asbestos.client.Base.ParserBase;
 import gov.nist.asbestos.client.client.FhirClient;
 import gov.nist.asbestos.client.client.Format;
 import gov.nist.asbestos.client.resolver.Ref;
@@ -274,7 +274,7 @@ public class TestEngine  implements TestDef {
         File logDir = new File(new File(externalCache, testSession), testDef.getName());
         logDir.mkdirs();
         TestReport testReport = getTestReport();
-        String json = ProxyBase.encode(testReport, Format.JSON);
+        String json = ParserBase.encode(testReport, Format.JSON);
         Path path = new File(logDir, "TestReport.json").toPath();
         try (BufferedWriter writer = Files.newBufferedWriter(path))
         {
@@ -1330,7 +1330,7 @@ public class TestEngine  implements TestDef {
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
         }
-        IParser parser = (location.toString().endsWith("xml") ? ProxyBase.getFhirContext().newXmlParser() : ProxyBase.getFhirContext().newJsonParser());
+        IParser parser = (location.toString().endsWith("xml") ? ParserBase.getFhirContext().newXmlParser() : ParserBase.getFhirContext().newJsonParser());
         IBaseResource resource = parser.parseResource(is);
         assert resource instanceof TestScript;
         TestScript testScript = (TestScript) resource;
@@ -1456,7 +1456,7 @@ public class TestEngine  implements TestDef {
     }
 
     public String getTestReportAsJson() {
-        return ProxyBase
+        return ParserBase
                 .getFhirContext()
                 .newJsonParser()
                 .setPrettyPrint(true)

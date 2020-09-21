@@ -1,7 +1,7 @@
 package gov.nist.asbestos.client.resolver;
 
 import gov.nist.asbestos.client.Base.EC;
-import gov.nist.asbestos.client.Base.ProxyBase;
+import gov.nist.asbestos.client.Base.ParserBase;
 import gov.nist.asbestos.client.client.Format;
 import gov.nist.asbestos.client.events.UIEvent;
 import gov.nist.asbestos.client.events.UITask;
@@ -21,7 +21,7 @@ public class ResourceWrapperBuilder {
         Headers headers = request ? new Headers(task.getRequestHeader()) : new Headers(task.getResponseHeader());
         String bodyString = request ? task.getRequestBody() : task.getResponseBody();
 
-        BaseResource baseResource = ProxyBase.parse(bodyString, Format.fromContentType(headers.getContentType().getValue()));
+        BaseResource baseResource = ParserBase.parse(bodyString, Format.fromContentType(headers.getContentType().getValue()));
         return new ResourceWrapper(baseResource);
     }
 }

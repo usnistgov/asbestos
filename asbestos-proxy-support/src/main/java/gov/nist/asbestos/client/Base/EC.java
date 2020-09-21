@@ -19,7 +19,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.xml.bind.JAXBException;
 import java.io.*;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
@@ -417,7 +416,7 @@ public class EC {
 
     // these utilities duplicated from FhirPathEngineBuilder
     private FHIRPathEngine build() {
-        return new FHIRPathEngine(new HapiWorkerContext(ProxyBase.getFhirContext(), new PrePopulatedValidationSupport(ProxyBase.getFhirContext())));
+        return new FHIRPathEngine(new HapiWorkerContext(ParserBase.getFhirContext(), new PrePopulatedValidationSupport(ParserBase.getFhirContext())));
     }
 
     private Resource evalForResource(Resource resourceIn, String expression) {
@@ -464,7 +463,7 @@ public class EC {
         // look in test definition
         if (file.exists() && file.isFile()) {
             try {
-                resource = ProxyBase.parse(file);
+                resource = ParserBase.parse(file);
                 URI uri = url.toURI();
                 Ref ref = new Ref(uri);
                 wrapper = new ResourceWrapper();

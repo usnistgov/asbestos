@@ -1,7 +1,7 @@
 package gov.nist.asbestos.testEngine.engine;
 
 import gov.nist.asbestos.client.Base.EC;
-import gov.nist.asbestos.client.Base.ProxyBase;
+import gov.nist.asbestos.client.Base.ParserBase;
 import gov.nist.asbestos.client.client.FhirClient;
 import gov.nist.asbestos.client.client.Format;
 import gov.nist.asbestos.client.events.UIEvent;
@@ -132,13 +132,13 @@ abstract class GenericSetupAction {
             return null;
         }
         BaseResource resource = wrapper.getResource();
-        String resourceString = ProxyBase.encode(resource, Format.JSON);
+        String resourceString = ParserBase.encode(resource, Format.JSON);
         String updatedResourceString = variableMgr.updateReference(resourceString);
         if (updatedResourceString == null) {
             reporter.reportError("Update to Fixture " + toSend.getId() + " failed");
             return resource;
         }
-        resource = ProxyBase.parse(updatedResourceString, Format.JSON);
+        resource = ParserBase.parse(updatedResourceString, Format.JSON);
         wrapper.setResource(resource);
         return resource;
     }

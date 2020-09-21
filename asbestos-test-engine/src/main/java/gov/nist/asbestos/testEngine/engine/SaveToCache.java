@@ -1,12 +1,10 @@
 package gov.nist.asbestos.testEngine.engine;
 
 import gov.nist.asbestos.client.Base.EC;
-import gov.nist.asbestos.client.Base.ProxyBase;
-import gov.nist.asbestos.client.client.FhirClient;
+import gov.nist.asbestos.client.Base.ParserBase;
 import gov.nist.asbestos.client.client.Format;
 import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
-import gov.nist.asbestos.simapi.validation.Val;
 import gov.nist.asbestos.simapi.validation.ValE;
 import gov.nist.asbestos.testEngine.engine.fixture.FixtureComponent;
 import gov.nist.asbestos.testEngine.engine.fixture.FixtureMgr;
@@ -18,7 +16,6 @@ import org.hl7.fhir.r4.model.TestScript;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintStream;
-import java.net.URI;
 
 public class SaveToCache extends GenericSetupAction {
 
@@ -75,7 +72,7 @@ public class SaveToCache extends GenericSetupAction {
 
         File typeBase = ec.getCache(channelId, resourceType);
         File outFile = new File(typeBase, url + ".json");
-        String json = ProxyBase.encode(wrapper.getResource(), Format.JSON);
+        String json = ParserBase.encode(wrapper.getResource(), Format.JSON);
 
         try (PrintStream ps = new PrintStream(outFile)) {
             ps.println(json);

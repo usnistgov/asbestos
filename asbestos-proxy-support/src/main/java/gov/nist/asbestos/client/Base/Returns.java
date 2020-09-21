@@ -1,9 +1,6 @@
 package gov.nist.asbestos.client.Base;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
-import gov.nist.asbestos.client.Base.ProxyBase;
 import org.hl7.fhir.r4.model.BaseResource;
 import org.hl7.fhir.r4.model.OperationOutcome;
 
@@ -25,7 +22,7 @@ public class Returns {
     }
 
     static String returnResource(HttpServletResponse resp, BaseResource resource) {
-        String json = ProxyBase.getFhirContext().newJsonParser().setPrettyPrint(true).encodeResourceToString(resource);
+        String json = ParserBase.getFhirContext().newJsonParser().setPrettyPrint(true).encodeResourceToString(resource);
         returnString(resp, json);
         return json;
     }

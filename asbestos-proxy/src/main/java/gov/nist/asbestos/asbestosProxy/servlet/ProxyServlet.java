@@ -8,7 +8,7 @@ import gov.nist.asbestos.asbestosProxy.channel.PassthroughChannelBuilder;
 import gov.nist.asbestos.asbestosProxy.channel.XdsOnFhirChannelBuilder;
 import gov.nist.asbestos.asbestosProxy.channels.capabilitystatement.FhirToolkitCapabilityStatement;
 import gov.nist.asbestos.client.Base.EC;
-import gov.nist.asbestos.client.Base.ProxyBase;
+import gov.nist.asbestos.client.Base.ParserBase;
 import gov.nist.asbestos.client.client.Format;
 import gov.nist.asbestos.client.events.*;
 import gov.nist.asbestos.client.log.SimStore;
@@ -243,13 +243,13 @@ public class ProxyServlet extends HttpServlet {
 
         OperationOutcome oo = wrapInOutcome(t);
         if (acceptHeader != null && acceptHeader.getValue().contains("json")) {
-            String ooString = ProxyBase.encode(oo, Format.JSON);
+            String ooString = ParserBase.encode(oo, Format.JSON);
             task.putResponseBodyText(ooString);
             resp.getWriter().print(ooString);
             resp.addHeader("Content-Type", Format.JSON.getContentType());
             responseHeaders.add(new Header("Content-Type", Format.JSON.getContentType()));
         } else {
-            String ooString = ProxyBase.encode(oo, Format.XML);
+            String ooString = ParserBase.encode(oo, Format.XML);
             task.putResponseBodyText(ooString);
             resp.getWriter().print(ooString);
             resp.addHeader("Content-Type", Format.XML.getContentType());
@@ -497,7 +497,7 @@ public class ProxyServlet extends HttpServlet {
     private void respond(HttpServletResponse resp, BaseResource resource, Headers inHeaders, ITask clientTask, int status) {
         String resourceString = "";
         if (resource != null)
-            resourceString = ProxyBase.encode(resource, Format.resultContentType(inHeaders));
+            resourceString = ParserBase.encode(resource, Format.resultContentType(inHeaders));
         respond(resp, resourceString.getBytes(), inHeaders, clientTask, status);
     }
 
@@ -582,8 +582,8 @@ public class ProxyServlet extends HttpServlet {
         try {
             // try to get input formatted
             Format format = Format.fromContentType(headers.getContentType().getValue());
-            BaseResource resource = ProxyBase.parse(task.getRequestBodyAsString(), format);
-            String text = ProxyBase.encode(resource, format);
+            BaseResource resource = ParserBase.parse(task.getRequestBodyAsString(), format);
+            String text = ParserBase.encode(resource, format);
             task.putRequestBodyText(text);
         } catch (Throwable t) {
 

@@ -1,6 +1,6 @@
 package gov.nist.asbestos.testEngine.engine;
 
-import gov.nist.asbestos.client.Base.ProxyBase;
+import gov.nist.asbestos.client.Base.ParserBase;
 import gov.nist.asbestos.simapi.validation.*;
 import gov.nist.asbestos.testEngine.engine.fixture.FixtureComponent;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -20,7 +20,7 @@ class FixtureTest {
 
     private TestScript load(String path) {
         InputStream is = FixtureTest.class.getResourceAsStream(path);
-        IBaseResource resource = ProxyBase.getFhirContext().newXmlParser().parseResource(is);
+        IBaseResource resource = ParserBase.getFhirContext().newXmlParser().parseResource(is);
         assertTrue(resource instanceof TestScript);
         return (TestScript) resource;
     }

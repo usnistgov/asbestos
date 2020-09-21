@@ -1,7 +1,7 @@
 package gov.nist.asbestos.asbestosProxy.channels.passthrough;
 
 import gov.nist.asbestos.asbestosProxy.channel.BaseChannel;
-import gov.nist.asbestos.client.Base.ProxyBase;
+import gov.nist.asbestos.client.Base.ParserBase;
 import gov.nist.asbestos.client.client.Format;
 import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.http.headers.Header;
@@ -100,7 +100,7 @@ public class PassthroughChannel extends BaseChannel /*implements IBaseChannel*/ 
         }
         Format format = Format.fromContentType(responseIn.getResponseHeaders().getContentType().getValue());
 
-        BaseResource resource = ProxyBase.parse(responseIn.getResponseText(), format);
+        BaseResource resource = ParserBase.parse(responseIn.getResponseText(), format);
         if (resource instanceof Bundle) {
             newBase = ServiceProperties.getInstance().getPropertyOrStop(ServicePropertiesEnum.FHIR_TOOLKIT_BASE) + "/proxy/" + channelConfig.asFullId();
             boolean updated = false;
@@ -136,7 +136,7 @@ public class PassthroughChannel extends BaseChannel /*implements IBaseChannel*/ 
                 }
             }
             if (updated) {
-                byte[] encoded = ProxyBase.encode(bundle, format).getBytes();
+                byte[] encoded = ParserBase.encode(bundle, format).getBytes();
 //                if (responseOut.isResponseGzipEncoded())
 //                    encoded = Gzip.compressGZIP(encoded);
                 rawResponse = encoded;

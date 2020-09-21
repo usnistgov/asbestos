@@ -1,7 +1,7 @@
 package gov.nist.asbestos.client.client;
 
 import com.google.common.base.Strings;
-import gov.nist.asbestos.client.Base.ProxyBase;
+import gov.nist.asbestos.client.Base.ParserBase;
 import gov.nist.asbestos.client.events.ProxyEvent;
 import gov.nist.asbestos.client.events.UIEvent;
 import gov.nist.asbestos.client.resolver.PatientCacheMgr;
@@ -80,9 +80,9 @@ public class FhirClient {
         byte[] content = null;
         if (resource != null) {
             if (format == Format.JSON)
-                content = ProxyBase.getFhirContext().newJsonParser().encodeResourceToString(resource).getBytes();
+                content = ParserBase.getFhirContext().newJsonParser().encodeResourceToString(resource).getBytes();
             else
-                content = ProxyBase.getFhirContext().newXmlParser().encodeResourceToString(resource).getBytes();
+                content = ParserBase.getFhirContext().newXmlParser().encodeResourceToString(resource).getBytes();
         }
 
         post.setRequest(content);
@@ -99,8 +99,8 @@ public class FhirClient {
             IBaseResource returnedResource;
             try {
                 returnedResource = isXml
-                        ? ProxyBase.getFhirContext().newXmlParser().parseResource(returnedResourceText)
-                        : ProxyBase.getFhirContext().newJsonParser().parseResource(returnedResourceText);
+                        ? ParserBase.getFhirContext().newXmlParser().parseResource(returnedResourceText)
+                        : ParserBase.getFhirContext().newJsonParser().parseResource(returnedResourceText);
                 if (returnedResource instanceof BaseResource)
                     response.setResource((BaseResource) returnedResource);
             } catch (Exception e) {
@@ -192,11 +192,11 @@ public class FhirClient {
         BaseResource resource = null;
         IBaseResource iBaseResource;
         if (format == Format.JSON) {
-            iBaseResource = ProxyBase.getFhirContext().newJsonParser().parseResource(resourceText);
+            iBaseResource = ParserBase.getFhirContext().newJsonParser().parseResource(resourceText);
             if (iBaseResource instanceof BaseResource)
                 resource = (BaseResource) iBaseResource;
         } else {
-            iBaseResource = ProxyBase.getFhirContext().newXmlParser().parseResource(resourceText);
+            iBaseResource = ParserBase.getFhirContext().newXmlParser().parseResource(resourceText);
             if (iBaseResource instanceof BaseResource)
                 resource = (BaseResource) iBaseResource;
         }

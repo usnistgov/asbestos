@@ -4,17 +4,14 @@ import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import gov.nist.asbestos.client.Base.EC;
-import gov.nist.asbestos.client.Base.ProxyBase;
+import gov.nist.asbestos.client.Base.ParserBase;
 import org.apache.commons.io.FileUtils;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.TestReport;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class ModularReports {
@@ -46,7 +43,7 @@ public class ModularReports {
         TestReport report;
         try {
             json = FileUtils.readFileToString(file, StandardCharsets.UTF_8);
-            report = (TestReport) ProxyBase.getFhirContext().newJsonParser().parseResource(json);
+            report = (TestReport) ParserBase.getFhirContext().newJsonParser().parseResource(json);
         } catch (IOException e) {
             return;
         }

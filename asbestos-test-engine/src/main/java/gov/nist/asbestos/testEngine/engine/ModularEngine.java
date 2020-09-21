@@ -1,7 +1,7 @@
 package gov.nist.asbestos.testEngine.engine;
 
 import gov.nist.asbestos.client.Base.EC;
-import gov.nist.asbestos.client.Base.ProxyBase;
+import gov.nist.asbestos.client.Base.ParserBase;
 import gov.nist.asbestos.client.client.FhirClient;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import gov.nist.asbestos.sharedObjects.debug.StopDebugTestScriptException;
@@ -135,7 +135,7 @@ public class ModularEngine {
             String moduleName = first ? null : scriptReportName;
 
             report.setName(this.testName + (moduleName == null ? "" : '/' + moduleName));
-            String json = ProxyBase.getFhirContext().newJsonParser().setPrettyPrint(true).encodeResourceToString(report);
+            String json = ParserBase.getFhirContext().newJsonParser().setPrettyPrint(true).encodeResourceToString(report);
             reports.put(report.getName(), json);
 
             if (saveLogs) {
