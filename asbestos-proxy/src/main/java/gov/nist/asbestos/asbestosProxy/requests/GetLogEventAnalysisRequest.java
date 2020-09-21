@@ -294,24 +294,30 @@ public class GetLogEventAnalysisRequest {
         }
 
         boolean focusOnRequest = "request".equals(request.uriParts.get(8));
-        // this is for the log object.  The request (above) has its own syntax that is different
-        Ref ref = new Ref(uiEvent.getURI());
 
-        if (queryParams.containsKey(Ref.FOCUSURL))
-            ref.setFocusUrl(queryParams.get(Ref.FOCUSURL));
-
-        ResourceWrapper contextBundle = getResourceFromEvent(uiEvent, focusOnRequest);
-
-        runAndReturnReport(
-                ref,
-                "By Request",
-                gzip,
-                useProxy,
-                ignoreBadRefs,
-                false,
-                contextBundle    // contextBundle
-        );
-
+        ResourceWrapper wrapper = new ResourceWrapper();
+        wrapper.setEvent(uiEvent, focusOnRequest);
+        wrapper.getRef().addParameters(queryParams);
+        runAndReturnReport(wrapper);
+//
+//        // this is for the log object.  The request (above) has its own syntax that is different
+//        Ref uiEventRef = new Ref(uiEvent.getURI());
+//
+//        if (queryParams.containsKey(Ref.FOCUSURL))
+//            uiEventRef.setFocusUrl(queryParams.get(Ref.FOCUSURL));
+//
+//        ResourceWrapper contextBundle = getResourceFromEvent(uiEvent, focusOnRequest);
+//
+//        runAndReturnReport(
+//                uiEventRef,
+//                "By Request",
+//                gzip,
+//                useProxy,
+//                ignoreBadRefs,
+//                false,
+//                contextBundle    // contextBundle
+//        );
+//
     }
 
 
@@ -481,6 +487,7 @@ public class GetLogEventAnalysisRequest {
     private void runAndReturnReport(ResourceWrapper wrapper) throws IOException {
         Report report;
         try {
+            wrapper.getResource();  // maybe force pulling of resource from logs
             report = new AnalysisReport(request.ec, wrapper).run();
         } catch (Throwable t) {
             report = new Report(t.getMessage());

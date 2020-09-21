@@ -15,6 +15,8 @@ import org.hl7.fhir.r4.model.TestScript;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
+import java.net.URLEncoder;
+import java.util.Map;
 
 class SetupActionRead extends GenericSetupAction {
 
@@ -69,10 +71,10 @@ class SetupActionRead extends GenericSetupAction {
                 reporter.reportError( "has params but no resource");
                 return null ;
             }
-            SearchParms searchParms = prepParams();
+            String searchParms = prepParams();
             if (searchParms == null)
                 return null;  // coding issue
-            if (searchParms.isSearch() && !isSearchOk()) {
+            if (searchParms.startsWith("?") && !isSearchOk()) {
                 reporter.reportError( "resulting URL is search (contains ?) - use search operation type instead");
                 return null ;
             }
@@ -112,10 +114,12 @@ class SetupActionRead extends GenericSetupAction {
         return true;
     }
 
-    SearchParms prepParams() {
+    // http://hl7.org/fhir/testscript-definitions.html#TestScript.setup.action.operation.params
+    //  "/[id]/_history/[vid] {?_format=[mime-type]}"
+    String prepParams() {
+        String params = "";
         assert op.hasParams();
-        SearchParms searchParms = new SearchParms();
-        boolean encodeRequestUrl = true;
+        boolean encodeRequestUrl = true;  // default is true
         if (op.hasEncodeRequestUrl())
             encodeRequestUrl = op.getEncodeRequestUrl();
         String rawParms1 = op.getParams();
@@ -126,15 +130,26 @@ class SetupActionRead extends GenericSetupAction {
         }
         if (rawParms.startsWith("/"))
             rawParms = rawParms.substring(1);  // should only be ID and _format (this is a READ)
+        Map<String, String> paramMap = Ref.parseParameters(rawParms);
+        if (hasParamOtherthenId(paramMap))
+            encodeRequestUrl = false;
         try {
-            searchParms.setParms(rawParms, encodeRequestUrl);
+            //searchParms.setParms(rawParms, encodeRequestUrl);
+            params = encodeRequestUrl ? URLEncoder.encode(rawParms, "UTF-8") : rawParms;
         } catch (UnsupportedEncodingException e) {
             reporter.reportError("Unable to encode URL parameters - " + e.getMessage());
             return null;
         }
-        return searchParms;
+        return params;
     }
 
+     boolean hasParamOtherthenId(Map<String, String> parms) {
+        for (String name : parms.keySet()) {
+            if (!"_format".equals(name))
+                return true;
+        }
+        return false;
+     }
 
     Ref refFromTargetId(String targetId, TestReport.SetupActionOperationComponent opReport, String label) {
         Ref ref = null;

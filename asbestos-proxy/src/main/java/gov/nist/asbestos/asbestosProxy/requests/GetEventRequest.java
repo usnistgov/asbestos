@@ -19,7 +19,7 @@ import java.util.List;
 // 3 - testSession
 // 4 - channelId
 // 5 - resourceType - may be null
-// 6 - event
+// 6 - eventId
 // returns UIEvent as JSON
 
 public class GetEventRequest {

@@ -1,6 +1,7 @@
 package gov.nist.asbestos.client.resolver;
 
 
+import com.google.common.base.Strings;
 import gov.nist.asbestos.client.Base.ProxyBase;
 import gov.nist.asbestos.client.client.Format;
 import gov.nist.asbestos.client.events.UIEvent;
@@ -231,6 +232,13 @@ public class ResourceWrapper {
                 resource = ProxyBase.parse(getter.getResponse(), Format.fromContentType(getter.getResponseContentType()));
                 return resource;
             }
+        }
+        if (hasEvent()) {
+            String body = isRequest ? getEvent().getRequestBody() : getEvent().getResponseBody();
+            if (Strings.isNullOrEmpty(body))
+                return null;
+            resource = ProxyBase.parse(body, Format.fromContent(body));
+            return resource;
         }
         return null;
     }

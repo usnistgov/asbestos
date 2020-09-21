@@ -44,9 +44,8 @@ public class AnalysePDBIT {
         assertEquals(200, getter.getStatus());
         Map<String, Object> result = new Gson().fromJson(getter.getResponseText(), Map.class);
         assertNotNull(result);
-        assertEquals(2, ((List)result.get("objects")).size());
+        assertEquals(1, ((List)result.get("objects")).size());
         assertTrue(hasType(result, "DocumentReference"));
-        assertTrue(hasType(result, "Binary"));
     }
 
     @Test

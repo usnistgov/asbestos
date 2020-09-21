@@ -172,13 +172,7 @@ public class FixtureComponent {
         String searchString = "?fixturePath=" + fixturePath;
         if (!Strings.isNullOrEmpty(fhirPath))
             searchString = searchString + ";fhirPath=" + fhirPath;
-        SearchParms searchParms = new SearchParms();
-        try {
-            searchParms.setParms(searchString, true);  // encoding needed to escape bundle references
-        } catch (UnsupportedEncodingException e) {
-            return null;
-        }
-        return new Ref(uri, wrapper.getResourceType(), searchParms);
+        return new Ref(uri, wrapper.getResourceType(), searchString);
     }
 
     public String getResponseType() {

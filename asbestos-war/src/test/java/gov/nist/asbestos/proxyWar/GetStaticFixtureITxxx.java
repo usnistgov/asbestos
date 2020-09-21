@@ -18,15 +18,13 @@ import java.net.URISyntaxException;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class GetStaticFixtureIT {
+class GetStaticFixtureITxxx {
 
     @Test
     void getBundle() throws Exception {
         FhirClient fhirClient = new FhirClient();
         URI uri = new URI(ITConfig.getFhirToolkitBase() + "/engine/staticFixture/IT_Test_Support/StaticFixture");
-        SearchParms searchParms = new SearchParms();
-        searchParms.setParms("?url=Bundle/pdb.xml", true);
-        Ref ref = new Ref(uri, "Bundle", searchParms);
+        Ref ref = new Ref(new Ref(uri), "Bundle", null, null, "url=Bundle/pdb.xml");
         ResourceWrapper wrapper = fhirClient.readResource(ref, Format.JSON);
         assertTrue(wrapper.isOk(), "uri is " + uri);
         assertTrue(wrapper.getResource() instanceof Bundle, "resource is " + wrapper.getResourceType());
@@ -36,9 +34,7 @@ class GetStaticFixtureIT {
     void getResourceInBundle() throws URISyntaxException, UnsupportedEncodingException {
         FhirClient fhirClient = new FhirClient();
         URI uri = new URI(ITConfig.getFhirToolkitBase() + "/engine/staticFixture/IT_Test_Support/StaticFixture");
-        SearchParms searchParms = new SearchParms();
-        searchParms.setParms("?url=Bundle/pdb.xml;fhirPath=Bundle.entry[0]", true);
-        Ref ref = new Ref(uri, "DocumentReference", searchParms);
+        Ref ref = new Ref(uri, "DocumentReference", "?url=Bundle/pdb.xml&fhirPath=Bundle.entry[0]");
         ResourceWrapper wrapper = fhirClient.readResource(ref, Format.JSON);
         assertTrue(wrapper.isOk(), "uri is " + "resource is " + wrapper.getResourceType());
         assertTrue(wrapper.getResource() instanceof DocumentReference);

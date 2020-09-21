@@ -79,7 +79,11 @@ public class AnalysisReport {
     private ErrorReporter errorReporter = new ErrorReporter();
 
     private Bundle getContextBundle() {
-        return contextResourceBundle == null ? null : (Bundle) contextResourceBundle.getResource();
+        if (contextResourceBundle == null)
+            return null;
+        if (contextResourceBundle.getResource() instanceof Bundle)
+            return (Bundle) contextResourceBundle.getResource();
+        return null;
     }
 
     private boolean hasContextBundle() {
@@ -275,6 +279,19 @@ public class AnalysisReport {
             } else if (baseRef == null && getContextBundle() != null) {
                 baseObj = contextResourceBundle;
             } else if (baseObj != null) {
+                try {
+                    BaseResource res = baseObj.getResource(); // maybe force loading from UIEvent
+                    if (res instanceof Bundle) {
+                        contextResourceBundle = new ResourceWrapper(res);
+                        contextResourceBundle.setRef(baseObj.getRef());
+                        contextResourceBundle.setEvent(baseObj.getEvent(), baseObj.isRequest());
+                        baseObj = null;
+                        loadBaseFromContext();
+                    }
+                } catch (Exception e) {
+                    generalErrors.add((baseObj.isRequest() ? "Request " : "Response ") + "contains no Resource");
+                    return buildReport();
+                }
                 buildAtts();
                 //   return buildReport();
             }
@@ -285,6 +302,8 @@ public class AnalysisReport {
             generalErrors.add(ExceptionUtils.getStackTrace(t));
             return buildReport();
         }
+        if (!generalErrors.isEmpty())
+            return buildReport();
         return null;
     }
 
@@ -292,7 +311,12 @@ public class AnalysisReport {
     private void buildAtts() {
         if (baseObj == null)
             return;
-        atts = ResourceHasMethodsFilter.toMap(baseObj.getResource());
+        BaseResource baseResource = baseObj.getResource();
+        if (baseResource == null) {
+            generalErrors.add("No Resource to analyse");
+            return;
+        }
+        atts = ResourceHasMethodsFilter.toMap(baseResource);
         for (Related rel : related) {
             if (rel.wrapper.hasResource()) {
                 rel.atts = ResourceHasMethodsFilter.toMap(rel.wrapper.getResource());
@@ -984,6 +1008,8 @@ public class AnalysisReport {
     private String extractDocument(Binary binary) {
         String contentType = binary.getContentType();
         byte[] data = binary.getData();
+        if (data == null)
+            return null;
         String strData = new String(data);
         byte[] byteData = strData.getBytes();
         String id = new DocumentCache(ec).putDocumentCache(data, contentType);

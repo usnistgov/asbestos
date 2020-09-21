@@ -34,9 +34,9 @@ public class Ref {
         uri = build(ref);
     }
 
-    public Ref(URI base, String resourceType, SearchParms searchParms) {
-        this(base.toString(), resourceType, searchParms.getParms());
-    }
+//    public Ref(URI base, String resourceType, SearchParms searchParms) {
+//        this(base.toString(), resourceType, searchParms.getParms());
+//    }
 
     public Ref(URI base, String resourceType, String id) {
         this(base.toString(), resourceType, id);
@@ -75,9 +75,11 @@ public class Ref {
             uri = ref.getUri();
             return;
         }
+        if (!parameters.startsWith("?"))
+            parameters = "?" + parameters;
         uri = build(
                 ref.toString()
-                        + "?" +  parameters
+                        +  parameters
         );
     }
 
@@ -134,6 +136,14 @@ public class Ref {
         return theUri.substring(0, quest);
     }
 
+    public Ref addParameters(Map<String, String> parms) {
+        for (String name : parms.keySet()) {
+            String value = parms.get(name);
+            addParameter(name, value);
+        }
+        return this;
+    }
+
     public Ref addParameter(String name, String value) {
         Map<String, String> parmMap = getParametersAsMap();
         parmMap.put(name, value);
@@ -160,7 +170,7 @@ public class Ref {
 
     public static Map<String, String> parseParameters(String parms) {
         Map<String, String> map = new HashMap<>();
-        String[] parts = parms.split(";");
+        String[] parts = parms.split("&");
         for (int i = 0; i < parts.length; i++) {
             String parm = parts[i];
             List<String> namevalue = Arrays.asList(parm.split("=", 2));
@@ -179,7 +189,7 @@ public class Ref {
         for (String name : parms.keySet()) {
             String value = parms.get(name);
             if (!first)
-                buf.append(";");
+                buf.append("&");
             buf.append(name).append("=").append(value);
             first = false;
         }
@@ -199,7 +209,7 @@ public class Ref {
             if (isFirst)
                 isFirst = false;
             else
-                buf.append(";");
+                buf.append("&");
             buf.append(key).append("=").append(value);
         }
         return buf.toString();

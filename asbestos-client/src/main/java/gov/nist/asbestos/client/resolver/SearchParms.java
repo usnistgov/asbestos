@@ -1,9 +1,12 @@
 package gov.nist.asbestos.client.resolver;
 
+import org.apache.http.annotation.Obsolete;
+
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
+@Obsolete
 public class SearchParms {
     private String parms = null;
 
