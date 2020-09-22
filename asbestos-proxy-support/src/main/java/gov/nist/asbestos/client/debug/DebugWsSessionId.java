@@ -1,4 +1,4 @@
-package gov.nist.asbestos.sharedObjects.debug;
+package gov.nist.asbestos.client.debug;
 
 import java.util.Objects;
 

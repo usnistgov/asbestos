@@ -4,7 +4,7 @@ import gov.nist.asbestos.asbestosProxy.servlet.ChannelConnector;
 import gov.nist.asbestos.client.Base.Request;
 import gov.nist.asbestos.client.client.Format;
 import gov.nist.asbestos.http.operations.HttpGetter;
-import gov.nist.asbestos.sharedObjects.ChannelConfig;
+import gov.nist.asbestos.client.channel.ChannelConfig;
 import org.apache.log4j.Logger;
 
 import java.net.URI;

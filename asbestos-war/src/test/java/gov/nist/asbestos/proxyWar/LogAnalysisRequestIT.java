@@ -43,7 +43,7 @@ public class LogAnalysisRequestIT {
     static URI base;
     static TestReport theReport;
     static String eventUrl;  // needs /request or /response appended before it points to a message
-    static String logBase = "http://localhost:8081/asbestos/log";
+    static String logBase = "http://localhost:" + proxyPort + "/asbestos/log";
     static AnalysisBuilder analysisBuilder = new AnalysisBuilder();
 
     static String getTestSession() {
@@ -94,7 +94,7 @@ public class LogAnalysisRequestIT {
         assertEquals(testSession, getTestSession());
         assertEquals(channelId, getChannelId());
         assertEquals("Bundle", getResourceType());
-        assertTrue(getEventId().split("_").length == 7);
+        assertEquals(getEventId().split("_").length, 7);
 
         analysisBuilder.setTestSession(getTestSession());
         analysisBuilder.setChannelId(getChannelId());
@@ -113,7 +113,7 @@ public class LogAnalysisRequestIT {
                 eventId);
         assertNotNull(uiEvent);
         List<Ref> locations = getLocationsFromEvent(uiEvent);
-        assertTrue(locations.size() == 3);
+        assertEquals(locations.size(), 3);
 
         Ref docRefRef = null;
         for (Ref location : locations) {
@@ -312,7 +312,7 @@ public class LogAnalysisRequestIT {
 
         // focusUrl is usable on response.  Just hard to setup test data for IT test.
         public String getEventResponseAnalysis() {
-            String url =
+            return
                     logBase
                             + "/" + "analysis"
                             + "/" + "event"
@@ -320,16 +320,14 @@ public class LogAnalysisRequestIT {
                             + "/" + channelId
                             + "/" + eventId
                             + "/" + "response";
-            return url;
         }
 
         public String getObjectAnalysis(Ref ref) {
-            String url =
+            return
                     logBase
                     + "/" + "analysis"
                     + "/" + "url"
                     + "?url=" + ref.toString();
-            return url;
         }
 
         public String getTestSession() {

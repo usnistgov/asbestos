@@ -5,7 +5,7 @@ import gov.nist.asbestos.client.Base.Dirs;
 import gov.nist.asbestos.client.Base.EC;
 import gov.nist.asbestos.client.Base.Request;
 import gov.nist.asbestos.client.events.Event;
-import gov.nist.asbestos.sharedObjects.ChannelConfig;
+import gov.nist.asbestos.client.channel.ChannelConfig;
 import gov.nist.asbestos.simapi.tk.installation.Installation;
 import org.apache.log4j.Logger;
 

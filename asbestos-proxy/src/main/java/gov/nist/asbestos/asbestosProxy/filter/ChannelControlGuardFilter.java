@@ -5,8 +5,8 @@ import gov.nist.asbestos.asbestosProxy.requests.DeleteChannelRequest;
 import gov.nist.asbestos.client.Base.Request;
 import gov.nist.asbestos.client.log.SimStore;
 import gov.nist.asbestos.serviceproperties.ServiceProperties;
-import gov.nist.asbestos.sharedObjects.ChannelConfig;
-import gov.nist.asbestos.sharedObjects.ChannelConfigFactory;
+import gov.nist.asbestos.client.channel.ChannelConfig;
+import gov.nist.asbestos.client.channel.ChannelConfigFactory;
 import gov.nist.asbestos.simapi.simCommon.SimId;
 import gov.nist.asbestos.simapi.simCommon.TestSession;
 import gov.nist.asbestos.simapi.tk.installation.Installation;
@@ -46,7 +46,7 @@ public class ChannelControlGuardFilter implements Filter {
         }
 
         @Override
-        public ServletInputStream getInputStream() throws IOException {
+        public ServletInputStream getInputStream() {
             return new ServletInputStream() {
                 ByteArrayInputStream bais = new ByteArrayInputStream(body);
 

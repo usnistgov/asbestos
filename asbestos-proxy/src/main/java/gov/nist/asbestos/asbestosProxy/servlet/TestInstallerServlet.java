@@ -5,8 +5,8 @@ import gov.nist.asbestos.client.log.SimStore;
 import gov.nist.asbestos.http.operations.HttpGetter;
 import gov.nist.asbestos.serviceproperties.ServiceProperties;
 import gov.nist.asbestos.serviceproperties.ServicePropertiesEnum;
-import gov.nist.asbestos.sharedObjects.ChannelConfig;
-import gov.nist.asbestos.sharedObjects.ChannelConfigFactory;
+import gov.nist.asbestos.client.channel.ChannelConfig;
+import gov.nist.asbestos.client.channel.ChannelConfigFactory;
 import gov.nist.asbestos.simapi.tk.installation.Installation;
 import gov.nist.toolkit.configDatatypes.server.SimulatorProperties;
 import gov.nist.toolkit.toolkitApi.DocumentRegRep;
@@ -257,13 +257,13 @@ public class TestInstallerServlet  extends HttpServlet {
         // String content = null;
         try {
             warMarkerFile = Paths.get(getClass().getResource("/war.txt").toURI()).toFile();
-            // content = new String ( Files.readAllBytes( Paths.get(warMarkerFile.toString()) ) );
+            // warMarkerFile is something like /home/bill/develop/asbestos/asbestos-war/target/asbestos-war/WEB-INF/classes/war.txt
+            return warMarkerFile.getParentFile().getParentFile().getParentFile();
         } catch (Throwable t) {
             log.error(ExceptionUtils.getStackTrace(t));
+            return null;
         }
 
-        // warMarkerFile is something like /home/bill/develop/asbestos/asbestos-war/target/asbestos-war/WEB-INF/classes/war.txt
-        return warMarkerFile.getParentFile().getParentFile().getParentFile();
     }
 
 

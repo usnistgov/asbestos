@@ -52,19 +52,12 @@
     </profiles>
 
     <modules>
-        <!--<module>http-test-editor-service</module> removed since embedded Jetty not workable -->
         <module>asbestos-adapter</module>
         <module>asbestos-simapi</module>
         <module>asbestos-view</module>
-        <!--<module>asbestos-simapitest</module>-->
-        <!--<module>asbestos-fproxy</module>-->
-<!--        <module>asbestos-proxy-test</module>-->
         <module>asbestos-http</module>
-        <module>asbestos-shared-objects</module>
         <module>asbestos-proxy</module>
         <module>asbestos-war</module>
-        <!--<module>asbestos-toolkit-api</module>-->
-        <!--<module>asbestos-simapi-extra</module>-->
         <module>asbestos-codes-jaxb</module>
         <module>asbestos-xds-jaxb</module>
         <module>asbestos-mhd</module>

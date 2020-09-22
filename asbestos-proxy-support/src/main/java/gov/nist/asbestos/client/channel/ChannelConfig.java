@@ -1,4 +1,4 @@
-package gov.nist.asbestos.sharedObjects;
+package gov.nist.asbestos.client.channel;
 
 import gov.nist.asbestos.serviceproperties.ServiceProperties;
 import gov.nist.asbestos.serviceproperties.ServicePropertiesEnum;

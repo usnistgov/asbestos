@@ -1,6 +1,6 @@
-package gov.nist.asbestos.sharedObjects.test;
+package gov.nist.abestos.client.channel;
 
-import gov.nist.asbestos.sharedObjects.ChannelConfig;
+import gov.nist.asbestos.client.channel.ChannelConfig;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 

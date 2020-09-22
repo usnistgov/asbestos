@@ -1,4 +1,4 @@
-package gov.nist.asbestos.sharedObjects;
+package gov.nist.asbestos.client.general;
 
 import java.util.ArrayList;
 import java.util.List;

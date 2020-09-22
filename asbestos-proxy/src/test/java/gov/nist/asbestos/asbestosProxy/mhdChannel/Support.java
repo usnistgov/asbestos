@@ -1,7 +1,7 @@
 package gov.nist.asbestos.asbestosProxy.mhdChannel;
 
-import gov.nist.asbestos.sharedObjects.ChannelConfig;
-import gov.nist.asbestos.sharedObjects.ChannelConfigFactory;
+import gov.nist.asbestos.client.channel.ChannelConfig;
+import gov.nist.asbestos.client.channel.ChannelConfigFactory;
 import org.junit.jupiter.api.Assertions;
 import org.mockito.Mockito;
 

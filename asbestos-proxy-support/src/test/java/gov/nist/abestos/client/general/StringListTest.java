@@ -1,7 +1,7 @@
-package gov.nist.asbestos.sharedObjects.test;
+package gov.nist.abestos.client.general;
 
-import gov.nist.asbestos.sharedObjects.GenericJSFactory;
-import gov.nist.asbestos.sharedObjects.StringList;
+import gov.nist.asbestos.client.general.GenericJSFactory;
+import gov.nist.asbestos.client.general.StringList;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;

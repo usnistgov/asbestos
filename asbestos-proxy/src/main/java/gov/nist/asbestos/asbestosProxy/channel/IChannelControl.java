@@ -2,14 +2,14 @@ package gov.nist.asbestos.asbestosProxy.channel;
 
 
 import gov.nist.asbestos.client.events.Event;
-import gov.nist.asbestos.sharedObjects.ChannelConfig;
+import gov.nist.asbestos.client.channel.ChannelConfig;
 
 /**
  * Defines a proxy channel.
  * Implemented as a simulator.
  */
 
-interface IChannelControl {
+public interface IChannelControl {
     void setup(ChannelConfig simConfig);
     void teardown();
     void validateConfig(ChannelConfig simConfig);

@@ -1,7 +1,7 @@
 package gov.nist.asbestos.asbestosProxy.servlet;
 
 import gov.nist.asbestos.client.log.SimStore;
-import gov.nist.asbestos.sharedObjects.ChannelConfig;
+import gov.nist.asbestos.client.channel.ChannelConfig;
 import gov.nist.asbestos.simapi.simCommon.SimId;
 
 import javax.servlet.http.HttpServletResponse;

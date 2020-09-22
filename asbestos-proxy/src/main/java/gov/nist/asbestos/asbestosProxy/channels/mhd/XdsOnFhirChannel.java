@@ -2,7 +2,7 @@ package gov.nist.asbestos.asbestosProxy.channels.mhd;
 
 import gov.nist.asbestos.asbestosProxy.channel.BaseChannel;
 import gov.nist.asbestos.asbestosProxy.channels.passthrough.PassthroughChannel;
-import gov.nist.asbestos.asbestosProxy.util.XdsActorMapper;
+import gov.nist.asbestos.mhd.util.XdsActorMapper;
 import gov.nist.asbestos.client.resolver.*;
 import gov.nist.asbestos.mhd.SubmittedObject;
 import gov.nist.asbestos.mhd.exceptions.TransformException;
@@ -22,7 +22,7 @@ import gov.nist.asbestos.mhd.translation.ContainedIdAllocator;
 import gov.nist.asbestos.mhd.translation.search.FhirSq;
 import gov.nist.asbestos.serviceproperties.ServiceProperties;
 import gov.nist.asbestos.serviceproperties.ServicePropertiesEnum;
-import gov.nist.asbestos.sharedObjects.ChannelConfig;
+import gov.nist.asbestos.client.channel.ChannelConfig;
 import gov.nist.asbestos.simapi.tk.installation.Installation;
 import gov.nist.asbestos.simapi.validation.Val;
 import gov.nist.asbestos.simapi.validation.ValE;
@@ -112,8 +112,7 @@ public class XdsOnFhirChannel extends BaseChannel /*implements IBaseChannel*/ {
         for (String id : bundleToRegistryObjectList.getDocumentContents().keySet()) {
             byte[] contents = bundleToRegistryObjectList.getDocumentContents(id);
             lastDocument = contents;
-            String contentsAsString = new String(contents);
-            lastDocumentStr = contentsAsString;
+            lastDocumentStr = new String(contents);
             String strContents = Base64.encodeBase64String(contents);
             ProvideAndRegisterDocumentSetRequestType.Document document1 = new ProvideAndRegisterDocumentSetRequestType.Document();
             document1.setValue(contents);
@@ -284,7 +283,7 @@ public class XdsOnFhirChannel extends BaseChannel /*implements IBaseChannel*/ {
                 String j;
                 if (lastDocument != null)
                     compare(lastDocument,retrieveContent.getContent());
-                j = "";
+                //j = "";
                 //binary.setData(lastDocument);
             } else {
                 throw new RuntimeException("GET " + resourceType + " not supported");
@@ -435,7 +434,7 @@ public class XdsOnFhirChannel extends BaseChannel /*implements IBaseChannel*/ {
         }
         if (requestedType != null && requestedType.equals("Binary")) {
             if (binary != null) {
-                responseOut.setStatus(200);;
+                responseOut.setStatus(200);
                 responseOut.setResponseContentType(returnFormatType.getContentType());
                 responseOut.setResponse(ParserBase.encode(binary, returnFormatType).getBytes());
                 return;
@@ -453,7 +452,7 @@ public class XdsOnFhirChannel extends BaseChannel /*implements IBaseChannel*/ {
                 return;
             }
             String responsePart = responseIn.getResponseText();
-            String registryResponse = "";
+            String registryResponse;
             try {
                 if (responsePart == null || responsePart.equals("")) {
                     returnErrorInOperationOutcome("Empty response from XDS.ProvideAndRegister", responseOut);
@@ -725,8 +724,7 @@ public class XdsOnFhirChannel extends BaseChannel /*implements IBaseChannel*/ {
     private boolean isWhite(char c) {
         if (c == ' ') return true;
         if (c == '\n') return true;
-        if (c == '\t') return true;
-        return false;
+        return c == '\t';
     }
 
     private String trim(String s) {

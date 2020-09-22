@@ -1,4 +1,4 @@
-package gov.nist.asbestos.asbestosProxy.util;
+package gov.nist.asbestos.mhd.util;
 
 import gov.nist.asbestos.serviceproperties.ServiceProperties;
 import gov.nist.asbestos.serviceproperties.ServicePropertiesEnum;

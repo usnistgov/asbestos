@@ -4,8 +4,8 @@ package gov.nist.asbestos.client.log;
 import gov.nist.asbestos.client.Base.Dirs;
 import gov.nist.asbestos.client.events.Event;
 import gov.nist.asbestos.client.events.ITask;
-import gov.nist.asbestos.sharedObjects.ChannelConfig;
-import gov.nist.asbestos.sharedObjects.ChannelConfigFactory;
+import gov.nist.asbestos.client.channel.ChannelConfig;
+import gov.nist.asbestos.client.channel.ChannelConfigFactory;
 import gov.nist.asbestos.simapi.simCommon.SimId;
 import gov.nist.asbestos.simapi.simCommon.TestSession;
 import gov.nist.asbestos.simapi.tk.installation.Installation;
@@ -231,7 +231,7 @@ public class SimStore {
         try {
             sleep(5);
         } catch (InterruptedException e) {
-
+            // This page intentionally left blank
         }
     }
 
@@ -254,7 +254,6 @@ public class SimStore {
      * Given base name of a new taskStore - extend it to ensure it is unique.
      * Does not create the directory, just the File
      * @param eventBase - usually date/time stamp
-     * @return
      */
     private File createEventDir(String eventBase) {
         int incr = 0;

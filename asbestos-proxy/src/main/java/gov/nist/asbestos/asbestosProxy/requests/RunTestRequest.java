@@ -6,7 +6,7 @@ import gov.nist.asbestos.client.client.FhirClient;
 import gov.nist.asbestos.client.client.Format;
 import gov.nist.asbestos.serviceproperties.ServiceProperties;
 import gov.nist.asbestos.serviceproperties.ServicePropertiesEnum;
-import gov.nist.asbestos.sharedObjects.ChannelConfig;
+import gov.nist.asbestos.client.channel.ChannelConfig;
 import gov.nist.asbestos.simapi.validation.Val;
 import gov.nist.asbestos.testEngine.engine.ModularEngine;
 import org.apache.log4j.Logger;
@@ -49,11 +49,11 @@ public class RunTestRequest {
             return;
         }
         String testSession = channelConfig.getTestSession();
-        String proxyStr = null;
+        String proxyStr;
         ServicePropertiesEnum key = ServicePropertiesEnum.FHIR_TOOLKIT_BASE;
         proxyStr = ServiceProperties.getInstance().getPropertyOrStop(key);
         proxyStr += "/proxy/" + channelId;
-        URI proxy = null;
+        URI proxy;
         proxy = new URI(proxyStr);
         File testDir = request.ec.getTest(testCollection, testName);
 

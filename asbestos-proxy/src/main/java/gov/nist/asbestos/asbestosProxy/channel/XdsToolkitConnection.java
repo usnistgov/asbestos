@@ -1,14 +1,12 @@
 package gov.nist.asbestos.asbestosProxy.channel;
 
-import gov.nist.asbestos.asbestosProxy.requests.XdsHeartbeat;
 import gov.nist.asbestos.client.Base.EC;
 import gov.nist.asbestos.client.log.SimStore;
 import gov.nist.asbestos.serviceproperties.ServiceProperties;
 import gov.nist.asbestos.serviceproperties.ServicePropertiesEnum;
-import gov.nist.asbestos.sharedObjects.ChannelConfig;
-import gov.nist.asbestos.sharedObjects.ChannelConfigFactory;
+import gov.nist.asbestos.client.channel.ChannelConfig;
+import gov.nist.asbestos.client.channel.ChannelConfigFactory;
 import gov.nist.toolkit.toolkitApi.SimulatorBuilder;
-import gov.nist.toolkit.toolkitApi.ToolkitServiceException;
 import gov.nist.toolkit.toolkitServicesCommon.SimConfig;
 import gov.nist.toolkit.toolkitServicesCommon.resource.SimIdResource;
 import org.apache.log4j.Logger;

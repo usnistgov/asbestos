@@ -1,24 +1,25 @@
-package gov.nist.asbestos.sharedObjects;
+package gov.nist.asbestos.client.channel;
 
-import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.File;
 import java.io.FileOutputStream;
 
-public class GenericJSFactory {
 
-    public static <T> T load(File file, Class<?> clazz) {
-        ObjectMapper objectMapper = new ObjectMapper();
+public class ChannelConfigFactory {
+
+    public static ChannelConfig load(File file) {
         try {
-            JavaType type = objectMapper.getTypeFactory().constructType(clazz);
-            return objectMapper.readValue(file, type);
-        } catch (Exception e ) {
+            ObjectMapper objectMapper = new ObjectMapper()
+                    .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)    ;
+            return objectMapper.readValue(file, ChannelConfig.class);
+        } catch (Throwable e ) {
             throw new RuntimeException(e);
         }
     }
 
-    public static <T> void store(T config, File file) {
+    public static void store(ChannelConfig config, File file) {
         ObjectMapper objectMapper = new ObjectMapper();
         try {
             objectMapper.writerWithDefaultPrettyPrinter().writeValue(new FileOutputStream(file), config);
@@ -27,17 +28,16 @@ public class GenericJSFactory {
         }
     }
 
-    public static <T> T convert(String string, Class<?> clazz) {
+    public static ChannelConfig convert(String string) {
         ObjectMapper objectMapper = new ObjectMapper();
         try {
-            JavaType type = objectMapper.getTypeFactory().constructType(clazz);
-            return objectMapper.readValue(string, type);
+            return objectMapper.readValue(string, ChannelConfig.class);
         } catch (Exception e ) {
             throw new RuntimeException(e);
         }
     }
 
-    public static <T> String convert(T config) {
+    public static String convert(ChannelConfig config) {
         ObjectMapper objectMapper = new ObjectMapper();
         try {
             return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(config);
@@ -45,4 +45,5 @@ public class GenericJSFactory {
             throw new RuntimeException(e);
         }
     }
+
 }

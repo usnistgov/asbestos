@@ -5,7 +5,7 @@ import gov.nist.asbestos.client.Base.Request;
 import gov.nist.asbestos.client.log.SimStore;
 import gov.nist.asbestos.serviceproperties.ServiceProperties;
 import gov.nist.asbestos.serviceproperties.ServicePropertiesEnum;
-import gov.nist.asbestos.sharedObjects.ChannelConfig;
+import gov.nist.asbestos.client.channel.ChannelConfig;
 import gov.nist.asbestos.simapi.simCommon.SimId;
 import gov.nist.asbestos.simapi.simCommon.TestSession;
 import org.apache.log4j.Logger;

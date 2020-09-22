@@ -2,7 +2,7 @@ package gov.nist.asbestos.asbestosProxy.channel;
 
 import gov.nist.asbestos.client.events.ITask;
 import gov.nist.asbestos.client.client.Format;
-import gov.nist.asbestos.sharedObjects.ChannelConfig;
+import gov.nist.asbestos.client.channel.ChannelConfig;
 
 public abstract class BaseChannel implements IBaseChannel {
     protected ChannelConfig channelConfig = null;

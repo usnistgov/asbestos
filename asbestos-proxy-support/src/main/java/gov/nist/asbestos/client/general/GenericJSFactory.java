@@ -1,29 +1,24 @@
-package gov.nist.asbestos.sharedObjects;
+package gov.nist.asbestos.client.general;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.http.client.methods.HttpPost;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
 
+public class GenericJSFactory {
 
-public class ChannelConfigFactory {
-
-    public static ChannelConfig load(File file) {
+    public static <T> T load(File file, Class<?> clazz) {
+        ObjectMapper objectMapper = new ObjectMapper();
         try {
-            ObjectMapper objectMapper = new ObjectMapper()
-                    .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)    ;
-            return objectMapper.readValue(file, ChannelConfig.class);
-        } catch (Throwable e ) {
+            JavaType type = objectMapper.getTypeFactory().constructType(clazz);
+            return objectMapper.readValue(file, type);
+        } catch (Exception e ) {
             throw new RuntimeException(e);
         }
     }
 
-    public static void store(ChannelConfig config, File file) {
+    public static <T> void store(T config, File file) {
         ObjectMapper objectMapper = new ObjectMapper();
         try {
             objectMapper.writerWithDefaultPrettyPrinter().writeValue(new FileOutputStream(file), config);
@@ -32,16 +27,17 @@ public class ChannelConfigFactory {
         }
     }
 
-    public static ChannelConfig convert(String string) {
+    public static <T> T convert(String string, Class<?> clazz) {
         ObjectMapper objectMapper = new ObjectMapper();
         try {
-            return objectMapper.readValue(string, ChannelConfig.class);
+            JavaType type = objectMapper.getTypeFactory().constructType(clazz);
+            return objectMapper.readValue(string, type);
         } catch (Exception e ) {
             throw new RuntimeException(e);
         }
     }
 
-    public static String convert(ChannelConfig config) {
+    public static <T> String convert(T config) {
         ObjectMapper objectMapper = new ObjectMapper();
         try {
             return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(config);
@@ -49,5 +45,4 @@ public class ChannelConfigFactory {
             throw new RuntimeException(e);
         }
     }
-
 }

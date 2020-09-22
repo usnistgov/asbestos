@@ -8,7 +8,7 @@ import gov.nist.asbestos.http.headers.Header;
 import gov.nist.asbestos.http.operations.HttpDelete;
 import gov.nist.asbestos.serviceproperties.ServiceProperties;
 import gov.nist.asbestos.serviceproperties.ServicePropertiesEnum;
-import gov.nist.asbestos.sharedObjects.ChannelConfig;
+import gov.nist.asbestos.client.channel.ChannelConfig;
 import gov.nist.asbestos.client.events.Event;
 import gov.nist.asbestos.http.headers.Headers;
 import gov.nist.asbestos.http.operations.HttpBase;
@@ -92,7 +92,7 @@ public class PassthroughChannel extends BaseChannel /*implements IBaseChannel*/ 
     }
 
     private void transformResponseBody(HttpBase responseIn, HttpBase responseOut) {
-        String newBase = null;
+        String newBase;
         byte[] rawResponse = responseIn.getResponse();
         if (rawResponse == null) {
             responseOut.setStatus(responseIn.getStatus());
@@ -136,10 +136,7 @@ public class PassthroughChannel extends BaseChannel /*implements IBaseChannel*/ 
                 }
             }
             if (updated) {
-                byte[] encoded = ParserBase.encode(bundle, format).getBytes();
-//                if (responseOut.isResponseGzipEncoded())
-//                    encoded = Gzip.compressGZIP(encoded);
-                rawResponse = encoded;
+                rawResponse = ParserBase.encode(bundle, format).getBytes();
             }
         }
         responseOut.setResponse(rawResponse);
