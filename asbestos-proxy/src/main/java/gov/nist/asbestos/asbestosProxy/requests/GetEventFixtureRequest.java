@@ -12,7 +12,6 @@ package gov.nist.asbestos.asbestosProxy.requests;
 // optional param fhirPath=path within bundle
 // returns UIEvent as JSON
 
-import com.google.gson.Gson;
 import gov.nist.asbestos.client.Base.Request;
 import gov.nist.asbestos.client.Base.Returns;
 import gov.nist.asbestos.client.events.UIEvent;
@@ -65,10 +64,5 @@ public class GetEventFixtureRequest {
             throw new RuntimeException("Cannot find content");
         UIEvent uiEvent = new UIEvent(request.ec).fromResource(wrapper);
         Returns.returnObject(request.resp, uiEvent);
-
-//        String json = new Gson().toJson(uiEvent);
-//        request.resp.setContentType("application/json");
-//        request.resp.getOutputStream().write(json.getBytes());
-//        request.ok();
     }
 }

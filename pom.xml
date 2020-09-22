@@ -68,7 +68,7 @@
         <module>asbestos-codes-jaxb</module>
         <module>asbestos-xds-jaxb</module>
         <module>asbestos-mhd</module>
-        <module>asbestos-client</module>
+        <module>asbestos-proxy-support</module>
         <module>asbestos-utilities</module>
         <module>asbestos-test-engine</module>
         <module>service-properties</module>
