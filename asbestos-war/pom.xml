@@ -184,11 +184,11 @@
             <plugin>
                 <groupId>org.eclipse.jetty</groupId>
                 <artifactId>jetty-maven-plugin</artifactId>
-                <version>9.2.21.v20170120</version>   <!--      -->
+                <version>9.4.31.v20200723</version>   <!--  9.2.21.v20170120     -->
                 <configuration>
                     <scanIntervalSeconds>0</scanIntervalSeconds>
                     <contextHandlers>
-                        <contextHandler implementation="org.eclipse.jetty.webapp.WebAppContext">
+                        <contextHandler implementation="org.eclipse.jetty.maven.plugin.JettyWebAppContext">
                             <war>${project.build.directory}/${project.name}.war</war>
                             <contextPath>/asbestos</contextPath>
                         </contextHandler>
@@ -198,7 +198,8 @@
 <!--                        </contextHandler>-->
                     </contextHandlers>
                     <!-- Enter any systemProperties here. -->
-                    <jettyXml>${basedir}/src/test/etc/jetty.xml,${basedir}/src/test/etc/jetty-http.xml,${basedir}/src/test/etc/jetty-https.xml,${basedir}/src/test/etc/jetty-ssl.xml,${basedir}/src/test/etc/jetty-logging.xml</jettyXml>
+                    <jettyXml>${basedir}/src/test/etc/jetty.xml,${basedir}/src/test/etc/console-capture.xml,${basedir}/src/test/etc/jetty-http.xml,${basedir}/src/test/etc/jetty-ssl.xml,${basedir}/src/test/etc/jetty-https.xml</jettyXml>
+                    <!-- keystore is not used: ${basedir}/src/test/etc/jetty-ssl-context.xml -->
                     <stopKey>alpha</stopKey>
                     <stopPort>9099</stopPort>
                     <systemProperties>

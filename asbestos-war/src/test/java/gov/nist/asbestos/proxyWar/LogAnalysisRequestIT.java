@@ -43,7 +43,7 @@ public class LogAnalysisRequestIT {
     static URI base;
     static TestReport theReport;
     static String eventUrl;  // needs /request or /response appended before it points to a message
-    static String logBase = "http://localhost:8081/asbestos/log";
+    static String logBase = "http://localhost:"+ proxyPort +"/asbestos/log";
     static AnalysisBuilder analysisBuilder = new AnalysisBuilder();
 
     static String getTestSession() {
