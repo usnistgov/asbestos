@@ -32,7 +32,7 @@
 
   <filter>
     <filter-name>ChannelControlGuardFilter</filter-name>
-    <filter-class>gov.nist.asbestos.asbestosProxy.filter.ChannelControlGuardFilter</filter-class>
+    <filter-class>gov.nist.asbestos.services.filter.ChannelControlGuardFilter</filter-class>
   </filter>
 
   <filter-mapping>
@@ -52,7 +52,7 @@
 
   <servlet>
     <servlet-name>ProxyService</servlet-name>
-    <servlet-class>gov.nist.asbestos.asbestosProxy.servlet.ProxyServlet</servlet-class>
+    <servlet-class>gov.nist.asbestos.services.servlet.ProxyServlet</servlet-class>
     <init-param>
       <param-name>port</param-name>
       <param-value>8080</param-value>
@@ -63,40 +63,40 @@
 
   <servlet>
     <servlet-name>ChannelControl</servlet-name>
-    <servlet-class>gov.nist.asbestos.asbestosProxy.servlet.ChannelControlServlet</servlet-class>
+    <servlet-class>gov.nist.asbestos.services.servlet.ChannelControlServlet</servlet-class>
     <load-on-startup>2</load-on-startup>
   </servlet>
 
   <servlet>
     <servlet-name>logViewer</servlet-name>
-    <servlet-class>gov.nist.asbestos.asbestosProxy.servlet.ProxyLogServlet</servlet-class>
+    <servlet-class>gov.nist.asbestos.services.servlet.ProxyLogServlet</servlet-class>
   </servlet>
 
   <servlet>
     <servlet-name>validationService</servlet-name>
-    <servlet-class>gov.nist.asbestos.asbestosProxy.servlet.ValidationServlet</servlet-class>
+    <servlet-class>gov.nist.asbestos.services.servlet.ValidationServlet</servlet-class>
   </servlet>
 
   <servlet>
     <servlet-name>TestEngine</servlet-name>
-    <servlet-class>gov.nist.asbestos.asbestosProxy.servlet.TestEngineServlet</servlet-class>
+    <servlet-class>gov.nist.asbestos.services.servlet.TestEngineServlet</servlet-class>
     <load-on-startup>3</load-on-startup> <!-- must be started after ProxyService -->
   </servlet>
 
   <servlet>
     <servlet-name>TestInstaller</servlet-name>
-    <servlet-class>gov.nist.asbestos.asbestosProxy.servlet.TestInstallerServlet</servlet-class>
+    <servlet-class>gov.nist.asbestos.services.servlet.TestInstallerServlet</servlet-class>
     <load-on-startup>3</load-on-startup> <!-- must be started after ProxyService -->
   </servlet>
 
   <servlet>
     <servlet-name>StaticResource</servlet-name>
-    <servlet-class>gov.nist.asbestos.asbestosProxy.servlet.StaticResourceServlet</servlet-class>
+    <servlet-class>gov.nist.asbestos.services.servlet.StaticResourceServlet</servlet-class>
   </servlet>
 
   <servlet>
     <servlet-name>Gen500</servlet-name>
-    <servlet-class>gov.nist.asbestos.asbestosProxy.servlet.Gen500Servlet</servlet-class>
+    <servlet-class>gov.nist.asbestos.services.servlet.Gen500Servlet</servlet-class>
   </servlet>
 
   <servlet-mapping>

@@ -171,8 +171,7 @@ public class Ref {
     public static Map<String, String> parseParameters(String parms) {
         Map<String, String> map = new HashMap<>();
         String[] parts = parms.split("&");
-        for (int i = 0; i < parts.length; i++) {
-            String parm = parts[i];
+        for (String parm : parts) {
             List<String> namevalue = Arrays.asList(parm.split("=", 2));
             if (!namevalue.get(0).equals(""))
                 map.put(namevalue.get(0), namevalue.get(1));
@@ -229,8 +228,7 @@ public class Ref {
         if (theParts.length == 2)
             parms = theParts[1];
         String[] parts = parms.split("&");
-        for (int i = 0; i < parts.length; i++) {
-            String parm = parts[i];
+        for (String parm : parts) {
             List<String> namevalue = Arrays.asList(parm.split("=", 2));
             if (!namevalue.get(0).equals("")) {
                 try {
@@ -410,7 +408,8 @@ public class Ref {
             return -1;
         String[] parts = path.split("/");
         for (int i=0; i<parts.length; i++) {
-            if (resourceNames.contains(parts[i]))
+            String type = parts[i];
+            if (resourceNames.contains(type))
                 return i;
         }
         return -1;
@@ -427,7 +426,8 @@ public class Ref {
         String path = uri.getPath();
         List<String> parts = Arrays.asList(path.split("/"));
         for (int i=0; i<parts.size(); i++) {
-            if (resourceNames.contains(parts.get(i)))
+            String type = parts.get(i);
+            if (resourceNames.contains(type))
                 return new Ref(String.join("/", parts.subList(i, parts.size())));
         }
         return new Ref("");
@@ -469,8 +469,7 @@ public class Ref {
         String id = getId();
         String version = getVersion();
         String params = getParameters();
-        Ref newRef = new Ref(theBase, resourceType, id, version, params);//.httpizeTo(uri);
-        return newRef;
+        return new Ref(theBase, resourceType, id, version, params);//.httpizeTo(uri);
     }
 
     public Ref rebase(Ref newBase) {
@@ -519,8 +518,7 @@ public class Ref {
     public boolean isAbsolute() {
         if (uri == null) return false;
         if (uri.toString().startsWith("http")) return true;
-        if (uri.toString().startsWith("file")) return true;
-        return false;
+        return uri.toString().startsWith("file");
     }
 
     public boolean isRelative() {
@@ -547,8 +545,7 @@ public class Ref {
 
     public String urlEncode() {
         try {
-            String x = URLEncoder.encode(asString(), "utf-8");
-            return x;
+            return URLEncoder.encode(asString(), "utf-8");
         } catch (Exception e) {
             throw new RuntimeException("Cannot URL encode " + asString(), e);
         }

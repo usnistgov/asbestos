@@ -67,6 +67,7 @@
         <module>service-properties</module>
         <module>asbestos-analysis</module>
         <module>asbestos-debug-testscript</module>
+        <module>asbestos-rest-services</module>
     </modules>
 
     <dependencyManagement>
