@@ -2,25 +2,29 @@ package gov.nist.asbestos.client.debug;
 
 import org.apache.log4j.Logger;
 
+import javax.websocket.Session;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.atomic.AtomicBoolean;
-import javax.websocket.Session;
+import java.util.function.Consumer;
 
 public class TestScriptDebugState {
     private static final String STEP_OVER_BKPT = "stepOverBkpt";
     /**
      "/test0" =
      "/" = nested test script separator.
-     "test0" = This is the imported test header which has no UI representation: skip this.
+     "test0" = This is the imported test header which has no UI representation: skip this. If this was not skipped, there would be an extra layer in the index mapping.
     */
     private static final String IMPORTED_TEST_HEADER = "/test0";
     private Object lock;
     private AtomicBoolean resume;
     private AtomicBoolean stopDebug;
     private AtomicBoolean evaluateMode;
+    private AtomicBoolean evaluateForResourceMode;
+    private AtomicBoolean requestAnnotations;
     /**
      * Debug Instance
      */
@@ -35,7 +39,7 @@ public class TestScriptDebugState {
     private String currentExecutionIndex;
     private boolean hasImportExtension;
     private List<String> parentExecutionIndex = new ArrayList<>();
-    TestScriptDebugInterface debugInterface = null;
+    Consumer<Optional<String>> onStop;
 
     private static Logger log = Logger.getLogger(TestScriptDebugState.class);
 
@@ -46,6 +50,8 @@ public class TestScriptDebugState {
         this.resume = new AtomicBoolean();
         this.stopDebug = new AtomicBoolean();
         this.evaluateMode = new AtomicBoolean();
+        this.evaluateForResourceMode = new AtomicBoolean();
+        this.requestAnnotations = new AtomicBoolean();
         this.breakpointSet = breakpointSet;
         this.session = session;
         this.debugTestSessionId = debugTestSessionId;
@@ -102,7 +108,7 @@ public class TestScriptDebugState {
      * Reset Resume: will resume the normal program flow until the next breakpoint
      */
     public void cancelResumeMode() {
-       this.resume.set(false);
+        getResume().set(false);
     }
 
     /**
@@ -110,6 +116,14 @@ public class TestScriptDebugState {
      */
     public void resetEvalModeWasRequested() {
        this.evaluateMode.set(false);
+    }
+
+    public void resetEvalForResourceMode() {
+        this.evaluateForResourceMode.set(false);
+    }
+
+    public AtomicBoolean getDebugEvaluateForResourceMode() {
+        return evaluateForResourceMode;
     }
 
     public void sendStopped() {
@@ -128,32 +142,40 @@ public class TestScriptDebugState {
         }
     }
 
-    public void sendAssertionStr(String assertionJson) {
-        getSession().getAsyncRemote().sendText("{\"messageType\":\"original-assertion\", \"assertionJson\":" + assertionJson +"}");
+    public void sendAssertionStr(String assertionJson, String fieldSupportJson, String fixtureIdsJson) {
+        getSession().getAsyncRemote().sendText("{\"messageType\":\"original-assertion\" "
+                + ", \"fixtureIds\": " + fixtureIdsJson
+                + ((fieldSupportJson != null) ? ", \"fieldSupport\": " + fieldSupportJson : "")
+                + ", \"assertionJson\":" + assertionJson +"}");
     }
 
-    public void sendDebugAssertionEvalResultStr(String str, String markdownMessage) {
+    public void sendDebugAssertionEvalResultStr(String resultMessage, String markdownMessage, String exceptionPropKey) {
         String base64 = (markdownMessage != null && markdownMessage.length() > 0) ? Base64.getEncoder().encodeToString(markdownMessage.getBytes()) : "";
-        getSession().getAsyncRemote().sendText("{\"messageType\":\"eval-assertion-result\", \"resultMessage\":\"" + str +"\","
+        getSession().getAsyncRemote().sendText("{\"messageType\":\"eval-assertion-result\", "
+                + ((exceptionPropKey != null && exceptionPropKey != "")?"\"exceptionPropKey\": \"" + exceptionPropKey + "\",":"")
+                + " \"resultMessage\":\"" + resultMessage +"\","
                 + "\"markdownMessage\":\"" + base64 + "\"}");
     }
 
-    public void sendBreakpointHit(boolean isEvaluable) {
-        if (! hasInterface())
-            return;
-        String reportsAsJson = debugInterface.getLogAtBreakpoint();
-        String breakpointIndex = getCurrentExecutionIndex();
-        log.info("pausing at " + breakpointIndex);
-        getSession().getAsyncRemote().sendText(
-                "{\"messageType\":\"breakpoint-hit\""
-                        + ",\"testScriptIndex\":\"" + getTestScriptIndex() + "\""
-                        + ",\"breakpointIndex\":\"" + breakpointIndex + "\""
-                        + ",\"debugButtonLabel\":\"Resume\""
-                        + ",\"isEvaluable\":\""+ isEvaluable +"\""
-                        + ",\"testReport\":" + reportsAsJson  + "}"); // getModularEngine().reportsAsJson()
-
+    public void sendEvalForResourcesResult(String resultMessage, String markdownMessage, String exceptionPropKey, String resourceList) {
+        String base64 = (markdownMessage != null && markdownMessage.length() > 0) ? Base64.getEncoder().encodeToString(markdownMessage.getBytes()) : "";
+        getSession().getAsyncRemote().sendText("{\"messageType\":\"eval-for-resources-result\", "
+                + ((exceptionPropKey != null && exceptionPropKey != "")?"\"exceptionPropKey\": \"" + exceptionPropKey + "\",":"")
+                + " \"resultMessage\":\"" + resultMessage +"\","
+                + "\"markdownMessage\":\"" + base64 + "\""
+                + ", \"resourceList\": [" +  resourceList + "]"
+                + "}");
     }
 
+
+
+    /**
+     *
+     * @param parentType
+     * @param parentIndex
+     * @param childPartIndex
+     * @return ParentTypeParentIndex.ChildPartIndex
+     */
     public static String getBreakpointIndex(String parentType, Integer parentIndex, Integer childPartIndex) {
         String breakpointIndex = String.format("%s%d", parentType, parentIndex);
         if (childPartIndex != null) {
@@ -185,36 +207,21 @@ public class TestScriptDebugState {
         return false;
     }
 
-    private boolean isWait() {
+    public boolean isWait() {
         boolean isWait = ! getStopDebug().get();
         isWait = isWait && ! getResume().get();
         isWait = isWait && ! getDebugEvaluateModeWasRequested().get();
+        isWait = isWait && ! getDebugEvaluateForResourceMode().get();
 
         return isWait;
     }
 
 
-    public void waitOnBreakpoint() {
-        cancelResumeMode();
 
-        synchronized (getLock()) {
-            while (isWait()) { // Condition must be false to exit the wait and to protect from spurious wake-ups
-                try {
-                    getLock().wait(); // Release the lock and wait for getResume to be True
-                } catch (InterruptedException ie) {
-                }
-            }
-            if (getResume().get()) {
-                log.info("Resuming " +  getSession().getId());
-            } else if (getStopDebug().get()) {
-//                throw new Error("KILL session: " + getSession().getId()); // This needs to throw a custom exception that does not show up in the test report
-                throw new StopDebugTestScriptException("STOP debug session: " + getSession().getId());
-            } else if (getDebugEvaluateModeWasRequested().get()) {
-                log.info("Eval mode is true.");
-            }
-        }
-    }
-
+    /**
+     * A string is returned in this format: ParentTypeParentIndex.ChildPartIndex
+     * @return
+     */
     public String getCurrentExecutionIndex() {
         if (parentExecutionIndex != null) {
             String parentIndex = String.join("/", parentExecutionIndex);
@@ -239,28 +246,6 @@ public class TestScriptDebugState {
        return parentExecutionIndex.remove(parentExecutionIndex.size()-1);
     }
 
-    public boolean hasInterface() {
-        return debugInterface != null;
-    }
-
-    public void pauseIfBreakpoint() {
-        boolean isBreakpoint = isBreakpoint();
-        if (isBreakpoint) {
-            if (hasInterface()) {
-                debugInterface.onBreakpoint();
-                sendBreakpointHit(false);
-                waitOnBreakpoint();
-            }
-        }
-    }
-
-    public TestScriptDebugInterface getDebugInterface() {
-        return debugInterface;
-    }
-
-    public void setDebugInterface(TestScriptDebugInterface debugInterface) {
-        this.debugInterface = debugInterface;
-    }
 
 
     public static void sendDebuggingTestScriptIndexes(Session session, String indexes) {
@@ -283,5 +268,25 @@ public class TestScriptDebugState {
 
     public boolean hasParentExecutionIndex() {
         return this.parentExecutionIndex.size() > 0;
+    }
+
+    public Consumer<Optional<String>> getOnStop() {
+        return onStop;
+    }
+
+    public void setOnStop(Consumer<Optional<String>> onStop) {
+        this.onStop = onStop;
+    }
+
+    public static String quoteString(String myValue) {
+        return "\"" + myValue + "\"";
+    }
+
+    public AtomicBoolean getRequestAnnotations() {
+        return requestAnnotations;
+    }
+
+    public void setRequestAnnotations(AtomicBoolean requestAnnotations) {
+        this.requestAnnotations = requestAnnotations;
     }
 }

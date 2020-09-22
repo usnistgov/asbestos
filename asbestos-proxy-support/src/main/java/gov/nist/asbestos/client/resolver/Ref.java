@@ -604,11 +604,6 @@ public class Ref {
         return anchor != null;
     }
 
-    static public List<String> getResourceNames() {
-        return resourceNames;
-    }
-
-
     static public void setEC(EC ec) {
         externalCache = ec;
     }
@@ -772,4 +767,7 @@ public class Ref {
         resourceNames = rawResourceNames;
     }
 
+    public static List<String> getResourceNames() {
+        return resourceNames;
+    }
 }

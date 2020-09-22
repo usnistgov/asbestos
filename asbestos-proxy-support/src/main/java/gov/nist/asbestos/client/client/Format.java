@@ -52,4 +52,7 @@ public enum Format {
         return content.trim().startsWith("<") ? XML : JSON;
     }
 
+    public static List<String> getFormats() {
+        return formats;
+    }
 }

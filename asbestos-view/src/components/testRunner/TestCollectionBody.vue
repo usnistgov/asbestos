@@ -34,15 +34,17 @@
 
                     <script-status v-if="!statusRight" :status-right="statusRight" :name="name"> </script-status>
 
-                    <template v-if="isDebugFeatureEnabled">
-                        <template v-if="isPreviousDebuggerStillAttached(i)">
-                            <span class="breakpointColumnHeader" title="A debugger is running for this TestScript.">&#x1F41E;</span> <!-- lady beetle icon -->
-                        </template>
-                        <template v-else-if="$store.state.testRunner.currentTest === name && ! isDebuggable(i) && ! isResumable(i)">
-                            <span class="breakpointColumnHeader infoIcon" title="Add at least one breakpoint in the column below to enable debugging.">&nbsp;&#x2139;</span> <!-- the "i" Information icon -->
-                        </template>
-                        <template v-else-if="$store.state.testRunner.currentTest === name && (isDebuggable(i) || isResumable(i))">
-                            <span class="breakpointColumnHeader clickableColumnHeader" title="Clear all breakpoints." @click.stop="removeAllBreakpoints(i)">&#x1F191;</span> <!-- the "i" Information icon -->
+                    <template v-if="! isClient">
+                        <template v-if="isDebugFeatureEnabled">
+                            <template v-if="isPreviousDebuggerStillAttached(i)">
+                                <span class="breakpointColumnHeader" title="A debugger is running for this TestScript.">&#x1F41E;</span> <!-- lady beetle icon -->
+                            </template>
+                            <template v-else-if="$store.state.testRunner.currentTest === name && ! isDebuggable(i) && ! isResumable(i)">
+                                <span class="breakpointColumnHeader infoIcon" title="Add at least one breakpoint in the column below to enable debugging.">&nbsp;&#x2139;</span> <!-- the "i" Information icon -->
+                            </template>
+                            <template v-else-if="$store.state.testRunner.currentTest === name && (isDebuggable(i) || isResumable(i))">
+                                <span class="breakpointColumnHeader clickableColumnHeader" title="Clear all breakpoints." @click.stop="removeAllBreakpoints(i)">&#x1F191;</span> <!-- the "i" Information icon -->
+                            </template>
                         </template>
                     </template>
 
@@ -64,7 +66,7 @@
                                         class="stopDebugTestScriptButton">Remove Debugger</button>
                             </template>
                             <template v-else>
-                                <button v-if="! isResumable(i) && ! isWaitingForBreakpoint" @click.stop="doRun(name)" class="runallbutton">Run</button>
+                                <button v-if="! isResumable(i) && ! isWaitingForBreakpoint" @click.stop="doRun(name, testRoutePath)" class="runallbutton">Run</button>
                                 <template v-if="$store.state.testRunner.currentTest === name">
                                     <button v-if="isDebuggable(i) && ! isWaitingForBreakpoint"
                                             @click.stop="doDebug(name)"
@@ -95,11 +97,11 @@
                             </template>
                     </span>
                     <span v-else>
-                          <button @click.stop="doRun(name)" class="runallbutton">Run</button>
+                          <button @click.stop="doRun(name, testRoutePath)" class="runallbutton">Run</button>
                     </span>
                     <span v-if="! isWaitingForBreakpoint && ! $store.state.testRunner.isClientTest"> --  {{ testTime(name) }}</span>
                 </div>
-                <debug-assertion-eval v-if="isDebugFeatureEnabled && isEvaluableAction(i)" :show="$store.state.debugAssertionEval.showModal" @close="closeModal()" @resume="doDebug(name)"></debug-assertion-eval>
+                <debug-assertion-eval-modal v-if="isDebugFeatureEnabled && isEvaluableAction(i)" :show="$store.state.debugAssertionEval.showEvalModalDialog" @close="closeModal()" @resume="doDebug(name)"></debug-assertion-eval-modal>
                 <router-view v-if="selected === name"></router-view>  <!--  opens TestOrEvalDetails   -->
             </div>
         </div>
@@ -111,13 +113,21 @@
     import colorizeTestReports from "../../mixins/colorizeTestReports";
     import debugTestScriptMixin from "../../mixins/debugTestScript";
     import ScriptStatus from "./ScriptStatus";
-    import DebugAssertionEval from "./debugger/DebugAssertionEval";
+    import DebugAssertionEvalModal from "./debugger/DebugAssertionEvalModal";
 
     export default {
         methods: {
             load() {
+                /*
+                 All tests details will be collapsed when loaded.
+                 The following setCurrentTest to null will reset the expanded arrow indicator
+                 otherwise the arrow indicator is incorrect when navigating out of the test collection and back into to the same test collection after a test was previously opened.
+                 */
+                this.$store.commit('setCurrentTest', null)
                 this.loadTestCollection(this.testCollection)
-                this.$store.dispatch('debugMgmt', {'cmd':'getExistingDebuggerList'})
+                if (! this.isClient) {
+                    this.$store.dispatch('debugMgmt', {'cmd': 'getExistingDebuggerList'})
+                }
             },
             openTest(name) {
                 if (!name)
@@ -129,13 +139,17 @@
                     return
                 }
                 this.$store.commit('setCurrentTest', name)
-                const route = `/session/${this.sessionId}/channel/${this.channelId}/collection/${this.testCollection}/test/${name}`
-                this.$router.push(route)
+                const selectedRoutePath = `${this.testRoutePath}/${this.selected}`
+                this.$router.push(selectedRoutePath)
             },
         },
         computed: {
             selected() {
                 return this.$store.state.testRunner.currentTest
+            },
+            testRoutePath() {
+                const route = `/session/${this.sessionId}/channel/${this.channelId}/collection/${this.testCollection}/test`
+                return route
             },
         },
         created() {
@@ -157,7 +171,7 @@
         ],
         components: {
             ScriptStatus,
-            DebugAssertionEval
+            DebugAssertionEvalModal
         }
     }
 </script>
@@ -177,7 +191,7 @@
     }
     .infoIcon {
         width: 14px;
-       border: blue 1px solid;
+       border: lightgray 1px solid;
     }
     .clickableColumnHeader {
         cursor: pointer;
@@ -196,7 +210,7 @@
     .debugFeatureOptionButton {
         margin-left: 7px;
         border-radius: 3px;
-        background-color: #FFC83D;
-       font-size: x-small;
+        background-color: lavender; /* #FFC83D; */
+        font-size: x-small;
     }
 </style>

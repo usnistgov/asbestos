@@ -116,8 +116,12 @@ public class DebugTestScriptWebSocketEndpoint {
                     TestScriptDebugState debugState = debugStateMap.get(realSessionId.get().getWsSessionId());
                     if (debugState != null) {
                         stopDebuggingTs(debugState);
-                        debugState.getSession().close(new CloseReason(CloseReason.CloseCodes.CLOSED_ABNORMALLY, "Remove debug session requested by test session user"));
-                        sendExistingDebuggerList(session, myMap); // Return an updated debugger list
+                        debugState.setOnStop(s -> sendExistingDebuggerList(session, myMap)); // Return an updated debugger list
+                        if (debugState.getSession().isOpen()) {
+                            debugState.getSession().close(new CloseReason(CloseReason.CloseCodes.CLOSED_ABNORMALLY, "Remove debug session requested by test session user"));
+                        } else {
+                            removeFromStateTracking(debugState);
+                        }
                     } else {
                         log.error("removeDebugger error: debugState could not be found!");
                     }
@@ -127,42 +131,55 @@ public class DebugTestScriptWebSocketEndpoint {
             return;
         }
 
-
         TestScriptDebugState state = debugStateMap.get(session.getId());
-        if (state == null) {
-            log.error("debugState was not established.");
-            return;
-        }
-
-
-        if (cmd.equals("beginDebug")) {
-            String uriString = (String) myMap.get("uri");
-            if (uriString != null) {
-                if (myMap.get("breakpointList") != null) {
-                    List<String> myList = (List<String>) myMap.get("breakpointList");
-//                        String testScriptIndex = (String) myMap.get("testScriptIndex");
-                    state.getBreakpointSet().addAll(myList);
-                    startDebuggerThread(state, uriString);
-                } else {
-                    String exception = "breakpointList is empty.";
-                    log.error(exception);
-                    throw new RuntimeException(exception);
-                }
+        try {
+            if (state == null) {
+                log.error("debugState was not established.");
+                return;
             }
-        } else if (cmd.equals("resumeBreakpoint")) {
-            List<String> updateList = (List<String>) myMap.get("breakpointList");
-            doResumeBreakpoint(state, updateList);
-        } else if (cmd.equals("stopDebug")) {
-            stopDebuggingTs(state);
-        } else if (cmd.equals("requestOriginalAssertion")) {
-            doRequestOriginalAssertion(state);
-        } else if (cmd.equals("debugEvalAssertion")) {
-            String base64String = (String)myMap.get("base64String");
-            doDebugEvaluate(state, base64String);
+
+            if (cmd.equals("beginDebug")) {
+                String uriString = (String) myMap.get("uri");
+                if (uriString != null) {
+                    if (myMap.get("breakpointList") != null) {
+                        List<String> myList = (List<String>) myMap.get("breakpointList");
+//                        String testScriptIndex = (String) myMap.get("testScriptIndex");
+                        state.getBreakpointSet().addAll(myList);
+                        startDebuggerThread(state, uriString);
+                    } else {
+                        String exception = "breakpointList is empty.";
+                        log.error(exception);
+                        throw new RuntimeException(exception);
+                    }
+                }
+            } else if (cmd.equals("resumeBreakpoint")) {
+                List<String> updateList = (List<String>) myMap.get("breakpointList");
+                doResumeBreakpoint(state, updateList);
+            } else if (cmd.equals("stopDebug")) {
+                stopDebuggingTs(state);
+            } else if (cmd.equals("requestAllParameters")) {
+                String requestAnnotationsStr = (String)myMap.get("requestAnnotations");
+                boolean isRequestAnnotations = Boolean.parseBoolean(requestAnnotationsStr);
+                doRequestAllParameters(state, isRequestAnnotations);
+            } else if (cmd.equals("debugEvalAssertion")) {
+                String base64String = (String)myMap.get("base64String");
+                doDebugEvaluate(state, base64String);
+            } else if (cmd.equals("debugEvalForResources")) {
+                String base64String = (String)myMap.get("base64String");
+                doDebugEvaluateForResource(state, base64String);
+            }
+
+            // else if stepOver
+            // else if Restart
+
+        } catch (Exception ex) {
+            if (state.isWait()) {
+                stopDebuggingTs(state);
+            } else {
+               removeFromStateTracking(state);
+            }
         }
 
-        // else if stepOver
-        // else if Restart
     }
 
     private void sendExistingDebuggerList(Session session, Map<String, Object> myMap) {
@@ -175,7 +192,8 @@ public class DebugTestScriptWebSocketEndpoint {
                 List<String> myList =
                     scriptIds
                         .stream()
-                        .map(DebugWsSessionId::getQuotedIdentifier)
+                        .map(DebugWsSessionId::getTestScriptIndex)
+                        .map(TestScriptDebugState::quoteString)
                         .collect(Collectors.toList());
                 String myString = String.join(",", myList);
                 TestScriptDebugState.sendDebuggingTestScriptIndexes(session, myString);
@@ -193,28 +211,44 @@ public class DebugTestScriptWebSocketEndpoint {
 
         if (debugStateMap.containsKey(sessionId)) {
             ExecutorService service = debugExecutorMap.get(sessionId);
-            if (debugStateMap.get(sessionId).getStopDebug().get()) {
-                try {
-                    service.awaitTermination(5, TimeUnit.SECONDS);
-                } catch (Throwable t) {
-                } finally {
-                    log.info(String.format("Session %s was terminated: %s", sessionId, service.isTerminated()));
-
+            if (service == null) {
+                log.info(String.format("Service is null for for sessionId: %s", sessionId));
+            }
+            TestScriptDebugState debugState = debugStateMap.get(sessionId);
+            if (debugState != null) {
+                if (debugState.getStopDebug().get()) {
+                    try {
+                        service.awaitTermination(5, TimeUnit.SECONDS);
+                    } catch (Throwable t) {
+                    } finally {
+                      log.info(String.format("Session %s was terminated: %s", sessionId, service.isTerminated()));
+                    }
+                }
+                if (service != null) {
+                    log.info("is service terminated? " + service.isTerminated() + ". is shutdown? " + service.isShutdown());
+                    if (service.isTerminated()) {
+                        removeFromStateTracking(debugState);
+                    }
                 }
             }
+        }
+    }
 
-            log.info("is service terminated? " + service.isTerminated() + ". is shutdown? " + service.isShutdown());
-            if (service.isTerminated()) {
-                TestScriptDebugState state = debugStateMap.get(sessionId);
-                String testScriptIndex = state.getTestScriptIndex();
-                DebugTestSessionId instanceId = state.getDebugTestSessionId();
-                DebugWsSessionId wsSessionId = new DebugWsSessionId(sessionId, testScriptIndex);
+    private void removeFromStateTracking(TestScriptDebugState debugState) {
+        try {
+            String sessionId = debugState.getSessionId();
+            String testScriptIndex = debugState.getTestScriptIndex();
+            DebugTestSessionId instanceId = debugState.getDebugTestSessionId();
+            DebugWsSessionId wsSessionId = new DebugWsSessionId(sessionId, testScriptIndex);
 
-                instanceMap.get(instanceId).remove(wsSessionId);
-                debugExecutorMap.remove(sessionId);
-                debugStateMap.remove(sessionId);
+            instanceMap.get(instanceId).remove(wsSessionId);
+            if (debugState.getOnStop() != null) {
+                debugState.getOnStop().accept(Optional.empty());
             }
-
+            debugExecutorMap.remove(sessionId);
+            debugStateMap.remove(sessionId);
+        } catch (Exception ex) {
+            log.error("removeFromStateTracking: " + ex.toString());
         }
     }
 
@@ -251,9 +285,10 @@ public class DebugTestScriptWebSocketEndpoint {
         }
     }
 
-    private void doRequestOriginalAssertion(TestScriptDebugState state) {
+    private void doRequestAllParameters(TestScriptDebugState state, boolean requestAnnotations) {
         synchronized (state.getLock()) {
             state.resetEvalJsonString();
+            state.getRequestAnnotations().set(requestAnnotations);
             state.getDebugEvaluateModeWasRequested().set(true);
             state.getLock().notify();
         }
@@ -268,6 +303,17 @@ public class DebugTestScriptWebSocketEndpoint {
             }
         }
     }
+
+    private void doDebugEvaluateForResource(TestScriptDebugState state, String base64String) {
+        if (base64String != null) {
+            state.setEvalJsonString(new String(Base64.getDecoder().decode(base64String)));
+            synchronized (state.getLock()) {
+                state.getDebugEvaluateForResourceMode().set(true);
+                state.getLock().notify();
+            }
+        }
+    }
+
 
 
     /**

@@ -116,6 +116,23 @@ export const testRunnerStore = {
             state.testReports = {}
             state.moduleTestReports = {}
         },
+        clearTestReport(state, testNameToRemove) {
+            if (state.testReports !== null && state.testReports !== undefined && Array.isArray(state.testReports) && state.testReports.length > 0) {
+                for (let testName in state.testReports) {
+                    const report = state.testReports[testName]
+                    if (report && report.resourceType === 'TestReport') {
+                        if (testName === testNameToRemove) {
+                            state.testReports.splice(testName, 1)
+                            for (let moduleName in state.moduleTestReports) {
+                               if (moduleName.startsWith(testNameToRemove + '/'))  {
+                                   state.moduleTestReports.splice(moduleName, 1)
+                               }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         setTestReport(state, report) {
             Vue.set(state.testReports, report.name, report)
         },

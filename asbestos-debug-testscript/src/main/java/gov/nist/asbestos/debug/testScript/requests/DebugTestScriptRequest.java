@@ -94,9 +94,10 @@ public class DebugTestScriptRequest implements Runnable {
         TestReport report;
         ModularEngine modularEngine = null;
         try {
-            modularEngine = new ModularEngine(testDir, proxy, state).setSaveLogs(true);
-            report = modularEngine
+            modularEngine = new ModularEngine(testDir, proxy, state);
+            modularEngine
                     //.getLastTestEngine()
+                    .setSaveLogs(true)
                     .setTestSession(testSession)
                     .setChannelId(channelId)
                     .setExternalCache(request.externalCache)
@@ -105,9 +106,7 @@ public class DebugTestScriptRequest implements Runnable {
                     .setTestCollection(testCollection)
                     .addCache(patientCacheDir)
                     .addCache(alternatePatientCacheDir)
-                    .runTest()
-                    .getTestReport();
-
+                    .runTest();
         }
         catch (StopDebugTestScriptException sdex) {
             log.info("caught StopDebug...");

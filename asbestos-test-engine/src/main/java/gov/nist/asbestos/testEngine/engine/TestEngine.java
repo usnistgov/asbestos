@@ -1,17 +1,16 @@
 package gov.nist.asbestos.testEngine.engine;
 
 import ca.uhn.fhir.parser.IParser;
-import com.google.gson.Gson;
 import gov.nist.asbestos.client.Base.EC;
 import gov.nist.asbestos.client.Base.ParserBase;
 import gov.nist.asbestos.client.client.FhirClient;
 import gov.nist.asbestos.client.client.Format;
-import gov.nist.asbestos.client.resolver.Ref;
-import gov.nist.asbestos.client.resolver.ResourceCacheMgr;
-import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import gov.nist.asbestos.client.debug.StopDebugTestScriptException;
 import gov.nist.asbestos.client.debug.TestScriptDebugInterface;
 import gov.nist.asbestos.client.debug.TestScriptDebugState;
+import gov.nist.asbestos.client.resolver.Ref;
+import gov.nist.asbestos.client.resolver.ResourceCacheMgr;
+import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import gov.nist.asbestos.simapi.validation.Val;
 import gov.nist.asbestos.simapi.validation.ValE;
 import gov.nist.asbestos.testEngine.engine.fixture.FixtureComponent;
@@ -23,10 +22,17 @@ import gov.nist.asbestos.testEngine.engine.translator.Parameter;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.log4j.Logger;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.Extension;
+import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.StringType;
+import org.hl7.fhir.r4.model.TestReport;
+import org.hl7.fhir.r4.model.TestScript;
 
-
-import java.io.*;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -70,10 +76,7 @@ public class TestEngine  implements TestDef {
     private Map<String, String> callFixtureMap = new HashMap<>();
     private Map<String, String> callVariableMap = new HashMap<>();
     private Map<String, String> externalVariables = new HashMap<>();
-    /**
-     * If testScriptDebugState is null, then TestScript is being run normally. ie., TestScript is not being debugged.
-     */
-    private TestScriptDebugState testScriptDebugState;
+    private TestScriptDebugInterface debugger = null;
 
     /**
      *
@@ -157,7 +160,7 @@ public class TestEngine  implements TestDef {
             doWorkflow();
         }
         catch (StopDebugTestScriptException sdex) {
-            if (testScriptDebugState.hasParentExecutionIndex())
+            if (debugger.getState().hasParentExecutionIndex())
                 throw sdex;
         }
         catch (Throwable t) {
@@ -649,7 +652,8 @@ public class TestEngine  implements TestDef {
     private void doSetup() {
         boolean reportAsConditional = false;  // upgrade this when conditional execution comes to setup
         if (testScript.hasSetup()) {
-            ifDebuggingPauseIfBreakpoint("setup", 0); // There is only one TestScript.Setup so parent index is always 0
+           if (hasDebugger())
+                getDebugger().pauseIfBreakpoint("setup", 0); // There is only one TestScript.Setup so parent index is always 0
             TestScript.TestScriptSetupComponent comp = testScript.getSetup();
             ValE fVal = new ValE(engineVal).setMsg("Setup");
             TestReport.TestReportSetupComponent setupReportComponent = testReport.getSetup();
@@ -669,7 +673,8 @@ public class TestEngine  implements TestDef {
                                 isFollowedByAssert = true;
                         }
 
-                        ifDebuggingPauseIfBreakpoint("setup", 0, actionIndex, hasImportModifierExtension(action.getOperation()));
+                        if (hasDebugger())
+                            getDebugger().pauseIfBreakpoint("setup", 0, actionIndex, hasImportModifierExtension(action.getOperation()));
                         doOperation(new ActionReference(testScript, action), typePrefix, action.getOperation(), actionReportComponent.getOperation(), isFollowedByAssert);
                         TestReport.SetupActionOperationComponent opReport = actionReportComponent.getOperation();
                         if (opReport.getResult() == TestReport.TestReportActionResult.ERROR) {
@@ -679,7 +684,8 @@ public class TestEngine  implements TestDef {
                         }
                     }
                     if (action.hasAssert()) {
-                        ifDebuggingPauseIfBreakpoint("setup", 0, action.getAssert(), actionIndex);
+                        if (hasDebugger())
+                            getDebugger().pauseIfBreakpoint("setup", 0, action.getAssert(), actionIndex);
                         TestReport.SetupActionAssertComponent actionReport = actionReportComponent.getAssert();
                         doAssert(typePrefix, action.getAssert(), actionReport);
                         if (actionReport == null)
@@ -745,7 +751,7 @@ public class TestEngine  implements TestDef {
         }
     }
 
-    private void doAssert(String typePrefix, TestScript.SetupActionAssertComponent theAssert, TestReport.SetupActionAssertComponent report) {
+    void doAssert(String typePrefix, TestScript.SetupActionAssertComponent theAssert, TestReport.SetupActionAssertComponent report) {
         try {
             ValE vale = new ValE(val);
             AssertionRunner runner = new AssertionRunner(fixtureMgr)
@@ -779,7 +785,8 @@ public class TestEngine  implements TestDef {
                 int testCounter = 1;
                 for (TestScript.TestScriptTestComponent test : testScript.getTest()) {
                     int testIndex = testScript.getTest().indexOf(test);
-                    ifDebuggingPauseIfBreakpoint("test", testIndex);
+                    if (hasDebugger())
+                        getDebugger().pauseIfBreakpoint("test", testIndex);
                     // if noErrors extension present and script has already hit an error then bail out
                     // and don't run actions in this test
                     if (getExtension(test.getModifierExtension(), ExtensionDef.noErrors) != null) {
@@ -930,8 +937,8 @@ public class TestEngine  implements TestDef {
         /*
             Call module
          */
-        if (hasDebugState())
-            testScriptDebugState.pushParentExecutionIndex();
+        if (hasDebugger())
+            getDebugger().getState().pushParentExecutionIndex();
 
         TestEngine testEngine1 = sut == null
                 ? new TestEngine(componentReference.getComponentRef())
@@ -947,12 +954,23 @@ public class TestEngine  implements TestDef {
                 .setChannelId(channelId)
                 .setTestCollection(testCollection)
                 .setTestId(testId)
-                .setTestScriptDebugState(this.testScriptDebugState)
                 .setCallFixtureMap(fixtureNameMap)
                 .setCallVariableMap(variableNameMap)
                 ;
+        if (hasDebugger()) {
+            testEngine1.setTestScriptDebugState(getDebugger().getState());
+        }
         modularEngine.add(testEngine1);
         testEngine1.parent = this;
+
+        String moduleName = simpleName(componentReference.getComponentRef());
+        String moduleId = assignModuleId(moduleName);
+        opReport.addModifierExtension(new Extension(ExtensionDef.moduleId, new StringType(moduleId)));
+        opReport.addModifierExtension(new Extension(ExtensionDef.moduleName, new StringType(moduleName)));
+        opReport.setResult(TestReport.TestReportActionResult.PASS); // may be overwritten
+        testEngine1.getTestReport().addExtension(ExtensionDef.moduleId, new StringType(moduleId));
+        testEngine1.getTestReport().addExtension(ExtensionDef.moduleName, new StringType(moduleName));
+
         try {
             testEngine1.runTest();
         } catch (StopDebugTestScriptException sdex) {
@@ -965,15 +983,8 @@ public class TestEngine  implements TestDef {
             moduleId is the same name with a numeric suffix to make this call unique.
             The module call is identified as moduleName/moduleId in the logs
          */
-        if (hasDebugState())
-            testScriptDebugState.popParentExecutionIndex();
-
-        String moduleName = simpleName(componentReference.getComponentRef());
-        String moduleId = assignModuleId(moduleName);
-        opReport.addModifierExtension(new Extension(ExtensionDef.moduleId, new StringType(moduleId)));
-        opReport.addModifierExtension(new Extension(ExtensionDef.moduleName, new StringType(moduleName)));
-        testEngine1.getTestReport().addExtension(ExtensionDef.moduleId, new StringType(moduleId));
-        testEngine1.getTestReport().addExtension(ExtensionDef.moduleName, new StringType(moduleName));
+        if (hasDebugger())
+            getDebugger().getState().popParentExecutionIndex();
 
         // Report overall module call status into caller's TestReport.operation
         ErrorReport errorReport = getErrorMessage(testEngine1.getTestReport());
@@ -1173,7 +1184,8 @@ public class TestEngine  implements TestDef {
                         if (nextAction.hasAssert())
                             isFollowedByAssert = true;
                     }
-                    ifDebuggingPauseIfBreakpoint("test", testIndex, testPartIndex, hasImportModifierExtension(action.getOperation()));
+                    if (hasDebugger())
+                        getDebugger().pauseIfBreakpoint("test", testIndex, testPartIndex, hasImportModifierExtension(action.getOperation()));
                     TestReport.SetupActionOperationComponent reportOp = actionReportComponent.getOperation();
                     doOperation(new ActionReference(testScript, action), typePrefix, action.getOperation(), reportOp, isFollowedByAssert);
                     TestReport.SetupActionOperationComponent opReport = actionReportComponent.getOperation();
@@ -1200,7 +1212,8 @@ public class TestEngine  implements TestDef {
                 }
                 if (action.hasAssert()) {
                     TestScript.SetupActionAssertComponent assertComponent = action.getAssert();
-                    ifDebuggingPauseIfBreakpoint("test", testIndex, assertComponent, testPartIndex);
+                    if (hasDebugger())
+                        getDebugger().pauseIfBreakpoint("test", testIndex, assertComponent, testPartIndex);
                     TestReport.SetupActionAssertComponent actionReport = actionReportComponent.getAssert();
                     doAssert(typePrefix, assertComponent, actionReport);
                     if (actionReport == null)
@@ -1584,42 +1597,13 @@ public class TestEngine  implements TestDef {
         return parts[1];
     }
 
-    // used for debugging
+    /**
+     *
+     * Required if debugging a test script through this test engine
+    */
     public TestEngine setTestScriptDebugState(TestScriptDebugState state) {
-        this.testScriptDebugState = state;
         if (state != null) {
-            this.testScriptDebugState.setDebugInterface(new TestScriptDebugInterface() {
-                public ModularEngine getMyModularEngine() {
-                    ModularEngine me = getModularEngine();
-                    if (me == null) {
-                        if (parent != null && parent.getModularEngine() !=null) {
-                            me = parent.getModularEngine();
-                        }
-                    }
-                    return me;
-                }
-                @Override
-                public void onBreakpoint() {
-                    ModularEngine me = this.getMyModularEngine();
-                    if (me != null) {
-                        me.saveLogs(); // Without this getTestReportsAsJson is empty
-                    } else {
-                        log.error("getModularEngine is null: log cannot be saved!");
-                    }
-                }
-
-                @Override
-                public String getLogAtBreakpoint() {
-                    ModularEngine me = this.getMyModularEngine();
-                    if (me != null) {
-                        return me.reportsAsJson();
-                    } else {
-                        log.error("getModularEngine is null!");
-                        testScriptDebugState.sendUnexpectedError();
-                        return "";
-                    }
-                }
-            });
+            this.debugger = new TestScriptDebugger(this, state);
         }
         return this;
     }
@@ -1629,84 +1613,6 @@ public class TestEngine  implements TestDef {
         return sut;
     }
 
-    public boolean hasDebugState() {
-        return testScriptDebugState != null;
-    }
-
-    private void ifDebuggingPauseIfBreakpoint(final String parentType, final Integer parentIndex, final TestScript.SetupActionAssertComponent assertComponent, final Integer childPartIndex) {
-        if (! hasDebugState()) {
-           return;
-        }
-           testScriptDebugState.setCurrentExecutionIndex(parentType, parentIndex, childPartIndex);
-
-            boolean isBreakpoint = testScriptDebugState.isBreakpoint();
-            if (isBreakpoint) {
-                testScriptDebugState.getDebugInterface().onBreakpoint();
-                testScriptDebugState.sendBreakpointHit(true);
-                do {
-                    // Must pause first before Eval
-                    testScriptDebugState.waitOnBreakpoint(); // if eval, exit pause
-                    if (testScriptDebugState.getDebugEvaluateModeWasRequested().get()) { // Only assertion-eval is supported for now. Need to address Operations later
-                        testScriptDebugState.resetEvalModeWasRequested();
-                        String evalJsonString = testScriptDebugState.getEvalJsonString();
-                        if (evalJsonString == null) {
-                            // If evalJsonString is empty, Send original assertion as a template for the user to edit an assertion
-                            String assertionJsonStr = new Gson().toJson(assertComponent);
-                            testScriptDebugState.sendAssertionStr(assertionJsonStr);
-                        } else {
-                            // Eval
-                            Map<String, String> myMap = new Gson().fromJson(evalJsonString, Map.class);
-                            TestScript.SetupActionAssertComponent copy = assertComponent.copy();
-                            copy.setLabel(myMap.get("label"));
-                            copy.setDescription(myMap.get("description"));
-                            copy.setDirection(TestScript.AssertionDirectionType.fromCode(myMap.get("direction")));
-                            copy.setCompareToSourceId(myMap.get("compareToSourceId"));
-                            copy.setCompareToSourceExpression(myMap.get("compareToSourceExpression"));
-                            copy.setCompareToSourcePath(myMap.get("compareToSourcePath"));
-                            copy.setContentType(myMap.get("contentType"));
-                            copy.setExpression(myMap.get("expression"));
-                            copy.setHeaderField(myMap.get("headerField"));
-                            copy.setMinimumId(myMap.get("minimumId"));
-                            copy.setNavigationLinks(new Boolean(myMap.get("navigationLinks")).booleanValue());
-                            copy.setOperator(TestScript.AssertionOperatorType.fromCode(myMap.get("operator")));
-                            copy.setPath(myMap.get("path"));
-                            copy.setRequestMethod(TestScript.TestScriptRequestMethodCode.fromCode(myMap.get("requestMethod")));
-                            copy.setRequestURL(myMap.get("requestURL"));
-                            copy.setResource(myMap.get("resource"));
-                            copy.setResponse(TestScript.AssertionResponseTypes.fromCode(myMap.get("response")));
-                            copy.setResponseCode(myMap.get("responseCode"));
-                            copy.setSourceId(myMap.get("sourceId"));
-                            copy.setValidateProfileId(myMap.get("validateProfileId"));
-                            copy.setValue(myMap.get("value"));
-                            copy.setWarningOnly(new Boolean(myMap.get("warningOnly")));
-
-                            String typePrefix = "contained.action";
-                            TestReport.SetupActionAssertComponent actionReport = new TestReport.SetupActionAssertComponent();
-                            doAssert(typePrefix, copy, actionReport);
-                            String code = actionReport.getResult().toCode();
-                            if ("fail".equals(code)) {
-                                log.info("copy eval failed.");
-                            } else if ("error".equals(code)) {
-                                log.info("copy eval error.");
-                            }
-                            testScriptDebugState.sendDebugAssertionEvalResultStr(code, actionReport.getMessage());
-                        }
-                    }
-                } while (! testScriptDebugState.getResume().get() && ! testScriptDebugState.getStopDebug().get());
-            }
-     }
-
-     private void ifDebuggingPauseIfBreakpoint(String parentType, Integer parentIndex) {
-        ifDebuggingPauseIfBreakpoint(parentType, parentIndex, null, false);
-     }
-
-    private void ifDebuggingPauseIfBreakpoint(String parentType, Integer parentIndex, Integer childPartIndex, boolean hasImportExtension) {
-        if (hasDebugState()) {
-            testScriptDebugState.setHasImportExtension(hasImportExtension);
-            testScriptDebugState.setCurrentExecutionIndex(parentType, parentIndex, childPartIndex);
-            testScriptDebugState.pauseIfBreakpoint();
-        }
-    }
 
     private boolean hasImportModifierExtension(TestScript.SetupActionOperationComponent operation) {
         if (operation.hasModifierExtension()) {
@@ -1760,18 +1666,19 @@ public class TestEngine  implements TestDef {
                             reporter,
                             source,
                             asrt);
+        } else {
+            new ActionReporter()
+                    .setModule(parent != null)
+                    .setTestEngine(this)
+                    .setTestCollectionId(testCollection)
+                    .setTestId(testId)
+                    .reportAssertion(
+                            fixtureMgr,
+                            new VariableMgr(getTestScript(), getFixtureMgr()),
+                            reporter,
+                            source,
+                            asrt);
         }
-        new ActionReporter()
-                .setModule(parent != null)
-                .setTestEngine(this)
-                .setTestCollectionId(testCollection)
-                .setTestId(testId)
-                .reportAssertion(
-                        fixtureMgr,
-                        new VariableMgr(getTestScript(), getFixtureMgr()),
-                        reporter,
-                        source,
-                        asrt);
     }
 
     public String getTestId() {
@@ -1804,5 +1711,13 @@ public class TestEngine  implements TestDef {
 
     public Map<String, String> getCallVariableMap() {
         return callVariableMap;
+    }
+
+    public boolean hasDebugger() {
+        return debugger != null;
+    }
+
+    public TestScriptDebugInterface getDebugger() {
+        return debugger;
     }
 }

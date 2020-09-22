@@ -52,6 +52,27 @@ export const debugTestScriptStore = {
                     // console.log(obj.testScriptIndex + "removed" + obj.breakpointIndex)
                 }
             },
+            doCloseDebugSession: function(state, commit, getters, callingMethod) {
+                console.log('in doCloseDebugSession: ' + callingMethod)
+                // console.log('In socket onClose. Setting socket to null...')
+                commit('resetDebuggingWebsocket')
+                commit('resetWaitingForBreakpoint')
+                commit('setAssertionEvalBreakpointIndex', '') // Reset the Eval state on Close so original assertion is requested next time it is run
+                // Enable Run button
+                // Breakpoints could have been cleared so only reset the label to Debug, if the label is not already labelled as Debug
+                var currentActiveIndex = getters.getActivelyDebuggingTestScriptIndex
+                if (currentActiveIndex !== null) {
+                    // console.log(currentActiveIndex)
+                    let actionData = {
+                        testScriptIndex: currentActiveIndex, // this.getters ??
+                        breakpointIndex: null,
+                        debugButtonLabel: 'Debug'
+                    }
+                    commit('setDebugButtonLabel', actionData)
+
+                }
+                // console.log('done.')
+            },
             /**
              * Nudges Vue reactivity.
              * @param state
@@ -76,7 +97,7 @@ export const debugTestScriptStore = {
             breakpointSet = state.breakpointMap.get(obj.testScriptIndex)
 
             breakpointSet.add(obj.breakpointIndex)
-            console.log(obj.testScriptIndex + " added " + obj.breakpointIndex)
+            console.log("testCollectionIndex.testScriptIndex:" + obj.testScriptIndex + ", added Test part: " + obj.breakpointIndex)
 
             // Sync showDebugButton because Vue does not support reactivity on Map or Set
 
@@ -123,7 +144,7 @@ export const debugTestScriptStore = {
                     valObj.debugButtonLabel = obj.debugButtonLabel // "Resume"
                 }
             } else {
-                alert(' failed: ' + obj.testScriptIndex)
+                console.log(' setDebugButtonLabel failed for testScriptIndex: ' + obj.testScriptIndex)
             }
         },
         setBeingDebuggedList(state, arr) {
@@ -133,7 +154,13 @@ export const debugTestScriptStore = {
         },
         setIsDebugTsFeatureEnabled(state, isTrue) {
             state.isDebugTsFeatureEnabled = Boolean(isTrue).valueOf()
-        }
+        },
+        resetDebuggingWebsocket(state) {
+            state.testScriptDebuggerWebSocket = null
+        },
+        resetWaitingForBreakpoint(state) {
+            state.waitingForBreakpoint = false
+        },
     },
     getters: {
         hasBreakpoint: (state) => (obj) => {
@@ -241,16 +268,23 @@ export const debugTestScriptStore = {
                 console.log('stopDebugTs ' + mapKey + ' failed: WebSocket is null!')
             }
         },
+        /*
+        This method gets called when the Eval button is clicked from the ActionDetails vue component.
+         */
         async doDebugEvalMode({commit, state, rootState, getters}) {
             let testId = rootState.testRunner.currentTest
             console.log('In doDebugEvalMode: ' + testId)
             const mapKey = getters.getMapKey(testId)
             const breakpointIndex = state.showDebugButton[mapKey].breakpointIndex
             if (rootState.debugAssertionEval.assertionEvalBreakpointIndex === breakpointIndex) {
+                // IF the button was pushed nth time, just toggle the modal display property
                 commit('setShowDebugEvalModal', true)
             } else {
+                // If the button was pushed the first time
                 commit('setAssertionEvalBreakpointIndex', breakpointIndex)
-                let sendData = `{"cmd":"requestOriginalAssertion","testScriptIndex":"${mapKey}"}`
+                const requestAnnotations = (rootState.debugAssertionEval.fieldSupport.fieldValueTypes === null)
+                // needsStaticValueCaching is True when enumeration types and the assertion field descriptions need to be cached
+                let sendData = `{"cmd":"requestAllParameters","testScriptIndex":"${mapKey}","requestAnnotations":"${requestAnnotations}"}`
 
                 console.log('Requesting original-assertion ' + breakpointIndex)
                 state.testScriptDebuggerWebSocket.send(sendData)
@@ -260,11 +294,15 @@ export const debugTestScriptStore = {
             let sendData = `{"cmd":"debugEvalAssertion", "base64String":"${assertionDataBase64}"}`
             state.testScriptDebuggerWebSocket.send(sendData)
         },
+        async doDebugEvalForResources({state}, assertionDataBase64) {
+            let sendData = `{"cmd":"debugEvalForResources", "base64String":"${assertionDataBase64}"}`
+            state.testScriptDebuggerWebSocket.send(sendData)
+        },
         async debugTestScript({commit, rootState, state, getters, dispatch}, testId) {
             if (! state.isDebugTsFeatureEnabled) {
                 return
             }
-            console.log('in debug' + testId + ' isGettersUndefined: ' + (getters === undefined).valueOf())
+            // console.log('in debug' + testId + ' isGettersUndefined: ' + (getters === undefined).valueOf())
             // commit('setTestReport',{name: testId, testReport: null})
             // console.log('log cleared for ' + testId)
 
@@ -285,7 +323,8 @@ export const debugTestScriptStore = {
                     // Disable Run button
                     console.log('In socket onOpen. event: ' + (event === undefined).valueOf())
                     // clear log 1?
-                    commit('clearTestReports')
+                    // commit('clearTestReports')
+                    commit('clearTestReport', testId)
                     let uri = `debug-testscript/${testSessionId}__${channelId}/${this.state.testRunner.currentTestCollectionName}/${testId}?_format=${this.state.testRunner.useJson ? 'json' : 'xml'};_gzip=${this.state.testRunner.useGzip}`
                     let indexOfTestId = getters.getIndexOfTestId(testId)
                     if (indexOfTestId > -1) {
@@ -300,34 +339,26 @@ export const debugTestScriptStore = {
                     }
                 }
                 state.testScriptDebuggerWebSocket.onclose = event => {
-                    commit('setAssertionEvalBreakpointIndex', '') // Reset the Eval state on Close so original assertion is requested next time it is run
-                    state.waitingForBreakpoint = false
-                    // Enable Run button
+                    state.doCloseDebugSession(state, commit, getters, 'onclose')
                     if (event != null && event != undefined) {
                         // console.log('onclose data: ' + event.returnData)
                     }
-                    // Breakpoints could have been cleared so only reset the label to Debug
-                    let actionData = {
-                        testScriptIndex: this.getters.getActivelyDebuggingTestScriptIndex,
-                        breakpointIndex: null,
-                        debugButtonLabel: 'Debug'
-                    }
-                    commit('setDebugButtonLabel', actionData)
-                    if (! getters.hasBreakpoints(actionData.testScriptIndex)) {
-                        state.doCleanupBreakpoints(state, actionData.testScriptIndex)
-                    }
-                    // console.log('In socket onClose. Setting socket to null...')
-                    state.testScriptDebuggerWebSocket = null
-                    // console.log('done.')
                 }
                 state.testScriptDebuggerWebSocket.onmessage = event => {
+                    /**
+                     * Message limit: -1 is full content, otherwise truncate message length to a number > 0.
+                      */
                     let messageStrLimit = 500
                     if (event && event.data) {
-                        console.log('onMessage: ' + (event.data.length < messageStrLimit ?
-                            event.data
-                            : 'Message too long. Showing first ' + messageStrLimit + " characters: " + event.data.substr(0, messageStrLimit) + ' TRUNCATED.'))
+                        if (messageStrLimit === -1) {
+                            console.log('onMessage: ' + event.data)
+                        } else {
+                            console.log('onMessage: ' + (event.data.length < messageStrLimit ?
+                                event.data
+                                : 'Message too long. Showing first ' + messageStrLimit + " characters: " + event.data.substr(0, messageStrLimit) + ' TRUNCATED.'))
+                        }
                     } else {
-                        console.log('event data is missing!')
+                        console.log('onmessage event data is missing!')
                     }
                     let returnData = JSON.parse(event.data)
                     if (returnData.messageType === 'final-report') {
@@ -343,30 +374,50 @@ export const debugTestScriptStore = {
                         commit('setCombinedTestReports', returnData.testReport)
                         if (('isEvaluable' in returnData) && returnData.isEvaluable === 'true') {
                             state.evalMode = true
-                            if (rootState.debugAssertionEval.showModal === true) {
+                            if (rootState.debugAssertionEval.showEvalModalDialog === true) {
                                 // Auto-refresh the modal if already evalMode is already displaying the modal
                                 //  state.doDebugEvalMode({commit: commit, state: state, rootState: rootState, getters: getters}, testId)
                                 dispatch('doDebugEvalMode')
                             }
                         }
                     } else if (returnData.messageType === 'original-assertion') {
-                        // alert(JSON.stringify(returnData.assertionJson))
+                        // console.log(JSON.stringify(returnData))
                         // rootState.testScriptAssertionEval.
-                        commit('updateAssertionEvalObj', returnData.assertionJson)
+                        try {
+                            commit('updateAssertionEvalObj', returnData.assertionJson)
+                            // Load static content if not yet loaded
+                            if (rootState.debugAssertionEval.fieldSupport.fieldValueTypes === null && 'fieldSupport' in returnData) {
+                                commit('setFieldSupportValueTypes', returnData.fieldSupport.fhirEnumerationTypes)
+                                // Load overrides
+                                if ('overrideFieldTypes' in returnData.fieldSupport) {
+                                    commit('setFieldSupportOverrides', returnData.fieldSupport.overrideFieldTypes)
+                                }
+                            }
+                            if ('fixtureIds' in returnData) {
+                                commit('setFixtureIds', returnData.fixtureIds)
+                            }
+                        } catch (e) {
+                            console.log('error in all-parameters: ' + e)
+                        }
+                        commit('setShowDebugEvalModal', true)
                     } else if (returnData.messageType === 'eval-assertion-result') {
                         commit('setDebugAssertionEvalResult', returnData)
+                    } else if (returnData.messageType === 'eval-for-resources-result') {
+                        commit('setDebugAssertionEvalResult', returnData)
+                        commit('setEvalForResourcesResult', returnData)
                     } else if (returnData.messageType === 'stoppedDebugging') {
-                        // alert('Debugging was stopped.')
+                        console.log('Debugging was stopped.')
                         state.testScriptDebuggerWebSocket.close()
+
                     } else if (returnData.messageType === 'unexpected-error') {
-                        alert('Debug: Unexpected error.')
-                        state.testScriptDebuggerWebSocket.close()
+                        console.log('Debug: unexpected-error.')
+                        state.doCloseDebugSession(state, commit, getters, 'unexpected-error')
                     }
                 }
                 state.testScriptDebuggerWebSocket.onerror = function (event) {
-                    state.waitingForBreakpoint = false
+                    state.doCloseDebugSession(state, commit, getters, 'onerror' )
                     if (event != null && event != undefined) {
-                        alert('Error: ' + event)
+                        // console.log('onclose data: ' + event.returnData)
                     }
                 }
             } else {
@@ -447,7 +498,7 @@ export const debugTestScriptStore = {
                     console.log(errorMessage)
                     commit('setIsDebugTsFeatureEnabled', false)
                     if (event != null && event != undefined) {
-                        console.log('Error Event: ' + event )
+                        console.log('Error Event: ' + JSON.stringify(event))
                     }
                 }
                 state.debugMgmtWebSocket.onclose = event => {
