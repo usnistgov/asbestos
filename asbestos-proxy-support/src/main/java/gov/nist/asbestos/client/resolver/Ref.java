@@ -439,7 +439,8 @@ public class Ref {
             path = path.substring(0, path.indexOf("?"));
         List<String> parts = Arrays.asList(path.split("/"));
         for (int i=0; i<parts.size(); i++) {
-            if (resourceNames.contains(parts.get(i)))
+            String type = parts.get(i);
+            if (resourceNames.contains(type))
                 return new Ref(String.join("/", parts.subList(0, i)));
         }
         return new Ref(uri.toString());
@@ -607,12 +608,6 @@ public class Ref {
         return resourceNames;
     }
 
-    static private List<String> resourceNames;
-
-    {
-        Collections.sort(rawResourceNames);
-        resourceNames = rawResourceNames;
-    }
 
     static public void setEC(EC ec) {
         externalCache = ec;
@@ -769,4 +764,12 @@ public class Ref {
             "SubstanceSpecification",
             "metadata"
     );
+
+    static private List<String> resourceNames;
+
+    static {
+        Collections.sort(rawResourceNames);
+        resourceNames = rawResourceNames;
+    }
+
 }
