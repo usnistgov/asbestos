@@ -49,14 +49,14 @@
         </dependency>
 
 
-        <dependency>
-            <!--Cannot reliably pull from net -->
-            <groupId>commons-io</groupId>
-            <artifactId>commons-io</artifactId>
-            <version>2.6</version>
-            <!--<scope>system</scope>-->
-            <!--<systemPath>${basedir}/lib/commons-io-2.6.jar</systemPath>-->
-        </dependency>
+<!--        <dependency>-->
+<!--            &lt;!&ndash;Cannot reliably pull from net &ndash;&gt;-->
+<!--            <groupId>commons-io</groupId>-->
+<!--            <artifactId>commons-io</artifactId>-->
+<!--            <version>2.6</version>-->
+<!--            &lt;!&ndash;<scope>system</scope>&ndash;&gt;-->
+<!--            &lt;!&ndash;<systemPath>${basedir}/lib/commons-io-2.6.jar</systemPath>&ndash;&gt;-->
+<!--        </dependency>-->
 
         <dependency>
             <groupId>gov.nist.asbestos</groupId>
