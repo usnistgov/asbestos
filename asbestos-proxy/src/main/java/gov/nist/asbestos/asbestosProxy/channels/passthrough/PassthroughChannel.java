@@ -1,14 +1,15 @@
 package gov.nist.asbestos.asbestosProxy.channels.passthrough;
 
-import gov.nist.asbestos.asbestosProxy.channel.BaseChannel;
-import gov.nist.asbestos.client.Base.ProxyBase;
+import gov.nist.asbestos.client.channel.BaseChannel;
+import gov.nist.asbestos.client.Base.ParserBase;
 import gov.nist.asbestos.client.client.Format;
+import gov.nist.asbestos.client.general.ChannelSupport;
 import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.http.headers.Header;
 import gov.nist.asbestos.http.operations.HttpDelete;
 import gov.nist.asbestos.serviceproperties.ServiceProperties;
 import gov.nist.asbestos.serviceproperties.ServicePropertiesEnum;
-import gov.nist.asbestos.sharedObjects.ChannelConfig;
+import gov.nist.asbestos.client.channel.ChannelConfig;
 import gov.nist.asbestos.client.events.Event;
 import gov.nist.asbestos.http.headers.Headers;
 import gov.nist.asbestos.http.operations.HttpBase;
@@ -43,32 +44,23 @@ public class PassthroughChannel extends BaseChannel /*implements IBaseChannel*/ 
 
     }
 
-    public static void passHeaders(HttpBase requestIn, HttpBase requestOut) {
-        Headers inHeaders = requestIn.getRequestHeaders();
-        Headers thruHeaders = inHeaders.select(Arrays.asList("content", "accept"));
-
-        thruHeaders.setVerb(inHeaders.getVerb());
-        thruHeaders.setPathInfo(inHeaders.getPathInfo());
-        requestOut.setRequestHeaders(thruHeaders);
-    }
-
     @Override
     public void transformRequest(HttpPost requestIn, HttpPost requestOut) {
-        passHeaders(requestIn, requestOut);
+        ChannelSupport.passHeaders(requestIn, requestOut);
 
         requestOut.setRequest(requestIn.getRequest());
     }
 
     @Override
     public void transformRequest(HttpGetter requestIn, HttpGetter requestOut) {
-        passHeaders(requestIn, requestOut);
+        ChannelSupport.passHeaders(requestIn, requestOut);
 
         requestOut.setRequest(requestIn.getRequest());
     }
 
     @Override
     public void transformRequest(HttpDelete requestIn, HttpDelete requestOut) {
-        passHeaders(requestIn, requestOut);
+        ChannelSupport.passHeaders(requestIn, requestOut);
 
         requestOut.setRequest(requestIn.getRequest());
     }
@@ -86,13 +78,12 @@ public class PassthroughChannel extends BaseChannel /*implements IBaseChannel*/ 
     @Override
     public void transformResponse(HttpBase responseIn, HttpBase responseOut, String proxyHostPort, String requestedType, String search) {
         transformResponseLocationHeader(responseIn, responseOut, proxyHostPort);
-        // responseOut.setResponse(responseIn.getResponse());
         transformResponseBody(responseIn, responseOut);
         responseOut.setStatus(responseIn.getStatus());
     }
 
     private void transformResponseBody(HttpBase responseIn, HttpBase responseOut) {
-        String newBase = null;
+        String newBase;
         byte[] rawResponse = responseIn.getResponse();
         if (rawResponse == null) {
             responseOut.setStatus(responseIn.getStatus());
@@ -100,7 +91,7 @@ public class PassthroughChannel extends BaseChannel /*implements IBaseChannel*/ 
         }
         Format format = Format.fromContentType(responseIn.getResponseHeaders().getContentType().getValue());
 
-        BaseResource resource = ProxyBase.parse(responseIn.getResponseText(), format);
+        BaseResource resource = ParserBase.parse(responseIn.getResponseText(), format);
         if (resource instanceof Bundle) {
             newBase = ServiceProperties.getInstance().getPropertyOrStop(ServicePropertiesEnum.FHIR_TOOLKIT_BASE) + "/proxy/" + channelConfig.asFullId();
             boolean updated = false;
@@ -136,10 +127,7 @@ public class PassthroughChannel extends BaseChannel /*implements IBaseChannel*/ 
                 }
             }
             if (updated) {
-                byte[] encoded = ProxyBase.encode(bundle, format).getBytes();
-//                if (responseOut.isResponseGzipEncoded())
-//                    encoded = Gzip.compressGZIP(encoded);
-                rawResponse = encoded;
+                rawResponse = ParserBase.encode(bundle, format).getBytes();
             }
         }
         responseOut.setResponse(rawResponse);

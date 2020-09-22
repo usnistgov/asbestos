@@ -1,16 +1,7 @@
 package gov.nist.asbestos.proxyWar;
 
 import com.google.gson.Gson;
-import gov.nist.asbestos.client.Base.ProxyBase;
-import gov.nist.asbestos.client.client.FhirClient;
-import gov.nist.asbestos.client.client.Format;
-import gov.nist.asbestos.client.resolver.Ref;
-import gov.nist.asbestos.client.resolver.ResourceWrapper;
-import gov.nist.asbestos.http.headers.Headers;
 import gov.nist.asbestos.http.operations.HttpPost;
-import org.hl7.fhir.r4.model.BaseResource;
-import org.hl7.fhir.r4.model.TestReport;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;

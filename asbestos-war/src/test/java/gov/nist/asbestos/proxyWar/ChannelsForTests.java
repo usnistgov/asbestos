@@ -2,8 +2,8 @@ package gov.nist.asbestos.proxyWar;
 
 import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.http.operations.HttpPost;
-import gov.nist.asbestos.sharedObjects.ChannelConfig;
-import gov.nist.asbestos.sharedObjects.ChannelConfigFactory;
+import gov.nist.asbestos.client.channel.ChannelConfig;
+import gov.nist.asbestos.client.channel.ChannelConfigFactory;
 
 
 import java.io.IOException;

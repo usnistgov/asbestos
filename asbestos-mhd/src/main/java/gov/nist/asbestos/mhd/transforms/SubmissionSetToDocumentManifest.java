@@ -11,7 +11,7 @@ import gov.nist.asbestos.mhd.translation.attribute.PatientId;
 import gov.nist.asbestos.mhd.translation.attribute.Slot;
 import gov.nist.asbestos.serviceproperties.ServiceProperties;
 import gov.nist.asbestos.serviceproperties.ServicePropertiesEnum;
-import gov.nist.asbestos.sharedObjects.ChannelConfig;
+import gov.nist.asbestos.client.channel.ChannelConfig;
 import gov.nist.asbestos.simapi.validation.Val;
 import gov.nist.asbestos.simapi.validation.ValE;
 import oasis.names.tc.ebxml_regrep.xsd.rim._3.*;
@@ -73,7 +73,7 @@ public class SubmissionSetToDocumentManifest implements IVal {
         for (ClassificationType c : ss.getClassification()) {
             String scheme = c.getClassificationScheme();
             if ("urn:uuid:a7058bb9-b4e4-4307-ba5b-e3f0ab85e12d".equals(scheme)) {
-                // author
+                // author - not implemented yet
             } else if ("urn:uuid:aa543740-bdda-424e-8c96-df4873be8500".equals(scheme)) {
                 // content type
                 XdsCode xdsCode = new XdsCode()

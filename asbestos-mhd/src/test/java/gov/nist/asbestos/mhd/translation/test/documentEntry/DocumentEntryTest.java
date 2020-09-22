@@ -5,7 +5,7 @@ import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import gov.nist.asbestos.client.Base.ProxyBase;
+import gov.nist.asbestos.client.Base.ParserBase;
 import gov.nist.asbestos.client.client.FhirClient;
 import gov.nist.asbestos.client.events.Event;
 import gov.nist.asbestos.client.events.ITask;
@@ -18,7 +18,7 @@ import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import gov.nist.asbestos.mhd.transforms.BundleToRegistryObjectList;
 import gov.nist.asbestos.mhd.translation.ContainedIdAllocator;
 import gov.nist.asbestos.mhd.transforms.DocumentEntryToDocumentReference;
-import gov.nist.asbestos.sharedObjects.ChannelConfig;
+import gov.nist.asbestos.client.channel.ChannelConfig;
 import gov.nist.asbestos.simapi.simCommon.SimId;
 import gov.nist.asbestos.simapi.tk.installation.Installation;
 import gov.nist.asbestos.simapi.validation.*;
@@ -36,7 +36,6 @@ import java.net.URISyntaxException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -60,7 +59,7 @@ class DocumentEntryTest {
     static void beforeAll() throws URISyntaxException {
         externalCache = Paths.get(DocumentEntryTest.class.getResource("/external_cache/findme.txt").toURI()).getParent().toFile();
         resourceCacheMgr = new ResourceCacheMgr(externalCache);
-        fhirContext = ProxyBase.getFhirContext();
+        fhirContext = ParserBase.getFhirContext();
         objectMapper = new  ObjectMapper();
         jsonFactory = objectMapper.getFactory();
         Installation.instance().setExternalCache(externalCache);

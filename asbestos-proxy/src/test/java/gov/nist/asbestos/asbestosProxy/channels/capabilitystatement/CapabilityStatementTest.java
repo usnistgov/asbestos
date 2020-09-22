@@ -1,6 +1,6 @@
 package gov.nist.asbestos.asbestosProxy.channels.capabilitystatement;
 
-import gov.nist.asbestos.client.Base.ProxyBase;
+import gov.nist.asbestos.client.Base.ParserBase;
 import gov.nist.asbestos.client.client.Format;
 import gov.nist.asbestos.serviceproperties.ServicePropertiesEnum;
 import org.hl7.fhir.r4.model.BaseResource;
@@ -42,7 +42,7 @@ class CapabilityStatementTest {
         assert baseResource != null;
         assert baseResource instanceof CapabilityStatement;
 
-        String content = ProxyBase.encode(baseResource, Format.XML);
+        String content = ParserBase.encode(baseResource, Format.XML);
         assert content.indexOf("${") == -1; // Parameters should have been replaced. If not check ServicePropertiesEnum to make sure the parameter have a matching key.
     }
 }

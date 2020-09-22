@@ -1,6 +1,6 @@
 package gov.nist.asbestos.testEngine.engine.translator;
 
-import gov.nist.asbestos.client.Base.ProxyBase;
+import gov.nist.asbestos.client.Base.ParserBase;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.TestScript;
 
@@ -81,7 +81,7 @@ public class ComponentReference {
 
     public TestScript getComponent() {
         if (component == null) {
-            component = (TestScript) ProxyBase.parse(componentRef);
+            component = (TestScript) ParserBase.parse(componentRef);
         }
         return component;
     }

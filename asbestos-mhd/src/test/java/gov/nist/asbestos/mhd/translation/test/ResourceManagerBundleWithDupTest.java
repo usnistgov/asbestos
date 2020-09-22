@@ -1,6 +1,6 @@
 package gov.nist.asbestos.mhd.translation.test;
 
-import gov.nist.asbestos.client.Base.ProxyBase;
+import gov.nist.asbestos.client.Base.ParserBase;
 import gov.nist.asbestos.client.resolver.ResourceMgr;
 import gov.nist.asbestos.simapi.validation.Val;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -21,7 +21,7 @@ public class ResourceManagerBundleWithDupTest {
     @BeforeAll
     static void beforeAll() {
         InputStream is = ResourceMgrContainedTest.class.getResourceAsStream("/gov/nist/asbestos/mhd/translation/shared/bundleWithDuplicate.xml");
-        IBaseResource resource = ProxyBase.getFhirContext().newXmlParser().parseResource(is);
+        IBaseResource resource = ParserBase.getFhirContext().newXmlParser().parseResource(is);
         assertTrue(resource instanceof Bundle);
         bundle = (Bundle) resource;
     }

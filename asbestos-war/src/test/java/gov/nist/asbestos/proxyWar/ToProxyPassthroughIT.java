@@ -2,8 +2,8 @@ package gov.nist.asbestos.proxyWar;
 
 import gov.nist.asbestos.client.client.FhirClient;
 import gov.nist.asbestos.http.operations.HttpPost;
-import gov.nist.asbestos.sharedObjects.ChannelConfig;
-import gov.nist.asbestos.sharedObjects.ChannelConfigFactory;
+import gov.nist.asbestos.client.channel.ChannelConfig;
+import gov.nist.asbestos.client.channel.ChannelConfigFactory;
 import gov.nist.asbestos.simapi.validation.Val;
 import gov.nist.asbestos.testEngine.engine.TestEngine;
 import org.hl7.fhir.r4.model.TestReport;
@@ -59,7 +59,7 @@ class ToProxyPassthroughIT {
     }
 
    @BeforeAll
-     static void beforeAll() throws IOException, URISyntaxException {
+     static void beforeAll() throws URISyntaxException {
         base = new URI(ITConfig.getChannelBase(testSession, channelId));
     }
 

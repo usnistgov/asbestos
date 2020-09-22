@@ -1,10 +1,9 @@
 package gov.nist.asbestos.testEngine.engine;
 
-import gov.nist.asbestos.client.Base.ProxyBase;
+import gov.nist.asbestos.client.Base.ParserBase;
 import gov.nist.asbestos.client.client.FhirClient;
 import gov.nist.asbestos.simapi.validation.Val;
 import gov.nist.asbestos.testEngine.engine.assertion.MinimumId;
-import gov.nist.asbestos.testEngine.engine.assertion.Report;
 import org.hl7.fhir.r4.model.DocumentReference;
 import org.hl7.fhir.r4.model.TestReport;
 import org.junit.jupiter.api.Test;
@@ -141,8 +140,8 @@ class MinimumIdTest {
     @Test
     void test1() throws URISyntaxException {
         File refFile = Paths.get(getClass().getResource("/minimumId/reference/minimal/DocumentReference.xml").toURI()).toFile();
-        DocumentReference reference = (DocumentReference) ProxyBase.parse(refFile);
-        DocumentReference sut = (DocumentReference) ProxyBase.parse(Paths.get(getClass().getResource("/minimumId/missingSubject/DocumentReference/DocRef3.xml").toURI()).toFile());
+        DocumentReference reference = (DocumentReference) ParserBase.parse(refFile);
+        DocumentReference sut = (DocumentReference) ParserBase.parse(Paths.get(getClass().getResource("/minimumId/missingSubject/DocumentReference/DocRef3.xml").toURI()).toFile());
         MinimumId.Report report = new MinimumId().run(reference, sut, false);
         assertEquals(1, report.missing.size());
         assertEquals(".masterIdentifier.value", report.missing.get(0));
@@ -152,8 +151,8 @@ class MinimumIdTest {
     void test2() throws URISyntaxException {
         TestReport.SetupActionAssertComponent assertReport = new TestReport.SetupActionAssertComponent();
         File refFile = Paths.get(getClass().getResource("/minimumId/reference/minimal/DocumentReferenceSecurityLabel.xml").toURI()).toFile();
-        DocumentReference reference = (DocumentReference) ProxyBase.parse(refFile);
-        DocumentReference sut = (DocumentReference) ProxyBase.parse(Paths.get(getClass().getResource("/minimumId/missingSubject/DocumentReference/DocRef4.xml").toURI()).toFile());
+        DocumentReference reference = (DocumentReference) ParserBase.parse(refFile);
+        DocumentReference sut = (DocumentReference) ParserBase.parse(Paths.get(getClass().getResource("/minimumId/missingSubject/DocumentReference/DocRef4.xml").toURI()).toFile());
         MinimumId.Report report = new MinimumId().run(reference, sut, false);
         assertEquals(1, report.missing.size());
         assertEquals(".securityLabel.coding.code", report.missing.get(0));

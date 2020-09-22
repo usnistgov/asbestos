@@ -1,6 +1,6 @@
 package gov.nist.asbestos.testEngine.engine;
 
-import gov.nist.asbestos.client.Base.ProxyBase;
+import gov.nist.asbestos.client.Base.ParserBase;
 import org.hl7.fhir.common.hapi.validation.support.PrePopulatedValidationSupport;
 import org.hl7.fhir.r4.hapi.ctx.HapiWorkerContext;
 import org.hl7.fhir.r4.model.*;
@@ -11,7 +11,7 @@ import java.util.List;
 public class FhirPathEngineBuilder {
 
     static FHIRPathEngine build() {
-        return new FHIRPathEngine(new HapiWorkerContext(ProxyBase.getFhirContext(), new PrePopulatedValidationSupport(ProxyBase.getFhirContext())));
+        return new FHIRPathEngine(new HapiWorkerContext(ParserBase.getFhirContext(), new PrePopulatedValidationSupport(ParserBase.getFhirContext())));
     }
 
     public static boolean evalForBoolean(BaseResource resource, String expression) {

@@ -1,11 +1,11 @@
 package gov.nist.asbestos.testEngine.engine;
 
 import gov.nist.asbestos.client.Base.EC;
-import gov.nist.asbestos.client.Base.ProxyBase;
+import gov.nist.asbestos.client.Base.ParserBase;
 import gov.nist.asbestos.client.client.FhirClient;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
-import gov.nist.asbestos.sharedObjects.debug.StopDebugTestScriptException;
-import gov.nist.asbestos.sharedObjects.debug.TestScriptDebugState;
+import gov.nist.asbestos.client.debug.StopDebugTestScriptException;
+import gov.nist.asbestos.client.debug.TestScriptDebugState;
 import gov.nist.asbestos.simapi.validation.Val;
 import gov.nist.asbestos.testEngine.engine.fixture.FixtureMgr;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -97,10 +97,7 @@ public class ModularEngine {
         boolean first = true;
         for (TestEngine engine : engines) {
             TestReport report = engine.getTestReport();
-            String scriptName = stripExtension(engine.getTestScriptName());
-
-            // scriptReportName can be different from scriptName if same script (module) used more than once
-            String scriptReportName = scriptName;
+            String scriptReportName = stripExtension(engine.getTestScriptName());
             if (report.hasExtension()) {
                 for (Extension e : report.getExtension()) {
                     if ("urn:moduleId".equals(e.getUrl())) {
@@ -135,7 +132,7 @@ public class ModularEngine {
             String moduleName = first ? null : scriptReportName;
 
             report.setName(this.testName + (moduleName == null ? "" : '/' + moduleName));
-            String json = ProxyBase.getFhirContext().newJsonParser().setPrettyPrint(true).encodeResourceToString(report);
+            String json = ParserBase.getFhirContext().newJsonParser().setPrettyPrint(true).encodeResourceToString(report);
             reports.put(report.getName(), json);
 
             if (saveLogs) {

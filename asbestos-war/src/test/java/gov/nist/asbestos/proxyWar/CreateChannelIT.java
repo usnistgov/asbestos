@@ -5,8 +5,8 @@ import com.google.gson.Gson;
 import gov.nist.asbestos.http.operations.HttpDelete;
 import gov.nist.asbestos.http.operations.HttpGetter;
 import gov.nist.asbestos.http.operations.HttpPost;
-import gov.nist.asbestos.sharedObjects.ChannelConfig;
-import gov.nist.asbestos.sharedObjects.ChannelConfigFactory;
+import gov.nist.asbestos.client.channel.ChannelConfig;
+import gov.nist.asbestos.client.channel.ChannelConfigFactory;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 

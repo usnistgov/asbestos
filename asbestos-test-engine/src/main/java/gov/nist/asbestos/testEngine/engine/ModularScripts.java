@@ -3,7 +3,7 @@ package gov.nist.asbestos.testEngine.engine;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import gov.nist.asbestos.client.Base.ProxyBase;
+import gov.nist.asbestos.client.Base.ParserBase;
 import gov.nist.asbestos.client.client.Format;
 import org.apache.commons.io.FileUtils;
 import org.hl7.fhir.r4.model.BaseResource;
@@ -38,7 +38,7 @@ public class ModularScripts {
 
         BaseResource resource;
         try {
-            resource = ProxyBase.parse(bytes, Format.fromContentType(testFile.getName()));
+            resource = ParserBase.parse(bytes, Format.fromContentType(testFile.getName()));
         } catch (Throwable t) {
             throw new RuntimeException("Cannot parse: " + testFile);
         }
@@ -57,7 +57,7 @@ public class ModularScripts {
             }
         }
 
-        String json = ProxyBase.encode(testScript, Format.JSON);
+        String json = ParserBase.encode(testScript, Format.JSON);
         scripts.put(testScript.getName(), json);
 
         TestScript.TestScriptSetupComponent setup = testScript.getSetup();
@@ -100,11 +100,11 @@ public class ModularScripts {
                     String relativePath = componentExtension.getValue().toString();
                     String componentPath = testDef.getPath() + File.separator + relativePath;
                     File componentFile = new File(componentPath);
-                    TestScript componentScript = (TestScript) ProxyBase.parse(componentFile);
+                    TestScript componentScript = (TestScript) ParserBase.parse(componentFile);
                     String componentId = fileName(componentFile);
                     String fullComponentId = testId + '/' + componentId;
                     componentScript.setName(fullComponentId);
-                    String componentJson = ProxyBase.encode(componentScript, Format.JSON);
+                    String componentJson = ParserBase.encode(componentScript, Format.JSON);
                     scripts.put(fullComponentId, componentJson);
                 }
             }

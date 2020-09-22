@@ -1,6 +1,6 @@
 package gov.nist.asbestos.mhd.translation.test;
 
-import gov.nist.asbestos.client.Base.ProxyBase;
+import gov.nist.asbestos.client.Base.ParserBase;
 import gov.nist.asbestos.client.client.FhirClient;
 import gov.nist.asbestos.client.events.Event;
 import gov.nist.asbestos.client.events.ITask;
@@ -11,7 +11,7 @@ import gov.nist.asbestos.mhd.transactionSupport.AssigningAuthorities;
 import gov.nist.asbestos.mhd.transactionSupport.CodeTranslator;
 import gov.nist.asbestos.mhd.transactionSupport.CodeTranslatorBuilder;
 import gov.nist.asbestos.mhd.transforms.BundleToRegistryObjectList;
-import gov.nist.asbestos.sharedObjects.ChannelConfig;
+import gov.nist.asbestos.client.channel.ChannelConfig;
 import gov.nist.asbestos.simapi.simCommon.SimId;
 import gov.nist.asbestos.simapi.validation.Val;
 import gov.nist.asbestos.simapi.validation.ValErrors;
@@ -49,7 +49,7 @@ class BuildRegistryObjectListTest {
     static void beforeAll() throws URISyntaxException {
         externalCache = Paths.get(BuildRegistryObjectListTest.class.getResource("/external_cache/findme.txt").toURI()).getParent().toFile();
         InputStream is = ResourceMgrContainedTest.class.getResourceAsStream("/gov/nist/asbestos/mhd/translation/shared/bundle.xml");
-        IBaseResource resource = ProxyBase.getFhirContext().newXmlParser().parseResource(is);
+        IBaseResource resource = ParserBase.getFhirContext().newXmlParser().parseResource(is);
         assertTrue(resource instanceof Bundle);
         bundle = (Bundle) resource;
     }

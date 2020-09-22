@@ -2,7 +2,7 @@ package gov.nist.asbestos.proxyWar;
 
 import gov.nist.asbestos.serviceproperties.ServiceProperties;
 import gov.nist.asbestos.serviceproperties.ServicePropertiesEnum;
-import gov.nist.asbestos.sharedObjects.ChannelConfig;
+import gov.nist.asbestos.client.channel.ChannelConfig;
 
 import java.net.URI;
 import java.net.URISyntaxException;

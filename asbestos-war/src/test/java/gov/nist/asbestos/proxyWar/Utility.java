@@ -3,14 +3,14 @@ package gov.nist.asbestos.proxyWar;
 import com.google.gson.Gson;
 import gov.nist.asbestos.analysis.Report;
 import gov.nist.asbestos.client.Base.EC;
-import gov.nist.asbestos.client.Base.ProxyBase;
+import gov.nist.asbestos.client.Base.ParserBase;
 import gov.nist.asbestos.client.client.FhirClient;
 import gov.nist.asbestos.client.client.Format;
 import gov.nist.asbestos.client.events.UIEvent;
 import gov.nist.asbestos.http.operations.HttpGetter;
 import gov.nist.asbestos.http.operations.HttpPost;
-import gov.nist.asbestos.sharedObjects.ChannelConfig;
-import gov.nist.asbestos.sharedObjects.ChannelConfigFactory;
+import gov.nist.asbestos.client.channel.ChannelConfig;
+import gov.nist.asbestos.client.channel.ChannelConfigFactory;
 import gov.nist.asbestos.simapi.validation.Val;
 import gov.nist.asbestos.testEngine.engine.ModularEngine;
 import gov.nist.asbestos.testEngine.engine.TestEngine;
@@ -165,7 +165,7 @@ public class Utility {
         Object reportObj = tests.get(testName);
         String json = new Gson().toJson(reportObj);
 
-        BaseResource resource = ProxyBase.parse(json, Format.JSON);
+        BaseResource resource = ParserBase.parse(json, Format.JSON);
         assertTrue(resource instanceof TestReport);
         TestReport report = (TestReport) resource;
         String url2 = report.getTest().get(0).getAction().get(0).getOperation().getDetail();

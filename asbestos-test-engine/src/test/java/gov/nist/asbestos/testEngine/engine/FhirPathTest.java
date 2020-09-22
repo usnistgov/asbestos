@@ -1,7 +1,6 @@
 package gov.nist.asbestos.testEngine.engine;
 
-import gov.nist.asbestos.client.Base.ProxyBase;
-import gov.nist.asbestos.testEngine.engine.FhirPathEngineBuilder;
+import gov.nist.asbestos.client.Base.ParserBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.utils.FHIRPathEngine;
@@ -72,7 +71,7 @@ class FhirPathTest {
 
     private Bundle loadBundle(String path) {
         InputStream is = FhirPathTest.class.getResourceAsStream(path);
-        IBaseResource resource = ProxyBase.getFhirContext().newXmlParser().parseResource(is);
+        IBaseResource resource = ParserBase.getFhirContext().newXmlParser().parseResource(is);
         assertTrue(resource instanceof Bundle);
         return (Bundle) resource;
     }

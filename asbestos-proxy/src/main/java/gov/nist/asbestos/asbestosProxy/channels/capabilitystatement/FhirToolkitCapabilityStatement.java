@@ -1,6 +1,6 @@
 package gov.nist.asbestos.asbestosProxy.channels.capabilitystatement;
 
-import gov.nist.asbestos.client.Base.ProxyBase;
+import gov.nist.asbestos.client.Base.ParserBase;
 import gov.nist.asbestos.client.client.Format;
 import gov.nist.asbestos.serviceproperties.ServiceProperties;
 import gov.nist.asbestos.serviceproperties.ServicePropertiesEnum;
@@ -69,8 +69,8 @@ public class FhirToolkitCapabilityStatement {
                 }
 
             // Comments in XML are also parsed as part of the BaseResource. As noticed in the JSON Format, XML begin/end comments are not necessarily meaningful when it gets parsed
-            Format format = ProxyBase.getFormat(capabilityStatementFile);
-            BaseResource baseResource = ProxyBase.parse(statementContent, format);
+            Format format = ParserBase.getFormat(capabilityStatementFile);
+            BaseResource baseResource = ParserBase.parse(statementContent, format);
            return baseResource;
         }
         throw new RuntimeException(String.format("Error: File '%s' was not found.", capabilityStatementFile.toString()));

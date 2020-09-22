@@ -2,9 +2,9 @@ package gov.nist.asbestos.debug.testScript;
 
 
 import gov.nist.asbestos.client.Base.Request;
-import gov.nist.asbestos.sharedObjects.debug.DebugTestSessionId;
-import gov.nist.asbestos.sharedObjects.debug.DebugWsSessionId;
-import gov.nist.asbestos.sharedObjects.debug.TestScriptDebugState;
+import gov.nist.asbestos.client.debug.DebugTestSessionId;
+import gov.nist.asbestos.client.debug.DebugWsSessionId;
+import gov.nist.asbestos.client.debug.TestScriptDebugState;
 import gov.nist.asbestos.simapi.tk.installation.Installation;
 import gov.nist.asbestos.debug.testScript.requests.DebugTestScriptRequest;
 import org.apache.log4j.Logger;
