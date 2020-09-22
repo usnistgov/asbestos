@@ -1,6 +1,7 @@
-package gov.nist.asbestos.asbestosProxy.channel;
+package gov.nist.asbestos.client.channel;
 
 
+import gov.nist.asbestos.client.channel.IChannelControl;
 import gov.nist.asbestos.client.events.ITask;
 import gov.nist.asbestos.http.operations.HttpBase;
 import gov.nist.asbestos.http.operations.HttpDelete;

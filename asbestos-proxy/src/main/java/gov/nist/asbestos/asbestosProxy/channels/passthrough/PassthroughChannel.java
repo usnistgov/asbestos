@@ -1,8 +1,9 @@
 package gov.nist.asbestos.asbestosProxy.channels.passthrough;
 
-import gov.nist.asbestos.asbestosProxy.channel.BaseChannel;
+import gov.nist.asbestos.client.channel.BaseChannel;
 import gov.nist.asbestos.client.Base.ParserBase;
 import gov.nist.asbestos.client.client.Format;
+import gov.nist.asbestos.client.general.ChannelSupport;
 import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.http.headers.Header;
 import gov.nist.asbestos.http.operations.HttpDelete;
@@ -43,32 +44,23 @@ public class PassthroughChannel extends BaseChannel /*implements IBaseChannel*/ 
 
     }
 
-    public static void passHeaders(HttpBase requestIn, HttpBase requestOut) {
-        Headers inHeaders = requestIn.getRequestHeaders();
-        Headers thruHeaders = inHeaders.select(Arrays.asList("content", "accept"));
-
-        thruHeaders.setVerb(inHeaders.getVerb());
-        thruHeaders.setPathInfo(inHeaders.getPathInfo());
-        requestOut.setRequestHeaders(thruHeaders);
-    }
-
     @Override
     public void transformRequest(HttpPost requestIn, HttpPost requestOut) {
-        passHeaders(requestIn, requestOut);
+        ChannelSupport.passHeaders(requestIn, requestOut);
 
         requestOut.setRequest(requestIn.getRequest());
     }
 
     @Override
     public void transformRequest(HttpGetter requestIn, HttpGetter requestOut) {
-        passHeaders(requestIn, requestOut);
+        ChannelSupport.passHeaders(requestIn, requestOut);
 
         requestOut.setRequest(requestIn.getRequest());
     }
 
     @Override
     public void transformRequest(HttpDelete requestIn, HttpDelete requestOut) {
-        passHeaders(requestIn, requestOut);
+        ChannelSupport.passHeaders(requestIn, requestOut);
 
         requestOut.setRequest(requestIn.getRequest());
     }
@@ -86,7 +78,6 @@ public class PassthroughChannel extends BaseChannel /*implements IBaseChannel*/ 
     @Override
     public void transformResponse(HttpBase responseIn, HttpBase responseOut, String proxyHostPort, String requestedType, String search) {
         transformResponseLocationHeader(responseIn, responseOut, proxyHostPort);
-        // responseOut.setResponse(responseIn.getResponse());
         transformResponseBody(responseIn, responseOut);
         responseOut.setStatus(responseIn.getStatus());
     }

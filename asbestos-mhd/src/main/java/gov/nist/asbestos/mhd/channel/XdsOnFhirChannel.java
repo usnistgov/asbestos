@@ -1,7 +1,7 @@
-package gov.nist.asbestos.asbestosProxy.channels.mhd;
+package gov.nist.asbestos.mhd.channel;
 
-import gov.nist.asbestos.asbestosProxy.channel.BaseChannel;
-import gov.nist.asbestos.asbestosProxy.channels.passthrough.PassthroughChannel;
+import gov.nist.asbestos.client.channel.BaseChannel;
+import gov.nist.asbestos.client.general.ChannelSupport;
 import gov.nist.asbestos.mhd.util.XdsActorMapper;
 import gov.nist.asbestos.client.resolver.*;
 import gov.nist.asbestos.mhd.SubmittedObject;
@@ -137,31 +137,6 @@ public class XdsOnFhirChannel extends BaseChannel /*implements IBaseChannel*/ {
     public static byte[] lastDocument;
     public static String lastDocumentStr;
 
-//    private String transformBinaryQueryToRetrieve(String docUid, String repUid, URI toAddr, ITask task) {
-//        Objects.requireNonNull(task);
-//
-//        RetrieveDocumentSetRequestType ret = new RetrieveDocumentSetRequestType();
-//        RetrieveDocumentSetRequestType.DocumentRequest docReq = new RetrieveDocumentSetRequestType.DocumentRequest();
-//        docReq.setDocumentUniqueId(docUid);
-//        docReq.setRepositoryUniqueId(repUid);
-//        ret.getDocumentRequest().add(docReq);
-//
-//        ByteArrayOutputStream retStream = new ByteArrayOutputStream();
-//        new RetrieveBuilder().toOutputStream(ret, retStream);
-//
-//        String retString = XmlTools.deleteXMLInstruction(new String(retStream.toByteArray()));
-//        String soapString = RetWrapper.wrap(toAddr.toString(), retString);
-//        ByteArrayOutputStream os = new ByteArrayOutputStream();
-//        try {
-//            MultipartSender.getMultipartEntity(soapString).writeTo(os);
-//        } catch (IOException e) {
-//            //
-//        }
-//        return os.toString();
-//    }
-
-
-
 
     private OperationOutcome regErrorListAsOperationOutcome(RegErrorList regErrorList) {
         OperationOutcome oo = new OperationOutcome();
@@ -202,7 +177,7 @@ public class XdsOnFhirChannel extends BaseChannel /*implements IBaseChannel*/ {
 
         if (!(resource instanceof Bundle) ) {
             // forward to fhir server
-            PassthroughChannel.passHeaders(requestIn, requestOut);
+            ChannelSupport.passHeaders(requestIn, requestOut);
             requestOut.setRequest(requestIn.getRequest());
             return;
         }

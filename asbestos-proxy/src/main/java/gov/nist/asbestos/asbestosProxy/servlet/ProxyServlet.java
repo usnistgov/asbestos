@@ -1,8 +1,8 @@
 package gov.nist.asbestos.asbestosProxy.servlet;
 
 
-import gov.nist.asbestos.asbestosProxy.channel.BaseChannel;
-import gov.nist.asbestos.asbestosProxy.channel.IBaseChannel;
+import gov.nist.asbestos.client.channel.BaseChannel;
+import gov.nist.asbestos.client.channel.IBaseChannel;
 import gov.nist.asbestos.asbestosProxy.channel.IChannelBuilder;
 import gov.nist.asbestos.asbestosProxy.channel.PassthroughChannelBuilder;
 import gov.nist.asbestos.asbestosProxy.channel.XdsOnFhirChannelBuilder;

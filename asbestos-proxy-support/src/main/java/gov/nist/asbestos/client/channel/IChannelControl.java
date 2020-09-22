@@ -1,4 +1,4 @@
-package gov.nist.asbestos.asbestosProxy.channel;
+package gov.nist.asbestos.client.channel;
 
 
 import gov.nist.asbestos.client.events.Event;
