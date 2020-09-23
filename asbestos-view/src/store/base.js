@@ -15,7 +15,7 @@ export const baseStore = {
             testSession: null,
             channelId: "default",
 
-            sessions: [],
+            sessions:[],
             environments: [
                 'default',
             ],
@@ -98,7 +98,35 @@ export const baseStore = {
                     commit('setError', url + ': ' + error)
                     console.error(`${error} for ${url}`)
                 })
-//            commit('setSessions', ['default'])
+        },
+        newSession({commit}, newName) {
+            const url = `addSession/${newName}`
+            console.log(`${url}`)
+            CHANNEL.get(`${url}`)
+                .then(response => {
+                    commit('setSessions', response.data)
+                })
+                .catch(function (error) {
+                    commit('setError', url + ': ' + error)
+                    console.error(`${error} for ${url}`)
+                })
+        },
+        delSession({commit}, name) {
+            const url = `delSession/${name}`
+            console.log(`${url}`)
+            CHANNEL.get(`${url}`)
+                .then(response => {
+                    commit('setSessions', response.data)
+                    if (response.data.length > 0) {
+                        const obj = response.data[0];
+                        console.log(`new session is ${obj}`)
+                        commit('setSession', obj);
+                    }
+                })
+                .catch(function (error) {
+                    commit('setError', url + ': ' + error)
+                    console.error(`${error} for ${url}`)
+                })
         },
         loadChannelNames({commit, state}) {
             const url = `CHANNEL/channel`

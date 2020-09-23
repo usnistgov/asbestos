@@ -76,6 +76,8 @@ public class ChannelControlServlet extends HttpServlet {
         try {
 
             if (GetChannelIdsRequest.isRequest(request))        new GetChannelIdsRequest(request).run();
+            else if (AddSessionRequest.isRequest(request))  new AddSessionRequest(request).run();
+            else if (DelSessionRequest.isRequest(request))  new DelSessionRequest(request).run();
             else if (GetChannelIdAndURLRequest.isRequest(request)) new GetChannelIdAndURLRequest(request).run();
             else if (GetSessionNamesRequest.isRequest(request)) new GetSessionNamesRequest(request).run();
             else if (GetChannelConfigRequest.isRequest(request)) new GetChannelConfigRequest(request).run();

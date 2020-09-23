@@ -1,11 +1,18 @@
 package gov.nist.asbestos.client.Base;
 
+import org.apache.commons.io.FileUtils;
+
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class Dirs {
+
+    static public void deleteDir(File dir) throws IOException {
+        FileUtils.deleteDirectory(dir);
+    }
 
     static public List<File> listOfFiles(File root) {
         List<File> list = new ArrayList<>();
