@@ -289,7 +289,8 @@ public class AnalysisReport {
                         loadBaseFromContext();
                     }
                 } catch (Exception e) {
-                    generalErrors.add((baseObj.isRequest() ? "Request " : "Response ") + "contains no Resource");
+                    if (baseObj != null)
+                        generalErrors.add((baseObj.isRequest() ? "Request " : "Response ") + "contains no Resource");
                     return buildReport();
                 }
                 buildAtts();
@@ -471,11 +472,11 @@ public class AnalysisReport {
 
         Map<String, String> params = baseRef.getParametersAsMap();
         BaseResource resource = null;
-        if (params.containsKey("focusUrl") && !Strings.isNullOrEmpty(params.get("focusUrl"))) {
+        if (hasValue(params, "focusUrl")) {
             String focusUrl = params.get("focusUrl");
             ResourceWrapper wrapper = findResourceInBundle(getContextBundle(), focusUrl);
             resource = wrapper.getResource();
-        } else if (params.containsKey("fhirPath")&& !Strings.isNullOrEmpty(params.get("fhirPath"))) {
+        } else if (hasValue(params, "fhirPath")) {
             FhirPath fhirPath = new FhirPath(params.get("fhirPath"));
             resource = resourceFromBundle((Bundle) contextResourceBundle.getResource(), fhirPath);
         } else if ("Bundle".equals(baseRef.getResourceType()) &&"Bundle".equals(contextResourceBundle.getResourceType())){
@@ -489,7 +490,7 @@ public class AnalysisReport {
                     baseObj.setRef(baseRef);
                 }
             } else if (isPDBResponse(bundle)) {
-                String uriBase = bundle.getLink("self").getUrl();
+                String uriBase = bundle.hasLink() ? bundle.getLink("self").getUrl() : null;
                 Ref documentManifestLocation = findDocumentManifestInResponseBundle(bundle);
                 if (uriBase != null && documentManifestLocation != null) {
                     Ref dmRef = documentManifestLocation.rebase(uriBase);
@@ -497,7 +498,8 @@ public class AnalysisReport {
                     ResourceWrapper dm = fhirClient.readResource(dmRef);
                     baseObj = dm;
                     baseRef = dmRef;
-                }
+                } else
+                    baseObj = contextResourceBundle;
             } else {
                 baseObj = new ResourceWrapper(bundle)
                         .setRef(baseRef)
@@ -510,6 +512,11 @@ public class AnalysisReport {
             baseObj = new ResourceWrapper(resource)
                     .setRef(baseRef)
                     .setContext((Bundle)contextResourceBundle.getResource());
+    }
+
+    private static boolean hasValue(Map<String, String> params, String key) {
+        if (!params.containsKey(key)) return false;
+        return !Strings.isNullOrEmpty(params.get(key));
     }
 
     private static List<String> pdbProfles = Arrays.asList(

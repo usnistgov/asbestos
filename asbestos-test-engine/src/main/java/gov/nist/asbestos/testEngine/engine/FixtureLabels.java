@@ -9,7 +9,6 @@ import gov.nist.asbestos.http.operations.HttpBase;
 import gov.nist.asbestos.serviceproperties.ServiceProperties;
 import gov.nist.asbestos.serviceproperties.ServicePropertiesEnum;
 import gov.nist.asbestos.testEngine.engine.fixture.FixtureComponent;
-import org.checkerframework.checker.guieffect.qual.UI;
 import org.hl7.fhir.r4.model.TestScript;
 
 import java.util.Objects;
@@ -18,12 +17,12 @@ public class FixtureLabels {
     TestDef testDef;
     boolean sourceId = false;
     boolean responseId = false;
-    String rawReference;
+    private String rawReference;
     public String referenceLabel;
     String label = null;
-    String tail = "";
+    //private String tail = "";
 
-    public enum Source { SOURCE, RESPONSE };
+    public enum Source { REQUEST, RESPONSE };
 
     FixtureLabels(TestDef testDef) {
         this.testDef = testDef;
@@ -46,40 +45,39 @@ public class FixtureLabels {
 
     public FixtureLabels(TestDef testDef, FixtureComponent assertionSource, Source source) {
         this.testDef = testDef;
-        if (source == Source.SOURCE) {
+        if (source == Source.REQUEST) {
             sourceId = true;
             label = "source";
         } else if (source == Source.RESPONSE) {
             sourceId = false;
             label = "response";
         }
+        responseId = !sourceId;
         assignAttributes(label);
 
         HttpBase httpBase = assertionSource.getHttpBase();  // http operation of fixtureComponent.wrapper
         ResourceWrapper wrapper1 = assertionSource.getResourceWrapper();
-        String refStrRaw = null;
 
         if (httpBase != null) {  // fixtureComponent created by operation
-            refStrRaw = operationReport(this, httpBase);
+            operationReport(this, httpBase);
         } else if (wrapper1 != null) {   // static fixtureComponent
-            refStrRaw = staticFixtureReport(this, assertionSource, wrapper1, refStrRaw);
+            staticFixtureReport(this, assertionSource, wrapper1);
         }
     }
 
-    private String operationReport(FixtureLabels labels, HttpBase httpBase) {
-        String refStrRaw = null;
+    private void operationReport(FixtureLabels labels, HttpBase httpBase) {
         Headers responseHeaders = httpBase.getResponseHeaders();
         String eventUrl = responseHeaders.getProxyEvent();
         if (eventUrl != null) {
-            refStrRaw = EventLinkToUILink.get(eventUrl, labels.tail);
+            String refStrRaw = EventLinkToUILink.get(eventUrl, labels.getTail());
             labels.referenceLabel = (labels.label == null) ? refStrRaw : "Open in Inspector";
-            labels.rawReference = refStrRaw;
+            labels.setRawReference(refStrRaw);
         }
-        return refStrRaw;
     }
 
-    private String staticFixtureReport(FixtureLabels labels, FixtureComponent fixtureComponent, ResourceWrapper wrapper1, String refStrRaw) {
+    private String staticFixtureReport(FixtureLabels labels, FixtureComponent fixtureComponent, ResourceWrapper wrapper1) {
         Objects.requireNonNull(testDef);
+        String refStrRaw = null;
         Ref ref = wrapper1.getRef();
         if (ref != null) {
             String base = ServiceProperties.getInstance().getPropertyOrStop(ServicePropertiesEnum.FHIR_TOOLKIT_UI_HOME_PAGE);
@@ -112,7 +110,7 @@ public class FixtureLabels {
                 refStrRaw = base + "/session/" + testDef.getTestSessionId()
                         + "/channel/" + testDef.getChannelId()
                         + "/lognav/" + uiEvent.getEventName()
-                        + labels.tail;
+                        + labels.getTail();
             }
         }
         return refStrRaw;
@@ -128,6 +126,12 @@ public class FixtureLabels {
             sourceId = true;
             label = "sourceId (" + key + ")";
         }
+
+        if (assertionSource != null) {
+            ResourceWrapper wrapper = assertionSource.getResourceWrapper();
+            sourceId = wrapper.isRequest();
+            responseId = !sourceId;
+        }
         assignAttributes(key);
     }
 
@@ -138,21 +142,17 @@ public class FixtureLabels {
     private void assignAttributes(String key) {
         if (key == null)
             key ="";
-        if (sourceId)
-            tail = "/req";
-        else if (responseId)
-            tail = "/resp";
-        else if (key != null && key.equals("lastOperation")) {
-            tail = "/resp";
+        if (key.equals("lastOperation")) {
+            responseId = true;
             label = key;
         }
 
         if (label == null) {
             label = key;
             if (key.equals("request"))
-                tail = "/req";
+                sourceId = true;
             if (key.equals("response"))
-                tail = "/resp";
+                responseId = true;
         }
     }
 
@@ -177,5 +177,14 @@ public class FixtureLabels {
         String uiLink = EventLinkToUILink.get(event, "");
         setRawReference(uiLink);
         referenceLabel = fixtureComponent.getId() == null ? "Open in Inspector" : fixtureComponent.getId();
+    }
+
+//    public FixtureLabels setTail(String tail) {
+//        this.tail = tail;
+//        return this;
+//    }
+
+    public String getTail() {
+        return responseId ? "/resp" : "/req";
     }
 }

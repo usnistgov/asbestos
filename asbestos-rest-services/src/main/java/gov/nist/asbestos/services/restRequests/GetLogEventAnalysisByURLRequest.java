@@ -53,6 +53,7 @@ public class GetLogEventAnalysisByURLRequest {
     Model model;
 
     public void run() throws IOException {
+        model.request.announce("GetLogEvent by URL");
         String url = model.queryParams.get("url");
         if (Strings.isNullOrEmpty(url)) {
             model.request.badRequest();
