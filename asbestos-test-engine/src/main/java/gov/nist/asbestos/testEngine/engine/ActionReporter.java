@@ -100,7 +100,7 @@ class ActionReporter implements TestDef {
             }
             if (refStrRaw != null && labels.label != null) {
                 // referenced to UIEvent for display in inspector
-                labels.rawReference = refStrRaw;
+                labels.setRawReference(refStrRaw);
                 labels.referenceLabel = "Open in Inspector";
                 // log.info("Fixture Reference: " + labels.label + " => " + refStrRaw);
                 fixtures.put(labels.label, labels.getReference());
@@ -170,7 +170,7 @@ class ActionReporter implements TestDef {
             }
             if (refStrRaw != null && labels.label != null) {
                 // referenced to UIEvent for display in inspector
-                labels.rawReference = refStrRaw;
+                labels.setRawReference(refStrRaw);
                 labels.referenceLabel = "Open in Inspector";
                 // log.info("Fixture Reference: " + labels.label + " => " + refStrRaw);
                 fixtures.put(labels.label, labels.getReference());
@@ -256,7 +256,7 @@ class ActionReporter implements TestDef {
                 refStrRaw = base + "/session/" + uiEvent.getTestSession()
                         + "/channel/" + uiEvent.getChannelId()
                         + "/lognav/" + uiEvent.getEventName()
-                + labels.tail;
+                + labels.getTail();
             }
         }
         return refStrRaw;
@@ -266,21 +266,21 @@ class ActionReporter implements TestDef {
         Headers responseHeaders = httpBase.getResponseHeaders();
         String eventUrl = responseHeaders.getProxyEvent();
         if (eventUrl != null) {
-            refStrRaw = EventLinkToUILink.get(eventUrl, labels.tail);
+            refStrRaw = EventLinkToUILink.get(eventUrl, labels.getTail());
             labels.referenceLabel = (labels.label == null) ? refStrRaw : "Open in Inspector";
-            labels.rawReference = refStrRaw;
+            labels.setRawReference(refStrRaw);
         }
         return refStrRaw;
     }
 
-    public String uiLinkToEvent(String eventUrl, String urlTail) {
-        FixtureLabels labels = new FixtureLabels(this);
-        labels.tail = urlTail;
-        String refStrRaw = EventLinkToUILink.get(eventUrl, labels.tail);
-        labels.referenceLabel = (labels.label == null) ? refStrRaw : "Open in Inspector";
-        labels.rawReference = refStrRaw;
-        return labels.getReference();
-    }
+//    public String uiLinkToEvent(String eventUrl, String urlTail) {
+//        FixtureLabels labels = new FixtureLabels(this);
+//        labels.setTail(urlTail);
+//        String refStrRaw = EventLinkToUILink.get(eventUrl, labels.getTail());
+//        labels.referenceLabel = (labels.label == null) ? refStrRaw : "Open in Inspector";
+//        labels.setRawReference(refStrRaw);
+//        return labels.getReference();
+//    }
 
     private void reportAssertionSource(Map<String, String> fixtures) {
         if (assertionSource != null) {

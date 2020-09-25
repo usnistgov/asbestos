@@ -110,7 +110,7 @@ export const logStore = {
             if (!anchor)
                 anchor = ""
 
-            const url = `analysis/event/${session}/${channel}/${eventId}/${requestOrResponse}?validation=true;focusUrl=${focusUrl};focusAnchor=${anchor}`
+            const url = `analysis/event/${session}/${channel}/${eventId}/${requestOrResponse}?validation=true&focusUrl=${focusUrl}&focusAnchor=${anchor}`
             try {
                 const result = await LOG.get(url)
                 //const data = {analysis: result.data, eventId: eventId}

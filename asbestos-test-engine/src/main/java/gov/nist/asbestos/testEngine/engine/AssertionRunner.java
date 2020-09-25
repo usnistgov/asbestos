@@ -8,8 +8,6 @@ import gov.nist.asbestos.testEngine.engine.fixture.FixtureMgr;
 import gov.nist.asbestos.testEngine.engine.fixture.UnregisteredFixtureComponent;
 import org.hl7.fhir.r4.model.*;
 
-import java.util.Arrays;
-import java.util.List;
 import java.util.Objects;
 
 public class AssertionRunner implements AssertionContext {
@@ -374,10 +372,13 @@ public class AssertionRunner implements AssertionContext {
             return null;
         }
 
+        ResourceWrapper wrapper = sourceFixture.getResourceWrapper();
+        FixtureLabels.Source source = wrapper.isRequest() ? FixtureLabels.Source.REQUEST : FixtureLabels.Source.RESPONSE;
+
         return new FixtureLabels(
                 getTestDef(),
-                getSource(),
-                FixtureLabels.Source.SOURCE);
+                sourceFixture,
+                source);
     }
 
     public FixtureLabels getCompareToFixtureLabels() {
@@ -392,7 +393,7 @@ public class AssertionRunner implements AssertionContext {
         return new FixtureLabels(
                 getTestDef(),
                 getCompareToSource(),
-                FixtureLabels.Source.SOURCE);
+                FixtureLabels.Source.REQUEST);
     }
 
     @Override

@@ -64,7 +64,7 @@
         <module>asbestos-proxy-support</module>
         <module>asbestos-utilities</module>
         <module>asbestos-test-engine</module>
-        <module>service-properties</module>
+        <module>asbestos-service-properties</module>
         <module>asbestos-analysis</module>
         <module>asbestos-debug-testscript</module>
         <module>asbestos-rest-services</module>

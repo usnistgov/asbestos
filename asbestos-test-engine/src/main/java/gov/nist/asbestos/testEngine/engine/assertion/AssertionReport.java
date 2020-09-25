@@ -2,7 +2,6 @@ package gov.nist.asbestos.testEngine.engine.assertion;
 
 import gov.nist.asbestos.testEngine.engine.FixtureLabels;
 import gov.nist.asbestos.testEngine.engine.Reporter;
-import gov.nist.asbestos.testEngine.engine.TestDef;
 import gov.nist.asbestos.testEngine.engine.fixture.FixtureComponent;
 import org.hl7.fhir.r4.model.TestReport;
 
@@ -43,7 +42,7 @@ public class AssertionReport {
     public static void build(AssertionContext ctx, FixtureComponent source, FixtureComponent reference) {
         FixtureLabels sourceLabels = new FixtureLabels(ctx.getTestDef(), source, FixtureLabels.Source.RESPONSE);
         sourceLabels.setReference(source);
-        FixtureLabels referenceLabels = new FixtureLabels(ctx.getTestDef(), reference, FixtureLabels.Source.SOURCE);
+        FixtureLabels referenceLabels = new FixtureLabels(ctx.getTestDef(), reference, FixtureLabels.Source.REQUEST);
         referenceLabels.setReference(reference);
         Reporter.assertDescription(ctx.getCurrentAssertReport(), "**Compare** " + sourceLabels.getReference() + " to **Reference** " + referenceLabels.getReference());
     }

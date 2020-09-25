@@ -65,6 +65,7 @@ public class GetLogEventAnalysisByEventRequest {
     Model model;
 
     public void run() throws IOException {
+        model.request.announce(("GetLogAnalysis by event"));
         if (model.done) return;
         EventAnalysisCommon.runAndReturnReport(model.wrapper, model.request, model.eventContext);
     }
