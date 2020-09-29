@@ -6,6 +6,9 @@ Vue.use(Vuex)
 function XpathNotSupportedFooter() {
     this.message = 'Note: FHIR Toolkit does not support XPath/JSONPath.'
 }
+function ResponseFooter() {
+    this.message = 'The processing of this assert is against the received response message.'
+}
 
 function AssertionEvalObj() {
     /*
@@ -54,6 +57,7 @@ function FhirPathContextObj() {
     this.dataObj = new AssertionEvalObj()
     this.resultObj = new EvalResultObj()
     this.resourceList = []
+    this.sourceIdDetails = {displayField: 'sourceId', fixtureResourceName: '',  fixtureProfileUrl: '',   analysisUrl: ''}
     this.displayFieldList = ['sourceId','expression','value']
     this.footerList = [new XpathNotSupportedFooter()]
     this.evalAction = 'doDebugEvalForResources'
@@ -120,6 +124,7 @@ export const debugAssertionEvalStore = {
                                 , displayFieldList: ['sourceId','response','warningOnly']
                                 , fhirPathContextObj: new FhirPathContextObj()
                                 , selectedEvalOptionTab: ''
+                                , footerList: [new ResponseFooter()]
                             },
                             ResponseCode: {dataObj: new AssertionEvalObj(), resultObj: new EvalResultObj()
                                 , displayFieldList: ['responseCode','operator','warningOnly']},
@@ -218,6 +223,18 @@ export const debugAssertionEvalStore = {
                         contextObj.resourceList.push(r)
                     }
                 }
+
+                // Set fixture specific values
+                if ('fixtureResourceName' in obj ) {
+                    contextObj.sourceIdDetails.fixtureResourceName = obj.fixtureResourceName
+                }
+                if ('fixtureProfileUrl' in obj) {
+                   contextObj.sourceIdDetails.fixtureProfileUrl = obj.fixtureProfileUrl
+                }
+                if ('analysisUrl' in obj) {
+                    contextObj.sourceIdDetails.analysisUrl = obj.analysisUrl
+                }
+
             } catch (e) {console.log(e.toString())}
         },
         updateAssertionEvalObj(state, obj) {

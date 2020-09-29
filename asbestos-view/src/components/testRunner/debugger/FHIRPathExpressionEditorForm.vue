@@ -1,30 +1,26 @@
 <template>
     <!--
-    Notes on the Debug assertion Eval window (and running an assertion in general):
-    Each assertion property is evaluated in an arbitrary order. The implication of this is that when Eval is executed for the entire assert object,
-    an error could have occurred in other place than the most recent place of change.
-    Example: prop1=true, prop2='OperationOutcome.count() = 0', Now if prop1 was actually false, the assertion runner will stop at the first failure.
-    AssertionRunner does not point the offending assert element in the TestReport.
+    AssertionRunner does not point to the offending assert element in the TestReport.
     -->
-   <div class="dafFlexContainer">
-     <div class="dafFlexItem" v-for="(propKey, keyIndex) in displayFieldList" :key="keyIndex" :data-flex-item="propKey">
+  <div>
+   <div id="firstRowContainer" class="dafFlexContainer">
+     <div class="dafFlexItem" > <!-- v-for="(propKey, keyIndex) in displayFieldList" :key="keyIndex" :data-flex-item="propKey" -->
         <div>
-            <div >
-                <label :for="getFormInputId(propKey)" :title="getEnumTypeShortDefinition(propKey)">{{propKey}}</label>
+            <div>
+                <label :for="getFormInputId('sourceId')" :title="getEnumTypeShortDefinition('sourceId')">sourceId</label>
                     <span
-                    @click.stop="openHelp(propKey)"
+                    @click.stop="openHelp('sourceId')"
                     class="infoIconLink"
-                    :title="`Click to open the ${propKey} assert element detailed description in a new browser tab.`"><img alt="External link" style="vertical-align: top" src="../../../assets/ext_link.png"></span> <!-- &#x1f4d6; &#x2139; -->
+                    :title="`Click to open the sourceId assert element detailed description in a new browser tab.`"><img alt="External link" style="vertical-align: top" src="../../../assets/ext_link.png"/></span> <!-- &#x1f4d6; &#x2139; -->
             </div>
             <div>
-                <template v-if="isPropertyAnEnumType(propKey)"> <!--  -->
                     <select class="form-control-select"
-                            :id="getFormInputId(propKey)"
-                            :data-prop-key="propKey"
-                            :value="getPropVal(propKey)"
+                            :id="getFormInputId('sourceId')"
+                            :data-prop-key="'sourceId'"
+                            :value="getPropVal('sourceId')"
                             @change="onEvalObjPropSelect"
                             >
-                        <option v-for="(option,idx) in getEnumTypeArray(propKey)"
+                        <option v-for="(option,idx) in getEnumTypeArray('sourceId')"
                                 :value="option.codeValue"
                                 :title="option.definition"
                                 :disabled="option.codeValue===''"
@@ -32,19 +28,6 @@
                             {{ option.displayName }}
                         </option>
                     </select>
-                </template>
-                <template v-else>
-                     <textarea
-                             v-bind:class="{
-                        'form-control-textarea-error': getResultCode().valueOf() !== 'pass' && getResultPropKey() === propKey,
-                        'form-control-textarea' : true,
-                        }"
-                             :id="getFormInputId(propKey)"
-                             :value="getPropVal(propKey)"
-                             :data-prop-key="propKey"
-                             @input="onTextChange"
-                     />
-                </template>
             </div>
             <div class="smallText">{{getEnumTypeFormalDefinition(propKey)}}</div>
             <div class="sourceIdDetails" v-if="isFhirPathOptionTab && propKey === getSourceIdDetails.displayField">
@@ -52,13 +35,6 @@
                     <a :href="getResourceLink(getSourceIdDetails.fixtureProfileUrl)" target="_blank">{{getSourceIdDetails.fixtureResourceName}}<img alt="External link" style="vertical-align: top" title="External link" src="../../../assets/ext_link.png"></a>.
                 </p>
                 <div v-if="getSourceIdDetails.analysisUrl" style="width: 700px">
-<!--                    <log-analysis-report-->
-<!--                            :session-id="$store.state.base.session"-->
-<!--                            :channel-id="$store.state.base.channelId"-->
-<!--                            :the-url="decodeURIComponent(getSourceIdDetails.analysisUrl)"-->
-<!--                            :gzip="true"-->
-<!--                            :use-proxy="true"-->
-<!--                            :ignore-bad-refs="true"></log-analysis-report>-->
                     <inspect-event
                             :sessionId="$store.state.base.session"
                             :channelId="$store.state.base.channelId"
@@ -68,51 +44,76 @@
                     </inspect-event>
                 </div>
             </div>
+
+
+
+
+
         </div>
-     </div> <!-- end flexItem -->
-     <button class="evalButton" @click="doEval('')">Evaluate</button>
-       <div class="resultBox" v-if="isFhirPathOptionTab">
-<!--         <span v-if="getSourceIdDetails.fixtureResourceName">The selected resource is a\an-->
-<!--             <a :href="getResourceLink(getSourceIdDetails.fixtureProfileUrl)" target="_blank">{{getSourceIdDetails.fixtureResourceName}}<img alt="External link" style="vertical-align: top" src="../../../assets/ext_link.png"></a>.-->
-<!--         </span>-->
-           <div v-if="getPatternTypeObj.resultObj.wasEvaluatedAtleastOnce && getResultCode() === 'pass'" >
-               <template v-if="getResourceList() && getResourceList().length > 0">
-                   <select size="5"  >
-                       <option v-for="(rName,rKey) in getResourceList()"
-                               :value="rName"
-                               :key="rKey">
-                           {{ rName}}
-                       </option>
-                   </select>
-                   <div class="form-label">{{getResourceList().length}} resource(s) found.</div>
-                   <div>
-                       <button class="resultBox">Inspect</button>
-                   </div>
-               </template>
-               <template v-else>
-                   No resources found.
-               </template>
-           </div>
-           <div v-if="getPropVal('expression')"
-                v-bind:class="{
-                    'resultBox': true,
-                    'evalNotPassed': getResultCode().valueOf() !== 'pass',
-                    }">
-               <span class="form-block">{{getResultCode()}}</span>
-               <vue-markdown
-                       v-bind:source="getResultMessage()"></vue-markdown>
-           </div>
+     </div> <!-- End div.dafFlexItem -->
+
+
+  </div>
+    <div class="secondRowFlexContainer" >
+       <div class="horizFlexItem">
+              <textarea
+                      v-bind:class="{
+                        'form-control-textarea-error': getResultCode().valueOf() !== 'pass' && getResultPropKey() === 'expression',
+                        'form-control-textarea' : true,
+                        }"
+                      :id="getFormInputId('expression')"
+                      :value="getPropVal('expression')"
+                      :data-prop-key="expression"
+                      @input="onTextChange"
+              />
+           <div class="smallText">{{getEnumTypeFormalDefinition('expression')}}</div>
+           <textarea
+                   v-bind:class="{
+                        'form-control-textarea-error': getResultCode().valueOf() !== 'pass' && getResultPropKey() === 'value',
+                        'form-control-textarea' : true,
+                        }"
+                   :id="getFormInputId('value')"
+                   :value="getPropVal('value')"
+                   :data-prop-key="value"
+                   @input="onTextChange"
+           />
+           <div class="smallText">{{getEnumTypeFormalDefinition('value')}}</div>
+
+           <button class="evalButton" @click="doEval('')">Evaluate</button>
        </div>
-     <div  v-else
-             v-bind:class="{
+        <div class="horizFlexItem">
+            <div class="resultBox" v-if="isFhirPathOptionTab">
+                <div v-if="getPatternTypeObj.resultObj.wasEvaluatedAtleastOnce && getResultCode() === 'pass'" >
+                    <template v-if="getResourceList() && getResourceList().length > 0">
+                        <select size="5"  >
+                            <option v-for="(rName,rKey) in getResourceList()"
+                                    :value="rName"
+                                    :key="rKey">
+                                {{ rName}}
+                            </option>
+                        </select>
+                        <div class="form-label">{{getResourceList().length}} resource(s) found.</div>
+                        <!--                   <div>-->
+                        <!--                       <button class="resultBox">Inspect</button>-->
+                        <!--                   </div>-->
+                    </template>
+                    <template v-else>
+                        No resources found.
+                    </template>
+                </div>
+                <div v-if="getPropVal('expression')"
+                     v-bind:class="{
                     'resultBox': true,
                     'evalNotPassed': getResultCode().valueOf() !== 'pass',
                     }">
-        <span class="form-block">{{getResultCode()}}</span>
-        <vue-markdown
-            v-bind:source="getResultMessage()"></vue-markdown>
-     </div>
- </div>
+                    <span class="form-block">{{getResultCode()}}</span>
+                    <vue-markdown
+                            v-bind:source="getResultMessage()"></vue-markdown>
+                </div>
+            </div>
+        </div>
+    </div>
+  </div>
 </template>
 
 <script>
@@ -121,7 +122,7 @@
     import debugEvalFormMixin from "../../../mixins/debugEvalFormMixin";
 
     export default {
-        name: "DebugAssertionEvalForm",
+        name: "FHIRPathExpressionEditorForm",
         data() {
             return {
                 evalTimer: null,
@@ -157,12 +158,20 @@
 </script>
 
 <style scoped>
+    .secondRowFlexContainer {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        width: auto; /* auto; */
+        height: auto; /* A definite pixel limit is needed for the flex mode column wrap */
+        text-align: left;
+    }
     .dafFlexContainer {
         display: flex;
         flex-direction: column;
         flex-wrap: wrap;
         width: auto; /* auto; */
-        height: 754px; /* A definite pixel limit is needed for the flex mode column wrap */
+        height: auto; /* A definite pixel limit is needed for the flex mode column wrap */
         text-align: left;
     }
 

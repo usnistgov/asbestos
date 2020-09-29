@@ -1,6 +1,7 @@
 package gov.nist.asbestos.testEngine.engine;
 
 import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import com.google.gson.Gson;
 import gov.nist.asbestos.client.client.Format;
 import gov.nist.asbestos.client.debug.AssertionFieldDescription;
@@ -11,17 +12,26 @@ import gov.nist.asbestos.client.debug.StopDebugTestScriptException;
 import gov.nist.asbestos.client.debug.TestScriptDebugInterface;
 import gov.nist.asbestos.client.debug.TestScriptDebugState;
 import gov.nist.asbestos.client.debug.TsEnumerationCodeExtractor;
+import gov.nist.asbestos.client.events.UIEvent;
 import gov.nist.asbestos.client.resolver.Ref;
+import gov.nist.asbestos.serviceproperties.ServiceProperties;
+import gov.nist.asbestos.serviceproperties.ServicePropertiesEnum;
+import gov.nist.asbestos.testEngine.engine.fixture.FixtureComponent;
 import org.apache.log4j.Logger;
 import org.hl7.fhir.r4.model.Base;
 import org.hl7.fhir.r4.model.BaseResource;
 import org.hl7.fhir.r4.model.Enumeration;
+import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.TestReport;
 import org.hl7.fhir.r4.model.TestScript;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -162,44 +172,74 @@ public class TestScriptDebugger implements TestScriptDebugInterface {
 
     private void doEvalForResource(TestScript.SetupActionAssertComponent assertComponent, TestScriptDebugState state, List<String> evalElementList, String evalJsonString) {
         TestScript.SetupActionAssertComponent copy = null;
+        TestReport.SetupActionAssertComponent actionReport = new TestReport.SetupActionAssertComponent();
         try {
             copy = makeAssert(assertComponent, state, evalElementList, evalJsonString);
             if (copy != null) {
                 String typePrefix = "contained.action";
-                TestReport.SetupActionAssertComponent actionReport = new TestReport.SetupActionAssertComponent();
                 te.doAssert(typePrefix, copy, actionReport);
-                String code = actionReport.getResult().toCode();
-                if ("fail".equals(code)) {
-                    log.info("copy eval failed.");
-                } else if ("error".equals(code)) {
-                    log.info("copy eval error.");
-                } else {
-                    String fixtureId = copy.getSourceId();
-                    String fhirPath = copy.getExpression();
-                    BaseResource resource = te.getFixtures().get(fixtureId).getResourceResource();
-                    List<Base> resources = FhirPathEngineBuilder.evalForResources(resource, fhirPath);
-                    List<String> baseNames = new ArrayList<>();
-                    if (resources != null) {
-                        for (Base b : resources) {
-                            baseNames.add(b.fhirType());
-                        }
-                        List<String> myList =
-                                baseNames
-                                        .stream()
-                                        .map(TestScriptDebugState::quoteString)
-                                        .collect(Collectors.toList());
-                        String myString = String.join(",", myList);
-                        state.sendEvalForResourcesResult(code, actionReport.getMessage(), "", myString);
-                    } else {
-                        String emptyStr = TestScriptDebugState.quoteString("");
-                        state.sendEvalForResourcesResult(code, actionReport.getMessage(), "", emptyStr);
-                    }
-                    return;
-                }
-                state.sendDebugAssertionEvalResultStr(code, actionReport.getMessage(), "");
             }
         } catch (DebugCopyAssertException ex) {
+            state.sendDebugAssertionEvalResultStr("error", ex.toString(), ex.getPropKey());
+            return;
         }
+
+        String code = actionReport.getResult().toCode();
+        String fixtureId = copy.getSourceId();
+        String propKey = "";
+        String fixtureResourceName = null;
+        String fixtureProfileUrl = null;
+        String analysisUrl = null;
+        String resourcesString = TestScriptDebugState.quoteString("");
+
+        try {
+            propKey = "sourceId";
+            if (fixtureId != null && !"".equals(fixtureId)) {
+                FixtureComponent selectedFixtureComponent = te.getFixtures().get(fixtureId);
+                Class<?> clazz = selectedFixtureComponent.getResourceResource().getClass();
+                ResourceDef annotation = clazz.getAnnotation(ResourceDef.class);
+                if (annotation != null) {
+                    fixtureResourceName = annotation.name();
+                    fixtureProfileUrl = URLEncoder.encode(annotation.profile(), StandardCharsets.UTF_8.toString());
+                }
+                if (selectedFixtureComponent.getCreatedByUIEvent() != null) {
+                    String direction = selectedFixtureComponent.getResourceWrapper().isRequest() ? "request" : "response";
+//                    URI eventUri = getAnalysisURI(selectedFixtureComponent.getCreatedByUIEvent(), direction);
+//                    analysisUrl = URLEncoder.encode(eventUri.toString(), StandardCharsets.UTF_8.toString());
+                    analysisUrl = URLEncoder.encode(selectedFixtureComponent.getCreatedByUIEvent().getEventName(), StandardCharsets.UTF_8.toString());
+                }
+            }
+        } catch (Exception ex) {
+            state.sendDebugAssertionEvalResultStr("error", "Fixture analysis exception: " + ex.toString(), propKey);
+            return;
+        }
+
+        try {
+            propKey = "expression";
+            String fhirPath = copy.getExpression();
+            if (fhirPath != null && ! "".equals(fhirPath)) {
+                BaseResource resource = te.getFixtures().get(fixtureId).getResourceResource();
+                List<Base> resources = FhirPathEngineBuilder.evalForResources(resource, fhirPath);
+                List<String> baseNames = new ArrayList<>();
+                if (resources != null) {
+                    for (Base b : resources) {
+                        baseNames.add(b.fhirType());
+                    }
+                    List<String> myList =
+                            baseNames
+                                    .stream()
+                                    .map(TestScriptDebugState::quoteString)
+                                    .collect(Collectors.toList());
+                    resourcesString = String.join(",", myList);
+                }
+            }
+        } catch (Exception ex) {
+            state.sendDebugAssertionEvalResultStr("error", "Expression resource exception: " + ex.toString(), propKey);
+            return;
+        }
+
+        state.sendEvalForResourcesResult(code, actionReport.getMessage(), "", resourcesString, fixtureResourceName, fixtureProfileUrl, analysisUrl);
+        return;
     }
 
     private void doEval(TestScript.SetupActionAssertComponent assertComponent, TestScriptDebugState state, List<String> evalElementList, String evalJsonString) {
@@ -219,6 +259,7 @@ public class TestScriptDebugger implements TestScriptDebugInterface {
                 state.sendDebugAssertionEvalResultStr(code, actionReport.getMessage(), "");
             }
         } catch (DebugCopyAssertException ex) {
+            state.sendDebugAssertionEvalResultStr("error", ex.toString(), ex.getPropKey());
         }
     }
 
@@ -255,8 +296,7 @@ public class TestScriptDebugger implements TestScriptDebugInterface {
             copy.setWarningOnly(Boolean.parseBoolean(myMap.get(it.next())));
             return copy;
         } catch (Exception ex) {
-            state.sendDebugAssertionEvalResultStr("Exception: ", ex.getMessage(), (it.hasPrevious()?it.previous():""));
-            throw new DebugCopyAssertException(ex.toString());
+            throw new DebugCopyAssertException("Copy exception: " + ex.toString(),  (it.hasPrevious()?it.previous():""));
         }
     }
 
@@ -366,6 +406,23 @@ public class TestScriptDebugger implements TestScriptDebugInterface {
                         + ",\"debugButtonLabel\":\"Resume\""
                         + ",\"isEvaluable\":\""+ isEvaluable +"\""
                         + ",\"testReport\":" + reportsAsJson  + "}"); // getModularEngine().reportsAsJson()
+
+    }
+
+    static URI getAnalysisURI(UIEvent uiEvent, String directionStr) {
+        try {
+            return new URI(ServiceProperties.getInstance().getPropertyOrStop(ServicePropertiesEnum.FHIR_TOOLKIT_BASE)
+                    + "/" + "analysis"
+                    + "/" + "event"
+                    + "/" + uiEvent.getTestSession()
+                    + "/" + uiEvent.getChannelId()
+                    + "/" + uiEvent.getEventName()
+                    + "/" + directionStr
+            );
+
+        } catch (URISyntaxException e) {
+            throw new Error(e);
+        }
 
     }
 

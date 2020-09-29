@@ -38,7 +38,10 @@
                                     </div>
                                 </div>
                             </template>
-                            <div>
+                            <div v-if="isFhirPathTabSelected">
+                                <f-h-i-r-path-expression-editor-form :pattern-type-obj="getSelectedObj" :pattern-type-id="selectedPatternTypeId" :option-type="selectedEvalOptionTab" />
+                            </div>
+                            <div v-else>
                                 <debug-assertion-eval-form :pattern-type-obj="getSelectedObj" :pattern-type-id="selectedPatternTypeId" :option-type="selectedEvalOptionTab" />
                             </div>
                         </div>
@@ -61,6 +64,7 @@
 
 <script>
     import DebugAssertionEvalForm from "./DebugAssertionEvalForm";
+    import FHIRPathExpressionEditorForm from "./FHIRPathExpressionEditorForm";
 
     export default {
         data() {
@@ -222,6 +226,7 @@
         },
         components: {
             DebugAssertionEvalForm,
+            FHIRPathExpressionEditorForm,
         },
         name: "DebugAssertionEvalModal"
     }
@@ -317,6 +322,7 @@
         display: flex;
         align-items: center;
         justify-content: space-evenly;
+        z-index: 99999;
     }
 
     * {
