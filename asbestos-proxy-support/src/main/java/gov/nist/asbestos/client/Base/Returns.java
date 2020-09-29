@@ -5,6 +5,7 @@ import org.hl7.fhir.r4.model.BaseResource;
 import org.hl7.fhir.r4.model.OperationOutcome;
 
 import javax.servlet.http.HttpServletResponse;
+import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
@@ -19,6 +20,11 @@ public class Returns {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    static void returnJson(HttpServletResponse resp, File file) {
+        String json = EC.readFromFile(file);
+        returnString(resp, json);
     }
 
     static String returnResource(HttpServletResponse resp, BaseResource resource) {

@@ -52,6 +52,7 @@ public class TestInstallerServlet  extends HttpServlet {
 
             initializeTestCollections();
             initializeAssertionMap();
+            initializeSessions();
 
             log.info("Locking External Cache copy of Test Definitions and Assertions");
             try {
@@ -247,6 +248,18 @@ public class TestInstallerServlet  extends HttpServlet {
         File war = warHome();
         try {
             FileUtils.copyDirectory(new File(new File(war, "data"), "TestCollections"), externalCollections);
+        } catch (IOException e) {
+            log.error(ExceptionUtils.getStackTrace(e));
+        }
+    }
+
+    private void initializeSessions() {
+        File externalSessions = new File(externalCache, EC.SESSIONS_DIR);
+        externalSessions.mkdirs();
+
+        File war = warHome();
+        try {
+            FileUtils.copyDirectory(new File(new File(war, "data"), "Sessions"), externalSessions);
         } catch (IOException e) {
             log.error(ExceptionUtils.getStackTrace(e));
         }

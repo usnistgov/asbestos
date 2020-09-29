@@ -36,6 +36,7 @@ public class EC {
 
     public static final String MarkerType = "Marker";
     public static final String TEST_COLLECTIONS_DIR = "FhirTestCollections";
+    public static final String SESSIONS_DIR = "FhirSessions";
     public static final String TEST_ASSERTIONS_DIR = "FhirTestAssertions";
     public static final String TEST_ASSERTIONS_FILE = "assertions.json";
     public static final String CHANNELS_DIR = "FhirChannels";
@@ -146,6 +147,14 @@ public class EC {
         if (!collectionRoot.exists()) return null;
         if (!collectionRoot.isDirectory()) return null;
         return collectionRoot;
+    }
+
+    public File getFhirSessions() {
+        return new File(externalCache, "FhirSessions");
+    }
+
+    public File getSessionConfig(String sessionId) {
+        return new File(getFhirSessions(), sessionId);
     }
 
     public File getTestCollectionsBase() {
@@ -534,5 +543,16 @@ public class EC {
             log.error(ExceptionUtils.getStackTrace(e));
             throw new RuntimeException(e);
         }
+    }
+
+    public static String readFromFile(File file) {
+        byte[] data;
+        try {
+            data = Files.readAllBytes(file.toPath());
+        } catch (IOException e) {
+            log.error(ExceptionUtils.getStackTrace(e));
+            throw new RuntimeException(e);
+        }
+        return new String(data);
     }
 }

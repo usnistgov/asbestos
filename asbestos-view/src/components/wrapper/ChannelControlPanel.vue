@@ -56,6 +56,10 @@
                     })
                 }
             },
+          updateChannelIdsFromEffectiveIds() {
+              const effective = this.$store.getters.getEffectiveChannelIds;
+
+          }
             updateChannelIdFromState() {
                 if (this.channel === null)
                     return
@@ -111,10 +115,10 @@
             },
         },
         created() {
-            if (this.$store.state.base.channelIds.length === 0) {
-                //this.$store.dispatch('loadChannelNames')   // should go away
-                this.$store.dispatch('loadChannelNamesAndURLs')
-            }
+            // if (this.$store.state.base.channelIds.length === 0) {
+            //     //this.$store.dispatch('loadChannelNames')   // should go away
+            //     //this.$store.dispatch('loadChannelIds')
+            // }
             this.channelId = this.channel
         },
         mounted() {

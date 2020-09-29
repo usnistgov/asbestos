@@ -9,23 +9,21 @@ import {CHANNEL} from '../common/http-common'
 export const baseStore = {
     state() {
         return {
-            session: 'default',
-            // environment: 'default',
+            session: 'default',   // name of current
+            sessionNames:[],
+            sessionConfigs: {},
 
-            testSession: null,
-            channelId: "default",
+            channelId: "default",  // current
+            channelIds: [],  // for all sessions
+            channel: null,   // current configuration matching channelId
 
-            sessions:[],
             environments: [
                 'default',
             ],
 
-            channelIds: [],  // for this session
-            channelURLs: [], // for this session { id:  ... , url: ... , site: ....}
             errors: [],
 
             proxyBase: null,
-            channel: null,
         }
     },
     mutations: {
@@ -41,12 +39,11 @@ export const baseStore = {
         setSession(state, theSession) {
             state.session = theSession
         },
-        // setEnvironment(state, theEnvironment) {
-        //     state.environment = theEnvironment
-        // },
-
-        setSessions(state, sessions) {
-            state.sessions = sessions
+        setSessionConfig(state, config) {
+            state.sessionConfigs[config.name] = config;
+        },
+        setSessionNames(state, sessions) {
+            state.sessionNames = sessions
         },
         setChannelId(state, channelId) {
             state.channelId = channelId
@@ -83,16 +80,66 @@ export const baseStore = {
         installChannelIds(state, channelIds) {
             state.channelIds = channelIds.sort()
         },
+        addChannelIds(state, channelIds) {
+            const currentChannelIds = state.channelIds;
+            const updatedChannelIds = currentChannelIds.concat(channelIds);
+            state.channelIds = updatedChannelIds.sort();
+        },
         installChannelURLs(state, urls) {
             state.channelURLs = urls
         },
     },
     actions: {
-        loadSessions({commit}) {
-            const url = `CHANNEL/sessionNames`
-            CHANNEL.get('sessionNames')
+        // used to initialize FTK
+        async initSessionsStore({commit}) {
+            let url
+            try {
+                url = `CHANNEL/sessionNames`
+                let data = await CHANNEL.get('sessionNames');
+                const sessionNames = data.data;
+                console.log(`sessionNames ${sessionNames}`);
+                commit('setSessionNames', sessionNames);
+
+                const promises = [];
+                sessionNames.forEach(sessionId => {
+                    url = `CHANNEL/sessionConfig/${sessionId}`;
+                    const promise = CHANNEL.get(`sessionConfig/${sessionId}`);
+                    promises.push(promise);
+                });
+                Promise.all(promises)
+                    .then(results => {
+                        results.forEach(result => {
+                            //console.log(`result is ${result}`);
+                            const config = result.data;
+                            //console.log(`config is ${config}`);
+                            commit('setSessionConfig', config);
+                        })
+                });
+
+                url = `CHANNEL/channels/all`;
+                let result = await CHANNEL.get('channels/all');
+                data = result.data;
+                console.log(`data is ${data}`)
+                let ids = [];
+                data.forEach(item => {
+                    console.log(`item is ${item}`)
+                    ids.push(item.id);
+                });
+                commit('installChannelIds', ids.sort());
+
+
+            } catch (error) {
+                commit('setError', url + ': ' + error)
+                console.error(`${error} for ${url}`)
+            }
+        },
+        // obsolete?
+        async selectSession({commit}, sessionId) {
+            commit('setSession', sessionId);
+            const url = `CHANNEL/sessionConfig/${sessionId}`
+            CHANNEL.get(`sessionConfig/${sessionId}`)
                 .then(response => {
-                    commit('setSessions', response.data)
+                    commit('setSessionConfig', response.data)
                 })
                 .catch(function (error) {
                     commit('setError', url + ': ' + error)
@@ -128,25 +175,25 @@ export const baseStore = {
                     console.error(`${error} for ${url}`)
                 })
         },
-        loadChannelNames({commit, state}) {
+        loadChannelNames({commit  /*, state */}) {
             const url = `CHANNEL/channel`
             PROXY.get('channel')
                 .then(response => {
                     const fullChannelIds = response.data
-                    const theFullChannelIds = fullChannelIds.filter(id => {
-                        return id.startsWith(state.session + '__')
-                    })
-                    const ids = theFullChannelIds.map(fullId => {
-                        return fullId.split('__')[1]
-                    })
-                    commit('installChannelIds', ids)
+                    // const theFullChannelIds = fullChannelIds.filter(id => {
+                    //     return id.startsWith(state.session + '__')
+                    // })
+                    // const ids = theFullChannelIds.map(fullId => {
+                    //     return fullId.split('__')[1]
+                    // })
+                    commit('installChannelIds', fullChannelIds)
                 })
                 .catch(function (error) {
                     commit('setError', url + ': ' + error)
                     console.error(`${error} for ${url}`)
                 })
         },
-        loadChannelNamesAndURLs({commit}) {
+        loadChannelIds({commit}) {  // for all sessions
             const url = `CHANNEL/channels/all`
             CHANNEL.get('channels/all')
                 .then(response => {
@@ -155,7 +202,7 @@ export const baseStore = {
                         ids.push(item.id)
                     })
                     commit('installChannelIds', ids.sort())
-                    commit('installChannelURLs', response.data)
+                    //commit('installChannelURLs', response.data)
                 })
                 .catch(e => {
                     commit('setError', url + ': ' + e)
@@ -188,6 +235,9 @@ export const baseStore = {
         }
     },
     getters: {
+        getSessionConfig: (state) => {
+            return state.sessionConfigs[state.session];
+        },
         getProxyBase: (state) => (parms) => {
             if (parms === null)
                 return state.proxyBase
@@ -203,6 +253,10 @@ export const baseStore = {
                 return channelId === theChannelId;
             })
             return index !== -1;
+        },
+        getEffectiveChannelIds: (state) => {
+            if (state.session === 'default')
+                return state.channelIds.filter(id => id.startsWith('default__'));
         }
     }
 }

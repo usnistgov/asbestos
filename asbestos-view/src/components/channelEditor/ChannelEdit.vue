@@ -278,7 +278,7 @@
                     }
                     this.msg('Deleted')
                     this.$store.commit('deleteChannel', this.channelId)
-                    await this.$store.dispatch('loadChannelNamesAndURLs')
+                    await this.$store.dispatch('loadChannelIds')
                     this.$router.push('/session/' + this.sessionId + '/channels')
                 } catch (error) {
                     this.lockAckMode = ""
