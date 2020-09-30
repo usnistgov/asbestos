@@ -59,7 +59,10 @@ export default {
             return null
         },
         getResultPropKey() {
-            return this.getPatternTypeObj.resultObj.propKey
+            if (this.getPatternTypeObj && 'propKey' in this.getPatternTypeObj.resultObj)
+                return this.getPatternTypeObj.resultObj.propKey
+            else
+                return ''
         },
         getPropVal(propKey) {
             let val = this.getPatternTypeObj.dataObj[propKey]

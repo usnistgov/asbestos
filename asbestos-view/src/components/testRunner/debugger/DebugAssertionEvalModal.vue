@@ -1,5 +1,5 @@
 <template>
-    <div name="modal" @dragover="drag_over" @drop="drop">
+    <div name="modal" @dragover="drag_over" @drop="drop" >
         <div class="modal-mask" @click.stop="close" v-show="show" >
             <div class="modalFlexContainer" >
                 <div id="debugAssertionEvalModal" class="eval-modal-container" @click.stop>
@@ -294,6 +294,7 @@
         width: 100%;
         top: 0;
         padding: 10px 10px 5px 10px;
+        z-index: 9100;
     }
 
     .patternHeaderContainer {
@@ -322,7 +323,7 @@
         display: flex;
         align-items: center;
         justify-content: space-evenly;
-        z-index: 99999;
+        z-index: 9000;
     }
 
     * {
@@ -331,7 +332,7 @@
 
     .modal-mask {
         position: fixed;
-        z-index: 9998;
+        z-index: 8000;
         top: 0;
         left: 0;
         width: 100%;

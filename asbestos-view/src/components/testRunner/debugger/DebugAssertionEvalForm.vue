@@ -10,7 +10,7 @@
      <div class="dafFlexItem" v-for="(propKey, keyIndex) in displayFieldList" :key="keyIndex" :data-flex-item="propKey">
         <div>
             <div >
-                <label :for="getFormInputId(propKey)" :title="getEnumTypeShortDefinition(propKey)">{{propKey}}</label>
+                <label class="form-label" :for="getFormInputId(propKey)" :title="getEnumTypeShortDefinition(propKey)">{{propKey}}</label>
                     <span
                     @click.stop="openHelp(propKey)"
                     class="infoIconLink"
@@ -47,63 +47,10 @@
                 </template>
             </div>
             <div class="smallText">{{getEnumTypeFormalDefinition(propKey)}}</div>
-            <div class="sourceIdDetails" v-if="isFhirPathOptionTab && propKey === getSourceIdDetails.displayField">
-                <p v-if="getSourceIdDetails.fixtureResourceName">The selected resource is a\an
-                    <a :href="getResourceLink(getSourceIdDetails.fixtureProfileUrl)" target="_blank">{{getSourceIdDetails.fixtureResourceName}}<img alt="External link" style="vertical-align: top" title="External link" src="../../../assets/ext_link.png"></a>.
-                </p>
-                <div v-if="getSourceIdDetails.analysisUrl" style="width: 700px">
-<!--                    <log-analysis-report-->
-<!--                            :session-id="$store.state.base.session"-->
-<!--                            :channel-id="$store.state.base.channelId"-->
-<!--                            :the-url="decodeURIComponent(getSourceIdDetails.analysisUrl)"-->
-<!--                            :gzip="true"-->
-<!--                            :use-proxy="true"-->
-<!--                            :ignore-bad-refs="true"></log-analysis-report>-->
-                    <inspect-event
-                            :sessionId="$store.state.base.session"
-                            :channelId="$store.state.base.channelId"
-                            :eventId="decodeURIComponent(getSourceIdDetails.analysisUrl)"
-                            :noNav="true"
-                    >
-                    </inspect-event>
-                </div>
-            </div>
         </div>
      </div> <!-- end flexItem -->
      <button class="evalButton" @click="doEval('')">Evaluate</button>
-       <div class="resultBox" v-if="isFhirPathOptionTab">
-<!--         <span v-if="getSourceIdDetails.fixtureResourceName">The selected resource is a\an-->
-<!--             <a :href="getResourceLink(getSourceIdDetails.fixtureProfileUrl)" target="_blank">{{getSourceIdDetails.fixtureResourceName}}<img alt="External link" style="vertical-align: top" src="../../../assets/ext_link.png"></a>.-->
-<!--         </span>-->
-           <div v-if="getPatternTypeObj.resultObj.wasEvaluatedAtleastOnce && getResultCode() === 'pass'" >
-               <template v-if="getResourceList() && getResourceList().length > 0">
-                   <select size="5"  >
-                       <option v-for="(rName,rKey) in getResourceList()"
-                               :value="rName"
-                               :key="rKey">
-                           {{ rName}}
-                       </option>
-                   </select>
-                   <div class="form-label">{{getResourceList().length}} resource(s) found.</div>
-                   <div>
-                       <button class="resultBox">Inspect</button>
-                   </div>
-               </template>
-               <template v-else>
-                   No resources found.
-               </template>
-           </div>
-           <div v-if="getPropVal('expression')"
-                v-bind:class="{
-                    'resultBox': true,
-                    'evalNotPassed': getResultCode().valueOf() !== 'pass',
-                    }">
-               <span class="form-block">{{getResultCode()}}</span>
-               <vue-markdown
-                       v-bind:source="getResultMessage()"></vue-markdown>
-           </div>
-       </div>
-     <div  v-else
+     <div
              v-bind:class="{
                     'resultBox': true,
                     'evalNotPassed': getResultCode().valueOf() !== 'pass',
@@ -212,7 +159,7 @@
     }
 
     .form-label {
-        margin-bottom: 4px;
+        margin: 4px;
     }
 
     .form-block {

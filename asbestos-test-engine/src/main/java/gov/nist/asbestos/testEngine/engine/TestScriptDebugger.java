@@ -191,6 +191,7 @@ public class TestScriptDebugger implements TestScriptDebugInterface {
         String fixtureProfileUrl = null;
         String analysisUrl = null;
         String resourcesString = TestScriptDebugState.quoteString("");
+        String direction = null;
 
         try {
             propKey = "sourceId";
@@ -203,7 +204,7 @@ public class TestScriptDebugger implements TestScriptDebugInterface {
                     fixtureProfileUrl = URLEncoder.encode(annotation.profile(), StandardCharsets.UTF_8.toString());
                 }
                 if (selectedFixtureComponent.getCreatedByUIEvent() != null) {
-                    String direction = selectedFixtureComponent.getResourceWrapper().isRequest() ? "request" : "response";
+                    direction = selectedFixtureComponent.getResourceWrapper().isRequest() ? "req" : "resp";
 //                    URI eventUri = getAnalysisURI(selectedFixtureComponent.getCreatedByUIEvent(), direction);
 //                    analysisUrl = URLEncoder.encode(eventUri.toString(), StandardCharsets.UTF_8.toString());
                     analysisUrl = URLEncoder.encode(selectedFixtureComponent.getCreatedByUIEvent().getEventName(), StandardCharsets.UTF_8.toString());
@@ -238,7 +239,7 @@ public class TestScriptDebugger implements TestScriptDebugInterface {
             return;
         }
 
-        state.sendEvalForResourcesResult(code, actionReport.getMessage(), "", resourcesString, fixtureResourceName, fixtureProfileUrl, analysisUrl);
+        state.sendEvalForResourcesResult(code, actionReport.getMessage(), "", resourcesString, fixtureResourceName, fixtureProfileUrl, analysisUrl, direction);
         return;
     }
 

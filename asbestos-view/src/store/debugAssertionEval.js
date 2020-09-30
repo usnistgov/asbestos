@@ -53,11 +53,18 @@ function EvalResultObj() {
     this.wasEvaluatedAtleastOnce = false
 }
 
+function SourceIdFpEvalDetails() {
+    this.fixtureResourceName = ''
+    this.fixtureProfileUrl = ''
+    this.analysisUrl = ''
+    this.direction = ''
+}
+
 function FhirPathContextObj() {
     this.dataObj = new AssertionEvalObj()
     this.resultObj = new EvalResultObj()
     this.resourceList = []
-    this.sourceIdDetails = {displayField: 'sourceId', fixtureResourceName: '',  fixtureProfileUrl: '',   analysisUrl: ''}
+    this.sourceIdDetails = new SourceIdFpEvalDetails()
     this.displayFieldList = ['sourceId','expression','value']
     this.footerList = [new XpathNotSupportedFooter()]
     this.evalAction = 'doDebugEvalForResources'
@@ -234,6 +241,9 @@ export const debugAssertionEvalStore = {
                 if ('analysisUrl' in obj) {
                     contextObj.sourceIdDetails.analysisUrl = obj.analysisUrl
                 }
+                if ('direction' in obj) {
+                    contextObj.sourceIdDetails.direction = obj.direction
+                }
 
             } catch (e) {console.log(e.toString())}
         },
@@ -261,6 +271,7 @@ export const debugAssertionEvalStore = {
                     let fhirPathObj = patternObj1.fhirPathContextObj
                    resetDataStateObj(fhirPathObj.dataObj, new AssertionEvalObj())
                    resetDataStateObj(fhirPathObj.resultObj, new EvalResultObj())
+                   resetDataStateObj(fhirPathObj.sourceIdDetails, new SourceIdFpEvalDetails())
                 }
 
                 if ('selectedEvalOptionTab' in patternObj1) {
