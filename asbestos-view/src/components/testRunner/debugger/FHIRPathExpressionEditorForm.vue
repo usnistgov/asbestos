@@ -66,6 +66,7 @@
                 </div>
                 <div>
                  <textarea
+                   :placeholder="getSourceIdDetails.fixtureResourceName"
                    :data-prop-key="'expression'"
                    :id="getFormInputId('expression')"
                    :value="getPropVal('expression')"
