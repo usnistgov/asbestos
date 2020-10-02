@@ -8,9 +8,9 @@
 <!--            &nbsp;-->
 <!--            <span class="selectable" @click="showAddr()">List by URL</span>-->
         </div>
-        <select v-model="channel" size="10" class="control-panel-font">
-            <option v-for="(chann, channeli) in channelIds"
-                    v-bind:value="getChannelIdByText(chann)"
+        <select v-model="channelId" size="10" class="control-panel-font">
+            <option v-for="(chann, channeli) in getEffectiveChannelIds()"
+                    v-bind:value="chann"
                     :key="chann + channeli"
                     >
                 {{ chann }}
@@ -27,68 +27,33 @@
     export default {
         data() {
             return {
-                channelId: null,
-                channels: [],  // ids
-                show: 'id',
             }
         },
         methods: {
-            showId() {
-                this.show = 'id'
-            },
-            showAddr() {
-                this.show = 'addr'
-            },
             manage() {  // go edit channel definitions
                 this.$router.push(`/session/${this.$store.state.base.session}/channels` +
-                    (this.channelId ? `/${this.channelId}`: ''))
+                    (this.channelName ? `/${this.channelName}`: ''))
             },
-            updateChannelIdsFromState() {
-                const ius = this.$store.state.base.channelURLs   // { id:  ... , url: ... }
-                this.channels.length = 0
-                if (this.show === 'id') {
-                    ius.forEach(iu => {
-                        this.channels.push({value: iu.id, text: iu.id})
-                    })
-                } else {
-                    ius.forEach(iu => {
-                        this.channels.push({value: iu.id, text: iu.url ? iu.url : iu.site })
-                    })
-                }
-            },
-          updateChannelIdsFromEffectiveIds() {
-              const effective = this.$store.getters.getEffectiveChannelIds;
-
-          }
-            updateChannelIdFromState() {
-                if (this.channel === null)
-                    return
-                this.channelId = this.channel
-            },
-            updateChannelFromUI() {
-                if (this.channelId !== this.channel)
-                    this.$router.push(`/session/${this.session}/channels/${this.channelId}`)
-            },
-            getChannelIdByText(text) {
-                let found = this.channels.find(function (element) {
-                    return element.text === text
-                })
-                return found.value
-            }
+          getEffectiveChannelIds() {
+              return this.$store.getters.getEffectiveChannelIds;
+          },
         },
         computed: {
-            channelIds() {
-                let ids = []
-                this.channels.forEach(item => {
-                    ids.push(item.text)
-                })
-                return ids.sort()
+          channelId: {
+            set(id) {
+                const parts = id.split('__', 2);
+                this.session = parts[0];
+                this.channelName = parts[1];
             },
-            channel: {
+            get() {
+              return this.$store.getters.getChannelId
+            }
+          },
+            channelName: {
                 set(name) {
-                    if (name !== this.$store.state.base.channelId) {
-                        this.$store.commit('setChannelId', name);
-                        this.$store.dispatch('loadChannel', this.$store.getters.getFullChannelId);
+                    if (name !== this.$store.state.base.channelName) {
+                        this.$store.commit('setChannelName', name);
+                        this.$store.dispatch('loadChannel', this.$store.getters.getChannelId);
                         const current = this.$router.currentRoute.path;
                         const parts = current.split("/");
                         const size = parts.length;
@@ -105,29 +70,23 @@
                     }
                 },
                 get() {
-                    return this.$store.state.base.channelId
+                    return this.$store.state.base.channelName;
                 }
             },
             session: {
+              set(id) {
+                this.$store.commit('setSession', id);
+              },
                 get() {
-                    return this.$store.state.base.session
+                    return this.$store.state.base.session;
                 }
             },
         },
         created() {
-            // if (this.$store.state.base.channelIds.length === 0) {
-            //     //this.$store.dispatch('loadChannelNames')   // should go away
-            //     //this.$store.dispatch('loadChannelIds')
-            // }
-            this.channelId = this.channel
         },
         mounted() {
         },
         watch: {
-            '$store.state.base.channelURLs': 'updateChannelIdsFromState',
-            'show': 'updateChannelIdsFromState',
-            '$store.state.base.channelId': 'updateChannelIdFromState',
-            'channelId': 'updateChannelFromUI'
         },
         name: "ChannelControlPanel"
     }

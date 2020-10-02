@@ -64,12 +64,12 @@ export const logStore = {
                 console.error('Session not set for logStore.loadEventSummaries')
                 return
             }
-            if (!rootState.base.channelId) {
+            if (!rootState.base.channelName) {
                 commit('setError', 'Channel not set in logStore.loadEventSummaries')
                 console.error('Channel not set in logStore.loadEventSummaries')
                 return
             }
-            const url = `${rootState.base.session}/${rootState.base.channelId}`
+            const url = `${rootState.base.session}/${rootState.base.channelName}`
             try {
                 const rawSummaries = await LOG.get(url, {
                     params: {

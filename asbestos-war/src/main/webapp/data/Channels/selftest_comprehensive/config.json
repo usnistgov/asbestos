@@ -1,7 +1,7 @@
 {
   "environment" : "default",
   "testSession" : "default",
-  "channelId" : "selftest_comprehensive",
+  "channelName" : "selftest_comprehensive",
   "actorType" : "fhir",
   "channelType" : "mhd",
   "includeValidation" : false,

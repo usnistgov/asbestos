@@ -16,7 +16,7 @@
         methods: {
         },
         created() {
-            this.$store.dispatch('loadSessions')
+            //this.$store.dispatch('loadSessions')
             this.$store.commit('setSession', this.sessionId)
         },
         computed: {

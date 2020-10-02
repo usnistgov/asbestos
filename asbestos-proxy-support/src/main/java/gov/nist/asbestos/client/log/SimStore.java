@@ -130,7 +130,7 @@ public class SimStore {
     }
 
     public static SimId getSimId(ChannelConfig channelConfig) {
-        return new SimId(new TestSession(channelConfig.getTestSession()), channelConfig.getChannelId(), channelConfig.getActorType(), channelConfig.getEnvironment());
+        return new SimId(new TestSession(channelConfig.getTestSession()), channelConfig.getChannelName(), channelConfig.getActorType(), channelConfig.getEnvironment());
     }
 
     public File getStore() {

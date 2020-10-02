@@ -13,7 +13,7 @@ import java.util.Objects;
 public class ChannelConfig {
     private String environment;
     private String testSession;
-    private String channelId;   // simple id (no testSesssion__ prefix)
+    private String channelName;   // simple id (no testSesssion__ prefix)
     private String actorType;
     private String channelType;
     private boolean includeValidation;
@@ -23,7 +23,7 @@ public class ChannelConfig {
     private boolean logMhdCapabilityStatementRequest;
 
     public String toString() {
-        return new StringBuilder().append("Channel ").append(testSession).append("__").append(channelId)
+        return new StringBuilder().append("Channel ").append(testSession).append("__").append(channelName)
                 .append(" of ").append(actorType).append(" in ").append(environment)
                 .append(" with base ").append(fhirBase)
                 .append(" with xdsSite ").append(xdsSiteName).toString();
@@ -56,7 +56,7 @@ public class ChannelConfig {
     public URI proxyURI() {
         ServicePropertiesEnum key = ServicePropertiesEnum.FHIR_TOOLKIT_BASE;
         String proxyStr = ServiceProperties.getInstance().getPropertyOrStop(key);
-        proxyStr += "/proxy/" + testSession + "__" + channelId;
+        proxyStr += "/proxy/" + testSession + "__" + channelName;
         try {
             return new URI(proxyStr);
         } catch (URISyntaxException e) {
@@ -83,11 +83,11 @@ public class ChannelConfig {
     }
 
     public String getChannelId() {
-        return channelId;
+        return testSession + "__" + channelName;
     }
 
-    public ChannelConfig setChannelId(String channelId) {
-        this.channelId = channelId;
+    public ChannelConfig setChannelName(String channelName) {
+        this.channelName = channelName;
         return this;
     }
 
@@ -125,7 +125,7 @@ public class ChannelConfig {
     }
 
     public String asFullId() {
-        return testSession + "__" + channelId;
+        return testSession + "__" + channelName;
     }
 
     @Override
@@ -136,7 +136,7 @@ public class ChannelConfig {
         return includeValidation == that.includeValidation &&
                 Objects.equals(environment, that.environment) &&
                 Objects.equals(testSession, that.testSession) &&
-                Objects.equals(channelId, that.channelId) &&
+                Objects.equals(channelName, that.channelName) &&
                 Objects.equals(actorType, that.actorType) &&
                 Objects.equals(channelType, that.channelType) &&
                 Objects.equals(fhirBase, that.fhirBase) &&
@@ -147,7 +147,7 @@ public class ChannelConfig {
 
     @Override
     public int hashCode() {
-        return Objects.hash(environment, testSession, channelId, actorType, channelType, includeValidation, fhirBase, xdsSiteName, writeLocked, logMhdCapabilityStatementRequest);
+        return Objects.hash(environment, testSession, channelName, actorType, channelType, includeValidation, fhirBase, xdsSiteName, writeLocked, logMhdCapabilityStatementRequest);
     }
 
     public String getXdsSiteName() {
@@ -182,5 +182,9 @@ public class ChannelConfig {
     public ChannelConfig setLogMhdCapabilityStatementRequest(boolean logMhdCapabilityStatementRequest) {
         this.logMhdCapabilityStatementRequest = logMhdCapabilityStatementRequest;
         return this;
+    }
+
+    public String getChannelName() {
+        return channelName;
     }
 }

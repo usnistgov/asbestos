@@ -85,7 +85,7 @@ class DocumentEntryTest {
         CodeTranslator codeTranslator = new CodeTranslator(getCodesFile());
 
         ChannelConfig channelConfig = new ChannelConfig()
-                .setChannelId("test")
+                .setChannelName("test")
                 .setChannelType("mhd")
                 .setActorType("fhir")
                 .setEnvironment("default")

@@ -14,7 +14,7 @@ class ChannelConfigTest {
 
     @BeforeAll
     static void beforeAll() {
-        config.setChannelId("HYLAND");
+        config.setChannelName("HYLAND");
         config.setTestSession("default");
         config.setEnvironment("default");
         config.setFhirBase("http://hyland26:17025/fhir/MHD/Bundle");

@@ -2,7 +2,6 @@
   <div>
     <div>
       <div class="control-panel-item-title">Test Session</div>
-<!--      <b-form-select class="control-panel-font" v-model="testSession" :options="testSessions"></b-form-select>-->
       <select class="control-panel-font" @change="changeTestSession($event)">
         <option v-for="ts in testSessions" :value="ts.id" :key="ts.id">{{ts.name}}</option>
       </select>
@@ -70,7 +69,7 @@
           },
           toggleDetails() {
             this.details = !this.details;
-            const sessionConfig = this.$store.getters.getSessionConfig();
+            const sessionConfig = this.$store.getters.getSessionConfig;
             if (this.details && (!sessionConfig || sessionConfig.name !== this.testSession)) {
                 this.$store.dispatch('loadSessionConfig', this.testSession);
             }

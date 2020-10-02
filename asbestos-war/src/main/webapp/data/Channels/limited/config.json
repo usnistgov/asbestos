@@ -1,7 +1,7 @@
 {
   "environment" : "default",
   "testSession" : "default",
-  "channelId" : "limited",
+  "channelName" : "limited",
   "actorType" : "fhir",
   "channelType" : "mhd",
   "includeValidation" : false,

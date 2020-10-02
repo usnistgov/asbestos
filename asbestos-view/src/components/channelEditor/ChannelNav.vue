@@ -49,10 +49,13 @@
                 return '/session/' + this.sessionId + '/channels/new'
             },
             channelsLink(channelId) {
-                return '/session/' + this.sessionId + '/channels/' + channelId
+              const chan = channelId.split('__', 2);
+              const session = chan[0];
+              const channelName = chan[1];
+                return '/session/' + session + '/channels/' + channelName;
             },
             channelIds() {
-                return this.$store.state.base.channelIds
+                return this.$store.getters.getEffectiveChannelIds;
             },
             msg(msg) {
                 console.log(msg)

@@ -71,9 +71,9 @@
                     </div>
                     <label class="grid-name">Id</label>
                     <div v-if="isNew" class="grid-item">
-                        <input v-model="channel.channelId">
+                        <input v-model="channel.channelName">
                     </div>
-                    <div v-else class="grid-item">{{ channel.channelId }}</div>
+                    <div v-else class="grid-item">{{ channel.channelName }}</div>
 
                     <label class="grid-name">Test Session</label>
                     <div class="grid-item">{{ channel.testSession }}</div>
@@ -195,7 +195,7 @@
                 channel: null,  // channel object
                 edit: false,
                 isNew: false,
-                originalChannelId: null,   // in case of delete
+                originalChannelName: null,   // in case of delete
                 discarding: false,  // for saving edits
                 ackMode: false,  // for deleting
                 lockAckMode: "", // for locking configuration to prevent unauthorized edits
@@ -205,7 +205,8 @@
             }
         },
         props: [
-            'sessionId', 'channelId'
+            'sessionId',
+          'channelName'
         ],
         created() {
             this.fetch()
@@ -218,9 +219,12 @@
         computed: {
             channelIds: {
                 get() {
-                    return this.$store.state.base.channelIds
+                    return this.$store.getters.getEffectiveChannelIds;
                 },
             },
+          channelId() {
+              return this.sessionId + '__' + this.channelName;
+          }
         },
         mounted() {
         },
@@ -264,7 +268,7 @@
             },
             copy() {  // actually duplicate (a channel)
                 let chan = cloneDeep(this.channel)
-                chan.channelId = 'copy'
+                chan.channelName = 'copy'
                 chan.writeLocked = false
                 this.$store.commit('installChannel', chan)
                 this.$router.push('/session/' + this.sessionId + '/channels/copy')
@@ -272,9 +276,9 @@
             async deleteChannel() {
                 try {
                     if (! this.channel.writeLocked) {
-                        await PROXY.delete('channel/' + this.sessionId + '__' + this.channelId)
+                        await PROXY.delete('channel/' + this.sessionId + '__' + this.channelName)
                     } else if (this.editUserProps.bapw != "") {
-                        await PROXY.delete('channelGuard/' + this.sessionId + '__' + this.channelId, { auth: {username: this.editUserProps.bauser, password: this.editUserProps.bapw}})
+                        await PROXY.delete('channelGuard/' + this.channelId, { auth: {username: this.editUserProps.bauser, password: this.editUserProps.bapw}})
                     }
                     this.msg('Deleted')
                     this.$store.commit('deleteChannel', this.channelId)
@@ -308,7 +312,7 @@
                         this.$store.commit('deleteChannel', this.originalChannelId) // original has been renamed
                         this.isNew = false
                         this.edit = false
-                        this.$router.push('/session/' + this.channel.testSession + '/channels/' + this.channel.channelId)
+                        this.$router.push('/session/' + this.channel.testSession + '/channels/' + this.channel.channelName)
                     })
                 } else {
                     this.$store.commit('installChannel', cloneDeep(this.channel))
@@ -373,25 +377,25 @@
                 this.$router.push(route)
             },
             isCurrentChannelIdNew() {
-                return this.channel.channelId === 'new' || this.channel.channelId === 'copy'
+                return this.channel.channelName === 'new' || this.channel.channelName === 'copy'
             },
             isCurrentChannelIdBadPattern() {
-                const id = this.channel.channelId
+                const name = this.channel.channelName
                 const re = RegExp('^([a-zA-Z0-9_]+)$')
-                const match = re.test(id)
+                const match = re.test(name)
                 const re2 = RegExp('.*__.*')
-                const match2 = re2.test(id)
+                const match2 = re2.test(name)
                 return !match || match2
             },
             isNewChannelId() {
-                return this.channelId === 'new' || this.channelId === 'copy'
+                return this.channelName === 'new' || this.channelName === 'copy'
             },
             fetch() {
-                if (this.channelId === undefined)
+                if (this.channelName === undefined)
                     return
                 if (this.channelIds.length === 0)
                     return
-                this.originalChannelId = this.channelId
+                this.originalChannelName = this.channelName
                 this.lockCanceled()
                 if (this.isNewChannelId()) {
                     this.edit = true
@@ -400,13 +404,14 @@
                     this.discarding = false
                     return
                 }
-                const index = this.channelIndex(this.sessionId, this.channelId)
+                const index = this.channelIndex(this.sessionId, this.channelName)
+              console.log(`index of ${this.channelName} is ${index}`)
                 if (index === -1) {
                     this.channel = null
                     return
                 }
                     //const that = this
-                    const fullId = `${this.sessionId}__${this.channelId}`
+                    const fullId = this.channelId;
 
                     this.$store.dispatch('loadChannel', fullId)
                         .then(channel => {
@@ -415,9 +420,10 @@
 
                 this.discarding = false
             },
-            channelIndex(theSession, theChannelId) {
+            channelIndex(theSessionId, theChannelName) {
+              const fullChannelId = `${theSessionId}__${theChannelName}`;
                 return this.$store.state.base.channelIds.findIndex( function(channelId) {
-                    return channelId === theChannelId
+                    return channelId === fullChannelId
                 })
             },
             getChannel() {
@@ -428,11 +434,11 @@
                 return cloneDeep(chan)
             },
             select() {
-                if (this.channel.testSession === undefined || this.channel.channelId === undefined) {
+                if (this.channel.testSession === undefined || this.channel.channelName === undefined) {
                     return
                 }
-                const newRoute =  '/session/' + this.channel.testSession + '/channel/' + this.channel.channelId
-                this.$store.commit('setChannelId', this.channel.channelId)
+                const newRoute =  '/session/' + this.channel.testSession + '/channel/' + this.channel.channelName
+                this.$store.commit('setChannelName', this.channel.channelName)
                 this.$router.push(newRoute)
             },
             isHttpsMode() {

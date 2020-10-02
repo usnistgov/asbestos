@@ -77,7 +77,7 @@ class ModuleIT {
     private static String createChannel() throws URISyntaxException, IOException {
         ChannelConfig channelConfig = new ChannelConfig()
                 .setTestSession(testSession)
-                .setChannelId(channelId)
+                .setChannelName(channelId)
                 .setEnvironment("default")
                 .setActorType("fhir")
                 .setChannelType("fhir")

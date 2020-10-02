@@ -37,7 +37,7 @@ public class Support {
     static ChannelConfig getChannelConfig(String testSession, String channelId) {
         return new ChannelConfig()
                 .setTestSession(testSession)
-                .setChannelId(channelId)
+                .setChannelName(channelId)
                 .setEnvironment("default")
                 .setActorType("fhir")
                 .setChannelType("passthrough")

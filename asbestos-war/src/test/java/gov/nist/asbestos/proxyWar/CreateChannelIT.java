@@ -36,7 +36,7 @@ class CreateChannelIT {
         // create
         ChannelConfig channelConfig = new ChannelConfig()
                 .setTestSession("default")
-                .setChannelId("test")
+                .setChannelName("test")
                 .setEnvironment("default")
                 .setActorType("fhir")
                 .setChannelType("passthrough")
@@ -62,7 +62,7 @@ class CreateChannelIT {
         // create
         ChannelConfig channelConfig = new ChannelConfig()
                 .setTestSession("default")
-                .setChannelId("test")
+                .setChannelName("test")
                 .setEnvironment("default")
                 .setActorType("fhir")
                 .setChannelType("passthrough")
@@ -96,7 +96,7 @@ class CreateChannelIT {
     void createMultipleChannels() throws URISyntaxException, IOException {
         String channelConfig1 = ChannelConfigFactory.convert(new ChannelConfig()
                 .setTestSession("default")
-                .setChannelId("test1")
+                .setChannelName("test1")
                 .setEnvironment("default")
                 .setActorType("fhir")
                 .setChannelType("passthrough")
@@ -104,7 +104,7 @@ class CreateChannelIT {
 
         String channelConfig2 = ChannelConfigFactory.convert(new ChannelConfig()
                 .setTestSession("default")
-                .setChannelId("test2")
+                .setChannelName("test2")
                 .setEnvironment("default")
                 .setActorType("fhir")
                 .setChannelType("passthrough")

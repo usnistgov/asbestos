@@ -1,7 +1,7 @@
 <template>
     <div class="container">
         <channel-nav :session-id="sessionId" class="nav"></channel-nav>
-        <channel-edit :sessionId="sessionId" :channelId="channelId" class="view"></channel-edit>
+        <channel-edit :sessionId="sessionId" :channelName="channelName" class="view"></channel-edit>
     </div>
 </template>
 
@@ -25,7 +25,7 @@
         methods: {
         },
         props: [
-           'sessionId', 'channelId'
+           'sessionId', 'channelName'
         ]
     }
 </script>

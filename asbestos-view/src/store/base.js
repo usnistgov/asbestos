@@ -13,7 +13,7 @@ export const baseStore = {
             sessionNames:[],
             sessionConfigs: {},
 
-            channelId: "default",  // current
+            channelName: 'default',  // current
             channelIds: [],  // for all sessions
             channel: null,   // current configuration matching channelId
 
@@ -45,8 +45,8 @@ export const baseStore = {
         setSessionNames(state, sessions) {
             state.sessionNames = sessions
         },
-        setChannelId(state, channelId) {
-            state.channelId = channelId
+        setChannelName(state, channelName) {
+            state.channelName = channelName
         },
         setChannel(state, theChannel) {
             state.channel = theChannel
@@ -151,7 +151,7 @@ export const baseStore = {
             console.log(`${url}`)
             CHANNEL.get(`${url}`)
                 .then(response => {
-                    commit('setSessions', response.data)
+                    commit('setSessionNames', response.data)
                 })
                 .catch(function (error) {
                     commit('setError', url + ': ' + error)
@@ -163,7 +163,7 @@ export const baseStore = {
             console.log(`${url}`)
             CHANNEL.get(`${url}`)
                 .then(response => {
-                    commit('setSessions', response.data)
+                    commit('setSessionNames', response.data)
                     if (response.data.length > 0) {
                         const obj = response.data[0];
                         console.log(`new session is ${obj}`)
@@ -245,8 +245,8 @@ export const baseStore = {
             const sessionId = parms.sessionId
             return `${state.proxyBase}/${sessionId}__${channelId}`
         },
-        getFullChannelId: (state) => {
-            return `${state.session}__${state.channelId}`
+        getChannelId: (state) => {
+            return `${state.session}__${state.channelName}`
         },
         channelExists: (state) => (theChannelId) => {
             const index = state.channelIds.findIndex(function(channelId) {
@@ -254,9 +254,26 @@ export const baseStore = {
             })
             return index !== -1;
         },
-        getEffectiveChannelIds: (state) => {
-            if (state.session === 'default')
-                return state.channelIds.filter(id => id.startsWith('default__'));
+        getChannelIdsForSession: (state) => (session) => {
+            return state.channelIds.filter(id => id.startsWith(`${session}__`));
+        },
+        getSessionIncludes: (state) => (session) => {
+              const config = state.sessionConfigs[session];
+              if (!config)
+                  return [];
+              return config.includes;
+        },
+        getEffectiveChannelIds: (state, getters) => {
+            let session = state.session;
+            let ids = getters.getChannelIdsForSession(session);
+            let includedSessions = getters.getSessionIncludes(session);
+            while ( Array.isArray(includedSessions) && includedSessions.length > 0) {
+                session = includedSessions.pop();
+                let channelIds = getters.getChannelIdsForSession(session);
+                ids = ids.concat(channelIds);
+                getters.getSessionIncludes(session).forEach(inc => includedSessions.push(inc));
+            }
+            return ids;
         }
     }
 }

@@ -48,7 +48,7 @@ public class CapabilityStatementIT {
         // create
         ChannelConfig channelConfig = new ChannelConfig()
                 .setTestSession("default")
-                .setChannelId(channelId)
+                .setChannelName(channelId)
                 .setEnvironment("default")
                 .setActorType("fhir")
                 .setChannelType("mhd")

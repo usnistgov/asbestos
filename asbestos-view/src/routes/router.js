@@ -83,7 +83,7 @@ export const routes = [
                 props: { session: true },
                 children: [
                     {
-                        path: 'channels/:channelId',
+                        path: 'channels/:channelName',
                         components: { default: ChannelsView },
                         props: { default: true},
                     },

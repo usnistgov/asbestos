@@ -99,7 +99,7 @@ class PassthroughIT {
     private String createChannel(String testSession, String channelId) throws URISyntaxException, IOException {
         ChannelConfig channelConfig = new ChannelConfig()
                 .setTestSession(testSession)
-                .setChannelId(channelId)
+                .setChannelName(channelId)
                 .setEnvironment("default")
                 .setActorType("fhir")
                 .setChannelType("fhir")

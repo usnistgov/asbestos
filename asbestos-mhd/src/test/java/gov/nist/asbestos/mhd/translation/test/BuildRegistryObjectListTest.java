@@ -57,7 +57,7 @@ class BuildRegistryObjectListTest {
     @BeforeEach
     void beforeEach() {
         ChannelConfig channelConfig = new ChannelConfig()
-                .setChannelId("test")
+                .setChannelName("test")
                 .setChannelType("mhd")
                 .setActorType("fhir")
                 .setEnvironment("default")

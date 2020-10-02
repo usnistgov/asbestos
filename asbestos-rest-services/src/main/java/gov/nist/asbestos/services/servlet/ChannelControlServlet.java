@@ -41,7 +41,7 @@ public class ChannelControlServlet extends HttpServlet {
             ChannelConfig cconfig = new ChannelConfig()
                     .setEnvironment("default")
                     .setTestSession("default")
-                    .setChannelId("default")
+                    .setChannelName("default")
                     .setChannelType("fhir")
                     .setActorType("fhir")
                     .setFhirBase(hapiFhirBase);
