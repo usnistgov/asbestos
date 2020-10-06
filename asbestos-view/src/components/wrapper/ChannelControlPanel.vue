@@ -3,13 +3,9 @@
         <div class="control-panel-item-title" @click="manage()">Channels</div>
         <div>
             <span class="selectable" @click="manage()">Config</span>
-            &nbsp;
-<!--            <span class="selectable" @click="showId()">List by ID</span>-->
-<!--            &nbsp;-->
-<!--            <span class="selectable" @click="showAddr()">List by URL</span>-->
         </div>
         <select v-model="channelId" size="10" class="control-panel-font">
-            <option v-for="(chann, channeli) in getEffectiveChannelIds()"
+            <option v-for="(chann, channeli) in effectiveChannelIds"
                     v-bind:value="chann"
                     :key="chann + channeli"
                     >
@@ -34,11 +30,13 @@
                 this.$router.push(`/session/${this.$store.state.base.session}/channels` +
                     (this.channelName ? `/${this.channelName}`: ''))
             },
-          getEffectiveChannelIds() {
-              return this.$store.getters.getEffectiveChannelIds;
-          },
         },
         computed: {
+          effectiveChannelIds: {
+              get() {
+                return this.$store.getters.getEffectiveChannelIds;
+              }
+          },
           channelId: {
             set(id) {
                 const parts = id.split('__', 2);

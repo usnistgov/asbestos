@@ -2,8 +2,13 @@
   <div>
     <div>
       <div class="control-panel-item-title">Test Session</div>
-      <select class="control-panel-font" @change="changeTestSession($event)">
-        <option v-for="ts in testSessions" :value="ts.id" :key="ts.id">{{ts.name}}</option>
+      <select v-model="testSession" size="1" class="control-panel-font">
+        <option v-for="(ts, tsi) in $store.state.base.sessionNames"
+                v-bind:value="ts"
+                :key="ts + tsi"
+                >
+          {{ ts }}
+        </option>
       </select>
       <img id="add" src="../../assets/add-button.png" @click="add()"/>
       <img id="delete" src="../../assets/exclude-button-red.png" @click="del()"/>
@@ -24,7 +29,7 @@
         <button @click="cancelAdd()">Cancel</button>
       </div>
       <div v-if="deleting">
-        Are you sure you want to delete testSession {{$store.state.base.session}}?
+        Are you sure you want to delete testSession {{testSession}}?
       </div>
       <div v-if="deleting">
         <button @click="confirmDel()">Delete</button>
@@ -42,7 +47,7 @@
     export default {
         data() {
             return {
-              testSession: 'default',  // driven by drop down menu
+//              testSession: 'default',  // driven by drop down menu
               testSessions: [],  // drives drop down menu
               adding: false,
               deleting: false,
@@ -52,6 +57,15 @@
             }
         },
       computed: {
+          testSession: {
+              set(id) {
+                console.log(`setting testSession ${id}`)
+                this.$store.dispatch('selectSession', id);
+              },
+            get() {
+                return this.$store.state.base.session;
+            }
+          },
           includesSession() {
             const config = this.$store.getters.getSessionConfig;
             if (!config) return 'No includes';
@@ -71,7 +85,7 @@
             this.details = !this.details;
             const sessionConfig = this.$store.getters.getSessionConfig;
             if (this.details && (!sessionConfig || sessionConfig.name !== this.testSession)) {
-                this.$store.dispatch('loadSessionConfig', this.testSession);
+                this.$store.dispatch('selectSession', this.testSession);
             }
           },
           add() {
@@ -82,6 +96,7 @@
             this.$store.commit('setSession', this.newChannelName.trim());
             this.newChannelName = null;
             this.adding = false;
+            this.updateSession();
           },
           cancelAdd() {
             this.newChannelName = null;

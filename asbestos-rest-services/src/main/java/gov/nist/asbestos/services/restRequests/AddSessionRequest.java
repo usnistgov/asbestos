@@ -3,6 +3,7 @@ package gov.nist.asbestos.services.restRequests;
 import com.google.gson.Gson;
 import gov.nist.asbestos.client.Base.Dirs;
 import gov.nist.asbestos.client.Base.Request;
+import gov.nist.asbestos.client.Base.ReturnIs;
 import org.apache.log4j.Logger;
 
 import java.io.File;
@@ -32,16 +33,16 @@ public class AddSessionRequest {
 
     public void run()  {
         request.announce("AddSession");
-        String newSession = request.uriParts.get(4);
-        File channels = new File(request.externalCache, "FhirChannels");
-        File newChannel = new File(channels, newSession);
-        newChannel.mkdirs();
+        String newSessionName = request.uriParts.get(4);
+        File sessions = new File(request.externalCache, "FhirSessions");
+        File newSession = new File(sessions, newSessionName);
+        ReturnIs.Boolean(newSession.mkdirs());
 
         SessionConfig config = new SessionConfig();
-        config.name = newSession;
+        config.name = newSessionName;
         config.includes.add("default");
 
-        File configFile = new File(newChannel, "config.json");
+        File configFile = new File(newSession, "config.json");
         Gson gson = new Gson();
         String json = gson.toJson(config);
 
@@ -52,8 +53,7 @@ public class AddSessionRequest {
             return;
         }
 
-
-        List<String> names = Dirs.dirListingAsStringList(channels);
+        List<String> names = Dirs.dirListingAsStringList(sessions);
         request.returnList(names);
         request.ok();
     }

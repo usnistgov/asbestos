@@ -23,10 +23,10 @@ public class ChannelConfig {
     private boolean logMhdCapabilityStatementRequest;
 
     public String toString() {
-        return new StringBuilder().append("Channel ").append(testSession).append("__").append(channelName)
-                .append(" of ").append(actorType).append(" in ").append(environment)
-                .append(" with base ").append(fhirBase)
-                .append(" with xdsSite ").append(xdsSiteName).toString();
+        return "Channel " + testSession + "__" + channelName +
+                " of " + actorType + " in " + environment +
+                " with base " + fhirBase +
+                " with xdsSite " + xdsSiteName;
     }
 
     // TODO test needed
@@ -49,8 +49,7 @@ public class ChannelConfig {
         if (joinedparts.length() > 0)
             joinedparts = "/" + joinedparts;
         String uriString = fhirBase + joinedparts + (query == null || query.equals("") ? "" : "?" + query);
-        URI uri = new URI(uriString);
-        return uri;
+        return new URI(uriString);
     }
 
     public URI proxyURI() {

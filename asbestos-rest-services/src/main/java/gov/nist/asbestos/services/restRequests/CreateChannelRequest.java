@@ -14,6 +14,7 @@ import java.nio.charset.Charset;
 // 0 - empty
 // 1 - app context
 // 2 - "channel"
+// 3 - "create"
 // Create a channel based on JSON configuration in request
 
 public class CreateChannelRequest {
@@ -22,9 +23,10 @@ public class CreateChannelRequest {
     private Request request;
 
     public static boolean isRequest(Request request) {
-        if (request.uriParts.size() == 3) {
+        if (request.uriParts.size() == 4) {
             String uriPart2 = request.uriParts.get(2);
-            return "channel".equals(uriPart2) || "channelGuard".equals(uriPart2);
+            String uriPart3 = request.uriParts.get(3);
+            return "create".equals(uriPart3) && ("channel".equals(uriPart2) || "channelGuard".equals(uriPart2));
         }
         return false;
     }

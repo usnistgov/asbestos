@@ -15,9 +15,9 @@ import org.apache.log4j.Logger;
 import java.io.File;
 
 public class GetSessionConfigRequest {
-    private static Logger log = Logger.getLogger(GetSessionConfigRequest.class);
+    private final static Logger log = Logger.getLogger(GetSessionConfigRequest.class);
 
-    private Request request;
+    private final Request request;
 
     public static boolean isRequest(Request request) {
         return request.uriParts.size() == 5 && "sessionConfig".equalsIgnoreCase(request.uriParts.get(3));

@@ -65,7 +65,7 @@ export const baseStore = {
             if (channelIndex === -1) {
                 state.channelIds.push(newChannel.channelId)
             } else {
-//                state.channel = newChannel
+                state.channel = newChannel
             }
             state.channel = newChannel
         },
@@ -95,6 +95,7 @@ export const baseStore = {
             let url
             try {
                 url = `CHANNEL/sessionNames`
+                console.log(url);
                 let data = await CHANNEL.get('sessionNames');
                 const sessionNames = data.data;
                 console.log(`sessionNames ${sessionNames}`);
@@ -103,6 +104,7 @@ export const baseStore = {
                 const promises = [];
                 sessionNames.forEach(sessionId => {
                     url = `CHANNEL/sessionConfig/${sessionId}`;
+                    console.log(url);
                     const promise = CHANNEL.get(`sessionConfig/${sessionId}`);
                     promises.push(promise);
                 });
@@ -117,12 +119,11 @@ export const baseStore = {
                 });
 
                 url = `CHANNEL/channels/all`;
+                console.log(url);
                 let result = await CHANNEL.get('channels/all');
                 data = result.data;
-                console.log(`data is ${data}`)
                 let ids = [];
                 data.forEach(item => {
-                    console.log(`item is ${item}`)
                     ids.push(item.id);
                 });
                 commit('installChannelIds', ids.sort());
@@ -133,8 +134,8 @@ export const baseStore = {
                 console.error(`${error} for ${url}`)
             }
         },
-        // obsolete?
-        async selectSession({commit}, sessionId) {
+        async selectSession({state, commit}, sessionId) {
+            if (sessionId === state.session) return;
             commit('setSession', sessionId);
             const url = `CHANNEL/sessionConfig/${sessionId}`
             CHANNEL.get(`sessionConfig/${sessionId}`)
@@ -256,6 +257,9 @@ export const baseStore = {
         },
         getChannelIdsForSession: (state) => (session) => {
             return state.channelIds.filter(id => id.startsWith(`${session}__`));
+        },
+        getChannelIdsForCurrentSession: (state) => {
+            return state.channelIds.filter(id => id.startsWith(`${state.session}__`));
         },
         getSessionIncludes: (state) => (session) => {
               const config = state.sessionConfigs[session];
