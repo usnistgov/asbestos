@@ -56,6 +56,10 @@ public class FhirPathEngineBuilder {
         return null;
     }
 
+    public static String evalForString(Base base) {
+        return getStringValue(base);
+    }
+
     public static String evalForString(BaseResource resource, String expression) {
         if (resource == null)
             return "";
@@ -81,6 +85,10 @@ public class FhirPathEngineBuilder {
             return buf.toString();
         }
         Base result = results.get(0);
+        return getStringValue(result);
+    }
+
+    private static String getStringValue(Base result) {
         if (result instanceof StringType) {
             return ((StringType) result).getValueAsString();
         }

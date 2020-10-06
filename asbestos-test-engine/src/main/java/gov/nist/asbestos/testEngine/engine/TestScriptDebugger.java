@@ -192,6 +192,7 @@ public class TestScriptDebugger implements TestScriptDebugInterface {
         String analysisUrl = null;
         String resourcesString = TestScriptDebugState.quoteString("");
         String direction = null;
+        String valueString = null;
 
         try {
             propKey = "sourceId";
@@ -223,8 +224,11 @@ public class TestScriptDebugger implements TestScriptDebugInterface {
                 List<Base> resources = FhirPathEngineBuilder.evalForResources(resource, fhirPath);
                 List<String> baseNames = new ArrayList<>();
                 if (resources != null) {
+                    int counter = 0;
                     for (Base b : resources) {
-                        baseNames.add(b.fhirType());
+                        // Assume all baseTypes are the same
+                        String indexHint =   resources.size() > 1 ? "[" + counter++ + "]" : "";
+                        baseNames.add(b.fhirType() + indexHint);
                     }
                     List<String> myList =
                             baseNames
@@ -232,6 +236,12 @@ public class TestScriptDebugger implements TestScriptDebugInterface {
                                     .map(TestScriptDebugState::quoteString)
                                     .collect(Collectors.toList());
                     resourcesString = String.join(",", myList);
+                    if (resources.size() == 1 && ! resources.get(0).isResource()) {
+                        List<Base> valueOnlyType = FhirPathEngineBuilder.evalForResources(resource, fhirPath + ".value");
+                        if (valueOnlyType != null && valueOnlyType.size() == 1) {
+                            valueString = URLEncoder.encode(FhirPathEngineBuilder.evalForString(valueOnlyType.get(0)), StandardCharsets.UTF_8.toString());
+                        }
+                    }
                 }
             }
         } catch (Exception ex) {
@@ -239,7 +249,7 @@ public class TestScriptDebugger implements TestScriptDebugInterface {
             return;
         }
 
-        state.sendEvalForResourcesResult(code, actionReport.getMessage(), "", resourcesString, fixtureResourceName, fixtureProfileUrl, analysisUrl, direction);
+        state.sendEvalForResourcesResult(code, actionReport.getMessage(), "", resourcesString, fixtureResourceName, fixtureProfileUrl, analysisUrl, direction, valueString);
         return;
     }
 

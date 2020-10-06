@@ -63,6 +63,14 @@
                             @click.stop="openHelp('expression')"
                             class="infoIconLink"><img
                             alt="External link" src="../../../assets/ext_link.png" style="vertical-align: top"/></span>
+                    <span>.&nbsp;</span>
+                    <div class="inlineDiv">FHIRPath Reference</div>
+                    <span
+                            :title="`Click to open the FHIRPath reference in a new browser tab.`"
+                            @click.stop="openFHIRPathWebsite"
+                            class="infoIconLink"><img
+                            alt="External link" src="../../../assets/ext_link.png" style="vertical-align: top"/></span>
+                    <span>.&nbsp;</span>
                 </div>
                 <div>
                  <textarea
@@ -106,10 +114,10 @@
                 <button @click="doEval('')" class="evalButton">Evaluate</button>
             </div>
             <div class="dafFlexItemResult">
-                <label class="form-label" for="fpeResultsBox" v-if="getPatternTypeObj.resultObj.wasEvaluatedAtleastOnce">result(s):</label>
+                <label class="form-label, resultShadow" for="fpeResultsBox" v-if="getPatternTypeObj.resultObj.wasEvaluatedAtleastOnce">result(s):</label>
                 <div id="fpeResultsBox" class="resultBox">
                     <div v-if="getPatternTypeObj.resultObj.wasEvaluatedAtleastOnce && getResultCode() === 'pass'">
-                        <template v-if="getResourceList() && getResourceList().length > 0">
+                        <template v-if="getResourceList() && (getResourceList().length > 0 && !getSourceIdDetails.valueString)">
                             <select size="5">
                                 <option :key="rKey"
                                         :value="rName"
@@ -118,15 +126,16 @@
                                 </option>
                             </select>
                             <p >{{getResourceList().length}} resource(s) found.</p>
-                            <!--                   <div>-->
-                            <!--                       <button class="resultBox">Inspect</button>-->
-                            <!--                   </div>-->
                         </template>
-                        <template v-else>
-                            No resources found.
+                        <template v-else-if="getSourceIdDetails.valueString">
+                            <p>{{decodeURIComponent(getSourceIdDetails.valueString)}}</p>
+                            <div class="resultShadow">type:</div>
+                            <p>{{getResourceList()[0]}}</p>
                         </template>
                     </div>
-                    <div v-bind:class="{
+                    <template v-if="getResultCode().valueOf() !== 'pass'">
+                    <div
+                         v-bind:class="{
                     'resultBox': true,
                     'evalNotPassed': getResultCode().valueOf() !== 'pass',
                     }"
@@ -135,6 +144,7 @@
                         <vue-markdown
                                 v-bind:source="getResultMessage()"></vue-markdown>
                     </div>
+                   </template>
                 </div>
             </div>
         </div>
@@ -261,6 +271,10 @@
 
     .form-label {
         /*margin: 4px;*/
+    }
+
+    .resultShadow {
+        text-decoration: underline;
     }
 
     .form-block {

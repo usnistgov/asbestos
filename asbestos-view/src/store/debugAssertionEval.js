@@ -58,6 +58,7 @@ function SourceIdFpEvalDetails() {
     this.fixtureProfileUrl = ''
     this.analysisUrl = ''
     this.direction = ''
+    this.valueString = ''
 }
 
 function FhirPathContextObj() {
@@ -231,6 +232,9 @@ export const debugAssertionEvalStore = {
                     }
                 }
 
+                // Reset fixture specific values
+                resetDataStateObj(contextObj.sourceIdDetails, new SourceIdFpEvalDetails())
+
                 // Set fixture specific values
                 if ('fixtureResourceName' in obj ) {
                     contextObj.sourceIdDetails.fixtureResourceName = obj.fixtureResourceName
@@ -243,6 +247,9 @@ export const debugAssertionEvalStore = {
                 }
                 if ('direction' in obj) {
                     contextObj.sourceIdDetails.direction = obj.direction
+                }
+                if ('valueString' in obj) {
+                    contextObj.sourceIdDetails.valueString = obj.valueString
                 }
 
             } catch (e) {console.log(e.toString())}

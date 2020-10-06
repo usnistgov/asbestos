@@ -37,6 +37,9 @@ export default {
         openHelp(propKey) {
             window.open("http://hl7.org/fhir/testscript-definitions.html#TestScript.setup.action.assert." + propKey, "_blank")
         },
+        openFHIRPathWebsite() {
+            window.open("http://hl7.org/fhirpath/N1/index.html", "_blank");
+        },
         getFormInputId(propKey) {
             return this.patternTypeId + '_' + this.optionType + '_' + propKey;
         },
