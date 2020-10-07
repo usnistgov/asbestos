@@ -205,7 +205,8 @@ public class TestScriptDebugger implements TestScriptDebugInterface {
                     fixtureProfileUrl = URLEncoder.encode(annotation.profile(), StandardCharsets.UTF_8.toString());
                 }
                 if (selectedFixtureComponent.getCreatedByUIEvent() != null) {
-                    direction = selectedFixtureComponent.getResourceWrapper().isRequest() ? "req" : "resp";
+                    // It appears the getResourceWrapper isRequest is false for static fixture, so the condition below is needed
+                    direction = selectedFixtureComponent.isStatic()? "request" : selectedFixtureComponent.getResourceWrapper().isRequest() ? "request" : "response";
 //                    URI eventUri = getAnalysisURI(selectedFixtureComponent.getCreatedByUIEvent(), direction);
 //                    analysisUrl = URLEncoder.encode(eventUri.toString(), StandardCharsets.UTF_8.toString());
                     analysisUrl = URLEncoder.encode(selectedFixtureComponent.getCreatedByUIEvent().getEventName(), StandardCharsets.UTF_8.toString());
@@ -227,8 +228,18 @@ public class TestScriptDebugger implements TestScriptDebugInterface {
                     int counter = 0;
                     for (Base b : resources) {
                         // Assume all baseTypes are the same
-                        String indexHint =   resources.size() > 1 ? "[" + counter++ + "]" : "";
-                        baseNames.add(b.fhirType() + indexHint);
+                        String indexHint =   resources.size() > 1 ? "[" + counter++ + "]":"";
+                        if (!fhirPath.endsWith(".resource")) {
+                            try {
+                                List<Base> resourceType = FhirPathEngineBuilder.evalForResources(resource, fhirPath + indexHint + ".resource");
+                                if (resourceType != null && resourceType.size() == 1) {
+                                    indexHint += ": " + resourceType.get(0).getClass().getSimpleName();
+                                }
+                            } catch (Exception ex) {}
+                            baseNames.add(((resources.size()==1 && !indexHint.equals(""))?".resource":b.fhirType()) + indexHint);
+                        } else {
+                            baseNames.add(b.fhirType() + indexHint);
+                        }
                     }
                     List<String> myList =
                             baseNames
@@ -237,7 +248,7 @@ public class TestScriptDebugger implements TestScriptDebugInterface {
                                     .collect(Collectors.toList());
                     resourcesString = String.join(",", myList);
                     if (resources.size() == 1 && ! resources.get(0).isResource()) {
-                        List<Base> valueOnlyType = FhirPathEngineBuilder.evalForResources(resource, fhirPath + ".value");
+                        List<Base> valueOnlyType = FhirPathEngineBuilder.evalForResources(resource, fhirPath + (fhirPath.endsWith(".value")?"":".value"));
                         if (valueOnlyType != null && valueOnlyType.size() == 1) {
                             valueString = URLEncoder.encode(FhirPathEngineBuilder.evalForString(valueOnlyType.get(0)), StandardCharsets.UTF_8.toString());
                         }

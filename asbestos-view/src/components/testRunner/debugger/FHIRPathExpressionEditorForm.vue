@@ -44,6 +44,7 @@
                                     :eventId="decodeURIComponent(getSourceIdDetails.analysisUrl)"
                                     :noNav="true"
                                     :sessionId="$store.state.base.session"
+                                    :modal-mode="getSourceIdDetails.direction"
                             >
                             </inspect-event>
                         </div>
@@ -57,20 +58,19 @@
         <div class="secondRowFlexContainer">
             <div class="dafFlexItem">
                 <div>
+                    <div class="inlineDiv">FHIRPath</div>
+                    <span
+                            :title="`Click to open the FHIRPath reference in a new browser tab.`"
+                            @click.stop="openFHIRPathWebsite"
+                            class="infoIconLink"><img
+                            alt="External link" src="../../../assets/ext_link.png" style="vertical-align: top"/></span>
+                    <span>&nbsp;</span>
                     <label class="form-label" :for="getFormInputId('expression')" :title="getEnumTypeShortDefinition('expression')">expression</label>
                     <span
                             :title="`Click to open the expression assert element detailed description in a new browser tab.`"
                             @click.stop="openHelp('expression')"
                             class="infoIconLink"><img
                             alt="External link" src="../../../assets/ext_link.png" style="vertical-align: top"/></span>
-                    <span>.&nbsp;</span>
-                    <div class="inlineDiv">FHIRPath Reference</div>
-                    <span
-                            :title="`Click to open the FHIRPath reference in a new browser tab.`"
-                            @click.stop="openFHIRPathWebsite"
-                            class="infoIconLink"><img
-                            alt="External link" src="../../../assets/ext_link.png" style="vertical-align: top"/></span>
-                    <span>.&nbsp;</span>
                 </div>
                 <div>
                  <textarea
@@ -86,7 +86,7 @@
                         'form-control-textarea-general' : true,
                         }"
                  />
-                    <div class="smallText">{{getEnumTypeFormalDefinition('expression')}}</div>
+                    <div class="fhirPathExpressionText">{{getEnumTypeFormalDefinition('expression')}}</div>
                 </div>
                 <div>
                     <label class="form-label" :for="getFormInputId('value')" :title="getEnumTypeShortDefinition('value')">value</label>
@@ -128,6 +128,7 @@
                             <p >{{getResourceList().length}} resource(s) found.</p>
                         </template>
                         <template v-else-if="getSourceIdDetails.valueString">
+                            <div class="">{{getPropVal('expression')}}<template v-if="!getPropVal('expression').endsWith('.value')"><b>.value</b></template>:</div>
                             <p>{{decodeURIComponent(getSourceIdDetails.valueString)}}</p>
                             <div class="resultShadow">type:</div>
                             <p>{{getResourceList()[0]}}</p>
@@ -255,6 +256,7 @@
         margin-left: 5px;
     }
 
+    .fhirPathExpressionText,
     .smallText {
         text-align: left;
         font-size: xx-small;
@@ -262,7 +264,10 @@
         width: 24em;
         color: gray;
         padding: 0.5em 1em;
+    }
 
+    .fhirPathExpressionText {
+        width: 34em;
     }
 
     .text-right {
