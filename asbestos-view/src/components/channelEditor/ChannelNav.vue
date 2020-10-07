@@ -3,7 +3,7 @@
     <div class="nav channel-panel-header">
       Channels
       <div class="tooltip">
-        <img id="add-button" @click="adding=true" src="../../assets/add-button.png"/>
+        <img id="add-button" @click="newChannelName = null;adding=true" src="../../assets/add-button.png"/>
         <img id="delete" src="../../assets/exclude-button-red.png" @click="del()"/>
         <span class="tooltiptext">Add Channel</span>
       </div>
@@ -35,7 +35,7 @@
       <!--    <router-view></router-view>-->
     </div>
     <div v-if="channel" class="view">
-      <channel-edit :session-id="sessionId" :channel-name="channelName" :new-channel="channel" class="view"></channel-edit>
+      <channel-edit :session-id="sessionId" :channel-name="channelName" :the-channel="channel" :start-edit="startEditOpen" class="view"></channel-edit>
     </div>
   </div>
 </template>
@@ -59,6 +59,7 @@ export default {
       channel: null,
       deleting: false,
       editUserProps: ASBTS_USERPROPS,
+      startEditOpen: false,
     }
   },
   props: [
@@ -100,6 +101,7 @@ export default {
           await PROXY.delete('channelGuard/' + this.channelId, { auth: {username: this.editUserProps.bauser, password: this.editUserProps.bapw}})
         }
         this.msg('Deleted')
+        this.localDelete(this.channelId);
         this.$store.commit('deleteChannel', this.channelId)
         await this.$store.dispatch('loadChannelIds')
         this.selectFirstChannelId();
@@ -109,6 +111,15 @@ export default {
       }
       this.adding = false;
       this.deleting = false;
+    },
+
+    localDelete(theChannelId) {
+      const index = this.channelIds.findIndex(function(channelId) {
+        return channelId === theChannelId;
+      })
+      if (index === -1)
+        return;
+      this.channelIds.splice(index, 1);
     },
 
     cancelDel() {
@@ -121,21 +132,39 @@ export default {
     },
     updateChannel() {
       if (!this.channel || this.channel.channelName !== this.channelName) {
-        this.$store.dispatch('loadChannel', this.channelId)
-            .then(channel => {
-              this.channel = channel
-            })
+        if (this.channelId !== null) {
+          this.$store.dispatch('loadChannel', this.channelId)
+              .then(channel => {
+                this.channel = channel
+              })
+        }
       }
     },
     doAdd() {
       this.channel = newChannel();
       this.channel.channelName = this.newChannelName;
-      this.$store.commit('setChannel', this.channel)
+      if (this.isCurrentChannelIdBadPattern()) {
+        this.$store.commit('setError', `Name may only contain a-z A-Z 0-9 and -.`);
+        return;
+      }
+      this.channel.testSession = this.sessionId;
+      //this.$store.commit('setChannel', this.channel)
       this.adding = false;
       this.channelId = `${this.sessionId}__${this.newChannelName}`;
       if (this.channelIds === null)
         this.channelIds = [];
-      this.channelIds.push(this.channelId);
+      //this.channelIds.push(this.channelId);
+      this.$store.commit('installChannel', this.channel);
+      this.$store.commit('setChannelIsNew');
+      this.pushChannelRoute();
+    },
+    isCurrentChannelIdBadPattern() {
+      const name = this.channel.channelName
+      const re = RegExp('^([a-zA-Z0-9-]+)$')
+      const match = re.test(name)
+      const re2 = RegExp('.*__.*')
+      const match2 = re2.test(name)
+      return !match || match2
     },
     cancelAdd() {
       this.newChannelName = null;
@@ -149,12 +178,23 @@ export default {
     pushNewChannelRoute() {
       return this.$router.push(this.newChannelRoute())
     },
+    pushChannelRoute() {
+      const route = this.channelRoute();
+      if (route)
+        return this.$router.push(route);
+    },
+    channelRoute() {
+      if (!this.channel)
+        return null;
+      return '/session/' + this.channel.testSession + '/channels/' + this.channel.channelName;
+    },
     newChannelRoute() {
       let chan = newChannel()
       chan.testSession = this.sessionId
       chan.channelName = 'new'
       chan.channelType = 'fhir'
       this.$store.commit('setChannel', chan)
+      this.$store.commit('setChannelIsNew');
       return '/session/' + this.sessionId + '/channels/new'
     },
     channelsLink(channelId) {

@@ -4,7 +4,7 @@
     <div class="window">
       <div v-if="channel" class="grid-container">
         <div class="button-bar">
-          <div v-if="edit">
+          <div v-if="edit || channelIsNew">
             <div v-if="badNameMode">
               Cannot save with this name - {{ badNameModeReason }}
               <button class="cancel-button" @click="badNameCanceled">Continue</button>
@@ -22,6 +22,7 @@
                 <span class="tooltiptext">Discard</span>
               </div>
             </div>
+<!--            <span v-if="channelIsNew" class="right">Edited</span>-->
           </div>
           <div v-else>
             <div v-if="ackMode">
@@ -50,12 +51,12 @@
               <div class="divider"></div>
               <div class="divider"></div>
               <div class="divider"></div>
-              <div class="tooltip">
-                <img id="delete-button" src="../../assets/delete-button.png" @click="guardedFn('Delete',requestDelete)" />
-                <span class="tooltiptext">Delete</span>
-              </div>
-              <div class="divider"></div>
-              <div class="divider"></div>
+<!--              <div class="tooltip">-->
+<!--                <img id="delete-button" src="../../assets/delete-button.png" @click="guardedFn('Delete',requestDelete)" />-->
+<!--                <span class="tooltiptext">Delete</span>-->
+<!--              </div>-->
+<!--              <div class="divider"></div>-->
+<!--              <div class="divider"></div>-->
               <div v-if="channel.writeLocked" class="tooltip">
                 <img id="unlock-button" src="../../assets/lock-icon.png" @click="requestLock(false)"/>
                 <span class="tooltiptext">Configuration is locked.</span>
@@ -64,6 +65,7 @@
                 <img id="lock-button" src="../../assets/unlock-icon.png" @click="requestLock(true)"/>
                 <span class="tooltiptext">Configuration is unlocked.</span>
               </div>
+<!--              <span v-if="channelIsNew" class="right">Edited</span>-->
             </div>
 
           </div>
@@ -201,17 +203,22 @@ export default {
       lockAckMode: "", // for locking configuration to prevent unauthorized edits
       badNameMode: false,
       badNameModeReason: null,
-      editUserProps: ASBTS_USERPROPS
+      editUserProps: ASBTS_USERPROPS,
     }
   },
   props: [
     'sessionId',
     'channelName',
-    'newChannel'
+    'theChannel',
+      'startEdit'
   ],
   created() {
     this.fetch()
     this.showAck(true)
+    if (this.startEdit) {
+      this.edit = true;
+      this.isNew = true;
+    }
     // this.loadChannelBaseAddr()
   },
   watch: {  // when $route changes run fetch()
@@ -220,6 +227,12 @@ export default {
     },
     channelName: function (newChannelName) {
       this.updateToChannel(newChannelName);
+    },
+    startEdit: function (newStartEdit) {
+      this.startEdit = newStartEdit;
+    },
+    channelIsNew(value) {
+      this.edit = value;
     }
   },
   computed: {
@@ -230,6 +243,9 @@ export default {
     },
     channelId() {
       return this.sessionId + '__' + this.channelName;
+    },
+    channelIsNew() {
+        return this.$store.state.base.channelIsNew;
     }
   },
   mounted() {
@@ -302,6 +318,7 @@ export default {
     async save() {
       const that = this
       if (this.isNew) {
+        console.log(`new new new`)
         if (this.isCurrentChannelIdNew()) {
           this.badNameMode = true
           this.badNameModeReason = `'new' is temporary and not acceptable`
@@ -312,35 +329,37 @@ export default {
           this.badNameModeReason = `Name may only contain a-z A-Z 0-9 _  and __ not allowed`
           return
         }
-        await this.saveToServer(this.channel).then (response => {
+        let response = await this.saveToServer(this.channel);
           if (response) {console.log(response)}
           this.$store.commit('installChannel', cloneDeep(this.channel))
-          this.$store.commit('deleteChannel', this.originalChannelId) // original has been renamed
+          //this.$store.commit('deleteChannel', this.originalChannelName) // original has been renamed
           this.isNew = false
           this.edit = false
-          this.$store.dispatch('initSessionsStore');
+          await this.$store.dispatch('initSessionsStore');
           // this.$store.commit('setChannelName', this.channel.channelName);
           // this.$store.commit('setSession', this.channel.testSession);
+          await this.$store.dispatch('loadChannelIds')
           this.$router.push('/session/' + this.channel.testSession + '/channels/' + this.channel.channelName)
-        })
       } else {
         this.$store.commit('installChannel', cloneDeep(this.channel))
         if (! this.channel.writeLocked) {
-          CHANNEL.post('', this.channel)
+          const url = `CHANNEL/create`;
+          CHANNEL.post('create', this.channel)
               .then(function () {
-                that.msg('Saved')
+                that.msg('Updated')
                 that.isNew = false
                 that.edit = false
                 that.lockAckMode = ""
                 that.fetch()
-
+                this.$store.dispatch('loadChannelIds')
               })
               .catch(function (error) {
-                that.error(error)
+                that.error(url + ': ' + error)
                 that.isNew = false
                 that.edit = false
               })
         } else {
+          const url = `channelGuard/create`;
           PROXY.post('/channelGuard', this.channel, {
             auth: {
               username: this.editUserProps.bauser,
@@ -353,10 +372,10 @@ export default {
                 that.edit = false
                 that.lockAckMode = ""
                 that.fetch()
-
+                this.$store.dispatch('loadChannelIds')
               })
               .catch(function (error) {
-                that.error(error)
+                that.error(url + ': ' + error)
                 that.isNew = false
                 that.edit = false
                 that.lockAckMode = ""
@@ -366,13 +385,15 @@ export default {
 
     },
     async saveToServer(aChannel) {
+      const url = `CHANNEL/create`;
       try {
         console.log(`saveToServer`)
         await CHANNEL.post('create', aChannel)
         this.msg('New Channel Saved')
         await this.$store.dispatch('loadChannelNames')
+        await this.$store.dispatch('loadChannelIds')
       } catch(error) {
-        this.error(error)
+        this.error(url + ': ' + 'saveToServer ' + error)
       }
     },
     discard() {
@@ -400,9 +421,15 @@ export default {
     isNewChannelId() {
       return this.channelName === 'new' || this.channelName === 'copy'
     },
+    isPreloaded() {
+      const channel = this.$store.state.base.channel;
+      return channel && this.channelName === channel.channelName && this.sessionId === channel.testSession;
+    },
     updateToChannel(channelName) {
       if (!channelName)
         return
+      if (this.isPreloaded())
+        return;
       this.channelName = channelName;
       this.$store.dispatch('loadChannel', this.channelId)   // this.channelId is computed off this.channelName
           .then(channel => {
@@ -421,17 +448,21 @@ export default {
         this.discarding = false
         return
       }
-      const index = this.channelIndex(this.sessionId, this.channelName)
-      console.log(`index of ${this.channelName} is ${index}`)
-      if (index === -1) {
-        this.channel = null
-        return
+
+      console.log(`checking for preload`);
+      const channel = this.$store.state.base.channel;
+      if (this.isPreloaded()) {
+        this.discarding = false;
+        this.channel = channel;
+        console.log(`preloaded`);
+        return;
       }
 
+      this.channel = null
       const fullId = this.channelId;
 
-      if (this.newChannel)
-        this.channel = this.newChannel;
+      if (this.theChannel)
+        this.channel = this.theChannel;
       else {
         this.$store.dispatch('loadChannel', fullId)
             .then(channel => {

@@ -73,9 +73,6 @@ public class Request {
 
     public URL getFullUrl()  {
         String url = uri.toString();
-//        String query = req.getQueryString();
-//        if (query != null && !query.equals(""))
-//            url = url + "?" + query;
         if (url.startsWith("/asbestos"))
             url = url.substring("/asbestos".length());
         url = ServiceProperties.getInstance().getPropertyOrStop(ServicePropertiesEnum.FHIR_TOOLKIT_BASE) + url;

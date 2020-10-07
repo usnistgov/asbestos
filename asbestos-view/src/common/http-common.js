@@ -17,10 +17,10 @@ export var ASBTS_USERPROPS =  {
 
 export const UtilFunctions = {
     getChannelBase :function(channel) {
-        return FHIRTOOLKITBASEURL + "/proxy/" + channel.testSession + "__" + channel.channelId
+        return FHIRTOOLKITBASEURL + "/proxy/" + channel.testSession + "__" + channel.channelName
     },
     getHttpsChannelBase :function(channel) {
-        return HTTPSFHIRTOOLKITBASEURL + "/proxy/" + channel.testSession + "__" + channel.channelId
+        return HTTPSFHIRTOOLKITBASEURL + "/proxy/" + channel.testSession + "__" + channel.channelName
     },
     getTestEngineBase: function() {
         return toolkitBaseToUse + "/engine"

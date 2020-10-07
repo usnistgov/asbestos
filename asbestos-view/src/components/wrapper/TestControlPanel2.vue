@@ -94,15 +94,6 @@
             client() {
                 return this.testType === 'Client'
             },
-            // collection: {
-            //     set(name) {
-            //         this.$store.commit('setTestCollectionName', name)
-            //         this.openCollection()
-            //     },
-            //     get() {
-            //         return this.$store.state.testRunner.currentTestCollectionName
-            //     }
-            // },
             collections: {
                 get() {
                     return (this.client)
@@ -120,10 +111,10 @@
                 return this.$store.state.base.session
             },
             channelId() {
-                return this.$store.state.base.channelId
+                return this.$store.getters.channelId
             },
             selectable() {
-                return this.$store.state.base.session !== null && this.$store.state.base.channelId !== null
+                return this.session !== null && this.channelId !== null
             },
             testId: {
                 set(name) {
@@ -144,7 +135,7 @@
 
         },
         watch: {
-            '$store.state.base.channelId': 'reload',
+            'channelId': 'reload',
             '$store.state.testRunner.currentTestCollectionName': 'vuexCollectionUpdated',
             'collection': 'localCollectionUpdated',
         },

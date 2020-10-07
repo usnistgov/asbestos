@@ -4,7 +4,7 @@ export function newChannel () {
         environment: 'default',
         testSession: 'default',
         actorType: 'fhir',
-        channelType: 'passthrough',
+        channelType: 'fhir',
         fhirBase: '',
         xdsSiteName: '',
         writeLocked: false,

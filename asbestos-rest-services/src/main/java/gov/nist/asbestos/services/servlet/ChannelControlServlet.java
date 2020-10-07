@@ -47,7 +47,6 @@ public class ChannelControlServlet extends HttpServlet {
                     .setFhirBase(hapiFhirBase);
             simStore.create(cconfig);
         }
-        //log.info("ChannelControlServlet init done");
     }
 
     @Override

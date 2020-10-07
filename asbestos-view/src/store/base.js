@@ -16,6 +16,7 @@ export const baseStore = {
             channelName: 'default',  // current
             channelIds: [],  // for all sessions
             channel: null,   // current configuration matching channelId
+            channelIsNew: false, // newly created means not saved to server yet
 
             environments: [
                 'default',
@@ -52,22 +53,33 @@ export const baseStore = {
             state.channel = theChannel
             if (theChannel === null)
                 return
+            const targetChannelId = `${theChannel.testSession}__${theChannel.channelName}`;
             let channelIndex = state.channelIds.findIndex( function(channelId) {
-                return channelId === theChannel.channelId
+                return channelId === targetChannelId;
             })
             if (channelIndex === -1)
-                state.channelIds.push(theChannel.channelId)
+                state.channelIds.push(targetChannelId)
+            state.channelIsNew = false;
         },
-        installChannel(state, newChannel) {  // adds to end
-            let channelIndex = state.channelIds.findIndex( function(channelId) {
-                return channelId === newChannel.channelId
-            })
-            if (channelIndex === -1) {
-                state.channelIds.push(newChannel.channelId)
-            } else {
-                state.channel = newChannel
+        setChannelIsNew(state) {
+            state.channelIsNew = true;
+        },
+        installChannel(state, newChannel) {
+            if (!newChannel) {
+                state.channel = newChannel;
+                return;
             }
+            // const targetChannelId = `${newChannel.testSession}__${newChannel.channelName}`;
+            // let channelIndex = state.channelIds.findIndex( function(channelId) {
+            //     return channelId === targetChannelId;
+            // })
+            // if (channelIndex === -1) {
+            //     state.channelIds.push(targetChannelId)
+            // } else {
+                state.channel = newChannel
+            // }
             state.channel = newChannel
+            state.channelIsNew = false;
         },
         deleteChannel(state, theChannelId) {
             const channelIndex = state.channelIds.findIndex( function(channelId) {
@@ -181,12 +193,6 @@ export const baseStore = {
             PROXY.get('channel')
                 .then(response => {
                     const fullChannelIds = response.data
-                    // const theFullChannelIds = fullChannelIds.filter(id => {
-                    //     return id.startsWith(state.session + '__')
-                    // })
-                    // const ids = theFullChannelIds.map(fullId => {
-                    //     return fullId.split('__')[1]
-                    // })
                     commit('installChannelIds', fullChannelIds)
                 })
                 .catch(function (error) {
@@ -203,13 +209,16 @@ export const baseStore = {
                         ids.push(item.id)
                     })
                     commit('installChannelIds', ids.sort())
-                    //commit('installChannelURLs', response.data)
                 })
                 .catch(e => {
                     commit('setError', url + ': ' + e)
                 })
         },
         loadChannel({commit}, fullId) {
+            commit('installChannel', null);
+            const parts = fullId.split('__', 2);
+            if (parts.length !== 2 || parts[0] === null || parts[1] === null)
+                return;
             const url = `CHANNEL/${fullId}`
             return CHANNEL.get(fullId)
                 .then(response => {
@@ -270,13 +279,13 @@ export const baseStore = {
         getEffectiveChannelIds: (state, getters) => {
             let session = state.session;
             let ids = getters.getChannelIdsForSession(session);
-            let includedSessions = getters.getSessionIncludes(session);
-            while ( Array.isArray(includedSessions) && includedSessions.length > 0) {
-                session = includedSessions.pop();
-                let channelIds = getters.getChannelIdsForSession(session);
-                ids = ids.concat(channelIds);
-                getters.getSessionIncludes(session).forEach(inc => includedSessions.push(inc));
-            }
+            // let includedSessions = getters.getSessionIncludes(session);
+            // while ( Array.isArray(includedSessions) && includedSessions.length > 0) {
+            //     session = includedSessions.pop();
+            //     let channelIds = getters.getChannelIdsForSession(session);
+            //     ids = ids.concat(channelIds);
+            //     getters.getSessionIncludes(session).forEach(inc => includedSessions.push(inc));
+            // }
             return ids;
         }
     }

@@ -14,7 +14,8 @@
 <!--        <router-view></router-view>-->
 
 <!--      </div>-->
-  <div class="container">
+<!--  <div class="container">-->
+  <div>
         <channel-nav :session-id="sessionId" class="nav"></channel-nav>
 <!--        <channel-edit :session-id="sessionId" :channelName="channelName" class="view"></channel-edit>-->
     </div>
@@ -64,6 +65,7 @@
             chan.channelName = 'new'
             chan.channelType = 'fhir'
             this.$store.commit('setChannel', chan)
+            this.$store.commit('setChannelIsNew');
             console.log(`newChannel ${Object.keys(chan)}`)
             return '/session/' + this.sessionId + '/channels/new'
           },
