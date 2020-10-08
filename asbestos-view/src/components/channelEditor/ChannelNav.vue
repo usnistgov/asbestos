@@ -67,6 +67,16 @@ export default {
   ],
   components: { ChannelEdit },
   mounted() {
+    this.$store.subscribe((mutation) => {
+      switch(mutation.type) {
+        case 'installChannel':
+        case 'installChannelIds':
+        case 'setSession':
+        case 'loadChannelNames':
+          this.channelIds = this.$store.getters.getChannelIdsForCurrentSession;
+          break;
+      }
+    })
   },
   created() {
     this.updateChannelIds();
@@ -80,6 +90,7 @@ export default {
   },
   computed: {
     channelName() {
+      if (!this.channelId) return null;
       if (this.channelId.split('__').length === 2)
         return this.channelId.split('__')[1];
       else
@@ -120,6 +131,7 @@ export default {
       if (index === -1)
         return;
       this.channelIds.splice(index, 1);
+      this.channel = null;
     },
 
     cancelDel() {

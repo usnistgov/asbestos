@@ -316,72 +316,55 @@ export default {
       this.edit = !this.edit
     },
     async save() {
-      const that = this
-      if (this.isNew) {
-        console.log(`new new new`)
-        if (this.isCurrentChannelIdNew()) {
-          this.badNameMode = true
-          this.badNameModeReason = `'new' is temporary and not acceptable`
-          return
-        }
-        if (this.isCurrentChannelIdBadPattern()) {
-          this.badNameMode = true
-          this.badNameModeReason = `Name may only contain a-z A-Z 0-9 _  and __ not allowed`
-          return
-        }
-        let response = await this.saveToServer(this.channel);
-          if (response) {console.log(response)}
-          this.$store.commit('installChannel', cloneDeep(this.channel))
-          //this.$store.commit('deleteChannel', this.originalChannelName) // original has been renamed
-          this.isNew = false
-          this.edit = false
-          await this.$store.dispatch('initSessionsStore');
-          // this.$store.commit('setChannelName', this.channel.channelName);
-          // this.$store.commit('setSession', this.channel.testSession);
-          await this.$store.dispatch('loadChannelIds')
-          this.$router.push('/session/' + this.channel.testSession + '/channels/' + this.channel.channelName)
-      } else {
+      // if (this.isNew) {
+      //   let response = await this.saveToServer(this.channel);
+      //     if (response) {console.log(response)}
+      //     this.$store.commit('installChannel', cloneDeep(this.channel))
+      //     this.isNew = false
+      //     this.edit = false
+      //     await this.$store.dispatch('initSessionsStore');
+      //     await this.$store.dispatch('loadChannelIds')
+      //     await this.$router.push('/session/' + this.channel.testSession + '/channels/' + this.channel.channelName)
+      // } else {
         this.$store.commit('installChannel', cloneDeep(this.channel))
         if (! this.channel.writeLocked) {
           const url = `CHANNEL/create`;
-          CHANNEL.post('create', this.channel)
-              .then(function () {
-                that.msg('Updated')
-                that.isNew = false
-                that.edit = false
-                that.lockAckMode = ""
-                that.fetch()
-                this.$store.dispatch('loadChannelIds')
-              })
-              .catch(function (error) {
-                that.error(url + ': ' + error)
-                that.isNew = false
-                that.edit = false
-              })
-        } else {
+          try {
+            await CHANNEL.post('create', this.channel);
+            this.msg('Updated')
+            this.isNew = false
+            this.edit = false
+            this.lockAckMode = ""
+            this.fetch()
+            await this.$store.dispatch('loadChannelIds')
+          } catch (error) {
+            this.error(url + ': ' + error)
+            this.isNew = false
+            this.edit = false
+          }
+        } else {  // has write lock
           const url = `channelGuard/create`;
-          PROXY.post('/channelGuard', this.channel, {
-            auth: {
-              username: this.editUserProps.bauser,
-              password: this.editUserProps.bapw
-            }
-          })
-              .then(function () {
-                that.msg('Saved')
-                that.isNew = false
-                that.edit = false
-                that.lockAckMode = ""
-                that.fetch()
-                this.$store.dispatch('loadChannelIds')
-              })
-              .catch(function (error) {
-                that.error(url + ': ' + error)
-                that.isNew = false
-                that.edit = false
-                that.lockAckMode = ""
-              })
+          try {
+            await PROXY.post('/channelGuard', this.channel, {
+              auth: {
+                username: this.editUserProps.bauser,
+                password: this.editUserProps.bapw
+              }
+            })
+            this.msg('Saved')
+            this.isNew = false
+            this.edit = false
+            this.lockAckMode = ""
+            this.fetch()
+            await this.$store.dispatch('loadChannelIds')
+          } catch (error) {
+            this.error(url + ': ' + error)
+            this.isNew = false
+            this.edit = false
+            this.lockAckMode = ""
+          }
         }
-      }
+//      }
 
     },
     async saveToServer(aChannel) {

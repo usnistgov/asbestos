@@ -217,7 +217,7 @@ export const baseStore = {
         loadChannel({commit}, fullId) {
             commit('installChannel', null);
             const parts = fullId.split('__', 2);
-            if (parts.length !== 2 || parts[0] === null || parts[1] === null)
+            if (parts.length !== 2 || parts[0] === null || parts[1] === null || parts[1] === 'null')
                 return;
             const url = `CHANNEL/${fullId}`
             return CHANNEL.get(fullId)
