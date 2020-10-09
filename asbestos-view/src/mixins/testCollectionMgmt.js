@@ -61,16 +61,13 @@ export default {
         async loadTestCollection(testCollection) {
             this.$store.commit('setTestCollectionName', testCollection)
             await this.$store.dispatch('loadCurrentTestCollection')
-            this.testScriptNamesUpdated()
+            await this.testScriptNamesUpdated()
             const requiredChannel = this.$store.state.testRunner.requiredChannel
             if (requiredChannel) {
+                console.log(`required channel is ${requiredChannel}`)
                 this.$store.commit('setChannelId', requiredChannel)
             }
-            this.loadAChannel(this.fullChannelId);
-            // this.$store.dispatch('loadChannel', this.fullChannelId)
-            //     .then(channel => {
-            //         this.channelObj = channel
-            //     })
+            await this.loadAChannel(this.fullChannelId);
             const promises = []
             promises.push(this.$store.dispatch('loadTestScripts', this.$store.state.testRunner.testScriptNames))
             if (!this.$store.state.testRunner.isClientTest)
@@ -131,7 +128,7 @@ export default {
             }
         },
         clientBaseAddress() { // for client tests
-            return `${this.$store.state.base.proxyBase}/${this.sessionId}__${this.channelId}`
+            return `${this.$store.state.base.proxyBase}/${this.sessionId}__${this.channelName}`
         },
         json: {
             get() {
@@ -148,17 +145,17 @@ export default {
         },
         channel: {
             set(name) {
-                if (name !== this.$store.state.base.channelId) {
-                    console.log(`really`);
-                    this.$store.commit('setChannelId', name)
+                if (name !== this.$store.state.base.channelName) {
+                    console.log(`setting channelName to ${name}`);
+                    this.$store.commit('setChannelName', name)
                 }
             },
             get() {
-                return this.$store.state.base.channelId
+                return this.$store.state.base.channelName
             }
         },
         fullChannelId() {
-            return `${this.sessionId}__${this.channelId}`
+            return `${this.sessionId}__${this.channelName}`
         },
     }
 }

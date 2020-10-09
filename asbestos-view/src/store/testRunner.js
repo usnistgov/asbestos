@@ -257,7 +257,7 @@ export const testRunnerStore = {
                 })
         },
         runEval({commit, state, rootState}, testId) {
-            const url = `clienteval/${rootState.base.session}__${rootState.base.channelId}/${state.eventEvalCount}/${state.currentTestCollectionName}/${testId}`
+            const url = `clienteval/${rootState.base.session}__${rootState.base.channelName}/${state.eventEvalCount}/${state.currentTestCollectionName}/${testId}`
             ENGINE.get(url)
                 .then(response => {
                     const reports = response.data
@@ -271,7 +271,7 @@ export const testRunnerStore = {
             const testId = parms.testId
             const eventId = parms.eventId
             const testCollectionName = parms.testCollectionName
-            const url = `clienteventeval/${rootState.base.session}__${rootState.base.channelId}/${testCollectionName}/${testId}/${eventId}`
+            const url = `clienteventeval/${rootState.base.session}__${rootState.base.channelName}/${testCollectionName}/${testId}/${eventId}`
             ENGINE.get(url)
                 .then(response => {
                     const results = response.data
@@ -316,7 +316,7 @@ export const testRunnerStore = {
             commit('clearTestReports')
             const promises = []
             state.testScriptNames.forEach(name => {
-                const url = `testReport/${rootState.base.session}__${rootState.base.channelId}/${testCollectionId}/${name}`
+                const url = `testReport/${rootState.base.session}__${rootState.base.channelName}/${testCollectionId}/${name}`
                 const promise = ENGINE.get(url)
                 promises.push(promise)
             })
@@ -337,7 +337,7 @@ export const testRunnerStore = {
         async loadTestReport({commit, rootState}, parms) {
             const testCollectionId = parms.testCollectionId
             const testId = parms.testId
-            const url = `testReport/${rootState.base.session}__${rootState.base.channelId}/${testCollectionId}/${testId}`
+            const url = `testReport/${rootState.base.session}__${rootState.base.channelName}/${testCollectionId}/${testId}`
             let report = ""
             const promise = ENGINE.get(url)
             promise.then(result => {
@@ -366,7 +366,7 @@ export const testRunnerStore = {
         runTest({commit, rootState, state}, testId) {
            // console.log(`run ${testId}`)
             //commit('setCurrentTest', testId)
-            const url = `testrun/${rootState.base.session}__${rootState.base.channelId}/${state.currentTestCollectionName}/${testId}?_format=${state.useJson ? 'json' : 'xml'};_gzip=${state.useGzip}`
+            const url = `testrun/${rootState.base.session}__${rootState.base.channelName}/${state.currentTestCollectionName}/${testId}?_format=${state.useJson ? 'json' : 'xml'};_gzip=${state.useGzip}`
             const promise = ENGINE.post(url)
             promise.then(result => {
                 const reports = result.data

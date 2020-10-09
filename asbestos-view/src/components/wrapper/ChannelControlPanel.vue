@@ -4,7 +4,7 @@
     <div>
       <span class="selectable" @click="manage()">Config</span>
     </div>
-    <select v-model="channelId" size="10" class="control-panel-font">
+    <select v-model="channelName" size="10" class="control-panel-font">
       <option v-for="(chann, channeli) in channelNames"
               v-bind:value="chann"
               :key="chann + channeli"
@@ -39,33 +39,33 @@ export default {
     }
   },
   computed: {
-    effectiveChannelIds: {
-      get() {
-        return this.$store.getters.getEffectiveChannelIds;
-      }
-    },
-    channelId: {
-      set(id) {
-        console.log(`channelId change to ${id}`);
-        let parts
-        if (this.effectiveChannelIds.includes(id)) {
-          parts = id.split('__', 2);
-        } else if (this.effectiveChannelIds.length > 0) {
-          parts = this.effectiveChannelIds[0].split('__', 2);
-        } else {
-          this.channelName = null;
-          return;
-        }
-        this.session = parts[0];
-        this.channelName = parts[1];
-        if (this.$store.state.base.session !== this.session)
-          this.$store.commit('setSession', this.session);
-        this.$store.commit('setChannelName', this.channelName);
-      },
-      get() {
-        return this.$store.getters.getChannelId
-      }
-    },
+    // effectiveChannelIds: {
+    //   get() {
+    //     return this.$store.getters.getEffectiveChannelIds;
+    //   }
+    // },
+    // channelId: {
+    //   set(id) {
+    //     console.log(`channelId change to ${id}`);
+    //     let parts
+    //     if (this.effectiveChannelIds.includes(id)) {
+    //       parts = id.split('__', 2);
+    //     } else if (this.effectiveChannelIds.length > 0) {
+    //       parts = this.effectiveChannelIds[0].split('__', 2);
+    //     } else {
+    //       this.channelName = null;
+    //       return;
+    //     }
+    //     this.session = parts[0];
+    //     this.channelName = parts[1];
+    //     if (this.$store.state.base.session !== this.session)
+    //       this.$store.commit('setSession', this.session);
+    //     this.$store.commit('setChannelName', this.channelName);
+    //   },
+    //   get() {
+    //     return this.$store.getters.getChannelId
+    //   }
+    // },
     channelName: {
       set(name) {
         console.log(`set channelName to ${name}`)
@@ -110,29 +110,29 @@ export default {
             case 'installChannelIds':
               case 'setSession':
                 case 'loadChannelNames':
-            this.channelNames = this.$store.getters.getChannelIdsForCurrentSession;
+            this.channelNames = this.$store.getters.getChannelNamesForCurrentSession;
             break;
         }
     })
   },
   watch: {
-    channelId: function(id) {
-      if (!this.channelValid(id))
-        return;
-      let parts
-      if (this.effectiveChannelIds.includes(id)) {
-        parts = id.split('__', 2);
-      } else if (this.effectiveChannelIds.length > 0) {
-        parts = this.effectiveChannelIds[0].split('__', 2);
-      } else {
-        this.channelName = null;
-        return;
-      }
-      this.session = parts[0];
-      this.channelName = parts[1];
-      this.$store.commit('setSession', this.session);
-      this.$store.commit('setChannelName', this.channelName);
-    }
+    // channelId: function(id) {
+    //   if (!this.channelValid(id))
+    //     return;
+    //   let parts
+    //   if (this.effectiveChannelIds.includes(id)) {
+    //     parts = id.split('__', 2);
+    //   } else if (this.effectiveChannelIds.length > 0) {
+    //     parts = this.effectiveChannelIds[0].split('__', 2);
+    //   } else {
+    //     this.channelName = null;
+    //     return;
+    //   }
+    //   this.session = parts[0];
+    //   this.channelName = parts[1];
+    //   this.$store.commit('setSession', this.session);
+    //   this.$store.commit('setChannelName', this.channelName);
+    // }
   },
   name: "ChannelControlPanel"
 }

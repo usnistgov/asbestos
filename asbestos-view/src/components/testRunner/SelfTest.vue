@@ -28,7 +28,7 @@
 
             <button class="runallbutton" @click.stop="doView(testCollection)">View</button>
 
-            Channel {{ channelId }}
+            Channel {{ channelName }}
         </div>
     </div>
 </template>
@@ -55,7 +55,7 @@
                 this.running = false;
             },
             async loadStatus(type) {
-                const url = `selftest/${this.sessionId}__${this.channelId}/${this.testCollection}/${type}/${this.eventsForClientCollections}`;
+                const url = `selftest/${this.sessionId}__${this.channelName}/${this.testCollection}/${type}/${this.eventsForClientCollections}`;
                 const promise = ENGINE.get(url);
                 promise
                     .then(response => {
@@ -72,8 +72,8 @@
             },
             async doView() {
                 await this.loadTestCollection(this.testCollection);
-                this.$store.commit('setChannelId', this.channelId)
-                this.$router.push(`/session/${this.sessionId}/channel/${this.channelId}/collection/${this.testCollection}`)
+                this.$store.commit('setChannelName', this.channelName)
+                this.$router.push(`/session/${this.sessionId}/channel/${this.channelName}/collection/${this.testCollection}`)
             },
             async loadTestCollection(testCollection) {
                 this.$store.commit('setCurrentTestCollection', testCollection);
@@ -88,7 +88,10 @@
         mixins: [ colorizeTestReports, testCollectionMgmt ],
         name: "SelfTest",
         props: [
-            'sessionId', 'channelId', 'testCollection', 'autoLoad'
+            'sessionId',
+          'channelName',   // simple name (really channelName)
+          'testCollection',
+          'autoLoad'
         ],
         components: {
         }

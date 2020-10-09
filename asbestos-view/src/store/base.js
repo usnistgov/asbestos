@@ -216,6 +216,7 @@ export const baseStore = {
         },
         loadChannel({commit}, fullId) {
             commit('installChannel', null);
+            console.log(`loadChannel ${fullId}`)
             const parts = fullId.split('__', 2);
             if (parts.length !== 2 || parts[0] === null || parts[1] === null || parts[1] === 'null')
                 return;
@@ -269,6 +270,12 @@ export const baseStore = {
         },
         getChannelIdsForCurrentSession: (state) => {
             return state.channelIds.filter(id => id.startsWith(`${state.session}__`));
+        },
+        getChannelNamesForCurrentSession: (state, getters) => {
+            return getters.getChannelIdsForCurrentSession.map(function (channelId) {
+                const parts = channelId.split('__');
+                return parts[1];
+            })
         },
         getSessionIncludes: (state) => (session) => {
               const config = state.sessionConfigs[session];

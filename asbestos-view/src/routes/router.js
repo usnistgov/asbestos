@@ -93,7 +93,7 @@ export const routes = [
                         props: { default: true}
                     },
                     {
-                        path: 'channel/:channelId',
+                        path: 'channel/:channelName',
                         components: { default: ChannelView },
                         props: { default: true},
                         children: [

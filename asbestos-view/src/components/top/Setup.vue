@@ -38,12 +38,12 @@
         <!--  SelfTest is an alternate test runner   -->
         <self-test
             :session-id="'default'"
-            :channel-id="'default'"
+            :channel-name="'default'"
             :auto-load="true"
             :test-collection="'Test_Patients'"> </self-test>
       <self-test
           :session-id="'default'"
-          :channel-id="'default'"
+          :channel-name="'default'"
           :auto-load="true"
           :test-collection="'Test_Documents'"> </self-test>
 
@@ -65,14 +65,14 @@
         channel.</p>
         <self-test
                 :session-id="'default'"
-                :channel-id="'selftest_comprehensive'"
+                :channel-name="'selftest_comprehensive'"
                 :test-collection="'MHD_DocumentRecipient_comprehensive'"> </self-test>
 
         <p>Run against MHD Document Source using XDSonFHIR option - links to XDS Toolkit
             Repository/Registry simulator for evaluation. </p>
         <self-test
                 :session-id="'default'"
-                :channel-id="'selftest_comprehensive'"
+                :channel-name="'selftest_comprehensive'"
                 :test-collection="'MHD_DocumentSource_comprehensive'"> </self-test>
 
         <h4>These two tests must be run one after another</h4>
@@ -86,7 +86,7 @@
             channel.</p>
         <self-test
                 :session-id="'default'"
-                :channel-id="'selftest_limited'"
+                :channel-name="'selftest_limited'"
                 :test-collection="'MHD_DocumentRecipient_minimal'"> </self-test>
 
         <p>Run against MHD Document Source - links to XDS Toolkit Repository/Registry
@@ -94,7 +94,7 @@
             </p>
         <self-test
                 :session-id="'default'"
-                :channel-id="'selftest_limited'"
+                :channel-name="'selftest_limited'"
                 :test-collection="'MHD_DocumentSource_minimal'"> </self-test>
     </div>
 </template>

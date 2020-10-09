@@ -432,12 +432,10 @@ export default {
         return
       }
 
-      console.log(`checking for preload`);
       const channel = this.$store.state.base.channel;
       if (this.isPreloaded()) {
         this.discarding = false;
         this.channel = channel;
-        console.log(`preloaded`);
         return;
       }
 

@@ -111,7 +111,7 @@ public class RunSelftestRequest {
                     report = modularEngine
                             //.getLastTestEngine()
                             .setTestSession(channelConfig.getTestSession())
-                            .setChannelId(channelConfig.getTestSession() + "__" + channelConfig.getChannelId())
+                            .setChannelId(channelConfig.getChannelId())
                             .setExternalCache(request.externalCache)
                             .setVal(new Val())
                             .setFhirClient(fhirClient)
