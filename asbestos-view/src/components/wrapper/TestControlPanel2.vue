@@ -8,21 +8,41 @@
         <br />
       </div>
 
-      <div class="disabled">
+      <div class="bold">
         Client:
       </div>
-      <div v-for="(coll, collectioni) in clientCollections"
-           :key="coll + collectioni" class="selectable">
-        <span v-bind:class="{active: coll === collection}" @click="openTheCollection(coll)">{{ coll }}</span>
-      </div>
+      <select v-model="collection" size="5" class="control-panel-font">
+        <option v-for="(coll, colli) in clientCollections"
+                v-bind:value="coll"
+                :key="coll + colli"
+                >
+          {{coll}}
+        </option>
+      </select>
 
-      <div class="disabled">
+
+
+<!--      <div v-for="(coll, collectioni) in clientCollections"-->
+<!--           :key="coll + collectioni" class="selectable">-->
+<!--        <span v-bind:class="{active: coll === collection}" @click="openTheCollection(coll)">{{ coll }}</span>-->
+<!--      </div>-->
+
+      <div class="bold">
         Server:
       </div>
-      <div v-for="(coll, collectioni) in serverCollections"
-           :key="coll + collectioni" class="selectable">
-        <span v-bind:class="{active: coll === collection}" @click="openTheCollection(coll)">{{ coll }}</span>
-      </div>
+      <select v-model="collection" size="5" class="control-panel-font">
+        <option v-for="(coll, colli) in serverCollections"
+                v-bind:value="coll"
+                :key="coll + colli"
+        >
+          {{coll}}
+        </option>
+      </select>
+
+<!--      <div v-for="(coll, collectioni) in serverCollections"-->
+<!--           :key="coll + collectioni" class="selectable">-->
+<!--        <span v-bind:class="{active: coll === collection}" @click="openTheCollection(coll)">{{ coll }}</span>-->
+<!--      </div>-->
 
     </div>
   </div>
@@ -140,7 +160,7 @@ export default {
   watch: {
     'channelName': 'reload',
     '$store.state.testRunner.currentTestCollectionName': 'vuexCollectionUpdated',
-    'collection': 'localCollectionUpdated',
+    'collection': 'openCollection',
   },
   mixins: [ errorHandlerMixin ],
   name: "TestControlPanel2"

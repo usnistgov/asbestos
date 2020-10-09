@@ -1,6 +1,6 @@
 <template>
     <div>
-        <log-nav v-if="!noNav" :index="index" :sessionId="sessionId" :channelId="channelId"> </log-nav>
+        <log-nav v-if="!noNav" :index="index" :sessionId="sessionId" :channelName="channelName"> </log-nav>
 
         <div class="boxed">
             <!-- Event Header -->
@@ -8,7 +8,7 @@
                 {{ eventAsDate(eventSummary.eventName) }} - {{ eventSummary.verb}} {{ eventSummary.resourceType }} - {{ eventSummary.status ? 'Ok' : 'Error' }}
                 <span class="client-server-position">
                 <span class="bolded">Client:</span>  {{clientIP}}
-                <span class="bolded">Server:</span>  {{channelId}}
+                <span class="bolded">Server:</span>  {{channelName}}
             </span>
             </div>
 
@@ -113,7 +113,7 @@
             <div v-if="inspectRequest" class="request-response">
                 <log-analysis-report
                         :session-id="sessionId"
-                        :channel-id="channelId"
+                        :channel-name="channelName"
                         :event-id="eventId"
                         :request-or-response="'request'"
                         :no-inspect-label="true"></log-analysis-report>
@@ -121,7 +121,7 @@
             <div v-if="inspectResponse" class="request-response">
                 <log-analysis-report
                         :session-id="sessionId"
-                        :channel-id="channelId"
+                        :channel-name="channelName"
                         :event-id="eventId"
                         :request-or-response="'response'"
                         :no-inspect-label="true"></log-analysis-report>
@@ -129,7 +129,7 @@
             <div v-if="displayValidations" class="request-response">
                 <eval-details
                         :session-id="sessionId"
-                        :channel-id="channelId"
+                        :channel-name="channelName"
                         :event-id="eventId"
                         :test-id="'bundle_eval'"
                         :test-collection="'Internal'"
@@ -206,7 +206,7 @@
                 if (selectedEventName !== null) {
                     this.selectedEvent = null
                     this.selectedTask = 0
-                    LOG.get(`${this.sessionId}/${this.channelId}/${summary.resourceType}/${summary.eventName}`)
+                    LOG.get(`${this.sessionId}/${this.channelName}/${summary.resourceType}/${summary.eventName}`)
                         .then(response => {
                             try {
                                 this.selectedEvent = response.data
@@ -229,7 +229,7 @@
                 return msg.replace(/&lt;/g, '<').replace(/&#xa;/g, '\n').replace(/&#x9;/g, '\t')
             },
             async loadEventSummaries() {
-                await this.$store.dispatch('loadEventSummaries', {session: this.sessionId, channel: this.channelId})
+                await this.$store.dispatch('loadEventSummaries', {session: this.sessionId, channel: this.channelName})
             },
         },
         computed: {
@@ -308,7 +308,7 @@
             },
         },
         props: [
-            'eventId', 'sessionId', 'channelId', 'noNav', 'reqresp',
+            'eventId', 'sessionId', 'channelName', 'noNav', 'reqresp',
         ],
         mixins: [eventMixin, errorHandlerMixin],
         components: {

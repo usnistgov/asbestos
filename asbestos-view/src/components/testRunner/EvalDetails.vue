@@ -16,7 +16,7 @@
                 <span v-if="inspectorOpen">
                         <inspect-event
                                 :sessionId="sessionId"
-                                :channelId="channelId"
+                                :channelName="channelName"
                                 :eventId="eventId"
                                 :noNav="true">
                         </inspect-event>
@@ -193,7 +193,7 @@
         },
         mixins: [ errorHandlerMixin, colorizeTestReports ],
         props: [
-            'sessionId', 'channelId', 'testCollection', 'testId', 'eventId', 'runEval', 'noInspectLabel',
+            'sessionId', 'channelName', 'testCollection', 'testId', 'eventId', 'runEval', 'noInspectLabel',
         ],
         components: {
             //EvalReportAssert

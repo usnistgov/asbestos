@@ -180,7 +180,7 @@
                     //console.log(`loadAnalysis2 for ${this.eventId}`)
                     //console.log(`theUrl=${this.theUrl}`)
                     await this.$store.dispatch('getLogEventAnalysis', {
-                        channel: this.channelId,
+                        channel: this.channelName,
                         session: this.sessionId,
                         eventId: this.eventId,
                         requestOrResponse: this.requestOrResponse
@@ -197,7 +197,7 @@
             },
             async loadAnalyisFromEventId(url, eventId, addToHistory) {
                 console.log(`loadAnalyisFromEventContext for ${eventId} and ${url}`)
-                await this.$store.dispatch('getLogEventAnalysis', {channel: this.channelId, session: this.sessionId, eventId: eventId, requestOrResponse: this.requestOrResponse, url: url})
+                await this.$store.dispatch('getLogEventAnalysis', {channel: this.channelName, session: this.sessionId, eventId: eventId, requestOrResponse: this.requestOrResponse, url: url})
                 if (addToHistory)
                     this.historyPush(url, eventId)
                 this.index = this.history.length - 1
@@ -267,7 +267,7 @@
             'theUrl': 'urlAnalysis'
         },
         props: [  // pass eventId OR theUrl
-            'sessionId', 'channelId', 'eventId',
+            'sessionId', 'channelName', 'eventId',
           'theUrl', // this is the URL of a Resource inside a Bundle
           'gzip', 'useProxy', "requestOrResponse", "ignoreBadRefs",
             'initiallyClosed', 'noInspectLabel',

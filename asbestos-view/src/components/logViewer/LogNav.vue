@@ -47,7 +47,7 @@
                     return
                 const summary = this.$store.state.log.eventSummaries[newIndex]
                 if (summary)
-                    this.$router.replace(`/session/${this.sessionId}/channel/${this.channelId}/lognav/${summary.eventName}`)
+                    this.$router.replace(`/session/${this.sessionId}/channel/${this.channelName}/lognav/${summary.eventName}`)
             },
         },
         created() {
@@ -62,7 +62,7 @@
             }
         },
         props: [
-            'index', 'sessionId', 'channelId'
+            'index', 'sessionId', 'channelName'
         ],
         components: {
 
