@@ -93,7 +93,7 @@ export default {
   watch: {
     'evalCount': 'setEvalCount',
     'testCollection': 'load',
-    'channelId': function() {
+    'channelName': function() {
       this.loadAChannel(`${this.sessionId}__${this.channelName}`);
     },
   },

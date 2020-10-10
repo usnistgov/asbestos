@@ -51,8 +51,6 @@
 <script>
     import errorHandlerMixin from '../../mixins/errorHandlerMixin'
     import colorizeTestReports from "../../mixins/colorizeTestReports";
-//    import InspectEvent from "../logViewer/InspectEvent";
-    //import TestStatus from "./TestStatus";
     import EvalActionDetails from "./EvalActionDetails";
 
     export default {
@@ -119,30 +117,40 @@
                 this.script = this.$store.state.testRunner.testScripts[this.testId]
             },
             loadTestReport() {
-                const reports = this.$store.state.testRunner.clientTestResult[this.testId]
-                if (reports)
-                    this.report = reports[this.eventId]
+              console.log(`loadTestReport`)
+                const reportsForTest = this.$store.state.testRunner.clientTestResult[this.testId]
+                if (!reportsForTest)
+                  return;
+                console.log(`got reportsForTest`)
+                const reportsForEvent = reportsForTest[this.eventId];
+                if (!reportsForEvent)
+                  return;
+                console.log(`got reportsForEvent - length is ${reportsForEvent.length}`)
+                if (reportsForEvent.length > 0)
+                  this.report = reportsForEvent[0];
             },
             actions(testIndex) {
                 return this.script.test[testIndex].action === undefined ? [] : this.script.test[testIndex].action
             },
-            runSingleEventEval() {
-                this.$store.dispatch('runSingleEventEval',
+            async runSingleEventEval() {
+                await this.$store.dispatch('runSingleEventEval',
                     {
                         testId: this.testId,
                         eventId: this.eventId,
                         testCollectionName: this.testCollection
                     })
+              console.log(`runSingleEventEval done`)
             },
             async testOrEventUpdated() {
                 if (this.runEval) {
                     if (!this.$store.state.testRunner.testAssertions)
-                        this.$store.dispatch('loadTestAssertions')
-                    await this.runSingleEventEval()
-                    await this.loadTestScript()
+                        await this.$store.dispatch('loadTestAssertions')
+                    await this.runSingleEventEval();
+                    await this.loadTestScript();
+                    this.loadTestReport();
                 } else {
                     await this.$store.dispatch('runEval', this.testId)
-                    this.loadTestScript()
+                    await this.loadTestScript()
                     this.loadTestReport()
                 }
             }
@@ -151,9 +159,6 @@
             assertProfile() {
                 return this.$store.state.testRunner.testAssertions['Profile']
             },
-            // selected() {
-            //     return this.$store.state.testRunner.currentAssertIndex
-            // },
             fixtures() {
                 return this.script.fixture
             },
@@ -163,11 +168,6 @@
             tests() {
                 return this.script.test
             },
-            // current() {
-            //     return this.$store.state.base.testCollectionDetails.find(item => {
-            //         return item.name === this.testId
-            //     })
-            // },
             testScript() {
                 return this.$store.state.testRunner.testScripts[this.testId]
             },

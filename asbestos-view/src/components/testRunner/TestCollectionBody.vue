@@ -160,7 +160,7 @@ export default {
   watch: {
     'evalCount': 'setEvalCount',
     'testCollection': 'load',
-    'channelId': function() {
+    'channelName': function() {
       this.load();
     },
   },
