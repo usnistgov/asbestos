@@ -103,14 +103,19 @@ export default {
             // return notRun
         },
         isConditionFailed() {
-            if (!this.report || !this.report.action) return false
-            let failed = false
-            this.report.action.forEach(action => {
-                if (action.assert) {
-                    if (action.assert.result === 'fail') failed = true
-                }
-            })
-            return failed
+            if (this.report && this.report.action) {
+                let failed = false
+                this.report.action.forEach(action => {
+                    if (action.assert) {
+                        if (action.assert.result === 'fail') failed = true
+                    }
+                })
+                return failed
+            }
+            if (this.report && this.report.assert) {
+                if (this.report.assert.result === 'fail') return true;
+            }
+            return false;
         },
     },
 }

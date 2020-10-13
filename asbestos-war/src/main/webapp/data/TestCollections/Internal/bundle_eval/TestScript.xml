@@ -8,9 +8,14 @@
         response - the response resource (could be OperationOutcome)
     -->
 
+    <variable>
+        <name value="isComprehensive"/>
+        <expression value="Bundle.meta.profile = 'http://ihe.net/fhir/StructureDefinition/IHE_MHD_Provide_Comprehensive_DocumentBundle'"/>
+        <sourceId value="request"/>
+    </variable>
     <test>
         <name value="Request message"/>
-        <description value="The Description"/>
+        <description value="PDB Request."/>
         <action>
             <assert>
                 <description value="PDB: Verb is POST|MHDPDBUsesPost"/>
@@ -74,10 +79,6 @@
                 <warningOnly value="false"/>
             </assert>
         </action>
-        <!--
-        .matches('.*Patient.*')
-        select(subject.reference).(matches('.*Patient.*') or matches('.*Practitioner.*') or matches('.*Group.*') or matches('.*Device.*'))
-        -->
         <action>
             <assert>
                 <description value="PDB: {DocumentReference, DocumentManifest}.subject.reference must reference same subject resource"/>
@@ -94,6 +95,9 @@
                 <warningOnly value="false"/>
             </assert>
         </action>
+    </test>
+    <test>
+        <description value="Bundle requirements."/>
         <action>
             <assert>
                 <description value="Transaction: Request is Bundle|MHDPDBRequestIsBundle"/>
@@ -142,6 +146,10 @@
                 <warningOnly value="false"/>
             </assert>
         </action>
+    </test>
+
+    <test>
+        <description value="DocumentReference requirements."/>
         <action>
             <assert>
                 <description value="DocumentReference: DocumentReference has single content element"/>
@@ -150,9 +158,6 @@
                 <warningOnly value="false"/>
             </assert>
         </action>
-        <!--
-        Bundle.entry.resource.where(is(FHIR.DocumentReference)).content.count() = 1
-        -->
         <action>
             <assert>
                 <description value="DocumentReference: DocumentReference has content.attachment.url|MHDPDBDocRefHasAttachment"/>
@@ -161,8 +166,6 @@
                 <warningOnly value="false"/>
             </assert>
         </action>
-        <!--
-        -->
         <action>
             <assert>
                 <description value="DocumentReference: DocumentReference.content.attachment has contentType"/>
@@ -170,6 +173,8 @@
                 <compareToSourceExpression value="Bundle.entry.resource.all(is(FHIR.DocumentReference)) implies content.attachment.contentType.exists()"/>
                 <warningOnly value="false"/>
             </assert>
+        </action>
+        <action>
             <assert>
                 <description value="DocumentReference: DocumentReference.content.attachment.data is not allowed"/>
                 <compareToSourceId value="request"/>
@@ -220,20 +225,16 @@
         </action>
         <action>
             <assert>
-                <description value="DocumentReference: securityLabel is required"/>
-                <compareToSourceId value="request"/>
-                <compareToSourceExpression value="Bundle.entry.resource.where(is(FHIR.DocumentReference)).securityLabel.exists()"/>
-                <warningOnly value="false"/>
-            </assert>
-        </action>
-        <action>
-            <assert>
                 <description value="DocumentReference: status is one of current, superseded, entered-in-error"/>
                 <compareToSourceId value="request"/>
                 <compareToSourceExpression value="Bundle.entry.resource.where(is(FHIR.DocumentReference)).status in ('current' | 'superseded' | 'entered-in-error')"/>
                 <warningOnly value="false"/>
             </assert>
         </action>
+    </test>
+
+    <test>
+        <description value="DocumentManifest requirements."/>
         <action>
             <assert>
                 <description value="DocumentManifest: masterIdentifier is required"/>
@@ -244,12 +245,33 @@
         </action>
     </test>
     <test>
-        <name value="Response message"/>
+        <description value="Comprehensive Metadata only"/>
+        <action>
+            <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Conditional"/>
+            <assert>
+                <description value="Is the transaction labeled Comprehensive Metadata?"/>
+                <expression value="${isComprehensive}"/>
+                <operator value="equals"/>
+                <value value="true"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
+            <assert>
+                <description value="DocumentReference: securityLabel is required for Comprehensive Metadata"/>
+                <compareToSourceId value="request"/>
+                <compareToSourceExpression value="Bundle.entry.resource.where(is(FHIR.DocumentReference)).securityLabel.exists()"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+    </test>
+    <test>
+        <description value="Transaction response."/>
         <action>
             <assert>
                 <description value="Transaction: returns 200|MHDPDBGoodStatus"/>
-                <sourceId value="response"/>
                 <response value="okay"/>
+                <sourceId value="response"/>
                 <warningOnly value="false"/>
             </assert>
         </action>
@@ -309,7 +331,5 @@
                 <warningOnly value="false"/>
             </assert>
         </action>
-
-
     </test>
 </TestScript>
