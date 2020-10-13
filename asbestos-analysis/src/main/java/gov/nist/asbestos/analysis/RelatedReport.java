@@ -2,9 +2,13 @@ package gov.nist.asbestos.analysis;
 
 import gov.nist.asbestos.client.Base.EventContext;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
+import gov.nist.asbestos.http.operations.HttpGetter;
+import gov.nist.asbestos.serviceproperties.ServiceProperties;
+import gov.nist.asbestos.serviceproperties.ServicePropertiesEnum;
 import org.apache.log4j.Logger;
 import org.hl7.fhir.r4.model.OperationOutcome;
 
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -15,7 +19,8 @@ public class RelatedReport {
     // basics
     String name;
     String relation;
-    String url; // link for UI to pull related FHIR object
+    String url; // link for UI to pull related FHIR object - through proxy
+    String nativeUrl;  // FHIR object native location (not through proxy)
     EventContext eventContext;
 
     // evaluation
@@ -41,6 +46,20 @@ public class RelatedReport {
             this.url = "Contained";
         else
             this.url = wrapper.getRef().toString();
+
+        if (this.url.contains("/proxy/")) {
+            String proxyLogUrl = ServiceProperties.getInstance().getPropertyOrStop(ServicePropertiesEnum.FHIR_TOOLKIT_BASE)
+                    + "/log/native?url=" + this.url;
+            HttpGetter getter = new HttpGetter();
+            try {
+                getter.get(proxyLogUrl);
+            } catch (URISyntaxException e) {
+                e.printStackTrace();
+            }
+            if (getter.isSuccess()) {
+                this.nativeUrl = getter.getResponseText();
+            }
+        }
 
         if (wrapper.hasEvent())
             eventContext = new EventContext(wrapper.getEvent());

@@ -6,8 +6,11 @@ import gov.nist.asbestos.analysis.RelatedReport;
 import gov.nist.asbestos.analysis.Report;
 import gov.nist.asbestos.client.Base.EventContext;
 import gov.nist.asbestos.client.Base.Request;
+import gov.nist.asbestos.client.client.Format;
 import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
+import gov.nist.asbestos.http.operations.HttpGetter;
+import org.hl7.fhir.r4.model.BaseResource;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -18,7 +21,12 @@ public class EventAnalysisCommon {
     static void runAndReturnReport(ResourceWrapper wrapper, Request request, EventContext eventContext) throws IOException {
         Report report;
         try {
-            wrapper.getResource();  // might force pulling of resource from logs
+            BaseResource resource = wrapper.getResource();  // might force pulling of resource from logs
+            if (resource == null && !wrapper.hasHttpBase()) {
+                HttpGetter getter = new HttpGetter();
+                getter.get(wrapper.getRef().getUri(), Format.JSON.getContentType());
+                wrapper.setHttpBase(getter);
+            }
             report = new AnalysisReport(request.ec, wrapper).run();
         } catch (Throwable t) {
             report = new Report(t.getMessage());

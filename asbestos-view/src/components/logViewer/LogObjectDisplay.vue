@@ -11,6 +11,10 @@
             <span class="caption"> Url:</span>
             {{ report.url }}
         </div>
+      <div v-if="report.nativeUrl">
+        <span class="caption">Native Url:</span>
+        {{ report.nativeUrl }}
+      </div>
 
         <div v-if="report.name === 'DocumentManifest' || report.name === 'DocumentReference'">
             <div>

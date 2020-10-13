@@ -1,11 +1,13 @@
 package gov.nist.asbestos.services.restRequests;
 
+import com.google.common.base.Strings;
 import gov.nist.asbestos.analysis.AnalysisReport;
 import gov.nist.asbestos.analysis.RelatedReport;
 import gov.nist.asbestos.analysis.Report;
 import gov.nist.asbestos.client.Base.EventContext;
 import gov.nist.asbestos.client.Base.Request;
 import gov.nist.asbestos.client.events.UIEvent;
+import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import org.apache.log4j.Logger;
 
@@ -40,25 +42,32 @@ public class GetLogEventAnalysisByEventRequest {
             this.request = request;
             request.testSession = request.uriParts.get(5);
             request.channelId = request.uriParts.get(6);
-            eventId = request.uriParts.get(7);
-            resourceType = request.ec.resourceTypeForEvent(
-                    request.ec.fhirDir(request.testSession, request.channelId),
-                    eventId);
-            uiEvent = new UIEvent(request.ec).fromParms(
-                    request.testSession,
-                    request.channelId,
-                    resourceType,
-                    eventId);
-            if (uiEvent == null) {
-                request.badRequest();
-                done = true;
+
+            String url = request.getParametersMap().get("focusUrl");
+            if (!Strings.isNullOrEmpty(url)) {
+                wrapper = new ResourceWrapper(new Ref(url));
+            } else {
+
+                eventId = request.uriParts.get(7);
+                resourceType = request.ec.resourceTypeForEvent(
+                        request.ec.fhirDir(request.testSession, request.channelId),
+                        eventId);
+                uiEvent = new UIEvent(request.ec).fromParms(
+                        request.testSession,
+                        request.channelId,
+                        resourceType,
+                        eventId);
+                if (uiEvent == null) {
+                    request.badRequest();
+                    done = true;
+                }
+                focusOnRequest = "request".equals(request.uriParts.get(8));
+                wrapper = new ResourceWrapper();
+                wrapper.setEvent(uiEvent, focusOnRequest);
+                wrapper.getRef().addParameters(request.getParametersMap());
+                eventContext = new EventContext(uiEvent);
+                eventAnalysisParams = new EventAnalysisParams(request);
             }
-            focusOnRequest = "request".equals(request.uriParts.get(8));
-            wrapper = new ResourceWrapper();
-            wrapper.setEvent(uiEvent, focusOnRequest);
-            wrapper.getRef().addParameters(request.getParametersMap());
-            eventContext = new EventContext(uiEvent);
-            eventAnalysisParams = new EventAnalysisParams(request);
         }
     }
 

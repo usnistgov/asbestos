@@ -139,7 +139,8 @@ public class Ref {
     public Ref addParameters(Map<String, String> parms) {
         for (String name : parms.keySet()) {
             String value = parms.get(name);
-            addParameter(name, value);
+            if (!Strings.isNullOrEmpty(value))
+                addParameter(name, value);
         }
         return this;
     }
