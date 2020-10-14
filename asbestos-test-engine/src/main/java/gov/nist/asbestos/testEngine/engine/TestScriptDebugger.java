@@ -192,7 +192,7 @@ public class TestScriptDebugger implements TestScriptDebugInterface {
         String analysisUrl = null;
         String resourcesString = TestScriptDebugState.quoteString("");
         String direction = null;
-        String valueString = null;
+        String scalarValueString = null;
 
         try {
             propKey = "sourceId";
@@ -250,7 +250,7 @@ public class TestScriptDebugger implements TestScriptDebugInterface {
                     if (resources.size() == 1 && ! resources.get(0).isResource()) {
                         List<Base> valueOnlyType = FhirPathEngineBuilder.evalForResources(resource, fhirPath + (fhirPath.endsWith(".value")?"":".value"));
                         if (valueOnlyType != null && valueOnlyType.size() == 1) {
-                            valueString = URLEncoder.encode(FhirPathEngineBuilder.evalForString(valueOnlyType.get(0)), StandardCharsets.UTF_8.toString());
+                            scalarValueString = URLEncoder.encode(FhirPathEngineBuilder.evalForString(valueOnlyType.get(0)), StandardCharsets.UTF_8.toString());
                         }
                     }
                 }
@@ -260,7 +260,7 @@ public class TestScriptDebugger implements TestScriptDebugInterface {
             return;
         }
 
-        state.sendEvalForResourcesResult(code, actionReport.getMessage(), "", resourcesString, fixtureResourceName, fixtureProfileUrl, analysisUrl, direction, valueString);
+        state.sendEvalForResourcesResult(code, actionReport.getMessage(), "", resourcesString, fixtureResourceName, fixtureProfileUrl, analysisUrl, direction, scalarValueString);
         return;
     }
 

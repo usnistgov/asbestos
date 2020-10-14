@@ -7,7 +7,8 @@
             <div class="dafFlexItem">
                 <div>
                     <div>
-                        <label class="form-label" :for="getFormInputId('sourceId')" :title="getEnumTypeShortDefinition('sourceId')">sourceId</label>
+                        <label :for="getFormInputId('sourceId')" :title="getEnumTypeShortDefinition('sourceId')"
+                               class="form-label">sourceId</label>
                         <span
                                 :title="`Click to open the sourceId assert element detailed description in a new browser tab.`"
                                 @click.stop="openHelp('sourceId')"
@@ -42,9 +43,9 @@
                             <inspect-event
                                     :channelId="$store.state.base.channelId"
                                     :eventId="decodeURIComponent(getSourceIdDetails.analysisUrl)"
+                                    :modal-mode="getSourceIdDetails.direction"
                                     :noNav="true"
                                     :sessionId="$store.state.base.session"
-                                    :modal-mode="getSourceIdDetails.direction"
                             >
                             </inspect-event>
                         </div>
@@ -65,7 +66,8 @@
                             class="infoIconLink"><img
                             alt="External link" src="../../../assets/ext_link.png" style="vertical-align: top"/></span>
                     <span>&nbsp;</span>
-                    <label class="form-label" :for="getFormInputId('expression')" :title="getEnumTypeShortDefinition('expression')">expression</label>
+                    <label :for="getFormInputId('expression')" :title="getEnumTypeShortDefinition('expression')"
+                           class="form-label">expression</label>
                     <span
                             :title="`Click to open the expression assert element detailed description in a new browser tab.`"
                             @click.stop="openHelp('expression')"
@@ -74,14 +76,14 @@
                 </div>
                 <div>
                  <textarea
-                   :placeholder="getSourceIdDetails.fixtureResourceName"
-                   :data-prop-key="'expression'"
-                   :id="getFormInputId('expression')"
-                   :value="getPropVal('expression')"
-                   @input="onTextChange"
-                   rows="4"
-                   cols="40"
-                   v-bind:class="{
+                         :data-prop-key="'expression'"
+                         :id="getFormInputId('expression')"
+                         :placeholder="getSourceIdDetails.fixtureResourceName"
+                         :value="getPropVal('expression')"
+                         @input="onTextChange"
+                         cols="40"
+                         rows="4"
+                         v-bind:class="{
                         'form-control-textarea-error': getResultCode().valueOf() !== 'pass' && getResultPropKey() === 'expression',
                         'form-control-textarea-general' : true,
                         }"
@@ -89,7 +91,36 @@
                     <div class="fhirPathExpressionText">{{getEnumTypeFormalDefinition('expression')}}</div>
                 </div>
                 <div>
-                    <label class="form-label" :for="getFormInputId('value')" :title="getEnumTypeShortDefinition('value')">value</label>
+                    <label :for="getFormInputId('operator')" :title="getEnumTypeShortDefinition('operator')"
+                           class="form-label">operator</label>
+                    <span
+                            :title="`Click to open the value element detailed description in a new browser tab.`"
+                            @click.stop="openHelp('operator')"
+                            class="infoIconLink"><img
+                            alt="External link" src="../../../assets/ext_link.png" style="vertical-align: top"/></span>
+                </div>
+                <div>
+                    <template v-if="isPropertyAnEnumType('operator')"> <!--  -->
+                        <select class="form-control-select"
+                                :id="getFormInputId('operator')"
+                                :data-prop-key="'operator'"
+                                :value="getPropVal('operator')"
+                                @change="onEvalObjPropSelect"
+                        >
+                            <option v-for="(option,idx) in getEnumTypeArray('operator')"
+                                    :value="option.codeValue"
+                                    :title="option.definition"
+                                    :disabled="option.codeValue===''"
+                                    :key="idx">
+                                {{ option.displayName }}
+                            </option>
+                        </select>
+                        <div class="smallText">{{getEnumTypeFormalDefinition('operator')}}</div>
+                    </template>
+                </div>
+                <div>
+                    <label :for="getFormInputId('value')" :title="getEnumTypeShortDefinition('value')"
+                           class="form-label">value</label>
                     <span
                             :title="`Click to open the value element detailed description in a new browser tab.`"
                             @click.stop="openHelp('value')"
@@ -108,16 +139,18 @@
                         'form-control-textarea-general' : true,
                         }"
                 />
-                <div class="smallText">{{getEnumTypeFormalDefinition('value')}}</div>
+                    <div class="smallText">{{getEnumTypeFormalDefinition('value')}}</div>
                 </div>
 
                 <button @click="doEval('')" class="evalButton">Evaluate</button>
             </div>
             <div class="dafFlexItemResult">
-                <label class="form-label, resultShadow" for="fpeResultsBox" v-if="getPatternTypeObj.resultObj.wasEvaluatedAtleastOnce">result(s):</label>
-                <div id="fpeResultsBox" class="resultBox">
+                <label class="form-label, resultShadow" for="fpeResultsBox"
+                       v-if="getPatternTypeObj.resultObj.wasEvaluatedAtleastOnce">result(s):</label>
+                <div class="resultBox" id="fpeResultsBox">
                     <div v-if="getPatternTypeObj.resultObj.wasEvaluatedAtleastOnce && getResultCode() === 'pass'">
-                        <template v-if="getResourceList() && (getResourceList().length > 0 && !getSourceIdDetails.valueString)">
+                        <template
+                                v-if="getResourceList() && (getResourceList().length > 0 && !getSourceIdDetails.scalarValueString)">
                             <select size="5">
                                 <option :key="rKey"
                                         :value="rName"
@@ -125,27 +158,38 @@
                                     {{ rName}}
                                 </option>
                             </select>
-                            <p >{{getResourceList().length}} resource(s) found.</p>
+                            <p>{{getResourceList().length}} resource(s) found.</p>
                         </template>
-                        <template v-else-if="getSourceIdDetails.valueString">
-                            <div class="">{{getPropVal('expression')}}<template v-if="!getPropVal('expression').endsWith('.value')"><b>.value</b></template>:</div>
-                            <p>{{decodeURIComponent(getSourceIdDetails.valueString)}}</p>
+                        <template v-else-if="getSourceIdDetails.scalarValueString && !getPropVal('value')">
+                            <div class="">{{getPropVal('expression')}}
+                                <template
+                                        v-if="!(getPropVal('expression').endsWith('.value')||getPropVal('expression').includes('='))">
+                                    <b>.value</b></template>
+                                :
+                            </div>
+                            <p>{{decodeURIComponent(getSourceIdDetails.scalarValueString)}}</p>
                             <div class="resultShadow">type:</div>
                             <p>{{getResourceList()[0]}}</p>
                         </template>
+                        <template v-else>
+                            <div class="resultBox">
+                                <span class="form-block">{{getResultCode()}}</span>
+                                <vue-markdown v-bind:source="getResultMessage()"></vue-markdown>
+                            </div>
+                        </template>
                     </div>
                     <template v-if="getResultCode().valueOf() !== 'pass'">
-                    <div
-                         v-bind:class="{
+                        <div
+                                v-bind:class="{
                     'resultBox': true,
                     'evalNotPassed': getResultCode().valueOf() !== 'pass',
                     }"
-                         v-if="getPropVal('expression')">
-                        <span class="form-block">{{getResultCode()}}</span>
-                        <vue-markdown
-                                v-bind:source="getResultMessage()"></vue-markdown>
-                    </div>
-                   </template>
+                                v-if="getPropVal('expression')">
+                            <span class="form-block">{{getResultCode()}}</span>
+                            <vue-markdown
+                                    v-bind:source="getResultMessage()"></vue-markdown>
+                        </div>
+                    </template>
                 </div>
             </div>
         </div>
@@ -223,6 +267,7 @@
         flex-basis: min-content;
 
     }
+
     .dafFlexItemResult {
         /*width: 16em;*/
         /*flex: 1; * shorthand. to be expanded by css. */
@@ -303,7 +348,7 @@
     .form-control-textarea {
         display: block;
         vertical-align: top;
-        margin-left: 5px;
+        /*margin-left: 5px;*/
         margin-right: 5px;
         resize: both;
         border-radius: 6px;

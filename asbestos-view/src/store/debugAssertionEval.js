@@ -58,7 +58,7 @@ function SourceIdFpEvalDetails() {
     this.fixtureProfileUrl = ''
     this.analysisUrl = ''
     this.direction = ''
-    this.valueString = ''
+    this.scalarValueString = ''
 }
 
 function FhirPathContextObj() {
@@ -66,9 +66,12 @@ function FhirPathContextObj() {
     this.resultObj = new EvalResultObj()
     this.resourceList = []
     this.sourceIdDetails = new SourceIdFpEvalDetails()
-    this.displayFieldList = ['sourceId','expression','value']
+    this.displayFieldList = ['sourceId','expression','operator','value']
     this.footerList = [new XpathNotSupportedFooter()]
     this.evalAction = 'doDebugEvalForResources'
+    this.applyDefaultsToDataObj = function(dataObj) {
+        dataObj.operator = 'equals'
+    }
 }
 
 export const debugAssertionEvalStore = {
@@ -122,7 +125,7 @@ export const debugAssertionEvalStore = {
                                 , fhirPathContextObj: new FhirPathContextObj()
                                 , selectedEvalOptionTab: ''
                                 , footerList: [new XpathNotSupportedFooter()]
-                                , applyDataObjDefaults: function(dataObj) { // To be called by resetDataState
+                                , applyDefaultsToDataObj: function(dataObj) { // To be called by resetDataState
                                     dataObj.requestMethod = 'get' // default to HTTP GET
                                 }
                             },
@@ -248,8 +251,8 @@ export const debugAssertionEvalStore = {
                 if ('direction' in obj) {
                     contextObj.sourceIdDetails.direction = obj.direction
                 }
-                if ('valueString' in obj) {
-                    contextObj.sourceIdDetails.valueString = obj.valueString
+                if ('scalarValueString' in obj) {
+                    contextObj.sourceIdDetails.scalarValueString = obj.scalarValueString
                 }
 
             } catch (e) {console.log(e.toString())}
@@ -268,8 +271,8 @@ export const debugAssertionEvalStore = {
                 let patternObj1 = state.evalObjByPattern.patternTypes[patternTypeName]
                 resetDataStateObj(patternObj1.dataObj, new AssertionEvalObj())
                 // apply defaults if applicable
-                if ('applyDataObjDefaults' in patternObj1) {
-                    patternObj1.applyDataObjDefaults(patternObj1.dataObj)
+                if ('applyDefaultsToDataObj' in patternObj1) {
+                    patternObj1.applyDefaultsToDataObj(patternObj1.dataObj)
                 }
                 // clear existing result
                 resetDataStateObj(patternObj1.resultObj, new EvalResultObj())
@@ -277,7 +280,10 @@ export const debugAssertionEvalStore = {
                 if ('fhirPathContextObj' in patternObj1) {
                     let fhirPathObj = patternObj1.fhirPathContextObj
                    resetDataStateObj(fhirPathObj.dataObj, new AssertionEvalObj())
-                   resetDataStateObj(fhirPathObj.resultObj, new EvalResultObj())
+                    if ('applyDefaultsToDataObj' in fhirPathObj) {
+                        fhirPathObj.applyDefaultsToDataObj(fhirPathObj.dataObj)
+                    }
+                    resetDataStateObj(fhirPathObj.resultObj, new EvalResultObj())
                    resetDataStateObj(fhirPathObj.sourceIdDetails, new SourceIdFpEvalDetails())
                 }
 
@@ -289,6 +295,7 @@ export const debugAssertionEvalStore = {
             for (let propKey in dataRef) {
              if (propKey in obj) {
                  if (typeof obj[propKey] === 'string') {
+                     console.log('setting propKey:' + propKey + ' to: ' + obj[propKey])
                      dataRef[propKey] = obj[propKey]
                  } else if ('myStringValue' in obj[propKey]) {
                     dataRef[propKey] = obj[propKey].myStringValue
