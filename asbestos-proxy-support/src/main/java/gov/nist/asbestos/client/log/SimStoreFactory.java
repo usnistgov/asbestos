@@ -45,7 +45,7 @@ public class SimStoreFactory {
     }
 
     private static SimId getSimId(ChannelConfig channelConfig) {
-        return new SimId(new TestSession(channelConfig.getTestSession()), channelConfig.getChannelId(), channelConfig.getActorType(), channelConfig.getEnvironment());
+        return new SimId(new TestSession(channelConfig.getTestSession()), channelConfig.asChannelId(), channelConfig.getActorType(), channelConfig.getEnvironment());
     }
 
 }

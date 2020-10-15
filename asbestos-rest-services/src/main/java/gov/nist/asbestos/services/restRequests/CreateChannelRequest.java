@@ -47,7 +47,7 @@ public class CreateChannelRequest {
 
         SimStore simStore = new SimStore(request.externalCache,
                 new SimId(new TestSession(channelConfig.getTestSession()),
-                        channelConfig.getChannelId(),
+                        channelConfig.asChannelId(),
                         channelConfig.getActorType(),
                         channelConfig.getEnvironment(),
                         true));

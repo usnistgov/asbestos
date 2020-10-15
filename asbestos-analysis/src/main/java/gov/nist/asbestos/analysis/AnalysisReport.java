@@ -970,7 +970,8 @@ public class AnalysisReport {
         }
         if (documentReference.hasContent()) {
             for (DocumentReference.DocumentReferenceContentComponent component : documentReference.getContent()) {
-                Related related = load(new Ref(component.getAttachment().getUrl()), "content/attachment", documentReference);
+                Ref ref = new Ref(component.getAttachment().getUrl());
+                Related related = load(ref, "content/attachment", documentReference);
                 if (related != null && related.wrapper.hasResource()) {
                     if (!related.wrapper.getResource().getClass().getSimpleName().equals("Binary"))
                         generalErrors.add("DocumentReference: " + related.wrapper.getResource().getClass().getSimpleName() + " is not a valid content/attachment resource");
@@ -1145,6 +1146,8 @@ public class AnalysisReport {
                 wrapper = fhirClient.readResource(ref);
             } catch (Throwable e) {
                 generalErrors.add(e.getMessage());
+                if (contextResourceBundle == null)
+                    return null;
                 wrapper = new ResourceWrapper(ref).setContext((Bundle)contextResourceBundle.getResource());
                 return addRelated(wrapper, howRelated, false);
             }

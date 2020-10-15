@@ -193,4 +193,8 @@ public class UIEvent {
     public String getEventName() {
         return eventName;
     }
+
+    public String getResourceType() {
+        return resourceType;
+    }
 }

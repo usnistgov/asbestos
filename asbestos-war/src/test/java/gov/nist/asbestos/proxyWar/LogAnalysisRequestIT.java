@@ -97,7 +97,7 @@ public class LogAnalysisRequestIT {
         assertEquals(getEventId().split("_").length, 7);
 
         analysisBuilder.setTestSession(getTestSession());
-        analysisBuilder.setChannelId(getChannelId());
+        analysisBuilder.setChannelName(getChannelId());
         analysisBuilder.setEventId(getEventId());
     }
 
@@ -285,7 +285,7 @@ public class LogAnalysisRequestIT {
 
     static class AnalysisBuilder {
         String testSession = null;
-        String channelId = null;
+        String channelName = null;
         String testCollectionId = null;
         String testId = null;
         String url = null;
@@ -301,7 +301,7 @@ public class LogAnalysisRequestIT {
                             + "/" + "analysis"
                             + "/" + "event"
                             + "/" + testSession
-                            + "/" + channelId
+                            + "/" + channelName
                             + "/" + eventId
                             + "/" + "request";
             if (focusUrl != null) {
@@ -317,7 +317,7 @@ public class LogAnalysisRequestIT {
                             + "/" + "analysis"
                             + "/" + "event"
                             + "/" + testSession
-                            + "/" + channelId
+                            + "/" + channelName
                             + "/" + eventId
                             + "/" + "response";
         }
@@ -339,12 +339,12 @@ public class LogAnalysisRequestIT {
             return this;
         }
 
-        public String getChannelId() {
-            return channelId;
+        public String getChannelName() {
+            return channelName;
         }
 
-        public AnalysisBuilder setChannelId(String channelId) {
-            this.channelId = channelId;
+        public AnalysisBuilder setChannelName(String channelName) {
+            this.channelName = channelName;
             return this;
         }
 

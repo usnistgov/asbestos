@@ -24,7 +24,7 @@ public class ChannelsForTests {
                 .setFhirBase(fhirBase.toString());
         String json = ChannelConfigFactory.convert(channelConfig);
         HttpPost poster = new HttpPost();
-        poster.postJson(new URI("http://localhost:" + ITConfig.getProxyPort() + "/asbestos/channel"), json);
+        poster.postJson(new URI("http://localhost:" + ITConfig.getProxyPort() + "/asbestos/channel/create"), json);
         int status = poster.getStatus();
         if (!(status == 200 || status == 201))
             fail("200 or 201 required from CreateChannel - returned " + status);

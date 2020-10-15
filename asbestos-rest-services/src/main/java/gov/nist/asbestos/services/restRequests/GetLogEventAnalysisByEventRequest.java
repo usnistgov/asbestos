@@ -1,5 +1,16 @@
 package gov.nist.asbestos.services.restRequests;
 
+// 0 - ""
+// 1 - context
+// 2 - "log"
+// 3 - "analysis"
+// 4 - "event"
+// 5 - session
+// 6 - channelName
+// 7 - eventId
+// 8 - "request" or "response"
+
+
 import com.google.common.base.Strings;
 import gov.nist.asbestos.analysis.AnalysisReport;
 import gov.nist.asbestos.analysis.RelatedReport;
@@ -33,9 +44,11 @@ public class GetLogEventAnalysisByEventRequest {
         String resourceType;
         boolean focusOnRequest;
         UIEvent uiEvent;
-        ResourceWrapper wrapper;
+        ResourceWrapper focusWrapper;
+        ResourceWrapper uiEventWrapper;
         EventContext eventContext;
         EventAnalysisParams eventAnalysisParams;
+        ResourceWrapper contextBundle;
         boolean done = false;
 
         Model(Request request) {
@@ -44,29 +57,41 @@ public class GetLogEventAnalysisByEventRequest {
             request.channelId = request.uriParts.get(6);
 
             String url = request.getParametersMap().get("focusUrl");
-            if (!Strings.isNullOrEmpty(url)) {
-                wrapper = new ResourceWrapper(new Ref(url));
-            } else {
+            if (!Strings.isNullOrEmpty(url))
+                focusWrapper = new ResourceWrapper(new Ref(url));
 
-                eventId = request.uriParts.get(7);
-                resourceType = request.ec.resourceTypeForEvent(
-                        request.ec.fhirDir(request.testSession, request.channelId),
-                        eventId);
-                uiEvent = new UIEvent(request.ec).fromParms(
-                        request.testSession,
-                        request.channelId,
-                        resourceType,
-                        eventId);
-                if (uiEvent == null) {
-                    request.badRequest();
-                    done = true;
-                }
-                focusOnRequest = "request".equals(request.uriParts.get(8));
-                wrapper = new ResourceWrapper();
-                wrapper.setEvent(uiEvent, focusOnRequest);
-                wrapper.getRef().addParameters(request.getParametersMap());
-                eventContext = new EventContext(uiEvent);
-                eventAnalysisParams = new EventAnalysisParams(request);
+            eventId = request.uriParts.get(7);
+            resourceType = request.ec.resourceTypeForEvent(
+                    request.ec.fhirDir(request.testSession, request.channelId),
+                    eventId);
+            uiEvent = new UIEvent(request.ec).fromParms(
+                    request.testSession,
+                    request.channelId,
+                    resourceType,
+                    eventId);
+            if (uiEvent == null) {
+                request.badRequest();
+                done = true;
+            }
+            String requestType = request.uriParts.get(8);
+            focusOnRequest = "request".equals(requestType);
+            uiEventWrapper = new ResourceWrapper();
+            uiEventWrapper.setEvent(uiEvent, focusOnRequest);
+            uiEventWrapper.getRef().addParameters(request.getParametersMap());
+            uiEventWrapper.setFocusUrl(url);
+            eventContext = new EventContext(uiEvent);
+            eventContext.setRequestFocus(focusOnRequest);
+            uiEventWrapper.getResource();
+            eventAnalysisParams = new EventAnalysisParams(request);
+
+            if ("Bundle".equals(uiEvent.getResourceType())) {
+                Ref bundleBase = new Ref(
+                        uiEventWrapper.getRef().uriWithoutParams()
+                );
+                contextBundle = new ResourceWrapper(bundleBase);
+                contextBundle.setRequest(focusOnRequest);
+                contextBundle.setEvent(uiEvent, focusOnRequest);
+                contextBundle.getResource();
             }
         }
     }
@@ -76,7 +101,7 @@ public class GetLogEventAnalysisByEventRequest {
     public void run() throws IOException {
         model.request.announce(("GetLogAnalysis by event"));
         if (model.done) return;
-        EventAnalysisCommon.runAndReturnReport(model.wrapper, model.request, model.eventContext);
+        EventAnalysisCommon.runAndReturnReport(model.uiEventWrapper, model.request, model.eventContext, model.contextBundle);
     }
 
 

@@ -69,12 +69,12 @@ public class CapabilityStatementIT {
 
         // create - must return 201 (didn't exist)
         HttpPost poster = new HttpPost();
-        poster.postJson(new URI("http://localhost:"+ proxyPort + "/asbestos/channel"), json);
+        poster.postJson(new URI("http://localhost:"+ proxyPort + "/asbestos/channel/create"), json);
         assertEquals(201, poster.getStatus(), poster.getResponseHeaders().toString());
 
         // create - must return 200 (did exist)
         poster = new HttpPost();
-        poster.postJson(new URI("http://localhost:"+ proxyPort + "/asbestos/channel"), json);
+        poster.postJson(new URI("http://localhost:"+ proxyPort + "/asbestos/channel/create"), json);
         assertEquals(200, poster.getStatus(), poster.getResponseHeaders().toString());
     }
 

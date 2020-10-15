@@ -292,7 +292,7 @@ public class ProxyServlet extends HttpServlet {
                  if (proxyBaseURI.isPresent()) {
                      Headers inHeaders = Common.getRequestHeaders(req, verb);
                     if (FhirToolkitCapabilityStatement.isCapabilityStatementRequest(proxyBaseURI.get(), inHeaders.getPathInfo())) {
-                        doGetCapabilityStatement(req, resp, simStore, uri, verb, inHeaders, simStore.getChannelConfig().getChannelId());
+                        doGetCapabilityStatement(req, resp, simStore, uri, verb, inHeaders, simStore.getChannelConfig().asChannelId());
                         return; // EXIT
                     }
                 }

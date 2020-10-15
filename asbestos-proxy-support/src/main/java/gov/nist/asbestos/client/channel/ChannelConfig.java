@@ -81,7 +81,7 @@ public class ChannelConfig {
         return this;
     }
 
-    public String getChannelId() {
+    public String asChannelId() {
         return testSession + "__" + channelName;
     }
 

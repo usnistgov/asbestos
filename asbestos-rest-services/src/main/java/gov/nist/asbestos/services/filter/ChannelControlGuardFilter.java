@@ -94,7 +94,7 @@ public class ChannelControlGuardFilter implements Filter {
                     MyHttpServletRequestWrapper myHttpServletRequest = new MyHttpServletRequestWrapper(httpServletRequest);
                     Request channelRequest = new Request(myHttpServletRequest, httpServletResponse, externalCache);
                     if (CreateChannelRequest.isRequest(channelRequest)) {
-                        log.info("Channel Control POST (GUARD) " + channelRequest.uri);
+                        log.info("Channel Control POST (ChannelControlGuardFilter) " + channelRequest.uri);
 
 
                         String rawRequest = IOUtils.toString(myHttpServletRequest.getInputStream(), Charset.defaultCharset());   // json
@@ -102,7 +102,7 @@ public class ChannelControlGuardFilter implements Filter {
 
                         SimStore simStore = new SimStore(externalCache,
                                 new SimId(new TestSession(channelConfigInRequest.getTestSession()),
-                                        channelConfigInRequest.getChannelId(),
+                                        channelConfigInRequest.asChannelId(),
                                         channelConfigInRequest.getActorType(),
                                         channelConfigInRequest.getEnvironment(),
                                         true));

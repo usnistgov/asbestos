@@ -50,22 +50,22 @@ public class Utility {
     }
 
 
-    static String createChannel(String testSession, String channelId, String fhirPort, String proxyPort) throws URISyntaxException, IOException {
+    static String createChannel(String testSession, String channelName, String fhirPort, String proxyPort) throws URISyntaxException, IOException {
         ChannelConfig channelConfig = new ChannelConfig()
                 .setTestSession(testSession)
-                .setChannelName(channelId)
+                .setChannelName(channelName)
                 .setEnvironment("default")
                 .setActorType("fhir")
                 .setChannelType("fhir")
                 .setFhirBase("http://localhost:" + fhirPort + "/fhir/fhir");
         String json = ChannelConfigFactory.convert(channelConfig);
         HttpPost poster = new HttpPost();
-        poster.postJson(new URI("http://localhost:" + proxyPort + "/asbestos/channel"), json);
+        poster.postJson(new URI("http://localhost:" + proxyPort + "/asbestos/channel/create"), json);
         int status = poster.getStatus();
-        assertTrue(status == 200 || status == 201, "POST to " + "http://localhost:" + proxyPort + "/asbestos/channel");
+        assertTrue(status == 200 || status == 201, "POST to " + "http://localhost:" + proxyPort + "/asbestos/channel/create");
 //        if (!(status == 200 || status == 201))
 //            fail("200 or 201 required - returned " + status);
-        return "http://localhost:" + proxyPort + "/asbestos/proxy/" + testSession + "__" + channelId;
+        return "http://localhost:" + proxyPort + "/asbestos/proxy/" + testSession + "__" + channelName;
     }
 
     static TestEngine run(URI serverBase, String testScriptLocation) throws URISyntaxException {

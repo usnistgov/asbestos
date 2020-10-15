@@ -1,9 +1,7 @@
 package gov.nist.asbestos.client.channel;
 
-import gov.nist.asbestos.client.channel.IBaseChannel;
 import gov.nist.asbestos.client.events.ITask;
 import gov.nist.asbestos.client.client.Format;
-import gov.nist.asbestos.client.channel.ChannelConfig;
 
 public abstract class BaseChannel implements IBaseChannel {
     protected ChannelConfig channelConfig = null;
@@ -36,7 +34,7 @@ public abstract class BaseChannel implements IBaseChannel {
     }
 
     public String getChannelId() {
-        return channelConfig.getChannelId();
+        return channelConfig.asChannelId();
     }
 
     @Override

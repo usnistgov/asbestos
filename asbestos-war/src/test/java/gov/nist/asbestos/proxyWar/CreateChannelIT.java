@@ -42,7 +42,7 @@ class CreateChannelIT {
                 .setChannelType("passthrough")
                 .setFhirBase("http://localhost:" + proxyPort + "/fhir/fhir");
         HttpPost poster = new HttpPost();
-        poster.postJson(new URI("http://localhost:" + proxyPort + "/asbestos/channel"), ChannelConfigFactory.convert(channelConfig));
+        poster.postJson(new URI("http://localhost:" + proxyPort + "/asbestos/channel/create"), ChannelConfigFactory.convert(channelConfig));
         int status = poster.getStatus();
         if (!(status == 200 || status == 201))
             fail("200 or 201 required - returned " + status);
@@ -82,12 +82,12 @@ class CreateChannelIT {
 
         // create - must return 201 (didn't exist)
         HttpPost poster = new HttpPost();
-        poster.postJson(new URI("http://localhost:"+ proxyPort + "/asbestos/channel"), json);
+        poster.postJson(new URI("http://localhost:"+ proxyPort + "/asbestos/channel/create"), json);
         assertEquals(201, poster.getStatus(), poster.getResponseHeaders().toString());
 
         // create - must return 200 (did exist)
         poster = new HttpPost();
-        poster.postJson(new URI("http://localhost:"+ proxyPort + "/asbestos/channel"), json);
+        poster.postJson(new URI("http://localhost:"+ proxyPort + "/asbestos/channel/create"), json);
         assertEquals(200, poster.getStatus(), poster.getResponseHeaders().toString());
 
     }
@@ -125,17 +125,17 @@ class CreateChannelIT {
 
         // create - must return 201 (didn't exist)
         poster = new HttpPost();
-        poster.postJson(new URI("http://localhost:"+ proxyPort + "/asbestos/channel"), channelConfig1);
+        poster.postJson(new URI("http://localhost:"+ proxyPort + "/asbestos/channel/create"), channelConfig1);
         assertEquals(201, poster.getStatus());
 
         // create - must return 201 (didn't exist)
         poster = new HttpPost();
-        poster.postJson(new URI("http://localhost:"+ proxyPort + "/asbestos/channel"), channelConfig2);
+        poster.postJson(new URI("http://localhost:"+ proxyPort + "/asbestos/channel/create"), channelConfig2);
         assertEquals(201, poster.getStatus());
 
         // create - must return 200 (did exist)
         poster = new HttpPost();
-        poster.postJson(new URI("http://localhost:"+ proxyPort + "/asbestos/channel"), channelConfig1);
+        poster.postJson(new URI("http://localhost:"+ proxyPort + "/asbestos/channel/create"), channelConfig1);
         assertEquals(200, poster.getStatus());
 
         getter = new HttpGetter();

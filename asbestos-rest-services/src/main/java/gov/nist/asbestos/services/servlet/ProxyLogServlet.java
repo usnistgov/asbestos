@@ -41,7 +41,7 @@ public class ProxyLogServlet extends HttpServlet {
     static String getEventLink(Event event, ChannelConfig channel) {
         String eventId = event.getEventId();
         String testSession = channel.getTestSession();
-        String channelId = channel.getChannelId();
+        String channelId = channel.asChannelId();
         return String.format("http://%s:%s/asbestos/log/%s/%s/null/%s", hostname, port, testSession, channelId, eventId);
     }
 

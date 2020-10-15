@@ -48,7 +48,7 @@ public class GetChannelIdAndURLRequest {
             try {
                 ChannelConfig channelConfig = ChannelControl.channelConfigFromChannelId(request.externalCache, id);
                 IdandURL idu = new IdandURL();
-                idu.id = channelConfig.getChannelId();
+                idu.id = channelConfig.asChannelId();
                 idu.url = channelConfig.getFhirBase();
                 idu.site = channelConfig.getXdsSiteName();
                 idsAndUrls.add(idu);

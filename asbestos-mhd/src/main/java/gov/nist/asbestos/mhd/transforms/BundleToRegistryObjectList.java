@@ -400,7 +400,7 @@ public class BundleToRegistryObjectList implements IVal {
             FhirClient fhirClient =
                     channelConfig == null
                             ? FhirClientBuilder.get(null)
-                            : FhirClientBuilder.get(channelConfig.getChannelId());
+                            : FhirClientBuilder.get(channelConfig.asChannelId());
 
             Optional<ResourceWrapper>  patient = fhirClient.readCachedResource(new Ref("Patient/No_Patient"));
             if (patient.isPresent()) {
@@ -572,7 +572,7 @@ public class BundleToRegistryObjectList implements IVal {
             FhirClient fhirClient =
                     channelConfig == null
                             ? FhirClientBuilder.get(null)
-                            : FhirClientBuilder.get(channelConfig.getChannelId());
+                            : FhirClientBuilder.get(channelConfig.asChannelId());
 
             Optional<ResourceWrapper>  patient = fhirClient.readCachedResource(new Ref("Patient/No_Patient"));
             if (patient.isPresent()) {

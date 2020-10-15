@@ -128,7 +128,7 @@ public class Ref {
         }
     }
 
-    private String uriWithoutParams() {
+    public String uriWithoutParams() {
         String theUri = uri.toString();
         int quest = theUri.indexOf("?");
         if (quest == -1)
@@ -520,6 +520,7 @@ public class Ref {
     public boolean isAbsolute() {
         if (uri == null) return false;
         if (uri.toString().startsWith("http")) return true;
+        if (uri.toString().startsWith("urn")) return true;
         return uri.toString().startsWith("file");
     }
 

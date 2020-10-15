@@ -13,21 +13,25 @@ import gov.nist.asbestos.http.operations.HttpGetter;
 import org.hl7.fhir.r4.model.BaseResource;
 
 import java.io.IOException;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
 public class EventAnalysisCommon {
-    static void runAndReturnReport(ResourceWrapper wrapper, Request request, EventContext eventContext) throws IOException {
+    static void runAndReturnReport(ResourceWrapper wrapper, Request request, EventContext eventContext, ResourceWrapper contextBundle) throws IOException {
         Report report;
         try {
             BaseResource resource = wrapper.getResource();  // might force pulling of resource from logs
             if (resource == null && !wrapper.hasHttpBase()) {
                 HttpGetter getter = new HttpGetter();
-                getter.get(wrapper.getRef().getUri(), Format.JSON.getContentType());
+                String url = wrapper.hasFocusUrl() ? wrapper.getFocusUrl() :  wrapper.getRef().getUri().toString();
+                getter.get(new URI(url), Format.JSON.getContentType());
                 wrapper.setHttpBase(getter);
             }
-            report = new AnalysisReport(request.ec, wrapper).run();
+            report = new AnalysisReport(request.ec, wrapper)
+                    .withContextResource(contextBundle)
+                    .run();
         } catch (Throwable t) {
             report = new Report(t.getMessage());
             returnReport(report, request, eventContext);

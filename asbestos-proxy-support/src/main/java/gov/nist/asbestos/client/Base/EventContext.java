@@ -43,4 +43,9 @@ public class EventContext {
     public boolean isRequestFocus() {
         return requestFocus;
     }
+
+    public EventContext setRequestFocus(boolean requestFocus) {
+        this.requestFocus = requestFocus;
+        return this;
+    }
 }

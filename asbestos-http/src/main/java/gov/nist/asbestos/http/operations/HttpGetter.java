@@ -19,7 +19,7 @@ public class HttpGetter extends HttpBase {
         try {
             url = theUri.toURL();
         } catch (Exception e) {
-            throw new RuntimeException("Cannot decode URI " + theUri);
+            throw new RuntimeException("Cannot decode URI " + theUri + " into a URL");
         }
         HttpURLConnection connection = null;
         try {

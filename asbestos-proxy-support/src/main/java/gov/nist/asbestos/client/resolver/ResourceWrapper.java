@@ -20,6 +20,7 @@ import org.hl7.fhir.r4.model.OperationOutcome;
 
 
 import java.io.File;
+import java.net.URISyntaxException;
 import java.util.*;
 
 public class ResourceWrapper {
@@ -38,7 +39,14 @@ public class ResourceWrapper {
     private Bundle context = null;
     private File file = null;
     private UIEvent event = null;
+
+    public ResourceWrapper setRequest(boolean request) {
+        isRequest = request;
+        return this;
+    }
+
     private boolean isRequest;  // did content come from event "request" or "response"
+    private String focusUrl; // if resource is Bundle then this can be the fullUrl of a resource in the Bundle
 
 
     public ResourceWrapper(BaseResource resource) {
@@ -238,7 +246,47 @@ public class ResourceWrapper {
             if (Strings.isNullOrEmpty(body))
                 return null;
             resource = ParserBase.parse(body, Format.fromContent(body));
+            if (resource instanceof Bundle) {
+                Bundle bundle = (Bundle) resource;
+                if (Strings.isNullOrEmpty(focusUrl)) {
+                    return bundle;
+                } else {
+                    for (Bundle.BundleEntryComponent comp : bundle.getEntry()) {
+                        if (focusUrl.equals(comp.getFullUrl())) {
+                            resource = comp.getResource();
+                            return resource;
+                        }
+                    }
+                }
+                HttpGetter getter = new HttpGetter();
+                try {
+                    getter.get(focusUrl);
+                } catch (URISyntaxException e) {
+                    throw new RuntimeException(focusUrl + ": " + e.getMessage());
+                }
+                if (getter.isSuccess()) {
+                    String gbody = getter.getResponseText();
+                    resource = ParserBase.parse(gbody, Format.fromContent(body));
+                    return resource;
+                }
+                return bundle;
+            }
             return resource;
+        }
+        if (httpBase == null && ref != null) {
+            HttpGetter getter = new HttpGetter();
+            httpBase = getter;
+            try {
+                getter.get(ref.getUri().toString());
+            } catch (URISyntaxException e) {
+                throw new RuntimeException(e);
+            }
+            if (getter.getStatus() == 404)
+                return null;
+            if (getter.getResponseText() != null) {
+                resource = ParserBase.parse(getter.getResponse(), Format.fromContentType(getter.getResponseContentType()));
+                return resource;
+            }
         }
         return null;
     }
@@ -369,5 +417,18 @@ public class ResourceWrapper {
     public ResourceWrapper setFile(File file) {
         this.file = file;
         return this;
+    }
+
+    public String getFocusUrl() {
+        return focusUrl;
+    }
+
+    public ResourceWrapper setFocusUrl(String focusUrl) {
+        this.focusUrl = focusUrl;
+        return this;
+    }
+
+    public boolean hasFocusUrl() {
+        return focusUrl != null;
     }
 }

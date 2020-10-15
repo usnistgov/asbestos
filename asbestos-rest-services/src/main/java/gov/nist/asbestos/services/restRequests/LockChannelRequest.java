@@ -44,7 +44,7 @@ public class LockChannelRequest {
             channelConfig.setWriteLocked(channelConfigInRequest.isWriteLocked());
             SimStore simStore = new SimStore(request.externalCache,
                     new SimId(new TestSession(channelConfig.getTestSession()),
-                            channelConfig.getChannelId(),
+                            channelConfig.asChannelId(),
                             channelConfig.getActorType(),
                             channelConfig.getEnvironment(),
                             true));
