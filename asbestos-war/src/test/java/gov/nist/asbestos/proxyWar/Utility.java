@@ -63,8 +63,6 @@ public class Utility {
         poster.postJson(new URI("http://localhost:" + proxyPort + "/asbestos/channel/create"), json);
         int status = poster.getStatus();
         assertTrue(status == 200 || status == 201, "POST to " + "http://localhost:" + proxyPort + "/asbestos/channel/create");
-//        if (!(status == 200 || status == 201))
-//            fail("200 or 201 required - returned " + status);
         return "http://localhost:" + proxyPort + "/asbestos/proxy/" + testSession + "__" + channelName;
     }
 
