@@ -138,7 +138,11 @@ export const debugAssertionEvalStore = {
                                 , footerList: [new ResponseFooter()]
                             },
                             ResponseCode: {dataObj: new AssertionEvalObj(), resultObj: new EvalResultObj()
-                                , displayFieldList: ['responseCode','operator','warningOnly']},
+                                , displayFieldList: ['responseCode','operator','warningOnly']
+                                , applyDefaultsToDataObj: function(dataObj) {
+                                    dataObj.operator = 'equals'
+                                }
+                            },
                         }
                     },
             collapsibleDisplayEventObj: {displayOpen: false, breakpointObj: null},
