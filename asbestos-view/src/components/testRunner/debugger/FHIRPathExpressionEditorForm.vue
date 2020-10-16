@@ -146,7 +146,7 @@
             </div>
             <div class="dafFlexItemResult">
                 <label class="form-label, resultShadow" for="fpeResultsBox"
-                       v-if="getPatternTypeObj.resultObj.wasEvaluatedAtleastOnce">result(s):</label>
+                       v-if="getPatternTypeObj.resultObj.wasEvaluatedAtleastOnce">Results(s) evaluated against above:</label>
                 <div class="resultBox" id="fpeResultsBox">
                     <div v-if="getPatternTypeObj.resultObj.wasEvaluatedAtleastOnce && getResultCode() === 'pass'">
                         <template

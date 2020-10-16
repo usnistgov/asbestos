@@ -91,7 +91,7 @@
                                             :disabled="isWaitingForBreakpoint"
                                             @click.stop="stopDebugging(i)"
                                         class="debugTestScriptButtonNormal">&#x1F7E5; Stop</button> <!-- &#x270B; -->
-                                    <span v-if="isWaitingForBreakpoint">&nbsp;&nbsp;&#x23F1;</span>
+                                    <span v-if="isWaitingForBreakpoint">&nbsp;Please wait...&nbsp;&#x23F1;</span>
                                     <!-- Display a stopwatch if waiting for breakpoint to be hit -->
                                 </template>
                             </template>
