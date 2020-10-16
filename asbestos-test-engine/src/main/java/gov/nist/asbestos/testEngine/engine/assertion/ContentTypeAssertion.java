@@ -13,18 +13,19 @@ public class ContentTypeAssertion {
             return false;
         FixtureComponent sourceFixture = ctx.getSource();
         FixtureLabels fixtureLabels = ctx.getFixtureLabels();
+        String actualValue = sourceFixture.getHttpBase().getResponseContentType();
         AssertionReport.build(ctx.getCurrentAssertReport(),
                 "Content type",
                 ctx.getCurrentAssert().getContentType(),
-                sourceFixture.getResponseType(),
+                actualValue,
                 sourceFixture,
                 fixtureLabels);
 
-        if (ctx.getCurrentAssert().getContentType().equalsIgnoreCase(sourceFixture.getResponseType()))
+        if (ctx.getCurrentAssert().getContentType().equalsIgnoreCase(actualValue))
             return Reporter.reportPass(ctx,
-                    ctx.getCurrentAssert().getContentType() + " = " + sourceFixture.getResponseType());
+                    ctx.getCurrentAssert().getContentType() + " = " + actualValue);
         return Reporter.reportFail(ctx,
-                "expecting " + ctx.getCurrentAssert().getContentType() + " found " + sourceFixture.getResponseType());
+                "expecting " + ctx.getCurrentAssert().getContentType() + " found " + actualValue);
 
     }
 }
