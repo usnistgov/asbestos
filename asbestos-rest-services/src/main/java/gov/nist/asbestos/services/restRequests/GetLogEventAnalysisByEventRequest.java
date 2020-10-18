@@ -57,41 +57,44 @@ public class GetLogEventAnalysisByEventRequest {
             request.channelId = request.uriParts.get(6);
 
             String url = request.getParametersMap().get("focusUrl");
-            if (!Strings.isNullOrEmpty(url))
+            if (!Strings.isNullOrEmpty(url) && url.startsWith("http")) {
                 focusWrapper = new ResourceWrapper(new Ref(url));
+                focusWrapper.getResource();
+            } else {
 
-            eventId = request.uriParts.get(7);
-            resourceType = request.ec.resourceTypeForEvent(
-                    request.ec.fhirDir(request.testSession, request.channelId),
-                    eventId);
-            uiEvent = new UIEvent(request.ec).fromParms(
-                    request.testSession,
-                    request.channelId,
-                    resourceType,
-                    eventId);
-            if (uiEvent == null) {
-                request.badRequest();
-                done = true;
-            }
-            String requestType = request.uriParts.get(8);
-            focusOnRequest = "request".equals(requestType);
-            uiEventWrapper = new ResourceWrapper();
-            uiEventWrapper.setEvent(uiEvent, focusOnRequest);
-            uiEventWrapper.getRef().addParameters(request.getParametersMap());
-            uiEventWrapper.setFocusUrl(url);
-            eventContext = new EventContext(uiEvent);
-            eventContext.setRequestFocus(focusOnRequest);
-            uiEventWrapper.getResource();
-            eventAnalysisParams = new EventAnalysisParams(request);
+                eventId = request.uriParts.get(7);
+                resourceType = request.ec.resourceTypeForEvent(
+                        request.ec.fhirDir(request.testSession, request.channelId),
+                        eventId);
+                uiEvent = new UIEvent(request.ec).fromParms(
+                        request.testSession,
+                        request.channelId,
+                        resourceType,
+                        eventId);
+                if (uiEvent == null) {
+                    request.badRequest();
+                    done = true;
+                }
+                String requestType = request.uriParts.get(8);
+                focusOnRequest = "request".equals(requestType);
+                uiEventWrapper = new ResourceWrapper();
+                uiEventWrapper.setEvent(uiEvent, focusOnRequest);
+                uiEventWrapper.getRef().addParameters(request.getParametersMap());
+                uiEventWrapper.setFocusUrl(url);
+                eventContext = new EventContext(uiEvent);
+                eventContext.setRequestFocus(focusOnRequest);
+                uiEventWrapper.getResource();
+                eventAnalysisParams = new EventAnalysisParams(request);
 
-            if ("Bundle".equals(uiEvent.getResourceType())) {
-                Ref bundleBase = new Ref(
-                        uiEventWrapper.getRef().uriWithoutParams()
-                );
-                contextBundle = new ResourceWrapper(bundleBase);
-                contextBundle.setRequest(focusOnRequest);
-                contextBundle.setEvent(uiEvent, focusOnRequest);
-                contextBundle.getResource();
+                if ("Bundle".equals(uiEvent.getResourceType())) {
+                    Ref bundleBase = new Ref(
+                            uiEventWrapper.getRef().uriWithoutParams()
+                    );
+                    contextBundle = new ResourceWrapper(bundleBase);
+                    contextBundle.setRequest(focusOnRequest);
+                    contextBundle.setEvent(uiEvent, focusOnRequest);
+                    contextBundle.getResource();
+                }
             }
         }
     }
@@ -101,7 +104,11 @@ public class GetLogEventAnalysisByEventRequest {
     public void run() throws IOException {
         model.request.announce(("GetLogAnalysis by event"));
         if (model.done) return;
-        EventAnalysisCommon.runAndReturnReport(model.uiEventWrapper, model.request, model.eventContext, model.contextBundle);
+        if (model.uiEventWrapper != null)
+            EventAnalysisCommon.runAndReturnReport(model.uiEventWrapper, model.request, model.eventContext, model.contextBundle);
+        else if (model.focusWrapper != null)
+            EventAnalysisCommon.runAndReturnReport(model.focusWrapper, model.request, model.eventContext, model.contextBundle);
+
     }
 
 

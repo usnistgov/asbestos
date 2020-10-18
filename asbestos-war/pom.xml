@@ -22,6 +22,7 @@
         <xdsToolkitBase>http://localhost:8080/xdstools</xdsToolkitBase>
         <tlsXdsToolkitBase>https://localhost:8443/xdstools</tlsXdsToolkitBase>
         <fhirValidationServer>http://localhost:8080/fhir/fhir</fhirValidationServer>
+        <startUpSession>default</startUpSession>
     </properties>
 
     <dependencies>

@@ -970,12 +970,17 @@ public class AnalysisReport {
         }
         if (documentReference.hasContent()) {
             for (DocumentReference.DocumentReferenceContentComponent component : documentReference.getContent()) {
-                Ref ref = new Ref(component.getAttachment().getUrl());
-                Related related = load(ref, "content/attachment", documentReference);
-                if (related != null && related.wrapper.hasResource()) {
-                    if (!related.wrapper.getResource().getClass().getSimpleName().equals("Binary"))
-                        generalErrors.add("DocumentReference: " + related.wrapper.getResource().getClass().getSimpleName() + " is not a valid content/attachment resource");
-                    buildRelatedBinary(related.wrapper);
+                String url = component.getAttachment().getUrl();
+                if (Strings.isNullOrEmpty(url)) {
+                    generalErrors.add("DocumentReference: content.attachment.url is missing." );
+                } else {
+                    Ref ref = new Ref(url);
+                    Related related = load(ref, "content/attachment", documentReference);
+                    if (related != null && related.wrapper.hasResource()) {
+                        if (!related.wrapper.getResource().getClass().getSimpleName().equals("Binary"))
+                            generalErrors.add("DocumentReference: " + related.wrapper.getResource().getClass().getSimpleName() + " is not a valid content/attachment resource");
+                        buildRelatedBinary(related.wrapper);
+                    }
                 }
             }
         }

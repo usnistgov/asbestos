@@ -130,6 +130,11 @@ export const baseStore = {
                         })
                 });
 
+                url = `LOG/startupSession`;
+                data = await LOG.get('startupSession');
+                let startupSession = data.data;
+                commit('setSession', startupSession);
+
                 url = `CHANNEL/channels/all`;
                 console.log(url);
                 let result = await CHANNEL.get('channels/all');

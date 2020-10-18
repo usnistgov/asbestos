@@ -65,6 +65,7 @@ public class ProxyLogServlet extends HttpServlet {
             else if (GetEventForResourceTypeRequest.isRequest(request)) new GetEventForResourceTypeRequest(request).run();
             else if (GetEventsForChannelRequest.isRequest(request)) new GetEventsForChannelRequest(request).run();
             else if (GetEcRequest.isRequest(request)) new GetEcRequest(request).run();
+            else if (GetStartupSessionRequest.isRequest(request)) new GetStartupSessionRequest(request).run();
             else request.badRequest();
 
         } catch (Throwable t) {

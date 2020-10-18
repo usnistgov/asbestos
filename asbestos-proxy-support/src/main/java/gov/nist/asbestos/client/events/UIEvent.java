@@ -1,11 +1,14 @@
 package gov.nist.asbestos.client.events;
 
 import gov.nist.asbestos.client.Base.EC;
+import gov.nist.asbestos.client.Base.ParserBase;
+import gov.nist.asbestos.client.client.Format;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import gov.nist.asbestos.http.headers.Header;
 import gov.nist.asbestos.http.headers.Headers;
 import gov.nist.asbestos.serviceproperties.ServiceProperties;
 import gov.nist.asbestos.serviceproperties.ServicePropertiesEnum;
+import org.hl7.fhir.r4.model.BaseResource;
 import org.hl7.fhir.r4.model.Resource;
 
 import java.io.File;
@@ -28,6 +31,7 @@ public class UIEvent {
     public UIEvent(EC ec) {
         this.ec = ec;
         hostPort = defaultHostPort();
+        int i = 1;
     }
 
     private String defaultHostPort() {
@@ -142,6 +146,11 @@ public class UIEvent {
             throw new Error(e);
         }
 
+    }
+
+    public BaseResource getResponseResource() {
+        String responseBody = getResponseBody();
+        return ParserBase.parse(responseBody, Format.fromContent(responseBody));
     }
 
     public void setHostPort(String hostPort) {

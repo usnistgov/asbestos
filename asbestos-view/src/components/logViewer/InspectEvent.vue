@@ -77,7 +77,7 @@
                     </span>
                     <div class="divider"></div>
                     <span v-bind:class="{
-                        selected: inspectResponse && responseEnabled,
+                        selected: inspectResponse,
                         'not-selected': !(inspectResponse && responseEnabled)
                         }"
                           @click="displayRequest = false; displayResponse = false; displayInspector = true; inspectType = 'response'; displayValidations = false">

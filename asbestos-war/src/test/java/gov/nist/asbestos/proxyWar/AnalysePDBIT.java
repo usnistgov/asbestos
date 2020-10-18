@@ -1,12 +1,20 @@
 package gov.nist.asbestos.proxyWar;
 
 import com.google.gson.Gson;
+import gov.nist.asbestos.client.Base.EC;
+import gov.nist.asbestos.client.events.UIEvent;
+import gov.nist.asbestos.client.resolver.Ref;
+import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import gov.nist.asbestos.http.operations.HttpGetter;
+import org.hl7.fhir.r4.model.BaseResource;
+import org.hl7.fhir.r4.model.Bundle;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
+import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -18,10 +26,14 @@ public class AnalysePDBIT {
     private static final String proxyPort = ITConfig.getProxyPort();
 
     private static URI base;
+    private static File external_cache;
 
     static String goodPdbLogUrl;
     static String noProfileLogUrl;
-    static String channelId = "limited";
+    static Map<String, Object> goodTestReport;
+    static String drUrl;
+    static Map<String, Object> noProfileTestReport;
+    static String channelName = "limited";
     static String collectionId = "Internal";
 
     static {
@@ -40,7 +52,7 @@ public class AnalysePDBIT {
         String analyseUrl;
 
         analyseUrl = "http://localhost:" + proxyPort + "/asbestos/log/analysis/event/default/"
-                + channelId + "/" + eventId + "/request?validation=true";
+                + channelName + "/" + eventId + "/request?validation=true";
         Map<String, Object> result;
 
         result = runAnalysis(analyseUrl);
@@ -60,11 +72,53 @@ public class AnalysePDBIT {
         Map<String, Object> result;
         // focus on DR
         analyseUrl = "http://localhost:" + proxyPort + "/asbestos/log/analysis/event/default/"
-                + channelId + "/" + eventId + "/request?focusUrl=urn:uuid:1e404af3-077f-4bee-b7a6-a9be97e1ce01";
+                + channelName + "/" + eventId + "/request?focusUrl=urn:uuid:1e404af3-077f-4bee-b7a6-a9be97e1ce01";
         result = runAnalysis(analyseUrl);
 
         printErrors(result);
         assertEquals(0, getErrors(result).size());
+    }
+
+    @Test
+    void analysePDBDRResponse() throws URISyntaxException {
+        String url = goodPdbLogUrl;
+        Map<String, Object> testReport = goodTestReport;
+        String logUrl = (String) testReport.get("logUrl");
+        ResourceWrapper logWrapper = new ResourceWrapper();
+        UIEvent uiEventBase = new UIEvent(new EC(external_cache));
+        uiEventBase.setHostPort("localhost:" + proxyPort);  // ServiceProperties access from outside war broken.
+        UIEvent uiEvent = uiEventBase.fromURI(new URI(logUrl));
+        logWrapper.setEvent(uiEvent, false);
+        BaseResource resource = uiEvent.getResponseResource();
+        assertTrue(resource instanceof Bundle);
+        Bundle bundle = (Bundle) resource;
+        List<String> drLocations = locations(bundle, "DocumentReference");
+        assertEquals(1, drLocations.size());
+        String[] parts = url.split("/");
+        String eventId = parts[8];
+        String analyseUrl;
+        Map<String, Object> result;
+        // focus on DR
+        analyseUrl = "http://localhost:" + proxyPort + "/asbestos/log/analysis/url?url=" + drLocations.get(0);
+        result = runAnalysis(analyseUrl);
+
+        printErrors(result);
+        assertEquals(0, getErrors(result).size());
+    }
+
+    List<String> locations(Bundle bundle, String type) {
+        assertEquals(Bundle.BundleType.TRANSACTIONRESPONSE, bundle.getType());
+        List<String> locations = new ArrayList<>();
+
+        for (Bundle.BundleEntryComponent comp : bundle.getEntry()) {
+            if (comp.hasResponse() && comp.getResponse().hasLocation()) {
+                Ref ref = new Ref(comp.getResponse().getLocation());
+                if (type.equals(ref.getResourceType()))
+                    locations.add(comp.getResponse().getLocation());
+            }
+        }
+
+        return locations;
     }
 
     Map<String, Object> runAnalysis(String analyseUrl) throws URISyntaxException {
@@ -123,7 +177,7 @@ public class AnalysePDBIT {
         String[] parts = url.split("/");
         String eventId = parts[8];
         String analyseUrl = "http://localhost:" + proxyPort + "/asbestos/log/analysis/event/default/"
-                + channelId + "/" + eventId + "/response?validation=false";
+                + channelName + "/" + eventId + "/response?validation=false";
         HttpGetter getter = new HttpGetter();
         getter.get(analyseUrl);
         assertEquals(200, getter.getStatus());
@@ -139,7 +193,7 @@ public class AnalysePDBIT {
         String[] parts = url.split("/");
         String eventId = parts[8];
         String analyseUrl = "http://localhost:" + proxyPort + "/asbestos/log/analysis/event/default/"
-                + channelId + "/" + eventId + "/request?validation=false";
+                + channelName + "/" + eventId + "/request?validation=false";
         HttpGetter getter = new HttpGetter();
         getter.get(analyseUrl);
         assertEquals(200, getter.getStatus());
@@ -164,18 +218,31 @@ public class AnalysePDBIT {
 
     @BeforeAll
     static void beforeAll() throws URISyntaxException {
-        Map<String, Object> testReport;
 
         loadCaches();
 
+        loadEC();
+
         String testId;
         testId = "sendMinimalPDB";
-        testReport = Utility.runTest(channelId, collectionId, testId, null);
-        goodPdbLogUrl = (String) testReport.get("logUrl");
+        goodTestReport = Utility.runTest(channelName, collectionId, testId, null);
+        goodPdbLogUrl = (String) goodTestReport.get("logUrl");
+        UIEvent baseEvent = new UIEvent(new EC(external_cache));
+        UIEvent event = baseEvent.fromURI(new URI(goodPdbLogUrl));
+        BaseResource resource = event.getResponseResource();
+        assertNotNull(resource);
+        assertTrue(resource instanceof Bundle);
+        Bundle bundle = (Bundle) resource;
+        for (Bundle.BundleEntryComponent comp : bundle.getEntry()) {
+            if (comp.hasResponse() && comp.getResponse().hasLocation() && comp.getResponse().getLocation().contains("DocumentReference")) {
+                drUrl = comp.getResponse().getLocation();
+            }
+        }
+
 
         testId = "Missing_Profile";
-        testReport = Utility.runTest(channelId, collectionId, testId, "PDBFails");
-        noProfileLogUrl = (String) testReport.get("logUrl");
+        noProfileTestReport = Utility.runTest(channelName, collectionId, testId, "PDBFails");
+        noProfileLogUrl = (String) noProfileTestReport.get("logUrl");
     }
 
     static void loadCaches() throws URISyntaxException {
@@ -184,6 +251,14 @@ public class AnalysePDBIT {
         HttpGetter getter = new HttpGetter();
         getter.get(url);
         assertEquals(200, getter.getStatus());
+    }
+
+    static void loadEC() throws URISyntaxException {
+        String url = "http://localhost:" + proxyPort + "/asbestos/log/ec";
+        HttpGetter getter = new HttpGetter();
+        getter.get(url);
+        assertEquals(200, getter.getStatus());
+        external_cache = new File(getter.getResponseText());
     }
 
 }
