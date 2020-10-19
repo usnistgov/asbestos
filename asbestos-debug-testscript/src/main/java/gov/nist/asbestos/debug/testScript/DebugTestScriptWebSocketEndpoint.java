@@ -60,11 +60,11 @@ public class DebugTestScriptWebSocketEndpoint {
         final Map<String, List<String>> myMap = session.getRequestParameterMap();
         String ftkTestSessionId /* ExclusivelyOptional */ = myMap.containsKey("ftkTestSessionId") ? myMap.get("ftkTestSessionId").get(0) : null;
         String testScriptIndex /* ExclusivelyOptional */ = myMap.containsKey("testScriptIndex") ? myMap.get("testScriptIndex").get(0) : null;
-        String channelId /* ExclusivelyOptional */ = myMap.containsKey("channelId") ? myMap.get("channelId").get(0) : null;
+        String channelName /* ExclusivelyOptional */ = myMap.containsKey("channelName") ? myMap.get("channelName").get(0) : null;
 
         if ("developer".equals(userType)) {
-            if (ftkTestSessionId != null && channelId != null && testScriptIndex != null) {
-                DebugTestSessionId instanceId = new DebugTestSessionId(ftkTestSessionId, channelId);
+            if (ftkTestSessionId != null && channelName != null && testScriptIndex != null) {
+                DebugTestSessionId instanceId = new DebugTestSessionId(ftkTestSessionId, channelName);
                 if (! instanceMap.containsKey(instanceId)) {
                     instanceMap.put(instanceId, new ConcurrentSkipListSet<>());
                 }

@@ -116,7 +116,8 @@
                         :channel-name="channelName"
                         :event-id="eventId"
                         :request-or-response="'request'"
-                        :no-inspect-label="true"></log-analysis-report>
+                        :no-inspect-label="true"
+                        :modal-mode="modalMode"></log-analysis-report>
             </div>
             <div v-if="inspectResponse" class="request-response">
                 <log-analysis-report
@@ -124,7 +125,8 @@
                         :channel-name="channelName"
                         :event-id="eventId"
                         :request-or-response="'response'"
-                        :no-inspect-label="true"></log-analysis-report>
+                        :no-inspect-label="true"
+                        :modal-mode="modalMode"></log-analysis-report>
             </div>
             <div v-if="displayValidations" class="request-response">
                 <eval-details
@@ -134,7 +136,8 @@
                         :test-id="'bundle_eval'"
                         :test-collection="'Internal'"
                         :run-eval="true"
-                        :no-inspect-label="true"></eval-details>
+                        :no-inspect-label="true"
+                        :modal-mode="modalMode"></eval-details>
             </div>
     </div>
 </template>
@@ -152,11 +155,11 @@
             return {
                 selectedEvent: false,
                 selectedTask: 0,
-                displayRequest: true,
-                displayResponse: false,
+                displayRequest: (this.modalMode==='')?'true':this.modalMode === 'request',
+                displayResponse: (this.modalMode=='')?'false':this.modalMode === 'response',
                 displayInspector: false,
                 displayValidations: false,
-                inspectType: 'request',
+                inspectType: (this.ModalMode==='')?'request':this.modalMode,
                 allEnabled: false,
             }
         },
@@ -306,9 +309,20 @@
                     return
                 this.loadEvent()
             },
+            modalMode: function(newVal) {
+                if (newVal === 'request') {
+                    this.displayResponse = false
+                    this.displayRequest = true
+                    this.inspectType = newVal
+                } else if (newVal === 'response') {
+                   this.displayRequest = false
+                   this.displayResponse = true
+                   this.inspectType = newVal
+                }
+            }
         },
         props: [
-            'eventId', 'sessionId', 'channelName', 'noNav', 'reqresp',
+            'eventId', 'sessionId', 'channelName', 'noNav', 'reqresp', 'modalMode'
         ],
         mixins: [eventMixin, errorHandlerMixin],
         components: {

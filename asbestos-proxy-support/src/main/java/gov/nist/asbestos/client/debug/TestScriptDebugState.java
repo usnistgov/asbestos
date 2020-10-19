@@ -157,13 +157,18 @@ public class TestScriptDebugState {
                 + "\"markdownMessage\":\"" + base64 + "\"}");
     }
 
-    public void sendEvalForResourcesResult(String resultMessage, String markdownMessage, String exceptionPropKey, String resourceList) {
+    public void sendEvalForResourcesResult(String resultMessage, String markdownMessage, String exceptionPropKey, String resourceList, String fixtureName, String fixtureProfileUrl, String analysisUrl, String direction, String scalarValueString) {
         String base64 = (markdownMessage != null && markdownMessage.length() > 0) ? Base64.getEncoder().encodeToString(markdownMessage.getBytes()) : "";
         getSession().getAsyncRemote().sendText("{\"messageType\":\"eval-for-resources-result\", "
                 + ((exceptionPropKey != null && exceptionPropKey != "")?"\"exceptionPropKey\": \"" + exceptionPropKey + "\",":"")
                 + " \"resultMessage\":\"" + resultMessage +"\","
-                + "\"markdownMessage\":\"" + base64 + "\""
-                + ", \"resourceList\": [" +  resourceList + "]"
+                + "\"markdownMessage\":\"" + base64 + "\","
+                + "\"resourceList\": [" +  resourceList + "]"
+                + ((fixtureName != null) ? ",\"fixtureResourceName\":\"" + fixtureName + "\"" : "")
+                + ((fixtureProfileUrl != null) ? ",\"fixtureProfileUrl\":\"" + fixtureProfileUrl + "\"" : "")
+                + ((analysisUrl != null ? ",\"analysisUrl\":\"" + analysisUrl + "\"" : ""))
+                + ((direction != null ? ",\"direction\":\"" + direction + "\"" : ""))
+                + ((scalarValueString != null ? ",\"scalarValueString\":\"" + scalarValueString + "\"" : ""))
                 + "}");
     }
 
