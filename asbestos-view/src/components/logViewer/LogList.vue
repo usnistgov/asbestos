@@ -1,7 +1,7 @@
 <template>
     <div>
         <div>
-            <span class="tool-title">Events for Channel {{ channelId }}</span>
+            <span class="tool-title">Events for Channel {{ channelName }}</span>
             <span class="divider"></span>
 
             <img id="reload" class="selectable" @click="loadEventSummaries()" src="../../assets/reload.png"/>
@@ -51,10 +51,10 @@
         methods: {
             selectSummary(summary) {
                 //this.$store.commit('setEventSummaries', this.eventSummaries)
-                this.$router.push(`/session/${this.sessionId}/channel/${this.channelId}/lognav/${summary.eventName}?clientIP=${summary.ipAddr}`)
+                this.$router.push(`/session/${this.sessionId}/channel/${this.channelName}/lognav/${summary.eventName}?clientIP=${summary.ipAddr}`)
             },
             loadEventSummaries() {
-                this.$store.dispatch('loadEventSummaries', {session: this.sessionId, channel: this.channelId})
+                this.$store.dispatch('loadEventSummaries', {session: this.sessionId, channel: this.channelName})
             }
         },
         created() {
@@ -74,7 +74,7 @@
             'resourceType': 'loadEventSummaries'
         },
         props: [
-            'resourceType',  'sessionId', 'channelId',
+            'resourceType',  'sessionId', 'channelName',
         ],
         mixins: [eventMixin, errorHandlerMixin],
         name: "LogList"
