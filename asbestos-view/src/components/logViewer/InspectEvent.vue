@@ -82,14 +82,21 @@
                         }"
                           @click="displayRequest = false; displayResponse = false; displayInspector = true; inspectType = 'response'; displayValidations = false">
                     Inspect Response/Server
-                </span>
+                    </span>
                     <div class="divider"></div>
-                    <span v-bind:class="{
-                    selected: displayValidations,
-                    'not-selected': !displayValidations
-                    }" @click="displayRequest = false; displayResponse = false; displayInspector = false; displayValidations = true">
-                    PDB Validations
-                </span>
+                    <template v-if="modalMode">
+                        <a :href="modalModeEventLink" target="_blank">PDB Validations<img
+                                alt="External link" src="../../assets/ext_link.png" style="vertical-align: top"
+                                title="Open Inspector in a new browser tab"></a>
+                    </template>
+                    <template v-else>
+                       <span v-bind:class="{
+                         selected: displayValidations,
+                         'not-selected': !displayValidations
+                         }" @click="displayRequest = false; displayResponse = false; displayInspector = false; displayValidations = true">
+                         PDB Validations
+                        </span>
+                    </template>
                 </div>
             </div>
             <br />
@@ -291,6 +298,11 @@
             eventLink() {
                 return window.location.href
             },
+            modalModeEventLink() {
+                // Example http://localhost:8082/session/default/channel/limited/lognav/
+                let reqStr = (this.inspectType=='request') ? 'req' : 'resp'
+               return '/session/' + this.sessionId +'/channel/' + this.channelName + '/lognav/'  + this.eventId + '/' + reqStr
+            }
         },
         created() {
             this.loadEventSummaries()
