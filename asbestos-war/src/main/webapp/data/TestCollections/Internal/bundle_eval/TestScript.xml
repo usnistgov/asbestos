@@ -65,23 +65,31 @@
         </action>
         <action>
             <assert>
-                <description value="PDB: {DocumentReference, DocumentManifest, List}.subject.reference is absolute external reference|MHDPDBPatientReference"/>
+                <description value="PDB: {DocumentReference, DocumentManifest, List}.subject.reference is absolute external reference or UUID.|MHDPDBPatientReference"/>
                 <compareToSourceId value="request"/>
-                <compareToSourceExpression value="Bundle.entry.resource.where(is(FHIR.DocumentReference) or is(FHIR.DocumentManifest) or is(FHIR.List)).subject.reference.startsWith('http')"/>
+                <compareToSourceExpression value="Bundle.entry.resource.all($this is(FHIR.DocumentReference) or $this is(FHIR.DocumentManifest) or $this is(FHIR.List)  implies ($this.subject.reference.startsWith('http') or $this.subject.reference.startsWith('urn:uuid:')   ))"/>
                 <warningOnly value="false"/>
             </assert>
         </action>
         <action>
             <assert>
-                <description value="PDB: subject resource must be one of Patient, Practitioner, Group, Device"/>
+                <description value="PDB: subject is required."/>
                 <compareToSourceId value="request"/>
-                <compareToSourceExpression value="Bundle.entry.resource.where(is(FHIR.DocumentReference) or is(FHIR.DocumentManifest) or is(FHIR.List)).subject.reference.select(matches('.*Patient.*')).all(true)"/>
+                <compareToSourceExpression value="Bundle.entry.resource.where(is(FHIR.DocumentReference) or is(FHIR.DocumentManifest) or is(FHIR.List)).all($this.subject.reference.exists())"/>
                 <warningOnly value="false"/>
             </assert>
         </action>
         <action>
             <assert>
-                <description value="PDB: {DocumentReference, DocumentManifest}.subject.reference must reference same subject resource"/>
+                <description value="PDB: subject must reference a Patient."/>
+                <compareToSourceId value="request"/>
+                <compareToSourceExpression value="Bundle.entry.resource.where(is(FHIR.DocumentReference) or is(FHIR.DocumentManifest) or is(FHIR.List)).subject.reference.select(matches('.*Patient.*')).all(true) "/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
+            <assert>
+                <description value="PDB: {DocumentReference, DocumentManifest, List}.subject.reference must reference same Patient"/>
                 <compareToSourceId value="request"/>
                 <compareToSourceExpression value="Bundle.entry.resource.where(is(FHIR.DocumentReference) or is(FHIR.DocumentManifest) or is(FHIR.List)).select(subject.reference).distinct().count() = 1"/>
                 <warningOnly value="false"/>

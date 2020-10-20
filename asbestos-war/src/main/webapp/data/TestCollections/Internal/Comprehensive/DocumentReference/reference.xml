@@ -27,9 +27,6 @@
             <display value="Reports"/>
         </coding>
     </category>
-    <subject>
-        <reference value="${patientResourceId}"/>
-    </subject>
     <date value="2005-12-24"/>
     <securityLabel>
         <coding>
