@@ -104,7 +104,7 @@ public class DebugTestScriptWebSocketEndpoint {
         } else if (cmd.equals("removeDebugger")) {
             DebugTestSessionId instanceId = new DebugTestSessionId(
                     (String) myMap.get("ftkTestSessionId"),
-                    (String) myMap.get("channelId"));
+                    (String) myMap.get("channelName"));
             if (instanceMap.containsKey(instanceId)) {
                 DebugWsSessionId wsSessionId = new DebugWsSessionId((String)myMap.get("testScriptIndex"));
                 final ConcurrentSkipListSet<DebugWsSessionId> scriptIds = instanceMap.get(instanceId);
@@ -185,7 +185,7 @@ public class DebugTestScriptWebSocketEndpoint {
     private void sendExistingDebuggerList(Session session, Map<String, Object> myMap) {
         DebugTestSessionId instanceId = new DebugTestSessionId(
                 (String)myMap.get("ftkTestSessionId"),
-                (String)myMap.get("channelId"));
+                (String)myMap.get("channelName"));
         if (instanceMap.containsKey(instanceId)) {
             final ConcurrentSkipListSet<DebugWsSessionId> scriptIds = instanceMap.get(instanceId);
             if (scriptIds != null && scriptIds.size() > 0) {
