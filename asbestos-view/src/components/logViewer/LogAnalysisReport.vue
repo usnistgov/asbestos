@@ -119,7 +119,9 @@
                 </div>
             </div>
         </div>
-      <router-view></router-view>
+        <template v-if="modalMode === undefined || modalMode===''">
+            <router-view></router-view>
+        </template>
     </div>
 </template>
 
@@ -270,7 +272,7 @@
             'sessionId', 'channelName', 'eventId',
           'theUrl', // this is the URL of a Resource inside a Bundle
           'gzip', 'useProxy', "requestOrResponse", "ignoreBadRefs",
-            'initiallyClosed', 'noInspectLabel',
+            'initiallyClosed', 'noInspectLabel', 'modalMode'
         ],
         components: { LogObjectDisplay },
         name: "LogAnalysisReport"

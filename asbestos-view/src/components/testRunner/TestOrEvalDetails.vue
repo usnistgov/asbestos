@@ -8,11 +8,11 @@
         <div class="vdivider"></div>
         <div class="vdivider"></div>
         <div class="vdivider"></div>
-        <span class="bold">Script:</span>
-        <span class="panel selectable underline"  @click="openScriptDisplay(testId)">{{ testId }}</span>
+        <span class="bold">Script:&nbsp;</span>
+        <span class="script-panel selectable underline"  @click="openScriptDisplay(testId)">{{ testId }}</span>
         <span v-for="(name, namei) in Object.getOwnPropertyNames(testModules)"
              :key="'TestModule' + namei">
-          <span class="panel selectable underline" @click="openScriptDisplay(name)">{{ name }}</span>
+          <span class="script-panel selectable underline" @click="openScriptDisplay(name)">{{ name }}</span>
         </span>
       </div>
 
@@ -119,6 +119,9 @@
 </script>
 
 <style scoped>
-
+.script-panel {
+    padding-left: 27px;
+    padding-right: 27px;
+}
 
 </style>

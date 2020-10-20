@@ -1,5 +1,5 @@
 <template>
-    <div name="modal" @dragover="drag_over" @drop="drop">
+    <div name="modal" @dragover="drag_over" @drop="drop" >
         <div class="modal-mask" @click.stop="close" v-show="show" >
             <div class="modalFlexContainer" >
                 <div id="debugAssertionEvalModal" class="eval-modal-container" @click.stop>
@@ -38,7 +38,10 @@
                                     </div>
                                 </div>
                             </template>
-                            <div>
+                            <div v-if="isFhirPathTabSelected">
+                                <f-h-i-r-path-expression-editor-form :pattern-type-obj="getSelectedObj" :pattern-type-id="selectedPatternTypeId" :option-type="selectedEvalOptionTab" />
+                            </div>
+                            <div v-else>
                                 <debug-assertion-eval-form :pattern-type-obj="getSelectedObj" :pattern-type-id="selectedPatternTypeId" :option-type="selectedEvalOptionTab" />
                             </div>
                         </div>
@@ -61,6 +64,7 @@
 
 <script>
     import DebugAssertionEvalForm from "./DebugAssertionEvalForm";
+    import FHIRPathExpressionEditorForm from "./FHIRPathExpressionEditorForm";
 
     export default {
         data() {
@@ -222,6 +226,7 @@
         },
         components: {
             DebugAssertionEvalForm,
+            FHIRPathExpressionEditorForm,
         },
         name: "DebugAssertionEvalModal"
     }
@@ -289,6 +294,7 @@
         width: 100%;
         top: 0;
         padding: 10px 10px 5px 10px;
+        z-index: 9100;
     }
 
     .patternHeaderContainer {
@@ -317,6 +323,7 @@
         display: flex;
         align-items: center;
         justify-content: space-evenly;
+        z-index: 9000;
     }
 
     * {
@@ -325,7 +332,7 @@
 
     .modal-mask {
         position: fixed;
-        z-index: 9998;
+        z-index: 8000;
         top: 0;
         left: 0;
         width: 100%;

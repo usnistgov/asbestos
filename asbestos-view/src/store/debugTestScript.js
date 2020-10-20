@@ -314,8 +314,8 @@ export const debugTestScriptStore = {
 
             if (state.testScriptDebuggerWebSocket === null) {
                 const wssBase = UtilFunctions.getWssBase()
-                const channelId = rootState.base.channelId
-                const wssSocketUrl = `${wssBase}/debugTestScript/developer?ftkTestSessionId=${testSessionId}&channelId=${channelId}&testScriptIndex=${mapKey}`
+                const channelName = rootState.base.channelName
+                const wssSocketUrl = `${wssBase}/debugTestScript/developer?ftkTestSessionId=${testSessionId}&channelName=${channelName}&testScriptIndex=${mapKey}`
                 state.testScriptDebuggerWebSocket = new WebSocket(wssSocketUrl)
                 state.testScriptDebuggerWebSocket.onopen = event => {
                     state.waitingForBreakpoint = true
@@ -325,7 +325,7 @@ export const debugTestScriptStore = {
                     // clear log 1?
                     // commit('clearTestReports')
                     commit('clearTestReport', testId)
-                    let uri = `debug-testscript/${testSessionId}__${channelId}/${this.state.testRunner.currentTestCollectionName}/${testId}?_format=${this.state.testRunner.useJson ? 'json' : 'xml'};_gzip=${this.state.testRunner.useGzip}`
+                    let uri = `debug-testscript/${testSessionId}__${channelName}/${this.state.testRunner.currentTestCollectionName}/${testId}?_format=${this.state.testRunner.useJson ? 'json' : 'xml'};_gzip=${this.state.testRunner.useGzip}`
                     let indexOfTestId = getters.getIndexOfTestId(testId)
                     if (indexOfTestId > -1) {
                         const breakpointSet = state.breakpointMap.get(mapKey) // Follow proper key format
@@ -465,13 +465,13 @@ export const debugTestScriptStore = {
                         console.log('In debugMgmt socket onOpen. event: ' + (event === undefined).valueOf())
                     }
                     const testSessionId = rootState.base.session
-                    const channelId = rootState.base.channelId
+                    const channelName = rootState.base.channelName
                     const cmd = fn.cmd
                     if ('getExistingDebuggerList' === cmd) {
-                        const sendData = `{"cmd":"${cmd}","ftkTestSessionId":"${testSessionId}","channelId":"${channelId}"}`
+                        const sendData = `{"cmd":"${cmd}","ftkTestSessionId":"${testSessionId}","channelName":"${channelName}"}`
                         state.debugMgmtWebSocket.send(sendData)
                     } else if ('removeDebugger' === cmd) {
-                        const sendData = `{"cmd":"${cmd}","ftkTestSessionId":"${testSessionId}","channelId":"${channelId}","testScriptIndex":"${fn.testScriptIndex}"}`
+                        const sendData = `{"cmd":"${cmd}","ftkTestSessionId":"${testSessionId}","channelName":"${channelName}","testScriptIndex":"${fn.testScriptIndex}"}`
                         state.debugMgmtWebSocket.send(sendData)
                     }
                 }

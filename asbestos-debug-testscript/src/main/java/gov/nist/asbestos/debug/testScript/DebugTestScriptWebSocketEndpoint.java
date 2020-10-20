@@ -60,11 +60,11 @@ public class DebugTestScriptWebSocketEndpoint {
         final Map<String, List<String>> myMap = session.getRequestParameterMap();
         String ftkTestSessionId /* ExclusivelyOptional */ = myMap.containsKey("ftkTestSessionId") ? myMap.get("ftkTestSessionId").get(0) : null;
         String testScriptIndex /* ExclusivelyOptional */ = myMap.containsKey("testScriptIndex") ? myMap.get("testScriptIndex").get(0) : null;
-        String channelId /* ExclusivelyOptional */ = myMap.containsKey("channelId") ? myMap.get("channelId").get(0) : null;
+        String channelName /* ExclusivelyOptional */ = myMap.containsKey("channelName") ? myMap.get("channelName").get(0) : null;
 
         if ("developer".equals(userType)) {
-            if (ftkTestSessionId != null && channelId != null && testScriptIndex != null) {
-                DebugTestSessionId instanceId = new DebugTestSessionId(ftkTestSessionId, channelId);
+            if (ftkTestSessionId != null && channelName != null && testScriptIndex != null) {
+                DebugTestSessionId instanceId = new DebugTestSessionId(ftkTestSessionId, channelName);
                 if (! instanceMap.containsKey(instanceId)) {
                     instanceMap.put(instanceId, new ConcurrentSkipListSet<>());
                 }
@@ -104,7 +104,7 @@ public class DebugTestScriptWebSocketEndpoint {
         } else if (cmd.equals("removeDebugger")) {
             DebugTestSessionId instanceId = new DebugTestSessionId(
                     (String) myMap.get("ftkTestSessionId"),
-                    (String) myMap.get("channelId"));
+                    (String) myMap.get("channelName"));
             if (instanceMap.containsKey(instanceId)) {
                 DebugWsSessionId wsSessionId = new DebugWsSessionId((String)myMap.get("testScriptIndex"));
                 final ConcurrentSkipListSet<DebugWsSessionId> scriptIds = instanceMap.get(instanceId);
@@ -185,7 +185,7 @@ public class DebugTestScriptWebSocketEndpoint {
     private void sendExistingDebuggerList(Session session, Map<String, Object> myMap) {
         DebugTestSessionId instanceId = new DebugTestSessionId(
                 (String)myMap.get("ftkTestSessionId"),
-                (String)myMap.get("channelId"));
+                (String)myMap.get("channelName"));
         if (instanceMap.containsKey(instanceId)) {
             final ConcurrentSkipListSet<DebugWsSessionId> scriptIds = instanceMap.get(instanceId);
             if (scriptIds != null && scriptIds.size() > 0) {

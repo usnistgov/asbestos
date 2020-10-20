@@ -112,9 +112,11 @@
                 return assert.description === undefined ? "" : assert.description
             },
             async loadTestScript() {
-                this.$store.commit('setTestCollectionName', this.testCollection)
-                await this.$store.dispatch('loadTestScripts', [this.testId]);
-                this.script = this.$store.state.testRunner.testScripts[this.testId]
+                if (this.modalMode === undefined || this.modalMode==='') {
+                    this.$store.commit('setTestCollectionName', this.testCollection)
+                    await this.$store.dispatch('loadTestScripts', [this.testId]);
+                    this.script = this.$store.state.testRunner.testScripts[this.testId]
+                }
             },
             loadTestReport() {
               console.log(`loadTestReport`)
@@ -193,7 +195,7 @@
         },
         mixins: [ errorHandlerMixin, colorizeTestReports ],
         props: [
-            'sessionId', 'channelName', 'testCollection', 'testId', 'eventId', 'runEval', 'noInspectLabel',
+            'sessionId', 'channelName', 'testCollection', 'testId', 'eventId', 'runEval', 'noInspectLabel', 'modalMode'
         ],
         components: {
             //EvalReportAssert

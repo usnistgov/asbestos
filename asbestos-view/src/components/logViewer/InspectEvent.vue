@@ -82,14 +82,21 @@
                         }"
                           @click="displayRequest = false; displayResponse = false; displayInspector = true; inspectType = 'response'; displayValidations = false">
                     Inspect Response/Server
-                </span>
+                    </span>
                     <div class="divider"></div>
-                    <span v-bind:class="{
-                    selected: displayValidations,
-                    'not-selected': !displayValidations
-                    }" @click="displayRequest = false; displayResponse = false; displayInspector = false; displayValidations = true">
-                    PDB Validations
-                </span>
+                    <template v-if="modalMode">
+                        <a :href="modalModeEventLink" target="_blank">PDB Validations<img
+                                alt="External link" src="../../assets/ext_link.png" style="vertical-align: top"
+                                title="Open Inspector in a new browser tab"></a>
+                    </template>
+                    <template v-else>
+                       <span v-bind:class="{
+                         selected: displayValidations,
+                         'not-selected': !displayValidations
+                         }" @click="displayRequest = false; displayResponse = false; displayInspector = false; displayValidations = true">
+                         PDB Validations
+                        </span>
+                    </template>
                 </div>
             </div>
             <br />
@@ -116,7 +123,8 @@
                         :channel-name="channelName"
                         :event-id="eventId"
                         :request-or-response="'request'"
-                        :no-inspect-label="true"></log-analysis-report>
+                        :no-inspect-label="true"
+                        :modal-mode="modalMode"></log-analysis-report>
             </div>
             <div v-if="inspectResponse" class="request-response">
                 <log-analysis-report
@@ -124,7 +132,8 @@
                         :channel-name="channelName"
                         :event-id="eventId"
                         :request-or-response="'response'"
-                        :no-inspect-label="true"></log-analysis-report>
+                        :no-inspect-label="true"
+                        :modal-mode="modalMode"></log-analysis-report>
             </div>
             <div v-if="displayValidations" class="request-response">
                 <eval-details
@@ -134,7 +143,8 @@
                         :test-id="'bundle_eval'"
                         :test-collection="'Internal'"
                         :run-eval="true"
-                        :no-inspect-label="true"></eval-details>
+                        :no-inspect-label="true"
+                        :modal-mode="modalMode"></eval-details>
             </div>
     </div>
 </template>
@@ -152,11 +162,11 @@
             return {
                 selectedEvent: false,
                 selectedTask: 0,
-                displayRequest: true,
-                displayResponse: false,
+                displayRequest: (this.modalMode==='')?'true':this.modalMode === 'request',
+                displayResponse: (this.modalMode=='')?'false':this.modalMode === 'response',
                 displayInspector: false,
                 displayValidations: false,
-                inspectType: 'request',
+                inspectType: (this.ModalMode==='')?'request':this.modalMode,
                 allEnabled: false,
             }
         },
@@ -288,6 +298,11 @@
             eventLink() {
                 return window.location.href
             },
+            modalModeEventLink() {
+                // Example http://localhost:8082/session/default/channel/limited/lognav/
+                let reqStr = (this.inspectType=='request') ? 'req' : 'resp'
+               return '/session/' + this.sessionId +'/channel/' + this.channelName + '/lognav/'  + this.eventId + '/' + reqStr
+            }
         },
         created() {
             this.loadEventSummaries()
@@ -306,9 +321,20 @@
                     return
                 this.loadEvent()
             },
+            modalMode: function(newVal) {
+                if (newVal === 'request') {
+                    this.displayResponse = false
+                    this.displayRequest = true
+                    this.inspectType = newVal
+                } else if (newVal === 'response') {
+                   this.displayRequest = false
+                   this.displayResponse = true
+                   this.inspectType = newVal
+                }
+            }
         },
         props: [
-            'eventId', 'sessionId', 'channelName', 'noNav', 'reqresp',
+            'eventId', 'sessionId', 'channelName', 'noNav', 'reqresp', 'modalMode'
         ],
         mixins: [eventMixin, errorHandlerMixin],
         components: {
