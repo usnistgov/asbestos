@@ -41,11 +41,11 @@
                         </p>
                         <div style="width: 700px" v-if="getSourceIdDetails.analysisUrl">
                             <inspect-event
-                                    :channelId="$store.state.base.channelId"
-                                    :eventId="decodeURIComponent(getSourceIdDetails.analysisUrl)"
-                                    :modal-mode="getSourceIdDetails.direction"
-                                    :noNav="true"
                                     :sessionId="$store.state.base.session"
+                                    :channelName="$store.state.base.channelName"
+                                    :eventId="decodeURIComponent(getSourceIdDetails.analysisUrl)"
+                                    :noNav="true"
+                                    :modal-mode="getSourceIdDetails.direction"
                             >
                             </inspect-event>
                         </div>
