@@ -1,5 +1,6 @@
 {
   "httpsFhirToolkitBase": "${httpsFhirToolkitBase}",
   "fhirToolkitBase": "${fhirToolkitBase}",
-  "projectVersion": "${project.version}"
+  "projectVersion": "${project.version}",
+  "startUpSession": "${startUpSession}"
 }

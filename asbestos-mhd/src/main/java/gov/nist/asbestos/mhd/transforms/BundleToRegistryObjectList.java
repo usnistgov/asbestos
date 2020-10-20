@@ -1,6 +1,7 @@
 package gov.nist.asbestos.mhd.transforms;
 
 
+import com.google.common.base.Strings;
 import gov.nist.asbestos.asbestorCodesJaxb.Code;
 import gov.nist.asbestos.client.Base.IVal;
 import gov.nist.asbestos.client.client.FhirClient;
@@ -566,33 +567,38 @@ public class BundleToRegistryObjectList implements IVal {
         }
 
         tr = vale.add(new ValE("DocumentReference.subject is [1..1]").addIheRequirement(DRTable));
-        if (!dr.hasSubject() || !dr.getSubject().hasReference() && isMinimalMetadata) {
-            // Patient is optional in minimal metadata - add reference to No_Patient to make XDS Toolkit happy
-            // Adds resource cache to configuration
-            FhirClient fhirClient =
-                    channelConfig == null
-                            ? FhirClientBuilder.get(null)
-                            : FhirClientBuilder.get(channelConfig.asChannelId());
-
-            Optional<ResourceWrapper>  patient = fhirClient.readCachedResource(new Ref("Patient/No_Patient"));
-            if (patient.isPresent()) {
-                ResourceWrapper thePatient = patient.get();
-                Bundle patientBundle;
-                if (thePatient.getResource() instanceof Bundle) {
-                    patientBundle = (Bundle) thePatient.getResource();
-                    Ref patRef = new Ref(patientBundle.getEntry().get(0).getFullUrl());  // this must be turned into fullURL (not relative)
-                    addSubject(eo, resource, patRef , CodeTranslator.DE_PID, "XDSDocumentEntry.patientId", vale);
-                } else {
-                    val.add(new ValE("Internal error - Lookup of Patient/No_Patient returned " + thePatient.getResource().getClass().getSimpleName() + " instead of Bundle").asError());
-                }
-            } else {
-                val.add(new ValE("Internal error - cannot locate Patient/No_Patient").asError());
-            }
-
-        } else {
+//        if (!dr.hasSubject() || !dr.getSubject().hasReference() && isMinimalMetadata) {
+//            // Patient is optional in minimal metadata - add reference to No_Patient to make XDS Toolkit happy
+//            // Adds resource cache to configuration
+//            FhirClient fhirClient =
+//                    channelConfig == null
+//                            ? FhirClientBuilder.get(null)
+//                            : FhirClientBuilder.get(channelConfig.asChannelId());
+//
+//            Optional<ResourceWrapper>  patient = fhirClient.readCachedResource(new Ref("Patient/No_Patient"));
+//            if (patient.isPresent()) {
+//                ResourceWrapper thePatient = patient.get();
+//                Bundle patientBundle;
+//                if (thePatient.getResource() instanceof Bundle) {
+//                    patientBundle = (Bundle) thePatient.getResource();
+//                    Ref patRef = new Ref(patientBundle.getEntry().get(0).getFullUrl());  // this must be turned into fullURL (not relative)
+//                    addSubject(eo, resource, patRef , CodeTranslator.DE_PID, "XDSDocumentEntry.patientId", vale);
+//                } else {
+//                    val.add(new ValE("Internal error - Lookup of Patient/No_Patient returned " + thePatient.getResource().getClass().getSimpleName() + " instead of Bundle").asError());
+//                }
+//            } else {
+//                val.add(new ValE("Internal error - cannot locate Patient/No_Patient").asError());
+//            }
+//
+//        } else {
             vale.add(new ValE("subject to Patient Id").asTranslation());
-            addSubject(eo, resource,  new Ref(dr.getSubject()), CodeTranslator.DE_PID, "XDSDocumentEntry.patientId", tr);
-        }
+            Reference sub = dr.getSubject();
+            if (sub == null || Strings.isNullOrEmpty(sub.getReference())) {
+                val.add(new ValE("DocumentReference.subject is missing").asError());
+            } else {
+                addSubject(eo, resource, new Ref(sub), CodeTranslator.DE_PID, "XDSDocumentEntry.patientId", tr);
+            }
+//        }
         if (dr.hasAuthor()) {
             tr = vale.addTr(new ValE("author"));
             ResourceWrapper containing = new ResourceWrapper();
