@@ -19,7 +19,7 @@ public class IdBuilder {
     public String allocate(String defaultValue) {
         if (!override)
             return defaultValue;
-        return Installation.dateAsIdentifier(new Date(), "1.2." + ip() + ".", ".");
+        return Installation.dateAsIdentifier(new Date(), "1.2." + ip() + ".", ".", false);
     }
 
     private String ip() {

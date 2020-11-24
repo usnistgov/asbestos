@@ -74,30 +74,38 @@ public class Installation {
 //        return new File(externalCache(), "fsimdb");
 //    }
 
-    public static String dateAsIdentifier(Date date, String prefix, String connector) {
+    /**
+     *
+     * @param date
+     * @param prefix
+     * @param connector
+     * @param isPadded If True, returns a date time components with a leading zero for a single-digit integer. Use padding where sorting is desired. If isPadded is False, there is no padding used, which produces an OID-friendly format.
+     * @return
+     */
+    public static String dateAsIdentifier(Date date, String prefix, String connector, boolean isPadded) {
         Calendar c  = Calendar.getInstance();
         c.setTime(date);
 
         String year = Integer.toString(c.get(Calendar.YEAR));
         String month = Integer.toString(c.get(Calendar.MONTH) + 1);
-        if (month.length() == 1)
+        if (month.length() == 1 && isPadded)
             month = "0" + month;
         String day = Integer.toString(c.get(Calendar.DAY_OF_MONTH));
-        if (day.length() == 1 )
+        if (day.length() == 1  && isPadded)
             day = "0" + day;
         String hour = Integer.toString(c.get(Calendar.HOUR_OF_DAY));
-        if (hour.length() == 1)
+        if (hour.length() == 1 && isPadded)
             hour = "0" + hour;
         String minute = Integer.toString(c.get(Calendar.MINUTE));
-        if (minute.length() == 1)
+        if (minute.length() == 1 && isPadded)
             minute = "0" + minute;
         String second = Integer.toString(c.get(Calendar.SECOND));
-        if (second.length() == 1)
+        if (second.length() == 1 && isPadded)
             second = "0" + second;
         String mili = Integer.toString(c.get(Calendar.MILLISECOND));
-        if (mili.length() == 2)
+        if (mili.length() == 2 && isPadded)
             mili = "0" + mili;
-        else if (mili.length() == 1)
+        else if (mili.length() == 1 && isPadded)
             mili = "00" + mili;
         String dot = connector;
 
@@ -121,7 +129,7 @@ public class Installation {
     }
 
     public static String asFilenameBase(Date date) {
-        return dateAsIdentifier(date, "", "_");
+        return dateAsIdentifier(date, "", "_", true);
     }
 
     private File actorsDir() {
