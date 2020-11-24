@@ -55,7 +55,6 @@
     import ScriptDetails from './ScriptDetails'
     import ClientDetails from './ClientDetails'
     import VueMarkdown from "vue-markdown";
-    import {UtilFunctions} from "../../common/http-common";
     export default {
         computed: {
           testModules() {
