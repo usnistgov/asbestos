@@ -29,6 +29,7 @@ then
 fi
 echo "BASEDIR is $BASEDIR"
 
+
 TOOLKITS=${BASEDIR}/../Toolkits
 FHIRTOOLKIT=${TOOLKITS}/FhirToolkit
 XDSTOOLKIT=${TOOLKITS}/XdsToolkit
@@ -36,6 +37,14 @@ XDSWEBAPPS=${XDSTOOLKIT}/webapps
 
 export CATALINA_HOME=${BASEDIR}/..
 echo "CATALINA_HOME is $CATALINA_HOME"
+
+echo "starting HAPI FHIR base"
+HAPIFHIRBASE=${BASEDIR}/../HapiFhir/base
+export CATALINA_BASE=${HAPIFHIRBASE}
+echo "CATALINA_BASE=$CATALINA_BASE"
+./startup.sh
+sleep 5
+
 
 echo "Looking at $XDSWEBAPPS"
 # find works different on a MAC vs LINUX
@@ -63,6 +72,7 @@ then
 	export CATALINA_BASE=${XDSTOOLKIT}
 	echo "CATALINA_BASE=$CATALINA_BASE"
 	./startup.sh
+	sleep 30
 else
 	echo "XdsToolkit should not be started"
 fi

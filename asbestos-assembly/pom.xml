@@ -27,22 +27,48 @@
         <!-- Base path should not end with a slash -->
         <build.profile.id>Production</build.profile.id>
 
-        <fhirToolkitUIHomePage>http://localhost:9760</fhirToolkitUIHomePage> <!-- If https is used here, the self-signed certificate fhirtoolkitui.p7b must be trusted by the Web browser unless another keystore was configured with a real certificate.  -->
-        <httpsFhirToolkitBase>https://fhirtoolkit.test:9743/asbestos</httpsFhirToolkitBase>
-        <fhirToolkitBase>http://localhost:9760/asbestos</fhirToolkitBase>
-        <hapiFhirBase>http://localhost:9770/fhir/fhir</hapiFhirBase>
-        <xdsToolkitBase>http://localhost:9770/xdstools</xdsToolkitBase>
-        <tlsXdsToolkitBase>http://localhost:9773/xdstools</tlsXdsToolkitBase>
+<!--        <fhirToolkitUIHomePage>http://localhost:9760</fhirToolkitUIHomePage> &lt;!&ndash; If https is used here, the self-signed certificate fhirtoolkitui.p7b must be trusted by the Web browser unless another keystore was configured with a real certificate.  &ndash;&gt;-->
+<!--        <httpsFhirToolkitBase>https://fhirtoolkit.test:9743/asbestos</httpsFhirToolkitBase>--><!-- used for Admin login and channel locking features -->
+<!--        <fhirToolkitBase>http://localhost:9760/asbestos</fhirToolkitBase> &lt;!&ndash; If https is used here, then this value must be the same as the httpsFhirToolkitBase value &ndash;&gt;-->
+<!--        <hapiFhirBase>http://localhost:9770/fhir/fhir</hapiFhirBase>-->
+<!--        <xdsToolkitBase>http://localhost:9770/xdstools</xdsToolkitBase>-->
+<!--        <tlsXdsToolkitBase>http://localhost:9773/xdstools</tlsXdsToolkitBase>-->
+        <!--
+README.txt and Tomcat server.xml use the properties below.
+If only the xdsToolkitBase property shown above is used to point to an existing toolkit outside of the Asbestos installation directory, the XdsToolkit\webapps should be empty to prevent
+it from starting up a Tomcat which would potentially take up the port as defined by the xdsToolkitHttpPort. In other words, if Tomcat does not start in XdsToolkit then the xdsToolkitHttpPort is not used.
+-->
+
+<!--        <fhirToolkitHttpPort>9760</fhirToolkitHttpPort>-->
+        <!--        <fhirToolkitTlsPort>9743</fhirToolkitTlsPort>-->
+<!--            <xdsToolkitHttpPort>9770</xdsToolkitHttpPort>-->
+<!--            <xdsToolkitTlsPort>9773</xdsToolkitTlsPort>-->
+<!--            <fhirValidationServer>http://localhost:9770/fhir/fhir</fhirValidationServer>-->
+<!--        <startUpSession>default</startUpSession>-->
+
+        <!-- begin CAT -->
+
+        <fhirToolkitUIHomePage>https://cat-nist-tools.ihe-europe.net:9443</fhirToolkitUIHomePage> <!-- If https is used here, the self-signed certificate fhirtoolkitui.p7b must be trusted by the Web browser unless another keystore was configured with a real certificate.  -->
+        <httpsFhirToolkitBase>https://cat-nist-tools.ihe-europe.net:9443/asbestos</httpsFhirToolkitBase> <!-- used for Admin login and channel locking features -->
+        <fhirToolkitBase>http://cat-nist-tools.ihe-europe.net:9760/asbestos</fhirToolkitBase> <!-- should be http only -->
+        <hapiFhirBase>http://localhost:7080/fhir/fhir</hapiFhirBase> <!-- If fhir is placed along side XTK webapps, need to use the same port as XTK -->
+        <xdsToolkitBase>http://localhost:8080/xdstools</xdsToolkitBase>
+        <tlsXdsToolkitBase>http://localhost:8443/xdstools</tlsXdsToolkitBase>
+
         <!--
         README.txt and Tomcat server.xml use the properties below.
         If only the xdsToolkitBase property shown above is used to point to an existing toolkit outside of the Asbestos installation directory, the XdsToolkit\webapps should be empty to prevent
         it from starting up a Tomcat which would potentially take up the port as defined by the xdsToolkitHttpPort. In other words, if Tomcat does not start in XdsToolkit then the xdsToolkitHttpPort is not used.
         -->
+        <hapiFhirHttpPort>7080</hapiFhirHttpPort>
         <fhirToolkitHttpPort>9760</fhirToolkitHttpPort>
-        <fhirToolkitTlsPort>9743</fhirToolkitTlsPort>
-        <xdsToolkitHttpPort>9770</xdsToolkitHttpPort>
-        <xdsToolkitTlsPort>9773</xdsToolkitTlsPort>
-        <fhirValidationServer>http://localhost:9770/fhir/fhir</fhirValidationServer>
+        <fhirToolkitTlsPort>9443</fhirToolkitTlsPort>
+        <xdsToolkitHttpPort>8080</xdsToolkitHttpPort>
+        <xdsToolkitTlsPort>8443</xdsToolkitTlsPort>
+        <fhirValidationServer>http://localhost:7080/fhir/fhir</fhirValidationServer>
+        <startUpSession>cat</startUpSession>
+
+        <!-- end CAT -->
     </properties>
 
 

@@ -5,6 +5,7 @@ Vue.use(Vuex)
 
 import {LOG, PROXY} from '../common/http-common'
 import {CHANNEL} from '../common/http-common'
+import {STARTUPSESSION} from "../common/http-common";
 
 export const baseStore = {
     state() {
@@ -130,10 +131,10 @@ export const baseStore = {
                         })
                 });
 
-                url = `LOG/startupSession`;
-                data = await LOG.get('startupSession');
-                let startupSession = data.data;
-                commit('setSession', startupSession);
+                // url = `LOG/startupSession`;
+                // data = await LOG.get('startupSession');
+                // let startupSession = data.data;
+                commit('setSession', STARTUPSESSION);
 
                 url = `CHANNEL/channels/all`;
                 console.log(url);

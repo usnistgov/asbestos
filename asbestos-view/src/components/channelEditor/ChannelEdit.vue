@@ -159,10 +159,10 @@
         <p class="caption">Channel Base Address: </p>
         <span class="center">{{getChannelBase(false, channel)}}</span>
       </div>
-      <div v-if="isHttpsMode()">
-        <p class="caption">Optional HTTPS Channel Base Address: </p>
-        <span class="center">{{getChannelBase(true, channel)}}</span>
-      </div>
+<!--      <div v-if="isHttpsMode()">-->
+<!--        <p class="caption">Optional HTTPS Channel Base Address: </p>-->
+<!--        <span class="center">{{getChannelBase(true, channel)}}</span>-->
+<!--      </div>-->
       <div>
         <p>Send to this URL and</p>
         <ul>

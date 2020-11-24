@@ -53,8 +53,7 @@ public class GetChannelIdAndURLRequest {
                 idu.site = channelConfig.getXdsSiteName();
                 idsAndUrls.add(idu);
             } catch (Throwable e) {
-                request.notFound();
-                return;
+                request.announce("Skipping " + id + " due to an exception: " + e.toString());
             }
         }
         String json = new Gson().toJson(idsAndUrls);

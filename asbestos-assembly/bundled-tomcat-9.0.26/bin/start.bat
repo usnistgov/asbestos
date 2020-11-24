@@ -26,8 +26,11 @@ SET FHIRTOOLKIT=%TOOLKITS%\FhirToolkit
 SET XDSTOOLKIT=%TOOLKITS%\XdsToolkit
 SET XDSWEBAPPS=%XDSTOOLKIT%\webapps
 
-
 ECHO CATALINA_HOME is %CATALINA_HOME%
+
+REM TODO:
+REM CAT ON WINDOWS -- START HAPI FHIR HERE.
+REM
 
 REM This count includes parent dir so count of 1 means no sub-directories
 ECHO Looking at %XDSWEBAPPS%

@@ -14,6 +14,7 @@ export var ASBTS_USERPROPS =  {
     bauser : "", /* Basic authentication username */
     bapw : "" /* Basic authentication password */
 };
+export var STARTUPSESSION = ''
 
 export const UtilFunctions = {
     getChannelBase :function(channel) {
@@ -34,6 +35,9 @@ export const UtilFunctions = {
     getWssBase: function() {
         return HTTPSFHIRTOOLKITBASEURL.replace("https","wss")
     },
+    getToolkitBase: function() {
+        return toolkitBaseToUse
+    }
 }
 
 export async function getServiceProperties() {
@@ -45,7 +49,8 @@ export async function getServiceProperties() {
             data : {
                 httpsFhirToolkitBase : process.env.VUE_APP_HTTPS_FHIR_TOOLKIT_BASE,
                 fhirToolkitBase : process.env.VUE_APP_FHIR_TOOLKIT_BASE,
-                projectVersion : "Development"
+                projectVersion : "Development",
+                startUpSession : "default"
             }
         };
     }
@@ -59,6 +64,7 @@ export async function initServiceProperties() {
                     PROJECTVERSION = `v${response.data.projectVersion}`
                     FHIRTOOLKITBASEURL = response.data.fhirToolkitBase
                     HTTPSFHIRTOOLKITBASEURL = response.data.httpsFhirToolkitBase
+                    STARTUPSESSION = response.data.startUpSession
 
                     if (window.location.protocol === 'https:') {
                         toolkitBaseToUse = HTTPSFHIRTOOLKITBASEURL

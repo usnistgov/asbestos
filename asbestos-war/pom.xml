@@ -152,6 +152,8 @@
 <!--                        <exclude>**/ToProxyPassthroughIT.java</exclude>-->
 <!--                        <exclude>**/CapabilityStatementIT.java</exclude>-->
 <!--                        <exclude>**/*IT.java</exclude>-->
+                        <exclude>**/AnalysePDBIT.java</exclude>
+                        <exclude>**/pdbMinimalIT.java</exclude>
                     </excludes>
                     <!--
                     NOTE:

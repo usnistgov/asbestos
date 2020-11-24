@@ -45,7 +45,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 // TODO content.attachment.data
 // TODO referenceIdList
 @Disabled("The Test suffix from the class name can be removed so that it would be ignored until the errors are fixed.")
-class DocumentEntryTest {
+class DocumentEntryTestxxx {
     private static Val val;
     private static FhirContext fhirContext;
     private static ObjectMapper objectMapper;
@@ -57,7 +57,7 @@ class DocumentEntryTest {
 
     @BeforeAll
     static void beforeAll() throws URISyntaxException {
-        externalCache = Paths.get(DocumentEntryTest.class.getResource("/external_cache/findme.txt").toURI()).getParent().toFile();
+        externalCache = Paths.get(DocumentEntryTestxxx.class.getResource("/external_cache/findme.txt").toURI()).getParent().toFile();
         resourceCacheMgr = new ResourceCacheMgr(externalCache);
         fhirContext = ParserBase.getFhirContext();
         objectMapper = new  ObjectMapper();

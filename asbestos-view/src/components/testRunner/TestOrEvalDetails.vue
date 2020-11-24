@@ -55,6 +55,7 @@
     import ScriptDetails from './ScriptDetails'
     import ClientDetails from './ClientDetails'
     import VueMarkdown from "vue-markdown";
+    import {UtilFunctions} from "../../common/http-common";
     export default {
         computed: {
           testModules() {
@@ -86,7 +87,7 @@
         methods: {
           openScriptDisplay(name) {
               console.log(`Open ${name}`)
-            window.open(`http://localhost:8082/script/collection/${this.testCollection}/test/${this.testId}/${name}`, "_blank");
+            window.open(`/script/collection/${this.testCollection}/test/${this.testId}/${name}`, "_blank");
           },
             async loadEventSummariesAndReRun() {
                 await this.$store.dispatch('loadEventSummaries', {session: this.sessionId, channel: this.channelId})

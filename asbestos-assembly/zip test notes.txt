@@ -25,6 +25,7 @@ mvn clean install -P Sunil -DskipTests=true -DskipITs=true
 cd asbestos-assembly
 
 Without using a profile, assembly makes use of the default XdsToolkit port setting at 9770. Do not use a profile for Production package.
+mvn clean package
 If Sunil profile is used, XdsToolkit port 8080 will be used. Use this for development testing.
 mvn clean package -P Sunil
 

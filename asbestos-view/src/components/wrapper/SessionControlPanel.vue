@@ -10,8 +10,14 @@
           {{ ts }}
         </option>
       </select>
-      <img id="add" src="../../assets/add-button.png" @click="add()"/>
-      <img id="delete" src="../../assets/exclude-button-red.png" @click="del()"/>
+        <!--
+        begin
+        has problems
+        CHANNEL/channels/all: Error: Request failed with status code 404
+        -->
+<!--      <img id="add" src="../../assets/add-button.png" @click="add()"/>-->
+<!--      <img id="delete" src="../../assets/exclude-button-red.png" @click="del()"/>-->
+      <!-- end -->
       <span v-if="details">
               <button type="button" @click="toggleDetails()">No Details</button>
       </span>
