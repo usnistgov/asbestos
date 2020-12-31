@@ -997,8 +997,9 @@ public class TestEngine  implements TestDef {
         FixtureMgr innerFixtures = testEngine1.fixtureMgr;
         Map<String, FixtureComponent> outFixturesForComponent = new HashMap<>();
         for (Parameter parm : componentReference.getFixturesOut()) {
-            if (parm.isVariable())
+            if (parm.isVariable()) { // Do not know why fixtureOut and isVariable can be mixed together like this
                 throw new RuntimeException("Script import with output variables not supported");
+            }
             String outerName = parm.getCallerName();
             String innerName = parm.getLocalName();
             FixtureComponent fixtureComponent = innerFixtures.get(innerName);
@@ -1008,6 +1009,31 @@ public class TestEngine  implements TestDef {
                 fixtureMgr.put(outerName, fixtureComponent);
             }
         }
+        // Script import with output variables
+        // The variable-out scope is only limited to the TestScript which called the module
+        // Inject variable-outs into the caller's TestEngine's TestScript as a defaultValue string. This pattern can be repeated as many times as needed.
+        // Parent TestScript cannot declare the same variable name, otherwise the variable-out has no effect, and this is silent.
+        // In other words, parent TestScript variable is immutable if it already exists.
+        for (Parameter parm : componentReference.getVariablesOut()) {
+            String vOutName = parm.getCallerName();
+            if (! varMgr.hasVariable(vOutName)) {
+                String vInName = parm.getLocalName();
+                VariableMgr te1vMgr = new VariableMgr(testEngine1.getTestScript(), testEngine1.fixtureMgr).setVal(testEngine1.engineVal).setOpReport(opReport);
+                // TestScript.TestScriptVariableComponent srcVariableComponent = te1vMgr.getVariable(vInName);
+                TestScript.TestScriptVariableComponent variableOut = new TestScript.TestScriptVariableComponent();
+                variableOut.setName(parm.getCallerName());
+                String value = FhirPathEngineBuilder.evalForString(testEngine1.getTestScript(), te1vMgr.eval(parm.getLocalName(), false));
+                if (value == null || "".equals(value)) {
+                    value = "asbts_undefined_var";
+                }
+                variableOut.setDefaultValue(value);
+                if (testScript.getVariable().add(variableOut)) { // Inject
+                    externalVariables.put(vOutName, value);
+//                    variableNameMap.put(vOutName, innerName);
+                }
+            }
+        }
+
         String result = testEngine1.getTestReport().getResult().toCode();
         opReport.setResult(TestReport.TestReportActionResult.fromCode(result));
 

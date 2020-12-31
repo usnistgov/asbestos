@@ -1,0 +1,41 @@
+<TestScript  xmlns="http://hl7.org/fhir">
+    <modifierExtension url="urn:module">
+        <extension url="urn:fixture-in">
+            <valueString value="searchResultBundle"/>
+        </extension>
+        <extension url="urn:fixture-in">
+            <valueString value="submittedDocRef"/>
+        </extension>
+    </modifierExtension>
+
+    <url value=""/>
+    <name value="VerifySearchDocRef"/>
+    <status value="active"/>
+    <description value="Verify DocumentReference against what was sent."/>
+
+    <fixture id="searchResultDocRef">
+        <autocreate value="false"/>
+        <autodelete value="false"/>
+        <extension url="urn:subFixture">
+            <extension url="urn:fhirPath">
+                <valueString value="Bundle.entry[0]"/>
+            </extension>
+            <extension url="urn:sourceId">
+                <valueString value="searchResultBundle"/>
+            </extension>
+        </extension>
+    </fixture>
+
+
+    <test>
+        <description value="Read back the DocumentReference and validate."/>
+        <action>
+            <assert>
+                <description value="Check server copy against submitted copy. Any attributes missing?"/>
+                <sourceId value="searchResultDocRef"/>
+                <minimumId value="submittedDocRef"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+    </test>
+</TestScript>

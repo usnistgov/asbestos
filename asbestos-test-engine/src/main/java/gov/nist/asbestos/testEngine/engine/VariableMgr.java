@@ -36,7 +36,7 @@ public class VariableMgr {
         return false;
     }
 
-    private TestScript.TestScriptVariableComponent getVariable(String name) {
+    public TestScript.TestScriptVariableComponent getVariable(String name) {
         Objects.requireNonNull(name);
         TestScript.TestScriptVariableComponent theVar = null;
         for(TestScript.TestScriptVariableComponent comp : testScript.getVariable()) {
@@ -103,13 +103,13 @@ public class VariableMgr {
     public String updateReference(String reference) {
         if (reference == null)
             return null;
-        int variableCount = variableCount(reference);
-        for (int i=0; i<50; i++) {
+        final int variableCount = variableCount(reference);
+        for (int i=1; i<51; i++) { // 50 variables limit
             if (!containsVariable(reference))
                 return reference;
             reference = updateReference1(reference);
-            int variableCount2 = variableCount(reference);
-            if (variableCount2 == variableCount) // stuck
+            int remainingVariables = variableCount(reference); // remaining variables should be one less than before
+            if (remainingVariables != (variableCount - i)) // stuck, probably an unresolved variable
                 break;
         }
         Variable var = getNextVariable(reference);
@@ -147,11 +147,16 @@ public class VariableMgr {
         return var;
     }
 
+    /**
+     * @param reference
+     * @return
+     */
     private String updateReference1(String reference) {
         Objects.requireNonNull(reference);
         Objects.requireNonNull(reporter);
-        if (!reference.contains(("${")))
+        if (!reference.contains(("${"))) // Check if reference follows the Variable naming-convention
             return reference;
+        // Can this recurse to handle nested variables?
         Variable var  = getNextVariable(reference); //reference.substring(from+2, to);
         String update = eval(var.name, false);
         if (update == null)
@@ -159,6 +164,12 @@ public class VariableMgr {
         return reference.substring(0, var.from) + update + reference.substring(var.to+1);
     }
 
+    /**
+     *
+     * @param variableName
+     * @param errorAsValue If true, then the output of this function contains the error
+     * @return
+     */
     String eval(String variableName, boolean errorAsValue) {
         Objects.requireNonNull(reporter);
         if (externalVariables.containsKey(variableName))
@@ -224,7 +235,12 @@ public class VariableMgr {
                 responseHeaders = new Headers();
             return responseHeaders.getValue(var.getHeaderField());
         } else if (var.hasExpression()) {
-            return FhirPathEngineBuilder.evalForString(fixture.getResourceResource(), var.getExpression());
+            String expression = var.getExpression();
+            // Does this expression yet reference another variable?
+            if (containsVariable(expression)) {
+                expression = updateReference(expression);
+            }
+            return FhirPathEngineBuilder.evalForString(fixture.getResourceResource(), expression);
         } else if (var.hasPath()) {
             String error = "Variable " + variableName + " path not supported";
             if (errorAsValue)

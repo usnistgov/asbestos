@@ -20,14 +20,26 @@ import static gov.nist.asbestos.mhd.translation.search.DocRefSQParamTranslator.q
 
 public class FhirSq {
 
+    public static String IheMhdDocumentationReference = "https://profiles.ihe.net/ITI/TF/Volume1/ch-33.html";
     /**
      *
      * @param query is param1=value1;param2=value2...
+     *              Delimiter can be either a ';' or a '&' character
      * @return StoredQuery model
      */
     private static Map<String, List<String>> docRefQueryToSQModel(String query) {
-        List<String> params = Arrays.asList(query.split(";"));
-        params = new ArrayList<>(params);  // make update-able
+        List<String> delimiters = Arrays.asList("&",";");
+        final List<String> params = new ArrayList<>();
+        delimiters.stream().forEach(s -> {
+            if (params.isEmpty()) { // unparsed state
+                if (query.contains(s)) {
+                    params.addAll(Arrays.asList(query.split(s)));
+                }
+            }
+        });
+        if (params.isEmpty()) {// if true then no delimiters were detected in the query string
+            params.add(query);
+        }
         return new DocRefSQParamTranslator().run(params);
     }
 
@@ -35,12 +47,21 @@ public class FhirSq {
         String sqid;
         Map<String, List<String>> params = docRefQueryToSQModel(httpQueryString);
         Set<String> names = params.keySet();
-        if (names.contains(DocRefSQParamTranslator.entryUUIDKey) || names.contains(DocRefSQParamTranslator.uniqueIdKey))
-            sqid = "urn:uuid:5c4f972b-d56b-40ac-a5fc-c8ca9b40b9d4"; /* GetDocuments */
-        else
-            sqid = "urn:uuid:14d4debf-8f97-4251-9a74-a90016b0af0d"; /* FindDocuments */
-
-        return run(params, sqid, toAddr, true, task);
+        /*
+        patient.identifier and documentReference status is required as per MHD since it only support FindDocuments and FindDocumentByRef type queries
+         Add spec page reference here if the above condition is false
+         */
+         if (names.contains(DocRefSQParamTranslator.uniqueIdKey)
+                && names.contains(DocRefSQParamTranslator.statusKey)
+                && names.contains(DocRefSQParamTranslator.patientIdKey)) {
+             /*
+             status and patientIdKey are not really needed here, though the presence of the parameters required by MHD through FindDocuments.
+             Asbestos implements GetDocuments and therefore only uniqueId is used.
+             */
+             sqid = "urn:uuid:5c4f972b-d56b-40ac-a5fc-c8ca9b40b9d4"; /* GetDocuments */
+             return run(params, sqid, toAddr, true, task);
+         }
+         throw new RuntimeException("DocumentReference required search parameters missing. " + IheMhdDocumentationReference);
     }
 
     public static AhqrSender docRefQuery(List<String> queryParams, URI toAddr, ITask task) {

@@ -36,7 +36,7 @@
       <expression value="Bundle.entry.select(resource as DocumentReference).masterIdentifier.value"/>
       <sourceId value="pdb-bundle"/>
     </variable>
-    
+
     <test>
         <description value="Submit."/>
         <action>

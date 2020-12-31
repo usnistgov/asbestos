@@ -61,6 +61,7 @@ public class DocumentEntryToDocumentReference implements IVal {
         dr.setContext(context);
 
         if (eo.getId() != null) {
+            dr.setId(stripUrnPrefix(eo.getId()));
 //            String id = eo.getId();
             Identifier idr = new EntryUuid().setVal(vale).getIdentifier(eo.getId());
 //            Identifier idr = new Identifier();
