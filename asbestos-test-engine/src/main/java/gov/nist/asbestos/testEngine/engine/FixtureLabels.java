@@ -6,6 +6,7 @@ import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import gov.nist.asbestos.http.headers.Headers;
 import gov.nist.asbestos.http.operations.HttpBase;
+import gov.nist.asbestos.http.operations.HttpGetter;
 import gov.nist.asbestos.serviceproperties.ServiceProperties;
 import gov.nist.asbestos.serviceproperties.ServicePropertiesEnum;
 import gov.nist.asbestos.testEngine.engine.fixture.FixtureComponent;
@@ -21,6 +22,10 @@ public class FixtureLabels {
     public String referenceLabel;
     String label = null;
     //private String tail = "";
+    private static String REQ_DIRECTION_FOR_INSPECTOR = "/req";
+    private static String RAW_REQ_DIRECTION_FOR_INSPECTOR = "/rawreq";
+    private static String RESP_DIRECTION_FOR_INSPECTOR = "/resp";
+    private static String RAW_RESP_DIRECTION_FOR_INSPECTOR = "/rawresp";
 
     public enum Source { REQUEST, RESPONSE };
 
@@ -69,10 +74,19 @@ public class FixtureLabels {
         Headers responseHeaders = httpBase.getResponseHeaders();
         String eventUrl = responseHeaders.getProxyEvent();
         if (eventUrl != null) {
-            String refStrRaw = EventLinkToUILink.get(eventUrl, labels.getTail());
+            String refStrRaw = EventLinkToUILink.get(eventUrl, getMessageDirectionForInspector(httpBase, labels.getTail()));
             labels.referenceLabel = (labels.label == null) ? refStrRaw : "Open in Inspector";
             labels.setRawReference(refStrRaw);
         }
+    }
+
+    private String getMessageDirectionForInspector(final HttpBase httpBase, String messageDirectionForInspector) {
+        if (HttpGetter.GET_VERB.equals(httpBase.getVerb())) {
+            if (REQ_DIRECTION_FOR_INSPECTOR.equals(messageDirectionForInspector)) {
+                return RAW_REQ_DIRECTION_FOR_INSPECTOR; // GET request has no FHIR resource for the Inspector so an error will occur if this was not used. Must use raw mode for inspector
+            }
+        }
+        return messageDirectionForInspector;
     }
 
     private String staticFixtureReport(FixtureLabels labels, FixtureComponent fixtureComponent, ResourceWrapper wrapper1) {
@@ -185,6 +199,6 @@ public class FixtureLabels {
 //    }
 
     public String getTail() {
-        return responseId ? "/resp" : "/req";
+        return responseId ? RESP_DIRECTION_FOR_INSPECTOR : REQ_DIRECTION_FOR_INSPECTOR;
     }
 }

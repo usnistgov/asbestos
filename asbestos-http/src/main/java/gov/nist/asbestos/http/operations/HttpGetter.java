@@ -12,14 +12,26 @@ import java.util.Map;
 import java.util.Objects;
 
 public class HttpGetter extends HttpBase {
+    public static String GET_VERB = "GET";
+
     // TODO GET parameters in the body
     private void get(URI theUri, Map<String, String> headers) {
         this.uri = theUri;
-        URL url;
+        URL url = null;
         try {
             url = theUri.toURL();
         } catch (Exception e) {
-            throw new RuntimeException("Cannot decode URI " + theUri + " into a URL. Exception: " + e.toString());
+            String message = "If this is a GET request, then it might not have a resource associated with its body. ";
+            if (url != null) {
+                if (url.toString().isEmpty()) {
+                    message += "URI is an empty string.";
+                } else {
+                    message = "";
+                }
+            } else {
+                message += "URI is null.";
+            }
+            throw new RuntimeException("Cannot decode URI " + theUri + " into a URL. " + message + " Exception: " + e.toString());
         }
         HttpURLConnection connection = null;
         try {
@@ -110,7 +122,7 @@ public class HttpGetter extends HttpBase {
     }
 
     public String getVerb() {
-        return "GET";
+        return GET_VERB;
     }
 
 }

@@ -162,11 +162,11 @@
             return {
                 selectedEvent: false,
                 selectedTask: 0,
-                displayRequest: (this.modalMode==='')?'true':this.modalMode === 'request',
-                displayResponse: (this.modalMode=='')?'false':this.modalMode === 'response',
+                displayRequest: (this.modalMode===undefined)?(this.reqresp==='rawreq'?true:this.reqresp==='req'):this.modalMode === 'request',
+                displayResponse: (this.modalMode===undefined)?(this.reqresp==='rawresp'?true:this.reqresp==='resp'):this.modalMode === 'response',
                 displayInspector: false,
                 displayValidations: false,
-                inspectType: (this.ModalMode==='')?'request':this.modalMode,
+                inspectType: (this.modalMode===undefined)?'request':this.modalMode,
                 allEnabled: false,
             }
         },
@@ -322,6 +322,7 @@
                 this.loadEvent()
             },
             modalMode: function(newVal) {
+                /* this is required to react to changes in the FHIRPath modal fixture dropdown selection */
                 if (newVal === 'request') {
                     this.displayResponse = false
                     this.displayRequest = true
@@ -331,7 +332,7 @@
                    this.displayResponse = true
                    this.inspectType = newVal
                 }
-            }
+            },
         },
         props: [
             'eventId', 'sessionId', 'channelName', 'noNav', 'reqresp', 'modalMode'
