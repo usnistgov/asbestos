@@ -225,8 +225,8 @@ public class XdsOnFhirChannel extends BaseChannel /*implements IBaseChannel*/ {
                 sender = FhirSq.docRefQuery(params, toAddr, task);
                 returnAhqrResults(requestOut);
             } else if (resourceType.equals("DocumentManifest")) {
-                    sender = FhirSq.docManQuery(params, toAddr, task);
-                    returnAhqrResults(requestOut);
+                sender = FhirSq.docManQuery(params, toAddr, task);
+                returnAhqrResults(requestOut);
             } else {
                 throw new RuntimeException("SEARCH " + resourceType + " not supported on this channel");
             }

@@ -4,7 +4,16 @@
             <valueString  value="manifestMasterIdentifier"/>
         </extension>
         <extension url="urn:variable-in">
+            <valueString value="pdbManifestStatus"/>
+        </extension>
+        <extension url="urn:variable-in">
             <valueString  value="referenceMasterIdentifier"/>
+        </extension>
+        <extension url="urn:variable-in">
+            <valueString value="pdbReferenceStatus"/>
+        </extension>
+        <extension url="urn:variable-in">
+            <valueString value="patientIdentifierSearchParamValue"/>
         </extension>
     </modifierExtension>
 
@@ -28,7 +37,7 @@
 				  </type>
 				  <resource value="DocumentManifest"/> 
 				  <contentType value="json"/>
-				  <params value="?identifier=${manifestMasterIdentifier}"/> 
+				  <params value="?identifier=${manifestMasterIdentifier}&amp;status=${pdbManifestStatus}&amp;patient.identifier=${patientIdentifierSearchParamValue}"/>
 				  <responseId value="manifest-search"/>
 			  </operation>
       </action>
@@ -56,7 +65,7 @@
 				  </type>
 				  <resource value="DocumentReference"/> 
 				  <contentType value="json"/>
-				  <params value="?identifier=${referenceMasterIdentifier}"/> 
+				  <params value="?identifier=${referenceMasterIdentifier}&amp;status=${pdbReferenceStatus}&amp;patient.identifier=${patientIdentifierSearchParamValue}"/>
 				  <responseId value="reference-search"/>
 			  </operation>
       </action>

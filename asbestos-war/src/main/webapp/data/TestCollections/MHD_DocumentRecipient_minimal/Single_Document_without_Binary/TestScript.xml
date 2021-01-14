@@ -37,6 +37,8 @@
         <autocreate value="false"/>
         <autodelete value="false"/>
         <resource>
+            <!-- This "reference" requires Setup-TestDocuments to be run against the default channel for the cache to be loaded. -->
+            <!-- Otherwise, this error will be shown: Error: Static Fixture Bundle/doc1.json cannot be loaded  -->
             <reference value="Bundle/doc1.json"/>
         </resource>
     </fixture>

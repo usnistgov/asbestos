@@ -27,11 +27,31 @@
       <sourceId value="pdb-bundle"/>
     </variable>
     <variable>
+        <name value="pdbManifestStatus"/>
+        <expression value="Bundle.entry.select(resource as DocumentManifest).status.value"/>
+        <sourceId value="pdb-bundle"/>
+    </variable>
+    <variable>
       <name value="referenceMasterIdentifier"/>
       <expression value="Bundle.entry.select(resource as DocumentReference).masterIdentifier.value"/>
       <sourceId value="pdb-bundle"/>
     </variable>
-    
+    <variable>
+        <name value="pdbReferenceStatus"/>
+        <expression value="Bundle.entry.select(resource as DocumentReference).status.value"/>
+        <sourceId value="pdb-bundle"/>
+    </variable>
+    <variable>
+        <name value="patientIdentifier"/>
+        <defaultValue value="Bundle.entry.select(resource as Patient).identifier[0]"/>
+    </variable>
+    <variable>
+        <name value="patientIdentifierSearchParamValue"/>
+        <expression value="${patientIdentifier}.system.value + '|' + ${patientIdentifier}.value.value"/>
+        <sourceId value="patient_bundle"/>
+    </variable>
+
+
     <test>
         <description value="Submit."/>
         <action>
@@ -64,7 +84,16 @@
                         <valueString  value="manifestMasterIdentifier"/>
                     </extension>
                     <extension url="urn:variable-in">
+                        <valueString value="pdbManifestStatus"/>
+                    </extension>
+                    <extension url="urn:variable-in">
                         <valueString value="referenceMasterIdentifier"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="pdbReferenceStatus"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="patientIdentifierSearchParamValue"/>
                     </extension>
                 </modifierExtension>
             </operation>

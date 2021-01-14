@@ -48,20 +48,25 @@ public class FhirSq {
         Map<String, List<String>> params = docRefQueryToSQModel(httpQueryString);
         Set<String> names = params.keySet();
         /*
-        patient.identifier and documentReference status is required as per MHD since it only support FindDocuments and FindDocumentByRef type queries
-         Add spec page reference here if the above condition is false
+        MHD Page 41
+        The Document Responder must implement the parameters described below.
+        Only for XDSonFHIR Option:
+        All of the query parameters in Table 3.67.4.1.3-1 shall be supported by the Document Responder.
          */
-         if (names.contains(DocRefSQParamTranslator.uniqueIdKey)
-                && names.contains(DocRefSQParamTranslator.statusKey)
-                && names.contains(DocRefSQParamTranslator.patientIdKey)) {
+         if (names.contains(DocRefSQParamTranslator.patientIdKey)
+            && names.contains(DocRefSQParamTranslator.statusKey)) {
+             if (names.contains(DocRefSQParamTranslator.uniqueIdKey)
+             || names.contains(DocRefSQParamTranslator.entryUUIDKey)) {
              /*
-             status and patientIdKey are not really needed here, though the presence of the parameters required by MHD through FindDocuments.
-             Asbestos implements GetDocuments and therefore only uniqueId is used.
+             status and patientIdKey are not really needed here, though the presence of the parameters is required by MHD through FindDocuments.
              */
-             sqid = "urn:uuid:5c4f972b-d56b-40ac-a5fc-c8ca9b40b9d4"; /* GetDocuments */
+                 sqid = "urn:uuid:5c4f972b-d56b-40ac-a5fc-c8ca9b40b9d4"; /* GetDocuments */
+             } else {
+                 sqid = "urn:uuid:14d4debf-8f97-4251-9a74-a90016b0af0d"; /* FindDocuments */
+             }
              return run(params, sqid, toAddr, true, task);
          }
-         throw new RuntimeException("DocumentReference required search parameters missing. " + IheMhdDocumentationReference);
+         throw new RuntimeException("MHD 3.67.4.1.2.1, para. 1035. The Document Consumer shall include search parameter patient or patient.identifier, and status. " + IheMhdDocumentationReference);
     }
 
     public static AhqrSender docRefQuery(List<String> queryParams, URI toAddr, ITask task) {
@@ -69,8 +74,20 @@ public class FhirSq {
     }
 
     public static AhqrSender docManQuery(String httpQueryString, URI toAddr, ITask task) {
-        Map<String, List<String>> model = new HashMap<>();
-        return run(new DocManSQParamTranslator().run(httpQueryString), DocManSQParamTranslator.GetSubmissionSetAndContentsKey, toAddr, true, task);
+        Map<String, List<String>> params = new DocManSQParamTranslator().run(httpQueryString);
+        Set<String> names = params.keySet();
+        if (names.contains(DocManSQParamTranslator.PatientId)
+                && names.contains(DocManSQParamTranslator.Status)) {
+            if (names.contains(DocManSQParamTranslator.SSuidKey)) {
+                params.remove(DocManSQParamTranslator.PatientId); // these are not needed when SsuidKey is used
+                params.remove(DocManSQParamTranslator.Status); // these are not needed when SsuidKey is used
+                return run(params, DocManSQParamTranslator.GetSubmissionSetAndContentsKey, toAddr, true, task);
+            } else {
+                throw new RuntimeException("Search on " + names.toString() + " not implemented");
+            }
+        }
+        throw new RuntimeException("MHD 3.66.4.1.2.1, para. 855. The Document Consumer shall include search parameter patient or patient.identifier, and status. " + IheMhdDocumentationReference);
+
     }
 
     public static AhqrSender documentEntryByUidQuery(String uid, URI toAddr, ITask task)  {
