@@ -9,6 +9,7 @@ import gov.nist.asbestos.mhd.translation.ContainedIdAllocator;
 import gov.nist.asbestos.mhd.translation.attribute.*;
 import gov.nist.asbestos.mhd.translation.attribute.Slot;
 import gov.nist.asbestos.client.channel.ChannelConfig;
+import gov.nist.asbestos.mhd.util.Utils;
 import gov.nist.asbestos.simapi.validation.Val;
 import gov.nist.asbestos.simapi.validation.ValE;
 import oasis.names.tc.ebxml_regrep.xsd.rim._3.*;
@@ -61,7 +62,7 @@ public class DocumentEntryToDocumentReference implements IVal {
         dr.setContext(context);
 
         if (eo.getId() != null) {
-            dr.setId(stripUrnPrefix(eo.getId()));
+            dr.setId(Utils.stripUrnPrefix(eo.getId())); // Used by fullURL
 //            String id = eo.getId();
             Identifier idr = new EntryUuid().setVal(vale).getIdentifier(eo.getId());
 //            Identifier idr = new Identifier();
@@ -95,7 +96,7 @@ public class DocumentEntryToDocumentReference implements IVal {
                 Identifier idr = new Identifier();
                 idr.setSystem("urn:ietf:rfc:3986");
                 String value = ei.getValue();
-                idr.setValue(stripUrnPrefix(value));
+                idr.setValue(Utils.addUrnOidPrefix(value));
                 dr.setMasterIdentifier(idr);
             } else {
                 val.add(new ValE("DocumentEntryToDocumentReference: Do not understand ExternalIdentifier identification scheme " + scheme).asError());
@@ -269,13 +270,6 @@ public class DocumentEntryToDocumentReference implements IVal {
         }
 
         return dr;
-    }
-
-    public static String stripUrnPrefix(String id) {
-        if (id == null) return id;
-        if (id.startsWith("urn:uuid:")) return id.substring("urn:uuid:".length());
-        if (id.startsWith("urn:oid:")) return id.substring("urn:oid:".length());
-        return id;
     }
 
     @Override

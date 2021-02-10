@@ -9,6 +9,7 @@ import gov.nist.asbestos.mhd.translation.ContainedIdAllocator;
 import gov.nist.asbestos.mhd.translation.attribute.DateTransform;
 import gov.nist.asbestos.mhd.translation.attribute.PatientId;
 import gov.nist.asbestos.mhd.translation.attribute.Slot;
+import gov.nist.asbestos.mhd.util.Utils;
 import gov.nist.asbestos.serviceproperties.ServiceProperties;
 import gov.nist.asbestos.serviceproperties.ServicePropertiesEnum;
 import gov.nist.asbestos.client.channel.ChannelConfig;
@@ -36,7 +37,7 @@ public class SubmissionSetToDocumentManifest implements IVal {
         String id = null;
         if (ss.getId() != null) {
             id = ss.getId();
-            dm.setId(stripUrnPrefix(ss.getId()));
+            dm.setId(Utils.stripUrnPrefix(ss.getId()));
             Identifier idr = new Identifier();
             idr.setSystem("urn:ietf:rfc:3986");
             idr.setValue(ss.getId());
@@ -61,11 +62,11 @@ public class SubmissionSetToDocumentManifest implements IVal {
                 // Unique ID
                 Identifier idr = new Identifier();
                 idr.setSystem("urn:ietf:rfc:3986");
-                idr.setValue(stripUrnPrefix(ei.getValue()));
+                idr.setValue(Utils.addUrnOidPrefix(ei.getValue()));
                 dm.setMasterIdentifier(idr);
             } else if ("urn:uuid:554ac39e-e3fe-47fe-b233-965d2a147832".equals(scheme)) {
                 // source ID
-                dm.setSource("urn:oid:" + ei.getValue());
+                dm.setSource(Utils.addUrnOidPrefix(ei.getValue()));
             } else {
                 val.add(new ValE("SubmissionSetToDocumentManifest: Do not understand ExternalIdentifier identification scheme " + scheme).asError());
             }
@@ -106,19 +107,12 @@ public class SubmissionSetToDocumentManifest implements IVal {
                 String fhirBase = ServiceProperties.getInstance().getPropertyOrStop(ServicePropertiesEnum.FHIR_TOOLKIT_BASE) + "/proxy/" + channelConfig.asFullId();
                 String reference = fhirBase +
                         "/DocumentReference/" +
-                        stripUrnPrefix(assoc.getTargetObject());
+                        Utils.stripUrnPrefix(assoc.getTargetObject());
                 dm.addContent(new Reference(reference));
             }
         }
 
         return dm;
-    }
-
-    private static String stripUrnPrefix(String id) {
-        if (id == null) return id;
-        if (id.startsWith("urn:uuid:")) return id.substring("urn:uuid:".length());
-        if (id.startsWith("urn:oid:")) return id.substring("urn:oid:".length());
-        return id;
     }
 
     @Override

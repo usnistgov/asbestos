@@ -19,6 +19,7 @@ import gov.nist.asbestos.mhd.translation.attribute.DateTransform;
 import gov.nist.asbestos.mhd.translation.attribute.EntryUuid;
 import gov.nist.asbestos.mhd.translation.search.FhirSq;
 import gov.nist.asbestos.client.channel.ChannelConfig;
+import gov.nist.asbestos.mhd.util.Utils;
 import gov.nist.asbestos.simapi.validation.Val;
 import gov.nist.asbestos.simapi.validation.ValE;
 import oasis.names.tc.ebxml_regrep.xsd.rim._3.*;
@@ -388,11 +389,11 @@ public class BundleToRegistryObjectList implements IVal {
         if (!dm.hasMasterIdentifier())
             val.add(new ValE("DocumentManifest.masterIdentifier not present - declared by IHE to be [1..1]").asError());
         else {
-            addExternalIdentifier(ss, CodeTranslator.SS_UNIQUEID, unURN(dm.getMasterIdentifier().getValue()), rMgr.allocateSymbolicId(), resource.getAssignedId(), "XDSSubmissionSet.uniqueId", idBuilder);
-            resource.setAssignedUid(unURN(dm.getMasterIdentifier().getValue()));
+            addExternalIdentifier(ss, CodeTranslator.SS_UNIQUEID, Utils.stripUrnPrefix(dm.getMasterIdentifier().getValue()), rMgr.allocateSymbolicId(), resource.getAssignedId(), "XDSSubmissionSet.uniqueId", idBuilder);
+            resource.setAssignedUid(Utils.stripUrnPrefix(dm.getMasterIdentifier().getValue()));
         }
         if (dm.hasSource())
-            addExternalIdentifier(ss, CodeTranslator.SS_SOURCEID, unURN(dm.getMasterIdentifier().getValue()), rMgr.allocateSymbolicId(), resource.getAssignedId(), "XDSSubmissionSet.sourceId", null);
+            addExternalIdentifier(ss, CodeTranslator.SS_SOURCEID, Utils.stripUrnPrefix(dm.getMasterIdentifier().getValue()), rMgr.allocateSymbolicId(), resource.getAssignedId(), "XDSSubmissionSet.sourceId", null);
         if (dm.hasSubject() && dm.getSubject().hasReference())
             addSubject(ss, resource,  new Ref(dm.getSubject()), CodeTranslator.SS_PID, "XDSSubmissionSet.patientId", vale);
         else if (isMinimalMetadata) {
@@ -562,8 +563,8 @@ public class BundleToRegistryObjectList implements IVal {
             tr.add(new ValE("masterIdentifier not present").asError());
         else {
             tr.add(new ValE("masterIdentifier").asTranslation());
-            addExternalIdentifier(eo, CodeTranslator.DE_UNIQUEID, unURN(dr.getMasterIdentifier().getValue()), rMgr.allocateSymbolicId(), resource.getAssignedId(), "XDSDocumentEntry.uniqueId", idBuilder);
-            resource.setAssignedUid(unURN(dr.getMasterIdentifier().getValue()));
+            addExternalIdentifier(eo, CodeTranslator.DE_UNIQUEID, Utils.stripUrnPrefix(dr.getMasterIdentifier().getValue()), rMgr.allocateSymbolicId(), resource.getAssignedId(), "XDSDocumentEntry.uniqueId", idBuilder);
+            resource.setAssignedUid(Utils.stripUrnPrefix(dr.getMasterIdentifier().getValue()));
         }
 
         tr = vale.add(new ValE("DocumentReference.subject is [1..1]").addIheRequirement(DRTable));
@@ -790,8 +791,8 @@ public class BundleToRegistryObjectList implements IVal {
     private String findAcceptablePID(List<Identifier> identifiers) {
         Objects.requireNonNull(assigningAuthorities);
         List<String> pids = identifiers.stream()
-                .filter(identifier -> assigningAuthorities.check(unURN(identifier.getSystem())))
-                .map(identifier -> identifier.getValue() + "^^^&" + unURN(identifier.getSystem()) + "&ISO")
+                .filter(identifier -> assigningAuthorities.check(Utils.stripUrnPrefix(identifier.getSystem())))
+                .map(identifier -> identifier.getValue() + "^^^&" + Utils.stripUrnPrefix(identifier.getSystem()) + "&ISO")
                 .collect(Collectors.toList());
 
         return (pids.isEmpty()) ? null : pids.get(0);
@@ -940,13 +941,6 @@ public class BundleToRegistryObjectList implements IVal {
 //                ((DocumentReference) resource).identifier
 //        identifiers.collect { Identifier ident -> new MhdIdentifier(ident)}
 //    }
-
-    private static String unURN(String uuid) {
-        if (uuid == null) return null;
-        if (uuid.startsWith("urn:uuid:")) return uuid.substring(9);
-        if (uuid.startsWith("urn:oid:")) return uuid.substring(8);
-        return uuid;
-    }
 
     private void scanBundleForAcceptability(Bundle bundle, ResourceMgr rMgr) {
         if (bundle.getMeta().getProfile().size() != 1)

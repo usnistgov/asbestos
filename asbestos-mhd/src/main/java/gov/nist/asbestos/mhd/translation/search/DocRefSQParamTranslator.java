@@ -1,6 +1,7 @@
 package gov.nist.asbestos.mhd.translation.search;
 
 import gov.nist.asbestos.mhd.translation.attribute.DateTransform;
+import gov.nist.asbestos.mhd.util.Utils;
 
 import java.util.*;
 
@@ -303,7 +304,7 @@ class DocRefSQParamTranslator {
                 if (value != null && value.startsWith("urn:uuid:"))
                     addResult(entryUUIDKey, value);
                 else
-                    addResult(uniqueIdKey, value);
+                    addResult(uniqueIdKey, Utils.stripUrnPrefix(value));
                 break;
 
             default:

@@ -48,7 +48,7 @@ public class FhirSq {
         Map<String, List<String>> params = docRefQueryToSQModel(httpQueryString);
         Set<String> names = params.keySet();
         /*
-        MHD Page 41
+        IHE MHD Page 41
         The Document Responder must implement the parameters described below.
         Only for XDSonFHIR Option:
         All of the query parameters in Table 3.67.4.1.3-1 shall be supported by the Document Responder.

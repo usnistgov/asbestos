@@ -2,13 +2,12 @@ package gov.nist.asbestos.mhd.translation.attribute;
 
 import gov.nist.asbestos.client.resolver.ResourceMgr;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
+import gov.nist.asbestos.mhd.util.Utils;
 import gov.nist.asbestos.simapi.validation.ValE;
 import org.hl7.fhir.r4.model.Identifier;
 
 import java.util.List;
 import java.util.Objects;
-
-import static gov.nist.asbestos.mhd.transforms.DocumentEntryToDocumentReference.stripUrnPrefix;
 
 public class EntryUuid extends AbstractAttribute {
     private ValE val = null;
@@ -54,7 +53,7 @@ public class EntryUuid extends AbstractAttribute {
         ValE tr = val.addTr(new ValE("entryUUID to Identifier"));
         identifier = new Identifier();
         identifier.setSystem("urn:ietf:rfc:3986");
-        identifier.setValue(stripUrnPrefix(id));
+        identifier.setValue(id);
         if (ResourceMgr.isUUID(id)) {
             identifier.setUse(Identifier.IdentifierUse.OFFICIAL);
             tr.add(new ValE("Official Identifier attached"));
