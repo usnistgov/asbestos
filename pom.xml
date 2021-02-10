@@ -149,6 +149,10 @@
             <artifactId>hapi-fhir-structures-r4</artifactId>
             <version>${hapi.version}</version>
         </dependency>
+        <!--
+       See
+       https://hapifhir.io/hapi-fhir/docs/introduction/versions.html
+       -->
         <dependency>
             <groupId>ca.uhn.hapi.fhir</groupId>
             <artifactId>hapi-fhir-structures-r5</artifactId>
