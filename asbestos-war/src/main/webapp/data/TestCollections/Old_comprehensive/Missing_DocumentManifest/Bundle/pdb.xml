@@ -118,7 +118,7 @@
                         <url value="http://localhost:9556/svc/fhir/Binary/1e404af3-077f-4bee-b7a6-a9be97e1ce32"/>
                     </attachment>
                     <format>
-                        <system value="http://ihe.net/fhir/ValueSet/IHE.FormatCode.codsystem"/>
+                        <system value="http://ihe.net/fhir/ihe.formatcode.fhir/CodeSystem/formatcode"/>
                         <code value="urn:ihe:pcc:cm:2008"/>
                     </format>
                 </content>

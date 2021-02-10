@@ -61,7 +61,7 @@
             <language value="en-us"/>
         </attachment>
         <format>
-            <system value="http://ihe.net/fhir/ValueSet/IHE.FormatCode.codsystem"/>
+            <system value="http://ihe.net/fhir/ihe.formatcode.fhir/CodeSystem/formatcode"/>
             <code value="urn:ihe:pcc:handp:2008"/>
         </format>
     </content>

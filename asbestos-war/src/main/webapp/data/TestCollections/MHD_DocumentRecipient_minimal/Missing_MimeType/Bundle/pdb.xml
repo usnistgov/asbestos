@@ -78,7 +78,7 @@
                         <language value="en-US"/>
                     </attachment>
                     <format>
-                        <system value="http://ihe.net/fhir/ValueSet/IHE.FormatCode.codsystem"/>
+                        <system value="http://ihe.net/fhir/ihe.formatcode.fhir/CodeSystem/formatcode"/>
                         <code value="urn:ihe:pcc:cm:2008"/>
                     </format>
                 </content>
