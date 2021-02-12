@@ -36,6 +36,7 @@
                     <format>
                         <system value="urn:oid:1.3.6.1.4.1.19376.1.2.3"/>
                         <code value="urn:ihe:pcc:cm:2008"/>
+                        <display value="Care Management (CM)"/>
                     </format>
                 </content>
             </DocumentReference>

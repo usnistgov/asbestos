@@ -87,6 +87,7 @@
                     <format>
                         <system value="http://ihe.net/fhir/ihe.formatcode.fhir/CodeSystem/formatcode"/>
                         <code value="urn:ihe:pcc:cm:2008"/>
+                        <display value="Care Management (CM)"/>
                     </format>
                 </content>
             </DocumentReference>
