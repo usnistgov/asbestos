@@ -77,7 +77,7 @@
             <assert>
                 <description value="PDB: if DocumentReference.identifier carries the entryUUID then it shall be labeled official."/>
                 <compareToSourceId value="request"/>
-                <compareToSourceExpression value="Bundle.entry.resource.(is(FHIR.DocumentReference) and identifier.use = 'official' implies identifier.value.startsWith('urn:uuid:'))"/>
+                <compareToSourceExpression value="Bundle.entry.select((resource as DocumentReference).identifier).all($this.value.startsWith('urn:uuid:') implies $this.use = 'official')"/>
                 <warningOnly value="false"/>
             </assert>
         </action>
