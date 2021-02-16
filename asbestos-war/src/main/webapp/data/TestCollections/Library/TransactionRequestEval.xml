@@ -52,10 +52,10 @@
         </action>
         <action>
             <assert>
-                <description value="Bundle: entry.request.url must be the same as entry.fullUrl."/>
+                <description value="Bundle: Test entry.request.url. See http://hl7.org/fhir/bundle-definitions.html#Bundle.entry.request.url"/>
                 <compareToSourceId value="request"/>
-                <compareToSourceExpression value="Bundle.entry.all(fullUrl = request.url)"/>
-                <warningOnly value="false"/>
+                <compareToSourceExpression value="Bundle.entry.all(request.url = resource.resourceType or request.url = fullUrl)"/>
+                <warningOnly value="true"/>
             </assert>
         </action>
     </test>
