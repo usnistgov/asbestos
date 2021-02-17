@@ -1,5 +1,10 @@
 <template>
     <div>
+        <div v-bind:class="{
+                            showLoading: isLoading,
+                            notLoading: !isLoading
+                         }"
+             >Loading...</div>
         <log-nav v-if="!noNav" :index="index" :sessionId="sessionId" :channelName="channelName"> </log-nav>
 
         <div class="boxed">
@@ -178,6 +183,7 @@
                 displayValidations: false,
                 inspectType: (this.modalMode===undefined)?'request':this.modalMode,
                 allEnabled: false,
+                isLoading: false,
             }
         },
         methods: {
@@ -226,8 +232,10 @@
                 if (selectedEventName !== null) {
                     this.selectedEvent = null
                     this.selectedTask = 0
+                    this.isLoading = true
                     LOG.get(`${this.sessionId}/${this.channelName}/${summary.resourceType}/${summary.eventName}`)
                         .then(response => {
+                            this.isLoading = false
                             try {
                                 this.selectedEvent = response.data
                             } catch (error) {
@@ -235,6 +243,7 @@
                             }
                         })
                         .catch(error => {
+                            this.isLoading = false
                             this.error(error)
                         })
                 }
@@ -249,7 +258,9 @@
                 return msg.replace(/&lt;/g, '<').replace(/&#xa;/g, '\n').replace(/&#x9;/g, '\t')
             },
             async loadEventSummaries() {
+                this.isLoading = true
                 await this.$store.dispatch('loadEventSummaries', {session: this.sessionId, channel: this.channelName})
+                this.isLoading = false
             },
         },
         computed: {
@@ -421,5 +432,16 @@
     }
     .defaultTextColor {
         color: black;
+    }
+    .showLoading {
+        color: gray;
+        font-size: x-large;
+        font-weight: bolder;
+        display: block;
+        visibility: visible;
+    }
+    .notLoading {
+        display: none;
+        visibility: hidden;
     }
 </style>
