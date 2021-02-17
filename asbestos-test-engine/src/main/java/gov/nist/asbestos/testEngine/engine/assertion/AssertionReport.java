@@ -44,7 +44,15 @@ public class AssertionReport {
         sourceLabels.setReference(source);
         FixtureLabels referenceLabels = new FixtureLabels(ctx.getTestDef(), reference, FixtureLabels.Source.REQUEST);
         referenceLabels.setReference(reference);
-        Reporter.assertDescription(ctx.getCurrentAssertReport(), "**Compare** " + sourceLabels.getReference() + " to **Reference** " + referenceLabels.getReference());
+        String sourceRef = sourceLabels.getReference();
+        if (sourceLabels.getRawReference() == null) {
+            if (sourceLabels.getLabel() != null) {
+                sourceRef = sourceLabels.getLabel();
+            } else {
+                sourceRef = "(fixture)";
+            }
+        }
+        Reporter.assertDescription(ctx.getCurrentAssertReport(), "**Compare** " + sourceRef + " to **Reference** " + referenceLabels.getReference());
     }
 
 }

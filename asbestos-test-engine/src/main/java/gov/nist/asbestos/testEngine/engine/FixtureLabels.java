@@ -204,4 +204,12 @@ public class FixtureLabels {
     public String getTail() {
         return responseId ? RESP_DIRECTION_FOR_INSPECTOR : REQ_DIRECTION_FOR_INSPECTOR;
     }
+
+    public String getRawReference() {
+        return rawReference;
+    }
+
+    public String getLabel() {
+        return label;
+    }
 }
