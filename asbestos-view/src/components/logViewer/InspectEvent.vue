@@ -20,7 +20,12 @@
 
                 <!-- From Client To Server -->
                 <div v-if="selectedEvent">
-                    Raw Event:
+                    <span title="Normal display of a resource is based on the HAPI FHIR library encode resource to plain text function. Click for known issues with the Contained reference.">
+                        <a href="https://github.com/usnistgov/asbestos/wiki/Connectathon-FAQ#issues" target="_blank">Event:</a>&nbsp;
+                    </span>&nbsp;
+                    <a title="Click for information on Event messages." href="https://github.com/usnistgov/asbestos/wiki/Connectathon-FAQ#event-messages" target="_blank">
+                        <img src="../../assets/info.png">
+                    </a>
                     <span v-for="(task, taski) in tasks" :key="taski">
                         <span v-bind:class="[{ selected: taski === selectedTask, selectable: taski !== selectedTask }, 'cursor-pointer']" @click="selectTask(taski)">
                             {{ taskLabel(taski) }}
@@ -29,7 +34,7 @@
                     </span>
 
                     <a href="https://github.com/usnistgov/asbestos/wiki/Connectathon-FAQ#inspector" target="_blank">
-                        <img src="../../assets/info.png">
+                        <img title="Click for information on Inspector" src="../../assets/info.png">
                     </a>
 
                     <!-- Request/Response line -->
@@ -43,6 +48,7 @@
                             Request
                         </span>
 
+
                         <div class="divider"></div>
                         <span v-bind:class="{
                             selected: displayResponse,
@@ -51,11 +57,15 @@
                             @click="displayRequest = false; displayResponse = true; displayInspector = false; displayValidations = false">
                             Response
                         </span>
+                        &nbsp; | &nbsp;
+                        <span>
+                            <a class="defaultTextColor" title="The raw request/response body as received by the proxy, displayed without the use of the HAPI FHIR library." :href="rawTextEventLink" target="_blank">Raw Messages</a>
+                        </span>
                     </div>
 
                 </div>
                 <div v-else>
-                    <div class="not-selected" @click="selectedEvent = true; displayRequest = true; displayInspector = false;"> Enable display of raw event</div>
+                    <div class="not-selected" @click="selectedEvent = true; displayRequest = true; displayInspector = false;">Enable display of event messages</div>
                 </div>
 
 
@@ -152,7 +162,7 @@
 <script>
     import LogNav from "./LogNav";
     import LogAnalysisReport from "./LogAnalysisReport";
-    import {LOG} from '../../common/http-common';
+    import {FHIRTOOLKITBASEURL, LOG} from '../../common/http-common';
     import eventMixin from '../../mixins/eventMixin';
     import errorHandlerMixin from '../../mixins/errorHandlerMixin';
     import EvalDetails from "../testRunner/EvalDetails";
@@ -162,6 +172,9 @@
             return {
                 selectedEvent: false,
                 selectedTask: 0,
+                /*
+                 * The term "raw", as in "rawreq" means the HAPI FHIR prettified text version of the message, not the real raw text captured by the proxy.
+                 */
                 displayRequest: (this.modalMode===undefined)?(this.reqresp==='rawreq'?true:this.reqresp==='req'):this.modalMode === 'request',
                 displayResponse: (this.modalMode===undefined)?(this.reqresp==='rawresp'?true:this.reqresp==='resp'):this.modalMode === 'response',
                 displayInspector: false,
@@ -274,19 +287,27 @@
                 return this.selectedEvent && this.selectedEvent.tasks !== undefined ? this.selectedEvent.tasks : []
             },
             taskCount() {
-                return this.selectedEvent && this.selectedEvent.tasks ? this.selectedEvent.tasks.length : 0
+                return this.selectedEvent && this.selectedEvent.tasks !== null && this.selectedEvent.tasks !== undefined ? this.selectedEvent.tasks.length : 0
             },
             requestHeader() {
-                return this.selectedEvent.tasks[this.selectedTask].requestHeader
+                if (this.taskCount)
+                    return this.selectedEvent.tasks[this.selectedTask].requestHeader
+                return null
             },
             requestBody() {
-                return this.removeFormatting(this.limitLines(this.selectedEvent.tasks[this.selectedTask].requestBody))
+                if (this.taskCount)
+                     return this.removeFormatting(this.limitLines(this.selectedEvent.tasks[this.selectedTask].requestBody))
+                return null
             },
             responseHeader() {
-                return this.selectedEvent.tasks[this.selectedTask].responseHeader
+                if (this.taskCount)
+                    return this.selectedEvent.tasks[this.selectedTask].responseHeader
+                return null
             },
             responseBody() {
-                return this.removeFormatting(this.limitLines(this.selectedEvent.tasks[this.selectedTask].responseBody))
+                if (this.taskCount)
+                    return this.removeFormatting(this.limitLines(this.selectedEvent.tasks[this.selectedTask].responseBody))
+                return null
             },
             eventSummary() {
                 if (!this.$store.state.log.eventSummaries)
@@ -302,6 +323,15 @@
                 // Example http://localhost:8082/session/default/channel/limited/lognav/
                 let reqStr = (this.inspectType=='request') ? 'req' : 'resp'
                return '/session/' + this.sessionId +'/channel/' + this.channelName + '/lognav/'  + this.eventId + '/' + reqStr
+            },
+            rawTextEventLink() {
+                const summary = this.$store.state.log.eventSummaries[this.index]
+                if (!summary) {
+                    console.log('rawTextEvent Error: No Summary.');
+                    return
+                }
+                const url = FHIRTOOLKITBASEURL + '/log/' + this.sessionId + '/' + this.channelName + '/' + summary.resourceType + '/' + this.eventId + '?textMode=raw'
+                return url
             }
         },
         created() {
@@ -391,5 +421,8 @@
     .not-selected {
         cursor: pointer;
         text-decoration: underline;
+    }
+    .defaultTextColor {
+        color: black;
     }
 </style>

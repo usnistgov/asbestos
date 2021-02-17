@@ -20,12 +20,16 @@ import java.util.List;
 // 4 - channelId
 // 5 - resourceType - may be null
 // 6 - eventId
+// Query string
+// textMode=raw
+// textMode=prettyprint
 // returns UIEvent as JSON
 
 public class GetEventRequest {
     private static Logger log = Logger.getLogger(GetEventRequest.class);
 
     private Request request;
+    private boolean rawTextMode;
 
     public static boolean isRequest(Request request) {
         return request.uriParts.size() == 7 && "log".equalsIgnoreCase(request.uriParts.get(2));
@@ -33,9 +37,11 @@ public class GetEventRequest {
 
     public GetEventRequest(Request request) {
         this.request = request;
+        String textMode = request.getParm("textMode");
+        rawTextMode = (textMode != null && "raw".equals(textMode));
     }
 
-    public void run() throws IOException {
+        public void run() throws IOException {
         request.announce("GetEventRequest");
         Headers headers = Common.getRequestHeaders(request.req, Verb.GET);
         Header acceptHeader = headers.getAccept();
@@ -95,7 +101,7 @@ public class GetEventRequest {
     private void displayEvent(StringBuilder b, File theEvent, String label) {
         String section = label.toLowerCase();
         b.append("<h2>").append(label).append("</h2>");
-        UITask uiTask = new UITask(theEvent, section);
+        UITask uiTask = new UITask(theEvent, section, rawTextMode);
         String description = uiTask.getDescription();
         if (!description.equals("")) {
             b.append("<h4>Description</h4>");

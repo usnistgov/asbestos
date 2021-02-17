@@ -14,6 +14,9 @@ import org.hl7.fhir.r4.model.TestScript;
 
 import java.util.Objects;
 
+/**
+ * The term "raw" used this class means the HAPI FHIR prettified text version of the message, not the real raw text captured by the proxy.
+ */
 public class FixtureLabels {
     TestDef testDef;
     boolean sourceId = false;
@@ -23,9 +26,9 @@ public class FixtureLabels {
     String label = null;
     //private String tail = "";
     private static String REQ_DIRECTION_FOR_INSPECTOR = "/req";
-    private static String RAW_REQ_DIRECTION_FOR_INSPECTOR = "/rawreq";
+    private static String TXT_MODE_REQ_DIRECTION_FOR_INSPECTOR = "/rawreq";
     private static String RESP_DIRECTION_FOR_INSPECTOR = "/resp";
-    private static String RAW_RESP_DIRECTION_FOR_INSPECTOR = "/rawresp";
+    private static String TXT_MODE_RESP_DIRECTION_FOR_INSPECTOR = "/rawresp";
 
     public enum Source { REQUEST, RESPONSE };
 
@@ -83,7 +86,7 @@ public class FixtureLabels {
     private String getMessageDirectionForInspector(final HttpBase httpBase, String messageDirectionForInspector) {
         if (HttpGetter.GET_VERB.equals(httpBase.getVerb())) {
             if (REQ_DIRECTION_FOR_INSPECTOR.equals(messageDirectionForInspector)) {
-                return RAW_REQ_DIRECTION_FOR_INSPECTOR; // GET request has no FHIR resource for the Inspector so an error will occur if this was not used. Must use raw mode for inspector
+                return TXT_MODE_REQ_DIRECTION_FOR_INSPECTOR; // GET request has no FHIR resource for the Inspector so an error will occur if this was not used. Must use raw mode for inspector
             }
         }
         return messageDirectionForInspector;

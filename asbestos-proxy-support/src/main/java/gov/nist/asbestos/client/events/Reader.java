@@ -9,15 +9,23 @@ import java.util.stream.Collectors;
 public class Reader {
 
     public static  String read(File theEvent, String theSection, String thePart) {
+       return read(theEvent, theSection, thePart, true);
+    }
+
+    public static  String read(File theEvent, String theSection, String thePart, boolean fallBackToTxtIfAvailable) {
         File file = new File(new File(theEvent, theSection), thePart);
         if (!file.exists() || !file.canRead()) {
-            String fileSt = file.toString();
-            if (fileSt.endsWith(".txt")) {
-                fileSt = fileSt.replace(".txt", ".bin");
-                file = new File(fileSt);
-            }
-            if (!file.exists() || !file.canRead()) {
-                return "";
+            if (fallBackToTxtIfAvailable) {
+                String fileSt = file.toString();
+                if (fileSt.endsWith(".txt")) {
+                    fileSt = fileSt.replace(".txt", ".bin");
+                    file = new File(fileSt);
+                }
+                if (!file.exists() || !file.canRead()) {
+                    return "";
+                }
+            } else {
+                return thePart + " is not available";
             }
         }
 

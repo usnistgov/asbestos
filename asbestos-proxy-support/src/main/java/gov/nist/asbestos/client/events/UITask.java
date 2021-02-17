@@ -16,12 +16,30 @@ public class UITask {
     private String responseHeader;
     private String responseBody;
 
+    public UITask(File eventDir, String taskLabel, boolean rawTextMode) {
+        description = readFile(eventDir, taskLabel,"description.txt" , true);
+        requestHeader = readFile(eventDir, taskLabel, "request_header.txt" ,true );
+        responseHeader = readFile(eventDir, taskLabel, "response_header.txt", true );
+
+       if (rawTextMode) {
+           requestBody = readFile(eventDir, taskLabel, "request_body.bin", false);
+           responseBody = readFile(eventDir, taskLabel, "response_body.bin", false);
+       } else {
+           requestBody = readFile(eventDir, taskLabel, "request_body.txt", true);
+           responseBody = readFile(eventDir, taskLabel, "response_body.txt", true);
+       }
+    }
+
+    private String readFile(File eventDir, String taskLabel, String fileName, boolean fallBackToTxt) {
+        try {
+            return Reader.read(eventDir, taskLabel, fileName, fallBackToTxt);
+        } catch (Exception ex) {
+            return  "UITask Exception: " + fileName + " could not be read. " + ex.toString();
+        }
+    }
+
     public UITask(File eventDir, String taskLabel) {
-        description = Reader.read(eventDir, taskLabel, "description.txt");
-        requestHeader = Reader.read(eventDir, taskLabel, "request_header.txt");
-        requestBody = Reader.read(eventDir, taskLabel, "request_body.txt");
-        responseHeader = Reader.read(eventDir, taskLabel, "response_header.txt");
-        responseBody = Reader.read(eventDir, taskLabel, "response_body.txt");
+        this(eventDir, taskLabel, false);
     }
 
     public UITask(ResourceWrapper wrapper) {
