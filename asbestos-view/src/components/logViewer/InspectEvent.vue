@@ -172,11 +172,8 @@
             return {
                 selectedEvent: false,
                 selectedTask: 0,
-                /*
-                 * The term "raw", as in "rawreq" means the HAPI FHIR prettified text version of the message, not the real raw text captured by the proxy.
-                 */
-                displayRequest: (this.modalMode===undefined)?(this.reqresp==='rawreq'?true:this.reqresp==='req'):this.modalMode === 'request',
-                displayResponse: (this.modalMode===undefined)?(this.reqresp==='rawresp'?true:this.reqresp==='resp'):this.modalMode === 'response',
+                displayRequest: (this.modalMode===undefined)?(this.reqresp==='reqmessage'?true:this.reqresp==='req'):this.modalMode === 'request',
+                displayResponse: (this.modalMode===undefined)?(this.reqresp==='respmessage'?true:this.reqresp==='resp'):this.modalMode === 'response',
                 displayInspector: false,
                 displayValidations: false,
                 inspectType: (this.modalMode===undefined)?'request':this.modalMode,

@@ -26,9 +26,9 @@ public class FixtureLabels {
     String label = null;
     //private String tail = "";
     private static String REQ_DIRECTION_FOR_INSPECTOR = "/req";
-    private static String TXT_MODE_REQ_DIRECTION_FOR_INSPECTOR = "/rawreq";
+    private static String TXT_MODE_REQ_DIRECTION_FOR_INSPECTOR = "/reqmessage";
     private static String RESP_DIRECTION_FOR_INSPECTOR = "/resp";
-    private static String TXT_MODE_RESP_DIRECTION_FOR_INSPECTOR = "/rawresp";
+    private static String TXT_MODE_RESP_DIRECTION_FOR_INSPECTOR = "/respmessage";
 
     public enum Source { REQUEST, RESPONSE };
 
