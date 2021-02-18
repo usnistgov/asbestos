@@ -6,6 +6,6 @@ linkage between DocumentManifest and DocumentReference and between DocumentRefer
 
 **Metadata contents**: DocumentManifest and DocumentReference contain the minimum required by Comprehensive
  Metadata except that DocumentManifest.source is missing.   DocumentManifest.masterIdentifier and
-DocumentReference.masterIdentifier are are given unique values before the transaction is sent.
+DocumentReference.masterIdentifier are given unique values before the transaction is sent.
 
 **Expected Outcome**: Transaction will fail with status 400 and no contents will be persisted to the server. An OperationOutcome resource will be returned.

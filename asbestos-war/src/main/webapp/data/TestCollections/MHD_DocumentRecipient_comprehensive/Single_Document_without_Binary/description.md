@@ -8,6 +8,6 @@ The standard linkage between DocumentManifest and DocumentReference is present.
 
 **Metadata contents**: DocumentManifest and DocumentReference contain the minimum required by Comprehensive
  Metadata.   DocumentManifest.masterIdentifier and
-DocumentReference.masterIdentifier are are given unique values before the transaction is sent.
+DocumentReference.masterIdentifier are given unique values before the transaction is sent.
 
 **Expected Outcome**: Transaction will succeed with status 200 and the contents will be persisted to the server.

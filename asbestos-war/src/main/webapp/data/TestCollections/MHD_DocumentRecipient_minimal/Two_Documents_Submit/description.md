@@ -8,6 +8,6 @@ linkage between DocumentManifest and DocumentReferences and between DocumentRefe
 **Metadata contents**: DocumentManifest contains the minimum required by Minimal Metadata.  DocumentReferences
 contain the minimum required by Minimal Metadata.
 DocumentManifest.masterIdentifier and
-DocumentReference.masterIdentifier are are given unique values before the transaction is sent.
+DocumentReference.masterIdentifier are given unique values before the transaction is sent.
 
 **Expected Outcome**: Transaction will succeed with status 200 and the contents will be persisted to the server.
