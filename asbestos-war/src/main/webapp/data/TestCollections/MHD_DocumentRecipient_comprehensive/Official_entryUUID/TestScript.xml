@@ -51,11 +51,11 @@
     	<expression value="Bundle.entry.fullUrl"/>
         <sourceId value="patient_bundle"/>
     </variable>
-    <variable>
-        <name value="readbackPatientId"/>
-        <expression value="Patient.identifier.value"/>
-        <sourceId value="read-back"/>
-    </variable>
+<!--    <variable>-->
+<!--        <name value="readbackPatientId"/>-->
+<!--        <expression value="Patient.identifier.value"/>-->
+<!--        <sourceId value="read-back"/>-->
+<!--    </variable>-->
     <variable>
         <name value="requestEntryCount"/>
         <expression value="Bundle.entry.count()"/>
