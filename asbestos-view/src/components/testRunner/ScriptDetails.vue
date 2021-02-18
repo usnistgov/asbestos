@@ -31,6 +31,7 @@
                             :key="'Setup0'"
                             :breakpoint-index="getBreakpointIndex('setup',0)"
                             :has-gutter-options="true"
+                            :is-disabled="disableDebugger"
                     >
                         <test-details
                                 :script="script.setup"
@@ -40,6 +41,7 @@
                                 :report-contained="report ? report.contained : null"
                                 :test-type="'setup'"
                                 :test-index="0"
+                                :disable-debugger="disableDebugger"
                         ></test-details>
                     </debuggable-list-item>
                 </ul>
@@ -51,6 +53,7 @@
                             :key="'Test' + testi"
                             :breakpoint-index="getBreakpointIndex('test',testi)"
                             :has-gutter-options="true"
+                            :is-disabled="disableDebugger"
                     >
                         <test-details
                                 :script="script.test[testi]"
@@ -59,6 +62,7 @@
                                 :report-contained="report ? report.contained : null"
                                 :test-type="'test'"
                                 :test-index="testi"
+                                :disable-debugger="disableDebugger"
                         ></test-details>
                     </debuggable-list-item>
                 </ul>
@@ -116,10 +120,24 @@
         },
         watch: {},
         mixins: [errorHandlerMixin, debugTestScriptMixin, ],
-        props: [
-            'script', 'report',  // TestScript and TestReport
-            'testScriptIndex',
-        ],
+        props: {
+            script: {
+               type: String,
+               required: true
+            },
+            report: {  // TestScript and TestReport
+                type: String,
+                required: true
+            },
+            testScriptIndex: {
+                type: String,
+                required: false
+            },  // used for breakpoint purposes
+            disableDebugger: {
+               type: String,
+               required: false
+            },
+        },
         components: {
             TestDetails,
             DebuggableListItem,

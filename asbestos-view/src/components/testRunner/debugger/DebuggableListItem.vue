@@ -1,6 +1,6 @@
 <template>
 
-    <li
+    <li v-if="isDisabled!=='true'"
         :class="{
                 'breakpointHit': isBreakpointHit,
         }"
@@ -34,8 +34,9 @@
                   title="Additional breakpoints exist in details" :data-breakpoint-index="breakpointIndex">{{getGutterOptionDisplayString()}}</span>
         <slot></slot>
     </li>
-
-
+    <li v-else>
+        <slot></slot>
+    </li>
 </template>
 
 <script>
@@ -126,7 +127,7 @@
         // watch: {
         // },
         props: [
-            'breakpointIndex', 'isImportHeader', 'hasGutterOptions',
+            'breakpointIndex', 'isImportHeader', 'hasGutterOptions', 'isDisabled'
         ],
         mixins: [
             debugTestScriptMixin,

@@ -60,6 +60,7 @@
                     :key="'Action' + actioni"
                     :breakpoint-index="getBreakpointIndex(testType, testIndex, actioni)"
                     :is-import-header="scriptImport(action).result.hasImport"
+                    :is-disabled="disableDebugger"
             >
                     <div v-for="(resultObj, resultKey) in scriptImport(action)" :key="resultKey">
                         <div v-if="report && report.action && report.action[actioni] && reportContainsError(report.action[actioni])">
@@ -75,6 +76,7 @@
                                :action-report="report && report.action ? report.action[actioni] : null"
                                :action-component-name="resultObj.componentName"
                                :parent-index="getBreakpointIndex(testType, testIndex, actioni)"
+                               :disable-debugger="disableDebugger"
                             ></component-script>
                         </div>
                         <div v-else class="has-cursor">
@@ -215,7 +217,7 @@
             'script', 'report',
             'scriptContained', 'reportContained', // contained section of the TestScript and TestReport - used in conditional
             'label',
-            'testIndex', 'testType',
+            'testIndex', 'testType', 'disableDebugger'
         ],
         components: {
             ActionDetails,

@@ -3,7 +3,8 @@
         <debuggable-list-item
                 v-for="(caction, cactioni) in scriptActions"
                 :key="'CAction' + cactioni"
-                :breakpoint-index="parentIndex + '/' + getBreakpointIndex('test', 0, cactioni)">
+                :breakpoint-index="parentIndex + '/' + getBreakpointIndex('test', 0, cactioni)"
+                :is-disabled="disableDebugger">
 
             <action-details
                     :script="caction"
@@ -94,6 +95,7 @@ import debugTestScriptMixin from "../../mixins/debugTestScript";
              'actionReport',
             'actionComponentName',
             'parentIndex',
+            'disableDebugger',
         ],
         components: {
             ActionDetails,

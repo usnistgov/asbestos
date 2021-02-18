@@ -19,12 +19,14 @@
             <div v-if="primaryTestReport">
                 <script-details
                         :script="testScript"
-                        :report="primaryTestReport"> </script-details>
+                        :report="primaryTestReport"
+                        :disable-debugger="'true'"> </script-details>
             </div>
             <div v-else>
                 <script-details
                         :script="testScript"
-                        :report="testReport"> </script-details>
+                        :report="testReport"
+                        :disable-debugger="'true'"> </script-details>
             </div>
         </div>
     </div>
