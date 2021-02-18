@@ -165,7 +165,7 @@ class DocRefSQParamTranslator {
     }
 
     static String cannotTranslateFhir(String param) {
-        throw new RuntimeException("Cannot translate code ${param} to XDS, no mapping defined for this code.");
+        throw new RuntimeException(String.format("Cannot translate code '%s' to XDS, no mapping defined for this code.", param));
     }
 
     List<String> addDEStatusIfNotPresent(List<String> params) {
