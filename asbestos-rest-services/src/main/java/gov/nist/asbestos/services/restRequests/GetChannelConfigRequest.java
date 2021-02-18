@@ -18,7 +18,7 @@ public class GetChannelConfigRequest {
     private Request request;
 
     public static boolean isRequest(Request request) {
-        return request.uriParts.size() == 4 && "channel".equalsIgnoreCase(request.uriParts.get(2));
+        return request.uriParts.size() == 4 && "channel".equalsIgnoreCase(request.uriParts.get(2)) && !"undefined".equals(request.uriParts.get(3));
     }
 
     public GetChannelConfigRequest(Request request) {

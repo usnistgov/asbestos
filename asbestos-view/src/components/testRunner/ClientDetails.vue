@@ -50,7 +50,7 @@ import ScriptDetails from "./ScriptDetails";
                 if (this.currentEvent === this.eventId)  { // unselect
                     // this.primaryTestReport = null;
                     this.$store.commit('setCurrentEvent', null)
-                    const route = `/session/${this.sessionId}/channel/${this.channelId}/collection/${this.testCollection}/test/${this.testId}`
+                    const route = `/session/${this.sessionId}/channel/${this.channelName}/collection/${this.testCollection}/test/${this.testId}`
                     this.$router.push(route)
                 } else {
                     this.$store.commit('setCurrentEvent', this.eventId)
@@ -72,7 +72,7 @@ import ScriptDetails from "./ScriptDetails";
                         this.$store.commit('setModuleTestReports', moduleReports);
                     }
 
-                    const route = `/session/${this.sessionId}/channel/${this.channelId}/collection/${this.testCollection}/test/${this.testId}/event/${this.eventId}`
+                    const route = `/session/${this.sessionId}/channel/${this.channelName}/collection/${this.testCollection}/test/${this.testId}/event/${this.eventId}`
                     this.$router.push(route)
                 }
             },
@@ -90,7 +90,7 @@ import ScriptDetails from "./ScriptDetails";
         computed: {
             eventDetail() {
                 if (this.logSummariesNeedLoading || this.logSummariesNeedLoading2) {
-                    this.$store.dispatch('loadEventSummaries', {session: this.sessionId, channel: this.channelId})
+                    this.$store.dispatch('loadEventSummaries', {session: this.sessionId, channel: this.channelName})
                 }
                 if (this.$store.state.log.eventSummaries) {
                     const summary = this.$store.state.log.eventSummaries.find(it =>
@@ -114,7 +114,7 @@ import ScriptDetails from "./ScriptDetails";
             logSummariesNeedLoading() {  // because of channel change
                 return !this.$store.state.log.eventSummaries ||
                     this.sessionId !== this.$store.state.log.session ||
-                        this.channelId !== this.$store.state.log.channel
+                        this.channelName !== this.$store.state.log.channel
             },
             logSummariesNeedLoading2() {  // because there are eventIds not present in summaries
                 if (!this.eventIds) return false
@@ -158,7 +158,7 @@ import ScriptDetails from "./ScriptDetails";
             'testId': 'loadTest',
         },
         props: [
-            'sessionId', 'channelId', 'testCollection', 'testId', 'eventId'
+            'sessionId', 'channelName', 'testCollection', 'testId', 'eventId'
         ],
         components: {
             ScriptStatus, ScriptDetails

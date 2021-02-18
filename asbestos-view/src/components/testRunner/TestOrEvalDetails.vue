@@ -30,11 +30,11 @@
                     <li v-for="(eventId, eventi) in eventIds"
                          :key="'Disp' + eventi">
                         <client-details
-                                :sessionId="sessionId"
-                                :channelId="channelId"
-                                :testCollection="testCollection"
-                                :testId="testId"
-                                :eventId="eventId"></client-details>
+                                :session-id="sessionId"
+                                :channel-name="channelName"
+                                :test-collection="testCollection"
+                                :test-id="testId"
+                                :event-id="eventId"></client-details>
                     </li>
                     </ul>
                 </div>
@@ -89,7 +89,7 @@
             window.open(`/script/collection/${this.testCollection}/test/${this.testId}/${name}`, "_blank");
           },
             async loadEventSummariesAndReRun() {
-                await this.$store.dispatch('loadEventSummaries', {session: this.sessionId, channel: this.channelId})
+                await this.$store.dispatch('loadEventSummaries', {session: this.sessionId, channel: this.channelName})
                 await this.$store.dispatch('runEval', this.testId);
             },
             async loadTestScript() {
@@ -105,7 +105,7 @@
             '$store.state.base.channelId': 'loadEventSummariesAndReRun'
         },
         props: [
-            'sessionId', 'channelId', 'testCollection', 'testId'
+            'sessionId', 'channelName', 'testCollection', 'testId'
         ],
         components: {
             ScriptDetails, ClientDetails, VueMarkdown,
