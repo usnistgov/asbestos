@@ -82,6 +82,18 @@ public class PassthroughChannel extends BaseChannel /*implements IBaseChannel*/ 
         responseOut.setStatus(responseIn.getStatus());
     }
 
+    private String getResource(URI uri) {
+        try {
+            String uriString = uri.toString();
+            String pathSeparator = "/";
+            String path = uriString.replace(channelConfig.getFhirBase() + pathSeparator, "");
+            String parts[] = path.split(pathSeparator);
+            return parts[0]; // The resource
+        } catch (Exception ex) {
+            return null;
+        }
+    }
+
     private void transformResponseBody(HttpBase responseIn, HttpBase responseOut) {
         String newBase;
         byte[] rawResponse = responseIn.getResponse();
@@ -89,47 +101,52 @@ public class PassthroughChannel extends BaseChannel /*implements IBaseChannel*/ 
             responseOut.setStatus(responseIn.getStatus());
             return;
         }
-        Format format = Format.fromContentType(responseIn.getResponseHeaders().getContentType().getValue());
 
-        BaseResource resource = ParserBase.parse(responseIn.getResponseText(), format);
-        if (resource instanceof Bundle) {
-            newBase = ServiceProperties.getInstance().getPropertyOrStop(ServicePropertiesEnum.FHIR_TOOLKIT_BASE) + "/proxy/" + channelConfig.asFullId();
-            boolean updated = false;
-            Bundle bundle = (Bundle) resource;
-            if (bundle.hasLink()) {
-                Bundle.BundleLinkComponent linkComponent = bundle.getLink("self");
-                if (linkComponent != null) {
-                    if (linkComponent.hasUrl()) {
-                        linkComponent.setUrl(new Ref(linkComponent.getUrl()).rebase(newBase).toString());
-                        //linkComponent.setUrl(newBase);
-                        updated = true;
-                    }
-                }
-            }
-            for (Bundle.BundleEntryComponent component : bundle.getEntry()) {
-                if (component.hasResponse()) {
-                    Bundle.BundleEntryResponseComponent responseComponent = component.getResponse();
-                    if (responseComponent.hasLocation()) {
-                        String location = responseComponent.getLocation();
-                        Ref locRef = new Ref(location);
-                        if (!locRef.isRelative()) {
-                            locRef.rebase(newBase);
-                            responseComponent.setLocation(locRef.toString());
+       String requestedResource = getResource(responseIn.getUri());
+        if (requestedResource != null && ! "Binary".equals(requestedResource)) {
+            Format format = Format.fromContentType(responseIn.getResponseHeaders().getContentType().getValue());
+
+            BaseResource resource = ParserBase.parse(responseIn.getResponseText(), format);
+            if (resource instanceof Bundle) {
+                newBase = ServiceProperties.getInstance().getPropertyOrStop(ServicePropertiesEnum.FHIR_TOOLKIT_BASE) + "/proxy/" + channelConfig.asFullId();
+                boolean updated = false;
+                Bundle bundle = (Bundle) resource;
+                if (bundle.hasLink()) {
+                    Bundle.BundleLinkComponent linkComponent = bundle.getLink("self");
+                    if (linkComponent != null) {
+                        if (linkComponent.hasUrl()) {
+                            linkComponent.setUrl(new Ref(linkComponent.getUrl()).rebase(newBase).toString());
+                            //linkComponent.setUrl(newBase);
                             updated = true;
                         }
                     }
                 }
-                if (component.hasFullUrl()) {
-                    Ref fullUrl = new Ref(component.getFullUrl());
-                    if (fullUrl.isAbsolute()) {
-                        component.setFullUrl(fullUrl.rebase(newBase).toString());
+                for (Bundle.BundleEntryComponent component : bundle.getEntry()) {
+                    if (component.hasResponse()) {
+                        Bundle.BundleEntryResponseComponent responseComponent = component.getResponse();
+                        if (responseComponent.hasLocation()) {
+                            String location = responseComponent.getLocation();
+                            Ref locRef = new Ref(location);
+                            if (!locRef.isRelative()) {
+                                locRef.rebase(newBase);
+                                responseComponent.setLocation(locRef.toString());
+                                updated = true;
+                            }
+                        }
+                    }
+                    if (component.hasFullUrl()) {
+                        Ref fullUrl = new Ref(component.getFullUrl());
+                        if (fullUrl.isAbsolute()) {
+                            component.setFullUrl(fullUrl.rebase(newBase).toString());
+                        }
                     }
                 }
-            }
-            if (updated) {
-                rawResponse = ParserBase.encode(bundle, format).getBytes();
+                if (updated) {
+                    rawResponse = ParserBase.encode(bundle, format).getBytes();
+                }
             }
         }
+
         responseOut.setResponse(rawResponse);
     }
 
