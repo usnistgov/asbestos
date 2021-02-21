@@ -48,21 +48,22 @@
                 </div>
                 <div class="vdivider"></div>
 
+
                 <!--   history navigation   -->
-                <div v-if="history.length > 0" class="solid-boxed">
-                    <div class="nav-buttons">
-                        <div v-if="moreToTheLeft()" class="tooltip left-arrow-position">
-                            <img id="left-button" class="selectable" src="../../assets/left-arrow.png" @click="left()"/>
-                            <span class="tooltiptext">Previous</span>
+                    <div v-if="history.length > 0" class="solid-boxed">
+                        <div class="nav-buttons">
+                            <div v-if="moreToTheLeft()" class="tooltip left-arrow-position">
+                                <img id="left-button" class="selectable" src="../../assets/left-arrow.png" @click="left()"/>
+                                <span class="tooltiptext">Previous</span>
+                            </div>
                         </div>
+                        <div class="details">History</div>
+                        <div class="vdivider"></div>
+
                     </div>
-                    <div class="details">History</div>
-                    <div class="vdivider"></div>
 
-                </div>
-
-                <!--  BASE OBJECT     -->
-                <div>
+                    <!--  BASE OBJECT     -->
+                    <div>
                     <span class="caption">Focus Object:</span>
                     <div class="vdivider"></div>
                     <div class="grid-container">
@@ -77,12 +78,14 @@
                     </div>
                 </div>
 
-                <!--  RELATED     -->
-                <div class="vdivider"></div>
-                <span class="caption">Related: </span>
-                <span>(referenced by Focus Object)</span>
-                <div class="vdivider"></div>
-                <div class="grid-container">
+                <template v-if="isLoading"><p>Loading...</p></template>
+                <template v-else>
+                    <!--  RELATED     -->
+                    <div class="vdivider"></div>
+                    <span class="caption">Related: </span>
+                    <span>(referenced by Focus Object)</span>
+                    <div class="vdivider"></div>
+                    <div class="grid-container">
                     <span v-for="(resource, resourcei) in report.objects"
                         :key="resource + resourcei">
                         <div class="grid-item">
@@ -103,20 +106,21 @@
                         </div>
                     </span>
                 </div>
-                <div class="vdivider"></div>
+                    <div class="vdivider"></div>
 
-                <!--  SELECTED      -->
-                <div v-if="selectedResourceIndex === null"></div>
+                    <!--  SELECTED      -->
+                    <div v-if="selectedResourceIndex === null"></div>
 
-                <!--  BASE OBJECT DETAILS -->
-                <div v-else-if="selectedResourceIndex === -1 && report.base">
-                    <log-object-display :report="report.base"> </log-object-display>
-                </div>
+                    <!--  BASE OBJECT DETAILS -->
+                    <div v-else-if="selectedResourceIndex === -1 && report.base">
+                        <log-object-display :report="report.base"> </log-object-display>
+                    </div>
 
-                <!--  RELATED OBJECT DETAILS -->
-                <div v-else-if="selectedResourceIndex > -1">
-                    <log-object-display :report="report.objects[selectedResourceIndex]"> </log-object-display>
-                </div>
+                    <!--  RELATED OBJECT DETAILS -->
+                    <div v-else-if="selectedResourceIndex > -1">
+                        <log-object-display :report="report.objects[selectedResourceIndex]"> </log-object-display>
+                    </div>
+                </template>
             </div>
         </div>
         <template v-if="modalMode === undefined || modalMode===''">
@@ -134,6 +138,7 @@
                 selectedResourceIndex: null,  // -1 is focus object.  0 or greater is a related object.
                 history: [],   // {url: report.base.url, eventId: eventId } - history[0] is never removed - it is the base object
                 closed: false,
+                isLoading: false,
             }
         },
         methods: {
@@ -175,9 +180,12 @@
                 await this.loadAnalysis2()
                 this.selectedResourceIndex = -1
                 this.historyClear()
-                this.historyPush(this.report.base.url, null)
+                if (this.report !== null && this.report !== undefined) {
+                    this.historyPush(this.report.base.url, null)
+                }
             },
             async loadAnalysis2() {
+                this.isLoading = true
                 if (this.eventId) {
                     //console.log(`loadAnalysis2 for ${this.eventId}`)
                     //console.log(`theUrl=${this.theUrl}`)
@@ -187,6 +195,8 @@
                         eventId: this.eventId,
                         requestOrResponse: this.requestOrResponse
                     })
+                        .then( s=>{if (s);  this.isLoading = false;})
+                        .catch(e=>{if (e); this.isLoading = false;})
                 }
             },
             async loadAnalysisFromEventContext(url, eventContext, addToHistory) {

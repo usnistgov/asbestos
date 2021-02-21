@@ -1,11 +1,8 @@
 <template>
     <div>
-        <div v-bind:class="{
-                            showLoading: isLoading,
-                            notLoading: !isLoading
-                         }"
-             >Loading...</div>
-        <log-nav v-if="!noNav" :index="index" :sessionId="sessionId" :channelName="channelName"> </log-nav>
+        <log-nav v-if="!noNav" :index="index" :sessionId="sessionId" :channelName="channelName">
+            <template v-if="isLoading">Loading...</template>
+        </log-nav>
 
         <div class="boxed">
             <!-- Event Header -->
@@ -64,7 +61,7 @@
                         </span>
                         &nbsp; | &nbsp;
                         <span>
-                            <a class="defaultTextColor" title="The raw request/response body as received by the proxy, displayed without the use of the HAPI FHIR library." :href="rawTextEventLink" target="_blank">Raw Messages</a>
+                            <a class="defaultTextColor" title="The raw request body or the raw response body as received by the proxy, displayed without the use of the HAPI FHIR library. The headers may have been processed by the proxy." :href="rawTextEventLink" target="_blank">Raw Message Body</a>
                         </span>
                     </div>
 
@@ -432,16 +429,5 @@
     }
     .defaultTextColor {
         color: black;
-    }
-    .showLoading {
-        color: gray;
-        font-size: x-large;
-        font-weight: bolder;
-        display: block;
-        visibility: visible;
-    }
-    .notLoading {
-        display: none;
-        visibility: hidden;
     }
 </style>

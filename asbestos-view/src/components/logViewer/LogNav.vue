@@ -14,7 +14,10 @@
                 <span class="tooltiptext">Next</span>
             </div>
             <span class="item-count-position">
-                Item {{ index + 1 }} of {{ this.$store.state.log.eventSummaries.length }}
+                <template v-if="this.$store.state.log.eventSummaries.length > 0">
+                    Item {{ index + 1 }} of {{ this.$store.state.log.eventSummaries.length }}
+                </template>
+                <slot></slot>
             </span>
         </div>
     </div>
@@ -86,5 +89,7 @@
     .item-count-position {
         position: absolute;
         left: 200px;
+        display: inline;
+        vertical-align: middle;
     }
 </style>

@@ -5,7 +5,7 @@
         :test-collection="testCollection"
         :session-id="sessionId"
         :channel-name="channelName"> </test-collection-header>
-
+    <div v-if="isLoading" class="loading">Loading...</div>
     <test-collection-body
         :test-collection="testCollection"
         :session-id="sessionId"
@@ -25,6 +25,7 @@ export default {
   data() {
     return {
       time: [],   // built as a side-effect of status (computed)
+      isLoading: false,
     }
   },
   methods: {
@@ -48,7 +49,18 @@ export default {
     },
     load() {
       console.log('tc loaded')
-      this.loadTestCollection(this.testCollection)
+      this.isLoading = true
+      this.loadTestCollection(this.testCollection).then(r => {
+        try {
+         if (r === null) {return;}
+        } catch(error) {
+          this.error(error)
+         this.isLoading = false
+        }
+      }).catch(error => {
+        this.error(error)
+       this.isLoading = false
+      })
     },
   },
   computed: {
@@ -233,5 +245,12 @@ export default {
 }
 .inlineDiv {
   display: inline;
+}
+.loading {
+  color: gray;
+  font-size: medium;
+  font-weight: bolder;
+  display: block;
+  visibility: visible;
 }
 </style>
