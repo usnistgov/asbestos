@@ -388,14 +388,18 @@ public class AnalysisReport {
         String type = wrapper.getResourceType();
         // TODO - huh?
         File testDef = new File(new File(new File(ec.externalCache, "FhirTestCollections"), "Internal"), "Comprehensive_" + type);
-        TestEngine testEngine = new TestEngine(testDef)
-                .setVal(new Val())
-                .setTestSession("default")
-                .setExternalCache(ec.externalCache)
-                .setTestCollection("Analysis")
-                .setTestId("Analysis")
-                .runEval(wrapper, null);
-        return testEngine;
+        if (testDef.exists()) {
+            TestEngine testEngine = new TestEngine(testDef)
+                    .setVal(new Val())
+                    .setTestSession("default")
+                    .setExternalCache(ec.externalCache)
+                    .setTestCollection("Analysis")
+                    .setTestId("Analysis")
+                    .runEval(wrapper, null);
+            return testEngine;
+        } else {
+            return null; // Resource does not have an eval TestScript
+        }
     }
 
     private Checked getMinimumIdReport(TestReport testReport) {
@@ -426,14 +430,18 @@ public class AnalysisReport {
         File testDef = new File(new File(new File(ec.externalCache, "FhirTestCollections"), "Internal"), "Minimal_" + type);
 //        if (!testDef.isDirectory())
 //            return null;
-        TestEngine testEngine = new TestEngine(testDef)
-                .setVal(new Val())
-                .setTestCollection("Analysis")
-                .setTestId("Analysis")
-                .setTestSession("default")
-                .setExternalCache(ec.externalCache)
-                .runEval(wrapper, null);
-        return testEngine;
+        if (testDef.exists()) {
+            TestEngine testEngine = new TestEngine(testDef)
+                    .setVal(new Val())
+                    .setTestCollection("Analysis")
+                    .setTestId("Analysis")
+                    .setTestSession("default")
+                    .setExternalCache(ec.externalCache)
+                    .runEval(wrapper, null);
+            return testEngine;
+        } else {
+            return null; // Resource type does not have an eval TestScript configured in FTK test collections
+        }
     }
 
     private Ref translateToProxyServerSide(Ref theRef) {
