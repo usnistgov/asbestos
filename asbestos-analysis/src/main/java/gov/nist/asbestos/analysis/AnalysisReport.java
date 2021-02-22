@@ -25,7 +25,10 @@ import org.apache.log4j.Logger;
 import org.hl7.fhir.r4.model.*;
 
 import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.*;
 
 public class AnalysisReport {
@@ -351,8 +354,9 @@ public class AnalysisReport {
         if (baseObj == null)
             return;
         TestEngine testEngine = comprehensiveEval(baseObj);
-        if (testEngine == null)
-            return;
+        // Guard seems to have a side effect
+//        if (testEngine == null)
+//            return;
         TestReport report = testEngine.getTestReport();
         Checked checked = getMinimumIdReport(report);
         comprehensiveErrors = testEngine.getTestReportErrors();
@@ -360,8 +364,13 @@ public class AnalysisReport {
         for (Related rel : related) {
             if (rel.wrapper != null) {
                 testEngine = comprehensiveEval(rel.wrapper);
-                rel.comprehensiveChecked = getMinimumIdReport(testEngine.getTestReport());
-                rel.comprehensiveErrors = testEngine.getTestReportErrors();
+//                if (testEngine != null) {
+                    rel.comprehensiveChecked = getMinimumIdReport(testEngine.getTestReport());
+                    rel.comprehensiveErrors = testEngine.getTestReportErrors();
+//                } else {
+//                    rel.comprehensiveChecked = getMinimumIdReport(null);
+//                    rel.comprehensiveErrors = new ArrayList<String>();
+//                }
             }
         }
     }
@@ -370,15 +379,21 @@ public class AnalysisReport {
         if (baseObj == null)
             return;
         TestEngine testEngine  = minimalEval(baseObj);
-        if (testEngine == null)
-            return;
+        // Guard seems to have a side effect
+//        if (testEngine == null)
+//            return;
         minimalErrors = testEngine.getTestReportErrors();
         minimalChecked = getMinimumIdReport(testEngine.getTestReport());
         for (Related rel : related) {
             if (rel.wrapper != null) {
                 testEngine = minimalEval(rel.wrapper);
-                rel.minimalChecked = getMinimumIdReport(testEngine.getTestReport());
-                rel.minimalErrors = testEngine.getTestReportErrors();
+//                if (testEngine != null) {
+                    rel.minimalChecked = getMinimumIdReport(testEngine.getTestReport());
+                    rel.minimalErrors = testEngine.getTestReportErrors();
+//                } else {
+//                    rel.minimalChecked =  getMinimumIdReport(null);
+//                    rel.minimalErrors = new ArrayList<>();
+//                }
             }
         }
     }
@@ -388,7 +403,8 @@ public class AnalysisReport {
         String type = wrapper.getResourceType();
         // TODO - huh?
         File testDef = new File(new File(new File(ec.externalCache, "FhirTestCollections"), "Internal"), "Comprehensive_" + type);
-        if (testDef.exists()) {
+        // Guard seems to have a side effect
+//        if (testDef.exists()) {
             TestEngine testEngine = new TestEngine(testDef)
                     .setVal(new Val())
                     .setTestSession("default")
@@ -397,9 +413,9 @@ public class AnalysisReport {
                     .setTestId("Analysis")
                     .runEval(wrapper, null);
             return testEngine;
-        } else {
-            return null; // Resource does not have an eval TestScript
-        }
+//        } else {
+//            return null; // Resource does not have an eval TestScript
+//        }
     }
 
     private Checked getMinimumIdReport(TestReport testReport) {
@@ -428,9 +444,10 @@ public class AnalysisReport {
     private TestEngine minimalEval(ResourceWrapper wrapper) {
         String type = wrapper.getResourceType();
         File testDef = new File(new File(new File(ec.externalCache, "FhirTestCollections"), "Internal"), "Minimal_" + type);
+        // Guard seems to have a side effect
 //        if (!testDef.isDirectory())
 //            return null;
-        if (testDef.exists()) {
+//        if (testDef.exists()) {
             TestEngine testEngine = new TestEngine(testDef)
                     .setVal(new Val())
                     .setTestCollection("Analysis")
@@ -439,9 +456,9 @@ public class AnalysisReport {
                     .setExternalCache(ec.externalCache)
                     .runEval(wrapper, null);
             return testEngine;
-        } else {
-            return null; // Resource type does not have an eval TestScript configured in FTK test collections
-        }
+//        } else {
+//            return null; // Resource type does not have an eval TestScript configured in FTK test collections
+//        }
     }
 
     private Ref translateToProxyServerSide(Ref theRef) {
@@ -498,16 +515,32 @@ public class AnalysisReport {
                     baseObj.setRef(baseRef);
                 }
             } else if (isPDBResponse(bundle)) {
-                String uriBase = bundle.hasLink() ? bundle.getLink("self").getUrl() : null;
-                Ref documentManifestLocation = findDocumentManifestInResponseBundle(bundle);
-                if (uriBase != null && documentManifestLocation != null) {
-                    Ref dmRef = documentManifestLocation.rebase(uriBase);
-                    FhirClient fhirClient = new FhirClient();
-                    ResourceWrapper dm = fhirClient.readResource(dmRef);
-                    baseObj = dm;
-                    baseRef = dmRef;
-                } else
-                    baseObj = contextResourceBundle;
+                Ref dmLocation = findDocumentManifestInResponseBundle(bundle);
+                if (dmLocation != null) {
+                    try {
+                        baseObj = contextResourceBundle;
+                        // Since DocResponder can be independent from the docRecip, use the direct location from the PDB response if the location is a URL
+                        // try direct location reference if it exists in the response
+                        Ref absRef = new Ref(dmLocation.getUri().toURL()); // Will automatically use this URL in future
+                        FhirClient fhirClient = new FhirClient();
+                        ResourceWrapper dm = fhirClient.readResource(absRef);
+                        baseObj = dm;
+                        baseRef = absRef;
+                    } catch (Exception ex) {
+                        // try rebase using the self link if it exists
+                        String bundleLink = bundle.hasLink() ? bundle.getLink("self").getUrl() : null;
+                        if (bundleLink != null) {
+                            Ref dmRef = dmLocation.rebase(bundleLink);
+                            FhirClient fhirClient = new FhirClient();
+                            ResourceWrapper dm = fhirClient.readResource(dmRef);
+                            baseObj = dm;
+                            baseRef = dmRef;
+                        }
+                        // else
+                            // Default behavior
+                            // Possible option: rebase using the proxy channel fhir base address
+                    }
+                }
             } else {
                 baseObj = new ResourceWrapper(bundle)
                         .setRef(baseRef)
