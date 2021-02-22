@@ -8,14 +8,14 @@ INSTALL=/opt/asbestos
 echo "CHECK FOR EXISTING INSTALLATION"
 if [ -d "$INSTALL" ]
 then
-  echo "$INSTALL already exists"
+  echo "$INSTALL already exists. This directory must not exist for the script to continue."
   exit -1
 fi
 
 echo "BUILD ASBESTOS"
 mvn clean
 if [ -d asbestos-war/target ]; then
-  echo "asbestos clean failed"
+  echo "asbestos clean failed: The asbestos-war/target still exists."
 fi
 
 echo ""
@@ -25,7 +25,7 @@ echo ''
 echo ""
 
 mkdir asbestos-war/target
-mvn install -Dmaven.test.skip=true &> asbestos-war/build-log.txt   # does not run any tests, there is more environment setup required for that
+mvn install -P Sunil -Dmaven.test.skip=true &> asbestos-war/build-log.txt   # does not run any tests, there is more environment setup required for that
 if [ ! -f asbestos-war/target/asbestos-war.war ]; then
   echo "asbestos build failed"
   exit -1
@@ -41,7 +41,7 @@ fi
 
 mkdir target
 mvn package &> target/build-log.txt
-mvn package
+mvn package -P Sunil
 if [ ! -f target/asbestos.zip ]; then
   echo "build asbestos-assembly failed"
   exit -1
