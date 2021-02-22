@@ -45,7 +45,7 @@
             <id>Sunil_Ubuntu</id>
             <properties>
                 <build.profile.id>Sunil_Ubuntu</build.profile.id>
-                <toolkitApiVersion>7.4.0-SNAPSHOT</toolkitApiVersion>
+                <toolkitApiVersion>7.6.0-SNAPSHOT</toolkitApiVersion>
                 <itTestsExternalCache>/home/sunil/ec/asbts-it-tests</itTestsExternalCache>
             </properties>
         </profile>
