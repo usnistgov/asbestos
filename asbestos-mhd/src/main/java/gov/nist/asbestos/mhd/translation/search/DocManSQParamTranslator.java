@@ -14,6 +14,11 @@ public class DocManSQParamTranslator {
 
     // query types
     public static final String GetSubmissionSetAndContentsKey = "urn:uuid:e8e3cb2c-e39c-46b9-99e4-c12f57260b83";
+    private Map<String, List<String>> result = new HashMap<>();
+
+    public DocManSQParamTranslator() {
+        result.put("QueryType", Arrays.asList(GetSubmissionSetAndContentsKey));
+    }
 
     Map<String, List<String>> run(String httpQueryString) {
         Map<String, List<String>> result = new HashMap<>();
@@ -40,10 +45,6 @@ public class DocManSQParamTranslator {
         return params;
     }
 
-    static Map<String, List<String>> result = new HashMap<>();
-    static {
-        result.put("QueryType", Arrays.asList(GetSubmissionSetAndContentsKey));
-    }
 
     private void addResult(String key, String value) {
         result.put(key, Arrays.asList(value));

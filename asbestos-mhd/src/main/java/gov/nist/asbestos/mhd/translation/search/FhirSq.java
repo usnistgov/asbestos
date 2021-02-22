@@ -12,7 +12,6 @@ import oasis.names.tc.ebxml_regrep.xsd.rim._3.AdhocQueryType;
 import oasis.names.tc.ebxml_regrep.xsd.rim._3.QueryExpressionType;
 import oasis.names.tc.ebxml_regrep.xsd.rim._3.SlotType1;
 
-import javax.swing.*;
 import java.net.URI;
 import java.util.*;
 

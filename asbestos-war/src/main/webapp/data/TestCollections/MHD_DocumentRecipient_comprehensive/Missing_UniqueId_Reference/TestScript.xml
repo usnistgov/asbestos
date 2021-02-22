@@ -31,7 +31,21 @@
       <expression value="Bundle.entry.select(resource as DocumentReference).masterIdentifier.value"/>
       <sourceId value="pdb-bundle"/>
     </variable>
-    
+    <variable>
+        <name value="pdbManifestStatus"/>
+        <expression value="Bundle.entry.select(resource as DocumentManifest).status.value"/>
+        <sourceId value="pdb-bundle"/>
+    </variable>
+    <variable>
+        <name value="patientIdentifier"/>
+        <defaultValue value="Bundle.entry.select(resource as Patient).identifier[0]"/>
+    </variable>
+    <variable>
+        <name value="patientIdentifierSearchParamValue"/>
+        <expression value="${patientIdentifier}.system.value + '|' + ${patientIdentifier}.value.value"/>
+        <sourceId value="patient_bundle"/>
+    </variable>
+
     <test>
         <description value="Submit."/>
         <action>
@@ -61,7 +75,7 @@
 				  </type>
 				  <resource value="DocumentManifest"/> 
 				  <contentType value="json"/>
-				  <params value="?identifier=${manifestMasterIdentifier}"/> 
+				  <params value="?identifier=${manifestMasterIdentifier}&amp;status=${pdbManifestStatus}&amp;patient.identifier=${patientIdentifierSearchParamValue}"/>
 				  <responseId value="manifest-search"/>
 			  </operation>
       </action>

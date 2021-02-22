@@ -31,7 +31,21 @@
       <expression value="Bundle.entry.select(resource as DocumentReference).masterIdentifier.value"/>
       <sourceId value="pdb-bundle"/>
     </variable>
-    
+    <variable>
+        <name value="pdbReferenceStatus"/>
+        <expression value="Bundle.entry.select(resource as DocumentReference).status.value"/>
+        <sourceId value="pdb-bundle"/>
+    </variable>
+    <variable>
+        <name value="patientIdentifier"/>
+        <defaultValue value="Bundle.entry.select(resource as Patient).identifier[0]"/>
+    </variable>
+    <variable>
+        <name value="patientIdentifierSearchParamValue"/>
+        <expression value="${patientIdentifier}.system.value + '|' + ${patientIdentifier}.value.value"/>
+        <sourceId value="patient_bundle"/>
+    </variable>
+
     <test>
         <description value="Submit."/>
         <action>
@@ -61,7 +75,7 @@
 				  </type>
 				  <resource value="DocumentReference"/> 
 				  <contentType value="json"/>
-				  <params value="?identifier=${referenceMasterIdentifier}"/> 
+				  <params value="?identifier=${referenceMasterIdentifier}&amp;status=${pdbReferenceStatus}&amp;patient.identifier=${patientIdentifierSearchParamValue}"/>
 				  <responseId value="reference-search"/>
 			  </operation>
       </action>

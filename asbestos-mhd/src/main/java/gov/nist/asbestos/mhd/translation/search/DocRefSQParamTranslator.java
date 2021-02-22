@@ -65,8 +65,9 @@ class DocRefSQParamTranslator {
     static final String GetDocs = "urn:uuid:5c4f972b-d56b-40ac-a5fc-c8ca9b40b9d4";
 
     // shows default query - may be upgraded to FindDocsByRefIdKey if related-id is used
-    static Map<String, List<String>> result = new HashMap<>();
-    static {
+    Map<String, List<String>> result = new HashMap<>();
+
+    public DocRefSQParamTranslator() {
         result.put("QueryType", Arrays.asList(FindDocsKey));
     }
 
