@@ -37,7 +37,7 @@
             <id>Sunil</id>
             <properties>
                 <build.profile.id>Sunil</build.profile.id>
-                <toolkitApiVersion>7.5.0</toolkitApiVersion>
+                <toolkitApiVersion>7.6.0-SNAPSHOT</toolkitApiVersion>
                 <itTestsExternalCache>/C:/Users/skb1/ec/asbts-it-tests</itTestsExternalCache>
             </properties>
         </profile>
