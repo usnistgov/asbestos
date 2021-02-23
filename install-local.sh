@@ -88,8 +88,9 @@ unzip -qq ../xdstools.war
 echo "REMOVE XDSTOOLS.WAR"
 rm -f ../xdstools.war
 
-echo "INSTALL PRODUCTION TOOLKIT.PROPERTIES"
-cp $DEVELOP/asbestos/asbestos-assembly/src/main/assembly/toolkit.properties $INSTALL/tomcat/Toolkits/XdsToolkit/webapps/xdstools/WEB-INF/classes
+#echo "INSTALL PRODUCTION TOOLKIT.PROPERTIES"
+# XdsToolkit/conf/toolkit.properties is the default
+# cp $DEVELOP/asbestos/asbestos-assembly/src/main/assembly/toolkit.properties $INSTALL/tomcat/Toolkits/XdsToolkit/webapps/xdstools/WEB-INF/classes
 
 echo "INSTALL HAPI"
 cp $DEVELOP/fhir.zip $INSTALL/tomcat/Toolkits/XdsToolkit/webapps
