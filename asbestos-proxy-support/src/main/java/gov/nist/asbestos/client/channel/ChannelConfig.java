@@ -1,14 +1,18 @@
 package gov.nist.asbestos.client.channel;
 
+import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.serviceproperties.ServiceProperties;
 import gov.nist.asbestos.serviceproperties.ServicePropertiesEnum;
 
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 public class ChannelConfig {
     private String environment;
@@ -29,7 +33,6 @@ public class ChannelConfig {
                 " with xdsSite " + xdsSiteName;
     }
 
-    // TODO test needed
     public URI translateEndpointToFhirBase(URI req) throws URISyntaxException {
         String path  = req.getPath();
         List<String> parts1 = Arrays.asList(path.split("/"));
@@ -48,7 +51,14 @@ public class ChannelConfig {
         String joinedparts = parts.size() == 0 ? "" : String.join("/", parts);
         if (joinedparts.length() > 0)
             joinedparts = "/" + joinedparts;
-        String uriString = fhirBase + joinedparts + (query == null || query.equals("") ? "" : "?" + query);
+
+        String uriString = fhirBase + joinedparts + (query == null || query.equals("") ? "" : "?" +
+                Ref.parseParameters(query)
+                        .entrySet()
+                        .stream()
+                        .map(e -> {try { return e.getKey() + "=" + URLEncoder.encode(e.getValue(),"UTF-8");} catch (UnsupportedEncodingException ex) {return "";}})
+                        .collect(Collectors.joining("&"))
+                );
         return new URI(uriString);
     }
 
