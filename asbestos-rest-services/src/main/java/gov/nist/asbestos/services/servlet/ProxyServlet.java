@@ -128,8 +128,12 @@ public class ProxyServlet extends HttpServlet {
 
     private static String getHostPort(Headers inHeaders) throws ServletException {
         String hostport = inHeaders.getValue("host");
-        if (hostport == null || !hostport.contains(":"))
-            throw new ServletException("host header missing or not formatted as host:port");
+        if (hostport == null || !hostport.contains(":")) {
+            //throw new ServletException("host header missing or not formatted as host:port");
+            String defaultPort = ":80";
+            log.info("Port is not present. Adding default port " + hostport + defaultPort);
+            hostport += defaultPort; //
+        }
         return hostport;
     }
 
