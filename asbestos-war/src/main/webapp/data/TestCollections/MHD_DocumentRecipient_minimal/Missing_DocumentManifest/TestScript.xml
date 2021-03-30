@@ -98,7 +98,7 @@
         <!-- A variable needs a static fixture reference but good-pdb-response fixture is dynamic. Calling this module call makes makes this possible. -->
         <action>
             <operation>
-                <description value="todo - 2."/>
+                <description value="Verify document responder base address."/>
                 <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
                     <extension url="component">
                         <valueString value="../../Library/VerifyDocumentResponderBaseAddress.xml"/>
