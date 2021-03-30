@@ -30,7 +30,7 @@ export const logStore = {
             state.analysis = analysis
         },
         resetLogLoaded(state) {
-            state.loaded = false
+            state.loaded = null
         },
         setEventSummaries(state, summaries) {
             state.eventSummaries = summaries

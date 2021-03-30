@@ -15,10 +15,13 @@
 
         <p>XDS Toolkit is required for testing XDSonFHIR option and for running self tests in Setup.</p>
 
-        <div class="selectable" @click="selfTest()">Run</div>
+        <div class="selectable" @click="selfTest()"><img src="../../assets/reload.png"/>&nbsp;Refresh</div>
         <div v-if="$store.state.log.loaded">
             <img src="../../assets/check.png">
             Proxy is responding at {{proxyBase()}}
+        </div>
+        <div v-else-if="$store.state.log.loaded===null">
+            Please wait. Refreshing proxy status...
         </div>
         <div v-else>
             <img src="../../assets/cross.png">
