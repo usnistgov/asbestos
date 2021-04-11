@@ -34,10 +34,10 @@
               <sign-in :banner="lockAckMode" :userProps="editUserProps" :doDefaultSignIn="true" :showCancelButton="true" @onOkClick="lockAcked" @onCancelClick="lockCanceled" />
             </div>
             <div v-else>
-              <div class="tooltip">
-                <img id="select-button" src="../../assets/select.png" @click="select()"/>
-                <span class="tooltiptext">Select</span>
-              </div>
+<!--              <div class="tooltip">-->
+<!--                <img id="select-button" src="../../assets/select.png" @click="select()"/>-->
+<!--                <span class="tooltiptext">Select</span>-->
+<!--              </div>-->
               <div class="divider"></div>
               <div class="tooltip">
                 <img id="edit-button" src="../../assets/pencil-edit-button.png" @click="guardedFn('Edit',toggleEdit)"/>
@@ -405,13 +405,19 @@ export default {
       //   this.deleteChannel()
       // }
       // this.isNew = false
-      this.msg('Discarded.')
-      this.toggleEdit()
-      this.$store.commit('setChannelIsNew', false);
-      this.discarding = true
-      const route = '/session/' + this.channel.testSession + '/channels'
-      this.channel = undefined
-      this.$router.push(route)
+        if (this.channelIsNew) {
+            this.msg('Discarded.')
+            this.toggleEdit()
+            this.$store.commit('setChannelIsNew', false);
+            this.discarding = true
+            const route = '/session/' + this.channel.testSession + '/channels'
+            this.channel = undefined
+            this.$router.push(route)
+        } else {
+            this.fetch()
+            this.edit = false
+            this.discarding = true
+        }
     },
     isCurrentChannelIdNew() {
       return this.channel.channelName === 'new' || this.channel.channelName === 'copy'
@@ -458,15 +464,14 @@ export default {
         this.channel = this.copyOfChannel()
         this.discarding = false
         this.edit = true
-        return this.channel
       }
 
-      const channel = this.$store.state.base.channel;
+      // const channel = this.$store.state.base.channel;
       const isPreloaded = this.isPreloaded()
       if (isPreloaded) {
         this.discarding = false;
-        this.channel = channel;
-        return this.channel;
+        this.channel = this.copyOfChannel();
+        return
       }
 
       this.channel = null
@@ -476,7 +481,6 @@ export default {
           .then(channel => {
             this.channel = channel
             this.discarding = false
-            return this.channel
           })
     },
     channelIndex(theSessionId, theChannelName) {
