@@ -6,6 +6,14 @@ Vue.use(Vuex)
 import {LOG, PROXY} from '../common/http-common'
 import {CHANNEL} from '../common/http-common'
 import {STARTUPSESSION} from "../common/http-common";
+import {newChannel} from '@/types/channel'
+
+function setDataStateObj(destObj, srcObj) {
+    for (let propKey in destObj) {
+        destObj[propKey] = srcObj[propKey]
+    }
+}
+
 
 export const baseStore = {
     state() {
@@ -13,10 +21,9 @@ export const baseStore = {
             session: 'default',   // name of current
             sessionNames:[],
             sessionConfigs: {},
-
             channelName: 'default',  // current
             channelIds: [],  // for all sessions
-            channel: null,   // current configuration matching channelId
+            channel: newChannel(),   // current configuration matching channelId
             channelIsNew: false, // newly created means not saved to server yet
 
             environments: [
@@ -51,9 +58,16 @@ export const baseStore = {
             state.channelName = channelName
         },
         setChannel(state, theChannel) {
-            state.channel = theChannel
-            if (theChannel === null)
+            if (theChannel !== undefined && theChannel !== null) {
+                console.log('set channel: ' + theChannel.channelName)
+
+                setDataStateObj(state.channel, theChannel)
+            } else {
+                setDataStateObj(state.channel, newChannel())
+            }
+            if (theChannel === undefined || theChannel === null)
                 return
+
             const targetChannelId = `${theChannel.testSession}__${theChannel.channelName}`;
             let channelIndex = state.channelIds.findIndex( function(channelId) {
                 return channelId === targetChannelId;
@@ -62,12 +76,20 @@ export const baseStore = {
                 state.channelIds.push(targetChannelId)
             state.channelIsNew = false;
         },
-        setChannelIsNew(state) {
-            state.channelIsNew = true;
+        setChannelIsNew(state, val) {
+            state.channelIsNew = val;
         },
-        installChannel(state, newChannel) {
+        installChannel(state, theChannel) {
+            if (theChannel !== undefined && theChannel !== null) {
+                // console.log('installed : ' + theChannel.channelName)
+                setDataStateObj(state.channel, theChannel)
+            } else {
+                setDataStateObj(state.channel, newChannel())
+            }
+            /*
             if (!newChannel) {
-                state.channel = newChannel;
+                // state.channel = newChannel;
+                console.log('store channel is undef? ' + (newChannel === undefined || newChannel === null))
                 return;
             }
             // const targetChannelId = `${newChannel.testSession}__${newChannel.channelName}`;
@@ -80,7 +102,7 @@ export const baseStore = {
                 state.channel = newChannel
             // }
             state.channel = newChannel
-            state.channelIsNew = false;
+             */
         },
         deleteChannel(state, theChannelId) {
             const channelIndex = state.channelIds.findIndex( function(channelId) {

@@ -4,7 +4,7 @@
     <div class="window">
       <div v-if="channel" class="grid-container">
         <div class="button-bar">
-          <div v-if="edit || channelIsNew">
+          <div v-if="isEditMode">
             <div v-if="badNameMode">
               Cannot save with this name - {{ badNameModeReason }}
               <button class="cancel-button" @click="badNameCanceled">Continue</button>
@@ -72,7 +72,7 @@
 
         </div>
         <label class="grid-name">Id</label>
-        <div v-if="isNew" class="grid-item">
+        <div v-if="channelIsNew" class="grid-item">
           <input v-model="channel.channelName">
         </div>
         <div v-else class="grid-item">{{ channel.channelName }}</div>
@@ -81,7 +81,7 @@
         <div class="grid-item">{{ channel.testSession }}</div>
 
         <label class="grid-name">Environment</label>
-        <div v-if="edit" class="grid-item">
+        <div v-if="isEditMode" class="grid-item">
           <select v-model="channel.environment">
             <option v-for="e in $store.state.base.environments" :key="e">
               {{e}}
@@ -91,7 +91,7 @@
         <div v-else class="grid-item">{{ channel.environment }}</div>
 
         <label class="grid-name">Channel Type</label>
-        <div v-if="edit" class="grid-item">
+        <div v-if="isEditMode" class="grid-item">
           <select v-model="channel.channelType">
             <option v-for="ct in $store.state.channel.channelTypes" :key="ct">
               {{ct}}
@@ -101,21 +101,21 @@
         <div v-else class="grid-item">{{ channel.channelType }}</div>
 
         <label class="grid-name">Fhir Base</label>
-        <div v-if="edit" class="grid-item">
+        <div v-if="isEditMode" class="grid-item">
           <input v-model="channel.fhirBase">
           Only used with Channel Type fhir
         </div>
         <div v-else class="grid-item">{{ channel.fhirBase }}</div>
 
         <label class="grid-name">XDS Site Name</label>
-        <div v-if="edit" class="grid-item">
+        <div v-if="isEditMode" class="grid-item">
           <input v-model="channel.xdsSiteName">
           Only used with Channel Type mhd
         </div>
         <div v-else class="grid-item">{{ channel.xdsSiteName }}</div>
 
         <label v-if="channel.channelType === 'mhd'" class="grid-name">Log MHD Capability Statement Request?</label>
-        <div v-if="channel.channelType === 'mhd' && edit" class="grid-item">
+        <div v-if="channel.channelType === 'mhd' && isEditMode" class="grid-item">
           <input type="radio" id="noLogCapStmt" value="false" v-model="channel.logMhdCapabilityStatementRequest">
           <label for="noLogCapStmt">No</label>
           <input type="radio" id="logCapStmt" value="true" v-model="channel.logMhdCapabilityStatementRequest">
@@ -130,21 +130,21 @@
           </div>
         </div>
 
-        <div v-if="!lockAckMode && !edit && !channel.fhirBase && !channel.xdsSiteName" class="channelError">
+        <div v-if="!lockAckMode && !isEditMode && !channel.fhirBase && !channel.xdsSiteName" class="channelError">
           <div class="vdivider"></div>
           <div class="vdivider"></div>
           <div class="vdivider"></div>
           <div class="vdivider"></div>
           Warning: FhirBase or XDS Site Name must be present
         </div>
-        <div v-if="!lockAckMode && !edit && channel.channelType === 'fhir' && !channel.fhirBase" class="channelError">
+        <div v-if="!lockAckMode && !isEditMode && channel.channelType === 'fhir' && !channel.fhirBase" class="channelError">
           <div class="vdivider"></div>
           <div class="vdivider"></div>
           <div class="vdivider"></div>
           <div class="vdivider"></div>
           Warning: FHIR type is selected but no FHIR Base is configured
         </div>
-        <div v-if="!lockAckMode && !edit && channel.channelType === 'mhd' && !channel.xdsSiteName" class="channelError">
+        <div v-if="!lockAckMode && !isEditMode && channel.channelType === 'mhd' && !channel.xdsSiteName" class="channelError">
           <div class="vdivider"></div>
           <div class="vdivider"></div>
           <div class="vdivider"></div>
@@ -154,7 +154,7 @@
       </div>
     </div>
     <!-- end of grid -->
-    <div v-if="channel && !edit">
+    <div v-if="channel && !isEditMode">
       <div>
         <p class="caption">Channel Base Address: </p>
         <span class="center">{{getChannelBase(false, channel)}}</span>
@@ -173,6 +173,9 @@
           </li>
         </ul>
       </div>
+    </div>
+    <div v-if="channel===undefined || channel===null">
+       Channel is undefined or null.
     </div>
   </div>
 </template>
@@ -196,7 +199,6 @@ export default {
     return {
       channel: null,  // channel object
       edit: false,
-      isNew: false,
       originalChannelName: null,   // in case of delete
       discarding: false,  // for saving edits
       ackMode: false,  // for deleting
@@ -209,22 +211,31 @@ export default {
   props: [
     'sessionId',
     'channelName',
-    'theChannel',
       'startEdit'
   ],
   created() {
-    this.fetch()
-    this.showAck(true)
-    if (this.startEdit) {
-      this.edit = true;
-      this.isNew = true;
-    }
+      // console.log('In Cedit.')
+      try {
+        this.fetch()
+        this.showAck(true)
+        if (this.channelIsNew) {
+          this.edit = true
+        }
+      } catch (e) {
+       console.log('error in Created lifecycle event: ' + e )
+      }
+    // if (this.startEdit) {
+    //   this.edit = true;
+      // this.isNew = true;
+    // }
     // this.loadChannelBaseAddr()
   },
   watch: {  // when $route changes run fetch()
     $route: function() {
       this.fetch();
     },
+    /*
+    *
     channelName: function (newChannelName) {
       this.updateToChannel(newChannelName);
     },
@@ -234,6 +245,7 @@ export default {
     channelIsNew(value) {
       this.edit = value;
     }
+     */
   },
   computed: {
     channelIds: {
@@ -246,7 +258,11 @@ export default {
     },
     channelIsNew() {
         return this.$store.state.base.channelIsNew;
-    }
+    },
+    isEditMode() {
+      return this.edit || this.channelIsNew
+    },
+
   },
   mounted() {
   },
@@ -293,6 +309,7 @@ export default {
       chan.channelName = 'copy'
       chan.writeLocked = false
       this.$store.commit('installChannel', chan)
+      this.$store.commit('setChannelIsNew', true);
       this.$router.push('/session/' + this.sessionId + '/channels/copy')
     },
     async deleteChannel() {
@@ -302,7 +319,7 @@ export default {
         } else if (this.editUserProps.bapw !== "") {
           await PROXY.delete('channelGuard/' + this.channelId, { auth: {username: this.editUserProps.bauser, password: this.editUserProps.bapw}})
         }
-        this.msg('Deleted')
+        this.msg('Deleted.')
         this.$store.commit('deleteChannel', this.channelId)
         await this.$store.dispatch('loadChannelIds')
         this.$router.push('/session/' + this.sessionId + '/channels')
@@ -326,20 +343,23 @@ export default {
       //     await this.$store.dispatch('loadChannelIds')
       //     await this.$router.push('/session/' + this.channel.testSession + '/channels/' + this.channel.channelName)
       // } else {
-        this.$store.commit('installChannel', cloneDeep(this.channel))
-        if (! this.channel.writeLocked) {
+      // this.$store.commit('installChannel', cloneDeep(this.channel))
+      this.$store.commit('installChannel', this.channel)
+      if (! this.channel.writeLocked) {
           const url = `CHANNEL/create`;
           try {
             await CHANNEL.post('create', this.channel);
-            this.msg('Updated')
-            this.isNew = false
+            this.msg(this.channelIsNew ? 'Saved.' : 'Updated.')
+            // this.isNew = false
+            this.$store.commit('setChannelIsNew', false);
             this.edit = false
             this.lockAckMode = ""
             this.fetch()
             await this.$store.dispatch('loadChannelIds')
           } catch (error) {
             this.error(url + ': ' + error)
-            this.isNew = false
+            // this.isNew = false
+            this.$store.commit('setChannelIsNew', false);
             this.edit = false
           }
         } else {  // has write lock
@@ -351,15 +371,16 @@ export default {
                 password: this.editUserProps.bapw
               }
             })
-            this.msg('Saved')
-            this.isNew = false
+            this.msg('Saved.')
+            // this.isNew = false
+            this.$store.commit('setChannelIsNew', false);
             this.edit = false
             this.lockAckMode = ""
             this.fetch()
             await this.$store.dispatch('loadChannelIds')
           } catch (error) {
             this.error(url + ': ' + error)
-            this.isNew = false
+            // this.isNew = false
             this.edit = false
             this.lockAckMode = ""
           }
@@ -372,7 +393,7 @@ export default {
       try {
         console.log(`saveToServer`)
         await CHANNEL.post('create', aChannel)
-        this.msg('New Channel Saved')
+        this.msg('New Channel Saved.')
         await this.$store.dispatch('loadChannelNames')
         await this.$store.dispatch('loadChannelIds')
       } catch(error) {
@@ -380,11 +401,13 @@ export default {
       }
     },
     discard() {
-      if (this.isNew) {
-        this.deleteChannel()
-      }
-      this.isNew = false
+      // if (this.channelIsNew) {
+      //   this.deleteChannel()
+      // }
+      // this.isNew = false
+      this.msg('Discarded.')
       this.toggleEdit()
+      this.$store.commit('setChannelIsNew', false);
       this.discarding = true
       const route = '/session/' + this.channel.testSession + '/channels'
       this.channel = undefined
@@ -401,12 +424,19 @@ export default {
       const match2 = re2.test(name)
       return !match || match2
     },
+    /*
+    Should not the base store for the new channel flag be used for this?
     isNewChannelId() {
       return this.channelName === 'new' || this.channelName === 'copy'
     },
+     */
     isPreloaded() {
       const channel = this.$store.state.base.channel;
-      return channel && this.channelName === channel.channelName && this.sessionId === channel.testSession;
+      // console.log('int. channel name: ' + this.channelName + '. ext channel name: ' + channel.channelName)
+      // console.log('int ts: ' + this.sessionId + ' ext. ts: ' + channel.testSession)
+      const ret = channel && this.channelName === channel.channelName && this.sessionId === channel.testSession;
+      // console.log('isPreloaded: ' + ret)
+      return ret
     },
     updateToChannel(channelName) {
       if (!channelName)
@@ -424,33 +454,30 @@ export default {
         return
       this.originalChannelName = this.channelName
       this.lockCanceled()
-      if (this.isNewChannelId()) {
-        this.edit = true
-        this.isNew = true
+      if (this.channelIsNew) {
         this.channel = this.copyOfChannel()
         this.discarding = false
-        return
+        this.edit = true
+        return this.channel
       }
 
       const channel = this.$store.state.base.channel;
-      if (this.isPreloaded()) {
+      const isPreloaded = this.isPreloaded()
+      if (isPreloaded) {
         this.discarding = false;
         this.channel = channel;
-        return;
+        return this.channel;
       }
 
       this.channel = null
       const fullId = this.channelId;
 
-      if (this.theChannel)
-        this.channel = this.theChannel;
-      else {
-        this.$store.dispatch('loadChannel', fullId)
-            .then(channel => {
-              this.channel = channel
-            })
-      }
-      this.discarding = false
+      this.$store.dispatch('loadChannel', fullId)
+          .then(channel => {
+            this.channel = channel
+            this.discarding = false
+            return this.channel
+          })
     },
     channelIndex(theSessionId, theChannelName) {
       const fullChannelId = `${theSessionId}__${theChannelName}`;
@@ -514,6 +541,7 @@ export default {
             that.channel.writeLocked = bool
             that.msg('Channel configuration is ' + ((bool)?'locked':'unlocked'))
             that.lockAckMode = ""
+            that.$emit('onChLockStatus', that.channel)
           })
           .catch(function (error) {
             let msg = ((error && error.response && error.response.status && error.response.statusText) ? (error.response.status +  ': ' + error.response.statusText) : "")

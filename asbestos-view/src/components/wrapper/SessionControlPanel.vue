@@ -2,21 +2,14 @@
   <div>
     <div>
       <div class="control-panel-item-title">Test Session</div>
-      <select v-model="testSession" size="1" class="control-panel-font">
-        <option v-for="(ts, tsi) in $store.state.base.sessionNames"
-                v-bind:value="ts"
-                :key="ts + tsi"
-        >
-          {{ ts }}
-        </option>
-      </select>
+
         <!--
         begin
         has problems
         CHANNEL/channels/all: Error: Request failed with status code 404
         -->
-<!--      <img id="add" src="../../assets/add-button.png" @click="add()"/>-->
-<!--      <img id="delete" src="../../assets/exclude-button-red.png" @click="del()"/>-->
+      <img id="add" src="../../assets/add-button.png" @click="add()"/>
+      <img id="delete" src="../../assets/exclude-button-red.png" @click="del()"/>
       <!-- end -->
       <span v-if="details">
               <button type="button" @click="toggleDetails()">No Details</button>
@@ -28,6 +21,14 @@
     <div v-if="details">
       {{ includesSession }}
     </div>
+    <select v-model="testSession" size="1" class="control-panel-font">
+      <option v-for="(ts, tsi) in $store.state.base.sessionNames"
+              v-bind:value="ts"
+              :key="ts + tsi"
+      >
+        {{ ts }}
+      </option>
+    </select>
     <div>
       <div v-if="adding">
         <input v-model="newChannelName">
@@ -49,6 +50,7 @@
 import Vue from 'vue'
 import { BFormSelect } from 'bootstrap-vue'
 Vue.component('b-form-select', BFormSelect)
+
 
 export default {
   data() {

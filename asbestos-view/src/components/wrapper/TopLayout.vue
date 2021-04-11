@@ -199,6 +199,8 @@
         font-size: large;
     }
     .control-panel-item-title {
+        margin-top: 4px;
+        margin-bottom: 4px;
         font-weight: bold;
         /*cursor: pointer;*/
         /*text-decoration: underline;*/

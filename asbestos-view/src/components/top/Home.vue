@@ -21,7 +21,7 @@
             Proxy is responding at {{proxyBase()}}
         </div>
         <div v-else-if="$store.state.log.loaded===null">
-            Please wait. Refreshing proxy status...
+            Refreshing proxy status...
         </div>
         <div v-else>
             <img src="../../assets/cross.png">

@@ -16,7 +16,7 @@
 <!--      </div>-->
 <!--  <div class="container">-->
   <div>
-        <channel-nav :session-id="sessionId" class="nav"></channel-nav>
+        <channel-nav :session-id="sessionId" :channel-name="channelName" class="nav"></channel-nav>
 <!--        <channel-edit :session-id="sessionId" :channelName="channelName" class="view"></channel-edit>-->
     </div>
 </template>
@@ -24,7 +24,7 @@
 <script>
     import ChannelNav from "./ChannelNav"
 //    import ChannelEdit from "./ChannelEdit"
-    import {newChannel} from "@/types/channel";
+//     import {newChannel} from "@/types/channel";
 
     export default {
         data() {
@@ -59,6 +59,7 @@
           pushNewChannelRoute() {
             return this.$router.push(this.newChannelRoute())
           },
+            /*
           newChannelRoute() {
             let chan = newChannel()
             chan.testSession = this.sessionId
@@ -69,6 +70,8 @@
             console.log(`newChannel ${Object.keys(chan)}`)
             return '/session/' + this.sessionId + '/channels/new'
           },
+          *
+             */
         },
         props: [
            'sessionId', 'channelName'
@@ -77,23 +80,24 @@
 </script>
 
 <style scoped>
+    /*
     .container {
         display: grid;
         grid-template-columns: auto auto;
         grid-template-areas: 'nav view';
-        align-content: start;
+        align-content: center;
     }
     .nav {
         grid-area: nav;
         border: 1px dotted black;
-        text-align: left;
+        text-align: center;
         width: fit-content;
     }
     .view {
         grid-area: view;
-        text-align: left;
+        text-align: center;
         width: fit-content;
-        /*border: 1px dotted black;*/
+        border: 1px dotted black;
     }
     .channel-panel-header {
       font-weight: bold;
@@ -102,5 +106,6 @@
       position: relative;
       left: 0px;
     }
+    */
 
 </style>
