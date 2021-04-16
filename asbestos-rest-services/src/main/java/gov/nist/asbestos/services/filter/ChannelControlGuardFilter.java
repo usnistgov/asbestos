@@ -1,5 +1,6 @@
 package gov.nist.asbestos.services.filter;
 
+import gov.nist.asbestos.client.log.ChannelDoesNotExistException;
 import gov.nist.asbestos.services.restRequests.CreateChannelRequest;
 import gov.nist.asbestos.services.restRequests.DeleteChannelRequest;
 import gov.nist.asbestos.client.Base.Request;
@@ -7,6 +8,7 @@ import gov.nist.asbestos.client.log.SimStore;
 import gov.nist.asbestos.serviceproperties.ServiceProperties;
 import gov.nist.asbestos.client.channel.ChannelConfig;
 import gov.nist.asbestos.client.channel.ChannelConfigFactory;
+import gov.nist.asbestos.services.restRequests.ReplaceChannelRequest;
 import gov.nist.asbestos.simapi.simCommon.SimId;
 import gov.nist.asbestos.simapi.simCommon.TestSession;
 import gov.nist.asbestos.simapi.tk.installation.Installation;
@@ -63,7 +65,6 @@ public class ChannelControlGuardFilter implements Filter {
     public void init(FilterConfig filterConfig) {
        // log.info("ChannelControlGuardFilter init");
 
-
         try {
             ServiceProperties.init();
         } catch (Exception ex) {
@@ -90,61 +91,77 @@ public class ChannelControlGuardFilter implements Filter {
             HttpServletRequest httpServletRequest = (HttpServletRequest) request;
             HttpServletResponse httpServletResponse = (HttpServletResponse) response;
 
-                if (httpServletRequest.getMethod().equalsIgnoreCase("POST")) {
-                    MyHttpServletRequestWrapper myHttpServletRequest = new MyHttpServletRequestWrapper(httpServletRequest);
-                    Request channelRequest = new Request(myHttpServletRequest, httpServletResponse, externalCache);
-                    if (CreateChannelRequest.isRequest(channelRequest)) {
-                        log.info("Channel Control POST (ChannelControlGuardFilter) " + channelRequest.uri);
+            String httpVerb = httpServletRequest.getMethod();
+            boolean isPost = httpVerb.equalsIgnoreCase("POST");
+            boolean isPut = httpVerb.equalsIgnoreCase("PUT");
+            boolean isDelete = httpVerb.equalsIgnoreCase("DELETE");
 
+            if (isPost || isPut) {
+                MyHttpServletRequestWrapper myHttpServletRequest = new MyHttpServletRequestWrapper(httpServletRequest);
+                Request channelRequest = new Request(myHttpServletRequest, httpServletResponse, externalCache);
+                boolean isValidPostRequest = isPost && CreateChannelRequest.isRequest(channelRequest);
+                boolean isValidPutRequest = isPut && ReplaceChannelRequest.isRequest(channelRequest);
+                if (isValidPostRequest || isValidPutRequest) {
+                    log.info(String.format("Channel Control %s (ChannelControlGuardFilter): %s" , httpVerb, channelRequest.uri));
 
-                        String rawRequest = IOUtils.toString(myHttpServletRequest.getInputStream(), Charset.defaultCharset());   // json
-                        ChannelConfig channelConfigInRequest = ChannelConfigFactory.convert(rawRequest);
+                    String rawRequest = IOUtils.toString(myHttpServletRequest.getInputStream(), Charset.defaultCharset());   // json
+                    ChannelConfig channelConfigInRequest = ChannelConfigFactory.convert(rawRequest);
 
-                        SimStore simStore = new SimStore(externalCache,
-                                new SimId(new TestSession(channelConfigInRequest.getTestSession()),
-                                        channelConfigInRequest.asChannelId(),
-                                        channelConfigInRequest.getActorType(),
-                                        channelConfigInRequest.getEnvironment(),
-                                        true));
-                        try {
-                            // Channel may not exist
-                            simStore.open();
-                        } catch (RuntimeException rex) {
-                            chain.doFilter(myHttpServletRequest, response);
+                    SimStore simStore = new SimStore(externalCache,
+                            new SimId(new TestSession(channelConfigInRequest.getTestSession()),
+                                    channelConfigInRequest.getChannelName(),
+                                    channelConfigInRequest.getActorType(),
+                                    channelConfigInRequest.getEnvironment(),
+                                    true));
+                    try {
+                        simStore.open();
+                        if (isPost) {
+                            ((HttpServletResponse) response).sendError(HttpServletResponse.SC_BAD_REQUEST, "Channel configuration already exists.");
                             return;
                         }
-                        ChannelConfig beforeUpdate = simStore.getChannelConfig();
-                        if (beforeUpdate.isWriteLocked()) {
-                            ((HttpServletResponse) response).sendError(HttpServletResponse.SC_UNAUTHORIZED, "Channel configuration is write protected.");
-                            return;
-                        } else {
+                    } catch (ChannelDoesNotExistException ex) {
+                        if (isPost) { // Expected exception
                             chain.doFilter(myHttpServletRequest, response);
+                            return;
+                        } else if (isPut) { // Channel configuration must exist if replacing
+                            ((HttpServletResponse) response).sendError(HttpServletResponse.SC_BAD_REQUEST, "Channel configuration does not exist.");
                             return;
                         }
                     }
-                } else if (httpServletRequest.getMethod().equalsIgnoreCase("DELETE")) {
-                    MyHttpServletRequestWrapper myHttpServletRequest = new MyHttpServletRequestWrapper(httpServletRequest);
-                    Request channelRequest = new Request(myHttpServletRequest, httpServletResponse, externalCache);
-                    if (DeleteChannelRequest.isRequest(channelRequest)) {
-                        String channelId = channelRequest.uriParts.get(3);
-                        SimStore simStore = new SimStore(externalCache, SimId.buildFromRawId(channelId));
-                        try {
-                            // Channel may not exist
-                            simStore.open();
-                        } catch (RuntimeException rex) {
-                            chain.doFilter(myHttpServletRequest, response);
-                            return;
-                        }
-                        ChannelConfig beforeUpdate = simStore.getChannelConfig();
-                        if (beforeUpdate.isWriteLocked()) {
-                            ((HttpServletResponse) response).sendError(HttpServletResponse.SC_UNAUTHORIZED, "Channel configuration is write protected.");
-                            return;
-                        } else {
-                            chain.doFilter(myHttpServletRequest, response);
-                            return;
-                        }
+
+                    ChannelConfig beforeUpdate = simStore.getChannelConfig();
+                    if (beforeUpdate.isWriteLocked()) {
+                        // Only way through this is to send a request through the channelGuard servlet.
+                        ((HttpServletResponse) response).sendError(HttpServletResponse.SC_UNAUTHORIZED, "Channel configuration is write protected.");
+                        return;
+                    } else {
+                        chain.doFilter(myHttpServletRequest, response);
+                        return;
                     }
                 }
+            } else if (isDelete) {
+                MyHttpServletRequestWrapper myHttpServletRequest = new MyHttpServletRequestWrapper(httpServletRequest);
+                Request channelRequest = new Request(myHttpServletRequest, httpServletResponse, externalCache);
+                if (DeleteChannelRequest.isRequest(channelRequest)) {
+                    String channelId = channelRequest.uriParts.get(3);
+                    SimStore simStore = new SimStore(externalCache, SimId.buildFromRawId(channelId));
+                    try {
+                        // Channel may not exist
+                        simStore.open();
+                    } catch (RuntimeException rex) {
+                        chain.doFilter(myHttpServletRequest, response);
+                        return;
+                    }
+                    ChannelConfig beforeUpdate = simStore.getChannelConfig();
+                    if (beforeUpdate.isWriteLocked()) {
+                        ((HttpServletResponse) response).sendError(HttpServletResponse.SC_UNAUTHORIZED, "Channel configuration is write protected.");
+                        return;
+                    } else {
+                        chain.doFilter(myHttpServletRequest, response);
+                        return;
+                    }
+                }
+            }
         }
         chain.doFilter(request, response);
     }

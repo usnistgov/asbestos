@@ -39,6 +39,7 @@ class PassthroughIT {
     }
 
     private void deleteChannels() {
+        new HttpDelete().run("http://localhost:" + proxyPort + "/asbestos/channel/default__default");
         new HttpDelete().run("http://localhost:" + proxyPort + "/asbestos/channel/default__fhirpass");
         new HttpDelete().run("http://localhost:"  + proxyPort + "/asbestos/channel/default__test");
         new HttpDelete().run("http://localhost:" + proxyPort + "/asbestos/channel/default__abc");

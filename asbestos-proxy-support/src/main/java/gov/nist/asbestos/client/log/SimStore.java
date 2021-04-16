@@ -114,7 +114,7 @@ public class SimStore {
     public SimStore open() {
         getStore(false);
         if (!existsChannelDir())
-            throw new RuntimeException("Channel does not exist");
+            throw new ChannelDoesNotExistException("Channel does not exist");
         File file = new File(getChannelDir(), CHANNEL_CONFIG_FILE);
         channelConfig = ChannelConfigFactory.load(file);
         channelId = getSimId(channelConfig);

@@ -200,6 +200,20 @@
   <security-constraint>
     <web-resource-collection>
       <web-resource-name>ChannelEditor</web-resource-name>
+      <url-pattern>/channelGuard</url-pattern>
+      <http-method>PUT</http-method>
+    </web-resource-collection>
+    <auth-constraint>
+      <role-name>editRole</role-name>
+    </auth-constraint>
+    <user-data-constraint>
+      <transport-guarantee>CONFIDENTIAL</transport-guarantee>
+    </user-data-constraint>
+  </security-constraint>
+
+  <security-constraint>
+    <web-resource-collection>
+      <web-resource-name>ChannelEditor</web-resource-name>
       <url-pattern>/channelLock</url-pattern>
       <http-method>POST</http-method>
     </web-resource-collection>

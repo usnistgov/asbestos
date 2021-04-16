@@ -7,6 +7,7 @@ import gov.nist.asbestos.client.client.Format;
 import gov.nist.asbestos.client.events.UIEvent;
 import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.http.headers.Headers;
+import gov.nist.asbestos.http.operations.HttpDelete;
 import gov.nist.asbestos.http.operations.HttpGetter;
 import gov.nist.asbestos.testEngine.engine.TestEngine;
 import org.hl7.fhir.r4.model.BaseResource;
@@ -35,7 +36,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class LogAnalysisRequestIT {
     private static String testSession = "default";
-    private static String channelId = "IT";
+    private static String channelName = "IT";
     private static String fhirPort = ITConfig.getFhirPort();
     private static String proxyPort = ITConfig.getProxyPort();
     private static EC ec;
@@ -51,6 +52,10 @@ public class LogAnalysisRequestIT {
         return parts[5];
     }
 
+    /**
+     * TODO: Is this channelName?
+     * @return
+     */
     static String getChannelId() {
         String[] parts = eventUrl.split("/");
         return parts[6];
@@ -80,7 +85,8 @@ public class LogAnalysisRequestIT {
 
     @BeforeAll
     static void runATest() throws IOException, URISyntaxException {
-        base = new URI(Utility.createChannel(testSession, channelId, fhirPort, proxyPort));
+        new HttpDelete().run(String.format("http://localhost:%s/asbestos/channel/%s__%s", proxyPort, testSession, channelName));
+        base = new URI(Utility.createChannel(testSession, channelName, fhirPort, proxyPort));
 
         TestEngine engine = Utility.run(base, "/logAnalysis/external_cache/FHIRTestCollections/collection1/test1/TestScript.xml");
         theReport = engine.getTestReport();
@@ -92,7 +98,7 @@ public class LogAnalysisRequestIT {
 
         // self checks
         assertEquals(testSession, getTestSession());
-        assertEquals(channelId, getChannelId());
+        assertEquals(channelName, getChannelId());
         assertEquals("Bundle", getResourceType());
         assertEquals(getEventId().split("_").length, 7);
 
@@ -108,7 +114,7 @@ public class LogAnalysisRequestIT {
         assertNotNull(eventId);
         UIEvent uiEvent = new UIEvent(ec).fromParms(
                 testSession,
-                channelId,
+                channelName,
                 "Bundle",
                 eventId);
         assertNotNull(uiEvent);

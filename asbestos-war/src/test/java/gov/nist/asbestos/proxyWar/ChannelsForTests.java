@@ -1,6 +1,7 @@
 package gov.nist.asbestos.proxyWar;
 
 import gov.nist.asbestos.client.resolver.Ref;
+import gov.nist.asbestos.http.operations.HttpDelete;
 import gov.nist.asbestos.http.operations.HttpPost;
 import gov.nist.asbestos.client.channel.ChannelConfig;
 import gov.nist.asbestos.client.channel.ChannelConfigFactory;
@@ -32,7 +33,9 @@ public class ChannelsForTests {
     }
 
     public static Ref gen500() throws IOException, URISyntaxException {
-        URI fhirBase500 = new URI("http://localhost:" + ITConfig.getProxyPort()  + "/asbestos/gen500");
+        String base = "http://localhost:" + ITConfig.getProxyPort()  + "/asbestos/gen500";
+        new HttpDelete().run(String.format("http://localhost:%s/asbestos/channel/%s__%s", ITConfig.getProxyPort(), "default", "g500"));
+        URI fhirBase500 = new URI(base);
         ChannelConfig channelConfig = ChannelsForTests.create("default", "g500", fhirBase500);
         URI channelBase = getChannelBase(channelConfig);
         return new Ref(channelBase);

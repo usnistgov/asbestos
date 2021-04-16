@@ -1,6 +1,7 @@
 package gov.nist.asbestos.proxyWar;
 
 import gov.nist.asbestos.client.resolver.Ref;
+import gov.nist.asbestos.http.operations.HttpDelete;
 import gov.nist.asbestos.testEngine.engine.ExtensionDef;
 import gov.nist.asbestos.testEngine.engine.TestEngine;
 import org.hl7.fhir.r4.model.TestReport;
@@ -15,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class SetupIT {
     private static String testSession = "default";
-    private static String channelId = "IT";
+    private static String channelName = "IT";
     private static String fhirPort = ITConfig.getFhirPort();
     private static String proxyPort = ITConfig.getProxyPort();
 
@@ -24,7 +25,8 @@ class SetupIT {
 
     @BeforeAll
     static void createTheChannel() throws IOException, URISyntaxException {
-        base = new URI(Utility.createChannel(testSession, channelId, fhirPort, proxyPort));
+        new HttpDelete().run(String.format("http://localhost:%s/asbestos/channel/%s__%s", ITConfig.getProxyPort(), testSession, channelName));
+        base = new URI(Utility.createChannel(testSession, channelName, fhirPort, proxyPort));
         base500 = ChannelsForTests.gen500();
     }
 

@@ -11,6 +11,8 @@ import org.apache.log4j.Logger;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 // 0 - empty
 // 1 - app context
 // 2 - "channel"
@@ -20,7 +22,7 @@ import java.nio.charset.Charset;
 public class CreateChannelRequest {
     private static Logger log = Logger.getLogger(CreateChannelRequest.class);
 
-    private Request request;
+    protected Request request;
 
     public static boolean isRequest(Request request) {
         if (request.uriParts.size() == 4) {
@@ -43,6 +45,21 @@ public class CreateChannelRequest {
 
         if ("fhir".equalsIgnoreCase(channelConfig.getChannelType()) && channelConfig.isLogMhdCapabilityStatementRequest()) {
             channelConfig.setLogMhdCapabilityStatementRequest(false);
+        }
+
+        Pattern validCharsPattern = Pattern.compile("^([a-zA-Z0-9_]+)$");
+        Pattern reservedNamesPattern = Pattern.compile("(\\bnew\\b)|(\\bcopy\\b)", Pattern.CASE_INSENSITIVE);
+
+        boolean isInvalidChannelName = ! validCharsPattern.matcher(channelConfig.asChannelId()).matches()
+                || reservedNamesPattern.matcher(channelConfig.getChannelName()).matches();
+
+        if (isInvalidChannelName) {
+            String error = "Invalid channel name";
+            log.warn(error + ": " +  channelConfig.asChannelId());
+            request.resp.setContentType("application/json");
+            request.resp.getOutputStream().print(error);
+            request.setStatus((request.resp.SC_BAD_REQUEST));
+            return;
         }
 
         SimStore simStore = new SimStore(request.externalCache,

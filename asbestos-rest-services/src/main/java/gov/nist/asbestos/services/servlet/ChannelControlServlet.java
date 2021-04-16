@@ -16,6 +16,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
+import java.io.IOException;
 
 public class ChannelControlServlet extends HttpServlet {
     private static Logger log = Logger.getLogger(ChannelControlServlet.class);
@@ -47,6 +48,20 @@ public class ChannelControlServlet extends HttpServlet {
                     .setFhirBase(hapiFhirBase);
             simStore.create(cconfig);
         }
+    }
+
+    @Override
+    protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        Request request = new Request(req, resp, externalCache);
+
+        try {
+            if (ReplaceChannelRequest.isRequest(request))        new ReplaceChannelRequest(request).run();
+            else  request.badRequest();
+
+        } catch (Throwable t) {
+            request.serverError(t);
+        }
+
     }
 
     @Override
