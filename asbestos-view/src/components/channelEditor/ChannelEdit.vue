@@ -34,10 +34,6 @@
               <sign-in :banner="lockAckMode" :userProps="editUserProps" :doDefaultSignIn="true" :showCancelButton="true" @onOkClick="lockAcked" @onCancelClick="lockCanceled" />
             </div>
             <div v-else>
-<!--              <div class="tooltip">-->
-<!--                <img id="select-button" src="../../assets/select.png" @click="select()"/>-->
-<!--                <span class="tooltiptext">Select</span>-->
-<!--              </div>-->
               <div class="divider"></div>
               <div class="tooltip">
                 <img id="edit-button" src="../../assets/pencil-edit-button.png" @click="guardedFn('Edit',toggleEdit)"/>
@@ -248,11 +244,13 @@ export default {
      */
   },
   computed: {
+    /*
     channelIds: {
       get() {
         return this.$store.getters.getEffectiveChannelIds;
       },
     },
+    */
     channelId() {
       return this.sessionId + '__' + this.channelName;
     },
@@ -276,7 +274,7 @@ export default {
     },
     error(msg) {
       console.log(msg)
-      this.$bvToast.toast(msg.message, {noCloseButton: true, title: 'Error'})
+      this.$bvToast.toast(msg, {noCloseButton: true, title: 'Error'})
     },
     requestDelete() {
       this.ackMode = true
@@ -305,13 +303,25 @@ export default {
       }
     },
     copy() {  // actually duplicate (a channel)
-      let chan = cloneDeep(this.channel)
+      let chan = this.copyOfChannel()
       chan.channelName = 'copy'
       chan.writeLocked = false
       this.$store.commit('installChannel', chan)
       this.$store.commit('setChannelIsNew', true);
+      this.edit = true
       this.$router.push('/session/' + this.sessionId + '/channels/copy')
+
+      /*
+    let chan = cloneDeep(this.channel)
+    chan.channelName = 'copy'
+    chan.writeLocked = false
+    this.$store.commit('installChannel', chan)
+    this.$store.commit('setChannelIsNew', true);
+    this.$router.push('/session/' + this.sessionId + '/channels/copy')
+       */
+
     },
+      /*
     async deleteChannel() {
       try {
         if (! this.channel.writeLocked) {
@@ -328,6 +338,7 @@ export default {
         this.error(error)
       }
     },
+    */
 
     toggleEdit() {
       this.edit = !this.edit
@@ -344,34 +355,57 @@ export default {
       //     await this.$router.push('/session/' + this.channel.testSession + '/channels/' + this.channel.channelName)
       // } else {
       // this.$store.commit('installChannel', cloneDeep(this.channel))
-      this.$store.commit('installChannel', this.channel)
       if (! this.channel.writeLocked) {
-          const url = `CHANNEL/create`;
           try {
-            await CHANNEL.post('create', this.channel);
-            this.msg(this.channelIsNew ? 'Saved.' : 'Updated.')
-            // this.isNew = false
-            this.$store.commit('setChannelIsNew', false);
+              if (this.channelIsNew) {
+                await CHANNEL.post('create', this.channel)
+                this.$store.commit('installChannel', this.channel)
+                this.$store.commit('setChannelIsNew', false);
+                this.msg('Saved.')
+              } else {
+                await CHANNEL.put(`${this.channel.testSession}__${this.channel.channelName}`, this.channel);
+                this.$store.commit('installChannel', this.channel)
+                this.msg('Updated.')
+              }
             this.edit = false
             this.lockAckMode = ""
             this.fetch()
             await this.$store.dispatch('loadChannelIds')
           } catch (error) {
-            this.error(url + ': ' + error)
+            if (error !== null && error !== undefined) {
+                const hasResponse = Object.keys(error).indexOf('response')
+                if (hasResponse) {
+                  this.error(error.response.statusText)
+                  this.error(error.response.data)
+                }
+            }
+            // const url = (this.channelIsNew ? 'CHANNEL.post' : 'CHANNEL.put');
+            // this.error(url + ': ' + error)
             // this.isNew = false
-            this.$store.commit('setChannelIsNew', false);
-            this.edit = false
+            // this.msg(error)
+            // this.$store.commit('setChannelIsNew', false);
+            // this.edit = false
           }
         } else {  // has write lock
           const url = `channelGuard/create`;
           try {
-            await PROXY.post('/channelGuard', this.channel, {
-              auth: {
-                username: this.editUserProps.bauser,
-                password: this.editUserProps.bapw
-              }
-            })
-            this.msg('Saved.')
+            if (this.channelIsNew) {
+              await PROXY.post('/channelGuard/create', this.channel, {
+                auth: {
+                  username: this.editUserProps.bauser,
+                  password: this.editUserProps.bapw
+                }
+              })
+              this.msg('Saved.')
+            } else {
+              await PROXY.put('/channelGuard', this.channel, {
+                auth: {
+                  username: this.editUserProps.bauser,
+                  password: this.editUserProps.bapw
+                }
+              })
+              this.msg('Updated.')
+            }
             // this.isNew = false
             this.$store.commit('setChannelIsNew', false);
             this.edit = false
@@ -407,7 +441,7 @@ export default {
       // this.isNew = false
         if (this.channelIsNew) {
             this.msg('Discarded.')
-            this.toggleEdit()
+            this.edit = false
             this.$store.commit('setChannelIsNew', false);
             this.discarding = true
             const route = '/session/' + this.channel.testSession + '/channels'
@@ -479,16 +513,19 @@ export default {
 
       this.$store.dispatch('loadChannel', fullId)
           .then(channel => {
-            this.channel = channel
+            this.channel = cloneDeep(channel)
             this.discarding = false
           })
     },
+    /*
     channelIndex(theSessionId, theChannelName) {
       const fullChannelId = `${theSessionId}__${theChannelName}`;
       return this.$store.state.base.channelIds.findIndex( function(channelId) {
         return channelId === fullChannelId
       })
     },
+
+     */
     getChannel() {
       return this.$store.state.base.channel
     },
@@ -543,9 +580,9 @@ export default {
       await PROXY.post('channelLock', chan, { auth: {username: this.editUserProps.bauser, password: this.editUserProps.bapw}})
           .then(function () {
             that.channel.writeLocked = bool
-            that.msg('Channel configuration is ' + ((bool)?'locked':'unlocked'))
             that.lockAckMode = ""
-            that.$emit('onChLockStatus', that.channel)
+            that.$store.commit('installChannel', that.channel)
+            that.msg('Channel configuration is ' + ((bool)?'locked':'unlocked'))
           })
           .catch(function (error) {
             let msg = ((error && error.response && error.response.status && error.response.statusText) ? (error.response.status +  ': ' + error.response.statusText) : "")

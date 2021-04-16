@@ -116,7 +116,7 @@ public class ChannelControlGuardFilter implements Filter {
                     try {
                         simStore.open();
                         if (isPost) {
-                            ((HttpServletResponse) response).sendError(HttpServletResponse.SC_BAD_REQUEST, "Channel configuration already exists.");
+                            rejectRequest(response, HttpServletResponse.SC_BAD_REQUEST, "Channel configuration already exists.");
                             return;
                         }
                     } catch (ChannelDoesNotExistException ex) {
@@ -124,7 +124,7 @@ public class ChannelControlGuardFilter implements Filter {
                             chain.doFilter(myHttpServletRequest, response);
                             return;
                         } else if (isPut) { // Channel configuration must exist if replacing
-                            ((HttpServletResponse) response).sendError(HttpServletResponse.SC_BAD_REQUEST, "Channel configuration does not exist.");
+                            rejectRequest(response, HttpServletResponse.SC_BAD_REQUEST, "Channel configuration does not exist.");
                             return;
                         }
                     }
@@ -132,7 +132,7 @@ public class ChannelControlGuardFilter implements Filter {
                     ChannelConfig beforeUpdate = simStore.getChannelConfig();
                     if (beforeUpdate.isWriteLocked()) {
                         // Only way through this is to send a request through the channelGuard servlet.
-                        ((HttpServletResponse) response).sendError(HttpServletResponse.SC_UNAUTHORIZED, "Channel configuration is write protected.");
+                        rejectRequest(response, HttpServletResponse.SC_BAD_REQUEST, "Channel configuration is write protected.");
                         return;
                     } else {
                         chain.doFilter(myHttpServletRequest, response);
@@ -154,7 +154,7 @@ public class ChannelControlGuardFilter implements Filter {
                     }
                     ChannelConfig beforeUpdate = simStore.getChannelConfig();
                     if (beforeUpdate.isWriteLocked()) {
-                        ((HttpServletResponse) response).sendError(HttpServletResponse.SC_UNAUTHORIZED, "Channel configuration is write protected.");
+                        rejectRequest(response, HttpServletResponse.SC_UNAUTHORIZED, "Channel configuration is write protected.");
                         return;
                     } else {
                         chain.doFilter(myHttpServletRequest, response);
@@ -164,6 +164,14 @@ public class ChannelControlGuardFilter implements Filter {
             }
         }
         chain.doFilter(request, response);
+    }
+
+    private void rejectRequest(ServletResponse response, int httpStatusCode, String message) throws IOException {
+        response.resetBuffer();
+        ((HttpServletResponse) response).setStatus(httpStatusCode);
+        response.setContentType("text/plain");
+        response.getOutputStream().print(message);
+        response.flushBuffer();
     }
 
     @Override

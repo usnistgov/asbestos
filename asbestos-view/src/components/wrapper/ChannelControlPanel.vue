@@ -82,7 +82,7 @@
                 lockAckMode: false,  // for deleting
                 adding: false,
                 newChannelName: null,
-                channel: null,
+                // channel: null, // used only for adding a new channel
                 deleting: false,
                 editUserProps: ASBTS_USERPROPS,
             }
@@ -95,11 +95,13 @@
         },
 
         methods: {
+            /*
             updateChannelLockStatus(ch) {
                 if (ch !== undefined && typeof (ch) === 'object' && ch['writeLocked'] !== undefined) {
                     this.channel.writeLocked = ch.writeLocked
                 }
             },
+            */
             lockAcked() {
             },
             lockCanceled() {
@@ -109,10 +111,11 @@
             },
             async confirmDel() {
                 try {
-                    if (!this.channel.writeLocked) {
-                        await PROXY.delete('channel/' + this.sessionId + '__' + this.currentChannelName)
+                    let channelId = `${this.theChannel.testSession}__${this.theChannel.channelName}`
+                    if (!this.theChannel.writeLocked) {
+                        await PROXY.delete('channel/' + channelId)
                     } else if (this.editUserProps.bapw !== "") {
-                        await PROXY.delete('channelGuard/' + this.channelId, {
+                        await PROXY.delete('channelGuard/' + channelId, {
                             auth: {
                                 username: this.editUserProps.bauser,
                                 password: this.editUserProps.bapw
@@ -120,17 +123,18 @@
                         })
                     }
                     this.msg('Deleted')
-                    this.localDelete(this.channelId);
-                    this.$store.commit('deleteChannel', this.channelId)
+                    // this.localDelete(channelId);
+                    this.$store.commit('deleteChannel', channelId)
                     await this.$store.dispatch('loadChannelIds')
-                    this.setChannelId();
-                    //this.$router.push('/session/' + this.sessionId + '/channels')
+                    // this.setChannelId();
+                    this.$router.push('/session/' + this.sessionId + '/channels')
                 } catch (error) {
                     this.error(error);
                 }
                 this.adding = false;
                 this.cancelDel()
             },
+            /*
             localDelete(theChannelId) {
                 const index = this.channelIds.findIndex(function (channelId) {
                     return channelId === theChannelId;
@@ -140,6 +144,7 @@
                 this.channelIds.splice(index, 1);
                 this.channel = null;
             },
+            */
 
             cancelDel() {
                 this.deleting = false;
@@ -156,7 +161,7 @@
                     this.adding = false;
                 }
                 if (typeof fn === 'function') {
-                    if (this.channel.writeLocked) {
+                    if (this.theChannel.writeLocked) {
                         if (this.editUserProps.signedIn) {
                             this.lockAcked = null
                             fn.call()
@@ -178,26 +183,26 @@
                 this.adding = true
             },
             doAdd() {
-                this.channel = newChannel();
-                this.channel.channelName = this.newChannelName;
-                if (this.isCurrentChannelIdBadPattern()) {
+                const channel = newChannel();
+                channel.channelName = this.newChannelName;
+                if (this.isCurrentChannelIdBadPattern(channel)) {
                     this.$store.commit('setError', `Name may only contain a-z A-Z 0-9 and -.`);
                     return;
                 }
-                this.channel.testSession = this.sessionId;
+                channel.testSession = this.sessionId;
                 //this.$store.commit('setChannel', this.channel)
                 this.adding = false;
-                this.channelId = `${this.sessionId}__${this.newChannelName}`;
-                if (this.channelIds === null)
-                    this.channelIds = [];
+                // const channelId = `${this.sessionId}__${this.newChannelName}`
+                // if (this.channelIds === null)
+                //     this.channelIds = [];
                 //this.channelIds.push(this.channelId);
                 this.$store.commit('setChannelIsNew', true);
-                this.$store.commit('installChannel', this.channel);
+                this.$store.commit('installChannel', channel);
                 // this.$store.commit('setChannelIsNew');
-                this.pushChannelRoute();
+                this.pushChannelRoute(channel);
             },
-            isCurrentChannelIdBadPattern() {
-                const name = this.channel.channelName
+            isCurrentChannelIdBadPattern(ch) {
+                const name = ch.channelName
                 const re = RegExp('^([a-zA-Z0-9-]+)$')
                 const match = re.test(name)
                 const re2 = RegExp('.*__.*')
@@ -212,18 +217,19 @@
                 this.channelIds = this.$store.getters.getChannelIdsForCurrentSession;
             },
             // for create a new channel
+            /*
             pushNewChannelRoute() {
                 return this.$router.push(this.newChannelRoute())
-            },
-            pushChannelRoute() {
-                const route = this.channelRoute();
+            },*/
+            pushChannelRoute(ch) {
+                const route = this.channelRoute(ch);
                 if (route)
                     return this.$router.push(route);
             },
-            channelRoute() {
-                if (!this.channel)
+            channelRoute(ch) {
+                if (ch===undefined || ch===null)
                     return null;
-                return '/session/' + this.channel.testSession + '/channels/' + this.channel.channelName;
+                return '/session/' + ch.testSession + '/channels/' + ch.channelName;
             },
             /*
             newChannelRoute() {
@@ -271,27 +277,25 @@
                     console.log(`set channelName to ${name}`)
                     if (name !== this.$store.state.base.channelName) {
                         this.$store.commit('setChannelName', name);
-
-                                this.$store.dispatch('loadChannel', this.$store.getters.getChannelId)
-                                    .then(c => {
-                                        if (c !== null && c !== undefined) {
-                                            const current = this.$router.currentRoute.path;
-                                            const parts = current.split("/");
-                                            const size = parts.length;
-                                            let i;
-                                            for (i = 0; i < size; i++) {
-                                                if (parts[i] === 'channel' || parts[i] === 'channels' && i + 1 <= size /*&& i<size+1*/) {
-                                                    i++;
-                                                    parts[i] = name;  // insert new channelId
-                                                    const newRoute = parts.join('/');
-                                                    this.$router.push(newRoute);
-                                                    break;
-                                                }
-                                            }
+                        this.$store.commit('setChannelIsNew', false);
+                        this.$store.dispatch('loadChannel', this.$store.getters.getChannelId)
+                            .then(c => {
+                                if (c !== null && c !== undefined) {
+                                    const current = this.$router.currentRoute.path;
+                                    const parts = current.split("/");
+                                    const size = parts.length;
+                                    let i;
+                                    for (i = 0; i < size; i++) {
+                                        if (parts[i] === 'channel' || parts[i] === 'channels' && i + 1 <= size /*&& i<size+1*/) {
+                                            i++;
+                                            parts[i] = name;  // insert new channelId
+                                            const newRoute = parts.join('/');
+                                            this.$router.push(newRoute);
+                                            break;
                                         }
-                                    })
-
-                                // return response.data
+                                    }
+                                }
+                            })
                     }
                 },
                 get() {
@@ -306,6 +310,9 @@
                 get() {
                     return this.$store.state.base.session;
                 }
+            },
+            theChannel() {
+                return this.$store.state.base.channel
             },
         },
         created() {

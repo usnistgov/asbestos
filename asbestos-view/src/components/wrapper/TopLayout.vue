@@ -152,7 +152,7 @@
     }
     .error-grid-container {
         display: grid;
-        grid-template-columns: 20px 1fr;
+        grid-template-columns: 20px .9fr;
     }
     .error-grid-close {
         grid-column: 1;
