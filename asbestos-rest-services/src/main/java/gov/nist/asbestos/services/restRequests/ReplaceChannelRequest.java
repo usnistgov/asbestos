@@ -7,8 +7,11 @@ import gov.nist.asbestos.client.channel.ChannelConfigFactory;
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.nio.charset.Charset;
+
+import static gov.nist.asbestos.client.Base.Returns.returnPlainTextResponse;
 
 // 0 - empty
 // 1 - app context
@@ -41,12 +44,12 @@ public class ReplaceChannelRequest extends CreateChannelRequest {
         try {
             channelConfigAsPerTheUri = ChannelControl.channelConfigFromChannelId(request.externalCache, channelId);
 
-            String rawRequest = IOUtils.toString(request.req.getInputStream(), Charset.defaultCharset());   // json
+            rawRequest = IOUtils.toString(request.req.getInputStream(), Charset.defaultCharset());   // json
             log.debug("REPLACE Channel " + rawRequest);
             ChannelConfig channelConfigAsPerBody = ChannelConfigFactory.convert(rawRequest);
 
             if (!channelConfigAsPerTheUri.asChannelId().equals(channelConfigAsPerBody.asChannelId())) { // The supplied entity must match the resource at URI being replaced
-               request.badRequest("Provided request body ChannelID does not match the ChannelID in the request URI.");
+               returnPlainTextResponse(request.resp, HttpServletResponse.SC_BAD_REQUEST, "Provided request body ChannelID does not match the ChannelID in the request URI.");
                return;
             }
         } catch (Throwable e) {

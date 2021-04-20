@@ -369,7 +369,7 @@ export default {
               }
             this.edit = false
             this.lockAckMode = ""
-            this.fetch()
+            this.fetch(true)
             await this.$store.dispatch('loadChannelIds')
           } catch (error) {
             if (error !== null && error !== undefined) {
@@ -387,10 +387,10 @@ export default {
             // this.edit = false
           }
         } else {  // has write lock
-          const url = `channelGuard/create`;
+          let url = `channelGuard/create`;
           try {
             if (this.channelIsNew) {
-              await PROXY.post('/channelGuard/create', this.channel, {
+              await PROXY.post(url, this.channel, {
                 auth: {
                   username: this.editUserProps.bauser,
                   password: this.editUserProps.bapw
@@ -398,7 +398,8 @@ export default {
               })
               this.msg('Saved.')
             } else {
-              await PROXY.put('/channelGuard', this.channel, {
+              url = `/channelGuard/${this.channel.testSession}__${this.channel.channelName}`
+              await PROXY.put(url, this.channel, {
                 auth: {
                   username: this.editUserProps.bauser,
                   password: this.editUserProps.bapw
@@ -410,7 +411,7 @@ export default {
             this.$store.commit('setChannelIsNew', false);
             this.edit = false
             this.lockAckMode = ""
-            this.fetch()
+            this.fetch(true)
             await this.$store.dispatch('loadChannelIds')
           } catch (error) {
             this.error(url + ': ' + error)
@@ -448,7 +449,7 @@ export default {
             this.channel = undefined
             this.$router.push(route)
         } else {
-            this.fetch()
+            this.fetch(true)
             this.edit = false
             this.discarding = true
         }
@@ -478,6 +479,7 @@ export default {
       // console.log('isPreloaded: ' + ret)
       return ret
     },
+    /*
     updateToChannel(channelName) {
       if (!channelName)
         return
@@ -489,7 +491,8 @@ export default {
             this.channel = channel
           })
     },
-    fetch() {
+    */
+    fetch(reload = false) {
       if (this.channelName === undefined)
         return
       this.originalChannelName = this.channelName
@@ -498,14 +501,19 @@ export default {
         this.channel = this.copyOfChannel()
         this.discarding = false
         this.edit = true
+      } else {
+          if (this.$store.state.base.channelName !== this.channelName) {
+            this.$store.commit('setChannelName', this.channelName)
+          }
       }
 
-      // const channel = this.$store.state.base.channel;
-      const isPreloaded = this.isPreloaded()
-      if (isPreloaded) {
-        this.discarding = false;
-        this.channel = this.copyOfChannel();
-        return
+      if (! reload) {
+        const isPreloaded = this.isPreloaded()
+        if (isPreloaded) {
+          this.discarding = false;
+          this.channel = this.copyOfChannel();
+          return
+        }
       }
 
       this.channel = null
@@ -533,6 +541,7 @@ export default {
       const chan = this.getChannel()
       return cloneDeep(chan)
     },
+    /*
     select() {
       if (this.channel.testSession === undefined || this.channel.channelName === undefined) {
         return
@@ -541,6 +550,7 @@ export default {
       this.$store.commit('setChannelName', this.channel.channelName)
       this.$router.push(newRoute)
     },
+     */
     isHttpsMode() {
       return UtilFunctions.isHttpsMode()
     },

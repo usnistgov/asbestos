@@ -30,6 +30,8 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 
+import static gov.nist.asbestos.client.Base.Returns.returnPlainTextResponse;
+
 public class ChannelControlGuardFilter implements Filter {
     private static Logger log = Logger.getLogger(ChannelControlGuardFilter.class);
     private File externalCache = null;
@@ -55,6 +57,36 @@ public class ChannelControlGuardFilter implements Filter {
                 @Override
                 public int read()  {
                     return bais.read();
+                }
+
+                @Override
+                public long skip(long n) throws IOException {
+                    return bais.skip(n);
+                }
+
+                @Override
+                public int available() throws IOException {
+                    return bais.available();
+                }
+
+                @Override
+                public void close() throws IOException {
+                    bais.close();
+                }
+
+                @Override
+                public synchronized void mark(int readlimit) {
+                    bais.mark(readlimit);
+                }
+
+                @Override
+                public boolean markSupported() {
+                    return bais.markSupported();
+                }
+
+                @Override
+                public synchronized void reset() throws IOException {
+                    bais.reset();
                 }
             };
         }
@@ -116,7 +148,7 @@ public class ChannelControlGuardFilter implements Filter {
                     try {
                         simStore.open();
                         if (isPost) {
-                            rejectRequest(response, HttpServletResponse.SC_BAD_REQUEST, "Channel configuration already exists.");
+                            returnPlainTextResponse(response, HttpServletResponse.SC_BAD_REQUEST, "Channel configuration already exists.");
                             return;
                         }
                     } catch (ChannelDoesNotExistException ex) {
@@ -124,7 +156,7 @@ public class ChannelControlGuardFilter implements Filter {
                             chain.doFilter(myHttpServletRequest, response);
                             return;
                         } else if (isPut) { // Channel configuration must exist if replacing
-                            rejectRequest(response, HttpServletResponse.SC_BAD_REQUEST, "Channel configuration does not exist.");
+                            returnPlainTextResponse(response, HttpServletResponse.SC_BAD_REQUEST, "Channel configuration does not exist.");
                             return;
                         }
                     }
@@ -132,7 +164,7 @@ public class ChannelControlGuardFilter implements Filter {
                     ChannelConfig beforeUpdate = simStore.getChannelConfig();
                     if (beforeUpdate.isWriteLocked()) {
                         // Only way through this is to send a request through the channelGuard servlet.
-                        rejectRequest(response, HttpServletResponse.SC_BAD_REQUEST, "Channel configuration is write protected.");
+                        returnPlainTextResponse(response, HttpServletResponse.SC_BAD_REQUEST, "Channel configuration is write protected.");
                         return;
                     } else {
                         chain.doFilter(myHttpServletRequest, response);
@@ -154,7 +186,7 @@ public class ChannelControlGuardFilter implements Filter {
                     }
                     ChannelConfig beforeUpdate = simStore.getChannelConfig();
                     if (beforeUpdate.isWriteLocked()) {
-                        rejectRequest(response, HttpServletResponse.SC_UNAUTHORIZED, "Channel configuration is write protected.");
+                        returnPlainTextResponse(response, HttpServletResponse.SC_UNAUTHORIZED, "Channel configuration is write protected.");
                         return;
                     } else {
                         chain.doFilter(myHttpServletRequest, response);
@@ -166,13 +198,6 @@ public class ChannelControlGuardFilter implements Filter {
         chain.doFilter(request, response);
     }
 
-    private void rejectRequest(ServletResponse response, int httpStatusCode, String message) throws IOException {
-        response.resetBuffer();
-        ((HttpServletResponse) response).setStatus(httpStatusCode);
-        response.setContentType("text/plain");
-        response.getOutputStream().print(message);
-        response.flushBuffer();
-    }
 
     @Override
     public void destroy() {

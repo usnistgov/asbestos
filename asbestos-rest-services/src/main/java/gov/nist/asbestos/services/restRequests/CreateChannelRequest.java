@@ -23,6 +23,7 @@ public class CreateChannelRequest {
     private static Logger log = Logger.getLogger(CreateChannelRequest.class);
 
     protected Request request;
+    protected String rawRequest;
 
     public static boolean isRequest(Request request) {
         if (request.uriParts.size() == 4) {
@@ -39,8 +40,10 @@ public class CreateChannelRequest {
 
     public void run() throws IOException {
         request.announce("CreateChannel");
-        String rawRequest = IOUtils.toString(request.req.getInputStream(), Charset.defaultCharset());   // json
-        log.debug("CREATE Channel " + rawRequest);
+        if (rawRequest == null) {
+            rawRequest = IOUtils.toString(request.req.getInputStream(), Charset.defaultCharset());   // json
+            log.debug("CREATE Channel " + rawRequest);
+        }
         ChannelConfig channelConfig = ChannelConfigFactory.convert(rawRequest);
 
         if ("fhir".equalsIgnoreCase(channelConfig.getChannelType()) && channelConfig.isLogMhdCapabilityStatementRequest()) {
