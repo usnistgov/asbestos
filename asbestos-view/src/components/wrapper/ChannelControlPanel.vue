@@ -111,11 +111,10 @@
             },
             async confirmDel() {
                 try {
-                    let channelId = `${this.theChannel.testSession}__${this.theChannel.channelName}`
                     if (!this.theChannel.writeLocked) {
-                        await PROXY.delete('channel/' + channelId)
+                        await PROXY.delete('channel/' + this.channelId)
                     } else if (this.editUserProps.bapw !== "") {
-                        await PROXY.delete('channelGuard/' + channelId, {
+                        await PROXY.delete('channelGuard/' + this.channelId, {
                             auth: {
                                 username: this.editUserProps.bauser,
                                 password: this.editUserProps.bapw
@@ -124,7 +123,7 @@
                     }
                     this.msg('Deleted')
                     // this.localDelete(channelId);
-                    this.$store.commit('deleteChannel', channelId)
+                    this.$store.commit('deleteChannel', this.channelId)
                     await this.$store.dispatch('loadChannelIds')
                     // this.setChannelId();
                     this.$router.push('/session/' + this.sessionId + '/channels')
@@ -269,6 +268,9 @@
             },
         },
         computed: {
+            channelId() {
+                return `${this.theChannel.testSession}__${this.theChannel.channelName}`
+            },
             sessionId() {
                 return this.$store.state.base.session
             },
