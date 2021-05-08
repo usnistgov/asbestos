@@ -64,8 +64,8 @@
                 <span v-if="eventId" class="selectable" @click="toggleEventDisplayed()">Inspect</span>
                 <span v-if="eventDisplayed && eventId">
                     <InspectEvent
-                            :sessionId="$store.state.base.session"
-                            :channelId="$store.state.base.channelId"
+                            :sessionId="$store.state.base.channel.testSession"
+                            :channelId="$store.state.base.channel.channelName"
                             :eventId="eventId"
                             :noNav="true">
                     </InspectEvent>

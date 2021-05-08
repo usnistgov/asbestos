@@ -56,7 +56,7 @@ public class CapabilityStatementIT {
                 .setXdsSiteName("bogus__rr")
                 .setLogMhdCapabilityStatementRequest(csloggingEnabled); // XdsSiteName is not used for this test
 
-        String channelLocation = "http://localhost:"+ proxyPort + "/asbestos/channel/default__" + channelName;
+        String channelLocation = "http://localhost:"+ proxyPort + "/asbestos/rw/channel/default__" + channelName;
 
         // delete
         String json = ChannelConfigFactory.convert(channelConfig);
@@ -72,7 +72,7 @@ public class CapabilityStatementIT {
 
         // create - must return 201 (didn't exist)
         HttpPost poster = new HttpPost();
-        poster.postJson(new URI("http://localhost:"+ proxyPort + "/asbestos/channel/create"), json);
+        poster.postJson(new URI("http://localhost:"+ proxyPort + "/asbestos/rw/channel/create"), json);
         assertEquals(201, poster.getStatus(), poster.getResponseHeaders().toString());
 
         // put - must return 200 (did exist)

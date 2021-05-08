@@ -15,8 +15,9 @@ import static gov.nist.asbestos.client.Base.Returns.returnPlainTextResponse;
 
 // 0 - empty
 // 1 - app context
-// 2 - "channel"
-// 3 - "channelID"
+// 2  "rw" or "accessGuard"
+// 3 - "channel"
+// 4 - "channelID"
 // Create a channel based on JSON configuration in request
 
 
@@ -28,17 +29,17 @@ public class ReplaceChannelRequest extends CreateChannelRequest {
     }
 
     public static boolean isRequest(Request request) {
-        if (request.uriParts.size() == 4) {
-            String uriPart2 = request.uriParts.get(2);
+        if (request.uriParts.size() == 5) {
             String uriPart3 = request.uriParts.get(3);
-            return uriPart3.contains("__") /* channel Id format */ && ("channel".equals(uriPart2) || "channelGuard".equals(uriPart2));
+            String uriPart4 = request.uriParts.get(4);
+            return "channel".equals(uriPart3) && uriPart4.contains("__") /* channel Id format */;
         }
         return false;
     }
 
     @Override
     public void run() throws IOException {
-        String channelId = request.uriParts.get(3);
+        String channelId = request.uriParts.get(4);
         ChannelConfig channelConfigAsPerTheUri;
 
         try {

@@ -387,7 +387,7 @@ export default {
             // this.edit = false
           }
         } else {  // has write lock
-          let url = `channelGuard/create`;
+          let url = `accessGuard/channel/create`;
           try {
             if (this.channelIsNew) {
               await PROXY.post(url, this.channel, {
@@ -398,7 +398,7 @@ export default {
               })
               this.msg('Saved.')
             } else {
-              url = `/channelGuard/${this.channel.testSession}__${this.channel.channelName}`
+              url = `/accessGuard/channel/${this.channel.testSession}__${this.channel.channelName}`
               await PROXY.put(url, this.channel, {
                 auth: {
                   username: this.editUserProps.bauser,
@@ -423,6 +423,7 @@ export default {
 //      }
 
     },
+    /*
     async saveToServer(aChannel) {
       const url = `CHANNEL/create`;
       try {
@@ -435,6 +436,7 @@ export default {
         this.error(url + ': ' + 'saveToServer ' + error)
       }
     },
+    */
     discard() {
       // if (this.channelIsNew) {
       //   this.deleteChannel()

@@ -129,18 +129,18 @@ export const baseStore = {
         async initSessionsStore({commit}) {
             let url
             try {
-                url = `CHANNEL/sessionNames`
+                url = `rw/testSession`
                 console.log(url);
-                let data = await CHANNEL.get('sessionNames');
+                let data = await PROXY.get(url);
                 const sessionNames = data.data;
                 console.log(`sessionNames ${sessionNames}`);
                 commit('setSessionNames', sessionNames);
 
                 const promises = [];
                 sessionNames.forEach(sessionId => {
-                    url = `CHANNEL/sessionConfig/${sessionId}`;
+                    url = `rw/testSession/${sessionId}`
                     console.log(url);
-                    const promise = CHANNEL.get(`sessionConfig/${sessionId}`);
+                    const promise = PROXY.get(url);
                     promises.push(promise);
                 });
                 Promise.all(promises)
@@ -156,6 +156,7 @@ export const baseStore = {
                 // url = `LOG/startupSession`;
                 // data = await LOG.get('startupSession');
                 // let startupSession = data.data;
+                console.log('Setting startup session to ' + STARTUPSESSION)
                 commit('setSession', STARTUPSESSION);
 
                 url = `CHANNEL/channels/all`;
@@ -174,42 +175,21 @@ export const baseStore = {
                 console.error(`${error} for ${url}`)
             }
         },
-        async selectSession({state, commit}, sessionId) {
+        async selectSession({state, commit, getters, dispatch}, sessionId) {
             if (sessionId === state.session) return;
-            commit('setSession', sessionId);
-            const url = `CHANNEL/sessionConfig/${sessionId}`
-            CHANNEL.get(`sessionConfig/${sessionId}`)
+            const url = `rw/testSession/${sessionId}`
+            PROXY.get(url)
                 .then(response => {
+                    commit('setSession', sessionId);
                     commit('setSessionConfig', response.data)
-                })
-                .catch(function (error) {
-                    commit('setError', url + ': ' + error)
-                    console.error(`${error} for ${url}`)
-                })
-        },
-        newSession({commit}, newName) {
-            const url = `addSession/${newName}`
-            console.log(`${url}`)
-            CHANNEL.get(`${url}`)
-                .then(response => {
-                    commit('setSessionNames', response.data)
-                })
-                .catch(function (error) {
-                    commit('setError', url + ': ' + error)
-                    console.error(`${error} for ${url}`)
-                })
-        },
-        delSession({commit}, name) {
-            const url = `delSession/${name}`
-            console.log(`${url}`)
-            CHANNEL.get(`${url}`)
-                .then(response => {
-                    commit('setSessionNames', response.data)
-                    if (response.data.length > 0) {
-                        const obj = response.data[0];
-                        console.log(`new session is ${obj}`)
-                        commit('setSession', obj);
+                    const chIds = getters.getEffectiveChannelIds
+                    if (chIds !== undefined && chIds !== null && chIds[0] !== undefined) {
+                        console.log('Trying to load ' + chIds[0])
+                        dispatch('loadChannel', chIds[0])
                     }
+                    // commit('installChannel', chIds[0]);
+                    // commit('setChannelName', null);
+
                 })
                 .catch(function (error) {
                     commit('setError', url + ': ' + error)
@@ -252,6 +232,7 @@ export const baseStore = {
             return CHANNEL.get(fullId)
                 .then(response => {
                     commit('installChannel', response.data)
+                    commit('setChannelName', parts[1]);
                     return response.data
                 })
                 .catch(e => {
@@ -296,13 +277,30 @@ export const baseStore = {
         getChannelIdsForSession: (state) => (session) => {
             return state.channelIds.filter(id => id.startsWith(`${session}__`));
         },
-        getChannelIdsForCurrentSession: (state) => {
-            return state.channelIds.filter(id => id.startsWith(`${state.session}__`));
+        getChannelIdsForCurrentSession: (state,getters) => {
+            return state.channelIds.filter(id => {
+                try {
+                    const parts = id.split('__')
+                    const chSessionPart = parts[0]
+                    const includesSession = [state.session].concat(getters.getSessionIncludes(state.session))
+                    // console.log(`looking for ${includesSession}`)
+                    return includesSession.includes(chSessionPart)
+                } catch (e) {
+                   console.log(e)
+                   return false
+                }
+            })
         },
         getChannelNamesForCurrentSession: (state, getters) => {
             return getters.getChannelIdsForCurrentSession.map(function (channelId) {
                 const parts = channelId.split('__');
-                return parts[1];
+                // Hide the session name if channel is already part of the same session
+                if (state.session === parts[0]) {
+                    return parts[1];
+                } else {
+                    // Full Id
+                    return channelId
+                }
             })
         },
         getSessionIncludes: (state) => (session) => {

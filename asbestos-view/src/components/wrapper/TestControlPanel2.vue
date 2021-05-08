@@ -117,9 +117,11 @@ export default {
       return this.$store.state.testRunner.serverTestCollectionNames
     },
     session() {
-      return this.$store.state.base.session
+      return this.$store.state.base.channel.testSession
     },
     channelId() {
+      // TODO: is this used anywhere?
+      // May need to use the session from the channel config, not from the current [base.js] session
       return this.$store.getters.getChannelId
     },
     selectable() {

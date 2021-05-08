@@ -41,8 +41,8 @@
                         </p>
                         <div style="width: 700px" v-if="getSourceIdDetails.analysisUrl">
                             <inspect-event
-                                    :sessionId="$store.state.base.session"
-                                    :channelName="$store.state.base.channelName"
+                                    :sessionId="$store.state.base.channel.testSession"
+                                    :channelName="$store.state.base.channel.channelName"
                                     :eventId="decodeURIComponent(getSourceIdDetails.analysisUrl)"
                                     :noNav="true"
                                     :modal-mode="getSourceIdDetails.direction"

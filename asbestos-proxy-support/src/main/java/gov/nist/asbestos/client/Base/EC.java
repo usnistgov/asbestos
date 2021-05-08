@@ -41,6 +41,7 @@ public class EC {
     public static final String TEST_ASSERTIONS_FILE = "assertions.json";
     public static final String CHANNELS_DIR = "FhirChannels";
     public static final String DOCUMENT_CACHE = "FhirDocCache";
+    public static final String TRASH_CAN = "trashcan";
 
 
     public EC(File externalCache) {
@@ -149,12 +150,28 @@ public class EC {
         return collectionRoot;
     }
 
-    public File getFhirSessions() {
-        return new File(externalCache, "FhirSessions");
+    public static File ftkTrashCan(File ecDir) {
+        return new File(ecDir, TRASH_CAN);
     }
 
-    public File getSessionConfig(String sessionId) {
-        return new File(getFhirSessions(), sessionId);
+    public File getFtkSessions() {
+        return ftkSessionsDir(externalCache);
+    }
+
+    public static File ftkSessionsDir(File ecDir) {
+        return new File(ecDir, SESSIONS_DIR);
+    }
+
+    public static File ftkChannelsDir(File ecDir) {
+        return new File(ecDir, CHANNELS_DIR);
+    }
+
+    public static File ftkSessionDir(File ecDir, String sessionName) {
+        return new File(ftkSessionsDir(ecDir), sessionName);
+    }
+
+    public File getSessionDir(String sessionId) {
+        return new File(getFtkSessions(), sessionId);
     }
 
     public File getTestCollectionsBase() {

@@ -18,7 +18,6 @@
 </template>
 
 <script>
-    import {newChannel} from '@/types/channel'
     import ChannelEdit from "./ChannelEdit"
     import Vue from 'vue'
     import {TooltipPlugin, ToastPlugin} from 'bootstrap-vue'
@@ -100,8 +99,6 @@
                 this.lockAcked = null
                 this.deleting = false
             },
-            *
-             */
             setChannelId(channelIdToSelect) {
                 if (this.channelIds && this.channelIds.length > 0) {
                     let index = 0
@@ -114,7 +111,6 @@
                 } else
                     this.channelId = null;
             },
-            /*
             async confirmDel() {
                 try {
                     if (!this.channel.writeLocked) {
@@ -181,7 +177,6 @@
                 }
             },
 
-             */
 
             updateChannel() {
                 if (!this.channel || this.channel.channelName !== this.currentChannelName) {
@@ -246,6 +241,7 @@
                     return null;
                 return '/session/' + this.channel.testSession + '/channels/' + this.channel.channelName;
             },
+             */
             /*
             newChannelRoute() {
                 let chan = newChannel()
@@ -257,13 +253,13 @@
                 return '/session/' + this.sessionId + '/channels/new'
             },
             *
-             */
             channelsLink(channelId) {
                 const chan = channelId.split('__', 2);
                 const session = chan[0];
                 const channelName = chan[1];
                 return '/session/' + session + '/channels/' + channelName;
             },
+             */
             msg(msg) {
                 console.log(msg)
                 this.$bvToast.toast(msg, {noCloseButton: true})

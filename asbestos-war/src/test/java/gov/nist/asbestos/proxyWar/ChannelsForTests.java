@@ -25,7 +25,7 @@ public class ChannelsForTests {
                 .setFhirBase(fhirBase.toString());
         String json = ChannelConfigFactory.convert(channelConfig);
         HttpPost poster = new HttpPost();
-        poster.postJson(new URI("http://localhost:" + ITConfig.getProxyPort() + "/asbestos/channel/create"), json);
+        poster.postJson(new URI("http://localhost:" + ITConfig.getProxyPort() + "/asbestos/rw/channel/create"), json);
         int status = poster.getStatus();
         if (!(status == 200 || status == 201))
             fail("200 or 201 required from CreateChannel - returned " + status);
@@ -34,7 +34,7 @@ public class ChannelsForTests {
 
     public static Ref gen500() throws IOException, URISyntaxException {
         String base = "http://localhost:" + ITConfig.getProxyPort()  + "/asbestos/gen500";
-        new HttpDelete().run(String.format("http://localhost:%s/asbestos/channel/%s__%s", ITConfig.getProxyPort(), "default", "g500"));
+        new HttpDelete().run(String.format("http://localhost:%s/asbestos/rw/channel/%s__%s", ITConfig.getProxyPort(), "default", "g500"));
         URI fhirBase500 = new URI(base);
         ChannelConfig channelConfig = ChannelsForTests.create("default", "g500", fhirBase500);
         URI channelBase = getChannelBase(channelConfig);

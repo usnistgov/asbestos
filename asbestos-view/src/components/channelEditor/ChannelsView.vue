@@ -40,11 +40,11 @@
         mounted() {
         },
       computed: {
-        channelIds: {
-          get() {
-            return this.$store.getters.getChannelIdsForCurrentSession;
-          }
-        }
+        // channelIds: {
+        //   get() {
+        //     return this.$store.getters.getChannelIdsForCurrentSession;
+        //   }
+        // }
       },
         methods: {
           channelsLink(channelId) {

@@ -15,8 +15,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 // 0 - empty
 // 1 - app context
-// 2 - "channel"
-// 3 - "create"
+// 2  "rw" or "accessGuard"
+// 3 "channel"
+// 4 "create"
 // Create a channel based on JSON configuration in request
 
 public class CreateChannelRequest {
@@ -26,10 +27,11 @@ public class CreateChannelRequest {
     protected String rawRequest;
 
     public static boolean isRequest(Request request) {
-        if (request.uriParts.size() == 4) {
-            String uriPart2 = request.uriParts.get(2);
-            String uriPart3 = request.uriParts.get(3);
-            return "create".equals(uriPart3) && ("channel".equals(uriPart2) || "channelGuard".equals(uriPart2));
+        if (request.uriParts.size() == 5) {
+            int channelIndex = 3;
+            int createIndex = 4;
+
+            return "channel".equals(request.uriParts.get(channelIndex)) && "create".equals(request.uriParts.get(createIndex));
         }
         return false;
     }
@@ -50,11 +52,9 @@ public class CreateChannelRequest {
             channelConfig.setLogMhdCapabilityStatementRequest(false);
         }
 
-        Pattern validCharsPattern = Pattern.compile("^([a-zA-Z0-9_]+)$");
-        Pattern reservedNamesPattern = Pattern.compile("(\\bnew\\b)|(\\bcopy\\b)", Pattern.CASE_INSENSITIVE);
 
-        boolean isInvalidChannelName = ! validCharsPattern.matcher(channelConfig.asChannelId()).matches()
-                || reservedNamesPattern.matcher(channelConfig.getChannelName()).matches();
+        boolean isInvalidChannelName = ! SimStore.isValidCharsPattern().matcher(channelConfig.asChannelId()).matches()
+                || SimStore.isReservedNamesPattern(null).matcher(channelConfig.getChannelName()).matches();
 
         if (isInvalidChannelName) {
             String error = "Invalid channel name";

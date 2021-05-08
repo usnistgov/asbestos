@@ -31,7 +31,7 @@ class ConditionalIT {
 
     @BeforeAll
     static void createTheChannel() throws IOException, URISyntaxException {
-        new HttpDelete().run(String.format("http://localhost:%s/asbestos/channel/%s__%s", proxyPort, testSession, channelName));
+        new HttpDelete().run(String.format("http://localhost:%s/asbestos/rw/channel/%s__%s", proxyPort, testSession, channelName));
         base = new URI(Utility.createChannel(testSession, channelName, fhirPort, proxyPort));
     }
 

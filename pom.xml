@@ -152,6 +152,7 @@
         <!--
        See
        https://hapifhir.io/hapi-fhir/docs/introduction/versions.html
+       https://hapifhir.io/hapi-fhir/docs/getting_started/versions.html
        -->
         <dependency>
             <groupId>ca.uhn.hapi.fhir</groupId>

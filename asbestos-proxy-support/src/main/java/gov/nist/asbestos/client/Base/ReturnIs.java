@@ -9,7 +9,7 @@ public class ReturnIs {
      * @param value
      */
     static public void Boolean(boolean value) {
-
+        True(value);
     }
 
     /**

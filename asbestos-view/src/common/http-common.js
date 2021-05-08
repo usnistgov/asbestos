@@ -108,15 +108,15 @@ export async function initServiceProperties() {
                         crossdomain: true,
                     }
                 })
-                    CHANNEL = axios.create({
-                        baseURL: `${toolkitBaseToUse}/channel/`,
-                        headers: {
-                            'Access-Control-Allow-Methods': 'GET, POST, OPTIONS, PUT, PATCH, DELETE'
-                        },
-                        params: {
-                            crossdomain: true,
-                        }
-                    })
+                CHANNEL = axios.create({
+                    baseURL: `${toolkitBaseToUse}/rw/channel/`,
+                    headers: {
+                        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS, PUT, PATCH, DELETE'
+                    },
+                    params: {
+                        crossdomain: true,
+                    }
+                })
                 console.log(`initServiceProperties done`)
                 console.log(`FHIR Toolkit base is ${toolkitBaseToUse}`)
                 }

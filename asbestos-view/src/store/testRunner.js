@@ -316,7 +316,7 @@ export const testRunnerStore = {
             commit('clearTestReports')
             const promises = []
             state.testScriptNames.forEach(name => {
-                const url = `testReport/${rootState.base.session}__${rootState.base.channelName}/${testCollectionId}/${name}`
+                const url = `testReport/${rootState.base.channel.testSession}__${rootState.base.channel.channelName}/${testCollectionId}/${name}`
                 const promise = ENGINE.get(url)
                 promises.push(promise)
             })

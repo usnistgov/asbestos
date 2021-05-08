@@ -137,7 +137,7 @@
                 this.$store.commit('setChannelId', channelId)
                 this.$store.commit('setTestCollectionName', collection)
                 this.$store.commit('setTestCollectionName', collection)
-                this.$router.push(`/session/${this.$store.state.base.session}/channel/${this.$store.state.base.channelId}/collection/${collection}`)
+                this.$router.push(`/session/${this.$store.state.base.channel.testSession}/channel/${this.$store.state.base.channel.channelName}/collection/${collection}`)
             },
         },
         name: "MhdTesting"

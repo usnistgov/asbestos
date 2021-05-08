@@ -85,7 +85,7 @@ public class LogAnalysisRequestIT {
 
     @BeforeAll
     static void runATest() throws IOException, URISyntaxException {
-        new HttpDelete().run(String.format("http://localhost:%s/asbestos/channel/%s__%s", proxyPort, testSession, channelName));
+        new HttpDelete().run(String.format("http://localhost:%s/asbestos/rw/channel/%s__%s", proxyPort, testSession, channelName));
         base = new URI(Utility.createChannel(testSession, channelName, fhirPort, proxyPort));
 
         TestEngine engine = Utility.run(base, "/logAnalysis/external_cache/FHIRTestCollections/collection1/test1/TestScript.xml");
