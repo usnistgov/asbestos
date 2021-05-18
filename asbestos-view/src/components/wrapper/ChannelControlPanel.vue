@@ -74,6 +74,7 @@
     import {newChannel} from '@/types/channel'
     import {ASBTS_USERPROPS, PROXY} from "@/common/http-common";
     import SignIn from "../SignIn";
+    import channelMixin from '@/mixins/channelMixin'
 
     export default {
         data() {
@@ -94,7 +95,7 @@
         methods: {
             setupMyComponent() {
                 const paramChannelName = this.$router.currentRoute.params['channelName']
-                console.log(`channelName prop: ${paramChannelName}`)
+                // console.log(`channelName prop: ${paramChannelName}`)
                 if (paramChannelName === undefined) {
                     const defaultChannelId = 'default__default'
                     if (this.channelNames.includes(defaultChannelId) || (this.sessionId === 'default' && this.channelNames.includes('default'))) {
@@ -269,8 +270,7 @@
             },
 
             manage() {  // go edit channel definitions
-                this.$router.push(`/session/${this.$store.state.base.channel.testSession}/channels` +
-                    (this.cpChannelName ? `/${this.cpChannelName}` : ''))
+                this.$router.push(`/session/${this.$store.state.base.channel.testSession}/channels` + `/${this.$store.state.base.channel.channelName}`)
             },
             channelValid(channelId) {
                 if (!channelId)
@@ -293,41 +293,7 @@
                 set(name) {
                     if (name === undefined) return
                     if (name !== this.$store.state.base.channel.channelName) {
-                        console.log(`set channelName to ${name}`)
-                        const theChannelId = (name.includes('__') ? name /* name is indicative of an Included channel within the test session */ : this.$store.state.base.session + '__' + name /* a channel local to the test session */  ) // this.$store.getters.getChannelId
-                        const theSessionName = theChannelId.split('__')[0]
-                        const theChannelName = theChannelId.split('__')[1]
-                        this.$store.dispatch('loadChannel', theChannelId)
-                            .then(c => {
-                                if (c !== null && c !== undefined) {
-                                    const current = this.$router.currentRoute.path;
-                                    const parts = current.split("/");
-                                    const size = parts.length;
-                                    let i;
-                                    // https://fhirtoolkit.test:8082/session/default/channel/default/collection/Test_Documents
-                                    for (i = 0; i < size; i++) {
-                                        if (parts[i] === 'session') {
-                                            i++;
-                                            parts[i] = theSessionName
-                                            // console.log('Updated test session part in the URL')
-                                        } else if (parts[i] === 'channel' || parts[i] === 'channels' && i + 1 <= size /*&& i<size+1*/) {
-                                            i++;
-                                            parts[i] = theChannelName;  // insert new channelId
-                                            const newRoute = parts.join('/');
-                                            if (newRoute !== current) {
-                                                console.log('Updated route: ' + newRoute)
-                                                this.$store.commit('setChannelName', theChannelName);
-                                                this.$store.commit('setChannelIsNew', false);
-                                                this.$router.push(newRoute, () => {
-                                                        console.log('push complete.')
-                                                    }
-                                                    , () => console.log('push failed.'));
-                                            }
-                                            break;
-                                        }
-                                    }
-                                }
-                            })
+                        this.ftkLoadChannel(name)
                     }
                 },
                 get() {
@@ -383,6 +349,7 @@
             */
         },
         watch: {},
+        mixins: [channelMixin],
         name: "ChannelControlPanel"
     }
 </script>

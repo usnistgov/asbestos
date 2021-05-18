@@ -305,6 +305,9 @@ export const baseStore = {
             })
             return index !== -1;
         },
+        /**
+         * This method only returns local channel excluding Includes
+         */
         getChannelIdsForSession: (state) => (session) => {
             return state.channelIds.filter(id => id.startsWith(`${session}__`));
         },
@@ -340,6 +343,7 @@ export const baseStore = {
                   return [];
               return config.includes;
         },
+        /*
         getEffectiveChannelIds: (state, getters) => {
             let session = state.session;
             let ids = getters.getChannelIdsForSession(session);
@@ -352,5 +356,6 @@ export const baseStore = {
             // }
             return ids;
         }
+         */
     }
 }

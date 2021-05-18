@@ -3,8 +3,14 @@
     <div>
       <div class="control-panel-item-title">Test Session</div>
 
-      <img id="add" src="../../assets/add-button.png" @click="add()"/>
-      <img id="delete" src="../../assets/exclude-button-red.png" @click="del()"/>
+      <div class="tooltip">
+        <img id="add" src="../../assets/add-button.png" @click="add()"/>
+        <span class="tooltiptext">Add a New Test Session</span>
+      </div>
+      <div class="tooltip">
+          <img v-if="!this.$store.getters.getSessionConfig.sessionConfigLocked" id="delete" src="../../assets/exclude-button-red.png" @click="del()"/>
+          <span class="tooltiptext">Delete Test Session</span>
+       </div>
       <!-- end -->
       <span v-if="details">
               <button type="button" @click="toggleDetails()">No Details</button>
@@ -32,8 +38,7 @@
       </div>
       <div v-if="deleting">
         <span>
-          <!-- TODO set the div width to 100px or so -->
-        This action will also delete all channel configurations for the test session. Are you sure you want to delete Test Session {{testSession}}?
+          This action will also delete all channel configurations for the test session. Are you sure you want to delete {{testSession}}?
         </span>
       </div>
       <div v-if="deleting">
@@ -50,6 +55,7 @@ import { BFormSelect } from 'bootstrap-vue'
 Vue.component('b-form-select', BFormSelect)
 import {PROXY} from '../../common/http-common'
 import { ButtonGroupPlugin, ButtonPlugin, ToastPlugin } from 'bootstrap-vue'
+import channelMixin from "@/mixins/channelMixin";
 Vue.use(ButtonGroupPlugin)
 Vue.use(ButtonPlugin)
 Vue.use(ToastPlugin)
@@ -104,41 +110,29 @@ watch: {
         if (id === undefined || id === null)
           return
         this.$store.dispatch('selectSession', id).then(() => {
-          const chIds = this.$store.getters.getEffectiveChannelIds
-          const firstChan = chIds[0]
-          if (chIds !== undefined && chIds !== null && firstChan !== undefined) {
-              console.log('set TestSession: Trying to load the first channel in effective session channel list: ' + firstChan)
-              // dispatch('loadChannel', chIds[0])
-            const theChannelId = (firstChan.includes('__') ? firstChan /* the Included channel */ : this.$store.state.base.session + '__' + firstChan /* the local channel */  ) // this.$store.getters.getChannelId
-            const theSessionName = theChannelId.split('__')[0]
-            const theChannelName = theChannelId.split('__')[1]
-            this.$store.dispatch('loadChannel', theChannelId)
-                    .then(c => {
-                      if (c !== null && c !== undefined) {
-                        const current = this.$router.currentRoute.path;
-                        const parts = current.split("/");
-                        const size = parts.length;
-                        let i;
-                        // https://fhirtoolkit.test:8082/session/default/channel/default/collection/Test_Documents
-                        for (i = 0; i < size; i++) {
-                          if (parts[i] === 'session') {
-                            i++;
-                            parts[i] = theSessionName
-                            console.log('Updated test session in the URL')
-                          } else if (parts[i] === 'channel' || parts[i] === 'channels' && i + 1 <= size /*&& i<size+1*/) {
-                            i++;
-                            parts[i] = theChannelName;  // insert new channelId
-                            const newRoute = parts.join('/');
-                            console.log('Updated route: ' + newRoute)
-                            this.$router.push(newRoute, () => console.log('push complete.'), () => console.log('push failed.'));
-                            this.$store.commit('setChannelName', theChannelName);
-                            this.$store.commit('setChannelIsNew', false);
-                            break;
-                          }
-                        }
-                      }
-                    })
+          // First attempt in finding a channel to load: does a local channel exist?
+          let chIds = this.$store.getters.getChannelIdsForSession
+          let channelIdToLoad = chIds[0]
+          if (chIds === undefined || chIds === null || channelIdToLoad === undefined) {
+            // Second attempt: does the default__default channel exist?
+            chIds = this.$store.getters.getChannelIdsForCurrentSession
+            if (chIds !== undefined && chIds !== null && chIds.length > 0) {
+              const theDefaultChannel = 'default__default'
+              if (chIds.includes(theDefaultChannel)) {
+                channelIdToLoad = theDefaultChannel
+              } else {
+                channelIdToLoad = chIds[0]
+              }
+            }
+          }
 
+          if (chIds !== undefined && chIds !== null && channelIdToLoad !== undefined) {
+            this.ftkLoadChannel(channelIdToLoad)
+          } else {
+            const errMsg = 'A channel is not available.'
+            console.log(errMsg)
+            this.$store.commit('setError', errMsg)
+            this.$store.commit('installChannel', null);
           }
 
         })
@@ -159,7 +153,7 @@ watch: {
         returnString += `Includes sessions: ${config.includes}.`
       }
       if (config.sessionConfigLocked === true)
-        returnString += ' Session configuration is locked.'
+        returnString += ' This session configuration is locked.'
       return returnString
     }
   },
@@ -185,21 +179,20 @@ watch: {
     doAdd() {
       const name = this.newTsName.trim();
       if (name) {
-          const that = this
         const url = `rw/testSession`
         console.log(`adding session ${url}`)
         PROXY.post(url, name) // /${newName}
                 .then(response => {
-                  that.$store.commit('setSessionNames', response.data)
-                  that.$store.commit('setSession', name);
-                  that.newTsName = null;
-                  that.adding = false;
-                  that.updateCurrentSession();
+                  this.$store.commit('setSessionNames', response.data)
+                  this.testSession = name
+                  // this.$store.commit('setSession', name);
+                  this.newTsName = null;
+                  this.adding = false;
                 })
                 .catch(function (error) {
-                  that.error(error)
-                  that.newTsName = null
-                  that.adding = false
+                  this.error(error)
+                  this.newTsName = null
+                  this.adding = false
                 })
       }
     },
@@ -228,8 +221,8 @@ watch: {
                   const obj = response.data[0];
                   console.log(`new session is ${obj}`)
                   that.$store.commit('setSession', obj);
-                  this.updateSessionsFromStore();
-                  this.updateCurrentSession();
+                  // this.updateSessionsFromStore();
+                  // this.updateCurrentSession();
                   this.adding = false;
                   this.deleting = false;
                 }
@@ -262,6 +255,7 @@ watch: {
       this.$bvToast.toast(msg, {noCloseButton: true, title: 'Error'})
     },
   },
+  mixins: [channelMixin],
   name: "SessionControlPanel"
 }
 </script>

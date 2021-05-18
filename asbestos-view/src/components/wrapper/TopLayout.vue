@@ -173,6 +173,7 @@
         position: absolute;
         right: 9px;
         text-align: left;
+        width: min-content;
     }
 </style>
 // these are shared across the tool
