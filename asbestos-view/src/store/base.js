@@ -18,24 +18,38 @@ function setDataStateObj(destObj, srcObj) {
 export const baseStore = {
     state() {
         return {
-            session: 'default',   // name of current
+            session: 'default',   // name of current test session, which could be different from the channel test session
             sessionNames:[],
             sessionConfigs: {},
+            /**
+             * channelName should be used only for creating new channel names,
+             * copying a channel within the current test session,
+             * or to represent the name of the channel to be selected when switching test sessions
+             */
             channelName: 'default',  // current
             channelIds: [],  // for all sessions
+            /**
+             * channel object should be used for FTK testing purposes since it contains the complete test session and channel name information
+             */
             channel: newChannel(),   // current configuration matching channelId
             channelIsNew: false, // newly created means not saved to server yet
 
             environments: [
                 'default',
             ],
-
             errors: [],
-
             proxyBase: null,
+            ftkInitialized: false,
+            ftkChannelLoaded: false,
         }
     },
     mutations: {
+        ftkInitComplete(state, value) {
+          state.ftkInitialized = value
+        },
+        ftkChannelLoaded(state, value) {
+            state.ftkChannelLoaded = value
+        },
         setProxyBase(state, value) {
             state.proxyBase = value
         },
@@ -125,25 +139,28 @@ export const baseStore = {
         },
     },
     actions: {
-        // used to initialize FTK
-        async initSessionsStore({commit}) {
+        // Generally used to initialize FTK by the default Home Page
+        // requestedSessionId: only used when accessing FTK directly through a URL that has a specific test session
+        async initSessionsStore({commit}, requestedSessionId) {
             let url
             try {
                 url = `rw/testSession`
                 console.log(url);
                 let data = await PROXY.get(url);
                 const sessionNames = data.data;
-                console.log(`sessionNames ${sessionNames}`);
+                // console.log(`sessionNames ${sessionNames}`);
                 commit('setSessionNames', sessionNames);
 
+                const aggregatePromises = []
                 const promises = [];
                 sessionNames.forEach(sessionId => {
                     url = `rw/testSession/${sessionId}`
-                    console.log(url);
+                    // console.log(url);
                     const promise = PROXY.get(url);
                     promises.push(promise);
                 });
-                Promise.all(promises)
+                aggregatePromises.push(
+                    Promise.all(promises)
                     .then(results => {
                         results.forEach(result => {
                             //console.log(`result is ${result}`);
@@ -151,42 +168,49 @@ export const baseStore = {
                             //console.log(`config is ${config}`);
                             commit('setSessionConfig', config);
                         })
-                });
+                }));
 
                 // url = `LOG/startupSession`;
                 // data = await LOG.get('startupSession');
                 // let startupSession = data.data;
-                console.log('Setting startup session to ' + STARTUPSESSION)
-                commit('setSession', STARTUPSESSION);
+                const startupSession = (requestedSessionId !== undefined && requestedSessionId !== null && requestedSessionId !== '') ? requestedSessionId : STARTUPSESSION
+                console.log('Setting startup session to ' + startupSession)
+                commit('setSession', startupSession);
 
                 url = `CHANNEL/channels/all`;
                 console.log(url);
-                let result = await CHANNEL.get('channels/all');
-                data = result.data;
-                let ids = [];
-                data.forEach(item => {
-                    ids.push(item.id);
-                });
-                commit('installChannelIds', ids.sort());
+                aggregatePromises.push(CHANNEL.get('channels/all')
+                    .then(result => {
+                    data = result.data;
+                    let ids = [];
+                    data.forEach(item => {
+                        ids.push(item.id);
+                    });
+                    commit('installChannelIds', ids.sort());
+                }))
 
+                Promise.all(aggregatePromises)
+                    .then(() => {
+                       commit('ftkInitComplete',true)
+                    })
 
             } catch (error) {
                 commit('setError', url + ': ' + error)
                 console.error(`${error} for ${url}`)
             }
         },
-        async selectSession({state, commit, getters, dispatch}, sessionId) {
+        async selectSession({state, commit /*,getters, dispatch*/}, sessionId) {
             if (sessionId === state.session) return;
             const url = `rw/testSession/${sessionId}`
-            PROXY.get(url)
+            return PROXY.get(url)
                 .then(response => {
                     commit('setSession', sessionId);
                     commit('setSessionConfig', response.data)
-                    const chIds = getters.getEffectiveChannelIds
-                    if (chIds !== undefined && chIds !== null && chIds[0] !== undefined) {
-                        console.log('Trying to load ' + chIds[0])
-                        dispatch('loadChannel', chIds[0])
-                    }
+                    // const chIds = getters.getEffectiveChannelIds
+                    // if (chIds !== undefined && chIds !== null && chIds[0] !== undefined) {
+                    //     console.log('Trying to load the first channel in effective session channel list: ' + chIds[0])
+                    //     dispatch('loadChannel', chIds[0])
+                    // }
                     // commit('installChannel', chIds[0]);
                     // commit('setChannelName', null);
 
@@ -198,7 +222,7 @@ export const baseStore = {
         },
         loadChannelNames({commit  /*, state */}) {
             const url = `CHANNEL/channel`
-            PROXY.get('channel')
+            PROXY.get('rw/channel')
                 .then(response => {
                     const fullChannelIds = response.data
                     commit('installChannelIds', fullChannelIds)
@@ -223,6 +247,12 @@ export const baseStore = {
                 })
         },
         loadChannel({commit}, fullId) {
+            if (this.channel !== undefined) {
+                if (fullId === this.channel.testSession + '__' + this.channel.channelName) {
+                    console.log('Returning a cached copy of channel.')
+                    return this.channel
+                }
+            }
             commit('installChannel', null);
             console.log(`loadChannel ${fullId}`)
             const parts = fullId.split('__', 2);
@@ -233,6 +263,7 @@ export const baseStore = {
                 .then(response => {
                     commit('installChannel', response.data)
                     commit('setChannelName', parts[1]);
+                    commit('ftkChannelLoaded', true);
                     return response.data
                 })
                 .catch(e => {
@@ -266,7 +297,7 @@ export const baseStore = {
             return `${state.proxyBase}/${sessionId}__${channelId}`
         },
         getChannelId: (state) => {
-            return `${state.session}__${state.channelName}`
+            return `${state.channel.testSession}__${state.channel.channelName}`
         },
         channelExists: (state) => (theChannelId) => {
             const index = state.channelIds.findIndex(function(channelId) {

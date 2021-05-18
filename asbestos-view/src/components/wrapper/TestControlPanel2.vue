@@ -95,7 +95,7 @@ export default {
   },
   computed: {
     channelName() {
-      return this.$store.state.base.channelName;
+      return this.$store.state.base.channel.channelName;
     },
     collectionDisplaySize() {
       return this.clientCollections.length + this.serverCollections.length + 2

@@ -3,11 +3,6 @@
     <div>
       <div class="control-panel-item-title">Test Session</div>
 
-        <!--
-        begin
-        has problems
-        CHANNEL/channels/all: Error: Request failed with status code 404
-        -->
       <img id="add" src="../../assets/add-button.png" @click="add()"/>
       <img id="delete" src="../../assets/exclude-button-red.png" @click="del()"/>
       <!-- end -->
@@ -22,7 +17,7 @@
       {{ sessionConfigDetails }}
     </div>
     <select v-model="testSession" size="1" class="control-panel-font">
-      <option v-for="(ts, tsi) in $store.state.base.sessionNames"
+      <option v-for="(ts, tsi) in testSessionNames"
               v-bind:value="ts"
               :key="ts + tsi"
       >
@@ -72,40 +67,81 @@ export default {
       details: false,
     }
   },
-  props: [
-  ],
   created() {
     //if (this.$store.state.base.sessions.length === 0)
-    this.$store.dispatch('initSessionsStore')
+    const sessionIdFromRoute = this.$router.currentRoute.params['sessionId']
+    this.$store.dispatch('initSessionsStore', sessionIdFromRoute)
     // for startup
-    this.updateSessionsFromStore()
-    this.updateCurrentSession()
+    // this.updateSessionsFromStore()
+    // this.updateCurrentSession()
   },
-  mounted() {
-    this.$store.subscribe((mutation) => {
-      switch(mutation.type) {
-        case 'setSessionNames':  // to catch changes later
-          console.log('SCP(a) syncing up mutation.type: ' + mutation.type)
-          this.updateSessionsFromStore()
-          this.updateCurrentSession()
-          break
-        case 'setSession':
-          console.log('SCP(b) syncing up mutation.type: ' + mutation.type)
-          this.updateCurrentSession()
-          break
-      }
-    })
-  },
-  watch: {
-    'testSession': 'routeTo'
-  },
+  /*
+mounted() {
+this.$store.subscribe((mutation) => {
+  switch(mutation.type) {
+    case 'setSessionNames':  // to catch changes later
+      console.log('SessionCP(a) syncing up mutation.type: ' + mutation.type)
+      this.updateSessionsFromStore()
+      this.updateCurrentSession()
+      break
+    case 'setSession':
+      console.log('SessionCP(b) syncing up mutation.type: ' + mutation.type)
+      this.updateCurrentSession()
+      break
+  }
+})
+},
+watch: {
+'testSession': 'routeTo'
+},
+*/
   computed: {
+      testSessionNames() {
+        return this.$store.state.base.sessionNames
+    },
     testSession: {
       set(id) {
-        if (id !== this.$store.state.base.session) {
-          console.log(`setting testSession ${id}`)
-          this.$store.dispatch('selectSession', id);
-        }
+        if (id === undefined || id === null)
+          return
+        this.$store.dispatch('selectSession', id).then(() => {
+          const chIds = this.$store.getters.getEffectiveChannelIds
+          const firstChan = chIds[0]
+          if (chIds !== undefined && chIds !== null && firstChan !== undefined) {
+              console.log('set TestSession: Trying to load the first channel in effective session channel list: ' + firstChan)
+              // dispatch('loadChannel', chIds[0])
+            const theChannelId = (firstChan.includes('__') ? firstChan /* the Included channel */ : this.$store.state.base.session + '__' + firstChan /* the local channel */  ) // this.$store.getters.getChannelId
+            const theSessionName = theChannelId.split('__')[0]
+            const theChannelName = theChannelId.split('__')[1]
+            this.$store.dispatch('loadChannel', theChannelId)
+                    .then(c => {
+                      if (c !== null && c !== undefined) {
+                        const current = this.$router.currentRoute.path;
+                        const parts = current.split("/");
+                        const size = parts.length;
+                        let i;
+                        // https://fhirtoolkit.test:8082/session/default/channel/default/collection/Test_Documents
+                        for (i = 0; i < size; i++) {
+                          if (parts[i] === 'session') {
+                            i++;
+                            parts[i] = theSessionName
+                            console.log('Updated test session in the URL')
+                          } else if (parts[i] === 'channel' || parts[i] === 'channels' && i + 1 <= size /*&& i<size+1*/) {
+                            i++;
+                            parts[i] = theChannelName;  // insert new channelId
+                            const newRoute = parts.join('/');
+                            console.log('Updated route: ' + newRoute)
+                            this.$router.push(newRoute, () => console.log('push complete.'), () => console.log('push failed.'));
+                            this.$store.commit('setChannelName', theChannelName);
+                            this.$store.commit('setChannelIsNew', false);
+                            break;
+                          }
+                        }
+                      }
+                    })
+
+          }
+
+        })
       },
       get() {
         const ts = this.$store.state.base.session
@@ -128,16 +164,20 @@ export default {
     }
   },
   methods: {
+    /*
     changeTestSession(event) {
       this.testSession = event.target.options[event.target.options.selectedIndex].text;
       this.$store.dispatch('selectSession', this.testSession);
     },
+    */
     toggleDetails() {
       this.details = !this.details;
+      /*
       const sessionConfig = this.$store.getters.getSessionConfig;
       if (this.details && (!sessionConfig || sessionConfig.name !== this.testSession)) {
         this.$store.dispatch('selectSession', this.testSession);
       }
+       */
     },
     add() {
       this.adding = true;
@@ -200,6 +240,7 @@ export default {
                   that.error('Delete failed')
               })
     },
+    /*
     updateSessionsFromStore() {
       let options = []
       let i = 0;
@@ -215,6 +256,7 @@ export default {
     routeTo() {
       this.$router.push(`/session/${this.testSession}`)
     },
+     */
     error(msg) {
       console.log(msg)
       this.$bvToast.toast(msg, {noCloseButton: true, title: 'Error'})

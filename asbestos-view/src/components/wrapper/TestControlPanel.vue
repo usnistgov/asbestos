@@ -142,7 +142,7 @@
 
         },
         watch: {
-            '$store.state.base.channelId': 'reload',
+            '$store.state.base.channelName': 'reload',
             '$store.state.testRunner.currentTestCollectionName': 'vuexCollectionUpdated',
             'collection': 'localCollectionUpdated',
         },

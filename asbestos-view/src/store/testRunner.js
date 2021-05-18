@@ -240,12 +240,14 @@ export const testRunnerStore = {
         },
     },
     actions: {
+        /*
         async loadHapiFhirBase({commit}) {
             if (this.hapiFhirBase !== null)
                 return;
             const result = await ENGINE.get('hapiFhirBase');
             commit('setHapiFhirBase', result.data);
         },
+         */
         loadTestAssertions({commit}) {
             const url = `assertions`
             ENGINE.get(url)
@@ -257,7 +259,7 @@ export const testRunnerStore = {
                 })
         },
         runEval({commit, state, rootState}, testId) {
-            const url = `clienteval/${rootState.base.session}__${rootState.base.channelName}/${state.eventEvalCount}/${state.currentTestCollectionName}/${testId}`
+            const url = `clienteval/${rootState.base.channel.testSession}__${rootState.base.channel.channelName}/${state.eventEvalCount}/${state.currentTestCollectionName}/${testId}`
             ENGINE.get(url)
                 .then(response => {
                     const reports = response.data
@@ -271,7 +273,7 @@ export const testRunnerStore = {
             const testId = parms.testId
             const eventId = parms.eventId
             const testCollectionName = parms.testCollectionName
-            const url = `clienteventeval/${rootState.base.session}__${rootState.base.channelName}/${testCollectionName}/${testId}/${eventId}`
+            const url = `clienteventeval/${rootState.base.channel.testSession}__${rootState.base.channel.channelName}/${testCollectionName}/${testId}/${eventId}`
             ENGINE.get(url)
                 .then(response => {
                     const results = response.data
@@ -298,7 +300,7 @@ export const testRunnerStore = {
                 .then(results => {
                     results.forEach(result => {
                         const scriptData = result.data
-                        if (scriptData) {
+                        if (scriptData !== null && scriptData !== undefined) {
                             for (let testName in scriptData) {
                                 const script = scriptData[testName]
                                 if (testName.includes('/'))
@@ -337,7 +339,7 @@ export const testRunnerStore = {
         async loadTestReport({commit, rootState}, parms) {
             const testCollectionId = parms.testCollectionId
             const testId = parms.testId
-            const url = `testReport/${rootState.base.session}__${rootState.base.channelName}/${testCollectionId}/${testId}`
+            const url = `testReport/${rootState.base.channel.testSession}__${rootState.base.channel.channelName}/${testCollectionId}/${testId}`
             let report = ""
             const promise = ENGINE.get(url)
             promise.then(result => {
@@ -366,7 +368,7 @@ export const testRunnerStore = {
         runTest({commit, rootState, state}, testId) {
            // console.log(`run ${testId}`)
             //commit('setCurrentTest', testId)
-            const url = `testrun/${rootState.base.session}__${rootState.base.channelName}/${state.currentTestCollectionName}/${testId}?_format=${state.useJson ? 'json' : 'xml'};_gzip=${state.useGzip}`
+            const url = `testrun/${rootState.base.channel.testSession}__${rootState.base.channel.channelName}/${state.currentTestCollectionName}/${testId}?_format=${state.useJson ? 'json' : 'xml'};_gzip=${state.useGzip}`
             const promise = ENGINE.post(url)
             promise.then(result => {
                 const reports = result.data

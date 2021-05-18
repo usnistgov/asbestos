@@ -2,7 +2,7 @@ export default {
     data() {
         return {
             running: false,
-            channelObj: null,  // channel object
+            // channelObj: this.theChannelObj,  // channel object
             testOpen: false,
             evalCount: 30,
         }
@@ -54,25 +54,34 @@ export default {
             }
             this.running = false
         },
-        async loadAChannel(channelId) {
-            let promise = this.$store.dispatch('loadChannel', channelId);
-            this.channelObj = await promise;
-        },
+        // async loadAChannel(channelId) {
+            // let promise =
+            // await this.$store.dispatch('loadChannel', channelId)
+            // this.channelObj = await promise;
+        // },
         async loadTestCollection(testCollection) {
-            this.$store.commit('setTestCollectionName', testCollection)
-            await this.$store.dispatch('loadCurrentTestCollection')
-            await this.testScriptNamesUpdated()
-            const requiredChannel = this.$store.state.testRunner.requiredChannel
-            if (requiredChannel) {
-                console.log(`required channel is ${requiredChannel}`)
-                this.$store.commit('setChannelId', requiredChannel)
-            }
-            await this.loadAChannel(this.fullChannelId);
-            const promises = []
-            promises.push(this.$store.dispatch('loadTestScripts', this.$store.state.testRunner.testScriptNames))
-            if (!this.$store.state.testRunner.isClientTest)
+            // this.$store.dispatch('loadChannel', this.fullChannelId).then(() => {
+                this.$store.commit('setTestCollectionName', testCollection)
+                this.$store.dispatch('loadCurrentTestCollection').then(() =>{
+                    this.testScriptNamesUpdated()
+                    const requiredChannel = this.$store.state.testRunner.requiredChannel
+                    if (requiredChannel) {
+                        console.log(`required channel is ${requiredChannel}`)
+                        this.$store.commit('setChannelId', requiredChannel)
+                    }
+                    // await this.loadAChannel(this.fullChannelId);
+                    //  this.channelObj = p
+                    const promises = []
+                    promises.push(this.$store.dispatch('loadTestScripts', this.$store.state.testRunner.testScriptNames))
+                    if (!this.$store.state.testRunner.isClientTest)
                 promises.push(this.$store.dispatch('loadTestReports', this.$store.state.testRunner.currentTestCollectionName))
-            await Promise.all(promises)
+                    promises.push(new Promise ((resolve  ) => {
+                        console.log('Done loading scripts and reports')
+                        resolve(true)
+                    }))
+                Promise.all(promises)
+            })
+            // })
         },
         cleanTestName(text) {
             if (text)
@@ -87,6 +96,9 @@ export default {
         },
     },
     computed: {
+        theChannelObj() {
+         return this.$store.state.base.channel
+        },
         collectionStatus() {  // 'not-run', 'pass', 'fail', 'error'
             const statuses = this.status;   // object of status indexed by testId
             let collectionStatus = 'pass'
@@ -143,6 +155,8 @@ export default {
                 return this.$store.state.testRunner.useGzip
             }
         },
+        /*
+        FIXME: where is this used?
         channel: {
             set(name) {
                 if (name !== this.$store.state.base.channelName) {
@@ -154,6 +168,8 @@ export default {
                 return this.$store.state.base.channelName
             }
         },
+
+         */
         fullChannelId() {
             return `${this.sessionId}__${this.channelName}`
         },

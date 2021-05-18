@@ -43,21 +43,21 @@
       <span v-else  class="instruction">
                 These are server tests
         <!-- Display the property, if it exists, based on channel Type -->
-                <div v-if="channelObj">
-                    <span v-if="channelObj.channelType === 'passthrough' || channelObj.channelType === 'fhir'">
+                <div v-if="theChannelObj">
+                    <span v-if="theChannelObj.channelType === 'passthrough' || theChannelObj.channelType === 'fhir'">
                         Requests will be sent to
-                        <span v-if="channelObj.fhirBase" class="boxed">{{ channelObj.fhirBase }}</span>
+                        <span v-if="theChannelObj.fhirBase" class="boxed">{{ theChannelObj.fhirBase }}</span>
                         <div class="divider"></div>
-                        (through the Proxy on Channel {{ channelObj.channelName }}) based on the Channel selection.
+                        (through the Proxy on Channel {{ theChannelObj.channelName }}) based on the Channel selection.
                     </span>
-                    <span v-else-if="channelObj.channelType === 'mhd'">
+                    <span v-else-if="theChannelObj.channelType === 'mhd'">
                          Requests will be sent to XDS Site:
-                        <span v-if="channelObj.xdsSiteName" class="boxed">{{ channelObj.xdsSiteName }}</span>
+                        <span v-if="theChannelObj.xdsSiteName" class="boxed">{{ theChannelObj.xdsSiteName }}</span>
                         <div class="divider"></div>
-                        (through the Proxy on Channel {{ channelObj.channelName }}) based on the Channel selection.
+                        (through the Proxy on Channel {{ theChannelObj.channelName }}) based on the Channel selection.
                     </span>
                     <span v-else class="configurationError">
-                        Unknown channel.channelType for {{channelObj.channelName }}.
+                        Unknown channel.channelType for {{theChannelObj.channelName }}.
                     </span>
                 </div>
             </span>
@@ -79,23 +79,35 @@ import testCollectionMgmt from "../../mixins/testCollectionMgmt";
 export default {
   methods: {
     load() {
-      this.loadTestCollection(this.testCollection)
+      // this.loadTestCollection(this.testCollection)
     },
   },
   computed: {
 
   },
   created() {
-    this.load(this.testCollection)
-    this.channel = this.channelName
-    this.setEvalCount()
+    // this.load(this.testCollection)
+    // this.setEvalCount()
   },
-  watch: {
+  mounted() {
+        this.$store.subscribe((mutation) => {
+            if (mutation.type === 'ftkChannelLoaded') {
+                if (this.$store.state.base.ftkChannelLoaded) {
+                    this.load(this.testCollection)
+                    this.setEvalCount()
+                }
+            }
+        })
+    },
+    watch: {
     'evalCount': 'setEvalCount',
     'testCollection': 'load',
+      /*
     'channelName': function() {
       this.loadAChannel(`${this.sessionId}__${this.channelName}`);
     },
+
+       */
   },
   mixins: [ testCollectionMgmt ],
   name: "TestCollectionHeader",

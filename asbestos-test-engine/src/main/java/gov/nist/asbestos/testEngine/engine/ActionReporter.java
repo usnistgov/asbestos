@@ -289,6 +289,9 @@ class ActionReporter implements TestDef {
                 Headers responseHeaders = httpBase.getResponseHeaders();
                 String eventUrl = responseHeaders.getProxyEvent();
                 if (eventUrl != null) {
+                    /*
+                     If events were created from one FTK webapp configured with a different URL and then later viewed from another FTK at runtime, then this link may have a bad hostname/port number
+                     */
                     String value = EventLinkToUILink.get(eventUrl);
                     try {
                         Ref ref = new Ref(value);

@@ -98,11 +98,13 @@
             }
         },
       created() {
+          console.log('TestOrEval... currentTest: ' + this.$store.state.testRunner.currentTest)
+            console.log('TestOrEval... testScripts[] ' + this.$store.state.testRunner.testScripts[this.$store.state.testRunner.currentTest])
         // this.$store.commit('setCurrentTest', this.testId);
         // this.$store.commit('setCurrentTestCollection', this.testCollection);
       },
         watch: {
-            '$store.state.base.channelId': 'loadEventSummariesAndReRun'
+            '$store.state.base.channelName': 'loadEventSummariesAndReRun'
         },
         props: [
             'sessionId', 'channelName', 'testCollection', 'testId'

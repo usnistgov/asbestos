@@ -122,12 +122,12 @@
         mixins: [errorHandlerMixin, debugTestScriptMixin, ],
         props: {
             script: {
-               type: String,
+               type: Object,
                required: true
             },
             report: {  // TestScript and TestReport
-                type: String,
-                required: true
+                type: Object,
+                required: false // Test that have not yet run have no report object
             },
             testScriptIndex: {
                 type: String,

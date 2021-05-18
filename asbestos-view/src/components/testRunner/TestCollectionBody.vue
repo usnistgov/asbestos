@@ -124,10 +124,11 @@ export default {
        otherwise the arrow indicator is incorrect when navigating out of the test collection and back into to the same test collection after a test was previously opened.
        */
       this.$store.commit('setCurrentTest', null)
-      this.loadTestCollection(this.testCollection)
-      if (! this.isClient) {
-        this.$store.dispatch('debugMgmt', {'cmd': 'getExistingDebuggerList'})
-      }
+      this.loadTestCollection(this.testCollection).then(() => {
+          if (! this.isClient) {
+              this.$store.dispatch('debugMgmt', {'cmd': 'getExistingDebuggerList'})
+          }
+      })
     },
     openTest(name) {
       if (!name)
@@ -153,16 +154,30 @@ export default {
     },
   },
   created() {
-    this.load(this.testCollection)
-    this.channel = this.channelName
-    this.setEvalCount()
+      if (this.$store.state.base.ftkChannelLoaded) {
+          this.load(this.testCollection)
+          // this.channel = this.channelName
+          this.setEvalCount()
+      } else {
+          console.log('on create, ftkChannelLoaded is false')
+      }
+  },
+  mounted() {
+        this.$store.subscribe((mutation) => {
+            if (mutation.type === 'ftkChannelLoaded') {
+                if (this.$store.state.base.ftkChannelLoaded) {
+                    this.load(this.testCollection)
+                    this.setEvalCount()
+                }
+            }
+        })
   },
   watch: {
     'evalCount': 'setEvalCount',
     'testCollection': 'load',
-    'channelName': function() {
-      this.load();
-    },
+    // 'channelName': function() {
+    //   this.load();
+    // },
   },
   mixins: [ testCollectionMgmt, colorizeTestReports, debugTestScriptMixin, ],
   name: "TestCollectionBody",

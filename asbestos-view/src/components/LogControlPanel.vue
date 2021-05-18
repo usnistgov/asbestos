@@ -18,13 +18,13 @@
                     return
                 if (this.$store.state.base.channelId === null)
                     return
-                const route = `/session/${this.$store.state.base.session}/channel/${this.$store.state.base.channelName}/logs`
+                const route = `/session/${this.$store.state.base.channel.testSession}/channel/${this.$store.state.base.channel.channelName}/logs`
                 this.$router.push(route)
             },
         },
         computed: {
             selectable() {
-                return this.$store.state.base.session !== null && this.$store.state.base.channelName !== null
+                return this.$store.state.base.channel.testSession !== null && this.$store.state.base.channel.channelName !== null
             }
         },
         created() {

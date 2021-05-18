@@ -15,7 +15,7 @@
                 <span class="tooltiptext">Config</span>
             </div>
         </div>
-        <select class="control-panel-font" size="10" v-model="channelName">
+        <select class="control-panel-font" size="10" v-model="cpChannelName">
             <option :key="chann + channeli"
                     v-bind:value="chann"
                     v-for="(chann, channeli) in channelNames"
@@ -78,7 +78,7 @@
     export default {
         data() {
             return {
-                channelNames: [],
+                // channelNames: [],
                 lockAckMode: false,  // for deleting
                 adding: false,
                 newChannelName: null,
@@ -87,14 +87,26 @@
                 editUserProps: ASBTS_USERPROPS,
             }
         },
-        props: [
-           /* 'xxsessionId', 'xxchannelName' */
-        ],
         components: {
             SignIn,
         },
 
         methods: {
+            setupMyComponent() {
+                const paramChannelName = this.$router.currentRoute.params['channelName']
+                console.log(`channelName prop: ${paramChannelName}`)
+                if (paramChannelName === undefined) {
+                    const defaultChannelId = 'default__default'
+                    if (this.channelNames.includes(defaultChannelId) || (this.sessionId === 'default' && this.channelNames.includes('default'))) {
+                        this.cpChannelName = defaultChannelId
+                    } else if (this.channelNames.length > 0) {
+                        this.cpChannelName = this.channelNames[0]
+                    }
+                } else {
+                    const paramSessionId = this.$router.currentRoute.params['sessionId']
+                    this.cpChannelName = paramSessionId + '__' + paramChannelName
+                }
+            },
             /*
             updateChannelLockStatus(ch) {
                 if (ch !== undefined && typeof (ch) === 'object' && ch['writeLocked'] !== undefined) {
@@ -244,8 +256,8 @@
             channelsLink(channelId) {
                 const chan = channelId.split('__', 2);
                 const session = chan[0];
-                const channelName = chan[1];
-                return '/session/' + session + '/channels/' + channelName;
+                const myChannelName = chan[1];
+                return '/session/' + session + '/channels/' + myChannelName;
             },
             msg(msg) {
                 console.log(msg)
@@ -258,7 +270,7 @@
 
             manage() {  // go edit channel definitions
                 this.$router.push(`/session/${this.$store.state.base.channel.testSession}/channels` +
-                    (this.channelName ? `/${this.channelName}` : ''))
+                    (this.cpChannelName ? `/${this.cpChannelName}` : ''))
             },
             channelValid(channelId) {
                 if (!channelId)
@@ -268,24 +280,25 @@
             },
         },
         computed: {
+            channelNames() {
+                return this.$store.getters.getChannelNamesForCurrentSession
+            },
             channelId() {
                 return `${this.theChannel.testSession}__${this.theChannel.channelName}`
             },
             sessionId() {
                 return this.$store.state.base.session
             },
-            channelName: {
+            cpChannelName: {
                 set(name) {
-                    console.log(`set channelName to ${name}`)
-                    // if (name !== this.$store.state.base.channelName) {
-                        const theChannelId = (name.includes('__') ? name /* the Included channel */ : this.$store.state.base.session + '__' + name /* the local channel */  ) // this.$store.getters.getChannelId
+                    if (name === undefined) return
+                    if (name !== this.$store.state.base.channel.channelName) {
+                        console.log(`set channelName to ${name}`)
+                        const theChannelId = (name.includes('__') ? name /* name is indicative of an Included channel within the test session */ : this.$store.state.base.session + '__' + name /* a channel local to the test session */  ) // this.$store.getters.getChannelId
                         const theSessionName = theChannelId.split('__')[0]
                         const theChannelName = theChannelId.split('__')[1]
-                        this.$store.commit('setChannelName', theChannelName);
-                        this.$store.commit('setChannelIsNew', false);
                         this.$store.dispatch('loadChannel', theChannelId)
                             .then(c => {
-                                console.log('Updating URL with the new channelId.')
                                 if (c !== null && c !== undefined) {
                                     const current = this.$router.currentRoute.path;
                                     const parts = current.split("/");
@@ -296,22 +309,35 @@
                                         if (parts[i] === 'session') {
                                             i++;
                                             parts[i] = theSessionName
-                                            console.log('updated test session in the URL')
+                                            // console.log('Updated test session part in the URL')
                                         } else if (parts[i] === 'channel' || parts[i] === 'channels' && i + 1 <= size /*&& i<size+1*/) {
                                             i++;
                                             parts[i] = theChannelName;  // insert new channelId
                                             const newRoute = parts.join('/');
-                                            console.log('updated route: ' + newRoute)
-                                            this.$router.push(newRoute, () => console.log('push complete.'), () => console.log('push failed.'));
+                                            if (newRoute !== current) {
+                                                console.log('Updated route: ' + newRoute)
+                                                this.$store.commit('setChannelName', theChannelName);
+                                                this.$store.commit('setChannelIsNew', false);
+                                                this.$router.push(newRoute, () => {
+                                                        console.log('push complete.')
+                                                    }
+                                                    , () => console.log('push failed.'));
+                                            }
                                             break;
                                         }
                                     }
                                 }
                             })
-                    // }
+                    }
                 },
                 get() {
-                    return this.$store.state.base.channelName;
+                    const channelTestSession = this.$store.state.base.channel.testSession
+                    const myChannelName = this.$store.state.base.channel.channelName
+                    if (this.$store.state.base.session !== channelTestSession) {
+                        return channelTestSession + '__' + myChannelName
+                    } else {
+                       return myChannelName
+                    }
                 }
             },
             /*
@@ -334,17 +360,27 @@
         },
         mounted() {
             this.$store.subscribe((mutation) => {
+                if (mutation.type === 'ftkInitComplete') {
+                    if (this.$store.state.base.ftkInitialized) {
+                            console.log('ChannelCP syncing on mutation.type: ' + mutation.type)
+                            this.setupMyComponent()
+                        }
+                }
+            })
+
+            /*
+            this.$store.subscribe((mutation) => {
                 switch (mutation.type) {
                     case 'installChannel':
                     case 'installChannelIds':
                     case 'setSession':
                     case 'loadChannelNames':
-                        console.log('CCP acting on mutation.type: ' + mutation.type)
+                        console.log('ChannelCP syncing on mutation.type: ' + mutation.type)
                         this.channelNames = this.$store.getters.getChannelNamesForCurrentSession;
                         break;
                 }
             })
-
+            */
         },
         watch: {},
         name: "ChannelControlPanel"

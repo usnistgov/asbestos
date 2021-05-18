@@ -120,7 +120,7 @@
             TestControlPanel2,
             // ChannelLogControlPanel,
             // GetterControlPanel
-        }
+        },
     }
 
 
