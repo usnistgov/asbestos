@@ -8,7 +8,7 @@
         <span class="tooltiptext">Add a New Test Session</span>
       </div>
       <div class="tooltip">
-          <img v-if="!this.$store.getters.getSessionConfig.sessionConfigLocked" id="delete" src="../../assets/exclude-button-red.png" @click="del()"/>
+          <img v-if="! isSessionConfigLocked" id="delete" src="../../assets/exclude-button-red.png" @click="del()"/>
           <span class="tooltiptext">Delete Test Session</span>
        </div>
       <!-- end -->
@@ -102,6 +102,13 @@ watch: {
 },
 */
   computed: {
+    isSessionConfigLocked() {
+      let sc = this.$store.getters.getSessionConfig
+              if (sc!== undefined && sc !== null) {
+                return sc.sessionConfigLocked
+              } else
+                return false
+    },
       testSessionNames() {
         return this.$store.state.base.sessionNames
     },
