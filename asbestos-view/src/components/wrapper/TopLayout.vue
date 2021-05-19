@@ -148,7 +148,7 @@
     }
     .grid-container {
         display: grid;
-        grid-template-columns: minmax(0, 1fr) 250px;
+        grid-template-columns: minmax(0, 1fr) 300px;
     }
     .error-grid-container {
         display: grid;
