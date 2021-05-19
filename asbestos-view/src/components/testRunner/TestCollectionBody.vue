@@ -166,7 +166,7 @@ export default {
         this.$store.subscribe((mutation) => {
             if (mutation.type === 'ftkChannelLoaded') {
                 if (this.$store.state.base.ftkChannelLoaded) {
-                    console.log('TestCollectionBody syncing on mutation.type: ' + mutation.type)
+                    // console.log('TestCollectionBody syncing on mutation.type: ' + mutation.type)
                     this.load(this.testCollection)
                     this.setEvalCount()
                 }

@@ -72,8 +72,8 @@
         The <span class="bold"> Control panel</span> is on the right side of the screen:<br /><br />
 
         <span class="bold">Test Session</span>
-        - an area to work in giving isolation from other users.  Same as XDS Toolkit. Only one test session, default,
-        is supported in this release.
+        - an area to work in giving isolation from other users. Test sessions can be locked manually, to prevent accidental deletion of the test
+        session contents. Locked test sessions do not have the Remove image icon.
         <br />
 
         <span class="bold">Channel</span>

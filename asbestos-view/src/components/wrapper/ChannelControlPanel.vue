@@ -328,7 +328,7 @@
             this.$store.subscribe((mutation) => {
                 if (mutation.type === 'ftkInitComplete') {
                     if (this.$store.state.base.ftkInitialized) {
-                            console.log('ChannelCP syncing on mutation.type: ' + mutation.type)
+                            // console.log('ChannelCP syncing on mutation.type: ' + mutation.type)
                             this.setupMyComponent()
                         }
                 }

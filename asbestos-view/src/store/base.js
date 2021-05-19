@@ -286,6 +286,15 @@ export const baseStore = {
         }
     },
     getters: {
+        getChannel: (state) => {
+           return state.channel
+        },
+        getChannelName: (state,getters) => {
+            return getters.getChannel.channelName
+        },
+        getChannelTestSession: (state,getters) => {
+           return getters.getChannel.testSession
+        },
         getSessionConfig: (state) => {
             return state.sessionConfigs[state.session];
         },

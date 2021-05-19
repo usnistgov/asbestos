@@ -379,20 +379,27 @@ export const testRunnerStore = {
         async loadTestCollectionNames({commit}) {
             const url = `collections`
             try {
-                const response = await ENGINE.get(url)
-                commit('testCollectionsLoaded')  // startup heartbeat for test engine
-                let clientTestNames = []
-                let serverTestNames = []
-                response.data.forEach(collection => {
-                    if (!collection.hidden) {
-                        if (collection.server)
-                            serverTestNames.push(collection.name)
-                        else
-                            clientTestNames.push(collection.name)
-                    }
+                ENGINE.get(url)
+                    .then(response => {
+                        commit('testCollectionsLoaded')  // startup heartbeat for test engine
+                        let clientTestNames = []
+                        let serverTestNames = []
+                        response.data.forEach(collection => {
+                            if (!collection.hidden) {
+                                if (collection.server)
+                                    serverTestNames.push(collection.name)
+                                else
+                                    clientTestNames.push(collection.name)
+                            }
+                        })
+                        commit('setClientTestCollectionNames', clientTestNames.sort())
+                        commit('setServerTestCollectionNames', serverTestNames.sort())
+                    })
+                .catch(function (error) {
+                    commit('setError', url + ': ' + error)
+                    console.error(`${error} for ${url}`)
                 })
-                commit('setClientTestCollectionNames', clientTestNames.sort())
-                commit('setServerTestCollectionNames', serverTestNames.sort())
+
             } catch (error) {
                 this.$store.commit('setError', url + ': ' +  error)
             }
