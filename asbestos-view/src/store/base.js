@@ -292,9 +292,9 @@ export const baseStore = {
         getProxyBase: (state) => (parms) => {
             if (parms === null)
                 return state.proxyBase
-            const channelId = parms.channelId
+            const channelName = parms.channelName
             const sessionId = parms.sessionId
-            return `${state.proxyBase}/${sessionId}__${channelId}`
+            return `${state.proxyBase}/${sessionId}__${channelName}`
         },
         getChannelId: (state) => {
             return `${state.channel.testSession}__${state.channel.channelName}`
