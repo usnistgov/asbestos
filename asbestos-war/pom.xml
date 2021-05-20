@@ -14,7 +14,10 @@
     <packaging>war</packaging>
 
     <properties>
-        <fhirToolkitUIHomePage>http://localhost:8082</fhirToolkitUIHomePage>
+        <!-- HTTPS UI -->
+        <fhirToolkitUIHomePage>https://fhirtoolkit.test:8082</fhirToolkitUIHomePage>
+        <!-- HTTP UI -->
+<!--        <fhirToolkitUIHomePage>http://localhost:8082</fhirToolkitUIHomePage>-->
         <httpsFhirToolkitBase>https://fhirtoolkit.test:9743/asbestos</httpsFhirToolkitBase>
         <fhirToolkitBase>http://localhost:8081/asbestos</fhirToolkitBase>
         <itTestfhirToolkitBase>http://localhost:8877/asbestos</itTestfhirToolkitBase>

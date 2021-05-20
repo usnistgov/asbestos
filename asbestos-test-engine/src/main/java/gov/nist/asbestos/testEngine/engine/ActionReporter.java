@@ -290,7 +290,7 @@ class ActionReporter implements TestDef {
                 String eventUrl = responseHeaders.getProxyEvent();
                 if (eventUrl != null) {
                     /*
-                     If events were created from one FTK webapp configured with a different URL and then later viewed from another FTK at runtime, then this link may have a bad hostname/port number
+                     Check fhirToolkitUIHomePage property in service.properties if URI scheme and/or authority are not correct in the link created below.
                      */
                     String value = EventLinkToUILink.get(eventUrl);
                     try {
