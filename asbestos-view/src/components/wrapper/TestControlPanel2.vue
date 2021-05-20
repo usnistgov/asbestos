@@ -11,7 +11,7 @@
       <div class="bold">
         Client:
       </div>
-      <select v-model="collection" v-bind:size="clientCollections.length" class="control-panel-font">
+      <select v-model="collection" v-bind:size="clientCollections.length" class="control-panel-list control-panel-font">
         <option v-for="(coll, colli) in clientCollections"
                 v-bind:value="coll"
                 :key="coll + colli"
@@ -22,7 +22,7 @@
       <div class="bold">
         Server:
       </div>
-      <select v-model="collection" v-bind:size="serverCollections.length" class="control-panel-font">
+      <select v-model="collection" v-bind:size="serverCollections.length" class="control-panel-list control-panel-font">
         <option v-for="(coll, colli) in serverCollections"
                 v-bind:value="coll"
                 :key="coll + colli"

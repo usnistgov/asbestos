@@ -192,6 +192,9 @@
     .control-panel-font {
         font-size: small;
     }
+    .control-panel-list {
+        margin: 2px;
+    }
     .bold {
         font-weight: bold;
     }
