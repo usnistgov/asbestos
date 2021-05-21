@@ -54,7 +54,7 @@
                          Requests will be sent to XDS Site:
                         <span v-if="theChannelObj.xdsSiteName" class="boxed">{{ theChannelObj.xdsSiteName }}</span>
                         <div class="divider"></div>
-                        (through the Proxy on Channel {{ theChannelObj.channelName }}) based on the Channel selection.
+                        (through the Proxy on MHD Channel {{ theChannelObj.channelName }}) based on the Channel selection.
                     </span>
                     <span v-else class="configurationError">
                         Unknown channel.channelType for {{theChannelObj.channelName }}.
@@ -103,12 +103,6 @@ export default {
     watch: {
     'evalCount': 'setEvalCount',
     'testCollection': 'load',
-      /*
-    'channelName': function() {
-      this.loadAChannel(`${this.sessionId}__${this.channelName}`);
-    },
-
-       */
   },
   mixins: [ testCollectionMgmt ],
   name: "TestCollectionHeader",

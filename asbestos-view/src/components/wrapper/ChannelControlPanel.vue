@@ -293,7 +293,7 @@
                 set(name) {
                     if (name === undefined) return
                     if (name !== this.$store.state.base.channel.channelName) {
-                        this.ftkLoadChannel(name)
+                        this.ftkLoadChannel(name, true, true)
                     }
                 },
                 get() {

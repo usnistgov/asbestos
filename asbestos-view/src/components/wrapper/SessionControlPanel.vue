@@ -135,7 +135,7 @@
                         }
 
                         if (chIds !== undefined && chIds !== null && channelIdToLoad !== undefined) {
-                            this.ftkLoadChannel(channelIdToLoad)
+                            this.ftkLoadChannel(channelIdToLoad, true, true)
                         } else {
                             const errMsg = 'A channel is not available.'
                             console.log(errMsg)

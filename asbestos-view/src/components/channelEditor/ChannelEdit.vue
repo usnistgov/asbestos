@@ -521,7 +521,7 @@ export default {
       this.channel = null
       const fullId = this.channelId;
 
-      this.$store.dispatch('loadChannel', fullId)
+      this.$store.dispatch('loadChannel', {channelId: fullId, raiseFtkCommit: false})
           .then(channel => {
             this.channel = cloneDeep(channel)
             this.discarding = false

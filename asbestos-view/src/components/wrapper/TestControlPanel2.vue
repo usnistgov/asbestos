@@ -62,6 +62,12 @@ export default {
           }
         }
     },
+      collectionUpdated() {
+       if (this.collection !== this.$store.state.testRunner.currentTestCollectionName) {
+        this.collection = this.$store.state.testRunner.currentTestCollectionName
+       }
+      },
+      /*
     vuexCollectionUpdated() {
       if (this.$store.state.testRunner.currentTestCollectionName === null)
         return;
@@ -70,6 +76,7 @@ export default {
         this.openCollection()
       }
     },
+       */
     localCollectionUpdated() {
 //                if (this.collection !== this.$store.state.testRunner.currentTestCollectionName)
       this.openCollection()
@@ -163,8 +170,7 @@ export default {
 
   },
   watch: {
-    // 'channelName': 'reload',
-    // '$store.state.testRunner.currentTestCollectionName': 'vuexCollectionUpdated',
+    // '$store.state.testRunner.currentTestCollectionName': 'collectionUpdated',
     'collection': 'openCollection',
   },
   mixins: [ errorHandlerMixin ],

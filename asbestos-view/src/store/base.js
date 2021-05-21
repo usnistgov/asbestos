@@ -246,7 +246,9 @@ export const baseStore = {
                     commit('setError', url + ': ' + e)
                 })
         },
-        loadChannel({commit}, fullId) {
+        loadChannel({commit}, paramObj) {
+            const fullId = paramObj.channelId
+            const raiseFtkCommit = paramObj.raiseFtkCommit
             if (this.channel !== undefined) {
                 if (fullId === this.channel.testSession + '__' + this.channel.channelName) {
                     console.log('Returning a cached copy of channel.')
@@ -263,7 +265,9 @@ export const baseStore = {
                 .then(response => {
                     commit('installChannel', response.data)
                     commit('setChannelName', parts[1]);
-                    commit('ftkChannelLoaded', true);
+                    if (raiseFtkCommit) {
+                        commit('ftkChannelLoaded', true);
+                    }
                     return response.data
                 })
                 .catch(e => {
