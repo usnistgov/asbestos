@@ -63,7 +63,8 @@ export const baseStore = {
             state.session = theSession
         },
         setSessionConfig(state, config) {
-            state.sessionConfigs[config.name] = config;
+            Vue.set(state.sessionConfigs, config.name, config)
+            // state.sessionConfigs[config.name] = config;
         },
         setSessionNames(state, sessions) {
             state.sessionNames = sessions
@@ -352,7 +353,7 @@ export const baseStore = {
         },
         getSessionIncludes: (state) => (session) => {
               const config = state.sessionConfigs[session];
-              if (!config)
+              if (config === undefined || config === null)
                   return [];
               return config.includes;
         },
