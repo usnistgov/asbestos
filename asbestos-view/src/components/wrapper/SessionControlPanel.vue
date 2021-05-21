@@ -7,9 +7,14 @@
                 <span class="tooltiptext">Add a New Test Session</span>
             </div>
             <div class="tooltip">
-                <img @click="del()" id="delete" src="../../assets/exclude-button-red.png"
-                     v-if="! isSessionConfigLocked"/>
-                <span class="tooltiptext">Delete Test Session</span>
+                <template v-if="! isSessionConfigLocked">
+                    <img @click="del()" id="delete" src="../../assets/exclude-button-red.png"/>
+                    <span class="tooltiptext">Delete Test Session</span>
+                </template>
+                <template v-else>
+                    <img class="dimOpacity" disabled="disabled" src="../../assets/exclude-button-red.png"/>
+                    <span class="tooltiptext">Configuration is locked</span>
+                </template>
             </div>
             <!-- end -->
             <span v-if="details">
@@ -269,5 +274,7 @@
 </script>
 
 <style scoped>
-
+.dimOpacity {
+    opacity: .25;
+}
 </style>
