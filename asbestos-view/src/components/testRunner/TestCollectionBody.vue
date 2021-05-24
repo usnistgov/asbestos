@@ -48,17 +48,17 @@
             </template>
           </template>
 
-          <span v-if="$store.state.testRunner.currentTest === name">
+          <span v-if="selected === name">
                             <img src="../../assets/arrow-down.png">
-                    </span>
+          </span>
           <span v-else>
                             <img src="../../assets/arrow-right.png"/>
-                    </span>
+          </span>
           <span class="large-text">{{ cleanTestName(name) }}</span>
           &nbsp;
           <span v-if="isClient">
                             <button class="runallbutton" @click="doEval(name)">Run</button>
-                    </span>
+          </span>
           <span v-else-if="isDebugFeatureEnabled">
                           <template v-if="isPreviousDebuggerStillAttached(i)">
                                 <button
@@ -98,7 +98,7 @@
                     </span>
           <span v-else>
                           <button @click.stop="doRun(name, testRoutePath)" class="runallbutton">Run</button>
-                    </span>
+          </span>
           <span v-if="! isWaitingForBreakpoint && ! $store.state.testRunner.isClientTest"> --  {{ testTime(name) }}</span>
         </div>
         <debug-assertion-eval-modal v-if="isDebugFeatureEnabled && isEvaluableAction(i)" :show="$store.state.debugAssertionEval.showEvalModalDialog" @close="closeModal()" @resume="doDebug(name)"></debug-assertion-eval-modal>
@@ -125,8 +125,12 @@ export default {
        */
       this.$store.commit('setCurrentTest', null)
       this.loadTestCollection(this.testCollection).then(() => {
-          if (! this.isClient) {
+          if (this.isClient === false) {
               this.$store.dispatch('debugMgmt', {'cmd': 'getExistingDebuggerList'})
+          }
+          const testIdParam = this.$router.currentRoute.params['testId']
+          if (testIdParam !== undefined && testIdParam !== null) {
+              this.$store.commit('setCurrentTest', testIdParam)
           }
       })
     },
