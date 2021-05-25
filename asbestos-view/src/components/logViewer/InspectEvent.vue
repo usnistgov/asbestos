@@ -259,6 +259,17 @@
                 await this.$store.dispatch('loadEventSummaries', {session: this.sessionId, channel: this.channelName})
                 this.isLoading = false
             },
+            setupMyComponent() {
+                this.loadEventSummaries()
+                if (this.requestEnabled && !this.responseEnabled) {
+                    this.displayInspector = true;
+                    this.inspectType = 'request';
+                }
+                if (!this.requestEnabled && this.responseEnabled) {
+                    this.displayInspector = true;
+                    this.inspectType = 'response';
+                }
+            },
         },
         computed: {
             requestEnabled() {
@@ -340,15 +351,18 @@
             }
         },
         created() {
-            this.loadEventSummaries()
-            if (this.requestEnabled && !this.responseEnabled) {
-                this.displayInspector = true;
-                this.inspectType = 'request';
+            if (this.$store.state.base.ftkChannelLoaded) {
+                this.setupMyComponent()
             }
-            if (!this.requestEnabled && this.responseEnabled) {
-                this.displayInspector = true;
-                this.inspectType = 'response';
-            }
+        },
+        mounted() {
+            this.$store.subscribe((mutation) => {
+                if (mutation.type === 'ftkChannelLoaded') {
+                    if (this.$store.state.base.ftkChannelLoaded) {
+                        this.setupMyComponent()
+                    }
+                }
+            })
         },
         watch: {
             eventId() {
