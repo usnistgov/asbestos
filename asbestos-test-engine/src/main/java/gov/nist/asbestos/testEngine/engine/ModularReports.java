@@ -15,9 +15,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ModularReports {
-    private Map<String, String> reports = new HashMap<>();  // name => TestReport json
+    private boolean objectModel;
+    private Map<String, String> reports = new HashMap<>();  // name => TestReport json string
+    private Map<String, TestReport> reportsObject = new HashMap<>();  // name => TestReport object
 
-    public ModularReports(EC ec, String channelId, String testCollection, String testName) throws IOException {
+    public ModularReports(EC ec, String channelId, String testCollection, String testName, boolean objectModel) throws IOException {
+        this.objectModel = objectModel;
         File base = ec.getTestLogDir(channelId, testCollection, testName);
 
         addReport(new File(base, "TestReport.json"));
@@ -28,6 +31,11 @@ public class ModularReports {
                     addReport(new File(module, "TestReport.json"));
             }
         }
+
+    }
+
+    public ModularReports(EC ec, String channelId, String testCollection, String testName) throws IOException {
+        this(ec, channelId, testCollection, testName, false);
     }
 
     public ModularReports(Map<String, String> reports) {
@@ -47,7 +55,12 @@ public class ModularReports {
         } catch (IOException e) {
             return;
         }
-        reports.put(report.getName(), json);
+
+        if (this.objectModel) {
+            reportsObject.put(report.getName(), report);
+        } else {
+            reports.put(report.getName(), json);
+        }
     }
 
     public String asJson() {
@@ -60,5 +73,9 @@ public class ModularReports {
         }
         String str = jsonObject.toString();
         return str;
+    }
+
+    public Map<String, TestReport> getReportsObject() {
+        return reportsObject;
     }
 }
