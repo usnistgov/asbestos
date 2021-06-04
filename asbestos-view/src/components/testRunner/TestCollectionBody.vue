@@ -171,8 +171,8 @@ export default {
         let returnObj = {}
         const testKeys = Object.keys(this.$store.state.testRunner.ftkTestDependencies)
         const currentTestCollectionTestKeys = testKeys.filter(e => e.startsWith(this.testCollection))
-        let passingCt = 0
         for (let testKey of currentTestCollectionTestKeys) {
+           let passingCt = 0
            const deps = this.$store.state.testRunner.ftkTestDependencies[testKey]
             for (let dep of deps) {
                 // TODO: handle "tc/" case
@@ -185,10 +185,17 @@ export default {
                 if (depName in tcTr) {
                     const tr = tcTr[depName]
                     if (tr !== undefined) {
-                       if (tr.result)
+                        // console.log(`computing ${depName}, tr.result is ${tr.result}, ${testKey}, tcTr count: ${Object.keys(tcTr).length}, deps count: ${deps.length}`)
+                       if (tr.result==='pass')
                            passingCt++
+                        // else
+                        //     console.log(`${depName} failed!`)
                     }
+                    // else
+                    //     console.log('is undefined!')
                 } // else, async func still hasn't loaded it yet?
+                // else
+                //     console.log(`${depName} does not exist in tcTr! ${Object.keys(tcTr)}`)
             }
             returnObj[testKey] = passingCt > 0 && passingCt === deps.length
         }

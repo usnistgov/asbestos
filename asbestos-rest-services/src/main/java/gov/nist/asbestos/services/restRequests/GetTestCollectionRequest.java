@@ -97,6 +97,7 @@ public class GetTestCollectionRequest {
             List<String> dependsOnList = Arrays.asList(testArtifactIds.split(","));
             List<String> list = dependsOnList
                     .stream()
+                    .map(s -> s.trim())
                     .filter(s -> s.contains(TC_SEPARATOR))
                     .collect(Collectors.toList());
             if (list != null) {
@@ -134,7 +135,7 @@ public class GetTestCollectionRequest {
             List<String> dependsOnList = Arrays.asList(testArtifactIds.split(","));
             return dependsOnList
                     .stream()
-                    .map(s -> s.contains(TC_SEPARATOR) ? s : tcPrefix(s))
+                    .map(s -> s.contains(TC_SEPARATOR) ? s.trim() : tcPrefix(s.trim()))
                     .collect(Collectors.toList());
         }
         return null;
