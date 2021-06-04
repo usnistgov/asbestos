@@ -22,10 +22,8 @@ import java.util.Map;
 // 3 - "eventPart"
 // 4 - channelId
 // 5 - testCollectionId
-// 6 - testId or testId%2ftestPart
-// ? Query string. example: ?getTask-0.responseBody
-//  Split query string by '.' to get the method name to invoke.
-//  Furthermore, split method name string by '-' for parameters to pass for method invocation.
+// 6 - testId
+// Example: https://fhirtoolkit.test:9743/asbestos/engine/eventPart/default__limited/MHD_DocumentRecipient_minimal/Missing_DocumentManifest?module=SendPDB&testIndex=0&actionIndex=0&eventPartLocation=operation.detail&targetTaskIndex=0&return=responseBody
 //
 
 public class GetEventPartRequest {

@@ -8,6 +8,7 @@ import gov.nist.asbestos.client.log.SimStore;
 import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import gov.nist.asbestos.simapi.simCommon.SimId;
+import gov.nist.asbestos.simapi.tk.siteManagement.SeparateSiteLoader;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.log4j.Logger;
 import org.hl7.fhir.common.hapi.validation.support.PrePopulatedValidationSupport;
@@ -42,6 +43,8 @@ public class EC {
     public static final String CHANNELS_DIR = "FhirChannels";
     public static final String DOCUMENT_CACHE = "FhirDocCache";
     public static final String TRASH_CAN = "trashcan";
+    public static final String TEST_COLLECTION_PROPERTIES = "TestCollection.properties";
+    public static final String TEST_PROPERTIES = "Test.properties";
 
 
     public EC(File externalCache) {
@@ -109,7 +112,7 @@ public class EC {
         File root = getTestCollectionBase(collectionName);
         if (root == null)
             return props;
-        File file = new File(root, "TestCollection.properties");
+        File file = new File(root, TEST_COLLECTION_PROPERTIES);
         try {
             props.load(new FileInputStream(file));
         } catch (IOException e) {
@@ -130,6 +133,21 @@ public class EC {
         } catch (IOException e) {
             throw new Error(e);
         }
+    }
+
+    public Properties getTestProperties(String collectionName, String testName) {
+        Properties props = new Properties();
+        File testDir = getTest(collectionName, testName);
+        if (testDir != null ) {
+            File testProps = new File(testDir, EC.TEST_PROPERTIES);
+            if (testProps.exists()) {
+                try {
+                    props.load(new FileInputStream(testProps));
+                    return props;
+                } catch (IOException ex) {}
+            }
+        }
+        return null;
     }
 
     public File getTestAssertionsFile() {

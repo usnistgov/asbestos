@@ -60,6 +60,14 @@
                             <button class="runallbutton" @click="doEval(name)">Run</button>
           </span>
           <span v-else-if="isDebugFeatureEnabled">
+            <template v-if="formatTestArtifactId(name) in dependencyTestResult">
+                <template v-if="dependencyTestResult[formatTestArtifactId(name)]===true">
+                 OK
+                </template>
+                <template v-else>
+                    &#x1F517;
+                </template>
+            </template>
                           <template v-if="isPreviousDebuggerStillAttached(i)">
                                 <button
                                     @click.stop="removeDebugger(i)"
@@ -147,6 +155,9 @@ export default {
       const selectedRoutePath = `${this.testRoutePath}/${this.selected}`
       this.$router.push(selectedRoutePath)
     },
+      formatTestArtifactId(name) {
+       return this.testCollection.concat("/").concat(name)
+      },
   },
   computed: {
     selected() {
@@ -156,6 +167,33 @@ export default {
       const route = `/session/${this.sessionId}/channel/${this.channelName}/collection/${this.testCollection}/test`
       return route
     },
+    dependencyTestResult() {
+        let returnObj = {}
+        const testKeys = Object.keys(this.$store.state.testRunner.ftkTestDependencies)
+        const currentTestCollectionTestKeys = testKeys.filter(e => e.startsWith(this.testCollection))
+        let passingCt = 0
+        for (let testKey of currentTestCollectionTestKeys) {
+           const deps = this.$store.state.testRunner.ftkTestDependencies[testKey]
+            for (let dep of deps) {
+                // TODO: handle "tc/" case
+                let tcTr = this.$store.state.testRunner.nonCurrentTcTestReports
+                let depName = dep
+                if (dep.startsWith(this.testCollection)) {
+                    tcTr = this.$store.state.testRunner.testReports
+                    depName = dep.split("/")[1]
+                }
+                if (depName in tcTr) {
+                    const tr = tcTr[depName]
+                    if (tr !== undefined) {
+                       if (tr.result)
+                           passingCt++
+                    }
+                } // else, async func still hasn't loaded it yet?
+            }
+            returnObj[testKey] = passingCt > 0 && passingCt === deps.length
+        }
+        return returnObj
+    },
   },
   created() {
       if (this.$store.state.base.ftkChannelLoaded) {
@@ -163,7 +201,7 @@ export default {
           // this.channel = this.channelName
           this.setEvalCount()
       } else {
-          console.log('on create, ftkChannelLoaded is false')
+          console.log('on Created, ftkChannelLoaded is false, so Loading is deferred.')
       }
   },
   mounted() {

@@ -5,7 +5,7 @@
         :test-collection="testCollection"
         :session-id="sessionId"
         :channel-name="channelName"> </test-collection-header>
-    <div v-if="isLoading" class="loading">Loading...</div>
+<!--    <div v-if="isLoading" class="loading">Loading...</div>-->
     <test-collection-body
         :test-collection="testCollection"
         :session-id="sessionId"
@@ -25,7 +25,7 @@ export default {
   data() {
     return {
       time: [],   // built as a side-effect of status (computed)
-      isLoading: false,
+      // isLoading: false,
     }
   },
   methods: {
@@ -47,6 +47,7 @@ export default {
         return null
       return this.$store.state.testRunner.testReports[testName]
     },
+      /*
     load() {
       console.log('tc loaded')
       this.isLoading = true
@@ -62,6 +63,7 @@ export default {
        this.isLoading = false
       })
     },
+     */
   },
   computed: {
   },

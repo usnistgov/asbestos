@@ -73,8 +73,10 @@ export default {
                     //  this.channelObj = p
                     const promises = []
                     promises.push(this.$store.dispatch('loadTestScripts', this.$store.state.testRunner.testScriptNames))
-                    if (!this.$store.state.testRunner.isClientTest)
-                promises.push(this.$store.dispatch('loadTestReports', this.$store.state.testRunner.currentTestCollectionName))
+                    if (!this.$store.state.testRunner.isClientTest) {
+                        promises.push(this.$store.dispatch('loadTestReports', this.$store.state.testRunner.currentTestCollectionName))
+                        promises.push(this.$store.dispatch('loadNonCurrentTcTestReports')) // for test dependency purposes
+                    }
                     promises.push(new Promise ((resolve  ) => {
                         console.log('Done loading scripts and reports')
                         resolve(true)
@@ -155,21 +157,6 @@ export default {
                 return this.$store.state.testRunner.useGzip
             }
         },
-        /*
-        FIXME: where is this used?
-        channel: {
-            set(name) {
-                if (name !== this.$store.state.base.channelName) {
-                    console.log(`setting channelName to ${name}`);
-                    this.$store.commit('setChannelName', name)
-                }
-            },
-            get() {
-                return this.$store.state.base.channelName
-            }
-        },
-
-         */
         fullChannelId() {
             return `${this.sessionId}__${this.channelName}`
         },
