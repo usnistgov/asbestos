@@ -1,5 +1,6 @@
 package gov.nist.asbestos.services.restRequests;
 
+import gov.nist.asbestos.client.Base.EC;
 import gov.nist.asbestos.client.Base.Request;
 import org.apache.log4j.Logger;
 
@@ -118,11 +119,16 @@ public class GetTestCollectionRequest {
         if (values != null && values.trim().length() > 0) {
             String[] testLevelDependsOnMapKeys = values.split(",");
             for (String testName : testLevelDependsOnMapKeys) {
-                Properties props = request.ec.getTestProperties(collectionName, testName);
-                String dependsOnValue = props.getProperty(DEPENDS_ON_KEY_NAME);
-                List<String> list = getTestLevelPrefixedDependsOnList(dependsOnValue);
-                if (list != null) {
-                    map.put(tcPrefix(testName), list.toArray(new String[list.size()]));
+                String testNameTrimmed = testName.trim();
+                Properties props = request.ec.getTestProperties(collectionName, testNameTrimmed);
+                if (props != null) {
+                    String dependsOnValue = props.getProperty(DEPENDS_ON_KEY_NAME);
+                    List<String> list = getTestLevelPrefixedDependsOnList(dependsOnValue);
+                    if (list != null) {
+                        map.put(tcPrefix(testNameTrimmed), list.toArray(new String[list.size()]));
+                    }
+                } else {
+                    log.error(String.format("%s/%s was defined, but %s/%s was not found.", collectionName, EC.TEST_COLLECTION_PROPERTIES, testNameTrimmed, EC.TEST_PROPERTIES));
                 }
             }
             return map;
