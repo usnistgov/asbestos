@@ -1,23 +1,4 @@
 <TestScript xmlns="http://hl7.org/fhir">
-    <fixture id="good-pdb-bundle">
-        <autocreate value="false"/>
-        <autodelete value="false"/>
-        <resource>
-            <reference value="Bundle/good-pdb.xml"/>
-        </resource>
-    </fixture>
-    <fixture id="goodSubmittedDocRef">
-        <autocreate value="false"/>
-        <autodelete value="false"/>
-        <extension url="urn:subFixture">
-            <extension url="urn:fhirPath">
-                <valueString value="Bundle.entry[0]"/>
-            </extension>
-            <extension url="urn:sourceId">
-                <valueString value="good-pdb-bundle"/>
-            </extension>
-        </extension>
-    </fixture>
     <fixture id="bad-pdb-bundle">
         <autocreate value="false"/>
         <autodelete value="false"/>
@@ -41,16 +22,6 @@
         <sourceId value="patient-bundle"/>
     </variable>
     <variable>
-        <name value="goodReferenceMasterIdentifier"/>
-        <expression value="Bundle.entry.select(resource as DocumentReference).masterIdentifier.value"/>
-        <sourceId value="good-pdb-bundle"/>
-    </variable>
-    <variable>
-        <name value="goodReferenceStatus"/>
-        <expression value="Bundle.entry.select(resource as DocumentReference).status.value"/>
-        <sourceId value="good-pdb-bundle"/>
-    </variable>
-    <variable>
         <name value="badPdbReferenceMasterIdentifier"/>
         <expression value="Bundle.entry.select(resource as DocumentReference).masterIdentifier.value"/>
         <sourceId value="bad-pdb-bundle"/>
@@ -70,41 +41,15 @@
         <sourceId value="patient-bundle"/>
     </variable>
 
-    <test>
-        <description value="Submit."/>
-        <action>
-            <operation>
-                <description value="Submit Provide Document Bundle to MHD Document Recipient."/>
-                <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
-                    <extension url="component">
-                        <valueString value="../../Library/SendPDB.xml"/>
-                    </extension>
-                    <extension url="urn:fixture-in">
-                        <valueString value="good-pdb-bundle"/>
-                    </extension>
-                    <extension url="urn:variable-in-no-translation">
-                        <valueString value="patientResourceId"/>
-                    </extension>
-                    <extension url="urn:fixture-out">
-                        <valueString value="good-pdb-response"/>
-                    </extension>
-                </modifierExtension>
-            </operation>
-        </action>
-    </test>
-    <test>
+    <setup>
         <modifierExtension url="urn:noErrors"/>
-        <description value="Verify Document Responder base address is present in the PDB Bundle response."/>
-        <!-- A variable needs a static fixture reference but good-pdb-response fixture is dynamic. Calling this module call makes makes this possible. -->
         <action>
             <operation>
-                <description value="Verify document responder base address."/>
+                <description value="Get the document responder base address from a prerequisite PDB submission.
+               (This test assumes the document responder base address in PDB response does not change between consecutive PDB submissions.)"/>
                 <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
                     <extension url="component">
-                        <valueString value="../../Library/VerifyDocumentResponderBaseAddress.xml"/>
-                    </extension>
-                    <extension url="urn:fixture-in">
-                        <valueString value="good-pdb-response"/>
+                        <valueString value="../../Library/DocumentResponderBaseAddress.xml"/>
                     </extension>
                     <extension url="urn:variable-out">
                         <valueString value="docRespBaseAddress"/>
@@ -112,92 +57,12 @@
                 </modifierExtension>
             </operation>
         </action>
-    </test>
+    </setup>
+
+
     <test>
         <modifierExtension url="urn:noErrors"/>
-        <description value="Verify update to server using search parameters."/>
-        <action>
-            <operation>
-                <description value="for DocumentReference."/>
-                <type>
-                    <code value="search"/>
-                </type>
-                <contentType value="json"/>
-                <!--
-                Parameters map to FindDocuments according to ITI Suppl MHD:
-                "It is equivalent to the FindDocuments and FindDocumentsByReferenceId queries from the Registry Stored Query [ITI-18] transaction."
-                -->
-                <url value="${docRespBaseAddress}/DocumentReference?identifier=${goodReferenceMasterIdentifier}&amp;status=${goodReferenceStatus}&amp;patient.identifier=${patientIdentifierSearchParamValue}"/>
-                <responseId value="reference-search"/>
-            </operation>
-        </action>
-        <action>
-            <assert>
-                <description value="Returns 200."/>
-                <sourceId value="reference-search"/>
-                <response value="okay"/>
-                <warningOnly value="false"/>
-            </assert>
-        </action>
-        <action>
-            <assert>
-                <description value="One DocumentReference should be returned in the bundle from the search result."/>
-                <compareToSourceId value="reference-search"/>
-                <compareToSourceExpression value="Bundle.total = 1 and Bundle.entry[0].resource is DocumentReference"/>
-                <warningOnly value="false"/>
-            </assert>
-        </action>
-        <action>
-            <!-- Subfixture on a dynamic fixture is made possible by this module call. -->
-            <operation>
-                <description value="todo - desc."/>
-                <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
-                    <extension url="component">
-                        <valueString value="../../Library/VerifySearchDocRef.xml"/>
-                    </extension>
-                    <extension url="urn:fixture-in">
-                        <valueString value="reference-search"/>
-                    </extension>
-                    <extension url="urn:fixture-in">
-                        <valueString value="goodSubmittedDocRef"/>
-                    </extension>
-                </modifierExtension>
-            </operation>
-        </action>
-    </test>
-    <test>
-        <modifierExtension url="urn:noErrors"/>
-        <description value="Retrieve a non-existent resource from DocResp."/>
-        <action>
-            <operation>
-                <description value="Read non-existent DocumentReference."/>
-                <label value="read-back"/>
-                <type>
-                    <code value="search"/>
-                </type>
-                <url value="${docRespBaseAddress}/DocumentReference?identifier=urn:oid:1.1.1.10&amp;status=${goodReferenceStatus}&amp;patient.identifier=${patientIdentifierSearchParamValue}"/>
-                <responseId value="searchBogusId"/>
-            </operation>
-        </action>
-        <action>
-            <assert>
-                <description value="... was okay."/>
-                <response value="okay"/>
-                <warningOnly value="false"/>
-            </assert>
-        </action>
-        <action>
-            <assert>
-                <description value="No DocumentReferences should be returned in the bundle from the search result."/>
-                <compareToSourceId value="searchBogusId"/>
-                <compareToSourceExpression value="Bundle.total = 0"/>
-                <warningOnly value="false"/>
-            </assert>
-        </action>
-    </test>
-    <test>
-        <modifierExtension url="urn:noErrors"/>
-        <description value="Submit a PDB with a missing DocumentManifest (Main Test Part A)."/>
+        <description value="Submit a PDB with a missing DocumentManifest."/>
         <action>
             <operation>
                 <description value="Submit."/>
@@ -217,7 +82,7 @@
     </test>
     <test>
         <modifierExtension url="urn:noErrors"/>
-        <description value="Verify no update to server using search parameters (Main Test Part B)."/>
+        <description value="Verify no update to server using search parameters."/>
         <action>
             <operation>
                 <description value="for DocumentReference."/>

@@ -51,9 +51,9 @@
         <sourceId value="patient_bundle"/>
     </variable>
 
-  <setup>
+    <!-- A variable needs a static fixture reference but good-pdb-response fixture is dynamic. Calling this module call makes makes this possible. -->
+    <setup>
         <modifierExtension url="urn:noErrors"/>
-        <!-- A variable needs a static fixture reference but good-pdb-response fixture is dynamic. Calling this module call makes makes this possible. -->
         <action>
             <operation>
                <description value="Get the document responder base address from a prerequisite PDB submission.
