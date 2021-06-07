@@ -51,6 +51,24 @@
         <sourceId value="patient_bundle"/>
     </variable>
 
+  <setup>
+        <modifierExtension url="urn:noErrors"/>
+        <!-- A variable needs a static fixture reference but good-pdb-response fixture is dynamic. Calling this module call makes makes this possible. -->
+        <action>
+            <operation>
+               <description value="Get the document responder base address from a prerequisite PDB submission.
+               (This test assumes the document responder base address in PDB response does not change between consecutive PDB submissions.)"/>
+                <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
+                    <extension url="component">
+                        <valueString value="../../Library/DocumentResponderBaseAddress.xml"/>
+                    </extension>
+                    <extension url="urn:variable-out">
+                        <valueString value="docRespBaseAddress"/>
+                    </extension>
+                </modifierExtension>
+            </operation>
+        </action>
+  </setup>
 
 
     <test>
@@ -67,60 +85,6 @@
                     </extension>
                     <extension url="urn:variable-in-no-translation">
                         <valueString value="patientResourceId"/>
-                    </extension>
-                </modifierExtension>
-            </operation>
-        </action>
-    </test>
-    <test>
-        <modifierExtension url="urn:noErrors"/>
-        <description value="Get the document responder base address from a prerequisite PDB submission.
-        (This test assumes the document responder base address in PDB response does not change between consecutive PDB submissions.)"/>
-        <action>
-            <operation>
-                <description value="for DocRespBaseAddress."/>
-                <type>
-                    <system value="https://github.com/usnistgov/asbestos/wiki/Testscript-Operation-Codes"/>
-                    <code value="eventPart"/>
-                </type>
-                <contentType value="json"/>
-                <url value="/MHD_DocumentRecipient_minimal/1_Prerequiste_Single_Document_with_Binary?module=SendPDB&amp;testIndex=0&amp;actionIndex=0&amp;eventPartLocation=operation.detail&amp;targetTaskIndex=0&amp;return=responseBody"/>
-                <responseId value="good-pdb-response"/>
-            </operation>
-        </action>
-        <action>
-            <assert>
-                <description value="Status is 200."/>
-                <sourceId value="good-pdb-response"/>
-                <response value="okay"/>
-                <warningOnly value="false"/>
-            </assert>
-        </action>
-        <action>
-            <assert>
-                <description value="Bundle should be returned."/>
-                <compareToSourceId value="good-pdb-response"/>
-                <compareToSourceExpression value="Bundle.count() = 1"/>
-                <warningOnly value="false"/>
-            </assert>
-        </action>
-    </test>
-    <test>
-        <modifierExtension url="urn:noErrors"/>
-        <description value="Verify Document Responder base address is present in the PDB Bundle response."/>
-        <!-- A variable needs a static fixture reference but good-pdb-response fixture is dynamic. Calling this module call makes makes this possible. -->
-        <action>
-            <operation>
-                <description value="Verify document responder base address."/>
-                <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
-                    <extension url="component">
-                        <valueString value="../../Library/VerifyDocumentResponderBaseAddress.xml"/>
-                    </extension>
-                    <extension url="urn:fixture-in">
-                        <valueString value="good-pdb-response"/>
-                    </extension>
-                    <extension url="urn:variable-out">
-                        <valueString value="docRespBaseAddress"/>
                     </extension>
                 </modifierExtension>
             </operation>

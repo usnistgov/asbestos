@@ -60,21 +60,24 @@
                             <button class="runallbutton" @click="doEval(name)">Run</button>
           </span>
           <span v-else-if="isDebugFeatureEnabled">
-            <template v-if="formatTestArtifactId(name) in dependencyTestResult">
-                <template v-if="dependencyTestResult[formatTestArtifactId(name)]===true">
-                 OK
-                </template>
-                <template v-else>
-                    &#x1F517;
-                </template>
-            </template>
                           <template v-if="isPreviousDebuggerStillAttached(i)">
                                 <button
                                     @click.stop="removeDebugger(i)"
                                     class="stopDebugTestScriptButton">Remove Debugger</button>
                             </template>
                             <template v-else>
+                            <template v-if="formatTestArtifactId(name) in dependencyTestResult">
+                                <template v-if="dependencyTestResult[formatTestArtifactId(name)]===true">
+                                    <button v-if="! isResumable(i) && ! isWaitingForBreakpoint" @click.stop="doRun(name, testRoutePath)" class="runallbutton">Run</button>
+                                </template>
+                                <template v-else>
+                                    <span :title="`This test has prerequisite test(s): ${testDependencyList(formatTestArtifactId(name))}. Please run the prerequisite test(s) first.`">&#x1F517;</span>
+                                </template>
+                            </template>
+                            <template v-else>
                                 <button v-if="! isResumable(i) && ! isWaitingForBreakpoint" @click.stop="doRun(name, testRoutePath)" class="runallbutton">Run</button>
+                            </template>
+
                                 <template v-if="$store.state.testRunner.currentTest === name">
                                     <button v-if="isDebuggable(i) && ! isWaitingForBreakpoint"
                                             @click.stop="doDebug(name)"
@@ -105,6 +108,7 @@
                             </template>
                     </span>
           <span v-else>
+              <!-- Unlike the Debug mode, there is no test dependency checks here if Debug mode is disabled. -->
                           <button @click.stop="doRun(name, testRoutePath)" class="runallbutton">Run</button>
           </span>
           <span v-if="! isWaitingForBreakpoint && ! $store.state.testRunner.isClientTest"> --  {{ testTime(name) }}</span>
@@ -157,6 +161,9 @@ export default {
     },
       formatTestArtifactId(name) {
        return this.testCollection.concat("/").concat(name)
+      },
+      testDependencyList(testKey) {
+          return this.$store.state.testRunner.ftkTestDependencies[testKey]
       },
   },
   computed: {

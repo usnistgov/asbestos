@@ -1,0 +1,106 @@
+<TestScript  xmlns="http://hl7.org/fhir">
+    <modifierExtension url="urn:module">
+<!--        <extension url="urn:fixture-in">-->
+<!--            <valueString value="pdb-response"/>-->
+<!--        </extension>-->
+        <extension url="urn:variable-out">
+            <valueString value="docRespBaseAddress"/>
+        </extension>
+    </modifierExtension>
+
+    <!-- this module expects the PDB to contain a DocumentReference at index position 0. See: docRefLocation variable. -->
+
+    <url value=""/>
+    <name value="VerifyDocRespBaseAddress"/>
+    <status value="active"/>
+    <description value="Verify Document Responder base address."/>
+
+    <variable>
+        <name value="docRefLocation"/>
+        <expression value="Bundle.entry[0].response.location"/>
+        <sourceId value="pdb-response"/>
+    </variable>
+    <variable>
+        <name value="docRefResourceName"/>
+        <defaultValue value="/DocumentReference/"/>
+    </variable>
+    <variable>
+        <name value="indexOfdocRefInLocation"/>
+        <defaultValue value="'${docRefLocation}'.indexOf('${docRefResourceName}')"/>
+    </variable>
+    <variable>
+        <name value="docRespBaseAddress"/>
+        <defaultValue value="'${docRefLocation}'.substring(0,${indexOfdocRefInLocation})"/>
+    </variable>
+    <!--
+    When variables are referenced inside another variable, remember that only the last variable will have to be evaluated by FHIRClient's evalForString against a resource.
+    Care needs to be taken when coding up a FHIRPath this way.
+    -->
+    <variable>
+        <name value="docRespBaseAddressDocRef"/>
+        <defaultValue value="${docRespBaseAddress}+'/'+'${docRefResourceName}'"/>
+    </variable>
+
+    <test>
+        <modifierExtension url="urn:noErrors"/>
+        <description value="Make an internal call to get Document Responder base address."/>
+        <action>
+            <operation>
+                <description value="of prerequisite test."/>
+                <type>
+                    <system value="https://github.com/usnistgov/asbestos/wiki/Testscript-Operation-Codes"/>
+                    <code value="eventPart"/>
+                </type>
+                <contentType value="json"/>
+                <url value="/MHD_DocumentRecipient_minimal/1_Prerequiste_Single_Document_with_Binary?module=SendPDB&amp;testIndex=0&amp;actionIndex=0&amp;eventPartLocation=operation.detail&amp;targetTaskIndex=0&amp;return=responseBody"/>
+                <responseId value="pdb-response"/>
+            </operation>
+        </action>
+        <action>
+            <assert>
+                <description value="Status was 200."/>
+                <sourceId value="pdb-response"/>
+                <response value="okay"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
+            <assert>
+                <description value="Bundle count is 1."/>
+                <compareToSourceId value="pdb-response"/>
+                <compareToSourceExpression value="Bundle.count() = 1"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
+            <assert>
+                <description value="Verify resource location value length is greater than zero in the PDB response."/>
+                <expression value="'${docRefLocation}'.length() > 0"/>
+                <operator value="equals"/>
+                <value value="true" />
+                <sourceId value="pdb-response"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
+            <assert>
+                <description value="Verify resource location value has an indexOf 'DocumentReference' is greater than -1."/>
+                <expression value="${indexOfdocRefInLocation}"/>
+                <operator value="greaterThan"/>
+                <value value="-1" />
+                <sourceId value="pdb-response"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
+            <assert>
+                <description value="Verify Document Responder base address length is greater than zero."/>
+                <expression value="${docRespBaseAddress}.length()"/>
+                <operator value="greaterThan"/>
+                <value value="0" />
+                <sourceId value="pdb-response"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+    </test>
+</TestScript>
