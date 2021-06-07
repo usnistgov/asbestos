@@ -324,9 +324,7 @@ export const testRunnerStore = {
                 })
         },
         async loadNonCurrentTcTestReports({commit, rootState, state}) {
-            // TODO: move this into loadInterDependentTestReports()
-            // call this from loadTestCollection:77
-            //  begin inter dependencies part
+            //  begin dependencies part
             const ftkTestDepKeys = Object.keys(state.ftkTestDependencies)
             if (ftkTestDepKeys.length) {
                 const testCollectionId = state.currentTestCollectionName

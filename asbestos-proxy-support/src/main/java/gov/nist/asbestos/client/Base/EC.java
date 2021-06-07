@@ -26,6 +26,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static gov.nist.asbestos.client.Base.Dirs.listOfDirectories;
@@ -45,6 +46,7 @@ public class EC {
     public static final String TRASH_CAN = "trashcan";
     public static final String TEST_COLLECTION_PROPERTIES = "TestCollection.properties";
     public static final String TEST_PROPERTIES = "Test.properties";
+    public static final String HIDDEN_KEY_NAME = "Hidden"; // TODO: make an enum
 
 
     public EC(File externalCache) {
@@ -99,7 +101,20 @@ public class EC {
         File root = getTestCollectionBase(collectionName);
         if (root == null)
             return new ArrayList<>();
-        return listOfDirectories(root);
+        List<File> testDirs = listOfDirectories(root);
+        return testDirs
+                .stream()
+                .filter(s -> !isHiddenTest(s))
+                .collect(Collectors.toList());
+    }
+
+    public boolean isHiddenTest(File testDir) {
+        Properties props = getTestProperties(testDir);
+        if (props != null) {
+            String hiddenValue = props.getProperty(EC.HIDDEN_KEY_NAME);
+            return "true".equals(hiddenValue);
+        }
+        return false;
     }
 
     private static Properties defaultProperties = new Properties();
@@ -136,8 +151,12 @@ public class EC {
     }
 
     public Properties getTestProperties(String collectionName, String testName) {
-        Properties props = new Properties();
         File testDir = getTest(collectionName, testName);
+        return getTestProperties(testDir);
+    }
+
+    static Properties getTestProperties(File testDir) {
+        Properties props = new Properties();
         if (testDir != null ) {
             File testProps = new File(testDir, EC.TEST_PROPERTIES);
             if (testProps.exists()) {

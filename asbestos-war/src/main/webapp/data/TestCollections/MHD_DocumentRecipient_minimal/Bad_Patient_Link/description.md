@@ -1,6 +1,8 @@
 **Submit** a Provide Document Bundle transaction [ITI-65] containing Comprehensive Metadata to a Document Recipient
 actor.
 
+**Get** the document responder base address from a prerequisite PDB test, and use the address to verify no updates.
+
 **Message contents**: Bundle resource containing a DocumentManifest, a DocumentReference, and a Binary. The standard
 linkage between DocumentManifest and DocumentReference and between DocumentReference and Binary is present.
 

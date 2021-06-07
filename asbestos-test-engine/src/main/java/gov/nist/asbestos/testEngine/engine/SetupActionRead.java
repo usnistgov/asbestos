@@ -3,11 +3,9 @@ package gov.nist.asbestos.testEngine.engine;
 import gov.nist.asbestos.client.client.FhirClient;
 import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
-import gov.nist.asbestos.client.resolver.SearchParms;
 import gov.nist.asbestos.http.operations.HttpGetter;
 import gov.nist.asbestos.http.operations.HttpPost;
 import gov.nist.asbestos.simapi.validation.ValE;
-import gov.nist.asbestos.testEngine.engine.assertion.ResponseCodeAssertion;
 import gov.nist.asbestos.testEngine.engine.fixture.FixtureComponent;
 import gov.nist.asbestos.testEngine.engine.fixture.FixtureMgr;
 import org.hl7.fhir.r4.model.TestReport;
@@ -19,6 +17,8 @@ import java.net.URLEncoder;
 import java.util.Map;
 
 class SetupActionRead extends GenericSetupAction {
+
+    String internalBasePath = null;
 
     SetupActionRead(ActionReference actionReference, FixtureMgr fixtureMgr, boolean isFollowedByAssert) {
         super(actionReference, isFollowedByAssert);
@@ -61,8 +61,13 @@ class SetupActionRead extends GenericSetupAction {
             if (theUrl == null)
                 return null;
             Ref url = new Ref(theUrl);
-            if (url.isRelative())
-                return url.rebase(new Ref(base));
+            if (url.isRelative()) {
+                if (getInternalBasePath() != null) {
+                    return new Ref(getInternalBasePath().concat(theUrl));
+                } else {
+                    return url.rebase(new Ref(base));
+                }
+            }
             return url;
         }
         // for READ this can only be ID
@@ -209,5 +214,11 @@ class SetupActionRead extends GenericSetupAction {
         return this;
     }
 
+    public String getInternalBasePath() {
+        return internalBasePath;
+    }
 
+    public void setInternalBasePath(String internalBasePath) {
+        this.internalBasePath = internalBasePath;
+    }
 }

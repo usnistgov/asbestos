@@ -1,6 +1,7 @@
 package gov.nist.asbestos.services.restRequests;
 
 import com.google.gson.Gson;
+import gov.nist.asbestos.client.Base.EC;
 import gov.nist.asbestos.client.Base.Request;
 import org.apache.log4j.Logger;
 
@@ -44,7 +45,7 @@ public class GetTestCollectionNamesRequest {
             collection.server = "server".equals(props.getProperty("TestType"));
             collection.name = name;
             collection.channel = props.getProperty("channel");
-            collection.hidden = "true".equals(props.getProperty("Hidden"));
+            collection.hidden = "true".equals(props.getProperty(EC.HIDDEN_KEY_NAME));
             collections.add(collection);
         }
         String json = new Gson().toJson(collections);

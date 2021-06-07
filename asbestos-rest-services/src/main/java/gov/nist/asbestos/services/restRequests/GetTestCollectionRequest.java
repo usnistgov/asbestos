@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
 
 public class GetTestCollectionRequest {
 
-    private static final String DEPENDS_ON_KEY_NAME = "DependsOn";
+    private static final String DEPENDS_ON_KEY_NAME = "DependsOn"; // TODO: Make an enum
     public static final String TC_SEPARATOR = "/";
     private final String collectionName;
 
@@ -110,7 +110,7 @@ public class GetTestCollectionRequest {
     }
 
     private String tcPrefix(String testName) {
-        return String.format("%s/%s", collectionName, testName);
+        return String.format("%s%s%s", collectionName, TC_SEPARATOR, testName);
     }
 
     private Map<String, String[]> loadTestLevelDependencies(String values) {

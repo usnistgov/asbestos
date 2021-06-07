@@ -61,65 +61,70 @@ public class GetEventPartRequest {
         Map<String,TestReport> reportsMap = modularReports.getReportsObject();
         // Check if entire test passed
         // /Missing_DocumentManifest?module=SendPDB&testIndex=0&actionIndex=0&eventPartLocation=operation.detail&targetTaskIndex=0&return=responseBody
-        if (TestReport.TestReportStatus.COMPLETED.equals(reportsMap.get(testName).getStatus())) {
-            if (TestReport.TestReportResult.PASS.equals(reportsMap.get(testName).getResult())) {
-                String moduleName = paramsMap.get("module");
-                if (moduleName != null) {
-                    testName = testName + "/" + moduleName;
-                }
-                int testIndex = Integer.parseInt(paramsMap.get("testIndex"));
-                TestReport.TestReportTestComponent testComponent = reportsMap.get(testName).getTest().get(testIndex);
-                if (testComponent.hasAction()) {
-                    int actionIndex = Integer.parseInt(paramsMap.get("actionIndex"));
-                    TestReport.TestActionComponent actionComponent =  testComponent.getAction().get(actionIndex);
-                    String eventPartLocation = paramsMap.get("eventPartLocation");
-                    String[] eventParts = eventPartLocation.split("\\.");
-                    if (eventParts.length == 2) {
-                       if ("operation".equals(eventParts[0])) {
-                           if ("detail".equals(eventParts[1])) {
-                               String detailString = actionComponent.getOperation().getDetail();
-                               try {
-                                   URI eventPartLocationDetail = new URI(detailString);
-                                   UIEvent uiEvent = new UIEvent(request.ec).fromURI(eventPartLocationDetail);
-                                   int targetTaskIndex = Integer.parseInt(paramsMap.get("targetTaskIndex"));
-                                   if (targetTaskIndex < uiEvent.getTaskCount()) {
-                                       UITask uiTask = uiEvent.getTask(targetTaskIndex);
-                                       if ("responseBody".equals(paramsMap.get("return"))) {
-                                           Returns.returnString(request.resp, uiTask.getResponseBody());
-                                           return;
-                                       } else {
-                                           unexpectedMessage("Unknown or missing Return parameter.");
-                                           return;
-                                       }
+        TestReport theReport = reportsMap.get(testName);
+        if (theReport == null) {
+            unexpectedMessage(String.format("TestReport was not found for %s. Test was probably not yet run.", testName));
+            return;
+        }
+        if (TestReport.TestReportResult.PASS.equals(theReport.getResult())) {
+            String moduleName = paramsMap.get("module");
+            if (moduleName != null) {
+                testName = testName + "/" + moduleName;
+                theReport = reportsMap.get(testName);
+            }
+            if (! TestReport.TestReportStatus.COMPLETED.equals(theReport.getStatus())) {
+                String message = String.format("%s: Test is not Completed.", testName);
+                unexpectedMessage(message);
+                return;
+            }
+            int testIndex = Integer.parseInt(paramsMap.get("testIndex"));
+            TestReport.TestReportTestComponent testComponent = theReport.getTest().get(testIndex);
+            if (testComponent.hasAction()) {
+                int actionIndex = Integer.parseInt(paramsMap.get("actionIndex"));
+                TestReport.TestActionComponent actionComponent =  testComponent.getAction().get(actionIndex);
+                String eventPartLocation = paramsMap.get("eventPartLocation");
+                String[] eventParts = eventPartLocation.split("\\.");
+                if (eventParts.length == 2) {
+                   if ("operation".equals(eventParts[0])) {
+                       if ("detail".equals(eventParts[1])) {
+                           String detailString = actionComponent.getOperation().getDetail();
+                           try {
+                               URI eventPartLocationDetail = new URI(detailString);
+                               UIEvent uiEvent = new UIEvent(request.ec).fromURI(eventPartLocationDetail);
+                               int targetTaskIndex = Integer.parseInt(paramsMap.get("targetTaskIndex"));
+                               if (targetTaskIndex < uiEvent.getTaskCount()) {
+                                   UITask uiTask = uiEvent.getTask(targetTaskIndex);
+                                   if ("responseBody".equals(paramsMap.get("return"))) {
+                                       Returns.returnString(request.resp, uiTask.getResponseBody());
+                                       return;
+                                   } else {
+                                       unexpectedMessage("Unknown or missing Return parameter.");
+                                       return;
                                    }
-
-                               } catch (Exception ex) {
-                                   unexpectedMessage(String.format("%s is not an URI. Exception is: %s", detailString, ex.toString()));
-                                   return;
                                }
-                           } else {
-                               unexpectedMessage("Not a detail.");
+
+                           } catch (Exception ex) {
+                               unexpectedMessage(String.format("%s is not an URI. Exception is: %s", detailString, ex.toString()));
                                return;
                            }
                        } else {
-                           unexpectedMessage("Not an operation.");
+                           unexpectedMessage("Not a detail.");
                            return;
                        }
-                    } else {
-                        unexpectedMessage(String.format("Invalid parts length %d", eventParts.length));
-                        return;
-                    }
+                   } else {
+                       unexpectedMessage("Not an operation.");
+                       return;
+                   }
+                } else {
+                    unexpectedMessage(String.format("Invalid parts length %d", eventParts.length));
+                    return;
                 }
+            }
             } else {
                 String message = String.format("%s: Test did not Pass.", testName);
                 unexpectedMessage(message);
                 return;
             }
-        } else {
-            String message = String.format("%s: Test is not Completed.", testName);
-            unexpectedMessage(message);
-            return;
-        }
 
         request.ok();
     }

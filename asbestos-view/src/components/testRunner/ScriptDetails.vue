@@ -123,7 +123,7 @@
         props: {
             script: {
                type: Object,
-               required: true
+               required: false
             },
             report: {  // TestScript and TestReport
                 type: Object,
