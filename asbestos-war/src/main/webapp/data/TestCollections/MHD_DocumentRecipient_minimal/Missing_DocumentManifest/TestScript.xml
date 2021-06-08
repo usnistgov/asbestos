@@ -40,6 +40,10 @@
         <expression value="${patientIdentifier}.system.value + '|' + ${patientIdentifier}.value.value"/>
         <sourceId value="patient-bundle"/>
     </variable>
+    <variable>
+        <name value="dependsOnTestId"/>
+        <defaultValue value="MHD_DocumentRecipient_minimal/1_Prerequisite_Single_Document_with_Binary"/>
+    </variable>
 
     <setup>
         <modifierExtension url="urn:noErrors"/>
@@ -51,6 +55,9 @@
                     <extension url="component">
                         <valueString value="../../Library/DocumentResponderBaseAddress.xml"/>
                     </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="dependsOnTestId"/>
+                    </extension>
                     <extension url="urn:variable-out">
                         <valueString value="docRespBaseAddress"/>
                     </extension>
@@ -58,7 +65,6 @@
             </operation>
         </action>
     </setup>
-
 
     <test>
         <modifierExtension url="urn:noErrors"/>

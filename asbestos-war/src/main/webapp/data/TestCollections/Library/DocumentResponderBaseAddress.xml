@@ -3,6 +3,9 @@
 <!--        <extension url="urn:fixture-in">-->
 <!--            <valueString value="pdb-response"/>-->
 <!--        </extension>-->
+        <extension url="urn:variable-in">
+            <valueString value="pdbTestId"/>
+        </extension>
         <extension url="urn:variable-out">
             <valueString value="docRespBaseAddress"/>
         </extension>
@@ -52,7 +55,7 @@
                     <code value="eventPart"/>
                 </type>
                 <contentType value="json"/>
-                <url value="/MHD_DocumentRecipient_minimal/1_Prerequiste_Single_Document_with_Binary?module=SendPDB&amp;testIndex=0&amp;actionIndex=0&amp;eventPartLocation=operation.detail&amp;targetTaskIndex=0&amp;return=responseBody"/>
+                <url value="/${pdbTestId}?module=SendPDB&amp;testIndex=0&amp;actionIndex=0&amp;eventPartLocation=operation.detail&amp;targetTaskIndex=0&amp;return=responseBody"/>
                 <responseId value="pdb-response"/>
             </operation>
         </action>
