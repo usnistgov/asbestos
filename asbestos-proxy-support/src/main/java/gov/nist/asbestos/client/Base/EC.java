@@ -128,8 +128,8 @@ public class EC {
         if (root == null)
             return props;
         File file = new File(root, TEST_COLLECTION_PROPERTIES);
-        try {
-            props.load(new FileInputStream(file));
+        try (final FileInputStream fis = new FileInputStream(file)) {
+            props.load(fis);
         } catch (IOException e) {
             return defaultProperties;
         }
@@ -160,8 +160,8 @@ public class EC {
         if (testDir != null ) {
             File testProps = new File(testDir, EC.TEST_PROPERTIES);
             if (testProps.exists()) {
-                try {
-                    props.load(new FileInputStream(testProps));
+                try (final FileInputStream fis = new FileInputStream(testProps)) {
+                    props.load(fis);
                     return props;
                 } catch (IOException ex) {}
             }
