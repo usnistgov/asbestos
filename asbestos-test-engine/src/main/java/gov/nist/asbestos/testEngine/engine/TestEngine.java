@@ -943,6 +943,14 @@ public class TestEngine  implements TestDef {
         TestEngine testEngine1 = sut == null
                 ? new TestEngine(componentReference.getComponentRef())
                 : new TestEngine(componentReference.getComponentRef(), this.sut);
+        FhirClient testEngine1fhirClient = new FhirClient();
+        if (fhirClient != null) {
+            if (fhirClient.getFormat() != null) {
+                testEngine1fhirClient.setFormat(fhirClient.getFormat());
+            }
+            testEngine1fhirClient.sendGzip(fhirClient.isSendGzip());
+            testEngine1fhirClient.requestGzip(fhirClient.isRequestGzip());
+        }
         testEngine1
                 .setTestSession(testSession)
                 .withResourceCacheManager(this.getCacheManager())
@@ -950,10 +958,7 @@ public class TestEngine  implements TestDef {
                 .setExternalCache(externalCache)
                 .setFixtures(inFixturesForComponent)
                 .setExternalVariables(externalVariables)
-                .setFhirClient(new FhirClient()
-                        .setFormat(fhirClient.getFormat())
-                        .sendGzip(fhirClient.isSendGzip())
-                        .requestGzip(fhirClient.isRequestGzip()))
+                .setFhirClient(testEngine1fhirClient)
                 .setChannelId(channelId)
                 .setTestCollection(testCollection)
                 .setTestId(testId)
