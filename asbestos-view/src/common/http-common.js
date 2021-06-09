@@ -50,7 +50,7 @@ export async function getServiceProperties() {
                 httpsFhirToolkitBase : process.env.VUE_APP_HTTPS_FHIR_TOOLKIT_BASE,
                 fhirToolkitBase : process.env.VUE_APP_FHIR_TOOLKIT_BASE,
                 projectVersion : "Development",
-                startUpSession : "default"
+                startUpSession : "cat"
             }
         };
     }

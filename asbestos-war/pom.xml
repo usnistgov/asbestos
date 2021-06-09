@@ -25,7 +25,9 @@
         <xdsToolkitBase>http://localhost:8080/xdstools</xdsToolkitBase>
         <tlsXdsToolkitBase>https://localhost:8443/xdstools</tlsXdsToolkitBase>
         <fhirValidationServer>http://localhost:8080/fhir/fhir</fhirValidationServer>
-        <startUpSession>default</startUpSession>
+        <!-- if Vue is running in Development mode, edit startUpSession in http-comon.js -->
+<!--        <startUpSession>default</startUpSession>-->
+        <startUpSession>cat</startUpSession>
     </properties>
 
     <dependencies>
