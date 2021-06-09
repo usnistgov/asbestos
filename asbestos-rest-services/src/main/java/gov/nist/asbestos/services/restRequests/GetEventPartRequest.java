@@ -1,10 +1,13 @@
 package gov.nist.asbestos.services.restRequests;
 
+import gov.nist.asbestos.client.Base.ParserBase;
 import gov.nist.asbestos.client.Base.Request;
 import gov.nist.asbestos.client.Base.Returns;
 import gov.nist.asbestos.client.channel.ChannelConfig;
+import gov.nist.asbestos.client.client.Format;
 import gov.nist.asbestos.client.events.UIEvent;
 import gov.nist.asbestos.client.events.UITask;
+import gov.nist.asbestos.http.headers.Headers;
 import gov.nist.asbestos.services.servlet.ChannelConnector;
 import gov.nist.asbestos.testEngine.engine.ModularReports;
 import org.apache.log4j.Logger;
@@ -95,14 +98,34 @@ public class GetEventPartRequest {
                                if (targetTaskIndex < uiEvent.getTaskCount()) {
                                    UITask uiTask = uiEvent.getTask(targetTaskIndex);
                                    if ("responseBody".equals(paramsMap.get("return"))) {
-                                       Returns.returnString(request.resp, uiTask.getResponseBody());
-                                       return;
+                                       // May need to encode to JSON if original response format is XML
+                                       String responseBody = uiTask.getResponseBody();
+                                       if (responseBody == null) {
+                                           unexpectedMessage("Response body is null for uiTask Label: " + uiTask.getLabel());
+                                           return;
+                                       }
+                                       String responseHeader = uiTask.getResponseHeader();
+                                       Headers headers = new Headers(responseHeader);
+                                       if (headers != null
+                                               && headers.getContentType() != null
+                                               && headers.getContentType().getAllValuesAsString().toLowerCase().contains("xml")) {
+                                           try {
+                                               String jsonStr = ParserBase.encode(ParserBase.parse(uiTask.getResponseBody(), Format.XML), Format.JSON);
+                                               Returns.returnString(request.resp, jsonStr);
+                                               return;
+                                           } catch (Exception ex) {
+                                               unexpectedMessage("responseBody Parser Exception: " + ex.toString());
+                                               return;
+                                           }
+                                       } else {
+                                           Returns.returnString(request.resp, uiTask.getResponseBody());
+                                           return;
+                                       }
                                    } else {
                                        unexpectedMessage("Unknown or missing Return parameter.");
                                        return;
                                    }
                                }
-
                            } catch (Exception ex) {
                                unexpectedMessage(String.format("%s is not an URI. Exception is: %s", detailString, ex.toString()));
                                return;

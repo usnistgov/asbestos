@@ -393,4 +393,12 @@ public class FhirClient {
         this.supportRequest = supportRequest;
         return this;
     }
+
+    public boolean isRequestGzip() {
+        return requestGzip;
+    }
+
+    public boolean isSendGzip() {
+        return sendGzip;
+    }
 }
