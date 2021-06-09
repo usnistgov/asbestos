@@ -108,7 +108,8 @@
                             </template>
                     </span>
           <span v-else>
-              <!-- Unlike the Debug mode, there is no test dependency checks here if Debug mode is disabled. -->
+              <!-- Unlike the Debug mode, there is no test dependency checks here if Debug mode is disabled.
+              If the dependency feature check is required, should create a new Vue component to use in both the Debug-Supported mode and non-Debug mode.  -->
                           <button @click.stop="doRun(name, testRoutePath)" class="runallbutton">Run</button>
           </span>
           <span v-if="! isWaitingForBreakpoint && ! $store.state.testRunner.isClientTest"> --  {{ testTime(name) }}</span>

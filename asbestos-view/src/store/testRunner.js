@@ -116,8 +116,15 @@ export const testRunnerStore = {
             state.currentAssertIndex = index
         },
         clearTestReports(state) {
-            state.testReports = {}
-            state.moduleTestReports = {}
+            let keys = Object.keys(state.testReports)
+            for (const k of keys) {
+                Vue.delete(state.testReports, k)
+            }
+            keys = Object.keys(state.moduleTestReports)
+            for (const k of keys) {
+                Vue.delete(state.moduleTestReports, k)
+            }
+
         },
         clearTestReport(state, testNameToRemove) {
             if (state.testReports !== null && state.testReports !== undefined && Array.isArray(state.testReports) && state.testReports.length > 0) {
@@ -143,8 +150,14 @@ export const testRunnerStore = {
             state.testReports = reports
         },
         clearTestScripts(state) {
-            state.testScripts = {}
-            state.moduleTestReports = {}
+            let keys = Object.keys(state.testScripts)
+            for (const k of keys) {
+                Vue.delete(state.testScripts, k)
+            }
+            keys = Object.keys(state.moduleTestReports)
+            for (const k of keys) {
+                Vue.delete(state.moduleTestReports, k)
+            }
         },
         setTestScript(state, script) {
             Vue.set(state.testScripts, script.name, script)
