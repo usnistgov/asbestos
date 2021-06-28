@@ -17,7 +17,7 @@ public class CustomUriBuilder {
     }
 
     public CustomUriBuilder(String url) throws URISyntaxException {
-        String pathPlus;
+        String pathPlus = null;
         String[] parts;
         if (url.startsWith("/") || !url.startsWith("http")) {
             // no scheme or authority
@@ -39,39 +39,41 @@ public class CustomUriBuilder {
                 else
                     pathPlus = "/" + parts[1];
             } else {
-                pathPlus = parts[0];
+                authority = authorityPlus;
             }
         }
-        String queryPlus;
-        parts = pathPlus.split("\\?");
-        if (parts.length == 2) {
-            path = parts[0];
-            queryPlus = parts[1];
-            if (queryPlus.contains("#")) {
-                parts = queryPlus.split("#");
-                query = parts[0];
-                if (parts.length == 2)
-                    fragment = parts[1];
-            } else {
-                query = queryPlus;
-            }
-        } else {  // no ? found
-            parts = pathPlus.split("#");
+        if (pathPlus != null ) {
+            String queryPlus;
+            parts = pathPlus.split("\\?");
             if (parts.length == 2) {
                 path = parts[0];
-                fragment = parts[1];
-            } else {
+                queryPlus = parts[1];
+                if (queryPlus.contains("#")) {
+                    parts = queryPlus.split("#");
+                    query = parts[0];
+                    if (parts.length == 2)
+                        fragment = parts[1];
+                } else {
+                    query = queryPlus;
+                }
+            } else {  // no ? found
                 parts = pathPlus.split("#");
                 if (parts.length == 2) {
+                    path = parts[0];
                     fragment = parts[1];
+                } else {
+                    parts = pathPlus.split("#");
+                    if (parts.length == 2) {
+                        fragment = parts[1];
+                    }
+                    path = parts[0];
                 }
-                path = parts[0];
             }
+            if (query != null && query.equals(""))
+                query = null;
+            if (fragment != null && fragment.equals(""))
+                fragment = null;
         }
-        if (query != null && query.equals(""))
-            query = null;
-        if (fragment != null && fragment.equals(""))
-            fragment = null;
     }
 
     public URI build() {
