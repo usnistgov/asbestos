@@ -572,13 +572,10 @@ public class ProxyServlet extends HttpServlet {
 //            base.setRequestText(txt);
 //        }
 //        else
-            if (headers.getContentType().getAllValues().get(0).equalsIgnoreCase("text/html")) {
+        if (body != null && headers.getContentType().getAllValues().get(0).equalsIgnoreCase("text/html")) {
             task.putRequestHTMLBody(body);
             base.setRequestText(new String(body));
-        } else if (isStringType(headers.getContentType().getAllValues().get(0))) {
-            task.putRequestBodyText(new String(body));
-            base.setRequestText(new String(body));
-        } else if (body != null){
+        } else if (body != null) {
             task.putRequestBodyText(new String(body));
             base.setRequestText(new String(body));
         }
