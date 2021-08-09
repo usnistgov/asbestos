@@ -16,8 +16,9 @@
         <jdk.version>1.8</jdk.version>
         <mavenCompilerPluginVersion>3.3</mavenCompilerPluginVersion>
         <mavenWarPluginVersion>3.2.2</mavenWarPluginVersion>
-        <hapi.version>5.0.2</hapi.version>   <!--   4.1.0  -->
+        <hapi.version>5.4.0</hapi.version>   <!--   4.1.0  -->
         <jersey.version>2.30</jersey.version>   <!--     must align with xdstoolkit -->
+        <!-- NOTE: Needs to match XDS Toolkit "jackson.version" maven property since introducing the SimulatorBuilder API into Asbestos. Otherwise, fasterxml errors will be thrown due to mismatch libraries. -->
         <jackson.version>2.11.0</jackson.version>   <!--  2.6.3   -->
     </properties>
 
@@ -37,7 +38,7 @@
             <id>Sunil</id>
             <properties>
                 <build.profile.id>Sunil</build.profile.id>
-                <toolkitApiVersion>7.6.0-SNAPSHOT</toolkitApiVersion>
+                <toolkitApiVersion>7.7.0-SNAPSHOT</toolkitApiVersion>
                 <itTestsExternalCache>/C:/Users/skb1/ec/asbts-it-tests</itTestsExternalCache>
             </properties>
         </profile>
@@ -154,11 +155,11 @@
        https://hapifhir.io/hapi-fhir/docs/introduction/versions.html
        https://hapifhir.io/hapi-fhir/docs/getting_started/versions.html
        -->
-        <dependency>
-            <groupId>ca.uhn.hapi.fhir</groupId>
-            <artifactId>hapi-fhir-structures-r5</artifactId>
-            <version>${hapi.version}</version>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>ca.uhn.hapi.fhir</groupId>-->
+<!--            <artifactId>hapi-fhir-structures-r5</artifactId>-->
+<!--            <version>${hapi.version}</version>-->
+<!--        </dependency>-->
         <dependency>
             <groupId>ca.uhn.hapi.fhir</groupId>
             <artifactId>hapi-fhir-validation</artifactId>
