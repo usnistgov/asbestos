@@ -26,8 +26,9 @@
         <tlsXdsToolkitBase>https://localhost:8443/xdstools</tlsXdsToolkitBase>
         <fhirValidationServer>http://localhost:8080/fhir/fhir</fhirValidationServer>
         <!-- if Vue is running in Development mode, edit startUpSession in http-comon.js -->
-<!--        <startUpSession>default</startUpSession>-->
-        <startUpSession>cat</startUpSession>
+        <startUpSession>default</startUpSession>
+        <!-- For Connectathon use cat test session -->
+<!--        <startUpSession>cat</startUpSession>-->
     </properties>
 
     <dependencies>
