@@ -8,7 +8,6 @@ import gov.nist.asbestos.http.operations.HttpPost;
 import gov.nist.asbestos.client.channel.ChannelConfig;
 import gov.nist.asbestos.client.channel.ChannelConfigFactory;
 import gov.nist.asbestos.http.operations.HttpPut;
-import jdk.nashorn.internal.ir.annotations.Ignore;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Patient;
@@ -84,6 +83,7 @@ public class CapabilityStatementIT {
     /**
      * Executes the client API in search of a bogus patient for the purpose of testing the FHIR client behaviour towards silent-retrieval of the capability statement.
      */
+    /*
     @Ignore
     void searchBogusPatient() {
         // Perform a search
@@ -112,6 +112,8 @@ public class CapabilityStatementIT {
            }
         }
     }
+
+     */
 
     @Test
     void getCapabilityStatementWithoutLoggingEvent() throws Exception {

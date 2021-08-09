@@ -211,7 +211,6 @@ class StructureDefinitionITx {
         ValueSet valueSet = (ValueSet) baseResource;
 
         CachingValidationSupport cache = new CachingValidationSupport(validationSupportChain);
-
         IValidationSupport.CodeValidationResult result = cache.validateCode(
                 validationSupportChain,
                 new ConceptValidationOptions().setInferSystem(true),
