@@ -8,7 +8,7 @@
         <div class="vdivider"></div>
         <div class="vdivider"></div>
         <div class="vdivider"></div>
-        <span class="bold">Script:&nbsp;</span>
+          <span class="bold" title="To determine TestScript execution order, refer to TestScript execution order below. The displayed module list is not necessarily in the execution order."><span class="scriptInfoIcon">&#x2139;</span>Script:&nbsp;</span>
         <span class="script-panel selectable underline"  @click="openScriptDisplay(testId)">&#x1F5D0;&nbsp;{{ testId }}</span>
         <span v-for="(name, namei) in Object.getOwnPropertyNames(testModules)"
              :key="'TestModule' + namei">
@@ -127,5 +127,9 @@
     }
     .text-wrap-break-word {
         word-wrap: break-word;
+    }
+    .scriptInfoIcon {
+        margin: 4px;
+        border: lightgray 1px solid;
     }
 </style>
