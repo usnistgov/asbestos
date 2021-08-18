@@ -13,8 +13,8 @@ should be able confirm the proper association.
 **Read back original**: Read the DocumentReference submitted as the original and verify that its status
 has not changed (status should still be current). 
 
-**Reference(s)**: 
-IHE MHD http://hl7.org/fhir/R4/valueset-document-relationship-type.html
+**Reference(s)**:<br> 
+IHE MHD http://hl7.org/fhir/R4/valueset-document-relationship-type.html<br> 
 IHE XDS ITI TF 3:4.2.2.2.1 APND.
 
 
