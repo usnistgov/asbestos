@@ -19,7 +19,7 @@ class FileSystemResourceCacheTest {
         File cacheFile = Paths.get(getClass().getResource("/gov/nist/asbestos/mhd/resolver/cache/cache.properties").toURI()).getParent().toFile();
 
         FileSystemResourceCache cache = new FileSystemResourceCache(cacheFile);
-        Ref ref = new Ref("http://localhost:8080/fhir/Patient/a2");
+        Ref ref = new Ref("http://localhost:7080/fhir/Patient/a2");
         ResourceWrapper resource = cache.readResource(ref);
 
         assertNotNull(resource);

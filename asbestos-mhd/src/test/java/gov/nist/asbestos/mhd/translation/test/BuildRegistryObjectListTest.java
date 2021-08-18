@@ -61,7 +61,7 @@ class BuildRegistryObjectListTest {
                 .setChannelType("mhd")
                 .setActorType("fhir")
                 .setEnvironment("default")
-                .setFhirBase("http://localhost:8877/fhir/fhir")
+                .setFhirBase("http://localhost:7080/fhir")
                 .setTestSession("default");
 
         rMgr = new ResourceMgr();

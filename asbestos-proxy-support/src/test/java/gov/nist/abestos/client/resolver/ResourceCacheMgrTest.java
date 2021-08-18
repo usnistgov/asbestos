@@ -42,20 +42,20 @@ class ResourceCacheMgrTest {
 
     @Test
     void readFromStaticCacheTest() {
-        Ref ref = new Ref("http://localhost:8080/fhir/Patient/a2");
+        Ref ref = new Ref("http://localhost:7080/fhir/Patient/a2");
         ResourceWrapper wrapper = fhirClient.readResource(ref);
         assertTrue(wrapper.isLoaded());
 
         assertTrue(resourceCacheMgr.getCachedServers().stream()
                 .map(ref1 -> ref1.getBase().toString())
                 .collect(Collectors.toList())
-                .contains("http://localhost:8080/fhir"));
+                .contains("http://localhost:7080/fhir"));
     }
 
     @Test
     void addToExistingMemoryCacheTest() {
         Patient patient1 = new Patient();
-        Ref baseUrl = new Ref("http://localhost:8080/fhir");
+        Ref baseUrl = new Ref("http://localhost:7080/fhir");
         Ref ref = baseUrl.withResource("Patient").withNewId("j89");
 
         // add to cache

@@ -21,10 +21,10 @@
         <httpsFhirToolkitBase>https://fhirtoolkit.test:9743/asbestos</httpsFhirToolkitBase>
         <fhirToolkitBase>http://localhost:8081/asbestos</fhirToolkitBase>
         <itTestfhirToolkitBase>http://localhost:8877/asbestos</itTestfhirToolkitBase>
-        <hapiFhirBase>http://localhost:8080/fhir/fhir</hapiFhirBase>
+        <hapiFhirBase>http://localhost:7080/fhir</hapiFhirBase>
+        <fhirValidationServer>http://localhost:7080/fhir</fhirValidationServer>
         <xdsToolkitBase>http://localhost:8080/xdstools</xdsToolkitBase>
         <tlsXdsToolkitBase>https://localhost:8443/xdstools</tlsXdsToolkitBase>
-        <fhirValidationServer>http://localhost:8080/fhir/fhir</fhirValidationServer>
         <!-- if Vue is running in Development mode, edit startUpSession in http-comon.js -->
         <startUpSession>default</startUpSession>
         <!-- For Connectathon use cat test session -->
@@ -142,7 +142,7 @@
                 </executions>
                 <configuration>
                     <systemPropertyVariables>
-                        <fhir.port>8080</fhir.port>
+                        <fhir.port>7080</fhir.port>
                         <proxy.port>8877</proxy.port>
                     </systemPropertyVariables>
                     <forkCount>1</forkCount>

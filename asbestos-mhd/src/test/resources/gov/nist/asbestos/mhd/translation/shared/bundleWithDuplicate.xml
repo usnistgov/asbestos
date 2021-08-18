@@ -92,7 +92,7 @@
                     </coding>
                 </class>
                 <subject>
-                    <reference value="http://localhost:8080/fhir/Patient/a2"/>
+                    <reference value="http://localhost:7080/fhir/Patient/a2"/>
                 </subject>
                 <created value="2005-12-24"/>
                 <indexed value="2013-07-01T23:11:33+10:00"/>
@@ -192,7 +192,7 @@
                     <text value="Hospital"/>
                 </type>
                 <subject>
-                    <reference value="http://localhost:8080/fhir/Patient/a2"/>
+                    <reference value="http://localhost:7080/fhir/Patient/a2"/>
                 </subject>
                 <created value="2004-12-25T23:50:50-05:00"/>
                 <author>

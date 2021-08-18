@@ -47,7 +47,7 @@ class FixtureTest {
     void loadFixtureFromTestDefinition() throws URISyntaxException {
         Val val = new Val();
         File testDef = Paths.get(getClass().getResource("/fixtures/fixtureFromTestDefinition/TestScript.xml").toURI()).getParent().toFile();
-        URI sut = new URI("http://localhost:8080/fhir/fhir");
+        URI sut = new URI("http://localhost:7080/fhir");
         TestEngine testEngine = new TestEngine(testDef, sut).setVal(val);
         testEngine.runTest();
 
@@ -67,7 +67,7 @@ class FixtureTest {
     void loadFixtureFromTestDefinitionBadReference() throws URISyntaxException {
         Val val = new Val();
         File testDef = Paths.get(getClass().getResource("/fixtures/fixtureFromBadTestDefinition/TestScript.xml").toURI()).getParent().toFile();
-        URI sut = new URI("http://localhost:8080/fhir/fhir");
+        URI sut = new URI("http://localhost:7080/fhir");
         TestEngine testEngine = new TestEngine(testDef, sut).setVal(val).runTest();
         System.out.println(testEngine.getTestReportAsJson());
         assertTrue(testEngine.hasError());

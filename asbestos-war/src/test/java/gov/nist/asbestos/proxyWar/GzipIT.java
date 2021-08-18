@@ -19,7 +19,7 @@ class GzipIT {
 
     @Test
     void readZipContentEncodingDirect() {
-        String fhirBase = "http://localhost:" + ITConfig.getFhirPort() + "/fhir/fhir";
+        String fhirBase = "http://localhost:" + ITConfig.getFhirPort() + "/fhir";
         DocumentReference drReference = new DocumentReference()
                 .setStatus(Enumerations.DocumentReferenceStatus.CURRENT)
                 .setDescription("Simple Document");
@@ -87,7 +87,7 @@ class GzipIT {
 
     @Test
     void writeZipDirect() {
-        String fhirBase = "http://localhost:" + ITConfig.getFhirPort() + "/fhir/fhir";
+        String fhirBase = "http://localhost:" + ITConfig.getFhirPort() + "/fhir";
         DocumentReference drReference = new DocumentReference()
                 .setStatus(Enumerations.DocumentReferenceStatus.CURRENT)
                 .setDescription("Simple Document");

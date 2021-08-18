@@ -11,6 +11,9 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * Use unique patient so as to not to conflict with the Self-Test Patient loading tests.
+ */
 public class LoadPatientIT {
     private static final String testSession = "default";
     private static final String channelId = "IT";
@@ -20,7 +23,7 @@ public class LoadPatientIT {
     @Test
     void nonZip() throws URISyntaxException, IOException {
         String url = "http://localhost:" + proxyPort + "/asbestos/engine/"
-                + "testrun/default__default/Test_Patients/Bob_Bangle?_gzip=false";
+                + "testrun/default__default/Test_Patients/Mickey_Mouse?_gzip=false";
 
         HttpPost poster = new HttpPost();
         poster.postJson(new URI(url), null);
@@ -29,7 +32,7 @@ public class LoadPatientIT {
         Map<String, Map<String, String>> myMap = new Gson().fromJson(poster.getResponseText(), Map.class);
         assertEquals(1, myMap.size());
 
-        Map<String, String> testReport = myMap.get("Bob_Bangle");
+        Map<String, String> testReport = myMap.get("Mickey_Mouse");
         assertTrue(testReport.size() > 3);
         assertTrue(testReport.containsKey("resourceType"));
     }
@@ -38,7 +41,7 @@ public class LoadPatientIT {
     @Test
     void zip() throws URISyntaxException, IOException {
         String url = "http://localhost:" + proxyPort + "/asbestos/engine/"
-                + "testrun/default__default/Test_Patients/Bob_Bangle?_gzip=true";
+                + "testrun/default__default/Test_Patients/Mickey_Mouse?_gzip=true";
 
         HttpPost poster = new HttpPost();
         poster.postJson(new URI(url), null);
@@ -47,7 +50,7 @@ public class LoadPatientIT {
         Map<String, Map<String, String>> myMap = new Gson().fromJson(poster.getResponseText(), Map.class);
         assertEquals(1, myMap.size());
 
-        Map<String, String> testReport = myMap.get("Bob_Bangle");
+        Map<String, String> testReport = myMap.get("Mickey_Mouse");
         assertTrue(testReport.size() > 3);
         assertTrue(testReport.containsKey("resourceType"));
     }

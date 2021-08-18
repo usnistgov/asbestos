@@ -36,8 +36,8 @@ class RefTest {
 
     @Test
     void rebase() throws URISyntaxException {
-        String location = "http://localhost:8080/fhir/fhir/Patient/15142/_history/1";
-        String base = "http://localhost:8080/fhir/fhir";
+        String location = "http://localhost:7080/fhir/Patient/15142/_history/1";
+        String base = "http://localhost:7080/fhir";
         Ref lref = new Ref(location);
         assertEquals(base, lref.getBase().toString());
 
@@ -52,7 +52,7 @@ class RefTest {
 
     @Test
     void rebaseWithQueryParams() {
-        String location = "http://localhost:8080/fhir/fhir/Patient?birthdate=1950-02-23&family=Alder&given=Alex";
+        String location = "http://localhost:7080/fhir/Patient?birthdate=1950-02-23&family=Alder&given=Alex";
         String newBase = "http://localhost:8081/asbestos/proxy/default__default";
 
         Ref ref = new Ref(location);
