@@ -234,7 +234,7 @@ public class XdsOnFhirChannel extends BaseChannel /*implements IBaseChannel*/ {
             // GET
             if (resourceType.equals("DocumentReference") && uid.contains(".")) {
                 // by UID
-                sender = FhirSq.documentEntryByUidQuery(uid, toAddr, task);
+                sender = FhirSq.documentEntryByUidQuery(uid, null, toAddr, task);
                 returnAhqrResults(requestOut);
             } else if (resourceType.equals("DocumentReference") && uid.contains("-")) {
                 // by UUID

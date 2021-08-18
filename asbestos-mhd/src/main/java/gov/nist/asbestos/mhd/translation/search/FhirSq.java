@@ -89,9 +89,12 @@ public class FhirSq {
 
     }
 
-    public static AhqrSender documentEntryByUidQuery(String uid, URI toAddr, ITask task)  {
+    public static AhqrSender documentEntryByUidQuery(String uid, String status, URI toAddr, ITask task)  {
         Map<String, List<String>> model = new HashMap<>();
         model.put("$XDSDocumentEntryUniqueId", Collections.singletonList(uid));
+        if (status != null) {
+            model.put("$XDSDocumentEntryStatus", Collections.singletonList(status));
+        }
         return run(model, "urn:uuid:5c4f972b-d56b-40ac-a5fc-c8ca9b40b9d4", toAddr, true, task);
     }
 

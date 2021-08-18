@@ -828,21 +828,31 @@ public class BundleToRegistryObjectList implements IVal {
     private AssociationType1 addRelationship(RegistryObjectType source, String relationshipType, Ref target, ValE val) {
         Objects.requireNonNull(task);
         Objects.requireNonNull(sqEndpoint);
-        if (relationshipType == null || !relationshipType.equals("replaces")) {
+        if (relationshipType == null ||
+                !(relationshipType.equals("replaces")
+                || relationshipType.equals("appends")
+                || relationshipType.equals("transforms"))) {
             val.add(new ValE("Relationship " + relationshipType + " is not supported ").asError());
             return null;
         }
 
-        AhqrSender sender = FhirSq.documentEntryByUidQuery(target.getId(), sqEndpoint, task.newTask());
+        val.add(new ValE("Once deprecated, a DocumentEntry shall not be referenced by future associations").addIheRequirement("ITI TF 3, 4.2.2"));
+
+        AhqrSender sender = FhirSq.documentEntryByUidQuery(
+                target.getId(),
+                "urn:oasis:names:tc:ebxml-regrep:StatusType:Approved",
+                sqEndpoint,
+                task.newTask());
         List<IdentifiableType> contents = sender.getContents();
         if (contents.size() != 1) {
-            val.add(new ValE("Error retrieving DocumentEntry " + target.getId() + " from " + sqEndpoint + " - expected 1 entry but got " + contents.size()).asError());
+            val.add(new ValE("Error retrieving DocumentEntry with Approved status " + target.getId() + " from " + sqEndpoint + " - expected 1 entry but got " + contents.size()).asError());
             return null;
         }
         ExtrinsicObjectType eo = (ExtrinsicObjectType) contents.get(0);
         String targetId = eo.getId();
 
-        return createAssociation("urn:ihe:iti:2007:AssociationType:RPLC",
+        String iheAssociationType = buildTypeMap().get(relationshipType);
+        return createAssociation(iheAssociationType,
                 source.getId(),
                 targetId,
                 null,
