@@ -8,6 +8,7 @@ export function newChannel () {
         fhirBase: '',
         xdsSiteName: '',
         writeLocked: false,
-        logMhdCapabilityStatementRequest: false
+        logMhdCapabilityStatementRequest: false,
+        mhdVersions: [],
     }
 }

@@ -10,7 +10,7 @@ export default {
           * @returns {string} - The fully qualified index including the test collection plus the test script index
           */
         getFqTestScriptIndexKey(testScriptIndex) {
-            const testCollectionIndex = this.$store.state.testRunner.serverTestCollectionNames.indexOf(this.testCollection)
+            const testCollectionIndex = this.$store.getters.allServerTestCollectionNames.indexOf(this.testCollection)
             const key = testCollectionIndex + '.' + testScriptIndex // Follow proper key format
             return key
         },

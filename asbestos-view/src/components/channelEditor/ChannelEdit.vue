@@ -126,6 +126,15 @@
           </div>
         </div>
 
+        <label>MHD Version Support</label>
+        <select size="5" multiple="multiple" v-model="channel.mhdVersions">
+          <option :key="eKey"
+                  :value="e"
+                  v-for="(e,eKey) in $store.state.channel.mhdVersions">
+            {{ e }}
+          </option>
+        </select>
+
         <div v-if="!lockAckMode && !isEditMode && !channel.fhirBase && !channel.xdsSiteName" class="channelError">
           <div class="vdivider"></div>
           <div class="vdivider"></div>

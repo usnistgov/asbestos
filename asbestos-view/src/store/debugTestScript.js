@@ -224,7 +224,7 @@ export const debugTestScriptStore = {
         },
         getMapKey: (state, getters, rootState)  => (testId) => {
             let testCollectionName = rootState.testRunner.currentTestCollectionName
-            const testCollectionIndex = rootState.testRunner.serverTestCollectionNames.indexOf(testCollectionName)
+            const testCollectionIndex = getters.allServerTestCollectionNames.indexOf(testCollectionName)
             const mapKey = testCollectionIndex + '.' + getters.getIndexOfTestId(testId)
             return mapKey
         },

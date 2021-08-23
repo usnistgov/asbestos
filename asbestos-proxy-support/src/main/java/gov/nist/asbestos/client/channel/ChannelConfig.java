@@ -25,12 +25,14 @@ public class ChannelConfig {
     private String xdsSiteName;       // point to XDS server if channel type is MHD
     private boolean writeLocked;
     private boolean logMhdCapabilityStatementRequest;
+    private String[] mhdVersions;
 
     public String toString() {
         return "Channel " + testSession + "__" + channelName +
                 " of " + actorType + " in " + environment +
                 " with base " + fhirBase +
-                " with xdsSite " + xdsSiteName;
+                " with xdsSite " + xdsSiteName +
+                " mhdVersion " + Arrays.toString(mhdVersions);
     }
 
     public URI translateEndpointToFhirBase(URI req) throws URISyntaxException {
@@ -151,12 +153,14 @@ public class ChannelConfig {
                 Objects.equals(fhirBase, that.fhirBase) &&
                 Objects.equals(xdsSiteName, that.xdsSiteName) &&
                 Objects.equals(writeLocked, that.writeLocked) &&
-                Objects.equals(logMhdCapabilityStatementRequest, that.logMhdCapabilityStatementRequest);
+                Objects.equals(logMhdCapabilityStatementRequest, that.logMhdCapabilityStatementRequest) &&
+                Arrays.equals(mhdVersions, that.mhdVersions);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(environment, testSession, channelName, actorType, channelType, includeValidation, fhirBase, xdsSiteName, writeLocked, logMhdCapabilityStatementRequest);
+        return Objects.hash(environment, testSession, channelName, actorType, channelType, includeValidation, fhirBase, xdsSiteName, writeLocked, logMhdCapabilityStatementRequest)
+                + Arrays.deepHashCode(mhdVersions);
     }
 
     public String getXdsSiteName() {
@@ -196,5 +200,13 @@ public class ChannelConfig {
 
     public String getChannelName() {
         return channelName;
+    }
+
+    public String[] getMhdVersions() {
+        return mhdVersions;
+    }
+
+    public void setMhdVersions(String[] mhdVersions) {
+        this.mhdVersions = mhdVersions;
     }
 }

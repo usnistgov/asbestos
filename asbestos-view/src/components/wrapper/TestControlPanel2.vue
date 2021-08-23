@@ -67,18 +67,7 @@ export default {
         this.collection = this.$store.state.testRunner.currentTestCollectionName
        }
       },
-      /*
-    vuexCollectionUpdated() {
-      if (this.$store.state.testRunner.currentTestCollectionName === null)
-        return;
-      if (this.$store.state.testRunner.autoRoute && this.collection !== this.$store.state.testRunner.currentTestCollectionName) {
-        this.collection = this.$store.state.testRunner.currentTestCollectionName
-        this.openCollection()
-      }
-    },
-       */
     localCollectionUpdated() {
-//                if (this.collection !== this.$store.state.testRunner.currentTestCollectionName)
       this.openCollection()
     },
     openTheCollection(collection) {
@@ -131,15 +120,17 @@ export default {
     collections: {
       get() {
         return (this.client)
-            ? this.$store.state.testRunner.clientTestCollectionNames
-            : this.$store.state.testRunner.serverTestCollectionNames
+            ? this.clientCollections
+            : this.serverCollections
       }
     },
     clientCollections() {
-      return this.$store.state.testRunner.clientTestCollectionNames
+      const mhdVersions = this.$store.state.base.channel.mhdVersions
+      return this.$store.getters.clientTestCollectionNames(mhdVersions)
     },
     serverCollections() {
-      return this.$store.state.testRunner.serverTestCollectionNames
+      const mhdVersions = this.$store.state.base.channel.mhdVersions
+      return this.$store.getters.serverTestCollectionNames(mhdVersions)
     },
     session() {
       return this.$store.state.base.channel.testSession

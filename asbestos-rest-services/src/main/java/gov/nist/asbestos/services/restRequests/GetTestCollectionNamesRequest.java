@@ -33,6 +33,7 @@ public class GetTestCollectionNamesRequest {
         boolean server;
         String channel;
         boolean hidden;
+        String mhdVersion;
     }
 
     public void run() throws IOException {
@@ -46,6 +47,7 @@ public class GetTestCollectionNamesRequest {
             collection.name = name;
             collection.channel = props.getProperty("channel");
             collection.hidden = "true".equals(props.getProperty(EC.HIDDEN_KEY_NAME));
+            collection.mhdVersion = props.getProperty("MhdVersion");
             collections.add(collection);
         }
         String json = new Gson().toJson(collections);

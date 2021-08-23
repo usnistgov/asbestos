@@ -6,10 +6,15 @@ Vue.use(Vuex)
 export const channelStore = {
     state() {
         return {
-            channel: null,  // private communication between ChannelNav and ChannelView
+            // channel is probably not used
+            // channel: null,  // private communication between ChannelNav and ChannelView
             channelTypes: [
                 'fhir',
                 'mhd'
+            ],
+            mhdVersions: [
+                'v3.x',
+                'v4'
             ],
         }
     }
