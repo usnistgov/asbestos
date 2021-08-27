@@ -13,8 +13,8 @@ export const channelStore = {
                 'mhd'
             ],
             mhdVersions: [
-                'v3.x',
-                'v4'
+                'MHDv3.x',
+                'MHDv4'
             ],
         }
     }
