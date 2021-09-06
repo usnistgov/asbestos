@@ -35,6 +35,9 @@
         <fullUrl value="urn:uuid:3fdc72f4-a11d-4a9d-9260-a9f745779e00"/>
         <resource>
             <List>
+                <meta>
+                    <profile value="http://profiles.ihe.net/ITI/MHD/StructureDefinition/IHE.MHD.Minimal.SubmissionSet"/>
+                </meta>
                 <text>
                     <status value="extensions"/>
                     <div xmlns="http://www.w3.org/1999/xhtml">List(SubmissionSet) with Patient</div>
@@ -47,6 +50,11 @@
                 </extension>
                 <identifier>
                     <use value="official"/>
+                    <system value="urn:ietf:rfc:3986"/>
+                    <!-- Document Source shall not provide any entryUUID values -->
+                </identifier>
+                <identifier>
+                    <use value="usual"/>
                     <system value="urn:ietf:rfc:3986"/>
                     <value value="urn:oid:1.2.129.6.58.92.88337.4"/> <!-- todo: update automatic ID replacement code -->
                 </identifier>

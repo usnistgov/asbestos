@@ -118,12 +118,14 @@ public class MhdV3x implements MhdProfileVersionInterface {
         return null;
     }
 
-    private RegistryPackageType createSubmissionSet(IdBuilder idBuilder, ResourceWrapper resource, ValE vale, ChannelConfig channelConfig, CodeTranslator codeTranslator, AssigningAuthorities assigningAuthorities) {
-        DocumentManifest dm = (DocumentManifest) resource.getResource();
+    private RegistryPackageType createSubmissionSet(IdBuilder idBuilder, ResourceWrapper wrapper, ValE vale, ChannelConfig channelConfig, CodeTranslator codeTranslator, AssigningAuthorities assigningAuthorities) {
+        DocumentManifest dm = (DocumentManifest) wrapper.getResource();
 
         if (dm.hasIdentifier()) {
             if (dm.getIdentifier().stream().anyMatch(i -> i.hasValue() && i.getValue().startsWith("urn:uuid:")))
-                vale.add(new ValE("DocumentManifest has Identifier (entryUUID)").asError());
+                vale.add(new ValE("DocumentManifest has Identifier (entryUUID)").asError()
+                .addIheRequirement("3.65.4.1.2 Message Semantics  " +
+                        "The Document Source shall not provide any entryUUID values."));
         }
 
         RegistryPackageType ss = new RegistryPackageType();
@@ -131,49 +133,32 @@ public class MhdV3x implements MhdProfileVersionInterface {
         ValE tr;
         vale.setMsg("DocumentManifest to SubmissionSet");
 
-        val.add(new ValE("SubmissionSet(" + resource.getAssignedId() + ")"));
-        ss.setId(resource.getAssignedId());
+        val.add(new ValE("SubmissionSet(" + wrapper.getAssignedId() + ")"));
+        ss.setId(wrapper.getAssignedId());
         ss.setObjectType("urn:oasis:names:tc:ebxml-regrep:ObjectType:RegistryObject:RegistryPackage");
 
         if (dm.hasCreated())
             mhdTransforms.addSlot(ss, "submissionTime", mhdTransforms.translateDateTime(dm.getCreated()));
-        if (dm.hasDescription())
+        if (dm.hasDescription()) {
+            // Mapped to Title according to MHD 3.1 Table 4.5.1.2-1: FHIR DocumentManifest mapping to SubmissionSet,
+            // and the 4th column in table maps to Name object. See https://profiles.ihe.net/ITI/TF/Volume3/ch-4.2.html#4.2.3.3.11
             mhdTransforms.addName(ss, dm.getDescription());
-        mhdTransforms.addClassification(ss, "urn:uuid:a54d6aa5-d40d-43f9-88c5-b4633d873bdd", mhdTransforms.getrMgr().allocateSymbolicId(), resource.getAssignedId());
+        }
+        mhdTransforms.addClassification(ss, "urn:uuid:a54d6aa5-d40d-43f9-88c5-b4633d873bdd", mhdTransforms.getrMgr().allocateSymbolicId(), wrapper.getAssignedId());
         if (dm.hasType())
-            mhdTransforms.addClassificationFromCodeableConcept(ss, dm.getType(), CodeTranslator.CONTENTTYPECODE, resource.getAssignedId(), vale, codeTranslator);
+            mhdTransforms.addClassificationFromCodeableConcept(ss, dm.getType(), CodeTranslator.CONTENTTYPECODE, wrapper.getAssignedId(), vale, codeTranslator);
         if (!dm.hasMasterIdentifier())
-            val.add(new ValE("DocumentManifest.masterIdentifier not present - declared by IHE to be [1..1]").asError());
+            val.add(new ValE("DocumentManifest.masterIdentifier not present - declared by IHE to be [1..1]. See Table 4.5.1.2-1: FHIR DocumentManifest mapping to SubmissionSet. See SubmissionSet uniqueId requirement as per the optionality table: https://profiles.ihe.net/ITI/TF/Volume3/ch-4.3.html#4.3.1").asError());
         else {
-            mhdTransforms.addExternalIdentifier(ss, CodeTranslator.SS_UNIQUEID, Utils.stripUrnPrefix(dm.getMasterIdentifier().getValue()), mhdTransforms.getrMgr().allocateSymbolicId(), resource.getAssignedId(), "XDSSubmissionSet.uniqueId", idBuilder);
-            resource.setAssignedUid(Utils.stripUrnPrefix(dm.getMasterIdentifier().getValue()));
+            mhdTransforms.addExternalIdentifier(ss, CodeTranslator.SS_UNIQUEID, Utils.stripUrnPrefix(dm.getMasterIdentifier().getValue()), mhdTransforms.getrMgr().allocateSymbolicId(), wrapper.getAssignedId(), "XDSSubmissionSet.uniqueId", idBuilder);
+            wrapper.setAssignedUid(Utils.stripUrnPrefix(dm.getMasterIdentifier().getValue()));
         }
         if (dm.hasSource())
-            mhdTransforms.addExternalIdentifier(ss, CodeTranslator.SS_SOURCEID, Utils.stripUrnPrefix(dm.getMasterIdentifier().getValue()), mhdTransforms.getrMgr().allocateSymbolicId(), resource.getAssignedId(), "XDSSubmissionSet.sourceId", null);
+            mhdTransforms.addExternalIdentifier(ss, CodeTranslator.SS_SOURCEID, Utils.stripUrnPrefix(dm.getMasterIdentifier().getValue()), mhdTransforms.getrMgr().allocateSymbolicId(), wrapper.getAssignedId(), "XDSSubmissionSet.sourceId", null);
         if (dm.hasSubject() && dm.getSubject().hasReference())
-            mhdTransforms.addSubject(ss, resource,  new Ref(dm.getSubject()), CodeTranslator.SS_PID, "XDSSubmissionSet.patientId", vale, assigningAuthorities);
+            mhdTransforms.addSubject(ss, wrapper,  new Ref(dm.getSubject()), CodeTranslator.SS_PID, "XDSSubmissionSet.patientId", vale, assigningAuthorities);
         else if (isMinimalMetadata) {
-            // Patient is optional in minimal metadata - add reference to No_Patient to make XDS Toolkit happy
-            // Adds resource cache to configuration
-            FhirClient fhirClient =
-                    channelConfig == null
-                            ? FhirClientBuilder.get(null)
-                            : FhirClientBuilder.get(channelConfig.asChannelId());
-
-            Optional<ResourceWrapper> patient = fhirClient.readCachedResource(new Ref("Patient/No_Patient"));
-            if (patient.isPresent()) {
-                ResourceWrapper thePatient = patient.get();
-                Bundle patientBundle;
-                if (thePatient.getResource() instanceof Bundle) {
-                    patientBundle = (Bundle) thePatient.getResource();
-                    Ref patRef = new Ref(patientBundle.getEntry().get(0).getFullUrl());  // this must be turned into fullURL (not relative)
-                    mhdTransforms.addSubject(ss, resource, patRef , CodeTranslator.SS_PID, "XDSSubmissionSet.patientId", vale, assigningAuthorities);
-                } else {
-                    val.add(new ValE("Internal error - Lookup of Patient/No_Patient returned " + thePatient.getResource().getClass().getSimpleName() + " instead of Bundle").asError());
-                }
-            } else {
-                val.add(new ValE("Internal error - cannot locate Patient/No_Patient").asError());
-            }
+            mhdTransforms.linkDummyPatient(wrapper, vale, channelConfig, assigningAuthorities, ss);
         }
         return ss;
     }

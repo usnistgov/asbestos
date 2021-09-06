@@ -12,6 +12,7 @@ import gov.nist.asbestos.mhd.transactionSupport.AssigningAuthorities;
 import gov.nist.asbestos.mhd.transactionSupport.CodeTranslator;
 import gov.nist.asbestos.mhd.transactionSupport.ProvideAndRegisterBuilder;
 import gov.nist.asbestos.mhd.transforms.BundleToRegistryObjectList;
+import gov.nist.asbestos.mhd.transforms.MhdVersionEnum;
 import gov.nist.asbestos.mhd.translation.ContainedIdAllocator;
 import gov.nist.asbestos.simapi.tk.installation.Installation;
 import gov.nist.asbestos.simapi.validation.Val;
@@ -78,7 +79,7 @@ class Pnr1IT {
         rMgr.setVal(val);
         rMgr.setFhirClient(fhirClient);
 
-        bundleToRegistryObjectList = new BundleToRegistryObjectList(null);
+        bundleToRegistryObjectList = new BundleToRegistryObjectList(MhdVersionEnum.MHDv3x);
         bundleToRegistryObjectList.setVal(val);
         bundleToRegistryObjectList.setCodeTranslator(codeTranslator);
         bundleToRegistryObjectList.setResourceMgr(rMgr);

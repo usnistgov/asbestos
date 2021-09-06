@@ -63,7 +63,7 @@ public class MhdTransforms {
     }
 
 
-    void addName(RegistryObjectType eo, String name) {
+    public void addName(RegistryObjectType eo, String name) {
         LocalizedStringType lst = new LocalizedStringType();
         lst.setValue(name);
         InternationalStringType ist = new InternationalStringType();
@@ -71,7 +71,7 @@ public class MhdTransforms {
         eo.setName(ist);
     }
 
-    void addSlot(RegistryObjectType registryObject, String name, String value) {
+    public void addSlot(RegistryObjectType registryObject, String name, String value) {
         Objects.requireNonNull(name);
         Objects.requireNonNull(value);
         SlotType1 slot = new SlotType1();
@@ -82,7 +82,7 @@ public class MhdTransforms {
         registryObject.getSlot().add(slot);
     }
 
-    void addSlot(RegistryObjectType registryObject, String name, List<String> values) {
+    public void addSlot(RegistryObjectType registryObject, String name, List<String> values) {
         Objects.requireNonNull(name);
         SlotType1 slot = new SlotType1();
         slot.setName(name);
@@ -256,7 +256,7 @@ public class MhdTransforms {
         return at;
     }
 
-    AssociationType1 createAssociation(String type, String sourceId, String targetId, String slotName, List<String> slotValues, ValE vale) {
+    public AssociationType1 createAssociation(String type, String sourceId, String targetId, String slotName, List<String> slotValues, ValE vale) {
         AssociationType1 at = new AssociationType1();
         at.setSourceObject(sourceId);
         at.setTargetObject(targetId);
@@ -268,7 +268,7 @@ public class MhdTransforms {
     }
 
 
-    ExtrinsicObjectType createExtrinsicObject(ResourceWrapper resource, ValE vale, IdBuilder idBuilder, Map<String, byte[]> documentContents, CodeTranslator codeTranslator, AssigningAuthorities assigningAuthorities) {
+    public ExtrinsicObjectType createExtrinsicObject(ResourceWrapper resource, ValE vale, IdBuilder idBuilder, Map<String, byte[]> documentContents, CodeTranslator codeTranslator, AssigningAuthorities assigningAuthorities) {
         Objects.requireNonNull(val);
         Objects.requireNonNull(rMgr);
 
@@ -604,6 +604,31 @@ public class MhdTransforms {
     public ResourceMgr getrMgr() {
         return rMgr;
     }
+
+    public void linkDummyPatient(ResourceWrapper wrapper, ValE vale, ChannelConfig channelConfig, AssigningAuthorities assigningAuthorities, RegistryPackageType ss) {
+        // Patient is optional in minimal metadata - add reference to No_Patient to make XDS Toolkit happy
+        // Adds resource cache to configuration
+        FhirClient fhirClient =
+                channelConfig == null
+                        ? FhirClientBuilder.get(null)
+                        : FhirClientBuilder.get(channelConfig.asChannelId());
+
+        Optional<ResourceWrapper> patient = fhirClient.readCachedResource(new Ref("Patient/No_Patient"));
+        if (patient.isPresent()) {
+            ResourceWrapper thePatient = patient.get();
+            Bundle patientBundle;
+            if (thePatient.getResource() instanceof Bundle) {
+                patientBundle = (Bundle) thePatient.getResource();
+                Ref patRef = new Ref(patientBundle.getEntry().get(0).getFullUrl());  // this must be turned into fullURL (not relative)
+                addSubject(ss, wrapper, patRef , CodeTranslator.SS_PID, "XDSSubmissionSet.patientId", vale, assigningAuthorities);
+            } else {
+                val.add(new ValE("Internal error - Lookup of Patient/No_Patient returned " + thePatient.getResource().getClass().getSimpleName() + " instead of Bundle").asError());
+            }
+        } else {
+            val.add(new ValE("Internal error - cannot locate Patient/No_Patient").asError());
+        }
+    }
+
 
     //    private addDocument(MarkupBuilder builder, String drId, String contentId) {
 //        val.add(new Val().msg("Attach Document ${drId}"))

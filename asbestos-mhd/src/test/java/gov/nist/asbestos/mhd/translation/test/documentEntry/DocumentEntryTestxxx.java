@@ -10,12 +10,15 @@ import gov.nist.asbestos.client.client.FhirClient;
 import gov.nist.asbestos.client.events.Event;
 import gov.nist.asbestos.client.events.ITask;
 import gov.nist.asbestos.client.log.SimStore;
+import gov.nist.asbestos.client.resolver.IdBuilder;
 import gov.nist.asbestos.client.resolver.ResourceCacheMgr;
 import gov.nist.asbestos.client.resolver.ResourceMgr;
 import gov.nist.asbestos.mhd.transactionSupport.AssigningAuthorities;
 import gov.nist.asbestos.mhd.transactionSupport.CodeTranslator;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import gov.nist.asbestos.mhd.transforms.BundleToRegistryObjectList;
+import gov.nist.asbestos.mhd.transforms.MhdTransforms;
+import gov.nist.asbestos.mhd.transforms.MhdVersionEnum;
 import gov.nist.asbestos.mhd.translation.ContainedIdAllocator;
 import gov.nist.asbestos.mhd.transforms.DocumentEntryToDocumentReference;
 import gov.nist.asbestos.client.channel.ChannelConfig;
@@ -106,11 +109,12 @@ class DocumentEntryTestxxx {
 
 
         // Translate DocRef to XDS
-        BundleToRegistryObjectList bundleToRegistryObjectList = new BundleToRegistryObjectList(null);
+        BundleToRegistryObjectList bundleToRegistryObjectList = new BundleToRegistryObjectList(MhdVersionEnum.MHDv3x);
         bundleToRegistryObjectList.setVal(val);
         bundleToRegistryObjectList.setCodeTranslator(codeTranslator);
         bundleToRegistryObjectList.setResourceMgr(rMgr);
-        bundleToRegistryObjectList.setAssigningAuthorities(AssigningAuthorities.allowAny());
+        AssigningAuthorities assigningAuthorities = AssigningAuthorities.allowAny();
+        bundleToRegistryObjectList.setAssigningAuthorities(assigningAuthorities);
 
         ContainedIdAllocator containedIdAllocator = new ContainedIdAllocator();
 
@@ -118,9 +122,11 @@ class DocumentEntryTestxxx {
         rMgr.setVal(val);
         rMgr.setFhirClient(fhirClient);
 
+        MhdTransforms mhdTransforms = new MhdTransforms(rMgr, val, true, task);
 
         // Translate XDS back to DocRef
-        ExtrinsicObjectType extrinsicObjectType = bundleToRegistryObjectList.createExtrinsicObject(resource, new ValE(val));
+        ExtrinsicObjectType extrinsicObjectType = mhdTransforms.createExtrinsicObject(resource, new ValE(val), new IdBuilder(true), null, codeTranslator,
+                assigningAuthorities);
 
         DocumentEntryToDocumentReference documentEntryToDocumentReference = new DocumentEntryToDocumentReference();
         documentEntryToDocumentReference.setVal(val);

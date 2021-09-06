@@ -64,13 +64,18 @@ public class BundleToRegistryObjectList implements IVal {
     private boolean isMinimalMetadata = false;
     private MhdProfileVersionInterface mhdVersionSpecificImpl;
     private MhdTransforms mhdTransforms;
+    private MhdVersionEnum defaultVersion;
 
 
     public BundleToRegistryObjectList(ChannelConfig channelConfig) {
         Objects.requireNonNull(channelConfig);
         this.channelConfig = channelConfig;
-
     }
+
+    public BundleToRegistryObjectList(MhdVersionEnum mhdVersion) {
+        defaultVersion = mhdVersion;
+    }
+
 
     public SubmittedObject findSubmittedObject(BaseResource resource) {
         for (SubmittedObject submittedObject : submittedObjects) {
@@ -101,7 +106,6 @@ public class BundleToRegistryObjectList implements IVal {
 
     private void setMhdVersionSpecificImpl(Bundle bundle) {
         String[] acceptableMhdVersions = channelConfig.getMhdVersions();
-        MhdVersionEnum defaultVersion = MhdVersionEnum.MHDv3x;
 
         if (acceptableMhdVersions != null) {
             // Allow only from the Accept list
@@ -134,6 +138,14 @@ public class BundleToRegistryObjectList implements IVal {
 
     // TODO handle List/Folder or signal error
     public RegistryObjectListType buildRegistryObjectList() {
+        if (mhdVersionSpecificImpl == null) {
+            if (mhdTransforms == null) {
+                setMhdTransforms();
+            }
+            Objects.requireNonNull(defaultVersion);
+            mhdVersionSpecificImpl = MhdImplFactory.getImplementation(defaultVersion, val, mhdTransforms);
+        }
+
         Objects.requireNonNull(mhdVersionSpecificImpl);
         Objects.requireNonNull(mhdTransforms);
         Objects.requireNonNull(val);
