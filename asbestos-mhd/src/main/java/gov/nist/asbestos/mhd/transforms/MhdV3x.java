@@ -1,13 +1,9 @@
 package gov.nist.asbestos.mhd.transforms;
 
 import gov.nist.asbestos.client.channel.ChannelConfig;
-import gov.nist.asbestos.client.client.FhirClient;
-import gov.nist.asbestos.client.client.FhirClientBuilder;
 import gov.nist.asbestos.client.resolver.IdBuilder;
 import gov.nist.asbestos.client.resolver.Ref;
-import gov.nist.asbestos.client.resolver.ResourceMgr;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
-import gov.nist.asbestos.mhd.SubmittedObject;
 import gov.nist.asbestos.mhd.transactionSupport.AssigningAuthorities;
 import gov.nist.asbestos.mhd.transactionSupport.CodeTranslator;
 import gov.nist.asbestos.mhd.util.Utils;
@@ -22,11 +18,8 @@ import org.hl7.fhir.r4.model.DocumentManifest;
 import org.hl7.fhir.r4.model.DocumentReference;
 import org.hl7.fhir.r4.model.ListResource;
 
-import javax.xml.bind.JAXBElement;
-import javax.xml.namespace.QName;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 
 /**
  * V3.x specific implementation
@@ -150,11 +143,11 @@ public class MhdV3x implements MhdProfileVersionInterface {
         if (!dm.hasMasterIdentifier())
             val.add(new ValE("DocumentManifest.masterIdentifier not present - declared by IHE to be [1..1]. See Table 4.5.1.2-1: FHIR DocumentManifest mapping to SubmissionSet. See SubmissionSet uniqueId requirement as per the optionality table: https://profiles.ihe.net/ITI/TF/Volume3/ch-4.3.html#4.3.1").asError());
         else {
-            mhdTransforms.addExternalIdentifier(ss, CodeTranslator.SS_UNIQUEID, Utils.stripUrnPrefix(dm.getMasterIdentifier().getValue()), mhdTransforms.getrMgr().allocateSymbolicId(), wrapper.getAssignedId(), "XDSSubmissionSet.uniqueId", idBuilder);
-            wrapper.setAssignedUid(Utils.stripUrnPrefix(dm.getMasterIdentifier().getValue()));
+            mhdTransforms.addExternalIdentifier(ss, CodeTranslator.SS_UNIQUEID, Utils.stripUrnPrefixes(dm.getMasterIdentifier().getValue()), mhdTransforms.getrMgr().allocateSymbolicId(), wrapper.getAssignedId(), "XDSSubmissionSet.uniqueId", idBuilder);
+            wrapper.setAssignedUid(Utils.stripUrnPrefixes(dm.getMasterIdentifier().getValue()));
         }
         if (dm.hasSource())
-            mhdTransforms.addExternalIdentifier(ss, CodeTranslator.SS_SOURCEID, Utils.stripUrnPrefix(dm.getMasterIdentifier().getValue()), mhdTransforms.getrMgr().allocateSymbolicId(), wrapper.getAssignedId(), "XDSSubmissionSet.sourceId", null);
+            mhdTransforms.addExternalIdentifier(ss, CodeTranslator.SS_SOURCEID, Utils.stripUrnPrefixes(dm.getMasterIdentifier().getValue()), mhdTransforms.getrMgr().allocateSymbolicId(), wrapper.getAssignedId(), "XDSSubmissionSet.sourceId", null);
         if (dm.hasSubject() && dm.getSubject().hasReference())
             mhdTransforms.addSubject(ss, wrapper,  new Ref(dm.getSubject()), CodeTranslator.SS_PID, "XDSSubmissionSet.patientId", vale, assigningAuthorities);
         else if (isMinimalMetadata) {

@@ -305,7 +305,7 @@ class DocRefSQParamTranslator {
                 if (value != null && value.startsWith("urn:uuid:"))
                     addResult(entryUUIDKey, value);
                 else
-                    addResult(uniqueIdKey, Utils.stripUrnPrefix(value));
+                    addResult(uniqueIdKey, Utils.stripUrnPrefixes(value));
                 break;
 
             default:

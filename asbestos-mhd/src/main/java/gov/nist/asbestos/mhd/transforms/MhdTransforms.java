@@ -31,7 +31,6 @@ import java.net.URI;
 import java.util.AbstractMap;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -238,8 +237,8 @@ public class MhdTransforms {
     String findAcceptablePID(List<Identifier> identifiers, AssigningAuthorities assigningAuthorities) {
         Objects.requireNonNull(assigningAuthorities);
         List<String> pids = identifiers.stream()
-                .filter(identifier -> assigningAuthorities.check(Utils.stripUrnPrefix(identifier.getSystem())))
-                .map(identifier -> identifier.getValue() + "^^^&" + Utils.stripUrnPrefix(identifier.getSystem()) + "&ISO")
+                .filter(identifier -> assigningAuthorities.check(Utils.stripUrnPrefixes(identifier.getSystem())))
+                .map(identifier -> identifier.getValue() + "^^^&" + Utils.stripUrnPrefixes(identifier.getSystem()) + "&ISO")
                 .collect(Collectors.toList());
 
         return (pids.isEmpty()) ? null : pids.get(0);
@@ -409,8 +408,8 @@ public class MhdTransforms {
             tr.add(new ValE("masterIdentifier not present").asError());
         else {
             tr.add(new ValE("masterIdentifier").asTranslation());
-            addExternalIdentifier(eo, CodeTranslator.DE_UNIQUEID, Utils.stripUrnPrefix(dr.getMasterIdentifier().getValue()), rMgr.allocateSymbolicId(), resource.getAssignedId(), "XDSDocumentEntry.uniqueId", idBuilder);
-            resource.setAssignedUid(Utils.stripUrnPrefix(dr.getMasterIdentifier().getValue()));
+            addExternalIdentifier(eo, CodeTranslator.DE_UNIQUEID, Utils.stripUrnPrefixes(dr.getMasterIdentifier().getValue()), rMgr.allocateSymbolicId(), resource.getAssignedId(), "XDSDocumentEntry.uniqueId", idBuilder);
+            resource.setAssignedUid(Utils.stripUrnPrefixes(dr.getMasterIdentifier().getValue()));
         }
 
         tr = vale.add(new ValE("DocumentReference.subject is [1..1]").addIheRequirement(DRTable));

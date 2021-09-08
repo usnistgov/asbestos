@@ -11,6 +11,7 @@ import gov.nist.asbestos.simapi.validation.Val;
 import gov.nist.asbestos.simapi.validation.ValE;
 import oasis.names.tc.ebxml_regrep.xsd.rim._3.RegistryPackageType;
 import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.codesystems.ListMode;
 
 import java.util.AbstractMap;
 import java.util.Arrays;
@@ -32,27 +33,27 @@ import java.util.stream.Stream;
  *    (IGNORED MAPPING) extension (intendedRecipient)	SubmissionSet.intendedRecipient
  *    identifier	SubmissionSet.entryUUID and SubmissionSet.uniqueId
  *    status	SubmissionSet.availabilityStatus
- *    IGNORED ?? mode	shall be 'working'
+ *    mode	shall be 'working'
  *    title	SubmissionSet.title
  *    code	shall be 'submissionset'
  *    subject	SubmissionSet.patientId
  *    date	SubmissionSet.submissionTime
- *    source	SubmissionSet.author
+ *    (IGNORED) source	SubmissionSet.author
  *       extension (authorOrg)	SubmissionSet.author when the author is an Organization
  *    (IGNORED) note	SubmissionSet.comments
- *    (IGNORED?) entry
+ *    (IGNORED?) entry is [0..1]
  *       item	references to DocumentReference(s) and Folder List(s)
- *       (Is this verified by the DocumentSource tests PDBRequestMinEval.xml ?)
+ *       (To be verified by the DocumentSource tests and Inspector Inspect Request, ie. PDBRequestMinEval.xml ?)
+ *
+ *      TODO - Contained option
+ *      static String containedMetadataProfile = "http://profiles.ihe.net/ITI/MHD/StructureDefinition/IHE.MHD.UnContained.Comprehensive.ProvideBundle";
  */
 public class MhdV4 implements MhdProfileVersionInterface {
+    public static final String SUBMISSION_SET_PROFILE = "https://profiles.ihe.net/ITI/MHD/StructureDefinition-IHE.MHD.Minimal.SubmissionSet.html#profile";
     static String comprehensiveMetadataProfile = "http://profiles.ihe.net/ITI/MHD/StructureDefinition/IHE.MHD.Comprehensive.ProvideBundle";
     static String minimalMetadataProfile = "http://profiles.ihe.net/ITI/MHD/StructureDefinition/IHE.MHD.Minimal.ProvideBundle";
     static String iheDesignationTypeExtensionUrl = "http://profiles.ihe.net/ITI/MHD/StructureDefinition/ihe-designationType";
     static String iheSourceIdExtensionUrl = "http://profiles.ihe.net/ITI/MHD/StructureDefinition/ihe-sourceId";
-    /**
-     * TODO
-     */
-    static String containedMetadataProfile = "http://profiles.ihe.net/ITI/MHD/StructureDefinition/IHE.MHD.UnContained.Comprehensive.ProvideBundle"; // TODO
     private static Map<String, String> listTypeMap  =
         Collections.unmodifiableMap(Stream.of(
                 new AbstractMap.SimpleEntry<>("submissionset", "http://profiles.ihe.net/ITI/MHD/CodeSystem/MHDlistTypes"))
@@ -64,7 +65,6 @@ public class MhdV4 implements MhdProfileVersionInterface {
     private Val val;
     private MhdTransforms mhdTransforms;
     Boolean isMinimalMetadata = null;
-    ListResource submissionSetListResource;
 
 
     public MhdV4(Val val, MhdTransforms mhdTransforms) {
@@ -178,7 +178,7 @@ public class MhdV4 implements MhdProfileVersionInterface {
 
         if (listResource.hasIdentifier()) {
             if (listResource.getIdentifier().stream().anyMatch(i -> i.hasValue() && i.getValue().startsWith("urn:uuid:")))
-                vale.add(new ValE("DocumentManifest has Identifier (entryUUID)").asError()
+                vale.add(new ValE("SubmissionSet of ListResource type has Identifier (entryUUID)").asError()
                         .addIheRequirement("2:3.65.4.1.2 Message Semantics: " +
                                 "The Document Source shall not provide any entryUUID values."
                         + "See https://profiles.ihe.net/ITI/MHD/ITI-65.html#2365412-message-semantics"));
@@ -191,6 +191,15 @@ public class MhdV4 implements MhdProfileVersionInterface {
         val.add(new ValE("SubmissionSet(" + wrapper.getAssignedId() + ")"));
         ss.setId(wrapper.getAssignedId());
         ss.setObjectType("urn:oasis:names:tc:ebxml-regrep:ObjectType:RegistryObject:RegistryPackage");
+
+        if (listResource.hasMode()) {
+            if (!ListMode.WORKING.equals(listResource.getMode())) {
+                vale.add(new ValE("Mode Required Pattern: working")
+                .addIheRequirement(SUBMISSION_SET_PROFILE));
+            }
+        } else {
+            vale.add(new ValE("Mode is required [1..1]").addIheRequirement(SUBMISSION_SET_PROFILE));
+        }
 
         if (listResource.hasDate())
             mhdTransforms.addSlot(ss, "submissionTime", mhdTransforms.translateDateTime(listResource.getDate()));
@@ -220,21 +229,26 @@ public class MhdV4 implements MhdProfileVersionInterface {
                             .addIheRequirement("https://profiles.ihe.net/ITI/MHD/StructureDefinition-IHE.MHD.Minimal.SubmissionSet-definitions.html#List.identifier"));
                 }
                 long usualIdCount = listResource.getIdentifier().stream()
-                        .filter(e -> e.hasUse() && Identifier.IdentifierUse.USUAL.equals(e.getUse())).count();
+                        .filter(e -> e.hasUse() && Identifier.IdentifierUse.USUAL.equals(e.getUse()) && "urn:ietf:rfc:3986".equals(e.getSystem())).count();
                 if (usualIdCount < 1) {
-                    vale.add(new ValE("should be at least one USUAL type identifier")
-                    .addIheRequirement("https://profiles.ihe.net/ITI/MHD/StructureDefinition-IHE.MHD.Minimal.SubmissionSet-definitions.html#List.identifier"));
+                    vale.add(new ValE("1) Expecting an OID (URI) according to ITI TF Vol 3:4.2.3.3.12 SubmissionSet.uniqueId. " +
+                            "2) MHD v4.0.1: If the value is a full URI, then the system SHALL be urn:ietf:rfc:3986.")
+                    .addIheRequirement("https://profiles.ihe.net/ITI/MHD/StructureDefinition-IHE.MHD.Minimal.SubmissionSet-definitions.html#List.identifier:uniqueId.value"));
                 } else {
                     Optional<Identifier> usualIdentifier = listResource.getIdentifier().stream()
-                            .filter(e -> e.hasUse() && Identifier.IdentifierUse.USUAL.equals(e.getUse()))
+                            .filter(e -> e.hasUse()
+                                    && Identifier.IdentifierUse.USUAL.equals(e.getUse())
+                                    && "urn:ietf:rfc:3986".equals(e.getSystem()))
                             .findFirst();
                    if (usualIdentifier.isPresent()) {
-                       String idValue = Utils.stripUrnPrefix(usualIdentifier.get().getValue());
+                       String idValue = Utils.stripUrnPrefixes(usualIdentifier.get().getValue());
                        mhdTransforms.addExternalIdentifier(ss, CodeTranslator.SS_UNIQUEID, idValue,
                                mhdTransforms.getrMgr().allocateSymbolicId(),
                                wrapper.getAssignedId(),
                                "XDSSubmissionSet.uniqueId", idBuilder);
-                       wrapper.setAssignedUid(Utils.stripUrnPrefix(idValue));
+                       wrapper.setAssignedUid(Utils.stripUrnPrefixes(idValue));
+                   } else {
+                       vale.add(new ValE("Unexpected error finding an USUAL type Identifier"));
                    }
                 }
             }
@@ -245,7 +259,7 @@ public class MhdV4 implements MhdProfileVersionInterface {
            Extension extension = listResource.getExtensionByUrl(iheSourceIdExtensionUrl);
            if (extension.getValue() instanceof Identifier) {
                Identifier identifier = (Identifier)extension.getValue();
-               mhdTransforms.addExternalIdentifier(ss, CodeTranslator.SS_SOURCEID, Utils.stripUrnPrefix(identifier.getValue()), mhdTransforms.getrMgr().allocateSymbolicId(), wrapper.getAssignedId(), "XDSSubmissionSet.sourceId", null);
+               mhdTransforms.addExternalIdentifier(ss, CodeTranslator.SS_SOURCEID, Utils.stripUrnPrefixes(identifier.getValue()), mhdTransforms.getrMgr().allocateSymbolicId(), wrapper.getAssignedId(), "XDSSubmissionSet.sourceId", null);
            }
         }
 

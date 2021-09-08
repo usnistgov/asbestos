@@ -7,7 +7,7 @@ public class Utils {
     public static String URN_OID = "urn:oid:";
             public static String URN_UUID = "urn:uuid:";
 
-    public static String stripUrnPrefix(String id) {
+    public static String stripUrnPrefixes(String id) {
         if (id == null) return id;
         List<String> prefixes = Arrays.asList(URN_UUID, URN_OID);
         for (String p : prefixes) {
@@ -17,7 +17,7 @@ public class Utils {
     }
 
     public static String addUrnOidPrefix(String id) {
-        return URN_OID + stripUrnPrefix(id);
+        return URN_OID + stripUrnPrefixes(id);
     }
 
 }
