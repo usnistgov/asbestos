@@ -50,6 +50,7 @@ import java.util.stream.Stream;
  */
 public class MhdV4 implements MhdProfileVersionInterface {
     public static final String SUBMISSION_SET_PROFILE = "https://profiles.ihe.net/ITI/MHD/StructureDefinition-IHE.MHD.Minimal.SubmissionSet.html#profile";
+    public static final String URN_IETF_RFC_3986 = "urn:ietf:rfc:3986";
     static String comprehensiveMetadataProfile = "http://profiles.ihe.net/ITI/MHD/StructureDefinition/IHE.MHD.Comprehensive.ProvideBundle";
     static String minimalMetadataProfile = "http://profiles.ihe.net/ITI/MHD/StructureDefinition/IHE.MHD.Minimal.ProvideBundle";
     static String iheDesignationTypeExtensionUrl = "http://profiles.ihe.net/ITI/MHD/StructureDefinition/ihe-designationType";
@@ -229,16 +230,16 @@ public class MhdV4 implements MhdProfileVersionInterface {
                             .addIheRequirement("https://profiles.ihe.net/ITI/MHD/StructureDefinition-IHE.MHD.Minimal.SubmissionSet-definitions.html#List.identifier"));
                 }
                 long usualIdCount = listResource.getIdentifier().stream()
-                        .filter(e -> e.hasUse() && Identifier.IdentifierUse.USUAL.equals(e.getUse()) && "urn:ietf:rfc:3986".equals(e.getSystem())).count();
+                        .filter(e -> e.hasUse() && Identifier.IdentifierUse.USUAL.equals(e.getUse()) && URN_IETF_RFC_3986.equals(e.getSystem())).count();
                 if (usualIdCount < 1) {
                     vale.add(new ValE("1) Expecting an OID (URI) according to ITI TF Vol 3:4.2.3.3.12 SubmissionSet.uniqueId. " +
-                            "2) MHD v4.0.1: If the value is a full URI, then the system SHALL be urn:ietf:rfc:3986.")
+                            "2) MHD v4.0.1: If the value is a full URI, then the system SHALL be "+ URN_IETF_RFC_3986 +".")
                     .addIheRequirement("https://profiles.ihe.net/ITI/MHD/StructureDefinition-IHE.MHD.Minimal.SubmissionSet-definitions.html#List.identifier:uniqueId.value"));
                 } else {
                     Optional<Identifier> usualIdentifier = listResource.getIdentifier().stream()
                             .filter(e -> e.hasUse()
                                     && Identifier.IdentifierUse.USUAL.equals(e.getUse())
-                                    && "urn:ietf:rfc:3986".equals(e.getSystem()))
+                                    && URN_IETF_RFC_3986.equals(e.getSystem()))
                             .findFirst();
                    if (usualIdentifier.isPresent()) {
                        String idValue = Utils.stripUrnPrefixes(usualIdentifier.get().getValue());
