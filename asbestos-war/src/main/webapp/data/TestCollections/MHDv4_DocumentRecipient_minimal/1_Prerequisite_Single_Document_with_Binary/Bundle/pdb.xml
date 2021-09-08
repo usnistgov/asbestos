@@ -51,15 +51,14 @@
                 <identifier>
                     <use value="official"/>
                     <system value="urn:ietf:rfc:3986"/>
-                    <!-- Document Source shall not provide any entryUUID values -->
                 </identifier>
                 <identifier>
                     <use value="usual"/>
                     <system value="urn:ietf:rfc:3986"/>
-                    <value value="urn:oid:1.2.129.6.58.92.88337.4"/> <!-- todo: update automatic ID replacement code -->
+                    <value value="urn:oid:1.2.129.6.58.92.88337.4"/>
                 </identifier>
                 <status value="current"/>
-                <mode value="working"/> <!-- 'Shall be working' according to https://profiles.ihe.net/ITI/MHD/StructureDefinition-IHE.MHD.Minimal.SubmissionSet-mappings.html#mappings-for-xds-and-mhd-mapping-xds -->
+                <mode value="working"/>
                 <code>
                     <coding>
                         <system
