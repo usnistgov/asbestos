@@ -22,6 +22,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static gov.nist.asbestos.mhd.channel.XdsOnFhirChannel.URN_UUID__BDD_SUBMISSION_SET;
+
 /**
  * Mappings for XDS and MHD Mapping (XDS)
  * SubmissionSet
@@ -208,7 +210,7 @@ public class MhdV4 implements MhdProfileVersionInterface {
             mhdTransforms.addName(ss, listResource.getTitle());
         }
         // 3bdd: Submission set type classification
-        mhdTransforms.addClassification(ss, "urn:uuid:a54d6aa5-d40d-43f9-88c5-b4633d873bdd", mhdTransforms.getrMgr().allocateSymbolicId(), wrapper.getAssignedId());
+        mhdTransforms.addClassification(ss, URN_UUID__BDD_SUBMISSION_SET, mhdTransforms.getrMgr().allocateSymbolicId(), wrapper.getAssignedId());
 
         if (listResource.hasExtension(iheDesignationTypeExtensionUrl)) {
            Extension extension = listResource.getExtensionByUrl(iheDesignationTypeExtensionUrl);

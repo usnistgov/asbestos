@@ -21,6 +21,8 @@ import org.hl7.fhir.r4.model.ListResource;
 import java.util.Arrays;
 import java.util.List;
 
+import static gov.nist.asbestos.mhd.channel.XdsOnFhirChannel.URN_UUID__BDD_SUBMISSION_SET;
+
 /**
  * V3.x specific implementation
  */
@@ -137,7 +139,7 @@ public class MhdV3x implements MhdProfileVersionInterface {
             // and the 4th column in table maps to Name object. See https://profiles.ihe.net/ITI/TF/Volume3/ch-4.2.html#4.2.3.3.11
             mhdTransforms.addName(ss, dm.getDescription());
         }
-        mhdTransforms.addClassification(ss, "urn:uuid:a54d6aa5-d40d-43f9-88c5-b4633d873bdd", mhdTransforms.getrMgr().allocateSymbolicId(), wrapper.getAssignedId());
+        mhdTransforms.addClassification(ss, URN_UUID__BDD_SUBMISSION_SET, mhdTransforms.getrMgr().allocateSymbolicId(), wrapper.getAssignedId());
         if (dm.hasType())
             mhdTransforms.addClassificationFromCodeableConcept(ss, dm.getType(), CodeTranslator.CONTENTTYPECODE, wrapper.getAssignedId(), vale, codeTranslator);
         if (!dm.hasMasterIdentifier())

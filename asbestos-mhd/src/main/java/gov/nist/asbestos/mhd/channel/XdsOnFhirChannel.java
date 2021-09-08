@@ -46,6 +46,7 @@ import java.util.*;
 
 // TODO - honor the Prefer header - http://hl7.org/fhir/http.html#ops
 public class XdsOnFhirChannel extends BaseChannel /*implements IBaseChannel*/ {
+    public static final String URN_UUID__BDD_SUBMISSION_SET = "urn:uuid:a54d6aa5-d40d-43f9-88c5-b4633d873bdd";
     private Bundle requestBundle = null;
     private String serverBase;
     private String proxyBase;
@@ -670,7 +671,7 @@ public class XdsOnFhirChannel extends BaseChannel /*implements IBaseChannel*/ {
             if (identifiableType instanceof RegistryPackageType) {
                 RegistryPackageType rpt = (RegistryPackageType) identifiableType;
                 for (ClassificationType classificationType : rpt.getClassification()) {
-                    if ("urn:uuid:a54d6aa5-d40d-43f9-88c5-b4633d873bdd".equals(classificationType.getClassificationNode())) {
+                    if (URN_UUID__BDD_SUBMISSION_SET.equals(classificationType.getClassificationNode())) {
                         ss = rpt;
                     }
                 }
