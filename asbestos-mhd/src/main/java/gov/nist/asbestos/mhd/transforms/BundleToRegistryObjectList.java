@@ -5,6 +5,7 @@ import gov.nist.asbestos.client.Base.IVal;
 import gov.nist.asbestos.client.events.ITask;
 import gov.nist.asbestos.client.resolver.*;
 import gov.nist.asbestos.mhd.SubmittedObject;
+import gov.nist.asbestos.mhd.channel.MhdProfileVersionInterface;
 import gov.nist.asbestos.mhd.exceptions.TransformException;
 import gov.nist.asbestos.mhd.transactionSupport.AssigningAuthorities;
 import gov.nist.asbestos.mhd.transactionSupport.CodeTranslator;
@@ -18,7 +19,6 @@ import javax.xml.bind.JAXBElement;
 import javax.xml.namespace.QName;
 import java.net.URI;
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  *
@@ -61,21 +61,11 @@ public class BundleToRegistryObjectList implements IVal {
     private URI sqEndpoint = null;
 //    private File externalCache = Installation.instance().externalCache();
     private ChannelConfig channelConfig;
-    private boolean isMinimalMetadata = false;
-    private MhdProfileVersionInterface mhdVersionSpecificImpl;
-    private MhdTransforms mhdTransforms;
-    private MhdVersionEnum defaultVersion;
 
 
     public BundleToRegistryObjectList(ChannelConfig channelConfig) {
-        Objects.requireNonNull(channelConfig);
         this.channelConfig = channelConfig;
     }
-
-    public BundleToRegistryObjectList(MhdVersionEnum mhdVersion) {
-        defaultVersion = mhdVersion;
-    }
-
 
     public SubmittedObject findSubmittedObject(BaseResource resource) {
         for (SubmittedObject submittedObject : submittedObjects) {
@@ -85,69 +75,22 @@ public class BundleToRegistryObjectList implements IVal {
         return null;
     }
 
-    public RegistryObjectListType build(Bundle bundle) {
+    public RegistryObjectListType build(MhdProfileVersionInterface mhdVersionSpecificImpl, MhdTransforms mhdTransforms, Bundle bundle) {
         Objects.requireNonNull(val);
         Objects.requireNonNull(bundle);
         Objects.requireNonNull(rMgr);
         Objects.requireNonNull(idBuilder);
+        Objects.requireNonNull(mhdVersionSpecificImpl);
 
-        setMhdTransforms();
+        scanBundleForAcceptability(mhdVersionSpecificImpl, bundle, rMgr);
 
-        setMhdVersionSpecificImpl(bundle);
-
-        scanBundleForAcceptability(bundle, rMgr);
-
-        return buildRegistryObjectList();
+        return buildRegistryObjectList(mhdVersionSpecificImpl, mhdTransforms);
     }
 
-    private void setMhdTransforms() {
-        mhdTransforms = new MhdTransforms(rMgr, val, isMinimalMetadata, task);
-    }
-
-    private void setMhdVersionSpecificImpl(Bundle bundle) {
-        String[] acceptableMhdVersions = channelConfig.getMhdVersions();
-
-        if (acceptableMhdVersions != null) {
-            // Allow only from the Accept list
-            mhdVersionSpecificImpl = findMhdImpl(bundle, acceptableMhdVersions, defaultVersion);
-        } else {
-            // All MHD versions are implicitly acceptable by channelConfig.
-            // Auto-detect based on Bundle profile
-            List<String> list = Arrays.stream(MhdVersionEnum.values())
-                    .map(MhdVersionEnum::toString)
-                    .collect(Collectors.toList());
-            mhdVersionSpecificImpl = findMhdImpl(bundle, list.toArray(new String[list.size()]), defaultVersion);
-        }
-    }
-
-    private MhdProfileVersionInterface findMhdImpl(Bundle bundle, String[] acceptableMhdVersions, MhdVersionEnum defaultVersion) {
-        Objects.requireNonNull(mhdTransforms);
-
-        MhdVersionEnum bundleVersion;
-        Optional<MhdVersionEnum> optionalMhdVersionEnum = Arrays.stream(acceptableMhdVersions)
-               .map(MhdVersionEnum::find)
-                .filter(e -> MhdImplFactory.getImplementation(e, val, mhdTransforms).isBundleProfileDetected(bundle))
-                .findAny();
-        if (optionalMhdVersionEnum.isPresent()) {
-            bundleVersion = optionalMhdVersionEnum.get();
-        } else {
-            bundleVersion = defaultVersion;
-        }
-        return MhdImplFactory.getImplementation(bundleVersion, val, mhdTransforms);
-    }
 
     // TODO handle List/Folder or signal error
-    public RegistryObjectListType buildRegistryObjectList() {
-        if (mhdVersionSpecificImpl == null) {
-            if (mhdTransforms == null) {
-                setMhdTransforms();
-            }
-            Objects.requireNonNull(defaultVersion);
-            mhdVersionSpecificImpl = MhdImplFactory.getImplementation(defaultVersion, val, mhdTransforms);
-        }
-
+    public RegistryObjectListType buildRegistryObjectList(MhdProfileVersionInterface mhdVersionSpecificImpl, MhdTransforms mhdTransforms) {
         Objects.requireNonNull(mhdVersionSpecificImpl);
-        Objects.requireNonNull(mhdTransforms);
         Objects.requireNonNull(val);
         Objects.requireNonNull(rMgr);
 
@@ -218,7 +161,7 @@ public class BundleToRegistryObjectList implements IVal {
 
         if (theSs != null) {
             for (ExtrinsicObjectType eo : eos) {
-                AssociationType1 a = createSSDEAssociation(theSs, eo, ssVale);
+                AssociationType1 a = createSSDEAssociation(mhdTransforms, theSs, eo, ssVale);
                 rol.getIdentifiable().add((new JAXBElement<>(new QName("urn:oasis:names:tc:ebxml-regrep:xsd:rim:3.0", "Association"), AssociationType1.class, a)));
             }
         }
@@ -327,7 +270,7 @@ public class BundleToRegistryObjectList implements IVal {
 //        submission.registryObjectList = writer.toString()
 //    }
 
-    private AssociationType1 createSSDEAssociation(RegistryPackageType ss, ExtrinsicObjectType de, ValE vale) {
+    private AssociationType1 createSSDEAssociation(MhdTransforms mhdTransforms, RegistryPackageType ss, ExtrinsicObjectType de, ValE vale) {
         Objects.requireNonNull(mhdTransforms);
         return mhdTransforms.createAssociation("urn:oasis:names:tc:ebxml-regrep:AssociationType:HasMember", ss.getId(), de.getId(), "SubmissionSetStatus", Collections.singletonList("Original"), vale);
 
@@ -371,14 +314,14 @@ public class BundleToRegistryObjectList implements IVal {
     }
 
 
-    private void scanBundleForAcceptability(Bundle bundle, ResourceMgr rMgr) {
+    private void scanBundleForAcceptability(MhdProfileVersionInterface mhdVersionSpecificImpl, Bundle bundle, ResourceMgr rMgr) {
         Objects.requireNonNull(mhdVersionSpecificImpl);
 
         mhdVersionSpecificImpl.evalBundleProfile(bundle);
 
         evalBundleType(bundle);
 
-        evalBundleResources(rMgr);
+        evalBundleResources(mhdVersionSpecificImpl, rMgr);
 
         evalSubjectReferences(rMgr);
 
@@ -398,7 +341,7 @@ public class BundleToRegistryObjectList implements IVal {
 //        }
     }
 
-    private void evalBundleResources(ResourceMgr rMgr) {
+    private void evalBundleResources(MhdProfileVersionInterface mhdVersionSpecificImpl, ResourceMgr rMgr) {
         Objects.requireNonNull(mhdVersionSpecificImpl);
 
         for (ResourceWrapper res : rMgr.getBundleResources()) {

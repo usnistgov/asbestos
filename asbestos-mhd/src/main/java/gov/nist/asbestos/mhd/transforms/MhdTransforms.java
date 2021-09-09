@@ -41,7 +41,6 @@ import java.util.stream.Stream;
 public class MhdTransforms {
     private ResourceMgr rMgr;
     private Val val;
-    private boolean isMinimalMetadata;
     private ITask task = null;
     private static final String DRTable = "MHD: Table 4.5.1.1-1";
     private static Map<String, String> buildTypeMap() {
@@ -54,10 +53,9 @@ public class MhdTransforms {
     }
 
 
-    public MhdTransforms(ResourceMgr rMgr, Val val, boolean isMinimalMetadata, ITask task) {
+    public MhdTransforms(ResourceMgr rMgr, Val val, ITask task) {
         this.rMgr = rMgr;
         this.val = val;
-        this.isMinimalMetadata = isMinimalMetadata;
         this.task = task;
     }
 

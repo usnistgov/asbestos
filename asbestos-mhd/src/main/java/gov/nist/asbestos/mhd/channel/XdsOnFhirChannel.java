@@ -2,6 +2,7 @@ package gov.nist.asbestos.mhd.channel;
 
 import gov.nist.asbestos.client.channel.BaseChannel;
 import gov.nist.asbestos.client.general.ChannelSupport;
+import gov.nist.asbestos.mhd.transforms.MhdTransforms;
 import gov.nist.asbestos.mhd.util.XdsActorMapper;
 import gov.nist.asbestos.client.resolver.*;
 import gov.nist.asbestos.mhd.SubmittedObject;
@@ -43,6 +44,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.util.*;
+import java.util.stream.Collectors;
 
 // TODO - honor the Prefer header - http://hl7.org/fhir/http.html#ops
 public class XdsOnFhirChannel extends BaseChannel /*implements IBaseChannel*/ {
@@ -53,6 +55,9 @@ public class XdsOnFhirChannel extends BaseChannel /*implements IBaseChannel*/ {
     private BundleToRegistryObjectList bundleToRegistryObjectList;
     private AhqrSender sender = null;
     private Binary binary = null;
+    private MhdTransforms mhdTransforms;
+    private MhdProfileVersionInterface mhdVersionSpecificImpl;
+    private MhdVersionEnum defaultVersion;
 
     public XdsOnFhirChannel() {}
 
@@ -92,11 +97,16 @@ public class XdsOnFhirChannel extends BaseChannel /*implements IBaseChannel*/ {
             throw new RuntimeException(e);
         }
 
-        // perform translation
+        // parse bundle
         rMgr.setBundle(bundle);
 
+        // Setup MHD specific implementation
+        mhdTransforms = new MhdTransforms(rMgr, val, task);
 
-        RegistryObjectListType registryObjectListType = bundleToRegistryObjectList.build(bundle);
+        mhdVersionSpecificImpl = getMhdVersionSpecificImpl(bundle, val);
+
+        // perform translation
+        RegistryObjectListType registryObjectListType = bundleToRegistryObjectList.build(mhdVersionSpecificImpl, mhdTransforms, bundle);
         if (bundleToRegistryObjectList.isResponseHasError()) {
             throw new TransformException(bundleToRegistryObjectList.getResponseBundle());
         }
@@ -133,6 +143,39 @@ public class XdsOnFhirChannel extends BaseChannel /*implements IBaseChannel*/ {
             //
         }
         return os.toString();
+    }
+
+    private MhdProfileVersionInterface getMhdVersionSpecificImpl(Bundle bundle, Val val) {
+        Objects.requireNonNull(channelConfig);
+        String[] acceptableMhdVersions = channelConfig.getMhdVersions();
+
+        if (acceptableMhdVersions != null) {
+            // Allow only from the Accept list
+            return findMhdImpl(bundle, acceptableMhdVersions, defaultVersion, val);
+        } else {
+            // All MHD versions are implicitly acceptable by channelConfig.
+            // Auto-detect based on Bundle profile
+            List<String> list = Arrays.stream(MhdVersionEnum.values())
+                    .map(MhdVersionEnum::toString)
+                    .collect(Collectors.toList());
+            return findMhdImpl(bundle, list.toArray(new String[list.size()]), defaultVersion, val);
+        }
+    }
+
+    private MhdProfileVersionInterface findMhdImpl(Bundle bundle, String[] acceptableMhdVersions, MhdVersionEnum defaultVersion, Val val) {
+        Objects.requireNonNull(mhdTransforms);
+
+        MhdVersionEnum bundleVersion;
+        Optional<MhdVersionEnum> optionalMhdVersionEnum = Arrays.stream(acceptableMhdVersions)
+                .map(MhdVersionEnum::find)
+                .filter(e -> MhdImplFactory.getImplementation(e, val, mhdTransforms).isBundleProfileDetected(bundle))
+                .findAny();
+        if (optionalMhdVersionEnum.isPresent()) {
+            bundleVersion = optionalMhdVersionEnum.get();
+        } else {
+            bundleVersion = defaultVersion;
+        }
+        return MhdImplFactory.getImplementation(bundleVersion, val, mhdTransforms);
     }
 
     public static byte[] lastDocument;
@@ -827,5 +870,15 @@ public class XdsOnFhirChannel extends BaseChannel /*implements IBaseChannel*/ {
             bundle.addEntry(entry);
         }
         return bundle;
+    }
+
+    @Override
+    public void setup(ChannelConfig simConfig) {
+        super.setup(simConfig);
+
+    }
+
+    private boolean isMhdVersionSpecificImplInitialized() {
+        return mhdTransforms != null && mhdVersionSpecificImpl != null;
     }
 }

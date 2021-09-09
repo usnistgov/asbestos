@@ -1,4 +1,4 @@
-package gov.nist.asbestos.mhd.transforms;
+package gov.nist.asbestos.mhd.channel;
 
 import java.util.Objects;
 

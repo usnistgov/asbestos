@@ -1,8 +1,7 @@
-package gov.nist.asbestos.mhd.transforms;
+package gov.nist.asbestos.mhd.channel;
 
 import gov.nist.asbestos.client.channel.ChannelConfig;
 import gov.nist.asbestos.client.resolver.IdBuilder;
-import gov.nist.asbestos.client.resolver.ResourceMgr;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import gov.nist.asbestos.mhd.transactionSupport.AssigningAuthorities;
 import gov.nist.asbestos.mhd.transactionSupport.CodeTranslator;

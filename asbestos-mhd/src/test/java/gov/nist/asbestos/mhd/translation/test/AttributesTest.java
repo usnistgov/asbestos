@@ -2,6 +2,7 @@ package gov.nist.asbestos.mhd.translation.test;
 
 
 import gov.nist.asbestos.client.Base.ParserBase;
+import gov.nist.asbestos.client.events.NoOpTask;
 import gov.nist.asbestos.client.resolver.ResourceMgr;
 import gov.nist.asbestos.mhd.transactionSupport.CodeTranslator;
 import gov.nist.asbestos.mhd.transactionSupport.CodeTranslatorBuilder;
@@ -44,7 +45,7 @@ class AttributesTest {
         ResourceMgr rMgr = new ResourceMgr();
         rMgr.setVal(val);
 
-        MhdTransforms mhdTransforms = new MhdTransforms(rMgr, val, false, null);
+        MhdTransforms mhdTransforms = new MhdTransforms(rMgr, val, new NoOpTask());
         mhdTransforms.addClassificationFromCodeableConcept(eo, type, "urn:uuid:f0306f51-975f-434e-a61c-c59651d33983", "classifiedObjectId", new ValE(val), codeTranslator);
 
         if (val.hasErrors()) {
@@ -68,7 +69,7 @@ class AttributesTest {
         rMgr.setVal(val);
 
 
-        MhdTransforms mhdTransforms = new MhdTransforms(rMgr, val, false, null);
+        MhdTransforms mhdTransforms = new MhdTransforms(rMgr, val, new NoOpTask());
         mhdTransforms.addExternalIdentifier(eo, "scheme", "value", "id", "registryObject", "name", null);
 
         String eoString = toXml(eo);
@@ -86,7 +87,7 @@ class AttributesTest {
         ResourceMgr rMgr = new ResourceMgr();
         Val val = new Val();
         rMgr.setVal(val);
-        MhdTransforms mhdTransforms = new MhdTransforms(rMgr, val, true, null) ;
+        MhdTransforms mhdTransforms = new MhdTransforms(rMgr, val, new NoOpTask()) ;
 
         mhdTransforms.addSlot(eo,"foo", "bar");
 
@@ -108,7 +109,7 @@ class AttributesTest {
         ResourceMgr rMgr = new ResourceMgr();
         Val val = new Val();
         rMgr.setVal(val);
-        MhdTransforms mhdTransforms = new MhdTransforms(rMgr, val, true, null) ;
+        MhdTransforms mhdTransforms = new MhdTransforms(rMgr, val, new NoOpTask()) ;
 
         mhdTransforms.addSlot(eo,"foo", Arrays.asList("bar", "xuy"));
 
@@ -130,7 +131,7 @@ class AttributesTest {
         ResourceMgr rMgr = new ResourceMgr();
         Val val = new Val();
         rMgr.setVal(val);
-        MhdTransforms mhdTransforms = new MhdTransforms(rMgr, val, true, null) ;
+        MhdTransforms mhdTransforms = new MhdTransforms(rMgr, val, new NoOpTask()) ;
 
         mhdTransforms.addName(eo, "MyName");
 
@@ -148,7 +149,7 @@ class AttributesTest {
         ResourceMgr rMgr = new ResourceMgr();
         rMgr.setVal(val);
 
-        MhdTransforms mhdTransforms = new MhdTransforms(rMgr, val, true, null) ;
+        MhdTransforms mhdTransforms = new MhdTransforms(rMgr, val, new NoOpTask()) ;
 
         AssociationType1 a = mhdTransforms.createAssociation("HasMember", "id1", "id2", "name", Collections.singletonList("foo"), new ValE(val));
 

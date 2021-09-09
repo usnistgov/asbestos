@@ -18,7 +18,7 @@ import gov.nist.asbestos.mhd.transactionSupport.CodeTranslator;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import gov.nist.asbestos.mhd.transforms.BundleToRegistryObjectList;
 import gov.nist.asbestos.mhd.transforms.MhdTransforms;
-import gov.nist.asbestos.mhd.transforms.MhdVersionEnum;
+import gov.nist.asbestos.mhd.channel.MhdVersionEnum;
 import gov.nist.asbestos.mhd.translation.ContainedIdAllocator;
 import gov.nist.asbestos.mhd.transforms.DocumentEntryToDocumentReference;
 import gov.nist.asbestos.client.channel.ChannelConfig;
@@ -109,7 +109,7 @@ class DocumentEntryTestxxx {
 
 
         // Translate DocRef to XDS
-        BundleToRegistryObjectList bundleToRegistryObjectList = new BundleToRegistryObjectList(MhdVersionEnum.MHDv3x);
+        BundleToRegistryObjectList bundleToRegistryObjectList = new BundleToRegistryObjectList(null);
         bundleToRegistryObjectList.setVal(val);
         bundleToRegistryObjectList.setCodeTranslator(codeTranslator);
         bundleToRegistryObjectList.setResourceMgr(rMgr);
@@ -122,7 +122,7 @@ class DocumentEntryTestxxx {
         rMgr.setVal(val);
         rMgr.setFhirClient(fhirClient);
 
-        MhdTransforms mhdTransforms = new MhdTransforms(rMgr, val, true, task);
+        MhdTransforms mhdTransforms = new MhdTransforms(rMgr, val, task);
 
         // Translate XDS back to DocRef
         ExtrinsicObjectType extrinsicObjectType = mhdTransforms.createExtrinsicObject(resource, new ValE(val), new IdBuilder(true), null, codeTranslator,
