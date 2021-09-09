@@ -84,15 +84,16 @@ public class BundleToRegistryObjectList implements IVal {
 
         scanBundleForAcceptability(mhdVersionSpecificImpl, bundle, rMgr);
 
-        return buildRegistryObjectList(mhdVersionSpecificImpl, mhdTransforms);
+        return buildRegistryObjectList(mhdVersionSpecificImpl);
     }
 
 
     // TODO handle List/Folder or signal error
-    public RegistryObjectListType buildRegistryObjectList(MhdProfileVersionInterface mhdVersionSpecificImpl, MhdTransforms mhdTransforms) {
+    public RegistryObjectListType buildRegistryObjectList(MhdProfileVersionInterface mhdVersionSpecificImpl) {
         Objects.requireNonNull(mhdVersionSpecificImpl);
         Objects.requireNonNull(val);
         Objects.requireNonNull(rMgr);
+        MhdTransforms mhdTransforms = mhdVersionSpecificImpl.getMhdTransforms();
 
         //rMgr.setBundle(bundle);
         //scanBundleForAcceptability(bundle, rMgr);

@@ -106,7 +106,7 @@ class BuildRegistryObjectListTest {
 
         MhdProfileVersionInterface mhdVersionSpecificImpl = MhdImplFactory.getImplementation(MhdVersionEnum.MHDv3x, val, mhdTransforms);
 
-        RegistryObjectListType rol = xlate.buildRegistryObjectList(mhdVersionSpecificImpl, mhdTransforms);
+        RegistryObjectListType rol = xlate.buildRegistryObjectList(mhdVersionSpecificImpl);
         if (val.hasErrors())
             fail( ValFactory.toJson(new ValErrors(val)));
         else

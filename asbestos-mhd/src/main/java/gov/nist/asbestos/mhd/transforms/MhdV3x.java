@@ -22,6 +22,7 @@ import org.hl7.fhir.r4.model.ListResource;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 import static gov.nist.asbestos.mhd.channel.XdsOnFhirChannel.URN_UUID__BDD_SUBMISSION_SET;
 
@@ -43,6 +44,8 @@ public class MhdV3x implements MhdProfileVersionInterface {
     MhdTransforms mhdTransforms;
 
     public MhdV3x(Val val, MhdTransforms mhdTransforms) {
+        Objects.requireNonNull(val);
+        Objects.requireNonNull(mhdTransforms);
         this.val = val;
         this.mhdTransforms = mhdTransforms;
     }
@@ -160,4 +163,8 @@ public class MhdV3x implements MhdProfileVersionInterface {
         return ss;
     }
 
+    @Override
+    public MhdTransforms getMhdTransforms() {
+        return mhdTransforms;
+    }
 }

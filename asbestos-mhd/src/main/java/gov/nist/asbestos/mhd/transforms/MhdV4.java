@@ -20,6 +20,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -73,6 +74,8 @@ public class MhdV4 implements MhdProfileVersionInterface {
 
 
     public MhdV4(Val val, MhdTransforms mhdTransforms) {
+        Objects.requireNonNull(val);
+        Objects.requireNonNull(mhdTransforms);
         this.val = val;
         this.mhdTransforms = mhdTransforms;
     }
@@ -275,6 +278,11 @@ public class MhdV4 implements MhdProfileVersionInterface {
         }
 
         return ss;
+    }
+
+    @Override
+    public MhdTransforms getMhdTransforms() {
+        return mhdTransforms;
     }
 }
 
