@@ -216,7 +216,8 @@ public class FhirClient {
                 if (!returnedResourceType.equals("OperationOutcome")) {
                     if (!expectedResourceType.equals("metadata") && !returnedResourceType.equals("CapabilityStatement")) {
                         if (!returnedResourceType.equals(expectedResourceType)) {
-                            if (/*getter.isSearch() && */returnedResourceType.equals("Bundle")) {
+                            /* Known Mismatch types - Special cases */
+                            if (returnedResourceType.equals("Bundle")) {
                                 Bundle bundle = (Bundle) resource;
                                 if (bundle.hasEntry()) {
                                     if (!bundle.getEntry().get(0).getResource().getClass().getSimpleName().equals(expectedResourceType))
@@ -224,8 +225,12 @@ public class FhirClient {
                                     if (!getter.isSearch())
                                         resource = bundle.getEntry().get(0).getResource();
                                 }
-                            } else
-                                throw new Error("Read must return " + expectedResourceType + " - received " + resource.getClass().getSimpleName() + " instead");
+                            } else if ("SubmissionSetMhdList".equals(expectedResourceType) && "ListResource".equals(returnedResourceType)) {
+                                /* OK */
+                            } else {
+                                /* Unknown Mismatch types */
+                                throw new Error("Read must return " + expectedResourceType + " - received " + returnedResourceType + " instead");
+                            }
                         }
                     }
                 }

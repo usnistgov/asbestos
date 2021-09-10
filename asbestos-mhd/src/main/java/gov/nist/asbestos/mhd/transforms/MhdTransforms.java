@@ -9,17 +9,21 @@ import gov.nist.asbestos.client.events.ITask;
 import gov.nist.asbestos.client.resolver.IdBuilder;
 import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.client.resolver.ResolverConfig;
+import gov.nist.asbestos.client.resolver.ResourceCacheMgr;
 import gov.nist.asbestos.client.resolver.ResourceMgr;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import gov.nist.asbestos.mhd.transactionSupport.AhqrSender;
 import gov.nist.asbestos.mhd.transactionSupport.AssigningAuthorities;
 import gov.nist.asbestos.mhd.transactionSupport.CodeTranslator;
+import gov.nist.asbestos.mhd.translation.ContainedIdAllocator;
 import gov.nist.asbestos.mhd.translation.attribute.Author;
 import gov.nist.asbestos.mhd.translation.attribute.AuthorRole;
 import gov.nist.asbestos.mhd.translation.attribute.DateTransform;
 import gov.nist.asbestos.mhd.translation.attribute.EntryUuid;
 import gov.nist.asbestos.mhd.translation.search.FhirSq;
 import gov.nist.asbestos.mhd.util.Utils;
+import gov.nist.asbestos.serviceproperties.ServiceProperties;
+import gov.nist.asbestos.serviceproperties.ServicePropertiesEnum;
 import gov.nist.asbestos.simapi.validation.Val;
 import gov.nist.asbestos.simapi.validation.ValE;
 import oasis.names.tc.ebxml_regrep.xsd.rim._3.*;
@@ -27,8 +31,10 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.*;
 
 import javax.xml.bind.DatatypeConverter;
+import java.io.File;
 import java.net.URI;
 import java.util.AbstractMap;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -39,10 +45,13 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class MhdTransforms {
+    public static String SubmissionSetMhdListResourceName = "SubmissionSetMhdList";
     private ResourceMgr rMgr;
     private Val val;
     private ITask task = null;
     private static final String DRTable = "MHD: Table 4.5.1.1-1";
+    public static final String URN_IETF_RFC_3986 = "urn:ietf:rfc:3986";
+    public static final String URN_UUID__BDD_SUBMISSION_SET = "urn:uuid:a54d6aa5-d40d-43f9-88c5-b4633d873bdd";
     private static Map<String, String> buildTypeMap() {
         return Collections.unmodifiableMap(Stream.of(
                 new AbstractMap.SimpleEntry<>("replaces", "urn:ihe:iti:2007:AssociationType:RPLC"),
@@ -90,7 +99,7 @@ public class MhdTransforms {
         registryObject.getSlot().add(slot);
     }
 
-    String translateDateTime(Date date) {
+    static String translateDateTime(Date date) {
         return DateTransform.fhirToDtm(date);
     }
 
@@ -624,6 +633,120 @@ public class MhdTransforms {
         } else {
             val.add(new ValE("Internal error - cannot locate Patient/No_Patient").asError());
         }
+    }
+
+    public static void withNewBase(Reference reference) {
+        String newBase = ServiceProperties.getInstance().getPropertyOrStop(ServicePropertiesEnum.FHIR_TOOLKIT_BASE) + "/proxy/default__default";
+        Ref ref = new Ref(reference.getReference());
+        ref = ref.rebase(newBase);
+        reference.setReference(ref.toString());
+    }
+
+    public static OperationOutcome operationOutcomefromVal(Val val) {
+        OperationOutcome oo = new OperationOutcome();
+        for (ValE err : val.getErrors())
+            addErrorToOperationOutcome(oo, err.getMsg());
+        return oo;
+    }
+
+    public static OperationOutcome addErrorToOperationOutcome(OperationOutcome oo, String msg) {
+        OperationOutcome.OperationOutcomeIssueComponent issue = oo.addIssue();
+        issue.setCode(OperationOutcome.IssueType.UNKNOWN);
+        issue.setSeverity(OperationOutcome.IssueSeverity.ERROR);
+        issue.setDiagnostics(msg);
+        return oo;
+    }
+
+
+
+    // assumes sender contains zero or one SubmissionSets
+    public static BaseResource ssToDocumentManifest(CodeTranslator codeTranslator, File externalCache, AhqrSender sender, ChannelConfig channelConfig) {
+        Val val = new Val();
+
+        ResourceCacheMgr resourceCacheMgr = new ResourceCacheMgr(externalCache);
+        FhirClient fhirClient = new FhirClient()
+                .setResourceCacheMgr(resourceCacheMgr);
+        SubmissionSetToDocumentManifest trans = new SubmissionSetToDocumentManifest();
+        trans
+                .setContainedIdAllocator(new ContainedIdAllocator())
+                .setResourceCacheMgr(resourceCacheMgr)
+                .setCodeTranslator(codeTranslator)
+                .setFhirClient(fhirClient)
+                .setVal(val);
+
+        RegistryPackageType ss = null;
+        List<AssociationType1> assocs = new ArrayList<>();
+        List<ExtrinsicObjectType> eos = new ArrayList<>();
+        for (IdentifiableType identifiableType : sender.getContents()) {
+            if (identifiableType instanceof RegistryPackageType) {
+                RegistryPackageType rpt = (RegistryPackageType) identifiableType;
+                for (ClassificationType classificationType : rpt.getClassification()) {
+                    if (URN_UUID__BDD_SUBMISSION_SET.equals(classificationType.getClassificationNode())) {
+                        ss = rpt;
+                    }
+                }
+            } else if (identifiableType instanceof AssociationType1) {
+                assocs.add((AssociationType1) identifiableType);
+            } else if (identifiableType instanceof ExtrinsicObjectType) {
+                eos.add((ExtrinsicObjectType) identifiableType);
+            }
+        }
+        DocumentManifest dm = null;
+        if (ss != null)
+            dm = trans.getDocumentManifest(ss, assocs, channelConfig);
+
+        if (dm != null && dm.hasSubject())
+            MhdTransforms.withNewBase(dm.getSubject());
+
+//        if (ss == null)
+//            val.add(new ValE("No SubmissionSet in query response.").asError());
+
+        if (val.hasErrors())
+            return MhdTransforms.operationOutcomefromVal(val);
+
+        return dm;
+    }
+
+    public static BaseResource ssToListResource(CodeTranslator codeTranslator, File externalCache, AhqrSender sender, ChannelConfig channelConfig) {
+        Val val = new Val();
+
+        ResourceCacheMgr resourceCacheMgr = new ResourceCacheMgr(externalCache);
+        FhirClient fhirClient = new FhirClient()
+                .setResourceCacheMgr(resourceCacheMgr);
+        SubmissionSetToListResource trans = new SubmissionSetToListResource(new ContainedIdAllocator(), resourceCacheMgr, codeTranslator, fhirClient, val);
+
+        RegistryPackageType ss = null;
+        List<AssociationType1> assocs = new ArrayList<>();
+        List<ExtrinsicObjectType> eos = new ArrayList<>();
+        for (IdentifiableType identifiableType : sender.getContents()) {
+            if (identifiableType instanceof RegistryPackageType) {
+                RegistryPackageType rpt = (RegistryPackageType) identifiableType;
+                for (ClassificationType classificationType : rpt.getClassification()) {
+                    if (URN_UUID__BDD_SUBMISSION_SET.equals(classificationType.getClassificationNode())) {
+                        ss = rpt;
+                    }
+                }
+            } else if (identifiableType instanceof AssociationType1) {
+                assocs.add((AssociationType1) identifiableType);
+            } else if (identifiableType instanceof ExtrinsicObjectType) {
+                eos.add((ExtrinsicObjectType) identifiableType);
+            }
+        }
+        ListResource listResource = null;
+        if (ss != null)
+            listResource = trans.getListResource(ss, assocs, channelConfig);
+
+        if (listResource != null && listResource.hasSubject())
+            MhdTransforms.withNewBase(listResource.getSubject());
+
+//        if (ss == null)
+//            val.add(new ValE("No SubmissionSet in query response.").asError());
+
+        if (val.hasErrors())
+            return MhdTransforms.operationOutcomefromVal(val);
+
+        return listResource;
+
     }
 
 

@@ -1,16 +1,24 @@
 package gov.nist.asbestos.mhd.transforms;
 
 import gov.nist.asbestos.client.channel.ChannelConfig;
+import gov.nist.asbestos.client.client.FhirClient;
 import gov.nist.asbestos.client.resolver.IdBuilder;
 import gov.nist.asbestos.client.resolver.Ref;
+import gov.nist.asbestos.client.resolver.ResourceCacheMgr;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import gov.nist.asbestos.mhd.channel.MhdProfileVersionInterface;
 import gov.nist.asbestos.mhd.channel.MhdVersionEnum;
+import gov.nist.asbestos.mhd.transactionSupport.AhqrSender;
 import gov.nist.asbestos.mhd.transactionSupport.AssigningAuthorities;
 import gov.nist.asbestos.mhd.transactionSupport.CodeTranslator;
+import gov.nist.asbestos.mhd.translation.ContainedIdAllocator;
 import gov.nist.asbestos.mhd.util.Utils;
 import gov.nist.asbestos.simapi.validation.Val;
 import gov.nist.asbestos.simapi.validation.ValE;
+import oasis.names.tc.ebxml_regrep.xsd.rim._3.AssociationType1;
+import oasis.names.tc.ebxml_regrep.xsd.rim._3.ClassificationType;
+import oasis.names.tc.ebxml_regrep.xsd.rim._3.ExtrinsicObjectType;
+import oasis.names.tc.ebxml_regrep.xsd.rim._3.IdentifiableType;
 import oasis.names.tc.ebxml_regrep.xsd.rim._3.RegistryPackageType;
 import org.hl7.fhir.r4.model.BaseResource;
 import org.hl7.fhir.r4.model.Binary;
@@ -20,11 +28,12 @@ import org.hl7.fhir.r4.model.DocumentManifest;
 import org.hl7.fhir.r4.model.DocumentReference;
 import org.hl7.fhir.r4.model.ListResource;
 
+import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
-import static gov.nist.asbestos.mhd.channel.XdsOnFhirChannel.URN_UUID__BDD_SUBMISSION_SET;
 
 /**
  * V3.x specific implementation
@@ -138,13 +147,13 @@ public class MhdV3x implements MhdProfileVersionInterface {
         ss.setObjectType("urn:oasis:names:tc:ebxml-regrep:ObjectType:RegistryObject:RegistryPackage");
 
         if (dm.hasCreated())
-            mhdTransforms.addSlot(ss, "submissionTime", mhdTransforms.translateDateTime(dm.getCreated()));
+            mhdTransforms.addSlot(ss, "submissionTime", MhdTransforms.translateDateTime(dm.getCreated()));
         if (dm.hasDescription()) {
             // Mapped to Title according to MHD 3.1 Table 4.5.1.2-1: FHIR DocumentManifest mapping to SubmissionSet,
             // and the 4th column in table maps to Name object. See https://profiles.ihe.net/ITI/TF/Volume3/ch-4.2.html#4.2.3.3.11
             mhdTransforms.addName(ss, dm.getDescription());
         }
-        mhdTransforms.addClassification(ss, URN_UUID__BDD_SUBMISSION_SET, mhdTransforms.getrMgr().allocateSymbolicId(), wrapper.getAssignedId());
+        mhdTransforms.addClassification(ss, MhdTransforms.URN_UUID__BDD_SUBMISSION_SET, mhdTransforms.getrMgr().allocateSymbolicId(), wrapper.getAssignedId());
         if (dm.hasType())
             mhdTransforms.addClassificationFromCodeableConcept(ss, dm.getType(), CodeTranslator.CONTENTTYPECODE, wrapper.getAssignedId(), vale, codeTranslator);
         if (!dm.hasMasterIdentifier())
@@ -167,4 +176,6 @@ public class MhdV3x implements MhdProfileVersionInterface {
     public MhdTransforms getMhdTransforms() {
         return mhdTransforms;
     }
+
+
 }

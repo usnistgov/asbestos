@@ -1,6 +1,8 @@
 package gov.nist.asbestos.client.resolver;
 
 import gov.nist.asbestos.simapi.tk.installation.Installation;
+import org.hl7.fhir.r4.model.Identifier;
+import org.hl7.fhir.r4.model.ListResource;
 
 import java.net.Inet4Address;
 import java.net.InetAddress;
@@ -8,6 +10,8 @@ import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.util.Date;
 import java.util.Enumeration;
+import java.util.Objects;
+import java.util.Optional;
 
 /**
  * ITI Suppl Appx Z
@@ -71,4 +75,15 @@ public class IdBuilder {
         int type = Character.getType(c);
         return type == Character.LOWERCASE_LETTER || type == Character.UPPERCASE_LETTER;
     }
+
+    public static Optional<Identifier> getUsualTypeIdentifier(ListResource listResource) {
+        Objects.requireNonNull(listResource);
+        return listResource.getIdentifier().stream()
+                .filter(e -> e.hasUse()
+                        && Identifier.IdentifierUse.USUAL.equals(e.getUse())
+                        && "urn:ietf:rfc:3986".equals(e.getSystem()))
+                .findFirst();
+    }
+
+
 }

@@ -1,21 +1,32 @@
 package gov.nist.asbestos.mhd.transforms;
 
 import gov.nist.asbestos.client.channel.ChannelConfig;
+import gov.nist.asbestos.client.client.FhirClient;
 import gov.nist.asbestos.client.resolver.IdBuilder;
 import gov.nist.asbestos.client.resolver.Ref;
+import gov.nist.asbestos.client.resolver.ResourceCacheMgr;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import gov.nist.asbestos.mhd.channel.MhdProfileVersionInterface;
 import gov.nist.asbestos.mhd.channel.MhdVersionEnum;
+import gov.nist.asbestos.mhd.transactionSupport.AhqrSender;
 import gov.nist.asbestos.mhd.transactionSupport.AssigningAuthorities;
 import gov.nist.asbestos.mhd.transactionSupport.CodeTranslator;
+import gov.nist.asbestos.mhd.translation.ContainedIdAllocator;
 import gov.nist.asbestos.mhd.util.Utils;
 import gov.nist.asbestos.simapi.validation.Val;
 import gov.nist.asbestos.simapi.validation.ValE;
+import oasis.names.tc.ebxml_regrep.xsd.rim._3.AssociationType1;
+import oasis.names.tc.ebxml_regrep.xsd.rim._3.ClassificationType;
+import oasis.names.tc.ebxml_regrep.xsd.rim._3.ExtrinsicObjectType;
+import oasis.names.tc.ebxml_regrep.xsd.rim._3.IdentifiableType;
 import oasis.names.tc.ebxml_regrep.xsd.rim._3.RegistryPackageType;
 import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.codesystems.ListMode;
+import org.jetbrains.annotations.NotNull;
 
+import java.io.File;
 import java.util.AbstractMap;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -25,10 +36,12 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static gov.nist.asbestos.mhd.channel.XdsOnFhirChannel.URN_UUID__BDD_SUBMISSION_SET;
+import static gov.nist.asbestos.mhd.transforms.MhdV4Constants.iheDesignationTypeExtensionUrl;
+import static gov.nist.asbestos.mhd.transforms.MhdV4Constants.iheSourceIdExtensionUrl;
 
 /**
  * Mappings for XDS and MHD Mapping (XDS)
+ * MHD 4.0.1
  * SubmissionSet
  * List	XDS SubmissionSet
  *    meta
@@ -55,11 +68,8 @@ import static gov.nist.asbestos.mhd.channel.XdsOnFhirChannel.URN_UUID__BDD_SUBMI
  */
 public class MhdV4 implements MhdProfileVersionInterface {
     public static final String SUBMISSION_SET_PROFILE = "https://profiles.ihe.net/ITI/MHD/StructureDefinition-IHE.MHD.Minimal.SubmissionSet.html#profile";
-    public static final String URN_IETF_RFC_3986 = "urn:ietf:rfc:3986";
     static String comprehensiveMetadataProfile = "http://profiles.ihe.net/ITI/MHD/StructureDefinition/IHE.MHD.Comprehensive.ProvideBundle";
     static String minimalMetadataProfile = "http://profiles.ihe.net/ITI/MHD/StructureDefinition/IHE.MHD.Minimal.ProvideBundle";
-    static String iheDesignationTypeExtensionUrl = "http://profiles.ihe.net/ITI/MHD/StructureDefinition/ihe-designationType";
-    static String iheSourceIdExtensionUrl = "http://profiles.ihe.net/ITI/MHD/StructureDefinition/ihe-sourceId";
     private static Map<String, String> listTypeMap  =
         Collections.unmodifiableMap(Stream.of(
                 new AbstractMap.SimpleEntry<>("submissionset", "http://profiles.ihe.net/ITI/MHD/CodeSystem/MHDlistTypes"))
@@ -159,26 +169,33 @@ public class MhdV4 implements MhdProfileVersionInterface {
          */
 
         BaseResource resource = wrapper.getResource();
-        if (resource instanceof ListResource) {
-            vale.setMsg("The Document Recipient shall transform the Bundle content into a proper message for the Given grouped Actor. " +
-                    "(Document Recipient is grouped with XDS Document Source. " +
-                    "Transformation task: Transforming List to SubmissionSet.)" +
-                    "https://profiles.ihe.net/ITI/MHD/ITI-65.html#23654131-grouping-with-actors-in-other-document-sharing-profiles");
+        vale.setMsg("The Document Recipient shall transform the Bundle content into a proper message for the Given grouped Actor. " +
+                "(Document Recipient is grouped with XDS Document Source. " +
+                "Transformation task: Transforming List to SubmissionSet.)" +
+                "https://profiles.ihe.net/ITI/MHD/ITI-65.html#23654131-grouping-with-actors-in-other-document-sharing-profiles");
 
+        if (isSubmissionSetListType(resource)) {
+            return createSubmissionSet(idBuilder, wrapper, vale, channelConfig, codeTranslator, assigningAuthorities);
+        }
+
+        return null;
+    }
+
+    /**
+     * Use discriminator to find if SS or Folder
+    */
+    public static boolean isSubmissionSetListType(BaseResource resource) {
+        if (resource instanceof ListResource) {
             ListResource listResource = (ListResource)resource;
             String code = "submissionset";
             String system = listTypeMap.get(code);
             if (listResource.getCode().hasCoding(system, code)) {
                 if (listResource.getCode().getCoding().stream().filter(e -> system.equals(e.getSystem()) && code.equals(e.getCode())).count() == 1) {
-                    vale.setMsg("Found ListResource with code " + code);
-                    return createSubmissionSet(idBuilder, wrapper, vale, channelConfig, codeTranslator, assigningAuthorities);
-                } else {
-                    vale.add(new ValE("ListResource has multiple codes of " + code).asWarning());
+                    return true;
                 }
             }
         }
-        return null;
-
+        return false;
     }
 
     private RegistryPackageType createSubmissionSet(IdBuilder idBuilder, ResourceWrapper wrapper, ValE vale, ChannelConfig channelConfig, CodeTranslator codeTranslator, AssigningAuthorities assigningAuthorities) {
@@ -215,7 +232,7 @@ public class MhdV4 implements MhdProfileVersionInterface {
             mhdTransforms.addName(ss, listResource.getTitle());
         }
         // 3bdd: Submission set type classification
-        mhdTransforms.addClassification(ss, URN_UUID__BDD_SUBMISSION_SET, mhdTransforms.getrMgr().allocateSymbolicId(), wrapper.getAssignedId());
+        mhdTransforms.addClassification(ss, MhdTransforms.URN_UUID__BDD_SUBMISSION_SET, mhdTransforms.getrMgr().allocateSymbolicId(), wrapper.getAssignedId());
 
         if (listResource.hasExtension(iheDesignationTypeExtensionUrl)) {
            Extension extension = listResource.getExtensionByUrl(iheDesignationTypeExtensionUrl);
@@ -237,18 +254,14 @@ public class MhdV4 implements MhdProfileVersionInterface {
                             .addIheRequirement("https://profiles.ihe.net/ITI/MHD/StructureDefinition-IHE.MHD.Minimal.SubmissionSet-definitions.html#List.identifier"));
                 }
                 long usualIdCount = listResource.getIdentifier().stream()
-                        .filter(e -> e.hasUse() && Identifier.IdentifierUse.USUAL.equals(e.getUse()) && URN_IETF_RFC_3986.equals(e.getSystem())).count();
+                        .filter(e -> e.hasUse() && Identifier.IdentifierUse.USUAL.equals(e.getUse()) && MhdTransforms.URN_IETF_RFC_3986.equals(e.getSystem())).count();
                 if (usualIdCount < 1) {
                     vale.add(new ValE("1) Expecting an OID (URI) according to ITI TF Vol 3:4.2.3.3.12 SubmissionSet.uniqueId. " +
-                            "2) MHD v4.0.1: If the value is a full URI, then the system SHALL be "+ URN_IETF_RFC_3986 +".")
+                            "2) MHD v4.0.1: If the value is a full URI, then the system SHALL be "+ MhdTransforms.URN_IETF_RFC_3986 +".")
                     .addIheRequirement("https://profiles.ihe.net/ITI/MHD/StructureDefinition-IHE.MHD.Minimal.SubmissionSet-definitions.html#List.identifier:uniqueId.value"));
                 } else {
-                    Optional<Identifier> usualIdentifier = listResource.getIdentifier().stream()
-                            .filter(e -> e.hasUse()
-                                    && Identifier.IdentifierUse.USUAL.equals(e.getUse())
-                                    && URN_IETF_RFC_3986.equals(e.getSystem()))
-                            .findFirst();
-                   if (usualIdentifier.isPresent()) {
+                    Optional<Identifier> usualIdentifier = IdBuilder.getUsualTypeIdentifier(listResource);
+                    if (usualIdentifier.isPresent()) {
                        String idValue = Utils.stripUrnPrefixes(usualIdentifier.get().getValue());
                        mhdTransforms.addExternalIdentifier(ss, CodeTranslator.SS_UNIQUEID, idValue,
                                mhdTransforms.getrMgr().allocateSymbolicId(),
@@ -280,9 +293,11 @@ public class MhdV4 implements MhdProfileVersionInterface {
         return ss;
     }
 
+
     @Override
     public MhdTransforms getMhdTransforms() {
         return mhdTransforms;
     }
+
 }
 

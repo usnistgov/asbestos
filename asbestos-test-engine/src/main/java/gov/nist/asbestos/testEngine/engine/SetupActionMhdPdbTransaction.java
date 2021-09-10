@@ -7,6 +7,7 @@ import gov.nist.asbestos.testEngine.engine.fixture.FixtureMgr;
 import org.hl7.fhir.r4.model.*;
 
 import java.util.Objects;
+import java.util.Optional;
 
 public class SetupActionMhdPdbTransaction extends SetupActionTransaction {
     private IdBuilder idBuilder = new IdBuilder(true);
@@ -32,7 +33,18 @@ public class SetupActionMhdPdbTransaction extends SetupActionTransaction {
             if (!component.hasResource())
                 continue;
             Resource resource = component.getResource();
-            if (resource instanceof DocumentManifest) {
+            if (resource instanceof ListResource) {
+                ListResource listResource = (ListResource) resource;
+                if (listResource.hasIdentifier()) {
+                    Optional<Identifier> usualIdentifier = IdBuilder.getUsualTypeIdentifier(listResource);
+                    if (usualIdentifier.isPresent()) {
+                        Identifier ident = usualIdentifier.get();
+                        String value = idBuilder.allocate(null);
+                        value = value + "." + counter++;
+                        ident.setValue(value);
+                    }
+                }
+            } else if (resource instanceof DocumentManifest) {
                 DocumentManifest dm = (DocumentManifest) resource;
                 if (dm.hasMasterIdentifier()) {
                     Identifier ident = dm.getMasterIdentifier();
