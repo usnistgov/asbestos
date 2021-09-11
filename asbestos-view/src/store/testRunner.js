@@ -65,7 +65,7 @@ export const testRunnerStore = {
                     mhdVersions = rootState.base.channel.mhdVersions
                 }
                 if (mhdVersions !== null && Array.isArray(mhdVersions)) {
-                    console.log(String(tcObjs.map(e=>e.mhdVersion)))
+                    // console.log(String(tcObjs.map(e=>e.mhdVersion)))
                     return tcObjs.filter(e => mhdVersions.includes(e.mhdVersion)).map(e => e.name)
                 }
                 return tcObjs.map(e => e.name)
