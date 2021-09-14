@@ -4,6 +4,7 @@ import gov.nist.asbestos.client.channel.BaseChannel;
 import gov.nist.asbestos.client.general.ChannelSupport;
 import gov.nist.asbestos.mhd.transforms.MhdTransforms;
 import gov.nist.asbestos.mhd.transforms.MhdV4;
+import gov.nist.asbestos.mhd.translation.search.DocManSQParamTranslator;
 import gov.nist.asbestos.mhd.util.XdsActorMapper;
 import gov.nist.asbestos.client.resolver.*;
 import gov.nist.asbestos.mhd.SubmittedObject;
@@ -272,9 +273,14 @@ public class XdsOnFhirChannel extends BaseChannel /*implements IBaseChannel*/ {
             } else if (resourceType.equals("DocumentManifest")) {
                 sender = FhirSq.docManQuery(params, toAddr, task);
                 returnAhqrResults(requestOut);
-            } else if (resourceType.equals(MhdTransforms.SubmissionSetMhdListResourceName)) {
-                sender = FhirSq.docManQuery(params, toAddr, task);
-                returnAhqrResults(requestOut);
+            } else if (resourceType.equals(MhdTransforms.MhdListResourceName)) {
+                // Code value must be supplied to distinguish SS from a Folder
+                if (DocManSQParamTranslator.parseParms(params).contains("code=submissionset")) {
+                    sender = FhirSq.docManQuery(params, toAddr, task);
+                    returnAhqrResults(requestOut);
+                } else {
+                    throw new RuntimeException("SEARCH resource " + resourceType + " not supported on this channel");
+                }
             } else {
                 throw new RuntimeException("SEARCH " + resourceType + " not supported on this channel");
             }
@@ -291,9 +297,14 @@ public class XdsOnFhirChannel extends BaseChannel /*implements IBaseChannel*/ {
             } else if (resourceType.equals("DocumentManifest")  && uid.contains(".")) {
                 sender = FhirSq.submissionSetByUidQuery(uid, toAddr, task);
                 returnAhqrResults(requestOut);
-            } else if (resourceType.equals(MhdTransforms.SubmissionSetMhdListResourceName)  && uid.contains(".")) {
-                sender = FhirSq.submissionSetByUidQuery(uid, toAddr, task);
-                returnAhqrResults(requestOut);
+            } else if (resourceType.equals(MhdTransforms.MhdListResourceName)  && uid.contains(".")) {
+                if (IdBuilder.isOpaqueLogicalId(IdBuilder.SS_OPAQUE_ID, uid)) {
+                    String id = IdBuilder.stripPrefix(IdBuilder.SS_OPAQUE_ID, uid);
+                    sender = FhirSq.submissionSetByUidQuery(id, toAddr, task);
+                    returnAhqrResults(requestOut);
+                } else {
+                    throw new RuntimeException("GET resource " + resourceType + " not supported");
+                }
             } else if (resourceType.equalsIgnoreCase("Binary") && uid.contains(".")) {
                 // by UUID
                 String repUid = "1.1.1";
@@ -378,7 +389,7 @@ public class XdsOnFhirChannel extends BaseChannel /*implements IBaseChannel*/ {
 
             if (resourceType.equals("DocumentReference")
                     || resourceType.equals("DocumentManifest")
-                    || resourceType.equals(MhdTransforms.SubmissionSetMhdListResourceName)) {
+                    || resourceType.equals(MhdTransforms.MhdListResourceName)) {
                 actorType = "reg";
                 transType = "sq";
             } else if (resourceType.equals("Binary")) {
@@ -541,7 +552,7 @@ public class XdsOnFhirChannel extends BaseChannel /*implements IBaseChannel*/ {
             if (sender.hasErrors()) {
                 OperationOutcome oo = regErrorListAsOperationOutcome(sender.getErrorList());
                 returnOperationOutcome(responseOut, oo);
-            } else if (isSearch) /* No ID provided */ {
+            } else if (isSearch) /* This is not a GET by logical ID provided, but has search params */ {
                 if (requestedType.equals("DocumentReference")) {
                     List<ResourceWrapper> results = new ArrayList<>();
                     for (IdentifiableType identifiableType  : sender.getContents()) {
@@ -567,9 +578,15 @@ public class XdsOnFhirChannel extends BaseChannel /*implements IBaseChannel*/ {
                     // this assumes a single manifest - must be extended to get more
                     BaseResource resource = MhdTransforms.ssToDocumentManifest(getCodeTranslator(), getExternalCache(), sender, channelConfig);
                     resourceResponse(responseOut, search, searchRef, resource);
-                } else if (requestedType.equals(MhdTransforms.SubmissionSetMhdListResourceName)) {
-                    BaseResource resource = MhdTransforms.ssToListResource(getCodeTranslator(), getExternalCache(), sender, channelConfig);
-                    resourceResponse(responseOut, search, searchRef, resource);
+                } else if (requestedType.equals(MhdTransforms.MhdListResourceName)) {
+                    if (DocManSQParamTranslator.parseParms(search).contains("code=submissionset")) {
+                        BaseResource resource = MhdTransforms.ssToListResource(getCodeTranslator(), getExternalCache(), sender, channelConfig);
+                        resourceResponse(responseOut, search, searchRef, resource);
+                    } else {
+                        responseOut.setResponseText("Unhandled search param code in list resource transform.");
+                        responseOut.setResponseContentType("text/plain");
+                        responseOut.setStatus(500);
+                    }
                 }
             } else /* HTTP Verb GET resource by ID */ {
                 if (sender.getContents().size() == 1 && requestedType != null) {
@@ -590,9 +607,15 @@ public class XdsOnFhirChannel extends BaseChannel /*implements IBaseChannel*/ {
                 } else if (requestedType != null && requestedType.equals("DocumentManifest")) {
                     BaseResource fhirResource = MhdTransforms.ssToDocumentManifest(getCodeTranslator(), getExternalCache(), sender, channelConfig);
                     responseResourceGet(responseOut, fhirResource);
-                } else if (requestedType.equals(MhdTransforms.SubmissionSetMhdListResourceName)) {
-                    BaseResource fhirResource = MhdTransforms.ssToListResource(getCodeTranslator(), getExternalCache(), sender, channelConfig);
-                    responseResourceGet(responseOut, fhirResource);
+                } else if (requestedType.equals(MhdTransforms.MhdListResourceName)) {
+                    if (IdBuilder.isOpaqueLogicalId(IdBuilder.SS_OPAQUE_ID, searchRef.getId())) {
+                        BaseResource fhirResource = MhdTransforms.ssToListResource(getCodeTranslator(), getExternalCache(), sender, channelConfig);
+                        responseResourceGet(responseOut, fhirResource);
+                    } else {
+                        responseOut.setResponseContentType(returnFormatType.getContentType());
+                        responseOut.setResponseText("MhdListResource URL is malformed.");
+                        responseOut.setStatus(500);
+                    }
                 } else { // no contents
                      responseOut.setResponseContentType(returnFormatType.getContentType());
                      responseOut.setStatus(404);
@@ -737,13 +760,14 @@ public class XdsOnFhirChannel extends BaseChannel /*implements IBaseChannel*/ {
                         }
                     }
                 } else {
-                    String resourceName = resource.getClass().getSimpleName();
-                    if ("ListResource".equals(resource.getClass().getSimpleName())) {
-                        if (MhdV4.isSubmissionSetListType(resource)) {
-                           resourceName = MhdTransforms.SubmissionSetMhdListResourceName;
+                    String resourceName = resource.fhirType();
+                    String logicalId = submittedObject.getUid();
+                    if (MhdTransforms.MhdListResourceName.equals(resourceName)) {
+                        if (MhdV4.isCodedListType(resource, "submissionset")) {
+                            logicalId = IdBuilder.makeOpaqueLogicalId(IdBuilder.SS_OPAQUE_ID, logicalId);
                         }
                     }
-                    String url = proxyBase + "/" + resourceName + "/" + submittedObject.getUid();
+                    String url = proxyBase + "/" + resourceName + "/" + logicalId;
                     responseComponent.setLocation(url);
                 }
             }

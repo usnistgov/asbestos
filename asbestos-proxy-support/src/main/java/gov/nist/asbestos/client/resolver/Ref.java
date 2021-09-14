@@ -636,7 +636,6 @@ public class Ref {
             "Consent",
             "Composition",
             "DocumentManifest",
-            "SubmissionSetMhdList",
             "DocumentReference",
             "CatalogEntry",
             "Basic",

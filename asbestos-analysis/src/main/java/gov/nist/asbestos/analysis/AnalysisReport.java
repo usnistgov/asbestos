@@ -8,6 +8,7 @@ import gov.nist.asbestos.client.client.Format;
 import gov.nist.asbestos.client.reporting.IErrorReporter;
 import gov.nist.asbestos.client.resolver.ChannelUrl;
 import gov.nist.asbestos.client.resolver.FhirPath;
+import gov.nist.asbestos.client.resolver.IdBuilder;
 import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import gov.nist.asbestos.http.headers.Headers;
@@ -605,10 +606,13 @@ public class AnalysisReport {
             Bundle.BundleEntryResponseComponent bundleEntryResponseComponent = bundleEntryComponent.getResponse();
             String location = bundleEntryResponseComponent.getLocation();
             if (!Strings.isNullOrEmpty(location)) {
-                if (location.contains("DocumentManifest") || location.contains(MhdTransforms.SubmissionSetMhdListResourceName))
+                if (location.contains("DocumentManifest")
+                        || (location.contains(String.format("/%s/",MhdTransforms.MhdListResourceName))
+                            && IdBuilder.isOpaqueLogicalId(IdBuilder.SS_OPAQUE_ID, new Ref(location).getId()) ))
                     return new Ref(location);
             }
         }
+        log.error("No submissionset counterpart found in response.");
         return null;
     }
 
@@ -616,7 +620,7 @@ public class AnalysisReport {
         for (Bundle.BundleEntryComponent bundleEntryComponent : bundle.getEntry()) {
             Resource componentResource = bundleEntryComponent.getResource();
             if (componentResource instanceof DocumentManifest
-                    || (componentResource instanceof ListResource && MhdV4.isSubmissionSetListType(componentResource))) {
+                    || (componentResource instanceof ListResource && MhdV4.isCodedListType(componentResource, "submissionset"))) {
                 ResourceWrapper wrapper = new ResourceWrapper(componentResource);
                 String fullUrl = bundleEntryComponent.getFullUrl();
                 if (!Strings.isNullOrEmpty(fullUrl)) {
@@ -635,6 +639,7 @@ public class AnalysisReport {
                 return wrapper;
             }
         }
+        log.error("No submissionset counterpart found in request");
         return null;
     }
 
@@ -711,10 +716,12 @@ public class AnalysisReport {
     private void buildListingFromContext(Bundle bundle, String howRelated) {
         for (Bundle.BundleEntryComponent comp : bundle.getEntry()) {
             Resource resource = comp.getResource();
-            ResourceWrapper wrapper = new ResourceWrapper(resource).setRef(new Ref(resource.getId())).setContext(getContextBundle());
-            if (baseObj == null)
-                baseObj = wrapper;
-            related.add(new Related(wrapper, howRelated));
+            if (resource != null) {
+                ResourceWrapper wrapper = new ResourceWrapper(resource).setRef(new Ref(resource.getId())).setContext(getContextBundle());
+                if (baseObj == null)
+                    baseObj = wrapper;
+                related.add(new Related(wrapper, howRelated));
+            }
         }
     }
 

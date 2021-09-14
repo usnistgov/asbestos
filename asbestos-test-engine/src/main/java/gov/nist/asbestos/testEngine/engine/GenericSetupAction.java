@@ -164,7 +164,7 @@ abstract class GenericSetupAction {
             }
 
             if (wrapper.hasResource()) {
-                String receivedResourceType = wrapper.getResource().getClass().getSimpleName();
+                String receivedResourceType = wrapper.getResource().fhirType();
                 String expectedResourceType = resourceTypeToBeReturned();
                 if (expectedResourceType != null && !receivedResourceType.equals(expectedResourceType)) {
                     reporter.reportError("Expected resource of type " + expectedResourceType + " received " + receivedResourceType + " instead");

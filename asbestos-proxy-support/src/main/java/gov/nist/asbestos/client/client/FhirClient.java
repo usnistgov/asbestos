@@ -211,7 +211,7 @@ public class FhirClient {
 //        } else {
             Ref ref = new Ref(getter.getUri());
             String expectedResourceType = ref.getResourceType();
-            String returnedResourceType = resource.getClass().getSimpleName();
+            String returnedResourceType = resource.fhirType();
             if (expectedResourceType != null && !expectedResourceType.equals("")) {
                 if (!returnedResourceType.equals("OperationOutcome")) {
                     if (!expectedResourceType.equals("metadata") && !returnedResourceType.equals("CapabilityStatement")) {
@@ -225,9 +225,9 @@ public class FhirClient {
                                     if (!getter.isSearch())
                                         resource = bundle.getEntry().get(0).getResource();
                                 }
-                            } else if ("SubmissionSetMhdList".equals(expectedResourceType) && "ListResource".equals(returnedResourceType)) {
-                                /* OK */
-                            } else {
+                            } /* else if ("SubmissionSetMhdList".equals(expectedResourceType) && "ListResource".equals(returnedResourceType)) {
+                                // OK
+                            } */ else {
                                 /* Unknown Mismatch types */
                                 throw new Error("Read must return " + expectedResourceType + " - received " + returnedResourceType + " instead");
                             }

@@ -29,7 +29,7 @@ public class DocManSQParamTranslator {
         return result;
     }
 
-    List<String> parseParms(String parmString) {
+    public static List<String> parseParms(String parmString) {
         List<String> delimiters = Arrays.asList("&",";");
         final List<String> params = new ArrayList<>();
         delimiters.stream().forEach(s -> {

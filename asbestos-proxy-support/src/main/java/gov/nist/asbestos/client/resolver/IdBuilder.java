@@ -22,10 +22,26 @@ import java.util.Optional;
  */
 public class IdBuilder {
     private boolean override = false;
+    public static String SS_OPAQUE_ID = "3bdd";
+    public static String FOLDER_OPAQUE_ID = "94c2";
 
     public IdBuilder(boolean override) {
         this.override = override;
     }
+
+    public static String makeOpaqueLogicalId(String opaqueIdPrefix, String logicalId) {
+        // Make logical ID opaque using the last parts of submission set classification node urn
+        return String.format("%s.%s", opaqueIdPrefix, logicalId);
+    }
+
+    public static boolean isOpaqueLogicalId(String opaqueIdPrefix, String uid) {
+        return uid.startsWith(opaqueIdPrefix);
+    }
+
+    public static String stripPrefix(String ssOpaqueIdPrefix, String uid) {
+        return uid.replaceFirst(String.format("%s\\.",ssOpaqueIdPrefix), "");
+    }
+
 
     public String allocate(String defaultValue) {
         if (!override)
@@ -84,6 +100,7 @@ public class IdBuilder {
                         && "urn:ietf:rfc:3986".equals(e.getSystem()))
                 .findFirst();
     }
+
 
 
 }

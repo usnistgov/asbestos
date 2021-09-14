@@ -45,7 +45,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class MhdTransforms {
-    public static String SubmissionSetMhdListResourceName = "SubmissionSetMhdList";
+    public static String MhdListResourceName = "List";
     private ResourceMgr rMgr;
     private Val val;
     private ITask task = null;

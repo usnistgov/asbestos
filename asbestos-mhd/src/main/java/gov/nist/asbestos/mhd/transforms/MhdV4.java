@@ -1,32 +1,21 @@
 package gov.nist.asbestos.mhd.transforms;
 
 import gov.nist.asbestos.client.channel.ChannelConfig;
-import gov.nist.asbestos.client.client.FhirClient;
 import gov.nist.asbestos.client.resolver.IdBuilder;
 import gov.nist.asbestos.client.resolver.Ref;
-import gov.nist.asbestos.client.resolver.ResourceCacheMgr;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import gov.nist.asbestos.mhd.channel.MhdProfileVersionInterface;
 import gov.nist.asbestos.mhd.channel.MhdVersionEnum;
-import gov.nist.asbestos.mhd.transactionSupport.AhqrSender;
 import gov.nist.asbestos.mhd.transactionSupport.AssigningAuthorities;
 import gov.nist.asbestos.mhd.transactionSupport.CodeTranslator;
-import gov.nist.asbestos.mhd.translation.ContainedIdAllocator;
 import gov.nist.asbestos.mhd.util.Utils;
 import gov.nist.asbestos.simapi.validation.Val;
 import gov.nist.asbestos.simapi.validation.ValE;
-import oasis.names.tc.ebxml_regrep.xsd.rim._3.AssociationType1;
-import oasis.names.tc.ebxml_regrep.xsd.rim._3.ClassificationType;
-import oasis.names.tc.ebxml_regrep.xsd.rim._3.ExtrinsicObjectType;
-import oasis.names.tc.ebxml_regrep.xsd.rim._3.IdentifiableType;
 import oasis.names.tc.ebxml_regrep.xsd.rim._3.RegistryPackageType;
 import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.codesystems.ListMode;
-import org.jetbrains.annotations.NotNull;
 
-import java.io.File;
 import java.util.AbstractMap;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -174,7 +163,7 @@ public class MhdV4 implements MhdProfileVersionInterface {
                 "Transformation task: Transforming List to SubmissionSet.)" +
                 "https://profiles.ihe.net/ITI/MHD/ITI-65.html#23654131-grouping-with-actors-in-other-document-sharing-profiles");
 
-        if (isSubmissionSetListType(resource)) {
+        if (isCodedListType(resource, "submissionset")) {
             return createSubmissionSet(idBuilder, wrapper, vale, channelConfig, codeTranslator, assigningAuthorities);
         }
 
@@ -184,10 +173,9 @@ public class MhdV4 implements MhdProfileVersionInterface {
     /**
      * Use discriminator to find if SS or Folder
     */
-    public static boolean isSubmissionSetListType(BaseResource resource) {
+    public static boolean isCodedListType(BaseResource resource, String code) {
         if (resource instanceof ListResource) {
             ListResource listResource = (ListResource)resource;
-            String code = "submissionset";
             String system = listTypeMap.get(code);
             if (listResource.getCode().hasCoding(system, code)) {
                 if (listResource.getCode().getCoding().stream().filter(e -> system.equals(e.getSystem()) && code.equals(e.getCode())).count() == 1) {
