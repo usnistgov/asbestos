@@ -50,6 +50,11 @@ public class GetClientEventEvalRequest {
         SimId simId = SimId.buildFromRawId(channelName);
         String testSession = simId.getTestSession().getValue();
         File eventFile = request.ec.getEvent(simId, eventId);
+        if (eventFile == null) {
+            log.error(String.format("EventId %s not found for %s", eventId, simId.toString()));
+            request.notFound();
+            return;
+        }
         Event event = new Event(eventFile);
 
         GetClientTestEvalRequest getClientTestEvalRequest = new GetClientTestEvalRequest(request);

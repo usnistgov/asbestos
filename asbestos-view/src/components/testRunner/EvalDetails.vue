@@ -43,7 +43,7 @@
 
         </div>
         <div v-else>
-            Not Available
+            EvalDetails Not Available
         </div>
     </div>
 </template>
@@ -178,7 +178,7 @@
             },
             testReports() {  // see watch of the same name
                 return this.$store.state.testRunner.testReports[this.testId]
-            }
+            },
         },
         created() {
            this.testOrEventUpdated()

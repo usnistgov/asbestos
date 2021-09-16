@@ -606,10 +606,28 @@ public class AnalysisReport {
             Bundle.BundleEntryResponseComponent bundleEntryResponseComponent = bundleEntryComponent.getResponse();
             String location = bundleEntryResponseComponent.getLocation();
             if (!Strings.isNullOrEmpty(location)) {
-                if (location.contains("DocumentManifest")
-                        || (location.contains(String.format("/%s/",MhdTransforms.MhdListResourceName))
-                            && IdBuilder.isOpaqueLogicalId(IdBuilder.SS_OPAQUE_ID, new Ref(location).getId()) ))
+                if (location.contains("DocumentManifest")) {
                     return new Ref(location);
+                } else if (location.contains(String.format("/%s/",MhdTransforms.MhdListResourceName))) {
+                    Ref ref = new Ref(location);
+                    String localBase = ServiceProperties.getInstance().getPropertyOrStop(ServicePropertiesEnum.FHIR_TOOLKIT_BASE);
+                    if (ref.getBase().toString().startsWith(localBase)) {
+                        // This opaque Id convention only applies to local channels
+                        if (IdBuilder.isOpaqueLogicalId(IdBuilder.SS_OPAQUE_ID, ref.getId())) {
+                            return ref;
+                        }
+                    } else {
+                        // May be an external system response, need to GET to differentiate if list is of submissionset type
+                        ResourceWrapper resourceWrapper = new ResourceWrapper(ref);
+                        BaseResource baseResource = resourceWrapper.getResource();
+                        if (baseResource != null) {
+                            if (baseResource instanceof ListResource && MhdV4.isCodedListType(baseResource, "submissionset") ) {
+                               return ref;
+                            }
+                        }
+                    }
+                }
+
             }
         }
         log.error("No submissionset counterpart found in response.");
@@ -821,7 +839,7 @@ public class AnalysisReport {
 
     private void buildRelated() {
         if (baseObj == null && contextResourceBundle != null) {
-            generalErrors.add("No content is available for display.");
+            generalErrors.add("No content is available for display. Check if FHIR submissionset counterpart resource exists in bundle.");
             plainListing((Bundle) contextResourceBundle.getResource());
             return;
         }

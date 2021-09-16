@@ -8,7 +8,6 @@ import gov.nist.asbestos.client.log.SimStore;
 import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import gov.nist.asbestos.simapi.simCommon.SimId;
-import gov.nist.asbestos.simapi.tk.siteManagement.SeparateSiteLoader;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.log4j.Logger;
 import org.hl7.fhir.common.hapi.validation.support.PrePopulatedValidationSupport;

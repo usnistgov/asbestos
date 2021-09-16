@@ -102,7 +102,15 @@
                                 title="Open Inspector in a new browser tab"></a>
                     </template>
                     <template v-else>
-                       <span v-bind:class="{
+                        <select size="1" v-model="pdbValMhdVersion">
+                            <option :key="eKey"
+                                    :value="e"
+                                    v-for="(e,eKey) in $store.state.channel.mhdVersions">
+                                {{ e }}
+                            </option>
+                        </select>
+
+                        <span v-bind:class="{
                          selected: displayValidations,
                          'not-selected': !displayValidations
                          }" @click="displayRequest = false; displayResponse = false; displayInspector = false; displayValidations = true">
@@ -152,7 +160,7 @@
                         :session-id="sessionId"
                         :channel-name="channelName"
                         :event-id="eventId"
-                        :test-id="'bundle_eval'"
+                        :test-id="bundleEvalMhdVersion"
                         :test-collection="'Internal'"
                         :run-eval="true"
                         :no-inspect-label="true"
@@ -181,6 +189,8 @@
                 inspectType: (this.modalMode===undefined)?'request':this.modalMode,
                 allEnabled: false,
                 isLoading: false,
+                defaultMhdVersion: 'MHDv3.x',
+                pdbValMhdVersion: this.firstSupportedMhdVersion,
             }
         },
         methods: {
@@ -348,6 +358,18 @@
                 }
                 const url = FHIRTOOLKITBASEURL + '/log/' + this.sessionId + '/' + this.channelName + '/' + summary.resourceType + '/' + this.eventId + '?textMode=raw'
                 return url
+            },
+            firstSupportedMhdVersion() {
+                if (this.$store.state.channel.mhdVersions.length == 1)
+                    return this.$store.state.channel.mhdVersions[0]
+                else
+                    return '' // Let user select
+            },
+            bundleEvalMhdVersion() {
+                if (this.pdbValMhdVersion !== this.defaultMhdVersion)
+                    return 'bundle_eval' + this.pdbValMhdVersion
+                else
+                    return 'bundle_eval'
             }
         },
         created() {
@@ -384,7 +406,7 @@
             },
         },
         props: [
-            'eventId', 'sessionId', 'channelName', 'noNav', 'reqresp', 'modalMode'
+            'eventId', 'sessionId', 'channelName', 'noNav', 'reqresp', 'modalMode',
         ],
         mixins: [eventMixin, errorHandlerMixin],
         components: {
