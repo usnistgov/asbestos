@@ -1,6 +1,9 @@
 package gov.nist.asbestos.services.restRequests;
 
 import gov.nist.asbestos.client.Base.Request;
+import gov.nist.asbestos.client.client.Format;
+import gov.nist.asbestos.client.events.Event;
+import gov.nist.asbestos.client.events.ITask;
 import gov.nist.asbestos.client.events.UITask;
 import gov.nist.asbestos.http.headers.Header;
 import gov.nist.asbestos.http.headers.Headers;
@@ -12,6 +15,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.Objects;
 
 // 0 - empty
 // 1 - app context  (asbestos)
@@ -90,7 +94,7 @@ public class GetEventRequest {
             File taskDir = new File(theEvent, "task" + task);
             if (!taskDir.exists())
                 break;
-            displayEvent(b, theEvent, "Task" + task);
+            displayEvent(b, theEvent, "Task" ,  task);
         }
 
         b.append("</body></html>");
@@ -98,7 +102,21 @@ public class GetEventRequest {
         resp.getOutputStream().write(b.toString().getBytes());
     }
 
-    private void displayEvent(StringBuilder b, File theEvent, String label) {
+    private void displayEvent(StringBuilder b, File theEvent, String labelPrefix, int taskIndex ) {
+        String label = labelPrefix + taskIndex;
+        Format format = null;
+        try {
+            Event e = new Event(theEvent);
+            ITask task = e.getTask(taskIndex);
+            if (task != null) {
+                String headerValue = task.getRequestHeader().getContentType().getAllValuesAndParmsAsString();
+                if (!headerValue.toLowerCase().contains("json")) {
+                    format = Format.fromContentType(headerValue); // Sniff xml
+                }
+            }
+        } catch (Exception ex) {
+            log.error("displayEvent Exception: " + ex.toString());
+        }
         String section = label.toLowerCase();
         b.append("<h2>").append(label).append("</h2>");
         UITask uiTask = new UITask(theEvent, section, rawTextMode);
@@ -109,10 +127,23 @@ public class GetEventRequest {
         }
         b.append("<h3>Request</h3>");
         b.append("<pre>").append(uiTask.getRequestHeader()).append("</pre>");
-        b.append("<pre>").append(uiTask.getRequestBody()).append("</pre>");
+        if (format != null && format == Format.XML) {
+            b.append("<pre>").append(quickEscape(uiTask.getRequestBody())).append("</pre>");
+        } else {
+            b.append("<pre>").append(uiTask.getRequestBody()).append("</pre>");
+        }
 
         b.append("<h3>Response</h3>");
         b.append("<pre>").append(uiTask.getResponseHeader()).append("</pre>");
-        b.append("<pre>").append(uiTask.getResponseBody()).append("</pre>");
+        if (format != null && format == Format.XML) {
+            b.append("<pre>").append(quickEscape(uiTask.getResponseBody())).append("</pre>");
+        } else {
+            b.append("<pre>").append(uiTask.getResponseBody()).append("</pre>");
+        }
+    }
+
+    private static String quickEscape(String in) {
+        Objects.requireNonNull(in);
+        return in.replaceAll("<","&lt;");
     }
 }

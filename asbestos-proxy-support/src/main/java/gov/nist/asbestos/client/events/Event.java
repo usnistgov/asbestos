@@ -112,6 +112,13 @@ public class Event implements Comparable<Event> {
         return new File(eventDir, "task" + i);
     }
 
+    public ITask getTask(int i) {
+        if (i < tasks.size())
+            return tasks.get(i);
+        else
+            return null;
+    }
+
 
     public int getTaskCount() {
         return taskFiles.size();
