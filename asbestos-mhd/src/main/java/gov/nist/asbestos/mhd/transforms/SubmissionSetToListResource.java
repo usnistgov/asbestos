@@ -2,6 +2,7 @@ package gov.nist.asbestos.mhd.transforms;
 
 import gov.nist.asbestos.client.channel.ChannelConfig;
 import gov.nist.asbestos.client.client.FhirClient;
+import gov.nist.asbestos.client.resolver.IdBuilder;
 import gov.nist.asbestos.client.resolver.ResourceCacheMgr;
 import gov.nist.asbestos.mhd.exceptions.MetadataAttributeTranslationException;
 import gov.nist.asbestos.mhd.transactionSupport.CodeTranslator;
@@ -50,7 +51,6 @@ public class SubmissionSetToListResource {
         String id = null;
         if (ss.getId() != null) {
             id = ss.getId();
-            listResource.setId(Utils.stripUrnPrefixes(ss.getId()));
             Identifier idr = new Identifier();
             idr.setSystem(MhdTransforms.URN_IETF_RFC_3986);
             idr.setValue(ss.getId());
@@ -72,6 +72,10 @@ public class SubmissionSetToListResource {
                     reference.ifPresent(listResource::setSubject);
                 }
             } else if ("urn:uuid:96fdda7c-d067-4183-912e-bf5ee74998a8".equals(scheme)) {
+                // Derive logicalId from the USUAL id to overcome differentiation problem with a GET request
+                String logicalId = IdBuilder.makeOpaqueLogicalId(IdBuilder.SS_OPAQUE_ID, Utils.stripUrnPrefixes(ei.getValue()));
+                listResource.setId(logicalId);
+
                 // Unique ID
                 Identifier idr = new Identifier();
                 idr.setSystem("urn:ietf:rfc:3986");
