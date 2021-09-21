@@ -23,7 +23,7 @@ public class LoadPatientIT {
     @Test
     void nonZip() throws URISyntaxException, IOException {
         String url = "http://localhost:" + proxyPort + "/asbestos/engine/"
-                + "testrun/default__default/Test_Patients/Mickey_Mouse?_gzip=false";
+                + "testrun/default__default/IT_Test_Patients/Mickey_Mouse?_gzip=false";
 
         HttpPost poster = new HttpPost();
         poster.postJson(new URI(url), null);
@@ -41,7 +41,7 @@ public class LoadPatientIT {
     @Test
     void zip() throws URISyntaxException, IOException {
         String url = "http://localhost:" + proxyPort + "/asbestos/engine/"
-                + "testrun/default__default/Test_Patients/Mickey_Mouse?_gzip=true";
+                + "testrun/default__default/IT_Test_Patients/Mickey_Mouse?_gzip=true";
 
         HttpPost poster = new HttpPost();
         poster.postJson(new URI(url), null);
