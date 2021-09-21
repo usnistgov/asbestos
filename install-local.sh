@@ -92,11 +92,14 @@ rm -f ../xdstools.war
 # XdsToolkit/conf/toolkit.properties is the default
 # cp $DEVELOP/asbestos/asbestos-assembly/src/main/assembly/toolkit.properties $INSTALL/tomcat/Toolkits/XdsToolkit/webapps/xdstools/WEB-INF/classes
 
-echo "INSTALL HAPI"
-cp $DEVELOP/fhir.zip $INSTALL/tomcat/Toolkits/XdsToolkit/webapps
-cd $INSTALL/tomcat/Toolkits/XdsToolkit/webapps
-unzip -qq fhir.zip
-echo "REMOVE FHIR.ZIP"
-rm -f fhir.zip
+# v2.2.0 require HAPI FHIR v5.4.0 ROOT war in the HapiFhir Tomcat base
+
+# Enable this only for pre-v2.2.0 releases
+#echo "INSTALL HAPI"
+#cp $DEVELOP/fhir.zip $INSTALL/tomcat/Toolkits/XdsToolkit/webapps
+#cd $INSTALL/tomcat/Toolkits/XdsToolkit/webapps
+#unzip -qq fhir.zip
+#echo "REMOVE FHIR.ZIP"
+#rm -f fhir.zip
 echo "DONE"
 
