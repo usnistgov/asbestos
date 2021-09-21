@@ -9,11 +9,7 @@
     <name value="PDBFails"/>
     <status value="active"/>
 
-    <variable>
-      <name value="manifestMasterIdentifier"/>
-      <expression value="Bundle.entry.select(resource as DocumentManifest).masterIdentifier.value"/>
-      <sourceId value="pdb-bundle"/>
-    </variable>
+
     <variable>
       <name value="referenceMasterIdentifier"/>
       <expression value="Bundle.entry.select(resource as DocumentReference).masterIdentifier.value"/>
