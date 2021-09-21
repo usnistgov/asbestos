@@ -1,6 +1,7 @@
 package gov.nist.asbestos.services.restRequests;
 
 import gov.nist.asbestos.client.Base.Dirs;
+import gov.nist.asbestos.client.Base.EC;
 import gov.nist.asbestos.client.Base.Request;
 import org.apache.log4j.Logger;
 
@@ -8,8 +9,8 @@ import java.io.File;
 import java.util.List;
 // 0 - empty
 // 1 - app context
-// 2 - "channel"
-// 3 - "sessionNames"
+// 2 - "rw"
+// 3 - "testSession"
 // Return list of TestSession IDs
 
 public class GetSessionNamesRequest {
@@ -18,7 +19,7 @@ public class GetSessionNamesRequest {
     private Request request;
 
     public static boolean isRequest(Request request) {
-        return request.uriParts.size() == 4 && "sessionNames".equalsIgnoreCase(request.uriParts.get(3));
+        return request.uriParts.size() == 4 && "testSession".equalsIgnoreCase(request.uriParts.get(3));
     }
 
     public GetSessionNamesRequest(Request request) {
@@ -27,8 +28,12 @@ public class GetSessionNamesRequest {
 
     public void run()  {
         request.announce("GetSessionNames");
-        List<String> names = Dirs.dirListingAsStringList(new File(request.externalCache, "FhirSessions"));
+        List<String> names = getSessionNames(request.externalCache);
         request.returnList(names);
         request.ok();
+    }
+
+    public static List<String> getSessionNames(File externalCache) {
+        return Dirs.dirListingAsStringList(EC.ftkSessionsDir(externalCache));
     }
 }

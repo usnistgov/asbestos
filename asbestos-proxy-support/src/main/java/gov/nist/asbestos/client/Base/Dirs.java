@@ -4,11 +4,16 @@ import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class Dirs {
+
+    public static void softDelete(File srcDir, File dstDir) throws IOException {
+        FileUtils.moveDirectoryToDirectory(srcDir, dstDir, true);
+    }
 
     static public void deleteDir(File dir) throws IOException {
         FileUtils.deleteDirectory(dir);

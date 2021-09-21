@@ -45,6 +45,9 @@ export const testRunnerStore = {
             statusRight: false,
             hapiFhirBase: null,
             autoRoute: false,
+
+            ftkTestDependencies: {},
+            nonCurrentTcTestReports: {},
         }
     },
     mutations: {
@@ -113,8 +116,15 @@ export const testRunnerStore = {
             state.currentAssertIndex = index
         },
         clearTestReports(state) {
-            state.testReports = {}
-            state.moduleTestReports = {}
+            let keys = Object.keys(state.testReports)
+            for (const k of keys) {
+                Vue.delete(state.testReports, k)
+            }
+            keys = Object.keys(state.moduleTestReports)
+            for (const k of keys) {
+                Vue.delete(state.moduleTestReports, k)
+            }
+
         },
         clearTestReport(state, testNameToRemove) {
             if (state.testReports !== null && state.testReports !== undefined && Array.isArray(state.testReports) && state.testReports.length > 0) {
@@ -140,8 +150,14 @@ export const testRunnerStore = {
             state.testReports = reports
         },
         clearTestScripts(state) {
-            state.testScripts = {}
-            state.moduleTestReports = {}
+            let keys = Object.keys(state.testScripts)
+            for (const k of keys) {
+                Vue.delete(state.testScripts, k)
+            }
+            keys = Object.keys(state.moduleTestReports)
+            for (const k of keys) {
+                Vue.delete(state.moduleTestReports, k)
+            }
         },
         setTestScript(state, script) {
             Vue.set(state.testScripts, script.name, script)
@@ -192,6 +208,12 @@ export const testRunnerStore = {
         setClientTestResult(state, parms) {     // { testId: testId, result: result }
             Vue.set(state.clientTestResult, parms.testId, parms.reports)
         },
+        addTestArtifactDependency(state, paramObj) {
+            Vue.set(state.ftkTestDependencies, paramObj.testArtifactId, paramObj.depTaIds)
+        },
+        addNonCurrentTcTestReport(state, paramObj) {
+            Vue.set(state.nonCurrentTcTestReports, paramObj.testArtifactId, paramObj.testReport)
+        },
     },
     getters: {
         testReportNames(state) {
@@ -240,12 +262,14 @@ export const testRunnerStore = {
         },
     },
     actions: {
+        /*
         async loadHapiFhirBase({commit}) {
             if (this.hapiFhirBase !== null)
                 return;
             const result = await ENGINE.get('hapiFhirBase');
             commit('setHapiFhirBase', result.data);
         },
+         */
         loadTestAssertions({commit}) {
             const url = `assertions`
             ENGINE.get(url)
@@ -257,7 +281,7 @@ export const testRunnerStore = {
                 })
         },
         runEval({commit, state, rootState}, testId) {
-            const url = `clienteval/${rootState.base.session}__${rootState.base.channelName}/${state.eventEvalCount}/${state.currentTestCollectionName}/${testId}`
+            const url = `clienteval/${rootState.base.channel.testSession}__${rootState.base.channel.channelName}/${state.eventEvalCount}/${state.currentTestCollectionName}/${testId}`
             ENGINE.get(url)
                 .then(response => {
                     const reports = response.data
@@ -271,7 +295,7 @@ export const testRunnerStore = {
             const testId = parms.testId
             const eventId = parms.eventId
             const testCollectionName = parms.testCollectionName
-            const url = `clienteventeval/${rootState.base.session}__${rootState.base.channelName}/${testCollectionName}/${testId}/${eventId}`
+            const url = `clienteventeval/${rootState.base.channel.testSession}__${rootState.base.channel.channelName}/${testCollectionName}/${testId}/${eventId}`
             ENGINE.get(url)
                 .then(response => {
                     const results = response.data
@@ -298,7 +322,7 @@ export const testRunnerStore = {
                 .then(results => {
                     results.forEach(result => {
                         const scriptData = result.data
-                        if (scriptData) {
+                        if (scriptData !== null && scriptData !== undefined) {
                             for (let testName in scriptData) {
                                 const script = scriptData[testName]
                                 if (testName.includes('/'))
@@ -312,11 +336,76 @@ export const testRunnerStore = {
                     commit('setModuleTestScripts', moduleScripts)
                 })
         },
+        async loadNonCurrentTcTestReports({commit, rootState, state}) {
+            //  begin dependencies part
+            const ftkTestDepKeys = Object.keys(state.ftkTestDependencies)
+            if (ftkTestDepKeys.length) {
+                const testCollectionId = state.currentTestCollectionName
+                // Only deal with current test collection but load its non-current test collection dependencies
+                const currentTestCollectionDependencies = ftkTestDepKeys.filter(e => e.startsWith(testCollectionId))
+                if (currentTestCollectionDependencies.length) {
+                    // if index of tc separator is true, use testReport/, else use tclogs/
+                   for (const testArtifactId of currentTestCollectionDependencies) {
+                       // Only cache non-current test collection test reports
+                       if (testArtifactId.startsWith(testCollectionId))
+                         continue
+                      if (testArtifactId.endsWith("/")) {
+                          const tcId = testArtifactId.slice(0,-1)
+                          const tcLogsUrl = `tclogs/${rootState.base.channel.testSession}__${rootState.base.channel.channelName}/${tcId}`
+                          ENGINE.get(tcLogsUrl)
+                              .then(result => {
+                                  const trArray = result.data
+                                  if (Array.isArray(trArray) && trArray.length) {
+                                      for (let idx = 0; idx < trArray.length; idx++) {
+                                          const trObj = trArray[idx]
+                                          try {
+                                              if (trObj.TestReport.resourceType === 'TestReport') {
+                                                  commit('addNonCurrentTcTestReport', {
+                                                      testArtifactId: testArtifactId + trObj.TestReport.name,
+                                                      testReport: trObj.TestReport
+                                                  })
+                                              }
+                                          } catch  {
+                                             console.log(`tclogs entry index ${idx} in ${tcId} does not contain a TestReport.`)
+                                          }
+                                      }
+                                  }
+                              })
+                              .catch(function(error) {
+                                  commit('setError', `Loading non-current test collection test reports for ${tcId} using tclogs failed: ${error}`)
+                              })
+
+                      } else if (testArtifactId.includes("/")) {
+                          const parts = testArtifactId.split("/",2)
+                          const tcId = parts[0]
+                          const testName = parts[1]
+                          const url = `testReport/${rootState.base.channel.testSession}__${rootState.base.channel.channelName}/${tcId}/${testName}`
+                          ENGINE.get(url)
+                              .then(result => {
+                                  const trObjs = result.data
+                                  const theTr = trObjs[testName]
+                                  if (theTr !== undefined || theTr !== null) {
+                                      commit('addNonCurrentTcTestReport', {testArtifactId: testArtifactId, testReport: theTr})
+                                  } else {
+                                      console.log('testArtifact theTr is not usable.')
+                                  }
+                              })
+                              .catch(function(error) {
+                                  commit('setError', `Loading non-current test collection test reports for ${testArtifactId} using testReport failed: ${error}`)
+                              })
+                      }
+                   }
+                    // create new state.interDependentTestReports
+                    // use a new computed property to check both the state.testReports and state.interDependentTestReports
+                }
+            }
+            // end.
+        },
         async loadTestReports({commit, rootState, state}, testCollectionId) {
             commit('clearTestReports')
             const promises = []
             state.testScriptNames.forEach(name => {
-                const url = `testReport/${rootState.base.session}__${rootState.base.channelName}/${testCollectionId}/${name}`
+                const url = `testReport/${rootState.base.channel.testSession}__${rootState.base.channel.channelName}/${testCollectionId}/${name}`
                 const promise = ENGINE.get(url)
                 promises.push(promise)
             })
@@ -337,7 +426,7 @@ export const testRunnerStore = {
         async loadTestReport({commit, rootState}, parms) {
             const testCollectionId = parms.testCollectionId
             const testId = parms.testId
-            const url = `testReport/${rootState.base.session}__${rootState.base.channelName}/${testCollectionId}/${testId}`
+            const url = `testReport/${rootState.base.channel.testSession}__${rootState.base.channel.channelName}/${testCollectionId}/${testId}`
             let report = ""
             const promise = ENGINE.get(url)
             promise.then(result => {
@@ -366,7 +455,7 @@ export const testRunnerStore = {
         runTest({commit, rootState, state}, testId) {
            // console.log(`run ${testId}`)
             //commit('setCurrentTest', testId)
-            const url = `testrun/${rootState.base.session}__${rootState.base.channelName}/${state.currentTestCollectionName}/${testId}?_format=${state.useJson ? 'json' : 'xml'};_gzip=${state.useGzip}`
+            const url = `testrun/${rootState.base.channel.testSession}__${rootState.base.channel.channelName}/${state.currentTestCollectionName}/${testId}?_format=${state.useJson ? 'json' : 'xml'};_gzip=${state.useGzip}`
             const promise = ENGINE.post(url)
             promise.then(result => {
                 const reports = result.data
@@ -377,20 +466,27 @@ export const testRunnerStore = {
         async loadTestCollectionNames({commit}) {
             const url = `collections`
             try {
-                const response = await ENGINE.get(url)
-                commit('testCollectionsLoaded')  // startup heartbeat for test engine
-                let clientTestNames = []
-                let serverTestNames = []
-                response.data.forEach(collection => {
-                    if (!collection.hidden) {
-                        if (collection.server)
-                            serverTestNames.push(collection.name)
-                        else
-                            clientTestNames.push(collection.name)
-                    }
+                ENGINE.get(url)
+                    .then(response => {
+                        commit('testCollectionsLoaded')  // startup heartbeat for test engine
+                        let clientTestNames = []
+                        let serverTestNames = []
+                        response.data.forEach(collection => {
+                            if (!collection.hidden) {
+                                if (collection.server)
+                                    serverTestNames.push(collection.name)
+                                else
+                                    clientTestNames.push(collection.name)
+                            }
+                        })
+                        commit('setClientTestCollectionNames', clientTestNames.sort())
+                        commit('setServerTestCollectionNames', serverTestNames.sort())
+                    })
+                .catch(function (error) {
+                    commit('setError', url + ': ' + error)
+                    console.error(`${error} for ${url}`)
                 })
-                commit('setClientTestCollectionNames', clientTestNames.sort())
-                commit('setServerTestCollectionNames', serverTestNames.sort())
+
             } catch (error) {
                 this.$store.commit('setError', url + ': ' +  error)
             }
@@ -417,11 +513,21 @@ export const testRunnerStore = {
                     const isClient =  ! theResponse.isServerTest
                     commit('setIsClientTest', isClient)   // sets isClientTest
                 }
+                if ('testDependencies' in theResponse) {
+                    // NOTE: this simply overwrites existing entries, should be OK to clear the testDependencies data if needed
+                    for (let testArtifactId in theResponse.testDependencies) {
+                        const val = theResponse.testDependencies[testArtifactId]
+                        if (Array.isArray(val)) {
+                            commit('addTestArtifactDependency', {testArtifactId: testArtifactId, depTaIds: val})
+                        }
+                    }
+                }
 
             } catch (error) {
                 commit('setError', ENGINE.baseURL + url + ': ' + error)
             }
         },
+        /* TODO: does not seem to be used anywhere.
         // this exists because loadCurrentTestCollection updates currentTestCollectionName
         // which causes TestControlPanel2 to auto-route to test display
         // this was first used for self tests.
@@ -445,6 +551,7 @@ export const testRunnerStore = {
                 commit('setError', ENGINE.baseURL + url + ': ' + error)
             }
         },
+         */
 
 
     }

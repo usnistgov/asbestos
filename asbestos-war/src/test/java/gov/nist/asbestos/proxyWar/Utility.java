@@ -60,9 +60,9 @@ public class Utility {
                 .setFhirBase("http://localhost:" + fhirPort + "/fhir/fhir");
         String json = ChannelConfigFactory.convert(channelConfig);
         HttpPost poster = new HttpPost();
-        poster.postJson(new URI("http://localhost:" + proxyPort + "/asbestos/channel/create"), json);
+        poster.postJson(new URI("http://localhost:" + proxyPort + "/asbestos/rw/channel/create"), json);
         int status = poster.getStatus();
-        assertTrue(status == 200 || status == 201, "POST to " + "http://localhost:" + proxyPort + "/asbestos/channel/create");
+        assertTrue(status == 200 || status == 201, "POST to " + "http://localhost:" + proxyPort + "/asbestos/rw/channel/create");
         return "http://localhost:" + proxyPort + "/asbestos/proxy/" + testSession + "__" + channelName;
     }
 

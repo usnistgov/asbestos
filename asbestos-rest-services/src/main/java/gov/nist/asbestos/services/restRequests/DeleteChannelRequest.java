@@ -8,8 +8,9 @@ import org.apache.log4j.Logger;
 import java.io.IOException;
 // 0 - empty
 // 1 - app context
-// 2 - "channel"
-// 3 - channelID  (testSession__id)
+// 2  "rw" or "accessGuard"
+// 3 - "channel"
+// 4 - channelID  (testSession__id)
 
 public class DeleteChannelRequest {
     private static Logger log = Logger.getLogger(DeleteChannelRequest.class);
@@ -17,9 +18,9 @@ public class DeleteChannelRequest {
     private Request request;
 
     public static boolean isRequest(Request request) {
-        if (request.uriParts.size() == 4) {
-            String uriPart2 = request.uriParts.get(2);
-            return "channel".equals(uriPart2) || "channelGuard".equals(uriPart2);
+        if (request.uriParts.size() == 5) {
+            String uriPart3 = request.uriParts.get(3);
+            return "channel".equals(uriPart3);
         }
         return false;
     }
@@ -30,7 +31,7 @@ public class DeleteChannelRequest {
 
     public void run() throws IOException {
         request.announce("DeleteChannel");
-        String channelId = request.uriParts.get(3);
+        String channelId = request.uriParts.get(4);
 
         SimId simId = SimId.buildFromRawId(channelId);
         SimStore simStore = new SimStore(request.externalCache, simId);

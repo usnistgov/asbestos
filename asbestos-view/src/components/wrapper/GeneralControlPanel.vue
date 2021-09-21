@@ -10,11 +10,11 @@
     export default {
         methods: {
             events() {
-                const route = `/session/${this.$store.state.base.session}/channel/${this.$store.state.base.channelName}/logs`
+                const route = `/session/${this.$store.state.base.channel.testSession}/channel/${this.$store.state.base.channel.channelName}/logs`
                 this.$router.push(route)
             },
             getter() {
-                this.$router.push(`/session/${this.$store.state.base.session}/channel/${this.$store.state.base.channelName}/getter`)
+                this.$router.push(`/session/${this.$store.state.base.channel.testSession}/channel/${this.$store.state.base.channel.channelName}/getter`)
             },
         },
         name: "GeneralControlPanel"

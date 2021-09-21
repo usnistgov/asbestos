@@ -37,6 +37,7 @@
     import colorizeTestReports from "../../mixins/colorizeTestReports";
     import {ENGINE} from '../../common/http-common';
     import testCollectionMgmt from "../../mixins/testCollectionMgmt";
+    import channelMixin from "@/mixins/channelMixin";
 
     export default {
         data() {
@@ -71,9 +72,16 @@
                 await promise;
             },
             async doView() {
-                await this.loadTestCollection(this.testCollection);
-                this.$store.commit('setChannelName', this.channelName)
-                this.$router.push(`/session/${this.sessionId}/channel/${this.channelName}/collection/${this.testCollection}`)
+                const channelId = `${this.sessionId}__${this.channelName}`
+                /*
+                Assumes that the setup channel exists, either through the current test session config Includes or as a local channel.
+                 */
+                this.ftkLoadChannel(channelId, false, false). then(() => {
+                    this.$router.push(`/session/${this.sessionId}/channel/${this.channelName}/collection/${this.testCollection}`)
+                })
+                // await this.loadTestCollection(this.testCollection);
+                // this.$store.commit('setChannelName', this.channelName)
+                // this.$router.push(`/session/${this.sessionId}/channel/${this.channelName}/collection/${this.testCollection}`)
             },
             async loadTestCollection(testCollection) {
                 this.$store.commit('setCurrentTestCollection', testCollection);
@@ -85,7 +93,7 @@
                 this.loadStatus("status");
             //this.channel = this.channelId;
         },
-        mixins: [ colorizeTestReports, testCollectionMgmt ],
+        mixins: [ colorizeTestReports, testCollectionMgmt, channelMixin ],
         name: "SelfTest",
         props: [
             'sessionId',

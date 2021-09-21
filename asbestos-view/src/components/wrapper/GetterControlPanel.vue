@@ -9,7 +9,7 @@
     export default {
         methods: {
             launch() {
-                this.$router.push(`/session/${this.$store.state.base.session}/channel/${this.$store.state.base.channelId}/getter`)
+                this.$router.push(`/session/${this.$store.state.base.channel.testSession}/channel/${this.$store.state.base.channel.channelName}/getter`)
             }
         },
         name: "GetterControlPanel"

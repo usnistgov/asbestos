@@ -113,13 +113,15 @@
                 return this.$store.state.testRunner.serverTestCollectionNames
             },
             session() {
-                return this.$store.state.base.session
+                return this.$store.state.base.channel.testSession
             },
             channelId() {
-                return this.$store.state.base.channelId
+                return this.$store.state.base.channel.channelName
             },
             selectable() {
-                return this.$store.state.base.session !== null && this.$store.state.base.channelId !== null
+                const ts = this.$store.state.base.channel.testSession
+                const cn = this.$store.state.base.channel.channelName
+                return (ts !== undefined || ts !== null) && (cn !== undefined || cn !== null)
             },
             testId: {
                 set(name) {
@@ -140,7 +142,7 @@
 
         },
         watch: {
-            '$store.state.base.channelId': 'reload',
+            '$store.state.base.channelName': 'reload',
             '$store.state.testRunner.currentTestCollectionName': 'vuexCollectionUpdated',
             'collection': 'localCollectionUpdated',
         },

@@ -3,6 +3,8 @@ package gov.nist.asbestos.testEngine.engine;
 import gov.nist.asbestos.client.client.FhirClient;
 import gov.nist.asbestos.client.client.Format;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
+import gov.nist.asbestos.serviceproperties.ServiceProperties;
+import gov.nist.asbestos.serviceproperties.ServicePropertiesEnum;
 import gov.nist.asbestos.simapi.validation.ValE;
 import gov.nist.asbestos.testEngine.engine.fixture.FixtureComponent;
 import gov.nist.asbestos.testEngine.engine.fixture.FixtureMgr;
@@ -242,9 +244,38 @@ public class OperationRunner {
                             .setExternalVariables(externalVariables)
                             .setVal(val)
                             .setOpReport(operationReport))
-                            .setTestCollectionId(testCollectionId)
-                            .setTestId(testId);
+                    .setTestCollectionId(testCollectionId)
+                    .setTestId(testId);
             saveToCache.run(op, operationReport);
+        } else if ("eventPart".equals(code)) {
+                SetupActionSearch setupActionSearch = new SetupActionSearch(actionReference, fixtureMgr, isFollowedByAssert)
+                        .setVal(val)
+                        .setFhirClient(fhirClient)
+                        .setSut(sut)
+                        .setType(type + ".search")
+                        .setTestReport(testReport);
+                setupActionSearch
+                        .setVal(val)
+                        .setVariableMgr(
+                                new VariableMgr(testScript, fixtureMgr)
+                                        .setExternalVariables(externalVariables)
+                                        .setVal(val)
+                                        .setOpReport(operationReport));
+                setupActionSearch.setTestEngine(testEngine);
+                setupActionSearch.setTestCollectionId(testCollectionId);
+                setupActionSearch.setTestId(testId);
+                String internalBasePath = ServiceProperties.getInstance().getPropertyOrStop(ServicePropertiesEnum.FHIR_TOOLKIT_BASE)
+                        .concat("/engine/")
+                        .concat(code)
+                        .concat("/")
+                        .concat(testEngine.getChannelId());
+                setupActionSearch.setInternalBasePath(internalBasePath);
+                ResourceWrapper responseWrapper = setupActionSearch.run(op, operationReport);
+                if (responseWrapper != null) {
+                    FixtureLabels labels = new FixtureLabels(new ActionReporter(), op, null)
+                            .referenceWrapper(responseWrapper);
+                    Reporter.operationDescription(operationReport, "**Request/Response** " + labels.getReference());
+                }
         } else {
             reporter.reportError("do not understand code.code of " + code);
         }

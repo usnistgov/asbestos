@@ -8,6 +8,7 @@ import gov.nist.asbestos.client.log.SimStore;
 import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import gov.nist.asbestos.simapi.simCommon.SimId;
+import gov.nist.asbestos.simapi.tk.siteManagement.SeparateSiteLoader;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.log4j.Logger;
 import org.hl7.fhir.common.hapi.validation.support.PrePopulatedValidationSupport;
@@ -25,6 +26,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static gov.nist.asbestos.client.Base.Dirs.listOfDirectories;
@@ -41,6 +43,10 @@ public class EC {
     public static final String TEST_ASSERTIONS_FILE = "assertions.json";
     public static final String CHANNELS_DIR = "FhirChannels";
     public static final String DOCUMENT_CACHE = "FhirDocCache";
+    public static final String TRASH_CAN = "trashcan";
+    public static final String TEST_COLLECTION_PROPERTIES = "TestCollection.properties";
+    public static final String TEST_PROPERTIES = "Test.properties";
+    public static final String HIDDEN_KEY_NAME = "Hidden"; // TODO: make an enum
 
 
     public EC(File externalCache) {
@@ -95,7 +101,20 @@ public class EC {
         File root = getTestCollectionBase(collectionName);
         if (root == null)
             return new ArrayList<>();
-        return listOfDirectories(root);
+        List<File> testDirs = listOfDirectories(root);
+        return testDirs
+                .stream()
+                .filter(s -> !isHiddenTest(s))
+                .collect(Collectors.toList());
+    }
+
+    public boolean isHiddenTest(File testDir) {
+        Properties props = getTestProperties(testDir);
+        if (props != null) {
+            String hiddenValue = props.getProperty(EC.HIDDEN_KEY_NAME);
+            return "true".equals(hiddenValue);
+        }
+        return false;
     }
 
     private static Properties defaultProperties = new Properties();
@@ -108,9 +127,9 @@ public class EC {
         File root = getTestCollectionBase(collectionName);
         if (root == null)
             return props;
-        File file = new File(root, "TestCollection.properties");
-        try {
-            props.load(new FileInputStream(file));
+        File file = new File(root, TEST_COLLECTION_PROPERTIES);
+        try (final FileInputStream fis = new FileInputStream(file)) {
+            props.load(fis);
         } catch (IOException e) {
             return defaultProperties;
         }
@@ -131,6 +150,25 @@ public class EC {
         }
     }
 
+    public Properties getTestProperties(String collectionName, String testName) {
+        File testDir = getTest(collectionName, testName);
+        return getTestProperties(testDir);
+    }
+
+    static Properties getTestProperties(File testDir) {
+        Properties props = new Properties();
+        if (testDir != null ) {
+            File testProps = new File(testDir, EC.TEST_PROPERTIES);
+            if (testProps.exists()) {
+                try (final FileInputStream fis = new FileInputStream(testProps)) {
+                    props.load(fis);
+                    return props;
+                } catch (IOException ex) {}
+            }
+        }
+        return null;
+    }
+
     public File getTestAssertionsFile() {
         return new File(new File(externalCache, TEST_ASSERTIONS_DIR), TEST_ASSERTIONS_FILE);
     }
@@ -149,12 +187,28 @@ public class EC {
         return collectionRoot;
     }
 
-    public File getFhirSessions() {
-        return new File(externalCache, "FhirSessions");
+    public static File ftkTrashCan(File ecDir) {
+        return new File(ecDir, TRASH_CAN);
     }
 
-    public File getSessionConfig(String sessionId) {
-        return new File(getFhirSessions(), sessionId);
+    public File getFtkSessions() {
+        return ftkSessionsDir(externalCache);
+    }
+
+    public static File ftkSessionsDir(File ecDir) {
+        return new File(ecDir, SESSIONS_DIR);
+    }
+
+    public static File ftkChannelsDir(File ecDir) {
+        return new File(ecDir, CHANNELS_DIR);
+    }
+
+    public static File ftkSessionDir(File ecDir, String sessionName) {
+        return new File(ftkSessionsDir(ecDir), sessionName);
+    }
+
+    public File getSessionDir(String sessionId) {
+        return new File(getFtkSessions(), sessionId);
     }
 
     public File getTestCollectionsBase() {

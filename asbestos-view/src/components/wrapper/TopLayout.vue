@@ -120,7 +120,7 @@
             TestControlPanel2,
             // ChannelLogControlPanel,
             // GetterControlPanel
-        }
+        },
     }
 
 
@@ -148,11 +148,11 @@
     }
     .grid-container {
         display: grid;
-        grid-template-columns: minmax(0, 1fr) 250px;
+        grid-template-columns: minmax(0, 1fr) 300px;
     }
     .error-grid-container {
         display: grid;
-        grid-template-columns: 20px 1fr;
+        grid-template-columns: 20px .9fr;
     }
     .error-grid-close {
         grid-column: 1;
@@ -173,6 +173,7 @@
         position: absolute;
         right: 9px;
         text-align: left;
+        width: min-content;
     }
 </style>
 // these are shared across the tool
@@ -191,6 +192,9 @@
     .control-panel-font {
         font-size: small;
     }
+    .control-panel-list {
+        margin: 2px;
+    }
     .bold {
         font-weight: bold;
     }
@@ -199,6 +203,8 @@
         font-size: large;
     }
     .control-panel-item-title {
+        margin-top: 4px;
+        margin-bottom: 4px;
         font-weight: bold;
         /*cursor: pointer;*/
         /*text-decoration: underline;*/

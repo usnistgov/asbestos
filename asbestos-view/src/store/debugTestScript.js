@@ -308,13 +308,13 @@ export const debugTestScriptStore = {
 
             commit('setCurrentTest', testId)
             const mapKey = this.getters.getMapKey(testId)
-            const testSessionId = rootState.base.session
+            const testSessionId = rootState.base.channel.testSession
 
             // Technically it is possible to run many debugger web sockets but the test display only allows "opening" one active Test bar at a time since the previous test bar is automatically closed.
 
             if (state.testScriptDebuggerWebSocket === null) {
                 const wssBase = UtilFunctions.getWssBase()
-                const channelName = rootState.base.channelName
+                const channelName = rootState.base.channel.channelName
                 const wssSocketUrl = `${wssBase}/debugTestScript/developer?ftkTestSessionId=${testSessionId}&channelName=${channelName}&testScriptIndex=${mapKey}`
                 state.testScriptDebuggerWebSocket = new WebSocket(wssSocketUrl)
                 state.testScriptDebuggerWebSocket.onopen = event => {
@@ -464,8 +464,8 @@ export const debugTestScriptStore = {
                     if (event === false) {
                         console.log('In debugMgmt socket onOpen. event: ' + (event === undefined).valueOf())
                     }
-                    const testSessionId = rootState.base.session
-                    const channelName = rootState.base.channelName
+                    const testSessionId = rootState.base.channel.testSession
+                    const channelName = rootState.base.channel.channelName
                     const cmd = fn.cmd
                     if ('getExistingDebuggerList' === cmd) {
                         const sendData = `{"cmd":"${cmd}","ftkTestSessionId":"${testSessionId}","channelName":"${channelName}"}`

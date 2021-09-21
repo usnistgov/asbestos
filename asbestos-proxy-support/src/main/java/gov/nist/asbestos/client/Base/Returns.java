@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import org.hl7.fhir.r4.model.BaseResource;
 import org.hl7.fhir.r4.model.OperationOutcome;
 
+import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
@@ -72,4 +73,13 @@ public class Returns {
         comp.setCode(issueType);
         returnObject(resp, oo);
     }
+
+    public static void returnPlainTextResponse(ServletResponse response, int httpStatusCode, String message) throws IOException {
+        response.resetBuffer();
+        ((HttpServletResponse) response).setStatus(httpStatusCode);
+        response.setContentType("text/plain");
+        response.getOutputStream().print(message);
+        response.flushBuffer();
+    }
+
 }

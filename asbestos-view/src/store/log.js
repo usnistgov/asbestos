@@ -30,7 +30,7 @@ export const logStore = {
             state.analysis = analysis
         },
         resetLogLoaded(state) {
-            state.loaded = false
+            state.loaded = null
         },
         setEventSummaries(state, summaries) {
             state.eventSummaries = summaries
@@ -59,17 +59,25 @@ export const logStore = {
             const session = parms.session
             commit('setLogChannel', channel)
             commit('setLogSession', session)
-            if (!rootState.base.session) {
-                commit('setError', 'Session not set in logStore.loadEventSummaries')
-                console.error('Session not set for logStore.loadEventSummaries')
+            if (rootState.base.channel === undefined || rootState.base.channel === null) {
+                const errorMsg = 'Channel object is undefined or null in logStore.loadEventSummaries'
+                commit('setError', errorMsg)
+                console.error(errorMsg)
                 return
             }
-            if (!rootState.base.channelName) {
-                commit('setError', 'Channel not set in logStore.loadEventSummaries')
-                console.error('Channel not set in logStore.loadEventSummaries')
+            if (rootState.base.channel.testSession === undefined || rootState.base.channel.testSession === null) {
+                const errorMsg = 'Session not set in logStore.loadEventSummaries'
+                commit('setError', errorMsg)
+                console.error(errorMsg)
                 return
             }
-            const url = `${rootState.base.session}/${rootState.base.channelName}`
+            if (!rootState.base.channel.channelName === undefined || rootState.base.channel.channelName === null) {
+                const errorMsg = 'Channel name not set in logStore.loadEventSummaries'
+                commit('setError', errorMsg)
+                console.error(errorMsg)
+                return
+            }
+            const url = `${rootState.base.channel.testSession}/${rootState.base.channel.channelName}`
             try {
                 const rawSummaries = await LOG.get(url, {
                     params: {

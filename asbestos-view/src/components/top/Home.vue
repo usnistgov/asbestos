@@ -15,10 +15,13 @@
 
         <p>XDS Toolkit is required for testing XDSonFHIR option and for running self tests in Setup.</p>
 
-        <div class="selectable" @click="selfTest()">Run</div>
+        <div class="selectable" @click="selfTest()"><img src="../../assets/reload.png"/>&nbsp;Refresh</div>
         <div v-if="$store.state.log.loaded">
             <img src="../../assets/check.png">
             Proxy is responding at {{proxyBase()}}
+        </div>
+        <div v-else-if="$store.state.log.loaded===null">
+            Refreshing proxy status...
         </div>
         <div v-else>
             <img src="../../assets/cross.png">
@@ -69,13 +72,19 @@
         The <span class="bold"> Control panel</span> is on the right side of the screen:<br /><br />
 
         <span class="bold">Test Session</span>
-        - an area to work in giving isolation from other users.  Same as XDS Toolkit. Only one test session, default,
-        is supported in this release.
+        - an area to work in giving isolation from other users. Similar to XDS Toolkit. To prevent accidental deletion of the test
+        session contents, the session configuration must be locked. For now, this will be a manual step on the server.
+        Edit the <span class="fixedWidthFont">ExternalCache\FhirSessions\theTestSession\config.json</span> file and add
+        the <span class="fixedWidthFont">"sessionConfigLocked":true</span> JSON property.
         <br />
 
         <span class="bold">Channel</span>
 - a channel through the Proxy.  All traffic is routed through the Proxy which provides logs of the messages and translation. There are two
-kinds of channels: FHIR - data passed without modification and MHD - translation is done between MHD and XDS formats.
+kinds of channels: FHIR - data passed without modification and MHD - translation is done between MHD and XDS formats. By naming convention, a channel Id is
+        displayed with a test session prefix in the Channel control panel if it originates from an Included test session. Channel name part without the test session
+        prefix is displayed for channels local the current test session.
+        To prevent accidental configuration changes, channels can be locked by the Admin SignIn feature.
+        A lock icon appears in the detailed channel configuration area if the channel configuration is locked.
         <br />
 
         <span class="bold">Events</span>
@@ -198,5 +207,8 @@ kinds of channels: FHIR - data passed without modification and MHD - translation
 </script>
 
 <style scoped>
+    .fixedWidthFont {
+        font-family: monospace;
+    }
 
 </style>

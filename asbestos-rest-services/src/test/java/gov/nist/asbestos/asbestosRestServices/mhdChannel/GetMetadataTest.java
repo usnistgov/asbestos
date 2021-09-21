@@ -5,13 +5,12 @@ import gov.nist.asbestos.client.events.EventStoreItem;
 import gov.nist.asbestos.client.events.EventStoreSearch;
 import gov.nist.asbestos.client.events.ITask;
 import gov.nist.asbestos.client.log.SimStore;
-import gov.nist.asbestos.services.servlet.ChannelControlServlet;
+import gov.nist.asbestos.services.servlet.FtkElementsServlet;
 import gov.nist.asbestos.services.servlet.ProxyServlet;
 import gov.nist.asbestos.simapi.simCommon.SimId;
 import org.junit.jupiter.api.Disabled;
 import org.mockito.Mock;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
@@ -63,7 +62,7 @@ class GetMetadataTest {
         ProxyServlet ps = new ProxyServlet();
         ps.setExternalCache(externalCache);
 
-        ChannelControlServlet ccs = new ChannelControlServlet();
+        FtkElementsServlet ccs = new FtkElementsServlet();
         ccs.setExternalCache(externalCache);
 
         // Create channel
@@ -102,7 +101,7 @@ class GetMetadataTest {
         assertTrue(event.getRequestHeaderFile(taski).exists());
 
         assertTrue(event.getRequestHeaderFile(taski).exists());
-        assertEquals("/proxy/channel/" + testSession + "__" + channelId + "/fhir/metadata", "/proxy/channel/" + testSession + "__" + channelId + "/fhir/metadata", task.getRequestHeader().getPathInfo().toString());
+        assertEquals("/proxy/rw/channel/" + testSession + "__" + channelId + "/fhir/metadata", "/proxy/rw/channel/" + testSession + "__" + channelId + "/fhir/metadata", task.getRequestHeader().getPathInfo().toString());
         assertEquals("GET", task.getRequestHeader().getVerb());
         assertTrue(event.getResponseHeaderFile(taski).exists());
         assertEquals(200, task.getResponseHeader().getStatus());

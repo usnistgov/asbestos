@@ -9,7 +9,8 @@ import java.io.IOException;
 import java.util.List;
 // 0 - empty
 // 1 - app context
-// 2 - "channel"
+// 2 - "rw"
+// 3 - "channel"
 // Return list of channel IDs
 
 public class GetChannelIdsRequest {
@@ -18,7 +19,7 @@ public class GetChannelIdsRequest {
     private Request request;
 
     public static boolean isRequest(Request request) {
-        return request.uriParts.size() == 3 && "channel".equalsIgnoreCase(request.uriParts.get(2));
+        return request.uriParts.size() == 4 && "channel".equalsIgnoreCase(request.uriParts.get(3));
     }
 
     public GetChannelIdsRequest(Request request) {

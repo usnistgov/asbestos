@@ -7,6 +7,7 @@ import gov.nist.asbestos.http.operations.HttpGetter;
 import gov.nist.asbestos.http.operations.HttpPost;
 import gov.nist.asbestos.client.channel.ChannelConfig;
 import gov.nist.asbestos.client.channel.ChannelConfigFactory;
+import gov.nist.asbestos.http.operations.HttpPut;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -32,6 +33,11 @@ class CreateChannelIT {
 
     @Test
     void createAChannel() throws URISyntaxException, IOException {
+        String channelLocation = "http://localhost:" + proxyPort + "/asbestos/rw/channel/default__test";
+
+        HttpDelete deleter = new HttpDelete();
+        deleter.run(new URI(channelLocation));
+
         Properties properties = System.getProperties();
         // create
         ChannelConfig channelConfig = new ChannelConfig()
@@ -42,20 +48,65 @@ class CreateChannelIT {
                 .setChannelType("passthrough")
                 .setFhirBase("http://localhost:" + proxyPort + "/fhir/fhir");
         HttpPost poster = new HttpPost();
-        poster.postJson(new URI("http://localhost:" + proxyPort + "/asbestos/channel/create"), ChannelConfigFactory.convert(channelConfig));
+        poster.postJson(new URI("http://localhost:" + proxyPort + "/asbestos/rw/channel/create"), ChannelConfigFactory.convert(channelConfig));
         int status = poster.getStatus();
         if (!(status == 200 || status == 201))
             fail("200 or 201 required - returned " + status);
 
         // verify
         HttpGetter getter = new HttpGetter();
-        getter.getJson(new URI("http://localhost:" + proxyPort + "/asbestos/channel/default__test"));
+        getter.getJson(new URI(channelLocation));
         status = getter.getStatus();
         if (!(status == 200))
             fail("200 required - returned " + status);
         ChannelConfig returnConfig = ChannelConfigFactory.convert(getter.getResponseText());
         assertEquals(channelConfig, returnConfig);
     }
+
+    /*
+    @Test
+    void createALockedChannel() throws URISyntaxException, IOException {
+        String channelLocation = "http://localhost:" + proxyPort + "/asbestos/rw/channel/default__lockedtest";
+
+        HttpDelete deleter = new HttpDelete();
+        deleter.run(new URI(channelLocation));
+
+        Properties properties = System.getProperties();
+        // create
+        ChannelConfig channelConfig = new ChannelConfig()
+                .setTestSession("default")
+                .setChannelName("lockedtest")
+                .setEnvironment("default")
+                .setActorType("fhir")
+                .setChannelType("passthrough")
+                .setFhirBase("http://localhost:" + proxyPort + "/fhir/fhir")
+                .setWriteLocked(true);
+
+        HttpPost poster = new HttpPost();
+        poster.postJson(new URI("http://localhost:" + proxyPort + "/asbestos/rw/channel/create"), ChannelConfigFactory.convert(channelConfig));
+        int status = poster.getStatus();
+        if (!(status == 200 || status == 201))
+            fail("200 or 201 required - returned " + status);
+
+        // verify
+        HttpGetter getter = new HttpGetter();
+        getter.getJson(new URI(channelLocation));
+        status = getter.getStatus();
+        if (!(status == 200))
+            fail("200 required - returned " + status);
+        ChannelConfig returnConfig = ChannelConfigFactory.convert(getter.getResponseText());
+        assertEquals(channelConfig, returnConfig);
+
+        // Deleting a locked channel through the "rw" route should result in a 401
+        deleter.run(new URI(channelLocation));
+        status = deleter.getStatus();
+        if (status != 401 )
+            fail("401 required - returned " + status);
+
+    }
+    *
+     */
+
 
     @Test
     void deleteAndRecreateChannel() throws URISyntaxException, IOException {
@@ -68,27 +119,30 @@ class CreateChannelIT {
                 .setChannelType("passthrough")
                 .setFhirBase("http://localhost:"+ proxyPort + "/fhir/fhir");
 
+        String channelLocation = "http://localhost:"+ proxyPort + "/asbestos/rw/channel/default__test";
+
         // delete
         String json = ChannelConfigFactory.convert(channelConfig);
         HttpDelete deleter = new HttpDelete();
-        deleter.run(new URI("http://localhost:"+ proxyPort + "/asbestos/channel/default__test"));
+        deleter.run(new URI(channelLocation));
+        // A Get before the Create can be useful in checking for the assertion below
         // could be 200 or 404
         //assertEquals(200, deleter.getStatus(), deleter.getResponseHeaders().toString());
 
         // verify
         HttpGetter getter = new HttpGetter();
-        getter.getJson(new URI("http://localhost:"+ proxyPort + "/asbestos/channel/default__test"));
+        getter.getJson(new URI("http://localhost:"+ proxyPort + "/asbestos/rw/channel/default__test"));
         assertEquals(404, getter.getStatus());
 
         // create - must return 201 (didn't exist)
         HttpPost poster = new HttpPost();
-        poster.postJson(new URI("http://localhost:"+ proxyPort + "/asbestos/channel/create"), json);
+        poster.postJson(new URI("http://localhost:"+ proxyPort + "/asbestos/rw/channel/create"), json);
         assertEquals(201, poster.getStatus(), poster.getResponseHeaders().toString());
 
-        // create - must return 200 (did exist)
-        poster = new HttpPost();
-        poster.postJson(new URI("http://localhost:"+ proxyPort + "/asbestos/channel/create"), json);
-        assertEquals(200, poster.getStatus(), poster.getResponseHeaders().toString());
+        // replace - must return 200 (did exist)
+        HttpPut putter = new HttpPut();
+        putter.putJson(new URI(channelLocation), json);
+        assertEquals(200, putter.getStatus(), putter.getResponseHeaders().toString());
 
     }
 
@@ -113,33 +167,37 @@ class CreateChannelIT {
         HttpDelete deleter;
         HttpPost poster;
         HttpGetter getter;
+        HttpPut putter;
         int status;
 
+        String channel1Location = "http://localhost:"+ proxyPort + "/asbestos/rw/channel/default__test1";
+        String channel2Location = "http://localhost:"+ proxyPort + "/asbestos/rw/channel/default__test2";
+
         deleter = new HttpDelete();
-        deleter.run(new URI("http://localhost:"+ proxyPort + "/asbestos/channel/default__test1"));
+        deleter.run(new URI(channel1Location));
         assertNotEquals(500, deleter.getStatus());
 
         deleter = new HttpDelete();
-        deleter.run(new URI("http://localhost:"+ proxyPort + "/asbestos/channel/default__test2"));
+        deleter.run(new URI(channel2Location));
         assertNotEquals(500, deleter.getStatus());
 
         // create - must return 201 (didn't exist)
         poster = new HttpPost();
-        poster.postJson(new URI("http://localhost:"+ proxyPort + "/asbestos/channel/create"), channelConfig1);
+        poster.postJson(new URI("http://localhost:"+ proxyPort + "/asbestos/rw/channel/create"), channelConfig1);
         assertEquals(201, poster.getStatus());
 
         // create - must return 201 (didn't exist)
         poster = new HttpPost();
-        poster.postJson(new URI("http://localhost:"+ proxyPort + "/asbestos/channel/create"), channelConfig2);
+        poster.postJson(new URI("http://localhost:"+ proxyPort + "/asbestos/rw/channel/create"), channelConfig2);
         assertEquals(201, poster.getStatus());
 
-        // create - must return 200 (did exist)
-        poster = new HttpPost();
-        poster.postJson(new URI("http://localhost:"+ proxyPort + "/asbestos/channel/create"), channelConfig1);
-        assertEquals(200, poster.getStatus());
+        // replace - must return 200 (did exist)
+        putter = new HttpPut();
+        putter.putJson(new URI(channel1Location), channelConfig1);
+        assertEquals(200, putter.getStatus());
 
         getter = new HttpGetter();
-        getter.get("http://localhost:"+ proxyPort + "/asbestos/channel");
+        getter.get("http://localhost:"+ proxyPort + "/asbestos/rw/channel");
         assertEquals(200, getter.getStatus());
         String response = getter.getResponseText();
 

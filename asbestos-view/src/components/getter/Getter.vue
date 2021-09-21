@@ -25,7 +25,7 @@
             </div>
 
             <!--   GET CapabilityStatement  -->
-            <button class="left" @click="runCapStmt()">INSPECT</button> CapabilityStatement from selected Channel ({{channelId}})
+            <button class="left" @click="runCapStmt()">INSPECT</button> CapabilityStatement from selected Channel ({{channelName}})
             <div class="left">
 
             </div>
@@ -40,7 +40,7 @@
             <div v-if="theUrl" class="request-response" :key="rerenderkey">
                 <log-analyis-report
                         :session-id="sessionId"
-                        :channel-id="channelId"
+                        :channel-name="channelName"
                         :the-url="theUrl"
                         :gzip="gzip"
                         :use-proxy="useProxy"> </log-analyis-report>
@@ -49,8 +49,8 @@
                 <div class="left">
                     <log-analyis-report
                             :session-id="sessionId"
-                            :channel-id="channelId"
-                            :the-url="`${$store.getters.getProxyBase({channelId: channelId, sessionId: sessionId})}/metadata`"
+                            :channel-name="channelName"
+                            :the-url="`${$store.getters.getProxyBase({channelName: channelName, sessionId: sessionId})}/metadata`"
                             :gzip="gzip"
                             :use-proxy="useProxy"
                             :ignore-bad-refs="true"> </log-analyis-report>
@@ -126,7 +126,7 @@
         },
         computed: {
             validateCallUrl() {
-                const url = this.$store.getters.getProxyBase({channelId: this.channelId, sessionId: this.sessionId}) + '/metadata'
+                const url = this.$store.getters.getProxyBase({channelName: this.channelName, sessionId: this.sessionId}) + '/metadata'
                 return this.validateCall('CapabilityStatement', url)
             },
         },
@@ -135,7 +135,7 @@
                 this.$store.dispatch('getValidationServer')
         },
         props: [
-            'sessionId', 'channelId'
+            'sessionId', 'channelName'
         ],
         components: { LogAnalyisReport },
         name: "Getter"

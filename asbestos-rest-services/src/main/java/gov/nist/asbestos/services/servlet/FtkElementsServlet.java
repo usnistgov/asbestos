@@ -16,15 +16,16 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
+import java.io.IOException;
 
-public class ChannelControlServlet extends HttpServlet {
-    private static Logger log = Logger.getLogger(ChannelControlServlet.class);
+public class FtkElementsServlet extends HttpServlet {
+    private static Logger log = Logger.getLogger(FtkElementsServlet.class);
     private File externalCache = null;
 
     @Override
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
-        log.info("ChannelControlServlet init");
+        log.info("FtkElementsServlet init");
         if (externalCache == null) {
             String ec = (String) config.getServletContext().getAttribute("ExternalCache");
             externalCache = new File(ec);
@@ -50,16 +51,30 @@ public class ChannelControlServlet extends HttpServlet {
     }
 
     @Override
+    protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        Request request = new Request(req, resp, externalCache);
+
+        try {
+            if (ReplaceChannelRequest.isRequest(request))        new ReplaceChannelRequest(request).run();
+            else  request.badRequest();
+
+        } catch (Throwable t) {
+            request.serverError(t);
+        }
+
+    }
+
+    @Override
     public void doPost(HttpServletRequest req, HttpServletResponse resp)  {
         Request request = new Request(req, resp, externalCache);
         //log.info("Channel Control POST " + request.uri);
 
         try {
             if (CreateChannelRequest.isRequest(request))        new CreateChannelRequest(request).run();
-            else if (GetChannelIdAndURLRequest.isRequest(request)) new GetChannelIdAndURLRequest(request).run();
             else if (EvalRequest.isRequest(request))            new EvalRequest(request).run();
             else if (CancelEvalRequest.isRequest(request))      new CancelEvalRequest(request).run();
             else if (LockChannelRequest.isRequest(request))      new LockChannelRequest(request).run();
+            else if (AddSessionRequest.isRequest(request))      new AddSessionRequest(request).run();
             else  request.badRequest();
 
         } catch (Throwable t) {
@@ -73,14 +88,11 @@ public class ChannelControlServlet extends HttpServlet {
         //log.info("Channel Control GET " + request.uri);
 
         try {
-
             if (GetChannelIdsRequest.isRequest(request))        new GetChannelIdsRequest(request).run();
-            else if (AddSessionRequest.isRequest(request))  new AddSessionRequest(request).run();
-            else if (GetSessionConfigRequest.isRequest(request)) new GetSessionConfigRequest(request).run();
-            else if (DelSessionRequest.isRequest(request))  new DelSessionRequest(request).run();
             else if (GetChannelIdAndURLRequest.isRequest(request)) new GetChannelIdAndURLRequest(request).run();
-            else if (GetSessionNamesRequest.isRequest(request)) new GetSessionNamesRequest(request).run();
             else if (GetChannelConfigRequest.isRequest(request)) new GetChannelConfigRequest(request).run();
+            else if (GetSessionNamesRequest.isRequest(request)) new GetSessionNamesRequest(request).run();
+            else if (GetSessionConfigRequest.isRequest(request)) new GetSessionConfigRequest(request).run();
             else if (GetSignInRequest.isRequest(request)) new GetSignInRequest(request).run();
             else request.badRequest();
 
@@ -97,6 +109,7 @@ public class ChannelControlServlet extends HttpServlet {
         try {
 
             if (DeleteChannelRequest.isRequest(request)) new DeleteChannelRequest(request).run();
+            else if (DelSessionRequest.isRequest(request))  new DelSessionRequest(request).run();
             else request.badRequest();
 
         } catch (Throwable t) {

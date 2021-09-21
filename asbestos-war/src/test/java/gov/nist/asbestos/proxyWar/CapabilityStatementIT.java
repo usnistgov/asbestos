@@ -7,6 +7,7 @@ import gov.nist.asbestos.http.operations.HttpGetter;
 import gov.nist.asbestos.http.operations.HttpPost;
 import gov.nist.asbestos.client.channel.ChannelConfig;
 import gov.nist.asbestos.client.channel.ChannelConfigFactory;
+import gov.nist.asbestos.http.operations.HttpPut;
 import jdk.nashorn.internal.ir.annotations.Ignore;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.OperationOutcome;
@@ -44,38 +45,40 @@ public class CapabilityStatementIT {
     }
 
 
-    private static void deleteAndRecreateMhdTestChannel(String channelId, boolean csloggingEnabled) throws URISyntaxException, IOException {
+    private static void deleteAndRecreateMhdTestChannel(String channelName, boolean csloggingEnabled) throws URISyntaxException, IOException {
         // create
         ChannelConfig channelConfig = new ChannelConfig()
                 .setTestSession("default")
-                .setChannelName(channelId)
+                .setChannelName(channelName)
                 .setEnvironment("default")
                 .setActorType("fhir")
                 .setChannelType("mhd")
                 .setXdsSiteName("bogus__rr")
                 .setLogMhdCapabilityStatementRequest(csloggingEnabled); // XdsSiteName is not used for this test
 
+        String channelLocation = "http://localhost:"+ proxyPort + "/asbestos/rw/channel/default__" + channelName;
+
         // delete
         String json = ChannelConfigFactory.convert(channelConfig);
         HttpDelete deleter = new HttpDelete();
-        deleter.run(new URI("http://localhost:"+ proxyPort + "/asbestos/channel/default__" + channelId));
+        deleter.run(new URI( channelLocation ));
         // could be 200 or 404
         //assertEquals(200, deleter.getStatus(), deleter.getResponseHeaders().toString());
 
         // verify
         HttpGetter getter = new HttpGetter();
-        getter.getJson(new URI("http://localhost:"+ proxyPort + "/asbestos/channel/default__" + channelId));
+        getter.getJson(new URI(channelLocation));
         assertEquals(404, getter.getStatus());
 
         // create - must return 201 (didn't exist)
         HttpPost poster = new HttpPost();
-        poster.postJson(new URI("http://localhost:"+ proxyPort + "/asbestos/channel/create"), json);
+        poster.postJson(new URI("http://localhost:"+ proxyPort + "/asbestos/rw/channel/create"), json);
         assertEquals(201, poster.getStatus(), poster.getResponseHeaders().toString());
 
-        // create - must return 200 (did exist)
-        poster = new HttpPost();
-        poster.postJson(new URI("http://localhost:"+ proxyPort + "/asbestos/channel/create"), json);
-        assertEquals(200, poster.getStatus(), poster.getResponseHeaders().toString());
+        // put - must return 200 (did exist)
+        HttpPut putter = new HttpPut();
+        putter.putJson(new URI(channelLocation), json);
+        assertEquals(200, putter.getStatus(), putter.getResponseHeaders().toString());
     }
 
     /**

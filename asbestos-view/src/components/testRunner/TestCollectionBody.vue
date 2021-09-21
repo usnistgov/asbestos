@@ -48,17 +48,17 @@
             </template>
           </template>
 
-          <span v-if="$store.state.testRunner.currentTest === name">
+          <span v-if="selected === name">
                             <img src="../../assets/arrow-down.png">
-                    </span>
+          </span>
           <span v-else>
                             <img src="../../assets/arrow-right.png"/>
-                    </span>
+          </span>
           <span class="large-text">{{ cleanTestName(name) }}</span>
           &nbsp;
           <span v-if="isClient">
                             <button class="runallbutton" @click="doEval(name)">Run</button>
-                    </span>
+          </span>
           <span v-else-if="isDebugFeatureEnabled">
                           <template v-if="isPreviousDebuggerStillAttached(i)">
                                 <button
@@ -66,7 +66,18 @@
                                     class="stopDebugTestScriptButton">Remove Debugger</button>
                             </template>
                             <template v-else>
+                            <template v-if="formatTestArtifactId(name) in dependencyTestResult">
+                                <template v-if="dependencyTestResult[formatTestArtifactId(name)]===true">
+                                    <button v-if="! isResumable(i) && ! isWaitingForBreakpoint" @click.stop="doRun(name, testRoutePath)" class="runallbutton">Run</button>
+                                </template>
+                                <template v-else>
+                                    <span :title="`This test has prerequisite test(s): ${testDependencyList(formatTestArtifactId(name))}. Please run the prerequisite test(s) first.`">&#x1F517;</span>
+                                </template>
+                            </template>
+                            <template v-else>
                                 <button v-if="! isResumable(i) && ! isWaitingForBreakpoint" @click.stop="doRun(name, testRoutePath)" class="runallbutton">Run</button>
+                            </template>
+
                                 <template v-if="$store.state.testRunner.currentTest === name">
                                     <button v-if="isDebuggable(i) && ! isWaitingForBreakpoint"
                                             @click.stop="doDebug(name)"
@@ -97,8 +108,10 @@
                             </template>
                     </span>
           <span v-else>
+              <!-- Unlike the Debug mode, there is no test dependency checks here if Debug mode is disabled.
+              If the dependency feature check is required, should create a new Vue component to use in both the Debug-Supported mode and non-Debug mode.  -->
                           <button @click.stop="doRun(name, testRoutePath)" class="runallbutton">Run</button>
-                    </span>
+          </span>
           <span v-if="! isWaitingForBreakpoint && ! $store.state.testRunner.isClientTest"> --  {{ testTime(name) }}</span>
         </div>
         <debug-assertion-eval-modal v-if="isDebugFeatureEnabled && isEvaluableAction(i)" :show="$store.state.debugAssertionEval.showEvalModalDialog" @close="closeModal()" @resume="doDebug(name)"></debug-assertion-eval-modal>
@@ -124,10 +137,15 @@ export default {
        otherwise the arrow indicator is incorrect when navigating out of the test collection and back into to the same test collection after a test was previously opened.
        */
       this.$store.commit('setCurrentTest', null)
-      this.loadTestCollection(this.testCollection)
-      if (! this.isClient) {
-        this.$store.dispatch('debugMgmt', {'cmd': 'getExistingDebuggerList'})
-      }
+      this.loadTestCollection(this.testCollection).then(() => {
+          if (this.isClient === false) {
+              this.$store.dispatch('debugMgmt', {'cmd': 'getExistingDebuggerList'})
+          }
+          const testIdParam = this.$router.currentRoute.params['testId']
+          if (testIdParam !== undefined && testIdParam !== null) {
+              this.$store.commit('setCurrentTest', testIdParam)
+          }
+      })
     },
     openTest(name) {
       if (!name)
@@ -142,6 +160,12 @@ export default {
       const selectedRoutePath = `${this.testRoutePath}/${this.selected}`
       this.$router.push(selectedRoutePath)
     },
+      formatTestArtifactId(name) {
+       return this.testCollection.concat("/").concat(name)
+      },
+      testDependencyList(testKey) {
+          return this.$store.state.testRunner.ftkTestDependencies[testKey]
+      },
   },
   computed: {
     selected() {
@@ -151,18 +175,67 @@ export default {
       const route = `/session/${this.sessionId}/channel/${this.channelName}/collection/${this.testCollection}/test`
       return route
     },
+    dependencyTestResult() {
+        let returnObj = {}
+        const testKeys = Object.keys(this.$store.state.testRunner.ftkTestDependencies)
+        const currentTestCollectionTestKeys = testKeys.filter(e => e.startsWith(this.testCollection))
+        for (let testKey of currentTestCollectionTestKeys) {
+           let passingCt = 0
+           const deps = this.$store.state.testRunner.ftkTestDependencies[testKey]
+            for (let dep of deps) {
+                // TODO: handle "tc/" case
+                let tcTr = this.$store.state.testRunner.nonCurrentTcTestReports
+                let depName = dep
+                if (dep.startsWith(this.testCollection)) {
+                    tcTr = this.$store.state.testRunner.testReports
+                    depName = dep.split("/")[1]
+                }
+                if (depName in tcTr) {
+                    const tr = tcTr[depName]
+                    if (tr !== undefined) {
+                        // console.log(`computing ${depName}, tr.result is ${tr.result}, ${testKey}, tcTr count: ${Object.keys(tcTr).length}, deps count: ${deps.length}`)
+                       if (tr.result==='pass')
+                           passingCt++
+                        // else
+                        //     console.log(`${depName} failed!`)
+                    }
+                    // else
+                    //     console.log('is undefined!')
+                } // else, async func still hasn't loaded it yet?
+                // else
+                //     console.log(`${depName} does not exist in tcTr! ${Object.keys(tcTr)}`)
+            }
+            returnObj[testKey] = passingCt > 0 && passingCt === deps.length
+        }
+        return returnObj
+    },
   },
   created() {
-    this.load(this.testCollection)
-    this.channel = this.channelName
-    this.setEvalCount()
+      if (this.$store.state.base.ftkChannelLoaded) {
+          this.load(this.testCollection)
+          // this.channel = this.channelName
+          this.setEvalCount()
+      } else {
+          console.log('on Created, ftkChannelLoaded is false, so Loading is deferred.')
+      }
+  },
+  mounted() {
+        this.$store.subscribe((mutation) => {
+            if (mutation.type === 'ftkChannelLoaded') {
+                if (this.$store.state.base.ftkChannelLoaded) {
+                    // console.log('TestCollectionBody syncing on mutation.type: ' + mutation.type)
+                    this.load(this.testCollection)
+                    this.setEvalCount()
+                }
+            }
+        })
   },
   watch: {
     'evalCount': 'setEvalCount',
     'testCollection': 'load',
-    'channelName': function() {
-      this.load();
-    },
+    // 'channelName': function() {
+    //   this.load();
+    // },
   },
   mixins: [ testCollectionMgmt, colorizeTestReports, debugTestScriptMixin, ],
   name: "TestCollectionBody",

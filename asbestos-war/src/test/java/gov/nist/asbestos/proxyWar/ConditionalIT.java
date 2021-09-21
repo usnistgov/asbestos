@@ -3,6 +3,7 @@ package gov.nist.asbestos.proxyWar;
 import gov.nist.asbestos.client.client.FhirClient;
 import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
+import gov.nist.asbestos.http.operations.HttpDelete;
 import gov.nist.asbestos.testEngine.engine.ExtensionDef;
 import gov.nist.asbestos.testEngine.engine.TestEngine;
 import org.hl7.fhir.r4.model.Extension;
@@ -22,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class ConditionalIT {
     private static String testSession = "default";
-    private static String channelId = "IT";
+    private static String channelName = "IT";
     private static String fhirPort = ITConfig.getFhirPort();
     private static String proxyPort = ITConfig.getProxyPort();
 
@@ -30,7 +31,8 @@ class ConditionalIT {
 
     @BeforeAll
     static void createTheChannel() throws IOException, URISyntaxException {
-        base = new URI(Utility.createChannel(testSession, channelId, fhirPort, proxyPort));
+        new HttpDelete().run(String.format("http://localhost:%s/asbestos/rw/channel/%s__%s", proxyPort, testSession, channelName));
+        base = new URI(Utility.createChannel(testSession, channelName, fhirPort, proxyPort));
     }
 
     @BeforeAll

@@ -11,22 +11,27 @@ import org.apache.log4j.Logger;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 // 0 - empty
 // 1 - app context
-// 2 - "channel"
-// 3 - "create"
+// 2  "rw" or "accessGuard"
+// 3 "channel"
+// 4 "create"
 // Create a channel based on JSON configuration in request
 
 public class CreateChannelRequest {
     private static Logger log = Logger.getLogger(CreateChannelRequest.class);
 
-    private Request request;
+    protected Request request;
+    protected String rawRequest;
 
     public static boolean isRequest(Request request) {
-        if (request.uriParts.size() == 4) {
-            String uriPart2 = request.uriParts.get(2);
-            String uriPart3 = request.uriParts.get(3);
-            return "create".equals(uriPart3) && ("channel".equals(uriPart2) || "channelGuard".equals(uriPart2));
+        if (request.uriParts.size() == 5) {
+            int channelIndex = 3;
+            int createIndex = 4;
+
+            return "channel".equals(request.uriParts.get(channelIndex)) && "create".equals(request.uriParts.get(createIndex));
         }
         return false;
     }
@@ -37,12 +42,27 @@ public class CreateChannelRequest {
 
     public void run() throws IOException {
         request.announce("CreateChannel");
-        String rawRequest = IOUtils.toString(request.req.getInputStream(), Charset.defaultCharset());   // json
-        log.debug("CREATE Channel " + rawRequest);
+        if (rawRequest == null) {
+            rawRequest = IOUtils.toString(request.req.getInputStream(), Charset.defaultCharset());   // json
+            log.debug("CREATE Channel " + rawRequest);
+        }
         ChannelConfig channelConfig = ChannelConfigFactory.convert(rawRequest);
 
         if ("fhir".equalsIgnoreCase(channelConfig.getChannelType()) && channelConfig.isLogMhdCapabilityStatementRequest()) {
             channelConfig.setLogMhdCapabilityStatementRequest(false);
+        }
+
+
+        boolean isInvalidChannelName = ! SimStore.isValidCharsPattern().matcher(channelConfig.asChannelId()).matches()
+                || SimStore.isReservedNamesPattern(null).matcher(channelConfig.getChannelName()).matches();
+
+        if (isInvalidChannelName) {
+            String error = "Invalid channel name";
+            log.warn(error + ": " +  channelConfig.asChannelId());
+            request.resp.setContentType("application/json");
+            request.resp.getOutputStream().print(error);
+            request.setStatus((request.resp.SC_BAD_REQUEST));
+            return;
         }
 
         SimStore simStore = new SimStore(request.externalCache,

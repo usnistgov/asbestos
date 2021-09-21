@@ -180,8 +180,9 @@ public class ChannelConfig {
         return writeLocked;
     }
 
-    public void setWriteLocked(boolean writeLocked) {
+    public ChannelConfig setWriteLocked(boolean writeLocked) {
         this.writeLocked = writeLocked;
+        return this;
     }
 
     public boolean isLogMhdCapabilityStatementRequest() {

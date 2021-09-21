@@ -50,7 +50,7 @@ export async function getServiceProperties() {
                 httpsFhirToolkitBase : process.env.VUE_APP_HTTPS_FHIR_TOOLKIT_BASE,
                 fhirToolkitBase : process.env.VUE_APP_FHIR_TOOLKIT_BASE,
                 projectVersion : "Development",
-                startUpSession : "default"
+                startUpSession : "cat"
             }
         };
     }
@@ -108,15 +108,15 @@ export async function initServiceProperties() {
                         crossdomain: true,
                     }
                 })
-                    CHANNEL = axios.create({
-                        baseURL: `${toolkitBaseToUse}/channel/`,
-                        headers: {
-                            'Access-Control-Allow-Methods': 'GET, POST, OPTIONS, PUT, PATCH, DELETE'
-                        },
-                        params: {
-                            crossdomain: true,
-                        }
-                    })
+                CHANNEL = axios.create({
+                    baseURL: `${toolkitBaseToUse}/rw/channel/`,
+                    headers: {
+                        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS, PUT, PATCH, DELETE'
+                    },
+                    params: {
+                        crossdomain: true,
+                    }
+                })
                 console.log(`initServiceProperties done`)
                 console.log(`FHIR Toolkit base is ${toolkitBaseToUse}`)
                 }

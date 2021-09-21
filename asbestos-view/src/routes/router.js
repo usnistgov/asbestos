@@ -32,7 +32,8 @@ Vue.use( VueRouter )
 
 export const routes = [
     {
-        path: '/', component: TopLayout,
+        path: '/',
+        component: TopLayout,
         meta: {
             title: 'FHIR Toolkit'
         },

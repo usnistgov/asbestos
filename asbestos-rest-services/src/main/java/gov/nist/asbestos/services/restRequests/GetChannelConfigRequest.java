@@ -9,8 +9,9 @@ import org.apache.log4j.Logger;
 import java.io.IOException;
 // 0 - empty
 // 1 - app context
-// 2 - "channel"
-// 3 - channelID
+// 2 - "rw" or "accessGuard"
+// 3 - "channel"
+// 4 - channelID
 
 public class GetChannelConfigRequest {
     private static Logger log = Logger.getLogger(GetChannelConfigRequest.class);
@@ -18,7 +19,7 @@ public class GetChannelConfigRequest {
     private Request request;
 
     public static boolean isRequest(Request request) {
-        return request.uriParts.size() == 4 && "channel".equalsIgnoreCase(request.uriParts.get(2)) && !"undefined".equals(request.uriParts.get(3));
+        return request.uriParts.size() == 5 && "channel".equalsIgnoreCase(request.uriParts.get(3));
     }
 
     public GetChannelConfigRequest(Request request) {
@@ -27,7 +28,7 @@ public class GetChannelConfigRequest {
 
     public void run() throws IOException {
         request.announce("GetChannelConfig");
-        String channelId = request.uriParts.get(3);
+        String channelId = request.uriParts.get(4);
         ChannelConfig channelConfig;
 
         try {

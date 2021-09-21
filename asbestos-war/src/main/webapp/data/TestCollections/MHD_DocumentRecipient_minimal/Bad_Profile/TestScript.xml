@@ -50,8 +50,31 @@
         <expression value="${patientIdentifier}.system.value + '|' + ${patientIdentifier}.value.value"/>
         <sourceId value="patient_bundle"/>
     </variable>
+    <variable>
+        <name value="dependsOnTestId"/>
+        <defaultValue value="MHD_DocumentRecipient_minimal/1_Prerequisite_Single_Document_with_Binary"/>
+    </variable>
 
-
+    <setup>
+        <modifierExtension url="urn:noErrors"/>
+        <action>
+            <operation>
+                <description value="Get the document responder base address from a prerequisite PDB submission.
+               (This test assumes the document responder base address in PDB response does not change between consecutive PDB submissions.)"/>
+                <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
+                    <extension url="component">
+                        <valueString value="../../Library/DocumentResponderBaseAddress.xml"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="dependsOnTestId"/>
+                    </extension>
+                    <extension url="urn:variable-out">
+                        <valueString value="docRespBaseAddress"/>
+                    </extension>
+                </modifierExtension>
+            </operation>
+        </action>
+    </setup>
 
 
     <test>
@@ -80,7 +103,7 @@
                 <description value="Verify no updates to server."/>
                 <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
                     <extension url="component">
-                        <valueString value="../../Library/NoUpdateOneDoc.xml"/>
+                        <valueString value="../../Library/NoUpdateOneDocUseDocResp.xml"/>
                     </extension>
                     <extension url="urn:variable-in">
                         <valueString  value="manifestMasterIdentifier"/>
@@ -96,6 +119,9 @@
                     </extension>
                     <extension url="urn:variable-in">
                         <valueString value="patientIdentifierSearchParamValue"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="docRespBaseAddress"/>
                     </extension>
                 </modifierExtension>
             </operation>

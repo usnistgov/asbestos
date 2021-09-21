@@ -13,6 +13,8 @@ import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.util.*;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import static java.lang.Thread.sleep;
 
@@ -41,6 +43,7 @@ public class SimStore {
     ChannelConfig channelConfig;
     private boolean channel = true;  // is this a channel to the backend system?
 
+
     public SimStore(File externalCache, SimId channelId) {
         Installation.validateExternalCache(externalCache);
         this.externalCache = externalCache;
@@ -66,7 +69,7 @@ public class SimStore {
                         throw new RuntimeException("SimStore: cannot create writable psimdb directory at " + _simStoreLocation);
             } else {
                 if (!(_simStoreLocation.exists() && _simStoreLocation.canWrite() && _simStoreLocation.isDirectory()))
-                    throw new RuntimeException("SimStore: Channel " + channelId.toString() + " does not exist");
+                    throw new ChannelDoesNotExistException("SimStore: Channel " + channelId.toString() + " does not exist");
             }
         }
         return  _simStoreLocation;
@@ -114,7 +117,7 @@ public class SimStore {
     public SimStore open() {
         getStore(false);
         if (!existsChannelDir())
-            throw new RuntimeException("Channel does not exist");
+            throw new ChannelDoesNotExistException("Channel does not exist");
         File file = new File(getChannelDir(), CHANNEL_CONFIG_FILE);
         channelConfig = ChannelConfigFactory.load(file);
         channelId = getSimId(channelConfig);
@@ -312,5 +315,28 @@ public class SimStore {
     public boolean isNewlyCreated() {
         return newlyCreated;
     }
+
+    public static Pattern isValidCharsPattern() {
+        return Pattern.compile("^([a-zA-Z0-9_]+)$");
+    }
+
+    public static Pattern isReservedNamesPattern(String[] additionalNames) {
+        final String regexStringWordBeginPrefix = "(\\b";
+        final String regexStringWordEndSuffix = "\\b)";
+        final String regexOr = "|";
+
+        String defaultReserved[] = {"new", "copy"};
+
+        List<String> theList = new ArrayList<>();
+        theList.addAll(Arrays.asList(defaultReserved));
+        if (additionalNames != null && additionalNames.length > 0) {
+            theList.addAll(Arrays.asList(additionalNames));
+        }
+
+        String theRegex = theList.stream().map(s -> regexStringWordBeginPrefix + s + regexStringWordEndSuffix).collect(Collectors.joining(regexOr));
+
+        return Pattern.compile(theRegex, Pattern.CASE_INSENSITIVE);
+    }
+
 
 }

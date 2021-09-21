@@ -31,8 +31,8 @@
   <!--  </filter-mapping>-->
 
   <filter>
-    <filter-name>ChannelControlGuardFilter</filter-name>
-    <filter-class>gov.nist.asbestos.services.filter.ChannelControlGuardFilter</filter-class>
+    <filter-name>FtkElementsGuardFilter</filter-name>
+    <filter-class>gov.nist.asbestos.services.filter.FtkElementsGuardFilter</filter-class>
   </filter>
 
   <filter-mapping>
@@ -41,13 +41,13 @@
   </filter-mapping>
 
   <filter-mapping>
-    <filter-name>ChannelControlGuardFilter</filter-name>
-    <url-pattern>/channel</url-pattern>
+    <filter-name>FtkElementsGuardFilter</filter-name>
+    <url-pattern>/rw</url-pattern>
   </filter-mapping>
 
   <filter-mapping>
-    <filter-name>ChannelControlGuardFilter</filter-name>
-    <url-pattern>/channel/*</url-pattern>
+    <filter-name>FtkElementsGuardFilter</filter-name>
+    <url-pattern>/rw/*</url-pattern>
   </filter-mapping>
 
   <servlet>
@@ -62,8 +62,8 @@
   </servlet>
 
   <servlet>
-    <servlet-name>ChannelControl</servlet-name>
-    <servlet-class>gov.nist.asbestos.services.servlet.ChannelControlServlet</servlet-class>
+    <servlet-name>FtkElements</servlet-name>
+    <servlet-class>gov.nist.asbestos.services.servlet.FtkElementsServlet</servlet-class>
     <load-on-startup>2</load-on-startup>
   </servlet>
 
@@ -115,16 +115,6 @@
   </servlet-mapping>
 
   <servlet-mapping>
-    <servlet-name>ChannelControl</servlet-name>
-    <url-pattern>/channel/*</url-pattern>
-  </servlet-mapping>
-
-  <servlet-mapping>
-    <servlet-name>ChannelControl</servlet-name>
-    <url-pattern>/channel</url-pattern>
-  </servlet-mapping>
-
-  <servlet-mapping>
     <servlet-name>TestInstaller</servlet-name>
     <url-pattern>/testInstall</url-pattern>
   </servlet-mapping>
@@ -145,24 +135,35 @@
   </servlet-mapping>
 
   <servlet-mapping>
-    <servlet-name>ChannelControl</servlet-name>
-    <url-pattern>/channelGuard/*</url-pattern>
+    <servlet-name>FtkElements</servlet-name>
+    <url-pattern>/rw/*</url-pattern>
   </servlet-mapping>
 
   <servlet-mapping>
-      <servlet-name>ChannelControl</servlet-name>
-      <url-pattern>/channelGuard</url-pattern>
+    <servlet-name>FtkElements</servlet-name>
+    <url-pattern>/rw</url-pattern>
   </servlet-mapping>
 
   <servlet-mapping>
-    <servlet-name>ChannelControl</servlet-name>
+    <servlet-name>FtkElements</servlet-name>
+    <url-pattern>/accessGuard/*</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+      <servlet-name>FtkElements</servlet-name>
+      <url-pattern>/accessGuard</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>FtkElements</servlet-name>
     <url-pattern>/channelLock</url-pattern>
   </servlet-mapping>
 
   <servlet-mapping>
-    <servlet-name>ChannelControl</servlet-name>
+    <servlet-name>FtkElements</servlet-name>
     <url-pattern>/signIn</url-pattern>
   </servlet-mapping>
+
 
   <servlet-mapping>
     <servlet-name>Gen500</servlet-name>
@@ -172,21 +173,7 @@
   <security-constraint>
     <web-resource-collection>
       <web-resource-name>ChannelEditor</web-resource-name>
-      <url-pattern>/channelGuard/*</url-pattern>
-      <http-method>DELETE</http-method>
-    </web-resource-collection>
-    <auth-constraint>
-      <role-name>editRole</role-name>
-    </auth-constraint>
-    <user-data-constraint>
-      <transport-guarantee>CONFIDENTIAL</transport-guarantee>
-    </user-data-constraint>
-  </security-constraint>
-
-  <security-constraint>
-    <web-resource-collection>
-      <web-resource-name>ChannelEditor</web-resource-name>
-      <url-pattern>/channelGuard</url-pattern>
+      <url-pattern>/accessGuard</url-pattern>
       <http-method>POST</http-method>
     </web-resource-collection>
     <auth-constraint>
@@ -199,7 +186,22 @@
 
   <security-constraint>
     <web-resource-collection>
-      <web-resource-name>ChannelEditor</web-resource-name>
+      <web-resource-name>FTKResourceEditor</web-resource-name>
+      <url-pattern>/accessGuard/*</url-pattern>
+      <http-method>PUT</http-method>
+      <http-method>DELETE</http-method>
+    </web-resource-collection>
+    <auth-constraint>
+      <role-name>editRole</role-name>
+    </auth-constraint>
+    <user-data-constraint>
+      <transport-guarantee>CONFIDENTIAL</transport-guarantee>
+    </user-data-constraint>
+  </security-constraint>
+
+  <security-constraint>
+    <web-resource-collection>
+      <web-resource-name>FTKResourceLocker</web-resource-name>
       <url-pattern>/channelLock</url-pattern>
       <http-method>POST</http-method>
     </web-resource-collection>

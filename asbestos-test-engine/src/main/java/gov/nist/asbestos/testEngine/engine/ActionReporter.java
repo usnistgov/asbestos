@@ -289,6 +289,9 @@ class ActionReporter implements TestDef {
                 Headers responseHeaders = httpBase.getResponseHeaders();
                 String eventUrl = responseHeaders.getProxyEvent();
                 if (eventUrl != null) {
+                    /*
+                     Check fhirToolkitUIHomePage property in service.properties if URI scheme and/or authority are not correct in the link created below.
+                     */
                     String value = EventLinkToUILink.get(eventUrl);
                     try {
                         Ref ref = new Ref(value);

@@ -6,29 +6,50 @@ Vue.use(Vuex)
 import {LOG, PROXY} from '../common/http-common'
 import {CHANNEL} from '../common/http-common'
 import {STARTUPSESSION} from "../common/http-common";
+import {newChannel} from '@/types/channel'
+
+function setDataStateObj(destObj, srcObj) {
+    for (let propKey in destObj) {
+        destObj[propKey] = srcObj[propKey]
+    }
+}
+
 
 export const baseStore = {
     state() {
         return {
-            session: 'default',   // name of current
+            session: 'default',   // name of current test session, which could be different from the channel test session
             sessionNames:[],
             sessionConfigs: {},
-
+            /**
+             * channelName should be used only for creating new channel names,
+             * copying a channel within the current test session,
+             * or to represent the name of the channel to be selected when switching test sessions
+             */
             channelName: 'default',  // current
             channelIds: [],  // for all sessions
-            channel: null,   // current configuration matching channelId
+            /**
+             * channel object should be used for FTK testing purposes since it contains the complete test session and channel name information
+             */
+            channel: newChannel(),   // current configuration matching channelId
             channelIsNew: false, // newly created means not saved to server yet
 
             environments: [
                 'default',
             ],
-
             errors: [],
-
             proxyBase: null,
+            ftkInitialized: false,
+            ftkChannelLoaded: false,
         }
     },
     mutations: {
+        ftkInitComplete(state, value) {
+          state.ftkInitialized = value
+        },
+        ftkChannelLoaded(state, value) {
+            state.ftkChannelLoaded = value
+        },
         setProxyBase(state, value) {
             state.proxyBase = value
         },
@@ -42,7 +63,8 @@ export const baseStore = {
             state.session = theSession
         },
         setSessionConfig(state, config) {
-            state.sessionConfigs[config.name] = config;
+            Vue.set(state.sessionConfigs, config.name, config)
+            // state.sessionConfigs[config.name] = config;
         },
         setSessionNames(state, sessions) {
             state.sessionNames = sessions
@@ -51,9 +73,16 @@ export const baseStore = {
             state.channelName = channelName
         },
         setChannel(state, theChannel) {
-            state.channel = theChannel
-            if (theChannel === null)
+            if (theChannel !== undefined && theChannel !== null) {
+                console.log('set channel: ' + theChannel.channelName)
+
+                setDataStateObj(state.channel, theChannel)
+            } else {
+                setDataStateObj(state.channel, newChannel())
+            }
+            if (theChannel === undefined || theChannel === null)
                 return
+
             const targetChannelId = `${theChannel.testSession}__${theChannel.channelName}`;
             let channelIndex = state.channelIds.findIndex( function(channelId) {
                 return channelId === targetChannelId;
@@ -62,12 +91,20 @@ export const baseStore = {
                 state.channelIds.push(targetChannelId)
             state.channelIsNew = false;
         },
-        setChannelIsNew(state) {
-            state.channelIsNew = true;
+        setChannelIsNew(state, val) {
+            state.channelIsNew = val;
         },
-        installChannel(state, newChannel) {
+        installChannel(state, theChannel) {
+            if (theChannel !== undefined && theChannel !== null) {
+                // console.log('installed : ' + theChannel.channelName)
+                setDataStateObj(state.channel, theChannel)
+            } else {
+                setDataStateObj(state.channel, newChannel())
+            }
+            /*
             if (!newChannel) {
-                state.channel = newChannel;
+                // state.channel = newChannel;
+                console.log('store channel is undef? ' + (newChannel === undefined || newChannel === null))
                 return;
             }
             // const targetChannelId = `${newChannel.testSession}__${newChannel.channelName}`;
@@ -80,7 +117,7 @@ export const baseStore = {
                 state.channel = newChannel
             // }
             state.channel = newChannel
-            state.channelIsNew = false;
+             */
         },
         deleteChannel(state, theChannelId) {
             const channelIndex = state.channelIds.findIndex( function(channelId) {
@@ -103,25 +140,28 @@ export const baseStore = {
         },
     },
     actions: {
-        // used to initialize FTK
-        async initSessionsStore({commit}) {
+        // Generally used to initialize FTK by the default Home Page
+        // requestedSessionId: only used when accessing FTK directly through a URL that has a specific test session
+        async initSessionsStore({commit}, requestedSessionId) {
             let url
             try {
-                url = `CHANNEL/sessionNames`
+                url = `rw/testSession`
                 console.log(url);
-                let data = await CHANNEL.get('sessionNames');
+                let data = await PROXY.get(url);
                 const sessionNames = data.data;
-                console.log(`sessionNames ${sessionNames}`);
+                // console.log(`sessionNames ${sessionNames}`);
                 commit('setSessionNames', sessionNames);
 
+                const aggregatePromises = []
                 const promises = [];
                 sessionNames.forEach(sessionId => {
-                    url = `CHANNEL/sessionConfig/${sessionId}`;
-                    console.log(url);
-                    const promise = CHANNEL.get(`sessionConfig/${sessionId}`);
+                    url = `rw/testSession/${sessionId}`
+                    // console.log(url);
+                    const promise = PROXY.get(url);
                     promises.push(promise);
                 });
-                Promise.all(promises)
+                aggregatePromises.push(
+                    Promise.all(promises)
                     .then(results => {
                         results.forEach(result => {
                             //console.log(`result is ${result}`);
@@ -129,65 +169,52 @@ export const baseStore = {
                             //console.log(`config is ${config}`);
                             commit('setSessionConfig', config);
                         })
-                });
+                }));
 
                 // url = `LOG/startupSession`;
                 // data = await LOG.get('startupSession');
                 // let startupSession = data.data;
-                commit('setSession', STARTUPSESSION);
+                const startupSession = (requestedSessionId !== undefined && requestedSessionId !== null && requestedSessionId !== '') ? requestedSessionId : STARTUPSESSION
+                console.log('Setting startup session to ' + startupSession)
+                commit('setSession', startupSession);
 
                 url = `CHANNEL/channels/all`;
                 console.log(url);
-                let result = await CHANNEL.get('channels/all');
-                data = result.data;
-                let ids = [];
-                data.forEach(item => {
-                    ids.push(item.id);
-                });
-                commit('installChannelIds', ids.sort());
+                aggregatePromises.push(CHANNEL.get('channels/all')
+                    .then(result => {
+                    data = result.data;
+                    let ids = [];
+                    data.forEach(item => {
+                        ids.push(item.id);
+                    });
+                    commit('installChannelIds', ids.sort());
+                }))
 
+                Promise.all(aggregatePromises)
+                    .then(() => {
+                       commit('ftkInitComplete',true)
+                    })
 
             } catch (error) {
                 commit('setError', url + ': ' + error)
                 console.error(`${error} for ${url}`)
             }
         },
-        async selectSession({state, commit}, sessionId) {
+        async selectSession({state, commit /*,getters, dispatch*/}, sessionId) {
             if (sessionId === state.session) return;
-            commit('setSession', sessionId);
-            const url = `CHANNEL/sessionConfig/${sessionId}`
-            CHANNEL.get(`sessionConfig/${sessionId}`)
+            const url = `rw/testSession/${sessionId}`
+            return PROXY.get(url)
                 .then(response => {
+                    commit('setSession', sessionId);
                     commit('setSessionConfig', response.data)
-                })
-                .catch(function (error) {
-                    commit('setError', url + ': ' + error)
-                    console.error(`${error} for ${url}`)
-                })
-        },
-        newSession({commit}, newName) {
-            const url = `addSession/${newName}`
-            console.log(`${url}`)
-            CHANNEL.get(`${url}`)
-                .then(response => {
-                    commit('setSessionNames', response.data)
-                })
-                .catch(function (error) {
-                    commit('setError', url + ': ' + error)
-                    console.error(`${error} for ${url}`)
-                })
-        },
-        delSession({commit}, name) {
-            const url = `delSession/${name}`
-            console.log(`${url}`)
-            CHANNEL.get(`${url}`)
-                .then(response => {
-                    commit('setSessionNames', response.data)
-                    if (response.data.length > 0) {
-                        const obj = response.data[0];
-                        console.log(`new session is ${obj}`)
-                        commit('setSession', obj);
-                    }
+                    // const chIds = getters.getEffectiveChannelIds
+                    // if (chIds !== undefined && chIds !== null && chIds[0] !== undefined) {
+                    //     console.log('Trying to load the first channel in effective session channel list: ' + chIds[0])
+                    //     dispatch('loadChannel', chIds[0])
+                    // }
+                    // commit('installChannel', chIds[0]);
+                    // commit('setChannelName', null);
+
                 })
                 .catch(function (error) {
                     commit('setError', url + ': ' + error)
@@ -196,7 +223,7 @@ export const baseStore = {
         },
         loadChannelNames({commit  /*, state */}) {
             const url = `CHANNEL/channel`
-            PROXY.get('channel')
+            PROXY.get('rw/channel')
                 .then(response => {
                     const fullChannelIds = response.data
                     commit('installChannelIds', fullChannelIds)
@@ -220,7 +247,15 @@ export const baseStore = {
                     commit('setError', url + ': ' + e)
                 })
         },
-        loadChannel({commit}, fullId) {
+        loadChannel({commit}, paramObj) {
+            const fullId = paramObj.channelId
+            const raiseFtkCommit = paramObj.raiseFtkCommit
+            if (this.channel !== undefined) {
+                if (fullId === this.channel.testSession + '__' + this.channel.channelName) {
+                    console.log('Returning a cached copy of channel.')
+                    return this.channel
+                }
+            }
             commit('installChannel', null);
             console.log(`loadChannel ${fullId}`)
             const parts = fullId.split('__', 2);
@@ -230,6 +265,10 @@ export const baseStore = {
             return CHANNEL.get(fullId)
                 .then(response => {
                     commit('installChannel', response.data)
+                    commit('setChannelName', parts[1]);
+                    if (raiseFtkCommit) {
+                        commit('ftkChannelLoaded', true);
+                    }
                     return response.data
                 })
                 .catch(e => {
@@ -252,18 +291,27 @@ export const baseStore = {
         }
     },
     getters: {
+        getChannel: (state) => {
+           return state.channel
+        },
+        getChannelName: (state,getters) => {
+            return getters.getChannel.channelName
+        },
+        getChannelTestSession: (state,getters) => {
+           return getters.getChannel.testSession
+        },
         getSessionConfig: (state) => {
             return state.sessionConfigs[state.session];
         },
         getProxyBase: (state) => (parms) => {
             if (parms === null)
                 return state.proxyBase
-            const channelId = parms.channelId
+            const channelName = parms.channelName
             const sessionId = parms.sessionId
-            return `${state.proxyBase}/${sessionId}__${channelId}`
+            return `${state.proxyBase}/${sessionId}__${channelName}`
         },
         getChannelId: (state) => {
-            return `${state.session}__${state.channelName}`
+            return `${state.channel.testSession}__${state.channel.channelName}`
         },
         channelExists: (state) => (theChannelId) => {
             const index = state.channelIds.findIndex(function(channelId) {
@@ -271,24 +319,45 @@ export const baseStore = {
             })
             return index !== -1;
         },
+        /**
+         * This method only returns local channel excluding Includes
+         */
         getChannelIdsForSession: (state) => (session) => {
             return state.channelIds.filter(id => id.startsWith(`${session}__`));
         },
-        getChannelIdsForCurrentSession: (state) => {
-            return state.channelIds.filter(id => id.startsWith(`${state.session}__`));
+        getChannelIdsForCurrentSession: (state,getters) => {
+            return state.channelIds.filter(id => {
+                try {
+                    const parts = id.split('__')
+                    const chSessionPart = parts[0]
+                    const includesSession = [state.session].concat(getters.getSessionIncludes(state.session))
+                    // console.log(`looking for ${includesSession}`)
+                    return includesSession.includes(chSessionPart)
+                } catch (e) {
+                   console.log(e)
+                   return false
+                }
+            })
         },
         getChannelNamesForCurrentSession: (state, getters) => {
             return getters.getChannelIdsForCurrentSession.map(function (channelId) {
                 const parts = channelId.split('__');
-                return parts[1];
+                // Hide the session name if channel is already part of the same session
+                if (state.session === parts[0]) {
+                    return parts[1];
+                } else {
+                    // Full Id
+                    return channelId
+                }
             })
         },
         getSessionIncludes: (state) => (session) => {
               const config = state.sessionConfigs[session];
-              if (!config)
+              if (config === undefined || config === null)
                   return [];
               return config.includes;
         },
+        /*
         getEffectiveChannelIds: (state, getters) => {
             let session = state.session;
             let ids = getters.getChannelIdsForSession(session);
@@ -301,5 +370,6 @@ export const baseStore = {
             // }
             return ids;
         }
+         */
     }
 }
