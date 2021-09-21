@@ -1,5 +1,4 @@
 <TestScript xmlns="http://hl7.org/fhir">
-    <!-- v4 temp progress marker -->
     <fixture id="pdb-bundle">
         <autocreate value="false"/>
         <autodelete value="false"/>
@@ -44,16 +43,31 @@
     	<expression value="Bundle.entry.fullUrl"/>
         <sourceId value="patient_bundle"/>
     </variable>
-<!--    <variable>-->
-<!--        <name value="readbackPatientId"/>-->
-<!--        <expression value="Patient.identifier.value"/>-->
-<!--        <sourceId value="read-back"/>-->
-<!--    </variable>-->
     <variable>
         <name value="requestEntryCount"/>
         <expression value="Bundle.entry.count()"/>
         <sourceId value="pdb-bundle"/>
     </variable>
+    <variable>
+        <name value="ssListUsualIdentifier"/>
+        <expression value="Bundle.entry.resource.where($this is List and code.coding.code='submissionset' ).select(identifier).where(use='usual').value"/>
+        <sourceId value="pdb-bundle"/>
+    </variable>
+    <variable>
+        <name value="ssListStatus"/>
+        <expression value="Bundle.entry.resource.where($this is List and code.coding.code='submissionset').status.value"/>
+        <sourceId value="pdb-bundle"/>
+    </variable>
+    <variable>
+        <name value="patientIdentifier"/>
+        <defaultValue value="Bundle.entry.select(resource as Patient).identifier[0]"/>
+    </variable>
+    <variable>
+        <name value="patientIdentifierSearchParamValue"/>
+        <expression value="${patientIdentifier}.system.value + '|' + ${patientIdentifier}.value.value"/>
+        <sourceId value="patient_bundle"/>
+    </variable>
+
     <test>
         <description value="Submit."/>
         <action>
@@ -99,4 +113,57 @@
             </operation>
         </action>
     </test>
+    <test>
+        <modifierExtension url="urn:noErrors"/>
+        <description value="Verify DocumentResponder base address."/>
+        <action>
+            <operation>
+                <description value="Extract the base address from the PDB response location."/>
+                <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
+                    <extension url="component">
+                        <valueString value="../../Library/VerifyDocumentResponderBaseAddress.xml"/>
+                    </extension>
+                    <extension url="urn:fixture-in">
+                        <valueString  value="pdb-response"/>
+                    </extension>
+                    <extension url="urn:variable-out">
+                        <valueString value="docRespBaseAddress"/>
+                    </extension>
+                </modifierExtension>
+            </operation>
+        </action>
+    </test>
+    <test>
+        <modifierExtension url="urn:noErrors"/>
+        <description value="Search List (SubmissionSet) in server."/>
+        <action>
+            <operation>
+                <description value="for List (SubmissionSet)."/>
+                <type>
+                    <code value="search"/>
+                </type>
+                <contentType value="json"/>
+                <url value="${docRespBaseAddress}/List?code=submissionset&amp;identifier=${ssListUsualIdentifier}&amp;status=${ssListStatus}&amp;patient.identifier=${patientIdentifierSearchParamValue}"/>
+                <responseId value="ssList-search"/>
+            </operation>
+        </action>
+        <action>
+            <assert>
+                <description value="Returns 200."/>
+                <sourceId value="ssList-search"/>
+                <response value="okay"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
+            <assert>
+                <description value="List returned."/>
+                <compareToSourceId value="ssList-search"/>
+                <compareToSourceExpression value="Bundle.total = 1"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+    </test>
+
+
 </TestScript>
