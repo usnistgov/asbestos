@@ -170,10 +170,10 @@
         /*grid-area: controls;*/
         /*grid-column: 2;*/
         /*grid-row: 2;*/
-        position: absolute;
-        right: 9px;
+        /*position: absolute;*/
+        /*right: 9px;*/
         text-align: left;
-        width: min-content;
+        /*width: min-content;*/
     }
 </style>
 // these are shared across the tool

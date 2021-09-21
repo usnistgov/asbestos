@@ -237,7 +237,7 @@ public class ProxyServlet extends HttpServlet {
         log.info("doDelete  " + uri);
         Verb verb = Verb.DELETE;
         SimStore simStore = getSimStore(req, resp, uri, verb);
-        doGetDelete(req, resp, simStore, uri, verb);
+        doGetOrDelete(req, resp, simStore, uri, verb);
     }
 
     private void returnOperationOutcome(HttpServletRequest req, HttpServletResponse resp, ITask task, Throwable t) throws IOException, ServletException {
@@ -306,7 +306,7 @@ public class ProxyServlet extends HttpServlet {
         }
 
         // All other requests including passthrough channel's capability statement, and other MHD requests
-        doGetDelete(req, resp, simStore, uri, verb);
+        doGetOrDelete(req, resp, simStore, uri, verb);
     }
 
     private void doGetCapabilityStatement(HttpServletRequest req, HttpServletResponse resp, SimStore simStore, URI uri, Verb verb, Headers inHeaders, String channelId) {
@@ -350,7 +350,7 @@ public class ProxyServlet extends HttpServlet {
         }
     }
 
-    private void doGetDelete(HttpServletRequest req, HttpServletResponse resp, SimStore simStore, URI uri, Verb verb)  {
+    private void doGetOrDelete(HttpServletRequest req, HttpServletResponse resp, SimStore simStore, URI uri, Verb verb)  {
         if (simStore == null) return;
 
         Event event = simStore.newEvent();

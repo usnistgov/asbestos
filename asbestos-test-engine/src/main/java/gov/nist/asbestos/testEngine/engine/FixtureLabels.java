@@ -178,8 +178,10 @@ public class FixtureLabels {
         if (Strings.isNullOrEmpty(label))
             label = rawReference;
 
-        return "<a href=\"" + rawReference + "\"" + " target=\"_blank\">" +
-                referenceLabel +
+        return "<a href=\"" +
+                rawReference +
+                "\"" + " target=\"_blank\">" +
+                label  +
                 "</a>";
     }
 

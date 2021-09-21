@@ -4,14 +4,19 @@ import gov.nist.asbestos.client.Base.ParserBase;
 import gov.nist.asbestos.client.client.FhirClient;
 import gov.nist.asbestos.client.events.Event;
 import gov.nist.asbestos.client.events.ITask;
+import gov.nist.asbestos.client.events.NoOpTask;
 import gov.nist.asbestos.client.log.SimStore;
 import gov.nist.asbestos.client.resolver.ResourceCacheMgr;
 import gov.nist.asbestos.client.resolver.ResourceMgr;
+import gov.nist.asbestos.mhd.channel.MhdImplFactory;
+import gov.nist.asbestos.mhd.channel.MhdProfileVersionInterface;
 import gov.nist.asbestos.mhd.transactionSupport.AssigningAuthorities;
 import gov.nist.asbestos.mhd.transactionSupport.CodeTranslator;
 import gov.nist.asbestos.mhd.transactionSupport.CodeTranslatorBuilder;
 import gov.nist.asbestos.mhd.transforms.BundleToRegistryObjectList;
 import gov.nist.asbestos.client.channel.ChannelConfig;
+import gov.nist.asbestos.mhd.channel.MhdVersionEnum;
+import gov.nist.asbestos.mhd.transforms.MhdTransforms;
 import gov.nist.asbestos.simapi.simCommon.SimId;
 import gov.nist.asbestos.simapi.validation.Val;
 import gov.nist.asbestos.simapi.validation.ValErrors;
@@ -61,7 +66,7 @@ class BuildRegistryObjectListTest {
                 .setChannelType("mhd")
                 .setActorType("fhir")
                 .setEnvironment("default")
-                .setFhirBase("http://localhost:8877/fhir/fhir")
+                .setFhirBase("http://localhost:7080/fhir")
                 .setTestSession("default");
 
         rMgr = new ResourceMgr();
@@ -97,7 +102,11 @@ class BuildRegistryObjectListTest {
                 .setAssigningAuthorities(AssigningAuthorities.allowAny())
                 .setVal(val);
 
-        RegistryObjectListType rol = xlate.buildRegistryObjectList();
+        MhdTransforms mhdTransforms = new MhdTransforms(rMgr, val, new NoOpTask());
+
+        MhdProfileVersionInterface mhdVersionSpecificImpl = MhdImplFactory.getImplementation(MhdVersionEnum.MHDv3x, val, mhdTransforms);
+
+        RegistryObjectListType rol = xlate.buildRegistryObjectList(mhdVersionSpecificImpl);
         if (val.hasErrors())
             fail( ValFactory.toJson(new ValErrors(val)));
         else

@@ -9,11 +9,11 @@ public class ITConfig {
     public static String getFhirPort() {
         // for running in automatic IT tests from Maven
         if (forMavenBuild)
-            return "8080";
+            return "7080";
         // For running manually from IntelliJ with...
         // proxy running at appContext /proxy
         // fhir running in separate/external Tomcat
-        return "8080";
+        return "7080";
     }
 
     public static String getProxyPort() {
@@ -27,7 +27,7 @@ public class ITConfig {
     }
 
     static String getFhirBase() {
-        return "http://localhost:" + getFhirPort() + "/fhir/fhir";
+        return "http://localhost:" + getFhirPort() + "/fhir";
     }
 
     static String getFhirToolkitBase() {

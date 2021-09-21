@@ -1,9 +1,7 @@
 package gov.nist.asbestos.http.operations;
 
 import org.apache.commons.io.IOUtils;
-import sun.nio.ch.IOUtil;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URI;

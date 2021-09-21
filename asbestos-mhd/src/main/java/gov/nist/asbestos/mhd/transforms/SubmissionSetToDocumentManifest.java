@@ -37,7 +37,7 @@ public class SubmissionSetToDocumentManifest implements IVal {
         String id = null;
         if (ss.getId() != null) {
             id = ss.getId();
-            dm.setId(Utils.stripUrnPrefix(ss.getId()));
+            dm.setId(Utils.stripUrnPrefixes(ss.getId()));
             Identifier idr = new Identifier();
             idr.setSystem("urn:ietf:rfc:3986");
             idr.setValue(ss.getId());
@@ -107,7 +107,7 @@ public class SubmissionSetToDocumentManifest implements IVal {
                 String fhirBase = ServiceProperties.getInstance().getPropertyOrStop(ServicePropertiesEnum.FHIR_TOOLKIT_BASE) + "/proxy/" + channelConfig.asFullId();
                 String reference = fhirBase +
                         "/DocumentReference/" +
-                        Utils.stripUrnPrefix(assoc.getTargetObject());
+                        Utils.stripUrnPrefixes(assoc.getTargetObject());
                 dm.addContent(new Reference(reference));
             }
         }

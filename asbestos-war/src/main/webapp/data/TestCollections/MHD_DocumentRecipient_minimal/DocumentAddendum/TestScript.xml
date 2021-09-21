@@ -1,0 +1,287 @@
+<TestScript xmlns="http://hl7.org/fhir">
+    <description value="Submit Provide Document Bundle followed by an Addendum."/>
+    <fixture id="original-bundle">
+        <autocreate value="false"/>
+        <autodelete value="false"/>
+        <resource>
+            <reference value="Bundle/original.xml"/>
+        </resource>
+    </fixture>
+    <fixture id="addendum-bundle">
+        <autocreate value="false"/>
+        <autodelete value="false"/>
+        <resource>
+            <reference value="Bundle/addendum.xml"/>
+        </resource>
+    </fixture>
+    <fixture id="patient_bundle">
+        <!--
+           This patient comes out of the test Patient cache
+        -->
+        <autocreate value="false"/>
+        <autodelete value="false"/>
+        <resource>
+            <reference value="Patient/Alex_Alder"/>
+        </resource>
+    </fixture>
+    <variable>
+        <name value="DocRefUrl"/>
+        <expression value="Bundle.entry[0].response.location"/>
+        <sourceId value="pdb-response"/>
+    </variable>
+    <variable>
+        <name value="DocRefUrlAddendum"/>
+        <expression value="Bundle.entry[0].response.location"/>
+        <sourceId value="addendum-response"/>
+    </variable>
+    <variable>  <!-- referenced in pdb -->
+        <name value="requestPatientRef"/>
+        <expression value="Bundle.entry.fullUrl"/>
+        <sourceId value="patient_bundle"/>
+    </variable>
+    <variable>
+    	<name value="patientResourceId"/>
+    	<expression value="Bundle.entry.fullUrl"/>
+        <sourceId value="patient_bundle"/>
+    </variable>
+<!--    <variable>-->
+<!--        <name value="readbackPatientId"/>-->
+<!--        <expression value="Patient.identifier.value"/>-->
+<!--        <sourceId value="read-back"/>-->
+<!--    </variable>-->
+    <variable>
+        <name value="requestEntryCount"/>
+        <expression value="Bundle.entry.count()"/>
+        <sourceId value="original-bundle"/>
+    </variable>
+    <variable>
+        <name value="original"/>
+        <expression value="Bundle.entry[0].response.location"/>
+        <sourceId value="pdb-response"/>
+    </variable>
+    <setup>
+        <action>
+            <operation>
+                <!-- references patient from resourceCache in EC -->
+                <description value="send PDB"/>
+                <label value="create"/>
+                <type>
+                    <system value="https://github.com/usnistgov/asbestos/wiki/Testscript-Operation-Codes"/>
+                    <code value="mhd-pdb-transaction"/>
+                </type>
+                <sourceId value="original-bundle"/>
+                <responseId value="pdb-response"/>
+            </operation>
+        </action>
+        <action>
+            <assert>
+                <description value="... transaction was successful"/>
+                <response value="okay"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
+            <assert>
+                <description value="... return Bundle"/>
+                <compareToSourceId value="pdb-response"/>
+                <compareToSourceExpression value="Bundle.exists()"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
+            <assert>
+                <description value="... Bundle is type transaction-response"/>
+                <compareToSourceId value="pdb-response"/>
+                <compareToSourceExpression value="Bundle.type = 'transaction-response'"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
+            <assert>
+                <description value="... Bundle may not contain OperationOutcome"/>
+                <compareToSourceId value="pdb-response"/>
+                <compareToSourceExpression value="Bundle.entry.response.outcome.where(OperationOutcome).exists().not()"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
+            <assert>
+                <description value="... all parts of transaction successful"/>
+                <expression value="Bundle.entry.response.all(status.startsWith(201))"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
+            <assert>
+                <description value="... response contains one entry for each entry in request"/>
+                <expression value="Bundle.entry.count()"/>
+                <value value="${requestEntryCount}"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
+            <operation>
+                <description value="DocumentReference"/>
+                <label value="read-back"/>
+                <type>
+                    <code value="read"/>
+                </type>
+                <url value="${DocRefUrl}"/>
+                <responseId value="readBackResponse"/>
+            </operation>
+        </action>
+        <action>
+            <assert>
+                <description value="... was successful"/>
+                <response value="okay"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
+            <assert>
+                <description value="... returned a DocumentReference"/>
+                <resource value="DocumentReference"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
+            <assert>
+                <description value="... status is current"/>
+                <expression value="DocumentReference.status = 'current'"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+    </setup>
+    <test>
+        <description value="Send Addendum DocumentReference in PDB"/>
+        <action>
+            <operation>
+                <!-- references patient from resourceCache in EC -->
+                <description value="send Addendum PDB"/>
+                <label value="create"/>
+                <type>
+                    <system value="https://github.com/usnistgov/asbestos/wiki/Testscript-Operation-Codes"/>
+                    <code value="mhd-pdb-transaction"/>
+                </type>
+                <sourceId value="addendum-bundle"/>
+                <responseId value="addendum-response"/>
+            </operation>
+        </action>
+        <action>
+            <assert>
+                <description value="... transaction was successful"/>
+                <response value="okay"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
+            <assert>
+                <description value="... return Bundle"/>
+                <compareToSourceId value="addendum-response"/>
+                <compareToSourceExpression value="Bundle.exists()"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
+            <assert>
+                <description value="... Bundle is type transaction-response"/>
+                <compareToSourceId value="addendum-response"/>
+                <compareToSourceExpression value="Bundle.type = 'transaction-response'"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
+            <assert>
+                <description value="... Bundle may not contain OperationOutcome"/>
+                <compareToSourceId value="addendum-response"/>
+                <compareToSourceExpression value="Bundle.entry.response.outcome.where(OperationOutcome).exists().not()"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
+            <assert>
+                <description value="... all parts of transaction successful"/>
+                <expression value="Bundle.entry.response.all(status.startsWith(201))"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
+            <assert>
+                <description value="... response contains one entry for each entry in request"/>
+                <expression value="Bundle.entry.count()"/>
+                <value value="${requestEntryCount}"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+    </test>
+    <test>
+        <description value="Read back addendum DocumentReference"/>
+        <action>
+            <operation>
+                <description value="Addendum DocumentReference"/>
+                <label value="read-back"/>
+                <type>
+                    <code value="read"/>
+                </type>
+                <url value="${DocRefUrlAddendum}"/>
+                <responseId value="readBackResponse"/>
+            </operation>
+        </action>
+        <action>
+            <assert>
+                <description value="... was successful"/>
+                <response value="okay"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
+            <assert>
+                <description value="... returned a DocumentReference"/>
+                <resource value="DocumentReference"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
+            <assert>
+                <description value="... status is current"/>
+                <expression value="DocumentReference.status = 'current'"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+    </test>
+    <test>
+        <description value="Read back original DocumentReference and verify status is current"/>
+        <action>
+            <operation>
+                <description value="Original DocumentReference"/>
+                <label value="read-back"/>
+                <type>
+                    <code value="read"/>
+                </type>
+                <url value="${DocRefUrl}"/>
+                <responseId value="rereadBackResponse"/>
+            </operation>
+        </action>
+        <action>
+            <assert>
+                <description value="... was successful"/>
+                <response value="okay"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
+            <assert>
+                <description value="... returned a DocumentReference"/>
+                <resource value="DocumentReference"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
+            <assert>
+                <description value="... status is current"/>
+                <expression value="DocumentReference.status = 'current'"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+    </test>
+</TestScript>

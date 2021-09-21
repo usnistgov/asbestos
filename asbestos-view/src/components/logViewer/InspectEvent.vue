@@ -84,7 +84,7 @@
                         selected: inspectRequest && requestEnabled,
                         'not-selected': !(inspectRequest && requestEnabled)
                         }"
-                      @click="displayRequest = false; displayResponse = false; displayInspector = true; inspectType = 'request'; displayValidations = false">
+                      @click="doInspectRequest">
                         Inspect Request
                     </span>
                     <div class="divider"></div>
@@ -102,12 +102,20 @@
                                 title="Open Inspector in a new browser tab"></a>
                     </template>
                     <template v-else>
-                       <span v-bind:class="{
-                         selected: displayValidations,
-                         'not-selected': !displayValidations
-                         }" @click="displayRequest = false; displayResponse = false; displayInspector = false; displayValidations = true">
+                        <span v-bind:class="{
+                        'grayText' : isPdbValDisabled,
+                         'selected': displayValidations,
+                         'not-selected': !displayValidations,
+                         }" @click="doPdbVal">
                          PDB Validations
                         </span>
+                        <select size="1" v-model="bundleEvalMhdVersion">
+                            <option :key="eKey"
+                                    :value="$store.state.channel.pdbAssertions[eKey]"
+                                    v-for="(e,eKey) in $store.state.channel.mhdVersions">
+                                {{ e }}
+                            </option>
+                        </select>
                     </template>
                 </div>
             </div>
@@ -152,7 +160,7 @@
                         :session-id="sessionId"
                         :channel-name="channelName"
                         :event-id="eventId"
-                        :test-id="'bundle_eval'"
+                        :test-id="pdbValMhdAssertion"
                         :test-collection="'Internal'"
                         :run-eval="true"
                         :no-inspect-label="true"
@@ -181,6 +189,8 @@
                 inspectType: (this.modalMode===undefined)?'request':this.modalMode,
                 allEnabled: false,
                 isLoading: false,
+                defaultMhdVersion: 'MHDv3.x',
+                pdbValMhdAssertion: '',
             }
         },
         methods: {
@@ -270,8 +280,41 @@
                     this.inspectType = 'response';
                 }
             },
+            doInspectRequest() {
+                this.displayRequest = false;
+                this.displayResponse = false;
+                this.displayInspector = true;
+                this.inspectType = 'request';
+                this.displayValidations = false
+            },
+            doPdbVal() {
+                if (!this.isPdbValDisabled) {
+                    // console.log(this.bundleEvalMhdVersion)
+                    if (this.modalMode === undefined || this.modalMode==='') {
+                        this.$store.commit('setTestCollectionName', 'Internal')
+                        this.$store.dispatch('runSingleEventEval',
+                            {
+                                testId: this.bundleEvalMhdVersion,
+                                eventId: this.eventId,
+                                testCollectionName: 'Internal'
+                            }).then(() => {
+                            this.$store.dispatch('loadTestScripts', [this.bundleEvalMhdVersion]).then(() => {
+                                this.displayRequest = false;
+                                this.displayResponse = false;
+                                this.displayInspector = false;
+                                this.inspectType = '';
+                                this.displayValidations = true;
+                            })
+                        })
+                    }
+
+                }
+            },
         },
         computed: {
+            isPdbValDisabled() {
+                return this.pdbValMhdAssertion==='' || this.pdbValMhdAssertion===undefined || this.inspectType=== 'response'
+            },
             requestEnabled() {
                 if (this.allEnabled) return true;
                 if (!this.reqresp)
@@ -348,6 +391,17 @@
                 }
                 const url = FHIRTOOLKITBASEURL + '/log/' + this.sessionId + '/' + this.channelName + '/' + summary.resourceType + '/' + this.eventId + '?textMode=raw'
                 return url
+            },
+            bundleEvalMhdVersion: {
+                set(val) {
+                      if (val === '' || val === undefined)
+                          return;
+                      this.pdbValMhdAssertion= val
+                    this.doPdbVal()
+                },
+                get() {
+                    return this.pdbValMhdAssertion
+                }
             }
         },
         created() {
@@ -384,7 +438,7 @@
             },
         },
         props: [
-            'eventId', 'sessionId', 'channelName', 'noNav', 'reqresp', 'modalMode'
+            'eventId', 'sessionId', 'channelName', 'noNav', 'reqresp', 'modalMode',
         ],
         mixins: [eventMixin, errorHandlerMixin],
         components: {

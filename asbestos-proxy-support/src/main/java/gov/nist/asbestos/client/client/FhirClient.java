@@ -211,21 +211,27 @@ public class FhirClient {
 //        } else {
             Ref ref = new Ref(getter.getUri());
             String expectedResourceType = ref.getResourceType();
-            String returnedResourceType = resource.getClass().getSimpleName();
+            String returnedResourceType = resource.fhirType();
             if (expectedResourceType != null && !expectedResourceType.equals("")) {
                 if (!returnedResourceType.equals("OperationOutcome")) {
                     if (!expectedResourceType.equals("metadata") && !returnedResourceType.equals("CapabilityStatement")) {
                         if (!returnedResourceType.equals(expectedResourceType)) {
-                            if (/*getter.isSearch() && */returnedResourceType.equals("Bundle")) {
+                            /* Known Mismatch types - Special cases */
+                            if (returnedResourceType.equals("Bundle")) {
                                 Bundle bundle = (Bundle) resource;
                                 if (bundle.hasEntry()) {
-                                    if (!bundle.getEntry().get(0).getResource().getClass().getSimpleName().equals(expectedResourceType))
-                                        throw new Error("Search returned bundle containing " + bundle.getEntry().get(0).getResource().getClass().getSimpleName() + " instead of " + expectedResourceType);
+                                    String entryResourceFhirType = bundle.getEntry().get(0).getResource().fhirType();
+                                    if (!entryResourceFhirType.equals(expectedResourceType))
+                                        throw new Error("Search returned bundle containing " + entryResourceFhirType + " instead of " + expectedResourceType);
                                     if (!getter.isSearch())
                                         resource = bundle.getEntry().get(0).getResource();
                                 }
-                            } else
-                                throw new Error("Read must return " + expectedResourceType + " - received " + resource.getClass().getSimpleName() + " instead");
+                            } /* else if ("SubmissionSetMhdList".equals(expectedResourceType) && "ListResource".equals(returnedResourceType)) {
+                                // OK
+                            } */ else {
+                                /* Unknown Mismatch types */
+                                throw new Error("Read must return " + expectedResourceType + " - received " + returnedResourceType + " instead");
+                            }
                         }
                     }
                 }

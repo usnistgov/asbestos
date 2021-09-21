@@ -15,6 +15,7 @@ import oasis.names.tc.ebxml_regrep.xsd.rim._3.SlotType1;
 import java.net.URI;
 import java.util.*;
 
+import static gov.nist.asbestos.mhd.translation.search.DocManSQParamTranslator.GetSubmissionSetAndContentsKey;
 import static gov.nist.asbestos.mhd.translation.search.DocRefSQParamTranslator.queryType;
 
 public class FhirSq {
@@ -80,7 +81,7 @@ public class FhirSq {
             if (names.contains(DocManSQParamTranslator.SSuidKey)) {
                 params.remove(DocManSQParamTranslator.PatientId); // these are not needed when SsuidKey is used
                 params.remove(DocManSQParamTranslator.Status); // these are not needed when SsuidKey is used
-                return run(params, DocManSQParamTranslator.GetSubmissionSetAndContentsKey, toAddr, true, task);
+                return run(params, GetSubmissionSetAndContentsKey, toAddr, true, task);
             } else {
                 throw new RuntimeException("Search on " + names.toString() + " not implemented");
             }
@@ -89,9 +90,12 @@ public class FhirSq {
 
     }
 
-    public static AhqrSender documentEntryByUidQuery(String uid, URI toAddr, ITask task)  {
+    public static AhqrSender documentEntryByUidQuery(String uid, String status, URI toAddr, ITask task)  {
         Map<String, List<String>> model = new HashMap<>();
         model.put("$XDSDocumentEntryUniqueId", Collections.singletonList(uid));
+        if (status != null) {
+            model.put("$XDSDocumentEntryStatus", Collections.singletonList(status));
+        }
         return run(model, "urn:uuid:5c4f972b-d56b-40ac-a5fc-c8ca9b40b9d4", toAddr, true, task);
     }
 
@@ -114,7 +118,7 @@ public class FhirSq {
     public static AhqrSender submissionSetByUidQuery(String uid, URI toAddr, ITask task)  {
         Map<String, List<String>> model = new HashMap<>();
         model.put("$XDSSubmissionSetUniqueId", Collections.singletonList(uid));
-        return run(model, "urn:uuid:e8e3cb2c-e39c-46b9-99e4-c12f57260b83", toAddr, true, task);
+        return run(model, GetSubmissionSetAndContentsKey, toAddr, true, task);
 
         // query returns more than what we want - prune results
     }

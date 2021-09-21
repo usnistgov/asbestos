@@ -10,8 +10,8 @@ export const testRunnerStore = {
         return {
             // testCollections (for listings in control panel)
             // loaded by action loadTestCollectionNames
-            clientTestCollectionNames: [],
-            serverTestCollectionNames: [],
+            clientTestCollectionObjs: [],
+            serverTestCollectionObjs: [],
             testCollectionsLoaded: false,  // used as a startup heartbeat for test engine
 
             // Only one testCollection is loaded at any time
@@ -48,6 +48,32 @@ export const testRunnerStore = {
 
             ftkTestDependencies: {},
             nonCurrentTcTestReports: {},
+
+            doReloadTestCollectionObjs: function(state, tcObj, tcObjs) {
+                if (tcObj in state) {
+                    if (state[tcObj].length > 0) {
+                        state[tcObj].splice(0, state[tcObj].length)
+                    }
+                    for (let r of tcObjs) {
+                        state[tcObj].push(r)
+                    }
+                }
+            },
+
+            filterTestCollectionsMhdVersion: function(state, rootState, tcObjs, mhdVersions) {
+                if (mhdVersions === undefined) {
+                    mhdVersions = rootState.base.channel.mhdVersions
+                }
+                if (mhdVersions !== null && Array.isArray(mhdVersions)) {
+                    // console.log(String(tcObjs.map(e=>e.mhdVersion)))
+                    return tcObjs.filter(e => mhdVersions.includes(e.mhdVersion)).map(e => e.name)
+                }
+                return tcObjs.map(e => e.name)
+            },
+
+            sortTestCollection: function(l,r) {
+                return l.name.localeCompare(r.name)
+            }
         }
     },
     mutations: {
@@ -199,11 +225,11 @@ export const testRunnerStore = {
         setTestCollectionName(state, name) {
             state.currentTestCollectionName = name
         },
-        setClientTestCollectionNames(state, names) {
-            state.clientTestCollectionNames = names
+        setClientTestCollectionObjs(state, objs) {
+            state.doReloadTestCollectionObjs(state, 'clientTestCollectionObjs', objs)
         },
-        setServerTestCollectionNames(state, names) {
-            state.serverTestCollectionNames = names
+        setServerTestCollectionObjs(state, objs) {
+            state.doReloadTestCollectionObjs(state, 'serverTestCollectionObjs', objs)
         },
         setClientTestResult(state, parms) {     // { testId: testId, result: result }
             Vue.set(state.clientTestResult, parms.testId, parms.reports)
@@ -216,6 +242,15 @@ export const testRunnerStore = {
         },
     },
     getters: {
+        clientTestCollectionNames: (state,rootState) => (mhdVersions) => {
+            return state.filterTestCollectionsMhdVersion(state, rootState, state.clientTestCollectionObjs, mhdVersions)
+        },
+        serverTestCollectionNames: (state,rootState) => (mhdVersions) => {
+            return state.filterTestCollectionsMhdVersion(state, rootState, state.serverTestCollectionObjs, mhdVersions)
+        },
+        allServerTestCollectionNames: (state) => {
+            return state.serverTestCollectionObjs.map(e => e.name)
+        },
         testReportNames(state) {
             return Object.keys(state.testReports).sort()
         },
@@ -262,14 +297,6 @@ export const testRunnerStore = {
         },
     },
     actions: {
-        /*
-        async loadHapiFhirBase({commit}) {
-            if (this.hapiFhirBase !== null)
-                return;
-            const result = await ENGINE.get('hapiFhirBase');
-            commit('setHapiFhirBase', result.data);
-        },
-         */
         loadTestAssertions({commit}) {
             const url = `assertions`
             ENGINE.get(url)
@@ -463,24 +490,14 @@ export const testRunnerStore = {
             })
             return promise
         },
-        async loadTestCollectionNames({commit}) {
-            const url = `collections`
+        async loadTestCollectionNames({commit, state}) {
+            const url = 'collections'
             try {
                 ENGINE.get(url)
                     .then(response => {
                         commit('testCollectionsLoaded')  // startup heartbeat for test engine
-                        let clientTestNames = []
-                        let serverTestNames = []
-                        response.data.forEach(collection => {
-                            if (!collection.hidden) {
-                                if (collection.server)
-                                    serverTestNames.push(collection.name)
-                                else
-                                    clientTestNames.push(collection.name)
-                            }
-                        })
-                        commit('setClientTestCollectionNames', clientTestNames.sort())
-                        commit('setServerTestCollectionNames', serverTestNames.sort())
+                        commit('setClientTestCollectionObjs', response.data.filter(e => !e.hidden && !e.server).sort(state.sortTestCollection))
+                        commit('setServerTestCollectionObjs', response.data.filter(e => !e.hidden && e.server).sort(state.sortTestCollection))
                     })
                 .catch(function (error) {
                     commit('setError', url + ': ' + error)
@@ -527,31 +544,6 @@ export const testRunnerStore = {
                 commit('setError', ENGINE.baseURL + url + ': ' + error)
             }
         },
-        /* TODO: does not seem to be used anywhere.
-        // this exists because loadCurrentTestCollection updates currentTestCollectionName
-        // which causes TestControlPanel2 to auto-route to test display
-        // this was first used for self tests.
-        async loadTestCollection({commit}, testCollectionName) {
-            const url = `collection/${testCollectionName}`
-            try {
-                //commit('clearTestScripts')  // clears testScripts
-                let theResponse = ""
-                const promise = ENGINE.get(url)
-                    .then(response => {
-                        theResponse = response.data
-                    })
-                await promise
-                commit('setTestScriptNames', theResponse.testNames)  // sets testScriptNames
-                const isClient = !theResponse.isServerTest
-                commit('setRequiredChannel', theResponse.requiredChannel)  // sets requiredChannel
-                const description = theResponse.description
-                commit('setCollectionDescription', description)  // sets collectionDescription
-                commit('setIsClientTest', isClient)   // sets isClientTest
-            } catch (error) {
-                commit('setError', ENGINE.baseURL + url + ': ' + error)
-            }
-        },
-         */
 
 
     }

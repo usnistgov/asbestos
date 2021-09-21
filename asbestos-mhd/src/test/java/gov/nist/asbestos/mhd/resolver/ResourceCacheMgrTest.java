@@ -19,7 +19,7 @@ public class ResourceCacheMgrTest {
         File externalCache = Paths.get(getClass().getResource("/external_cache/findme.txt").toURI()).getParent().toFile();
 
         ResourceCacheMgr mgr = new ResourceCacheMgr(externalCache);
-        Ref ref = new Ref("http://localhost:8080/fhir/Patient/a2");
+        Ref ref = new Ref("http://localhost:7080/fhir/Patient/a2");
         ResourceWrapper resource = mgr.getResource(ref);
 
         assertNotNull(resource);

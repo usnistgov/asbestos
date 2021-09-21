@@ -1,5 +1,9 @@
 SET TOOLKITS_DIR=%CATALINA_HOME%\Toolkits
 
+REM Gson library problem in Jre16
+REM See https://github.com/google/gson/issues/1875
+SET "CATALINA_OPTS=%CATALINA_OPTS% --add-opens java.base/java.util=ALL-UNNAMED"
+
 REM Service Properties
 REM Enable the Java system property to use a specific property file
 SET "CATALINA_OPTS=%CATALINA_OPTS% -DSERVICE_PROPERTIES=%TOOLKITS_DIR%\FhirToolkit\conf\service.properties"

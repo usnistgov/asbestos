@@ -41,7 +41,7 @@ public class Support {
                 .setEnvironment("default")
                 .setActorType("fhir")
                 .setChannelType("passthrough")
-                .setFhirBase("http://localhost:8080/fhir/fhir");
+                .setFhirBase("http://localhost:7080/fhir");
     }
 
     static File findExternalCache() throws URISyntaxException {

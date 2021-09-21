@@ -1,6 +1,8 @@
 package gov.nist.asbestos.client.resolver;
 
 import gov.nist.asbestos.simapi.tk.installation.Installation;
+import org.hl7.fhir.r4.model.Identifier;
+import org.hl7.fhir.r4.model.ListResource;
 
 import java.net.Inet4Address;
 import java.net.InetAddress;
@@ -8,6 +10,8 @@ import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.util.Date;
 import java.util.Enumeration;
+import java.util.Objects;
+import java.util.Optional;
 
 /**
  * ITI Suppl Appx Z
@@ -18,10 +22,26 @@ import java.util.Enumeration;
  */
 public class IdBuilder {
     private boolean override = false;
+    public static String SS_OPAQUE_ID = "3bdd";
+    public static String FOLDER_OPAQUE_ID = "94c2";
 
     public IdBuilder(boolean override) {
         this.override = override;
     }
+
+    public static String makeOpaqueLogicalId(String opaqueIdPrefix, String logicalId) {
+        // Make logical ID opaque using the last parts of submission set classification node urn
+        return String.format("%s.%s", opaqueIdPrefix, logicalId);
+    }
+
+    public static boolean isOpaqueLogicalId(String opaqueIdPrefix, String uid) {
+        return uid.startsWith(opaqueIdPrefix);
+    }
+
+    public static String stripPrefix(String ssOpaqueIdPrefix, String uid) {
+        return uid.replaceFirst(String.format("%s\\.",ssOpaqueIdPrefix), "");
+    }
+
 
     public String allocate(String defaultValue) {
         if (!override)
@@ -71,4 +91,16 @@ public class IdBuilder {
         int type = Character.getType(c);
         return type == Character.LOWERCASE_LETTER || type == Character.UPPERCASE_LETTER;
     }
+
+    public static Optional<Identifier> getUsualTypeIdentifier(ListResource listResource) {
+        Objects.requireNonNull(listResource);
+        return listResource.getIdentifier().stream()
+                .filter(e -> e.hasUse()
+                        && Identifier.IdentifierUse.USUAL.equals(e.getUse())
+                        && "urn:ietf:rfc:3986".equals(e.getSystem()))
+                .findFirst();
+    }
+
+
+
 }

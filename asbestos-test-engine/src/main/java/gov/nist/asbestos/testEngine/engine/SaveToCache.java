@@ -65,7 +65,7 @@ public class SaveToCache extends GenericSetupAction {
         String resourceType;
         if (bundle.getTotal() == 1) {
             Resource resource = bundle.getEntry().get(0).getResource();
-            resourceType = resource.getClass().getSimpleName();
+            resourceType = resource.fhirType();
         } else {
             resourceType = "Bundle";
         }

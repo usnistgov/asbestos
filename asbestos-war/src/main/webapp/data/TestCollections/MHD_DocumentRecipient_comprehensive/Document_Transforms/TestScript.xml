@@ -1,0 +1,172 @@
+<TestScript xmlns="http://hl7.org/fhir">
+    <fixture id="original-bundle">
+        <autocreate value="false"/>
+        <autodelete value="false"/>
+        <resource>
+            <reference value="Bundle/original.xml"/>
+        </resource>
+    </fixture>
+    <fixture id="transforms-bundle">
+        <autocreate value="false"/>
+        <autodelete value="false"/>
+        <resource>
+            <reference value="Bundle/transforms.xml"/>
+        </resource>
+    </fixture>
+    <fixture id="patient_bundle">
+        <!--
+           This patient comes out of the test Patient cache
+        -->
+        <autocreate value="false"/>
+        <autodelete value="false"/>
+        <resource>
+            <reference value="Patient/Alex_Alder"/>
+        </resource>
+    </fixture>
+    <variable>
+        <name value="DocRefUrl"/>
+        <expression value="Bundle.entry[0].response.location"/>
+        <sourceId value="original-response"/>
+    </variable>
+    <variable>
+        <name value="DocRefUrlTransforms"/>
+        <expression value="Bundle.entry[0].response.location"/>
+        <sourceId value="transforms-response"/>
+    </variable>
+    <variable>  <!-- referenced in pdb -->
+        <name value="requestPatientRef"/>
+        <expression value="Bundle.entry.fullUrl"/>
+        <sourceId value="patient_bundle"/>
+    </variable>
+    <variable>
+    	<name value="patientResourceId"/>
+    	<expression value="Bundle.entry.fullUrl"/>
+        <sourceId value="patient_bundle"/>
+    </variable>
+<!--    <variable>-->
+<!--        <name value="readbackPatientId"/>-->
+<!--        <expression value="Patient.identifier.value"/>-->
+<!--        <sourceId value="read-back"/>-->
+<!--    </variable>-->
+    <variable>
+        <name value="requestEntryCount"/>
+        <expression value="Bundle.entry.count()"/>
+        <sourceId value="original-bundle"/>
+    </variable>
+    <variable>
+        <name value="original"/>
+        <expression value="Bundle.entry[0].response.location"/>
+        <sourceId value="original-response"/>
+    </variable>
+    <setup>
+        <action>
+            <operation>
+                <description value="send PDB."/>
+                <label value="create"/>
+                <type>
+                    <system value="https://github.com/usnistgov/asbestos/wiki/Testscript-Operation-Codes"/>
+                    <code value="mhd-pdb-transaction"/>
+                </type>
+                <sourceId value="original-bundle"/>
+                <responseId value="original-response"/>
+            </operation>
+        </action>
+    </setup>
+    <test>
+        <description value="Send Transforms DocumentReference."/>
+        <action>
+            <operation>
+                <description value="Submit."/>
+                <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
+                    <extension url="component">
+                        <valueString value="../../Library/SendPDB.xml"/>
+                    </extension>
+                    <extension url="urn:fixture-in">
+                        <valueString  value="transforms-bundle"/>
+                    </extension>
+                    <extension url="urn:variable-in-no-translation">
+                        <valueString value="patientResourceId"/>
+                    </extension>
+                    <extension url="urn:variable-in-no-translation">
+                        <valueString value="original"/>
+                    </extension>
+                    <extension url="urn:fixture-out">
+                        <valueString value="transforms-response"/>
+                    </extension>
+                </modifierExtension>
+            </operation>
+        </action>
+    </test>
+    <test>
+      <modifierExtension url="urn:noErrors"/>
+        <description value="Read back transforms."/>
+        <action>
+            <operation>
+                <description value="Transforms DocumentReference."/>
+                <label value="read-back"/>
+                <type>
+                    <code value="read"/>
+                </type>
+                <url value="${DocRefUrlTransforms}"/>
+                <responseId value="readBackResponse"/>
+            </operation>
+        </action>
+        <action>
+            <assert>
+                <description value="... was successful."/>
+                <response value="okay"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
+            <assert>
+                <description value="... returned a DocumentReference."/>
+                <resource value="DocumentReference"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
+            <assert>
+                <description value="... status is current."/>
+                <expression value="DocumentReference.status = 'current'"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+    </test>
+    <test>
+      <modifierExtension url="urn:noErrors"/>
+        <description value="Read back original and verify it has status current."/>
+        <action>
+            <operation>
+                <description value="Original DocumentReference."/>
+                <label value="read-back"/>
+                <type>
+                    <code value="read"/>
+                </type>
+                <url value="${DocRefUrl}"/>
+                <responseId value="rereadBackResponse"/>
+            </operation>
+        </action>
+        <action>
+            <assert>
+                <description value="... was successful."/>
+                <response value="okay"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
+            <assert>
+                <description value="... returned a DocumentReference."/>
+                <resource value="DocumentReference"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
+            <assert>
+                <description value="... status is current."/>
+                <expression value="DocumentReference.status = 'current'"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+    </test>
+</TestScript>

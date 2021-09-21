@@ -43,7 +43,7 @@
 
         </div>
         <div v-else>
-            Not Available
+            EvalDetails Not Available
         </div>
     </div>
 </template>
@@ -56,8 +56,8 @@
     export default {
         data() {
             return {
-                script: null,
-                report: null,
+                // script: null,
+                // report: null,
                 selectedAssertIndex: null,
                 selectedTestIndex: null,
                 passClass: 'pass',
@@ -67,7 +67,10 @@
         },
         methods: {
             reportAction(testi, actioni) {
-                return this.report.test[testi].action[actioni]
+                if (this.report.test[testi] !== undefined)
+                    return this.report.test[testi].action[actioni]
+                else
+                    return null
             },
             toggleInspectorOpen() {
                 this.inspectorOpen = !this.inspectorOpen
@@ -111,6 +114,19 @@
             assertionDescription(assert) {
                 return assert.description === undefined ? "" : assert.description
             },
+            loadTestScript2() {
+                if (this.modalMode === undefined || this.modalMode==='') {
+                    this.$store.commit('setTestCollectionName', this.testCollection)
+                    this.$store.dispatch('runSingleEventEval',
+                        {
+                            testId: this.testId,
+                            eventId: this.eventId,
+                            testCollectionName: this.testCollection
+                        }).then(() => {
+                        this.$store.dispatch('loadTestScripts', [this.testId])
+                    })
+                }
+            },
             async loadTestScript() {
                 if (this.modalMode === undefined || this.modalMode==='') {
                     this.$store.commit('setTestCollectionName', this.testCollection)
@@ -141,7 +157,7 @@
                         eventId: this.eventId,
                         testCollectionName: this.testCollection
                     })
-              console.log(`runSingleEventEval done`)
+              // console.log(`runSingleEventEval done`)
             },
             async testOrEventUpdated() {
                 if (this.runEval) {
@@ -155,9 +171,30 @@
                     await this.loadTestScript()
                     this.loadTestReport()
                 }
+            },
+            loadAssertions() {
+                if (!this.$store.state.testRunner.testAssertions)
+                    this.$store.dispatch('loadTestAssertions')
             }
+
         },
         computed: {
+            script() {
+                try {
+                    return this.$store.state.testRunner.testScripts[this.testId]
+                } catch (e) {
+                   console.log('computed script error: ' + e)
+                   return null
+                }
+            },
+            report() {
+                try {
+                    return this.$store.state.testRunner.clientTestResult[this.testId][this.eventId][0]
+                } catch (e) {
+                    console.log('computed report error: ' + e)
+                   return null
+                }
+            },
             assertProfile() {
                 return this.$store.state.testRunner.testAssertions['Profile']
             },
@@ -178,14 +215,16 @@
             },
             testReports() {  // see watch of the same name
                 return this.$store.state.testRunner.testReports[this.testId]
-            }
+            },
         },
         created() {
-           this.testOrEventUpdated()
+            this.loadAssertions()
+           // this.testOrEventUpdated()
         },
         mounted() {
 
         },
+        /*
         watch: {
             'testId': 'testOrEventUpdated',
             'eventId': 'testOrEventUpdated',
@@ -193,6 +232,7 @@
                 this.loadTestReport()
             }
         },
+         */
         mixins: [ errorHandlerMixin, colorizeTestReports ],
         props: [
             'sessionId', 'channelName', 'testCollection', 'testId', 'eventId', 'runEval', 'noInspectLabel', 'modalMode'

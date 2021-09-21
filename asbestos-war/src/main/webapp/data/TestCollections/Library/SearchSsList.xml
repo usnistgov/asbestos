@@ -1,0 +1,41 @@
+<TestScript  xmlns="http://hl7.org/fhir">
+    <modifierExtension url="urn:module">
+        <extension url="urn:fixture-in">
+            <valueString value="pdb-response"/>
+        </extension>
+        <extension url="urn:variable-in">
+            <valueString value="pdbTestId"/>
+        </extension>
+        <extension url="urn:variable-out">
+            <valueString value="ssListBaseAddress"/>
+        </extension>
+    </modifierExtension>
+
+    <!-- this module expects the PDB to contain a List of SS type at index position 1. See: ssListLocation variable. -->
+
+    <url value=""/>
+    <name value="VerifyDocRespBaseAddress"/>
+    <status value="active"/>
+    <description value="Document Responder base address."/>
+
+
+    <variable>
+        <name value="ssListLocation"/>
+        <expression value="Bundle.entry[1].response.location"/>
+        <sourceId value="pdb-response"/>
+    </variable>
+    <variable>
+        <name value="ssListResourceName"/>
+        <defaultValue value="/List/"/>
+    </variable>
+    <variable>
+        <name value="indexOfSsListInLocation"/>
+        <defaultValue value="'${ssListLocation}'.indexOf('${ssListResourceName}')"/>
+    </variable>
+    <variable>
+        <name value="ssListBaseAddress"/>
+        <defaultValue value="'${ssListLocation}'.substring(0,${indexOfSsListInLocation})"/>
+    </variable>
+
+
+</TestScript>

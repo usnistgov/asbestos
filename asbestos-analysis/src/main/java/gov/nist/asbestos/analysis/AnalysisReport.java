@@ -8,10 +8,12 @@ import gov.nist.asbestos.client.client.Format;
 import gov.nist.asbestos.client.reporting.IErrorReporter;
 import gov.nist.asbestos.client.resolver.ChannelUrl;
 import gov.nist.asbestos.client.resolver.FhirPath;
+import gov.nist.asbestos.client.resolver.IdBuilder;
 import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import gov.nist.asbestos.http.headers.Headers;
-import gov.nist.asbestos.http.operations.HttpGetter;
+import gov.nist.asbestos.mhd.transforms.MhdTransforms;
+import gov.nist.asbestos.mhd.transforms.MhdV4;
 import gov.nist.asbestos.serviceproperties.ServiceProperties;
 import gov.nist.asbestos.serviceproperties.ServicePropertiesEnum;
 import gov.nist.asbestos.simapi.validation.Val;
@@ -25,10 +27,7 @@ import org.apache.log4j.Logger;
 import org.hl7.fhir.r4.model.*;
 
 import java.io.File;
-import java.net.MalformedURLException;
-import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.*;
 
 public class AnalysisReport {
@@ -507,7 +506,7 @@ public class AnalysisReport {
         } else if ("Bundle".equals(baseRef.getResourceType()) &&"Bundle".equals(contextResourceBundle.getResourceType())){
             Bundle bundle = (Bundle) contextResourceBundle.getResource();
             if (isPDBRequest(bundle)) {
-                baseObj = findDocumentManifestInRequestBundle(bundle);
+                baseObj = findSubmissionSetFhirCounterpartInRequestBundle(bundle);
                 if (baseObj != null) {
                     Ref baseObjRef = baseObj.getRef();
                     baseObj.setContext(bundle);
@@ -515,7 +514,7 @@ public class AnalysisReport {
                     baseObj.setRef(baseRef);
                 }
             } else if (isPDBResponse(bundle)) {
-                Ref dmLocation = findDocumentManifestInResponseBundle(bundle);
+                Ref dmLocation = findSubmissionSetFhirCounterpartInResponseBundle(bundle);
                 if (dmLocation != null) {
                     try {
                         baseObj = contextResourceBundle;
@@ -602,22 +601,44 @@ public class AnalysisReport {
                 .filter(l2::contains).count() > 0;
     }
 
-    private Ref findDocumentManifestInResponseBundle(Bundle bundle) {
+    private Ref findSubmissionSetFhirCounterpartInResponseBundle(Bundle bundle) {
         for (Bundle.BundleEntryComponent bundleEntryComponent : bundle.getEntry()) {
             Bundle.BundleEntryResponseComponent bundleEntryResponseComponent = bundleEntryComponent.getResponse();
             String location = bundleEntryResponseComponent.getLocation();
             if (!Strings.isNullOrEmpty(location)) {
-                if (location.contains("DocumentManifest"))
+                if (location.contains("DocumentManifest")) {
                     return new Ref(location);
+                } else if (location.contains(String.format("/%s/",MhdTransforms.MhdListResourceName))) {
+                    Ref ref = new Ref(location);
+                    String localBase = ServiceProperties.getInstance().getPropertyOrStop(ServicePropertiesEnum.FHIR_TOOLKIT_BASE);
+                    if (ref.getBase().toString().startsWith(localBase)) {
+                        // This opaque Id convention only applies to local channels
+                        if (IdBuilder.isOpaqueLogicalId(IdBuilder.SS_OPAQUE_ID, ref.getId())) {
+                            return ref;
+                        }
+                    } else {
+                        // May be an external system response, need to GET to differentiate if list is of submissionset type
+                        ResourceWrapper resourceWrapper = new ResourceWrapper(ref);
+                        BaseResource baseResource = resourceWrapper.getResource();
+                        if (baseResource != null) {
+                            if (baseResource instanceof ListResource && MhdV4.isCodedListType(baseResource, "submissionset") ) {
+                               return ref;
+                            }
+                        }
+                    }
+                }
+
             }
         }
+        log.error("No submissionset counterpart found in response.");
         return null;
     }
 
-    private ResourceWrapper findDocumentManifestInRequestBundle(Bundle bundle) {
+    private ResourceWrapper findSubmissionSetFhirCounterpartInRequestBundle(Bundle bundle) {
         for (Bundle.BundleEntryComponent bundleEntryComponent : bundle.getEntry()) {
             Resource componentResource = bundleEntryComponent.getResource();
-            if (componentResource instanceof DocumentManifest) {
+            if (componentResource instanceof DocumentManifest
+                    || (componentResource instanceof ListResource && MhdV4.isCodedListType(componentResource, "submissionset"))) {
                 ResourceWrapper wrapper = new ResourceWrapper(componentResource);
                 String fullUrl = bundleEntryComponent.getFullUrl();
                 if (!Strings.isNullOrEmpty(fullUrl)) {
@@ -636,6 +657,7 @@ public class AnalysisReport {
                 return wrapper;
             }
         }
+        log.error("No submissionset counterpart found in request");
         return null;
     }
 
@@ -712,10 +734,12 @@ public class AnalysisReport {
     private void buildListingFromContext(Bundle bundle, String howRelated) {
         for (Bundle.BundleEntryComponent comp : bundle.getEntry()) {
             Resource resource = comp.getResource();
-            ResourceWrapper wrapper = new ResourceWrapper(resource).setRef(new Ref(resource.getId())).setContext(getContextBundle());
-            if (baseObj == null)
-                baseObj = wrapper;
-            related.add(new Related(wrapper, howRelated));
+            if (resource != null) {
+                ResourceWrapper wrapper = new ResourceWrapper(resource).setRef(new Ref(resource.getId())).setContext(getContextBundle());
+                if (baseObj == null)
+                    baseObj = wrapper;
+                related.add(new Related(wrapper, howRelated));
+            }
         }
     }
 
@@ -815,7 +839,7 @@ public class AnalysisReport {
 
     private void buildRelated() {
         if (baseObj == null && contextResourceBundle != null) {
-            generalErrors.add("No content is available for display.");
+            generalErrors.add("No content is available for display. Check if FHIR submissionset counterpart resource exists in bundle.");
             plainListing((Bundle) contextResourceBundle.getResource());
             return;
         }

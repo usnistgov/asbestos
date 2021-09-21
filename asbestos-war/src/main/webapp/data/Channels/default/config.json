@@ -5,6 +5,6 @@
   "actorType" : "fhir",
   "channelType" : "fhir",
   "includeValidation" : false,
-  "fhirBase" : "http://localhost:8080/fhir/fhir",
+  "fhirBase" : "http://localhost:7080/fhir",
   "xdsSiteName" : null
 }

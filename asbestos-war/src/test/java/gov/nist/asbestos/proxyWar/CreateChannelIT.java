@@ -46,7 +46,7 @@ class CreateChannelIT {
                 .setEnvironment("default")
                 .setActorType("fhir")
                 .setChannelType("passthrough")
-                .setFhirBase("http://localhost:" + proxyPort + "/fhir/fhir");
+                .setFhirBase("http://localhost:" + fhirPort + "/fhir");
         HttpPost poster = new HttpPost();
         poster.postJson(new URI("http://localhost:" + proxyPort + "/asbestos/rw/channel/create"), ChannelConfigFactory.convert(channelConfig));
         int status = poster.getStatus();
@@ -117,7 +117,7 @@ class CreateChannelIT {
                 .setEnvironment("default")
                 .setActorType("fhir")
                 .setChannelType("passthrough")
-                .setFhirBase("http://localhost:"+ proxyPort + "/fhir/fhir");
+                .setFhirBase("http://localhost:"+ fhirPort + "/fhir");
 
         String channelLocation = "http://localhost:"+ proxyPort + "/asbestos/rw/channel/default__test";
 
@@ -154,7 +154,7 @@ class CreateChannelIT {
                 .setEnvironment("default")
                 .setActorType("fhir")
                 .setChannelType("passthrough")
-                .setFhirBase("http://localhost:8877/fhir/fhir"));
+                .setFhirBase("http://localhost:7080/fhir"));
 
         String channelConfig2 = ChannelConfigFactory.convert(new ChannelConfig()
                 .setTestSession("default")
@@ -162,7 +162,7 @@ class CreateChannelIT {
                 .setEnvironment("default")
                 .setActorType("fhir")
                 .setChannelType("passthrough")
-                .setFhirBase("http://localhost:8877/fhir/fhir"));
+                .setFhirBase("http://localhost:7080/fhir"));
 
         HttpDelete deleter;
         HttpPost poster;

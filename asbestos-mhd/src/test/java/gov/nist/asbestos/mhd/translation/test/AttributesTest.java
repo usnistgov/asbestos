@@ -2,10 +2,12 @@ package gov.nist.asbestos.mhd.translation.test;
 
 
 import gov.nist.asbestos.client.Base.ParserBase;
+import gov.nist.asbestos.client.events.NoOpTask;
 import gov.nist.asbestos.client.resolver.ResourceMgr;
 import gov.nist.asbestos.mhd.transactionSupport.CodeTranslator;
 import gov.nist.asbestos.mhd.transactionSupport.CodeTranslatorBuilder;
 import gov.nist.asbestos.mhd.transforms.BundleToRegistryObjectList;
+import gov.nist.asbestos.mhd.transforms.MhdTransforms;
 import gov.nist.asbestos.simapi.validation.Val;
 import gov.nist.asbestos.simapi.validation.ValE;
 import oasis.names.tc.ebxml_regrep.xsd.lcm._3.SubmitObjectsRequest;
@@ -39,15 +41,12 @@ class AttributesTest {
         CodeTranslator codeTranslator = CodeTranslatorBuilder.read(is2);
 
         ExtrinsicObjectType eo = new ExtrinsicObjectType();
-        BundleToRegistryObjectList brol = new BundleToRegistryObjectList(null);
         Val val = new Val();
-        brol.setVal(val);
-        brol.setCodeTranslator(codeTranslator);
         ResourceMgr rMgr = new ResourceMgr();
         rMgr.setVal(val);
-        brol.setResourceMgr(rMgr);
 
-        brol.addClassificationFromCodeableConcept(eo, type, "urn:uuid:f0306f51-975f-434e-a61c-c59651d33983", "classifiedObjectId", new ValE(val));
+        MhdTransforms mhdTransforms = new MhdTransforms(rMgr, val, new NoOpTask());
+        mhdTransforms.addClassificationFromCodeableConcept(eo, type, "urn:uuid:f0306f51-975f-434e-a61c-c59651d33983", "classifiedObjectId", new ValE(val), codeTranslator);
 
         if (val.hasErrors()) {
             fail(val.toString());
@@ -64,10 +63,14 @@ class AttributesTest {
     @Test
     void addExternalIdentifier()  throws JAXBException {
         ExtrinsicObjectType eo = new ExtrinsicObjectType();
-        BundleToRegistryObjectList brol = new BundleToRegistryObjectList(null);
-        brol.setVal(new Val());
+        Val val = new Val();
 
-        brol.addExternalIdentifier(eo, "scheme", "value", "id", "registryObject", "name", null);
+        ResourceMgr rMgr = new ResourceMgr();
+        rMgr.setVal(val);
+
+
+        MhdTransforms mhdTransforms = new MhdTransforms(rMgr, val, new NoOpTask());
+        mhdTransforms.addExternalIdentifier(eo, "scheme", "value", "id", "registryObject", "name", null);
 
         String eoString = toXml(eo);
         System.out.println(eoString);
@@ -80,9 +83,13 @@ class AttributesTest {
     @Test
     void addSlot() throws JAXBException {
         ExtrinsicObjectType eo = new ExtrinsicObjectType();
-        BundleToRegistryObjectList brol = new BundleToRegistryObjectList(null);
 
-        brol.addSlot(eo,"foo", "bar");
+        ResourceMgr rMgr = new ResourceMgr();
+        Val val = new Val();
+        rMgr.setVal(val);
+        MhdTransforms mhdTransforms = new MhdTransforms(rMgr, val, new NoOpTask()) ;
+
+        mhdTransforms.addSlot(eo,"foo", "bar");
 
         String eoString = toXml(eo);
         System.out.println(eoString);
@@ -98,9 +105,13 @@ class AttributesTest {
     @Test
     void addSlot2() throws JAXBException {
         ExtrinsicObjectType eo = new ExtrinsicObjectType();
-        BundleToRegistryObjectList brol = new BundleToRegistryObjectList(null);
 
-        brol.addSlot(eo,"foo", Arrays.asList("bar", "xuy"));
+        ResourceMgr rMgr = new ResourceMgr();
+        Val val = new Val();
+        rMgr.setVal(val);
+        MhdTransforms mhdTransforms = new MhdTransforms(rMgr, val, new NoOpTask()) ;
+
+        mhdTransforms.addSlot(eo,"foo", Arrays.asList("bar", "xuy"));
 
         String eoString = toXml(eo);
         System.out.println(eoString);
@@ -116,9 +127,13 @@ class AttributesTest {
     @Test
     void addName() throws JAXBException {
         ExtrinsicObjectType eo = new ExtrinsicObjectType();
-        BundleToRegistryObjectList brol = new BundleToRegistryObjectList(null);
 
-        brol.addName(eo, "MyName");
+        ResourceMgr rMgr = new ResourceMgr();
+        Val val = new Val();
+        rMgr.setVal(val);
+        MhdTransforms mhdTransforms = new MhdTransforms(rMgr, val, new NoOpTask()) ;
+
+        mhdTransforms.addName(eo, "MyName");
 
         String eoString = toXml(eo);
         System.out.println(eoString);
@@ -131,12 +146,12 @@ class AttributesTest {
     @Test
     void createAssociation() throws JAXBException {
         Val val = new Val();
-        BundleToRegistryObjectList brol = new BundleToRegistryObjectList(null);
         ResourceMgr rMgr = new ResourceMgr();
         rMgr.setVal(val);
-        brol.setResourceMgr(rMgr);
 
-        AssociationType1 a = brol.createAssociation("HasMember", "id1", "id2", "name", Collections.singletonList("foo"), new ValE(val));
+        MhdTransforms mhdTransforms = new MhdTransforms(rMgr, val, new NoOpTask()) ;
+
+        AssociationType1 a = mhdTransforms.createAssociation("HasMember", "id1", "id2", "name", Collections.singletonList("foo"), new ValE(val));
 
         String aString = toXml(a);
         System.out.println(aString);

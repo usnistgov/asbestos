@@ -2,6 +2,9 @@ package gov.nist.asbestos.mhd.channel;
 
 import gov.nist.asbestos.client.channel.BaseChannel;
 import gov.nist.asbestos.client.general.ChannelSupport;
+import gov.nist.asbestos.mhd.transforms.MhdTransforms;
+import gov.nist.asbestos.mhd.transforms.MhdV4;
+import gov.nist.asbestos.mhd.translation.search.DocManSQParamTranslator;
 import gov.nist.asbestos.mhd.util.XdsActorMapper;
 import gov.nist.asbestos.client.resolver.*;
 import gov.nist.asbestos.mhd.SubmittedObject;
@@ -17,7 +20,6 @@ import gov.nist.asbestos.http.operations.*;
 import gov.nist.asbestos.mhd.transactionSupport.*;
 import gov.nist.asbestos.mhd.transforms.BundleToRegistryObjectList;
 import gov.nist.asbestos.mhd.transforms.DocumentEntryToDocumentReference;
-import gov.nist.asbestos.mhd.transforms.SubmissionSetToDocumentManifest;
 import gov.nist.asbestos.mhd.translation.ContainedIdAllocator;
 import gov.nist.asbestos.mhd.translation.search.FhirSq;
 import gov.nist.asbestos.serviceproperties.ServiceProperties;
@@ -25,7 +27,6 @@ import gov.nist.asbestos.serviceproperties.ServicePropertiesEnum;
 import gov.nist.asbestos.client.channel.ChannelConfig;
 import gov.nist.asbestos.simapi.tk.installation.Installation;
 import gov.nist.asbestos.simapi.validation.Val;
-import gov.nist.asbestos.simapi.validation.ValE;
 import gov.nist.asbestos.utilities.*;
 import ihe.iti.xds_b._2007.ProvideAndRegisterDocumentSetRequestType;
 import oasis.names.tc.ebxml_regrep.xsd.lcm._3.SubmitObjectsRequest;
@@ -43,6 +44,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.util.*;
+import java.util.stream.Collectors;
 
 // TODO - honor the Prefer header - http://hl7.org/fhir/http.html#ops
 public class XdsOnFhirChannel extends BaseChannel /*implements IBaseChannel*/ {
@@ -52,6 +54,9 @@ public class XdsOnFhirChannel extends BaseChannel /*implements IBaseChannel*/ {
     private BundleToRegistryObjectList bundleToRegistryObjectList;
     private AhqrSender sender = null;
     private Binary binary = null;
+    private MhdTransforms mhdTransforms;
+    private MhdProfileVersionInterface mhdVersionSpecificImpl;
+    private MhdVersionEnum defaultVersion = MhdVersionEnum.MHDv3x;
 
     public XdsOnFhirChannel() {}
 
@@ -91,11 +96,19 @@ public class XdsOnFhirChannel extends BaseChannel /*implements IBaseChannel*/ {
             throw new RuntimeException(e);
         }
 
-        // perform translation
+        // parse bundle
         rMgr.setBundle(bundle);
 
+        // Setup MHD specific implementation
+        if (! isMhdVersionSpecificImplInitialized()) {
+            mhdTransforms = new MhdTransforms(rMgr, val, task);
+            mhdVersionSpecificImpl = getMhdVersionSpecificImpl(bundle, val);
+        } else {
+            throw new RuntimeException("MhdVersionSpecificImpl already initialized");
+        }
 
-        RegistryObjectListType registryObjectListType = bundleToRegistryObjectList.build(bundle);
+        // perform translation
+        RegistryObjectListType registryObjectListType = bundleToRegistryObjectList.build(mhdVersionSpecificImpl, mhdTransforms, bundle);
         if (bundleToRegistryObjectList.isResponseHasError()) {
             throw new TransformException(bundleToRegistryObjectList.getResponseBundle());
         }
@@ -132,6 +145,39 @@ public class XdsOnFhirChannel extends BaseChannel /*implements IBaseChannel*/ {
             //
         }
         return os.toString();
+    }
+
+    private MhdProfileVersionInterface getMhdVersionSpecificImpl(Bundle bundle, Val val) {
+        Objects.requireNonNull(channelConfig);
+        String[] acceptableMhdVersions = channelConfig.getMhdVersions();
+
+        if (acceptableMhdVersions != null) {
+            // Allow only from the Accept list
+            return findMhdImpl(bundle, acceptableMhdVersions, defaultVersion, val);
+        } else {
+            // All MHD versions are implicitly acceptable by channelConfig.
+            // Auto-detect based on Bundle profile
+            List<String> list = Arrays.stream(MhdVersionEnum.values())
+                    .map(MhdVersionEnum::toString)
+                    .collect(Collectors.toList());
+            return findMhdImpl(bundle, list.toArray(new String[list.size()]), defaultVersion, val);
+        }
+    }
+
+    private MhdProfileVersionInterface findMhdImpl(Bundle bundle, String[] acceptableMhdVersions, MhdVersionEnum defaultVersion, Val val) {
+        Objects.requireNonNull(mhdTransforms);
+
+        MhdVersionEnum bundleVersion;
+        Optional<MhdVersionEnum> optionalMhdVersionEnum = Arrays.stream(acceptableMhdVersions)
+                .map(MhdVersionEnum::find)
+                .filter(e -> MhdImplFactory.getImplementation(e, val, mhdTransforms).isBundleProfileDetected(bundle))
+                .findAny();
+        if (optionalMhdVersionEnum.isPresent()) {
+            bundleVersion = optionalMhdVersionEnum.get();
+        } else {
+            bundleVersion = defaultVersion;
+        }
+        return MhdImplFactory.getImplementation(bundleVersion, val, mhdTransforms);
     }
 
     public static byte[] lastDocument;
@@ -227,6 +273,14 @@ public class XdsOnFhirChannel extends BaseChannel /*implements IBaseChannel*/ {
             } else if (resourceType.equals("DocumentManifest")) {
                 sender = FhirSq.docManQuery(params, toAddr, task);
                 returnAhqrResults(requestOut);
+            } else if (resourceType.equals(MhdTransforms.MhdListResourceName)) {
+                // Code value must be supplied to distinguish SS from a Folder
+                if (DocManSQParamTranslator.parseParms(params).contains("code=submissionset")) {
+                    sender = FhirSq.docManQuery(params, toAddr, task);
+                    returnAhqrResults(requestOut);
+                } else {
+                    throw new RuntimeException("SEARCH resource " + resourceType + " not supported on this channel");
+                }
             } else {
                 throw new RuntimeException("SEARCH " + resourceType + " not supported on this channel");
             }
@@ -234,7 +288,7 @@ public class XdsOnFhirChannel extends BaseChannel /*implements IBaseChannel*/ {
             // GET
             if (resourceType.equals("DocumentReference") && uid.contains(".")) {
                 // by UID
-                sender = FhirSq.documentEntryByUidQuery(uid, toAddr, task);
+                sender = FhirSq.documentEntryByUidQuery(uid, null, toAddr, task);
                 returnAhqrResults(requestOut);
             } else if (resourceType.equals("DocumentReference") && uid.contains("-")) {
                 // by UUID
@@ -243,6 +297,14 @@ public class XdsOnFhirChannel extends BaseChannel /*implements IBaseChannel*/ {
             } else if (resourceType.equals("DocumentManifest")  && uid.contains(".")) {
                 sender = FhirSq.submissionSetByUidQuery(uid, toAddr, task);
                 returnAhqrResults(requestOut);
+            } else if (resourceType.equals(MhdTransforms.MhdListResourceName)  && uid.contains(".")) {
+                if (IdBuilder.isOpaqueLogicalId(IdBuilder.SS_OPAQUE_ID, uid)) {
+                    String id = IdBuilder.stripPrefix(IdBuilder.SS_OPAQUE_ID, uid);
+                    sender = FhirSq.submissionSetByUidQuery(id, toAddr, task);
+                    returnAhqrResults(requestOut);
+                } else {
+                    throw new RuntimeException("GET resource " + resourceType + " not supported");
+                }
             } else if (resourceType.equalsIgnoreCase("Binary") && uid.contains(".")) {
                 // by UUID
                 String repUid = "1.1.1";
@@ -325,7 +387,9 @@ public class XdsOnFhirChannel extends BaseChannel /*implements IBaseChannel*/ {
             if (resourceType == null)
                 throw new Error("Cannot retrieve XDS contents for resource type " + resourceType);
 
-            if (resourceType.equals("DocumentReference") || resourceType.equals("DocumentManifest")) {
+            if (resourceType.equals("DocumentReference")
+                    || resourceType.equals("DocumentManifest")
+                    || resourceType.equals(MhdTransforms.MhdListResourceName)) {
                 actorType = "reg";
                 transType = "sq";
             } else if (resourceType.equals("Binary")) {
@@ -349,17 +413,10 @@ public class XdsOnFhirChannel extends BaseChannel /*implements IBaseChannel*/ {
 
     private OperationOutcome wrapErrorInOperationOutcome(String msg) {
         OperationOutcome oo = new OperationOutcome();
-        addErrorToOperationOutcome(oo, msg);
+        MhdTransforms.addErrorToOperationOutcome(oo, msg);
         return oo;
     }
 
-    private OperationOutcome addErrorToOperationOutcome(OperationOutcome oo, String msg) {
-        OperationOutcome.OperationOutcomeIssueComponent issue = oo.addIssue();
-        issue.setCode(OperationOutcome.IssueType.UNKNOWN);
-        issue.setSeverity(OperationOutcome.IssueSeverity.ERROR);
-        issue.setDiagnostics(msg);
-        return oo;
-    }
 
     private void returnErrorInOperationOutcome(String message, HttpBase responseOut) {
         OperationOutcome oo = wrapErrorInOperationOutcome(message);
@@ -495,7 +552,7 @@ public class XdsOnFhirChannel extends BaseChannel /*implements IBaseChannel*/ {
             if (sender.hasErrors()) {
                 OperationOutcome oo = regErrorListAsOperationOutcome(sender.getErrorList());
                 returnOperationOutcome(responseOut, oo);
-            } else if (isSearch) {
+            } else if (isSearch) /* This is not a GET by logical ID provided, but has search params */ {
                 if (requestedType.equals("DocumentReference")) {
                     List<ResourceWrapper> results = new ArrayList<>();
                     for (IdentifiableType identifiableType  : sender.getContents()) {
@@ -519,57 +576,66 @@ public class XdsOnFhirChannel extends BaseChannel /*implements IBaseChannel*/ {
                     responseOut.setResponseContentType(returnFormatType.getContentType());
                 } else if (requestedType.equals("DocumentManifest")) {
                     // this assumes a single manifest - must be extended to get more
-                    BaseResource resource = ssToFhir();
-                    if (resource == null) {
-                        // No error just no response (empty SearchSet)
-                        responseOut.setResponseText(ParserBase.encode(buildSearchResult(Collections.EMPTY_LIST, search), returnFormatType));
-                        return;
+                    BaseResource resource = MhdTransforms.ssToDocumentManifest(getCodeTranslator(), getExternalCache(), sender, channelConfig);
+                    resourceResponse(responseOut, search, searchRef, resource);
+                } else if (requestedType.equals(MhdTransforms.MhdListResourceName)) {
+                    List<String> paramList = DocManSQParamTranslator.parseParms(search);
+                    String error = "";
+                    if (paramList != null && !paramList.isEmpty()) {
+                        Optional<String> matchParam = paramList.stream().filter(s -> s.contains("code=submissionset") || s.contains("code%3dsubmissionset")).findAny();
+                        if (matchParam.isPresent()) {
+                            BaseResource resource = MhdTransforms.ssToListResource(getCodeTranslator(), getExternalCache(), sender, channelConfig);
+                            resourceResponse(responseOut, search, searchRef, resource);
+                            return;
+                        } else {
+                            error = "Missing required code parameter. See https://profiles.ihe.net/ITI/MHD/ITI-66.html#23664121-query-search-parameters";
+                        }
+                    } else {
+                        error = "Search param is empty or null. See https://profiles.ihe.net/ITI/MHD/ITI-66.html#23664121-query-search-parameters";
                     }
-                    if (resource instanceof OperationOutcome) {
+                    if (returnFormatType.equals(Format.JSON)) {
+                        responseOut.setResponseText(String.format("{\"errorString\":\"%s\"}", error));
+                    } else {
+                        responseOut.setResponseText(error);
+                    }
+                    responseOut.setResponseContentType("text/plain");
+                    responseOut.setStatus(500);
+
+                }
+            } else /* HTTP Verb GET resource by ID */ {
+                if (sender.getContents().size() == 1 && requestedType != null) {
+                    if (requestedType.equals("DocumentReference")) {
+                        BaseResource resource = toFhir((ExtrinsicObjectType) sender.getContents().get(0));
+                        if (resource == null) {
+                            responseOut.setStatus(404);
+                            return;
+                        }
                         responseOut.setResponseText(ParserBase.encode(resource, returnFormatType));
                         responseOut.setResponseContentType(returnFormatType.getContentType());
-                        responseOut.setStatus(500);
                     } else {
-                        ResourceWrapper wrapper = new ResourceWrapper(resource);
-                        if (resource.getId() != null) {
-                            Ref ref = searchRef.withNewId(resource.getId());
-                            wrapper.setRef(ref);
-                        }
-                        responseOut.setResponseText(ParserBase.encode(buildSearchResult(Collections.singletonList(wrapper), search), returnFormatType));
-                        responseOut.setResponseContentType(returnFormatType.getContentType());
+                        String errorRequestType = (requestedType == null)?"requestedType is null":requestedType;
+                        returnOperationOutcome(responseOut,
+                                new OperationOutcome()
+                                        .addIssue(new OperationOutcome.OperationOutcomeIssueComponent().setSeverity(OperationOutcome.IssueSeverity.ERROR).setDiagnostics(errorRequestType)));
                     }
-                }
-            } else {
-                 if (sender.getContents().size() == 1 && requestedType != null) {
-                     BaseResource resource = requestedType.equals("DocumentReference")
-                        ? toFhir((ExtrinsicObjectType) sender.getContents().get(0))
-                        : ssToFhir();
-                     if (resource == null) {
-                         responseOut.setStatus(404);
-                         return;
-                     }
-                     responseOut.setResponseText(ParserBase.encode(resource, returnFormatType));
-                     responseOut.setResponseContentType(returnFormatType.getContentType());
-                 }
-                 else if (requestedType != null && requestedType.equals("DocumentManifest")) {
-                     BaseResource manifest = ssToFhir();
-                     responseOut.setResponseContentType(returnFormatType.getContentType());
-                     if (manifest == null) {
-                         responseOut.setStatus(404);
-                     } else if (manifest instanceof DocumentManifest) {
-                         responseOut.setStatus(200);
-                         responseOut.setResponseText(ParserBase.encode(manifest, returnFormatType));
-                     } else {
-                         // OperationOutcome
-                         responseOut.setStatus(500);
-                         responseOut.setResponseText(ParserBase.encode(manifest, returnFormatType));
-                     }
-                 } else { // no contents
+                } else if (requestedType != null && requestedType.equals("DocumentManifest")) {
+                    BaseResource fhirResource = MhdTransforms.ssToDocumentManifest(getCodeTranslator(), getExternalCache(), sender, channelConfig);
+                    responseResourceGet(responseOut, fhirResource);
+                } else if (requestedType.equals(MhdTransforms.MhdListResourceName)) {
+                    if (IdBuilder.isOpaqueLogicalId(IdBuilder.SS_OPAQUE_ID, searchRef.getId())) {
+                        BaseResource fhirResource = MhdTransforms.ssToListResource(getCodeTranslator(), getExternalCache(), sender, channelConfig);
+                        responseResourceGet(responseOut, fhirResource);
+                    } else {
+                        responseOut.setResponseContentType(returnFormatType.getContentType());
+                        responseOut.setResponseText("MhdListResource URL is malformed.");
+                        responseOut.setStatus(500);
+                    }
+                } else { // no contents
                      responseOut.setResponseContentType(returnFormatType.getContentType());
                      responseOut.setStatus(404);
                  }
             }
-        } else {
+        } /* HTTP Verb is something other than a GET */ else {
             // TODO when is AhqrSender used and verb is not GET?
             if (sender.hasErrors()) {
                 OperationOutcome oo = regErrorListAsOperationOutcome(sender.getErrorList());
@@ -595,12 +661,41 @@ public class XdsOnFhirChannel extends BaseChannel /*implements IBaseChannel*/ {
         }
     }
 
-    private void withNewBase(Reference reference) {
-        String newBase = ServiceProperties.getInstance().getPropertyOrStop(ServicePropertiesEnum.FHIR_TOOLKIT_BASE) + "/proxy/default__default";
-        Ref ref = new Ref(reference.getReference());
-        ref = ref.rebase(newBase);
-        reference.setReference(ref.toString());
+    private void responseResourceGet(HttpBase responseOut, BaseResource fhirResource) {
+        responseOut.setResponseContentType(returnFormatType.getContentType());
+        if (fhirResource == null) {
+            responseOut.setStatus(404);
+        } else if (fhirResource instanceof DocumentManifest || fhirResource instanceof ListResource) {
+            responseOut.setStatus(200);
+            responseOut.setResponseText(ParserBase.encode(fhirResource, returnFormatType));
+        } else {
+            // OperationOutcome
+            responseOut.setStatus(500);
+            responseOut.setResponseText(ParserBase.encode(fhirResource, returnFormatType));
+        }
     }
+
+    private void resourceResponse(HttpBase responseOut, String search, Ref searchRef, BaseResource resource) {
+        if (resource == null) {
+            // No error just no response (empty SearchSet)
+            responseOut.setResponseText(ParserBase.encode(buildSearchResult(Collections.EMPTY_LIST, search), returnFormatType));
+            return;
+        }
+        if (resource instanceof OperationOutcome) {
+            responseOut.setResponseText(ParserBase.encode(resource, returnFormatType));
+            responseOut.setResponseContentType(returnFormatType.getContentType());
+            responseOut.setStatus(500);
+        } else {
+            ResourceWrapper wrapper = new ResourceWrapper(resource);
+            if (resource.getId() != null) {
+                Ref ref = searchRef.withNewId(resource.getId());
+                wrapper.setRef(ref);
+            }
+            responseOut.setResponseText(ParserBase.encode(buildSearchResult(Collections.singletonList(wrapper), search), returnFormatType));
+            responseOut.setResponseContentType(returnFormatType.getContentType());
+        }
+    }
+
 
     private CodeTranslator getCodeTranslator() {
         CodeTranslator codeTranslator;
@@ -632,69 +727,15 @@ public class XdsOnFhirChannel extends BaseChannel /*implements IBaseChannel*/ {
         DocumentReference dr = trans.getDocumentReference(eo, channelConfig);
 
         if (dr.hasSubject())
-            withNewBase(dr.getSubject());
+            MhdTransforms.withNewBase(dr.getSubject());
 
         if (val.hasErrors())
-            return operationOutcomefromVal(val);
+            return MhdTransforms.operationOutcomefromVal(val);
 
         return dr;
     }
 
-    private OperationOutcome operationOutcomefromVal(Val val) {
-        OperationOutcome oo = new OperationOutcome();
-        for (ValE err : val.getErrors())
-            addErrorToOperationOutcome(oo, err.getMsg());
-        return oo;
-    }
 
-    // assumes sender contains zero or one SubmissionSets
-    private BaseResource ssToFhir() {
-        Val val = new Val();
-        CodeTranslator codeTranslator = getCodeTranslator();
-
-        ResourceCacheMgr resourceCacheMgr = new ResourceCacheMgr(getExternalCache());
-        FhirClient fhirClient = new FhirClient()
-                .setResourceCacheMgr(resourceCacheMgr);
-        SubmissionSetToDocumentManifest trans = new SubmissionSetToDocumentManifest();
-        trans
-                .setContainedIdAllocator(new ContainedIdAllocator())
-                .setResourceCacheMgr(resourceCacheMgr)
-                .setCodeTranslator(codeTranslator)
-                .setFhirClient(fhirClient)
-                .setVal(val);
-
-        RegistryPackageType ss = null;
-        List<AssociationType1> assocs = new ArrayList<>();
-        List<ExtrinsicObjectType> eos = new ArrayList<>();
-        for (IdentifiableType identifiableType : sender.getContents()) {
-            if (identifiableType instanceof RegistryPackageType) {
-                RegistryPackageType rpt = (RegistryPackageType) identifiableType;
-                for (ClassificationType classificationType : rpt.getClassification()) {
-                    if ("urn:uuid:a54d6aa5-d40d-43f9-88c5-b4633d873bdd".equals(classificationType.getClassificationNode())) {
-                        ss = rpt;
-                    }
-                }
-            } else if (identifiableType instanceof AssociationType1) {
-                assocs.add((AssociationType1) identifiableType);
-            } else if (identifiableType instanceof ExtrinsicObjectType) {
-                eos.add((ExtrinsicObjectType) identifiableType);
-            }
-        }
-        DocumentManifest dm = null;
-        if (ss != null)
-            dm = trans.getDocumentManifest(ss, assocs, channelConfig);
-
-        if (dm != null && dm.hasSubject())
-            withNewBase(dm.getSubject());
-
-//        if (ss == null)
-//            val.add(new ValE("No SubmissionSet in query response.").asError());
-
-        if (val.hasErrors())
-            return operationOutcomefromVal(val);
-
-        return dm;
-    }
 
     private boolean isWhite(char c) {
         if (c == ' ') return true;
@@ -733,7 +774,14 @@ public class XdsOnFhirChannel extends BaseChannel /*implements IBaseChannel*/ {
                         }
                     }
                 } else {
-                    String url = proxyBase + "/" + resource.getClass().getSimpleName() + "/" + submittedObject.getUid();
+                    String resourceName = resource.fhirType();
+                    String logicalId = submittedObject.getUid();
+                    if (MhdTransforms.MhdListResourceName.equals(resourceName)) {
+                        if (MhdV4.isCodedListType(resource, "submissionset")) {
+                            logicalId = IdBuilder.makeOpaqueLogicalId(IdBuilder.SS_OPAQUE_ID, logicalId);
+                        }
+                    }
+                    String url = proxyBase + "/" + resourceName + "/" + logicalId;
                     responseComponent.setLocation(url);
                 }
             }
@@ -826,5 +874,10 @@ public class XdsOnFhirChannel extends BaseChannel /*implements IBaseChannel*/ {
             bundle.addEntry(entry);
         }
         return bundle;
+    }
+
+
+    private boolean isMhdVersionSpecificImplInitialized() {
+        return mhdTransforms != null && mhdVersionSpecificImpl != null;
     }
 }

@@ -1,0 +1,123 @@
+<TestScript xmlns="http://hl7.org/fhir">
+    <fixture id="bad-pdb-bundle">
+        <autocreate value="false"/>
+        <autodelete value="false"/>
+        <resource>
+            <reference value="Bundle/bad-pdb.xml"/>
+        </resource>
+    </fixture>
+    <fixture id="patient-bundle">
+        <!--
+           This patient comes out of the test Patient cache
+        -->
+        <autocreate value="false"/>
+        <autodelete value="false"/>
+        <resource>
+            <reference value="Patient/Alex_Alder"/>
+        </resource>
+    </fixture>
+    <variable>
+        <name value="patientResourceId"/>
+        <expression value="Bundle.entry.fullUrl"/>
+        <sourceId value="patient-bundle"/>
+    </variable>
+    <variable>
+        <name value="badPdbReferenceMasterIdentifier"/>
+        <expression value="Bundle.entry.select(resource as DocumentReference).masterIdentifier.value"/>
+        <sourceId value="bad-pdb-bundle"/>
+    </variable>
+    <variable>
+        <name value="badPdbReferenceStatus"/>
+        <expression value="Bundle.entry.select(resource as DocumentReference).status.value"/>
+        <sourceId value="bad-pdb-bundle"/>
+    </variable>
+    <variable>
+        <name value="patientIdentifier"/>
+        <defaultValue value="Bundle.entry.select(resource as Patient).identifier[0]"/>
+    </variable>
+    <variable>
+        <name value="patientIdentifierSearchParamValue"/>
+        <expression value="${patientIdentifier}.system.value + '|' + ${patientIdentifier}.value.value"/>
+        <sourceId value="patient-bundle"/>
+    </variable>
+    <variable>
+        <name value="dependsOnTestId"/>
+        <defaultValue value="MHDv4_DocumentRecipient_minimal/1_Prerequisite_Single_Document_with_Binary"/>
+    </variable>
+
+    <setup>
+        <modifierExtension url="urn:noErrors"/>
+        <action>
+            <operation>
+                <description value="Get the document responder base address from a prerequisite PDB submission.
+               (This test assumes the document responder base address in PDB response does not change between consecutive PDB submissions.)"/>
+                <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
+                    <extension url="component">
+                        <valueString value="../../Library/DocumentResponderBaseAddress.xml"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="dependsOnTestId"/>
+                    </extension>
+                    <extension url="urn:variable-out">
+                        <valueString value="docRespBaseAddress"/>
+                    </extension>
+                </modifierExtension>
+            </operation>
+        </action>
+    </setup>
+
+    <test>
+        <modifierExtension url="urn:noErrors"/>
+        <description value="Submit a PDB with a missing List (SubmissionSet)."/>
+        <action>
+            <operation>
+                <description value="Submit."/>
+                <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
+                    <extension url="component">
+                        <valueString value="../../Library/PDBFails.xml"/>
+                    </extension>
+                    <extension url="urn:fixture-in">
+                        <valueString value="bad-pdb-bundle"/>
+                    </extension>
+                    <extension url="urn:variable-in-no-translation">
+                        <valueString value="patientResourceId"/>
+                    </extension>
+                </modifierExtension>
+            </operation>
+        </action>
+    </test>
+    <test>
+        <modifierExtension url="urn:noErrors"/>
+        <description value="Verify no update to server using search parameters."/>
+        <action>
+            <operation>
+                <description value="for DocumentReference."/>
+                <type>
+                    <code value="search"/>
+                </type>
+                <contentType value="json"/>
+                <url value="${docRespBaseAddress}/DocumentReference?identifier=${badPdbReferenceMasterIdentifier}&amp;status=${badPdbReferenceStatus}&amp;patient.identifier=${patientIdentifierSearchParamValue}"/>
+                <responseId value="bad-reference-search"/>
+            </operation>
+        </action>
+        <action>
+            <assert>
+                <description value="Status is 200."/>
+                <sourceId value="bad-reference-search"/>
+                <response value="okay"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
+            <assert>
+                <description value="No DocumentReference should be returned in the bundle from the search result."/>
+                <compareToSourceId value="bad-reference-search"/>
+                <compareToSourceExpression value="Bundle.total = 0"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+    </test>
+
+
+
+</TestScript>

@@ -38,7 +38,7 @@ public class RelatedReport {
 
     RelatedReport(ResourceWrapper wrapper, String relation) {
         if (wrapper.hasResource())
-            this.name = wrapper.getResource().getClass().getSimpleName();
+            this.name = wrapper.getResource().fhirType();
         else
             this.name = wrapper.getRef().getResourceType();
         this.relation = relation;

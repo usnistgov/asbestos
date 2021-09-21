@@ -31,8 +31,10 @@ HAPI is running in a separate Tomcat on 8080.  I leave this up in my development
 permanently.  HAPI takes a bit of time to load and I don't like waiting for it.
 The critial hapi.properties are:
 
-    server_address=http://localhost:8080/fhir/fhir/
-    server.base=/fhir/fhir
+    server_address=http://localhost:7080/
+    server.base=/fhir
+
+HAPI FHIR v5.4.x uses application.yaml, use the same values in the appropriate fields.
 
 Proxy is run out of IntelliJ on 8081.  This gets started/restarted a lot so having it isolated
 is faster. When creating the IntelliJ run configuration:

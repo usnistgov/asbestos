@@ -57,7 +57,7 @@ public class Utility {
                 .setEnvironment("default")
                 .setActorType("fhir")
                 .setChannelType("fhir")
-                .setFhirBase("http://localhost:" + fhirPort + "/fhir/fhir");
+                .setFhirBase("http://localhost:" + fhirPort + "/fhir");
         String json = ChannelConfigFactory.convert(channelConfig);
         HttpPost poster = new HttpPost();
         poster.postJson(new URI("http://localhost:" + proxyPort + "/asbestos/rw/channel/create"), json);
