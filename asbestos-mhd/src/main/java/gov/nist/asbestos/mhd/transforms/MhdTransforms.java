@@ -111,7 +111,7 @@ public class MhdTransforms {
         boolean isLoaded = loadedResource.isPresent() && loadedResource.get().isLoaded();
         if (!isLoaded) {
             val.add(new ValE(resource + " makes reference to " + referenced + " which cannot be loaded").asError()
-                    .add(new ValE("   All DocumentReference.subject and DocumentManifest.subject values shall be References to FHIR Patient Resources identified by an absolute external reference (URL).").asDoc())
+                    .add(new ValE("   All DocumentReference.subject and DocumentManifest.subject (or List) values shall be References to FHIR Patient Resources identified by an absolute external reference (URL).").asDoc())
                     .add(new ValE("3.65.4.1.2.2 Patient Identity").asDoc()));
             return;
         }

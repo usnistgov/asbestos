@@ -56,7 +56,7 @@ public class XdsOnFhirChannel extends BaseChannel /*implements IBaseChannel*/ {
     private Binary binary = null;
     private MhdTransforms mhdTransforms;
     private MhdProfileVersionInterface mhdVersionSpecificImpl;
-    private MhdVersionEnum defaultVersion;
+    private MhdVersionEnum defaultVersion = MhdVersionEnum.MHDv3x;
 
     public XdsOnFhirChannel() {}
 
@@ -579,14 +579,28 @@ public class XdsOnFhirChannel extends BaseChannel /*implements IBaseChannel*/ {
                     BaseResource resource = MhdTransforms.ssToDocumentManifest(getCodeTranslator(), getExternalCache(), sender, channelConfig);
                     resourceResponse(responseOut, search, searchRef, resource);
                 } else if (requestedType.equals(MhdTransforms.MhdListResourceName)) {
-                    if (DocManSQParamTranslator.parseParms(search).contains("code=submissionset")) {
-                        BaseResource resource = MhdTransforms.ssToListResource(getCodeTranslator(), getExternalCache(), sender, channelConfig);
-                        resourceResponse(responseOut, search, searchRef, resource);
+                    List<String> paramList = DocManSQParamTranslator.parseParms(search);
+                    String error = "";
+                    if (paramList != null && !paramList.isEmpty()) {
+                        Optional<String> matchParam = paramList.stream().filter(s -> s.contains("code=submissionset") || s.contains("code%3dsubmissionset")).findAny();
+                        if (matchParam.isPresent()) {
+                            BaseResource resource = MhdTransforms.ssToListResource(getCodeTranslator(), getExternalCache(), sender, channelConfig);
+                            resourceResponse(responseOut, search, searchRef, resource);
+                            return;
+                        } else {
+                            error = "Missing required code parameter. See https://profiles.ihe.net/ITI/MHD/ITI-66.html#23664121-query-search-parameters";
+                        }
                     } else {
-                        responseOut.setResponseText("Unhandled search param code in list resource transform.");
-                        responseOut.setResponseContentType("text/plain");
-                        responseOut.setStatus(500);
+                        error = "Search param is empty or null. See https://profiles.ihe.net/ITI/MHD/ITI-66.html#23664121-query-search-parameters";
                     }
+                    if (returnFormatType.equals(Format.JSON)) {
+                        responseOut.setResponseText(String.format("{\"errorString\":\"%s\"}", error));
+                    } else {
+                        responseOut.setResponseText(error);
+                    }
+                    responseOut.setResponseContentType("text/plain");
+                    responseOut.setStatus(500);
+
                 }
             } else /* HTTP Verb GET resource by ID */ {
                 if (sender.getContents().size() == 1 && requestedType != null) {
