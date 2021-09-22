@@ -40,6 +40,7 @@ echo "CATALINA_HOME is $CATALINA_HOME"
 
 echo "starting HAPI FHIR base"
 HAPIFHIRBASE=${BASEDIR}/../HapiFhir/base
+mkdir ${HAPIFHIRBASE}/logs
 export CATALINA_BASE=${HAPIFHIRBASE}
 echo "CATALINA_BASE=$CATALINA_BASE"
 ./startup.sh
