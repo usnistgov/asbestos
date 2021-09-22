@@ -14,7 +14,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * This test works with ec_shared EC_DIR (Tomcat launch) but not asbts-it-tests EC_DIR (using Maven command-line).
+ * This test works with ec_shared EC_DIR (Tomcat launch) but not asbts-it-tests EC_DIR (using Maven command-line) because codes.xml does not exist.
+ * Copy the environment folder from ec_shared to asbts-it-tests.
  */
 class pdbCompIT {
     private static String testSession = "default";

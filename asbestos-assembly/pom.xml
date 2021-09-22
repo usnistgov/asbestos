@@ -6,7 +6,7 @@
     <parent>
         <artifactId>asbestos</artifactId>
         <groupId>gov.nist.asbestos</groupId>
-        <version>2.2.0-SNAPSHOT</version>
+        <version>2.3.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -29,7 +29,7 @@
         <fhirToolkitUIHomePage>http://localhost:9760</fhirToolkitUIHomePage> <!-- If https is used here, the self-signed certificate fhirtoolkitui.p7b must be trusted by the Web browser unless another keystore was configured with a real certificate.  -->
         <httpsFhirToolkitBase>https://fhirtoolkit.test:9743/asbestos</httpsFhirToolkitBase> <!-- used for Admin login and channel locking features -->
         <fhirToolkitBase>http://localhost:9760/asbestos</fhirToolkitBase> <!-- If https is used here, then this value must be the same as the httpsFhirToolkitBase value -->
-        <hapiFhirBase>http://localhost:9770/fhir</hapiFhirBase> <!-- HAPI FHIR v5.4.x runs on ROOT -->
+        <hapiFhirBase>http://localhost:7080/fhir</hapiFhirBase> <!-- HAPI FHIR v5.4.x runs on ROOT -->
         <xdsToolkitBase>http://localhost:9770/xdstools</xdsToolkitBase>
         <tlsXdsToolkitBase>http://localhost:9773/xdstools</tlsXdsToolkitBase>
         <!--
@@ -39,8 +39,8 @@ the XdsToolkit\webapps should be empty to prevent
 it from starting up a Tomcat which would potentially take up the port as defined by the xdsToolkitHttpPort.
 In other words, if Tomcat does not start in XdsToolkit then the xdsToolkitHttpPort is not used.
 -->
-        <hapiFhirHttpPort>9790</hapiFhirHttpPort> <!-- NOTE: must be unique for Hapi FHIR catalina base server.xml, only used if not using the XDS Toolkit copy of Hapi FHIR webapp -->
-        <fhirValidationServer>http://localhost:9790/fhir</fhirValidationServer>
+        <hapiFhirHttpPort>7080</hapiFhirHttpPort> <!-- NOTE: must be unique for Hapi FHIR catalina base server.xml, only used if not using the XDS Toolkit copy of Hapi FHIR webapp -->
+        <fhirValidationServer>http://localhost:7080/fhir</fhirValidationServer>
         <fhirToolkitHttpPort>9760</fhirToolkitHttpPort>
         <fhirToolkitTlsPort>9743</fhirToolkitTlsPort>
         <xdsToolkitHttpPort>9770</xdsToolkitHttpPort>
