@@ -144,6 +144,7 @@ public class ModularEngine {
                 ).toPath();
                 try (BufferedWriter writer = Files.newBufferedWriter(path)) {
                     writer.write(json);
+                    writer.flush();
                 } catch (IOException e) {
                     log.error(ExceptionUtils.getStackTrace(e));
                     throw new RuntimeException(e);

@@ -282,6 +282,7 @@ public class TestEngine  implements TestDef {
         try (BufferedWriter writer = Files.newBufferedWriter(path))
         {
             writer.write(json);
+            writer.flush();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

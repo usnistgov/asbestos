@@ -84,7 +84,10 @@ public class EC {
     }
 
     public List<String> getTestsInCollection(String collectionName) {
-        return getTests(collectionName).stream().map(File::getName).collect(Collectors.toList());
+        List<String> list = getTests(collectionName).stream().map(File::getName).collect(Collectors.toList());
+        if (list != null)
+            Collections.sort(list);
+        return list;
     }
 
     public File getTest(String collectionName, String testName) {
