@@ -94,12 +94,21 @@ rm -f ../xdstools.war
 
 # v2.2.0 require HAPI FHIR v5.4.0 ROOT war in the HapiFhir Tomcat base
 
-# Enable this only for pre-v2.2.0 releases
+# Enable this only for pre-v2.2.0 releases, HAPI v3.7
 #echo "INSTALL HAPI"
 #cp $DEVELOP/fhir.zip $INSTALL/tomcat/Toolkits/XdsToolkit/webapps
 #cd $INSTALL/tomcat/Toolkits/XdsToolkit/webapps
 #unzip -qq fhir.zip
 #echo "REMOVE FHIR.ZIP"
 #rm -f fhir.zip
+
+echo "INSTALL HAPI 5.4.0"
+cp $DEVELOP/fhir.zip $INSTALL/tomcat/HapiFhir/base/webapps
+cd $INSTALL/tomcat/HapiFhir/base/webapps
+unzip -qq fhir.zip
+echo "REMOVE FHIR.ZIP"
+rm -f fhir.zip
+
+
 echo "DONE"
 
