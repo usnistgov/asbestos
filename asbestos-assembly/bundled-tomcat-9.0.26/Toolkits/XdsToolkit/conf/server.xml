@@ -67,21 +67,12 @@
          Define a non-SSL/TLS HTTP/1.1 Connector on port ${xdsToolkitHttpPort}
     -->
     <!-- HTTP GUI with a redirect to HTTPS GUI -->
-    <Connector port="${xdsToolkitHttpPort}" protocol="HTTP/1.1"
-               connectionTimeout="20000"
-               redirectPort="${xdsToolkitTlsPort}" />
-
     <Connector
             port="${xdsToolkitHttpPort}"
+            connectionTimeout="20000"
             protocol="org.apache.coyote.http11.Http11NioProtocol"
             maxThreads="150"
-            SSLEnabled="true"
-            clientAuth="false"
-            sslProtocol="TLS"
-            keystoreFile="connectathon-certificate/catNov2020Keystore.jks"
-            keystorePass="password"
-            SSLProtocol="TLSv1.2"
-            SSLCipherSuite="TLS_RSA_WITH_AES_128_CBC_SHA"
+            redirectPort="${xdsToolkitTlsPort}"
     />
 
     <!-- A "Connector" using the shared thread pool-->
@@ -106,9 +97,9 @@
         SSLEnabled="true"
         clientAuth="true"
         sslProtocol="TLS"
-        keystoreFile="connectathon-certificate/gazellecert.jks"
+        keystoreFile="connectathon-certificate/cat.jks"
         keystorePass="password"
-        truststoreFile="connectathon-certificate/gazellecert.jks"
+        truststoreFile="connectathon-certificate/cat.jks"
         truststorePass="password"
         SSLVerifyClient="true"
         SSLProtocol="TLSv1.2"
