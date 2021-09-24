@@ -3,6 +3,7 @@ package gov.nist.asbestos.testEngine.engine.fixture;
 import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import gov.nist.asbestos.testEngine.engine.FhirPathEngineBuilder;
+import gov.nist.asbestos.testEngine.engine.NotABundleException;
 import org.hl7.fhir.r4.model.*;
 
 import java.util.Objects;
@@ -47,7 +48,7 @@ public class FixtureSub {
         else
             throw new RuntimeException("SubFixture: fixture " + sourceId + " of type " + baseResource.getClass().getName() + " cannot be converted to type Resource");
         if (!(resource instanceof Bundle))
-            throw new RuntimeException("Fixture " + sourceId + " does not contain a Bundle");
+            throw new NotABundleException("Fixture " + sourceId + " does not contain a Bundle");
         Resource resource1 = FhirPathEngineBuilder.evalForResource(resource, fhirPath);
         ResourceWrapper wrapper = new ResourceWrapper(resource1);
         if (resource1 != null) {

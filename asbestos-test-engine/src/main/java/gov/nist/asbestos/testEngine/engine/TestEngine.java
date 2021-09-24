@@ -770,6 +770,13 @@ public class TestEngine  implements TestDef {
                     .setTestId(testId)
                     .setTestEngine(this);
             runner.run(theAssert, report);
+        } catch (NotABundleException nabEx) {
+            /*
+             Ignoreable since it fills the log n times.
+             GetClientTestEvalRequest uses N message limit, ex. 30
+            When a client test is run, against the last 30 messages, this message also repeats at least 30 times in the log:
+	        RuntimeException: Fixture request does not contain a Bundle
+             */
         } catch (Throwable t) {
             reportTerminalFailure(t);
 //            report = new TestReport.SetupActionAssertComponent();
