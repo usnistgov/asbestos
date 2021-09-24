@@ -1,8 +1,9 @@
 SET TOOLKITS_DIR=%CATALINA_HOME%\Toolkits
 
+REM THIS SECTION IS DELEGATED TO A START.BAT PARAMETER
 REM Gson library problem in Jre16
 REM See https://github.com/google/gson/issues/1875
-SET "CATALINA_OPTS=%CATALINA_OPTS% --add-opens java.base/java.util=ALL-UNNAMED"
+REM SET "CATALINA_OPTS=%CATALINA_OPTS% --add-opens java.base/java.util=ALL-UNNAMED"
 
 REM Service Properties
 REM Enable the Java system property to use a specific property file

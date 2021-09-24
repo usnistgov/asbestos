@@ -11,6 +11,8 @@ REM NOTE: HAPI FHIR and XDS Toolkit must be started before FhirToolkit.
 REM Start with clean ERRORLEVEL.
 TYPE NUL>NUL
 
+SET JREVERSION=%1
+
 SET "CATALINA_HOME="
 SET "TOOLKITS="
 
@@ -68,12 +70,21 @@ IF %WEBAPPSCOUNT% GTR 0 (
     REM Wait (in seconds) for XdsToolkit (and maybe HAPI FHIR) to startup
     ECHO Waiting for XdsToolkit to startup
     TIMEOUT /T 60
- )
 ) ELSE (
 	ECHO XdsToolkit should not be started
 )
 
 REM Start FhirToolkit
+IF DEFINED JREVERSION (
+	IF "%JREVERSION%"=="jre1.8" (
+	    REM No special setting needed
+	)
+) ELSE (
+	    REM JRE 9 or above require this setting
+		REM Gson library problem in Jre16
+        REM See https://github.com/google/gson/issues/1875
+        SET "CATALINA_OPTS=%CATALINA_OPTS% --add-opens java.base/java.util=ALL-UNNAMED"
+)
 
 ECHO Starting FhirToolkit
 MKDIR %FHIRTOOLKIT%\logs

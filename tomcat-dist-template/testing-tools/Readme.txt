@@ -1,3 +1,6 @@
+CONTENTS OF TOMCAT-DIST-TEMPLATE ARE OBSOLETE SINCE ASBESTOS 2.X
+NEED TO REVISIT
+
 This 'testing-tools' directory is intended to co-exist along Tomcat's home directory (CATALINA_HOME). It contains application bases for each type of toolkit.
 
 testing-tools directory contents:

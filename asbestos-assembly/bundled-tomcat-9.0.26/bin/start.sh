@@ -81,6 +81,11 @@ fi
 # start FhirToolkit
 
 echo "Starting FhirToolkit"
+if [[ $1 != 'jre1.8' ]]
+then
+  export CATALINA_OPTS="${CATALINA_OPTS} --add-opens java.base/java.util=ALL-UNNAMED"
+fi
+
 mkdir ${FHIRTOOLKIT}/logs
 export CATALINA_BASE=${FHIRTOOLKIT}
 echo "CATALINA_BASE=$CATALINA_BASE"
