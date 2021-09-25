@@ -112,7 +112,7 @@
        <file>
            <source>${basedir}/README.html</source>
            <outputDirectory>./</outputDirectory>
-<!--           <filtered>true</filtered>-->
+           <filtered>true</filtered>
        </file>
        <!-- end Copy the README.html file -->
 

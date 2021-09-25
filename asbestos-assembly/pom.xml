@@ -19,6 +19,7 @@
     -->
 
     <properties>
+        <asbestosInstallationGuide>https://github.com/usnistgov/asbestos/wiki/Installation-Guide</asbestosInstallationGuide>
         <!-- The preconfigured Tomcat distribution with the "Toolkits" application base and HTTP port number -->
         <baseTomcatDir>${basedir}/bundled-tomcat-9.0.26</baseTomcatDir>
         <!-- The directory name given to the final Tomcat directory with the installed webapps, ie. bundled Tomcat -->
