@@ -25,23 +25,32 @@
     <profiles>
         <profile>
             <id>Bill</id>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-            </activation>
             <properties>
                 <build.profile.id>Bill</build.profile.id>
                 <toolkitApiVersion>7.5.0</toolkitApiVersion>
                 <itTestsExternalCache>/Users/bill/ec</itTestsExternalCache>
             </properties>
         </profile>
+        <!--
+        This profile is mainly used for development
+        -->
         <profile>
             <id>Sunil</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
             <properties>
                 <build.profile.id>Sunil</build.profile.id>
                 <toolkitApiVersion>7.7.0-SNAPSHOT</toolkitApiVersion>
                 <itTestsExternalCache>/C:/Users/skb1/ec/asbts-it-tests</itTestsExternalCache>
+                <!-- itTestsExternalCache:
+                Remember to copy the environment directory from the ec_shared directory, otherwise, some it-tests will fail due to missing codes.xml file.
+                -->
             </properties>
         </profile>
+        <!--
+        This profile is used for production release builds
+        -->
         <profile>
             <id>Sunil_Ubuntu</id>
             <properties>
@@ -50,6 +59,18 @@
                 <itTestsExternalCache>/home/sunil/ec/asbts-it-tests</itTestsExternalCache>
             </properties>
         </profile>
+        <!--
+        This profile is used for Connectathon (cat) mode build
+        -->
+        <profile>
+            <id>cat</id>
+            <properties>
+                <build.profile.id>cat</build.profile.id>
+                <toolkitApiVersion>7.7.0</toolkitApiVersion>
+                <itTestsExternalCache>/C:/Users/skb1/ec/asbts-it-tests</itTestsExternalCache>
+            </properties>
+        </profile>
+
     </profiles>
 
     <modules>

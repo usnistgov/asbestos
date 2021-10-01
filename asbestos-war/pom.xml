@@ -14,21 +14,22 @@
     <packaging>war</packaging>
 
     <properties>
+        <!-- begin ServiceProperties -->
+        <!-- itTestfhirToolkitBas is used for unit tests only -->
+        <itTestfhirToolkitBase>http://localhost:8877/asbestos</itTestfhirToolkitBase>
         <!-- HTTPS UI -->
         <fhirToolkitUIHomePage>https://fhirtoolkit.test:8082</fhirToolkitUIHomePage>
         <!-- HTTP UI -->
 <!--        <fhirToolkitUIHomePage>http://localhost:8082</fhirToolkitUIHomePage>-->
         <httpsFhirToolkitBase>https://fhirtoolkit.test:9743/asbestos</httpsFhirToolkitBase>
         <fhirToolkitBase>http://localhost:8081/asbestos</fhirToolkitBase>
-        <itTestfhirToolkitBase>http://localhost:8877/asbestos</itTestfhirToolkitBase>
         <hapiFhirBase>http://localhost:7080/fhir</hapiFhirBase>
         <fhirValidationServer>http://localhost:7080/fhir</fhirValidationServer>
         <xdsToolkitBase>http://localhost:8080/xdstools</xdsToolkitBase>
         <tlsXdsToolkitBase>https://localhost:8443/xdstools</tlsXdsToolkitBase>
-        <!-- if Vue is running in Development mode, edit startUpSession in http-comon.js -->
+        <!-- if Vue is running in Development mode, edit startUpSession in http-common.js -->
         <startUpSession>default</startUpSession>
-        <!-- For Connectathon use cat test session -->
-<!--        <startUpSession>cat</startUpSession>-->
+        <!-- end ServiceProperties -->
     </properties>
 
     <dependencies>
