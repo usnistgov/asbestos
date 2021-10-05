@@ -80,33 +80,9 @@
             }
         },
         created() {
-            //if (this.$store.state.base.sessions.length === 0)
             const sessionIdFromRoute = this.$router.currentRoute.params['sessionId']
             this.$store.dispatch('initSessionsStore', sessionIdFromRoute)
-            // for startup
-            // this.updateSessionsFromStore()
-            // this.updateCurrentSession()
         },
-        /*
-      mounted() {
-      this.$store.subscribe((mutation) => {
-        switch(mutation.type) {
-          case 'setSessionNames':  // to catch changes later
-            console.log('SessionCP(a) syncing up mutation.type: ' + mutation.type)
-            this.updateSessionsFromStore()
-            this.updateCurrentSession()
-            break
-          case 'setSession':
-            console.log('SessionCP(b) syncing up mutation.type: ' + mutation.type)
-            this.updateCurrentSession()
-            break
-        }
-      })
-      },
-      watch: {
-      'testSession': 'routeTo'
-      },
-      */
         computed: {
             isSessionConfigLocked() {
                 let sc = this.$store.getters.getSessionConfig
@@ -171,20 +147,8 @@
             }
         },
         methods: {
-            /*
-            changeTestSession(event) {
-              this.testSession = event.target.options[event.target.options.selectedIndex].text;
-              this.$store.dispatch('selectSession', this.testSession);
-            },
-            */
             toggleDetails() {
                 this.details = !this.details;
-                /*
-                const sessionConfig = this.$store.getters.getSessionConfig;
-                if (this.details && (!sessionConfig || sessionConfig.name !== this.testSession)) {
-                  this.$store.dispatch('selectSession', this.testSession);
-                }
-                 */
             },
             add() {
                 this.adding = true;
@@ -246,23 +210,6 @@
                         that.error('Delete failed')
                     })
             },
-            /*
-            updateSessionsFromStore() {
-              let options = []
-              let i = 0;
-              this.$store.state.base.sessionNames.forEach(function(ts) {
-                options.push({ name: ts, id: i })
-                i = i + 1;
-              })
-              this.testSessions = options
-            },
-            updateCurrentSession() {
-              this.testSession = this.$store.state.base.session
-            },
-            routeTo() {
-              this.$router.push(`/session/${this.testSession}`)
-            },
-             */
             error(msg) {
                 console.log(msg)
                 this.$bvToast.toast(msg, {noCloseButton: true, title: 'Error'})
