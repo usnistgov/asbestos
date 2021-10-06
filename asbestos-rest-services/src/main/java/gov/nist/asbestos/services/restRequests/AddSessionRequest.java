@@ -43,7 +43,7 @@ public class AddSessionRequest {
         String newSessionName = IOUtils.toString(request.req.getInputStream(), Charset.defaultCharset());   // unchecked test session name
 
         if (isInvalidName(newSessionName)) {
-            String error = "Invalid Test Session name";
+            String error = "Invalid Test Session name. Check if name contains an illegal character or a reserved name.";
             log.warn(error + ": " +  newSessionName);
             returnPlainTextResponse(request.resp, HttpServletResponse.SC_BAD_REQUEST, error);
             return;

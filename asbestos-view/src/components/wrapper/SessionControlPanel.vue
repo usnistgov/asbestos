@@ -152,6 +152,7 @@
                 if (name) {
                     const url = `rw/testSession`
                     console.log(`adding session ${url}`)
+                    const that = this
                     PROXY.post(url, name) // /${newName}
                         .then(response => {
                             this.$store.commit('setSessionNames', response.data)
@@ -161,9 +162,12 @@
                             this.adding = false;
                         })
                         .catch(function (error) {
-                            this.error(error)
-                            this.newTsName = null
-                            this.adding = false
+                            if (error.response) {
+                                that.$store.commit('setError', url + ': ' + error.response.data)
+                                that.error(error.response.data)
+                            }
+                            that.newTsName = null
+                            that.adding = false
                         })
                 }
             },
@@ -199,7 +203,9 @@
                         }
                     })
                     .catch(function (error) {
-                        that.$store.commit('setError', url + ': ' + error)
+                        if (error.response) {
+                            that.$store.commit('setError', url + ': ' + error.response.data)
+                        }
                         console.error(`${error} for ${url}`)
                         that.error('Delete failed')
                     })
