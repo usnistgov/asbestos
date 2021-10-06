@@ -290,4 +290,8 @@
         /*padding-top: 5px;*/
         padding-bottom: 5px;
     }
+    .dimOpacity {
+       opacity: .25;
+    }
+
 </style>

@@ -75,7 +75,9 @@
         - an area to work in giving isolation from other users. Similar to XDS Toolkit. To prevent accidental deletion of the test
         session contents, the session configuration must be locked. For now, this will be a manual step on the server.
         Edit the <span class="fixedWidthFont">ExternalCache\FhirSessions\theTestSession\config.json</span> file and add
-        the <span class="fixedWidthFont">"sessionConfigLocked":true</span> JSON property.
+        the <span class="fixedWidthFont">"sessionConfigLocked":true</span> JSON property. Two other properties become relevant
+        if session config is locked: <span class="fixedWidthFont">canAddChannel</span> and <span class="fixedWidthFont">canRemoveChannel</span>.
+        They offer whether the channel level add/remove features are enabled to the user.
         <br />
 
         <span class="bold">Channel</span>

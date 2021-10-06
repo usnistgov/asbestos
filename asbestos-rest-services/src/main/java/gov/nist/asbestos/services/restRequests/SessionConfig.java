@@ -8,6 +8,14 @@ public class SessionConfig {
     private String name;
     private List<String> includes = new ArrayList<>();
     private boolean sessionConfigLocked;
+    /**
+     * Only applies if config is locked
+     */
+    private boolean canAddChannel;
+    /**
+     * Only applies if config is locked
+     */
+    private boolean canRemoveChannel;
 
 
     public SessionConfig(String name, String[] includes, boolean sessionConfigLocked) {
@@ -28,6 +36,14 @@ public class SessionConfig {
 
     public boolean isSessionConfigLocked() {
         return sessionConfigLocked;
+    }
+
+    public boolean isCanAddChannel() {
+        return canAddChannel;
+    }
+
+    public boolean isCanRemoveChannel() {
+        return canRemoveChannel;
     }
 
     /**
@@ -56,5 +72,13 @@ public class SessionConfig {
      */
     public void setSessionConfigLocked(boolean sessionConfigLocked) {
         this.sessionConfigLocked = sessionConfigLocked;
+    }
+
+    public void setCanAddChannel(boolean canAddChannel) {
+        this.canAddChannel = canAddChannel;
+    }
+
+    public void setCanRemoveChannel(boolean canRemoveChannel) {
+        this.canRemoveChannel = canRemoveChannel;
     }
 }

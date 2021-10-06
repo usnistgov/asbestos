@@ -106,13 +106,16 @@ public class FtkElementsGuardFilter implements Filter {
         chain.doFilter(request, response);
     }
 
+    private static SessionConfig getSessionConfig(File externalCache, String testSessionName) {
+        File sessionDir = EC.ftkSessionDir(externalCache, testSessionName);
+        File configFile = new File(sessionDir, "config.json");
+        return GetSessionConfigRequest.load(configFile);
+    }
+
     private void validateTestSessionDeleteRequest(ServletResponse response, FilterChain chain, FtkHttpServletRequestWrapper myHttpServletRequest, Request requestObj) throws IOException, ServletException {
        // If the test session config is write protected, then exit
         String testSessionName = requestObj.uriParts.get(4);
-        File sessionDir = EC.ftkSessionDir(requestObj.externalCache, testSessionName);
-        File configFile = new File(sessionDir, "config.json");
-        SessionConfig sessionConfig = GetSessionConfigRequest.load(configFile);
-        if (sessionConfig.isSessionConfigLocked()) {
+        if (getSessionConfig(requestObj.externalCache, testSessionName).isSessionConfigLocked()) {
             returnPlainTextResponse(response, HttpServletResponse.SC_UNAUTHORIZED, "Session is write protected.");
             return;
         } else {
@@ -137,8 +140,19 @@ public class FtkElementsGuardFilter implements Filter {
             returnPlainTextResponse(response, HttpServletResponse.SC_UNAUTHORIZED, "Channel configuration is write protected.");
             return;
         } else {
-            chain.doFilter(myHttpServletRequest, response);
-            return;
+            SessionConfig sessionConfig = getSessionConfig(channelRequest.externalCache, beforeUpdate.getTestSession());
+            if (sessionConfig.isSessionConfigLocked()) {
+                if (sessionConfig.isCanRemoveChannel()) {
+                    chain.doFilter(myHttpServletRequest, response);
+                    return;
+                } else {
+                    returnPlainTextResponse(response, HttpServletResponse.SC_UNAUTHORIZED, "Channel remove feature is protected.");
+                    return;
+                }
+            } else {
+                chain.doFilter(myHttpServletRequest, response);
+                return;
+            }
         }
     }
 
@@ -162,8 +176,19 @@ public class FtkElementsGuardFilter implements Filter {
             }
         } catch (ChannelDoesNotExistException ex) {
             if (isPost) { // Expected exception
-                chain.doFilter(myHttpServletRequest, response);
-                return;
+                SessionConfig sessionConfig = getSessionConfig(channelRequest.externalCache, channelConfigInRequest.getTestSession());
+                if (sessionConfig.isSessionConfigLocked()) {
+                    if (sessionConfig.isCanAddChannel()) {
+                        chain.doFilter(myHttpServletRequest, response);
+                        return;
+                    } else {
+                        returnPlainTextResponse(response, HttpServletResponse.SC_UNAUTHORIZED, "New channels cannot be created in a locked test session.");
+                        return;
+                    }
+                } else {
+                    chain.doFilter(myHttpServletRequest, response);
+                    return;
+                }
             } else if (isPut) { // Channel configuration must exist if replacing
                 returnPlainTextResponse(response, HttpServletResponse.SC_BAD_REQUEST, "Channel configuration does not exist.");
                 return;
@@ -172,7 +197,7 @@ public class FtkElementsGuardFilter implements Filter {
 
         ChannelConfig beforeUpdate = simStore.getChannelConfig();
         if (beforeUpdate.isWriteLocked()) {
-            // Only way through this is to send a request through the accessGuard servlet.
+            // Only way through this is to send a request through the accessGuard servlet mapping, which has nothing to do with this GuardFilter.
             returnPlainTextResponse(response, HttpServletResponse.SC_BAD_REQUEST, "Channel configuration is write protected.");
             return;
         } else {

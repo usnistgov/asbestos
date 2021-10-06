@@ -62,6 +62,7 @@
     import {PROXY} from '../../common/http-common'
     import {ButtonGroupPlugin, ButtonPlugin, ToastPlugin} from 'bootstrap-vue'
     import channelMixin from "@/mixins/channelMixin";
+    import testSessionMixin from "../../mixins/testSessionMixin";
 
     Vue.use(ButtonGroupPlugin)
     Vue.use(ButtonPlugin)
@@ -84,13 +85,6 @@
             this.$store.dispatch('initSessionsStore', sessionIdFromRoute)
         },
         computed: {
-            isSessionConfigLocked() {
-                let sc = this.$store.getters.getSessionConfig
-                if (sc !== undefined && sc !== null) {
-                    return sc.sessionConfigLocked
-                } else
-                    return false
-            },
             testSessionNames() {
                 return this.$store.state.base.sessionNames
             },
@@ -215,13 +209,10 @@
                 this.$bvToast.toast(msg, {noCloseButton: true, title: 'Error'})
             },
         },
-        mixins: [channelMixin],
+        mixins: [channelMixin, testSessionMixin],
         name: "SessionControlPanel"
     }
 </script>
 
 <style scoped>
-.dimOpacity {
-    opacity: .25;
-}
 </style>

@@ -1,15 +1,34 @@
 <template>
     <div>
-        <div @click="manage()" class="control-panel-item-title">Channels</div>
+        <div class="control-panel-item-title">Channels</div>
         <div>
-            <div class="tooltip">
-                <img @click="addBtnClick()" id="add-button" src="../../assets/add-button.png"/>
-                <span class="tooltiptext">Add Channel</span>
-            </div>
-            <div class="tooltip">
-                <img @click="guardedFn('Delete',del)" id="delete" src="../../assets/exclude-button-red.png"/>
-                <span class="tooltiptext">Delete Channel</span>
-            </div>
+            <template v-if="isCanAddChannel || editUserProps.signedIn">
+                <div class="tooltip">
+                    <img @click="addBtnClick()" id="add-button" src="../../assets/add-button.png"/>
+                    <span class="tooltiptext">Add Channel</span>
+                </div>
+            </template>
+            <template v-else>
+                <div class="tooltip">
+                    <img class="dimOpacity" disabled="disabled" src="../../assets/add-button.png"/>
+                    <span class="tooltiptext">Channel create is disabled in this test session</span>
+                </div>
+            </template>
+
+            <template v-if="isCanRemoveChannel || editUserProps.signedIn">
+                <div class="tooltip">
+                    <img @click="guardedFn('Delete',del)" id="delete" src="../../assets/exclude-button-red.png"/>
+                    <span class="tooltiptext">Delete Channel</span>
+                </div>
+            </template>
+            <template v-else>
+                <div class="tooltip">
+                    <img class="dimOpacity" disabled="disabled" src="../../assets/exclude-button-red.png"/>
+                    <span class="tooltiptext">Remove channel is disabled in this test session</span>
+                </div>
+            </template>
+
+
             <div class="tooltip">
                 <button @click="manage()" type="button">Config</button>
                 <span class="tooltiptext">Config</span>
@@ -23,28 +42,6 @@
                 {{ chann }}
             </option>
         </select>
-        <!--
-    Channels
-    <div class="tooltip">
-    <img id="add-button" @click="addBtnClick()" src="../../assets/add-button.png"/>
-    <span class="tooltiptext">Add Channel</span>
-    </div>
-    <div class="tooltip">
-    <img id="delete" src="../../assets/exclude-button-red.png" @click="guardedFn('Delete',del)"/>
-    <span class="tooltiptext">Delete Channel</span>
-    </div>
-    <div>
-    <div v-if="channelId">
-    <select v-model="channelId" size="10">
-      <option v-for="(chann, channI) in channelIds"
-              v-bind:value="chann"
-              :key="chann + channI"
-      >
-        {{ chann}}
-      </option>
-    </select>
-    </div>
-    -->
         <div v-if="adding">
             <input v-model="newChannelName">
             <button @click="doAdd()">Add</button>
@@ -75,6 +72,7 @@
     import {ASBTS_USERPROPS, PROXY} from "@/common/http-common";
     import SignIn from "../SignIn";
     import channelMixin from '@/mixins/channelMixin'
+    import testSessionMixin from "../../mixins/testSessionMixin";
 
     export default {
         data() {
@@ -146,18 +144,6 @@
                 this.adding = false;
                 this.cancelDel()
             },
-            /*
-            localDelete(theChannelId) {
-                const index = this.channelIds.findIndex(function (channelId) {
-                    return channelId === theChannelId;
-                })
-                if (index === -1)
-                    return;
-                this.channelIds.splice(index, 1);
-                this.channel = null;
-            },
-            */
-
             cancelDel() {
                 this.deleting = false;
                 this.lockAcked = null;
@@ -229,10 +215,6 @@
                 this.channelIds = this.$store.getters.getChannelIdsForCurrentSession;
             },
             // for create a new channel
-            /*
-            pushNewChannelRoute() {
-                return this.$router.push(this.newChannelRoute())
-            },*/
             pushChannelRoute(ch) {
                 const route = this.channelRoute(ch);
                 if (route)
@@ -243,17 +225,6 @@
                     return null;
                 return '/session/' + ch.testSession + '/channels/' + ch.channelName;
             },
-            /*
-            newChannelRoute() {
-                let chan = newChannel()
-                chan.testSession = this.sessionId
-                chan.channelName = 'new'
-                chan.channelType = 'fhir'
-                this.$store.commit('setChannel', chan)
-                this.$store.commit('setChannelIsNew');
-                return '/session/' + this.sessionId + '/channels/new'
-            },
-             */
             channelsLink(channelId) {
                 const chan = channelId.split('__', 2);
                 const session = chan[0];
@@ -306,18 +277,6 @@
                     }
                 }
             },
-            /*
-            Is this used ?
-            session: {
-                set(id) {
-                    if (id !== this.$store.state.base.session)
-                        this.$store.commit('setSession', id);
-                },
-                get() {
-                    return this.$store.state.base.session;
-                }
-            },
-             */
             theChannel() {
                 return this.$store.state.base.channel
             },
@@ -334,26 +293,12 @@
                 }
             })
 
-            /*
-            this.$store.subscribe((mutation) => {
-                switch (mutation.type) {
-                    case 'installChannel':
-                    case 'installChannelIds':
-                    case 'setSession':
-                    case 'loadChannelNames':
-                        console.log('ChannelCP syncing on mutation.type: ' + mutation.type)
-                        this.channelNames = this.$store.getters.getChannelNamesForCurrentSession;
-                        break;
-                }
-            })
-            */
         },
         watch: {},
-        mixins: [channelMixin],
+        mixins: [channelMixin, testSessionMixin],
         name: "ChannelControlPanel"
     }
 </script>
 
 <style scoped>
-
 </style>

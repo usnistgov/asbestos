@@ -22,7 +22,6 @@
                 <span class="tooltiptext">Discard</span>
               </div>
             </div>
-<!--            <span v-if="channelIsNew" class="right">Edited</span>-->
           </div>
           <div v-else>
             <div v-if="ackMode">
@@ -47,12 +46,6 @@
               <div class="divider"></div>
               <div class="divider"></div>
               <div class="divider"></div>
-<!--              <div class="tooltip">-->
-<!--                <img id="delete-button" src="../../assets/delete-button.png" @click="guardedFn('Delete',requestDelete)" />-->
-<!--                <span class="tooltiptext">Delete</span>-->
-<!--              </div>-->
-<!--              <div class="divider"></div>-->
-<!--              <div class="divider"></div>-->
               <div v-if="channel.writeLocked" class="tooltip">
                 <img id="unlock-button" src="../../assets/lock-icon.png" @click="requestLock(false)"/>
                 <span class="tooltiptext">Configuration is locked.</span>
@@ -61,12 +54,19 @@
                 <img id="lock-button" src="../../assets/unlock-icon.png" @click="requestLock(true)"/>
                 <span class="tooltiptext">Configuration is unlocked.</span>
               </div>
-<!--              <span v-if="channelIsNew" class="right">Edited</span>-->
             </div>
 
           </div>
 
         </div>
+
+        <template v-if="editUserProps.signedIn">
+          <div v-if="channelIsNew" class="grid-item">
+            <label class="grid-name">Locked?</label>
+            <input type="checkbox" v-model="channel.writeLocked">
+          </div>
+        </template>
+
         <label class="grid-name">Id</label>
         <div v-if="channelIsNew" class="grid-item">
           <input v-model="channel.channelName">
@@ -198,6 +198,7 @@ Vue.use(ButtonGroupPlugin)
 Vue.use(ButtonPlugin)
 Vue.use(ToastPlugin)
 import SignIn from "../SignIn";
+import testSessionMixin from "../../mixins/testSessionMixin";
 
 export default {
   data () {
@@ -229,37 +230,13 @@ export default {
       } catch (e) {
        console.log('error in Created lifecycle event: ' + e )
       }
-    // if (this.startEdit) {
-    //   this.edit = true;
-      // this.isNew = true;
-    // }
-    // this.loadChannelBaseAddr()
   },
   watch: {  // when $route changes run fetch()
     $route: function() {
       this.fetch();
     },
-    /*
-    *
-    channelName: function (newChannelName) {
-      this.updateToChannel(newChannelName);
-    },
-    startEdit: function (newStartEdit) {
-      this.startEdit = newStartEdit;
-    },
-    channelIsNew(value) {
-      this.edit = value;
-    }
-     */
   },
   computed: {
-    /*
-    channelIds: {
-      get() {
-        return this.$store.getters.getEffectiveChannelIds;
-      },
-    },
-    */
     channelId() {
       return this.sessionId + '__' + this.channelName;
     },
@@ -319,95 +296,70 @@ export default {
       this.$store.commit('setChannelIsNew', true);
       this.edit = true
       this.$router.push('/session/' + this.sessionId + '/channels/copy')
-
-      /*
-    let chan = cloneDeep(this.channel)
-    chan.channelName = 'copy'
-    chan.writeLocked = false
-    this.$store.commit('installChannel', chan)
-    this.$store.commit('setChannelIsNew', true);
-    this.$router.push('/session/' + this.sessionId + '/channels/copy')
-       */
-
     },
-      /*
-    async deleteChannel() {
-      try {
-        if (! this.channel.writeLocked) {
-          await PROXY.delete('channel/' + this.sessionId + '__' + this.channelName)
-        } else if (this.editUserProps.bapw !== "") {
-          await PROXY.delete('channelGuard/' + this.channelId, { auth: {username: this.editUserProps.bauser, password: this.editUserProps.bapw}})
-        }
-        this.msg('Deleted.')
-        this.$store.commit('deleteChannel', this.channelId)
-        await this.$store.dispatch('loadChannelIds')
-        this.$router.push('/session/' + this.sessionId + '/channels')
-      } catch (error) {
-        this.lockAckMode = ""
-        this.error(error)
-      }
-    },
-    */
-
     toggleEdit() {
       this.edit = !this.edit
     },
     async save() {
-      // if (this.isNew) {
-      //   let response = await this.saveToServer(this.channel);
-      //     if (response) {console.log(response)}
-      //     this.$store.commit('installChannel', cloneDeep(this.channel))
-      //     this.isNew = false
-      //     this.edit = false
-      //     await this.$store.dispatch('initSessionsStore');
-      //     await this.$store.dispatch('loadChannelIds')
-      //     await this.$router.push('/session/' + this.channel.testSession + '/channels/' + this.channel.channelName)
-      // } else {
-      // this.$store.commit('installChannel', cloneDeep(this.channel))
-      if (! this.channel.writeLocked) {
+      if (this.channelIsNew) {
+        let url = ''
           try {
-              if (this.channelIsNew) {
-                await CHANNEL.post('create', this.channel)
-                this.$store.commit('installChannel', this.channel)
-                this.$store.commit('setChannelIsNew', false);
-                this.msg('Saved.')
-              } else {
-                await CHANNEL.put(`${this.channel.testSession}__${this.channel.channelName}`, this.channel);
-                this.$store.commit('installChannel', this.channel)
-                this.msg('Updated.')
-              }
+            if (this.isSessionConfigLocked) {
+                if (this.isCanAddChannel) {
+                  url = 'create'
+                  await CHANNEL.post(url, this.channel)
+                } else {
+                  if (this.editUserProps.signedIn) {
+                    url = 'accessGuard/channel/create'
+                    await PROXY.post(url, this.channel, {
+                      auth: {
+                        username: this.editUserProps.bauser,
+                        password: this.editUserProps.bapw
+                      }
+                    })
+                  } else {
+                    this.msg("Sign-in is required to add a new channel to a locked test session.")
+                  }
+                }
+            } else {
+              url = 'create'
+              await CHANNEL.post(url, this.channel)
+            }
+            this.$store.commit('installChannel', this.channel)
+            this.$store.commit('setChannelIsNew', false);
             this.edit = false
             this.lockAckMode = ""
             this.fetch(true)
             await this.$store.dispatch('loadChannelIds')
-          } catch (error) {
-            if (error !== null && error !== undefined) {
+            this.msg('Saved.')
+          }
+          catch (error) {
+            this.error(url + ': ' + error)
+            this.edit = false
+            this.lockAckMode = ""
+          }
+        } else {
+          if (! this.channel.writeLocked) {
+            try {
+              await CHANNEL.put(`${this.channel.testSession}__${this.channel.channelName}`, this.channel);
+              this.$store.commit('installChannel', this.channel)
+              this.msg('Updated.')
+              this.edit = false
+              this.lockAckMode = ""
+              this.fetch(true)
+              await this.$store.dispatch('loadChannelIds')
+            } catch (error) {
+              if (error !== null && error !== undefined) {
                 const hasResponse = Object.keys(error).indexOf('response')
                 if (hasResponse) {
                   this.error(error.response.statusText)
                   this.error(error.response.data)
                 }
+              }
             }
-            // const url = (this.channelIsNew ? 'CHANNEL.post' : 'CHANNEL.put');
-            // this.error(url + ': ' + error)
-            // this.isNew = false
-            // this.msg(error)
-            // this.$store.commit('setChannelIsNew', false);
-            // this.edit = false
-          }
-        } else {  // has write lock
-          let url = `accessGuard/channel/create`;
-          try {
-            if (this.channelIsNew) {
-              await PROXY.post(url, this.channel, {
-                auth: {
-                  username: this.editUserProps.bauser,
-                  password: this.editUserProps.bapw
-                }
-              })
-              this.msg('Saved.')
-            } else {
-              url = `/accessGuard/channel/${this.channel.testSession}__${this.channel.channelName}`
+          } else {  // has write lock
+            let url = `/accessGuard/channel/${this.channel.testSession}__${this.channel.channelName}`
+            try {
               await PROXY.put(url, this.channel, {
                 auth: {
                   username: this.editUserProps.bauser,
@@ -415,42 +367,20 @@ export default {
                 }
               })
               this.msg('Updated.')
+              this.$store.commit('setChannelIsNew', false);
+              this.edit = false
+              this.lockAckMode = ""
+              this.fetch(true)
+              await this.$store.dispatch('loadChannelIds')
+            } catch (error) {
+              this.error(url + ': ' + error)
+              this.edit = false
+              this.lockAckMode = ""
             }
-            // this.isNew = false
-            this.$store.commit('setChannelIsNew', false);
-            this.edit = false
-            this.lockAckMode = ""
-            this.fetch(true)
-            await this.$store.dispatch('loadChannelIds')
-          } catch (error) {
-            this.error(url + ': ' + error)
-            // this.isNew = false
-            this.edit = false
-            this.lockAckMode = ""
           }
         }
-//      }
-
     },
-    /*
-    async saveToServer(aChannel) {
-      const url = `CHANNEL/create`;
-      try {
-        console.log(`saveToServer`)
-        await CHANNEL.post('create', aChannel)
-        this.msg('New Channel Saved.')
-        await this.$store.dispatch('loadChannelNames')
-        await this.$store.dispatch('loadChannelIds')
-      } catch(error) {
-        this.error(url + ': ' + 'saveToServer ' + error)
-      }
-    },
-    */
     discard() {
-      // if (this.channelIsNew) {
-      //   this.deleteChannel()
-      // }
-      // this.isNew = false
         if (this.channelIsNew) {
             this.msg('Discarded.')
             this.edit = false
@@ -490,19 +420,6 @@ export default {
       // console.log('isPreloaded: ' + ret)
       return ret
     },
-    /*
-    updateToChannel(channelName) {
-      if (!channelName)
-        return
-      if (this.isPreloaded())
-        return;
-      this.channelName = channelName;
-      this.$store.dispatch('loadChannel', this.channelId)   // this.channelId is computed off this.channelName
-          .then(channel => {
-            this.channel = channel
-          })
-    },
-    */
     fetch(reload = false) {
       if (this.channelName === undefined)
         return
@@ -536,15 +453,6 @@ export default {
             this.discarding = false
           })
     },
-    /*
-    channelIndex(theSessionId, theChannelName) {
-      const fullChannelId = `${theSessionId}__${theChannelName}`;
-      return this.$store.state.base.channelIds.findIndex( function(channelId) {
-        return channelId === fullChannelId
-      })
-    },
-
-     */
     getChannel() {
       return this.$store.state.base.channel
     },
@@ -552,16 +460,6 @@ export default {
       const chan = this.getChannel()
       return cloneDeep(chan)
     },
-    /*
-    select() {
-      if (this.channel.testSession === undefined || this.channel.channelName === undefined) {
-        return
-      }
-      const newRoute =  '/session/' + this.channel.testSession + '/channel/' + this.channel.channelName
-      this.$store.commit('setChannelName', this.channel.channelName)
-      this.$router.push(newRoute)
-    },
-     */
     isHttpsMode() {
       return UtilFunctions.isHttpsMode()
     },
@@ -628,6 +526,7 @@ export default {
       }
     }
   },
+  mixins: [testSessionMixin],
   store: store,
   name: "ChannelEdit"
 }
