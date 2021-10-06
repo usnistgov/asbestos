@@ -57,7 +57,7 @@ public class CreateChannelRequest {
                 || SimStore.isReservedNamesPattern(null).matcher(channelConfig.getChannelName()).matches();
 
         if (isInvalidChannelName) {
-            String error = "Invalid channel name";
+            String error = "Invalid channel name. Check if name contains an illegal character or a reserved name.";
             log.warn(error + ": " +  channelConfig.asChannelId());
             request.resp.setContentType("application/json");
             request.resp.getOutputStream().print(error);
