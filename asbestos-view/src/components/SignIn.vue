@@ -114,6 +114,7 @@
                         let msg = ((error) ? error.message: '' )
                         msg += ((error && error.response && error.response.status && error.response.statusText) ? (error.response.status +  ': ' + error.response.statusText) : "")
                         that.error({message: msg})
+                        that.$store.commit('setError',  msg)
                         return {
                             data: {isSignedIn : false}
                         }
