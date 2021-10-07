@@ -37,31 +37,31 @@ mvn clean package -P cat
 For hotfixes:
     copy the individual hotfix jar file
 
-@call c:\Users\skb1\myprojects\env.bat cd
+@call %USERPROFILE%\myprojects\env.bat cd
 
-dir C:\Users\skb1\myprojects\asbestos\asbestos-assembly\target\asbestos.zip
+dir %USERPROFILE%\myprojects\asbestos\asbestos-assembly\target\asbestos.zip
 
 Normal path
     Note: As of February 3, 2020 long file paths cause unzip errors.
-    unzip -qq C:\Users\skb1\myprojects\asbestos\asbestos-assembly\target\asbestos.zip -d C:\Users\skb1\myprojects\asbestos\asbestos-assembly\target\asbestos
+    unzip -qq %USERPROFILE%\myprojects\asbestos\asbestos-assembly\target\asbestos.zip -d %USERPROFILE%\myprojects\asbestos\asbestos-assembly\target\asbestos
 
     --OR--
 
 Short directory paths
     del /f /s /q c:\temp\asbestos\*.*
     rmdir /q /s c:\temp\asbestos
-    unzip -qq C:\Users\skb1\myprojects\asbestos\asbestos-assembly\target\asbestos.zip -d C:\temp\asbestos
-    robocopy C:\Users\skb1\ec\ec_shared\environment C:\temp\asbestos\tomcat\Toolkits\ExternalCache\environment /MIR
+    unzip -qq %USERPROFILE%\myprojects\asbestos\asbestos-assembly\target\asbestos.zip -d C:\temp\asbestos
+    robocopy %USERPROFILE%\ec\ec_shared\environment C:\temp\asbestos\tomcat\Toolkits\ExternalCache\environment /MIR
     cd c:\temp\asbestos\tomcat\bin
     If XdsToolkit is not bundled, then a running copy of the XdsToolkit must use the same EC Dir for the codes.xml verification to work on FHIR Toolkit startup.
     If Tomcat at 8080 with XdsToolkit is already running, then:
     .\start
 
 If Tomcat needs to be copied to the testing area:
-copy C:\Users\skb1\myprojects\fhirtoolkit-cert\XdsToolkit\webapps\fhir to C:\Users\skb1\myprojects\asbestos\asbestos-assembly\target\asbestos\tomcat\Toolkits\XdsToolkit\webapps
-copy C:\Users\skb1\myprojects\fhirtoolkit-cert\XdsToolkit\webapps\xdstools to C:\Users\skb1\myprojects\asbestos\asbestos-assembly\target\asbestos\tomcat\Toolkits\XdsToolkit\webapps
+copy %USERPROFILE%\myprojects\fhirtoolkit-cert\XdsToolkit\webapps\fhir to %USERPROFILE%\myprojects\asbestos\asbestos-assembly\target\asbestos\tomcat\Toolkits\XdsToolkit\webapps
+copy %USERPROFILE%\myprojects\fhirtoolkit-cert\XdsToolkit\webapps\xdstools to %USERPROFILE%\myprojects\asbestos\asbestos-assembly\target\asbestos\tomcat\Toolkits\XdsToolkit\webapps
 
-cd C:\Users\skb1\myprojects\asbestos\asbestos-assembly\target\asbestos
+cd %USERPROFILE%\myprojects\asbestos\asbestos-assembly\target\asbestos
 
 cd tomcat\bin
 .\start
@@ -71,19 +71,6 @@ http://localhost:9760/
 
 end.
 
-Manual base startup:
-
-set CATALINA_HOME=C:\Users\skb1\myprojects\asbestos\asbestos-assembly\target\asbestos\tomcat
-
-set CATALINA_BASE=%CATALINA_HOME%\Toolkits\FhirToolkit
-
-If using XDS Toolkit, using same external cache is recommended. So update %CATALINA_BASE%\bin\setenv.bat
-    SET "CATALINA_OPTS=%CATALINA_OPTS% -DEXTERNAL_CACHE=/C:/Users/skb1/ec/xds729"
-
-cd %CATALINA_HOME%\bin
-
-startup
-
 
 Problem ports if another tomcat is already running:
 
@@ -92,3 +79,11 @@ port 8005 => 9705
 port 8009 => 9709
 port 8443 => 9743
 
+
+Starting only the FHIR toolkit:
+
+Downloads>set CATALINA_BASE=%USERPROFILE%\Downloads\asbestos221\asbestos\tomcat\Toolkits\FhirToolkit
+
+Downloads>cd asbestos221\asbestos\tomcat\bin
+
+Downloads\asbestos221\asbestos\tomcat\bin>startup
