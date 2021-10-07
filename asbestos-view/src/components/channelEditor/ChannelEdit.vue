@@ -126,14 +126,25 @@
           </div>
         </div>
 
-        <label>MHD Version Support</label>
-        <select size="5" multiple="multiple" v-model="channel.mhdVersions">
-          <option :key="eKey"
-                  :value="e"
-                  v-for="(e,eKey) in $store.state.channel.mhdVersions">
-            {{ e }}
-          </option>
-        </select>
+        <label class="grid-name">MHD Version Support</label>
+        <div v-if="isEditMode" class="grid-item" >
+          <select size="5" multiple="multiple" v-model="channel.mhdVersions">
+            <option :key="eKey"
+                    :value="e"
+                    v-for="(e,eKey) in $store.state.channel.mhdVersions">
+              {{ e }}
+            </option>
+          </select>
+            If no options are selected, channel validation is based on the PDB bundle profile.
+        </div>
+        <div v-else>
+            <template v-if="Array.isArray(channel.mhdVersions) && channel.mhdVersions.length > 0">
+              {{channel.mhdVersions.join(", ")}}
+            </template>
+          <template v-else>
+            Auto select based on bundle profile
+          </template>
+        </div>
 
         <div v-if="!lockAckMode && !isEditMode && !channel.fhirBase && !channel.xdsSiteName" class="channelError">
           <div class="vdivider"></div>

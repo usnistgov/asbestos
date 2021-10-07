@@ -34,6 +34,7 @@ import oasis.names.tc.ebxml_regrep.xsd.rim._3.*;
 import oasis.names.tc.ebxml_regrep.xsd.rs._3.RegistryResponseType;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.apache.log4j.Logger;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.Attachment;
@@ -48,6 +49,7 @@ import java.util.stream.Collectors;
 
 // TODO - honor the Prefer header - http://hl7.org/fhir/http.html#ops
 public class XdsOnFhirChannel extends BaseChannel /*implements IBaseChannel*/ {
+    private static final Logger log = Logger.getLogger(XdsOnFhirChannel.class);
     private Bundle requestBundle = null;
     private String serverBase;
     private String proxyBase;
@@ -167,15 +169,28 @@ public class XdsOnFhirChannel extends BaseChannel /*implements IBaseChannel*/ {
     private MhdProfileVersionInterface findMhdImpl(Bundle bundle, String[] acceptableMhdVersions, MhdVersionEnum defaultVersion, Val val) {
         Objects.requireNonNull(mhdTransforms);
 
-        MhdVersionEnum bundleVersion;
-        Optional<MhdVersionEnum> optionalMhdVersionEnum = Arrays.stream(acceptableMhdVersions)
-                .map(MhdVersionEnum::find)
-                .filter(e -> MhdImplFactory.getImplementation(e, val, mhdTransforms).isBundleProfileDetected(bundle))
-                .findAny();
-        if (optionalMhdVersionEnum.isPresent()) {
-            bundleVersion = optionalMhdVersionEnum.get();
-        } else {
-            bundleVersion = defaultVersion;
+        MhdVersionEnum bundleVersion = defaultVersion;
+        try {
+            Optional<MhdVersionEnum> optionalMhdVersionEnum = Arrays.stream(acceptableMhdVersions)
+                    .map(MhdVersionEnum::find)
+                    .filter(e -> {
+                        if (e == null) {
+                            return false;
+                        } else {
+                            MhdProfileVersionInterface intf = MhdImplFactory.getImplementation(e, val, mhdTransforms);
+                            if (intf == null) {
+                                return false;
+                            } else {
+                                return intf.isBundleProfileDetected(bundle);
+                            }
+                        }
+                    })
+                    .findAny();
+            if (optionalMhdVersionEnum.isPresent()) {
+                bundleVersion = optionalMhdVersionEnum.get();
+            }
+        } catch (Exception ex) {
+            log.warn("findMhdImpl Exception: " + ex.toString());
         }
         return MhdImplFactory.getImplementation(bundleVersion, val, mhdTransforms);
     }

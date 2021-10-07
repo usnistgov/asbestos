@@ -4,7 +4,6 @@ import gov.nist.asbestos.mhd.transforms.MhdTransforms;
 import gov.nist.asbestos.mhd.transforms.MhdV3x;
 import gov.nist.asbestos.mhd.transforms.MhdV4;
 import gov.nist.asbestos.simapi.validation.Val;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 public class MhdImplFactory {
 
@@ -14,6 +13,6 @@ public class MhdImplFactory {
         } else if (MhdVersionEnum.MHDv4.equals(mhdVersionEnum)) {
             return new MhdV4(val, mhdTransforms);
         }
-        throw new NotImplementedException();
+        return null;
     }
 }

@@ -210,7 +210,7 @@ public class ProxyServlet extends HttpServlet {
             HttpBase requestOut = transformRequest(backSideTask, requestIn, outURI, channel);
             requestOut.setUri(outURI);
 
-            // send request to backend service
+            // send request to backend service, if this fails probably the proxy target (fhir base or mhd channel name is not configured properly in the channel config)
             requestOut.run();
 
             // log response from backend service
