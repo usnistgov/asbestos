@@ -4,6 +4,7 @@ import gov.nist.asbestos.client.Base.Request;
 import gov.nist.asbestos.client.log.SimStore;
 import gov.nist.asbestos.client.channel.ChannelConfig;
 import gov.nist.asbestos.client.channel.ChannelConfigFactory;
+import gov.nist.asbestos.mhd.channel.MhdVersionEnum;
 import gov.nist.asbestos.simapi.simCommon.SimId;
 import gov.nist.asbestos.simapi.simCommon.TestSession;
 import org.apache.commons.io.IOUtils;
@@ -11,6 +12,7 @@ import org.apache.log4j.Logger;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 // 0 - empty
@@ -57,7 +59,16 @@ public class CreateChannelRequest {
                 || SimStore.isReservedNamesPattern(null).matcher(channelConfig.getChannelName()).matches();
 
         if (isInvalidChannelName) {
-            String error = "Invalid channel name. Check if name contains an illegal character or a reserved name.";
+            String error = "Invalid channel name. Check if name contains an illegal character or is a reserved name.";
+            log.warn(error + ": " +  channelConfig.asChannelId());
+            request.resp.setContentType("application/json");
+            request.resp.getOutputStream().print(error);
+            request.setStatus((request.resp.SC_BAD_REQUEST));
+            return;
+        }
+
+        if (! isMhdVersionValid(channelConfig.getMhdVersions())) {
+            String error = "Invalid mhdVersion.";
             log.warn(error + ": " +  channelConfig.asChannelId());
             request.resp.setContentType("application/json");
             request.resp.getOutputStream().print(error);
@@ -79,5 +90,24 @@ public class CreateChannelRequest {
         request.resp.getOutputStream().print(rawRequest);
 
         request.setStatus((simStore.isNewlyCreated() ? request.resp.SC_CREATED : request.resp.SC_OK));
+    }
+
+    private static boolean isMhdVersionValid(String[] mhdVersions) {
+         if (mhdVersions == null) { /* null means nothing is specified, which is valid since mhdVersion is optional */
+             return true;
+         }
+         // If a mhdVersion is indeed specified, make sure it is mappable to the enum
+         try {
+             if (mhdVersions != null  && mhdVersions.length > 0) {
+                 long count = Arrays.stream(mhdVersions).map(e -> MhdVersionEnum.find(e)).count();
+                 if (mhdVersions.length == count)
+                     return true;
+             } else {
+                 return true; // 0 length is OK
+             }
+         } catch (Exception ex) {
+            return false;
+         }
+         return false;
     }
 }
