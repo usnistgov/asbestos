@@ -135,14 +135,14 @@
               {{ e }}
             </option>
           </select>
-            If no options are selected, channel validation is based on the PDB bundle profile.
+            No selection is required. If no options are selected, channel validation is based on the PDB bundle profile. All test collections are displayed if no options are selected. If option(s) are selected, test collections are filtered based on the option selection.
         </div>
         <div v-else>
             <template v-if="Array.isArray(channel.mhdVersions) && channel.mhdVersions.length > 0">
               {{channel.mhdVersions.join(", ")}}
             </template>
           <template v-else>
-            Auto select based on bundle profile
+            Auto-select based on bundle profile
           </template>
         </div>
 
