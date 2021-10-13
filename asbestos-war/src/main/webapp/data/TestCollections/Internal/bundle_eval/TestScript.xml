@@ -195,10 +195,19 @@
             <assert>
                 <description value="DocumentReference: DocumentReference links to Binary through content.attachment.url|MHDPDBBinaryInBundle"/>
                 <compareToSourceId value="request"/>
-                <compareToSourceExpression value="Bundle.entry.resource.all(is(FHIR.DocumentReference) implies content.attachment.url = Bundle.entry.where(resource.is(FHIR.Binary)).fullUrl).exists()"/>
+                <compareToSourceExpression value="Bundle.entry.select(resource as DocumentReference).content.attachment.url ~ Bundle.entry.where(resource is Binary).fullUrl"/>
                 <warningOnly value="false"/>
             </assert>
         </action>
+        <action>
+            <assert>
+                <description value="DocumentReference: DocumentReference content attachment contentType is equivalent to Binary contentType|MHDPDBAttachmentContentType"/>
+                <compareToSourceId value="request"/>
+                <compareToSourceExpression value="Bundle.entry.select(resource as DocumentReference).content.attachment.contentType ~ Bundle.entry.select(resource as Binary).contentType"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+
         <action>
             <assert>
                 <description value="DocumentReference: sourcePatientInfo, if it exists, is a reference to a contained Patient Resource|MHDPDBSourcePatientInfoIsContained"/>
