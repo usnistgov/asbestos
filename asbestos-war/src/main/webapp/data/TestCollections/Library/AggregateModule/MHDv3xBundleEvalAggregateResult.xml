@@ -10,7 +10,7 @@
 
     <id value="MHDv3xBundleEvalAggregateResult"/>
     <name value="MHDv3xBundleEvalAggregateResult"/>
-    <description value="Evaluate PDB-request Bundle, result is the aggregate of the top-level module level run."/>
+    <description value="This TestScript is a bridge that links the parent TestScript to the imported module component."/>
 
     <test>
         <description value="Bundle evaluation assertions."/>
