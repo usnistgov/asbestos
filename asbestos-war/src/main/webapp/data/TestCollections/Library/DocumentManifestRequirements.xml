@@ -1,0 +1,26 @@
+<TestScript xmlns="http://hl7.org/fhir">
+    <modifierExtension url="urn:module">
+        <extension url="urn:fixture-in">
+            <valueString value="request"/>
+        </extension>
+        <extension url="urn:fixture-in">
+            <valueString value="response"/>
+        </extension>
+    </modifierExtension>
+
+    <id value="documentManifestValidations"/>
+    <name value="documentManifestValidations"/>
+    <description value="DocumentManifest requirements3."/>
+
+    <test>
+    <description value="DocumentManifest requirements4."/>
+    <action>
+        <assert>
+            <description value="DocumentManifest: masterIdentifier is required"/>
+            <compareToSourceId value="request"/>
+            <compareToSourceExpression value="Bundle.entry.resource.where(is(FHIR.DocumentManifest)).masterIdentifier.exists()"/>
+            <warningOnly value="false"/>
+        </assert>
+    </action>
+</test>
+</TestScript>

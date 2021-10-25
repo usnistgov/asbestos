@@ -47,8 +47,6 @@ import ActionDetails from "./ActionDetails";
 import DebuggableListItem from "./debugger/DebuggableListItem";
 import debugTestScriptMixin from "../../mixins/debugTestScript";
 import importMixin from "../../mixins/importMixin";
-// import TestDetails from "./TestDetails";
-// import TestOrEvalDetails from "./TestOrEvalDetails";
 
     export default {
         data() {
@@ -151,7 +149,6 @@ import importMixin from "../../mixins/importMixin";
             TestOrEvalDetails: () => import('./TestOrEvalDetails'),
             ActionDetails,
             DebuggableListItem,
-            // TestDetails,
         },
         mixins: [
             debugTestScriptMixin,
