@@ -1,5 +1,5 @@
 <template>
-    <ul class="importedTestScriptList">
+    <ul v-bind:class="[evalTestId  ? 'evalImportedTestScriptList' : 'importedTestScriptList', '']">
         <debuggable-list-item
                 v-for="(caction, cactioni) in scriptActions"
                 :key="'CAction' + cactioni"
@@ -160,8 +160,12 @@ import importMixin from "../../mixins/importMixin";
 <style scoped>
 </style>
 <style>
+    .evalImportedTestScriptList,
     .importedTestScriptList {
         list-style:none;
         padding-left: 0px;
+    }
+    .evalImportedTestScriptList {
+        margin: 0px 0px 16px 0px;
     }
 </style>
