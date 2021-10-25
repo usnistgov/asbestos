@@ -24,9 +24,9 @@ public class FixtureMgr {
     }
 
     public void putAll(Map<String, FixtureComponent> fixtures) {
-        this.fixtures.putAll(fixtures);
-        for (FixtureComponent fixture : fixtures.values())
-            fixture.setFixtureMgr(this);
+        for (String key : fixtures.keySet()) {
+            put(key, fixtures.get(key));
+        }
     }
 
     public void put(String name, FixtureComponent component) {

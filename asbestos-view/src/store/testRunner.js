@@ -232,7 +232,30 @@ export const testRunnerStore = {
             state.doReloadTestCollectionObjs(state, 'serverTestCollectionObjs', objs)
         },
         setClientTestResult(state, parms) {     // { testId: testId, result: result }
+            const eventReports = parms.reports
+            // Partition the modular reports
+            // let obj = {}
             Vue.set(state.clientTestResult, parms.testId, parms.reports)
+            for (let eventId in eventReports) {
+                // let mainReports = []
+               for (let testReport of eventReports[eventId]) {
+                   // console.log('processing index #...')
+                   if (testReport !== null && testReport !== undefined && 'resourceType' in testReport) {
+                       if (testReport.resourceType === 'TestReport') {
+                           let testName = testReport.name
+                           if (testName.includes("/"))
+                               Vue.set(state.moduleTestReports, testName, testReport)
+                           // else
+                           //     mainReports.push(testReport)
+                       } else {
+                           console.error('Unexpected resourceType: ' + testReport.resourceType)
+                       }
+                   } else {
+                       console.error('Unexpected resource in eventReports')
+                   }
+               }
+               // obj[eventId] = mainReports
+            }
         },
         addTestArtifactDependency(state, paramObj) {
             Vue.set(state.ftkTestDependencies, paramObj.testArtifactId, paramObj.depTaIds)
@@ -327,7 +350,8 @@ export const testRunnerStore = {
                 .then(response => {
                     const results = response.data
                     commit('setClientTestResult', { testId: testId, reports: results[testId] } )
-                    commit('setTestReport', results[testId][eventId] )
+                    // setTestReport is not really useful if modular test scripts were used and multiple reports are compressed all into one report file
+                    // commit('setTestReport', results[testId][eventId] )
                 })
                 .catch(function (error) {
                     commit('setError', ENGINE.baseURL + url + ': ' + error)

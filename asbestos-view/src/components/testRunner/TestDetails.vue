@@ -96,14 +96,13 @@
     import ActionDetails from './ActionDetails'
     import ScriptDetailsContained from "./ScriptDetailsContained";
     import colorizeTestReports from "../../mixins/colorizeTestReports";
-   import TestStatus from "./TestStatus";
+    import TestStatus from "./TestStatus";
     import VueMarkdown from "vue-markdown";
 
-    // import importMixin from "../../mixins/importMixin";
     import ComponentScript from "./ComponentScript";
     import DebuggableListItem from "./debugger/DebuggableListItem";
     import debugTestScriptMixin from "../../mixins/debugTestScript";
-    const path = require('path')
+    import importMixin from "../../mixins/importMixin";
 
     export default {
         data() {
@@ -112,47 +111,12 @@
             }
         },
         methods: {
-            // did call to module fail (different from action in module failing)
-            reportContainsError(reportAction) {
-                if (!reportAction)
-                    return false;
-                if (reportAction.operation && reportAction.operation.result && reportAction.operation.result === 'error')
-                    return true;
-                // I do not think this can happen.abbrev. Module call errors are reported in the operation.
-                if (reportAction.assert && reportAction.assert.result && reportAction.assert.result === 'error')
-                    return true;
-                return false;
-            },
             reportContainsImport(action, actioni) {
                 if (!this.report.action) return false
                 const reportAction = this.report.action[actioni]
                 if (!reportAction) return false
                 if (!reportAction.operation) return false
                 if (!reportAction.operation.modifierExtension) return false
-            },
-            scriptImport(action) {
-                if (!action.operation) return {'result' : {'hasImport' : false}}
-                if (!action.operation.modifierExtension) return {'result' : {'hasImport' : false}}
-                let hasImport = false
-                let componentName = ''
-
-                action.operation.modifierExtension.forEach(extension => {
-                    if (extension.url === 'https://github.com/usnistgov/asbestos/wiki/TestScript-Import') {
-                        hasImport = true
-                        if (extension.modifierExtension) {
-                            extension.modifierExtension.forEach(extension => {
-                                if (extension.url === 'component') {
-                                    let filePath = extension.valueString
-                                    let fileDotExtension = path.extname(filePath)
-                                    componentName = path.basename(filePath, fileDotExtension)
-                                }
-                            })
-                        }
-
-                    }
-                })
-                let resultObj = {'result' :{'hasImport' : hasImport, 'componentName' : componentName}}
-                return resultObj
             },
             toggleDisplay() {
                 this.displayOpen = !this.displayOpen
@@ -230,7 +194,7 @@
         mixins: [
             colorizeTestReports,
             debugTestScriptMixin,
-        //    importMixin
+            importMixin
         ],
         name: "TestDetails"
     }

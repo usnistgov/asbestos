@@ -1,0 +1,35 @@
+<TestScript xmlns="http://hl7.org/fhir">
+    <modifierExtension url="urn:module">
+        <extension url="urn:fixture-in">
+            <valueString value="request"/>
+        </extension>
+        <extension url="urn:fixture-in">
+            <valueString value="response"/>
+        </extension>
+    </modifierExtension>
+
+    <id value="MHDv3xBundleEvalAggregateResult"/>
+    <name value="MHDv3xBundleEvalAggregateResult"/>
+    <description value="Evaluate PDB-request Bundle, result is the aggregate of the top-level module level run."/>
+
+    <test>
+        <description value="Bundle evaluation assertions."/>
+        <action>
+            <operation>
+                <description value="Previous test action operation is analyzed using assertions."/>
+                <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
+                    <extension url="component">
+                        <valueString value="../Internal/bundle_eval/TestScript.xml"/>
+                    </extension>
+                    <extension url="urn:fixture-in">
+                        <valueString value="request"/>
+                    </extension>
+                    <extension url="urn:fixture-in">
+                        <valueString value="response"/>
+                    </extension>
+                </modifierExtension>
+            </operation>
+        </action>
+    </test>
+
+</TestScript>

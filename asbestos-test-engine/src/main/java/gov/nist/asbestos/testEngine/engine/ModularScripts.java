@@ -16,12 +16,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class ModularScripts {
     // testId => TestScript json
     // testId/componentId => TestScript.json
-    private final Map<String, String> scripts = new HashMap<>();
+    private final Map<String, String> scripts = new LinkedHashMap<>();
 
     public ModularScripts(File testDef) {
         // fill the script Map with the base script and all referenced component scripts
@@ -67,7 +68,10 @@ public class ModularScripts {
             }
         }
 
+        testActionsHandleImport(testDef, testId, testScript);
+    }
 
+    private void testActionsHandleImport(File testDef, String testId, TestScript testScript) {
         for (TestScript.TestScriptTestComponent test : testScript.getTest()) {
             for (TestScript.TestActionComponent action: test.getAction()) {
                 handleImportScripts(testDef, testId, action);
@@ -106,6 +110,12 @@ public class ModularScripts {
                     componentScript.setName(fullComponentId);
                     String componentJson = ParserBase.encode(componentScript, Format.JSON);
                     scripts.put(fullComponentId, componentJson);
+
+                    /* Aggregate Test Script
+                    locally rebase the testDef to component script module since its references are relative to the module path, not the root testDef
+                     */
+                    File rebasedTestDef = componentFile.getParentFile();
+                    testActionsHandleImport(rebasedTestDef, testId, componentScript);
                 }
             }
         }

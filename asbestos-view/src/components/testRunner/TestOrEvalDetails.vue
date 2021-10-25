@@ -8,7 +8,7 @@
         <div class="vdivider"></div>
         <div class="vdivider"></div>
         <div class="vdivider"></div>
-          <span class="bold" title="To determine TestScript execution order, refer to TestScript execution order below. The displayed module list is not necessarily in the execution order."><span class="scriptInfoIcon">&#x2139;</span>Script:&nbsp;</span>
+          <span class="bold" title="Displays the TestScripts in order of execution. Imported test module components and aggregate module are all flattened (module nesting is deconstructed into a single-file structure). The end-result TestScript is basically conformant to the standard FHIR TestScript."><span class="scriptInfoIcon">&#x2139;</span>Script:&nbsp;</span>
         <span class="script-panel selectable underline"  @click="openScriptDisplay(testId)">&#x1F5D0;&nbsp;{{ testId }}</span>
         <span v-for="(name, namei) in Object.getOwnPropertyNames(testModules)"
              :key="'TestModule' + namei">
@@ -42,9 +42,10 @@
         </li>
         <li v-else>
             <script-details
-                :script="$store.state.testRunner.testScripts[$store.state.testRunner.currentTest]"
-                :report="$store.state.testRunner.testReports[$store.state.testRunner.currentTest]"
-                :test-script-index="$store.getters.allServerTestCollectionNames.indexOf(testCollection) + '.' + $store.state.testRunner.testScriptNames.indexOf(testId)"
+                :script="theScript"
+                :report="theReport"
+                :test-script-index="theTestScriptIndex"
+                :disable-debugger="disableDebugger"
             > </script-details>
         </li>
     </ul>
@@ -57,6 +58,24 @@
     import VueMarkdown from "vue-markdown";
     export default {
         computed: {
+          theScript() {
+              if (this.testId.includes('/'))
+                  return this.$store.state.testRunner.moduleTestScripts[this.testId]
+              else
+                  return this.$store.state.testRunner.testScripts[this.testId] // this.$store.state.testRunner.currentTest
+          },
+          theReport() {
+              if (this.testId.includes('/'))
+                  return this.$store.state.testRunner.moduleTestReports[this.testId]
+              else
+                  return this.$store.state.testRunner.testReports[this.testId]  // $store.state.testRunner.currentTest
+          },
+          theTestScriptIndex() {
+              if (this.testId.includes('/'))
+                  return '' // not applicable for aggregate testscript
+              else
+                 return this.$store.getters.allServerTestCollectionNames.indexOf(this.testCollection) + '.' + this.$store.state.testRunner.testScriptNames.indexOf(this.testId)
+          },
           testModules() {
             const modules = {};
             const allModules = this.$store.state.testRunner.moduleTestScripts;
@@ -98,8 +117,8 @@
             }
         },
       created() {
-          console.log('TestOrEval... currentTest: ' + this.$store.state.testRunner.currentTest)
-            console.log('TestOrEval... testScripts[] ' + this.$store.state.testRunner.testScripts[this.$store.state.testRunner.currentTest])
+          // console.log('TestOrEval... currentTest: ' + this.$store.state.testRunner.currentTest)
+          //   console.log('TestOrEval... testScripts[] ' + this.$store.state.testRunner.testScripts[this.$store.state.testRunner.currentTest])
         // this.$store.commit('setCurrentTest', this.testId);
         // this.$store.commit('setCurrentTestCollection', this.testCollection);
       },
@@ -107,7 +126,7 @@
             '$store.state.base.channelName': 'loadEventSummariesAndReRun'
         },
         props: [
-            'sessionId', 'channelName', 'testCollection', 'testId'
+            'sessionId', 'channelName', 'testCollection', 'testId', 'disableDebugger'
         ],
         components: {
             ScriptDetails, ClientDetails, VueMarkdown,

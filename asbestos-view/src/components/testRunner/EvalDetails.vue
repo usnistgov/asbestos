@@ -1,6 +1,6 @@
 <template>
     <div>
-        <div v-if="script && report" class="script">
+        <div v-if="script !== undefined && report !== undefined" class="script">
             <!--   add SETUP here  -->
             <div>
                 <span v-if="inspectorOpen">
@@ -25,17 +25,29 @@
 
 
             <div v-for="(test, testi) in tests" class="test-part"
-                 :key="'Eval' + testi">    <!--   v-bind:class="testResult(testi) + ((colorful)?'':'plain-detail')"   -->
+                 :key="'Eval' + testi">
                 <div >{{test.description}}</div>
 
-                <!-- actions will be asserts only-->
+                <!-- actions will be asserts only OR actions with Asbestos extensions ex. test script module call -->
                 <div v-for="(action, actioni) in actions(testi)" class="assert-part"
                      :key="'Eval' + testi + 'Action' + actioni">
-
-                    <eval-action-details
-                            :script="action"
-                            :report="reportAction(testi, actioni)"
-                    > </eval-action-details>
+                    <div v-for="(resultObj, resultKey) in scriptImport(action)" :key="resultKey">
+                        <template v-if="'hasImport' in resultObj && resultObj.hasImport">
+                            <component-script
+                                    :action-script="action"
+                                    :action-report="reportAction(testi, actioni)"
+                                    :action-component-name="resultObj.componentName"
+                                    :disable-debugger="'true'"
+                                    :eval-test-id="testId"
+                            ></component-script>
+                        </template>
+                        <template v-else class="has-cursor">
+                            <eval-action-details
+                                    :script="action"
+                                    :report="reportAction(testi, actioni)"
+                            > </eval-action-details>
+                        </template>
+                    </div>
                 </div>
             </div>
 
@@ -52,6 +64,9 @@
     import errorHandlerMixin from '../../mixins/errorHandlerMixin'
     import colorizeTestReports from "../../mixins/colorizeTestReports";
     import EvalActionDetails from "./EvalActionDetails";
+    import importMixin from "../../mixins/importMixin";
+
+    import ComponentScript from "./ComponentScript";
 
     export default {
         data() {
@@ -66,12 +81,6 @@
             }
         },
         methods: {
-            reportAction(testi, actioni) {
-                if (this.report.test[testi] !== undefined)
-                    return this.report.test[testi].action[actioni]
-                else
-                    return null
-            },
             toggleInspectorOpen() {
                 this.inspectorOpen = !this.inspectorOpen
             },
@@ -81,6 +90,7 @@
                 }
                 return null
             },
+            /*
             testResult(testIndex) {
                 let assertIndex
                 for (assertIndex=0; assertIndex<this.actions(testIndex).length; assertIndex++) {
@@ -93,6 +103,7 @@
                 }
                 return 'pass'
             },
+            */
             assertResult(testIndex, actionIndex) {
                 if (this.report && actionIndex < this.report.test[testIndex].action.length)
                     return this.report.test[testIndex].action[actionIndex].assert.result
@@ -114,6 +125,8 @@
             assertionDescription(assert) {
                 return assert.description === undefined ? "" : assert.description
             },
+            /*
+            unused
             loadTestScript2() {
                 if (this.modalMode === undefined || this.modalMode==='') {
                     this.$store.commit('setTestCollectionName', this.testCollection)
@@ -127,6 +140,7 @@
                     })
                 }
             },
+            */
             async loadTestScript() {
                 if (this.modalMode === undefined || this.modalMode==='') {
                     this.$store.commit('setTestCollectionName', this.testCollection)
@@ -159,6 +173,8 @@
                     })
               // console.log(`runSingleEventEval done`)
             },
+            /*
+            unused function
             async testOrEventUpdated() {
                 if (this.runEval) {
                     if (!this.$store.state.testRunner.testAssertions)
@@ -172,10 +188,17 @@
                     this.loadTestReport()
                 }
             },
+             */
             loadAssertions() {
                 if (!this.$store.state.testRunner.testAssertions)
                     this.$store.dispatch('loadTestAssertions')
-            }
+            },
+            reportAction(testi, actioni) {
+                if (this.report !== null && this.report.test[testi] !== undefined)
+                    return this.report.test[testi].action[actioni]
+                else
+                    return null
+            },
 
         },
         computed: {
@@ -189,15 +212,27 @@
             },
             report() {
                 try {
+                    /*
+                    let myObj = this.$store.state.testRunner.clientTestResult
+                    console.log('myObj is undefined? ' + (myObj === undefined))
+                    console.log('myObj[testId]: ' + ( this.testId in myObj))
+                    // At any time, eventid property may be reset to null or undefined and this triggers an exception in this computed method
+                    console.log('myObj[testId][eventid]: ' + ( this.eventId in myObj[this.testId]))
+                    console.log('myObj[testId][eventid][0]: ' + (  myObj[this.testId][this.eventId][0] !== undefined))
+                    console.log('myObj[testId][eventid][0].resourceType: ' + (  (myObj[this.testId][this.eventId][0]).resourceType )) // should be TestReport
+                     */
                     return this.$store.state.testRunner.clientTestResult[this.testId][this.eventId][0]
                 } catch (e) {
-                    console.log('computed report error: ' + e)
+                    // Things can change dynamically, console.log below may not always reflect a real error while things are settling into place by Vue reactivity
+                    // console.log('computed report error: ' + e)
                    return null
                 }
             },
+            /*
             assertProfile() {
                 return this.$store.state.testRunner.testAssertions['Profile']
             },
+             */
             fixtures() {
                 return this.script.fixture
             },
@@ -213,27 +248,17 @@
             testReport() {
                 return this.$store.state.testRunner.clientTestResult[this.testId][this.eventId]
             },
-            testReports() {  // see watch of the same name
+            testReports() {
                 return this.$store.state.testRunner.testReports[this.testId]
             },
         },
         created() {
             this.loadAssertions()
-           // this.testOrEventUpdated()
         },
         mounted() {
 
         },
-        /*
-        watch: {
-            'testId': 'testOrEventUpdated',
-            'eventId': 'testOrEventUpdated',
-            testReports() {  // this has same name as computed - see https://stackoverflow.com/questions/43270159/vuejs-2-how-to-watch-store-values-from-vuex
-                this.loadTestReport()
-            }
-        },
-         */
-        mixins: [ errorHandlerMixin, colorizeTestReports ],
+        mixins: [ errorHandlerMixin, colorizeTestReports, importMixin ],
         props: [
             'sessionId', 'channelName', 'testCollection', 'testId', 'eventId', 'runEval', 'noInspectLabel', 'modalMode'
         ],
@@ -242,7 +267,8 @@
 
             InspectEvent: () => import('../logViewer/InspectEvent'),
            // TestStatus,
-            EvalActionDetails
+            EvalActionDetails,
+            ComponentScript,
         },
         name: "EvalDetails"
     }

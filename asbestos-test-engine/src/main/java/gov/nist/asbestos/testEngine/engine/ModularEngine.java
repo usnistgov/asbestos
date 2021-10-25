@@ -34,7 +34,6 @@ public class ModularEngine {
     private boolean saveLogs = false;
     private String testName;
     private Map<String, String> reports = new HashMap<>();   // name => TestReport json
-    private TestScriptDebugState testScriptDebugState;
 
     public ModularEngine(File testDefDir) {
         this(testDefDir, (URI) null);

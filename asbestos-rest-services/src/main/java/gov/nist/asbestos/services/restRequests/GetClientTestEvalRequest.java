@@ -135,15 +135,18 @@ public class GetClientTestEvalRequest {
         // for one testId
         String testId = request.uriParts.get(7);
 
+        evalClientTest(testDirs, testSession, events, eventsToEvaluate);
 
-         evalClientTest(testDirs, testSession, events, eventsToEvaluate);
+        String myStr = saveLog(testLogDir, testId);
+        request.returnString(myStr);
+    }
 
+    private String saveLog(File testLogDir, String testId) throws IOException {
         StringBuilder buf = buildJson(testId);
 
         String myStr = buf.toString();
         Files.write(Paths.get(new File(testLogDir, testId + ".json").toString()), myStr.getBytes());
-
-        request.returnString(myStr);
+        return myStr;
     }
 
     public List<Event> getEvents(SimId simId) {
@@ -200,7 +203,7 @@ public class GetClientTestEvalRequest {
                     ResourceWrapper requestResource = getRequestResource(event);
                     ResourceWrapper responseResource = getResponseResource(event);
                     modularEngine.runEval(requestResource, responseResource);
-                    EventResult eventResult = result.results.get(theTestId); //new EventResult();
+                    EventResult eventResult = result.results.get(theTestId);
                     if (eventResult == null)
                         eventResult = new EventResult();
                     List<TestReport> thisReports = modularEngine.getTestReports();

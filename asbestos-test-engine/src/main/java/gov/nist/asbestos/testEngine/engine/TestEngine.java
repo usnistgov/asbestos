@@ -302,7 +302,7 @@ public class TestEngine  implements TestDef {
             if (errorOut()) return;
             doSetup();
             if (errorOut()) return;
-                doTest();
+            doTest();
             if (errorOut()) return;
             doTearDown();
             fillInSkips();
@@ -860,6 +860,17 @@ public class TestEngine  implements TestDef {
     }
 
     Set<String> moduleIds = new HashSet<>();
+
+    /**
+     *
+     *  Assign moduleName and moduleId in caller's TestReport.
+     *  moduleName is the name of the module.
+     *  moduleId is the same name with a numeric suffix to make this call unique.
+     *  The module call is identified as moduleName/moduleId in the logs
+     *
+     * @param candidate
+     * @return
+     */
     private String assignModuleId(String candidate) {
         String real = candidate;
         int i = 1;
@@ -972,13 +983,13 @@ public class TestEngine  implements TestDef {
                 .setTestId(testId)
                 .setCallFixtureMap(fixtureNameMap)
                 .setCallVariableMap(variableNameMap)
+                .setModularEngine(modularEngine)
                 ;
         if (hasDebugger()) {
             testEngine1.setTestScriptDebugState(getDebugger().getState());
         }
         modularEngine.add(testEngine1);
         testEngine1.parent = this;
-
         String moduleName = simpleName(componentReference.getComponentRef());
         String moduleId = assignModuleId(moduleName);
         opReport.addModifierExtension(new Extension(ExtensionDef.moduleId, new StringType(moduleId)));
@@ -993,12 +1004,6 @@ public class TestEngine  implements TestDef {
            throw sdex;
         }
 
-        /*
-            Assign moduleName and moduleId in caller's TestReport.
-            moduleName is the name of the module.
-            moduleId is the same name with a numeric suffix to make this call unique.
-            The module call is identified as moduleName/moduleId in the logs
-         */
         if (hasDebugger())
             getDebugger().getState().popParentExecutionIndex();
 
