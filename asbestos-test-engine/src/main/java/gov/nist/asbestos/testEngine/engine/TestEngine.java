@@ -915,6 +915,7 @@ public class TestEngine  implements TestDef {
         Map<String, String> externalVariables = new HashMap<>();
         Map<String, String> variableNameMap = new HashMap<>();
         VariableMgr varMgr = new VariableMgr(testScript, fixtureMgr)
+                .setExternalVariables(this.externalVariables)
                 .setVal(engineVal)
                 .setOpReport(opReport);
         if (engineVal.hasErrors())

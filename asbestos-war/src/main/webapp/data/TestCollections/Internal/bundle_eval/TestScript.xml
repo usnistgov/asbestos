@@ -6,6 +6,9 @@
         <extension url="urn:fixture-in">
             <valueString value="response"/>
         </extension>
+        <extension url="urn:variable-in">
+            <valueString value="isComprehensiveMetadataExpected"/>
+        </extension>
     </modifierExtension>
 
     <id value="singleDoc"/>
@@ -106,7 +109,6 @@
     </test>
 
 
-
     <!-- Comprehensive Metadata only -->
     <test>
         <description value="Comprehensive Metadata only."/>
@@ -123,12 +125,13 @@
                     <extension url="urn:fixture-in">
                         <valueString value="response"/>
                     </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="isComprehensiveMetadataExpected"/>
+                    </extension>
                 </modifierExtension>
             </operation>
         </action>
     </test>
-
-
 
     <!-- Transaction response. -->
     <test>

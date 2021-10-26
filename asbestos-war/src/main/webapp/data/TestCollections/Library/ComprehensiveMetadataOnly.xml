@@ -6,6 +6,9 @@
         <extension url="urn:fixture-in">
             <valueString value="response"/>
         </extension>
+        <extension url="urn:variable-in">
+            <valueString value="isComprehensiveMetadataExpected"/>
+        </extension>
     </modifierExtension>
 
     <id value="comprehensiveMetadataOnly"/>
@@ -14,30 +17,41 @@
 
     <variable>
         <name value="isComprehensive"/>
-        <expression value="Bundle.meta.profile = 'http://ihe.net/fhir/StructureDefinition/IHE_MHD_Provide_Comprehensive_DocumentBundle'"/>
+        <expression
+                value="Bundle.meta.profile = 'http://ihe.net/fhir/StructureDefinition/IHE_MHD_Provide_Comprehensive_DocumentBundle'"/>
         <sourceId value="request"/>
     </variable>
 
 
     <test>
-    <description value="Comprehensive Metadata only"/>
-    <action>
-        <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Conditional"/>
-        <assert>
-            <description value="Is the transaction labeled Comprehensive Metadata?"/>
-            <expression value="${isComprehensive}"/>
-            <operator value="equals"/>
-            <value value="true"/>
-            <warningOnly value="false"/>
-        </assert>
-    </action>
-    <action>
-        <assert>
-            <description value="DocumentReference: securityLabel is required for Comprehensive Metadata"/>
-            <compareToSourceId value="request"/>
-            <compareToSourceExpression value="Bundle.entry.resource.where(is(FHIR.DocumentReference)).securityLabel.exists()"/>
-            <warningOnly value="false"/>
-        </assert>
-    </action>
-</test>
+        <description value="Comprehensive Metadata only"/>
+        <action>
+            <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Conditional"/>
+            <assert>
+                <description value="Is Comprehensive Metadata expected or the transaction labeled Comprehensive Metadata?"/>
+                <expression value="${isComprehensiveMetadataExpected} or ${isComprehensive}"/>
+                <operator value="equals"/>
+                <value value="true"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
+            <assert>
+                <description value="Transaction must be labeled Comprehensive Metadata."/>
+                <expression value="${isComprehensive}"/>
+                <operator value="equals"/>
+                <value value="true"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
+            <assert>
+                <description value="DocumentReference: securityLabel is required for Comprehensive Metadata."/>
+                <compareToSourceId value="request"/>
+                <compareToSourceExpression
+                        value="Bundle.entry.resource.where(is(FHIR.DocumentReference)).securityLabel.exists()"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+    </test>
 </TestScript>

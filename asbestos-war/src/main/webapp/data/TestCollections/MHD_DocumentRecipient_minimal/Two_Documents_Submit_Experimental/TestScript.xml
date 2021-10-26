@@ -71,6 +71,11 @@
         <expression value="Bundle.entry.count()"/>
         <sourceId value="pdb-bundle"/>
     </variable>
+    <variable>
+        <name value="isComprehensiveMetadataExpected"/>
+        <defaultValue value="false"/>
+    </variable>
+
     <test>
         <description value="Submit."/>
         <action>
@@ -109,6 +114,10 @@
                     <extension url="urn:fixture-in">
                         <valueString value="pdb-response"/>
                     </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="isComprehensiveMetadataExpected"/>
+                    </extension>
+
                 </modifierExtension>
             </operation>
         </action>
