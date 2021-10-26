@@ -71,6 +71,11 @@
         <expression value="Bundle.entry.count()"/>
         <sourceId value="pdb-bundle"/>
     </variable>
+    <variable>
+        <name value="isComprehensiveMetadataExpected"/>
+        <defaultValue value="false"/>
+    </variable>
+
     <test>
         <description value="Submit."/>
         <action>
@@ -94,16 +99,22 @@
         </action>
     </test>
     <test>
-        <description value="Validate transaction response."/>
+        <description value="PDB Validations."/>
         <action>
             <operation>
-                <description value="Validate transaction response."/>
+                <description value="Module usage description"/>
                 <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
                     <extension url="component">
-                        <valueString value="../../Library/ResponseBundleEval.xml"/>
+                        <valueString value="../../Library/AggregateModule/MHDv3xBundleEvalAggregateResult.xml"/>
                     </extension>
                     <extension url="urn:fixture-in">
-                        <valueString  value="pdb-response"/>
+                        <valueString value="pdb-bundle"/>
+                    </extension>
+                    <extension url="urn:fixture-in">
+                        <valueString value="pdb-response"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="isComprehensiveMetadataExpected"/>
                     </extension>
                 </modifierExtension>
             </operation>

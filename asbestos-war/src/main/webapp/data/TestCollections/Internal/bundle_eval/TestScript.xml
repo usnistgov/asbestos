@@ -22,6 +22,10 @@
         If this is a module call, the urn:fixture-in extension supplies the fixture.
     -->
 
+    <variable>
+        <name value="isComprehensiveMetadataExpected"/>
+        <defaultValue value="false"/>
+    </variable>
 
 
     <test>
@@ -111,7 +115,7 @@
 
     <!-- Comprehensive Metadata only -->
     <test>
-        <description value="Comprehensive Metadata only."/>
+        <description value="If applicable, Comprehensive Metadata only."/>
         <action>
             <operation>
                 <description value="Comprehensive Metadata only"/>

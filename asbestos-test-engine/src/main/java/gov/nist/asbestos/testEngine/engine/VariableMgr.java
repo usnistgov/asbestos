@@ -172,10 +172,16 @@ public class VariableMgr {
      */
     String eval(String variableName, boolean errorAsValue) {
         Objects.requireNonNull(reporter);
-        if (externalVariables.containsKey(variableName))
+        TestScript.TestScriptVariableComponent testScriptLocalVariable = getVariable(variableName);
+
+        // If there exists a local variable defined in TestScript, external variable with the same name overrides the local variable value
+        if (testScriptLocalVariable != null && externalVariables.containsKey(variableName))
             return externalVariables.get(variableName);
-        TestScript.TestScriptVariableComponent var = getVariable(variableName);
-        if (var == null) {
+
+        if (testScriptLocalVariable == null) {
+            if (externalVariables.containsKey(variableName)) {
+                return externalVariables.get(variableName);
+            }
             String error = "Variable " + variableName + " is referenced but not defined";
             if (errorAsValue)
                 return error;
@@ -184,22 +190,22 @@ public class VariableMgr {
         }
 
         // special feature to generate unique UUIDs
-        if (var.hasSourceId() && "GENERATEUUID".equals(var.getSourceId())) {
+        if (testScriptLocalVariable.hasSourceId() && "GENERATEUUID".equals(testScriptLocalVariable.getSourceId())) {
             String newUUID = "urn:uuid:" + UUIDFactory.getInstance().newUUID().toString();
-            var.setSourceId(null);
-            var.setDefaultValue(newUUID);
+            testScriptLocalVariable.setSourceId(null);
+            testScriptLocalVariable.setDefaultValue(newUUID);
         }
 
-        if (var.hasDefaultValue()) {
-            String value =  var.getDefaultValue();
+        if (testScriptLocalVariable.hasDefaultValue()) {
+            String value =  testScriptLocalVariable.getDefaultValue();
             value = updateReference(value);
             return value;
         }
 
         String sourceId = null;
-        if (var.hasSourceId()) {
-            sourceId = var.getSourceId();
-        } else if (!var.hasDefaultValue()){
+        if (testScriptLocalVariable.hasSourceId()) {
+            sourceId = testScriptLocalVariable.getSourceId();
+        } else if (!testScriptLocalVariable.hasDefaultValue()){
             String error = "Variable " + variableName + " does not have a source and does not define a defaultValue";
             if (errorAsValue)
                 return error;
@@ -217,7 +223,7 @@ public class VariableMgr {
         }
         FixtureComponent fixture = fixtureMgr.get(sourceId);
 
-        if (var.hasHeaderField()) {
+        if (testScriptLocalVariable.hasHeaderField()) {
             if (!fixture.hasHttpBase()) {
                 String error = "Variable " + variableName + " source " + sourceId + " does not have a HTTP header behind it";
                 if (errorAsValue)
@@ -226,22 +232,22 @@ public class VariableMgr {
                 return null;
             }
             HttpBase base = fixture.getHttpBase();
-            if (var.getHeaderField().equals("Location") && base instanceof HttpPost) {
+            if (testScriptLocalVariable.getHeaderField().equals("Location") && base instanceof HttpPost) {
                 HttpPost poster = (HttpPost) base;
                 return poster.getLocationHeader().getValue();
             }
             Headers responseHeaders = base.getResponseHeaders();
             if (responseHeaders == null)
                 responseHeaders = new Headers();
-            return responseHeaders.getValue(var.getHeaderField());
-        } else if (var.hasExpression()) {
-            String expression = var.getExpression();
+            return responseHeaders.getValue(testScriptLocalVariable.getHeaderField());
+        } else if (testScriptLocalVariable.hasExpression()) {
+            String expression = testScriptLocalVariable.getExpression();
             // Does this expression yet reference another variable?
             if (containsVariable(expression)) {
                 expression = updateReference(expression);
             }
             return FhirPathEngineBuilder.evalForString(fixture.getResourceResource(), expression);
-        } else if (var.hasPath()) {
+        } else if (testScriptLocalVariable.hasPath()) {
             String error = "Variable " + variableName + " path not supported";
             if (errorAsValue)
                 return error;
