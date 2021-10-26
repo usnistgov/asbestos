@@ -485,7 +485,7 @@ public class TestEngine  implements TestDef {
                     TestReport.SetupActionOperationComponent op = action.getOperation();
                     TestReport.TestReportActionResult result = op.getResult();
                     if (result == TestReport.TestReportActionResult.FAIL || result == TestReport.TestReportActionResult.ERROR) {
-                        if (op.getExtensionByUrl(ExtensionDef.conditional) == null)
+                        if (op.getExtensionByUrl(ExtensionDef.conditional) == null && op.getExtensionByUrl(ExtensionDef.expectFailure) == null)
                             failingComponents.add(op.getMessage());
                     }
                 }
@@ -1218,7 +1218,9 @@ public class TestEngine  implements TestDef {
             for (int testPartIndex=0; testPartIndex<testScriptElement.getAction().size(); testPartIndex++) {
                 TestScript.TestActionComponent action = testScriptElement.getAction().get(testPartIndex);
                 Extension conditional = getExtension(action.getModifierExtension(), ExtensionDef.ts_conditional);
+                Extension expectFailure = getExtension(action.getModifierExtension(), ExtensionDef.expectFailure);
                 boolean isConditional = conditional != null;
+                boolean isExpectFailure = expectFailure != null;
                 TestReport.TestActionComponent actionReportComponent = testReportComponent.addAction();
                 if (invalidAction(action, actionReportComponent, fVal)) {
                     reportTerminalFailure("Action must contain operation or assert.");
@@ -1237,6 +1239,15 @@ public class TestEngine  implements TestDef {
                     TestReport.SetupActionOperationComponent reportOp = actionReportComponent.getOperation();
                     doOperation(new ActionReference(testScript, action), typePrefix, action.getOperation(), reportOp, isFollowedByAssert);
                     TestReport.SetupActionOperationComponent opReport = actionReportComponent.getOperation();
+                    if (isExpectFailure && opReport.getResult() == TestReport.TestReportActionResult.FAIL) {
+                        testReport.setStatus(TestReport.TestReportStatus.COMPLETED);
+                        testReport.setResult(TestReport.TestReportResult.PASS);
+
+                        actionReportComponent.addModifierExtension(expectFailure);
+//                        reportOp.addExtension(ExtensionDef.expectFailure, new StringType("Operation failed as expected: Result was changed from Fail to Pass."));
+                        opReport.setResult(TestReport.TestReportActionResult.PASS);
+                        return true;
+                    }
                     if (opReport.getResult() == TestReport.TestReportActionResult.ERROR) {
                         testReport.setStatus(TestReport.TestReportStatus.COMPLETED);
                         testReport.setResult(TestReport.TestReportResult.FAIL);

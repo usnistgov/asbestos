@@ -29,6 +29,20 @@
                     <img src="../../assets/blank-circle.png" class="align-left">
                 </span>
             </span>
+            <span v-else-if="isExpectFailure">
+                <span v-if="isPass">
+                    <img src="../../assets/yellow-error.png" class="align-left" title="Partial failure expected">
+                </span>
+                <span v-else-if="isFail">
+                    <img src="../../assets/error.png" class="align-left">
+                </span>
+                <span v-else-if="isError">
+                    <img src="../../assets/yellow-error.png" class="align-left">
+                </span>
+                <span v-else>
+                    <img src="../../assets/blank-circle.png" class="align-left">
+                </span>
+            </span>
             <span v-else>
                 <span v-if="isPass">
                     <img src="../../assets/checked.png" class="align-left">
@@ -67,6 +81,17 @@
                         cond = true;
                 })
                 return cond;
+            },
+            isExpectFailure() {
+                if (this.report === null || this.report===undefined) return false;
+                if (!this.report.action === null || this.report.action === undefined || this.report.action.length < 1) return false;
+                if (!this.report.action[0].modifierExtension === null || this.report.action[0].modifierExtension === undefined) return false;
+                let expectFailure = false;
+                this.report.action[0].modifierExtension.forEach(ex => {
+                    if (ex.url === 'urn:asbestos:test:action:expectFailure')
+                        expectFailure = true;
+                })
+                return expectFailure;
             }
         },
         props: [

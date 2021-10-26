@@ -3,6 +3,9 @@
         <extension url="urn:fixture-in">
             <valueString  value="pdb-bundle"/>
         </extension>
+        <extension url="urn:fixture-out">
+            <valueString value="pdb-response-bundle"/>
+        </extension>
     </modifierExtension>
     
     <url value=""/>
