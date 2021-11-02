@@ -10,10 +10,10 @@
 
     <id value="documentManifestValidations"/>
     <name value="documentManifestValidations"/>
-    <description value="DocumentManifest requirements3."/>
+    <description value="DocumentManifest requirements."/>
 
     <test>
-    <description value="DocumentManifest requirements4."/>
+    <description value="DocumentManifest requirements."/>
     <action>
         <assert>
             <description value="DocumentManifest: masterIdentifier is required"/>

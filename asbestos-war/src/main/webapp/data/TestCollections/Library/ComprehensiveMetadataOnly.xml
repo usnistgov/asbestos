@@ -9,18 +9,15 @@
         <extension url="urn:variable-in">
             <valueString value="isComprehensiveMetadataExpected"/>
         </extension>
+        <extension url="urn:variable-in">
+            <valueString value="isComprehensive"/>
+        </extension>
     </modifierExtension>
 
     <id value="comprehensiveMetadataOnly"/>
     <name value="comprehensiveMetadataOnly"/>
     <description value="Comprehensive Metadata only."/>
 
-    <variable>
-        <name value="isComprehensive"/>
-        <expression
-                value="Bundle.meta.profile = 'http://ihe.net/fhir/StructureDefinition/IHE_MHD_Provide_Comprehensive_DocumentBundle'"/>
-        <sourceId value="request"/>
-    </variable>
 
 
     <test>

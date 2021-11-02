@@ -1,0 +1,26 @@
+<TestScript xmlns="http://hl7.org/fhir">
+    <modifierExtension url="urn:module">
+        <extension url="urn:fixture-in">
+            <valueString value="request"/>
+        </extension>
+        <extension url="urn:fixture-in">
+            <valueString value="response"/>
+        </extension>
+    </modifierExtension>
+
+    <id value="documentManifestValidationsMHDv4"/>
+    <name value="documentManifestValidationsMHDv4"/>
+    <description value="DocumentManifest requirements."/>
+
+    <test>
+        <description value="List (SubmissionSet) type: The Document Source shall not provide any entryUUID values."/>
+        <action>
+            <assert>
+                <description value="https://profiles.ihe.net/ITI/MHD/ITI-65.html#2365412-message-semantics"/>
+                <compareToSourceId value="request"/>
+                <compareToSourceExpression value="Bundle.entry.resource.where($this is List and code.coding.code='submissionset').where(identifier.use='official' implies identifier.value.empty() or identifier.value.startsWith('urn:uuid').not()).exists()"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+    </test>
+</TestScript>
