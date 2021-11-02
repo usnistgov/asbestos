@@ -11,8 +11,8 @@
         </extension>
     </modifierExtension>
 
-    <id value="singleDoc"/>
-    <name value="singleDoc"/>
+    <id value="singleDocMHDv4"/>
+    <name value="singleDocMHDv4"/>
     <description value="Evaluate PDB-request Bundle"/>
     <!--
       If this is a normal TestScript execution, these fixtures will be inserted by the TestEngine:
@@ -28,11 +28,9 @@
     </variable>
     <variable>
         <name value="isComprehensive"/>
-        <expression
-                value="Bundle.meta.profile = 'http://ihe.net/fhir/StructureDefinition/IHE_MHD_Provide_Comprehensive_DocumentBundle'"/>
+        <expression value="Bundle.meta.profile = 'http://profiles.ihe.net/ITI/MHD/StructureDefinition/IHE.MHD.Comprehensive.ProvideBundle'"/>
         <sourceId value="request"/>
     </variable>
-
 
     <test>
         <description value="PDB Validations - Request message."/>
@@ -41,7 +39,7 @@
                 <description value="PDB in the request bundle is analyzed using FHIRPath assertions."/>
                 <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
                     <extension url="component">
-                        <valueString value="../../Library/RequestMessage.xml"/>
+                        <valueString value="../../Library/RequestMessageMHDv4.xml"/>
                     </extension>
                     <extension url="urn:fixture-in">
                         <valueString value="request"/>
@@ -99,13 +97,13 @@
 
     <!-- DocumentManifest requirements. -->
     <test>
-        <description value="DocumentManifest requirements."/>
+        <description value="List - SubmissionSet requirements."/>
         <action>
             <operation>
                 <description value="DocumentManifest requirements"/>
                 <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
                     <extension url="component">
-                        <valueString value="../../Library/DocumentManifestRequirements.xml"/>
+                        <valueString value="../../Library/SubmissionSetListRequirements.xml"/>
                     </extension>
                     <extension url="urn:fixture-in">
                         <valueString value="request"/>
@@ -166,9 +164,6 @@
             </operation>
         </action>
     </test>
-
-
-
 
 
 </TestScript>
