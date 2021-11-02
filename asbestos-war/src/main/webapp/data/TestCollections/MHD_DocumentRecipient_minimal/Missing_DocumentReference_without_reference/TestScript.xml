@@ -88,6 +88,9 @@
                     <extension url="urn:fixture-in">
                         <valueString  value="pdb-bundle"/>
                     </extension>
+                    <extension url="urn:fixture-out">
+                        <valueString value="pdb-response"/>
+                    </extension>
                     <extension url="urn:variable-in-no-translation">
                         <valueString value="requestPatientRef"/>
                     </extension>
