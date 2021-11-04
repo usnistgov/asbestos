@@ -39,7 +39,7 @@
                 <description value="PDB in the request bundle is analyzed using FHIRPath assertions."/>
                 <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
                     <extension url="component">
-                        <valueString value="../../Library/RequestMessageMHDv4.xml"/>
+                        <valueString value="../../Library/PDBVal/RequestMessageMHDv4.xml"/>
                     </extension>
                     <extension url="urn:fixture-in">
                         <valueString value="request"/>
@@ -60,7 +60,7 @@
                 <description value="PDB in the request bundle is analyzed using FHIRPath assertions."/>
                 <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
                     <extension url="component">
-                        <valueString value="../../Library/BundleRequirements.xml"/>
+                        <valueString value="../../Library/PDBVal/BundleRequirements.xml"/>
                     </extension>
                     <extension url="urn:fixture-in">
                         <valueString value="request"/>
@@ -81,7 +81,7 @@
                 <description value="DocumentReference requirements"/>
                 <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
                     <extension url="component">
-                        <valueString value="../../Library/DocumentReferenceRequirements.xml"/>
+                        <valueString value="../../Library/PDBVal/DocumentReferenceRequirements.xml"/>
                     </extension>
                     <extension url="urn:fixture-in">
                         <valueString value="request"/>
@@ -103,7 +103,7 @@
                 <description value="DocumentManifest requirements"/>
                 <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
                     <extension url="component">
-                        <valueString value="../../Library/SubmissionSetListRequirements.xml"/>
+                        <valueString value="../../Library/PDBVal/SubmissionSetListRequirements.xml"/>
                     </extension>
                     <extension url="urn:fixture-in">
                         <valueString value="request"/>
@@ -125,7 +125,7 @@
                 <description value="Comprehensive Metadata only"/>
                 <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
                     <extension url="component">
-                        <valueString value="../../Library/ComprehensiveMetadataOnly.xml"/>
+                        <valueString value="../../Library/PDBVal/ComprehensiveMetadataOnly.xml"/>
                     </extension>
                     <extension url="urn:fixture-in">
                         <valueString value="request"/>
@@ -152,7 +152,7 @@
                 <description value="Transaction response"/>
                 <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
                     <extension url="component">
-                        <valueString value="../../Library/TransactionResponse.xml"/>
+                        <valueString value="../../Library/PDBVal/TransactionResponse.xml"/>
                     </extension>
                     <extension url="urn:fixture-in">
                         <valueString value="request"/>
