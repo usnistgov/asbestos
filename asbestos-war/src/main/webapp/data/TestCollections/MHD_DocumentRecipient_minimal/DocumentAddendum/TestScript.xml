@@ -62,87 +62,41 @@
     <setup>
         <action>
             <operation>
-                <!-- references patient from resourceCache in EC -->
-                <description value="send PDB"/>
-                <label value="create"/>
-                <type>
-                    <system value="https://github.com/usnistgov/asbestos/wiki/Testscript-Operation-Codes"/>
-                    <code value="mhd-pdb-transaction"/>
-                </type>
-                <sourceId value="original-bundle"/>
-                <responseId value="pdb-response"/>
+                <description value="Submit Provide Document Bundle to MHD Document Recipient."/>
+                <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
+                    <extension url="component">
+                        <valueString value="../../Library/SendPDB.xml"/>
+                    </extension>
+                    <extension url="urn:fixture-in">
+                        <valueString  value="original-bundle"/>
+                    </extension>
+                    <extension url="urn:variable-in-no-translation">
+                        <valueString value="patientResourceId"/>
+                    </extension>
+                    <extension url="urn:fixture-out">
+                        <valueString value="pdb-response"/>
+                    </extension>
+                </modifierExtension>
             </operation>
-        </action>
-        <action>
-            <assert>
-                <description value="... transaction was successful"/>
-                <response value="okay"/>
-                <warningOnly value="false"/>
-            </assert>
-        </action>
-        <action>
-            <assert>
-                <description value="... return Bundle"/>
-                <compareToSourceId value="pdb-response"/>
-                <compareToSourceExpression value="Bundle.exists()"/>
-                <warningOnly value="false"/>
-            </assert>
-        </action>
-        <action>
-            <assert>
-                <description value="... Bundle is type transaction-response"/>
-                <compareToSourceId value="pdb-response"/>
-                <compareToSourceExpression value="Bundle.type = 'transaction-response'"/>
-                <warningOnly value="false"/>
-            </assert>
-        </action>
-        <action>
-            <assert>
-                <description value="... Bundle may not contain OperationOutcome"/>
-                <compareToSourceId value="pdb-response"/>
-                <compareToSourceExpression value="Bundle.entry.response.outcome.where(OperationOutcome).exists().not()"/>
-                <warningOnly value="false"/>
-            </assert>
-        </action>
-        <action>
-            <assert>
-                <description value="... all parts of transaction successful"/>
-                <expression value="Bundle.entry.response.all(status.startsWith(201))"/>
-                <warningOnly value="false"/>
-            </assert>
-        </action>
-        <action>
-            <assert>
-                <description value="... response contains one entry for each entry in request"/>
-                <expression value="Bundle.entry.count()"/>
-                <value value="${requestEntryCount}"/>
-                <warningOnly value="false"/>
-            </assert>
         </action>
         <action>
             <operation>
-                <description value="DocumentReference"/>
-                <label value="read-back"/>
-                <type>
-                    <code value="read"/>
-                </type>
-                <url value="${DocRefUrl}"/>
-                <responseId value="readBackResponse"/>
+                <description value="Read back original DocumentReference and verify status is current."/>
+                <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
+                    <extension url="component">
+                        <valueString value="../../Library/ReadDocRef.xml"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="DocRefUrl"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="patientResourceId"/>
+                    </extension>
+                    <extension url="urn:fixture-out">
+                        <valueString  value="response"/>
+                    </extension>
+                </modifierExtension>
             </operation>
-        </action>
-        <action>
-            <assert>
-                <description value="... was successful"/>
-                <response value="okay"/>
-                <warningOnly value="false"/>
-            </assert>
-        </action>
-        <action>
-            <assert>
-                <description value="... returned a DocumentReference"/>
-                <resource value="DocumentReference"/>
-                <warningOnly value="false"/>
-            </assert>
         </action>
         <action>
             <assert>
@@ -152,94 +106,53 @@
             </assert>
         </action>
     </setup>
+
     <test>
-        <description value="Send Addendum DocumentReference in PDB"/>
+        <description value="Send Addendum DocumentReference in PDB."/>
         <action>
             <operation>
-                <!-- references patient from resourceCache in EC -->
-                <description value="send Addendum PDB"/>
-                <label value="create"/>
-                <type>
-                    <system value="https://github.com/usnistgov/asbestos/wiki/Testscript-Operation-Codes"/>
-                    <code value="mhd-pdb-transaction"/>
-                </type>
-                <sourceId value="addendum-bundle"/>
-                <responseId value="addendum-response"/>
+                <description value="Submit Provide Document Bundle to MHD Document Recipient."/>
+                <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
+                    <extension url="component">
+                        <valueString value="../../Library/SendPDB.xml"/>
+                    </extension>
+                    <extension url="urn:fixture-in">
+                        <valueString  value="addendum-bundle"/>
+                    </extension>
+                    <extension url="urn:variable-in-no-translation">
+                        <valueString value="patientResourceId"/>
+                    </extension>
+                    <extension url="urn:variable-in-no-translation">
+                        <valueString value="original"/>
+                    </extension>
+                    <extension url="urn:fixture-out">
+                        <valueString value="addendum-response"/>
+                    </extension>
+                </modifierExtension>
             </operation>
-        </action>
-        <action>
-            <assert>
-                <description value="... transaction was successful"/>
-                <response value="okay"/>
-                <warningOnly value="false"/>
-            </assert>
-        </action>
-        <action>
-            <assert>
-                <description value="... return Bundle"/>
-                <compareToSourceId value="addendum-response"/>
-                <compareToSourceExpression value="Bundle.exists()"/>
-                <warningOnly value="false"/>
-            </assert>
-        </action>
-        <action>
-            <assert>
-                <description value="... Bundle is type transaction-response"/>
-                <compareToSourceId value="addendum-response"/>
-                <compareToSourceExpression value="Bundle.type = 'transaction-response'"/>
-                <warningOnly value="false"/>
-            </assert>
-        </action>
-        <action>
-            <assert>
-                <description value="... Bundle may not contain OperationOutcome"/>
-                <compareToSourceId value="addendum-response"/>
-                <compareToSourceExpression value="Bundle.entry.response.outcome.where(OperationOutcome).exists().not()"/>
-                <warningOnly value="false"/>
-            </assert>
-        </action>
-        <action>
-            <assert>
-                <description value="... all parts of transaction successful"/>
-                <expression value="Bundle.entry.response.all(status.startsWith(201))"/>
-                <warningOnly value="false"/>
-            </assert>
-        </action>
-        <action>
-            <assert>
-                <description value="... response contains one entry for each entry in request"/>
-                <expression value="Bundle.entry.count()"/>
-                <value value="${requestEntryCount}"/>
-                <warningOnly value="false"/>
-            </assert>
         </action>
     </test>
+
     <test>
-        <description value="Read back addendum DocumentReference"/>
+        <description value="Read back addendum DocumentReference and verify status is current."/>
         <action>
             <operation>
-                <description value="Addendum DocumentReference"/>
-                <label value="read-back"/>
-                <type>
-                    <code value="read"/>
-                </type>
-                <url value="${DocRefUrlAddendum}"/>
-                <responseId value="readBackResponse"/>
+                <description value="Call module to read back the DocumentReference."/>
+                <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
+                    <extension url="component">
+                        <valueString value="../../Library/ReadDocRef.xml"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="DocRefUrlAddendum"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="patientResourceId"/>
+                    </extension>
+                    <extension url="urn:fixture-out">
+                        <valueString  value="response"/>
+                    </extension>
+                </modifierExtension>
             </operation>
-        </action>
-        <action>
-            <assert>
-                <description value="... was successful"/>
-                <response value="okay"/>
-                <warningOnly value="false"/>
-            </assert>
-        </action>
-        <action>
-            <assert>
-                <description value="... returned a DocumentReference"/>
-                <resource value="DocumentReference"/>
-                <warningOnly value="false"/>
-            </assert>
         </action>
         <action>
             <assert>
@@ -249,32 +162,27 @@
             </assert>
         </action>
     </test>
+
     <test>
-        <description value="Read back original DocumentReference and verify status is current"/>
+        <description value="Read back original DocumentReference and verify status is current."/>
         <action>
             <operation>
-                <description value="Original DocumentReference"/>
-                <label value="read-back"/>
-                <type>
-                    <code value="read"/>
-                </type>
-                <url value="${DocRefUrl}"/>
-                <responseId value="rereadBackResponse"/>
+                <description value="Call module to read back the DocumentReference."/>
+                <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
+                    <extension url="component">
+                        <valueString value="../../Library/ReadDocRef.xml"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="DocRefUrl"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="patientResourceId"/>
+                    </extension>
+                    <extension url="urn:fixture-out">
+                        <valueString  value="response"/>
+                    </extension>
+                </modifierExtension>
             </operation>
-        </action>
-        <action>
-            <assert>
-                <description value="... was successful"/>
-                <response value="okay"/>
-                <warningOnly value="false"/>
-            </assert>
-        </action>
-        <action>
-            <assert>
-                <description value="... returned a DocumentReference"/>
-                <resource value="DocumentReference"/>
-                <warningOnly value="false"/>
-            </assert>
         </action>
         <action>
             <assert>
@@ -284,4 +192,6 @@
             </assert>
         </action>
     </test>
+
+
 </TestScript>
