@@ -134,7 +134,7 @@
     </test>
 
     <test>
-        <description value="Read back addendum DocumentReference and verify status is current."/>
+        <description value="Read back addendum DocumentReference."/>
         <action>
             <operation>
                 <description value="Call module to read back the DocumentReference."/>
@@ -164,7 +164,7 @@
     </test>
 
     <test>
-        <description value="Read back original DocumentReference and verify status is current."/>
+        <description value="Read back original DocumentReference."/>
         <action>
             <operation>
                 <description value="Call module to read back the DocumentReference."/>
