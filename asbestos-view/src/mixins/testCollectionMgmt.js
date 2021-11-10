@@ -46,11 +46,13 @@ export default {
         // run all tests in collection
         async doRunAll()  {
             this.running = true
+            this.$store.commit('clearTestReports' )
             for (const name of this.scriptNames) {
-                if (this.isClient)  // collection is client or server
+                if (this.isClient) { // collection is client or server
                     await this.$store.dispatch('runEval', name)
-                else
+                } else {
                     await this.$store.dispatch('runTest', name)
+                }
             }
             this.running = false
         },
