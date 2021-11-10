@@ -59,6 +59,11 @@
         <expression value="Bundle.entry[0].response.location"/>
         <sourceId value="pdb-response"/>
     </variable>
+    <variable>
+        <name value="isComprehensiveMetadataExpected"/>
+        <defaultValue value="false"/>
+    </variable>
+
     <setup>
         <action>
             <operation>
@@ -106,7 +111,28 @@
             </assert>
         </action>
     </setup>
-
+    <test>
+        <description value="Original-bundle PDB Validations."/>
+        <action>
+            <operation>
+                <description value="Module call to Original-bundle PDB Validations."/>
+                <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
+                    <extension url="component">
+                        <valueString value="../../Library/AggregateModule/MHDv3xBundleEvalAggregateResult.xml"/>
+                    </extension>
+                    <extension url="urn:fixture-in">
+                        <valueString value="original-bundle"/>
+                    </extension>
+                    <extension url="urn:fixture-in">
+                        <valueString value="pdb-response"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="isComprehensiveMetadataExpected"/>
+                    </extension>
+                </modifierExtension>
+            </operation>
+        </action>
+    </test>
     <test>
         <description value="Send Replacement DocumentReference in PDB."/>
         <action>
@@ -132,6 +158,29 @@
             </operation>
         </action>
     </test>
+    <test>
+        <description value="Replacement-bundle PDB Validations."/>
+        <action>
+            <operation>
+                <description value="Module call to Original-bundle PDB Validations."/>
+                <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
+                    <extension url="component">
+                        <valueString value="../../Library/AggregateModule/MHDv3xBundleEvalAggregateResult.xml"/>
+                    </extension>
+                    <extension url="urn:fixture-in">
+                        <valueString value="replace-bundle"/>
+                    </extension>
+                    <extension url="urn:fixture-in">
+                        <valueString value="replace-response"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="isComprehensiveMetadataExpected"/>
+                    </extension>
+                </modifierExtension>
+            </operation>
+        </action>
+    </test>
+
 
     <test>
         <description value="Read back replacement DocumentReference."/>

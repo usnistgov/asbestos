@@ -16,11 +16,24 @@
         <description value="List (SubmissionSet) type: The Document Source shall not provide any entryUUID values."/>
         <action>
             <assert>
-                <description value="https://profiles.ihe.net/ITI/MHD/ITI-65.html#2365412-message-semantics"/>
+                <description value="The Document Source shall not provide any entryUUID values.|MHDv4MessageSemantics"/>
                 <compareToSourceId value="request"/>
                 <compareToSourceExpression value="Bundle.entry.resource.where($this is List and code.coding.code='submissionset').where(identifier.use='official' implies identifier.value.empty() or identifier.value.startsWith('urn:uuid').not()).exists()"/>
                 <warningOnly value="false"/>
             </assert>
         </action>
+<!--        <action>-->
+<!--            <assert>-->
+<!--                <description value="|MHDv4_3:4.5.2SubmissionSetMetadataAttributes"/>-->
+<!--                source-id TODO -->
+<!--            </assert>-->
+<!--        </action>-->
+        <!--        <action>-->
+        <!--            <assert>-->
+        <!--                <description value="|MHDv4_3:4.5.2SubmissionSetMetadataAttributes"/>-->
+        <!--                date TODO -->
+        <!--            </assert>-->
+        <!--        </action>-->
+
     </test>
 </TestScript>

@@ -404,7 +404,7 @@ public class AnalysisReport {
         File testDef = new File(new File(new File(ec.externalCache, "FhirTestCollections"), "Internal"), "Comprehensive_" + type);
         // Guard seems to have a side effect
 //        if (testDef.exists()) {
-            TestEngine testEngine = new TestEngine(testDef)
+            TestEngine testEngine = new TestEngine(testDef, null)
                     .setVal(new Val())
                     .setTestSession("default")
                     .setExternalCache(ec.externalCache)
@@ -447,7 +447,7 @@ public class AnalysisReport {
 //        if (!testDef.isDirectory())
 //            return null;
 //        if (testDef.exists()) {
-            TestEngine testEngine = new TestEngine(testDef)
+            TestEngine testEngine = new TestEngine(testDef, null)
                     .setVal(new Val())
                     .setTestCollection("Analysis")
                     .setTestId("Analysis")

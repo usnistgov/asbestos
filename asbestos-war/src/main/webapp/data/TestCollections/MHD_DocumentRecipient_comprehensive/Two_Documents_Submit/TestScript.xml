@@ -94,22 +94,7 @@
             </operation>
         </action>
     </test>
-    <test>
-        <description value="Validate transaction response."/>
-        <action>
-            <operation>
-                <description value="Validate transaction response."/>
-                <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
-                    <extension url="component">
-                        <valueString value="../../Library/ResponseBundleEval.xml"/>
-                    </extension>
-                    <extension url="urn:fixture-in">
-                        <valueString  value="pdb-response"/>
-                    </extension>
-                </modifierExtension>
-            </operation>
-        </action>
-    </test>
+
     <test>
         <description value="Read back DocumentReference 1."/>
         <action>

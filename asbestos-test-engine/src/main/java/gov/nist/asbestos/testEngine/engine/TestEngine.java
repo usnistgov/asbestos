@@ -83,7 +83,7 @@ public class TestEngine  implements TestDef {
      * @param testDef  directory containing test definition
      * @param sut base address of fhir server under test
      */
-    public TestEngine(File testDef, URI sut) {
+    public TestEngine(File testDef, URI sut, Set<String> moduleIds) {
         Objects.requireNonNull(testDef);
         Objects.requireNonNull(sut);
         Objects.requireNonNull(Ref.asURL(sut));
@@ -96,24 +96,33 @@ public class TestEngine  implements TestDef {
         ResourceCacheMgr inTestResources = new ResourceCacheMgr(this.testDef, new Ref(""));
         fhirClientForFixtures = new FhirClient().setResourceCacheMgr(inTestResources);
         fixtureMgr.setFhirClient(fhirClientForFixtures);
+        if (moduleIds != null) {
+            this.moduleIds.addAll(moduleIds);
+        }
     }
 
     // used for evaluation including in the Inspector
-    public TestEngine(File testDef) {
+    public TestEngine(File testDef, Set<String> moduleIds) {
         Objects.requireNonNull(testDef);
         setTestDef(testDef);
         ResourceCacheMgr inTestResources = new ResourceCacheMgr(testDef, new Ref(""));
         fhirClientForFixtures = new FhirClient().setResourceCacheMgr(inTestResources);
         fixtureMgr.setFhirClient(fhirClientForFixtures);
+        if (moduleIds != null) {
+            this.moduleIds.addAll(moduleIds);
+        }
     }
 
     // used for client tests
-    public TestEngine(File testDef, TestScript testScript) {
+    public TestEngine(File testDef, TestScript testScript, Set<String> moduleIds) {
         setTestDef(testDef);
         this.testScript = testScript;
         ResourceCacheMgr inTestResources = new ResourceCacheMgr(testDef, new Ref(""));
         fhirClientForFixtures = new FhirClient().setResourceCacheMgr(inTestResources);
         fixtureMgr.setFhirClient(fhirClientForFixtures);
+        if (moduleIds != null) {
+            this.moduleIds.addAll(moduleIds);
+        }
     }
 
     public TestEngine setFixtures(Map<String, FixtureComponent> fixtures) {
@@ -960,9 +969,14 @@ public class TestEngine  implements TestDef {
         if (hasDebugger())
             getDebugger().getState().pushParentExecutionIndex();
 
+        Set<String> moduleIds = new HashSet<>();
+                for (TestEngine te : modularEngine.getTestEngines()) {
+                       moduleIds.addAll(te.moduleIds);
+                }
+
         TestEngine testEngine1 = sut == null
-                ? new TestEngine(componentReference.getComponentRef())
-                : new TestEngine(componentReference.getComponentRef(), this.sut);
+                ? new TestEngine(componentReference.getComponentRef(), moduleIds)
+                : new TestEngine(componentReference.getComponentRef(), this.sut, moduleIds);
         FhirClient testEngine1fhirClient = new FhirClient();
         if (fhirClient != null) {
             if (fhirClient.getFormat() != null) {

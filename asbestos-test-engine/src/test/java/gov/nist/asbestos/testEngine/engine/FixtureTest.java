@@ -48,7 +48,7 @@ class FixtureTest {
         Val val = new Val();
         File testDef = Paths.get(getClass().getResource("/fixtures/fixtureFromTestDefinition/TestScript.xml").toURI()).getParent().toFile();
         URI sut = new URI("http://localhost:7080/fhir");
-        TestEngine testEngine = new TestEngine(testDef, sut).setVal(val);
+        TestEngine testEngine = new TestEngine(testDef, sut, null).setVal(val);
         testEngine.runTest();
 
         if (val.hasErrors())
@@ -68,7 +68,7 @@ class FixtureTest {
         Val val = new Val();
         File testDef = Paths.get(getClass().getResource("/fixtures/fixtureFromBadTestDefinition/TestScript.xml").toURI()).getParent().toFile();
         URI sut = new URI("http://localhost:7080/fhir");
-        TestEngine testEngine = new TestEngine(testDef, sut).setVal(val).runTest();
+        TestEngine testEngine = new TestEngine(testDef, sut, null).setVal(val).runTest();
         System.out.println(testEngine.getTestReportAsJson());
         assertTrue(testEngine.hasError());
     }

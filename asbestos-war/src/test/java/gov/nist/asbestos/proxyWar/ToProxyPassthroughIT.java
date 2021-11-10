@@ -39,7 +39,7 @@ class ToProxyPassthroughIT {
     TestEngine run(String testScriptLocation) throws URISyntaxException {
         Val val = new Val();
         File test1 = Paths.get(getClass().getResource(testScriptLocation).toURI()).getParent().toFile();
-        TestEngine testEngine = new TestEngine(test1, base)
+        TestEngine testEngine = new TestEngine(test1, base, null)
                 .setVal(val)
                 .setTestSession("default")
                 .setChannelId("default__default")

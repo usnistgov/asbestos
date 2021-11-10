@@ -117,7 +117,7 @@
                 
                 <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
                     <extension url="component">
-                        <valueString value="../../Library/TransactionResponseEval.xml"/>
+                        <valueString value="../../Library/PDBVal/TransactionResponse.xml"/>
                     </extension>
                     <extension url="urn:fixture-in">
                         <valueString  value="request"/>

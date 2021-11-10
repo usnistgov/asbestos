@@ -22,9 +22,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 public class ModularEngine {
@@ -50,7 +52,11 @@ public class ModularEngine {
 
     public ModularEngine(File testDefDir, URI sut, TestScriptDebugState state) {
         nameFromTestDefDir(testDefDir);
-        TestEngine testEngine = sut == null ? new TestEngine(testDefDir) : new TestEngine(testDefDir, sut);
+        Set<String> moduleIds = new HashSet<>();
+        for (TestEngine te : engines) {
+           moduleIds.addAll(te.moduleIds);
+        }
+        TestEngine testEngine = sut == null ? new TestEngine(testDefDir, moduleIds) : new TestEngine(testDefDir, sut, moduleIds);
         testEngine.setTestScriptDebugState(state);
         engines.add(testEngine);
         testEngine.setModularEngine(this);

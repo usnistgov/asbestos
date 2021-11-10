@@ -52,7 +52,7 @@ class SutTest {
 
         Val val = new Val();
         File test1 = Paths.get(getClass().getResource("/sut/createread/TestScript.xml").toURI()).getParent().toFile();
-        TestEngine testEngine = new TestEngine(test1, new URI(""))
+        TestEngine testEngine = new TestEngine(test1, new URI(""), null)
                 .setVal(val)
                 .setFhirClient(fhirClientMock)
                 .setSut(new URI("http://localhost:9999/fhir"))
@@ -91,7 +91,7 @@ class SutTest {
 
         Val val = new Val();
         File test1 = Paths.get(getClass().getResource("/sut/createreadAssertPreviousStep/TestScript.xml").toURI()).getParent().toFile();
-        TestEngine testEngine = new TestEngine(test1, new URI(""))
+        TestEngine testEngine = new TestEngine(test1, new URI(""), null)
                 .setVal(val)
                 .setFhirClient(fhirClientMock)
                 .setSut(new URI("http://localhost:9999/fhir"))
@@ -130,7 +130,7 @@ class SutTest {
 
         Val val = new Val();
         File test1 = Paths.get(getClass().getResource("/sut/createreadAssertBadPreviousStep/TestScript.xml").toURI()).getParent().toFile();
-        TestEngine testEngine = new TestEngine(test1, new URI(""))
+        TestEngine testEngine = new TestEngine(test1, new URI(""), null)
                 .setVal(val)
                 .setFhirClient(fhirClientMock)
                 .setSut(new URI("http://localhost:9999/fhir"))
@@ -169,7 +169,7 @@ class SutTest {
 
         Val val = new Val();
         File test1 = Paths.get(getClass().getResource("/sut/createreadNumericStatus/TestScript.xml").toURI()).getParent().toFile();
-        TestEngine testEngine = new TestEngine(test1, new URI(""))
+        TestEngine testEngine = new TestEngine(test1, new URI(""), null)
                 .setVal(val)
                 .setFhirClient(fhirClientMock)
                 .setSut(new URI("http://localhost:9999/fhir"))
@@ -208,7 +208,7 @@ class SutTest {
 
         Val val = new Val();
         File test1 = Paths.get(getClass().getResource("/sut/createreadWrongNumericStatus/TestScript.xml").toURI()).getParent().toFile();
-        TestEngine testEngine = new TestEngine(test1, new URI(""))
+        TestEngine testEngine = new TestEngine(test1, new URI(""), null)
                 .setVal(val)
                 .setFhirClient(fhirClientMock)
                 .setSut(new URI("http://localhost:9999/fhir"))
@@ -253,7 +253,7 @@ class SutTest {
 
         Val val = new Val();
         File test1 = Paths.get(getClass().getResource("/sut/createreadWrongStatus/TestScript.xml").toURI()).getParent().toFile();
-        TestEngine testEngine = new TestEngine(test1, new URI(""))
+        TestEngine testEngine = new TestEngine(test1, new URI(""), null)
                 .setVal(val)
                 .setFhirClient(fhirClientMock)
                 .setSut(new URI("http://localhost:9999/fhir"))

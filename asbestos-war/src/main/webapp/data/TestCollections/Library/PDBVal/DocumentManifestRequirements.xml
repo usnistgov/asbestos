@@ -16,11 +16,27 @@
     <description value="DocumentManifest requirements."/>
     <action>
         <assert>
-            <description value="DocumentManifest: masterIdentifier is required"/>
+            <description value="DocumentManifest: masterIdentifier is required.|MHDSendingActorMetadataAttributeOptionality"/>
             <compareToSourceId value="request"/>
             <compareToSourceExpression value="Bundle.entry.resource.where(is(FHIR.DocumentManifest)).masterIdentifier.exists()"/>
             <warningOnly value="false"/>
         </assert>
     </action>
-</test>
+    <action>
+        <assert>
+            <description value="DocumentManifest: source is required.|MHDSendingActorMetadataAttributeOptionality"/>
+            <compareToSourceId value="request"/>
+            <compareToSourceExpression value="Bundle.entry.resource.where(is(FHIR.DocumentManifest)).source.exists()"/>
+            <warningOnly value="false"/>
+        </assert>
+    </action>
+        <action>
+            <assert>
+                <description value="DocumentManifest: created is required.|MHDSendingActorMetadataAttributeOptionality"/>
+                <compareToSourceId value="request"/>
+                <compareToSourceExpression value="Bundle.entry.resource.where(is(FHIR.DocumentManifest)).created.exists()"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+    </test>
 </TestScript>

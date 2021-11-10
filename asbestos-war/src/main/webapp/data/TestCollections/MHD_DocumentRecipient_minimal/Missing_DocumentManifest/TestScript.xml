@@ -44,6 +44,10 @@
         <name value="dependsOnTestId"/>
         <defaultValue value="MHD_DocumentRecipient_minimal/1_Prerequisite_Single_Document_with_Binary"/>
     </variable>
+    <variable>
+        <name value="isComprehensiveMetadataExpected"/>
+        <defaultValue value="false"/>
+    </variable>
 
     <setup>
         <modifierExtension url="urn:noErrors"/>
@@ -65,7 +69,6 @@
             </operation>
         </action>
     </setup>
-
     <test>
         <modifierExtension url="urn:noErrors"/>
         <description value="Submit a PDB with a missing DocumentManifest."/>
@@ -84,6 +87,29 @@
                     </extension>
                     <extension url="urn:variable-in-no-translation">
                         <valueString value="patientResourceId"/>
+                    </extension>
+                </modifierExtension>
+            </operation>
+        </action>
+    </test>
+    <test>
+        <description value="PDB Validations."/>
+        <action>
+            <modifierExtension url="urn:asbestos:test:action:expectFailure"/>
+            <operation>
+                <description value="Module usage description: TestScript import call to bridge an aggregate TestScript."/>
+                <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
+                    <extension url="component">
+                        <valueString value="../../Library/AggregateModule/MHDv3xBundleEvalAggregateResult.xml"/>
+                    </extension>
+                    <extension url="urn:fixture-in">
+                        <valueString value="bad-pdb-bundle"/>
+                    </extension>
+                    <extension url="urn:fixture-in">
+                        <valueString value="pdb-response"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="isComprehensiveMetadataExpected"/>
                     </extension>
                 </modifierExtension>
             </operation>

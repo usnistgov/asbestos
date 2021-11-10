@@ -21,7 +21,7 @@ class AssertFixtureTest {
     void verifyPatientName() throws URISyntaxException {
         Val val = new Val();
         File test1 = Paths.get(getClass().getResource("/setup/assertFixture/patientNameGood/TestScript.xml").toURI()).getParent().toFile();
-        TestEngine testEngine = new TestEngine(test1, new URI(""))
+        TestEngine testEngine = new TestEngine(test1, new URI(""), null)
                 .setVal(val)
                 .runTest();
         TestReport report = testEngine.getTestReport();
@@ -39,7 +39,7 @@ class AssertFixtureTest {
     void warningOnlyMissing() throws URISyntaxException {
         Val val = new Val();
         File test1 = Paths.get(getClass().getResource("/setup/assertFixture/warningOnlyMissing/TestScript.xml").toURI()).getParent().toFile();
-        TestEngine testEngine = new TestEngine(test1, new URI(""))
+        TestEngine testEngine = new TestEngine(test1, new URI(""), null)
                 .setVal(val)
                 .setFhirClient(new FhirClient())
                 .runTest();
@@ -55,7 +55,7 @@ class AssertFixtureTest {
     void patientNameWarning() throws URISyntaxException {
         Val val = new Val();
         File test1 = Paths.get(getClass().getResource("/setup/assertFixture/patientNameWarning/TestScript.xml").toURI()).getParent().toFile();
-        TestEngine testEngine = new TestEngine(test1, new URI(""))
+        TestEngine testEngine = new TestEngine(test1, new URI(""), null)
                 .setVal(val)
                 .setFhirClient(new FhirClient())
                 .runTest();
@@ -71,7 +71,7 @@ class AssertFixtureTest {
     void patientNameError() throws URISyntaxException {
         Val val = new Val();
         File test1 = Paths.get(getClass().getResource("/setup/assertFixture/patientNameError/TestScript.xml").toURI()).getParent().toFile();
-        TestEngine testEngine = new TestEngine(test1, new URI(""))
+        TestEngine testEngine = new TestEngine(test1, new URI(""), null)
                 .setVal(val)
                 .setFhirClient(new FhirClient())
                 .runTest();
@@ -87,7 +87,7 @@ class AssertFixtureTest {
     void patientNameGood() throws URISyntaxException {
         Val val = new Val();
         File test1 = Paths.get(getClass().getResource("/setup/assertFixture/patientNameGood/TestScript.xml").toURI()).getParent().toFile();
-        TestEngine testEngine = new TestEngine(test1, new URI(""))
+        TestEngine testEngine = new TestEngine(test1, new URI(""), null)
                 .setVal(val)
                 .setFhirClient(new FhirClient())
                 .runTest();
@@ -103,7 +103,7 @@ class AssertFixtureTest {
     void patientNameWithSourceId() throws URISyntaxException {
         Val val = new Val();
         File test1 = Paths.get(getClass().getResource("/setup/assertFixture/patientNameWithSourceId/TestScript.xml").toURI()).getParent().toFile();
-        TestEngine testEngine = new TestEngine(test1, new URI(""))
+        TestEngine testEngine = new TestEngine(test1, new URI(""), null)
                 .setVal(val)
                 .setFhirClient(new FhirClient())
                 .runTest();
@@ -119,7 +119,7 @@ class AssertFixtureTest {
     void patientNameBadWithSourceId() throws URISyntaxException {
         Val val = new Val();
         File test1 = Paths.get(getClass().getResource("/setup/assertFixture/patientNameBadWithSourceId/TestScript.xml").toURI()).getParent().toFile();
-        TestEngine testEngine = new TestEngine(test1, new URI(""))
+        TestEngine testEngine = new TestEngine(test1, new URI(""), null)
                 .setVal(val)
                 .setFhirClient(new FhirClient())
                 .runTest();

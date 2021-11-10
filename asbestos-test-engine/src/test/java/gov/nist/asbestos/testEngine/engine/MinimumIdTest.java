@@ -162,7 +162,7 @@ class MinimumIdTest {
     void wrongType() throws URISyntaxException {
         Val val = new Val();
         File test1 = Paths.get(getClass().getResource("/minimumId/wrongType/TestScript.xml").toURI()).getParent().toFile();
-        TestEngine testEngine = new TestEngine(test1, new URI(""))
+        TestEngine testEngine = new TestEngine(test1, new URI(""), null)
                 .setVal(val)
                 .setFhirClient(new FhirClient())
                 .setTestSession("default")
@@ -180,7 +180,7 @@ class MinimumIdTest {
     void missingSubject() throws URISyntaxException {
         Val val = new Val();
         File test1 = Paths.get(getClass().getResource("/minimumId/missingSubject/TestScript.xml").toURI()).getParent().toFile();
-        TestEngine testEngine = new TestEngine(test1, new URI(""))
+        TestEngine testEngine = new TestEngine(test1, new URI(""), null)
                 .setVal(val)
                 .setFhirClient(new FhirClient())
                 .setTestSession("default")
@@ -199,7 +199,7 @@ class MinimumIdTest {
     void hasExtra() throws URISyntaxException {
         Val val = new Val();
         File test1 = Paths.get(getClass().getResource("/minimumId/hasExtra/TestScript.xml").toURI()).getParent().toFile();
-        TestEngine testEngine = new TestEngine(test1, new URI(""))
+        TestEngine testEngine = new TestEngine(test1, new URI(""), null)
                 .setVal(val)
                 .setFhirClient(new FhirClient())
                 .setTestSession("default")

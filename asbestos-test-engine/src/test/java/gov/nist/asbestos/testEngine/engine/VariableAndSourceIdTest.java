@@ -52,7 +52,7 @@ class VariableAndSourceIdTest {
 
         Val val = new Val();
         File test1 = Paths.get(getClass().getResource("/variable/createread/TestScript.xml").toURI()).getParent().toFile();
-        TestEngine testEngine = new TestEngine(test1, new URI(""))
+        TestEngine testEngine = new TestEngine(test1, new URI(""), null)
                 .setVal(val)
                 .setFhirClient(fhirClientMock)
                 .runTest();
@@ -90,7 +90,7 @@ class VariableAndSourceIdTest {
 
         Val val = new Val();
         File test1 = Paths.get(getClass().getResource("/variable/createreadAssertPreviousStep/TestScript.xml").toURI()).getParent().toFile();
-        TestEngine testEngine = new TestEngine(test1, new URI(""))
+        TestEngine testEngine = new TestEngine(test1, new URI(""), null)
                 .setVal(val)
                 .setFhirClient(fhirClientMock)
                 .runTest();
@@ -128,7 +128,7 @@ class VariableAndSourceIdTest {
 
         Val val = new Val();
         File test1 = Paths.get(getClass().getResource("/variable/createreadAssertBadPreviousStep/TestScript.xml").toURI()).getParent().toFile();
-        TestEngine testEngine = new TestEngine(test1, new URI(""))
+        TestEngine testEngine = new TestEngine(test1, new URI(""), null)
                 .setVal(val)
                 .setFhirClient(fhirClientMock)
                 .runTest();
@@ -166,7 +166,7 @@ class VariableAndSourceIdTest {
 
         Val val = new Val();
         File test1 = Paths.get(getClass().getResource("/variable/createreadNumericStatus/TestScript.xml").toURI()).getParent().toFile();
-        TestEngine testEngine = new TestEngine(test1, new URI(""))
+        TestEngine testEngine = new TestEngine(test1, new URI(""), null)
                 .setVal(val)
                 .setFhirClient(fhirClientMock)
                 .runTest();
@@ -204,7 +204,7 @@ class VariableAndSourceIdTest {
 
         Val val = new Val();
         File test1 = Paths.get(getClass().getResource("/variable/createreadWrongNumericStatus/TestScript.xml").toURI()).getParent().toFile();
-        TestEngine testEngine = new TestEngine(test1, new URI(""))
+        TestEngine testEngine = new TestEngine(test1, new URI(""), null)
                 .setVal(val)
                 .setFhirClient(fhirClientMock)
                 .runTest();
@@ -248,7 +248,7 @@ class VariableAndSourceIdTest {
 
         Val val = new Val();
         File test1 = Paths.get(getClass().getResource("/variable/createreadWrongStatus/TestScript.xml").toURI()).getParent().toFile();
-        TestEngine testEngine = new TestEngine(test1, new URI(""))
+        TestEngine testEngine = new TestEngine(test1, new URI(""), null)
                 .setVal(val)
                 .setFhirClient(fhirClientMock)
                 .runTest();

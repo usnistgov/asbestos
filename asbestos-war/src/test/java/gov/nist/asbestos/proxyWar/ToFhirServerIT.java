@@ -42,7 +42,7 @@ class ToFhirServerIT {
     void run(String testScriptLocation) throws URISyntaxException {
         Val val = new Val();
         File test1 = Paths.get(getClass().getResource(testScriptLocation).toURI()).getParent().toFile();
-        TestEngine testEngine = new TestEngine(test1, new URI(ITConfig.getChannelBase("default", "default")))
+        TestEngine testEngine = new TestEngine(test1, new URI(ITConfig.getChannelBase("default", "default")), null)
                 .setVal(val)
                 .setFhirClient(new FhirClient())
                 .setTestSession("default")

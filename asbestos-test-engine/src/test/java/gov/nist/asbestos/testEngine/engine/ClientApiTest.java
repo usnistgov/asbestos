@@ -36,7 +36,7 @@ class ClientApiTest {
         ResourceWrapper responseWrapper = ResourceWrapperBuilder.fromUIEvent(eventDir, 1, true);
         assertNotNull(responseWrapper);
 
-        List<String> errors = new TestEngine(testDef)
+        List<String> errors = new TestEngine(testDef, null)
                 .setVal(new Val())
                 .setTestSession("default")
                 .setExternalCache(ec.externalCache)
