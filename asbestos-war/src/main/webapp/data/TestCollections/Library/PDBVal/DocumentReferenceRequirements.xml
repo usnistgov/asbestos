@@ -68,7 +68,7 @@
         <assert>
             <description value="DocumentReference: sourcePatientInfo, if it exists, is a reference to a contained Patient Resource|MHDPDBSourcePatientInfoIsContained"/>
             <compareToSourceId value="request"/>
-            <compareToSourceExpression value="iif(Bundle.entry.resource.ofType(DocumentReference).context.sourcePatientInfo, Bundle.entry.resource.ofType(DocumentReference).context.sourcePatientInfo.reference = Bundle.entry.resource.ofType(DocumentReference).contained.Patient.id, true)"/>
+            <compareToSourceExpression value="Bundle.entry.select(resource as DocumentReference).select(context.exists() implies context.sourcePatientInfo.exists() implies context.sourcePatientInfo.reference in contained.where(is(Patient)).id).allTrue()"/>
             <warningOnly value="false"/>
         </assert>
     </action>
