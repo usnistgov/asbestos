@@ -18,8 +18,8 @@
       <button class="runallbutton" @click="doRunAll()">Run All</button>
     </div>
 
-    <h3 class="conformance-tests-header">Tests</h3>
-    <div>
+      <h3 class="conformance-tests-header" :title="`There are ${scriptNames.length} tests in this test collection. pass:${passingTestCount}, fail:${failingTestCount}, notRun:${notRunTestCount} `">Tests<test-progress-bar class="testProgressBar" :fail-count="failingTestCount" :pass-count="passingTestCount" :not-run-count="notRunTestCount" :total-count="scriptNames.length"></test-progress-bar></h3>
+      <div>
       <div class="testBarMargin" v-for="(name, i) in scriptNames"
            :key="name + i" >
         <div v-bind:class="{
@@ -127,6 +127,7 @@ import colorizeTestReports from "../../mixins/colorizeTestReports";
 import debugTestScriptMixin from "../../mixins/debugTestScript";
 import ScriptStatus from "./ScriptStatus";
 import DebugAssertionEvalModal from "./debugger/DebugAssertionEvalModal";
+import TestProgressBar from "./TestProgressBar";
 
 export default {
   methods: {
@@ -209,6 +210,17 @@ export default {
         }
         return returnObj
     },
+    passingTestCount() {
+        return (this.scriptNames.filter(e => this.status[e]==='pass')).length
+    },
+    failingTestCount() {
+          return (this.scriptNames.filter(e => this.status[e]==='fail' || this.status[e]==='error')).length
+      },
+    notRunTestCount() {
+          return (this.scriptNames.filter(e => this.status[e]==='not-run')).length
+      },
+
+
   },
   created() {
       if (this.$store.state.base.ftkChannelLoaded) {
@@ -244,7 +256,8 @@ export default {
   ],
   components: {
     ScriptStatus,
-    DebugAssertionEvalModal
+    DebugAssertionEvalModal,
+    TestProgressBar,
   }
 }
 </script>
@@ -285,5 +298,10 @@ export default {
   border-radius: 3px;
   background-color: lavender; /* #FFC83D; */
   font-size: x-small;
+}
+.testProgressBar {
+  display: inline-block;
+  text-align: center;
+  margin-left: 4px;
 }
 </style>
