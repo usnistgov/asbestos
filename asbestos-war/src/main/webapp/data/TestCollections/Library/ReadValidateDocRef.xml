@@ -28,11 +28,11 @@
                     <extension url="urn:variable-in">
                         <valueString  value="DocRefUrl"/>
                     </extension>
-                    <extension url="urn:variable-in-no-translation">
+                    <extension url="urn:variable-in">
                         <valueString value="patientResourceId"/>
                     </extension>
                     <extension url="urn:fixture-out">
-                        <valueString value="addendum-response"/>
+                        <valueString value="readBackResponse"/>
                     </extension>
                 </modifierExtension>
             </operation>

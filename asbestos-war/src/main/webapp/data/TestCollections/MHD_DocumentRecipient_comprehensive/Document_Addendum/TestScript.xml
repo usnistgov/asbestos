@@ -58,6 +58,11 @@
         <expression value="Bundle.entry[0].response.location"/>
         <sourceId value="original-response"/>
     </variable>
+    <variable>
+        <name value="isComprehensiveMetadataExpected"/>
+        <defaultValue value="true"/>
+    </variable>
+
     <setup>
         <action>
             <operation>
@@ -72,6 +77,28 @@
             </operation>
         </action>
     </setup>
+    <test>
+        <description value="PDB Validations."/>
+        <action>
+            <operation>
+                <description value="Module usage description: TestScript import call to bridge an aggregate TestScript."/>
+                <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
+                    <extension url="component">
+                        <valueString value="../../Library/AggregateModule/MHDv3xBundleEvalAggregateResult.xml"/>
+                    </extension>
+                    <extension url="urn:fixture-in">
+                        <valueString value="original-bundle"/>
+                    </extension>
+                    <extension url="urn:fixture-in">
+                        <valueString value="original-response"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="isComprehensiveMetadataExpected"/>
+                    </extension>
+                </modifierExtension>
+            </operation>
+        </action>
+    </test>
     <test>
         <description value="Send Addendum DocumentReference."/>
         <action>
@@ -98,72 +125,80 @@
         </action>
     </test>
     <test>
-      <modifierExtension url="urn:noErrors"/>
-        <description value="Read back addendum."/>
+        <description value="PDB Validations."/>
         <action>
             <operation>
-                <description value="Addendum DocumentReference."/>
-                <label value="read-back"/>
-                <type>
-                    <code value="read"/>
-                </type>
-                <url value="${DocRefUrlAddendum}"/>
-                <responseId value="readBackResponse"/>
+                <description value="Module usage description: TestScript import call to bridge an aggregate TestScript."/>
+                <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
+                    <extension url="component">
+                        <valueString value="../../Library/AggregateModule/MHDv3xBundleEvalAggregateResult.xml"/>
+                    </extension>
+                    <extension url="urn:fixture-in">
+                        <valueString value="addendum-bundle"/>
+                    </extension>
+                    <extension url="urn:fixture-in">
+                        <valueString value="addendum-response"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="isComprehensiveMetadataExpected"/>
+                    </extension>
+                </modifierExtension>
+            </operation>
+        </action>
+    </test>
+    <test>
+        <description value="Read back addendum DocumentReference."/>
+        <action>
+            <operation>
+                <description value="Call module to read back the DocumentReference."/>
+                <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
+                    <extension url="component">
+                        <valueString value="../../Library/ReadDocRef.xml"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="DocRefUrlAddendum"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="patientResourceId"/>
+                    </extension>
+                    <extension url="urn:fixture-out">
+                        <valueString  value="response"/>
+                    </extension>
+                </modifierExtension>
             </operation>
         </action>
         <action>
             <assert>
-                <description value="... was successful."/>
-                <response value="okay"/>
-                <warningOnly value="false"/>
-            </assert>
-        </action>
-        <action>
-            <assert>
-                <description value="... returned a DocumentReference."/>
-                <resource value="DocumentReference"/>
-                <warningOnly value="false"/>
-            </assert>
-        </action>
-        <action>
-            <assert>
-                <description value="... status is current."/>
+                <description value="... status is current"/>
                 <expression value="DocumentReference.status = 'current'"/>
                 <warningOnly value="false"/>
             </assert>
         </action>
     </test>
     <test>
-      <modifierExtension url="urn:noErrors"/>
-        <description value="Read back original and verify it has status current."/>
+        <description value="Read back original DocumentReference."/>
         <action>
             <operation>
-                <description value="Original DocumentReference."/>
-                <label value="read-back"/>
-                <type>
-                    <code value="read"/>
-                </type>
-                <url value="${DocRefUrl}"/>
-                <responseId value="rereadBackResponse"/>
+                <description value="Call module to read back the DocumentReference."/>
+                <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
+                    <extension url="component">
+                        <valueString value="../../Library/ReadDocRef.xml"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="DocRefUrl"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="patientResourceId"/>
+                    </extension>
+                    <extension url="urn:fixture-out">
+                        <valueString  value="rereadBackresponse"/>
+                    </extension>
+                </modifierExtension>
             </operation>
         </action>
         <action>
             <assert>
-                <description value="... was successful."/>
-                <response value="okay"/>
-                <warningOnly value="false"/>
-            </assert>
-        </action>
-        <action>
-            <assert>
-                <description value="... returned a DocumentReference."/>
-                <resource value="DocumentReference"/>
-                <warningOnly value="false"/>
-            </assert>
-        </action>
-        <action>
-            <assert>
-                <description value="... status is current."/>
+                <description value="... status is current"/>
                 <expression value="DocumentReference.status = 'current'"/>
                 <warningOnly value="false"/>
             </assert>

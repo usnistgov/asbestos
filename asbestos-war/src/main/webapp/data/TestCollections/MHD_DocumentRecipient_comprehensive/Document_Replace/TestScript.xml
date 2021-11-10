@@ -58,6 +58,11 @@
         <expression value="Bundle.entry[0].response.location"/>
         <sourceId value="original-response"/>
     </variable>
+    <variable>
+        <name value="isComprehensiveMetadataExpected"/>
+        <defaultValue value="true"/>
+    </variable>
+
     <setup>
         <action>
             <operation>
@@ -72,6 +77,29 @@
             </operation>
         </action>
     </setup>
+    <test>
+        <description value="PDB Validations."/>
+        <action>
+            <modifierExtension url="urn:asbestos:test:action:expectFailure"/>
+            <operation>
+                <description value="Module usage description: TestScript import call to bridge an aggregate TestScript."/>
+                <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
+                    <extension url="component">
+                        <valueString value="../../Library/AggregateModule/MHDv3xBundleEvalAggregateResult.xml"/>
+                    </extension>
+                    <extension url="urn:fixture-in">
+                        <valueString value="original-bundle"/>
+                    </extension>
+                    <extension url="urn:fixture-in">
+                        <valueString value="original-response"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="isComprehensiveMetadataExpected"/>
+                    </extension>
+                </modifierExtension>
+            </operation>
+        </action>
+    </test>
     <test>
         <description value="Send Replacement DocumentReference."/>
         <action>
@@ -98,7 +126,28 @@
         </action>
     </test>
     <test>
-      <modifierExtension url="urn:noErrors"/>
+        <description value="PDB Validations."/>
+        <action>
+            <operation>
+                <description value="Module usage description: TestScript import call to bridge an aggregate TestScript."/>
+                <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
+                    <extension url="component">
+                        <valueString value="../../Library/AggregateModule/MHDv3xBundleEvalAggregateResult.xml"/>
+                    </extension>
+                    <extension url="urn:fixture-in">
+                        <valueString value="replace-bundle"/>
+                    </extension>
+                    <extension url="urn:fixture-in">
+                        <valueString value="replace-response"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="isComprehensiveMetadataExpected"/>
+                    </extension>
+                </modifierExtension>
+            </operation>
+        </action>
+    </test>
+    <test>
         <description value="Read back replacement."/>
         <action>
             <operation>
