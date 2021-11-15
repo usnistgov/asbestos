@@ -30,7 +30,6 @@
                 <span v-else-if="isConditional" class="bold">If: </span>
               <span v-if="name">{{name}}</span>
               <span v-else>{{description}}</span>
-
             </span>
         </span>
 

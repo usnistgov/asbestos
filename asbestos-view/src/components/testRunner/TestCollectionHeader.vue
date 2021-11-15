@@ -27,9 +27,9 @@
                 <ol>
                     <li>Send messages matching each per-test description.</li>
                     <li>Response message will reflect evaluation by the FHIR server (or XDS server for MHD tests) running in the background.</li>
-                    <li>Once an adequate collection of messages has been sent to satisfy the tests, evaluate them further by clicking the
-                    spyglass icon to evaluate against a set of assertions specific to each test.
-                    This evaluation will include validating the response from the background server.</li>
+<!--                    <li>Once an adequate collection of messages has been sent to satisfy the tests, evaluate them further by clicking the-->
+<!--                    spyglass icon to evaluate against a set of assertions specific to each test.-->
+<!--                    This evaluation will include validating the response from the background server.</li>-->
                     <li>Only the most recent messages will be evaluated.  Adjust the count below.</li>
                     <li>A test passes if one or more message evaluates correctly.</li>
                     <li>Click on a test to see the messages evaluated.  Click on a message to see the result of each

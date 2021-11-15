@@ -17,10 +17,10 @@
       </div>
 
       <ul class="noTopMargin">
-        <li v-if="$store.state.testRunner.isClientTest">
-            <div v-if="testScript">
+        <li v-if="isEventBasedDisplayMode">
+            <div v-if="theScript !== undefined">
                 <div class="instruction">
-                    <vue-markdown>{{ testScript.description }}</vue-markdown>
+                   <vue-markdown>{{ theScript.description }}</vue-markdown>
                 </div>
                 <div v-if="eventIds === null">
                     No messages present on this channel
@@ -40,13 +40,16 @@
                 </div>
             </div>
         </li>
-        <li v-else>
+        <li v-else-if="theScript !== undefined">
             <script-details
                 :script="theScript"
                 :report="theReport"
                 :test-script-index="theTestScriptIndex"
                 :disable-debugger="disableDebugger"
             > </script-details>
+        </li>
+        <li v-else>
+            Please use the Test Collection Refresh image link to reload.
         </li>
     </ul>
     </div>
@@ -59,22 +62,41 @@
     export default {
         computed: {
           theScript() {
-              if (this.testId.includes('/'))
+              if (this.testId.includes('/')) {
+                  if (!(this.testId in this.$store.state.testRunner.moduleTestScripts)) {
+                      console.error(this.testId + ' does not exist in moduleTestScripts object.')
+                  }
                   return this.$store.state.testRunner.moduleTestScripts[this.testId]
-              else
+              } else {
+                  if (!(this.testId in this.$store.state.testRunner.testScripts)) {
+                      console.error(this.testId + ' does not exist in testScripts object.')
+                  }
                   return this.$store.state.testRunner.testScripts[this.testId] // this.$store.state.testRunner.currentTest
+              }
           },
           theReport() {
-              if (this.testId.includes('/'))
+              if (this.testId.includes('/')) {
+                  if (! (this.testId in this.$store.state.testRunner.moduleTestReports)) {
+                      console.error(this.testId + ' does not exist in moduleTestReports object.')
+                  }
                   return this.$store.state.testRunner.moduleTestReports[this.testId]
-              else
+              } else {
+                  if (! (this.testId in this.$store.state.testRunner.testReports)) {
+                      console.error(this.testId + ' does not exist in testReports object.')
+                  }
                   return this.$store.state.testRunner.testReports[this.testId]  // $store.state.testRunner.currentTest
+              }
           },
           theTestScriptIndex() {
-              if (this.testId.includes('/'))
-                  return '' // not applicable for aggregate testscript
-              else
-                 return this.$store.getters.allServerTestCollectionNames.indexOf(this.testCollection) + '.' + this.$store.state.testRunner.testScriptNames.indexOf(this.testId)
+              try {
+                  if (this.testId.includes('/'))
+                      return '' // not applicable for aggregate testscript
+                  else
+                      return this.$store.getters.allServerTestCollectionNames.indexOf(this.testCollection) + '.' + this.$store.state.testRunner.testScriptNames.indexOf(this.testId)
+              } catch (e) {
+                 console.error('theTestScriptIndex error:' + e)
+                  return ''
+              }
           },
           testModules() {
             const modules = {};
@@ -93,14 +115,27 @@
                 if (!this.$store.state.testRunner.testScripts[this.testId].description) return null
                 return this.$store.state.testRunner.testScripts[this.testId].description.replace(/\n/g, "<br />")
             },
+            /*
             testScript() {
-                this.loadTestScript();
-                return   this.$store.state.testRunner.testScripts[this.testId]
+                console.info('loading testScript for ' + this.testId)
+                console.info('is testscript locally available? ' + (this.theScript !== undefined && this.theScript !== null))
+                console.info('ts desc: ' + this.theScript.description)
+                return this.theScript
+                // this.loadTestScript();
+                // return this.$store.state.testRunner.testScripts[this.testId]
             },
+             */
             eventIds() {
-                if (!this.$store.state.testRunner.clientTestResult) return null
+                if (this.$store.state.testRunner.clientTestResult === undefined) return null
+                if (! (this.testId in this.$store.state.testRunner.clientTestResult)) return null
                 return Object.keys(this.$store.state.testRunner.clientTestResult[this.testId])
             },
+            isEventBasedDisplayMode() {
+              if (this.isAggregateDetail==='true') {
+                  return false
+              } else
+                  return this.$store.state.testRunner.isClientTest
+            }
         },
         methods: {
           openScriptDisplay(name) {
@@ -126,7 +161,7 @@
             '$store.state.base.channelName': 'loadEventSummariesAndReRun'
         },
         props: [
-            'sessionId', 'channelName', 'testCollection', 'testId', 'disableDebugger'
+            'sessionId', 'channelName', 'testCollection', 'testId', 'disableDebugger', 'isAggregateDetail'
         ],
         components: {
             ScriptDetails, ClientDetails, VueMarkdown,

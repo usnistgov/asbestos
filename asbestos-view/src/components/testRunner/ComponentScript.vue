@@ -15,7 +15,6 @@
                             :module-script="moduleScript"
                     >
                     </action-details>
-
                 </div>
                 <div v-else-if="'hasImport' in resultObj && resultObj.hasImport">
                    <test-or-eval-details
@@ -24,6 +23,7 @@
                        :test-collection="$store.state.testRunner.currentTestCollectionName"
                        :test-id="testId.concat('/').concat(resultObj.componentName)"
                        :disable-debugger="'true'"
+                       :is-aggregate-detail="'true'"
                        ></test-or-eval-details>
                 </div>
                 <div v-else class="has-cursor">

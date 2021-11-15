@@ -38,7 +38,7 @@ import ScriptStatus from "./ScriptStatus";
 import ScriptDetails from "./ScriptDetails";
 
     export default {
-        data() {
+    data() {
             return {
                 passClass: null,  // initialized in created()
                 failClass: null,
@@ -52,8 +52,13 @@ import ScriptDetails from "./ScriptDetails";
                 if (this.currentEvent === this.eventId)  { // unselect
                     // this.primaryTestReport = null;
                     this.$store.commit('setCurrentEvent', null)
-                    const route = `/session/${this.sessionId}/channel/${this.channelName}/collection/${this.testCollection}/test/${this.testId}`
-                    this.$router.push(route)
+                    const currentRoutePath = this.$router.currentRoute.path
+                    const routePathToBe = `/session/${this.sessionId}/channel/${this.channelName}/collection/${this.testCollection}/test/${this.testId}`
+                    // console.log('current route: ' + currentRoutePath)
+                    // console.log('route to be: ' + routePathToBe)
+                    if (currentRoutePath !== routePathToBe) {
+                        this.$router.push(routePathToBe)
+                    }
                 } else {
                     this.$store.commit('setCurrentEvent', this.eventId)
                     // If this is a client test then testReport is an array.

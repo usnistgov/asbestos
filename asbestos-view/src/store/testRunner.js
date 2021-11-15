@@ -235,7 +235,9 @@ export const testRunnerStore = {
             const eventReports = parms.reports
             // Partition the modular reports
             // let obj = {}
-            Vue.set(state.clientTestResult, parms.testId, parms.reports)
+            Vue.set(state.clientTestResult, parms.testId, eventReports)
+            /*
+            This is probably not needed since ClientDetails.vue selectEvent method loads module reports when a particular event is selected by the user
             for (let eventId in eventReports) {
                 // let mainReports = []
                for (let testReport of eventReports[eventId]) {
@@ -256,6 +258,7 @@ export const testRunnerStore = {
                }
                // obj[eventId] = mainReports
             }
+             */
         },
         addTestArtifactDependency(state, paramObj) {
             Vue.set(state.ftkTestDependencies, paramObj.testArtifactId, paramObj.depTaIds)
