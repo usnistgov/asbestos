@@ -31,12 +31,12 @@ public class AssertionReport {
     public static void build(TestReport.SetupActionAssertComponent assertReport, String descHdr, String raw, String expanded, boolean result, FixtureComponent fixture, FixtureLabels fixtureLabels) {
         Reporter.assertDescription(assertReport,
                 (descHdr == null ? "" : "**" + descHdr + "**:" )+
-                        "\n**Raw expression** " + raw + "\n**Expanded Expression** " + expanded +
+                        "\n**Raw expression** ``` " + raw + " ```\n**Expanded Expression** " + expanded +
                         "\n**Result** " + result);
     }
 
     public static void build(TestReport.SetupActionAssertComponent assertReport, String expression, FixtureLabels fixtureLabels, FixtureComponent fixture) {
-        Reporter.assertDescription(assertReport, "**Eval** " + expression + " **against** " + fixtureLabels.getReference());
+        Reporter.assertDescription(assertReport, "**Eval** ``` " + expression + " ``` **against** " + fixtureLabels.getReference());
     }
 
     public static void build(AssertionContext ctx, FixtureComponent source, FixtureComponent reference) {
