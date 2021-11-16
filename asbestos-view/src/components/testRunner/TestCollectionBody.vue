@@ -5,7 +5,7 @@
       <div class="divider"></div>
       <div class="divider"></div>
 
-      <button :disabled="running" class="clearLogsButton" @click="doClearLogs()" title="Temporarily clear logs for this browser tab">&#x1f5d1; Clear Logs</button>
+      <button :disabled="running" class="clearLogsButton" @click="doClearLogs()" title="Temporarily clear TestReports for this browser tab">&#x1f5d1; Clear Logs</button>
       <span v-if="!$store.state.testRunner.isClientTest">
             <input type="checkbox" id="doGzip" v-model="gzip">
             <label for="doGzip">GZip?</label>

@@ -57,7 +57,7 @@ export default {
             this.running = false
         },
         async doClearLogs(silent=false) {
-            if (silent || confirm('Clear log files for this Test Collection?')) {
+            if (silent || confirm('Clear all test reports for this Test Collection?')) {
                 await this.$store.commit('clearTestReports')
             }
         },
