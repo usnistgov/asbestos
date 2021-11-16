@@ -139,8 +139,13 @@
         },
         methods: {
           openScriptDisplay(name) {
-              console.log(`Open ${name}`)
-            window.open(`/script/collection/${this.testCollection}/test/${this.testId}/${name}`, "_blank");
+              console.info(`Open ${name}`)
+              const scriptUrl = `/script/collection/${this.testCollection}/test`
+              if (name.includes('/')) {
+                  window.open(`${scriptUrl}/${name}`)
+              } else {
+                  window.open(`${scriptUrl}/${this.testId}/${name}`, "_blank");
+              }
           },
             async loadEventSummariesAndReRun() {
                 await this.$store.dispatch('loadEventSummaries', {session: this.sessionId, channel: this.channelName})
