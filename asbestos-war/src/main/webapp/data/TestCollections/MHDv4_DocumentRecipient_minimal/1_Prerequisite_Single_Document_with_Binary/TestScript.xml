@@ -67,6 +67,10 @@
         <expression value="${patientIdentifier}.system.value + '|' + ${patientIdentifier}.value.value"/>
         <sourceId value="patient_bundle"/>
     </variable>
+    <variable>
+        <name value="isComprehensiveMetadataExpected"/>
+        <defaultValue value="false"/>
+    </variable>
 
     <test>
         <description value="Submit."/>
@@ -85,6 +89,28 @@
                     </extension>
                     <extension url="urn:fixture-out">
                         <valueString value="pdb-response"/>
+                    </extension>
+                </modifierExtension>
+            </operation>
+        </action>
+    </test>
+    <test>
+        <description value="PDB Validations."/>
+        <action>
+            <operation>
+                <description value="Module usage description"/>
+                <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
+                    <extension url="component">
+                        <valueString value="../../Library/AggregateModule/MHDv4BundleEvalAggregateResult.xml"/>
+                    </extension>
+                    <extension url="urn:fixture-in">
+                        <valueString value="pdb-bundle"/>
+                    </extension>
+                    <extension url="urn:fixture-in">
+                        <valueString value="pdb-response"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="isComprehensiveMetadataExpected"/>
                     </extension>
                 </modifierExtension>
             </operation>
