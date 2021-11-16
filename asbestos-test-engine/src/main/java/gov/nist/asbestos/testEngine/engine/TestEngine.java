@@ -1735,7 +1735,7 @@ public class TestEngine  implements TestDef {
                     .setTestId(parent.getTestId())
                     .reportAssertion(
                             parent.getFixtureMgr(),
-                            new VariableMgr(parent.getTestScript(), parent.getFixtureMgr()),
+                            new VariableMgr(parent.getTestScript(), parent.getFixtureMgr()).setExternalVariables(parent.externalVariables),
                             reporter,
                             source,
                             asrt);
@@ -1747,7 +1747,7 @@ public class TestEngine  implements TestDef {
                     .setTestId(testId)
                     .reportAssertion(
                             fixtureMgr,
-                            new VariableMgr(getTestScript(), getFixtureMgr()),
+                            new VariableMgr(getTestScript(), getFixtureMgr()).setExternalVariables(externalVariables),
                             reporter,
                             source,
                             asrt);

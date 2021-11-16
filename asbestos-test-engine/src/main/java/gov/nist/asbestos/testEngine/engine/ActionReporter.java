@@ -191,7 +191,7 @@ class ActionReporter implements TestDef {
                 + "\n"
                 + (imAParent ? "" : request
                 + callGraph(requestLabels, responseLabels)
-        )
+                   )
                 + "\n"
                 + errorDisplay(reporter.getOpReport())
                 + asMarkdown(fixtures, "TestScript Fixtures")
