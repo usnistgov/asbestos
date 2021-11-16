@@ -46,7 +46,7 @@ export default {
         // run all tests in collection
         async doRunAll()  {
             this.running = true
-            this.$store.commit('clearTestReports' )
+            this.doClearLogs(true)
             for (const name of this.scriptNames) {
                 if (this.isClient) { // collection is client or server
                     await this.$store.dispatch('runEval', name)
@@ -55,6 +55,11 @@ export default {
                 }
             }
             this.running = false
+        },
+        async doClearLogs(silent=false) {
+            if (silent || confirm('Clear log files for this Test Collection?')) {
+                await this.$store.commit('clearTestReports')
+            }
         },
         // async loadAChannel(channelId) {
             // let promise =

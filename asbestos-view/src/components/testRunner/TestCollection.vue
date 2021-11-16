@@ -101,6 +101,14 @@ export default {
   border-radius: 25px;
   font-weight: bold;
 }
+.clearLogsButton {
+  background-color: seashell;
+  cursor: pointer;
+  border-radius: 2px;
+  font-weight: normal;
+  margin-left: 8px;
+  margin-right: 8px;
+}
 .button-selected {
   border: 1px solid black;
   background-color: lightgray;

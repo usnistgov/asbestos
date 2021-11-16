@@ -5,17 +5,18 @@
       <div class="divider"></div>
       <div class="divider"></div>
 
+      <button :disabled="running" class="clearLogsButton" @click="doClearLogs()" title="Temporarily clear logs for this browser tab">&#x1f5d1; Clear Logs</button>
       <span v-if="!$store.state.testRunner.isClientTest">
-                <input type="checkbox" id="doGzip" v-model="gzip">
-                <label for="doGzip">GZip?</label>
-                <div class="divider"></div>
-            </span>
+            <input type="checkbox" id="doGzip" v-model="gzip">
+            <label for="doGzip">GZip?</label>
+            <div class="divider"></div>
+      </span>
 
       <button v-bind:class="{'button-selected': json, 'button-not-selected': !json}" @click="doJson()">JSON</button>
       <button v-bind:class="{'button-selected': !json, 'button-not-selected': json}" @click="doXml()">XML</button>
       <div class="divider"></div>
       <div class="divider"></div>
-      <button class="runallbutton" @click="doRunAll()">Run All</button>
+      <button :disabled="running" class="runallbutton" @click="doRunAll()">Run All</button>
     </div>
 
       <h3 class="conformance-tests-header" :title="`There are ${scriptNames.length} tests in this test collection. pass:${passingTestCount}, fail:${failingTestCount}, notRun:${notRunTestCount} `">Tests<test-progress-bar class="testProgressBar" :fail-count="failingTestCount" :pass-count="passingTestCount" :not-run-count="notRunTestCount" :total-count="scriptNames.length"></test-progress-bar></h3>
