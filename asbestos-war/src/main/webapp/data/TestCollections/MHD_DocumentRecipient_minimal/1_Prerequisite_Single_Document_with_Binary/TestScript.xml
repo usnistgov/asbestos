@@ -54,6 +54,35 @@
         <sourceId value="pdb-bundle"/>
     </variable>
     <variable>
+        <name value="manifestMasterIdentifier"/>
+        <expression value="Bundle.entry.select(resource as DocumentManifest).masterIdentifier.value"/>
+        <sourceId value="pdb-bundle"/>
+    </variable>
+    <variable>
+        <name value="pdbManifestStatus"/>
+        <expression value="Bundle.entry.select(resource as DocumentManifest).status.value"/>
+        <sourceId value="pdb-bundle"/>
+    </variable>
+    <variable>
+        <name value="referenceMasterIdentifier"/>
+        <expression value="Bundle.entry.select(resource as DocumentReference).masterIdentifier.value"/>
+        <sourceId value="pdb-bundle"/>
+    </variable>
+    <variable>
+        <name value="pdbReferenceStatus"/>
+        <expression value="Bundle.entry.select(resource as DocumentReference).status.value"/>
+        <sourceId value="pdb-bundle"/>
+    </variable>
+    <variable>
+        <name value="patientIdentifier"/>
+        <defaultValue value="Bundle.entry.select(resource as Patient).identifier[0]"/>
+    </variable>
+    <variable>
+        <name value="patientIdentifierSearchParamValue"/>
+        <expression value="${patientIdentifier}.system.value + '|' + ${patientIdentifier}.value.value"/>
+        <sourceId value="patient_bundle"/>
+    </variable>
+    <variable>
         <name value="isComprehensiveMetadataExpected"/>
         <defaultValue value="false"/>
     </variable>
@@ -125,4 +154,81 @@
             </operation>
         </action>
     </test>
+    <test>
+        <modifierExtension url="urn:noErrors"/>
+        <description value="DocumentResponder base address exists."/>
+        <action>
+            <operation>
+                <description value="Extract the base address from the PDB response location."/>
+                <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
+                    <extension url="component">
+                        <valueString value="../../Library/VerifyDocumentResponderBaseAddress.xml"/>
+                    </extension>
+                    <extension url="urn:fixture-in">
+                        <valueString  value="pdb-response"/>
+                    </extension>
+                    <extension url="urn:variable-out">
+                        <valueString value="docRespBaseAddress"/>
+                    </extension>
+                </modifierExtension>
+            </operation>
+        </action>
+    </test>
+    <test>
+        <description value="Search DocumentManifest."/>
+        <action>
+            <operation>
+                <description value="Verify update to server."/>
+                <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
+                    <extension url="component">
+                        <valueString value="../../Library/SearchDocumentManifest.xml"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString  value="manifestMasterIdentifier"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="pdbManifestStatus"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="patientIdentifierSearchParamValue"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="docRespBaseAddress"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="'1'"/>
+                    </extension>
+                </modifierExtension>
+            </operation>
+        </action>
+    </test>
+    <test>
+        <description value="Search DocumentReference."/>
+        <action>
+            <operation>
+                <description value="Module call: Verify update to server."/>
+                <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
+                    <extension url="component">
+                        <valueString value="../../Library/SearchDocRef.xml"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="referenceMasterIdentifier"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="pdbReferenceStatus"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="patientIdentifierSearchParamValue"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="docRespBaseAddress"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="'1'"/>
+                    </extension>
+                </modifierExtension>
+            </operation>
+        </action>
+    </test>
+
 </TestScript>

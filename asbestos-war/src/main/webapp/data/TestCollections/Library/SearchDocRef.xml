@@ -22,7 +22,7 @@
     <status value="active"/>
 
     <test>
-      <description value="Test persistence on Document Responder."/>
+      <description value="Test persistence to Document Responder."/>
 
         <action>
             <operation>

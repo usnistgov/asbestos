@@ -151,7 +151,7 @@
     </test>
     <test>
         <modifierExtension url="urn:noErrors"/>
-        <description value="Verify DocumentResponder base address."/>
+        <description value="DocumentResponder base address exists."/>
         <action>
             <operation>
                 <description value="Extract the base address from the PDB response location."/>

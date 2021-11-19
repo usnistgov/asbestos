@@ -125,34 +125,31 @@
         </action>
     </test>
     <test>
-      <description value="Verify no updates to server."/>
-      <action>
-        <operation>
-				  <description value="for DocumentManifest."/>
-				  <type>
-					  <code value="search"/>
-				  </type>
-				  <contentType value="json"/>
-				  <url value="${docRespBaseAddress}/DocumentManifest?identifier=${manifestMasterIdentifier}&amp;status=${pdbManifestStatus}&amp;patient.identifier=${patientIdentifierSearchParamValue}"/>
-				  <responseId value="manifest-search"/>
-			  </operation>
-      </action>
-      <action>
-        <assert>
-          <description value="Returns 200."/>
-          <sourceId value="manifest-search"/>
-          <response value="okay"/>
-          <warningOnly value="false"/>
-        </assert>
-      </action>
-      <action>
-        <assert>
-          <description value="No manifest returned."/>
-          <compareToSourceId value="manifest-search"/>
-          <compareToSourceExpression value="Bundle.total = 0"/>
-          <warningOnly value="false"/>
-        </assert>
-      </action>
+        <description value="DocumentManifest was not persisted."/>
+        <action>
+            <operation>
+                <description value="Verify no updates to server."/>
+                <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
+                    <extension url="component">
+                        <valueString value="../../Library/SearchDocumentManifest.xml"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString  value="manifestMasterIdentifier"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="pdbManifestStatus"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="patientIdentifierSearchParamValue"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="docRespBaseAddress"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="'0'"/>
+                    </extension>
+                </modifierExtension>
+            </operation>
+        </action>
     </test>
-
 </TestScript>
