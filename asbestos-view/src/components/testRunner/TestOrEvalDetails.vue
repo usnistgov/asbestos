@@ -40,7 +40,7 @@
                 </div>
             </div>
         </li>
-        <li v-else-if="theScript !== undefined">
+        <li v-else-if="theScript !== undefined && theScript !== null">
             <script-details
                 :script="theScript"
                 :report="theReport"
@@ -49,7 +49,7 @@
             > </script-details>
         </li>
         <li v-else>
-            Please use the Test Collection Refresh image link to reload.
+            <span class="configurationError">Invalid TestScript: TestScript could not be loaded. Please fix the TestScript and reload the Test Collection using the Refresh image link.</span>
         </li>
     </ul>
     </div>

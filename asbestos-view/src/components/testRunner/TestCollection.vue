@@ -104,7 +104,7 @@ export default {
 .clearLogsButton {
   background-color: seashell;
   cursor: pointer;
-  border-radius: 2px;
+  border-radius: 25px;
   font-weight: normal;
   margin-left: 8px;
   margin-right: 8px;
