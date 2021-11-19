@@ -27,11 +27,34 @@
       <sourceId value="pdb-bundle"/>
     </variable>
     <variable>
+        <name value="pdbManifestStatus"/>
+        <expression value="Bundle.entry.select(resource as DocumentManifest).status.value"/>
+        <sourceId value="pdb-bundle"/>
+    </variable>
+    <variable>
       <name value="referenceMasterIdentifier"/>
       <expression value="Bundle.entry.select(resource as DocumentReference).masterIdentifier.value"/>
       <sourceId value="pdb-bundle"/>
     </variable>
-    
+    <variable>
+        <name value="pdbReferenceStatus"/>
+        <expression value="Bundle.entry.select(resource as DocumentReference).status.value"/>
+        <sourceId value="pdb-bundle"/>
+    </variable>
+    <variable>
+        <name value="patientIdentifier"/>
+        <defaultValue value="Bundle.entry.select(resource as Patient).identifier[0]"/>
+    </variable>
+    <variable>
+        <name value="patientIdentifierSearchParamValue"/>
+        <expression value="${patientIdentifier}.system.value + '|' + ${patientIdentifier}.value.value"/>
+        <sourceId value="patient_bundle"/>
+    </variable>
+    <variable>
+        <name value="docRespBaseAddress"/>
+        <defaultValue value="'http://localhost:8877/asbestos/proxy/default__limited'"/>
+    </variable>
+
     <test>
         <description value="Submit."/>
         <action>
@@ -52,19 +75,56 @@
         </action>
     </test>
     <test>
-        <description value="Verify no updates to server."/>
+        <description value="DocumentManifest was not persisted."/>
         <action>
             <operation>
                 <description value="Verify no updates to server."/>
                 <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
                     <extension url="component">
-                        <valueString value="../../Library/NoUpdateOneDoc.xml"/>
+                        <valueString value="../../Library/SearchDocumentManifest.xml"/>
                     </extension>
                     <extension url="urn:variable-in">
                         <valueString  value="manifestMasterIdentifier"/>
                     </extension>
                     <extension url="urn:variable-in">
+                        <valueString value="pdbManifestStatus"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="patientIdentifierSearchParamValue"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="docRespBaseAddress"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="'0'"/>
+                    </extension>
+                </modifierExtension>
+            </operation>
+        </action>
+    </test>
+    <test>
+        <description value="DocumentReference was not persisted."/>
+        <action>
+            <operation>
+                <description value="Module call: Verify no updates to server."/>
+                <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
+                    <extension url="component">
+                        <valueString value="../../Library/SearchDocRef.xml"/>
+                    </extension>
+                    <extension url="urn:variable-in">
                         <valueString value="referenceMasterIdentifier"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="pdbReferenceStatus"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="patientIdentifierSearchParamValue"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="docRespBaseAddress"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="'0'"/>
                     </extension>
                 </modifierExtension>
             </operation>
