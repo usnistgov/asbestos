@@ -1,5 +1,7 @@
 package gov.nist.asbestos.testEngine.engine;
 
+import com.google.errorprone.annotations.Var;
+import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import gov.nist.asbestos.http.headers.Headers;
 import gov.nist.asbestos.http.operations.HttpBase;
 import gov.nist.asbestos.http.operations.HttpPost;
@@ -7,6 +9,10 @@ import gov.nist.asbestos.simapi.tk.stubs.UUIDFactory;
 import gov.nist.asbestos.simapi.validation.ValE;
 import gov.nist.asbestos.testEngine.engine.fixture.FixtureComponent;
 import gov.nist.asbestos.testEngine.engine.fixture.FixtureMgr;
+import org.hl7.fhir.r4.model.BaseResource;
+import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Resource;
+import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.TestReport;
 import org.hl7.fhir.r4.model.TestScript;
 
@@ -181,12 +187,33 @@ public class VariableMgr {
         if (testScriptLocalVariable == null) {
             if (externalVariables.containsKey(variableName)) {
                 return externalVariables.get(variableName);
+            } else {
+            /*
+            Is this an anonymous variable in a TestScript Module reference call?
+             If there is no local variable defined, attempt the value as an evaluable expression assigned to an anonymous variable.
+            If the expression yields an empty string, then it is a genuine error that the variable is an unreferenced variable error.
+            Anonymous variables are only traceable in the TestReport if the Test is Passes, and shown in the Called Module: report section.
+            */
+                TestScript.TestScriptVariableComponent anonymousVariable = new TestScript.TestScriptVariableComponent(new StringType("asbestosAnonVar1"));
+                anonymousVariable.setDefaultValue(variableName);
+                FixtureComponent anonFixture = new FixtureComponent().setFixtureMgr(fixtureMgr).setResourceSimple(new ResourceWrapper(new Bundle()));
+                anonFixture.setId("anon");
+                String anonExpValue = null;
+                try {
+                    anonExpValue = doVariableEval(anonFixture, anonymousVariable.getDefaultValue());
+                } catch (Exception ex) {
+                   reporter.reportError(anonymousVariable.getName() + " Exception: " + ex.toString());
+                }
+                if (anonExpValue != null && !"".equals(anonExpValue)) {
+                   return anonExpValue;
+                } else {
+                    String error = "Variable " + variableName + " is referenced but not defined";
+                    if (errorAsValue)
+                        return error;
+                    reporter.reportError(error);
+                    return null;
+                }
             }
-            String error = "Variable " + variableName + " is referenced but not defined";
-            if (errorAsValue)
-                return error;
-            reporter.reportError(error);
-            return null;
         }
 
         // special feature to generate unique UUIDs
@@ -243,10 +270,7 @@ public class VariableMgr {
         } else if (testScriptLocalVariable.hasExpression()) {
             String expression = testScriptLocalVariable.getExpression();
             // Does this expression yet reference another variable?
-            if (containsVariable(expression)) {
-                expression = updateReference(expression);
-            }
-            return FhirPathEngineBuilder.evalForString(fixture.getResourceResource(), expression);
+            return doVariableEval(fixture, expression);
         } else if (testScriptLocalVariable.hasPath()) {
             String error = "Variable " + variableName + " path not supported";
             if (errorAsValue)
@@ -260,6 +284,13 @@ public class VariableMgr {
             reporter.reportError(error);
             return null;
         }
+    }
+
+    private String doVariableEval(FixtureComponent fixture, String expression) {
+        if (containsVariable(expression)) {
+            expression = updateReference(expression);
+        }
+        return FhirPathEngineBuilder.evalForString(fixture.getResourceResource(), expression);
     }
 
     public VariableMgr setVal(ValE val) {

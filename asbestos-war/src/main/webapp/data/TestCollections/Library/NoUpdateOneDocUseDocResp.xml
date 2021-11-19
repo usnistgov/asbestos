@@ -24,12 +24,6 @@
     <name value="NoUpdateOneDocUseDocResp"/>
     <status value="active"/>
 
-    <variable>
-      <name value="manifestPatientReference"/>
-      <expression value="Bundle.entry.resource.where(is(FHIR.DocumentManifest)).subject.reference"/>
-      <sourceId value="request"/>
-    </variable>
-
     <test>
       <description value="Verify no updates to server."/>
       <action>

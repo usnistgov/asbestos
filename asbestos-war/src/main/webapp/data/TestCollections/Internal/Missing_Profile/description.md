@@ -1,3 +1,4 @@
+**Purpose** Asbestos IT Test only.
 **Submit** a Provide Document Bundle transaction [ITI-65] containing Minimal Metadata to a Document Recipient
 actor.
 

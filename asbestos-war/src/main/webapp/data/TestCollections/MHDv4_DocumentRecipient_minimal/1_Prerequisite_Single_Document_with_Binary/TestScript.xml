@@ -68,6 +68,16 @@
         <sourceId value="patient_bundle"/>
     </variable>
     <variable>
+        <name value="referenceMasterIdentifier"/>
+        <expression value="Bundle.entry.select(resource as DocumentReference).masterIdentifier.value"/>
+        <sourceId value="pdb-bundle"/>
+    </variable>
+    <variable>
+        <name value="pdbReferenceStatus"/>
+        <expression value="Bundle.entry.select(resource as DocumentReference).status.value"/>
+        <sourceId value="pdb-bundle"/>
+    </variable>
+    <variable>
         <name value="isComprehensiveMetadataExpected"/>
         <defaultValue value="false"/>
     </variable>
@@ -161,35 +171,59 @@
     </test>
     <test>
         <modifierExtension url="urn:noErrors"/>
-        <description value="Search List (SubmissionSet) in server."/>
+        <description value="Search List (SubmissionSet)."/>
         <action>
             <operation>
-                <description value="for List (SubmissionSet)."/>
-                <type>
-                    <code value="search"/>
-                </type>
-                <contentType value="json"/>
-                <url value="${docRespBaseAddress}/List?code=submissionset&amp;identifier=${ssListUsualIdentifier}&amp;status=${ssListStatus}&amp;patient.identifier=${patientIdentifierSearchParamValue}"/>
-                <responseId value="ssList-search"/>
+                <description value="Module call: Verify updates to server."/>
+                <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
+                    <extension url="component">
+                        <valueString value="../../Library/MHDv4SearchSsList.xml"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="ssListUsualIdentifier"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="ssListStatus"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="patientIdentifierSearchParamValue"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="docRespBaseAddress"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="'1'"/>
+                    </extension>
+                </modifierExtension>
             </operation>
         </action>
+    </test>
+    <test>
+        <description value="Search DocumentReference."/>
         <action>
-            <assert>
-                <description value="Returns 200."/>
-                <sourceId value="ssList-search"/>
-                <response value="okay"/>
-                <warningOnly value="false"/>
-            </assert>
-        </action>
-        <action>
-            <assert>
-                <description value="List returned."/>
-                <compareToSourceId value="ssList-search"/>
-                <compareToSourceExpression value="Bundle.total = 1"/>
-                <warningOnly value="false"/>
-            </assert>
+            <operation>
+                <description value="Module call: Verify updates to server."/>
+                <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
+                    <extension url="component">
+                        <valueString value="../../Library/SearchDocRef.xml"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="referenceMasterIdentifier"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="pdbReferenceStatus"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="patientIdentifierSearchParamValue"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="docRespBaseAddress"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="'1'"/>
+                    </extension>
+                </modifierExtension>
+            </operation>
         </action>
     </test>
-
-
 </TestScript>
