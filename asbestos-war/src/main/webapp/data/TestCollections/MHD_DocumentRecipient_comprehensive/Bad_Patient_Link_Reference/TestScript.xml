@@ -125,19 +125,41 @@
         </action>
     </test>
     <test>
-        <description value="Verify no updates to server."/>
+        <description value="DocumentManifest was not persisted."/>
         <action>
             <operation>
                 <description value="Verify no updates to server."/>
                 <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
                     <extension url="component">
-                        <valueString value="../../Library/NoUpdateOneDocUseDocResp.xml"/>
+                        <valueString value="../../Library/SearchDocumentManifest.xml"/>
                     </extension>
                     <extension url="urn:variable-in">
                         <valueString  value="manifestMasterIdentifier"/>
                     </extension>
                     <extension url="urn:variable-in">
                         <valueString value="pdbManifestStatus"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="patientIdentifierSearchParamValue"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="docRespBaseAddress"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="'0'"/>
+                    </extension>
+                </modifierExtension>
+            </operation>
+        </action>
+    </test>
+    <test>
+        <description value="DocumentReference was not persisted."/>
+        <action>
+            <operation>
+                <description value="Module call: Verify no updates to server."/>
+                <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
+                    <extension url="component">
+                        <valueString value="../../Library/SearchDocRef.xml"/>
                     </extension>
                     <extension url="urn:variable-in">
                         <valueString value="referenceMasterIdentifier"/>
@@ -151,10 +173,14 @@
                     <extension url="urn:variable-in">
                         <valueString value="docRespBaseAddress"/>
                     </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="'0'"/>
+                    </extension>
                 </modifierExtension>
             </operation>
         </action>
     </test>
+
 
 
 </TestScript>
