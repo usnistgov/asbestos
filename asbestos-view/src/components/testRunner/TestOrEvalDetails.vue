@@ -8,12 +8,15 @@
         <div class="vdivider"></div>
         <div class="vdivider"></div>
         <div class="vdivider"></div>
-          <span class="bold" title="Displays the TestScripts in order of execution. Imported test module components and aggregate module are all flattened (module nesting is deconstructed into a single-file structure). The end-result TestScript is basically conformant to the standard FHIR TestScript."><span class="scriptInfoIcon">&#x2139;</span>Script:&nbsp;</span>
+          <span class="bold" title="Displays the TestScripts in order of execution. Imported test module components and aggregate module are all flattened (module nesting is deconstructed into a single-file structure). The end-result TestScript is basically conformant to the standard FHIR TestScript."><span class="scriptInfoIcon">&#x2139;</span>Script(s):&nbsp;</span>
         <span class="script-panel selectable underline"  @click="openScriptDisplay(testId)">&#x1F5D0;&nbsp;{{ testId }}</span>
+          <span v-if="Object.getOwnPropertyNames(testModules).length > 0" @click="isScriptsClosed=!isScriptsClosed" :title="'Click to ' + (isScriptsClosed?'open':'hide') + ' all script modules'">...</span>
+          <span :class="[isScriptsClosed?'scriptsClosed':'scriptsOpen']">
         <span v-for="(name, namei) in Object.getOwnPropertyNames(testModules)"
              :key="'TestModule' + namei">
            <span class="script-panel selectable underline" @click="openScriptDisplay(name)">&#x1F5CF;&nbsp;{{ name }}</span>
         </span>
+          </span>
       </div>
 
       <ul class="noTopMargin">
@@ -60,6 +63,11 @@
     import ClientDetails from './ClientDetails'
     import VueMarkdown from "vue-markdown";
     export default {
+        data() {
+              return {
+               isScriptsClosed: true
+            }
+        },
         computed: {
           theScript() {
               if (this.testId.includes('/')) {
@@ -190,5 +198,15 @@
     .scriptInfoIcon {
         margin: 4px;
         border: lightgray 1px solid;
+    }
+    .scriptsClosed {
+        display: none;
+        visibility: hidden;
+        cursor: pointer;
+    }
+    .scriptsOpen {
+        display: block;
+        visibility: visible;
+        cursor: pointer;
     }
 </style>
