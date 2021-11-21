@@ -5,6 +5,9 @@ export default {
             // channelObj: this.theChannelObj,  // channel object
             testOpen: false,
             evalCount: 30,
+            testTimerBeginTime : new Date(),
+            testTimer: null,
+            testTimerElapsedMilliSeconds: 0,
         }
     },
     methods: {
@@ -29,10 +32,12 @@ export default {
             if (!testName)
                 return
             this.running = true
+            this.beginTestTime()
             this.$store.commit('setCurrentTest', null)
             await this.$store.dispatch('runTest', testName)
             this.$store.commit('setCurrentTest', testName)
             this.running = false
+            this.endTestTime()
             const currentRoutePath = this.$router.currentRoute.path
             const testRoutePathToBe = `${testRoutePath}/${testName}`
             if (currentRoutePath !== testRoutePathToBe) {
@@ -46,6 +51,7 @@ export default {
         // run all tests in collection
         async doRunAll()  {
             this.running = true
+            this.beginTestTime()
             this.doClearLogs(true)
             for (const name of this.scriptNames) {
                 if (this.isClient) { // collection is client or server
@@ -55,6 +61,7 @@ export default {
                 }
             }
             this.running = false
+            this.endTestTime()
         },
         async doClearLogs(silent=false) {
             if (silent || confirm('Clear all test reports for this Test Collection?')) {
@@ -102,6 +109,25 @@ export default {
         },
         doXml() {
             this.$store.commit('setUseJson', false)
+        },
+        beginTestTime() {
+            this.testTimerBeginTime = new Date()
+            this.calcTestTime()
+            if (this.testTimer === null) {
+                this.testTimer = setInterval(this.calcTestTime, 100);
+            } else {
+                console.error('testTimer is already active, beginTestTime is cancelled.')
+            }
+        },
+        calcTestTime() {
+            this.testTimerElapsedMilliSeconds = new Date().getTime() - this.testTimerBeginTime.getTime()
+        },
+        endTestTime() {
+            if (this.testTimer !== null) {
+                clearInterval(this.testTimer)
+                this.testTimer = null
+                this.calcTestTime()
+            }
         },
     },
     computed: {
@@ -166,6 +192,10 @@ export default {
         },
         fullChannelId() {
             return `${this.sessionId}__${this.channelName}`
+        },
+        elapsedTestTime() {
+            const s = this.testTimerElapsedMilliSeconds / 1000
+            return Number(s).toFixed(1);
         },
     }
 }

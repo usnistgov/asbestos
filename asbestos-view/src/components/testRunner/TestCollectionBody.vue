@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="runallgroup">
-      <span v-if="running" class="running">Running</span>
+      <span v-if="running" class="running">Running</span><span v-if="running" class="fixedWidthFont">{{elapsedTestTime}}s</span>
       <div class="divider"></div>
       <div class="divider"></div>
 
@@ -19,7 +19,7 @@
       <button :disabled="running" class="runallbutton" @click="doRunAll()">Run All</button>
     </div>
 
-      <h3 class="conformance-tests-header" :title="`There are ${scriptNames.length} tests in this test collection. pass:${passingTestCount}, fail:${failingTestCount}, notRun:${notRunTestCount} `">Tests<test-progress-bar class="testProgressBar" :fail-count="failingTestCount" :pass-count="passingTestCount" :not-run-count="notRunTestCount" :total-count="scriptNames.length"></test-progress-bar></h3>
+      <h3 class="conformance-tests-header" :title="`There are ${scriptNames.length} tests in this test collection, pass:${passingTestCount}, fail:${failingTestCount}, notRun:${notRunTestCount}. ${elapsedTestTime > 0 ? 'Previous test(s) took ' + elapsedTestTime + ' seconds to run.':''}`">Tests<test-progress-bar class="testProgressBar" :fail-count="failingTestCount" :pass-count="passingTestCount" :not-run-count="notRunTestCount" :total-count="scriptNames.length"></test-progress-bar></h3>
       <div>
       <div class="testBarMargin" v-for="(name, i) in scriptNames"
            :key="name + i" >
@@ -113,7 +113,7 @@
               If the dependency feature check is required, should create a new Vue component to use in both the Debug-Supported mode and non-Debug mode.  -->
                           <button @click.stop="doRun(name, testRoutePath)" class="runallbutton">Run</button>
           </span>
-          <span v-if="! isWaitingForBreakpoint && ! $store.state.testRunner.isClientTest"> --  {{ testTime(name) }}</span>
+          <span v-if="! isWaitingForBreakpoint && ! $store.state.testRunner.isClientTest" title="Test begin time."> --  {{ testTime(name) }}</span>
         </div>
         <debug-assertion-eval-modal v-if="isDebugFeatureEnabled && isEvaluableAction(i)" :show="$store.state.debugAssertionEval.showEvalModalDialog" @close="closeModal()" @resume="doDebug(name)"></debug-assertion-eval-modal>
         <router-view v-if="selected === name"></router-view>  <!--  opens TestOrEvalDetails   -->
@@ -220,8 +220,6 @@ export default {
     notRunTestCount() {
           return (this.scriptNames.filter(e => this.status[e]==='not-run')).length
       },
-
-
   },
   created() {
       if (this.$store.state.base.ftkChannelLoaded) {
@@ -305,4 +303,13 @@ export default {
   text-align: center;
   margin-left: 4px;
 }
+    .fixedWidthFont {
+        font-family: monospace;
+        font-weight: lighter;
+        font-size: x-small;
+        border-style: double;
+        margin-left: 2px;
+        horiz-align: center;
+        vertical-align: middle;
+    }
 </style>
