@@ -10,7 +10,7 @@
         <div class="vdivider"></div>
           <span class="bold" title="Displays the TestScripts in order of execution. Imported test module components and aggregate module are all flattened (module nesting is deconstructed into a single-file structure). The end-result TestScript is basically conformant to the standard FHIR TestScript."><span class="scriptInfoIcon">&#x2139;</span>Script(s):&nbsp;</span>
         <span class="script-panel selectable underline"  @click="openScriptDisplay(testId)">&#x1F5D0;&nbsp;{{ testId }}</span>
-          <span v-if="Object.getOwnPropertyNames(testModules).length > 0" @click="isScriptsClosed=!isScriptsClosed" :title="'Click to ' + (isScriptsClosed?'open':'hide') + ' all script modules'">...</span>
+          <span v-if="Object.getOwnPropertyNames(testModules).length > 0" @click="isScriptsClosed=!isScriptsClosed" :title="'Click to ' + (isScriptsClosed?'open':'hide') + ' all script modules'" class="moreScriptsLink">...</span>
           <span :class="[isScriptsClosed?'scriptsClosed':'scriptsOpen']">
         <span v-for="(name, namei) in Object.getOwnPropertyNames(testModules)"
              :key="'TestModule' + namei">
@@ -149,11 +149,7 @@
           openScriptDisplay(name) {
               console.info(`Open ${name}`)
               const scriptUrl = `/script/collection/${this.testCollection}/test`
-              if (name.includes('/')) {
-                  window.open(`${scriptUrl}/${name}`)
-              } else {
-                  window.open(`${scriptUrl}/${this.testId}/${name}`, "_blank");
-              }
+              window.open(`${scriptUrl}/${this.testId}/${name}`, "_blank");
           },
             async loadEventSummariesAndReRun() {
                 await this.$store.dispatch('loadEventSummaries', {session: this.sessionId, channel: this.channelName})
@@ -202,11 +198,12 @@
     .scriptsClosed {
         display: none;
         visibility: hidden;
-        cursor: pointer;
     }
     .scriptsOpen {
         display: block;
         visibility: visible;
+    }
+    .moreScriptsLink {
         cursor: pointer;
     }
 </style>
