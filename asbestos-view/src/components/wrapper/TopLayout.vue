@@ -182,7 +182,10 @@
   text-indent: 50px;
 }
 .indent2 {
-  text-indent: 100px;
+  text-indent: 0px;
+}
+.indent2MdTable {
+    text-indent: 50px;
 }
     .system-error {
         font-weight: bold;
@@ -293,5 +296,11 @@
     .dimOpacity {
        opacity: .25;
     }
+
+    pre {
+         white-space: pre-wrap;
+         word-wrap: break-word;
+    }
+
 
 </style>

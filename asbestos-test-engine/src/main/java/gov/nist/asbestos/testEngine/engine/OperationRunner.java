@@ -252,7 +252,7 @@ public class OperationRunner {
                         .setVal(val)
                         .setFhirClient(fhirClient)
                         .setSut(sut)
-                        .setType(type + ".search")
+                        .setType(String.format("%s.%s.search", type , code ))
                         .setTestReport(testReport);
                 setupActionSearch
                         .setVal(val)
@@ -270,12 +270,56 @@ public class OperationRunner {
                         .concat("/")
                         .concat(testEngine.getChannelId());
                 setupActionSearch.setInternalBasePath(internalBasePath);
+                /*
+                TODO
+               Remove the TestScript variable and use the test's Test.properties DependsOn property instead
+               TestScript.xml variable:
+                 <variable>
+                <name value="dependsOnTestId"/>
+                <defaultValue value="MHD_DocumentRecipient_minimal/1_Prerequisite_Single_Document_with_Binary"/>
+                </variable>
+                Test.properties:
+                DependsOn=1_Prerequisite_Single_Document_with_Binary
+                 */
                 ResourceWrapper responseWrapper = setupActionSearch.run(op, operationReport);
                 if (responseWrapper != null) {
                     FixtureLabels labels = new FixtureLabels(new ActionReporter(), op, null)
                             .referenceWrapper(responseWrapper);
                     Reporter.operationDescription(operationReport, "**Request/Response** " + labels.getReference());
                 }
+        } else if ("getFixtureString".equals(code)) {
+            SetupActionSearch setupActionSearch = new SetupActionSearch(actionReference, fixtureMgr, isFollowedByAssert)
+                    .setVal(val)
+                    .setFhirClient(fhirClient)
+                    .setSut(sut)
+                    .setType(String.format("%s.%s.search", type , code))
+                    .setTestReport(testReport);
+            setupActionSearch
+                    .setVal(val)
+                    .setVariableMgr(
+                            new VariableMgr(testScript, fixtureMgr)
+                                    .setExternalVariables(externalVariables)
+                                    .setVal(val)
+                                    .setOpReport(operationReport));
+            setupActionSearch.setTestEngine(testEngine);
+            setupActionSearch.setTestCollectionId(testCollectionId);
+            setupActionSearch.setTestId(testId);
+            String internalBasePath = ServiceProperties.getInstance().getPropertyOrStop(ServicePropertiesEnum.FHIR_TOOLKIT_BASE)
+                    .concat("/engine/")
+                    .concat(code)
+                    .concat("/")
+                    .concat(testEngine.getChannelId())
+                    .concat("/")
+                    .concat(testCollectionId)
+                    .concat("/")
+                    .concat(testId);
+            setupActionSearch.setInternalBasePath(internalBasePath);
+            ResourceWrapper responseWrapper = setupActionSearch.run(op, operationReport);
+            if (responseWrapper != null) {
+                FixtureLabels labels = new FixtureLabels(new ActionReporter(), op, null)
+                        .referenceWrapper(responseWrapper);
+                Reporter.operationDescription(operationReport, "**Request/Response** " + labels.getReference());
+            }
         } else {
             reporter.reportError("do not understand code.code of " + code);
         }

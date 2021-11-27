@@ -7,14 +7,11 @@
     </div>
 
     <div class="vdivider"> </div>
-
-    <vue-json-pretty :data="source"></vue-json-pretty>
+    <pre>{{cleanFx()}}</pre>
   </div>
 </template>
 
 <script>
-
-import VueJsonPretty from 'vue-json-pretty'
 
 export default {
   computed: {
@@ -28,6 +25,9 @@ export default {
     }
   },
   methods: {
+    cleanFx() {
+      return JSON.stringify( this.source, null, 2)
+    },
     async loadTestScript() {
       if (!this.$store.state.testRunner.testScripts.hasOwnProperty(this.testId)) {
         //console.log(`testScript ${this.testId} needs loading`)
@@ -45,12 +45,10 @@ export default {
       'testCollection', 'testId', 'scriptId', 'moduleId'
   ],
   components: {
-    VueJsonPretty
   },
   name: "DisplayTestSource"
 }
 </script>
 
 <style scoped>
-
 </style>

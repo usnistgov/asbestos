@@ -90,6 +90,8 @@ class ActionReporter implements TestDef {
 
             FixtureComponent fixtureComponent = fixtureMgr.get(key);
             HttpBase httpBase = fixtureComponent.getHttpBase();  // http operation of fixtureComponent.wrapper
+            try {
+
             ResourceWrapper wrapper1 = fixtureComponent.getResourceWrapper();
             String refStrRaw = null;
 
@@ -113,6 +115,9 @@ class ActionReporter implements TestDef {
                     responseLabels = labels;
                     responseLabels.referenceLabel = "Response";
                 }
+            }
+            } catch (Exception ex) {
+               log.error("ActionReporter report Exception: " + ex.toString());
             }
         }
 
@@ -340,7 +345,7 @@ class ActionReporter implements TestDef {
 
         //buf.append("<div class=\"indent2\">");
         buf.append("\n**").append(title).append("**\n");
-        buf.append("<table class=\"indent2\">\n");
+        buf.append("<table class=\"indent2MdTable\">\n");
         buf.append("\n<tr>");
         buf.append("\n<th>").append(header1).append("</th>");
         buf.append("\n<th>").append(header2).append("</th>");

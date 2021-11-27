@@ -15,7 +15,6 @@ import org.hl7.fhir.r4.model.TestReport;
 
 import java.io.IOException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
@@ -26,7 +25,8 @@ import java.util.Map;
 // 4 - channelId
 // 5 - testCollectionId
 // 6 - testId
-// Example: https://fhirtoolkit.test:9743/asbestos/engine/eventPart/default__limited/MHD_DocumentRecipient_minimal/Missing_DocumentManifest?module=SendPDB&testIndex=0&actionIndex=0&eventPartLocation=operation.detail&targetTaskIndex=0&return=responseBody
+// Example: https://fhirtoolkit.test:9743/asbestos/engine/eventPart/default__limited/MHD_DocumentRecipient_minimal/1_Prerequisite_Single_Document_Submit_with_Binary
+// ?module=SendPDB&testIndex=0&actionIndex=0&eventPartLocation=operation.detail&targetTaskIndex=0&return=responseBody
 //
 
 public class GetEventPartRequest {
@@ -86,6 +86,11 @@ public class GetEventPartRequest {
                 int actionIndex = Integer.parseInt(paramsMap.get("actionIndex"));
                 TestReport.TestActionComponent actionComponent =  testComponent.getAction().get(actionIndex);
                 String eventPartLocation = paramsMap.get("eventPartLocation");
+                if (eventPartLocation == null) {
+                    String message = "eventPartLocation parameter cannot be null.";
+                    unexpectedMessage(message);
+                    return;
+                }
                 String[] eventParts = eventPartLocation.split("\\.");
                 if (eventParts.length == 2) {
                    if ("operation".equals(eventParts[0])) {

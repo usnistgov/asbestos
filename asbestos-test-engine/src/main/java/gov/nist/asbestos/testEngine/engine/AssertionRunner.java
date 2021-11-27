@@ -188,64 +188,68 @@ public class AssertionRunner implements AssertionContext {
         if (source == null)
             source = getCompareToSourceIfAvailable(as);
 
-        // add context to report
-        testEngine.reportAssertion(new Reporter(val, assertReport, "", ""), as, source);
+        try {
+            label = as.getLabel();
+            type = typePrefix + ".assert";
 
-        label = as.getLabel();
-        type = typePrefix + ".assert";
-
-        if (as.hasWarningOnly())
-            warningOnly = as.getWarningOnly();
-        else {
-            Reporter.reportError(this, "warningOnly is required but missing");
-            return false;
-        }
-
-        if (as.hasCompareToSourcePath() && as.hasCompareToSourceExpression()) {
-            Reporter.reportError(this, "has both compareToSourcePath and compareToSourceExpression");
-            return false;
-        }
-
-        if (as.hasCompareToSourceId()) {
-            if (!as.hasCompareToSourceExpression() && !as.hasCompareToSourcePath()) {
-                Reporter.reportError(this, "has compareToSourceId and nether compareToSourcePath nor compareToSourceExpression are defined");
+            if (as.hasWarningOnly())
+                warningOnly = as.getWarningOnly();
+            else {
+                Reporter.reportError(this, "warningOnly is required but missing");
                 return false;
             }
-        }
+
+            if (as.hasCompareToSourcePath() && as.hasCompareToSourceExpression()) {
+                Reporter.reportError(this, "has both compareToSourcePath and compareToSourceExpression");
+                return false;
+            }
+
+            if (as.hasCompareToSourceId()) {
+                if (!as.hasCompareToSourceExpression() && !as.hasCompareToSourcePath()) {
+                    Reporter.reportError(this, "has compareToSourceId and nether compareToSourcePath nor compareToSourceExpression are defined");
+                    return false;
+                }
+            }
 
 //        INSTRUCTIONS
 
-        if (as.hasCompareToSourceId() && as.hasCompareToSourceExpression())
-            return SourceIdSourceExpressionAssertion.run(this);
+            if (as.hasCompareToSourceId() && as.hasCompareToSourceExpression())
+                return SourceIdSourceExpressionAssertion.run(this);
 
-        if (as.hasMinimumId()) return MinimumIdAssertion.run(this);
+            if (as.hasMinimumId()) return MinimumIdAssertion.run(this);
 
-        // resource type pattern
-        // resource type specified sourceId or lastOperation must have returned that resource type
-        if (as.hasResource()) return ResourceAssertion.run(this);
+            // resource type pattern
+            // resource type specified sourceId or lastOperation must have returned that resource type
+            if (as.hasResource()) return ResourceAssertion.run(this);
 
-        // contentType pattern
-        // compares against sourceId or return of lastOperation
-        if (as.hasContentType()) return ContentTypeAssertion.run(this);
+            // contentType pattern
+            // compares against sourceId or return of lastOperation
+            if (as.hasContentType()) return ContentTypeAssertion.run(this);
 
-        // headerField/value comparison pattern
-        // compares against sourceId or return of lastOperation
-        if (as.hasHeaderField() && as.hasValue()) return HeaderFieldAssertion.run(this);
+            // headerField/value comparison pattern
+            // compares against sourceId or return of lastOperation
+            if (as.hasHeaderField() && as.hasValue()) return HeaderFieldAssertion.run(this);
 
-        // response pattern
-        if (as.hasResponse()) return ResponseAssertion.run(this);
+            // response pattern
+            if (as.hasResponse()) return ResponseAssertion.run(this);
 
-        // responseCodePattern
-        if (as.hasResponseCode()) return ResponseCodeAssertion.run(this);
+            // responseCodePattern
+            if (as.hasResponseCode()) return ResponseCodeAssertion.run(this);
 
-        // expression and value pattern
-        if (as.hasExpression() && as.hasValue()) return ExpressionValueAssertion.run(this);
+            // expression and value pattern
+            if (as.hasExpression() && as.hasValue()) return ExpressionValueAssertion.run(this);
 
-        // expression
-        if (as.hasExpression()) return ExpressionAssertion.run(this);
+            // expression
+            if (as.hasExpression()) return ExpressionAssertion.run(this);
 
-        if (as.hasRequestMethod()) return RequestMethodAssertion.run(this);
+            if (as.hasRequestMethod()) return RequestMethodAssertion.run(this);
 
+        } catch (Exception ex) {
+
+        } finally {
+            // add context to report
+            testEngine.reportAssertion(new Reporter(val, assertReport, "", ""), as, source);
+        }
         Reporter.reportError(this, "No assertion.");
         return false;
     }

@@ -1,11 +1,4 @@
 <TestScript xmlns="http://hl7.org/fhir">
-    <fixture id="pdb-bundle">
-        <autocreate value="false"/>
-        <autodelete value="false"/>
-        <resource>
-            <reference value="Bundle/pdb.xml"/>
-        </resource>
-    </fixture>
     <fixture id="submittedDocRef">
         <autocreate value="false"/>
         <autodelete value="false"/>
@@ -28,6 +21,18 @@
             <reference value="Patient/Alex_Alder.json"/>
         </resource>
     </fixture>
+    <fixture id="submissionSet">
+        <autocreate value="false"/>
+        <autodelete value="false"/>
+        <resource>
+            <reference value="Bundle/SubmissionSet.xml"/>
+        </resource>
+    </fixture>
+    <variable>
+        <name value="theSubmissionSet"/>
+        <expression value="DocumentManifest"/>
+        <sourceId value="submissionSet"/>
+    </variable>
     <variable>
         <name value="DocRefUrl"/>
         <expression value="Bundle.entry[0].response.location"/>
@@ -87,7 +92,30 @@
         <defaultValue value="false"/>
     </variable>
 
+    <setup>
+        <modifierExtension url="urn:noErrors"/>
+        <action>
+            <operation>
+                <description value="Get fixture string"/>
+                <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
+                    <extension url="component">
+                        <valueString value="../../Library/GetFixtureString.xml"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="'3'"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="'?fixtureId=pdb'"/>
+                    </extension>
+                    <extension url="urn:fixture-out">
+                        <valueString value="pdb-bundle"/>
+                    </extension>
+                </modifierExtension>
+            </operation>
+        </action>
+    </setup>
     <test>
+        <modifierExtension url="urn:noErrors"/>
         <description value="Submit."/>
         <action>
             <operation>
@@ -98,6 +126,9 @@
                     </extension>
                     <extension url="urn:fixture-in">
                         <valueString  value="pdb-bundle"/>
+                    </extension>
+                    <extension url="urn:variable-in-no-translation">
+                        <valueString value="theSubmissionSet"/>
                     </extension>
                     <extension url="urn:variable-in-no-translation">
                         <valueString value="patientResourceId"/>

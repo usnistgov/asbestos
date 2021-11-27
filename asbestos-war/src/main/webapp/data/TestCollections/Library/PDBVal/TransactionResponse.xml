@@ -21,7 +21,7 @@
     <variable>
         <name value="responseEntryCount"/>
         <expression value="Bundle.entry.count()"/>
-        <sourceId value="request"/>
+        <sourceId value="response"/>
     </variable>
 
 

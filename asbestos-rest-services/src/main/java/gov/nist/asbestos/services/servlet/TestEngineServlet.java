@@ -51,6 +51,7 @@ public class TestEngineServlet extends HttpServlet {
             else if (HapiHeartbeat.isRequest(request)) new HapiHeartbeat(request).run();
             else if (XdsHeartbeat.isRequest(request)) new XdsHeartbeat(request).run();
             else if (GetEventPartRequest.isRequest(request)) new GetEventPartRequest(request).run();
+            else if (GetFixtureStringRequest.isRequest(request)) new GetFixtureStringRequest(request).run();
             else request.badRequest();
 
         } catch (Throwable e) {

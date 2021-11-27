@@ -2,24 +2,23 @@
     <id value="xds"/>
     <meta>
         <lastUpdated value="2013-07-01T13:11:33Z"/>
-        @{BundleMetaProfileElement}
+        <profile value="http://profiles.ihe.net/ITI/MHD/StructureDefinition/IHE.MHD.Minimal.ProvideBundle"/>
     </meta>
     <type value="transaction"/>
-
     <entry>
-        <fullUrl value="urn:uuid:3fdc72f4-a11d-4a9d-9260-a9f745779e1e"/>
+        <fullUrl value="urn:uuid:3fdc72f4-a11d-4a9d-9260-a9f745779e00"/>
         <resource>
-            @{SubmissionSetResourceElement}
+
         </resource>
         <request>
             <method value="POST"/>
+            <url value="List"/>
         </request>
     </entry>
     <entry>
-        <fullUrl value="http://localhost:9556/svc/fhir/Binary/1e404af3-077f-4bee-b7a6-a9be97e1ce32"/>
+        <fullUrl value="urn:uuid:3fdc72f4-a11d-4a9d-9260-a9f745779e03"/>
         <resource>
             <Binary>
-                <id value="1e404af3-077f-4bee-b7a6-a9be97e1ce32"/>
                 <meta>
                     <lastUpdated value="2013-07-01T13:11:33Z"/>
                 </meta>
@@ -29,6 +28,7 @@
         </resource>
         <request>
             <method value="POST"/>
+            <url value="urn:uuid:3fdc72f4-a11d-4a9d-9260-a9f745779e03"/>
         </request>
     </entry>
 </Bundle>

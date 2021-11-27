@@ -1,11 +1,4 @@
 <TestScript xmlns="http://hl7.org/fhir">
-    <fixture id="pdb-bundle">
-        <autocreate value="false"/>
-        <autodelete value="false"/>
-        <resource>
-            <reference value="Bundle/pdb.xml"/>
-        </resource>
-    </fixture>
     <fixture id="patient_bundle">
         <!--
            This patient comes out of the test Patient cache
@@ -59,8 +52,28 @@
         <defaultValue value="false"/>
     </variable>
 
+
     <setup>
         <modifierExtension url="urn:noErrors"/>
+        <action>
+            <operation>
+                <description value="Get fixture string"/>
+                <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
+                    <extension url="component">
+                        <valueString value="../../Library/GetFixtureString.xml"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="'2'"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="'?fixtureId=pdb'"/>
+                    </extension>
+                    <extension url="urn:fixture-out">
+                        <valueString value="pdb-bundle"/>
+                    </extension>
+                </modifierExtension>
+            </operation>
+        </action>
         <action>
             <operation>
                 <description value="Get the document responder base address from a prerequisite PDB submission.

@@ -61,7 +61,7 @@
         </action>
         <action>
             <assert>
-                <description value="Status was 200."/>
+                <description value="Status is 200."/>
                 <sourceId value="pdb-response"/>
                 <response value="okay"/>
                 <warningOnly value="false"/>

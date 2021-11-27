@@ -10,46 +10,31 @@
 
     <div v-if="displayTestScript">
     <div class="container">
-      <div v-if="callingScript">
-        <div class="script-header">
-          Calling Script
-        </div>
-        <div class="script">
-          <vue-json-pretty :data="callingScript"></vue-json-pretty>
-        </div>
-      </div>
-      <div v-if="moduleScript">
-        <div class="script-header">
+      <div v-if="callingScript" class="script-header">Calling Script</div>
+      <div v-if="callingScript" class="script"><pre>{{JSON.stringify(callingScript, null, 2)}}</pre></div>
+      <div v-if="moduleScript" class="module-script-header">
           Module Script Header
-        </div>
-        <div class="script">
-          <vue-json-pretty :data="moduleScriptHeader"></vue-json-pretty>
-        </div>
       </div>
-        <div class="script-header">
-          <div v-if="callingScript">
+      <div v-if="moduleScript" class="module-script"><pre>{{JSON.stringify(moduleScriptHeader, null, 2)}}</pre></div>
+      <div class="script-header2">
+          <span v-if="callingScript">
             Module Script
-          </div>
-          <div v-else>
+          </span>
+          <span v-else>
             Script
-          </div>
-        </div>
-        <div class="report-header">
+          </span>
+      </div>
+       <div class="report-header2">
             Report
         </div>
-        <div class="script">
-            <vue-json-pretty :data="script"></vue-json-pretty>
-        </div>
-        <div class="report">
-            <vue-json-pretty :data="filteredReport"></vue-json-pretty>
-        </div>
+        <div class="script2"><pre>{{JSON.stringify( script, null, 2) }}</pre></div>
+        <div class="report2"><pre>{{JSON.stringify( filteredReport, null, 2) }}</pre></div>
     </div>
   </div>
   </div>
 </template>
 
 <script>
-    import VueJsonPretty from 'vue-json-pretty'
     export default {
       data() {
           return {
@@ -88,7 +73,6 @@
             'script', 'report', 'callingScript', 'moduleScript'
         ],
         components: {
-            VueJsonPretty
         },
         name: "ScriptDisplay"
     }
@@ -97,25 +81,57 @@
 <style scoped>
     .container {
         display: grid;
-        grid-template-columns: 50% 50%;
+        grid-template-columns: auto auto;
+      justify-items: start;
+      justify-content: start;
+      margin-top: 10px;
+        margin-left: 10px;
+      margin-bottom: 10px;
+        text-indent: 0px;
     }
     .script-header {
-        grid-column: 1;
-        grid-row: 1;
+        grid-column: 1 / span 1;
+        grid-row: 1 / span 1;
         font-weight: bold;
     }
-    .report-header {
-        grid-column: 2;
-        grid-row: 1;
+    .module-script-header {
+        grid-column: 2 / span 1;
+        grid-row: 1 / span 1;
         font-weight: bold;
+    }
+    .script-header2 {
+        grid-column: 1 / span 1;
+        grid-row: 3 / span 1;
+        font-weight: bold;
+    }
+
+
+    .report-header2 {
+        grid-column: 2 / span 1;
+        grid-row: 3 / span 1;
+        font-weight: bold;
+    }
+    .script2 {
+        grid-column: 1;
+        grid-row: 4;
+    }
+    .report2 {
+        grid-column: 2;
+        grid-row: 4;
     }
     .script {
-        grid-column: 1;
+        grid-column: 1 / span 1;
         grid-row: 2;
+        word-wrap: break-word;
+      font-weight: normal;
+      border-color: black;
+      border-style: solid;
+      border: 1px;
     }
-    .report {
-        grid-column: 2;
+    .module-script {
+        grid-column: 2 / span 1;
         grid-row: 2;
+        word-wrap: break-word;
     }
 
 </style>

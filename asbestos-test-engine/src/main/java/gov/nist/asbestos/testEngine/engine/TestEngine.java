@@ -262,6 +262,7 @@ public class TestEngine  implements TestDef {
         if (t.getMessage() == null || t.getMessage().endsWith("Exception"))
             msg = ExceptionUtils.getStackTrace(t);
         reportTerminalFailure(msg);
+        log.error(msg);
     }
 
     private void reportTerminalFailure(String msg) {
@@ -271,7 +272,6 @@ public class TestEngine  implements TestDef {
 
         Extension extension = new Extension().setUrl(ExtensionDef.failure).setValue(new StringType(msg));
         getTestReport().getExtension().add(extension);
-        log.error(msg);
 
 //        TestReport.TestReportSetupComponent setup = testReport.getSetup();
 //        TestReport.SetupActionComponent comp = setup.addAction();
@@ -376,11 +376,14 @@ public class TestEngine  implements TestDef {
     private void doLintTestReport() {
         List<TestScript.SetupActionComponent> scriptSetups = testScript.getSetup().getAction();
         List<TestReport.SetupActionComponent> reportSetups = testReport.getSetup().getAction();
-        if (scriptSetups.size() != reportSetups.size())
-            reportTerminalFailure("TestEngine internal Error: Script Setup had " +
+        if (scriptSetups.size() != reportSetups.size()) {
+            String msg = "TestEngine internal Error: Script Setup had " +
                     scriptSetups.size() +
                     " elements but Report had " +
-                    reportSetups.size());
+                    reportSetups.size();
+            reportTerminalFailure(msg);
+            log.error(msg);
+        }
 
         for (int i=0; i< testScript.getTest().size(); i++) {
             List<TestScript.TestActionComponent> tests = testScript.getTest().get(i).getAction();
@@ -389,21 +392,27 @@ public class TestEngine  implements TestDef {
                 reports = testReport.getTest().get(i).getAction();
             else
                 reports = new ArrayList<>();
-            if (tests.size() != reports.size())
-                reportTerminalFailure("TestEngine internal Error: Script Test " + i + " had " +
+            if (tests.size() != reports.size()) {
+                String msg = "TestEngine internal Error: Script Test " + i + " had " +
                         tests.size() +
                         " elements but Report had " +
-                        reports.size());
+                        reports.size();
+                reportTerminalFailure(msg);
+                log.error(msg);
+            }
         }
 
         List<TestScript.TeardownActionComponent> script = testScript.getTeardown().getAction();
         List<TestReport.TeardownActionComponent> report;
         report = testReport.getTeardown().getAction();
-        if (script.size() != report.size())
-            reportTerminalFailure("TestEngine internal Error: Script Teardown had " +
+        if (script.size() != report.size()) {
+            String msg = "TestEngine internal Error: Script Teardown had " +
                     script.size() +
                     " elements but Report had " +
-                    report.size());
+                    report.size();
+            reportTerminalFailure(msg);
+            log.error(msg);
+        }
     }
 
     private void initWorkflow() {
@@ -781,16 +790,15 @@ public class TestEngine  implements TestDef {
             runner.run(theAssert, report);
         } catch (NotABundleException nabEx) {
             /*
-             Ignoreable since it fills the log n times.
              GetClientTestEvalRequest uses N message limit, ex. 30
             When a client test is run, against the last 30 messages, this message also repeats at least 30 times in the log:
 	        RuntimeException: Fixture request does not contain a Bundle
              */
+            report.setMessage(nabEx.getMessage());
+            report.setResult(TestReport.TestReportActionResult.ERROR);
+            reportTerminalFailure(nabEx.toString());
         } catch (Throwable t) {
             reportTerminalFailure(t);
-//            report = new TestReport.SetupActionAssertComponent();
-//            report.setMessage(ExceptionUtils.getStackTrace(t));
-//            report.setResult(TestReport.TestReportActionResult.ERROR);
         }
     }
 
@@ -1222,7 +1230,9 @@ public class TestEngine  implements TestDef {
         ValE fVal = new ValE(engineVal).setMsg("Test");
 
         if (!testScriptElement.hasAction()) {
-            reportTerminalFailure("Action must contain operation or assert.");
+            String msg = "Action must contain operation or assert.";
+            reportTerminalFailure(msg);
+            log.error(msg);
             return false;
         }
             String typePrefix = "contained.action";
@@ -1237,7 +1247,9 @@ public class TestEngine  implements TestDef {
                 boolean isExpectFailure = expectFailure != null;
                 TestReport.TestActionComponent actionReportComponent = testReportComponent.addAction();
                 if (invalidAction(action, actionReportComponent, fVal)) {
-                    reportTerminalFailure("Action must contain operation or assert.");
+                    String msg = "Action must contain operation or assert.";
+                    reportTerminalFailure(msg);
+                    log.error(msg);
                     return false;
                 }
                 if (action.hasOperation()) {
@@ -1700,6 +1712,16 @@ public class TestEngine  implements TestDef {
 
     void reportOperation(ResourceWrapper wrapper, Reporter reporter, TestScript.SetupActionOperationComponent op) {
         if (parent != null) {
+            if (op.getType().getCode().equals("getFixtureString")) {
+                // This is required for reporting purposes. Some sub-fixtures within the parent TestScript may use the output fixture of this operation, which is not yet available without this step.
+                // Even though this 'missing fixture' is not critical at this point, reporting method likes to dump the entire TestScript state
+                String lastOp = this.fixtureMgr.getLastOp();
+                if (lastOp != null) {
+                    parent.getFixtureMgr().put(lastOp, this.fixtureMgr.get(lastOp));
+                } else {
+                    log.error("Error: lastOp is null. lastOp should be non-empty when getFixtureString is used. Check fixture-out parameter mapping.");
+                }
+            }
             new ActionReporter()
                     .setModule(false)
                     .setImAParent(true)

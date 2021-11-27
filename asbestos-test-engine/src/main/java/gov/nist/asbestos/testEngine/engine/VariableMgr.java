@@ -180,7 +180,9 @@ public class VariableMgr {
         Objects.requireNonNull(reporter);
         TestScript.TestScriptVariableComponent testScriptLocalVariable = getVariable(variableName);
 
-        // If there exists a local variable defined in TestScript, external variable with the same name overrides the local variable value
+        /* If there exists a local variable defined in TestScript, external variable with the same name overrides the local variable value.
+         This is useful in the case where a TestScript can be both executed independently and as a module
+         */
         if (testScriptLocalVariable != null && externalVariables.containsKey(variableName))
             return externalVariables.get(variableName);
 

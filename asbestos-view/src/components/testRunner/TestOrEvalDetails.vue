@@ -147,9 +147,18 @@
         },
         methods: {
           openScriptDisplay(name) {
+              /*
+              The name parameter is not straightforward, the server call only uses the parent script name with the GetTestScriptRequest call,
+              which returns all test scripts, including all module scripts, then based on the name parameter here, the front-end map is used to display the script.
+               */
               console.info(`Open ${name}`)
               const scriptUrl = `/script/collection/${this.testCollection}/test`
-              window.open(`${scriptUrl}/${this.testId}/${name}`, "_blank");
+              let localTestId = this.testId // The top-level test script links
+              if (localTestId.includes('/')) {
+                  // This handles the case where aggregate module script link shows up when a test-level node is expanded
+                  localTestId = localTestId.split('/',2)[0]
+              }
+              window.open(`${scriptUrl}/${localTestId}/${name}`, "_blank");
           },
             async loadEventSummariesAndReRun() {
                 await this.$store.dispatch('loadEventSummaries', {session: this.sessionId, channel: this.channelName})
