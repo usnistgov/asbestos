@@ -285,7 +285,13 @@ public class OperationRunner {
                 if (responseWrapper != null) {
                     FixtureLabels labels = new FixtureLabels(new ActionReporter(), op, null)
                             .referenceWrapper(responseWrapper);
-                    Reporter.operationDescription(operationReport, "**Request/Response** " + labels.getReference());
+                    /*
+                    Because there is no event registered for this code,
+                    the call to Reporter.operationDescription(operationReport, "**Request/Response** " + labels.getReference());
+                    results in
+                    "Request/Response null"
+                    where 'null' is a link to something like: https://fhirtoolkit.test:8082/session/default/channel/limited/collection/MHDv4_DocumentRecipient_minimal/test/null
+                     */
                 }
         } else if ("getFixtureString".equals(code)) {
             SetupActionSearch setupActionSearch = new SetupActionSearch(actionReference, fixtureMgr, isFollowedByAssert)
@@ -318,7 +324,13 @@ public class OperationRunner {
             if (responseWrapper != null) {
                 FixtureLabels labels = new FixtureLabels(new ActionReporter(), op, null)
                         .referenceWrapper(responseWrapper);
-                Reporter.operationDescription(operationReport, "**Request/Response** " + labels.getReference());
+                 /*
+                    Because there is no event registered for this code,
+                    the call to Reporter.operationDescription(operationReport, "**Request/Response** " + labels.getReference());
+                    results in
+                    "Request/Response null"
+                    where 'null' is a link to something like: https://fhirtoolkit.test:8082/session/default/channel/limited/collection/MHDv4_DocumentRecipient_minimal/test/null
+                 */
             }
         } else {
             reporter.reportError("do not understand code.code of " + code);

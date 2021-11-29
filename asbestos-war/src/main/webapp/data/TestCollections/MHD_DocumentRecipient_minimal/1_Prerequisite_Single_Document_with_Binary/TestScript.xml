@@ -21,18 +21,6 @@
             <reference value="Patient/Alex_Alder.json"/>
         </resource>
     </fixture>
-    <fixture id="submissionSet">
-        <autocreate value="false"/>
-        <autodelete value="false"/>
-        <resource>
-            <reference value="Bundle/SubmissionSet.xml"/>
-        </resource>
-    </fixture>
-    <variable>
-        <name value="theSubmissionSet"/>
-        <expression value="DocumentManifest"/>
-        <sourceId value="submissionSet"/>
-    </variable>
     <variable>
         <name value="DocRefUrl"/>
         <expression value="Bundle.entry[0].response.location"/>
@@ -126,9 +114,6 @@
                     </extension>
                     <extension url="urn:fixture-in">
                         <valueString  value="pdb-bundle"/>
-                    </extension>
-                    <extension url="urn:variable-in-no-translation">
-                        <valueString value="theSubmissionSet"/>
                     </extension>
                     <extension url="urn:variable-in-no-translation">
                         <valueString value="patientResourceId"/>

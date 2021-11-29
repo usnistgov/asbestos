@@ -5,6 +5,7 @@ import gov.nist.asbestos.client.Base.Request;
 import gov.nist.asbestos.client.Base.Returns;
 import gov.nist.asbestos.client.client.Format;
 import gov.nist.asbestos.fixture.FixturePlaceholderEnum;
+import gov.nist.asbestos.fixture.FixturePlaceholderParamEnum;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 
@@ -60,7 +61,7 @@ public class GetFixtureStringRequest {
         // Read fixtureId File
         Map<String, String> paramsMap = request.getParametersMap();
 
-        String fixtureId = paramsMap.get("fixtureId");
+        String fixtureId = paramsMap.get(FixturePlaceholderParamEnum.fixtureId.name());
         if (! isSafe(fixtureId)) {
             String message = "fixtureId parameter is not valid.";
             unexpectedMessage(message);
@@ -71,10 +72,10 @@ public class GetFixtureStringRequest {
         String fixtureString =  readFixtureString(testCollection, testName, fixtureId);
         if (fixtureString == null) {
             // Try base Test Collection if the optional parameter is available
-            String baseTestCollection = paramsMap.get("baseTestCollection");
+            String baseTestCollection = paramsMap.get(FixturePlaceholderParamEnum.baseTestCollection.name());
             if (isSafe(baseTestCollection)) {
                 String baseTestCollectionNameDecoded = URLDecoder.decode(baseTestCollection, StandardCharsets.UTF_8.toString());
-                String baseTestName = paramsMap.get("baseTestName");
+                String baseTestName = paramsMap.get(FixturePlaceholderParamEnum.baseTestName.name());
                 if (baseTestName == null) {
                     fixtureString = readFixtureString(baseTestCollectionNameDecoded, testName, fixtureId);
                 } else if (isSafe(baseTestName)) {
