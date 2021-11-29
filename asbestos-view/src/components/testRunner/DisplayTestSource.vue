@@ -7,7 +7,7 @@
     </div>
 
     <div class="vdivider"> </div>
-    <pre>{{cleanFx()}}</pre>
+    <pre>{{testScriptAsString()}}</pre>
   </div>
 </template>
 
@@ -25,7 +25,7 @@ export default {
     }
   },
   methods: {
-    cleanFx() {
+    testScriptAsString() {
       return JSON.stringify( this.source, null, 2)
     },
     async loadTestScript() {

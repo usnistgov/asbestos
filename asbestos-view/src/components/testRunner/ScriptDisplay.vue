@@ -11,11 +11,11 @@
     <div v-if="displayTestScript">
     <div class="container">
       <div v-if="callingScript" class="script-header">Calling Script</div>
-      <div v-if="callingScript" class="script"><pre>{{JSON.stringify(callingScript, null, 2)}}</pre></div>
+      <div v-if="callingScript" class="script"><pre>{{jsonAsString(callingScript)}}</pre></div>
       <div v-if="moduleScript" class="module-script-header">
           Module Script Header
       </div>
-      <div v-if="moduleScript" class="module-script"><pre>{{JSON.stringify(moduleScriptHeader, null, 2)}}</pre></div>
+      <div v-if="moduleScript" class="module-script"><pre>{{jsonAsString(moduleScriptHeader)}}</pre></div>
       <div class="script-header2">
           <span v-if="callingScript">
             Module Script
@@ -27,8 +27,8 @@
        <div class="report-header2">
             Report
         </div>
-        <div class="script2"><pre>{{JSON.stringify( script, null, 2) }}</pre></div>
-        <div class="report2"><pre>{{JSON.stringify( filteredReport, null, 2) }}</pre></div>
+        <div class="script2"><pre>{{jsonAsString(script)}}</pre></div>
+        <div class="report2"><pre>{{jsonAsString(filteredReport)}}</pre></div>
     </div>
   </div>
   </div>
@@ -42,6 +42,9 @@
           }
       },
         methods: {
+          jsonAsString(jsonObj) {
+            return  JSON.stringify(jsonObj, null, 2)
+          },
           toggleDisplay() {
             this.displayTestScript = !this.displayTestScript;
           }

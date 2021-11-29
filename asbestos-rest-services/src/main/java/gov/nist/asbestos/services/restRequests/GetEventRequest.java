@@ -86,7 +86,17 @@ public class GetEventRequest {
 
         //resp.addHeader("Content-Type", "text/html; charset=utf-8");
         StringBuilder b = new StringBuilder();
-        b.append("<!DOCTYPE HTML>\n<html><body>");
+        b.append("<!DOCTYPE HTML>\n" +
+                "<html>" +
+                "<head>" +
+                "<style>" +
+                "      pre {" +
+                "         white-space: pre-wrap;" +
+                "         word-wrap: break-word;" +
+                "    }" +
+                "</style>" +
+                "</head>" +
+                "<body>");
 
         b.append("<h1>").append(event).append("</h1>");
 
