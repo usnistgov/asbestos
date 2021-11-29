@@ -27,6 +27,7 @@ import java.util.regex.Pattern;
 // 6 - testId
 // Example: https://fhirtoolkit.test:9743/asbestos/engine/getFixtureString/default__limited/MHD_DocumentRecipient_minimal/Missing_DocumentManifest
 //  ?fixtureId=pdb&[baseTestCollection=&baseTestName=]&[fixtureElementPlaceholder=LocalFixtureReferenceFileName]
+// See @FixturePlaceholderParamEnum for complete search order reference.
 // fixtureId is searched for in the current test Collection, test name, Bundle,
 // if not found, the fall back location is ../../Common[Test.properties:hidden=true].
 // If LocalFixtureReferenceFileName (without the file extension) is not found in the current Test Bundle directory,
@@ -89,11 +90,16 @@ public class GetFixtureStringRequest {
         if (fixtureString != null) {
             fixtureString = replacePlaceholder(fixtureString, paramsMap);
             if (fixtureString != null) {
-                // Parse to see if the whole thing is a valid Fixture
-                Format outFormat = Format.JSON; // TODO: this should honor the TestScript Operation contentType value
-                String jsonStr = ParserBase.encode(ParserBase.parse(fixtureString, Format.XML), outFormat);
-                Returns.returnString(request.resp, jsonStr);
-                return;
+                try {
+                    // Parse to see if the whole thing is a parsable Fixture
+                    Format outFormat = Format.JSON; // TODO: this should honor the TestScript Operation contentType value
+                    String jsonStr = ParserBase.encode(ParserBase.parse(fixtureString, Format.XML), outFormat);
+                    Returns.returnString(request.resp, jsonStr);
+                    return;
+                } catch (Exception ex) {
+                    unexpectedMessage("ParserBase Exception: " + ex.toString());
+                    return;
+                }
             } else {
                 unexpectedMessage("replacePlaceholder is null.");
                 return;

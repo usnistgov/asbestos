@@ -76,6 +76,7 @@
                                :action-component-name="resultObj.componentName"
                                :parent-index="getBreakpointIndex(testType, testIndex, actioni)"
                                :disable-debugger="disableDebugger"
+                               :test-type="testType"
                             ></component-script>
                         </div>
                         <div v-else class="has-cursor">

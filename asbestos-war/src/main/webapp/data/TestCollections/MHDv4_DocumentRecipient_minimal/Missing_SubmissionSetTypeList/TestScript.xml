@@ -37,6 +37,11 @@
         <name value="dependsOnTestId"/>
         <defaultValue value="MHDv4_DocumentRecipient_minimal/1_Prerequisite_Single_Document_with_Binary"/>
     </variable>
+    <variable>
+        <name value="isComprehensiveMetadataExpected"/>
+        <defaultValue value="true"/>
+    </variable>
+
 
     <setup>
         <modifierExtension url="urn:noErrors"/>
@@ -102,37 +107,55 @@
         </action>
     </test>
     <test>
-        <modifierExtension url="urn:noErrors"/>
-        <description value="Verify no update to server using search parameters."/>
+        <description value="PDB Validations."/>
         <action>
+            <modifierExtension url="urn:asbestos:test:action:expectFailure"/>
             <operation>
-                <description value="for DocumentReference."/>
-                <type>
-                    <code value="search"/>
-                </type>
-                <contentType value="json"/>
-                <url value="${docRespBaseAddress}/DocumentReference?identifier=${badPdbReferenceMasterIdentifier}&amp;status=${badPdbReferenceStatus}&amp;patient.identifier=${patientIdentifierSearchParamValue}"/>
-                <responseId value="bad-reference-search"/>
+                <description value="Module usage description: TestScript import call to bridge an aggregate TestScript."/>
+                <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
+                    <extension url="component">
+                        <valueString value="../../Library/AggregateModule/MHDv3xBundleEvalAggregateResult.xml"/>
+                    </extension>
+                    <extension url="urn:fixture-in">
+                        <valueString value="pdb-bundle"/>
+                    </extension>
+                    <extension url="urn:fixture-in">
+                        <valueString value="pdb-response"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="isComprehensiveMetadataExpected"/>
+                    </extension>
+                </modifierExtension>
             </operation>
         </action>
+    </test>
+    <test>
+        <description value="Search DocumentReference."/>
         <action>
-            <assert>
-                <description value="Status is 200."/>
-                <sourceId value="bad-reference-search"/>
-                <response value="okay"/>
-                <warningOnly value="false"/>
-            </assert>
-        </action>
-        <action>
-            <assert>
-                <description value="No DocumentReference should be returned in the bundle from the search result."/>
-                <compareToSourceId value="bad-reference-search"/>
-                <compareToSourceExpression value="Bundle.total = 0"/>
-                <warningOnly value="false"/>
-            </assert>
+            <operation>
+                <description value="Module call: Verify updates to server."/>
+                <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
+                    <extension url="component">
+                        <valueString value="../../Library/SearchDocRef.xml"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="badPdbReferenceMasterIdentifier"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="badPdbReferenceStatus"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="patientIdentifierSearchParamValue"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="docRespBaseAddress"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="'0'"/>
+                    </extension>
+                </modifierExtension>
+            </operation>
         </action>
     </test>
-
-
 
 </TestScript>

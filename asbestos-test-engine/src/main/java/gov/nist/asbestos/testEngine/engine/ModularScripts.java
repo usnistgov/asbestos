@@ -65,6 +65,11 @@ public class ModularScripts {
         String json = ParserBase.encode(testScript, Format.JSON);
         scripts.put(testScript.getName(), json);
 
+
+        testActionsHandleImport(testDef, testId, testScript);
+    }
+
+    private void testActionsHandleImport(File testDef, String testId, TestScript testScript) {
         TestScript.TestScriptSetupComponent setup = testScript.getSetup();
         if (setup != null ) {
             for (TestScript.SetupActionComponent action : setup.getAction()) {
@@ -72,10 +77,6 @@ public class ModularScripts {
             }
         }
 
-        testActionsHandleImport(testDef, testId, testScript);
-    }
-
-    private void testActionsHandleImport(File testDef, String testId, TestScript testScript) {
         for (TestScript.TestScriptTestComponent test : testScript.getTest()) {
             for (TestScript.TestActionComponent action: test.getAction()) {
                 handleImportScripts(testDef, testId, action);

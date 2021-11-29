@@ -10,23 +10,23 @@
         </resource>
     </fixture>
     <variable>   <!-- referenced in pdb -->
-    	<name value="patientResourceId"/>
-    	<expression value="Bundle.entry.fullUrl"/>
-      <sourceId value="patient_bundle"/>
+        <name value="patientResourceId"/>
+        <expression value="Bundle.entry.fullUrl"/>
+        <sourceId value="patient_bundle"/>
     </variable>
     <variable>
-      <name value="manifestMasterIdentifier"/>
-      <expression value="Bundle.entry.select(resource as DocumentManifest).masterIdentifier.value"/>
-      <sourceId value="pdb-bundle"/>
+        <name value="ssListUsualIdentifier"/>
+        <expression value="Bundle.entry.resource.where($this is List and code.coding.code='submissionset' ).select(identifier).where(use='usual').value"/>
+        <sourceId value="pdb-bundle"/>
     </variable>
     <variable>
-      <name value="referenceMasterIdentifier"/>
-      <expression value="Bundle.entry.select(resource as DocumentReference).masterIdentifier.value"/>
-      <sourceId value="pdb-bundle"/>
+        <name value="ssListStatus"/>
+        <expression value="Bundle.entry.resource.where($this is List and code.coding.code='submissionset').status.value"/>
+        <sourceId value="pdb-bundle"/>
     </variable>
     <variable>
-        <name value="pdbManifestStatus"/>
-        <expression value="Bundle.entry.select(resource as DocumentManifest).status.value"/>
+        <name value="referenceMasterIdentifier"/>
+        <expression value="Bundle.entry.select(resource as DocumentReference).masterIdentifier.value"/>
         <sourceId value="pdb-bundle"/>
     </variable>
     <variable>
@@ -45,12 +45,13 @@
     </variable>
     <variable>
         <name value="dependsOnTestId"/>
-        <defaultValue value="MHD_DocumentRecipient_minimal/1_Prerequisite_Single_Document_with_Binary"/>
+        <defaultValue value="MHDv4_DocumentRecipient_minimal/1_Prerequisite_Single_Document_with_Binary"/>
     </variable>
     <variable>
         <name value="isComprehensiveMetadataExpected"/>
         <defaultValue value="true"/>
     </variable>
+
 
     <setup>
         <modifierExtension url="urn:noErrors"/>
@@ -65,7 +66,7 @@
                         <valueString value="'3'"/>
                     </extension>
                     <extension url="urn:variable-in">
-                        <valueString value="'?fixtureId=pdb'"/>
+                        <valueString value="'?fixtureId=pdb&amp;baseTestCollection=MHD_DocumentRecipient_minimal'"/>
                     </extension>
                     <extension url="urn:fixture-out">
                         <valueString value="pdb-bundle"/>
@@ -75,7 +76,7 @@
         </action>
         <action>
             <operation>
-               <description value="Get the document responder base address from a prerequisite PDB submission.
+                <description value="Get the document responder base address from a prerequisite PDB submission.
                (This test assumes the document responder base address in PDB response does not change between consecutive PDB submissions.)"/>
                 <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
                     <extension url="component">
@@ -90,8 +91,9 @@
                 </modifierExtension>
             </operation>
         </action>
-  </setup>
+    </setup>
     <test>
+        <modifierExtension url="urn:noErrors"/>
         <description value="Submit."/>
         <action>
             <operation>
@@ -118,10 +120,10 @@
         <action>
             <modifierExtension url="urn:asbestos:test:action:expectFailure"/>
             <operation>
-                <description value="Module usage description: TestScript import call to bridge an aggregate TestScript."/>
+                <description value="Module usage description"/>
                 <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
                     <extension url="component">
-                        <valueString value="../../Library/AggregateModule/MHDv3xBundleEvalAggregateResult.xml"/>
+                        <valueString value="../../Library/AggregateModule/MHDv4BundleEvalAggregateResult.xml"/>
                     </extension>
                     <extension url="urn:fixture-in">
                         <valueString value="pdb-bundle"/>
@@ -137,19 +139,20 @@
         </action>
     </test>
     <test>
-        <description value="DocumentManifest was not persisted."/>
+        <modifierExtension url="urn:noErrors"/>
+        <description value="Verify no updates to server."/>
         <action>
             <operation>
-                <description value="Verify no updates to server."/>
+                <description value="Module call: Verify updates to server."/>
                 <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
                     <extension url="component">
-                        <valueString value="../../Library/SearchDocumentManifest.xml"/>
+                        <valueString value="../../Library/MHDv4SearchSsList.xml"/>
                     </extension>
                     <extension url="urn:variable-in">
-                        <valueString  value="manifestMasterIdentifier"/>
+                        <valueString value="ssListUsualIdentifier"/>
                     </extension>
                     <extension url="urn:variable-in">
-                        <valueString value="pdbManifestStatus"/>
+                        <valueString value="ssListStatus"/>
                     </extension>
                     <extension url="urn:variable-in">
                         <valueString value="patientIdentifierSearchParamValue"/>

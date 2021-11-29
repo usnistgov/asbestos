@@ -3,7 +3,7 @@
         <debuggable-list-item
                 v-for="(caction, cactioni) in scriptActions"
                 :key="'CAction' + cactioni"
-                :breakpoint-index="parentIndex + '/' + getBreakpointIndex('test', 0, cactioni)"
+                :breakpoint-index="parentIndex + '/' + getBreakpointIndex(testType, 0, cactioni)"
                 :is-disabled="disableDebugger">
 
             <div v-for="(resultObj, resultKey) in scriptImport(caction)" :key="resultKey">
@@ -34,7 +34,6 @@
                             :module-script="moduleScript"
                     >
                     </action-details>
-
                 </div>
             </div>
 
@@ -110,9 +109,25 @@ import importMixin from "../../mixins/importMixin";
                     return null;
                 }
                 const myModuleId = this.testId + '/' + this.actionComponentName
-                const script = this.$store.state.testRunner.moduleTestScripts[myModuleId]
-                if (!script || !script.test || !script.test[0]) return null
-                return script.test[0].action
+                let script = this.$store.state.testRunner.moduleTestScripts[myModuleId]
+                // console.info(`1.script is undef ${script===undefined}`)
+                // console.info(`1.scrip is null ${script===null}`)
+                // if (this.testType === 'setup') {
+                //     script = this.$store.state.testRunner.testScripts[myModuleId]
+                // }
+                // console.info(`myModuleId is ${myModuleId} and testType is ${this.testType}. setup exists? ${(this.testType==='setup'?JSON.stringify(script):'n/a')}` )
+                // console.info(`2.script is undef ${script===undefined}`)
+                // console.info(`2.scrip is null ${script===null}`)
+                /* if (this.testType==='setup') {
+                    if (!script || !script.setup || !script.setup[0]) return null
+                    return script.setup[0].action
+                } else if (this.testType==='test') { */
+                    if (!script || !script.test || !script.test[0]) return null
+                    return script.test[0].action
+                // } else {
+                //     console.error(`ComponentScript testType ${this.testType} is not understood`)
+                //     return null
+                // }
             },
             reportActions() {  // component has no setup and a single test
                 // for server tests the module-report is in separate file (hence moduleTestReports)
@@ -144,6 +159,7 @@ import importMixin from "../../mixins/importMixin";
             'parentIndex',
             'disableDebugger',
             'evalTestId',
+            'testType',
         ],
         components: {
             TestOrEvalDetails: () => import('./TestOrEvalDetails'),

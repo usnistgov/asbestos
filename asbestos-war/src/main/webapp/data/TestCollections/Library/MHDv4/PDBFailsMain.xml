@@ -1,4 +1,26 @@
 <TestScript xmlns="http://hl7.org/fhir">
+    <modifierExtension url="urn:module">
+        <extension url="urn:variable-in">
+            <valueString value="isComprehensiveMetadataExpected"/>
+        </extension>
+        <extension url="urn:variable-in">
+            <valueString value="getFixtureParams"/>
+        </extension>
+        <extension url="urn:variable-in">
+            <valueString value="expectedFixtureBundleEntryCount"/>
+        </extension>
+        <extension url="urn:variable-in">
+            <valueString value="expectedSsListCount"/>
+        </extension>
+        <extension url="urn:variable-in">
+            <valueString value="expectedDocRefCount"/>
+        </extension>
+    </modifierExtension>
+
+    <id value="PDBFailsMain"/>
+    <name value="PDBFailsMain"/>
+    <description value="This TestScript is a bridge to submit a bundle and evaluate."/>
+
     <fixture id="patient_bundle">
         <!--
            This patient comes out of the test Patient cache
@@ -15,19 +37,19 @@
       <sourceId value="patient_bundle"/>
     </variable>
     <variable>
-      <name value="manifestMasterIdentifier"/>
-      <expression value="Bundle.entry.select(resource as DocumentManifest).masterIdentifier.value"/>
-      <sourceId value="pdb-bundle"/>
+        <name value="ssListUsualIdentifier"/>
+        <expression value="Bundle.entry.resource.where($this is List and code.coding.code='submissionset' ).select(identifier).where(use='usual').value"/>
+        <sourceId value="pdb-bundle"/>
+    </variable>
+    <variable>
+        <name value="ssListStatus"/>
+        <expression value="Bundle.entry.resource.where($this is List and code.coding.code='submissionset').status.value"/>
+        <sourceId value="pdb-bundle"/>
     </variable>
     <variable>
       <name value="referenceMasterIdentifier"/>
       <expression value="Bundle.entry.select(resource as DocumentReference).masterIdentifier.value"/>
       <sourceId value="pdb-bundle"/>
-    </variable>
-    <variable>
-        <name value="pdbManifestStatus"/>
-        <expression value="Bundle.entry.select(resource as DocumentManifest).status.value"/>
-        <sourceId value="pdb-bundle"/>
     </variable>
     <variable>
         <name value="pdbReferenceStatus"/>
@@ -47,10 +69,6 @@
         <name value="dependsOnTestId"/>
         <defaultValue value="MHD_DocumentRecipient_minimal/1_Prerequisite_Single_Document_with_Binary"/>
     </variable>
-    <variable>
-        <name value="isComprehensiveMetadataExpected"/>
-        <defaultValue value="true"/>
-    </variable>
 
     <setup>
         <modifierExtension url="urn:noErrors"/>
@@ -59,13 +77,13 @@
                 <description value="Get fixture string"/>
                 <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
                     <extension url="component">
-                        <valueString value="../../Library/GetFixtureString.xml"/>
+                        <valueString value="../GetFixtureString.xml"/>
                     </extension>
                     <extension url="urn:variable-in">
-                        <valueString value="'3'"/>
+                        <valueString value="expectedFixtureBundleEntryCount"/>
                     </extension>
                     <extension url="urn:variable-in">
-                        <valueString value="'?fixtureId=pdb'"/>
+                        <valueString value="getFixtureParams"/>
                     </extension>
                     <extension url="urn:fixture-out">
                         <valueString value="pdb-bundle"/>
@@ -75,11 +93,11 @@
         </action>
         <action>
             <operation>
-               <description value="Get the document responder base address from a prerequisite PDB submission.
+                <description value="Get the document responder base address from a prerequisite PDB submission.
                (This test assumes the document responder base address in PDB response does not change between consecutive PDB submissions.)"/>
                 <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
                     <extension url="component">
-                        <valueString value="../../Library/DocumentResponderBaseAddress.xml"/>
+                        <valueString value="../DocumentResponderBaseAddress.xml"/>
                     </extension>
                     <extension url="urn:variable-in">
                         <valueString value="dependsOnTestId"/>
@@ -90,7 +108,7 @@
                 </modifierExtension>
             </operation>
         </action>
-  </setup>
+    </setup>
     <test>
         <description value="Submit."/>
         <action>
@@ -98,7 +116,7 @@
                 <description value="Submit Provide Document Bundle to MHD Document Recipient."/>
                 <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
                     <extension url="component">
-                        <valueString value="../../Library/PDBFails.xml"/>
+                        <valueString value="../PDBFails.xml"/>
                     </extension>
                     <extension url="urn:fixture-in">
                         <valueString  value="pdb-bundle"/>
@@ -118,10 +136,10 @@
         <action>
             <modifierExtension url="urn:asbestos:test:action:expectFailure"/>
             <operation>
-                <description value="Module usage description: TestScript import call to bridge an aggregate TestScript."/>
+                <description value="Module usage description"/>
                 <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
                     <extension url="component">
-                        <valueString value="../../Library/AggregateModule/MHDv3xBundleEvalAggregateResult.xml"/>
+                        <valueString value="../AggregateModule/MHDv4BundleEvalAggregateResult.xml"/>
                     </extension>
                     <extension url="urn:fixture-in">
                         <valueString value="pdb-bundle"/>
@@ -137,19 +155,20 @@
         </action>
     </test>
     <test>
-        <description value="DocumentManifest was not persisted."/>
+        <modifierExtension url="urn:noErrors"/>
+        <description value="List was not persisted."/>
         <action>
             <operation>
-                <description value="Verify no updates to server."/>
+                <description value="Module call: Verify updates to server."/>
                 <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
                     <extension url="component">
-                        <valueString value="../../Library/SearchDocumentManifest.xml"/>
+                        <valueString value="../MHDv4SearchSsList.xml"/>
                     </extension>
                     <extension url="urn:variable-in">
-                        <valueString  value="manifestMasterIdentifier"/>
+                        <valueString value="ssListUsualIdentifier"/>
                     </extension>
                     <extension url="urn:variable-in">
-                        <valueString value="pdbManifestStatus"/>
+                        <valueString value="ssListStatus"/>
                     </extension>
                     <extension url="urn:variable-in">
                         <valueString value="patientIdentifierSearchParamValue"/>
@@ -158,7 +177,7 @@
                         <valueString value="docRespBaseAddress"/>
                     </extension>
                     <extension url="urn:variable-in">
-                        <valueString value="'0'"/>
+                        <valueString value="${expectedSsListCount}"/>
                     </extension>
                 </modifierExtension>
             </operation>
@@ -171,7 +190,7 @@
                 <description value="Module call: Verify no updates to server."/>
                 <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
                     <extension url="component">
-                        <valueString value="../../Library/SearchDocRef.xml"/>
+                        <valueString value="../SearchDocRef.xml"/>
                     </extension>
                     <extension url="urn:variable-in">
                         <valueString value="referenceMasterIdentifier"/>
@@ -186,10 +205,11 @@
                         <valueString value="docRespBaseAddress"/>
                     </extension>
                     <extension url="urn:variable-in">
-                        <valueString value="'0'"/>
+                        <valueString value="${expectedDocRefCount}"/>
                     </extension>
                 </modifierExtension>
             </operation>
         </action>
     </test>
+
 </TestScript>

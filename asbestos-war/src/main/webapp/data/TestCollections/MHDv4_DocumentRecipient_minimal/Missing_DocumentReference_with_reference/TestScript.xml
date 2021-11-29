@@ -10,12 +10,12 @@
         </resource>
     </fixture>
     <variable>   <!-- referenced in pdb -->
-    	<name value="requestPatientRef"/>
+    	<name value="patientResourceId"/>
     	<expression value="Bundle.entry.fullUrl"/>
       <sourceId value="patient_bundle"/>
     </variable>
     <variable>
-        <name value="sSListUsualIdentifier"/>
+        <name value="ssListUsualIdentifier"/>
         <expression value="Bundle.entry.resource.where($this is List and code.coding.code='submissionset' ).select(identifier).where(use='usual').value"/>
         <sourceId value="pdb-bundle"/>
     </variable>
@@ -25,7 +25,7 @@
       <sourceId value="pdb-bundle"/>
     </variable>
     <variable>
-        <name value="sSListStatus"/>
+        <name value="ssListStatus"/>
         <expression value="Bundle.entry.resource.where($this is List and code.coding.code='submissionset').status.value"/>
         <sourceId value="pdb-bundle"/>
     </variable>
@@ -99,7 +99,30 @@
                         <valueString value="pdb-response"/>
                     </extension>
                     <extension url="urn:variable-in-no-translation">
-                        <valueString value="requestPatientRef"/>
+                        <valueString value="patientResourceId"/>
+                    </extension>
+                </modifierExtension>
+            </operation>
+        </action>
+    </test>
+    <test>
+        <description value="PDB Validations."/>
+        <action>
+            <modifierExtension url="urn:asbestos:test:action:expectFailure"/>
+            <operation>
+                <description value="Module usage description"/>
+                <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
+                    <extension url="component">
+                        <valueString value="../../Library/AggregateModule/MHDv4BundleEvalAggregateResult.xml"/>
+                    </extension>
+                    <extension url="urn:fixture-in">
+                        <valueString value="pdb-bundle"/>
+                    </extension>
+                    <extension url="urn:fixture-in">
+                        <valueString value="pdb-response"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="isComprehensiveMetadataExpected"/>
                     </extension>
                 </modifierExtension>
             </operation>
@@ -108,33 +131,31 @@
     <test>
       <modifierExtension url="urn:noErrors"/>
       <description value="Verify no updates to server."/>
-      <action>
-        <operation>
-				  <description value="for List (SubmissionSet)."/>
-				  <type>
-					  <code value="search"/>
-				  </type>
-				  <contentType value="json"/>
-				  <url value="${docRespBaseAddress}/List?code=submissionset&amp;identifier=${sSListUsualIdentifier}&amp;status=${sSListStatus}&amp;patient.identifier=${patientIdentifierSearchParamValue}"/>
-				  <responseId value="ssList-search"/>
-			  </operation>
-      </action>
-      <action>
-        <assert>
-          <description value="Returns 200."/>
-          <sourceId value="ssList-search"/>
-          <response value="okay"/>
-          <warningOnly value="false"/>
-        </assert>
-      </action>
-      <action>
-        <assert>
-          <description value="No List returned."/>
-          <compareToSourceId value="ssList-search"/>
-          <compareToSourceExpression value="Bundle.total = 0"/>
-          <warningOnly value="false"/>
-        </assert>
-      </action>
+        <action>
+            <operation>
+                <description value="Module call: Verify updates to server."/>
+                <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
+                    <extension url="component">
+                        <valueString value="../../Library/MHDv4SearchSsList.xml"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="ssListUsualIdentifier"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="ssListStatus"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="patientIdentifierSearchParamValue"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="docRespBaseAddress"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="'0'"/>
+                    </extension>
+                </modifierExtension>
+            </operation>
+        </action>
     </test>
 
 </TestScript>
