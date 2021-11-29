@@ -13,6 +13,7 @@ import gov.nist.asbestos.testEngine.engine.ModularScripts;
 import org.apache.log4j.Logger;
 
 import java.io.File;
+import java.io.IOException;
 
 public class GetTestScriptRequest {
     private static Logger log = Logger.getLogger(GetTestScriptRequest.class);
@@ -38,9 +39,13 @@ public class GetTestScriptRequest {
             return;
         }
 
-        ModularScripts modularScripts = new ModularScripts(testDef);
-        String json = modularScripts.asJson();
-        request.returnString(json);
-        request.ok();
+        try {
+            ModularScripts modularScripts = new ModularScripts(testDef);
+            String json = modularScripts.asJson();
+            request.returnString(json);
+            request.ok();
+        } catch (IOException ex) {
+            request.badRequest(ex.toString());
+        }
     }
 }

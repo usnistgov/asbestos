@@ -24,7 +24,7 @@ public class ModularScripts {
     // testId/componentId => TestScript.json
     private final Map<String, String> scripts = new LinkedHashMap<>();
 
-    public ModularScripts(File testDef) {
+    public ModularScripts(File testDef) throws IOException {
         // fill the script Map with the base script and all referenced component scripts
         String testId = testDef.getName();
         File testFile = TestEngine.findTestScriptFile(testDef);
@@ -48,13 +48,17 @@ public class ModularScripts {
 
         File descriptionFile = new File(testDef, "description.md");
         if (descriptionFile.exists()) {
+            InputStream ins =  null;
             try {
-                InputStream ins = new FileInputStream(descriptionFile);
+                ins = new FileInputStream(descriptionFile);
                 String description = org.apache.commons.io.IOUtils.toString(ins, Charset.defaultCharset());
                 description = description.replaceAll("\\n", "\\\\n");
                 testScript.setDescription(description);
             } catch (Exception e) {
                 throw new RuntimeException(e);
+            } finally {
+               if (ins != null)
+                   ins.close();
             }
         }
 
