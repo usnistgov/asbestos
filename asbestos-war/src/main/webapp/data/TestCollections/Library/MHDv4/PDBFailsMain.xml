@@ -158,6 +158,16 @@
         <modifierExtension url="urn:noErrors"/>
         <description value="List was not persisted."/>
         <action>
+            <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Conditional"/>
+            <assert>
+                <description value="Check List?"/>
+                <expression value="${expectedSsListCount} >= 0"/>
+                <operator value="equals"/>
+                <value value="true"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
             <operation>
                 <description value="Module call: Verify updates to server."/>
                 <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
@@ -185,6 +195,16 @@
     </test>
     <test>
         <description value="DocumentReference was not persisted."/>
+        <action>
+            <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Conditional"/>
+            <assert>
+                <description value="Check DocumentReference?"/>
+                <expression value="${expectedDocRefCount} >= 0"/>
+                <operator value="equals"/>
+                <value value="true"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
         <action>
             <operation>
                 <description value="Module call: Verify no updates to server."/>

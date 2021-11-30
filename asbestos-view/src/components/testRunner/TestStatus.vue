@@ -31,7 +31,7 @@
             </span>
             <span v-else-if="isExpectFailure">
                 <span v-if="isPass">
-                    <img src="../../assets/yellow-error.png" class="align-left" title="Partial failure expected">
+                    <img src="../../assets/round.png" class="align-left" title="Partial failure expected, check to see if the correct assertion failed.">
                 </span>
                 <span v-else-if="isFail">
                     <img src="../../assets/error.png" class="align-left">
