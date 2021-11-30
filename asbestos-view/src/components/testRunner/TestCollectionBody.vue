@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="runallgroup">
-      <span v-if="running" class="running">Running</span><span v-if="running" class="fixedWidthFont">{{elapsedTestTime}}s</span>
+      <span v-if="running" class="running">Running</span><span v-if="running" class="timerFont">{{elapsedTestTime}}s</span>
       <div class="divider"></div>
       <div class="divider"></div>
 
@@ -303,13 +303,16 @@ export default {
   text-align: center;
   margin-left: 4px;
 }
-    .fixedWidthFont {
-        font-family: monospace;
-        font-weight: lighter;
-        font-size: x-small;
-        border-style: double;
-        margin-left: 2px;
-        horiz-align: center;
-        vertical-align: middle;
-    }
+.timerFont,
+.fixedWidthFont {
+    font-family: monospace;
+    font-weight: lighter;
+    font-size: x-small;
+    margin-left: 2px;
+    horiz-align: center;
+    vertical-align: middle;
+}
+.timerFont {
+    border-style: double;
+}
 </style>
