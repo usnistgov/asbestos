@@ -49,6 +49,7 @@
                 :report="theReport"
                 :test-script-index="theTestScriptIndex"
                 :disable-debugger="disableDebugger"
+                :parent-test-index="parentTestIndex"
             > </script-details>
         </li>
         <li v-else>
@@ -179,7 +180,7 @@
             '$store.state.base.channelName': 'loadEventSummariesAndReRun'
         },
         props: [
-            'sessionId', 'channelName', 'testCollection', 'testId', 'disableDebugger', 'isAggregateDetail'
+            'sessionId', 'channelName', 'testCollection', 'testId', 'disableDebugger', 'isAggregateDetail', 'parentTestIndex'
         ],
         components: {
             ScriptDetails, ClientDetails, VueMarkdown,

@@ -74,7 +74,7 @@
                                :action-script="action"
                                :action-report="report && report.action ? report.action[actioni] : null"
                                :action-component-name="resultObj.componentName"
-                               :parent-index="getBreakpointIndex(testType, testIndex, actioni)"
+                               :parent-index="getParentBreakpointIndex(parentTestIndex, testType, testIndex, actioni)"
                                :disable-debugger="disableDebugger"
                                :test-type="testType"
                             ></component-script>
@@ -181,7 +181,7 @@
             'script', 'report',
             'scriptContained', 'reportContained', // contained section of the TestScript and TestReport - used in conditional
             'label',
-            'testIndex', 'testType', 'disableDebugger'
+            'testIndex', 'testType', 'disableDebugger', 'parentTestIndex',
         ],
         components: {
             ActionDetails,

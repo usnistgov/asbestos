@@ -29,7 +29,7 @@
                 <ul class="noListStyle">
                     <debuggable-list-item
                             :key="'Setup0'"
-                            :breakpoint-index="getBreakpointIndex('setup',0)"
+                            :breakpoint-index="getParentBreakpointIndex(parentTestIndex,'setup',0)"
                             :has-gutter-options="true"
                             :is-disabled="disableDebugger"
                     >
@@ -42,6 +42,7 @@
                                 :test-type="'setup'"
                                 :test-index="0"
                                 :disable-debugger="disableDebugger"
+                                :parent-test-index="parentTestIndex"
                         ></test-details>
                     </debuggable-list-item>
                 </ul>
@@ -51,7 +52,7 @@
                     <debuggable-list-item
                             v-for="(test, testi) in tests"
                             :key="'Test' + testi"
-                            :breakpoint-index="getBreakpointIndex('test',testi)"
+                            :breakpoint-index="getParentBreakpointIndex(parentTestIndex,'test',testi)"
                             :has-gutter-options="true"
                             :is-disabled="disableDebugger"
                     >
@@ -63,6 +64,7 @@
                                 :test-type="'test'"
                                 :test-index="testi"
                                 :disable-debugger="disableDebugger"
+                                :parent-test-index="parentTestIndex"
                         ></test-details>
                     </debuggable-list-item>
                 </ul>
@@ -137,6 +139,10 @@
                type: String,
                required: false
             },
+            parentTestIndex: {
+                type: String,
+                required: false
+            }
         },
         components: {
             TestDetails,

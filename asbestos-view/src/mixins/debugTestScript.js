@@ -96,7 +96,14 @@ export default {
         getBreakpointIndex(testType, testIndex, actionIndex) {
             return testType + testIndex + (actionIndex !== undefined ?   "." + actionIndex : "")
         },
-        getBreakpointObj(breakpointIndex) {
+        getParentBreakpointIndex(parentTestIndex, testType, testIndex, actionIndex) {
+            const normalIndex = this.getBreakpointIndex(testType, testIndex, actionIndex)
+            if (parentTestIndex !== undefined && parentTestIndex !== null) {
+               return parentTestIndex + '/' + normalIndex
+            }
+            return normalIndex
+         },
+         getBreakpointObj(breakpointIndex) {
             let obj = {testScriptIndex: this.currentMapKey, breakpointIndex: breakpointIndex}
             return obj
         },

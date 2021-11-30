@@ -3,7 +3,7 @@
         <debuggable-list-item
                 v-for="(caction, cactioni) in scriptActions"
                 :key="'CAction' + cactioni"
-                :breakpoint-index="parentIndex + '/' + getBreakpointIndex(testType, 0, cactioni)"
+                :breakpoint-index="parentIndex + '/' + getBreakpointIndex('test', 0, cactioni)"
                 :is-disabled="disableDebugger">
 
             <div v-for="(resultObj, resultKey) in scriptImport(caction)" :key="resultKey">
@@ -22,8 +22,9 @@
                        :channel-name="$store.state.base.channel.channelName"
                        :test-collection="$store.state.testRunner.currentTestCollectionName"
                        :test-id="testId.concat('/').concat(resultObj.componentName)"
-                       :disable-debugger="'true'"
+                       :disable-debugger="'false'"
                        :is-aggregate-detail="'true'"
+                       :parent-test-index="getParentBreakpointIndex(parentIndex, testType, 0, cactioni)"
                        ></test-or-eval-details>
                 </div>
                 <div v-else class="has-cursor">
