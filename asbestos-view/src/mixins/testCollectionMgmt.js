@@ -1,3 +1,5 @@
+import Vue from 'vue'
+
 export default {
     data() {
         return {
@@ -7,7 +9,7 @@ export default {
             evalCount: 30,
             testTimerBeginTime : new Date(),
             testTimer: null,
-            testTimerElapsedMilliSeconds: 0,
+            tcTestTimerElapsedMilliSeconds: {},
         }
     },
     methods: {
@@ -120,7 +122,11 @@ export default {
             }
         },
         calcTestTime() {
-            this.testTimerElapsedMilliSeconds = new Date().getTime() - this.testTimerBeginTime.getTime()
+            const currentTcName = this.$store.state.testRunner.currentTestCollectionName
+            if (this.tcTestTimerElapsedMilliSeconds[currentTcName] === undefined) {
+                Vue.set(this.tcTestTimerElapsedMilliSeconds,currentTcName,  0)
+            }
+            Vue.set(this.tcTestTimerElapsedMilliSeconds, currentTcName,  new Date().getTime() - this.testTimerBeginTime.getTime())
         },
         endTestTime() {
             if (this.testTimer !== null) {
@@ -194,8 +200,13 @@ export default {
             return `${this.sessionId}__${this.channelName}`
         },
         elapsedTestTime() {
-            const s = this.testTimerElapsedMilliSeconds / 1000
-            return Number(s).toFixed(1);
+            try {
+                const currentTcName = this.$store.state.testRunner.currentTestCollectionName
+                const s = this.tcTestTimerElapsedMilliSeconds[currentTcName] / 1000
+                return Number(s).toFixed(1);
+            } catch {
+               return 0
+            }
         },
     }
 }

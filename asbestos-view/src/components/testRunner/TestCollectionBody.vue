@@ -19,7 +19,7 @@
       <button :disabled="running" class="runallbutton" @click="doRunAll()">Run All</button>
     </div>
 
-      <h3 class="conformance-tests-header" :title="`There are ${scriptNames.length} tests in this test collection. pass:${passingTestCount}, fail:${failingTestCount}, notRun:${notRunTestCount}. ${elapsedTestTime > 0 ? 'Previous test(s) took ' + elapsedTestTime + ' seconds to run.':''}`">Tests<test-progress-bar class="testProgressBar" :fail-count="failingTestCount" :pass-count="passingTestCount" :not-run-count="notRunTestCount" :total-count="scriptNames.length"></test-progress-bar></h3>
+      <h3 class="conformance-tests-header" :title="`There are ${scriptNames.length} tests in this test collection. Pass:${passingTestCount}, fail:${failingTestCount}, notRun:${notRunTestCount}. ${elapsedTestTime > 0 ? 'Previous test(s) took ' + elapsedTestTime + ' seconds to run.':''}`">Tests<test-progress-bar class="testProgressBar" :fail-count="failingTestCount" :pass-count="passingTestCount" :not-run-count="notRunTestCount" :total-count="scriptNames.length"></test-progress-bar></h3>
       <div>
       <div class="testBarMargin" v-for="(name, i) in scriptNames"
            :key="name + i" >
