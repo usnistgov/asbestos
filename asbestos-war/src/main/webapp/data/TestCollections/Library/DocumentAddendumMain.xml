@@ -72,7 +72,7 @@
                 <description value="Get fixture string"/>
                 <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
                     <extension url="component">
-                        <valueString value="../GetFixtureString.xml"/>
+                        <valueString value="GetFixtureString.xml"/>
                     </extension>
                     <extension url="urn:variable-in">
                         <valueString value="expectedFixtureBundleEntryCount"/>
@@ -91,7 +91,7 @@
                 <description value="Get fixture string"/>
                 <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
                     <extension url="component">
-                        <valueString value="../GetFixtureString.xml"/>
+                        <valueString value="GetFixtureString.xml"/>
                     </extension>
                     <extension url="urn:variable-in">
                         <valueString value="expectedFixtureBundleEntryCount"/>
@@ -110,7 +110,7 @@
                 <description value="Submit Provide Document Bundle to MHD Document Recipient."/>
                 <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
                     <extension url="component">
-                        <valueString value="../SendPDB.xml"/>
+                        <valueString value="SendPDB.xml"/>
                     </extension>
                     <extension url="urn:fixture-in">
                         <valueString  value="original-bundle"/>
@@ -129,7 +129,7 @@
                 <description value="Read back original DocumentReference and verify status is current."/>
                 <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
                     <extension url="component">
-                        <valueString value="../ReadDocRef.xml"/>
+                        <valueString value="ReadDocRef.xml"/>
                     </extension>
                     <extension url="urn:variable-in">
                         <valueString value="DocRefUrl"/>
@@ -159,7 +159,7 @@
                 <description value="Module call to Original-bundle PDB Validations."/>
                 <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
                     <extension url="component">
-                        <valueString value="../AggregateModule/MHDBundleEvalAggregateResult.xml"/>
+                        <valueString value="AggregateModule/MHDBundleEvalAggregateResult.xml"/>
                     </extension>
                     <extension url="urn:fixture-in">
                         <valueString value="original-bundle"/>
@@ -182,7 +182,7 @@
                 <description value="Submit Provide Document Bundle to MHD Document Recipient."/>
                 <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
                     <extension url="component">
-                        <valueString value="../SendPDB.xml"/>
+                        <valueString value="SendPDB.xml"/>
                     </extension>
                     <extension url="urn:fixture-in">
                         <valueString  value="addendum-bundle"/>
@@ -207,7 +207,7 @@
                 <description value="Module call to PDB Validations."/>
                 <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
                     <extension url="component">
-                        <valueString value="../AggregateModule/MHDv3xBundleEvalAggregateResult.xml"/>
+                        <valueString value="AggregateModule/MHDBundleEvalAggregateResult.xml"/>
                     </extension>
                     <extension url="urn:fixture-in">
                         <valueString value="addendum-bundle"/>
@@ -230,7 +230,7 @@
                 <description value="Call module to read back the DocumentReference."/>
                 <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
                     <extension url="component">
-                        <valueString value="../ReadDocRef.xml"/>
+                        <valueString value="ReadDocRef.xml"/>
                     </extension>
                     <extension url="urn:variable-in">
                         <valueString value="DocRefUrlAddendum"/>
@@ -260,7 +260,7 @@
                 <description value="Call module to read back the DocumentReference."/>
                 <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
                     <extension url="component">
-                        <valueString value="../ReadDocRef.xml"/>
+                        <valueString value="ReadDocRef.xml"/>
                     </extension>
                     <extension url="urn:variable-in">
                         <valueString value="DocRefUrl"/>

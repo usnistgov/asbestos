@@ -10,7 +10,7 @@ import java.util.Properties;
 
 public class AsbestosComponentPath {
     private static Logger log = Logger.getLogger(AsbestosComponentPath.class);
-    private final static String BEGIN_ASBESTOS_COMPONENT_VALUE_VARIABLE = "${";
+    private final static String BEGIN_ASBESTOS_COMPONENT_VALUE_VARIABLE = "#{";
     private final static String END_COMPONENT_VALUE_VARIABLE = "}";
     private final static String COMPONENT_VALUE_CODE_DELIMITER = ":";
 

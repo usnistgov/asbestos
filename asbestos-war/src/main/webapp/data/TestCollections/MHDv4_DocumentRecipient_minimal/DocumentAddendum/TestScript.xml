@@ -7,7 +7,7 @@
                 <description value="Module usage description"/>
                 <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
                     <extension url="component">
-                        <valueString value="../../Library/AggregateModule/MHDv4DocumentAddendum.xml"/>
+                        <valueString value="../../Library/AggregateModule/DocumentAddendum.xml"/>
                     </extension>
                     <extension url="urn:variable-in">
                         <valueString value="'false'"/>
@@ -20,12 +20,6 @@
                     </extension>
                     <extension url="urn:variable-in">
                         <valueString value="'3'"/>
-                    </extension>
-                    <extension url="urn:variable-in">
-                        <valueString value="'1'"/>
-                    </extension>
-                    <extension url="urn:variable-in">
-                        <valueString value="'1'"/>
                     </extension>
                 </modifierExtension>
             </operation>

@@ -20,6 +20,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -83,38 +84,48 @@ public class ModularScripts {
         testActionsHandleImport(testDef, testId, testScript);
     }
 
-    private void testActionsHandleImport(File testDef, String testId, TestScript testScript) {
+    private List<ComponentPathValue> testActionsHandleImport(File testDef, String testId, TestScript testScript ) {
+        List<ComponentPathValue> componentPathValues = new ArrayList<>();
         TestScript.TestScriptSetupComponent setup = testScript.getSetup();
         if (setup != null ) {
             for (TestScript.SetupActionComponent action : setup.getAction()) {
-                handleImportScripts(testDef, testId, action, testScript.getVariable());
+                List<ComponentPathValue> list = handleImportScripts(testDef, testId, action, testScript.getVariable() );
+                if (list != null) {
+                    componentPathValues.addAll(list);
+                }
             }
         }
 
         for (TestScript.TestScriptTestComponent test : testScript.getTest()) {
             for (TestScript.TestActionComponent action: test.getAction()) {
-                handleImportScripts(testDef, testId, action, testScript.getVariable());
+                List<ComponentPathValue> list = handleImportScripts(testDef, testId, action, testScript.getVariable() );
+                if (list != null) {
+                    componentPathValues.addAll(list);
+                }
+
             }
         }
+        return componentPathValues;
     }
 
-    void handleImportScripts(File testDef, String testId, TestScript.SetupActionComponent action, List<TestScript.TestScriptVariableComponent> variableComponentList) {
+    List<ComponentPathValue> handleImportScripts(File testDef, String testId, TestScript.SetupActionComponent action, List<TestScript.TestScriptVariableComponent> variableComponentList ) {
         if (!action.hasOperation())
-            return;
+            return null;
         TestScript.SetupActionOperationComponent op = action.getOperation();
-        handleImportAction(testDef, testId, op, variableComponentList);
+        return handleImportAction(testDef, testId, op, variableComponentList );
     }
 
-    void handleImportScripts(File testDef, String testId, TestScript.TestActionComponent action, List<TestScript.TestScriptVariableComponent> variableComponentList) {
+    List<ComponentPathValue> handleImportScripts(File testDef, String testId, TestScript.TestActionComponent action, List<TestScript.TestScriptVariableComponent> variableComponentList) {
         if (!action.hasOperation())
-            return;
+            return null;
         TestScript.SetupActionOperationComponent op = action.getOperation();
-        handleImportAction(testDef, testId, op, variableComponentList);
+        return handleImportAction(testDef, testId, op, variableComponentList);
     }
 
-    private void handleImportAction(File testDef, String testId, TestScript.SetupActionOperationComponent op, List<TestScript.TestScriptVariableComponent> variableComponentList) {
+    private List<ComponentPathValue> handleImportAction(File testDef, String testId, TestScript.SetupActionOperationComponent op, List<TestScript.TestScriptVariableComponent> variableComponentList) {
+        List<ComponentPathValue> componentPathValues = new ArrayList<>();
         if (!op.hasModifierExtension())
-            return;
+            return null;
         for (Extension importExtension : op.getModifierExtension()) {
             if (!importExtension.getUrl().equals("https://github.com/usnistgov/asbestos/wiki/TestScript-Import"))
                 continue;
@@ -122,16 +133,11 @@ public class ModularScripts {
                 if (componentExtension.getUrl().equals("component")) {
                     if (componentExtension.hasValue()) {
                         String componentExtensionValue = componentExtension.getValue().toString();
-                        ComponentPathValue componentPathValue  = AsbestosComponentPath.getRelativeComponentPath(ec.getTestCollectionProperties(testCollectionName), variableComponentList, componentExtensionValue);
-                        if (componentPathValue.isReplaced()) {
-                            // file name becomes the key to partition the scripts in UI
-                            // rewrite the path in the json that was already added prior to this method call
-                            // previous script is the parent, which calls this module component
-                            String lastKey = scripts.keySet().stream().reduce((f, s) -> s).get();
-                            String newValue = scripts.get(lastKey).replaceFirst(Pattern.quote(componentPathValue.getToken()), Matcher.quoteReplacement(componentPathValue.getRelativePath()));
-                            scripts.replace(lastKey, newValue);
-                        }
+                        ComponentPathValue componentPathValue = AsbestosComponentPath.getRelativeComponentPath(ec.getTestCollectionProperties(testCollectionName), variableComponentList, componentExtensionValue);
                         String relativePath = componentPathValue.getRelativePath();
+                        if (componentPathValue.isReplaced()) {
+                            componentPathValues.add(componentPathValue);
+                        }
                         String componentPath = testDef.getPath() + File.separator + relativePath;
                         File componentFile = new File(componentPath);
                         TestScript componentScript = (TestScript) ParserBase.parse(componentFile);
@@ -145,7 +151,20 @@ public class ModularScripts {
                         locally rebase the testDef to component script module since its references are relative to the module path, not the root testDef
                          */
                         File rebasedTestDef = componentFile.getParentFile();
-                        testActionsHandleImport(rebasedTestDef, testId, componentScript);
+                        List<ComponentPathValue> replacedComponentPathValues = testActionsHandleImport(rebasedTestDef, testId, componentScript);
+                        if (replacedComponentPathValues != null && !replacedComponentPathValues.isEmpty()) {
+                            String newValue = componentJson;
+                            boolean isReplaced = false;
+                            for (ComponentPathValue c : replacedComponentPathValues) {
+                                if (c != null && c.isReplaced()) {
+                                    isReplaced = true;
+                                    newValue = newValue.replaceAll(Pattern.quote(c.getToken()), Matcher.quoteReplacement(c.getRelativePath()));
+                                }
+                            }
+                            if (isReplaced) {
+                                scripts.replace(fullComponentId, newValue);
+                            }
+                        }
 
                     } else {
                         log.error(String.format("%s component value does not exist.", testDef.toString()));
@@ -153,6 +172,7 @@ public class ModularScripts {
                 }
             }
         }
+        return componentPathValues;
     }
 
     public String asJson() {  // returns object : name => TestScript

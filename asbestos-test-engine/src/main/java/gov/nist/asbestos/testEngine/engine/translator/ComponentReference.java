@@ -57,7 +57,7 @@ public class ComponentReference {
             throw new RuntimeException("Import does not declare a component reference");
         this.componentRef = new File(testDef, relativePath);
         if (!this.componentRef.exists())
-            throw new RuntimeException("Component reference " + this.componentRef + " does not exist");
+            throw new RuntimeException("Modular TestScript error: Component reference " + this.componentRef + " does not exist");
     }
 
     @Override

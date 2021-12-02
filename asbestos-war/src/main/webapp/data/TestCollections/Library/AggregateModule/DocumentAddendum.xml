@@ -25,7 +25,7 @@
                 <description value="Previous test action operation is analyzed using assertions."/>
                 <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
                     <extension url="component">
-                        <valueString value="../MHDv3x/DocumentAddendumMain.xml"/>
+                        <valueString value="../DocumentAddendumMain.xml"/>
                     </extension>
                     <extension url="urn:variable-in">
                         <valueString value="isComprehensiveMetadataExpected"/>
