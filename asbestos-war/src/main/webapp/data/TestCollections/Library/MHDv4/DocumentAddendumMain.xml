@@ -1,0 +1,293 @@
+<TestScript xmlns="http://hl7.org/fhir">
+    <modifierExtension url="urn:module">
+        <extension url="urn:variable-in">
+            <valueString value="isComprehensiveMetadataExpected"/>
+        </extension>
+        <extension url="urn:variable-in">
+            <valueString value="getOriginalFixtureParams"/>
+        </extension>
+        <extension url="urn:variable-in">
+            <valueString value="getAddendumFixtureParams"/>
+        </extension>
+        <extension url="urn:variable-in">
+            <valueString value="expectedFixtureBundleEntryCount"/>
+        </extension>
+        <extension url="urn:variable-in">
+            <valueString value="expectedManifestCount"/>
+        </extension>
+        <extension url="urn:variable-in">
+            <valueString value="expectedDocRefCount"/>
+        </extension>
+    </modifierExtension>
+
+    <description value="Submit Provide Document Bundle followed by an Addendum."/>
+    <fixture id="patient_bundle">
+        <!--
+           This patient comes out of the test Patient cache
+        -->
+        <autocreate value="false"/>
+        <autodelete value="false"/>
+        <resource>
+            <reference value="Patient/Alex_Alder"/>
+        </resource>
+    </fixture>
+    <variable>
+        <name value="DocRefUrl"/>
+        <expression value="Bundle.entry[0].response.location"/>
+        <sourceId value="pdb-response"/>
+    </variable>
+    <variable>
+        <name value="DocRefUrlAddendum"/>
+        <expression value="Bundle.entry[0].response.location"/>
+        <sourceId value="addendum-response"/>
+    </variable>
+    <variable>  <!-- referenced in pdb -->
+        <name value="requestPatientRef"/>
+        <expression value="Bundle.entry.fullUrl"/>
+        <sourceId value="patient_bundle"/>
+    </variable>
+    <variable>
+        <name value="patientResourceId"/>
+        <expression value="Bundle.entry.fullUrl"/>
+        <sourceId value="patient_bundle"/>
+    </variable>
+    <!--    <variable>-->
+    <!--        <name value="readbackPatientId"/>-->
+    <!--        <expression value="Patient.identifier.value"/>-->
+    <!--        <sourceId value="read-back"/>-->
+    <!--    </variable>-->
+    <variable>
+        <name value="requestEntryCount"/>
+        <expression value="Bundle.entry.count()"/>
+        <sourceId value="original-bundle"/>
+    </variable>
+    <variable>
+        <name value="original"/>
+        <expression value="Bundle.entry[0].response.location"/>
+        <sourceId value="pdb-response"/>
+    </variable>
+    <variable>
+        <name value="isComprehensiveMetadataExpected"/>
+        <defaultValue value="false"/>
+    </variable>
+
+    <setup>
+        <modifierExtension url="urn:noErrors"/>
+        <action>
+            <operation>
+                <description value="Get fixture string"/>
+                <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
+                    <extension url="component">
+                        <valueString value="../GetFixtureString.xml"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="expectedFixtureBundleEntryCount"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="getOriginalFixtureParams"/>
+                    </extension>
+                    <extension url="urn:fixture-out">
+                        <valueString value="original-bundle"/>
+                    </extension>
+                </modifierExtension>
+            </operation>
+        </action>
+        <action>
+            <operation>
+                <description value="Get fixture string"/>
+                <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
+                    <extension url="component">
+                        <valueString value="../GetFixtureString.xml"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="expectedFixtureBundleEntryCount"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="getAddendumFixtureParams"/>
+                    </extension>
+                    <extension url="urn:fixture-out">
+                        <valueString value="addendum-bundle"/>
+                    </extension>
+                </modifierExtension>
+            </operation>
+        </action>
+        <action>
+            <operation>
+                <description value="Submit Provide Document Bundle to MHD Document Recipient."/>
+                <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
+                    <extension url="component">
+                        <valueString value="../SendPDB.xml"/>
+                    </extension>
+                    <extension url="urn:fixture-in">
+                        <valueString  value="original-bundle"/>
+                    </extension>
+                    <extension url="urn:variable-in-no-translation">
+                        <valueString value="patientResourceId"/>
+                    </extension>
+                    <extension url="urn:fixture-out">
+                        <valueString value="pdb-response"/>
+                    </extension>
+                </modifierExtension>
+            </operation>
+        </action>
+        <action>
+            <operation>
+                <description value="Read back original DocumentReference and verify status is current."/>
+                <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
+                    <extension url="component">
+                        <valueString value="../ReadDocRef.xml"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="DocRefUrl"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="patientResourceId"/>
+                    </extension>
+                    <extension url="urn:fixture-out">
+                        <valueString  value="response"/>
+                    </extension>
+                </modifierExtension>
+            </operation>
+        </action>
+        <action>
+            <assert>
+                <description value="... status is current"/>
+                <expression value="DocumentReference.status = 'current'"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+    </setup>
+
+    <test>
+        <description value="Original-bundle PDB Validations."/>
+        <action>
+            <operation>
+                <description value="Module call to Original-bundle PDB Validations."/>
+                <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
+                    <extension url="component">
+                        <valueString value="../AggregateModule/MHDv4BundleEvalAggregateResult.xml"/>
+                    </extension>
+                    <extension url="urn:fixture-in">
+                        <valueString value="original-bundle"/>
+                    </extension>
+                    <extension url="urn:fixture-in">
+                        <valueString value="pdb-response"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="isComprehensiveMetadataExpected"/>
+                    </extension>
+                </modifierExtension>
+            </operation>
+        </action>
+    </test>
+
+    <test>
+        <description value="Send Addendum DocumentReference in PDB."/>
+        <action>
+            <operation>
+                <description value="Submit Provide Document Bundle to MHD Document Recipient."/>
+                <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
+                    <extension url="component">
+                        <valueString value="../SendPDB.xml"/>
+                    </extension>
+                    <extension url="urn:fixture-in">
+                        <valueString  value="addendum-bundle"/>
+                    </extension>
+                    <extension url="urn:variable-in-no-translation">
+                        <valueString value="patientResourceId"/>
+                    </extension>
+                    <extension url="urn:variable-in-no-translation">
+                        <valueString value="original"/>
+                    </extension>
+                    <extension url="urn:fixture-out">
+                        <valueString value="addendum-response"/>
+                    </extension>
+                </modifierExtension>
+            </operation>
+        </action>
+    </test>
+    <test>
+        <description value="Addendum-bundle PDB Validations."/>
+        <action>
+            <operation>
+                <description value="Module call to PDB Validations."/>
+                <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
+                    <extension url="component">
+                        <valueString value="../AggregateModule/MHDv4BundleEvalAggregateResult.xml"/>
+                    </extension>
+                    <extension url="urn:fixture-in">
+                        <valueString value="addendum-bundle"/>
+                    </extension>
+                    <extension url="urn:fixture-in">
+                        <valueString value="addendum-response"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="isComprehensiveMetadataExpected"/>
+                    </extension>
+                </modifierExtension>
+            </operation>
+        </action>
+    </test>
+
+    <test>
+        <description value="Read back addendum DocumentReference."/>
+        <action>
+            <operation>
+                <description value="Call module to read back the DocumentReference."/>
+                <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
+                    <extension url="component">
+                        <valueString value="../ReadDocRef.xml"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="DocRefUrlAddendum"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="patientResourceId"/>
+                    </extension>
+                    <extension url="urn:fixture-out">
+                        <valueString  value="response"/>
+                    </extension>
+                </modifierExtension>
+            </operation>
+        </action>
+        <action>
+            <assert>
+                <description value="... status is current"/>
+                <expression value="DocumentReference.status = 'current'"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+    </test>
+
+    <test>
+        <description value="Read back original DocumentReference."/>
+        <action>
+            <operation>
+                <description value="Call module to read back the DocumentReference."/>
+                <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
+                    <extension url="component">
+                        <valueString value="../ReadDocRef.xml"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="DocRefUrl"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="patientResourceId"/>
+                    </extension>
+                    <extension url="urn:fixture-out">
+                        <valueString  value="response"/>
+                    </extension>
+                </modifierExtension>
+            </operation>
+        </action>
+        <action>
+            <assert>
+                <description value="... status is current"/>
+                <expression value="DocumentReference.status = 'current'"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+    </test>
+
+
+</TestScript>

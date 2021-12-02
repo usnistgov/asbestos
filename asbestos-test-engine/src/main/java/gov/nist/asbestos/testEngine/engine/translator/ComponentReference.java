@@ -7,6 +7,7 @@ import org.hl7.fhir.r4.model.TestScript;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 
 public class ComponentReference {
     private String relativePath = null;
@@ -18,13 +19,14 @@ public class ComponentReference {
     private List<Parameter> variablesInNoTranslation = new ArrayList<>();
     private List<Parameter> variablesOut = new ArrayList<>();
 
-    public ComponentReference(File testDef, List<Extension> importDeclaration)  {
+    public ComponentReference(Properties propertiesMap, List<TestScript.TestScriptVariableComponent> variableComponentList, File testDef, List<Extension> importDeclaration)  {
         for (Extension imd : importDeclaration) {
             for (Extension e : imd.getExtension()) {
                 String url = e.getUrl();
                 String value = e.getValue().toString();  // value type is Type????
                 if (url.equals("component")) {
-                    this.relativePath = value;
+                    ComponentPathValue componentPathValue = AsbestosComponentPath.getRelativeComponentPath(propertiesMap, variableComponentList, value);
+                    this.relativePath = componentPathValue.getRelativePath();
                 } else if (url.equals("urn:fixture-in")) {
                     Parameter p = new Parameter();
                     p.setCallerName(value);

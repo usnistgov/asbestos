@@ -904,7 +904,7 @@ public class TestEngine  implements TestDef {
         /*
             Validate and align request input fixtures and variables
          */
-        ComponentReference componentReference = new ComponentReference(testDef, Collections.singletonList(extension));
+        ComponentReference componentReference = new ComponentReference(getEC().getTestCollectionProperties(getTestCollection()), testScript.getVariable(),  testDef, Collections.singletonList(extension));
 
         TestScript module = componentReference.getComponent();
         // fill in componentReference with local names from module definition

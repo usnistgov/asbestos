@@ -8,14 +8,17 @@ import org.jaxen.util.SingletonList;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 
 public class ScriptTranslator {
     private File testDef;
     private TestScript script;
     private List<String> errors = new ArrayList<>();
+    private Properties propertiesMap;
 
 
-    public ScriptTranslator(File testDef) {
+    public ScriptTranslator(Properties propertiesMap, File testDef) {
+        this.propertiesMap = propertiesMap;
         this.testDef = testDef;
         this.script = (TestScript) ParserBase.parse(new File(testDef, "script.xml"));
     }
@@ -53,11 +56,11 @@ public class ScriptTranslator {
         return errors;
     }
 
-    ComponentReferences extractComponentReferences(TestScript.TestScriptTestComponent test) {
+    private ComponentReferences extractComponentReferences(TestScript.TestScriptTestComponent test) {
         List<ComponentReference> rawRefs = new ArrayList<>();
         for (Extension e : test.getModifierExtension()) {
             if (e.getUrl().equals("urn:import")) {
-                ComponentReference ref = new ComponentReference(testDef, new SingletonList(e));
+                ComponentReference ref = new ComponentReference(propertiesMap, script.getVariable(), testDef, new SingletonList(e));
                 ref.loadComponentHeader();
                 rawRefs.add(ref);
             }
@@ -65,11 +68,11 @@ public class ScriptTranslator {
         return new ComponentReferences(rawRefs);
     }
 
-    ComponentReferences extractComponentReferences(TestScript.TestScriptSetupComponent setup) {
+    private ComponentReferences extractComponentReferences(TestScript.TestScriptSetupComponent setup) {
         List<ComponentReference> rawRefs = new ArrayList<>();
         for (Extension e : setup.getModifierExtension()) {
             if (e.getUrl().equals("urn:import")) {
-                ComponentReference ref = new ComponentReference(testDef, new SingletonList(e));
+                ComponentReference ref = new ComponentReference(propertiesMap, script.getVariable(),  testDef, new SingletonList(e));
                 ref.loadComponentHeader();
                 rawRefs.add(ref);
             }

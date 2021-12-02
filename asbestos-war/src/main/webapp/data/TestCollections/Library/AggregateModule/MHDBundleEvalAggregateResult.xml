@@ -1,0 +1,50 @@
+<TestScript xmlns="http://hl7.org/fhir">
+    <modifierExtension url="urn:module">
+        <extension url="urn:fixture-in">
+            <valueString value="request"/>
+        </extension>
+        <extension url="urn:fixture-in">
+            <valueString value="response"/>
+        </extension>
+        <extension url="urn:variable-in">
+            <valueString value="isComprehensiveMetadataExpected"/>
+        </extension>
+    </modifierExtension>
+
+    <id value="MHDBundleEvalAggregateResult"/>
+    <name value="MHDBundleEvalAggregateResult"/>
+    <description value="This TestScript is a bridge that links the parent TestScript to the imported module component."/>
+
+    <variable>
+        <name value="scriptMHDv3.x"/>
+        <defaultValue value="../../Internal/bundle_eval/TestScript.xml"/>
+    </variable>
+    <variable>
+        <name value="scriptMHDv4"/>
+        <defaultValue value="../../Internal/bundle_evalMHDv4/TestScript.xml"/>
+    </variable>
+    <test>
+        <description value="Bundle evaluation assertions."/>
+        <action>
+            <operation>
+                <description value="Previous test action operation is analyzed using assertions."/>
+                <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
+                    <extension url="component">
+                        <valueString value="${script:TestCollection.properties:MhdVersion}"/>
+                    </extension>
+                    <extension url="urn:fixture-in">
+                        <valueString value="request"/>
+                    </extension>
+                    <extension url="urn:fixture-in">
+                        <valueString value="response"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="isComprehensiveMetadataExpected"/>
+                    </extension>
+
+                </modifierExtension>
+            </operation>
+        </action>
+    </test>
+
+</TestScript>

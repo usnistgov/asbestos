@@ -40,7 +40,7 @@ public class GetTestScriptRequest {
         }
 
         try {
-            ModularScripts modularScripts = new ModularScripts(testDef);
+            ModularScripts modularScripts = new ModularScripts(request.ec, collectionName, testDef);
             String json = modularScripts.asJson();
             request.returnString(json);
             request.ok();
