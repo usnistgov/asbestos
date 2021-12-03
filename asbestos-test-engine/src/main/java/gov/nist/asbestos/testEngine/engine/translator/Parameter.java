@@ -33,14 +33,23 @@ public class Parameter {
         return null;
     }
 
-    static public Parameter findByLocalName(List<Parameter> parameterList, String localName) {
-        boolean isVariable = false;
-        if (localName.startsWith("${")) {
-            isVariable = true;
-            // is Variable reference - strip ${} wrapper for comparision
+    public static String extractParameterName(String localName) {
+        if (isVariable(localName)) {
             localName = localName.substring(2);
-            if (localName.endsWith("}"))
-                localName = localName.substring(0, localName.length() - 1);
+            localName = localName.substring(0, localName.length() - 1);
+            return localName;
+        }
+        return localName;
+    }
+
+    public static boolean isVariable(String name) {
+       return name.startsWith("${") && name.endsWith("}");
+    }
+
+    static public Parameter findByLocalName(List<Parameter> parameterList, String localName) {
+        boolean isVariable = isVariable(localName);
+        if (isVariable) {
+            localName = extractParameterName(localName);
         }
         for (Parameter p : parameterList) {
             if (p.getLocalName().equals(localName)) {

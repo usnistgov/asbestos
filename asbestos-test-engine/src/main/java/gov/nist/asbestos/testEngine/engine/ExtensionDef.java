@@ -6,6 +6,10 @@ public class ExtensionDef {
     public static final String multiErrors = "urn:multipleErrors";
     public static final String noErrors = "urn:noErrors";
     public static final String expectFailure = "urn:asbestos:test:action:expectFailure";
+    /**
+     * coded as a FHIRPath collection string in (a|b...n) format
+     */
+    public static final String assertionIdList = "urn:asbestos:test:action:assertionIdList";
     public static final String conditional = "urn:conditional";
     public static final String subFixture = "urn:subFixture";
     public static final String fhirPath = "urn:fhirPath";

@@ -15,11 +15,14 @@
         <extension url="urn:variable-in">
             <valueString value="expectedDocRefCount"/>
         </extension>
+        <extension url="urn:variable-in">
+            <valueString value="expectedFailAssertionIdList"/>
+        </extension>
     </modifierExtension>
 
     <id value="PDBFailsMain"/>
     <name value="PDBFailsMain"/>
-    <description value="This TestScript is a bridge to submit a bundle and evaluate."/>
+    <description value="Test workflow."/>
 
     <fixture id="patient_bundle">
         <!--
@@ -67,7 +70,7 @@
     </variable>
     <variable>
         <name value="dependsOnTestId"/>
-        <defaultValue value="MHD_DocumentRecipient_minimal/1_Prerequisite_Single_Document_with_Binary"/>
+        <defaultValue value="MHDv4_DocumentRecipient_minimal/1_Prerequisite_Single_Document_with_Binary"/>
     </variable>
 
     <setup>
@@ -134,12 +137,16 @@
     <test>
         <description value="PDB Validations."/>
         <action>
-            <modifierExtension url="urn:asbestos:test:action:expectFailure"/>
+            <modifierExtension url="urn:asbestos:test:action:expectFailure">
+                <extension url="urn:asbestos:test:action:assertionIdList">
+                    <valueString value="${expectedFailAssertionIdList}"/>
+                </extension>
+            </modifierExtension>
             <operation>
                 <description value="Module usage description"/>
                 <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
                     <extension url="component">
-                        <valueString value="../AggregateModule/MHDv4BundleEvalAggregateResult.xml"/>
+                        <valueString value="../AggregateModule/MHDBundleEvalAggregateResult.xml"/>
                     </extension>
                     <extension url="urn:fixture-in">
                         <valueString value="pdb-bundle"/>

@@ -7,7 +7,7 @@
             <valueString value="getOriginalFixtureParams"/>
         </extension>
         <extension url="urn:variable-in">
-            <valueString value="getAddendumFixtureParams"/>
+            <valueString value="getReplaceFixtureParams"/>
         </extension>
         <extension url="urn:variable-in">
             <valueString value="expectedFixtureBundleEntryCount"/>
@@ -31,9 +31,9 @@
         <sourceId value="pdb-response"/>
     </variable>
     <variable>
-        <name value="DocRefUrlAddendum"/>
+        <name value="DocRefUrlReplace"/>
         <expression value="Bundle.entry[0].response.location"/>
-        <sourceId value="addendum-response"/>
+        <sourceId value="replace-response"/>
     </variable>
     <variable>  <!-- referenced in pdb -->
         <name value="requestPatientRef"/>
@@ -41,15 +41,15 @@
         <sourceId value="patient_bundle"/>
     </variable>
     <variable>
-        <name value="patientResourceId"/>
-        <expression value="Bundle.entry.fullUrl"/>
+    	<name value="patientResourceId"/>
+    	<expression value="Bundle.entry.fullUrl"/>
         <sourceId value="patient_bundle"/>
     </variable>
-    <!--    <variable>-->
-    <!--        <name value="readbackPatientId"/>-->
-    <!--        <expression value="Patient.identifier.value"/>-->
-    <!--        <sourceId value="read-back"/>-->
-    <!--    </variable>-->
+<!--    <variable>-->
+<!--        <name value="readbackPatientId"/>-->
+<!--        <expression value="Patient.identifier.value"/>-->
+<!--        <sourceId value="read-back"/>-->
+<!--    </variable>-->
     <variable>
         <name value="requestEntryCount"/>
         <expression value="Bundle.entry.count()"/>
@@ -97,10 +97,10 @@
                         <valueString value="expectedFixtureBundleEntryCount"/>
                     </extension>
                     <extension url="urn:variable-in">
-                        <valueString value="getAddendumFixtureParams"/>
+                        <valueString value="getReplaceFixtureParams"/>
                     </extension>
                     <extension url="urn:fixture-out">
-                        <valueString value="addendum-bundle"/>
+                        <valueString value="replace-bundle"/>
                     </extension>
                 </modifierExtension>
             </operation>
@@ -151,7 +151,6 @@
             </assert>
         </action>
     </setup>
-
     <test>
         <description value="Original-bundle PDB Validations."/>
         <action>
@@ -174,9 +173,8 @@
             </operation>
         </action>
     </test>
-
     <test>
-        <description value="Send Addendum DocumentReference in PDB."/>
+        <description value="Send Replacement DocumentReference in PDB."/>
         <action>
             <operation>
                 <description value="Submit Provide Document Bundle to MHD Document Recipient."/>
@@ -185,7 +183,7 @@
                         <valueString value="SendPDB.xml"/>
                     </extension>
                     <extension url="urn:fixture-in">
-                        <valueString  value="addendum-bundle"/>
+                        <valueString  value="replace-bundle"/>
                     </extension>
                     <extension url="urn:variable-in-no-translation">
                         <valueString value="patientResourceId"/>
@@ -194,26 +192,26 @@
                         <valueString value="original"/>
                     </extension>
                     <extension url="urn:fixture-out">
-                        <valueString value="addendum-response"/>
+                        <valueString value="replace-response"/>
                     </extension>
                 </modifierExtension>
             </operation>
         </action>
     </test>
     <test>
-        <description value="Addendum-bundle PDB Validations."/>
+        <description value="Replacement-bundle PDB Validations."/>
         <action>
             <operation>
-                <description value="Module call to PDB Validations."/>
+                <description value="Module call to Original-bundle PDB Validations."/>
                 <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
                     <extension url="component">
                         <valueString value="AggregateModule/MHDBundleEvalAggregateResult.xml"/>
                     </extension>
                     <extension url="urn:fixture-in">
-                        <valueString value="addendum-bundle"/>
+                        <valueString value="replace-bundle"/>
                     </extension>
                     <extension url="urn:fixture-in">
-                        <valueString value="addendum-response"/>
+                        <valueString value="replace-response"/>
                     </extension>
                     <extension url="urn:variable-in">
                         <valueString value="isComprehensiveMetadataExpected"/>
@@ -223,8 +221,9 @@
         </action>
     </test>
 
+
     <test>
-        <description value="Read back addendum DocumentReference."/>
+        <description value="Read back replacement DocumentReference."/>
         <action>
             <operation>
                 <description value="Call module to read back the DocumentReference."/>
@@ -233,13 +232,13 @@
                         <valueString value="ReadDocRef.xml"/>
                     </extension>
                     <extension url="urn:variable-in">
-                        <valueString value="DocRefUrlAddendum"/>
+                        <valueString value="DocRefUrlReplace"/>
                     </extension>
                     <extension url="urn:variable-in">
                         <valueString value="patientResourceId"/>
                     </extension>
                     <extension url="urn:fixture-out">
-                        <valueString  value="response"/>
+                        <valueString  value="readBackResponse"/>
                     </extension>
                 </modifierExtension>
             </operation>
@@ -269,19 +268,18 @@
                         <valueString value="patientResourceId"/>
                     </extension>
                     <extension url="urn:fixture-out">
-                        <valueString  value="response"/>
+                        <valueString  value="rereadBackResponse"/>
                     </extension>
                 </modifierExtension>
             </operation>
         </action>
         <action>
             <assert>
-                <description value="... status is current"/>
-                <expression value="DocumentReference.status = 'current'"/>
+                <description value="... status is superseded"/>
+                <expression value="DocumentReference.status = 'superseded'"/>
                 <warningOnly value="false"/>
             </assert>
         </action>
     </test>
-
 
 </TestScript>

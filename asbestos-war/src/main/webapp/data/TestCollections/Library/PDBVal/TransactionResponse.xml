@@ -28,7 +28,7 @@
     <test>
         <name value="Transaction response message."/>
         <action>
-            <assert>
+            <assert id="FTKAID_888">
                 <description value="Transaction: returns 200.|MHDPDBGoodStatus"/>
                 <response value="okay"/>
                 <sourceId value="response"/>

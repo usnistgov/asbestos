@@ -39,7 +39,7 @@
                 <description value="PDB in the request bundle is analyzed using FHIRPath assertions."/>
                 <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
                     <extension url="component">
-                        <valueString value="../../Library/PDBVal/RequestMessageMHDv4.xml"/>
+                        <valueString value="../../Library/PDBVal/MHDv4RequestMessage.xml"/>
                     </extension>
                     <extension url="urn:fixture-in">
                         <valueString value="request"/>

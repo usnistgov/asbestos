@@ -182,6 +182,8 @@ public class AssertionRunner implements AssertionContext {
         currentAssert = as;
         currentAssertReport = assertReport;
 
+        if (as.hasId())
+            assertReport.setId(as.getId());
         assertReport.setResult(TestReport.TestReportActionResult.PASS);  // may be overwritten
 
         FixtureComponent source = getSourceIfAvailable();

@@ -7,16 +7,16 @@
             <valueString value="getOriginalFixtureParams"/>
         </extension>
         <extension url="urn:variable-in">
-            <valueString value="getAddendumFixtureParams"/>
+            <valueString value="getReplaceFixtureParams"/>
         </extension>
         <extension url="urn:variable-in">
             <valueString value="expectedFixtureBundleEntryCount"/>
         </extension>
     </modifierExtension>
 
-    <id value="MHDDocumentAddendumAggregate"/>
-    <name value="MHDDocumentAddendumAggregate"/>
-    <description value="This TestScript is a bridge that links the parent TestScript to the imported module component."/>
+    <id value="MHDDocumentReplaceAggregate"/>
+    <name value="MHDDocumentReplace"/>
+    <description value="Aggregate test that imports many other TestScript(s)."/>
 
     <test>
         <description value="Bundle evaluation assertions."/>
@@ -25,7 +25,7 @@
                 <description value="Previous test action operation is analyzed using assertions."/>
                 <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
                     <extension url="component">
-                        <valueString value="../DocumentAddendumMain.xml"/>
+                        <valueString value="../DocumentReplaceMain.xml"/>
                     </extension>
                     <extension url="urn:variable-in">
                         <valueString value="isComprehensiveMetadataExpected"/>
@@ -34,7 +34,7 @@
                         <valueString value="getOriginalFixtureParams"/>
                     </extension>
                     <extension url="urn:variable-in">
-                        <valueString value="getAddendumFixtureParams"/>
+                        <valueString value="getReplaceFixtureParams"/>
                     </extension>
                     <extension url="urn:variable-in">
                         <valueString value="expectedFixtureBundleEntryCount"/>

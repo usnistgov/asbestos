@@ -38,6 +38,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * See http://hl7.org/fhir/testing.html
@@ -1097,18 +1098,28 @@ public class TestEngine  implements TestDef {
         return fixtureMgr.getFhirClient().getResourceCacheMgr();
     }
 
+    /**
+     * This only supports initial assertion failure, and the message is propagated to the parent operation of the module containing assertions
+     */
     static class ErrorReport {
         TestReport.TestReportActionResult type;
         String message;
+        List<String> failedAssertionIds = new ArrayList<>();
 
-        ErrorReport(TestReport.SetupActionAssertComponent theAssert) {
+        ErrorReport(TestReport.SetupActionAssertComponent theAssert, List<String> ids) {
             type = theAssert.getResult();
-            message = theAssert.getMessage();
+            failedAssertionIds.addAll(ids);
+            // Was  message = theAssert.getMessage();
+            message = //"(".concat(
+                    ids.stream()
+                    .map(s -> "'".concat(s).concat("'"))
+                    .collect(Collectors.joining("|"));
+           ; //.concat(")");
         }
 
-        ErrorReport(TestReport.SetupActionOperationComponent theOp) {
+        ErrorReport(TestReport.SetupActionOperationComponent theOp, String message) {
             type = theOp.getResult();
-            message = theOp.getMessage();
+            this.message = message;
         }
     }
 
@@ -1125,22 +1136,50 @@ public class TestEngine  implements TestDef {
     }
 
     private ErrorReport getErrorMessage(TestReport report) {
+        TestReport.SetupActionAssertComponent firstFailedAssertion = null;
+        TestReport.SetupActionOperationComponent firstFailedOperation = null;
+        List<String> failedIds = new ArrayList<>();
+        List<String> messageList = new ArrayList<>();
+
         if (report.hasSetup()) {
             for (TestReport.SetupActionComponent action : report.getSetup().getAction()) {
-                if (action.hasAssert() && hasErrorOrFail(action.getAssert()))
-                    return new ErrorReport(action.getAssert());
-                if (action.hasOperation() && hasErrorOrFail(action.getOperation()))
-                    return new ErrorReport(action.getOperation());
+                if (action.hasAssert() && hasErrorOrFail(action.getAssert())) {
+                    TestReport.SetupActionAssertComponent failedAssert = action.getAssert();
+                    if (firstFailedAssertion == null)
+                        firstFailedAssertion = failedAssert;
+                    if (failedAssert.hasId()) {
+                        failedIds.add(failedAssert.getId());
+                    }
+                }
+                if (action.hasOperation() && hasErrorOrFail(action.getOperation())) {
+                    TestReport.SetupActionOperationComponent failedOperation = action.getOperation();
+                    if (failedOperation.hasMessage())
+                        messageList.add( failedOperation.getMessage());
+                    if (firstFailedOperation == null)
+                        firstFailedOperation = action.getOperation();
+                }
             }
         }
 
         if (report.hasTest()) {
             for (TestReport.TestReportTestComponent test : report.getTest()) {
                 for (TestReport.TestActionComponent action : test.getAction()) {
-                    if (action.hasAssert() && hasErrorOrFail(action.getAssert()))
-                        return new ErrorReport(action.getAssert());
-                    if (action.hasOperation() && hasErrorOrFail(action.getOperation()))
-                        return new ErrorReport(action.getOperation());
+                    if (action.hasAssert() && hasErrorOrFail(action.getAssert())) {
+                        TestReport.SetupActionAssertComponent failedAssert = action.getAssert();
+                        if (firstFailedAssertion == null)
+                            firstFailedAssertion = failedAssert;
+                        if (failedAssert.hasId()) {
+                            failedIds.add(failedAssert.getId());
+                        }
+                    }
+                    if (action.hasOperation() && hasErrorOrFail(action.getOperation())) {
+                        TestReport.SetupActionOperationComponent failedOperation = action.getOperation();
+                        if (failedOperation.hasMessage()) {
+                            messageList.add(failedOperation.getMessage());
+                        }
+                        if (firstFailedOperation == null)
+                            firstFailedOperation = failedOperation;
+                    }
                 }
             }
         }
@@ -1148,10 +1187,15 @@ public class TestEngine  implements TestDef {
             TestReport.TestReportTeardownComponent teardown = report.getTeardown();
             for (TestReport.TeardownActionComponent action : teardown.getAction()) {
                 if (action.hasOperation() && hasErrorOrFail(action.getOperation())) {
-                    return new ErrorReport(action.getOperation());
+                    if (firstFailedOperation == null)
+                        firstFailedOperation = action.getOperation();
                 }
             }
         }
+        if (firstFailedAssertion != null)
+            return new ErrorReport(firstFailedAssertion, failedIds);
+        else if (firstFailedOperation != null)
+            return new ErrorReport(firstFailedOperation, String.join("|", messageList));
         return null;
     }
 
@@ -1266,13 +1310,29 @@ public class TestEngine  implements TestDef {
                     doOperation(new ActionReference(testScript, action), typePrefix, action.getOperation(), reportOp, isFollowedByAssert);
                     TestReport.SetupActionOperationComponent opReport = actionReportComponent.getOperation();
                     if (isExpectFailure && opReport.getResult() == TestReport.TestReportActionResult.FAIL) {
-                        testReport.setStatus(TestReport.TestReportStatus.COMPLETED);
-                        testReport.setResult(TestReport.TestReportResult.PASS);
-
                         actionReportComponent.addModifierExtension(expectFailure);
-//                        reportOp.addExtension(ExtensionDef.expectFailure, new StringType("Operation failed as expected: Result was changed from Fail to Pass."));
-                        opReport.setResult(TestReport.TestReportActionResult.PASS);
-                        return true;
+                        // If the failed assertion ids match the expected assertion id list, the it is a PASS
+                        if (expectFailure.hasExtension()) {
+                            Extension assertionIdList = expectFailure.getExtension().get(0);
+                            if (ExtensionDef.assertionIdList.equals(assertionIdList.getUrl()) && opReport.hasMessage()) {
+                                String assertionIdListValue = assertionIdList.getValue().toString();
+                                if (Parameter.isVariable(assertionIdListValue)) {
+                                  assertionIdListValue = Parameter.extractParameterName(assertionIdListValue);
+                                  assertionIdListValue = externalVariables.get(assertionIdListValue);
+                                }
+                                if (assertionIdListValue != null && !"".equals(assertionIdListValue)) {
+                                    String expression = assertionIdListValue.concat("~")
+                                            .concat("(".concat(opReport.getMessage()).concat(")"));
+                                    boolean result = FhirPathEngineBuilder.evalForBoolean(new TestReport(), expression);
+                                    if (result) {
+                                        testReport.setStatus(TestReport.TestReportStatus.COMPLETED);
+                                        testReport.setResult(TestReport.TestReportResult.PASS);
+                                        opReport.setResult(TestReport.TestReportActionResult.PASS);
+                                        return true;
+                                    }
+                                }
+                            }
+                        }
                     }
                     if (opReport.getResult() == TestReport.TestReportActionResult.ERROR) {
                         testReport.setStatus(TestReport.TestReportStatus.COMPLETED);

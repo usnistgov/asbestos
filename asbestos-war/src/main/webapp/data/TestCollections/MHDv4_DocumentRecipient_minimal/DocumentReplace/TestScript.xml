@@ -13,10 +13,10 @@
                         <valueString value="'false'"/>
                     </extension>
                     <extension url="urn:variable-in">
-                        <valueString value="'?fixtureId=original'"/>
+                        <valueString value="'?fixtureId=original&amp;baseTestCollection=MHD_DocumentRecipient_minimal'"/>
                     </extension>
                     <extension url="urn:variable-in">
-                        <valueString value="'?fixtureId=replace'"/>
+                        <valueString value="'?fixtureId=replace&amp;baseTestCollection=MHD_DocumentRecipient_minimal'"/>
                     </extension>
                     <extension url="urn:variable-in">
                         <valueString value="'3'"/>
@@ -26,4 +26,3 @@
         </action>
     </test>
 </TestScript>
-

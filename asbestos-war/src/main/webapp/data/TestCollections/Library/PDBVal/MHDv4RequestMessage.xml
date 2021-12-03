@@ -8,8 +8,8 @@
         </extension>
     </modifierExtension>
 
-    <id value="requestMessageMHDv4"/>
-    <name value="requestMessageMHDv4"/>
+    <id value="MHDv4RequestMessage"/>
+    <name value="MHDv4RequestMessage"/>
     <description value="Evaluate PDB-request Bundle"/>
 
     <test>
@@ -63,7 +63,7 @@
             </assert>
         </action>
         <action>
-            <assert>
+            <assert id="FTKAID_999">
                 <description value="PDB: {DocumentReference, List}.subject.reference is absolute external reference or UUID.|MHDPDBPatientReference"/>
                 <compareToSourceId value="request"/>
                 <compareToSourceExpression value="Bundle.entry.resource.all($this is DocumentReference or $this is List implies (subject.reference.startsWith('http') or subject.reference.startsWith('urn:uuid:')))"/>

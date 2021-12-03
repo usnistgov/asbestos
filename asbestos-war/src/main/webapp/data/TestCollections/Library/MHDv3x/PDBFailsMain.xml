@@ -19,7 +19,7 @@
 
         <id value="MHDv3xPDBFailsMain"/>
         <name value="MHDv3xPDBFailsMain"/>
-        <description value="This TestScript is a bridge to submit a bundle and evaluate."/>
+        <description value="Test workflow."/>
 
         <fixture id="patient_bundle">
         <!--
