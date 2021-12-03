@@ -117,10 +117,16 @@
     .script2 {
         grid-column: 1;
         grid-row: 4;
+        border-left: #f5f5f5 solid 1px;
+        padding-left: 10px;
     }
     .report2 {
         grid-column: 2;
         grid-row: 4;
+        /*margin-left: 5px;*/
+        border-left: #f5f5f5 solid 1px;
+        padding-left: 10px;
+
     }
     .script {
         grid-column: 1 / span 1;
@@ -130,11 +136,16 @@
       border-color: black;
       border-style: solid;
       border: 1px;
+        border-left: #f5f5f5 solid 1px;
+        padding-left: 10px;
+
     }
     .module-script {
         grid-column: 2 / span 1;
         grid-row: 2;
         word-wrap: break-word;
+        border-left: #f5f5f5 solid 1px;
+        padding-left: 10px;
     }
 
 </style>
