@@ -53,7 +53,7 @@
             > </script-details>
         </li>
         <li v-else>
-            <span class="configurationError">Invalid TestScript: TestScript could not be loaded. Please fix the TestScript and reload the Test Collection using the Refresh image link.</span>
+            <span class="configurationError">One or more TestScript(s) in this TEST COLLECTION is invalid: TestScript could not be loaded. Check server log for errors. Please fix the TestScript and reload the Test Collection using the Refresh image link.</span>
         </li>
     </ul>
     </div>

@@ -31,10 +31,10 @@
             </span>
             <span v-else-if="isExpectFailure">
                 <span v-if="isPass">
-                    <img src="../../assets/round.png" class="align-left" title="Partial failure expected, check to see if the correct assertion failed.">
+                    <img src="../../assets/checked.png" class="align-left" title="Pass if expected assertion failed (check the top-level TestScript for the expectedFailAssertionIdList variable). Fails if an unexpected assertion failed.">
                 </span>
                 <span v-else-if="isFail">
-                    <img src="../../assets/error.png" class="align-left">
+                    <img src="../../assets/error.png" class="align-left" title="Unexpected assertion failure. Check the top-level TestScript for the expectedFailAssertionIdList variable.">
                 </span>
                 <span v-else-if="isError">
                     <img src="../../assets/yellow-error.png" class="align-left">
