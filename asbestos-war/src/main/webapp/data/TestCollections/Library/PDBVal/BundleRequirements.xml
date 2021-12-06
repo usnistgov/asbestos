@@ -15,7 +15,7 @@
     <test>
     <description value="Bundle requirements."/>
     <action>
-        <assert>
+        <assert id="FTKBR100">
             <description value="Transaction: Request is Bundle|MHDPDBRequestIsBundle"/>
             <sourceId value="request"/>
             <resource value="Bundle"/>
@@ -23,7 +23,7 @@
         </assert>
     </action>
     <action>
-        <assert>
+        <assert id="FTKBR200">
             <description value="Transaction: Request is labeled as transaction|MHDPDBRequestIsTransaction"/>
             <compareToSourceId value="request"/>
             <compareToSourceExpression value="Bundle.type = 'transaction'"/>
@@ -31,7 +31,7 @@
         </assert>
     </action>
     <action>
-        <assert>
+        <assert id="FTKBR300">
             <description value="Bundle: bundle.entry.fullUrl starts with http, urn:uuid: or urn:oid:"/>
             <compareToSourceId value="request"/>
             <compareToSourceExpression value="Bundle.entry.fullUrl.startsWith('http') or Bundle.entry.fullUrl.startsWith('urn:uuid:') or Bundle.entry.fullUrl.startsWith('urn:oid:')"/>
@@ -39,7 +39,7 @@
         </assert>
     </action>
     <action>
-        <assert>
+        <assert id="FTKBR400">
             <description value="Bundle: entry.fullUrl must be unique in Bundle|MHDPDBFullUrlUniqueInBundle"/>
             <compareToSourceId value="request"/>
             <compareToSourceExpression value="Bundle.entry.where(fullUrl.exists()).select(fullUrl&amp;resource.meta.versionId).isDistinct()"/>
@@ -47,7 +47,7 @@
         </assert>
     </action>
     <action>
-        <assert>
+        <assert id="FTKBR500">
             <description value="Bundle: entry.request must exist for each entry with method=POST and a url"/>
             <compareToSourceId value="request"/>
             <compareToSourceExpression value="Bundle.entry.all(request.exists() and request.method = 'POST' and request.url.exists())"/>
@@ -55,7 +55,7 @@
         </assert>
     </action>
     <action>
-        <assert>
+        <assert id="FTKBR600">
             <description value="Bundle: Test entry.request.url. See http://hl7.org/fhir/bundle-definitions.html#Bundle.entry.request.url"/>
             <compareToSourceId value="request"/>
             <compareToSourceExpression value="Bundle.entry.all(request.url = resource.resourceType or request.url = fullUrl)"/>

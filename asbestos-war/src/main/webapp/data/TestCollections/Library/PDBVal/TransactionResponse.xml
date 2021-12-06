@@ -28,7 +28,7 @@
     <test>
         <name value="Transaction response message."/>
         <action>
-            <assert id="FTKAID_888">
+            <assert id="FTKTR100">
                 <description value="Transaction: returns 200.|MHDPDBGoodStatus"/>
                 <response value="okay"/>
                 <sourceId value="response"/>
@@ -36,7 +36,7 @@
             </assert>
         </action>
         <action>
-            <assert>
+            <assert id="FTKTR200">
                 <description value="Transaction: returns Bundle.|MHDPDBReturnsBundle"/>
                 <resource value="Bundle"/>
                 <sourceId value="response"/>
@@ -44,7 +44,7 @@
             </assert>
         </action>
         <action>
-            <assert>
+            <assert id="FTKTR300">
                 <description value="Transaction: Response is labeled as transaction-response.|MHDPDBRequestIsTransaction"/>
                 <compareToSourceId value="response"/>
                 <compareToSourceExpression value="Bundle.type = 'transaction-response'"/>
@@ -52,7 +52,7 @@
             </assert>
         </action>
         <action>
-            <assert>
+            <assert id="FTKTR400">
                 <description value="Transaction: All resources in Bundle return 201.|MHDPDBEntryReturns201"/>
                 <compareToSourceId value="response"/>
                 <compareToSourceExpression value="Bundle.entry.all(response.status.value.startsWith('201'))"/>
@@ -60,7 +60,7 @@
             </assert>
         </action>
         <action>
-            <assert>
+            <assert id="FTKTR500">
                 <description value="Transaction: All resources in Bundle return location.|MHDPDBReturnLocation"/>
                 <compareToSourceId value="response"/>
                 <compareToSourceExpression value="Bundle.entry.all(response.location.exists())"/>
@@ -68,7 +68,7 @@
             </assert>
         </action>
         <action>
-            <assert>
+            <assert id="FTKTR600">
                 <description value="Transaction: All resources in Bundle return etag (warning only).|MHDPDBReturnEtag|FHIRTransReturnsBundle"/>
                 <compareToSourceId value="response"/>
                 <compareToSourceExpression value="Bundle.entry.all(response.etag)"/>
@@ -76,7 +76,7 @@
             </assert>
         </action>
         <action>
-            <assert>
+            <assert id="FTKTR700">
                 <description value="Transaction: All resources in Bundle return lastModified (warning only)."/>
                 <compareToSourceId value="response"/>
                 <compareToSourceExpression value="Bundle.entry.all(response.lastModified.exists())"/>
@@ -84,7 +84,7 @@
             </assert>
         </action>
         <action>
-            <assert>
+            <assert id="FTKTR800">
                 <description value="Transaction: No resources in Bundle return OperationOutcome."/>
                 <compareToSourceId value="response"/>
                 <compareToSourceExpression value="Bundle.entry.all(response.outcome).not()"/>
@@ -92,7 +92,7 @@
             </assert>
         </action>
         <action>
-            <assert>
+            <assert id="FTKTR900">
                 <description value="Response Bundle has same number of entries as Request Bundle."/>
                 <expression value="${requestEntryCount} = ${responseEntryCount}"/>
                 <sourceId value="response"/>    <!-- required but not referenced -->

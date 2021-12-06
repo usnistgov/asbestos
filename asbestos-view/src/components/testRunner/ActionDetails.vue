@@ -21,6 +21,7 @@
                                            :status-on-right="statusRight"
                                            :script="script"
                                            :report="report"
+                                            :title="ftkTsElId"
                 > </test-status>
 
                 <span v-if="displayMessage">
@@ -270,6 +271,14 @@
           },
             descriptionAtt() {
                 return this.script.operation ? this.script.operation.description : this.script.assert.description
+            },
+            ftkTsElId() {
+                if (this.script !== undefined && this.script !== null && this.script.assert !== undefined && this.script.assert !== null)
+                {
+                    if ('id' in this.script.assert)
+                        return 'Assertion ID: ' + this.script.assert.id
+                }
+                return ''
             },
           resultDescription() {
               if (!this.report)

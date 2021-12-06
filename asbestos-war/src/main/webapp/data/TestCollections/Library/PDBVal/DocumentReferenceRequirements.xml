@@ -15,7 +15,7 @@
     <test>
     <description value="DocumentReference requirements."/>
     <action>
-        <assert>
+        <assert id="FTKDR100">
             <description value="DocumentReference: DocumentReference has single content element"/>
             <compareToSourceId value="request"/>
             <compareToSourceExpression value="Bundle.entry.resource.select(is(FHIR.DocumentReference).content).all(count() = 1)"/>
@@ -23,7 +23,7 @@
         </assert>
     </action>
     <action>
-        <assert>
+        <assert id="FTKDR200">
             <description value="DocumentReference: DocumentReference has content.attachment.url|MHDPDBDocRefHasAttachment"/>
             <compareToSourceId value="request"/>
             <compareToSourceExpression value="Bundle.entry.resource.where(is(FHIR.DocumentReference)).content.attachment.url.exists()"/>
@@ -31,7 +31,7 @@
         </assert>
     </action>
     <action>
-        <assert>
+        <assert id="FTKDR300">
             <description value="DocumentReference: DocumentReference.content.attachment has contentType"/>
             <compareToSourceId value="request"/>
             <compareToSourceExpression value="Bundle.entry.resource.all(is(FHIR.DocumentReference)) implies content.attachment.contentType.exists()"/>
@@ -39,7 +39,7 @@
         </assert>
     </action>
     <action>
-        <assert>
+        <assert id="FTKDR400">
             <description value="DocumentReference: DocumentReference.content.attachment.data is not allowed"/>
             <compareToSourceId value="request"/>
             <compareToSourceExpression value="Bundle.entry.resource.all(is(FHIR.DocumentReference)) implies content.attachment.data.exists().not()"/>
@@ -48,7 +48,7 @@
     </action>
 
     <action>
-        <assert>
+        <assert id="FTKDR500">
             <description value="DocumentReference: DocumentReference links to Binary through content.attachment.url|MHDPDBBinaryInBundle"/>
             <compareToSourceId value="request"/>
             <compareToSourceExpression value="Bundle.entry.select(resource as DocumentReference).content.attachment.url ~ Bundle.entry.where(resource is Binary).fullUrl"/>
@@ -56,7 +56,7 @@
         </assert>
     </action>
     <action>
-        <assert>
+        <assert id="FTKDR600">
             <description value="DocumentReference: DocumentReference content attachment contentType is equivalent to Binary contentType|MHDPDBAttachmentContentType"/>
             <compareToSourceId value="request"/>
             <compareToSourceExpression value="Bundle.entry.select(resource as DocumentReference).select(content.attachment.url.value + content.attachment.contentType.value) ~ Bundle.entry.where(resource is Binary).select(fullUrl.value + resource.contentType.value)"/>
@@ -65,7 +65,7 @@
     </action>
 
     <action>
-        <assert>
+        <assert id="FTKDR700">
             <description value="DocumentReference: sourcePatientInfo, if it exists, is a reference to a contained Patient Resource|MHDPDBSourcePatientInfoIsContained"/>
             <compareToSourceId value="request"/>
             <compareToSourceExpression value="Bundle.entry.select(resource as DocumentReference).select(context.exists() implies context.sourcePatientInfo.exists() implies context.sourcePatientInfo.reference in contained.where(is(Patient)).id).allTrue()"/>
@@ -73,7 +73,7 @@
         </assert>
     </action>
     <action>
-        <assert>
+        <assert id="FTKDR800">
             <description value="DocumentReference: author, if it exists, is a reference to a contained Practitioner, PractitionerRole, Organization, Device, Patient, RelatedPerson Resource"/>
             <compareToSourceId value="request"/>
             <compareToSourceExpression value="Bundle.entry.resource.((is(FHIR.DocumentReference) and author.exists()) implies (author.reference in contained.(Practitioner.id | PractitionerRole.id | Organization.id | Device.id | Patient.id | RelatedPerson.id)))"/>
@@ -81,7 +81,7 @@
         </assert>
     </action>
     <action>
-        <assert>
+        <assert id="FTKDR900">
             <description value="DocumentReference: authenticator, if it exists, is a reference to a contained Practitioner, PractitionerRole, Organization Resource"/>
             <compareToSourceId value="request"/>
             <compareToSourceExpression value="Bundle.entry.resource.((is(FHIR.DocumentReference) and author.exists()) implies (author.reference in contained.(Practitioner.id | PractitionerRole.id | Organization.id)))"/>
@@ -89,7 +89,7 @@
         </assert>
     </action>
     <action>
-        <assert>
+        <assert id="FTKDR1000">
             <description value="DocumentReference: masterIdentifier is required"/>
             <compareToSourceId value="request"/>
             <compareToSourceExpression value="Bundle.entry.resource.where(is(FHIR.DocumentReference)).masterIdentifier.exists()"/>
@@ -97,7 +97,7 @@
         </assert>
     </action>
     <action>
-        <assert>
+        <assert id="FTKDR1100">
             <description value="DocumentReference: status is one of current, superseded, entered-in-error"/>
             <compareToSourceId value="request"/>
             <compareToSourceExpression value="Bundle.entry.resource.where(is(FHIR.DocumentReference)).status in ('current' | 'superseded' | 'entered-in-error')"/>

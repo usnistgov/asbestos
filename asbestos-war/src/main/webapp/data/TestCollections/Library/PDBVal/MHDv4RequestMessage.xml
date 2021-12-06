@@ -16,14 +16,14 @@
         <name value="Request message"/>
         <description value="PDB Request."/>
         <action>
-            <assert>
+            <assert id="FTK4RM100">
                 <description value="PDB: Verb is POST|MHDPDBUsesPost"/>
                 <requestMethod value="post"/>
                 <warningOnly value="false"/>
             </assert>
         </action>
         <action>
-            <assert>
+            <assert id="FTK4RM200">
                 <description value="PDB: Request contains one List|MHDv4BundleResources"/>
                 <compareToSourceId value="request"/>
                 <compareToSourceExpression value="Bundle.entry.resource.where($this is List).count() = 1 and Bundle.entry.resource.where($this is List).code.coding.code='submissionset'"/>
@@ -31,7 +31,7 @@
             </assert>
         </action>
         <action>
-            <assert>
+            <assert id="FTK4RM300">
                 <description value="PDB: Request contains one or more DocumentReference|MHDPDBOnePlusDocumentReference"/>
                 <compareToSourceId value="request"/>
                 <compareToSourceExpression value="Bundle.entry.resource.where($this is DocumentReference).count() >= 1"/>
@@ -39,7 +39,7 @@
             </assert>
         </action>
         <action>
-            <assert>
+            <assert id="FTK4RM400">
                 <description value="PDB: Comprehensive or Minimal metadata identified in profile|MHDPDBMetadataType"/>
                 <compareToSourceId value="request"/>
                 <compareToSourceExpression value="Bundle.meta.profile = 'http://profiles.ihe.net/ITI/MHD/StructureDefinition/IHE.MHD.Comprehensive.ProvideBundle' or Bundle.meta.profile='http://profiles.ihe.net/ITI/MHD/StructureDefinition/IHE.MHD.Minimal.ProvideBundle'"/>
@@ -47,7 +47,7 @@
             </assert>
         </action>
         <action>
-            <assert>
+            <assert id="FTK4RM500">
                 <description value="PDB: All DocumentReferences in Bundle are linked to (SubmissionSet type) List"/>
                 <compareToSourceId value="request"/>
                 <compareToSourceExpression value="Bundle.entry.where(resource is DocumentReference).fullUrl in Bundle.entry.resource.where($this is List and code.coding.code='submissionset').select(entry.item.reference)"/>
@@ -55,7 +55,7 @@
             </assert>
         </action>
         <action>
-            <assert>
+            <assert id="FTK4RM600">
                 <description value="PDB: List links to only DocumentReferences that are in Bundle"/>
                 <compareToSourceId value="request"/>
                 <compareToSourceExpression value="Bundle.entry.resource.where($this is List and code.coding.code='submissionset').select(entry.item.reference).supersetOf(Bundle.entry.where(resource is DocumentReference).fullUrl)"/>
@@ -63,7 +63,7 @@
             </assert>
         </action>
         <action>
-            <assert id="FTKAID_999">
+            <assert id="FTK4RM700">
                 <description value="PDB: {DocumentReference, List}.subject.reference is absolute external reference or UUID.|MHDPDBPatientReference"/>
                 <compareToSourceId value="request"/>
                 <compareToSourceExpression value="Bundle.entry.resource.all($this is DocumentReference or $this is List implies (subject.reference.startsWith('http') or subject.reference.startsWith('urn:uuid:')))"/>
@@ -71,7 +71,7 @@
             </assert>
         </action>
         <action>
-            <assert>
+            <assert id="FTK4RM800">
                 <description value="PDB: subject is required."/>
                 <compareToSourceId value="request"/>
                 <compareToSourceExpression value="Bundle.entry.resource.where($this is DocumentReference or $this is List).all(subject.reference.exists())"/>
@@ -79,7 +79,7 @@
             </assert>
         </action>
         <action>
-            <assert>
+            <assert id="FTK4RM900">
                 <description value="PDB: subject must reference a Patient."/>
                 <compareToSourceId value="request"/>
                 <compareToSourceExpression value="Bundle.entry.resource.where($this is DocumentReference or ($this is List and code.coding.code='submissionset')).subject.reference.select(contains('/Patient/')).allTrue()"/>
@@ -87,7 +87,7 @@
             </assert>
         </action>
         <action>
-            <assert>
+            <assert id="FTK4RM1000">
                 <description value="PDB: {DocumentReference, List}.subject.reference must reference same Patient"/>
                 <compareToSourceId value="request"/>
                 <compareToSourceExpression value="Bundle.entry.resource.where($this is DocumentReference or ($this is List and code.coding.code='submissionset')).select(subject.reference).distinct().count() = 1"/>
@@ -95,7 +95,7 @@
             </assert>
         </action>
         <action>
-            <assert>
+            <assert id="FTK4RM1100">
                 <description value="PDB: if DocumentReference.identifier carries the entryUUID then it shall be labeled official"/>
                 <compareToSourceId value="request"/>
                 <compareToSourceExpression value="Bundle.entry.resource.where($this is DocumentReference).all((identifier.value.startsWith('urn:uuid:') implies use = 'official'))"/>
