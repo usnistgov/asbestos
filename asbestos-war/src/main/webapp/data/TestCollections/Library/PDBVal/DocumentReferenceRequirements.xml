@@ -16,9 +16,9 @@
     <description value="DocumentReference requirements."/>
     <action>
         <assert id="FTKDR100">
-            <description value="DocumentReference: DocumentReference has single content element"/>
+            <description value="DocumentReference: Every DocumentReference has single content element"/>
             <compareToSourceId value="request"/>
-            <compareToSourceExpression value="Bundle.entry.resource.select(is(FHIR.DocumentReference).content).all(count() = 1)"/>
+            <compareToSourceExpression value="Bundle.entry.resource.where(is(DocumentReference)).exists() and Bundle.entry.resource.where(is(DocumentReference) and content.exists() and content.count() = 1).count() = Bundle.entry.resource.where(is(DocumentReference)).count()"/>
             <warningOnly value="false"/>
         </assert>
     </action>
@@ -68,7 +68,7 @@
         <assert id="FTKDR700">
             <description value="DocumentReference: sourcePatientInfo, if it exists, is a reference to a contained Patient Resource|MHDPDBSourcePatientInfoIsContained"/>
             <compareToSourceId value="request"/>
-            <compareToSourceExpression value="Bundle.entry.select(resource as DocumentReference).select(context.exists() implies context.sourcePatientInfo.exists() implies context.sourcePatientInfo.reference in contained.where(is(Patient)).id).allTrue()"/>
+            <compareToSourceExpression value="Bundle.entry.select(resource as DocumentReference).select(iif (context.exists() and context.sourcePatientInfo.exists(), context.sourcePatientInfo.reference in contained.where(is(Patient)).id , true)).allTrue()"/>
             <warningOnly value="false"/>
         </assert>
     </action>

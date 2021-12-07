@@ -13,10 +13,11 @@
         </resource>
         <request>
             <method value="POST"/>
+            <url value="urn:uuid:3fdc72f4-a11d-4a9d-9260-a9f745779e1e"/>
         </request>
     </entry>
     <entry>
-        <fullUrl value="http://localhost:9556/svc/fhir/Binary/1e404af3-077f-4bee-b7a6-a9be97e1ce32"/>
+        <fullUrl value="urn:uuid:1e404af3-077f-4bee-b7a6-a9be97e1ce32"/>
         <resource>
             <Binary>
                 <id value="1e404af3-077f-4bee-b7a6-a9be97e1ce32"/>
@@ -29,6 +30,7 @@
         </resource>
         <request>
             <method value="POST"/>
+            <url value="urn:uuid:1e404af3-077f-4bee-b7a6-a9be97e1ce32"/>
         </request>
     </entry>
 </Bundle>

@@ -15,6 +15,9 @@
             <extension url="urn:variable-in">
                 <valueString value="expectedDocRefCount"/>
             </extension>
+            <extension url="urn:variable-in">
+                <valueString value="expectedFailAssertionIdList"/>
+            </extension>
         </modifierExtension>
 
         <id value="MHDv3xPDBFailsMain"/>
@@ -138,12 +141,16 @@
     <test>
         <description value="PDB Validations."/>
         <action>
-            <modifierExtension url="urn:asbestos:test:action:expectFailure"/>
+            <modifierExtension url="urn:asbestos:test:action:expectFailure">
+                <extension url="urn:asbestos:test:action:assertionIdList">
+                    <valueString value="${expectedFailAssertionIdList}"/>
+                </extension>
+            </modifierExtension>
             <operation>
                 <description value="Module usage description: TestScript import call to bridge an aggregate TestScript."/>
                 <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
                     <extension url="component">
-                        <valueString value="../AggregateModule/MHDv3xBundleEvalAggregateResult.xml"/>
+                        <valueString value="../AggregateModule/MHDBundleEvalAggregateResult.xml"/>
                     </extension>
                     <extension url="urn:fixture-in">
                         <valueString value="pdb-bundle"/>

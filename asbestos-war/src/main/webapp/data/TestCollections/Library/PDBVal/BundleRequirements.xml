@@ -32,7 +32,7 @@
     </action>
     <action>
         <assert id="FTKBR300">
-            <description value="Bundle: bundle.entry.fullUrl starts with http, urn:uuid: or urn:oid:"/>
+            <description value="Bundle: bundle.entry.fullUrl starts with http, urn:uuid: or urn:oid:. See https://hl7.org/fhir/bundle-definitions.html#Bundle.entry.fullUrl"/>
             <compareToSourceId value="request"/>
             <compareToSourceExpression value="Bundle.entry.fullUrl.startsWith('http') or Bundle.entry.fullUrl.startsWith('urn:uuid:') or Bundle.entry.fullUrl.startsWith('urn:oid:')"/>
             <warningOnly value="false"/>
@@ -56,10 +56,10 @@
     </action>
     <action>
         <assert id="FTKBR600">
-            <description value="Bundle: Test entry.request.url. See http://hl7.org/fhir/bundle-definitions.html#Bundle.entry.request.url"/>
+            <description value="Bundle: entry.request.url. See https://hl7.org/fhir/bundle-definitions.html#Bundle.entry.request.url"/>
             <compareToSourceId value="request"/>
             <compareToSourceExpression value="Bundle.entry.all(request.url = resource.resourceType or request.url = fullUrl)"/>
-            <warningOnly value="true"/>
+            <warningOnly value="false"/>
         </assert>
     </action>
 </test>
