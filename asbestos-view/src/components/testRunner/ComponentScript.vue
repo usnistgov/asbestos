@@ -135,10 +135,18 @@ import importMixin from "../../mixins/importMixin";
                 // but for client tests it is compressed all into one report file
                 // console.log('reportActions componentId is ' + this.componentId)
                 if (this.componentId === null) return null
-                const report = this.$store.state.testRunner.moduleTestReports[this.componentId]
+                let report = this.$store.state.testRunner.moduleTestReports[this.componentId]
+                if (report == undefined || report == null) {
+                    console.error('report1 is undefined or null')
+                    report = this.$store.state.testRunner.testScripts[this.componentId]
+                }
+                if (report == undefined || report == null) {
+                    console.error('report2 is undefined or null')
+                }
+
                 if (!report || !report.test || !report.test[0]) {
-                    console.error('report is not usable')
-                    return null
+                console.error('report is not usable for ' + this.componentId)
+                return null
                 }
                 return report.test[0].action
             },
