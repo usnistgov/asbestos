@@ -31,7 +31,7 @@
             </span>
             <span v-else-if="isExpectFailure">
                 <span v-if="isPass">
-                    <img src="../../assets/checked.png" class="align-left" title="Pass if expected assertion failed (check the top-level TestScript for the expectedFailAssertionIdList variable). Fails if an unexpected assertion failed.">
+                    <img src="../../assets/select.png" class="align-left" title="Pass if expected assertion failed (check the top-level TestScript for the expectedFailAssertionIdList variable). Fails if an unexpected assertion failed.">
                 </span>
                 <span v-else-if="isFail">
                     <img src="../../assets/error.png" class="align-left" title="Unexpected assertion failure. Check the top-level TestScript for the expectedFailAssertionIdList variable.">
