@@ -174,6 +174,12 @@ public class FixtureLabels {
     }
 
     public String getReference() {
+        // Dynamic
+        if (rawReference == null && referenceLabel ==null) {
+           return "<span title='A dynamic fixture-out feature is not a registered channel event. Inspector is not available at this point, but future uses of the resulting fixture-out may be inspectable. Check the next Submit Test Action Operation.'>Fixture-out.</span>";  /* operation results in a fixture-out that is added to fixture */
+        }
+
+        // Static fixture
         String label = referenceLabel;
         if (Strings.isNullOrEmpty(label))
             label = rawReference;
