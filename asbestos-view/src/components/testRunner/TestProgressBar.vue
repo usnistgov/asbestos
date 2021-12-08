@@ -6,8 +6,8 @@
 
         <template v-if="!allPassed && !allFailed">
             <div :style="`background-color:white;height:${adjustedPct.notRunPct*100}%`"></div>
-            <div :style="`background-color:lightgreen;height:${adjustedPct.passPct*100}%`"></div>
             <div :style="`background-color:#D75A4A;height:${adjustedPct.failPct*100}%;`"></div>
+            <div :style="`background-color:lightgreen;height:${adjustedPct.passPct*100}%`"></div>
         </template>
 
     </div>
