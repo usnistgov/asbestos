@@ -1,5 +1,10 @@
 <TestScript xmlns="http://hl7.org/fhir">
 
+    <variable>
+        <name value="expectedFailAssertionIdList"/>
+        <defaultValue value="('FTK4RM400'|'FTKCM200'|'FTKTR100')"/>
+    </variable>
+
     <test>
         <description value="Submit a request containing a PDB and evaluate response."/>
         <action>
@@ -23,6 +28,9 @@
                     </extension>
                     <extension url="urn:variable-in">
                         <valueString value="'0'"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="expectedFailAssertionIdList"/>
                     </extension>
                 </modifierExtension>
             </operation>

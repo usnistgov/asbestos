@@ -1,0 +1,46 @@
+<TestScript xmlns="http://hl7.org/fhir">
+    <modifierExtension url="urn:module">
+        <extension url="urn:variable-in">
+            <valueString value="isComprehensiveMetadataExpected"/>
+        </extension>
+        <extension url="urn:variable-in">
+            <valueString value="getOriginalFixtureParams"/>
+        </extension>
+        <extension url="urn:variable-in">
+            <valueString value="getTransformsFixtureParams"/>
+        </extension>
+        <extension url="urn:variable-in">
+            <valueString value="expectedFixtureBundleEntryCount"/>
+        </extension>
+    </modifierExtension>
+
+    <id value="MHDDocumentTransformsAggregate"/>
+    <name value="MHDDocumentTransforms"/>
+    <description value="Aggregate test that imports many other TestScript(s)."/>
+
+    <test>
+        <description value="Bundle evaluation assertions."/>
+        <action>
+            <operation>
+                <description value="Previous test action operation is analyzed using assertions."/>
+                <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
+                    <extension url="component">
+                        <valueString value="../DocumentTransformsMain.xml"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="isComprehensiveMetadataExpected"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="getOriginalFixtureParams"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="getTransformsFixtureParams"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="expectedFixtureBundleEntryCount"/>
+                    </extension>
+                </modifierExtension>
+            </operation>
+        </action>
+    </test>
+</TestScript>

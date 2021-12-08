@@ -1,7 +1,7 @@
 <TestScript xmlns="http://hl7.org/fhir">
 
     <test>
-        <description value="Submit a request containing a PDB and evaluate response."/>
+        <description value="Submit Provide Document Bundle followed by a Replace."/>
         <action>
             <operation>
                 <description value="Module usage description"/>
