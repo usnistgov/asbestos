@@ -190,7 +190,7 @@
             },
              */
             loadAssertions() {
-                if (!this.$store.state.testRunner.testAssertions)
+                if (Object.keys(this.$store.state.testRunner.testAssertions).length === 0)
                     this.$store.dispatch('loadTestAssertions')
             },
             reportAction(testi, actioni) {

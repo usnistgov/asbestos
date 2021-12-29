@@ -37,7 +37,7 @@ export const testRunnerStore = {
             eventEvalCount: 0,   // number of most recent events to evaluate
 
             clientTestResult: {}, // { testId: { eventId: TestReport } }
-            testAssertions: null,
+            testAssertions: {},
             debug: null,
             useJson: true,
             useGzip: true,
@@ -113,6 +113,13 @@ export const testRunnerStore = {
         },
         setTestAssertions(state, assertions) {
             state.testAssertions = assertions
+            /*
+            if (assertions !== null && assertions !== undefined) {
+                for (let assertionId in assertions) {
+                    Vue.set(state.testAssertions, assertionId, assertions[assertionId])
+                }
+            }
+             */
         },
         setEventEvalCount(state, count) {
             state.eventEvalCount = count
@@ -329,6 +336,8 @@ export const testRunnerStore = {
             const url = `assertions`
             ENGINE.get(url)
                 .then(response => {
+                    // console.log(JSON.stringify(response.data))
+                    // console.log('assertions Profile: ' + response.data.Profile)
                     commit('setTestAssertions', response.data)
                 })
                 .catch(function (error) {

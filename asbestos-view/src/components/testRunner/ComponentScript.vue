@@ -130,23 +130,18 @@ import importMixin from "../../mixins/importMixin";
                 //     return null
                 // }
             },
-            reportActions() {  // component has no setup and a single test
+            reportActions() {  // before aggregate modules, component had no setup and a single test
                 // for server tests the module-report is in separate file (hence moduleTestReports)
                 // but for client tests it is compressed all into one report file
-                // console.log('reportActions componentId is ' + this.componentId)
+                // client tests now partition modular tests
                 if (this.componentId === null) return null
-                let report = this.$store.state.testRunner.moduleTestReports[this.componentId]
+                const report = this.$store.state.testRunner.moduleTestReports[this.componentId]
                 if (report == undefined || report == null) {
-                    console.error('report1 is undefined or null')
-                    report = this.$store.state.testRunner.testScripts[this.componentId]
+                    console.error('report is undefined or null')
                 }
-                if (report == undefined || report == null) {
-                    console.error('report2 is undefined or null')
-                }
-
                 if (!report || !report.test || !report.test[0]) {
-                console.error('report is not usable for ' + this.componentId)
-                return null
+                    console.error('report is not usable for ' + this.componentId)
+                    return null
                 }
                 return report.test[0].action
             },
