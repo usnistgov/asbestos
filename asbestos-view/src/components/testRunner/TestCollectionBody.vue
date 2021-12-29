@@ -69,14 +69,14 @@
                             <template v-else>
                             <template v-if="formatTestArtifactId(name) in dependencyTestResult">
                                 <template v-if="dependencyTestResult[formatTestArtifactId(name)]===true">
-                                    <button v-if="! isResumable(i) && ! isWaitingForBreakpoint" @click.stop="doRun(name, testRoutePath)" class="runallbutton">Run</button>
+                                    <button :disabled="running" v-if="! isResumable(i) && ! isWaitingForBreakpoint" @click.stop="doRun(name, testRoutePath)" class="runallbutton">Run</button>
                                 </template>
                                 <template v-else>
                                     <span :title="`This test has prerequisite test(s): ${testDependencyList(formatTestArtifactId(name))}. Please run the prerequisite test(s) first.`">&#x1F517;</span>
                                 </template>
                             </template>
                             <template v-else>
-                                <button v-if="! isResumable(i) && ! isWaitingForBreakpoint" @click.stop="doRun(name, testRoutePath)" class="runallbutton">Run</button>
+                                <button :disabled="running" v-if="! isResumable(i) && ! isWaitingForBreakpoint" @click.stop="doRun(name, testRoutePath)" class="runallbutton">Run</button>
                             </template>
 
                                 <template v-if="$store.state.testRunner.currentTest === name">
@@ -111,7 +111,7 @@
           <span v-else>
               <!-- Unlike the Debug mode, there is no test dependency checks here if Debug mode is disabled.
               If the dependency feature check is required, should create a new Vue component to use in both the Debug-Supported mode and non-Debug mode.  -->
-                          <button @click.stop="doRun(name, testRoutePath)" class="runallbutton">Run</button>
+                          <button :disabled="running" @click.stop="doRun(name, testRoutePath)" class="runallbutton">Run</button>
           </span>
           <span v-if="! isWaitingForBreakpoint && ! $store.state.testRunner.isClientTest" title="Test begin time."> --  {{ testTime(name) }}</span>
         </div>
