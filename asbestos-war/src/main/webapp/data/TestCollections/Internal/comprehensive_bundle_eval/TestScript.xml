@@ -7,7 +7,7 @@
         request - the input resource
         response - the response resource (could be OperationOutcome)
     -->
-
+    <!-- this file is not being used anywhere ? -->
     <test>
         <name value="Evaluations"/>
         <description value="The Description"/>
@@ -23,7 +23,7 @@
             <assert>
                 <description value="DocumentManifest: type is required"/>
                 <compareToSourceId value="request"/>
-                <compareToSourceExpression value="Bundle.entry.resource.where(is(FHIR.DocumentReference)).type.exists()"/>
+                <compareToSourceExpression value="Bundle.entry.resource.where(is(FHIR.DocumentReference)).type.exists()"/> <!-- should be DocumentManifest ? -->
                 <warningOnly value="false"/>
             </assert>
         </action>
