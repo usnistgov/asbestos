@@ -1,7 +1,7 @@
 package gov.nist.asbestos.client.resolver;
 
 import gov.nist.asbestos.client.client.FhirClient;
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Patient;
@@ -21,7 +21,7 @@ import java.util.stream.Stream;
  *
  */
 public class ResourceCacheMgr {
-    private static final Logger logger = Logger.getLogger(ResourceCacheMgr.class);
+    private static final Logger logger = Logger.getLogger(ResourceCacheMgr.class.getName());
 
     private Map<Ref, CacheBundle> caches = new HashMap<>();  // baseUrl -> cache
     private List<Ref> knownPatientServers = new ArrayList<>();

@@ -1,6 +1,7 @@
 package gov.nist.asbestos.serviceproperties;
 
-import org.apache.log4j.Logger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -18,7 +19,7 @@ import java.util.Properties;
  */
 public class ServiceProperties {
     public static String SERVICE_PROPERTIES_FILE_NAME = "service.properties";
-    private static final Logger logger = Logger.getLogger(ServiceProperties.class);
+    private static final Logger logger = Logger.getLogger(ServiceProperties.class.getName());
     private static File spFile;
     private long spFileLastModified;
     private static Properties properties;
@@ -30,7 +31,7 @@ public class ServiceProperties {
             try {
                 spFile = getLocalSpFile(getClass(), SERVICE_PROPERTIES_FILE_NAME);
             } catch (Exception ex) {
-                logger.error("Could not locate the service.properties file: " + ex.toString());
+                logger.log(Level.SEVERE, "Could not locate the service.properties file.", ex);
                 throw ex;
             }
         } else {
@@ -80,7 +81,7 @@ public class ServiceProperties {
             try {
                 loadProperties();
             } catch (IOException ioEx) {
-                logger.warn("reloadIfModified failed: " + ioEx.toString());
+                logger.warning("reloadIfModified failed: " + ioEx.toString());
             }
         }
     }
@@ -128,7 +129,7 @@ public class ServiceProperties {
             properties.remove(key);
             return true;
         } catch (Exception ex) {
-            logger.warn("Could not remove key: " + key);
+            logger.warning("Could not remove key: " + key);
             return false;
         }
     }

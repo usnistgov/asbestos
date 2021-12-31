@@ -3,7 +3,7 @@ package gov.nist.asbestos.services.restRequests;
 import com.google.common.base.Strings;
 import gov.nist.asbestos.client.Base.Request;
 import gov.nist.asbestos.client.resolver.Ref;
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 
 import java.io.IOException;
 import java.util.Map;
@@ -24,7 +24,7 @@ import java.util.Map;
 // eventId - don't understand how this works - session and channel are needed to use this
 
 public class GetLogEventAnalysisByURLRequest {
-    private static Logger log = Logger.getLogger(GetLogEventAnalysisByURLRequest.class);
+    private static Logger log = Logger.getLogger(GetLogEventAnalysisByURLRequest.class.getName());
 
     public GetLogEventAnalysisByURLRequest(Request request) {
         model = new Model(request);

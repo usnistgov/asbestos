@@ -1,7 +1,7 @@
 package gov.nist.asbestos.services.restRequests;
 
 import gov.nist.asbestos.client.Base.Request;
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 
 import java.io.File;
 import java.io.IOException;
@@ -15,7 +15,7 @@ import java.nio.file.Files;
 
 public class GetTestAssertionsRequest {
 
-    private static Logger log = Logger.getLogger(GetTestAssertionsRequest.class);
+    private static Logger log = Logger.getLogger(GetTestAssertionsRequest.class.getName());
 
     private Request request;
 

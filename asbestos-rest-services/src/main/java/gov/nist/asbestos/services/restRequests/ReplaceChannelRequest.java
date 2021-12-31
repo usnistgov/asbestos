@@ -5,7 +5,7 @@ import gov.nist.asbestos.client.Base.Request;
 import gov.nist.asbestos.client.channel.ChannelConfig;
 import gov.nist.asbestos.client.channel.ChannelConfigFactory;
 import org.apache.commons.io.IOUtils;
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -22,7 +22,7 @@ import static gov.nist.asbestos.client.Base.Returns.returnPlainTextResponse;
 
 
 public class ReplaceChannelRequest extends CreateChannelRequest {
-    private static Logger log = Logger.getLogger(CreateChannelRequest.class);
+    private static Logger log = Logger.getLogger(CreateChannelRequest.class.getName());
 
     public ReplaceChannelRequest(Request request) {
         super(request);
@@ -46,7 +46,7 @@ public class ReplaceChannelRequest extends CreateChannelRequest {
             channelConfigAsPerTheUri = ChannelControl.channelConfigFromChannelId(request.externalCache, channelId);
 
             rawRequest = IOUtils.toString(request.req.getInputStream(), Charset.defaultCharset());   // json
-            log.debug("REPLACE Channel " + rawRequest);
+            log.fine("REPLACE Channel " + rawRequest);
             ChannelConfig channelConfigAsPerBody = ChannelConfigFactory.convert(rawRequest);
 
             if (!channelConfigAsPerTheUri.asChannelId().equals(channelConfigAsPerBody.asChannelId())) { // The supplied entity must match the resource at URI being replaced

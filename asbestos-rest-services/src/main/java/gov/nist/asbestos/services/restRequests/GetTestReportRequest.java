@@ -4,7 +4,7 @@ import gov.nist.asbestos.services.servlet.ChannelConnector;
 import gov.nist.asbestos.client.Base.Request;
 import gov.nist.asbestos.client.channel.ChannelConfig;
 import gov.nist.asbestos.testEngine.engine.ModularReports;
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 
 import java.io.IOException;
 
@@ -18,7 +18,7 @@ import java.io.IOException;
 // return List of TestReports - main report first
 
 public class GetTestReportRequest {
-    private static Logger log = Logger.getLogger(GetTestReportRequest.class);
+    private static Logger log = Logger.getLogger(GetTestReportRequest.class.getName());
 
     private Request request;
 

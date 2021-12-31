@@ -20,12 +20,12 @@ import gov.nist.asbestos.client.Base.Request;
 import gov.nist.asbestos.client.events.UIEvent;
 import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 
 import java.io.IOException;
 
 public class GetLogEventAnalysisByEventRequest {
-    private static Logger log = Logger.getLogger(GetLogEventAnalysisByEventRequest.class);
+    private static Logger log = Logger.getLogger(GetLogEventAnalysisByEventRequest.class.getName());
 
     public GetLogEventAnalysisByEventRequest(Request request) {
         model = new Model(request);

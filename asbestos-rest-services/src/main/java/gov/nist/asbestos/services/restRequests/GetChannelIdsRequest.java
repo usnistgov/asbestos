@@ -3,7 +3,7 @@ package gov.nist.asbestos.services.restRequests;
 import com.google.gson.Gson;
 import gov.nist.asbestos.client.Base.Request;
 import gov.nist.asbestos.client.log.SimStore;
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 
 import java.io.IOException;
 import java.util.List;
@@ -14,7 +14,7 @@ import java.util.List;
 // Return list of channel IDs
 
 public class GetChannelIdsRequest {
-    private static Logger log = Logger.getLogger(GetChannelIdsRequest.class);
+    private static Logger log = Logger.getLogger(GetChannelIdsRequest.class.getName());
 
     private Request request;
 

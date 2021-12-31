@@ -5,7 +5,7 @@ import gov.nist.asbestos.http.headers.Header;
 import gov.nist.asbestos.http.headers.Headers;
 import gov.nist.asbestos.http.operations.Verb;
 import gov.nist.asbestos.http.support.Common;
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 
 // 0 - empty
 // 1 - app context  (asbestos)
@@ -15,7 +15,7 @@ import org.apache.log4j.Logger;
 // 5 - resourceType
 
 public class GetEventForResourceTypeRequest {
-    private static Logger log = Logger.getLogger(GetEventForResourceTypeRequest.class);
+    private static Logger log = Logger.getLogger(GetEventForResourceTypeRequest.class.getName());
 
     private Request request;
 

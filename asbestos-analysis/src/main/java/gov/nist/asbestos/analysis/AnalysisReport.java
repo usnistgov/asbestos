@@ -22,8 +22,8 @@ import gov.nist.asbestos.testEngine.engine.FhirPathEngineBuilder;
 import gov.nist.asbestos.testEngine.engine.TestEngine;
 import gov.nist.asbestos.testEngine.engine.assertion.MinimumId;
 import gov.nist.asbestos.utilities.ResourceHasMethodsFilter;
-import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.apache.log4j.Logger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.hl7.fhir.r4.model.*;
 
 import java.io.File;
@@ -31,7 +31,7 @@ import java.net.URISyntaxException;
 import java.util.*;
 
 public class AnalysisReport {
-    private static final Logger log = Logger.getLogger(AnalysisReport.class);
+    private static final Logger log = Logger.getLogger(AnalysisReport.class.getName());
     private Ref fhirBase = null;
     private Ref baseRef = null;
     private List<Ref> relatedRefs = new ArrayList<>();
@@ -256,7 +256,9 @@ public class AnalysisReport {
             binaryEval();
             return buildReport();
         } catch (Throwable t) {
-            generalErrors.add(ExceptionUtils.getStackTrace(t));
+            String error = "AnalysisReport#run Error: " + t;
+            log.log(Level.SEVERE, error, t);
+            generalErrors.add(String.format("%s. Check server log for details.", error));
             return buildReport();
         }
     }
@@ -302,7 +304,9 @@ public class AnalysisReport {
                 baseObj.setEvent(contextResourceBundle.getEvent(), contextResourceBundle.isRequest());
             }
         } catch (Throwable t) {
-            generalErrors.add(ExceptionUtils.getStackTrace(t));
+            String error = "AnalysisReport#establishBase Error: " + t;
+            log.log(Level.SEVERE, error, t);
+            generalErrors.add(String.format("%s. Check server log for details.", error));
             return buildReport();
         }
         if (!generalErrors.isEmpty())
@@ -630,7 +634,7 @@ public class AnalysisReport {
 
             }
         }
-        log.error("No submissionset counterpart found in response.");
+        log.severe("No submissionset counterpart found in response.");
         return null;
     }
 
@@ -657,7 +661,7 @@ public class AnalysisReport {
                 return wrapper;
             }
         }
-        log.error("No submissionset counterpart found in request");
+        log.severe("No submissionset counterpart found in request");
         return null;
     }
 

@@ -5,7 +5,7 @@ import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import gov.nist.asbestos.http.operations.HttpGetter;
 import gov.nist.asbestos.serviceproperties.ServiceProperties;
 import gov.nist.asbestos.serviceproperties.ServicePropertiesEnum;
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 import org.hl7.fhir.r4.model.OperationOutcome;
 
 import java.net.URISyntaxException;
@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Map;
 
 public class RelatedReport {
-    private static final Logger log = Logger.getLogger(RelatedReport.class);
+    private static final Logger log = Logger.getLogger(RelatedReport.class.getName());
 
     // basics
     String name;

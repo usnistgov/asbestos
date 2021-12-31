@@ -11,12 +11,12 @@ import gov.nist.asbestos.asbestosProxy.channel.ChannelControl;
 import gov.nist.asbestos.client.Base.Request;
 import gov.nist.asbestos.client.channel.ChannelConfig;
 import gov.nist.asbestos.client.resolver.Ref;
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 
 import java.io.IOException;
 
 public class GetNativeUrlRequest {
-    private static Logger log = Logger.getLogger(GetNativeUrlRequest.class);
+    private static Logger log = Logger.getLogger(GetNativeUrlRequest.class.getName());
 
     private Request request;
 

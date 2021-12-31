@@ -8,7 +8,7 @@ import gov.nist.asbestos.client.channel.ChannelConfigFactory;
 import gov.nist.asbestos.simapi.simCommon.SimId;
 import gov.nist.asbestos.simapi.simCommon.TestSession;
 import org.apache.commons.io.IOUtils;
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -18,7 +18,7 @@ import java.nio.charset.Charset;
 // Create a channel based on JSON configuration in request
 
 public class LockChannelRequest {
-    private static Logger log = Logger.getLogger(LockChannelRequest.class);
+    private static Logger log = Logger.getLogger(LockChannelRequest.class.getName());
 
     private Request request;
 

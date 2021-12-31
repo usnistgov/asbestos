@@ -16,13 +16,13 @@ import gov.nist.asbestos.client.Base.Request;
 import gov.nist.asbestos.client.Base.Returns;
 import gov.nist.asbestos.client.events.UIEvent;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 
 import java.io.IOException;
 import java.net.URL;
 
 public class GetEventFixtureRequest {
-    private static Logger log = Logger.getLogger(GetEventFixtureRequest.class);
+    private static Logger log = Logger.getLogger(GetEventFixtureRequest.class.getName());
 
     private Request request;
 

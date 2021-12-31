@@ -3,7 +3,7 @@ package gov.nist.asbestos.services.restRequests;
 import gov.nist.asbestos.client.Base.Dirs;
 import gov.nist.asbestos.client.Base.EC;
 import gov.nist.asbestos.client.Base.Request;
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 
 import java.io.File;
 import java.util.List;
@@ -14,7 +14,7 @@ import java.util.List;
 // Return list of TestSession IDs
 
 public class GetSessionNamesRequest {
-    private static Logger log = Logger.getLogger(GetSessionNamesRequest.class);
+    private static Logger log = Logger.getLogger(GetSessionNamesRequest.class.getName());
 
     private Request request;
 

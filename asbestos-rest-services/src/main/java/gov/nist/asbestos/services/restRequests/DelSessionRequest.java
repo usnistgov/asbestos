@@ -4,7 +4,9 @@ import gov.nist.asbestos.client.Base.Dirs;
 import gov.nist.asbestos.client.Base.EC;
 import gov.nist.asbestos.client.Base.Request;
 import gov.nist.asbestos.client.log.SimStore;
-import org.apache.log4j.Logger;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import java.io.File;
 import java.io.IOException;
@@ -21,7 +23,7 @@ import static gov.nist.asbestos.services.restRequests.GetSessionNamesRequest.get
 // Return list of TestSession IDs
 
 public class DelSessionRequest {
-    private static Logger log = Logger.getLogger(DelSessionRequest.class);
+    private static Logger log = Logger.getLogger(DelSessionRequest.class.getName());
 
     private Request request;
 
@@ -62,8 +64,8 @@ public class DelSessionRequest {
             request.returnList(names);
             request.ok();
         } catch (IOException ex) {
-            log.error("DelSessionRequest could not remove " + theSessionToDelete + ". Please remove the files manually if possible.");
-            log.error(ex);
+            log.severe("DelSessionRequest could not remove " + theSessionToDelete + ". Please remove the files manually if possible.");
+            log.log(Level.SEVERE, "DelSessionRequest#run", ex);
         }
     }
 }

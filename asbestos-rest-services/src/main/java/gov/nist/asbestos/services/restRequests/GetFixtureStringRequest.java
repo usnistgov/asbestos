@@ -6,7 +6,7 @@ import gov.nist.asbestos.client.Base.Returns;
 import gov.nist.asbestos.client.client.Format;
 import gov.nist.asbestos.fixture.FixturePlaceholderEnum;
 import gov.nist.asbestos.fixture.FixturePlaceholderParamEnum;
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
@@ -36,7 +36,7 @@ import java.util.regex.Pattern;
 public class GetFixtureStringRequest {
     public static final String PLACEHOLDER_BEGIN = "@{";
     public static final String PLACEHOLDER_END = "}";
-    private static Logger log = Logger.getLogger(GetFixtureStringRequest.class);
+    private static Logger log = Logger.getLogger(GetFixtureStringRequest.class.getName());
 
     private Request request;
     private String testCollection;
@@ -106,7 +106,7 @@ public class GetFixtureStringRequest {
             }
         } else {
             String message = "fixtureString is null.";
-            log.error(message);
+            log.severe(message);
             unexpectedMessage(message);
             return;
         }
@@ -138,7 +138,7 @@ public class GetFixtureStringRequest {
     }
 
     private void unexpectedMessage(String message) throws IOException {
-        log.warn("GetFixtureStringRequest unexpectedMessage: " + message);
+        log.warning("GetFixtureStringRequest unexpectedMessage: " + message);
         Returns.returnPlainTextResponse(request.resp, 400, String.format("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
                 "\n" +
                 "<OperationOutcome xmlns=\"http://hl7.org/fhir\">\n" +
@@ -200,7 +200,7 @@ public class GetFixtureStringRequest {
                 return null;
             }
         } else {
-            log.error(String.format("%s is not safe",paramValue));
+            log.severe(String.format("%s is not safe",paramValue));
             return null;
         }
     }

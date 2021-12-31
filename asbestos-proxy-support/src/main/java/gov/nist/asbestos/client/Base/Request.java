@@ -4,8 +4,8 @@ import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.http.support.Common;
 import gov.nist.asbestos.serviceproperties.ServiceProperties;
 import gov.nist.asbestos.serviceproperties.ServicePropertiesEnum;
-import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.apache.log4j.Logger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.hl7.fhir.r4.model.BaseResource;
 
 import javax.servlet.http.HttpServletRequest;
@@ -34,7 +34,7 @@ public class Request {
     public boolean isGzip = false;
     private String query = null;
     private Map<String, String> parametersMap;
-    private static final Logger log = Logger.getLogger(Request.class);
+    private static final Logger log = Logger.getLogger(Request.class.getName());
 
     public Request(HttpServletRequest req, HttpServletResponse resp, File externalCache) {
         this.req = req;
@@ -134,15 +134,18 @@ public class Request {
         return uriParts.get(i);
     }
 
-    public void setStatus(int status) { log.info(status); resp.setStatus(status); }
+    public void setStatus(int status) {
+        log.info(String.format("%d", status));
+        resp.setStatus(status);
+    }
 
     public void badRequest() {
-        log.error("Do not understand " + uri.toString());
+        log.severe("Do not understand " + uri.toString());
         setStatus(resp.SC_BAD_REQUEST);
     }
 
     public void badRequest(String msg) {
-        log.error(msg);
+        log.severe(msg);
         setStatus(resp.SC_BAD_REQUEST);
     }
 
@@ -151,7 +154,7 @@ public class Request {
     public void serverError() { setStatus(resp.SC_INTERNAL_SERVER_ERROR);}
 
     public void serverError(Throwable t) {
-        log.error(ExceptionUtils.getStackTrace(t));
+        log.log(Level.SEVERE, "", t);
         setStatus(resp.SC_INTERNAL_SERVER_ERROR);
     }
 

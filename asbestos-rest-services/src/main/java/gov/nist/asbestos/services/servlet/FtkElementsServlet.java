@@ -8,7 +8,7 @@ import gov.nist.asbestos.serviceproperties.ServicePropertiesEnum;
 import gov.nist.asbestos.client.channel.ChannelConfig;
 import gov.nist.asbestos.simapi.simCommon.SimId;
 import gov.nist.asbestos.simapi.simCommon.TestSession;
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -19,7 +19,7 @@ import java.io.File;
 import java.io.IOException;
 
 public class FtkElementsServlet extends HttpServlet {
-    private static Logger log = Logger.getLogger(FtkElementsServlet.class);
+    private static Logger log = Logger.getLogger(FtkElementsServlet.class.getName());
     private File externalCache = null;
 
     @Override

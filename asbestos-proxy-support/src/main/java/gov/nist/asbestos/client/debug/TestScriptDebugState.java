@@ -1,6 +1,6 @@
 package gov.nist.asbestos.client.debug;
 
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 
 import javax.websocket.Session;
 import java.util.ArrayList;
@@ -41,7 +41,7 @@ public class TestScriptDebugState {
     private List<String> parentExecutionIndex = new ArrayList<>();
     Consumer<Optional<String>> onStop;
 
-    private static Logger log = Logger.getLogger(TestScriptDebugState.class);
+    private static Logger log = Logger.getLogger(TestScriptDebugState.class.getName());
 
 
     public TestScriptDebugState(Session session, DebugTestSessionId debugTestSessionId, String testScriptIndex, ConcurrentSkipListSet breakpointSet) {
@@ -138,7 +138,7 @@ public class TestScriptDebugState {
         if (getSession() != null && getSession().isOpen()) {
             getSession().getAsyncRemote().sendText("{\"messageType\":\"final-report\", \"testReport\":" + testReport + "}");
         } else {
-            log.error("sendFinalReport: session was already closed!");
+            log.severe("sendFinalReport: session was already closed!");
         }
     }
 

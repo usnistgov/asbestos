@@ -3,7 +3,7 @@ package gov.nist.asbestos.client.resolver;
 import ca.uhn.fhir.context.FhirContext;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 
 
 import java.io.File;
@@ -17,7 +17,7 @@ import java.util.Properties;
  * Local cache of FHIR resources
  */
 public class FileSystemResourceCache implements ResourceCache {
-    private static final Logger logger = Logger.getLogger(FileSystemResourceCache.class);
+    private static final Logger logger = Logger.getLogger(FileSystemResourceCache.class.getName());
     private static FhirContext ctx = FhirContext.forR4();
 
     private List<File> cacheDirs = new ArrayList<>();

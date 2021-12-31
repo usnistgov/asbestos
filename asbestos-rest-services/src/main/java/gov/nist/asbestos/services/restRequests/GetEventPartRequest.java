@@ -10,7 +10,7 @@ import gov.nist.asbestos.client.events.UITask;
 import gov.nist.asbestos.http.headers.Headers;
 import gov.nist.asbestos.services.servlet.ChannelConnector;
 import gov.nist.asbestos.testEngine.engine.ModularReports;
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 import org.hl7.fhir.r4.model.TestReport;
 
 import java.io.IOException;
@@ -30,7 +30,7 @@ import java.util.Map;
 //
 
 public class GetEventPartRequest {
-    private static Logger log = Logger.getLogger(GetEventPartRequest.class);
+    private static Logger log = Logger.getLogger(GetEventPartRequest.class.getName());
 
     private Request request;
 
@@ -158,7 +158,7 @@ public class GetEventPartRequest {
     }
 
     private void unexpectedMessage(String message) throws IOException {
-        log.warn(message);
+        log.warning(message);
         Returns.returnPlainTextResponse(request.resp, 400, message);
     }
 }

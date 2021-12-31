@@ -4,7 +4,7 @@ import gov.nist.asbestos.asbestosProxy.channel.ChannelControl;
 import gov.nist.asbestos.client.Base.Request;
 import gov.nist.asbestos.client.channel.ChannelConfig;
 import gov.nist.asbestos.client.channel.ChannelConfigFactory;
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 
 import java.io.IOException;
 // 0 - empty
@@ -14,7 +14,7 @@ import java.io.IOException;
 // 4 - channelID
 
 public class GetChannelConfigRequest {
-    private static Logger log = Logger.getLogger(GetChannelConfigRequest.class);
+    private static Logger log = Logger.getLogger(GetChannelConfigRequest.class.getName());
 
     private Request request;
 

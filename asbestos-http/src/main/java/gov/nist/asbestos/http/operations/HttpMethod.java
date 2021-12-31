@@ -3,7 +3,7 @@ package gov.nist.asbestos.http.operations;
 import gov.nist.asbestos.http.headers.Header;
 import gov.nist.asbestos.http.util.Gzip;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.exception.ExceptionUtils;
+import java.util.logging.Level;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -12,8 +12,10 @@ import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.logging.Logger;
 
 public class HttpMethod extends HttpBase {
+    private static Logger logger = Logger.getLogger(HttpMethod.class.getName());
     private Header locationHeader = null;
     protected String theHttpVerb;
 
@@ -72,7 +74,8 @@ public class HttpMethod extends HttpBase {
             doVerb(uri, getRequestHeaders().getAll(), getRequest());
         } catch (IOException e) {
             status = 400;
-            String msg = uri + "\n" + e.getMessage() + "\n" + ExceptionUtils.getStackTrace(e);
+            String msg = uri + "\n" + e.getMessage() + "\n" + "HttpMethod#submit Error: Check log for details.";
+            logger.log(Level.SEVERE, msg, e);
             setResponseText(msg);
             setResponse(msg.getBytes());
         }

@@ -2,7 +2,7 @@ package gov.nist.asbestos.services.servlet;
 
 import gov.nist.asbestos.services.restRequests.*;
 import gov.nist.asbestos.client.Base.Request;
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -12,7 +12,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 
 public class TestEngineServlet extends HttpServlet {
-    private static Logger log = Logger.getLogger(TestEngineServlet.class);
+    private static Logger log = Logger.getLogger(TestEngineServlet.class.getName());
     private File externalCache = null;
     private String port = "8081";
 
@@ -28,7 +28,7 @@ public class TestEngineServlet extends HttpServlet {
             log.info("TestEngineServlet - Got External Cache from ProxyServlet");
             externalCache = new File((String) ec);
         } else {
-            log.fatal("TestEngineServlet - Proxy not started");
+            log.severe("TestEngineServlet - Proxy not started");
         }
     }
 

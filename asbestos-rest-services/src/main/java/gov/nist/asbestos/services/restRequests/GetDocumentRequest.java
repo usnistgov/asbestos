@@ -10,12 +10,12 @@ import gov.nist.asbestos.client.Base.DocumentCache;
 import gov.nist.asbestos.client.Base.Request;
 import gov.nist.asbestos.serviceproperties.ServiceProperties;
 import gov.nist.asbestos.serviceproperties.ServicePropertiesEnum;
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 
 import java.io.IOException;
 
 public class GetDocumentRequest {
-    private static Logger log = Logger.getLogger(GetEventRequest.class);
+    private static Logger log = Logger.getLogger(GetEventRequest.class.getName());
 
     private Request request;
 

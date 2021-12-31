@@ -9,7 +9,7 @@ import gov.nist.asbestos.client.client.Format;
 import gov.nist.asbestos.testEngine.engine.translator.AsbestosComponentPath;
 import gov.nist.asbestos.testEngine.engine.translator.ComponentPathValue;
 import org.apache.commons.io.FileUtils;
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 import org.hl7.fhir.r4.model.BaseResource;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.StringType;
@@ -30,7 +30,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class ModularScripts {
-    private static Logger log = Logger.getLogger(ModularScripts.class);
+    private static Logger log = Logger.getLogger(ModularScripts.class.getName());
     // testId => TestScript json
     // testId/componentId => TestScript.json
     private final Map<String, String> scripts = new LinkedHashMap<>();
@@ -167,7 +167,7 @@ public class ModularScripts {
                         }
 
                     } else {
-                        log.error(String.format("%s component value does not exist.", testDef.toString()));
+                        log.severe(String.format("%s component value does not exist.", testDef.toString()));
                     }
                 }
             }

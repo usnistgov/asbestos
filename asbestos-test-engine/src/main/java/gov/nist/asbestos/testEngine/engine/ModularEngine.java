@@ -8,8 +8,8 @@ import gov.nist.asbestos.client.debug.StopDebugTestScriptException;
 import gov.nist.asbestos.client.debug.TestScriptDebugState;
 import gov.nist.asbestos.simapi.validation.Val;
 import gov.nist.asbestos.testEngine.engine.fixture.FixtureMgr;
-import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.apache.log4j.Logger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.TestReport;
 import org.hl7.fhir.r4.model.TestScript;
@@ -30,7 +30,7 @@ import java.util.Set;
 import java.util.regex.Pattern;
 
 public class ModularEngine {
-    private static Logger log = Logger.getLogger(ModularEngine.class);
+    private static Logger log = Logger.getLogger(ModularEngine.class.getName());
 
     private List<TestEngine> engines = new ArrayList<>();
     private boolean saveLogs = false;
@@ -151,7 +151,7 @@ public class ModularEngine {
                     writer.write(json);
                     writer.flush();
                 } catch (IOException e) {
-                    log.error(ExceptionUtils.getStackTrace(e));
+                    log.log(Level.SEVERE, "", e);
                     throw new RuntimeException(e);
                 }
             }

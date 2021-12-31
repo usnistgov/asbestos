@@ -1,7 +1,7 @@
 package gov.nist.asbestos.services.restRequests;
 
 import gov.nist.asbestos.client.Base.Request;
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 
 import java.io.IOException;
 // 0 - empty
@@ -9,7 +9,7 @@ import java.io.IOException;
 // 2 - "signIn"
 
 public class GetSignInRequest {
-    private static Logger log = Logger.getLogger(GetSignInRequest.class);
+    private static Logger log = Logger.getLogger(GetSignInRequest.class.getName());
 
     private Request request;
 

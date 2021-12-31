@@ -3,8 +3,8 @@ package gov.nist.asbestos.client.resolver;
 import com.google.common.base.Strings;
 import gov.nist.asbestos.client.Base.EC;
 import gov.nist.asbestos.http.operations.CustomUriBuilder;
-import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.apache.log4j.Logger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
@@ -14,7 +14,7 @@ import java.net.*;
 import java.util.*;
 
 public class Ref {
-    private static Logger log = Logger.getLogger(Ref.class);
+    private static Logger log = Logger.getLogger(Ref.class.getName());
     private static EC externalCache;
 
     private URI uri;
@@ -541,7 +541,7 @@ public class Ref {
             return uri.toASCIIString();
             //return URLDecoder.decode(uri.toString(), "UTF-8");
         } catch (Exception e) {
-            log.error(uri + " : " + ExceptionUtils.getStackTrace(e));
+            log.log(Level.SEVERE, "asString URI: " + uri.toString(), e);
             return uri.toString();
         }
     }

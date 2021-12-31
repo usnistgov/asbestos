@@ -7,7 +7,7 @@ import gov.nist.asbestos.client.debug.DebugWsSessionId;
 import gov.nist.asbestos.client.debug.TestScriptDebugState;
 import gov.nist.asbestos.simapi.tk.installation.Installation;
 import gov.nist.asbestos.debug.testScript.requests.DebugTestScriptRequest;
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 
 import javax.websocket.CloseReason;
 import javax.websocket.OnClose;
@@ -34,7 +34,7 @@ import com.google.gson.Gson;
 
 @ServerEndpoint("/debugTestScript/{userType}")
 public class DebugTestScriptWebSocketEndpoint {
-    private static Logger log = Logger.getLogger(DebugTestScriptWebSocketEndpoint.class);
+    private static Logger log = Logger.getLogger(DebugTestScriptWebSocketEndpoint.class.getName());
     /**
      * Key=The Websocket Session Id
      * Value=TestScriptDebugState
@@ -123,7 +123,7 @@ public class DebugTestScriptWebSocketEndpoint {
                             removeFromStateTracking(debugState);
                         }
                     } else {
-                        log.error("removeDebugger error: debugState could not be found!");
+                        log.severe("removeDebugger error: debugState could not be found!");
                     }
                 }
 
@@ -134,7 +134,7 @@ public class DebugTestScriptWebSocketEndpoint {
         TestScriptDebugState state = debugStateMap.get(session.getId());
         try {
             if (state == null) {
-                log.error("debugState was not established.");
+                log.severe("debugState was not established.");
                 return;
             }
 
@@ -148,7 +148,7 @@ public class DebugTestScriptWebSocketEndpoint {
                         startDebuggerThread(state, uriString);
                     } else {
                         String exception = "breakpointList is empty.";
-                        log.error(exception);
+                        log.severe(exception);
                         throw new RuntimeException(exception);
                     }
                 }
@@ -248,13 +248,13 @@ public class DebugTestScriptWebSocketEndpoint {
             debugExecutorMap.remove(sessionId);
             debugStateMap.remove(sessionId);
         } catch (Exception ex) {
-            log.error("removeFromStateTracking: " + ex.toString());
+            log.severe("removeFromStateTracking: " + ex.toString());
         }
     }
 
     @OnError
     public void onError(Throwable t) {
-       log.error(t.toString());
+       log.severe(t.toString());
     }
 
     private void startDebuggerThread(TestScriptDebugState state, String uriString) throws Exception {

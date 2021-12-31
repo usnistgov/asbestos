@@ -30,8 +30,9 @@ import gov.nist.asbestos.client.channel.ChannelConfigFactory;
 import gov.nist.asbestos.simapi.simCommon.SimId;
 import gov.nist.asbestos.simapi.tk.installation.Installation;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.apache.log4j.Logger;
+import java.util.logging.Level;
+
+import java.util.logging.Logger;
 import org.hl7.fhir.r4.model.BaseResource;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CapabilityStatement;
@@ -55,7 +56,7 @@ import java.util.regex.Pattern;
 import java.util.stream.IntStream;
 
 public class ProxyServlet extends HttpServlet {
-    private static Logger log = Logger.getLogger(ProxyServlet.class);
+    private static Logger log = Logger.getLogger(ProxyServlet.class.getName());
     private static File externalCache = null;
     private Map<String, IChannelBuilder> proxyMap = new HashMap<>();
 
@@ -148,11 +149,11 @@ public class ProxyServlet extends HttpServlet {
             if (simStore == null)
                 return;
         } catch (IOException e) {
-            log.error(ExceptionUtils.getStackTrace(e));
+            log.log(Level.SEVERE, "Check parseUri method call.", e);
             resp.setStatus(resp.SC_INTERNAL_SERVER_ERROR);
             return;
         } catch (Throwable t) {
-            log.error(ExceptionUtils.getStackTrace(t));
+            log.log(Level.SEVERE, "Unexpected exception.", t);
             resp.setStatus(resp.SC_BAD_REQUEST);
             return;
         }
@@ -268,7 +269,8 @@ public class ProxyServlet extends HttpServlet {
     }
 
     private OperationOutcome wrapInOutcome(Throwable t) {
-        return wrapInOutcome(ExceptionUtils.getStackTrace(t));
+        String error = BaseChannel.logReference(log, "", t);
+        return wrapInOutcome(error);
     }
 
     private OperationOutcome wrapInOutcome(String msg) {
@@ -301,7 +303,7 @@ public class ProxyServlet extends HttpServlet {
                     }
                 }
             } catch (URISyntaxException uriEx) {
-                 log.error(ExceptionUtils.getStackTrace(uriEx));
+                 log.log(Level.SEVERE, "mhd channelType exception.", uriEx);
             }
         }
 
@@ -341,11 +343,11 @@ public class ProxyServlet extends HttpServlet {
             resp.addHeader("ETag", String.format("W/\"%s\"", versionId.hashCode()));
             respond(resp, baseResource, inHeaders, clientTask, 200);
         } catch (Exception ex) {
-            // This did not work in IntelliJ Jetty runner without any Jetty XML config:
+            // Following call did not work in IntelliJ Jetty runner without any Jetty XML config:
             // resp.sendError(500, ex.toString());.
-            // This worked in Tomcat but not Jetty without any Jetty XML config. Works with the following accept-headers: fhir+xml and fhir+json.
-            log.error(ExceptionUtils.getStackTrace(ex));
+            // Following call worked in Tomcat but not Jetty without any Jetty XML config. Works with the following accept-headers: fhir+xml and fhir+json.
             resp.setStatus(resp.SC_INTERNAL_SERVER_ERROR);
+            log.log(Level.SEVERE, "500 Server error.", ex);
             respondWithError(req, resp, ex.toString(), inHeaders, clientTask);
         }
     }
@@ -443,7 +445,7 @@ public class ProxyServlet extends HttpServlet {
                 return null;
             }
         } catch (IOException e) {
-            log.error(ExceptionUtils.getStackTrace(e));
+            log.log(Level.SEVERE, "", e);
             resp.setStatus(resp.SC_INTERNAL_SERVER_ERROR);
             return null;
         }
@@ -477,7 +479,7 @@ public class ProxyServlet extends HttpServlet {
 
     private void respondWithError(HttpServletRequest req, HttpServletResponse resp, Throwable t, Headers inHeaders, ITask
         clientTask) {
-        log.error(ExceptionUtils.getStackTrace(t));
+        log.log(Level.SEVERE, "", t);
         Ref ref = new Ref(Common.buildURI(req));
 //        if (ref.isQuery()) {
 //            respond(resp, wrapInOutcome(t), inHeaders, clientTask, 403);
@@ -534,7 +536,7 @@ public class ProxyServlet extends HttpServlet {
                 resp.getOutputStream().write(content);
             }
         } catch (Exception e) {
-            log.error(ExceptionUtils.getStackTrace(e));
+            log.log(Level.SEVERE, "", e);
         }
     }
 
@@ -762,7 +764,6 @@ public class ProxyServlet extends HttpServlet {
     // format of Channel URI is also found in class ChannelUrl
     SimStore parseUri(URI uri, HttpServletRequest req, HttpServletResponse resp, Verb verb) throws IOException {
         List<String> uriParts = ChannelUrl.uriParts(uri);  // so parts are deletable
-        SimStore simStore;
 
         SimId simId = null;
 
@@ -770,6 +771,7 @@ public class ProxyServlet extends HttpServlet {
             // /appContext/proxy/channelId
             if (uriParts.get(0).equals("") && uriParts.get(2).equals("proxy")) {
                 simId = ChannelUrl.getSimId(uri);    //  SimId.buildFromRawId(uriParts.get(3));
+                SimStore simStore;
                 simStore = new SimStore(externalCache, simId);
                 if (!simStore.exists()) {
                     resp.setStatus(resp.SC_NOT_FOUND);
@@ -799,7 +801,7 @@ public class ProxyServlet extends HttpServlet {
         }  else
             return null;
 
-        simStore = new SimStore(externalCache, simId);
+        final SimStore simStore = new SimStore(externalCache, simId);
 
         String uriString = uri.toString();
         if (uriString.contains("?")) {
@@ -818,7 +820,7 @@ public class ProxyServlet extends HttpServlet {
             simStore.getStore();  // exception if proxy does not exist
         simStore.open();
 
-        log.debug("Sim " + simStore.getChannelId() + " " +  simStore.getActorType() + " " + simStore.getResource());
+        log.fine(()->"Sim " + simStore.getChannelId() + " " +  simStore.getActorType() + " " + simStore.getResource());
 
         return simStore; // expect content
 
@@ -844,6 +846,6 @@ public class ProxyServlet extends HttpServlet {
     public void setExternalCache(File externalCache) {
         this.externalCache = externalCache;
         Installation.instance().setExternalCache(externalCache);
-        log.debug("Asbestos Proxy init EC is " + externalCache.getPath());
+        log.fine(()->"Asbestos Proxy init EC is " + externalCache.getPath());
     }
 }

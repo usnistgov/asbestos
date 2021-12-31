@@ -2,7 +2,7 @@ package gov.nist.asbestos.services.servlet;
 
 import gov.nist.asbestos.services.restRequests.GetStaticResourceRequest;
 import gov.nist.asbestos.client.Base.Request;
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -12,7 +12,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 
 public class StaticResourceServlet extends HttpServlet {
-    private static Logger log = Logger.getLogger(StaticResourceServlet.class);
+    private static Logger log = Logger.getLogger(StaticResourceServlet.class.getName());
     private File externalCache = null;
 
     public StaticResourceServlet() {
@@ -26,7 +26,7 @@ public class StaticResourceServlet extends HttpServlet {
         if (ec != null) {
             externalCache = new File((String) ec);
         } else {
-            log.fatal("StaticResourceServlet - Proxy not started");
+            log.severe("StaticResourceServlet - Proxy not started");
         }
     }
 

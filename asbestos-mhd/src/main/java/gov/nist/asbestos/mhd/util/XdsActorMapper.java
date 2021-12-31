@@ -2,13 +2,13 @@ package gov.nist.asbestos.mhd.util;
 
 import gov.nist.asbestos.serviceproperties.ServiceProperties;
 import gov.nist.asbestos.serviceproperties.ServicePropertiesEnum;
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 
 import java.net.URI;
 import java.net.URISyntaxException;
 
 public class XdsActorMapper {
-    private static Logger logger = Logger.getLogger(XdsActorMapper.class);
+    private static Logger logger = Logger.getLogger(XdsActorMapper.class.getName());
 
     public URI getEndpoint(String siteName, String actorType, String transactionType, boolean isTls) {
         try {

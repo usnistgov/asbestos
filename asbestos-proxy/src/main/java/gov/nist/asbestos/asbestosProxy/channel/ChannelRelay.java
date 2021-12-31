@@ -1,6 +1,6 @@
 package gov.nist.asbestos.asbestosProxy.channel;
 
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 
 import java.io.File;
 import java.util.HashMap;
@@ -8,7 +8,7 @@ import java.util.Map;
 
 // synchronization objects for Channels
 public class ChannelRelay {
-    private static Logger log = Logger.getLogger(ChannelRelay.class);
+    private static Logger log = Logger.getLogger(ChannelRelay.class.getName());
     private String channelId;
     private File eventDir = null;
 

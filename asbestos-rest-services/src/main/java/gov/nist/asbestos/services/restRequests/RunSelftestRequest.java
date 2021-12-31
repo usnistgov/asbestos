@@ -28,8 +28,8 @@ import gov.nist.asbestos.client.channel.ChannelConfig;
 import gov.nist.asbestos.simapi.simCommon.SimId;
 import gov.nist.asbestos.simapi.validation.Val;
 import gov.nist.asbestos.testEngine.engine.ModularEngine;
-import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.apache.log4j.Logger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.hl7.fhir.r4.model.TestReport;
 
 import java.io.File;
@@ -37,7 +37,7 @@ import java.net.URI;
 import java.util.List;
 
 public class RunSelftestRequest {
-    private static Logger log = Logger.getLogger(RunSelftestRequest.class);
+    private static Logger log = Logger.getLogger(RunSelftestRequest.class.getName());
 
     private Request request;
 
@@ -131,7 +131,7 @@ public class RunSelftestRequest {
                         lastTime.time = time;
 
                 } catch (Throwable t) {
-                    log.error(ExceptionUtils.getStackTrace(t));
+                    log.log(Level.SEVERE, "", t);
                     lastTime.hasError = true;
                 }
             }

@@ -16,7 +16,7 @@ import gov.nist.asbestos.client.Base.Request;
 import gov.nist.asbestos.client.client.Format;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import org.apache.commons.io.IOUtils;
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 import org.hl7.fhir.r4.model.BaseResource;
 
 import java.io.IOException;
@@ -24,7 +24,7 @@ import java.io.InputStream;
 import java.io.StringWriter;
 
 public class AnalyseResourceRequest {
-    private static Logger log = Logger.getLogger(AnalyseResourceRequest.class);
+    private static Logger log = Logger.getLogger(AnalyseResourceRequest.class.getName());
     private EventContext eventContext;
     private Request request;
 

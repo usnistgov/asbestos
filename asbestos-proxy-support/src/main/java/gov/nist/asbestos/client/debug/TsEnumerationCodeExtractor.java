@@ -18,11 +18,11 @@ public class TsEnumerationCodeExtractor implements Function<Object, AssertionFie
         try {
             for (Method m : methodList) {
                 if ("getDisplay".equals(m.getName())) {
-                    displayStr = (String) m.invoke(e, null);
+                    displayStr = (String) m.invoke(e, (Object[])null);
                 } else if ("toCode".equals(m.getName())) {
-                    codeStr = (String) m.invoke(e, null);
+                    codeStr = (String) m.invoke(e, (Object[])null);
                 } else if ("getDefinition".equals(m.getName())) {
-                    definitionStr = (String) m.invoke(e, null);
+                    definitionStr = (String) m.invoke(e, (Object[])null);
                 }
             }
             if (displayStr != null && codeStr != null && definitionStr != null) {

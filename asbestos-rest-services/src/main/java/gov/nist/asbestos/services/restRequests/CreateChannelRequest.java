@@ -8,7 +8,7 @@ import gov.nist.asbestos.mhd.channel.MhdVersionEnum;
 import gov.nist.asbestos.simapi.simCommon.SimId;
 import gov.nist.asbestos.simapi.simCommon.TestSession;
 import org.apache.commons.io.IOUtils;
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -23,7 +23,7 @@ import java.util.regex.Pattern;
 // Create a channel based on JSON configuration in request
 
 public class CreateChannelRequest {
-    private static Logger log = Logger.getLogger(CreateChannelRequest.class);
+    private static Logger log = Logger.getLogger(CreateChannelRequest.class.getName());
 
     protected Request request;
     protected String rawRequest;
@@ -46,7 +46,7 @@ public class CreateChannelRequest {
         request.announce("CreateChannel");
         if (rawRequest == null) {
             rawRequest = IOUtils.toString(request.req.getInputStream(), Charset.defaultCharset());   // json
-            log.debug("CREATE Channel " + rawRequest);
+            log.fine("CREATE Channel " + rawRequest);
         }
         ChannelConfig channelConfig = ChannelConfigFactory.convert(rawRequest);
 
@@ -60,7 +60,7 @@ public class CreateChannelRequest {
 
         if (isInvalidChannelName) {
             String error = "Invalid channel name. Check if name contains an illegal character or is a reserved name.";
-            log.warn(error + ": " +  channelConfig.asChannelId());
+            log.warning(error + ": " +  channelConfig.asChannelId());
             request.resp.setContentType("application/json");
             request.resp.getOutputStream().print(error);
             request.setStatus((request.resp.SC_BAD_REQUEST));
@@ -69,7 +69,7 @@ public class CreateChannelRequest {
 
         if (! isMhdVersionValid(channelConfig.getMhdVersions())) {
             String error = "Invalid mhdVersion.";
-            log.warn(error + ": " +  channelConfig.asChannelId());
+            log.warning(error + ": " +  channelConfig.asChannelId());
             request.resp.setContentType("application/json");
             request.resp.getOutputStream().print(error);
             request.setStatus((request.resp.SC_BAD_REQUEST));

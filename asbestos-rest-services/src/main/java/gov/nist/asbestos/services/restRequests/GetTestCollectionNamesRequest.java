@@ -3,7 +3,7 @@ package gov.nist.asbestos.services.restRequests;
 import com.google.gson.Gson;
 import gov.nist.asbestos.client.Base.EC;
 import gov.nist.asbestos.client.Base.Request;
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -16,7 +16,7 @@ import java.util.Properties;
 // Return list of test collection names
 
 public class GetTestCollectionNamesRequest {
-    private static Logger log = Logger.getLogger(GetTestCollectionNamesRequest.class);
+    private static Logger log = Logger.getLogger(GetTestCollectionNamesRequest.class.getName());
 
     private Request request;
 

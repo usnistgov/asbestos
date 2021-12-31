@@ -5,7 +5,7 @@ import gov.nist.asbestos.asbestosProxy.channel.ChannelControl;
 import gov.nist.asbestos.client.Base.Request;
 import gov.nist.asbestos.client.log.SimStore;
 import gov.nist.asbestos.client.channel.ChannelConfig;
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -19,7 +19,7 @@ import java.util.List;
 // return channelIds and their URLs
 
 public class GetChannelIdAndURLRequest {
-    private static Logger log = Logger.getLogger(GetChannelIdAndURLRequest.class);
+    private static Logger log = Logger.getLogger(GetChannelIdAndURLRequest.class.getName());
 
     private Request request;
 

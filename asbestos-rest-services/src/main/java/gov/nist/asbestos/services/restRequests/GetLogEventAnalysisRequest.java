@@ -13,7 +13,7 @@ import gov.nist.asbestos.client.events.UIEvent;
 import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import gov.nist.asbestos.http.headers.Headers;
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 import org.hl7.fhir.r4.model.*;
 
 import java.io.File;
@@ -25,7 +25,7 @@ import java.util.Map;
 import java.util.Objects;
 
 public class GetLogEventAnalysisRequest {
-    private static Logger log = Logger.getLogger(GetLogEventAnalysisRequest.class);
+    private static Logger log = Logger.getLogger(GetLogEventAnalysisRequest.class.getName());
     private EventContext eventContext;
     private gov.nist.asbestos.client.Base.Request request;
 

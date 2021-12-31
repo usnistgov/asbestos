@@ -12,12 +12,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import gov.nist.asbestos.client.Base.EC;
 import gov.nist.asbestos.client.Base.Request;
 import gov.nist.asbestos.client.Base.Returns;
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 
 import java.io.File;
 
 public class GetSessionConfigRequest {
-    private final static Logger log = Logger.getLogger(GetSessionConfigRequest.class);
+    private final static Logger log = Logger.getLogger(GetSessionConfigRequest.class.getName());
 
     private final Request request;
 

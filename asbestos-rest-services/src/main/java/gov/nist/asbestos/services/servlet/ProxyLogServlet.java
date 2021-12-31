@@ -7,7 +7,7 @@ import gov.nist.asbestos.client.Base.Request;
 import gov.nist.asbestos.client.events.Event;
 import gov.nist.asbestos.client.channel.ChannelConfig;
 import gov.nist.asbestos.simapi.tk.installation.Installation;
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -23,7 +23,7 @@ public class ProxyLogServlet extends HttpServlet {
     private File externalCache = null;
     private static String port = "8081";
     private static String hostname = "localhost";
-    private static Logger log = Logger.getLogger(ProxyLogServlet.class);
+    private static Logger log = Logger.getLogger(ProxyLogServlet.class.getName());
 
     @Override
     public void init(ServletConfig config) throws ServletException {

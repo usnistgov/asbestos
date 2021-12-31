@@ -14,7 +14,7 @@ import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.client.resolver.ResourceCacheMgr;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import gov.nist.asbestos.http.operations.HttpPost;
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.BaseResource;
 import org.hl7.fhir.r4.model.Bundle;
@@ -25,7 +25,7 @@ import java.net.URI;
 import java.util.*;
 
 public class FhirClient {
-    private static Logger log = Logger.getLogger(FhirClient.class);
+    private static Logger log = Logger.getLogger(FhirClient.class.getName());
 
     private Format format = Format.JSON;
     private ResourceCacheMgr resourceCacheMgr = null;

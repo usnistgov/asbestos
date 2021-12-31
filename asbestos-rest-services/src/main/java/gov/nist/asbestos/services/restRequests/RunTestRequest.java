@@ -9,7 +9,7 @@ import gov.nist.asbestos.serviceproperties.ServicePropertiesEnum;
 import gov.nist.asbestos.client.channel.ChannelConfig;
 import gov.nist.asbestos.simapi.validation.Val;
 import gov.nist.asbestos.testEngine.engine.ModularEngine;
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 
 import java.io.File;
 import java.net.URI;
@@ -25,7 +25,7 @@ import java.net.URISyntaxException;
 //   JSON object : test/moduleId => TestReport
 
 public class RunTestRequest {
-    private static Logger log = Logger.getLogger(RunTestRequest.class);
+    private static Logger log = Logger.getLogger(RunTestRequest.class.getName());
 
     private Request request;
 

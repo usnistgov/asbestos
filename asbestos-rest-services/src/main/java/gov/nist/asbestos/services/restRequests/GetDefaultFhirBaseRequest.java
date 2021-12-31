@@ -12,12 +12,12 @@ import com.google.gson.Gson;
 import gov.nist.asbestos.client.Base.Request;
 import gov.nist.asbestos.serviceproperties.ServiceProperties;
 import gov.nist.asbestos.serviceproperties.ServicePropertiesEnum;
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 
 import java.io.IOException;
 
 public class GetDefaultFhirBaseRequest {
-    private static Logger log = Logger.getLogger(GetDefaultFhirBaseRequest.class);
+    private static Logger log = Logger.getLogger(GetDefaultFhirBaseRequest.class.getName());
 
     private Request request;
 

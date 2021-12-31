@@ -13,13 +13,13 @@ package gov.nist.asbestos.services.restRequests;
 import gov.nist.asbestos.client.Base.Request;
 import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 
 import java.net.URL;
 import java.util.Map;
 
 public class GetStaticResourceRequest {
-    private static final Logger log = Logger.getLogger(GetStaticResourceRequest.class);
+    private static final Logger log = Logger.getLogger(GetStaticResourceRequest.class.getName());
 
     private final Request request;
 

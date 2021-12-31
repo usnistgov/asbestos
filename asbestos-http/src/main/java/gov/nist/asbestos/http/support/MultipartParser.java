@@ -1,7 +1,5 @@
 package gov.nist.asbestos.http.support;
 
-import org.apache.commons.lang3.StringUtils;
-
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -106,7 +104,7 @@ class MultipartParser {
         Map<String, String> params = parts.stream()
                 .filter(x -> x.contains("="))
                 .map(string -> string.split("=", 2))
-                .filter(array -> !StringUtils.isEmpty(array[0]) && !StringUtils.isEmpty(array[1]))
+                .filter(array -> ! Optional.ofNullable(array[0]).orElse("").isEmpty()  && ! Optional.ofNullable(array[1]).orElse("").isEmpty() )
                 .collect(Collectors.toMap(array -> array[0].toLowerCase(), array -> array[1]));
         return params;
     }

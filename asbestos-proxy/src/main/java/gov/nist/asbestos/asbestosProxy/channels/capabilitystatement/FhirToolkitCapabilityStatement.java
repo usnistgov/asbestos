@@ -4,7 +4,7 @@ import gov.nist.asbestos.client.Base.ParserBase;
 import gov.nist.asbestos.client.client.Format;
 import gov.nist.asbestos.serviceproperties.ServiceProperties;
 import gov.nist.asbestos.serviceproperties.ServicePropertiesEnum;
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 import org.hl7.fhir.r4.model.BaseResource;
 
 import java.io.File;
@@ -16,7 +16,7 @@ import java.util.Optional;
 import java.util.regex.Pattern;
 
 public class FhirToolkitCapabilityStatement {
-    private static Logger logger = Logger.getLogger(FhirToolkitCapabilityStatement.class);
+    private static Logger logger = Logger.getLogger(FhirToolkitCapabilityStatement.class.getName());
 
     /**
      *
@@ -63,7 +63,7 @@ public class FhirToolkitCapabilityStatement {
                         if (paramValue.isPresent()) {
                             statementContent = statementContent.replaceAll(Pattern.quote(param),  paramValue.get());
                         } else {
-                            logger.warn("No service property value found for key: " + paramKey);
+                            logger.warning("No service property value found for key: " + paramKey);
                         }
                     }
                 }

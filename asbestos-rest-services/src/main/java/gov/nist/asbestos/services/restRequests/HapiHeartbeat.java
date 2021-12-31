@@ -5,7 +5,7 @@ import gov.nist.asbestos.client.Base.Request;
 import gov.nist.asbestos.client.client.Format;
 import gov.nist.asbestos.http.operations.HttpGetter;
 import gov.nist.asbestos.client.channel.ChannelConfig;
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 
 import java.net.URI;
 
@@ -16,7 +16,7 @@ import java.net.URI;
 // issues a simple GET to default channel
 
 public class HapiHeartbeat {
-    private static Logger log = Logger.getLogger(HapiHeartbeat.class);
+    private static Logger log = Logger.getLogger(HapiHeartbeat.class.getName());
 
     private Request request;
 

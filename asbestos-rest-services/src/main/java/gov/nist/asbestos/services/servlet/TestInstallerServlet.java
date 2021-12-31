@@ -15,9 +15,9 @@ import gov.nist.toolkit.toolkitApi.ToolkitServiceException;
 import gov.nist.toolkit.toolkitServicesCommon.SimConfig;
 import gov.nist.toolkit.toolkitServicesCommon.resource.SimIdResource;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.exception.ExceptionUtils;
+import java.util.logging.Level;
 import org.apache.http.HttpStatus;
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -31,7 +31,7 @@ import java.nio.file.Paths;
 import java.util.Optional;
 
 public class TestInstallerServlet  extends HttpServlet {
-    private static Logger log = Logger.getLogger(TestInstallerServlet.class);
+    private static Logger log = Logger.getLogger(TestInstallerServlet.class.getName());
     private File externalCache = null;
 
     @Override
@@ -42,7 +42,7 @@ public class TestInstallerServlet  extends HttpServlet {
             log.info("TestInstallerServlet - Got External Cache from ProxyServlet");
             externalCache = new File((String) ec);
         } else {
-            log.fatal("TestInstallerServlet - Proxy not started");
+            log.severe("TestInstallerServlet - Proxy not started");
             return;
         }
 
@@ -58,7 +58,7 @@ public class TestInstallerServlet  extends HttpServlet {
             try {
                 lockFile.createNewFile();
             } catch (IOException e) {
-                log.fatal("TestInstallerServlet - Cannot create FhirTestCollections.lock");
+                log.severe("TestInstallerServlet - Cannot create FhirTestCollections.lock");
             }
         } else {
             log.info("Not updating Test Definitions and Assertions - External Cache copy is locked");
@@ -70,7 +70,7 @@ public class TestInstallerServlet  extends HttpServlet {
         try {
             verifyCodesXml();
         } catch (Exception e) {
-            log.fatal("TestInstallerServlet - codes verification failed - " + e.getMessage());
+            log.severe("TestInstallerServlet - codes verification failed - " + e.getMessage());
         }
     }
 
@@ -86,7 +86,7 @@ public class TestInstallerServlet  extends HttpServlet {
         if (xdsCodes.equals(fhirCodes)) {
             log.info("TestInstallerServlet - codes.xml checked - FHIR and XDS reference same version");
         } else {
-            log.fatal("TestInstallerServlet - codes.xml checked - FHIR and XDS reference different versions");
+            log.severe("TestInstallerServlet - codes.xml checked - FHIR and XDS reference different versions");
         }
     }
 
@@ -124,7 +124,7 @@ public class TestInstallerServlet  extends HttpServlet {
                 }
             }
         } catch (IOException e) {
-            log.error(ExceptionUtils.getStackTrace(e));
+            log.log(Level.SEVERE, "", e);
         }
     }
 
@@ -153,11 +153,11 @@ public class TestInstallerServlet  extends HttpServlet {
                             DocumentRegRep rr = xdsSimApi.createDocumentRegRep(simIdResource.getId(), simIdResource.getUser(), "default");
                             simConfig = rr.getConfig();
                         } catch (ToolkitServiceException createEx) {
-                            log.error(createEx.toString());
-                            log.error(String.format("Error: %s sim could not be created on %s", xdsSiteName, xdsToolkitBase));
+                            log.severe(createEx.toString());
+                            log.severe(String.format("Error: %s sim could not be created on %s", xdsSiteName, xdsToolkitBase));
                         }
                     } else {
-                        log.error(String.format("Error: HTTP Status: %d. Unhandled exception %s", getSimEx.getCode(),  getSimEx.toString()));
+                        log.severe(String.format("Error: HTTP Status: %d. Unhandled exception %s", getSimEx.getCode(),  getSimEx.toString()));
                     }
                 }
                 if (simConfig != null) {
@@ -198,8 +198,8 @@ public class TestInstallerServlet  extends HttpServlet {
                         try {
                             xdsSimApi.update(simConfig);
                         } catch (ToolkitServiceException updateEx) {
-                            log.error(updateEx.toString());
-                            log.error(String.format("Error: %s SimConfig could not be updated!", xdsSiteName));
+                            log.severe(updateEx.toString());
+                            log.severe(String.format("Error: %s SimConfig could not be updated!", xdsSiteName));
                         }
                     } else {
                         log.info("Already up to date.");
@@ -237,7 +237,7 @@ public class TestInstallerServlet  extends HttpServlet {
         try {
             FileUtils.copyDirectory(new File(new File(war, "data"), "TestAssertions"), externalAssertions);
         } catch (IOException e) {
-            log.error(ExceptionUtils.getStackTrace(e));
+            log.log(Level.SEVERE, "", e);
         }
     }
 
@@ -249,7 +249,7 @@ public class TestInstallerServlet  extends HttpServlet {
         try {
             FileUtils.copyDirectory(new File(new File(war, "data"), "TestCollections"), externalCollections);
         } catch (IOException e) {
-            log.error(ExceptionUtils.getStackTrace(e));
+            log.log(Level.SEVERE, "", e);
         }
     }
 
@@ -261,7 +261,7 @@ public class TestInstallerServlet  extends HttpServlet {
         try {
             FileUtils.copyDirectory(new File(new File(war, "data"), "Sessions"), externalSessions);
         } catch (IOException e) {
-            log.error(ExceptionUtils.getStackTrace(e));
+            log.log(Level.SEVERE, "", e);
         }
     }
 
@@ -273,7 +273,7 @@ public class TestInstallerServlet  extends HttpServlet {
             // warMarkerFile is something like /home/bill/develop/asbestos/asbestos-war/target/asbestos-war/WEB-INF/classes/war.txt
             return warMarkerFile.getParentFile().getParentFile().getParentFile();
         } catch (Throwable t) {
-            log.error(ExceptionUtils.getStackTrace(t));
+            log.log(Level.SEVERE, "", t);
             return null;
         }
 

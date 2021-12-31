@@ -5,7 +5,7 @@ import gov.nist.asbestos.http.headers.Header;
 import gov.nist.asbestos.http.headers.Headers;
 import gov.nist.asbestos.http.operations.Verb;
 import gov.nist.asbestos.http.support.Common;
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 
 import java.io.IOException;
 
@@ -16,7 +16,7 @@ import java.io.IOException;
 // 4 - channelId
 
 public class GetEventsForChannelRequest {
-    private static Logger log = Logger.getLogger(GetEventsForChannelRequest.class);
+    private static Logger log = Logger.getLogger(GetEventsForChannelRequest.class.getName());
 
     private Request request;
 

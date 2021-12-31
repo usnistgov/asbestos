@@ -21,7 +21,7 @@ import java.util.*;
  *
  */
 public class ResourceMgr implements IVal {
-    //    static private final Logger logger = Logger.getLogger(ResourceMgr.class);
+    //    static private final Logger logger = Logger.getLogger(ResourceMgr.class.getName());
     private Map<Ref, ResourceWrapper> bundleResources = new HashMap<>();   // url -> resource; for contents of bundle
     private Val val;
     private ResourceMgrConfig resourceMgrConfig = new ResourceMgrConfig();

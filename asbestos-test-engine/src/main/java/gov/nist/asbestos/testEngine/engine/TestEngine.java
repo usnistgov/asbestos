@@ -19,8 +19,10 @@ import gov.nist.asbestos.testEngine.engine.fixture.FixtureSub;
 import gov.nist.asbestos.testEngine.engine.translator.ComponentDefinition;
 import gov.nist.asbestos.testEngine.engine.translator.ComponentReference;
 import gov.nist.asbestos.testEngine.engine.translator.Parameter;
-import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.apache.log4j.Logger;
+import java.util.logging.Level;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Reference;
@@ -44,7 +46,7 @@ import java.util.stream.Collectors;
  * See http://hl7.org/fhir/testing.html
  */
 public class TestEngine  implements TestDef {
-    private static Logger log = Logger.getLogger(TestEngine.class);
+    private static Logger log = Logger.getLogger(TestEngine.class.getName());
 
     private File testDef = null; // directory holding test definition
     private String testScriptName = null;   // name of testscript file, TestScript.xml by default
@@ -260,14 +262,16 @@ public class TestEngine  implements TestDef {
 
     private void reportTerminalFailure(Throwable t) {
         String msg = t.getClass().getSimpleName() + ": " + t.getMessage();
-        if (t.getMessage() == null || t.getMessage().endsWith("Exception"))
-            msg = ExceptionUtils.getStackTrace(t);
+        if (t.getMessage() == null || t.getMessage().endsWith("Exception")) {
+            msg += " - Check the server log for a stack trace.";
+            log.log(Level.SEVERE, "reportTerminalFailure", t);
+        } else {
+            log.severe(msg);
+        }
         reportTerminalFailure(msg);
-        log.error(msg);
     }
 
     private void reportTerminalFailure(String msg) {
-        // String trace = ExceptionUtils.getStackTrace(t);
         getTestReport().setStatus(TestReport.TestReportStatus.ENTEREDINERROR);
         getTestReport().setResult(TestReport.TestReportResult.FAIL);
 
@@ -383,7 +387,7 @@ public class TestEngine  implements TestDef {
                     " elements but Report had " +
                     reportSetups.size();
             reportTerminalFailure(msg);
-            log.error(msg);
+            log.severe(msg);
         }
 
         for (int i=0; i< testScript.getTest().size(); i++) {
@@ -399,7 +403,7 @@ public class TestEngine  implements TestDef {
                         " elements but Report had " +
                         reports.size();
                 reportTerminalFailure(msg);
-                log.error(msg);
+                log.severe(msg);
             }
         }
 
@@ -412,7 +416,7 @@ public class TestEngine  implements TestDef {
                     " elements but Report had " +
                     report.size();
             reportTerminalFailure(msg);
-            log.error(msg);
+            log.severe(msg);
         }
     }
 
@@ -750,7 +754,9 @@ public class TestEngine  implements TestDef {
                 runner.setTestEngine(this);
                 runner.run(operation, report, isFollowedByAssert);
             } catch (Throwable t) {
-                report.setMessage(ExceptionUtils.getStackTrace(t));
+                String error = String.format("TestEngine#doOperation: %s", t.toString());
+                log.log(Level.SEVERE, error, t);
+                report.setMessage(error.concat("Check server log for details."));
                 report.setResult(TestReport.TestReportActionResult.ERROR);
             }
             propagateStatus(testReport);
@@ -869,8 +875,10 @@ public class TestEngine  implements TestDef {
             }
             catch (Throwable t) {
                 String msg = t.getMessage();
-                if (msg == null || msg.equals(""))
-                    msg = ExceptionUtils.getStackTrace(t);
+                if (msg == null || msg.equals("")) {
+                    msg = "TestEngine#doTest Error: Check server log for details.";
+                    log.log(Level.SEVERE, msg, t);
+                }
                 reportParsingError(testReport.addTest(), msg);
             }
 
@@ -1276,7 +1284,7 @@ public class TestEngine  implements TestDef {
         if (!testScriptElement.hasAction()) {
             String msg = "Action must contain operation or assert.";
             reportTerminalFailure(msg);
-            log.error(msg);
+            log.severe(msg);
             return false;
         }
             String typePrefix = "contained.action";
@@ -1293,7 +1301,7 @@ public class TestEngine  implements TestDef {
                 if (invalidAction(action, actionReportComponent, fVal)) {
                     String msg = "Action must contain operation or assert.";
                     reportTerminalFailure(msg);
-                    log.error(msg);
+                    log.severe(msg);
                     return false;
                 }
                 if (action.hasOperation()) {
@@ -1321,8 +1329,7 @@ public class TestEngine  implements TestDef {
                                   assertionIdListValue = externalVariables.get(assertionIdListValue);
                                 }
                                 if (assertionIdListValue != null && !"".equals(assertionIdListValue)) {
-                                    String expression = assertionIdListValue.concat("~")
-                                            .concat("(".concat(opReport.getMessage()).concat(")"));
+                                    String expression = String.format("%s~(%s)",assertionIdListValue, opReport.getMessage());
                                     boolean result = FhirPathEngineBuilder.evalForBoolean(new TestReport(), expression);
                                     if (result) {
                                         testReport.setStatus(TestReport.TestReportStatus.COMPLETED);
@@ -1779,7 +1786,7 @@ public class TestEngine  implements TestDef {
                 if (lastOp != null) {
                     parent.getFixtureMgr().put(lastOp, this.fixtureMgr.get(lastOp));
                 } else {
-                    log.error("Error: lastOp is null. lastOp should be non-empty when getFixtureString is used. Check fixture-out parameter mapping.");
+                    log.severe("Error: lastOp is null. lastOp should be non-empty when getFixtureString is used. Check fixture-out parameter mapping.");
                 }
             }
             new ActionReporter()

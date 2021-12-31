@@ -6,7 +6,7 @@ import gov.nist.asbestos.client.Base.EC;
 import gov.nist.asbestos.client.Base.Request;
 import gov.nist.asbestos.client.log.SimStore;
 import org.apache.commons.io.IOUtils;
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
@@ -26,7 +26,7 @@ import static gov.nist.asbestos.client.Base.Returns.returnPlainTextResponse;
 public class AddSessionRequest {
     public static final String[] RESERVED_NAMES = {"undefined","reserved", "backup", "internal", "private"};
     public static final String[] DEFAULT_INCLUDES = {"default"};
-    private static Logger log = Logger.getLogger(AddSessionRequest.class);
+    private static Logger log = Logger.getLogger(AddSessionRequest.class.getName());
 
     private Request request;
 
@@ -44,7 +44,7 @@ public class AddSessionRequest {
 
         if (isInvalidName(newSessionName)) {
             String error = "Invalid Test Session name. Check if name contains an illegal character or is a reserved name.";
-            log.warn(error + ": " +  newSessionName);
+            log.warning(error + ": " +  newSessionName);
             returnPlainTextResponse(request.resp, HttpServletResponse.SC_BAD_REQUEST, error);
             return;
         }
@@ -58,7 +58,7 @@ public class AddSessionRequest {
         }
 
         if (!newSessionDir.mkdirs()) {
-            log.error(String.format("Test session directory create failed: %s", newSessionDir));
+            log.severe(String.format("Test session directory create failed: %s", newSessionDir));
             returnPlainTextResponse(request.resp, HttpServletResponse.SC_BAD_REQUEST, "Test Session could not be created.");
             return;
         }

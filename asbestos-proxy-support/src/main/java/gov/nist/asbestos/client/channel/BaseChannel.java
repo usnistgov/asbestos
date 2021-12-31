@@ -3,6 +3,10 @@ package gov.nist.asbestos.client.channel;
 import gov.nist.asbestos.client.events.ITask;
 import gov.nist.asbestos.client.client.Format;
 
+import java.util.Date;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 public abstract class BaseChannel implements IBaseChannel {
     protected ChannelConfig channelConfig = null;
     protected Format returnFormatType = null;
@@ -41,4 +45,11 @@ public abstract class BaseChannel implements IBaseChannel {
     public void setup(ChannelConfig simConfig) {
         this.channelConfig = simConfig;
     }
+
+    public static String logReference(Logger log, String methodName, Throwable t) {
+        String error = String.format("An %s error occurred at %s.\nMessage: %s\nException: %s", methodName, new Date().toString(), t.getMessage(), t.toString());
+        log.log(Level.SEVERE, error, t);
+        return error;
+    }
+
 }

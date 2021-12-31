@@ -1,7 +1,7 @@
 package gov.nist.asbestos.http.headers;
 
 
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -13,7 +13,7 @@ public class Headers {
     URI pathInfo = null;
     int status = 0;
     private List<Header> headers = new ArrayList<>();
-    private static Logger log = Logger.getLogger(Headers.class);
+    private static Logger log = Logger.getLogger(Headers.class.getName());
     public Headers() {}
 
     public Headers(List<Header> headerList) {
@@ -112,7 +112,7 @@ public class Headers {
                             if (parts.length >= 2)
                                 this.pathInfo = new URI(parts[1]);
                         } catch (Throwable t1) {
-                            log.error("Cannot parse " + parts[1]);
+                            log.severe("Cannot parse " + parts[1]);
                         }
                     }
                 }

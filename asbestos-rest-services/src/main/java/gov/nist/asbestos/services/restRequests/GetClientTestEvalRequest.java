@@ -12,8 +12,8 @@ import gov.nist.asbestos.simapi.validation.Val;
 import gov.nist.asbestos.testEngine.engine.ModularEngine;
 import gov.nist.asbestos.testEngine.engine.TestEngine;
 import gov.nist.asbestos.testEngine.engine.fixture.FixtureMgr;
-import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.apache.log4j.Logger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.hl7.fhir.r4.model.BaseResource;
 import org.hl7.fhir.r4.model.TestReport;
 import org.hl7.fhir.r4.model.TestScript;
@@ -36,7 +36,7 @@ import java.util.stream.Collectors;
 // Run a client test
 
 public class GetClientTestEvalRequest {
-    private static Logger log = Logger.getLogger(GetClientTestEvalRequest.class);
+    private static Logger log = Logger.getLogger(GetClientTestEvalRequest.class.getName());
 
     private Request request;
 
@@ -216,7 +216,7 @@ public class GetClientTestEvalRequest {
                     }
                     result.results.put(theTestId, eventResult);
                 } catch (Throwable t) {
-                    log.error(ExceptionUtils.getStackTrace(t));
+                    log.log(Level.SEVERE, "", t);
                     throw t;
                 }
             }

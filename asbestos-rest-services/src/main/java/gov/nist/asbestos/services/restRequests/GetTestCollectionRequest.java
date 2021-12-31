@@ -2,7 +2,7 @@ package gov.nist.asbestos.services.restRequests;
 
 import gov.nist.asbestos.client.Base.EC;
 import gov.nist.asbestos.client.Base.Request;
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -50,7 +50,7 @@ public class GetTestCollectionRequest {
         Map<String, String[]> testDependencies;
     }
 
-    private static Logger log = Logger.getLogger(GetTestCollectionRequest.class);
+    private static Logger log = Logger.getLogger(GetTestCollectionRequest.class.getName());
 
     private Request request;
 
@@ -128,7 +128,7 @@ public class GetTestCollectionRequest {
                         map.put(tcPrefix(testNameTrimmed), list.toArray(new String[list.size()]));
                     }
                 } else {
-                    log.error(String.format("%s/%s was defined, but %s/%s was not found.", collectionName, EC.TEST_COLLECTION_PROPERTIES, testNameTrimmed, EC.TEST_PROPERTIES));
+                    log.severe(String.format("%s/%s was defined, but %s/%s was not found.", collectionName, EC.TEST_COLLECTION_PROPERTIES, testNameTrimmed, EC.TEST_PROPERTIES));
                 }
             }
             return map;

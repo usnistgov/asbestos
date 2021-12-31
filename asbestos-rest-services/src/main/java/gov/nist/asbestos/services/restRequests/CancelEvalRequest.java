@@ -10,10 +10,10 @@ package gov.nist.asbestos.services.restRequests;
 
 import gov.nist.asbestos.services.servlet.ChannelConnector;
 import gov.nist.asbestos.client.Base.Request;
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 
 public class CancelEvalRequest {
-    private static Logger log = Logger.getLogger(CancelEvalRequest.class);
+    private static Logger log = Logger.getLogger(CancelEvalRequest.class.getName());
     private Request request;
 
     public static boolean isRequest(Request request) {

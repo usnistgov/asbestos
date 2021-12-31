@@ -1,13 +1,13 @@
 package gov.nist.asbestos.client.resolver;
 
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
 class CacheBundle {
-    private static final Logger logger = Logger.getLogger(CacheBundle.class);
+    private static final Logger logger = Logger.getLogger(CacheBundle.class.getName());
     MemoryResourceCache mem = null;
     FileSystemResourceCache file = null;
 

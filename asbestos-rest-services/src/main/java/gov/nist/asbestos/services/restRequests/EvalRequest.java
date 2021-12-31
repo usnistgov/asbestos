@@ -2,7 +2,7 @@ package gov.nist.asbestos.services.restRequests;
 
 import gov.nist.asbestos.services.servlet.ChannelConnector;
 import gov.nist.asbestos.client.Base.Request;
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 // 0 - empty
 // 1 - app context
 // 2 - "engine"
@@ -14,7 +14,7 @@ import org.apache.log4j.Logger;
 // payload is ignored
 
 public class EvalRequest {
-    private static Logger log = Logger.getLogger(EvalRequest.class);
+    private static Logger log = Logger.getLogger(EvalRequest.class.getName());
     private Request request;
 
     public static String NEXT_CLIENT_TEST = "nextClientTest";

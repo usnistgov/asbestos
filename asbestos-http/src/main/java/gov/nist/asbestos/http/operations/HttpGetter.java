@@ -3,15 +3,17 @@ package gov.nist.asbestos.http.operations;
 
 import gov.nist.asbestos.http.util.Gzip;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.exception.ExceptionUtils;
+import java.util.logging.Level;
 
 import java.io.InputStream;
 import java.net.*;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.logging.Logger;
 
 public class HttpGetter extends HttpBase {
+    private static Logger logger = Logger.getLogger(HttpGetter.class.getName());
     public static String GET_VERB = "GET";
 
     // TODO GET parameters in the body
@@ -86,7 +88,8 @@ public class HttpGetter extends HttpBase {
             get(getUri(), getRequestHeaders().getAll());
         } catch (Throwable e) {
             status = 404;
-            String msg = e.getMessage() + "\n" + ExceptionUtils.getStackTrace(e);
+            String msg = e.getMessage() + "\n" + "HttpGetter#get Error: Check server log for details.";
+            logger.log(Level.SEVERE, msg, e);
             setResponseText(msg);
             setResponse(msg.getBytes());
         }

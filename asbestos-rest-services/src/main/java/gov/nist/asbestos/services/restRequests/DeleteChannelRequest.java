@@ -3,7 +3,7 @@ package gov.nist.asbestos.services.restRequests;
 import gov.nist.asbestos.client.Base.Request;
 import gov.nist.asbestos.client.log.SimStore;
 import gov.nist.asbestos.simapi.simCommon.SimId;
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 
 import java.io.IOException;
 // 0 - empty
@@ -13,7 +13,7 @@ import java.io.IOException;
 // 4 - channelID  (testSession__id)
 
 public class DeleteChannelRequest {
-    private static Logger log = Logger.getLogger(DeleteChannelRequest.class);
+    private static Logger log = Logger.getLogger(DeleteChannelRequest.class.getName());
 
     private Request request;
 

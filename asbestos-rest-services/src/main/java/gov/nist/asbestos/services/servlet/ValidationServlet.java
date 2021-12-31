@@ -3,7 +3,7 @@ package gov.nist.asbestos.services.servlet;
 import gov.nist.asbestos.services.restRequests.GetValidationRequest;
 import gov.nist.asbestos.client.Base.Request;
 import gov.nist.asbestos.simapi.tk.installation.Installation;
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -14,7 +14,7 @@ import java.io.File;
 
 public class ValidationServlet  extends HttpServlet {
     private File externalCache = null;
-    private static Logger log = Logger.getLogger(ValidationServlet.class);
+    private static Logger log = Logger.getLogger(ValidationServlet.class.getName());
 
     @Override
     public void init(ServletConfig config) throws ServletException {

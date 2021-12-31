@@ -9,7 +9,7 @@ import gov.nist.asbestos.http.headers.Header;
 import gov.nist.asbestos.http.headers.Headers;
 import gov.nist.asbestos.http.operations.Verb;
 import gov.nist.asbestos.http.support.Common;
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
@@ -30,7 +30,7 @@ import java.util.Objects;
 // returns UIEvent as JSON
 
 public class GetEventRequest {
-    private static Logger log = Logger.getLogger(GetEventRequest.class);
+    private static Logger log = Logger.getLogger(GetEventRequest.class.getName());
 
     private Request request;
     private boolean rawTextMode;
@@ -125,7 +125,7 @@ public class GetEventRequest {
                 }
             }
         } catch (Exception ex) {
-            log.error("displayEvent Exception: " + ex.toString());
+            log.severe("displayEvent Exception: " + ex.toString());
         }
         String section = label.toLowerCase();
         b.append("<h2>").append(label).append("</h2>");

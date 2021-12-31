@@ -18,7 +18,7 @@ import gov.nist.asbestos.simapi.simCommon.SimId;
 import gov.nist.asbestos.simapi.simCommon.TestSession;
 import gov.nist.asbestos.simapi.tk.installation.Installation;
 import org.apache.commons.io.IOUtils;
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -38,7 +38,7 @@ import static gov.nist.asbestos.client.Base.Returns.returnPlainTextResponse;
  * The main purpose of this filter is to prevent unauthorized modifications to FTK channels and test sessions.
  */
 public class FtkElementsGuardFilter implements Filter {
-    private static Logger log = Logger.getLogger(FtkElementsGuardFilter.class);
+    private static Logger log = Logger.getLogger(FtkElementsGuardFilter.class.getName());
     private File externalCache = null;
 
     @Override
@@ -216,7 +216,7 @@ public class FtkElementsGuardFilter implements Filter {
     public void setExternalCache(File externalCache) {
         this.externalCache = externalCache;
         Installation.instance().setExternalCache(externalCache);
-     //   log.debug("Asbestos Proxy init EC is " + externalCache.getPath());
+     //   log.fine("Asbestos Proxy init EC is " + externalCache.getPath());
     }
 
 }

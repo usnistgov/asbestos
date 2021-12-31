@@ -9,12 +9,12 @@ package gov.nist.asbestos.services.restRequests;
 import gov.nist.asbestos.client.Base.Request;
 import gov.nist.asbestos.serviceproperties.ServiceProperties;
 import gov.nist.asbestos.serviceproperties.ServicePropertiesEnum;
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 
 import java.io.IOException;
 
 public class GetStartupSessionRequest {
-    private static Logger log = Logger.getLogger(GetStartupSessionRequest.class);
+    private static Logger log = Logger.getLogger(GetStartupSessionRequest.class.getName());
 
     private Request request;
 

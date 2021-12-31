@@ -14,7 +14,7 @@ package gov.nist.asbestos.services.restRequests;
 import gov.nist.asbestos.client.Base.Request;
 import gov.nist.asbestos.client.events.Event;
 import gov.nist.asbestos.simapi.simCommon.SimId;
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 
 import java.io.File;
 import java.io.IOException;
@@ -24,7 +24,7 @@ import java.util.Collections;
 import java.util.List;
 
 public class GetClientEventEvalRequest {
-    private static Logger log = Logger.getLogger(GetClientEventEvalRequest.class);
+    private static Logger log = Logger.getLogger(GetClientEventEvalRequest.class.getName());
 
     private Request request;
 
@@ -51,7 +51,7 @@ public class GetClientEventEvalRequest {
         String testSession = simId.getTestSession().getValue();
         File eventFile = request.ec.getEvent(simId, eventId);
         if (eventFile == null) {
-            log.error(String.format("EventId %s not found for %s", eventId, simId.toString()));
+            log.severe(String.format("EventId %s not found for %s", eventId, simId.toString()));
             request.notFound();
             return;
         }

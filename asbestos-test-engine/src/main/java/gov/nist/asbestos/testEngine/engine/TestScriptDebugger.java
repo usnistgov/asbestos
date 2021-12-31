@@ -17,7 +17,7 @@ import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.serviceproperties.ServiceProperties;
 import gov.nist.asbestos.serviceproperties.ServicePropertiesEnum;
 import gov.nist.asbestos.testEngine.engine.fixture.FixtureComponent;
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 import org.hl7.fhir.r4.model.Base;
 import org.hl7.fhir.r4.model.BaseResource;
 import org.hl7.fhir.r4.model.Enumeration;
@@ -43,7 +43,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 public class TestScriptDebugger implements TestScriptDebugInterface {
-    private static Logger log = Logger.getLogger(TestScriptDebugger.class);
+    private static Logger log = Logger.getLogger(TestScriptDebugger.class.getName());
     /**
      * An implementation of the TestScript Test Engine
      */
@@ -73,7 +73,7 @@ public class TestScriptDebugger implements TestScriptDebugInterface {
         if (me != null) {
             me.saveLogs(); // Without this getTestReportsAsJson is empty
         } else {
-            log.error("getModularEngine is null: log cannot be saved!");
+            log.severe("getModularEngine is null: log cannot be saved!");
         }
     }
 
@@ -83,7 +83,7 @@ public class TestScriptDebugger implements TestScriptDebugInterface {
         if (me != null) {
             return me.reportsAsJson();
         } else {
-            log.error("getModularEngine is null!");
+            log.severe("getModularEngine is null!");
             getState().sendUnexpectedError();
             return "";
         }

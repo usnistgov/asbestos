@@ -8,8 +8,8 @@ import gov.nist.asbestos.client.log.SimStore;
 import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import gov.nist.asbestos.simapi.simCommon.SimId;
-import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.apache.log4j.Logger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.hl7.fhir.common.hapi.validation.support.PrePopulatedValidationSupport;
 import org.hl7.fhir.r4.hapi.ctx.HapiWorkerContext;
 import org.hl7.fhir.r4.model.*;
@@ -32,7 +32,7 @@ import static gov.nist.asbestos.client.Base.Dirs.listOfDirectories;
 import static gov.nist.asbestos.client.Base.Dirs.listOfFiles;
 
 public class EC {
-    private static Logger log = Logger.getLogger(EC.class);
+    private static Logger log = Logger.getLogger(EC.class.getName());
     public File externalCache;
 
     public static final String MarkerType = "Marker";
@@ -572,7 +572,7 @@ public class EC {
         try {
             new MhdValueSets(externalCache, environment).build(this);
         } catch (FileNotFoundException | JAXBException e) {
-            log.error(ExceptionUtils.getStackTrace(e));
+            log.log(Level.SEVERE, "", e);
             throw new RuntimeException(e);
         }
     }
@@ -596,7 +596,7 @@ public class EC {
         try (BufferedWriter writer = Files.newBufferedWriter(path)) {
             writer.write(content);
         } catch (IOException e) {
-            log.error(ExceptionUtils.getStackTrace(e));
+            log.log(Level.SEVERE, "", e);
             throw new RuntimeException(e);
         }
     }
@@ -606,7 +606,7 @@ public class EC {
         try {
             data = Files.readAllBytes(file.toPath());
         } catch (IOException e) {
-            log.error(ExceptionUtils.getStackTrace(e));
+            log.log(Level.SEVERE, "", e);
             throw new RuntimeException(e);
         }
         return new String(data);

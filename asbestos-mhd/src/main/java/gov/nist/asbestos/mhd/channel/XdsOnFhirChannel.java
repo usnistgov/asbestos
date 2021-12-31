@@ -33,8 +33,8 @@ import oasis.names.tc.ebxml_regrep.xsd.lcm._3.SubmitObjectsRequest;
 import oasis.names.tc.ebxml_regrep.xsd.rim._3.*;
 import oasis.names.tc.ebxml_regrep.xsd.rs._3.RegistryResponseType;
 import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.apache.log4j.Logger;
+
+import java.util.logging.Logger;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.Attachment;
@@ -49,7 +49,7 @@ import java.util.stream.Collectors;
 
 // TODO - honor the Prefer header - http://hl7.org/fhir/http.html#ops
 public class XdsOnFhirChannel extends BaseChannel /*implements IBaseChannel*/ {
-    private static final Logger log = Logger.getLogger(XdsOnFhirChannel.class);
+    private static final Logger log = Logger.getLogger(XdsOnFhirChannel.class.getName());
     private Bundle requestBundle = null;
     private String serverBase;
     private String proxyBase;
@@ -190,7 +190,7 @@ public class XdsOnFhirChannel extends BaseChannel /*implements IBaseChannel*/ {
                 bundleVersion = optionalMhdVersionEnum.get();
             }
         } catch (Exception ex) {
-            log.warn("findMhdImpl Exception: " + ex.toString());
+            log.warning("findMhdImpl Exception: " + ex.toString());
         }
         return MhdImplFactory.getImplementation(bundleVersion, val, mhdTransforms);
     }
@@ -423,7 +423,11 @@ public class XdsOnFhirChannel extends BaseChannel /*implements IBaseChannel*/ {
     }
 
     private void returnErrorInOperationOutcome(String msg, Throwable t, HttpBase responseOut) {
-        returnErrorInOperationOutcome(msg + "\n" + ExceptionUtils.getStackTrace(t), responseOut);
+        String logReference = logReference(log, "returnErrorInOperationOutcome", t);
+        String errorMessage = String.format("%s, %s. Check server log for details.",
+                logReference,
+                msg);
+        returnErrorInOperationOutcome(errorMessage, responseOut);
     }
 
     private OperationOutcome wrapErrorInOperationOutcome(String msg) {
@@ -529,7 +533,8 @@ public class XdsOnFhirChannel extends BaseChannel /*implements IBaseChannel*/ {
             try {
                 rrt = new RegistryResponseBuilder().fromInputStream(new ByteArrayInputStream(registryResponse.getBytes()));
             } catch (Exception e) {
-                returnErrorInOperationOutcome(ExceptionUtils.getStackTrace(e), responseOut);
+                String logReference = logReference(log, "XdsOnFhirChannel#transform", e);
+                returnErrorInOperationOutcome(logReference.concat("Check server log for more details."), responseOut);
                 return;
             }
             RegErrorList regErrorList = RegistryResponseBuilder.asErrorList(rrt);
@@ -557,6 +562,7 @@ public class XdsOnFhirChannel extends BaseChannel /*implements IBaseChannel*/ {
             );
         }
     }
+
 
     private void transformDSResponse(AhqrSender sender, HttpBase responseOut, String requestedType, String search) {
         responseOut.setResponseContentType(returnFormatType.getContentType());

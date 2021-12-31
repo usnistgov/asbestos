@@ -22,12 +22,12 @@ import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import gov.nist.asbestos.http.headers.Headers;
 import gov.nist.asbestos.serviceproperties.ServiceProperties;
 import gov.nist.asbestos.serviceproperties.ServicePropertiesEnum;
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 import org.hl7.fhir.r4.model.BaseResource;
 import org.hl7.fhir.r4.model.OperationOutcome;
 
 public class GetValidationRequest {
-    private static Logger log = Logger.getLogger(GetEventRequest.class);
+    private static Logger log = Logger.getLogger(GetEventRequest.class.getName());
 
     private Request request;
 

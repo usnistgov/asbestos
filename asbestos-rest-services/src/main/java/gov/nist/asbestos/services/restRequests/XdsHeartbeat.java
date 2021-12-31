@@ -3,7 +3,7 @@ package gov.nist.asbestos.services.restRequests;
 import gov.nist.asbestos.asbestosProxy.channel.XdsToolkitConnection;
 import gov.nist.asbestos.client.Base.Request;
 import gov.nist.toolkit.toolkitServicesCommon.SimConfig;
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 
 import java.io.IOException;
 import java.util.Optional;
@@ -15,7 +15,7 @@ import java.util.Optional;
 // load simConfig for xds channel to prove XDS Toolkit is healthy
 
 public class XdsHeartbeat {
-    private static Logger log = Logger.getLogger(XdsHeartbeat.class);
+    private static Logger log = Logger.getLogger(XdsHeartbeat.class.getName());
 
     private Request request;
 

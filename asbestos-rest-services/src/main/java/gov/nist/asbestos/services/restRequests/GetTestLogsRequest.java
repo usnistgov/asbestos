@@ -3,7 +3,7 @@ package gov.nist.asbestos.services.restRequests;
 import gov.nist.asbestos.services.servlet.ChannelConnector;
 import gov.nist.asbestos.client.Base.Request;
 import gov.nist.asbestos.client.channel.ChannelConfig;
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 
 import java.io.File;
 import java.io.IOException;
@@ -20,7 +20,7 @@ import java.util.List;
 // return list of test logs (TestReport resources)
 
 public class GetTestLogsRequest {
-    private static Logger log = Logger.getLogger(GetTestLogsRequest.class);
+    private static Logger log = Logger.getLogger(GetTestLogsRequest.class.getName());
 
     private Request request;
 
