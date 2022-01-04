@@ -37,7 +37,7 @@ export const testRunnerStore = {
             eventEvalCount: 0,   // number of most recent events to evaluate
 
             clientTestResult: {}, // { testId: { eventId: TestReport } }
-            testAssertions: {},
+            testAssertions: null, // {},
             debug: null,
             useJson: true,
             useGzip: true,
