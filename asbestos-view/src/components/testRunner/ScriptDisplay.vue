@@ -96,16 +96,19 @@
         grid-column: 1 / span 1;
         grid-row: 1 / span 1;
         font-weight: bold;
+        border-bottom: solid black 2px;
     }
     .module-script-header {
         grid-column: 2 / span 1;
         grid-row: 1 / span 1;
         font-weight: bold;
+        border-bottom: solid black 2px;
     }
     .script-header2 {
         grid-column: 1 / span 1;
         grid-row: 3 / span 1;
         font-weight: bold;
+        border-bottom: solid black 2px;
     }
 
 
@@ -113,6 +116,7 @@
         grid-column: 2 / span 1;
         grid-row: 3 / span 1;
         font-weight: bold;
+        border-bottom: solid black 2px;
     }
     .script2 {
         grid-column: 1;
