@@ -117,15 +117,17 @@
     .script2 {
         grid-column: 1;
         grid-row: 4;
-        border-left: #f5f5f5 solid 1px;
-        padding-left: 10px;
+        border: #f5f5f5 solid 1px;
+        width: 100%;
+        /*padding-left: 10px;*/
     }
     .report2 {
         grid-column: 2;
         grid-row: 4;
         /*margin-left: 5px;*/
-        border-left: #f5f5f5 solid 1px;
-        padding-left: 10px;
+        border: #f5f5f5 solid 1px;
+        /*padding-left: 10px;*/
+        width: 100%;
 
     }
     .script {
@@ -133,19 +135,21 @@
         grid-row: 2;
         word-wrap: break-word;
       font-weight: normal;
-      border-color: black;
-      border-style: solid;
-      border: 1px;
-        border-left: #f5f5f5 solid 1px;
-        padding-left: 10px;
+      /*border-color: black;*/
+      /*border-style: solid;*/
+      /*border: 1px;*/
+      border: #f5f5f5 solid 1px;
+      /*padding-left: 10px;*/
+        width: 100%;
 
     }
     .module-script {
         grid-column: 2 / span 1;
         grid-row: 2;
         word-wrap: break-word;
-        border-left: #f5f5f5 solid 1px;
-        padding-left: 10px;
+        border: #f5f5f5 solid 1px;
+        width: 100%;
+        /*padding-left: 10px;*/
     }
 
 </style>
