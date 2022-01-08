@@ -48,6 +48,10 @@
                 > </test-status>
             </span>
 
+
+            <!-- OLD way of displaying assertion references
+            Assertions is the assertions.json data.
+            References are the assertion references coded as an urn: extension to the assertion definition.
           <div v-if="displayMessage && assertions">
                 <div v-for="(ref, refi) in references"
                     :key="'Ref' + refi" class="assert">
@@ -64,6 +68,9 @@
                     </div>
                 </div>
             </div>
+            -->
+
+
 
         </div>
         <div>
@@ -82,8 +89,12 @@
             <vue-markdown>{{resultDescription}}</vue-markdown>
           </div>
 
-            <div class="indent">
+            <div v-if="isAnAssertion" >
+                <assertion-references :assertion-obj="script.assert"/>
+            </div>
 
+
+            <div class="indent">
             <!-- Test Script/Report -->
             <div>
                 <span v-if="displayScript">
@@ -117,6 +128,7 @@
     import VueMarkdown from 'vue-markdown'
     import colorizeTestReports from "../../mixins/colorizeTestReports";
     import TestStatus from "./TestStatus";
+    import AssertionReferences from "./AssertionReferences";
 
     export default {
         data() {
@@ -266,6 +278,10 @@
               }
               return references;
           },
+            isAnAssertion() {
+                const isAssert = this.script !== undefined && this.script !== null && this.script.assert !== undefined && this.script.assert !== null;
+                return isAssert
+            },
           scriptExtensions() {
               return this.script.operation ? this.script.operation.extension : this.script.assert.extension;
           },
@@ -273,7 +289,7 @@
                 return this.script.operation ? this.script.operation.description : this.script.assert.description
             },
             ftkTsElId() {
-                if (this.script !== undefined && this.script !== null && this.script.assert !== undefined && this.script.assert !== null)
+                if (this.isAnAssertion)
                 {
                     if ('id' in this.script.assert)
                         return 'Assertion ID: ' + this.script.assert.id
@@ -327,6 +343,7 @@
             // InspectEvent,
             VueMarkdown,
             TestStatus,
+            AssertionReferences,
         },
         mixins: [colorizeTestReports],
         name: "ActionDetails"

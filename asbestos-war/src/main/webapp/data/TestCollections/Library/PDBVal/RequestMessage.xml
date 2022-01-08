@@ -14,10 +14,10 @@
 
     <test>
     <name value="Request message"/>
-    <description value="PDB Request."/>
+    <description value="ITI-65 PDB Request Message."/>
     <action>
         <assert id="FTK3RM100">
-            <description value="PDB: Verb is POST|MHDPDBUsesPost"/>
+            <description value="HTTP POST request method"/>
             <requestMethod value="post"/>
             <warningOnly value="false"/>
         </assert>

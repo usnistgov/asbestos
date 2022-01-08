@@ -1,27 +1,86 @@
 {
+  "id": "NIST FHIR(r) Toolkit (Asbestos) Assertion References",
+  "referenceMetadata": {
+    "version" : "1.0",
+    "lastUpdated": "2022-JAN-06",
+    "comments": ""
+  },
+
+  "assertionReferences" : {
+    "FTK4RM100": [{"mhdv4":"messageSemantics"},{"fhir":"httpTransaction"}]
+  },
+
+  "references" : {
+    "mhdv3x" : {
+
+    },
+    "mhdv4" : {
+      "messageSemantics": {
+        "Source": {
+          "text": "IHEMHD"
+        },
+        "Version": {
+          "text": "MHDv4"
+        },
+        "Transaction": {
+          "text": "ITI-65 Provide Document Bundle",
+          "link": "https://profiles.ihe.net/ITI/MHD/ITI-65.html#2-3-65-provide-document-bundle-iti-65"
+        },
+        "Volume:Section": {
+          "text": "2:3.65.4.1.2 Message Semantics",
+          "link": "https://profiles.ihe.net/ITI/MHD/ITI-65.html#2365412-message-semantics"
+        },
+        "specificationText": {
+          "hasAssertionOrderBiasAnnotations": true,
+          "text": "The Document Source shall initiate a [2.1]FHIR \"transaction\" using a \"create\" action by sending an [1]HTTP POST request method composed of a [2.0]FHIR Bundle Resource [2.1]containing: one SubmissionSet type List Resource; [2.2]one or more DocumentReference Resources; [2.3]zero or more Folder type List Resources; and [2.4]zero or more Binary Resources to the Document Recipient. "
+        }
+      }
+    },
+    "fhir" : {
+      "httpTransaction" : {
+        "Source": {"text":"HL7FHIR"},
+        "Section" : {"text":"3.1.0.11 batch/transaction", "link" : "https://hl7.org/fhir/R4/http.html#transaction"},
+        "specificationText" : {"text": "The content of the post submission is a Bundle with Bundle.type = batch or transaction."}
+      }
+    }
+  },
+
+"oldReferenceRoot_ToBeRemoved": {
   "Profile": "MHD Rev 3.1",
-  "MHDPDBRequestIsBundle" : "ITI-65 - 3.65.4.1.2 Message Semantics Para 1",
+  "MHDPDBRequestIsBundle": "ITI-65 - 3.65.4.1.2 Message Semantics Para 1",
   "MHDPDBRequestIsTransaction": "ITI-65 - 3.65.4.1.2 Message Semantics Para 1",
   "MHDPDBUsesPost": "ITI-65 - 3.65.4.1.2 Message Semantics Para 1",
   "MHDPDBOneDocumentManifest": "ITI-65 - 3.65.4.1.2 Message Semantics Para 1",
   "MHDPDBOnePlusDocumentReference": "ITI-65 - 3.65.4.1.2 Message Semantics Para 1",
   "MHDPDBMediaType": "ITI-65 - 3.65.4.1.2 Message Semantics Para 1",
   "MHDPDBMetadataType": "ITI-65 - 3.65.4.1.2.1 Bundle Resources Para 2",
-  "MHDPDBBinaryInBundle": "ITI-65 - 3.65.4.1.2.1 Bundle Resources Para 4",
+  "MHDPDBBinaryInBundle": ["ITI-65 - 3.65.4.1.2.1 Bundle Resources Para 4",
+  "When the DocumentReference.content.attachment.url points at a Binary Resource, the Binary Resource shall be in the Bundle. See FHIR Resolving references in Bundles at http://hl7.org/fhir/R4/bundle.html#references."],
   "MHDPDBAttachmentContentType": "content.attachment.contentType",
   "MHDPDBPatientReference": "ITI-65 - 3.65.4.1.2.2 Patient Identity Para 1",
   "MHDPDBSourcePatientInfoIsContained": "ITI-65 - 3.65.4.1.2.2 Patient Identity Para 2",
   "MHDPDBGoodStatus": "ITI-65 - 3.65.4.2.2 Message Semantics Para 2",
-  "MHDPDBReturnsBundle": "ITI-65 - 3.65.4.2.2 Message Semantics Para 1",
   "MHDPDBEntryReturns201": "ITI-65 - 3.65.4.2.2 Message Semantics Para 2",
   "MHDPDBReturnLocation": "ITI-65 - 3.65.4.2.2 Message Semantics Para 2",
   "MHDPDBReturnEtag": "ITI-65 - 3.65.4.2.2 Message Semantics Para 2",
   "MHDPDBDocRefHasAttachment": "ITI-65 - Table 4.5.1.1-1 content.attachment.url",
   "MHDPDBFullUrlUniqueInBundle": "http://hl7.org/fhir/bundle.html#invs bld-7",
+
+  "MHDPDBReturnsBundle": "ITI-65 - 3.65.4.2.2 Message Semantics Para 1",
   "FHIRTransReturnsBundle": "http://hl7.org/fhir/http.html#transaction-response",
+
   "FHIRTransReturns201": "http://hl7.org/fhir/http.html#transaction-response",
   "MHDv4BundleResources": "https://profiles.ihe.net/ITI/MHD/ITI-65.html#23654121-bundle-resources",
   "MHDv4MessageSemantics": "https://profiles.ihe.net/ITI/MHD/ITI-65.html#2365412-message-semantics",
   "MHDSendingActorMetadataAttributeOptionality": "ITI TF-3: Table 4.3.1-3 Sending Actor Metadata Attribute Optionality, https://profiles.ihe.net/ITI/MHD/ITI-65.html#2365412-message-semantics and https://profiles.ihe.net/ITI/TF/Volume3/ch-4.3.html",
-  "MHDv4_3:4.5.2SubmissionSetMetadataAttributes": "https://profiles.ihe.net/ITI/MHD/32_fhir_maps.html#submissionSet"
+  "MHDv4_3:4.5.2SubmissionSetMetadataAttributes": "https://profiles.ihe.net/ITI/MHD/32_fhir_maps.html#submissionSet",
+
+  "comments": [
+    " bundle profile comprehensive or minimal 3.65.4.1.2.1 - Bundle Resources The FHIR Bundle.meta.profile shall have the following value depending on the use of"
+  ]
+
+
+
+
+}
 }

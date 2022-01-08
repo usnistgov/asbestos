@@ -17,7 +17,7 @@
         <description value="PDB Request."/>
         <action>
             <assert id="FTK4RM100">
-                <description value="PDB: Verb is POST|MHDPDBUsesPost"/>
+                <description value="HTTP POST request method"/>
                 <requestMethod value="post"/>
                 <warningOnly value="false"/>
             </assert>
