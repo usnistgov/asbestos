@@ -572,7 +572,7 @@ public class EC {
         try {
             new MhdValueSets(externalCache, environment).build(this);
         } catch (FileNotFoundException | JAXBException e) {
-            log.log(Level.SEVERE, "", e);
+            log.log(Level.SEVERE, e.toString(), e);
             throw new RuntimeException(e);
         }
     }
@@ -596,7 +596,7 @@ public class EC {
         try (BufferedWriter writer = Files.newBufferedWriter(path)) {
             writer.write(content);
         } catch (IOException e) {
-            log.log(Level.SEVERE, "", e);
+            log.log(Level.SEVERE, e.toString(), e);
             throw new RuntimeException(e);
         }
     }

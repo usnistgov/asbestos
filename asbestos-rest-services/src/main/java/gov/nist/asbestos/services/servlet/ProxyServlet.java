@@ -445,7 +445,7 @@ public class ProxyServlet extends HttpServlet {
                 return null;
             }
         } catch (IOException e) {
-            log.log(Level.SEVERE, "", e);
+            log.log(Level.SEVERE, e.toString(), e);
             resp.setStatus(resp.SC_INTERNAL_SERVER_ERROR);
             return null;
         }
@@ -479,7 +479,7 @@ public class ProxyServlet extends HttpServlet {
 
     private void respondWithError(HttpServletRequest req, HttpServletResponse resp, Throwable t, Headers inHeaders, ITask
         clientTask) {
-        log.log(Level.SEVERE, "", t);
+        log.log(Level.SEVERE, t.toString(), t);
         Ref ref = new Ref(Common.buildURI(req));
 //        if (ref.isQuery()) {
 //            respond(resp, wrapInOutcome(t), inHeaders, clientTask, 403);
@@ -536,7 +536,7 @@ public class ProxyServlet extends HttpServlet {
                 resp.getOutputStream().write(content);
             }
         } catch (Exception e) {
-            log.log(Level.SEVERE, "", e);
+            log.log(Level.SEVERE, e.toString(), e);
         }
     }
 

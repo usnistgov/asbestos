@@ -131,7 +131,7 @@ public class RunSelftestRequest {
                         lastTime.time = time;
 
                 } catch (Throwable t) {
-                    log.log(Level.SEVERE, "", t);
+                    log.log(Level.SEVERE, t.toString(), t);
                     lastTime.hasError = true;
                 }
             }

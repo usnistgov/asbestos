@@ -124,7 +124,7 @@ public class TestInstallerServlet  extends HttpServlet {
                 }
             }
         } catch (IOException e) {
-            log.log(Level.SEVERE, "", e);
+            log.log(Level.SEVERE, e.toString(), e);
         }
     }
 
@@ -237,7 +237,7 @@ public class TestInstallerServlet  extends HttpServlet {
         try {
             FileUtils.copyDirectory(new File(new File(war, "data"), "TestAssertions"), externalAssertions);
         } catch (IOException e) {
-            log.log(Level.SEVERE, "", e);
+            log.log(Level.SEVERE, e.toString(), e);
         }
     }
 
@@ -249,7 +249,7 @@ public class TestInstallerServlet  extends HttpServlet {
         try {
             FileUtils.copyDirectory(new File(new File(war, "data"), "TestCollections"), externalCollections);
         } catch (IOException e) {
-            log.log(Level.SEVERE, "", e);
+            log.log(Level.SEVERE, e.toString(), e);
         }
     }
 
@@ -261,7 +261,7 @@ public class TestInstallerServlet  extends HttpServlet {
         try {
             FileUtils.copyDirectory(new File(new File(war, "data"), "Sessions"), externalSessions);
         } catch (IOException e) {
-            log.log(Level.SEVERE, "", e);
+            log.log(Level.SEVERE, e.toString(), e);
         }
     }
 
@@ -273,7 +273,7 @@ public class TestInstallerServlet  extends HttpServlet {
             // warMarkerFile is something like /home/bill/develop/asbestos/asbestos-war/target/asbestos-war/WEB-INF/classes/war.txt
             return warMarkerFile.getParentFile().getParentFile().getParentFile();
         } catch (Throwable t) {
-            log.log(Level.SEVERE, "", t);
+            log.log(Level.SEVERE, t.toString(), t);
             return null;
         }
 

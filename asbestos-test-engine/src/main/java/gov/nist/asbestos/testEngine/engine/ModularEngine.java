@@ -151,7 +151,7 @@ public class ModularEngine {
                     writer.write(json);
                     writer.flush();
                 } catch (IOException e) {
-                    log.log(Level.SEVERE, "", e);
+                    log.log(Level.SEVERE, e.toString(), e);
                     throw new RuntimeException(e);
                 }
             }

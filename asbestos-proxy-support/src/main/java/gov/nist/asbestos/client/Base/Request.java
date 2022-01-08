@@ -135,7 +135,11 @@ public class Request {
     }
 
     public void setStatus(int status) {
-        log.info(String.format("%d", status));
+        if (status == 200) {
+            log.log(Level.FINE, ()->String.format("Status %d: %s", status, uri));
+        } else {
+            log.severe(String.format("Status %d: %s", status, uri));
+        }
         resp.setStatus(status);
     }
 
@@ -154,7 +158,7 @@ public class Request {
     public void serverError() { setStatus(resp.SC_INTERNAL_SERVER_ERROR);}
 
     public void serverError(Throwable t) {
-        log.log(Level.SEVERE, "", t);
+        log.log(Level.SEVERE, t.toString(), t);
         setStatus(resp.SC_INTERNAL_SERVER_ERROR);
     }
 

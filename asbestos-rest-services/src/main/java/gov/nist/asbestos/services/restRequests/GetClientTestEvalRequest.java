@@ -216,7 +216,7 @@ public class GetClientTestEvalRequest {
                     }
                     result.results.put(theTestId, eventResult);
                 } catch (Throwable t) {
-                    log.log(Level.SEVERE, "", t);
+                    log.log(Level.SEVERE, t.toString(), t);
                     throw t;
                 }
             }
