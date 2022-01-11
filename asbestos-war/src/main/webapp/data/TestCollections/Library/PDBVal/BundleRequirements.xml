@@ -14,22 +14,7 @@
 
     <test>
     <description value="Bundle requirements."/>
-    <action>
-        <assert id="FTKBR100">
-            <description value="Transaction: Request is Bundle|MHDPDBRequestIsBundle"/>
-            <sourceId value="request"/>
-            <resource value="Bundle"/>
-            <warningOnly value="false"/>
-        </assert>
-    </action>
-    <action>
-        <assert id="FTKBR200">
-            <description value="Transaction: Request is labeled as transaction|MHDPDBRequestIsTransaction"/>
-            <compareToSourceId value="request"/>
-            <compareToSourceExpression value="Bundle.type = 'transaction'"/>
-            <warningOnly value="false"/>
-        </assert>
-    </action>
+
     <action>
         <assert id="FTKBR300">
             <description value="Bundle: bundle.entry.fullUrl starts with http, urn:uuid: or urn:oid:. See https://hl7.org/fhir/bundle-definitions.html#Bundle.entry.fullUrl"/>

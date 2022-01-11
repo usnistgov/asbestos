@@ -1,22 +1,30 @@
 <template>
-
+<div>
+    <p class="asbtsReferenceHeaderLabel" v-if="referenceMap.length > 0">&nbsp;Reference(s):</p>
 <!--    <div class="specificationMargin">{{assertionId}}</div>-->
-        <ol>
-    <li class="asbtsReferenceTable" v-for="(refMap,rmKeyIndex ) in referenceMap" :key="rmKeyIndex" >
-        <div class="gridContainer" v-for="(specRef, srKeyIndex) in Object.keys(referenceTable(refMap))"  :key="srKeyIndex">
-            <div v-if="'specificationText'!==specRef">{{specRef}}</div>
-            <div :class="{'specText':'specificationText'===specRef}">
-                {{referenceTable(refMap)[specRef].text}}
-                <template v-if="'link' in referenceTable(refMap)[specRef]">
-                  <a :href="referenceTable(refMap)[specRef].link" target="_blank"><img
-                          alt="External link" src="../../assets/ext_link.png" style="vertical-align: top"
-                          title="Open link in a new browser tab"></a>
+       <ol>
+        <li v-for="(refMap,rmKeyIndex ) in referenceMap" :key="rmKeyIndex" >
+          <div class="gridContainer" v-for="(referenceProperty, srKeyIndex) in Object.keys(referenceTable(refMap))"  :key="srKeyIndex">
+            <div v-if="'SpecificationText'!==referenceProperty">{{referenceProperty}}</div>
+            <template v-if="'SpecificationText'===referenceProperty">
+                <div class="specificationTextGridItem">
+                    <p v-html="getReferencePropertyText(refMap,referenceProperty)"></p>
+                </div>
+            </template>
+            <template v-else>
+                <div>
+                {{getReferencePropertyText(refMap,referenceProperty)}}
+                <template v-if="'link' in referenceTable(refMap)[referenceProperty]">
+                    <a :href="referenceTable(refMap)[referenceProperty].link" target="_blank"><img
+                            alt="External link" src="../../assets/ext_link.png" style="vertical-align: top"
+                            title="Open link in a new browser tab"></a>
                 </template>
-            </div>
-        </div>
-    </li>
-        </ol>
-
+                </div>
+            </template>
+          </div>
+        </li>
+       </ol>
+</div>
 
 </template>
 
@@ -27,6 +35,10 @@
                 type: Object,
                 required: true
             },
+            isFail: {
+                type: Boolean,
+                required: true
+            }
         },
         computed: {
             assertionId() {
@@ -43,10 +55,10 @@
                             const refArray = arObj.assertionReferences[aId]
                             return refArray
                         } else {
-                            console.log("aId does not exist in assertionReferences");
+                            console.error(`aId ${aId} does not exist in assertionReferences.`);
                         }
                     } else {
-                        console.log("assertionsReference is not ready")
+                        console.error("assertionsReference is not ready.")
                     }
                 } catch (e) {
                     console.error('referenceObj error ' + e)
@@ -72,6 +84,41 @@
                    console.error('specSourceKey ' + specSourceKey + ' does not exist in rObj')
                 }
                 return {}
+            },
+            getReferencePropertyText(refMap, referenceProperty) {
+                const specRef = this.referenceTable(refMap)[referenceProperty]
+                const specText = specRef.text
+                if ('hasAssertionOrderBiasAnnotations' in specRef) {
+                   if (specRef.hasAssertionOrderBiasAnnotations === true) {
+                       let specTargetPhrase = ''
+                       if ('verbatimPhrase' in specRef) {
+                          specTargetPhrase = specRef.verbatimPhrase
+                       } else {
+                           /* user friendly language, or descriptive assertion */
+                          specTargetPhrase = this.assertionObj.description
+                          const startWords = ["Is","Has"];
+                          for (const startWord of startWords) {
+                              const re = new RegExp(`^${startWord}\\s`)
+                              specTargetPhrase = specTargetPhrase.replace(re,"")
+                          }
+                          if (specTargetPhrase.endsWith("."))
+                               specTargetPhrase = specTargetPhrase.slice(0,-1)
+                       }
+                       if (specText === '') {
+                           console.warn('empty specText for ' + referenceProperty)
+                           return '';
+                       }
+                       // replace the main target focus assertion tag, along with the proper text underline focus
+                       //const re = new RegExp(`(\\[\\d.\\d\\])(${specTargetPhrase})`,'gi') // use $2 in replace.()
+                       const re = new RegExp(`(${specTargetPhrase})`,'i')
+                       const specTargetTextClass = (this.isFail ? "failedAssertionTargetClass" : "normalAssertionTargetClass")
+
+                        const focusedPhrase = specText.replace(re, `<span class='${specTargetTextClass}'>$1</span>`)
+                       // replace assertion order annotation tags
+                       return focusedPhrase.replace(/(\[\d.\d\])(\S)/g,"$2")
+                   }
+                }
+                return specText
             }
 
         }
@@ -90,13 +137,12 @@
         /*grid-template-rows:  auto auto;*/
         /*grid-auto-flow: column;*/
     }
-    .asbtsReferenceTable {
-        margin-top: 15px;
+    .asbtsReferenceHeaderLabel {
+        margin-left: 19px;
     }
 
-    .specText {
+    .specificationTextGridItem {
        grid-column: span 2;
-        margin-top: 5px;
         text-align: left;
     }
 

@@ -17,11 +17,28 @@
         <description value="PDB Request."/>
         <action>
             <assert id="FTK4RM100">
-                <description value="HTTP POST request method"/>
+                <description value="Sending an HTTP POST request method."/>
                 <requestMethod value="post"/>
                 <warningOnly value="false"/>
             </assert>
         </action>
+        <action>
+            <assert id="FTKBR100">
+                <description value="Is composed of a FHIR Bundle Resource."/>
+                <sourceId value="request"/>
+                <resource value="Bundle"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
+            <assert id="FTKBR200">
+                <description value="Is a FHIR &quot;transaction&quot;."/>
+                <compareToSourceId value="request"/>
+                <compareToSourceExpression value="Bundle.type = 'transaction'"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+
         <action>
             <assert id="FTK4RM200">
                 <description value="PDB: Request contains one List|MHDv4BundleResources"/>

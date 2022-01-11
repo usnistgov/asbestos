@@ -178,15 +178,19 @@
 </style>
 // these are shared across the tool
 <style>
-.indent {
-  text-indent: 50px;
-}
-.indent2 {
-  text-indent: 0px;
-}
-.indent2MdTable {
-    text-indent: 50px;
-}
+    .marginOfCircleWidth {
+        margin-left: 16px;
+    }
+
+    .indent {
+        text-indent: 50px;
+    }
+    .indent2 {
+        text-indent: 0px;
+    }
+    .indent2MdTable {
+        text-indent: 50px;
+    }
     .system-error {
         font-weight: bold;
         font-size: larger;
@@ -302,5 +306,16 @@
          word-wrap: break-word;
     }
 
+    .failedAssertionTargetClass {
+     text-decoration-color: red;
+     text-decoration-line: underline;
+     text-decoration-style: wavy;
+    }
+
+    .normalAssertionTargetClass {
+       text-decoration-color: black;
+       text-decoration-line: underline;
+       text-decoration-style: dotted;
+    }
 
 </style>

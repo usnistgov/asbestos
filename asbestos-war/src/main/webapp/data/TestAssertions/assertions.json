@@ -7,7 +7,9 @@
   },
 
   "assertionReferences" : {
-    "FTK4RM100": [{"mhdv4":"messageSemantics"},{"fhir":"httpTransaction"}]
+    "FTK4RM100": [{"mhdv4":"messageSemantics"}],
+    "FTKBR100": [{"mhdv4":"messageSemantics"}],
+    "FTKBR200": [{"mhdv4": "messageSemantics"},{"fhir":"httpTransaction"}]
   },
 
   "references" : {
@@ -17,10 +19,11 @@
     "mhdv4" : {
       "messageSemantics": {
         "Source": {
-          "text": "IHEMHD"
+          "text": "IHE ITI"
         },
-        "Version": {
-          "text": "MHDv4"
+        "Profile": {
+          "text": "MHDv4",
+          "link": "https://profiles.ihe.net/ITI/MHD/toc.html"
         },
         "Transaction": {
           "text": "ITI-65 Provide Document Bundle",
@@ -30,17 +33,17 @@
           "text": "2:3.65.4.1.2 Message Semantics",
           "link": "https://profiles.ihe.net/ITI/MHD/ITI-65.html#2365412-message-semantics"
         },
-        "specificationText": {
+        "SpecificationText": {
           "hasAssertionOrderBiasAnnotations": true,
-          "text": "The Document Source shall initiate a [2.1]FHIR \"transaction\" using a \"create\" action by sending an [1]HTTP POST request method composed of a [2.0]FHIR Bundle Resource [2.1]containing: one SubmissionSet type List Resource; [2.2]one or more DocumentReference Resources; [2.3]zero or more Folder type List Resources; and [2.4]zero or more Binary Resources to the Document Recipient. "
+          "text": "The Document Source shall initiate [2.1]a FHIR \"transaction\" using a \"create\" action by [1.0]sending an HTTP POST request method [2.0]composed of a FHIR Bundle Resource [2.2]containing: one SubmissionSet type List Resource; [2.3]one or more DocumentReference Resources; [2.4]zero or more Folder type List Resources; and [2.5]zero or more Binary Resources to the Document Recipient. "
         }
       }
     },
     "fhir" : {
       "httpTransaction" : {
-        "Source": {"text":"HL7FHIR"},
+        "Source": {"text":"HL7 FHIR"},
         "Section" : {"text":"3.1.0.11 batch/transaction", "link" : "https://hl7.org/fhir/R4/http.html#transaction"},
-        "specificationText" : {"text": "The content of the post submission is a Bundle with Bundle.type = batch or transaction."}
+        "SpecificationText" : {"text": "The content of the post submission is a Bundle with Bundle.type = batch or transaction."}
       }
     }
   },

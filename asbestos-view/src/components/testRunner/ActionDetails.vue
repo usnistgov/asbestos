@@ -48,30 +48,6 @@
                 > </test-status>
             </span>
 
-
-            <!-- OLD way of displaying assertion references
-            Assertions is the assertions.json data.
-            References are the assertion references coded as an urn: extension to the assertion definition.
-          <div v-if="displayMessage && assertions">
-                <div v-for="(ref, refi) in references"
-                    :key="'Ref' + refi" class="assert">
-                    <div v-if="assertions && assertions[ref]">
-                        <div v-if="assertions[ref].startsWith('http')">
-                            Reference:
-                            <a v-bind:href="assertions[ref]" target="_blank">
-                                {{assertions[ref] }}
-                            </a>
-                        </div>
-                        <div v-else>
-                            Reference: {{ assertions[ref] }}
-                        </div>
-                    </div>
-                </div>
-            </div>
-            -->
-
-
-
         </div>
         <div>
             <!--
@@ -90,11 +66,11 @@
           </div>
 
             <div v-if="isAnAssertion" >
-                <assertion-references :assertion-obj="script.assert"/>
+                <assertion-references :assertion-obj="script.assert" :is-fail="isFail"/>
             </div>
 
 
-            <div class="indent">
+            <div   class="marginOfCircleWidth" >
             <!-- Test Script/Report -->
             <div>
                 <span v-if="displayScript">
