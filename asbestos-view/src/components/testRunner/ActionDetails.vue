@@ -61,14 +61,13 @@
 
         <div v-if="displayMessage">
 
-          <div class="indent">
-            <vue-markdown>{{resultDescription}}</vue-markdown>
-          </div>
-
             <div v-if="isAnAssertion" >
                 <assertion-references :assertion-obj="script.assert" :is-fail="isFail"/>
             </div>
 
+            <div class="asbtsReferenceHeaderLabel">
+                <vue-markdown>{{resultDescription}}</vue-markdown>
+            </div>
 
             <div   class="marginOfCircleWidth" >
             <!-- Test Script/Report -->
