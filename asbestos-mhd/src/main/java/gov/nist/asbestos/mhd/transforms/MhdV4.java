@@ -50,7 +50,7 @@ import static gov.nist.asbestos.mhd.transforms.MhdV4Constants.iheSourceIdExtensi
  *    (IGNORED) note	SubmissionSet.comments
  *    (IGNORED?) entry is [0..1]
  *       item	references to DocumentReference(s) and Folder List(s)
- *       (To be verified by the DocumentSource tests and Inspector Inspect Request, ie. PDBRequestMinEval.xml ?)
+ *       (To be verified by the DocumentSource tests and Inspector Inspect Request, ie. Assertion ID FTK4RM500 ?)
  *
  *      TODO - Contained option
  *      static String containedMetadataProfile = "http://profiles.ihe.net/ITI/MHD/StructureDefinition/IHE.MHD.UnContained.Comprehensive.ProvideBundle";

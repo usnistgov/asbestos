@@ -8,7 +8,7 @@
             <div v-if="'SpecificationText'!==referenceProperty">{{referenceProperty}}</div>
             <template v-if="'SpecificationText'===referenceProperty">
                 <div class="specificationTextGridItem">
-                    <p v-html="getReferencePropertyText(refMap,referenceProperty)"></p>
+                    <p :title="getSpecificationPropertyComments(refMap,referenceProperty)" v-html="getSpecificationPropertyText(refMap,referenceProperty)"></p>
                 </div>
             </template>
             <template v-else>
@@ -85,41 +85,60 @@
                 }
                 return {}
             },
-            getReferencePropertyText(refMap, referenceProperty) {
+            getSpecificationPropertyText(refMap, referenceProperty) {
                 const specRef = this.referenceTable(refMap)[referenceProperty]
-                const specText = specRef.text
-                if ('hasAssertionOrderBiasAnnotations' in specRef) {
-                   if (specRef.hasAssertionOrderBiasAnnotations === true) {
-                       let specTargetPhrase = ''
-                       if ('verbatimPhrase' in specRef) {
-                          specTargetPhrase = specRef.verbatimPhrase
-                       } else {
-                           /* user friendly language, or descriptive assertion */
-                          specTargetPhrase = this.assertionObj.description
-                          const startWords = ["Is","Has"];
-                          for (const startWord of startWords) {
-                              const re = new RegExp(`^${startWord}\\s`)
-                              specTargetPhrase = specTargetPhrase.replace(re,"")
-                          }
-                          if (specTargetPhrase.endsWith("."))
-                               specTargetPhrase = specTargetPhrase.slice(0,-1)
-                       }
-                       if (specText === '') {
-                           console.warn('empty specText for ' + referenceProperty)
-                           return '';
-                       }
-                       // replace the main target focus assertion tag, along with the proper text underline focus
-                       //const re = new RegExp(`(\\[\\d.\\d\\])(${specTargetPhrase})`,'gi') // use $2 in replace.()
-                       const re = new RegExp(`(${specTargetPhrase})`,'i')
-                       const specTargetTextClass = (this.isFail ? "failedAssertionTargetClass" : "normalAssertionTargetClass")
+                let specText = specRef.text
+                let specTargetPhrase = ''
+                if ('verbatimPhrase' in specRef) {
+                    specTargetPhrase = specRef.verbatimPhrase
+                } else {
+                    /* user friendly language, or descriptive assertion */
+                    specTargetPhrase = this.assertionObj.description
+                    const startWords = ["Is","Has","(.*)(\\scontains)"];
+                    for (const startWord of startWords) {
+                        const re = new RegExp(`^${startWord}\\s`)
+                        if (specTargetPhrase.match(re) !== null) {
+                            specTargetPhrase = specTargetPhrase.replace(re, "")
+                            break
+                        }
+                    }
+                    if (specTargetPhrase.endsWith("."))
+                        specTargetPhrase = specTargetPhrase.slice(0,-1)
+                }
+                if (specText === '') {
+                    console.warn('empty specText for ' + referenceProperty)
+                    return '';
+                }
+                // replace the main target focus assertion tag, along with the proper text underline focus
+                //const re = new RegExp(`(\\[\\d.\\d\\])(${specTargetPhrase})`,'gi') // use $2 in replace.()
+                const re = new RegExp(`(${specTargetPhrase})`,'i')
+                const specTargetTextClass = (this.isFail ? "failedAssertionTargetClass" : "normalAssertionTargetClass")
 
-                        const focusedPhrase = specText.replace(re, `<span class='${specTargetTextClass}'>$1</span>`)
-                       // replace assertion order annotation tags
-                       return focusedPhrase.replace(/(\[\d.\d\])(\S)/g,"$2")
-                   }
+                specText = specText.replace(re, `<span class='${specTargetTextClass}'>$1</span>`)
+
+                if ('hasAssertionOrderBiasAnnotations' in specRef) {
+                    if (specRef.hasAssertionOrderBiasAnnotations === true) {
+                        // replace assertion order annotation tags
+                        return specText.replace(/(\[\d.\d\])(\S)/g,"$2")
+                    }
                 }
                 return specText
+            },
+            getReferencePropertyText(refMap, referenceProperty) {
+                const specRef = this.referenceTable(refMap)[referenceProperty]
+                if ('text' in specRef)
+                    return specRef.text
+                return ''
+            },
+            getSpecificationPropertyComments(refMap, referenceProperty) {
+                const specRef = this.referenceTable(refMap)[referenceProperty]
+                if ('comments' in specRef) {
+                    const specComments = specRef.comments
+                    return specComments
+                }
+                return ''
             }
+
 
         }
     }

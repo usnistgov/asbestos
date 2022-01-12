@@ -38,18 +38,18 @@
                 <warningOnly value="false"/>
             </assert>
         </action>
-
         <action>
             <assert id="FTK4RM200">
-                <description value="PDB: Request contains one List|MHDv4BundleResources"/>
+                <description value="Bundle contains one SubmissionSet type List Resource.|MHDv4BundleResources"/>
                 <compareToSourceId value="request"/>
                 <compareToSourceExpression value="Bundle.entry.resource.where($this is List).count() = 1 and Bundle.entry.resource.where($this is List).code.coding.code='submissionset'"/>
                 <warningOnly value="false"/>
             </assert>
         </action>
+
         <action>
             <assert id="FTK4RM300">
-                <description value="PDB: Request contains one or more DocumentReference|MHDPDBOnePlusDocumentReference"/>
+                <description value="Bundle contains one or more DocumentReference resources.|MHDPDBOnePlusDocumentReference"/>
                 <compareToSourceId value="request"/>
                 <compareToSourceExpression value="Bundle.entry.resource.where($this is DocumentReference).count() >= 1"/>
                 <warningOnly value="false"/>
@@ -57,7 +57,7 @@
         </action>
         <action>
             <assert id="FTK4RM400">
-                <description value="PDB: Comprehensive or Minimal metadata identified in profile|MHDPDBMetadataType"/>
+                <description value="Bundle.meta.profile.|MHDPDBMetadataType"/>
                 <compareToSourceId value="request"/>
                 <compareToSourceExpression value="Bundle.meta.profile = 'http://profiles.ihe.net/ITI/MHD/StructureDefinition/IHE.MHD.Comprehensive.ProvideBundle' or Bundle.meta.profile='http://profiles.ihe.net/ITI/MHD/StructureDefinition/IHE.MHD.Minimal.ProvideBundle'"/>
                 <warningOnly value="false"/>
@@ -65,7 +65,7 @@
         </action>
         <action>
             <assert id="FTK4RM500">
-                <description value="PDB: All DocumentReferences in Bundle are linked to (SubmissionSet type) List"/>
+                <description value="All DocumentReferences in Bundle are linked to (SubmissionSet type) List."/>
                 <compareToSourceId value="request"/>
                 <compareToSourceExpression value="Bundle.entry.where(resource is DocumentReference).fullUrl in Bundle.entry.resource.where($this is List and code.coding.code='submissionset').select(entry.item.reference)"/>
                 <warningOnly value="false"/>
