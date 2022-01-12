@@ -91,10 +91,12 @@ public class DebugTestScriptWebSocketEndpoint {
     public void onMessage(String message, Session session) throws Exception {
         Objects.requireNonNull(message);
 
-        log.info("raw onMessage: " + message);
+        log.fine("raw onMessage: " + message);
         Map<String /* Request Type */, Object> myMap = new Gson().fromJson(message, Map.class);
 
         String cmd = (String) myMap.get("cmd");
+        log.info("onMessage cmd is: " + cmd);
+
         if (cmd == null || "".equals(cmd))
             return;
 
