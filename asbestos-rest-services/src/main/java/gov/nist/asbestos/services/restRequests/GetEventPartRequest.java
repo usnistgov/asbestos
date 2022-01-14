@@ -43,6 +43,7 @@ public class GetEventPartRequest {
     }
 
     public GetEventPartRequest(Request request) {
+        request.setType(this.getClass().getSimpleName());
         this.request = request;
     }
 

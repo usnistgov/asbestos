@@ -53,6 +53,7 @@ public class RunSelftestRequest {
     }
 
     public RunSelftestRequest(Request request) {
+        request.setType(this.getClass().getSimpleName());
         this.request = request;
     }
 

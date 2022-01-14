@@ -47,6 +47,7 @@ public class GetClientTestEvalRequest {
     }
 
     public GetClientTestEvalRequest(Request request) {
+        request.setType(this.getClass().getSimpleName());
         this.request = request;
     }
 

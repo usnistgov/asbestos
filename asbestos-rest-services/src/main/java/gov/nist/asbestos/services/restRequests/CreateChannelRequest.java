@@ -46,7 +46,7 @@ public class CreateChannelRequest {
         request.announce("CreateChannel");
         if (rawRequest == null) {
             rawRequest = IOUtils.toString(request.req.getInputStream(), Charset.defaultCharset());   // json
-            log.fine("CREATE Channel " + rawRequest);
+            log.fine(()->"CREATE Channel " + rawRequest);
         }
         ChannelConfig channelConfig = ChannelConfigFactory.convert(rawRequest);
 

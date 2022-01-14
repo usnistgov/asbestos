@@ -59,6 +59,7 @@ public class GetTestCollectionRequest {
     }
 
     public GetTestCollectionRequest(Request request) {
+        request.setType(this.getClass().getSimpleName());
         this.request = request;
         collectionName = request.uriParts.get(4);
     }

@@ -34,6 +34,7 @@ public class Request {
     public boolean isGzip = false;
     private String query = null;
     private Map<String, String> parametersMap;
+    private String type;
     private static final Logger log = Logger.getLogger(Request.class.getName());
 
     public Request(HttpServletRequest req, HttpServletResponse resp, File externalCache) {
@@ -136,9 +137,9 @@ public class Request {
 
     public void setStatus(int status) {
         if (status == 200) {
-            log.log(Level.FINE, ()->String.format("Status %d: %s", status, uri));
+            log.log(Level.FINE, ()->String.format("Status %d: URI=%s", status, uri));
         } else {
-            log.severe(String.format("Status %d: %s", status, uri));
+            log.severe(String.format("%s Error Status: %d, URI=%s", getType(), status, uri));
         }
         resp.setStatus(status);
     }
@@ -158,7 +159,7 @@ public class Request {
     public void serverError() { setStatus(resp.SC_INTERNAL_SERVER_ERROR);}
 
     public void serverError(Throwable t) {
-        log.log(Level.SEVERE, t.toString(), t);
+        log.log(Level.SEVERE, String.format("%s Error Message:  %s", getType(), t.toString()), t);
         setStatus(resp.SC_INTERNAL_SERVER_ERROR);
     }
 
@@ -180,5 +181,13 @@ public class Request {
 
     public Map<String, String> getParametersMap() {
         return parametersMap;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
     }
 }

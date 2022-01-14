@@ -25,6 +25,7 @@ public class GetTestScriptRequest {
     }
 
     public GetTestScriptRequest(Request request) {
+        request.setType(this.getClass().getSimpleName());
         this.request = request;
     }
 

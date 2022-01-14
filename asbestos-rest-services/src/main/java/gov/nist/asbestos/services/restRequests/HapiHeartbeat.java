@@ -25,6 +25,7 @@ public class HapiHeartbeat {
     }
 
     public HapiHeartbeat(Request request) {
+        request.setType(this.getClass().getSimpleName());
         this.request = request;
     }
 

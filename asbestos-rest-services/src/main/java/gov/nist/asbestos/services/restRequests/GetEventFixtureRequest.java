@@ -49,6 +49,8 @@ public class GetEventFixtureRequest {
     Model model;
 
     public GetEventFixtureRequest(Request request) {
+        request.setType(this.getClass().getSimpleName());
+
         model = new Model(request);
     }
 

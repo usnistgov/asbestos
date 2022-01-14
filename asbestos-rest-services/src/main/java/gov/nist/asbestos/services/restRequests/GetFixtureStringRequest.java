@@ -43,6 +43,7 @@ public class GetFixtureStringRequest {
     private String testName;
 
     public GetFixtureStringRequest(Request request) throws IOException {
+        request.setType(this.getClass().getSimpleName());
         this.request = request;
         this.testCollection = request.uriParts.get(5);
         this.testName = URLDecoder.decode(request.uriParts.get(6), StandardCharsets.UTF_8.toString());

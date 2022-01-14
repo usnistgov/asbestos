@@ -27,6 +27,7 @@ public class GetTestReportRequest {
     }
 
     public GetTestReportRequest(Request request) {
+        request.setType(this.getClass().getSimpleName());
         this.request = request;
     }
 

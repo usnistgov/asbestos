@@ -34,6 +34,7 @@ public class GetTestLogsRequest {
     }
 
     public GetTestLogsRequest(Request request) {
+        request.setType(this.getClass().getSimpleName());
         this.request = request;
     }
 

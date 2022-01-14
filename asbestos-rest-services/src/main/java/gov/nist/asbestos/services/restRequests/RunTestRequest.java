@@ -34,6 +34,7 @@ public class RunTestRequest {
     }
 
     public RunTestRequest(Request request) {
+        request.setType(this.getClass().getSimpleName());
         this.request = request;
     }
 

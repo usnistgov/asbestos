@@ -25,7 +25,10 @@ public class GetDefaultFhirBaseRequest {
         return request.uriParts.size() == 3 && "hapiFhirBase".equalsIgnoreCase(request.uriParts.get(2));
     }
 
-    public GetDefaultFhirBaseRequest(Request request) { this.request = request; }
+    public GetDefaultFhirBaseRequest(Request request) {
+        request.setType(this.getClass().getSimpleName());
+        this.request = request;
+    }
 
     static class FhirBase {
         String fhirBase;
