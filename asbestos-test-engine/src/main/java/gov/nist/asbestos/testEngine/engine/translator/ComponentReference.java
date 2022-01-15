@@ -8,6 +8,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 
 public class ComponentReference {
     private String relativePath = null;
@@ -124,4 +125,25 @@ public class ComponentReference {
     public List<Parameter> getVariablesInNoTranslation() {
         return variablesInNoTranslation;
     }
+
+    /**
+     *
+     *  Assign moduleName and moduleId in caller's TestReport.
+     *  moduleName is the name of the module.
+     *  moduleId is the same name with a numeric suffix to make this call unique.
+     *  The module call is identified as moduleName/moduleId in the logs
+     *
+     * @param candidate
+     * @return
+     */
+    public static String assignModuleId(Set<String> moduleIds, String candidate) {
+        String real = candidate;
+        int i = 1;
+        while (moduleIds.contains(real)) {
+            real = candidate + i;
+            i++;
+        }
+        return real;
+    }
+
 }

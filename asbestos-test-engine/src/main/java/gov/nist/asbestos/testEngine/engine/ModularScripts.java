@@ -8,11 +8,14 @@ import gov.nist.asbestos.client.Base.ParserBase;
 import gov.nist.asbestos.client.client.Format;
 import gov.nist.asbestos.testEngine.engine.translator.AsbestosComponentPath;
 import gov.nist.asbestos.testEngine.engine.translator.ComponentPathValue;
+import gov.nist.asbestos.testEngine.engine.translator.ComponentReference;
 import org.apache.commons.io.FileUtils;
+
+import java.nio.file.Paths;
+import java.util.UUID;
 import java.util.logging.Logger;
 import org.hl7.fhir.r4.model.BaseResource;
 import org.hl7.fhir.r4.model.Extension;
-import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.TestScript;
 
 import java.io.File;
@@ -24,8 +27,6 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -34,6 +35,7 @@ public class ModularScripts {
     // testId => TestScript json
     // testId/componentId => TestScript.json
     private final Map<String, String> scripts = new LinkedHashMap<>();
+    private final Map<String, MultiUseScriptAllocator> multiUseScriptOperationIdentifiers = new LinkedHashMap<>();
     private String testCollectionName;
     private EC ec;
 
@@ -79,9 +81,28 @@ public class ModularScripts {
 
         String json = ParserBase.encode(testScript, Format.JSON);
         scripts.put(testScript.getName(), json);
-
-
         testActionsHandleImport(testDef, testId, testScript);
+        allocateMultiUseScript();
+        return;
+    }
+
+    private void allocateMultiUseScript() {
+        if (multiUseScriptOperationIdentifiers.size() > 0) {
+            for (String opId : multiUseScriptOperationIdentifiers.keySet()) {
+               for (String key: scripts.keySet()) {
+                   String script = scripts.get(key);
+                   if (script.contains(opId)) {
+                       MultiUseScriptAllocator multiUse = multiUseScriptOperationIdentifiers.get(opId);
+                       Pattern p = Pattern.compile(String.format("(^.*/)(%s.xml\"$)",multiUse.getSourceComponentIdPart()) ,Pattern.MULTILINE);// Example: "line1\nline2\nvalueString": "../CheckSubject.xml"\nline\n
+                       Matcher m = p.matcher(script);
+                       if (m.find()) {
+                           scripts.replace(key, m.replaceFirst(String.format("$1%s.xml\"", multiUse.getNewScriptId())));
+                       }
+                   }
+               }
+            }
+        }
+
     }
 
     private List<ComponentPathValue> testActionsHandleImport(File testDef, String testId, TestScript testScript ) {
@@ -112,13 +133,22 @@ public class ModularScripts {
         if (!action.hasOperation())
             return null;
         TestScript.SetupActionOperationComponent op = action.getOperation();
+        if (! op.hasId()) {
+            setOperationId(op);
+        }
         return handleImportAction(testDef, testId, op, variableComponentList );
+    }
+
+    private void setOperationId(TestScript.SetupActionOperationComponent op) {
+        log.fine("Assigning operation ID to backtrack and replace component references to make them unique.");
+        op.setId(UUID.randomUUID().toString());
     }
 
     List<ComponentPathValue> handleImportScripts(File testDef, String testId, TestScript.TestActionComponent action, List<TestScript.TestScriptVariableComponent> variableComponentList) {
         if (!action.hasOperation())
             return null;
         TestScript.SetupActionOperationComponent op = action.getOperation();
+        setOperationId(op);
         return handleImportAction(testDef, testId, op, variableComponentList);
     }
 
@@ -143,22 +173,35 @@ public class ModularScripts {
                         TestScript componentScript = (TestScript) ParserBase.parse(componentFile);
                         String componentId = fileName(componentFile);
                         String fullComponentId = testId + '/' + componentId;
+                        String newFullComponentId = ComponentReference.assignModuleId(scripts.keySet(), fullComponentId);
                         componentScript.setName(fullComponentId);
-                        String componentJson = ParserBase.encode(componentScript, Format.JSON);
-                        scripts.put(fullComponentId, componentJson);
 
                         /* Aggregate Test Script
                         locally rebase the testDef to component script module since its references are relative to the module path, not the root testDef
                          */
                         File rebasedTestDef = componentFile.getParentFile();
                         List<ComponentPathValue> replacedComponentPathValues = testActionsHandleImport(rebasedTestDef, testId, componentScript);
+
+
+                        String componentJson = ParserBase.encode(componentScript, Format.JSON);
+                        if (! fullComponentId.equals(newFullComponentId)) {
+                            MultiUseScriptAllocator multiUseScriptAllocator = new MultiUseScriptAllocator(fullComponentId, newFullComponentId);
+                            multiUseScriptOperationIdentifiers.put(op.getId(), multiUseScriptAllocator);
+
+//                          log.fine("ModularScripts Pattern match failed for " + fullComponentId + " in " + componentFile.toString());
+                        }
+                        scripts.put(newFullComponentId, componentJson);
+
+
                         if (replacedComponentPathValues != null && !replacedComponentPathValues.isEmpty()) {
                             String newValue = componentJson;
                             boolean isReplaced = false;
                             for (ComponentPathValue c : replacedComponentPathValues) {
                                 if (c != null && c.isReplaced()) {
                                     isReplaced = true;
-                                    newValue = newValue.replaceAll(Pattern.quote(c.getToken()), Matcher.quoteReplacement(c.getRelativePath()));
+                                    log.fine(() -> "ModularScripts component path traversal before normalization: " + c.getRelativePath());
+                                    String normalizedPathString = Paths.get(c.getRelativePath()).normalize().toString().replace("\\","/");
+                                    newValue = newValue.replaceAll(Pattern.quote(c.getToken()), Matcher.quoteReplacement(normalizedPathString));
                                 }
                             }
                             if (isReplaced) {

@@ -182,6 +182,10 @@
         margin-left: 16px;
     }
 
+    .asbtsReferenceHeaderLabel {
+        margin-left: 19px;
+    }
+
     .indent {
         text-indent: 50px;
     }

@@ -2,12 +2,18 @@
 <div>
     <p class="asbtsReferenceHeaderLabel" v-if="referenceMap.length > 0">&nbsp;Reference(s):</p>
 <!--    <div class="specificationMargin">{{assertionId}}</div>-->
-       <ol>
+        <ol>
         <li v-for="(refMap,rmKeyIndex ) in referenceMap" :key="rmKeyIndex" >
-          <div class="gridContainer" v-for="(referenceProperty, srKeyIndex) in Object.keys(referenceTable(refMap))"  :key="srKeyIndex">
+            <div class="system-error" v-if="Object.keys(referenceTable(refMap)).length===0" :key="rmKeyIndex">
+                Error: {{refMap}} Assertion Reference map exists, but the reference table is not defined in the references object literal.
+            </div>
+            <div v-else class="gridContainer" v-for="(referenceProperty, srKeyIndex) in Object.keys(referenceTable(refMap))"  :key="srKeyIndex">
             <div v-if="'SpecificationText'!==referenceProperty">{{referenceProperty}}</div>
             <template v-if="'SpecificationText'===referenceProperty">
                 <div class="specificationTextGridItem">
+                    <!-- Use markdown with html=false, if html is not desired anymore.
+                        Change the css class usage in getSpecificationPropertyText method -->
+<!--                    <p :title="getSpecificationPropertyComments(refMap,referenceProperty)"><vue-markdown :html="false">{{getSpecificationPropertyText(refMap,referenceProperty)}}</vue-markdown></p>-->
                     <p :title="getSpecificationPropertyComments(refMap,referenceProperty)" v-html="getSpecificationPropertyText(refMap,referenceProperty)"></p>
                 </div>
             </template>
@@ -29,7 +35,12 @@
 </template>
 
 <script>
+    // import VueMarkdown from 'vue-markdown'
+
     export default {
+        components: {
+           // VueMarkdown
+        },
         props: {
             assertionObj: {
                 type: Object,
@@ -68,10 +79,10 @@
 
         },
         methods: {
-            referenceTable(tableKeyMap) {
+            referenceTable(assertionReferenceMap) {
                 const rObj = this.$store.state.testRunner.testAssertions.references
-                const specSourceKey = Object.keys(tableKeyMap)[0]
-                const specReference = tableKeyMap[specSourceKey]
+                const specSourceKey = Object.keys(assertionReferenceMap)[0]
+                const specReference = assertionReferenceMap[specSourceKey]
                 if (specSourceKey in rObj) {
                     if  (specReference in rObj[specSourceKey]) {
                         const theTable = rObj[specSourceKey][specReference]
@@ -89,8 +100,8 @@
                 const specRef = this.referenceTable(refMap)[referenceProperty]
                 let specText = specRef.text
                 let specTargetPhrase = ''
-                if ('verbatimPhrase' in specRef) {
-                    specTargetPhrase = specRef.verbatimPhrase
+                if ('verbatimPhraseToFocus' in refMap) {
+                    specTargetPhrase = refMap.verbatimPhraseToFocus
                 } else {
                     /* user friendly language, or descriptive assertion */
                     specTargetPhrase = this.assertionObj.description
@@ -155,9 +166,6 @@
         /*justify-content: start;*/
         /*grid-template-rows:  auto auto;*/
         /*grid-auto-flow: column;*/
-    }
-    .asbtsReferenceHeaderLabel {
-        margin-left: 19px;
     }
 
     .specificationTextGridItem {

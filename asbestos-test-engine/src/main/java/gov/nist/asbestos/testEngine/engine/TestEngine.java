@@ -887,26 +887,6 @@ public class TestEngine  implements TestDef {
 
     Set<String> moduleIds = new HashSet<>();
 
-    /**
-     *
-     *  Assign moduleName and moduleId in caller's TestReport.
-     *  moduleName is the name of the module.
-     *  moduleId is the same name with a numeric suffix to make this call unique.
-     *  The module call is identified as moduleName/moduleId in the logs
-     *
-     * @param candidate
-     * @return
-     */
-    private String assignModuleId(String candidate) {
-        String real = candidate;
-        int i = 1;
-        while (moduleIds.contains(real)) {
-            real = candidate + i;
-            i++;
-        }
-        moduleIds.add(real);
-        return real;
-    }
 
     private void handleImport(Extension extension, TestScript.SetupActionOperationComponent opScript, TestReport.SetupActionOperationComponent opReport) {
 
@@ -1023,7 +1003,8 @@ public class TestEngine  implements TestDef {
         modularEngine.add(testEngine1);
         testEngine1.parent = this;
         String moduleName = simpleName(componentReference.getComponentRef());
-        String moduleId = assignModuleId(moduleName);
+        String moduleId = ComponentReference.assignModuleId(moduleIds, moduleName);
+        moduleIds.add(moduleId);
         opReport.addModifierExtension(new Extension(ExtensionDef.moduleId, new StringType(moduleId)));
         opReport.addModifierExtension(new Extension(ExtensionDef.moduleName, new StringType(moduleName)));
         opReport.setResult(TestReport.TestReportActionResult.PASS); // may be overwritten
