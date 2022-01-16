@@ -36,6 +36,7 @@ public class ModularEngine {
     private boolean saveLogs = false;
     private String testName;
     private Map<String, String> reports = new HashMap<>();   // name => TestReport json
+    private ModularScripts modularScripts;
 
     public ModularEngine(File testDefDir) {
         this(testDefDir, (URI) null);
@@ -243,5 +244,21 @@ public class ModularEngine {
         getMainTestEngine().runEval(request, response);
         installModuleNames();
         return this;
+    }
+
+    public ModularEngine setModularScripts() {
+        try {
+            if (modularScripts == null)
+                modularScripts = new ModularScripts(new EC(getMainTestEngine().getExternalCache()), getMainTestEngine().getTestCollectionId(), getMainTestEngine().getTestDef());
+        } catch (Exception ex) {
+            log.severe("setModularScripts Exception: " + ex.toString());
+        }
+        return this;
+    }
+
+    public String getMultiUseScriptId(String moduleName, String simpleName) {
+        if (modularScripts != null)
+            return modularScripts.getMultiUseScriptId(moduleName, simpleName);
+        return moduleName;
     }
 }

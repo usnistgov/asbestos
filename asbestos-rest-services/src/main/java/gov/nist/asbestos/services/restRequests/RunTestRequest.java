@@ -78,6 +78,7 @@ public class RunTestRequest {
                 .setTestCollection(testCollection)
                 .addCache(patientCacheDir)
                 .addCache(alternatePatientCacheDir)
+                .setModularScripts()
                 .runTest()
                 .getTestReport();
 

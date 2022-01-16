@@ -119,6 +119,7 @@ public class RunSelftestRequest {
                             .setTestCollection(testCollection)
                             .addCache(patientCacheDir)
                             .addCache(alternatePatientCacheDir)
+                            .setModularScripts()
                             .runTest()
                             .getTestReport();
 

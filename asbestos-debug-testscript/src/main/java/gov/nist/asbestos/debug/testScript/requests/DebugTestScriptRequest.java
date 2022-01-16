@@ -106,6 +106,7 @@ public class DebugTestScriptRequest implements Runnable {
                     .setTestCollection(testCollection)
                     .addCache(patientCacheDir)
                     .addCache(alternatePatientCacheDir)
+                    .setModularScripts()
                     .runTest();
         }
         catch (StopDebugTestScriptException sdex) {

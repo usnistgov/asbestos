@@ -19,10 +19,14 @@ public class MultiUseScriptAllocator {
     }
 
     public String getSourceComponentIdPart() {
-        return sourceScriptId.split("/")[1];
+        return getComponentPart(sourceScriptId);
     }
 
     public String getNewComponentIdPart() {
-        return newScriptId.split("/")[1];
+        return getComponentPart(newScriptId);
+    }
+
+    public static String getComponentPart(String s) {
+       return s.split("/")[1];
     }
 }

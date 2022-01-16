@@ -35,6 +35,10 @@ public class ModularScripts {
     // testId => TestScript json
     // testId/componentId => TestScript.json
     private final Map<String, String> scripts = new LinkedHashMap<>();
+    /*
+    Multi use is where a module is reused multiple times within the scope of the main TestScript
+    See minimalmetadataonly module and comprehensiveonly module to see how subject, checksubject modules are used.
+     */
     private final Map<String, MultiUseScriptAllocator> multiUseScriptOperationIdentifiers = new LinkedHashMap<>();
     private String testCollectionName;
     private EC ec;
@@ -102,7 +106,24 @@ public class ModularScripts {
                }
             }
         }
+    }
 
+    String getMultiUseScriptId(String moduleName, String simpleName) {
+        if (multiUseScriptOperationIdentifiers.size() > 0) {
+            for (String opId : multiUseScriptOperationIdentifiers.keySet()) {
+                if (moduleName.equals(multiUseScriptOperationIdentifiers.get(opId).getSourceComponentIdPart())) {
+                    // Check if same parent
+                    for (String scriptKey : scripts.keySet()) {
+                        if (scripts.get(scriptKey).contains(opId)) {
+                           if (simpleName.equals(MultiUseScriptAllocator.getComponentPart(scriptKey))) {
+                               return multiUseScriptOperationIdentifiers.get(opId).getNewComponentIdPart();
+                           }
+                        }
+                    }
+                }
+            }
+        }
+        return moduleName;
     }
 
     private List<ComponentPathValue> testActionsHandleImport(File testDef, String testId, TestScript testScript ) {
@@ -238,5 +259,4 @@ public class ModularScripts {
             return name;
         return name.substring(0, dot);
     }
-
 }

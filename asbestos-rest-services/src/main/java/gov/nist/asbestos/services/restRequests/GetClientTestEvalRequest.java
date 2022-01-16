@@ -201,6 +201,7 @@ public class GetClientTestEvalRequest {
                     modularEngine.setVal(new Val());
                     modularEngine.setTestSession(testSession);
                     modularEngine.setExternalCache(request.externalCache);
+                    modularEngine.setModularScripts();
                     ResourceWrapper requestResource = getRequestResource(event);
                     ResourceWrapper responseResource = getResponseResource(event);
                     modularEngine.runEval(requestResource, responseResource);

@@ -140,7 +140,7 @@ public class ComponentReference {
         String real = candidate;
         int i = 1;
         while (moduleIds.contains(real)) {
-            real = candidate + i;
+            real = candidate + "_asbtsFiber" + i;
             i++;
         }
         return real;

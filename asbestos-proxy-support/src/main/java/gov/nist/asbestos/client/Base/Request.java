@@ -139,7 +139,8 @@ public class Request {
         if (status == 200) {
             log.log(Level.FINE, ()->String.format("Status %d: URI=%s", status, uri));
         } else {
-            log.severe(String.format("%s Error Status: %d, URI=%s", getType(), status, uri));
+            String requestType = null == getType() ? "UnknownRequestType." : getType();
+            log.severe(String.format("%s Error Status: %d, URI=%s", requestType, status, uri));
         }
         resp.setStatus(status);
     }

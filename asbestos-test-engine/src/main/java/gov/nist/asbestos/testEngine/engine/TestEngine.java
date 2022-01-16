@@ -50,6 +50,7 @@ public class TestEngine  implements TestDef {
 
     private File testDef = null; // directory holding test definition
     private String testScriptName = null;   // name of testscript file, TestScript.xml by default
+    private String multiUseTestScriptName = null;
     private URI sut = null;
     TestEngine parent = null;
 
@@ -65,7 +66,7 @@ public class TestEngine  implements TestDef {
     private Val val;
     private ValE engineVal;
     private FhirClient fhirClient = null;
-    private final FhirClient fhirClientForFixtures;
+    private FhirClient fhirClientForFixtures;
     private List<String> errors;
     private String testSession = null;
     private String channelId = null;   // testSession __ channelName
@@ -87,6 +88,7 @@ public class TestEngine  implements TestDef {
      * @param sut base address of fhir server under test
      */
     public TestEngine(File testDef, URI sut, Set<String> moduleIds) {
+        this();
         Objects.requireNonNull(testDef);
         Objects.requireNonNull(sut);
         Objects.requireNonNull(Ref.asURL(sut));
@@ -99,30 +101,29 @@ public class TestEngine  implements TestDef {
         ResourceCacheMgr inTestResources = new ResourceCacheMgr(this.testDef, new Ref(""));
         fhirClientForFixtures = new FhirClient().setResourceCacheMgr(inTestResources);
         fixtureMgr.setFhirClient(fhirClientForFixtures);
-        if (moduleIds != null) {
-            this.moduleIds.addAll(moduleIds);
-        }
     }
 
     // used for evaluation including in the Inspector
     public TestEngine(File testDef, Set<String> moduleIds) {
+        this();
         Objects.requireNonNull(testDef);
         setTestDef(testDef);
         ResourceCacheMgr inTestResources = new ResourceCacheMgr(testDef, new Ref(""));
         fhirClientForFixtures = new FhirClient().setResourceCacheMgr(inTestResources);
         fixtureMgr.setFhirClient(fhirClientForFixtures);
-        if (moduleIds != null) {
-            this.moduleIds.addAll(moduleIds);
-        }
     }
 
     // used for client tests
     public TestEngine(File testDef, TestScript testScript, Set<String> moduleIds) {
+        this();
         setTestDef(testDef);
         this.testScript = testScript;
         ResourceCacheMgr inTestResources = new ResourceCacheMgr(testDef, new Ref(""));
         fhirClientForFixtures = new FhirClient().setResourceCacheMgr(inTestResources);
         fixtureMgr.setFhirClient(fhirClientForFixtures);
+    }
+
+    private TestEngine() {
         if (moduleIds != null) {
             this.moduleIds.addAll(moduleIds);
         }
@@ -1004,6 +1005,14 @@ public class TestEngine  implements TestDef {
         testEngine1.parent = this;
         String moduleName = simpleName(componentReference.getComponentRef());
         String moduleId = ComponentReference.assignModuleId(moduleIds, moduleName);
+        if (multiUseTestScriptName != null && moduleName.equals(moduleId)) {
+           // Check modular scripts for multi-use script case
+            String multiUseScriptId = modularEngine.getMultiUseScriptId(moduleName, simpleName(new File(multiUseTestScriptName)));
+            if (! moduleName.equals(multiUseScriptId))
+                log.fine("multiUseScriptId : " + multiUseScriptId);
+            moduleId = multiUseScriptId;
+            testEngine1.setMultiUseTestScriptName(moduleId.concat(".xml"));
+        }
         moduleIds.add(moduleId);
         opReport.addModifierExtension(new Extension(ExtensionDef.moduleId, new StringType(moduleId)));
         opReport.addModifierExtension(new Extension(ExtensionDef.moduleName, new StringType(moduleName)));
@@ -1661,8 +1670,16 @@ public class TestEngine  implements TestDef {
         } else {
             this.testDef = testDef.getParentFile();
             this.testScriptName = testDef.getName();
+            this.multiUseTestScriptName = testScriptName;
         }
         return this;
+    }
+
+    public File getTestDef() {
+        if (this.testDef.isDirectory())
+            return this.testDef;
+        else
+            return new File(this.testDef, this.testScriptName);
     }
 
     private File getTestScriptFile() {
@@ -1862,5 +1879,9 @@ public class TestEngine  implements TestDef {
 
     public TestScriptDebugInterface getDebugger() {
         return debugger;
+    }
+
+    public void setMultiUseTestScriptName(String multiUseTestScriptName) {
+        this.multiUseTestScriptName = multiUseTestScriptName;
     }
 }
