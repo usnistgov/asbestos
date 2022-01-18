@@ -42,6 +42,9 @@
                         <display value="Reports"/>
                     </coding>
                 </category>
+                <subject>
+                    <reference value="http://example.com/fhir/Patient/1"/>
+                </subject>
                 <date value="2015-02-07T13:28:17.239+02:00"/>
                 <securityLabel>
                     <coding>

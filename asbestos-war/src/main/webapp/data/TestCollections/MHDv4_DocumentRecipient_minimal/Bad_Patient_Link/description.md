@@ -7,7 +7,7 @@ actor.
 linkage between List and DocumentReference and between DocumentReference and Binary is present.
 
 **Metadata contents**: List and DocumentReference contain the minimum required by Comprehensive
- Metadata except that DocumentEntry.subject.reference is a bad link.   List and
+ Metadata except that DocumentReference.subject.reference is a bad link.   List and
 DocumentReference.masterIdentifier are given unique values before the transaction is sent.
 
 **Expected Outcome**: Transaction will fail with status 400 and the contents will not be persisted to the server.

@@ -5,7 +5,7 @@ actor.
 linkage between DocumentManifest and DocumentReference and between DocumentReference and Binary is present.
 
 **Metadata contents**: DocumentManifest and DocumentReference contain the minimum required by Comprehensive
- Metadata except that DocumentEntry.subject.reference is a bad link.   DocumentManifest.masterIdentifier and
+ Metadata except that DocumentReference.subject.reference is a bad link.   DocumentManifest.masterIdentifier and
 DocumentReference.masterIdentifier are given unique values before the transaction is sent.
 
-**Expected Outcome**: Transaction will fail with status 400 and the contents will not be persisted to the server.
+**Expected Outcome**: Transaction will fail with status 400 and no contents will be persisted to the server. An OperationOutcome resource will be returned.

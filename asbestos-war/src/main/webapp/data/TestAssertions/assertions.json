@@ -1,26 +1,26 @@
 {
   "id": "NIST FHIR(r) Toolkit (Asbestos) Assertion References",
   "referenceMetadata": {
-    "version" : "1.0",
+    "version": "1.0",
     "lastUpdated": "2022-JAN-06",
-    "comments": ""
+    "comments": "All specifications are captured as a snapshot as of the lastUpdated date. Any future changes will have to reported through a GitHub pull request for a review."
   },
-
-  "assertionReferences" : {
+  "assertionReferences": {
     "FTK4RM100":  [{"mhdv4": "messageSemantics"}],
     "FTKBR100":   [{"mhdv4": "messageSemantics"}],
-    "FTKBR200":   [{"mhdv4": "messageSemantics"},{"fhir": "httpTransaction"}],
+    "FTKBR200":   [{"mhdv4": "messageSemantics"}, {"fhir": "httpTransaction"}],
     "FTK4RM200":  [{"mhdv4": "messageSemantics"}],
     "FTK4RM300":  [{"mhdv4": "messageSemantics"}],
-    "FTK4RM400":  [{"mhdv4": "bundleResources"}],
-    "FTK4RM500":  [{"mhdv4": "messageSemantics_attributeMap"},{"mhdv4": "submissionSet_attributeMap"}, {"mhdv4": "submissionSet_mappingToXds"}]
+    "FTK4RM400":  [{"mhdv4": "bundleResources", "verbatimPhraseToFocus": "Bundle.meta.profile"}],
+    "FTK4RM500":  [{"mhdv4": "messageSemantics_attributeMap"}, {"mhdv4": "submissionSet_attributeMap" }, {"mhdv4": "submissionSet_mappingToXds" }],
+    "FTK4RM700":  [{"mhdv4": "patientReference"}],
+    "FTKCM105":   [{"mhdv4": "comprehensiveMetadata_subject"}]
   },
 
-  "references" : {
-    "mhdv3x" : {
-
+  "references": {
+    "mhdv3x": {
     },
-    "mhdv4" : {
+    "mhdv4": {
       "messageSemantics": {
         "Source": {
           "text": "IHE ITI"
@@ -42,55 +42,61 @@
           "text": "The Document Source shall initiate [2.1]a FHIR \"transaction\" using a \"create\" action by [1.0]sending an HTTP POST request method [2.0]composed of a FHIR Bundle Resource [2.2]containing: one SubmissionSet type List Resource; [2.3]one or more DocumentReference Resources; [2.4]zero or more Folder type List Resources; and [2.5]zero or more Binary Resources to the Document Recipient. "
         }
       },
-        "messageSemantics_attributeMap": {
-          "Source": {
-            "text": "IHE ITI"
-          },
-          "Profile": {
-            "text": "MHDv4",
-            "link": "https://profiles.ihe.net/ITI/MHD/toc.html"
-          },
-          "Volume:Section": {
-            "text": "2:3.65.4.1.2 Message Semantics",
-            "link": "https://profiles.ihe.net/ITI/MHD/ITI-65.html#2365412-message-semantics"
-          },
-          "SpecificationText": {
-            "text": "(Para 1.) Refer to ITI TF-3: 4.5.1 for details on the FHIR Resources and how Document Sharing metadata attributes are mapped.",
-            "comments": "Revelant information is found in 3:4.5.2 SubmissionSet Metadata Attributes, not in directly in Section 4.5.1."
-          }
+      "messageSemantics_attributeMap": {
+        "Source": {
+          "text": "IHE ITI"
         },
-          "submissionSet_attributeMap": {
-            "Source": {
-              "text": "IHE ITI"
-            },
-            "Profile": {
-              "text": "MHDv4",
-              "link": "https://profiles.ihe.net/ITI/MHD/toc.html"
-            },
-            "Volume:Section": {
-              "text": "3:4.5.2 SubmissionSet Metadata Attributes",
-              "link": "https://profiles.ihe.net/ITI/MHD/32_fhir_maps.html#submissionSet"
-            },
-            "SpecificationText": {
-              "text": "The documented mapping of the metadata elements associated with a Document Sharing SubmissionSet object attributes."
-            }
-          },
-            "submissionSet_mappingToXds": {
-              "Source": {
-                "text": "IHE ITI"
-              },
-              "Profile": {
-                "text": "MHDv4",
-                "link": "https://profiles.ihe.net/ITI/MHD/toc.html"
-              },
-              "SubmissionSet": {
-                "text": "Mappings for XDS and MHD Mapping (XDS)",
-                "link": "https://profiles.ihe.net/ITI/MHD/StructureDefinition-IHE.MHD.Minimal.SubmissionSet-mappings.html#mappings-for-xds-and-mhd-mapping-xds"
-              },
-              "SpecificationText": { "text":  "entry<br>&nbsp;&nbsp;item references to DocumentReference(s) and Folder List(s)"}
-            },
-
-      "bundleResources" : {
+        "Profile": {
+          "text": "MHDv4",
+          "link": "https://profiles.ihe.net/ITI/MHD/toc.html"
+        },
+        "Transaction": {
+          "text": "ITI-65 Provide Document Bundle",
+          "link": "https://profiles.ihe.net/ITI/MHD/ITI-65.html#2-3-65-provide-document-bundle-iti-65"
+        },
+        "Volume:Section": {
+          "text": "2:3.65.4.1.2 Message Semantics",
+          "link": "https://profiles.ihe.net/ITI/MHD/ITI-65.html#2365412-message-semantics"
+        },
+        "SpecificationText": {
+          "text": "(Para 1.) Refer to ITI TF-3: 4.5.1 for details on the FHIR Resources and how Document Sharing metadata attributes are mapped.",
+          "comments": "Revelant information is found in 3:4.5.2 SubmissionSet Metadata Attributes, not in directly in Section 4.5.1."
+        }
+      },
+      "submissionSet_attributeMap": {
+        "Source": {
+          "text": "IHE ITI"
+        },
+        "Profile": {
+          "text": "MHDv4",
+          "link": "https://profiles.ihe.net/ITI/MHD/toc.html"
+        },
+        "Volume:Section": {
+          "text": "3:4.5.2 SubmissionSet Metadata Attributes",
+          "link": "https://profiles.ihe.net/ITI/MHD/32_fhir_maps.html#submissionSet"
+        },
+        "SpecificationText": {
+          "text": "The documented mapping of the metadata elements associated with a Document Sharing SubmissionSet object attributes."
+        }
+      },
+      "submissionSet_mappingToXds": {
+        "Source": {
+          "text": "IHE ITI"
+        },
+        "Profile": {
+          "text": "MHDv4",
+          "link": "https://profiles.ihe.net/ITI/MHD/toc.html"
+        },
+        "SubmissionSet": {
+          "text": "Mappings for XDS and MHD Mapping (XDS)",
+          "link": "https://profiles.ihe.net/ITI/MHD/StructureDefinition-IHE.MHD.Minimal.SubmissionSet-mappings.html#mappings-for-xds-and-mhd-mapping-xds"
+        },
+        "SpecificationText": {
+          "text": "entry<br>&nbsp;&nbsp;item references to DocumentReference(s) and Folder List(s)",
+          "comments": "Folder List(s) not yet supported."
+        }
+      },
+      "bundleResources": {
         "Source": {
           "text": "IHE ITI"
         },
@@ -107,56 +113,76 @@
           "link": "https://profiles.ihe.net/ITI/MHD/ITI-65.html#23654121-bundle-resources"
         },
         "SpecificationText": {
-          "text":  "The FHIR Bundle.meta.profile shall have..."
+          "text": "The FHIR Bundle.meta.profile shall have..."
         }
-
+      },
+      "patientReference": {
+        "Source": {
+          "text": "IHE ITI"
+        },
+        "Profile": {
+          "text": "MHDv4",
+          "link": "https://profiles.ihe.net/ITI/MHD/toc.html"
+        },
+        "Transaction": {
+          "text": "ITI-65 Provide Document Bundle",
+          "link": "https://profiles.ihe.net/ITI/MHD/ITI-65.html#2-3-65-provide-document-bundle-iti-65"
+        },
+        "Volume:Section": {
+          "text": "2:3.65.4.1.2.2 Patient Identity",
+          "link": "https://profiles.ihe.net/ITI/MHD/ITI-65.html#23654122-patient-identity"
+        },
+        "SpecificationText": {
+          "text": "All DocumentReference.subject, and List.subject values shall be References to a FHIR Patient Resource that may be obtained through use of PDQm, PIXm, or by some other means. If the Patient Resource is accessible to both the Document Source and Document Recipient via an external reference, it shall be included as an external reference. Otherwise, the Patient Resource shall be included in the Bundle."
+        }
       }
     },
-    "fhir" : {
-      "httpTransaction" : {
-        "Source": {"text":"HL7 FHIR"},
-        "Section" : {"text":"3.1.0.11 batch/transaction", "link" : "https://hl7.org/fhir/R4/http.html#transaction"},
-        "SpecificationText" : {"text": "The content of the post submission is a Bundle with Bundle.type = batch or transaction."}
+    "fhir": {
+      "httpTransaction": {
+        "Source": {
+          "text": "HL7 FHIR"
+        },
+        "Section": {
+          "text": "3.1.0.11 batch/transaction",
+          "link": "https://hl7.org/fhir/R4/http.html#transaction"
+        },
+        "SpecificationText": {
+          "text": "The content of the post submission is a Bundle with Bundle.type = batch or transaction."
+        }
       }
     }
   },
-
-"oldReferenceRoot_ToBeRemoved": {
-  "Profile": "MHD Rev 3.1",
-  "MHDPDBRequestIsBundle": "ITI-65 - 3.65.4.1.2 Message Semantics Para 1",
-  "MHDPDBRequestIsTransaction": "ITI-65 - 3.65.4.1.2 Message Semantics Para 1",
-  "MHDPDBUsesPost": "ITI-65 - 3.65.4.1.2 Message Semantics Para 1",
-  "MHDPDBOneDocumentManifest": "ITI-65 - 3.65.4.1.2 Message Semantics Para 1",
-  "MHDPDBOnePlusDocumentReference": "ITI-65 - 3.65.4.1.2 Message Semantics Para 1",
-  "MHDPDBMediaType": "ITI-65 - 3.65.4.1.2 Message Semantics Para 1",
-  "MHDPDBMetadataType": "ITI-65 - 3.65.4.1.2.1 Bundle Resources Para 2",
-  "MHDPDBBinaryInBundle": ["ITI-65 - 3.65.4.1.2.1 Bundle Resources Para 4",
-  "When the DocumentReference.content.attachment.url points at a Binary Resource, the Binary Resource shall be in the Bundle. See FHIR Resolving references in Bundles at http://hl7.org/fhir/R4/bundle.html#references."],
-  "MHDPDBAttachmentContentType": "content.attachment.contentType",
-  "MHDPDBPatientReference": "ITI-65 - 3.65.4.1.2.2 Patient Identity Para 1",
-  "MHDPDBSourcePatientInfoIsContained": "ITI-65 - 3.65.4.1.2.2 Patient Identity Para 2",
-  "MHDPDBGoodStatus": "ITI-65 - 3.65.4.2.2 Message Semantics Para 2",
-  "MHDPDBEntryReturns201": "ITI-65 - 3.65.4.2.2 Message Semantics Para 2",
-  "MHDPDBReturnLocation": "ITI-65 - 3.65.4.2.2 Message Semantics Para 2",
-  "MHDPDBReturnEtag": "ITI-65 - 3.65.4.2.2 Message Semantics Para 2",
-  "MHDPDBDocRefHasAttachment": "ITI-65 - Table 4.5.1.1-1 content.attachment.url",
-  "MHDPDBFullUrlUniqueInBundle": "http://hl7.org/fhir/bundle.html#invs bld-7",
-
-  "MHDPDBReturnsBundle": "ITI-65 - 3.65.4.2.2 Message Semantics Para 1",
-  "FHIRTransReturnsBundle": "http://hl7.org/fhir/http.html#transaction-response",
-
-  "FHIRTransReturns201": "http://hl7.org/fhir/http.html#transaction-response",
-  "MHDv4BundleResources": "https://profiles.ihe.net/ITI/MHD/ITI-65.html#23654121-bundle-resources",
-  "MHDv4MessageSemantics": "https://profiles.ihe.net/ITI/MHD/ITI-65.html#2365412-message-semantics",
-  "MHDSendingActorMetadataAttributeOptionality": "ITI TF-3: Table 4.3.1-3 Sending Actor Metadata Attribute Optionality, https://profiles.ihe.net/ITI/MHD/ITI-65.html#2365412-message-semantics and https://profiles.ihe.net/ITI/TF/Volume3/ch-4.3.html",
-  "MHDv4_3:4.5.2SubmissionSetMetadataAttributes": "https://profiles.ihe.net/ITI/MHD/32_fhir_maps.html#submissionSet",
-
-  "comments": [
-    " bundle profile comprehensive or minimal 3.65.4.1.2.1 - Bundle Resources The FHIR Bundle.meta.profile shall have the following value depending on the use of"
-  ]
-
-
-
-
-}
+  "oldReferenceRoot_ToBeRemoved": {
+    "Profile": "MHD Rev 3.1",
+    "MHDPDBRequestIsBundle": "ITI-65 - 3.65.4.1.2 Message Semantics Para 1",
+    "MHDPDBRequestIsTransaction": "ITI-65 - 3.65.4.1.2 Message Semantics Para 1",
+    "MHDPDBUsesPost": "ITI-65 - 3.65.4.1.2 Message Semantics Para 1",
+    "MHDPDBOneDocumentManifest": "ITI-65 - 3.65.4.1.2 Message Semantics Para 1",
+    "MHDPDBOnePlusDocumentReference": "ITI-65 - 3.65.4.1.2 Message Semantics Para 1",
+    "MHDPDBMediaType": "ITI-65 - 3.65.4.1.2 Message Semantics Para 1",
+    "MHDPDBMetadataType": "ITI-65 - 3.65.4.1.2.1 Bundle Resources Para 2",
+    "MHDPDBBinaryInBundle": [
+      "ITI-65 - 3.65.4.1.2.1 Bundle Resources Para 4",
+      "When the DocumentReference.content.attachment.url points at a Binary Resource, the Binary Resource shall be in the Bundle. See FHIR Resolving references in Bundles at http://hl7.org/fhir/R4/bundle.html#references."
+    ],
+    "MHDPDBAttachmentContentType": "content.attachment.contentType",
+    "MHDPDBPatientReference": "ITI-65 - 3.65.4.1.2.2 Patient Identity Para 1",
+    "MHDPDBSourcePatientInfoIsContained": "ITI-65 - 3.65.4.1.2.2 Patient Identity Para 2",
+    "MHDPDBGoodStatus": "ITI-65 - 3.65.4.2.2 Message Semantics Para 2",
+    "MHDPDBEntryReturns201": "ITI-65 - 3.65.4.2.2 Message Semantics Para 2",
+    "MHDPDBReturnLocation": "ITI-65 - 3.65.4.2.2 Message Semantics Para 2",
+    "MHDPDBReturnEtag": "ITI-65 - 3.65.4.2.2 Message Semantics Para 2",
+    "MHDPDBDocRefHasAttachment": "ITI-65 - Table 4.5.1.1-1 content.attachment.url",
+    "MHDPDBFullUrlUniqueInBundle": "http://hl7.org/fhir/bundle.html#invs bld-7",
+    "MHDPDBReturnsBundle": "ITI-65 - 3.65.4.2.2 Message Semantics Para 1",
+    "FHIRTransReturnsBundle": "http://hl7.org/fhir/http.html#transaction-response",
+    "FHIRTransReturns201": "http://hl7.org/fhir/http.html#transaction-response",
+    "MHDv4BundleResources": "https://profiles.ihe.net/ITI/MHD/ITI-65.html#23654121-bundle-resources",
+    "MHDv4MessageSemantics": "https://profiles.ihe.net/ITI/MHD/ITI-65.html#2365412-message-semantics",
+    "MHDSendingActorMetadataAttributeOptionality": "ITI TF-3: Table 4.3.1-3 Sending Actor Metadata Attribute Optionality, https://profiles.ihe.net/ITI/MHD/ITI-65.html#2365412-message-semantics and https://profiles.ihe.net/ITI/TF/Volume3/ch-4.3.html",
+    "MHDv4_3:4.5.2SubmissionSetMetadataAttributes": "https://profiles.ihe.net/ITI/MHD/32_fhir_maps.html#submissionSet",
+    "comments": [
+      " bundle profile comprehensive or minimal 3.65.4.1.2.1 - Bundle Resources The FHIR Bundle.meta.profile shall have the following value depending on the use of"
+    ]
+  }
 }

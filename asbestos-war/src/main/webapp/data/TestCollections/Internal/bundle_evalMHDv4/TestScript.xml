@@ -47,6 +47,12 @@
                     <extension url="urn:fixture-in">
                         <valueString value="response"/>
                     </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="isComprehensiveMetadataExpected"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="isComprehensive"/>
+                    </extension>
                 </modifierExtension>
             </operation>
         </action>
@@ -117,9 +123,37 @@
     </test>
 
 
+    <!-- Minimal Metadata only -->
+    <test>
+        <description value="If Minimal Metadata."/>
+        <action>
+            <operation>
+                <description value="Minimal Metadata only"/>
+                <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
+                    <extension url="component">
+                        <valueString value="../../Library/PDBVal/MinimalMetadataOnly.xml"/>
+                    </extension>
+                    <extension url="urn:fixture-in">
+                        <valueString value="request"/>
+                    </extension>
+                    <extension url="urn:fixture-in">
+                        <valueString value="response"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="isComprehensiveMetadataExpected"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="isComprehensive"/>
+                    </extension>
+                </modifierExtension>
+            </operation>
+        </action>
+    </test>
+
+
     <!-- Comprehensive Metadata only -->
     <test>
-        <description value="If applicable, Comprehensive Metadata only."/>
+        <description value="If Comprehensive Metadata."/>
         <action>
             <operation>
                 <description value="Comprehensive Metadata only"/>

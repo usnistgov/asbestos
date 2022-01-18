@@ -1,0 +1,34 @@
+<TestScript xmlns="http://hl7.org/fhir">
+    <modifierExtension url="urn:module">
+        <extension url="urn:fixture-in">
+            <valueString value="request"/>
+        </extension>
+        <extension url="urn:fixture-in">
+            <valueString value="response"/>
+        </extension>
+    </modifierExtension>
+
+    <id value="SubjectAggregate"/>
+    <name value="SubjectAggregate"/>
+    <description value="Evaluate Subject."/>
+
+    <test>
+        <description value="Subject assertions."/>
+        <action>
+            <operation>
+                <description value="Previous test action operation is analyzed using assertions."/>
+                <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
+                    <extension url="component">
+                        <valueString value="../CheckSubject.xml"/>
+                    </extension>
+                    <extension url="urn:fixture-in">
+                        <valueString value="request"/>
+                    </extension>
+                    <extension url="urn:fixture-in">
+                        <valueString value="response"/>
+                    </extension>
+                </modifierExtension>
+            </operation>
+        </action>
+    </test>
+</TestScript>
