@@ -113,14 +113,20 @@ public class VariableMgr {
         for (int i=1; i<51; i++) { // 50 variables limit
             if (!containsVariable(reference))
                 return reference;
-            reference = updateReference1(reference);
+            reference = updateReference1(reference, false);
             int remainingVariables = variableCount(reference); // remaining variables should be one less than before
             if (remainingVariables != (variableCount - i)) // stuck, probably an unresolved variable
                 break;
         }
-        Variable var = getNextVariable(reference);
-        if (var != null) {
-            reporter.reportError("variable " + var.name + " cannot be resolved");
+        Variable unresolvedVariable = getNextVariable(reference);
+        if (unresolvedVariable != null) {
+            reference = updateReference1(reference, true);
+            unresolvedVariable = getNextVariable(reference);
+            if (unresolvedVariable == null) {
+                return reference;
+            } else {
+                reporter.reportError("ASBTS variable " + unresolvedVariable.name + " cannot be resolved");
+            }
             //throw new Error("variable " + var.name + " cannot be resolved");
         }
         return null;
@@ -155,9 +161,10 @@ public class VariableMgr {
 
     /**
      * @param reference
+     * @param convertNullToEmptySet See http://hl7.org/fhirpath/#null-and-empty
      * @return
      */
-    private String updateReference1(String reference) {
+    private String updateReference1(String reference, boolean convertNullToEmptySet) {
         Objects.requireNonNull(reference);
         Objects.requireNonNull(reporter);
         if (!reference.contains(("${"))) // Check if reference follows the Variable naming-convention
@@ -165,8 +172,13 @@ public class VariableMgr {
         // Can this recurse to handle nested variables?
         Variable var  = getNextVariable(reference); //reference.substring(from+2, to);
         String update = eval(var.name, false);
-        if (update == null)
-            return reference;
+        if (update == null) {
+            if (convertNullToEmptySet) {
+                final String emptySet = "{}";
+                update = String.format("%s/* ASBTS_WARN: %s Is an unresolved variable. */", emptySet, var.name);
+            } else
+                return reference;
+        }
         return reference.substring(0, var.from) + update + reference.substring(var.to+1);
     }
 
