@@ -14,7 +14,10 @@
                     <!-- Use markdown with html=false, if html is not desired anymore.
                         Change the css class usage in getSpecificationPropertyText method -->
 <!--                    <p :title="getSpecificationPropertyComments(refMap,referenceProperty)"><vue-markdown :html="false">{{getSpecificationPropertyText(refMap,referenceProperty)}}</vue-markdown></p>-->
-                    <p :title="getSpecificationPropertyComments(refMap,referenceProperty)" v-html="getSpecificationPropertyText(refMap,referenceProperty)"></p>
+                    <p v-html="getSpecificationPropertyText(refMap,referenceProperty)"></p>
+                    <template v-for="(comment, cKey) in getSpecificationPropertyComments(refMap,referenceProperty)">
+                       <p v-if="comment !== ''" :title="comment" :key="cKey">[Comments]</p>
+                    </template>
                 </div>
             </template>
             <template v-else>
@@ -145,9 +148,9 @@
                 const specRef = this.referenceTable(refMap)[referenceProperty]
                 if ('comments' in specRef) {
                     const specComments = specRef.comments
-                    return specComments
+                    return [specComments]
                 }
-                return ''
+                return ['']
             }
 
 
