@@ -57,8 +57,8 @@ public class XdsOnFhirChannel extends BaseChannel /*implements IBaseChannel*/ {
     private AhqrSender sender = null;
     private Binary binary = null;
     private MhdTransforms mhdTransforms;
-    private MhdProfileVersionInterface mhdVersionSpecificImpl;
     private MhdVersionEnum defaultVersion = MhdVersionEnum.MHDv3x;
+    private MhdProfileVersionInterface mhdImpl;
 
     public XdsOnFhirChannel() {}
 
@@ -104,13 +104,13 @@ public class XdsOnFhirChannel extends BaseChannel /*implements IBaseChannel*/ {
         // Setup MHD specific implementation
         if (! isMhdVersionSpecificImplInitialized()) {
             mhdTransforms = new MhdTransforms(rMgr, val, task);
-            mhdVersionSpecificImpl = getMhdVersionSpecificImpl(bundle, val);
+            mhdImpl = getMhdVersionSpecificImpl(bundle, val);
         } else {
             throw new RuntimeException("MhdVersionSpecificImpl already initialized");
         }
 
         // perform translation
-        RegistryObjectListType registryObjectListType = bundleToRegistryObjectList.build(mhdVersionSpecificImpl, mhdTransforms, bundle);
+        RegistryObjectListType registryObjectListType = bundleToRegistryObjectList.build(mhdImpl, mhdTransforms, bundle);
         if (bundleToRegistryObjectList.isResponseHasError()) {
             throw new TransformException(bundleToRegistryObjectList.getResponseBundle());
         }
@@ -899,6 +899,6 @@ public class XdsOnFhirChannel extends BaseChannel /*implements IBaseChannel*/ {
 
 
     private boolean isMhdVersionSpecificImplInitialized() {
-        return mhdTransforms != null && mhdVersionSpecificImpl != null;
+        return mhdTransforms != null && mhdImpl != null;
     }
 }

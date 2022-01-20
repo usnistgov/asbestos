@@ -82,10 +82,16 @@
 
         },
         methods: {
+            getAssertionReferenceMapKey(assertionReferenceMap) {
+                return Object.keys(assertionReferenceMap)[0]
+            },
+            getSpecReference(assertionReferenceMap, specSourceKey) {
+                return assertionReferenceMap[specSourceKey]
+            },
             referenceTable(assertionReferenceMap) {
                 const rObj = this.$store.state.testRunner.testAssertions.references
-                const specSourceKey = Object.keys(assertionReferenceMap)[0]
-                const specReference = assertionReferenceMap[specSourceKey]
+                const specSourceKey = this.getAssertionReferenceMapKey(assertionReferenceMap)
+                const specReference = this.getSpecReference(assertionReferenceMap, specSourceKey)
                 if (specSourceKey in rObj) {
                     if  (specReference in rObj[specSourceKey]) {
                         const theTable = rObj[specSourceKey][specReference]
@@ -108,9 +114,14 @@
                 } else {
                     /* user friendly language, or descriptive assertion */
                     specTargetPhrase = this.assertionObj.description
-                    const startWords = ["Is","Has","(.*)(\\scontains)"];
+                    const startWords = [
+                        "Is",                   // Is ...
+                        "Has",                  // Has ...
+                        "(.*)(\\scontains)",    // bar bar contains ...
+                        "^(.*:)"                // baz: ...
+                    ];
                     for (const startWord of startWords) {
-                        const re = new RegExp(`^${startWord}\\s`)
+                        const re = new RegExp(`^${startWord}\\s`) // ^start line, {pattern}, s is whitespace
                         if (specTargetPhrase.match(re) !== null) {
                             specTargetPhrase = specTargetPhrase.replace(re, "")
                             break
@@ -140,8 +151,13 @@
             },
             getReferencePropertyText(refMap, referenceProperty) {
                 const specRef = this.referenceTable(refMap)[referenceProperty]
-                if ('text' in specRef)
-                    return specRef.text
+                if (typeof specRef === 'object') {
+                    if ('text' in specRef)
+                        return specRef.text
+                }
+                try {
+                    console.warn("refMap Key: " + this.getAssertionReferenceMapKey(refMap) + ", refMap table: " + this.getSpecReference(refMap, this.getAssertionReferenceMapKey(refMap)) + ":  '" + referenceProperty + "' specRef is not an object, probably a misplaced property!")
+                } catch {console.error('getReferencePropertyText: an error occurred in console.warn.')}
                 return ''
             },
             getSpecificationPropertyComments(refMap, referenceProperty) {
@@ -164,9 +180,11 @@
     }
     .gridContainer {
         display: grid;
-        grid-template-columns: minmax(120px,150px) auto;
+        grid-template-columns: .2fr 1fr;
+        grid-column-gap: 20px;
+        /*text-align: left;*/
         /*justify-items: left;*/
-        /*justify-content: start;*/
+        justify-content: start;
         /*grid-template-rows:  auto auto;*/
         /*grid-auto-flow: column;*/
     }

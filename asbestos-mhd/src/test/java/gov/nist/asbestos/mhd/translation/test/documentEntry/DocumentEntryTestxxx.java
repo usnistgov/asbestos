@@ -19,6 +19,7 @@ import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import gov.nist.asbestos.mhd.transforms.BundleToRegistryObjectList;
 import gov.nist.asbestos.mhd.transforms.MhdTransforms;
 import gov.nist.asbestos.mhd.channel.MhdVersionEnum;
+import gov.nist.asbestos.mhd.transforms.MhdV3x;
 import gov.nist.asbestos.mhd.translation.ContainedIdAllocator;
 import gov.nist.asbestos.mhd.transforms.DocumentEntryToDocumentReference;
 import gov.nist.asbestos.client.channel.ChannelConfig;
@@ -125,7 +126,7 @@ class DocumentEntryTestxxx {
         MhdTransforms mhdTransforms = new MhdTransforms(rMgr, val, task);
 
         // Translate XDS back to DocRef
-        ExtrinsicObjectType extrinsicObjectType = mhdTransforms.createExtrinsicObject(resource, new ValE(val), new IdBuilder(true), null, codeTranslator,
+        ExtrinsicObjectType extrinsicObjectType = mhdTransforms.createExtrinsicObject(new MhdV3x(val,mhdTransforms), resource, new ValE(val), new IdBuilder(true), null, codeTranslator,
                 assigningAuthorities);
 
         DocumentEntryToDocumentReference documentEntryToDocumentReference = new DocumentEntryToDocumentReference();

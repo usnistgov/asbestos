@@ -1,30 +1,23 @@
 package gov.nist.asbestos.mhd.translation.attribute;
 
 import gov.nist.asbestos.client.resolver.ResourceMgr;
-import gov.nist.asbestos.client.resolver.ResourceWrapper;
-import gov.nist.asbestos.mhd.util.Utils;
 import gov.nist.asbestos.simapi.validation.ValE;
 import org.hl7.fhir.r4.model.Identifier;
 
 import java.util.List;
 import java.util.Objects;
 
-public class EntryUuid extends AbstractAttribute {
+public class ExtrinsicId extends AbstractAttribute {
     private ValE val = null;
-    private ResourceWrapper resource = null;
     private Identifier identifier = null;
     private ResourceMgr rMgr = null;
 
-    public EntryUuid setResource(ResourceWrapper resource) {
-        this.resource = resource;
-        return this;
-    }
 
-    public ResourceWrapper assignId(List<Identifier> identifierList) {
+    public String getId(List<Identifier> identifierList) {
         Objects.requireNonNull(val);
-        Objects.requireNonNull(resource);
         Objects.requireNonNull(rMgr);
         ValE tr = val.addTr(new ValE("Identifier to entryUUID"));
+        String retVal = null;
         if (identifierList != null) {
             for (Identifier id : identifierList) {
                 if (id.hasValue()) {
@@ -34,7 +27,9 @@ public class EntryUuid extends AbstractAttribute {
                             tr.add(new ValE("DocumentReference.identifier is UUID but not labeled as official").asWarning());
                         else {
                             tr.add(new ValE("Official Identifier found").asTranslation());
-                            resource.setAssignedId(id.getValue());
+//                            resource.setAssignedId(id.getValue());
+                            retVal = id.getValue();
+                            break;
                         }
                     } else {
                         if (isOfficial)
@@ -43,9 +38,9 @@ public class EntryUuid extends AbstractAttribute {
                 }
             }
         }
-        if (resource.getAssignedId() == null)
-            resource.setAssignedId(rMgr.allocateSymbolicId());
-        return resource;
+        if (retVal == null)
+            retVal = rMgr.allocateSymbolicId();
+        return retVal;
     }
 
     public Identifier getIdentifier(String id) {
@@ -68,13 +63,13 @@ public class EntryUuid extends AbstractAttribute {
         this.identifier = identifier;
     }
 
-    public EntryUuid setrMgr(ResourceMgr rMgr) {
+    public ExtrinsicId setrMgr(ResourceMgr rMgr) {
         this.rMgr = rMgr;
         return this;
     }
 
     @Override
-    public EntryUuid setVal(ValE val) {
+    public ExtrinsicId setVal(ValE val) {
         this.val = val;
         return this;
     }

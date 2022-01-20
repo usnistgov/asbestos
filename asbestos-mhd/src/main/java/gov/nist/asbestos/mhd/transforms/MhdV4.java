@@ -3,6 +3,7 @@ package gov.nist.asbestos.mhd.transforms;
 import gov.nist.asbestos.client.channel.ChannelConfig;
 import gov.nist.asbestos.client.resolver.IdBuilder;
 import gov.nist.asbestos.client.resolver.Ref;
+import gov.nist.asbestos.client.resolver.ResourceMgr;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import gov.nist.asbestos.mhd.channel.MhdProfileVersionInterface;
 import gov.nist.asbestos.mhd.channel.MhdVersionEnum;
@@ -287,5 +288,9 @@ public class MhdV4 implements MhdProfileVersionInterface {
         return mhdTransforms;
     }
 
+    @Override
+    public String getExtrinsicId(ValE valE, ResourceMgr rMgr, List<Identifier> identifiers) {
+        return rMgr.allocateSymbolicId();
+    }
 }
 

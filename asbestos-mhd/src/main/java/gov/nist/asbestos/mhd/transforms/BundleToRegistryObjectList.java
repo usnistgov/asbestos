@@ -75,16 +75,15 @@ public class BundleToRegistryObjectList implements IVal {
         return null;
     }
 
-    public RegistryObjectListType build(MhdProfileVersionInterface mhdVersionSpecificImpl, MhdTransforms mhdTransforms, Bundle bundle) {
+    public RegistryObjectListType build(MhdProfileVersionInterface mhdImpl, MhdTransforms mhdTransforms, Bundle bundle) {
         Objects.requireNonNull(val);
         Objects.requireNonNull(bundle);
         Objects.requireNonNull(rMgr);
         Objects.requireNonNull(idBuilder);
-        Objects.requireNonNull(mhdVersionSpecificImpl);
 
-        scanBundleForAcceptability(mhdVersionSpecificImpl, bundle, rMgr);
+        scanBundleForAcceptability(mhdImpl, bundle, rMgr);
 
-        return buildRegistryObjectList(mhdVersionSpecificImpl);
+        return buildRegistryObjectList(mhdImpl);
     }
 
 
@@ -123,7 +122,7 @@ public class BundleToRegistryObjectList implements IVal {
 
             if (resource instanceof DocumentReference) {
                 DocumentReference dr = (DocumentReference) resource;
-                ExtrinsicObjectType eo = mhdTransforms.createExtrinsicObject(wrapper, vale, idBuilder, documentContents, codeTranslator, assigningAuthorities);
+                ExtrinsicObjectType eo = mhdTransforms.createExtrinsicObject(mhdVersionSpecificImpl, wrapper, vale, idBuilder, documentContents, codeTranslator, assigningAuthorities);
                 eos.add(eo);
                 submittedObjects.add(new SubmittedObject(wrapper.getAssignedUid(), resource));
                 rol.getIdentifiable().add(new JAXBElement<>(new QName("urn:oasis:names:tc:ebxml-regrep:xsd:rim:3.0", "ExtrinsicObject"), ExtrinsicObjectType.class, eo));

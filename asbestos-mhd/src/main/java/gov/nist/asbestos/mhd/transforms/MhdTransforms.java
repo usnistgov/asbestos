@@ -12,6 +12,7 @@ import gov.nist.asbestos.client.resolver.ResolverConfig;
 import gov.nist.asbestos.client.resolver.ResourceCacheMgr;
 import gov.nist.asbestos.client.resolver.ResourceMgr;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
+import gov.nist.asbestos.mhd.channel.MhdProfileVersionInterface;
 import gov.nist.asbestos.mhd.transactionSupport.AhqrSender;
 import gov.nist.asbestos.mhd.transactionSupport.AssigningAuthorities;
 import gov.nist.asbestos.mhd.transactionSupport.CodeTranslator;
@@ -19,7 +20,6 @@ import gov.nist.asbestos.mhd.translation.ContainedIdAllocator;
 import gov.nist.asbestos.mhd.translation.attribute.Author;
 import gov.nist.asbestos.mhd.translation.attribute.AuthorRole;
 import gov.nist.asbestos.mhd.translation.attribute.DateTransform;
-import gov.nist.asbestos.mhd.translation.attribute.EntryUuid;
 import gov.nist.asbestos.mhd.translation.search.FhirSq;
 import gov.nist.asbestos.mhd.util.Utils;
 import gov.nist.asbestos.serviceproperties.ServiceProperties;
@@ -274,7 +274,7 @@ public class MhdTransforms {
     }
 
 
-    public ExtrinsicObjectType createExtrinsicObject(ResourceWrapper resource, ValE vale, IdBuilder idBuilder, Map<String, byte[]> documentContents, CodeTranslator codeTranslator, AssigningAuthorities assigningAuthorities) {
+    public ExtrinsicObjectType createExtrinsicObject(MhdProfileVersionInterface mhdImpl, ResourceWrapper resource, ValE vale, IdBuilder idBuilder, Map<String, byte[]> documentContents, CodeTranslator codeTranslator, AssigningAuthorities assigningAuthorities) {
         Objects.requireNonNull(val);
         Objects.requireNonNull(rMgr);
 
@@ -305,13 +305,9 @@ public class MhdTransforms {
         DocumentReference.DocumentReferenceContentComponent content = dr.getContent().get(0);
         Attachment attachment = content.getAttachment();
 
-        new EntryUuid()
-                .setVal(vale)
-                .setrMgr(rMgr)
-                .setResource(resource)
-                .assignId(dr.getIdentifier());
-
+        resource.setAssignedId(mhdImpl.getExtrinsicId(vale, rMgr, dr.getIdentifier()));
         eo.setId(resource.getAssignedId());
+
         eo.setObjectType("urn:uuid:7edca82f-054d-47f2-a032-9b2a5b5186c1");
 
         tr = vale.add(new ValE("content.attachment.contentType is [1..1]").addIheRequirement(DRTable));

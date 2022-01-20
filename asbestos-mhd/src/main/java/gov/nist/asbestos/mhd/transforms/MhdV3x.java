@@ -1,24 +1,18 @@
 package gov.nist.asbestos.mhd.transforms;
 
 import gov.nist.asbestos.client.channel.ChannelConfig;
-import gov.nist.asbestos.client.client.FhirClient;
 import gov.nist.asbestos.client.resolver.IdBuilder;
 import gov.nist.asbestos.client.resolver.Ref;
-import gov.nist.asbestos.client.resolver.ResourceCacheMgr;
+import gov.nist.asbestos.client.resolver.ResourceMgr;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import gov.nist.asbestos.mhd.channel.MhdProfileVersionInterface;
 import gov.nist.asbestos.mhd.channel.MhdVersionEnum;
-import gov.nist.asbestos.mhd.transactionSupport.AhqrSender;
 import gov.nist.asbestos.mhd.transactionSupport.AssigningAuthorities;
 import gov.nist.asbestos.mhd.transactionSupport.CodeTranslator;
-import gov.nist.asbestos.mhd.translation.ContainedIdAllocator;
+import gov.nist.asbestos.mhd.translation.attribute.ExtrinsicId;
 import gov.nist.asbestos.mhd.util.Utils;
 import gov.nist.asbestos.simapi.validation.Val;
 import gov.nist.asbestos.simapi.validation.ValE;
-import oasis.names.tc.ebxml_regrep.xsd.rim._3.AssociationType1;
-import oasis.names.tc.ebxml_regrep.xsd.rim._3.ClassificationType;
-import oasis.names.tc.ebxml_regrep.xsd.rim._3.ExtrinsicObjectType;
-import oasis.names.tc.ebxml_regrep.xsd.rim._3.IdentifiableType;
 import oasis.names.tc.ebxml_regrep.xsd.rim._3.RegistryPackageType;
 import org.hl7.fhir.r4.model.BaseResource;
 import org.hl7.fhir.r4.model.Binary;
@@ -26,10 +20,9 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.DocumentManifest;
 import org.hl7.fhir.r4.model.DocumentReference;
+import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.ListResource;
 
-import java.io.File;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -177,5 +170,12 @@ public class MhdV3x implements MhdProfileVersionInterface {
         return mhdTransforms;
     }
 
+    @Override
+    public String getExtrinsicId(ValE valE, ResourceMgr rMgr, List<Identifier> identifiers) {
+        return new ExtrinsicId()
+                .setVal(valE)
+                .setrMgr(rMgr)
+                .getId(identifiers);
 
+    }
 }

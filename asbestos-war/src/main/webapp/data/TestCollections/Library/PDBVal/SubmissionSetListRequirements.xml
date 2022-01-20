@@ -13,7 +13,7 @@
     <description value="List (SubmissionSet) requirements."/>
 
     <test>
-        <description value="List (SubmissionSet) type: The Document Source shall not provide any entryUUID values."/>
+        <description value="List (SubmissionSet) type assertions."/>
         <action>
             <assert id="FTKSS100">
                 <description value="The Document Source shall not provide any entryUUID values.|MHDv4MessageSemantics"/>

@@ -78,10 +78,10 @@
             </assert>
         </action>
         <action>
-            <assert id="FTK4RM1100">
-                <description value="PDB: if DocumentReference.identifier carries the entryUUID then it shall be labeled official"/>
+            <assert id="FTK4RM600">
+                <description value="DocumentReference: The Document Source shall not provide any entryUUID values."/>
                 <compareToSourceId value="request"/>
-                <compareToSourceExpression value="Bundle.entry.resource.where($this is DocumentReference).all((identifier.value.startsWith('urn:uuid:') implies use = 'official'))"/>
+                <compareToSourceExpression value="Bundle.entry.resource.where($this is DocumentReference).where(identifier.use='official' implies identifier.value.empty() or identifier.value.startsWith('urn:uuid').not()).exists()"/>
                 <warningOnly value="false"/>
             </assert>
         </action>

@@ -2,8 +2,8 @@
   "id": "NIST FHIR(r) Toolkit (Asbestos) Assertion References",
   "referenceMetadata": {
     "version": "1.0",
-    "lastUpdated": "2022-JAN-06",
-    "comments": "All specifications are captured as a snapshot as of the lastUpdated date. Any future changes will have to reported through a GitHub pull request for a review."
+    "lastUpdated": "2022-JAN-18",
+    "comments": "All specifications are captured as of the lastUpdated date. This offline-list only serves as a quick reference for the Asbestos Toolkit users. Users should be familiar with the actual specification guidelines. With the help of the community, any future changes in the actual specification text will have to reported through a GitHub Pull Request for a review."
   },
   "assertionReferences": {
     "FTK4RM100":  [{"mhdv4": "messageSemantics"}],
@@ -12,9 +12,10 @@
     "FTK4RM200":  [{"mhdv4": "messageSemantics"}],
     "FTK4RM300":  [{"mhdv4": "messageSemantics"}],
     "FTK4RM400":  [{"mhdv4": "bundleResources", "verbatimPhraseToFocus": "Bundle.meta.profile"}],
-    "FTK4RM500":  [{"mhdv4": "messageSemantics_attributeMap"}, {"mhdv4": "submissionSet_attributeMap" }, {"mhdv4": "submissionSet_mappingToXds" }],
+    "FTK4RM500":  [{"mhdv4": "submissionSet_attributeMap" }, {"mhdv4": "submissionSet_mappingToXds" }],
     "FTK4RM700":  [{"mhdv4": "patientReference"}],
-    "FTKCM105":   [{"mhdv4": "comprehensiveMetadata_subject"}]
+    "FTKCM105":   [{"mhdv4": "comprehensiveMetadata_subject"}],
+    "FTK4RM600":  [{"mhdv4": "messageSemantics_elements"}, {"mhdv4": "documentReferenceMin_mappingToXds"}]
   },
 
   "references": {
@@ -59,8 +60,29 @@
           "link": "https://profiles.ihe.net/ITI/MHD/ITI-65.html#2365412-message-semantics"
         },
         "SpecificationText": {
-          "text": "(Para 1.) Refer to ITI TF-3: 4.5.1 for details on the FHIR Resources and how Document Sharing metadata attributes are mapped.",
-          "comments": "Revelant information is found in 3:4.5.2 SubmissionSet Metadata Attributes, not in directly in Section 4.5.1."
+          "text": "(Para 1.)<br/>Refer to ITI TF-3: 4.5.1 for details on the FHIR Resources and how Document Sharing metadata attributes are mapped.",
+          "comments": "Relevant information is found in 3:4.5.2 SubmissionSet Metadata Attributes, not in directly in Section 4.5.1."
+        }
+      },
+      "messageSemantics_elements": {
+        "Source": {
+          "text": "IHE ITI"
+        },
+        "Profile": {
+          "text": "MHDv4",
+          "link": "https://profiles.ihe.net/ITI/MHD/toc.html"
+        },
+        "Transaction": {
+          "text": "ITI-65 Provide Document Bundle",
+          "link": "https://profiles.ihe.net/ITI/MHD/ITI-65.html#2-3-65-provide-document-bundle-iti-65"
+        },
+        "Volume:Section": {
+          "text": "2:3.65.4.1.2 Message Semantics",
+          "link": "https://profiles.ihe.net/ITI/MHD/ITI-65.html#2365412-message-semantics"
+        },
+        "SpecificationText": {
+          "text": "(Para 5.)<br/>The Document Source shall assure all FHIR resource elements are consistent with the Document Sharing metadata requirements as specified for attributes ITI TF-3: Table 4.3.1-3 \"Sending Actor Metadata Attribute Optionality\". The Document Source that supports the Comprehensive Metadata or the XDS on FHIR Options shall assure consistency with column \"XDS DS\"; otherwise, the Document Source shall assure consistency with column \"XDR MS\". The Document Source shall not provide any entryUUID values.",
+          "comments": "Other DocumentReference Identifiers values will be ignored by Toolkit. Toolkit will assign symbolic Id(s) in the submission to meet XDS requirements."
         }
       },
       "submissionSet_attributeMap": {
@@ -93,7 +115,23 @@
         },
         "SpecificationText": {
           "text": "entry<br>&nbsp;&nbsp;item references to DocumentReference(s) and Folder List(s)",
-          "comments": "Folder List(s) not yet supported."
+          "comments": "Folder List(s) not yet supported in Toolkit."
+        }
+      },
+      "documentReferenceMin_mappingToXds": {
+        "Source": {
+          "text": "IHE ITI"
+        },
+        "Profile": {
+          "text": "MHDv4",
+          "link": "https://profiles.ihe.net/ITI/MHD/toc.html"
+        },
+        "MinimalDocumentReference": {
+         "text": "Mappings for XDS and MHD Mapping (XDS)",
+         "link": "https://profiles.ihe.net/ITI/MHD/StructureDefinition-IHE.MHD.Minimal.DocumentReference-mappings.html#mappings-for-xds-and-mhd-mapping-xds"
+       },
+        "SpecificationText": {
+          "text": "identifier DocumentEntry.entryUUID"
         }
       },
       "bundleResources": {
