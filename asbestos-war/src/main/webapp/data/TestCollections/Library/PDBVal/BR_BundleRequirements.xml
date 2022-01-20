@@ -8,7 +8,7 @@
         </extension>
     </modifierExtension>
 
-    <id value="bundleRequirements"/>
+    <id value="BR_BundleRequirements"/>
     <name value="bundleRequirements"/>
     <description value="Evaluate PDB-request Bundle"/>
 
@@ -16,31 +16,31 @@
     <description value="Bundle requirements."/>
 
     <action>
-        <assert id="FTKBR300">
-            <description value="Bundle: bundle.entry.fullUrl starts with http, urn:uuid: or urn:oid:. See https://hl7.org/fhir/bundle-definitions.html#Bundle.entry.fullUrl"/>
+        <assert id="BR_1">
+            <description value="Bundle.entry.fullUrl."/>
             <compareToSourceId value="request"/>
             <compareToSourceExpression value="Bundle.entry.fullUrl.startsWith('http') or Bundle.entry.fullUrl.startsWith('urn:uuid:') or Bundle.entry.fullUrl.startsWith('urn:oid:')"/>
             <warningOnly value="false"/>
         </assert>
     </action>
     <action>
-        <assert id="FTKBR400">
-            <description value="Bundle: entry.fullUrl must be unique in Bundle|MHDPDBFullUrlUniqueInBundle"/>
+        <assert id="BR_2">
+            <description value="FullUrl must be unique in a bundle."/>
             <compareToSourceId value="request"/>
             <compareToSourceExpression value="Bundle.entry.where(fullUrl.exists()).select(fullUrl&amp;resource.meta.versionId).isDistinct()"/>
             <warningOnly value="false"/>
         </assert>
     </action>
     <action>
-        <assert id="FTKBR500">
-            <description value="Bundle: entry.request must exist for each entry with method=POST and a url"/>
+        <assert id="BR_3">
+            <description value="Bundle: Each entry SHALL carry request details."/>
             <compareToSourceId value="request"/>
             <compareToSourceExpression value="Bundle.entry.all(request.exists() and request.method = 'POST' and request.url.exists())"/>
             <warningOnly value="false"/>
         </assert>
     </action>
     <action>
-        <assert id="FTKBR600">
+        <assert id="BR_4">
             <description value="Bundle: entry.request.url. See https://hl7.org/fhir/bundle-definitions.html#Bundle.entry.request.url"/>
             <compareToSourceId value="request"/>
             <compareToSourceExpression value="Bundle.entry.all(request.url = resource.resourceType or request.url = fullUrl)"/>

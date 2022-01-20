@@ -29,6 +29,13 @@ public class IdBuilder {
         this.override = override;
     }
 
+    /**
+     * http://hl7.org/fhir/bundle.html#bundle-unique
+     * Where a resource is not assigned a persistent identity that can be used in the Bundle, a UUID should be used (urn:uuid:...).
+     * @param opaqueIdPrefix
+     * @param logicalId
+     * @return
+     */
     public static String makeOpaqueLogicalId(String opaqueIdPrefix, String logicalId) {
         // Make logical ID opaque using the last parts of submission set classification node urn
         return String.format("%s.%s", opaqueIdPrefix, logicalId);

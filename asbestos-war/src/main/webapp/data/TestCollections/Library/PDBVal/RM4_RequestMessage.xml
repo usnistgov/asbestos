@@ -14,7 +14,7 @@
         </extension>
     </modifierExtension>
 
-    <id value="MHDv4RequestMessage"/>
+    <id value="RM4_RequestMessage"/>
     <name value="MHDv4RequestMessage"/>
     <description value="Evaluate PDB-request Bundle"/>
 
@@ -22,14 +22,14 @@
         <name value="Request message"/>
         <description value="PDB Request."/>
         <action>
-            <assert id="FTK4RM100">
+            <assert id="RM4_1">
                 <description value="Sending an HTTP POST request method."/>
                 <requestMethod value="post"/>
                 <warningOnly value="false"/>
             </assert>
         </action>
         <action>
-            <assert id="FTKBR100">
+            <assert id="RM4_1_1">
                 <description value="Is composed of a FHIR Bundle Resource."/>
                 <sourceId value="request"/>
                 <resource value="Bundle"/>
@@ -37,7 +37,7 @@
             </assert>
         </action>
         <action>
-            <assert id="FTKBR200">
+            <assert id="RM4_1_2">
                 <description value="Is a FHIR &quot;transaction&quot;."/>
                 <compareToSourceId value="request"/>
                 <compareToSourceExpression value="Bundle.type = 'transaction'"/>
@@ -45,7 +45,7 @@
             </assert>
         </action>
         <action>
-            <assert id="FTK4RM200">
+            <assert id="RM4_2">
                 <description value="Bundle contains one SubmissionSet type List Resource.|MHDv4BundleResources"/>
                 <compareToSourceId value="request"/>
                 <compareToSourceExpression value="Bundle.entry.resource.where(is(List) and $this.code.coding.code='submissionset').count() = 1"/>
@@ -54,7 +54,7 @@
         </action>
 
         <action>
-            <assert id="FTK4RM300">
+            <assert id="RM4_3">
                 <description value="Bundle contains one or more DocumentReference resources.|MHDPDBOnePlusDocumentReference"/>
                 <compareToSourceId value="request"/>
                 <compareToSourceExpression value="Bundle.entry.resource.where($this is DocumentReference).count() >= 1"/>
@@ -62,7 +62,7 @@
             </assert>
         </action>
         <action>
-            <assert id="FTK4RM400">
+            <assert id="RM4_4">
                 <description value="Bundle.meta.profile: Minimal Metadata or Comprehensive Metadata."/>
                 <compareToSourceId value="request"/>
                 <compareToSourceExpression value="Bundle.meta.profile = 'http://profiles.ihe.net/ITI/MHD/StructureDefinition/IHE.MHD.Minimal.ProvideBundle' or Bundle.meta.profile='http://profiles.ihe.net/ITI/MHD/StructureDefinition/IHE.MHD.Comprehensive.ProvideBundle'"/>
@@ -70,7 +70,7 @@
             </assert>
         </action>
         <action>
-            <assert id="FTK4RM500">
+            <assert id="RM4_5">
                 <description value="SubmissionSet type List links to only DocumentReferences that are in Bundle."/>
                 <compareToSourceId value="request"/>
                 <compareToSourceExpression value="Bundle.entry.resource.where($this is List and code.coding.code='submissionset').select(entry.item.reference) ~ (Bundle.entry.where(resource is DocumentReference).fullUrl)"/>
@@ -78,7 +78,7 @@
             </assert>
         </action>
         <action>
-            <assert id="FTK4RM600">
+            <assert id="RM4_6">
                 <description value="DocumentReference: The Document Source shall not provide any entryUUID values."/>
                 <compareToSourceId value="request"/>
                 <compareToSourceExpression value="Bundle.entry.resource.where($this is DocumentReference).where(identifier.use='official' implies identifier.value.empty() or identifier.value.startsWith('urn:uuid').not()).exists()"/>
