@@ -1,23 +1,35 @@
 {
-  "id": "NIST FHIR(r) Toolkit (Asbestos) Assertion References",
+  "id": "NIST FHIR(r) Toolkit (Asbestos) Assertion References Mapping File",
   "referenceMetadata": {
     "version": "1.0",
     "lastUpdated": "2022-JAN-18",
-    "comments": "All specifications are captured as of the lastUpdated date. This offline list only serves as a quick reference for the Asbestos Toolkit users. Users should be familiar with the actual specification guidelines. With the help of the community, any future changes in the actual specification text will have to reported through a GitHub Pull Request for a review until more advancements in automated references can be developed.",
-    "assertionIdConvention": "ShortCode(_Integer)+"
+    "comments": {
+      "purpose": "This JSON is general purpose format, it may be suitable for other specifications. All specifications are captured as of the lastUpdated date. This offline list only serves as a quick reference for the Asbestos Toolkit users. Users should be familiar with the actual specification guidelines. With the help of the community, any future changes in the actual specification text will have to reported through a GitHub Pull Request for a review until advancements in automated StructureDefinition-based references can generate this format.",
+      "assertionReferences-assertionId": "Use ShortCode(_Integer)+, where ShortCode is the prefix before the assertion TestScript file. Ids are sequentially numbered, at least one _Integer suffix is required. New independent assertion Ids can be inserted in between two existing Ids by appending a _Integer, example SC_1, SC_1_1, SC_2."
+    }
   },
   "assertionReferences": {
-    "RM4_1":  [{"mhdv4": "messageSemantics"}],
-    "RM4_1_1":   [{"mhdv4": "messageSemantics"}],
-    "RM4_1_2":   [{"mhdv4": "messageSemantics"}, {"fhir": "httpTransaction", "verbatimPhraseToFocus": "transaction"}],
-    "RM4_2":  [{"mhdv4": "messageSemantics"}],
-    "RM4_3":  [{"mhdv4": "messageSemantics"}],
-    "RM4_4":  [{"mhdv4": "bundleResources", "verbatimPhraseToFocus": "Bundle.meta.profile"}],
-    "RM4_5":  [{"mhdv4": "submissionSet_attributeMap" }, {"mhdv4": "submissionSet_mappingToXds" }],
-    "RM4_6":  [{"mhdv4": "messageSemantics_elements"}, {"mhdv4": "documentReferenceMin_mappingToXds"}],
-    "BR_1":   [{"fhir": "Bundle.entry.fullUrl-type"}, {"fhir": "resourceUrl-transaction", "verbatimPhraseToFocus": "Note"}],
-    "BR_2":   [{"fhir": "bundleConstraint-bdl7"}, {"fhir": "transactionProcessingRules-uniqueResource"}],
-    "BR_3":   [{"fhir": "httpTransaction"},{"fhir": "Bundle.entry.request.method-cardinality"}, {"fhir": "Bundle.entry.request.url-cardinality"}],
+    "RM4_1":      [{"mhdv4": "messageSemantics", "context": "requestMessage"}],
+    "RM4_1_1":    [{"mhdv4": "messageSemantics", "context": "requestMessage"}],
+    "RM4_1_2":    [{"mhdv4": "messageSemantics", "context": "requestMessage"},
+                   {"fhir": "httpTransaction", "verbatimPhraseToFocus": "transaction"}],
+    "RM4_2":      [{"mhdv4": "messageSemantics", "context": "requestMessage"}],
+    "RM4_3":      [{"mhdv4": "messageSemantics", "context": "requestMessage"}],
+    "RM4_4":      [{"mhdv4": "bundleResources", "verbatimPhraseToFocus": "Bundle.meta.profile"}],
+    "RM4_5":      [{"mhdv4": "submissionSet_attributeMap" },
+                   {"mhdv4": "submissionSet_mappingToXds" }],
+    "RM4_6":      [{"mhdv4": "messageSemantics", "context": "elements"},
+                   {"mhdv4": "DocumentReference", "context": "Min_mappingToXds"}],
+    "BR_1":       [{"fhir": "Bundle.entry.fullUrl-type"},
+                   {"fhir": "resourceUrl-transaction", "verbatimPhraseToFocus": "Note"}],
+    "BR_2":       [{"fhir": "bundleConstraint-bdl7"},
+                   {"fhir": "transactionProcessingRules-uniqueResource"}],
+    "BR_3":       [{"fhir": "httpTransaction"},
+                   {"fhir": "Bundle.entry.request.method-cardinality"},
+                   {"fhir": "Bundle.entry.request.url"}],
+    "BR_4":       [{"fhir": "Bundle.entry.request.url", "verbatimPhraseToFocus": "Type"}],
+    "DR_1":       [{"mhdv4": "DocumentReference", "context": ".content"  }],
+    "DR_2":       [{"mhdv4": "DocumentReference", "context": ".content.attachment.url"}],
     "FTK4RM700":  [{"mhdv4": "patientReference"}],
     "FTKCM105":   [{"mhdv4": "comprehensiveMetadata_subject"}]
   },
@@ -26,118 +38,6 @@
     "mhdv3x": {
     },
     "mhdv4": {
-      "messageSemantics": {
-        "Source": {
-          "text": "IHE ITI"
-        },
-        "Profile": {
-          "text": "MHDv4",
-          "link": "https://profiles.ihe.net/ITI/MHD/toc.html"
-        },
-        "Transaction": {
-          "text": "ITI-65 Provide Document Bundle",
-          "link": "https://profiles.ihe.net/ITI/MHD/ITI-65.html#2-3-65-provide-document-bundle-iti-65"
-        },
-        "Volume:Section": {
-          "text": "2:3.65.4.1.2 Message Semantics",
-          "link": "https://profiles.ihe.net/ITI/MHD/ITI-65.html#2365412-message-semantics"
-        },
-        "SpecificationText": {
-          "hasAssertionOrderBiasAnnotations": true,
-          "text": "The Document Source shall initiate [2.1]a FHIR \"transaction\" using a \"create\" action by [1.0]sending an HTTP POST request method [2.0]composed of a FHIR Bundle Resource [2.2]containing: one SubmissionSet type List Resource; [2.3]one or more DocumentReference Resources; [2.4]zero or more Folder type List Resources; and [2.5]zero or more Binary Resources to the Document Recipient. "
-        }
-      },
-      "messageSemantics_attributeMap": {
-        "Source": {
-          "text": "IHE ITI"
-        },
-        "Profile": {
-          "text": "MHDv4",
-          "link": "https://profiles.ihe.net/ITI/MHD/toc.html"
-        },
-        "Transaction": {
-          "text": "ITI-65 Provide Document Bundle",
-          "link": "https://profiles.ihe.net/ITI/MHD/ITI-65.html#2-3-65-provide-document-bundle-iti-65"
-        },
-        "Volume:Section": {
-          "text": "2:3.65.4.1.2 Message Semantics",
-          "link": "https://profiles.ihe.net/ITI/MHD/ITI-65.html#2365412-message-semantics"
-        },
-        "SpecificationText": {
-          "text": "(Para 1.)<br/>Refer to ITI TF-3: 4.5.1 for details on the FHIR Resources and how Document Sharing metadata attributes are mapped.",
-          "comments": "Relevant information is found in 3:4.5.2 SubmissionSet Metadata Attributes, not in directly in Section 4.5.1."
-        }
-      },
-      "messageSemantics_elements": {
-        "Source": {
-          "text": "IHE ITI"
-        },
-        "Profile": {
-          "text": "MHDv4",
-          "link": "https://profiles.ihe.net/ITI/MHD/toc.html"
-        },
-        "Transaction": {
-          "text": "ITI-65 Provide Document Bundle",
-          "link": "https://profiles.ihe.net/ITI/MHD/ITI-65.html#2-3-65-provide-document-bundle-iti-65"
-        },
-        "Volume:Section": {
-          "text": "2:3.65.4.1.2 Message Semantics",
-          "link": "https://profiles.ihe.net/ITI/MHD/ITI-65.html#2365412-message-semantics"
-        },
-        "SpecificationText": {
-          "text": "(Para 5.)<br/>The Document Source shall assure all FHIR resource elements are consistent with the Document Sharing metadata requirements as specified for attributes ITI TF-3: Table 4.3.1-3 \"Sending Actor Metadata Attribute Optionality\". The Document Source that supports the Comprehensive Metadata or the XDS on FHIR Options shall assure consistency with column \"XDS DS\"; otherwise, the Document Source shall assure consistency with column \"XDR MS\". The Document Source shall not provide any entryUUID values.",
-          "comments": "Other DocumentReference Identifiers values will be ignored by Toolkit. Toolkit will assign symbolic Id(s) in the submission to meet XDS requirements."
-        }
-      },
-      "submissionSet_attributeMap": {
-        "Source": {
-          "text": "IHE ITI"
-        },
-        "Profile": {
-          "text": "MHDv4",
-          "link": "https://profiles.ihe.net/ITI/MHD/toc.html"
-        },
-        "Volume:Section": {
-          "text": "3:4.5.2 SubmissionSet Metadata Attributes",
-          "link": "https://profiles.ihe.net/ITI/MHD/32_fhir_maps.html#submissionSet"
-        },
-        "SpecificationText": {
-          "text": "The documented mapping of the metadata elements associated with a Document Sharing SubmissionSet object attributes."
-        }
-      },
-      "submissionSet_mappingToXds": {
-        "Source": {
-          "text": "IHE ITI"
-        },
-        "Profile": {
-          "text": "MHDv4",
-          "link": "https://profiles.ihe.net/ITI/MHD/toc.html"
-        },
-        "SubmissionSet": {
-          "text": "Mappings for XDS and MHD Mapping (XDS)",
-          "link": "https://profiles.ihe.net/ITI/MHD/StructureDefinition-IHE.MHD.Minimal.SubmissionSet-mappings.html#mappings-for-xds-and-mhd-mapping-xds"
-        },
-        "SpecificationText": {
-          "text": "entry<br>&nbsp;&nbsp;item references to DocumentReference(s) and Folder List(s)",
-          "comments": "Folder List(s) not yet supported in Toolkit."
-        }
-      },
-      "documentReferenceMin_mappingToXds": {
-        "Source": {
-          "text": "IHE ITI"
-        },
-        "Profile": {
-          "text": "MHDv4",
-          "link": "https://profiles.ihe.net/ITI/MHD/toc.html"
-        },
-        "MinimalDocumentReference": {
-         "text": "Mappings for XDS and MHD Mapping (XDS)",
-         "link": "https://profiles.ihe.net/ITI/MHD/StructureDefinition-IHE.MHD.Minimal.DocumentReference-mappings.html#mappings-for-xds-and-mhd-mapping-xds"
-       },
-        "SpecificationText": {
-          "text": "identifier DocumentEntry.entryUUID"
-        }
-      },
       "bundleResources": {
         "Source": {
           "text": "IHE ITI"
@@ -154,10 +54,124 @@
           "text": "2:3.65.4.1.2.1 Bundle Resources",
           "link": "https://profiles.ihe.net/ITI/MHD/ITI-65.html#23654121-bundle-resources"
         },
-        "SpecificationText": {
+        "SpecificationText": [{
           "text": "The FHIR Bundle.meta.profile shall have..."
+        }]
+      },
+      "DocumentReference": {
+        "common": {
+          "Source": {
+            "text": "IHE ITI"
+          },
+          "Profile": {
+            "text": "MHDv4",
+            "link": "https://profiles.ihe.net/ITI/MHD/toc.html"
+          }
+        },
+        "context": {
+          ".content": {
+            "Resource Element": {
+              "text": "DocumentReference.content",
+              "link": "https://profiles.ihe.net/ITI/MHD/StructureDefinition-IHE.MHD.Minimal.DocumentReference-definitions.html#DocumentReference.content"
+            },
+            "SpecificationText": [{
+              "text": "Control 1..1",
+              "comments": "<a href='https://github.com/IHE/ITI.MHD/issues/110'>Issue 110.</a>"
+            }]
+        },
+          ".content.attachment.url": {
+            "Resource Element": {
+              "text": "DocumentReference.content.attachment.url",
+              "link": "https://profiles.ihe.net/ITI/MHD/StructureDefinition-IHE.MHD.Minimal.DocumentReference-definitions.html#DocumentReference.content.attachment.url"
+            },
+            "SpecificationText": [{
+              "text": "Control 1..1"
+            }]
+          },
+          "Min_mappingToXds": {
+            "MinimalDocumentReference": {
+              "text": "Mappings for XDS and MHD Mapping (XDS)",
+              "link": "https://profiles.ihe.net/ITI/MHD/StructureDefinition-IHE.MHD.Minimal.DocumentReference-mappings.html#mappings-for-xds-and-mhd-mapping-xds"
+            },
+            "SpecificationText": [{
+              "text": "identifier DocumentEntry.entryUUID"
+            }]
+          }
         }
       },
+      "messageSemantics": {
+        "common": {
+          "Source": {
+            "text": "IHE ITI"
+          },
+          "Profile": {
+            "text": "MHDv4",
+            "link": "https://profiles.ihe.net/ITI/MHD/toc.html"
+          },
+          "Transaction": {
+            "text": "ITI-65 Provide Document Bundle",
+            "link": "https://profiles.ihe.net/ITI/MHD/ITI-65.html#2-3-65-provide-document-bundle-iti-65"
+          },
+          "Volume:Section": {
+            "text": "2:3.65.4.1.2 Message Semantics",
+            "link": "https://profiles.ihe.net/ITI/MHD/ITI-65.html#2365412-message-semantics"
+          }
+        },
+        "context": {
+          "requestMessage": {
+            "SpecificationText": [{
+              "hasAssertionOrderBiasAnnotations": true,
+              "text": "The Document Source shall initiate [2.1]a FHIR \"transaction\" using a \"create\" action by [1.0]sending an HTTP POST request method [2.0]composed of a FHIR Bundle Resource [2.2]containing: one SubmissionSet type List Resource; [2.3]one or more DocumentReference Resources; [2.4]zero or more Folder type List Resources; and [2.5]zero or more Binary Resources to the Document Recipient. "
+            }]
+          },
+          "elements": {
+            "SpecificationText": [{
+              "text": "(Para 5.)<br/>The Document Source shall assure all FHIR resource elements are consistent with the Document Sharing metadata requirements as specified for attributes ITI TF-3: Table 4.3.1-3 \"Sending Actor Metadata Attribute Optionality\". The Document Source that supports the Comprehensive Metadata or the XDS on FHIR Options shall assure consistency with column \"XDS DS\"; otherwise, the Document Source shall assure consistency with column \"XDR MS\". The Document Source shall not provide any entryUUID values.",
+              "comments": "Other DocumentReference Identifiers values will be ignored by Toolkit. Toolkit will assign symbolic Id(s) in the submission to meet XDS requirements."
+            }]
+          },
+          "attributeMap": {
+            "SpecificationText": [{
+              "text": "(Para 1.)<br/>Refer to ITI TF-3: 4.5.1 for details on the FHIR Resources and how Document Sharing metadata attributes are mapped.",
+              "comments": "Relevant information is found in 3:4.5.2 SubmissionSet Metadata Attributes, not in directly in Section 4.5.1."
+            }]
+          }
+        }
+      },
+      "submissionSet_attributeMap": {
+        "Source": {
+          "text": "IHE ITI"
+        },
+        "Profile": {
+          "text": "MHDv4",
+          "link": "https://profiles.ihe.net/ITI/MHD/toc.html"
+        },
+        "Volume:Section": {
+          "text": "3:4.5.2 SubmissionSet Metadata Attributes",
+          "link": "https://profiles.ihe.net/ITI/MHD/32_fhir_maps.html#submissionSet"
+        },
+        "SpecificationText": [{
+          "text": "The documented mapping of the metadata elements associated with a Document Sharing SubmissionSet object attributes."
+        }]
+      },
+      "submissionSet_mappingToXds": {
+        "Source": {
+          "text": "IHE ITI"
+        },
+        "Profile": {
+          "text": "MHDv4",
+          "link": "https://profiles.ihe.net/ITI/MHD/toc.html"
+        },
+        "SubmissionSet": {
+          "text": "Mappings for XDS and MHD Mapping (XDS)",
+          "link": "https://profiles.ihe.net/ITI/MHD/StructureDefinition-IHE.MHD.Minimal.SubmissionSet-mappings.html#mappings-for-xds-and-mhd-mapping-xds"
+        },
+        "SpecificationText": [{
+          "text": "entry<br>&nbsp;&nbsp;item references to DocumentReference(s) and Folder List(s)",
+          "comments": "Folder List(s) not yet supported in Toolkit."
+        }]
+      },
+
       "patientReference": {
         "Source": {
           "text": "IHE ITI"
@@ -174,9 +188,9 @@
           "text": "2:3.65.4.1.2.2 Patient Identity",
           "link": "https://profiles.ihe.net/ITI/MHD/ITI-65.html#23654122-patient-identity"
         },
-        "SpecificationText": {
+        "SpecificationText": [{
           "text": "All DocumentReference.subject, and List.subject values shall be References to a FHIR Patient Resource that may be obtained through use of PDQm, PIXm, or by some other means. If the Patient Resource is accessible to both the Document Source and Document Recipient via an external reference, it shall be included as an external reference. Otherwise, the Patient Resource shall be included in the Bundle."
-        }
+        }]
       }
     },
     "fhir": {
@@ -188,10 +202,10 @@
           "text": "2.36 Resource Bundle - Content, 2.36.3 Resource Content",
           "link": "https://hl7.org/fhir/bundle-definitions.html#Bundle.entry.fullUrl"
         },
-        "SpecificationText": {
+        "SpecificationText": [{
           "text": "Type uri",
           "comments": "Note that since FHIR resources do not need to be served through the FHIR API, the fullURL might be a URN or an absolute URL that does not end with the logical id of the resource (Resource.id)."
-        }
+        }]
       },
       "Bundle.entry.request.method-cardinality": {
         "Source": {
@@ -201,11 +215,11 @@
           "text": "2.36.7 Resource Bundle - Detailed Descriptions, Bundle.entry.request.method",
           "link": "https://hl7.org/fhir/bundle-definitions.html#Bundle.entry.request.method"
         },
-        "SpecificationText": {
+        "SpecificationText": [{
           "text": "Cardinality 1..1"
-        }
+        }]
       },
-      "Bundle.entry.request.url-cardinality": {
+      "Bundle.entry.request.url": {
         "Source": {
           "text": "HL7 FHIR"
         },
@@ -213,9 +227,10 @@
           "text": "2.36.7 Resource Bundle - Detailed Descriptions, Bundle.entry.request.url",
           "link": "https://hl7.org/fhir/bundle-definitions.html#Bundle.entry.request.url"
         },
-        "SpecificationText": {
-          "text": "Cardinality 1..1"
-        }
+        "SpecificationText": [{
+          "text": "Cardinality 1..1<br>Type uri",
+          "comments": "E.g. for a Patient Create, the method would be \"POST\" and the URL would be \"Patient\". For a Patient Update, the method would be PUT and the URL would be \"Patient/[id]\"."
+        }]
       },
       "bundleConstraint-bdl7": {
         "Source": {
@@ -225,9 +240,9 @@
           "text": "2.36 Resource Bundle - Content, 2.36.3.2 Constraints",
           "link": "http://hl7.org/fhir/bundle.html#invs"
         },
-        "SpecificationText": {
+        "SpecificationText": [{
           "text": "FullUrl must be unique in a bundle, or else entries with the same fullUrl must have different meta.versionId (except in history bundles)"
-        }
+        }]
       },
       "transactionProcessingRules-uniqueResource": {
         "Source": {
@@ -237,9 +252,9 @@
           "text": "RESTful API 3.1.0.11.2 Transaction Processing Rules",
            "link": "https://hl7.org/fhir/http.html#trules"
          },
-         "SpecificationText": {
+         "SpecificationText": [{
            "text": "A resource can only appear in a transaction once (by identity). "
-         }
+         }]
       },
       "httpTransaction": {
         "Source": {
@@ -249,9 +264,9 @@
           "text": "RESTful API 3.1.0.11 batch/transaction",
           "link": "https://hl7.org/fhir/R4/http.html#transaction"
         },
-        "SpecificationText": {
+        "SpecificationText": [{
           "text": "(Para 5.)<br>The content of the post submission is a Bundle with Bundle.type = batch or transaction. Each entry SHALL carry request details (Bundle.entry.request) that provides the HTTP details of the action in order to inform the system processing the batch or transaction what to do for the entry. If the HTTP command is a PUT or POST, then the entry SHALL contain a resource for the body of the action. "
-        }
+        }]
       },
       "resourceUrl-transaction": {
         "Source": {
@@ -261,9 +276,10 @@
           "text": "2.36 Resource Bundle - Content, 2.36.4 Resource URL & Uniqueness rules in a bundle",
           "link": "https://hl7.org/fhir/bundle.html#bundle-unique"
         },
-        "SpecificationText": {
-         "text": "For transactions and batches, entries MAY not have fullURLs when the entry.request.method = POST, and the resource has no identity. Note that even in this case, there may still be a fullURL in a transaction on a POST so that relationships between resources can be represented"
-        }
+        "SpecificationText": [{
+         "text": "For transactions and batches, entries MAY not have fullURLs when the entry.request.method = POST, and the resource has no identity. Note that even in this case, there may still be a fullURL in a transaction on a POST so that relationships between resources can be represented",
+          "comments": "When processing a \"POST\" (create), the full URL is treated as the id of the resource on the source, and is ignored; the server generates an id for the resource. (https://hl7.org/fhir/http.html#trules)"
+        }]
       }
     }
   },

@@ -66,7 +66,7 @@
                 <description value="PDB in the request bundle is analyzed using FHIRPath assertions."/>
                 <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
                     <extension url="component">
-                        <valueString value="../../Library/PDBVal/BundleRequirements.xml"/>
+                        <valueString value="../../Library/PDBVal/BR_BundleRequirements.xml"/>
                     </extension>
                     <extension url="urn:fixture-in">
                         <valueString value="request"/>
@@ -87,7 +87,7 @@
                 <description value="DocumentReference requirements"/>
                 <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
                     <extension url="component">
-                        <valueString value="../../Library/PDBVal/DocumentReferenceRequirements.xml"/>
+                        <valueString value="../../Library/PDBVal/DR_DocumentReferenceRequirements.xml"/>
                     </extension>
                     <extension url="urn:fixture-in">
                         <valueString value="request"/>

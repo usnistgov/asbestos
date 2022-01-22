@@ -41,7 +41,7 @@
     </action>
     <action>
         <assert id="BR_4">
-            <description value="Bundle: entry.request.url. See https://hl7.org/fhir/bundle-definitions.html#Bundle.entry.request.url"/>
+            <description value="Bundle.entry.request.url"/>
             <compareToSourceId value="request"/>
             <compareToSourceExpression value="Bundle.entry.all(request.url = resource.resourceType or request.url = fullUrl)"/>
             <warningOnly value="false"/>

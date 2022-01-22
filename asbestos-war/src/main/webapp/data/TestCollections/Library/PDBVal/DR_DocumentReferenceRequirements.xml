@@ -8,25 +8,25 @@
         </extension>
     </modifierExtension>
 
-    <id value="documentReferenceValidations"/>
+    <id value="DR_DocumentReferenceRequirements"/>
     <name value="documentReferenceValidations"/>
     <description value="Evaluate PDB-request Bundle"/>
 
     <test>
     <description value="DocumentReference requirements."/>
     <action>
-        <assert id="FTKDR100">
-            <description value="DocumentReference: Every DocumentReference has single content element"/>
+        <assert id="DR_1">
+            <description value="DocumentReference: Every DocumentReference has single content element."/>
             <compareToSourceId value="request"/>
             <compareToSourceExpression value="Bundle.entry.resource.where(is(DocumentReference)).exists() and Bundle.entry.resource.where(is(DocumentReference) and content.exists() and content.count() = 1).count() = Bundle.entry.resource.where(is(DocumentReference)).count()"/>
             <warningOnly value="false"/>
         </assert>
     </action>
     <action>
-        <assert id="FTKDR200">
-            <description value="DocumentReference: DocumentReference has content.attachment.url|MHDPDBDocRefHasAttachment"/>
+        <assert id="DR_2">
+            <description value="DocumentReference: DocumentReference has content.attachment.url."/>
             <compareToSourceId value="request"/>
-            <compareToSourceExpression value="Bundle.entry.resource.where(is(FHIR.DocumentReference)).content.attachment.url.exists()"/>
+            <compareToSourceExpression value="Bundle.entry.resource.all(is(FHIR.DocumentReference) implies content.attachment.url.exists())"/>
             <warningOnly value="false"/>
         </assert>
     </action>

@@ -8,29 +8,34 @@
                 Error: {{refMap}} Assertion Reference map exists, but the reference table is not defined in the references object literal.
             </div>
             <div v-else class="gridContainer" v-for="(referenceProperty, srKeyIndex) in Object.keys(referenceTable(refMap))"  :key="srKeyIndex">
-            <div v-if="'SpecificationText'!==referenceProperty">{{referenceProperty}}</div>
-            <template v-if="'SpecificationText'===referenceProperty">
-                <div class="specificationTextGridItem">
-                    <!-- Use markdown with html=false, if html is not desired anymore.
-                        Change the css class usage in getSpecificationPropertyText method -->
-<!--                    <p :title="getSpecificationPropertyComments(refMap,referenceProperty)"><vue-markdown :html="false">{{getSpecificationPropertyText(refMap,referenceProperty)}}</vue-markdown></p>-->
-                    <p v-html="getSpecificationPropertyText(refMap,referenceProperty)"></p>
-                    <template v-for="(comment, cKey) in getSpecificationPropertyComments(refMap,referenceProperty)">
-                       <p v-if="comment !== ''" :title="comment" :key="cKey">[Comments]</p>
+                <template v-if="'context'!==referenceProperty">
+                    <div v-if="'SpecificationText'!==referenceProperty">{{referenceProperty}}</div>
+                    <template v-if="'SpecificationText'===referenceProperty">
+                        <template v-for="(specTextObj, specTextObjKey) in referenceTable(refMap)[referenceProperty]">
+
+                        <div class="specificationTextGridItem" :key="specTextObjKey">
+                            <!-- Use markdown with html=false, if html is not desired anymore.
+                                Change the css class usage in getSpecificationPropertyText method -->
+                            <!--                    <p :title="getSpecificationPropertyComments(refMap,referenceProperty)"><vue-markdown :html="false">{{getSpecificationPropertyText(refMap,referenceProperty)}}</vue-markdown></p>-->
+                            <p v-html="getSpecificationPropertyText(specTextObj, getVerbatimPhraseToFocus(refMap))"></p>
+                            <template v-for="(comment, cKey) in getSpecificationPropertyComments(specTextObj)">
+                                <p v-if="comment !== ''" :title="comment" :key="cKey" @click="showComments($event,comment)">{{commentsLabel}}</p>
+                            </template>
+                        </div>
+                        </template>
                     </template>
-                </div>
-            </template>
-            <template v-else>
-                <div>
-                {{getReferencePropertyText(refMap,referenceProperty)}}
-                <template v-if="'link' in referenceTable(refMap)[referenceProperty]">
-                    <a :href="referenceTable(refMap)[referenceProperty].link" target="_blank"><img
-                            alt="External link" src="../../assets/ext_link.png" style="vertical-align: top"
-                            title="Open link in a new browser tab"></a>
+                    <template v-else>
+                        <div>
+                            {{getReferencePropertyText(refMap,referenceProperty)}}
+                            <template v-if="'link' in referenceTable(refMap)[referenceProperty]">
+                                <a :href="referenceTable(refMap)[referenceProperty].link" target="_blank"><img
+                                        alt="External link" src="../../assets/ext_link.png" style="vertical-align: top"
+                                        title="Open link in a new browser tab"></a>
+                            </template>
+                        </div>
+                    </template>
                 </template>
-                </div>
-            </template>
-          </div>
+            </div>
         </li>
        </ol>
 </div>
@@ -43,6 +48,11 @@
     export default {
         components: {
            // VueMarkdown
+        },
+        data() {
+           return {
+               commentsLabel: '[Comments]'
+           }
         },
         props: {
             assertionObj: {
@@ -82,36 +92,60 @@
 
         },
         methods: {
+            showComments: function(pElement, comment) {
+                if (pElement.target.innerText === this.commentsLabel)
+                    pElement.target.innerHTML = 'Comments<br>' + comment
+            },
             getAssertionReferenceMapKey(assertionReferenceMap) {
                 return Object.keys(assertionReferenceMap)[0]
             },
-            getSpecReference(assertionReferenceMap, specSourceKey) {
+            getSpecReferenceValue(assertionReferenceMap, specSourceKey) {
                 return assertionReferenceMap[specSourceKey]
             },
             referenceTable(assertionReferenceMap) {
                 const rObj = this.$store.state.testRunner.testAssertions.references
                 const specSourceKey = this.getAssertionReferenceMapKey(assertionReferenceMap)
-                const specReference = this.getSpecReference(assertionReferenceMap, specSourceKey)
+                const specReference = this.getSpecReferenceValue(assertionReferenceMap, specSourceKey)
                 if (specSourceKey in rObj) {
                     if  (specReference in rObj[specSourceKey]) {
-                        const theTable = rObj[specSourceKey][specReference]
+                        const theTable = rObj[specSourceKey][specReference]  // Table (HTML Grid) to be rendered on the screen
                         // console.log(JSON.stringify(theTable))
+                        if ('context' in assertionReferenceMap) { // additional context was declared in map
+                            const specContext = assertionReferenceMap.context
+                            if (specContext in theTable.context) {
+                                 return {...theTable.common, ...theTable.context[specContext]}
+                            } else {
+                                const errorStr = specContext + ' was declared in key: '+ specSourceKey + ' and ref: '+ specReference
+                                    + ' assertionReference map but not found in specification table.'
+                                console.error(errorStr)
+                                this.$store.commit('setError',errorStr)
+                                return {}
+                            }
+                        }
                         return theTable
                     }
-                    else
-                        console.error('specReference ' + specReference + ' does not exist in Source')
+                    else {
+                        const errorStr = 'specReference ' + specReference + ' does not exist in Source'
+                        console.error(errorStr)
+                        this.$store.commit('setError',errorStr)
+                    }
                 } else {
-                   console.error('specSourceKey ' + specSourceKey + ' does not exist in rObj')
+                    const errorStr = 'specSourceKey ' + specSourceKey + ' does not exist in rObj'
+                   console.error(errorStr)
+                    this.$store.commit('setError',errorStr)
                 }
                 return {}
             },
-            getSpecificationPropertyText(refMap, referenceProperty) {
-                const specRef = this.referenceTable(refMap)[referenceProperty]
+            getVerbatimPhraseToFocus(refMap) {
+                if ('verbatimPhraseToFocus' in refMap)
+                    return refMap.verbatimPhraseToFocus
+                else
+                    return ''
+            },
+            getSpecificationPropertyText(specRef, specTargetPhrase) {
+                // const specRef = this.referenceTable(refMap)[referenceProperty]
                 let specText = specRef.text
-                let specTargetPhrase = ''
-                if ('verbatimPhraseToFocus' in refMap) {
-                    specTargetPhrase = refMap.verbatimPhraseToFocus
-                } else {
+                if (specTargetPhrase === '' ) {
                     /* user friendly language, or descriptive assertion */
                     specTargetPhrase = this.assertionObj.description
                     const startWords = [
@@ -131,7 +165,7 @@
                         specTargetPhrase = specTargetPhrase.slice(0,-1)
                 }
                 if (specText === '') {
-                    console.warn('empty specText for ' + referenceProperty)
+                    console.warn('empty specText!' )
                     return '';
                 }
                 // replace the main target focus assertion tag, along with the proper text underline focus
@@ -156,12 +190,12 @@
                         return specRef.text
                 }
                 try {
-                    console.warn("refMap Key: " + this.getAssertionReferenceMapKey(refMap) + ", refMap table: " + this.getSpecReference(refMap, this.getAssertionReferenceMapKey(refMap)) + ":  '" + referenceProperty + "' specRef is not an object, probably a misplaced property!")
+                    console.warn("refMap Key: " + this.getAssertionReferenceMapKey(refMap) + ", refMap table: " + this.getSpecReferenceValue(refMap, this.getAssertionReferenceMapKey(refMap)) + ":  '" + referenceProperty + "' specRef is not an object, probably a misplaced property!")
                 } catch {console.error('getReferencePropertyText: an error occurred in console.warn.')}
                 return ''
             },
-            getSpecificationPropertyComments(refMap, referenceProperty) {
-                const specRef = this.referenceTable(refMap)[referenceProperty]
+            getSpecificationPropertyComments(specRef) {
+                // const specRef = this.referenceTable(refMap)[referenceProperty]
                 if ('comments' in specRef) {
                     const specComments = specRef.comments
                     return [specComments]
