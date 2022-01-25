@@ -1,6 +1,7 @@
 package gov.nist.asbestos.testEngine.engine.translator;
 
 import gov.nist.asbestos.client.Base.ParserBase;
+import gov.nist.asbestos.testEngine.engine.ExtensionDef;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.TestScript;
 
@@ -25,27 +26,27 @@ public class ComponentReference {
             for (Extension e : imd.getExtension()) {
                 String url = e.getUrl();
                 String value = e.getValue().toString();  // value type is Type????
-                if (url.equals("component")) {
+                if (url.equals(ExtensionDef.component)) {
                     ComponentPathValue componentPathValue = AsbestosComponentPath.getRelativeComponentPath(propertiesMap, variableComponentList, value);
                     this.relativePath = componentPathValue.getRelativePath();
-                } else if (url.equals("urn:fixture-in")) {
+                } else if (url.equals(ExtensionDef.fixtureIn)) {
                     Parameter p = new Parameter();
                     p.setCallerName(value);
                     fixturesIn.add(p);
-                } else if (url.equals("urn:fixture-out")) {
+                } else if (url.equals(ExtensionDef.fixtureOut)) {
                     Parameter p = new Parameter();
                     p.setCallerName(value);
                     fixturesOut.add(p);
-                } else if (url.equals("urn:variable-in")) {
+                } else if (url.equals(ExtensionDef.variableIn)) {
                     Parameter p = new Parameter();
                     p.setCallerName(value);
                     variablesIn.add(p);
-                } else if (url.equals("urn:variable-in-no-translation")) {
+                } else if (url.equals(ExtensionDef.variableInNoTranslation)) {
                     Parameter p = new Parameter().setVariable(true);
                     p.setLocalName(value);
                     p.setCallerName(value);
                     variablesInNoTranslation.add(p);
-                } else if (url.equals("urn:variable-out")) {
+                } else if (url.equals(ExtensionDef.variableOut)) {
                     Parameter p = new Parameter();
                     p.setCallerName(value);
                     variablesOut.add(p);
@@ -100,18 +101,18 @@ public class ComponentReference {
     public void loadComponentHeader() {
         int inI = 0;
         int outI = 0;
-        Extension paramsExtension = getComponent().getExtensionByUrl("urn:component-parameters");
+        Extension paramsExtension = getComponent().getExtensionByUrl(ExtensionDef.componentParameters);
         for (Extension e : paramsExtension.getExtension()) {
             String url = e.getUrl();
             String value = e.getValue().toString();
-            if (url.equals("urn:fixture-in")) {
+            if (url.equals(ExtensionDef.fixtureIn)) {
                 if (inI < fixturesIn.size()) {
                     fixturesIn.get(inI).setLocalName(value);
                     inI++;
                 } else {
                     throw new RuntimeException("Component " + relativePath + " was not called with a " + inI + "th in parameter");
                 }
-            } else if (url.equals("urn:fixture-out")) {
+            } else if (url.equals(ExtensionDef.fixtureOut)) {
                 if (outI < fixturesOut.size()) {
                     fixturesOut.get(outI).setLocalName(value);
                     outI++;
