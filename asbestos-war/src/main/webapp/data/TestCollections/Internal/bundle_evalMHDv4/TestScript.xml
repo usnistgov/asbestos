@@ -109,7 +109,7 @@
                 <description value="DocumentManifest requirements"/>
                 <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
                     <extension url="component">
-                        <valueString value="../../Library/PDBVal/SubmissionSetListRequirements.xml"/>
+                        <valueString value="../../Library/PDBVal/SSLIST_SubmissionSetListRequirements.xml"/>
                     </extension>
                     <extension url="urn:fixture-in">
                         <valueString value="request"/>

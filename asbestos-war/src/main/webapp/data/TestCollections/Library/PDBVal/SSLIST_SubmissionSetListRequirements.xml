@@ -8,31 +8,31 @@
         </extension>
     </modifierExtension>
 
-    <id value="ssListValidationsMHDv4"/>
+    <id value="SSLIST_SubmissionSetListRequirements"/>
     <name value="ssListValidationsMHDv4"/>
     <description value="List (SubmissionSet) requirements."/>
 
     <test>
         <description value="List (SubmissionSet) type assertions."/>
         <action>
-            <assert id="FTKSS100">
-                <description value="The Document Source shall not provide any entryUUID values.|MHDv4MessageSemantics"/>
+            <assert id="SSLIST_1">
+                <description value="The Document Source shall not provide any entryUUID values."/>
                 <compareToSourceId value="request"/>
                 <compareToSourceExpression value="Bundle.entry.resource.where($this is List and code.coding.code='submissionset').where(identifier.use='official' implies identifier.value.empty() or identifier.value.startsWith('urn:uuid').not()).exists()"/>
                 <warningOnly value="false"/>
             </assert>
         </action>
         <action>
-            <assert id="FTKSS200">
-                <description value="sourceId: The Document Source shall assure all FHIR resource elements are consistent with the Document Sharing metadata requirements|MHDSendingActorMetadataAttributeOptionality"/>
+            <assert id="SSLIST_2">
+                <description value="sourceId: The Document Source shall assure all FHIR resource elements are consistent with the Document Sharing metadata requirements."/>
                 <compareToSourceId value="request"/>
                 <compareToSourceExpression value="Bundle.entry.resource.where($this is List and code.coding.code='submissionset' and extension.exists()).extension.where(url ='http://profiles.ihe.net/ITI/MHD/StructureDefinition/ihe-sourceId').select(count()=1 and first().value.value.exists()).empty().not().allTrue()"/>
                 <warningOnly value="false"/>
             </assert>
         </action>
         <action>
-            <assert id="FTKSS300">
-                <description value="date: The Document Source shall assure all FHIR resource elements are consistent with the Document Sharing metadata requirements|MHDSendingActorMetadataAttributeOptionality"/>
+            <assert id="SSLIST_3">
+                <description value="date: The Document Source shall assure all FHIR resource elements are consistent with the Document Sharing metadata requirements."/>
                 <compareToSourceId value="request"/>
                 <compareToSourceExpression value="Bundle.entry.resource.where($this is List and code.coding.code='submissionset' and date.exists()).date.empty().not()"/>
                 <warningOnly value="false"/>

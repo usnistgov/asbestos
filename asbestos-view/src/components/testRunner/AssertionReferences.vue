@@ -1,7 +1,6 @@
 <template>
 <div>
-    <p class="asbtsReferenceHeaderLabel" v-if="referenceMap.length > 0">&nbsp;Reference(s):</p>
-<!--    <div class="specificationMargin">{{assertionId}}</div>-->
+    <p class="asbtsReferenceHeaderLabel" v-if="referenceMap.length > 0">Asbestos Assertion ID: {{assertionId}}<br>Reference(s):</p>
         <ol>
         <li v-for="(refMap,rmKeyIndex ) in referenceMap" :key="rmKeyIndex" >
             <div class="system-error" v-if="Object.keys(referenceTable(refMap)).length===0" :key="rmKeyIndex">
@@ -28,7 +27,7 @@
                         <div>
                             {{getReferencePropertyText(refMap,referenceProperty)}}
                             <template v-if="'link' in referenceTable(refMap)[referenceProperty]">
-                                <a :href="referenceTable(refMap)[referenceProperty].link" target="_blank"><img
+                                <a :href="getReferencePropertyLink(refMap, referenceProperty)" target="_blank"><img
                                         alt="External link" src="../../assets/ext_link.png" style="vertical-align: top"
                                         title="Open link in a new browser tab"></a>
                             </template>
@@ -102,7 +101,7 @@
             getSpecReferenceValue(assertionReferenceMap, specSourceKey) {
                 return assertionReferenceMap[specSourceKey]
             },
-            referenceTable(assertionReferenceMap) {
+            getRawTable(assertionReferenceMap) {
                 const rObj = this.$store.state.testRunner.testAssertions.references
                 const specSourceKey = this.getAssertionReferenceMapKey(assertionReferenceMap)
                 const specReference = this.getSpecReferenceValue(assertionReferenceMap, specSourceKey)
@@ -110,18 +109,6 @@
                     if  (specReference in rObj[specSourceKey]) {
                         const theTable = rObj[specSourceKey][specReference]  // Table (HTML Grid) to be rendered on the screen
                         // console.log(JSON.stringify(theTable))
-                        if ('context' in assertionReferenceMap) { // additional context was declared in map
-                            const specContext = assertionReferenceMap.context
-                            if (specContext in theTable.context) {
-                                 return {...theTable.common, ...theTable.context[specContext]}
-                            } else {
-                                const errorStr = specContext + ' was declared in key: '+ specSourceKey + ' and ref: '+ specReference
-                                    + ' assertionReference map but not found in specification table.'
-                                console.error(errorStr)
-                                this.$store.commit('setError',errorStr)
-                                return {}
-                            }
-                        }
                         return theTable
                     }
                     else {
@@ -131,10 +118,27 @@
                     }
                 } else {
                     const errorStr = 'specSourceKey ' + specSourceKey + ' does not exist in rObj'
-                   console.error(errorStr)
+                    console.error(errorStr)
                     this.$store.commit('setError',errorStr)
                 }
                 return {}
+            },
+            referenceTable(assertionReferenceMap) {
+                const theTable = this.getRawTable(assertionReferenceMap)
+                // console.log(JSON.stringify(theTable))
+                if ('context' in assertionReferenceMap) { // additional context was declared in map
+                    const specContext = assertionReferenceMap.context
+                    if (specContext in theTable.context) {
+                         return {...theTable.common, ...theTable.context[specContext]}
+                    } else {
+                        const errorStr = specContext + ' was declared in key: '+ specSourceKey + ' and ref: '+ specReference
+                            + ' assertionReference map but not found in specification table.'
+                        console.error(errorStr)
+                        this.$store.commit('setError',errorStr)
+                        return {}
+                    }
+                }
+                return theTable
             },
             getVerbatimPhraseToFocus(refMap) {
                 if ('verbatimPhraseToFocus' in refMap)
@@ -186,11 +190,21 @@
             getReferencePropertyText(refMap, referenceProperty) {
                 const specRef = this.referenceTable(refMap)[referenceProperty]
                 if (typeof specRef === 'object') {
-                    if ('text' in specRef)
+                    if ('text' in specRef) {
                         return specRef.text
+                    } else {
+                        // text property is optional if context exists
+                        // Only ONE JSON property without text will make sense, otherwise same text is returned for all other properties which may not be desired
+                        // if context is available, return it
+                        if ('context' in refMap) {
+                            const specSourceKey = this.getAssertionReferenceMapKey(refMap)
+                            const specReference = this.getSpecReferenceValue(refMap, specSourceKey)
+                            return specReference.concat(refMap.context)
+                        }
+                    }
                 }
                 try {
-                    console.warn("refMap Key: " + this.getAssertionReferenceMapKey(refMap) + ", refMap table: " + this.getSpecReferenceValue(refMap, this.getAssertionReferenceMapKey(refMap)) + ":  '" + referenceProperty + "' specRef is not an object, probably a misplaced property!")
+                    console.warn("refMap Key: " + JSON.stringify(this.getAssertionReferenceMapKey(refMap)) + ", refMap table: " + JSON.stringify(this.getSpecReferenceValue(refMap, this.getAssertionReferenceMapKey(refMap))) + ":  '" + referenceProperty + "' specRef is not an object, probably a misplaced property!")
                 } catch {console.error('getReferencePropertyText: an error occurred in console.warn.')}
                 return ''
             },
@@ -198,11 +212,30 @@
                 // const specRef = this.referenceTable(refMap)[referenceProperty]
                 if ('comments' in specRef) {
                     const specComments = specRef.comments
+                    if (specComments.startsWith('<')) {
+                        return ['Click to see link(s): ' + specComments]
+                    }
                     return [specComments]
                 }
                 return ['']
+            },
+            getReferencePropertyLink(refMap, referenceProperty) {
+                // const specRef = rawTable[referenceProperty]
+                const specRef = this.referenceTable(refMap)[referenceProperty]
+                    if ('link' in specRef) {
+                        return specRef.link
+                    } else if ('context' in refMap) {
+                        // build context link off the baseLink
+                        const rawTable = this.getRawTable(refMap)
+                        if ('baseLink' in  rawTable) {
+                            const baseLink = rawTable.baseLink
+                            return baseLink.concat(refMap.context)
+                        } else {
+                            console.warn('context link nor baseLink is not available for ' + JSON.stringify(refMap) + ' referenceProperty ' + JSON.stringify(referenceProperty))
+                        }
+                    }
+                    return ''
             }
-
 
         }
     }
