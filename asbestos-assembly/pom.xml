@@ -45,7 +45,7 @@
         <fhirToolkitBase>http://localhost:9760/asbestos</fhirToolkitBase> <!-- If https is used here, then this value must be the same as the httpsFhirToolkitBase value -->
         <hapiFhirBase>http://localhost:7080/fhir</hapiFhirBase> <!-- HAPI FHIR v5.4.x runs on ROOT -->
         <xdsToolkitBase>http://localhost:9770/xdstools</xdsToolkitBase>
-        <tlsXdsToolkitBase>http://localhost:9773/xdstools</tlsXdsToolkitBase>
+        <tlsXdsToolkitBase>https://localhost:9773/xdstools</tlsXdsToolkitBase>
         <startUpSession>default</startUpSession>
         <!-- end ServiceProperties -->
     </properties>
@@ -60,7 +60,7 @@
                 <fhirToolkitBase>http://cat-nist-tools.ihe-europe.net:9760/asbestos</fhirToolkitBase> <!-- should be http only -->
                 <hapiFhirBase>http://localhost:7080/fhir/fhir</hapiFhirBase> <!-- If fhir is placed along side XTK webapps, need to use the same port as XTK -->
                 <xdsToolkitBase>http://localhost:8080/xdstools</xdsToolkitBase>
-                <tlsXdsToolkitBase>http://localhost:8443/xdstools</tlsXdsToolkitBase>
+                <tlsXdsToolkitBase>https://localhost:8443/xdstools</tlsXdsToolkitBase>
                 <!--
                 README.txt and Tomcat server.xml use the properties below.
                 If only the xdsToolkitBase property shown above is used to point to an existing toolkit outside of the Asbestos installation directory, the XdsToolkit\webapps should be empty to prevent
