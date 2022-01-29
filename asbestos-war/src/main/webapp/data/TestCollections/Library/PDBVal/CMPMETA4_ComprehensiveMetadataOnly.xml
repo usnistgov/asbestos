@@ -14,43 +14,29 @@
         </extension>
     </modifierExtension>
 
-    <id value="minimalMetadataOnly"/>
-    <name value="minimalMetadataOnly"/>
-    <description value="Minimal Metadata only."/>
+    <id value="CMPMETA4"/>
+    <name value="comprehensiveMetadataOnly"/>
+    <description value="Comprehensive Metadata only."/>
 
-    <variable>
-        <name value="isSubjectPresent"/>
-        <expression value="Bundle.entry.resource.select($this.subject.exists()).anyTrue()"/>
-        <sourceId value="request"/>
-    </variable>
+
 
     <test>
-        <description value="Minimal Metadata only"/>
+        <description value="Comprehensive Metadata only"/>
         <action>
             <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Conditional"/>
-            <assert id="FTKMM100">
-                <description value="Is Minimal Metadata expected or transaction is labeled as Minimal Metadata?"/>
-                <expression value="${isComprehensiveMetadataExpected}.not() or ${isComprehensive}.not()"/>
+            <assert id="CMPMETA4_1">
+                <description value="Is Comprehensive Metadata expected or transaction is labeled as Comprehensive Metadata?"/>
+                <expression value="${isComprehensiveMetadataExpected} or ${isComprehensive}"/>
                 <operator value="equals"/>
                 <value value="true"/>
                 <warningOnly value="false"/>
             </assert>
         </action>
         <action>
-            <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Conditional"/>
-            <assert id="FTKMM105">
-                <description value="Subject is required if known. Subject must either be present or non-existent consistently among bundle resources."/>
+            <assert id="CMPMETA4_2">
+                <description value="Subject is required."/>
                 <compareToSourceId value="request"/>
-                <compareToSourceExpression value="Bundle.entry.resource.where($this is DocumentReference or ($this is List and code.coding.code='submissionset')).select(subject.exists()).distinct().count()=1"/>
-                <warningOnly value="false"/>
-            </assert>
-        </action>
-        <action>
-            <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Conditional"/>
-            <assert id="FTKMM110">
-                <description value="Is Subject present?"/>
-                <compareToSourceId value="request"/>
-                <compareToSourceExpression value="${isSubjectPresent}=true"/>
+                <compareToSourceExpression value="Bundle.entry.resource.where($this is DocumentReference or ($this is List and code.coding.code='submissionset')).all(subject.reference.exists())"/>
                 <warningOnly value="false"/>
             </assert>
         </action>
@@ -69,6 +55,24 @@
                     </extension>
                 </modifierExtension>
             </operation>
+        </action>
+        <action>
+            <assert id="CMPMETA4_3">
+                <description value="Transaction must be labeled Comprehensive Metadata."/>
+                <expression value="${isComprehensive}"/>
+                <operator value="equals"/>
+                <value value="true"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
+            <assert id="CMPMETA4_4">
+                <description value="DocumentReference: securityLabel is required for Comprehensive Metadata."/>
+                <compareToSourceId value="request"/>
+                <compareToSourceExpression
+                        value="Bundle.entry.resource.where(is(FHIR.DocumentReference)).securityLabel.exists()"/>
+                <warningOnly value="false"/>
+            </assert>
         </action>
     </test>
 </TestScript>

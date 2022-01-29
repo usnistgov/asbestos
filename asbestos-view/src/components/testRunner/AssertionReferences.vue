@@ -131,6 +131,8 @@
                     if (specContext in theTable.context) {
                          return {...theTable.common, ...theTable.context[specContext]}
                     } else {
+                        const specSourceKey = this.getAssertionReferenceMapKey(assertionReferenceMap)
+                        const specReference = this.getSpecReferenceValue(assertionReferenceMap, specSourceKey)
                         const errorStr = specContext + ' was declared in key: '+ specSourceKey + ' and ref: '+ specReference
                             + ' assertionReference map but not found in specification table.'
                         console.error(errorStr)
@@ -159,7 +161,7 @@
                         "^(.*:)"                // baz: ...
                     ];
                     for (const startWord of startWords) {
-                        const re = new RegExp(`^${startWord}\\s`) // ^start line, {pattern}, s is whitespace
+                        const re = new RegExp(`^${startWord}\\s`,'i') // ^start line, {pattern}, s is whitespace
                         if (specTargetPhrase.match(re) !== null) {
                             specTargetPhrase = specTargetPhrase.replace(re, "")
                             break

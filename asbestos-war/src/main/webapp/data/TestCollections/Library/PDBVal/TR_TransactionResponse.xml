@@ -8,7 +8,7 @@
         </extension>
     </modifierExtension>
 
-    <id value="transactionResponse"/>
+    <id value="TR_TransactionResponse"/>
     <name value="transactionResponse"/>
     <description value="Transaction response."/>
 
@@ -28,63 +28,63 @@
     <test>
         <name value="Transaction response message."/>
         <action>
-            <assert id="FTKTR100">
-                <description value="Transaction: returns 200.|MHDPDBGoodStatus"/>
+            <assert id="TR_1">
+                <description value="Transaction: http 200 response."/>
                 <response value="okay"/>
                 <sourceId value="response"/>
                 <warningOnly value="false"/>
             </assert>
         </action>
         <action>
-            <assert id="FTKTR200">
-                <description value="Transaction: returns Bundle.|MHDPDBReturnsBundle"/>
+            <assert id="TR_2">
+                <description value="Transaction: return a Bundle."/>
                 <resource value="Bundle"/>
                 <sourceId value="response"/>
                 <warningOnly value="false"/>
             </assert>
         </action>
         <action>
-            <assert id="FTKTR300">
-                <description value="Transaction: Response is labeled as transaction-response.|MHDPDBRequestIsTransaction"/>
+            <assert id="TR_3">
+                <description value="Transaction: return a Bundle, with type set to transaction-response."/>
                 <compareToSourceId value="response"/>
                 <compareToSourceExpression value="Bundle.type = 'transaction-response'"/>
                 <warningOnly value="false"/>
             </assert>
         </action>
         <action>
-            <assert id="FTKTR400">
-                <description value="Transaction: All resources in Bundle return 201.|MHDPDBEntryReturns201"/>
+            <assert id="TR_4">
+                <description value="Bundle.entry.response.status shall be 201."/>
                 <compareToSourceId value="response"/>
                 <compareToSourceExpression value="Bundle.entry.all(response.status.value.startsWith('201'))"/>
                 <warningOnly value="false"/>
             </assert>
         </action>
         <action>
-            <assert id="FTKTR500">
-                <description value="Transaction: All resources in Bundle return location.|MHDPDBReturnLocation"/>
+            <assert id="TR_5">
+                <description value="For all entries in response: the .location element shall be populated."/>
                 <compareToSourceId value="response"/>
                 <compareToSourceExpression value="Bundle.entry.all(response.location.exists())"/>
                 <warningOnly value="false"/>
             </assert>
         </action>
         <action>
-            <assert id="FTKTR600">
-                <description value="Transaction: All resources in Bundle return etag (warning only).|MHDPDBReturnEtag|FHIRTransReturnsBundle"/>
+            <assert id="TR_6">
+                <description value="Warning only: .etag element may be populated."/>
                 <compareToSourceId value="response"/>
                 <compareToSourceExpression value="Bundle.entry.all(response.etag)"/>
                 <warningOnly value="true"/>
             </assert>
         </action>
         <action>
-            <assert id="FTKTR700">
-                <description value="Transaction: All resources in Bundle return lastModified (warning only)."/>
+            <assert id="TR_7">
+                <description value="Warning only: server SHOULD populate at least response.lastModified."/>
                 <compareToSourceId value="response"/>
                 <compareToSourceExpression value="Bundle.entry.all(response.lastModified.exists())"/>
                 <warningOnly value="true"/>
             </assert>
         </action>
         <action>
-            <assert id="FTKTR800">
+            <assert id="TR_8">
                 <description value="Transaction: No resources in Bundle return OperationOutcome."/>
                 <compareToSourceId value="response"/>
                 <compareToSourceExpression value="Bundle.entry.all(response.outcome).not()"/>
@@ -92,7 +92,7 @@
             </assert>
         </action>
         <action>
-            <assert id="FTKTR900">
+            <assert id="TR_9">
                 <description value="Response Bundle has same number of entries as Request Bundle."/>
                 <expression value="${requestEntryCount} = ${responseEntryCount}"/>
                 <sourceId value="response"/>    <!-- required but not referenced -->

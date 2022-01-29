@@ -131,7 +131,7 @@
                 <description value="Minimal Metadata only"/>
                 <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
                     <extension url="component">
-                        <valueString value="../../Library/PDBVal/MinimalMetadataOnly.xml"/>
+                        <valueString value="../../Library/PDBVal/MINMETA4_MinimalMetadataOnly.xml"/>
                     </extension>
                     <extension url="urn:fixture-in">
                         <valueString value="request"/>
@@ -159,7 +159,7 @@
                 <description value="Comprehensive Metadata only"/>
                 <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
                     <extension url="component">
-                        <valueString value="../../Library/PDBVal/ComprehensiveMetadataOnly.xml"/>
+                        <valueString value="../../Library/PDBVal/CMPMETA4_ComprehensiveMetadataOnly.xml"/>
                     </extension>
                     <extension url="urn:fixture-in">
                         <valueString value="request"/>
@@ -186,7 +186,7 @@
                 <description value="Transaction response"/>
                 <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
                     <extension url="component">
-                        <valueString value="../../Library/PDBVal/TransactionResponse.xml"/>
+                        <valueString value="../../Library/PDBVal/TR_TransactionResponse.xml"/>
                     </extension>
                     <extension url="urn:fixture-in">
                         <valueString value="request"/>

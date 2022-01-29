@@ -9,50 +9,112 @@
     }
   },
   "assertionReferences": {
-    "RM4_1":      [{"mhdv4": "ITI-65_MessageSemantics", "context": "requestMessage"}],
-    "RM4_1_1":    [{"mhdv4": "ITI-65_MessageSemantics", "context": "requestMessage"}],
-    "RM4_1_2":    [{"mhdv4": "ITI-65_MessageSemantics", "context": "requestMessage"},
-                   {"fhir": "httpTransaction", "verbatimPhraseToFocus": "transaction"}],
-    "RM4_2":      [{"mhdv4": "ITI-65_MessageSemantics", "context": "requestMessage"}],
-    "RM4_3":      [{"mhdv4": "ITI-65_MessageSemantics", "context": "requestMessage"}],
-    "RM4_4":      [{"mhdv4": "ITI-65_BundleResources", "context":"Bundle.meta.profile", "verbatimPhraseToFocus": "Bundle.meta.profile"}],
-    "RM4_5":      [{"mhdv4": "SubmissionSetTypeList", "context": "attributeMap" },
-                   {"mhdv4": "SubmissionSetTypeList", "context":"mappingToXds" }],
-    "RM4_6":      [{"mhdv4": "ITI-65_MessageSemantics", "context": "elements"},
-                   {"mhdv4": "DocumentReference", "context": "Min_mappingToXds"}],
-    "BR_1":       [{"fhir": "Bundle", "context": ".entry.fullUrl-type"},
-                   {"fhir": "resourceUrl-transaction", "verbatimPhraseToFocus": "Note"}],
-    "BR_2":       [{"fhir": "Bundle", "context":"bundleConstraint-bdl7"},
-                   {"fhir": "transactionProcessingRules-uniqueResource"}],
-    "BR_3":       [{"fhir": "httpTransaction"},
-                    {"fhir": "Bundle", "context":".entry.request.url"},
-                    {"fhir": "Bundle", "context":".entry.request.method-cardinality"}
-                   ],
-    "BR_4":       [{"fhir": "Bundle", "context":".entry.request.url", "verbatimPhraseToFocus": "Type"}],
-    "DR_1":       [{"mhd": "DocumentReference", "context": ".content"  }],
-    "DR_2":       [{"mhd": "DocumentReference", "context": ".content.attachment.url"}],
-    "DR_3":       [{"mhd": "DocumentReference", "context": ".content.attachment.contentType"}],
-    "DR_4":       [{"mhd": "DocumentReference", "context": ".content.attachment.data"}],
-    "DR_5":       [{"mhdv4": "ITI-65_BundleResources", "context": "binaryResourceInBundle"}],
-    "DR_6":       [{"mhd": "DocumentReference", "context": ".content.attachment.contentType"}, {"fhir": "Binary", "context": ".contentType"}],
-    "DR_7":       [{"mhd": "ITI-65_non-unContainedOption", "context": "sourcePatientInfo"}],
-    "DR_8":       [{"mhd": "ITI-65_non-unContainedOption", "context": "MISSINGTEXTInMHD4"}],
-    "DR_9":       [{"mhd": "ITI-65_non-unContainedOption", "context": "MISSINGTEXTInMHD4"}],
-    "DR_10":      [{"mhd": "DocumentReference", "context": ".masterIdentifier"}],
-    "DR_11":      [{"mhd": "DocumentReference", "context": ".status"}],
-    "SSLIST_1":   [{"mhdv4": "ITI-65_MessageSemantics", "context": "requestMessage"}],
-    "SSLIST_2":   [{"mhdv4": "ITI-65_MessageSemantics", "context": "elements"},
-                    {"mhdv4": "SubmissionSetTypeList", "context": ".extension:sourceId"}],
-    "SSLIST_3":   [{"mhdv4": "ITI-65_MessageSemantics", "context": "elements"},
-                    {"mhdv4": "SubmissionSetTypeList", "context": ".date"}],
+    "RM4_1":        [{"mhdv4": "ITI-65_RequestMessage", "context": "messageSemantics"}],
+    "RM4_1_1":      [{"mhdv4": "ITI-65_RequestMessage", "context": "messageSemantics"}],
+    "RM4_1_2":      [{"mhdv4": "ITI-65_RequestMessage", "context": "messageSemantics"},
+                     {"fhir": "httpTransaction", "verbatimPhraseToFocus": "transaction"}],
+    "RM4_2":        [{"mhdv4": "ITI-65_RequestMessage", "context": "messageSemantics"}],
+    "RM4_3":        [{"mhdv4": "ITI-65_RequestMessage", "context": "messageSemantics"}],
+    "RM4_4":        [{"mhdv4": "ITI-65_BundleResources", "context":"Bundle.meta.profile",
+                      "verbatimPhraseToFocus": "Bundle.meta.profile"}],
+    "RM4_5":        [{"mhdv4": "SubmissionSetTypeList", "context": "attributeMap" },
+                     {"mhdv4": "SubmissionSetTypeList", "context":"mappingToXds" }],
+    "RM4_6":        [{"mhdv4": "ITI-65_RequestMessage", "context": "elements"},
+                     {"mhd": "DocumentReference", "context": "MinMeta_mappingToXds"}],
+    "BR_1":         [{"fhir": "Bundle", "context": ".entry.fullUrl-type"},
+                     {"fhir": "resourceUrl-transaction", "verbatimPhraseToFocus": "Note"}],
+    "BR_2":         [{"fhir": "Bundle", "context":"bundleConstraint-bdl7"},
+                     {"fhir": "restApi", "context":"transactionProcessingRules-uniqueResource"}],
+    "BR_3":         [{"fhir": "httpTransaction"},
+                      {"fhir": "Bundle", "context":".entry.request.url"},
+                      {"fhir": "Bundle", "context":".entry.request.method-cardinality"}
+                     ],
+    "BR_4":         [{"fhir": "Bundle", "context":".entry.request.url", "verbatimPhraseToFocus": "Type"}],
+    "DR_1":         [{"mhd": "DocumentReference", "context": ".content"  }],
+    "DR_2":         [{"mhd": "DocumentReference", "context": ".content.attachment.url"}],
+    "DR_3":         [{"mhd": "DocumentReference", "context": ".content.attachment.contentType"}],
+    "DR_4":         [{"mhd": "DocumentReference", "context": ".content.attachment.data"}],
+    "DR_5":         [{"mhd": "ITI-65_BundleResources", "context": "binaryResourceInBundle"}],
+    "DR_6":         [{"mhd": "DocumentReference", "context": ".content.attachment.contentType"},
+                      {"fhir": "Binary", "context": ".contentType"}],
+    "DR_7":         [{"mhdv4": "ITI-65_non-unContainedOption", "context": "sourcePatientInfo",
+                      "verbatimPhraseToFocus": "Otherwise, when sourcePatientInfo is provided, the DocumentReference.context.sourcePatientInfo shall be a reference to a \"contained\" Patient Resource"}],
+    "DR_8":         [{"mhdv4": "ITI-65_non-unContainedOption", "context": "MISSINGTEXTInMHD4"}],
+    "DR_9":         [{"mhdv4": "ITI-65_non-unContainedOption", "context": "MISSINGTEXTInMHD4"}],
+    "DR_10":        [{"mhd": "DocumentReference", "context": ".masterIdentifier"}],
+    "DR_11":        [{"mhd": "DocumentReference", "context": ".status"}],
+    "SSLIST_1":     [{"mhdv4": "ITI-65_RequestMessage", "context": "messageSemantics"}],
+    "SSLIST_2":     [{"mhdv4": "ITI-65_RequestMessage", "context": "elements"},
+                      {"mhdv4": "SubmissionSetTypeList", "context": ".extension:sourceId"}],
+    "SSLIST_3":     [{"mhdv4": "ITI-65_RequestMessage", "context": "elements"},
+                      {"mhdv4": "SubmissionSetTypeList", "context": ".date"}],
+    "MINMETA4_1":   [{"mhdv4": "ITI-65_BundleResources", "context":"Bundle.meta.profile",
+                      "verbatimPhraseToFocus": "Bundle.meta.profile"}],
+    "MINMETA4_2":   [{"mhdv4": "ITI-65_RequestMessage", "context": "elements"},
+                      {"mhdv4": "SubmissionSetTypeList", "context": ".subject"},
+                      {"mhd": "DocumentReference", "context": ".subject"}],
+    "MINMETA4_3":   [{"mhdv4": "SubmissionSetTypeList", "context": ".subject"},
+                      {"mhd": "DocumentReference", "context": ".subject"}],
+    "SUBJ4_1":      [{"mhdv4": "patientReference"}],
+    "SUBJ4_2":      [{"mhdv4": "patientReference", "verbatimPhraseToFocus": "FHIR Patient Resource"}],
+    "SUBJ4_3":      [{"mhdv4": "ITI-65_RequestMessage", "context": "elements"},
+                      {"xds": "4.2 ebRIM Representation", "context": "associatedPatient"}],
+    "CMPMETA4_1":   [{"mhdv4": "ITI-65_BundleResources", "context":"Bundle.meta.profile",
+                      "verbatimPhraseToFocus": "Bundle.meta.profile"}],
+    "CMPMETA4_2":   [{"mhdv4": "ITI-65_RequestMessage", "context": "elements"},
+                      {"mhdv4": "SubmissionSetTypeList", "context": "cmpSubject"},
+                      {"mhd": "DocumentReference", "context": "cmpSubject"}],
+    "CMPMETA4_3":   [{"mhdv4": "ITI-65_BundleResources", "context":"Bundle.meta.profile",
+                      "verbatimPhraseToFocus": "Bundle.meta.profile"}],
+    "CMPMETA4_4":   [{"mhd": "DocumentReference", "context": "cmpSecurityLabel"}],
+    "TR_1":         [{"mhd": "ITI-65_ResponseMessage", "context": "messageSemantics_p2"}],
+    "TR_2":         [{"mhd": "ITI-65_ResponseMessage", "context": "messageSemantics_p1"}],
+    "TR_3":         [{"mhd": "ITI-65_ResponseMessage", "context": "messageSemantics_p1"}],
+    "TR_4":         [{"mhd": "ITI-65_ResponseMessage", "context": "messageSemantics_p1",
+                      "verbatimPhraseToFocus": "contains one entry for each entry in the request"},
+                     {"mhd": "ITI-65_ResponseMessage", "context": "messageSemantics_p2"}],
+    "TR_5":         [{"mhd": "ITI-65_ResponseMessage", "context": "messageSemantics_p2"}],
+    "TR_6":         [{"mhd": "ITI-65_ResponseMessage", "context": "messageSemantics_p2"}],
+    "TR_7":         [{"fhir": "restApi", "context": "response.lastModified"}],
+    "TR_8":         [{"fhir": "restApi", "context": "transactionResponse-operationOutcome"}],
+    "TR_9":         [{"mhd": "ITI-65_ResponseMessage", "context": "messageSemantics_p1", "verbatimPhraseToFocus": "contains one entry for each entry in the request"}]
 
-
-    "FTK4RM700":  [{"mhdv4": "patientReference"}],
-    "FTKCM105":   [{"mhdv4": "comprehensiveMetadata_subject"}]
   },
 
   "references": {
     "mhd": {
+      "ITI-65_ResponseMessage": {
+        "common": {
+          "Source": {
+            "text": "IHE ITI"
+          },
+          "Profile": {
+            "text": "MHDv4",
+            "link": "https://profiles.ihe.net/ITI/MHD/toc.html"
+          },
+          "Transaction": {
+            "text": "ITI-65 Provide Document Bundle",
+            "link": "https://profiles.ihe.net/ITI/MHD/ITI-65.html#2-3-65-provide-document-bundle-iti-65"
+          },
+          "Volume:Section": {
+            "text": "2:3.65.4.2.2 Message Semantics",
+            "link": "https://profiles.ihe.net/ITI/MHD/ITI-65.html#2365422-message-semantics"
+          }
+        },
+        "context": {
+          "messageSemantics_p1": {
+            "SpecificationText": [{
+              "text":
+              "To enable the Document Source to know the outcome of processing the transaction, and the identities assigned to the resources by the Document Recipient, the Document Recipient shall return a Bundle, with type set to transaction-response, that contains one entry for each entry in the request, in the same order as received, with the Bundle.entry.response.outcome indicating the results of processing the entry warnings such as PartialFolderContentNotProcessed. The Document Recipient shall comply with FHIR http://hl7.org/fhir/R4/bundle.html#transaction-response and http://hl7.org/fhir/R4/http.html#transaction-response."
+            }]
+          },
+          "messageSemantics_p2": {
+            "SpecificationText": [{
+              "text": "(Para 2.)<br>To indicate success the overall http 200 response is used. The Bundle.entry.response.status shall be 201 to indicate the Resource has been created, the .location element shall be populated, and the .etag element may be populated when the Document Recipient supports FHIR resource versioning."
+            }]
+          }
+        }
+      },
       "DocumentReference": {
         "baseLink": "https://profiles.ihe.net/ITI/MHD/StructureDefinition-IHE.MHD.Minimal.DocumentReference-definitions.html#DocumentReference",
         "common": {
@@ -62,6 +124,9 @@
           "Profile": {
             "text": "MHDv3.x, MHDv4",
             "link": "https://profiles.ihe.net/ITI/MHD/toc.html"
+          },
+          "Metadata Profile": {
+            "text": "Minimal or Comprehensive"
           }
         },
         "context": {
@@ -96,20 +161,70 @@
               "text": "Control 1..1"
             }]
           },
-          "Min_mappingToXds": {
-            "MinimalDocumentReference": {
-              "text": "Mappings for XDS and MHD Mapping (XDS)",
-              "link": "https://profiles.ihe.net/ITI/MHD/StructureDefinition-IHE.MHD.Minimal.DocumentReference-mappings.html#mappings-for-xds-and-mhd-mapping-xds"
-            },
-            "SpecificationText": [{
-              "text": "identifier DocumentEntry.entryUUID"
-            }]
-          },
           ".status": {
-            "Element": {
-            },
+            "Element": {},
             "SpecificationText": [{
               "text": "Control 1..1<br>Type code<br>The codes SHALL be taken from DocumentReferenceStatus The status of the document reference."
+            }]
+          },
+          ".subject": {
+            "Element": {},
+            "SpecificationText": [{
+              "text": "Control 0..1",
+              "comments": "MustSupport, Required if known. https://profiles.ihe.net/ITI/MHD/index.html#must-support"
+            }]
+          },
+          "cmpSubject": {
+            "Element": {
+              "text": "subject",
+              "link": "https://profiles.ihe.net/ITI/MHD/StructureDefinition-IHE.MHD.Comprehensive.DocumentReference-definitions.html#DocumentReference.subject"
+            },
+            "SpecificationText": [{
+              "text": "Control 1..1"
+            }]
+          },
+          "cmpSecurityLabel": {
+            "Element": {
+              "text": "securityLabel",
+              "link": "https://profiles.ihe.net/ITI/MHD/StructureDefinition-IHE.MHD.Comprehensive.DocumentReference-definitions.html#DocumentReference.securityLabel"
+            },
+            "SpecificationText": [{
+              "text": "Control 1..*"
+            }]
+          },
+            "MinMeta_mappingToXds": {
+              "MinimalDocumentReference": {
+                "text": "Mappings for XDS and MHD Mapping (XDS)",
+                "link": "https://profiles.ihe.net/ITI/MHD/StructureDefinition-IHE.MHD.Minimal.DocumentReference-mappings.html#mappings-for-xds-and-mhd-mapping-xds"
+              },
+              "SpecificationText": [{
+                "text": "identifier DocumentEntry.entryUUID"
+              }]
+            }
+        }
+      },
+      "ITI-65_BundleResources": {
+        "common": {
+          "Source": {
+            "text": "IHE ITI"
+          },
+          "Profile": {
+            "text": "MHDv4",
+            "link": "https://profiles.ihe.net/ITI/MHD/toc.html"
+          },
+          "Transaction": {
+            "text": "ITI-65 Provide Document Bundle",
+            "link": "https://profiles.ihe.net/ITI/MHD/ITI-65.html#2-3-65-provide-document-bundle-iti-65"
+          },
+          "Volume:Section": {
+            "text": "2:3.65.4.1.2.1 Bundle Resources",
+            "link": "https://profiles.ihe.net/ITI/MHD/ITI-65.html#23654121-bundle-resources"
+          }
+        },
+        "context": {
+          "binaryResourceInBundle" : {
+            "SpecificationText": [{
+              "text": "When the DocumentReference.content.attachment.url points at a Binary Resource, the Binary Resource shall be in the Bundle."
             }]
           }
         }
@@ -142,15 +257,10 @@
               "text": "The FHIR Bundle.meta.profile shall have the following value depending on the Actor implementation of no options (Minimal Metadata), Comprehensive Metadata Option, or UnContained References Option...",
               "comments": "1:33.2.3 UnContained Reference Option<br>https://profiles.ihe.net/ITI/MHD/1332_actor_options.html#13323-uncontained-reference-option<br>The UnContained Reference Option is not compatible with the XDS on FHIR Option. A system may be able to support both options, but only one will be able to be used at a given deployment.<br>UnContained References Option is not yet supported in Toolkit."
             }]
-          },
-          "binaryResourceInBundle" : {
-            "SpecificationText": [{
-              "text": "When the DocumentReference.content.attachment.url points at a Binary Resource, the Binary Resource shall be in the Bundle."
-            }]
           }
         }
       },
-      "ITI-65_MessageSemantics": {
+      "ITI-65_RequestMessage": {
         "common": {
           "Source": {
             "text": "IHE ITI"
@@ -169,7 +279,7 @@
           }
         },
         "context": {
-          "requestMessage": {
+          "messageSemantics": {
             "SpecificationText": [{
               "hasAssertionOrderBiasAnnotations": true,
               "text": "The Document Source shall initiate [2.1]a FHIR \"transaction\" using a \"create\" action by [1.0]sending an HTTP POST request method [2.0]composed of a FHIR Bundle Resource [2.2]containing: one SubmissionSet type List Resource; [2.3]one or more DocumentReference Resources; [2.4]zero or more Folder type List Resources; and [2.5]zero or more Binary Resources to the Document Recipient. ",
@@ -178,7 +288,7 @@
           },
           "elements": {
             "SpecificationText": [{
-              "text": "(Para 5.)<br/>The Document Source shall assure all FHIR resource elements are consistent with the Document Sharing metadata requirements as specified for attributes ITI TF-3: Table 4.3.1-3 \"Sending Actor Metadata Attribute Optionality\". The Document Source that supports the Comprehensive Metadata or the XDS on FHIR Options shall assure consistency with column \"XDS DS\"; otherwise, the Document Source shall assure consistency with column \"XDR MS\". The Document Source shall not provide any entryUUID values.",
+              "text": "(Para 5.)<br>The Document Source shall assure all FHIR resource elements are consistent with the Document Sharing metadata requirements as specified for attributes ITI TF-3: Table 4.3.1-3 \"Sending Actor Metadata Attribute Optionality\". The Document Source that supports the Comprehensive Metadata or the XDS on FHIR Options shall assure consistency with column \"XDS DS\"; otherwise, the Document Source shall assure consistency with column \"XDR MS\". The Document Source shall not provide any entryUUID values.",
               "comments": "Other DocumentReference Identifiers values will be ignored by Toolkit. Toolkit will assign symbolic Id(s) in the submission to meet XDS requirements."
             }]
           },
@@ -221,7 +331,7 @@
             },
             "SpecificationText": [{
               "text": "See comments below.",
-              "comments": "Specification Missing in MHD 4.x. See Previous MHD PDF Rev. 3.2 – Trial Implementation. Table 4.5.1.1-1: FHIR DocumentReference mapping to DocumentEntry<br>Note 1: Indicates that the data shall be represented as a contained resource, unless the UnContained References Option is used."
+              "comments": "Specification Missing in MHD 4.x. See Previous MHD PDF Rev. 3.2 ? Trial Implementation. Table 4.5.1.1-1: FHIR DocumentReference mapping to DocumentEntry<br>Note 1: Indicates that the data shall be represented as a contained resource, unless the UnContained References Option is used."
             }]
           }
         }
@@ -246,6 +356,22 @@
           },
           ".date": {
             "Element": {},
+            "SpecificationText": [{
+              "text": "Control 1..1"
+            }]
+          },
+          ".subject": {
+            "Element": {},
+            "SpecificationText": [{
+              "text": "Control 0..1",
+              "comments": "MustSupport, Required if known. https://profiles.ihe.net/ITI/MHD/index.html#must-support"
+            }]
+          },
+          "cmpSubject": {
+            "Element": {
+              "text": "subject",
+              "link": "https://profiles.ihe.net/ITI/MHD/StructureDefinition-IHE.MHD.Comprehensive.SubmissionSet-definitions.html#List.subject"
+            },
             "SpecificationText": [{
               "text": "Control 1..1"
             }]
@@ -365,17 +491,41 @@
           }
         }
       },
-      "transactionProcessingRules-uniqueResource": {
-        "Source": {
-          "text": "HL7 FHIR"
+      "restApi": {
+        "common": {
+           "Source": {
+             "text": "HL7 FHIR"
+            }
         },
-         "Section": {
-          "text": "RESTful API 3.1.0.11.2 Transaction Processing Rules",
-           "link": "https://hl7.org/fhir/http.html#trules"
-         },
-         "SpecificationText": [{
-           "text": "A resource can only appear in a transaction once (by identity). "
-         }]
+        "context": {
+          "transactionProcessingRules-uniqueResource": {
+            "Section": {
+              "text": "RESTful API 3.1.0.11.2 Transaction Processing Rules",
+              "link": "https://hl7.org/fhir/http.html#trules"
+            },
+            "SpecificationText": [{
+              "text": "A resource can only appear in a transaction once (by identity). "
+            }]
+          },
+          "response.lastModified" : {
+            "Section": {
+              "text": "RESTful API 3.1.0.12 history",
+              "link": "https://hl7.org/fhir/http.html#history"
+            },
+            "SpecificationText": [{
+              "text": "Notes:<br>The server SHOULD populate at least response.lastModified so the time of processing is clear in the history record"
+            }]
+          },
+          "transactionResponse-operationOutcome": {
+            "Section": {
+              "text": "RESTful API 3.1.0.11.3 Batch/Transaction Response",
+              "link": "https://hl7.org/fhir/http.html#transaction-response"
+            },
+            "SpecificationText": [{
+              "text": "For a batch, or a successful transaction, the response the server SHALL return a Bundle with type set to batch-response or transaction-response that contains one entry for each entry in the request, in the same order, with the outcome of processing the entry. For a failed transaction, the server returns a single OperationOutcome instead of a Bundle."
+            }]
+          }
+        }
       },
       "httpTransaction": {
         "Source": {
@@ -402,39 +552,35 @@
           "comments": "When processing a \"POST\" (create), the full URL is treated as the id of the resource on the source, and is ignored; the server generates an id for the resource. (https://hl7.org/fhir/http.html#trules)"
         }]
       }
+    },
+    "xds": {
+      "4.2 ebRIM Representation" : {
+        "baseLink": "https://profiles.ihe.net/ITI/TF/Volume3/ch-4.2.html#",
+        "common": {
+          "Source": {
+            "text": "IHE ITI TF"
+          },
+          "Profile": {
+            "text": "XDS",
+            "link": "https://profiles.ihe.net/ITI/TF/index.html"
+          },
+          "Volume:Section": {
+            "text": "3:4.2 ebRIM Representation",
+            "link": "https://profiles.ihe.net/ITI/TF/Volume3/ch-4.2.html#4.2"
+          }
+        },
+        "context": {
+          "associatedPatient": {
+            "AssociationType": {
+              "text": "4.2.2.1.1 SS-DE HasMember",
+              "link": "https://profiles.ihe.net/ITI/TF/Volume3/ch-4.2.html#4.2.2.1.1"
+            },
+            "SpecificationText": [{
+              "text": "All DocumentEntries submitted in a SubmissionSet, included by value, shall have their patientId attribute set to the same value. The value of the SubmissionSet.patientId attribute shall match the value of the DocumentEntry.patientId attribute."
+            }]
+          }
+      }
+      }
     }
-  },
-  "oldReferenceRoot_ToBeRemoved": {
-    "Profile": "MHD Rev 3.1",
-    "MHDPDBRequestIsBundle": "ITI-65 - 3.65.4.1.2 Message Semantics Para 1",
-    "MHDPDBRequestIsTransaction": "ITI-65 - 3.65.4.1.2 Message Semantics Para 1",
-    "MHDPDBUsesPost": "ITI-65 - 3.65.4.1.2 Message Semantics Para 1",
-    "MHDPDBOneDocumentManifest": "ITI-65 - 3.65.4.1.2 Message Semantics Para 1",
-    "MHDPDBOnePlusDocumentReference": "ITI-65 - 3.65.4.1.2 Message Semantics Para 1",
-    "MHDPDBMediaType": "ITI-65 - 3.65.4.1.2 Message Semantics Para 1",
-    "MHDPDBMetadataType": "ITI-65 - 3.65.4.1.2.1 Bundle Resources Para 2",
-    "MHDPDBBinaryInBundle": [
-      "ITI-65 - 3.65.4.1.2.1 Bundle Resources Para 4",
-      "When the DocumentReference.content.attachment.url points at a Binary Resource, the Binary Resource shall be in the Bundle. See FHIR Resolving references in Bundles at http://hl7.org/fhir/R4/bundle.html#references."
-    ],
-    "MHDPDBAttachmentContentType": "content.attachment.contentType",
-    "MHDPDBPatientReference": "ITI-65 - 3.65.4.1.2.2 Patient Identity Para 1",
-    "MHDPDBSourcePatientInfoIsContained": "ITI-65 - 3.65.4.1.2.2 Patient Identity Para 2",
-    "MHDPDBGoodStatus": "ITI-65 - 3.65.4.2.2 Message Semantics Para 2",
-    "MHDPDBEntryReturns201": "ITI-65 - 3.65.4.2.2 Message Semantics Para 2",
-    "MHDPDBReturnLocation": "ITI-65 - 3.65.4.2.2 Message Semantics Para 2",
-    "MHDPDBReturnEtag": "ITI-65 - 3.65.4.2.2 Message Semantics Para 2",
-    "MHDPDBDocRefHasAttachment": "ITI-65 - Table 4.5.1.1-1 content.attachment.url",
-    "MHDPDBFullUrlUniqueInBundle": "http://hl7.org/fhir/bundle.html#invs bld-7",
-    "MHDPDBReturnsBundle": "ITI-65 - 3.65.4.2.2 Message Semantics Para 1",
-    "FHIRTransReturnsBundle": "http://hl7.org/fhir/http.html#transaction-response",
-    "FHIRTransReturns201": "http://hl7.org/fhir/http.html#transaction-response",
-    "MHDv4BundleResources": "https://profiles.ihe.net/ITI/MHD/ITI-65.html#23654121-bundle-resources",
-    "MHDv4MessageSemantics": "https://profiles.ihe.net/ITI/MHD/ITI-65.html#2365412-message-semantics",
-    "MHDSendingActorMetadataAttributeOptionality": "ITI TF-3: Table 4.3.1-3 Sending Actor Metadata Attribute Optionality, https://profiles.ihe.net/ITI/MHD/ITI-65.html#2365412-message-semantics and https://profiles.ihe.net/ITI/TF/Volume3/ch-4.3.html",
-    "MHDv4_3:4.5.2SubmissionSetMetadataAttributes": "https://profiles.ihe.net/ITI/MHD/32_fhir_maps.html#submissionSet",
-    "comments": [
-      " bundle profile comprehensive or minimal 3.65.4.1.2.1 - Bundle Resources The FHIR Bundle.meta.profile shall have the following value depending on the use of"
-    ]
   }
 }

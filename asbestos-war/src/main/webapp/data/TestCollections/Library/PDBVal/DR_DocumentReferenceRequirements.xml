@@ -66,7 +66,7 @@
 
     <action>
         <assert id="DR_7">
-            <description value="Not UnContained Reference Option: Otherwise, when sourcePatientInfo is provided."/>
+            <description value="When sourcePatientInfo is provided, it must be contained."/>
             <compareToSourceId value="request"/>
             <compareToSourceExpression value="Bundle.entry.select(resource as DocumentReference).select(iif (context.exists() and context.sourcePatientInfo.exists(), context.sourcePatientInfo.reference in contained.where(is(Patient)).id , true)).allTrue()"/>
             <warningOnly value="false"/>

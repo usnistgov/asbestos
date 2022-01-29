@@ -1,7 +1,7 @@
 <TestScript xmlns="http://hl7.org/fhir">
     <variable>
         <name value="expectedFailAssertionIdList"/>
-        <defaultValue value="('RM4_2'|'SSLIST_1'|'FTKTR100')"/>
+        <defaultValue value="('RM4_2'|'SSLIST_1'|'TR_1')"/>
     </variable>
 
     <test>

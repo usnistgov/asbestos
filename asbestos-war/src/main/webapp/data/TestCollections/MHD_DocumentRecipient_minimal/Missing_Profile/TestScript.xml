@@ -2,7 +2,7 @@
 
     <variable>
         <name value="expectedFailAssertionIdList"/>
-        <defaultValue value="('FTK3RM400'|'FTKCM100'|'FTKTR100')"/>
+        <defaultValue value="('FTK3RM400'|'CMPMETA4_1'|'TR_1')"/>
     </variable>
 
     <test>

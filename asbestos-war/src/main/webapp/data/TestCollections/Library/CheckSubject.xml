@@ -17,7 +17,7 @@
         <description value="Check Subject."/>
 
         <action>
-            <assert id="FTK4RM700">
+            <assert id="SUBJ4_1">
                 <description value="{DocumentReference, List}.subject.reference is an absolute external reference or UUID."/>
                 <compareToSourceId value="request"/>
                 <compareToSourceExpression value="Bundle.entry.resource.all($this is DocumentReference or ($this is List and code.coding.code='submissionset') implies (subject.reference.startsWith('http') or subject.reference.startsWith('urn:uuid:')))"/>
@@ -26,7 +26,7 @@
         </action>
 
         <action>
-            <assert id="FTK4RM900">
+            <assert id="SUBJ4_2">
                 <description value="PDB: subject must reference a Patient."/>
                 <compareToSourceId value="request"/>
                 <compareToSourceExpression value="Bundle.entry.resource.where($this is DocumentReference or ($this is List and code.coding.code='submissionset')).subject.reference.select(contains('/Patient/')).allTrue()"/>
@@ -34,7 +34,7 @@
             </assert>
         </action>
         <action>
-            <assert id="FTK4RM1000">
+            <assert id="SUBJ4_3">
                 <description value="PDB: {DocumentReference, List}.subject.reference must reference same Patient"/>
                 <compareToSourceId value="request"/>
                 <compareToSourceExpression value="Bundle.entry.resource.where($this is DocumentReference or ($this is List and code.coding.code='submissionset')).select(subject.reference).distinct().count() = 1"/>

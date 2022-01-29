@@ -23,7 +23,7 @@
         <description value="PDB Request."/>
         <action>
             <assert id="RM4_1">
-                <description value="Sending an HTTP POST request method."/>
+                <description value="Is sending an HTTP POST request method."/>
                 <requestMethod value="post"/>
                 <warningOnly value="false"/>
             </assert>
