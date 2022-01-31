@@ -337,11 +337,12 @@ export const testRunnerStore = {
             ENGINE.get(url)
                 .then(response => {
                     // console.log(JSON.stringify(response.data))
-                    // console.log('assertions Profile: ' + response.data.Profile)
+                    console.info(response.data.id + ' has ' + Object.keys(response.data.assertionReferences).length + ' assertions.')
                     commit('setTestAssertions', response.data)
                 })
                 .catch(function (error) {
                     commit('setError', ENGINE.baseURL  + url + ': ' + error)
+                    commit('setTestAssertions', {})
                 })
         },
         runEval({commit, state, rootState}, testId) {

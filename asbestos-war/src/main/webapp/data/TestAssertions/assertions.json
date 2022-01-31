@@ -43,7 +43,7 @@
     "DR_9":         [{"mhdv4": "ITI-65_non-unContainedOption", "context": "MISSINGTEXTInMHD4"}],
     "DR_10":        [{"mhd": "DocumentReference", "context": ".masterIdentifier"}],
     "DR_11":        [{"mhd": "DocumentReference", "context": ".status"}],
-    "SSLIST_1":     [{"mhdv4": "ITI-65_RequestMessage", "context": "messageSemantics"}],
+    "SSLIST_1":     [{"mhdv4": "ITI-65_RequestMessage", "context": "elements"}],
     "SSLIST_2":     [{"mhdv4": "ITI-65_RequestMessage", "context": "elements"},
                       {"mhdv4": "SubmissionSetTypeList", "context": ".extension:sourceId"}],
     "SSLIST_3":     [{"mhdv4": "ITI-65_RequestMessage", "context": "elements"},
@@ -62,11 +62,11 @@
     "CMPMETA4_1":   [{"mhdv4": "ITI-65_BundleResources", "context":"Bundle.meta.profile",
                       "verbatimPhraseToFocus": "Bundle.meta.profile"}],
     "CMPMETA4_2":   [{"mhdv4": "ITI-65_RequestMessage", "context": "elements"},
-                      {"mhdv4": "SubmissionSetTypeList", "context": "cmpSubject"},
-                      {"mhd": "DocumentReference", "context": "cmpSubject"}],
+                      {"mhdv4Comprehensive": "SubmissionSetTypeList", "context": ".subject"},
+                      {"mhdComprehensive": "DocumentReference", "context": ".subject"}],
     "CMPMETA4_3":   [{"mhdv4": "ITI-65_BundleResources", "context":"Bundle.meta.profile",
                       "verbatimPhraseToFocus": "Bundle.meta.profile"}],
-    "CMPMETA4_4":   [{"mhd": "DocumentReference", "context": "cmpSecurityLabel"}],
+    "CMPMETA4_4":   [{"mhdComprehensive": "DocumentReference", "context": ".securityLabel"}],
     "TR_1":         [{"mhd": "ITI-65_ResponseMessage", "context": "messageSemantics_p2"}],
     "TR_2":         [{"mhd": "ITI-65_ResponseMessage", "context": "messageSemantics_p1"}],
     "TR_3":         [{"mhd": "ITI-65_ResponseMessage", "context": "messageSemantics_p1"}],
@@ -76,12 +76,69 @@
     "TR_5":         [{"mhd": "ITI-65_ResponseMessage", "context": "messageSemantics_p2"}],
     "TR_6":         [{"mhd": "ITI-65_ResponseMessage", "context": "messageSemantics_p2"}],
     "TR_7":         [{"fhir": "restApi", "context": "response.lastModified"}],
-    "TR_8":         [{"fhir": "restApi", "context": "transactionResponse-operationOutcome"}],
+    "TR_8":         [{"fhir": "restApi", "context": "transactionResponse-operationOutcome",
+                      "verbatimPhraseToFocus": "For a failed transaction, the server returns a single OperationOutcome instead of a Bundle"}],
     "TR_9":         [{"mhd": "ITI-65_ResponseMessage", "context": "messageSemantics_p1", "verbatimPhraseToFocus": "contains one entry for each entry in the request"}]
 
   },
 
   "references": {
+    "mhdv4Comprehensive": {
+      "SubmissionSetTypeList": {
+        "baseLink": "https://profiles.ihe.net/ITI/MHD/StructureDefinition-IHE.MHD.Comprehensive.SubmissionSet-definitions.html#List",
+        "common": {
+          "Source": {
+            "text": "IHE ITI"
+          },
+          "Profile": {
+            "text": "MHDv4",
+            "link": "https://profiles.ihe.net/ITI/MHD/toc.html"
+          },
+          "Metadata": {
+            "text": "Comprehensive"
+          }
+        },
+        "context": {
+          ".subject": {
+            "Element": {},
+            "SpecificationText": [{
+              "text": "Control 1..1"
+            }]
+          }
+        }
+      }
+    },
+    "mhdComprehensive": {
+      "DocumentReference": {
+        "baseLink": "https://profiles.ihe.net/ITI/MHD/StructureDefinition-IHE.MHD.Comprehensive.DocumentReference-definitions.html#DocumentReference",
+        "common": {
+          "Source": {
+            "text": "IHE ITI"
+          },
+          "Profile": {
+            "text": "MHDv3.x, MHDv4",
+            "link": "https://profiles.ihe.net/ITI/MHD/toc.html"
+          },
+          "Metadata": {
+            "text": "Comprehensive"
+          }
+        },
+        "context": {
+          ".subject": {
+            "Element": {},
+            "SpecificationText": [{
+              "text": "Control 1..1"
+            }]
+          },
+          ".securityLabel": {
+            "Element": {},
+            "SpecificationText": [{
+              "text": "Control 1..*"
+            }]
+          }
+        }
+      }
+    },
     "mhd": {
       "ITI-65_ResponseMessage": {
         "common": {
@@ -125,7 +182,7 @@
             "text": "MHDv3.x, MHDv4",
             "link": "https://profiles.ihe.net/ITI/MHD/toc.html"
           },
-          "Metadata Profile": {
+          "Metadata": {
             "text": "Minimal or Comprehensive"
           }
         },
@@ -169,27 +226,12 @@
           },
           ".subject": {
             "Element": {},
+            "Metadata": {
+              "text": "Minimal"
+            },
             "SpecificationText": [{
               "text": "Control 0..1",
               "comments": "MustSupport, Required if known. https://profiles.ihe.net/ITI/MHD/index.html#must-support"
-            }]
-          },
-          "cmpSubject": {
-            "Element": {
-              "text": "subject",
-              "link": "https://profiles.ihe.net/ITI/MHD/StructureDefinition-IHE.MHD.Comprehensive.DocumentReference-definitions.html#DocumentReference.subject"
-            },
-            "SpecificationText": [{
-              "text": "Control 1..1"
-            }]
-          },
-          "cmpSecurityLabel": {
-            "Element": {
-              "text": "securityLabel",
-              "link": "https://profiles.ihe.net/ITI/MHD/StructureDefinition-IHE.MHD.Comprehensive.DocumentReference-definitions.html#DocumentReference.securityLabel"
-            },
-            "SpecificationText": [{
-              "text": "Control 1..*"
             }]
           },
             "MinMeta_mappingToXds": {
@@ -345,6 +387,9 @@
           "Profile": {
             "text": "MHDv4",
             "link": "https://profiles.ihe.net/ITI/MHD/toc.html"
+          },
+          "Metadata": {
+            "text": "Minimal or Comprehensive"
           }
         },
         "context": {
@@ -362,18 +407,12 @@
           },
           ".subject": {
             "Element": {},
+            "Metadata": {
+              "text": "Minimal"
+            },
             "SpecificationText": [{
               "text": "Control 0..1",
               "comments": "MustSupport, Required if known. https://profiles.ihe.net/ITI/MHD/index.html#must-support"
-            }]
-          },
-          "cmpSubject": {
-            "Element": {
-              "text": "subject",
-              "link": "https://profiles.ihe.net/ITI/MHD/StructureDefinition-IHE.MHD.Comprehensive.SubmissionSet-definitions.html#List.subject"
-            },
-            "SpecificationText": [{
-              "text": "Control 1..1"
             }]
           },
           "attributeMap": {

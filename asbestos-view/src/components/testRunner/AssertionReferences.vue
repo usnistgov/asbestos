@@ -26,8 +26,8 @@
                     <template v-else>
                         <div>
                             {{getReferencePropertyText(refMap,referenceProperty)}}
-                            <template v-if="'link' in referenceTable(refMap)[referenceProperty]">
-                                <a :href="getReferencePropertyLink(refMap, referenceProperty)" target="_blank"><img
+                            <template v-for="(refLink, refLinkKey) in getReferencePropertyLink(refMap, referenceProperty)">
+                                <a :href="refLink" target="_blank" :key="refLinkKey"><img
                                         alt="External link" src="../../assets/ext_link.png" style="vertical-align: top"
                                         title="Open link in a new browser tab"></a>
                             </template>
@@ -81,7 +81,7 @@
                             console.error(`aId ${aId} does not exist in assertionReferences.`);
                         }
                     } else {
-                        console.error("assertionsReference is not ready.")
+                        console.error("assertionsReference is not loaded.")
                     }
                 } catch (e) {
                     console.error('referenceObj error ' + e)
@@ -113,13 +113,13 @@
                     }
                     else {
                         const errorStr = 'specReference ' + specReference + ' does not exist in Source'
-                        console.error(errorStr)
-                        this.$store.commit('setError',errorStr)
+                        console.error('AssertionReferences Error 1: ' + errorStr)
+                        // this.$store.commit('setError',errorStr)
                     }
                 } else {
                     const errorStr = 'specSourceKey ' + specSourceKey + ' does not exist in rObj'
-                    console.error(errorStr)
-                    this.$store.commit('setError',errorStr)
+                    console.error('AssertionReferences Error 2: ' + errorStr)
+                    // this.$store.commit('setError',errorStr)
                 }
                 return {}
             },
@@ -133,10 +133,11 @@
                     } else {
                         const specSourceKey = this.getAssertionReferenceMapKey(assertionReferenceMap)
                         const specReference = this.getSpecReferenceValue(assertionReferenceMap, specSourceKey)
-                        const errorStr = specContext + ' was declared in key: '+ specSourceKey + ' and ref: '+ specReference
-                            + ' assertionReference map but not found in specification table.'
-                        console.error(errorStr)
-                        this.$store.commit('setError',errorStr)
+                        const errorStr = specContext + ' was declared in category: '+ specSourceKey + ' with key: '+ specReference
+                            + ' in the assertionReference map, but not found in references table.'
+                        console.error('AssertionReferences Error 3:' + errorStr)
+                        // This $store.commit statement below causes infinite loop render vue warn
+                        // this.$store.commit('setError',errorStr)
                         return {}
                     }
                 }
@@ -194,9 +195,9 @@
                 if (typeof specRef === 'object') {
                     if ('text' in specRef) {
                         return specRef.text
-                    } else {
+                    } else if (Object.keys(specRef).length === 0) {
                         // text property is optional if context exists
-                        // Only ONE JSON property without text will make sense, otherwise same text is returned for all other properties which may not be desired
+                        // Only ONE empty JSON property will make sense, otherwise same text is returned for all other properties which may not be desired
                         // if context is available, return it
                         if ('context' in refMap) {
                             const specSourceKey = this.getAssertionReferenceMapKey(refMap)
@@ -225,18 +226,20 @@
                 // const specRef = rawTable[referenceProperty]
                 const specRef = this.referenceTable(refMap)[referenceProperty]
                     if ('link' in specRef) {
-                        return specRef.link
-                    } else if ('context' in refMap) {
+                        return [specRef.link]
+                    } else if (Object.keys(specRef).length === 0
+                        /* Element property type is an Empty object, a dynamically populated table property at runtime */
+                        && 'context' in refMap) {
                         // build context link off the baseLink
                         const rawTable = this.getRawTable(refMap)
                         if ('baseLink' in  rawTable) {
                             const baseLink = rawTable.baseLink
-                            return baseLink.concat(refMap.context)
+                            return [baseLink.concat(refMap.context)]
                         } else {
                             console.warn('context link nor baseLink is not available for ' + JSON.stringify(refMap) + ' referenceProperty ' + JSON.stringify(referenceProperty))
                         }
                     }
-                    return ''
+                    return []
             }
 
         }
