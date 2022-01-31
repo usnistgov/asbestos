@@ -1,6 +1,6 @@
 <template>
 <div>
-    <p class="asbtsReferenceHeaderLabel" v-if="referenceMap.length > 0">Asbestos Assertion ID: {{assertionId}}<br>Reference(s):</p>
+    <p class="asbtsReferenceHeaderLabel" v-if="referenceMap.length > 0">Asbestos Assertion ID <span class="asbestosAssertionId">{{assertionId}}</span> has {{referenceMap.length}} reference(s):</p>
         <ol>
         <li v-for="(refMap,rmKeyIndex ) in referenceMap" :key="rmKeyIndex" >
             <div class="system-error" v-if="Object.keys(referenceTable(refMap)).length===0" :key="rmKeyIndex">
@@ -264,6 +264,10 @@
     .specificationTextGridItem {
        grid-column: span 2;
         text-align: left;
+    }
+    .asbestosAssertionId {
+        font-family: monospace;
+        background-color: #f5f5f5;
     }
 
 </style>
