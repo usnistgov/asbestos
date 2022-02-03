@@ -39,7 +39,7 @@
         <action>
             <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Conditional"/>
             <assert id="MINMETA4_2">
-                <description value="Subject is required if known. Subject must either be present or non-existent consistently among bundle resources."/>
+                <description value="Subject is known, is it present consistently among bundle resources? If Subject is not present or not known, is it non-existent consistently among bundle resources?"/>
                 <compareToSourceId value="request"/>
                 <compareToSourceExpression value="Bundle.entry.resource.where($this is DocumentReference or ($this is List and code.coding.code='submissionset')).select(subject.exists()).distinct().count()=1"/>
                 <warningOnly value="false"/>
