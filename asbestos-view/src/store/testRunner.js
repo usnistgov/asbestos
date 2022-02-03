@@ -342,7 +342,6 @@ export const testRunnerStore = {
                 })
                 .catch(function (error) {
                     commit('setError', ENGINE.baseURL  + url + ': ' + error)
-                    commit('setTestAssertions', {})
                 })
         },
         runEval({commit, state, rootState}, testId) {
@@ -374,11 +373,11 @@ export const testRunnerStore = {
         },
         loadTestScripts({commit, state}, scriptNames) {
             commit('clearTestScripts')
-            console.log(`scriptNames = ${scriptNames}`)
+            console.info(`scriptNames to be loaded = ${scriptNames}`)
             const promises = []
             scriptNames.forEach(name => {
                 const url = `testScript/${state.currentTestCollectionName}/${name}`
-                console.log(`loadTestScripts ${url}`)
+                // console.log(`loadTestScripts ${url}`)
                 const promise = ENGINE.get(url)
                 promises.push(promise)
             })

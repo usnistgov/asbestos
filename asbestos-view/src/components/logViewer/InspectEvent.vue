@@ -1,13 +1,13 @@
 <template>
     <div>
-        <log-nav v-if="!noNav" :index="index" :sessionId="sessionId" :channelName="channelName">
-            <template v-if="isLoading">Loading...</template>
+        <log-nav v-if="!noNav" :index="index" :sessionId="sessionId" :channelName="channelName" title="Source: FhirChannel Events">
+<!--            <template v-if="isLoading"><span>Loading...</span></template>-->
         </log-nav>
 
         <div class="boxed">
             <!-- Event Header -->
             <div v-if="eventSummary" class="event-description">
-                {{ eventAsDate(eventSummary.eventName) }} - {{ eventSummary.verb}} {{ eventSummary.resourceType }} - {{ eventSummary.status ? 'Ok' : 'Error' }}
+                {{ eventAsDate(eventSummary.eventName) }} - {{ eventSummary.verb}} {{ eventSummary.resourceType }} - {{ eventStatus}}
                 <span class="client-server-position">
                 <span class="bolded">Client:</span>  {{clientIP}}
                 <span class="bolded">Server:</span>  {{channelName}}
@@ -123,7 +123,7 @@
         </div>
 
         <!-- basic event display choices -->
-            <div v-if="!displayInspector && !displayValidations && getEvent()">
+            <div v-if="!displayInspector && !displayValidations /*&& getEvent()*/">
                 <div v-if="displayRequest" class="event-details">
                             <pre>{{ requestHeader }}
                             </pre>
@@ -172,7 +172,7 @@
 <script>
     import LogNav from "./LogNav";
     import LogAnalysisReport from "./LogAnalysisReport";
-    import {FHIRTOOLKITBASEURL, LOG} from '../../common/http-common';
+    import {FHIRTOOLKITBASEURL, LOG, PROXY,  UtilFunctions} from '../../common/http-common';
     import eventMixin from '../../mixins/eventMixin';
     import errorHandlerMixin from '../../mixins/errorHandlerMixin';
     import EvalDetails from "../testRunner/EvalDetails";
@@ -191,6 +191,7 @@
                 isLoading: false,
                 defaultMhdVersion: 'MHDv3.x',
                 pdbValMhdAssertion: '',
+                currentEventSummary: []
             }
         },
         methods: {
@@ -235,11 +236,13 @@
                 if (!summary)
                     return
                 // don't load if it is already the selected event
+                // console.log('summary.eventName = ' + summary.eventName + ' selectedEventName = ' + this.selectedEventName())
                 const selectedEventName = summary.eventName === this.selectedEventName() ? null: summary.eventName
                 if (selectedEventName !== null) {
                     this.selectedEvent = null
                     this.selectedTask = 0
                     this.isLoading = true
+                    // GetEventRequest
                     LOG.get(`${this.sessionId}/${this.channelName}/${summary.resourceType}/${summary.eventName}`)
                         .then(response => {
                             this.isLoading = false
@@ -253,6 +256,41 @@
                             this.isLoading = false
                             this.error(error)
                         })
+
+                    // const parms = {
+                    //     filterEventId : summary.eventName,
+                    //     getSingleEvent: true
+                    // }
+
+                    // const url = UtilFunctions.getLogListUrl(parms, this.$store.state.base.channel.testSession, this.$store.state.base.channel.channelName)
+                    // console.log('2'+url)
+
+                    try {
+                    if (!( 'status' in summary)) {
+                        // Now, fully load the event summary for this single event
+                        const parms = {
+                            filterEventId : summary.eventName,
+                            getSingleEvent: true
+                        }
+                        const methodParms =  {
+                            params: {
+                                summaries: 'true'
+                            }
+                        }
+                        const url = UtilFunctions.getLogListUrl(parms, this.$store.state.base.channel.testSession, this.$store.state.base.channel.channelName)
+                        PROXY.get(url, methodParms)
+                            .then((response)=>
+                            {
+                            // console.log(response.data);
+                            this.currentEventSummary.splice(0)
+                               response.data.forEach((e,idx) => {
+                                   this.currentEventSummary.splice(idx, 1, response.data[idx])
+                               })
+                            })
+                    }
+                    } catch (e) {
+                        console.error(e)
+                    }
                 }
             },
             limitLines(text) {
@@ -266,8 +304,10 @@
             },
             async loadEventSummaries() {
                 this.isLoading = true
-                await this.$store.dispatch('loadEventSummaries', {session: this.sessionId, channel: this.channelName})
-                this.isLoading = false
+                await this.$store.dispatch('loadEventSummaries',
+                    {session: this.sessionId, channel: this.channelName, filterEventId: this.eventId})
+                    .then(() => this.isLoading = false)
+                this.getEvent()
             },
             setupMyComponent() {
                 this.loadEventSummaries()
@@ -312,6 +352,24 @@
             },
         },
         computed: {
+            eventStatus() {
+                let myEventStatus = null
+                if ('status' in this.eventSummary) {
+                    myEventStatus = this.eventSummary.status
+                } else {
+                    if (this.currentEventSummary !== null && this.currentEventSummary.length > 0 && this.eventSummary !== null) {
+                        var o = this.currentEventSummary.filter(
+                            e => e.resourceType === (this.eventSummary.resourceType) && e.eventName === (this.eventSummary.eventName))
+                        if (o !== undefined && o.length > 0) {
+                        myEventStatus = o[0].status
+                        }
+                    }
+                }
+                if (myEventStatus !== null) {
+                    return myEventStatus ? 'Ok' : 'Error'
+                }
+                return ''
+            },
             isPdbValDisabled() {
                 return this.pdbValMhdAssertion==='' || this.pdbValMhdAssertion===undefined || this.inspectType=== 'response'
             },
@@ -371,9 +429,11 @@
             eventSummary() {
                 if (!this.$store.state.log.eventSummaries)
                     return null
-                return (this.index > -1)
+                const eSummary = (this.index > -1)
                     ? this.$store.state.log.eventSummaries[this.index]
                     : null
+
+                return eSummary
             },
             eventLink() {
                 return window.location.href

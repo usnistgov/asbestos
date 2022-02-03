@@ -37,6 +37,12 @@ export const UtilFunctions = {
     },
     getToolkitBase: function() {
         return toolkitBaseToUse
+    },
+    getLogListUrl: function(parms, testSession, channelName) {
+        const url = `logList/${testSession}/${channelName}`
+            .concat(('filterEventId' in parms)? `/${parms.filterEventId}`:'')
+            .concat(('getSingleEvent' in parms ? '/getSingleEvent':''))
+        return url
     }
 }
 

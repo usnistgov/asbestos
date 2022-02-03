@@ -4,6 +4,8 @@ import Vuex from 'vuex'
 Vue.use(Vuex)
 
 import {LOG} from '../common/http-common'
+import {PROXY} from '../common/http-common'
+import {UtilFunctions} from "../common/http-common";
 
 export const logStore = {
     state() {
@@ -77,20 +79,23 @@ export const logStore = {
                 console.error(errorMsg)
                 return
             }
-            const url = `${rootState.base.channel.testSession}/${rootState.base.channel.channelName}`
+            const url = UtilFunctions.getLogListUrl(parms, rootState.base.channel.testSession, rootState.base.channel.channelName)
+            console.info(url)
             try {
-                const rawSummaries = await LOG.get(url, {
-                    params: {
-                        summaries: 'true'
+                const methodParams =
+                    {
+                        params: {
+                            summaries: 'true'
+                        }
                     }
-                })
+                const rawSummaries = await PROXY.get(url, methodParams)
                 const eventSummaries = rawSummaries.data.sort((a, b) => {
                     if (a.eventName < b.eventName) return 1
                     return -1
                 })
                 commit('setEventSummaries', eventSummaries)
             } catch (error) {
-                commit('setError', `${error} for LOG/${url}`)
+                commit('setError', `${error} for LOGLIST/${url}`)
                 console.error(`${error} for ${url}`)
             }
         },

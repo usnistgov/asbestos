@@ -130,6 +130,11 @@
   </servlet-mapping>
 
   <servlet-mapping>
+    <servlet-name>logViewer</servlet-name>
+    <url-pattern>/logList/*</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
     <servlet-name>validationService</servlet-name>
     <url-pattern>/validate/*</url-pattern>
   </servlet-mapping>

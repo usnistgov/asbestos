@@ -180,7 +180,7 @@
                 await this.loadAnalysis2()
                 this.selectedResourceIndex = -1
                 this.historyClear()
-                if (this.report !== null && this.report !== undefined) {
+                if (this.report !== null && this.report !== undefined && this.report.base !== undefined) {
                     this.historyPush(this.report.base.url, null)
                 }
             },

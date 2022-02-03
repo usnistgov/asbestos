@@ -32,6 +32,7 @@ import static gov.nist.asbestos.client.Base.Dirs.listOfDirectories;
 import static gov.nist.asbestos.client.Base.Dirs.listOfFiles;
 
 public class EC {
+    private static final int MAX_EVENT_LIMIT = 5000;
     private static Logger log = Logger.getLogger(EC.class.getName());
     public File externalCache;
 
@@ -399,24 +400,36 @@ public class EC {
         }
     }
 
-    public void buildJsonListingOfEventSummaries(HttpServletResponse resp, String testSession, String channelId) throws IOException {
+    public void buildJsonListingOfEventSummaries(HttpServletResponse resp, String testSession, String channelId, final String filterEventId, boolean isGetSingleEvent) throws IOException {
         File fhir = new EC(externalCache).fhirDir(testSession, channelId);
         List<String> resourceTypes = Dirs.dirListingAsStringList(fhir);
         List<EventSummary> eventSummaries = new ArrayList<>();
         for (String resourceType : resourceTypes) {
             File resourceDir = new File(fhir, resourceType);
-            List<String> eventIds = Dirs.dirListingAsStringList(resourceDir);
-            for (String eventId : eventIds) {
-                File eventFile = new File(resourceDir, eventId);
+            if (isGetSingleEvent) {
+                File eventFile = new File(resourceDir, filterEventId);
                 EventSummary summary = new EventSummary(eventFile);
                 summary.resourceType = resourceType;
-                summary.eventName = eventId;
+                summary.eventName = filterEventId;
                 eventSummaries.add(summary);
+            } else {
+                List<String> eventIds = Dirs.dirListingAsStringList(resourceDir);
+                if (eventIds.size() > MAX_EVENT_LIMIT) {
+                    log.warning(String.format("eventIds limit of %d exceeded for %s/%s.", MAX_EVENT_LIMIT, testSession, channelId));
+                }
+                eventIds.stream().limit(MAX_EVENT_LIMIT).forEach(eventId -> {
+                    File eventFile = new File(resourceDir, eventId);
+                    EventSummary summary =
+                            (filterEventId != null && ! eventId.equalsIgnoreCase(filterEventId)) ?
+                                    new EventSummary() : new EventSummary(eventFile);
+                    summary.resourceType = resourceType;
+                    summary.eventName = eventId;
+                    eventSummaries.add(summary);
+                });
             }
         }
         String json = new Gson().toJson(eventSummaries);
-        resp.setContentType("application/json");
-        resp.getOutputStream().print(json);
+        Returns.returnString(resp, json);
     }
 
     public void buildJsonListingOfResourceTypes(HttpServletResponse resp, String testSession, String channelId) {

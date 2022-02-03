@@ -192,7 +192,7 @@ kinds of channels: FHIR - data passed without modification and MHD - translation
                 this.$store.dispatch('loadTestCollectionNames')
             },
             testProxy() {
-                this.$store.dispatch('loadEventSummaries',{session: 'default', channel: 'default'})
+                this.$store.dispatch('loadEventSummaries',{session: 'default', channel: 'default', filterEventId: 'bogusFlagToSkipSummariesForTestProxy'})
             },
             testXdsToolkit() {
                 this.$store.dispatch('xdsHeartbeat')
