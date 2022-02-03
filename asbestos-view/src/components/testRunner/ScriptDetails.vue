@@ -65,6 +65,7 @@
                                 :test-index="testi"
                                 :disable-debugger="disableDebugger"
                                 :parent-test-index="parentTestIndex"
+                                :eval-test-id="evalTestId"
                         ></test-details>
                     </debuggable-list-item>
                 </ul>
@@ -140,6 +141,10 @@
                required: false
             },
             parentTestIndex: {
+                type: String,
+                required: false
+            },
+            evalTestId: {
                 type: String,
                 required: false
             }

@@ -297,7 +297,7 @@
           "Bundle.meta.profile": {
             "SpecificationText": [{
               "text": "The FHIR Bundle.meta.profile shall have the following value depending on the Actor implementation of no options (Minimal Metadata), Comprehensive Metadata Option, or UnContained References Option...",
-              "comments": "1:33.2.3 UnContained Reference Option<br>https://profiles.ihe.net/ITI/MHD/1332_actor_options.html#13323-uncontained-reference-option<br>The UnContained Reference Option is not compatible with the XDS on FHIR Option. A system may be able to support both options, but only one will be able to be used at a given deployment.<br>UnContained References Option is not yet supported in Toolkit."
+              "comments": "<span>1:33.2.3 UnContained Reference Option</span><br>https://profiles.ihe.net/ITI/MHD/1332_actor_options.html#13323-uncontained-reference-option<br>The UnContained Reference Option is not compatible with the XDS on FHIR Option. A system may be able to support both options, but only one will be able to be used at a given deployment.<br>UnContained References Option is not yet supported in Toolkit."
             }]
           }
         }
@@ -325,7 +325,7 @@
             "SpecificationText": [{
               "hasAssertionOrderBiasAnnotations": true,
               "text": "The Document Source shall initiate [2.1]a FHIR \"transaction\" using a \"create\" action by [1.0]sending an HTTP POST request method [2.0]composed of a FHIR Bundle Resource [2.2]containing: one SubmissionSet type List Resource; [2.3]one or more DocumentReference Resources; [2.4]zero or more Folder type List Resources; and [2.5]zero or more Binary Resources to the Document Recipient. ",
-              "comments": "MHD specification issue:<br>https://profiles.ihe.net/ITI/MHD/ITI-65.html#2365412-message-semantics<br>(Para 1.) Zero or more Binary Resources does not seem right. If one or more DocumentReference is expected, then according to 2:3.65.4.1.2.1 Bundle Resources, Binary shall be in the Bundle, then it also implies a minimum of one Binary resource, not zero.<br>Under 2:3.65.4.1.2.1 Bundle Resources, may create one or more Binary is specified."
+              "comments": "<span>MHD specification issue:</span><br>https://profiles.ihe.net/ITI/MHD/ITI-65.html#2365412-message-semantics<br>(Para 1.) Zero or more Binary Resources does not seem right. If one or more DocumentReference is expected, then according to 2:3.65.4.1.2.1 Bundle Resources, Binary shall be in the Bundle, then it also implies a minimum of one Binary resource, not zero.<br>Under 2:3.65.4.1.2.1 Bundle Resources, may create one or more Binary is specified."
             }]
           },
           "elements": {
@@ -373,7 +373,7 @@
             },
             "SpecificationText": [{
               "text": "See comments below.",
-              "comments": "Specification Missing in MHD 4.x. See Previous MHD PDF Rev. 3.2 ? Trial Implementation. Table 4.5.1.1-1: FHIR DocumentReference mapping to DocumentEntry<br>Note 1: Indicates that the data shall be represented as a contained resource, unless the UnContained References Option is used."
+              "comments": "<span>Specification Missing in MHD 4.x.</span> See Previous MHD PDF Rev. 3.2 ? Trial Implementation. Table 4.5.1.1-1: FHIR DocumentReference mapping to DocumentEntry<br>Note 1: Indicates that the data shall be represented as a contained resource, unless the UnContained References Option is used."
             }]
           }
         }

@@ -41,8 +41,8 @@ export default {
                         extension.modifierExtension.forEach(extension => {
                             if (extension.url === 'component') {
                                 let filePath = extension.valueString
-                                let fileDotExtension = path.extname(filePath)
-                                componentName = path.basename(filePath, fileDotExtension)
+                                let dotExtension = path.extname(filePath)
+                                componentName = path.basename(filePath, dotExtension)
                             }
                         })
                     }

@@ -33,12 +33,14 @@
                      :key="'Eval' + testi + 'Action' + actioni">
                     <div v-for="(resultObj, resultKey) in scriptImport(action)" :key="resultKey">
                         <template v-if="'hasImport' in resultObj && resultObj.hasImport">
+                            <!-- EEE{{eventId}} -->
                             <component-script
                                     :action-script="action"
                                     :action-report="reportAction(testi, actioni)"
                                     :action-component-name="resultObj.componentName"
                                     :disable-debugger="'true'"
                                     :eval-test-id="testId"
+                                    :report-event-id="eventId"
                             ></component-script>
                         </template>
                         <template v-else class="has-cursor">
@@ -149,7 +151,7 @@
                 }
             },
             loadTestReport() {
-              console.log(`loadTestReport`)
+              console.log(`EvalDetails: loadTestReport`)
                 const reportsForTest = this.$store.state.testRunner.clientTestResult[this.testId]
                 if (!reportsForTest)
                   return;
@@ -191,7 +193,6 @@
              */
             loadAssertions() {
                 // if (Object.keys(this.$store.state.testRunner.testAssertions).length === 0)
-                if (this.$store.state.testRunner.testAssertions === null)
                     this.$store.dispatch('loadTestAssertions')
             },
             reportAction(testi, actioni) {
@@ -254,10 +255,10 @@
             },
         },
         created() {
-            this.loadAssertions()
         },
         mounted() {
-
+            if (this.$store.state.testRunner.testAssertions === null)
+                this.loadAssertions()
         },
         mixins: [ errorHandlerMixin, colorizeTestReports, importMixin ],
         props: [

@@ -70,6 +70,11 @@
                             </action-details>
                         </div>
                         <div v-else-if="'hasImport' in resultObj && resultObj.hasImport">
+                            <!--
+                            hasImportZZ{{testType}}
+                            {{action}}
+                            {{report}}
+                            -->
                             <component-script
                                :action-script="action"
                                :action-report="report && report.action ? report.action[actioni] : null"
@@ -77,6 +82,7 @@
                                :parent-index="getParentBreakpointIndex(parentTestIndex, testType, testIndex, actioni)"
                                :disable-debugger="disableDebugger"
                                :test-type="testType"
+                               :eval-test-id="evalTestId"
                             ></component-script>
                         </div>
                         <div v-else class="has-cursor">
@@ -181,7 +187,7 @@
             'script', 'report',
             'scriptContained', 'reportContained', // contained section of the TestScript and TestReport - used in conditional
             'label',
-            'testIndex', 'testType', 'disableDebugger', 'parentTestIndex',
+            'testIndex', 'testType', 'disableDebugger', 'parentTestIndex', 'evalTestId'
         ],
         components: {
             ActionDetails,

@@ -18,7 +18,7 @@
                             <!--                    <p :title="getSpecificationPropertyComments(refMap,referenceProperty)"><vue-markdown :html="false">{{getSpecificationPropertyText(refMap,referenceProperty)}}</vue-markdown></p>-->
                             <p v-html="getSpecificationPropertyText(specTextObj, getVerbatimPhraseToFocus(refMap))"></p>
                             <template v-for="(comment, cKey) in getSpecificationPropertyComments(specTextObj)">
-                                <p v-if="comment !== ''" :title="comment" :key="cKey" @click="showComments($event,comment)">{{commentsLabel}}</p>
+                                <p v-if="comment !== ''" :title="getCommentTitle(comment)" :key="cKey"  @click="showComments($event,comment)" >{{commentsLabel}}</p>
                             </template>
                         </div>
                         </template>
@@ -91,6 +91,12 @@
 
         },
         methods: {
+            getCommentTitle(comment) {
+                if (comment !== undefined && comment !== null) {
+                    return comment.replace(/(<([^>]+)>)/gi, '')
+                }
+                return ''
+            },
             showComments: function(pElement, comment) {
                 if (pElement.target.innerText === this.commentsLabel)
                     pElement.target.innerHTML = 'Comments<br>' + comment
@@ -215,9 +221,6 @@
                 // const specRef = this.referenceTable(refMap)[referenceProperty]
                 if ('comments' in specRef) {
                     const specComments = specRef.comments
-                    if (specComments.startsWith('<')) {
-                        return ['Click to see link(s): ' + specComments]
-                    }
                     return [specComments]
                 }
                 return ['']

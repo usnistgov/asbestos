@@ -44,16 +44,22 @@
             </div>
         </li>
         <li v-else-if="theScript !== undefined && theScript !== null">
+            <!--
+            Y{{reportEventId}}.
+            {{theScript}}.
+            {{theReport}}.
+            -->
             <script-details
                 :script="theScript"
                 :report="theReport"
                 :test-script-index="theTestScriptIndex"
                 :disable-debugger="disableDebugger"
                 :parent-test-index="parentTestIndex"
+                :eval-test-id="testId"
             > </script-details>
         </li>
         <li v-else>
-            <span class="configurationError">One or more TestScript(s) in this TEST COLLECTION is invalid: TestScript could not be loaded. Check server log for errors. Please fix the TestScript and reload the Test Collection using the Refresh image link.</span>
+            <span class="configurationError">If this message persists, then one or more TestScript(s) in this TEST COLLECTION is invalid: TestScript could not be loaded. Check server log for errors. Please fix the TestScript and reload the Test Collection using the Refresh image link.</span>
         </li>
     </ul>
     </div>
@@ -85,10 +91,30 @@
           },
           theReport() {
               if (this.testId.includes('/')) {
-                  if (! (this.testId in this.$store.state.testRunner.moduleTestReports)) {
-                      console.error(this.testId + ' does not exist in moduleTestReports object.')
-                  }
-                  return this.$store.state.testRunner.moduleTestReports[this.testId]
+                  // if (this.reportEventId !== undefined  && this.reportEventId !== '') {
+                  //     Inspector PDB Val on an event
+                  //     console.log('testId ' + this.testId + ' exists in moduleTestReports ? ' + (this.testId in this.$store.state.testRunner.moduleTestReports))
+                  //     console.log('clientTestResult has ' +  Object.keys(this.$store.state.testRunner.clientTestResult).length + ' entries. [0]=' +
+                  //         Object.keys(this.$store.state.testRunner.clientTestResult)[0] + ' testId=' + this.testId )
+                  //     console.log('moduleTestReports has ' + Object.keys(this.$store.state.testRunner.moduleTestReports).length + ' entries.')
+                  //     return this.$store.state.testRunner.clientTestResult[this.testId][this.reportEventId]
+                  // } else {
+                      if (! (this.testId in this.$store.state.testRunner.moduleTestReports)) {
+                          if (! this.testId.includes('asbtsFiber')) {
+                            console.warn('testId: ' + this.testId + ' does not exist in moduleTestReports object.')
+                          }
+                          return {}
+                          /*
+                          if (! (this.testId in this.$store.state.testRunner.clientTestResult[this.testId][this.reportEventId])) {
+                              console.error('testId: ' + this.testId + ' does not exist in clientTestResult object.')
+                          } else {
+                              console.info("testId: " + this.testId + " exists in clientTestResult")
+                          return {}
+                          }
+                           */
+                      }
+                      return this.$store.state.testRunner.moduleTestReports[this.testId]
+                  // }
               } else {
                   if (! (this.testId in this.$store.state.testRunner.testReports)) {
                       console.error(this.testId + ' does not exist in testReports object.')
@@ -180,7 +206,8 @@
             '$store.state.base.channelName': 'loadEventSummariesAndReRun'
         },
         props: [
-            'sessionId', 'channelName', 'testCollection', 'testId', 'disableDebugger', 'isAggregateDetail', 'parentTestIndex'
+            'sessionId', 'channelName', 'testCollection', 'testId', 'disableDebugger', 'isAggregateDetail', 'parentTestIndex',
+            'reportEventId',
         ],
         components: {
             ScriptDetails, ClientDetails, VueMarkdown,

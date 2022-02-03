@@ -22,9 +22,10 @@
                        :channel-name="$store.state.base.channel.channelName"
                        :test-collection="$store.state.testRunner.currentTestCollectionName"
                        :test-id="testId.concat('/').concat(resultObj.componentName)"
-                       :disable-debugger="'false'"
+                       :disable-debugger="disableDebugger"
                        :is-aggregate-detail="'true'"
                        :parent-test-index="getParentBreakpointIndex(parentIndex, testType, 0, cactioni)"
+                       :report-event-id="reportEventId"
                        ></test-or-eval-details>
                 </div>
                 <div v-else class="has-cursor">
@@ -105,8 +106,8 @@ import importMixin from "../../mixins/importMixin";
             },
             scriptActions() {   // component has no setup and a single test
                 // if (this.componentName === null) return null
-                if (this.testId == null || this.testId == undefined) {
-                    console.error('Incorrect testId, value is: ' + this.testId)
+                if (this.testId === null || this.testId === undefined) {
+                    console.error('Incorrect testId. testId is: ' + this.testId)
                     return null;
                 }
                 const myModuleId = this.testId + '/' + this.actionComponentName
@@ -116,7 +117,7 @@ import importMixin from "../../mixins/importMixin";
                 // if (this.testType === 'setup') {
                 //     script = this.$store.state.testRunner.testScripts[myModuleId]
                 // }
-                // console.info(`myModuleId is ${myModuleId} and testType is ${this.testType}. setup exists? ${(this.testType==='setup'?JSON.stringify(script):'n/a')}` )
+                // console.info(`evalTestId ${this.evalTestId} myModuleId is ${myModuleId} and testType is ${this.testType}. setup exists? ${(this.testType==='setup'?JSON.stringify(script):'n/a')}` )
                 // console.info(`2.script is undef ${script===undefined}`)
                 // console.info(`2.scrip is null ${script===null}`)
                 /* if (this.testType==='setup') {
@@ -145,9 +146,16 @@ import importMixin from "../../mixins/importMixin";
                 }
                 return report.test[0].action
             },
+            /**
+             * Guarantee to return only the testId part, never appended by the forward-slash '/' component separator
+             * @returns {string|default.computed.currentTest|null}
+             */
             testId() {
-                if (this.evalTestId !== '' && this.evalTestId !== null && this.evalTestId !== undefined) {
-                    // For client test
+                if (this.evalTestId !== '' && this.evalTestId !== undefined) {
+                    // For client test which will not have any test collection context selected by user
+                    if (this.evalTestId.includes('/')) {
+                        return this.evalTestId.split('/')[0]
+                    }
                     return this.evalTestId
                 } else {
                   // For client eval tests, currentTest is not set
@@ -164,6 +172,7 @@ import importMixin from "../../mixins/importMixin";
             'disableDebugger',
             'evalTestId',
             'testType',
+            'reportEventId'
         ],
         components: {
             TestOrEvalDetails: () => import('./TestOrEvalDetails'),
