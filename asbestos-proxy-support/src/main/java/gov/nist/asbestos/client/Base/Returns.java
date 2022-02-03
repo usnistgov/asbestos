@@ -8,6 +8,7 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.List;
 
 public class Returns {
@@ -37,7 +38,11 @@ public class Returns {
     public static void returnString(HttpServletResponse resp, String json) {
         resp.setContentType("application/json");
         try {
-            resp.getOutputStream().print(json);
+            resp.setCharacterEncoding("UTF-8"); // now equivalent to setContentType "application/json; charset=UTF-8"
+            PrintWriter writer = resp.getWriter();
+            writer.print(json);
+            // Binary output
+//            resp.getOutputStream().print(json);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
