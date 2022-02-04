@@ -31,7 +31,7 @@ public class GetStartupSessionRequest {
 
     public void run() throws IOException {
         request.announce("GetStartupSession");
-        String session = ServiceProperties.getInstance().getPropertyOrStop(ServicePropertiesEnum.STARTUP_SESSION_ID);
+        String session = ServiceProperties.getInstance().getPropertyOrThrow(ServicePropertiesEnum.STARTUP_SESSION_ID);
         log.info("initial session is " + session);
         request.resp.setContentType("text/plain");
         request.resp.getOutputStream().print(session);

@@ -104,7 +104,7 @@ public class SubmissionSetToDocumentManifest implements IVal {
 
         for (AssociationType1 assoc : assocs) {
             if (assoc.getAssociationType().endsWith("HasMember") && assoc.getSourceObject().equals(id)) {
-                String fhirBase = ServiceProperties.getInstance().getPropertyOrStop(ServicePropertiesEnum.FHIR_TOOLKIT_BASE) + "/proxy/" + channelConfig.asFullId();
+                String fhirBase = ServiceProperties.getInstance().getPropertyOrThrow(ServicePropertiesEnum.FHIR_TOOLKIT_BASE) + "/proxy/" + channelConfig.asFullId();
                 String reference = fhirBase +
                         "/DocumentReference/" +
                         Utils.stripUrnPrefixes(assoc.getTargetObject());

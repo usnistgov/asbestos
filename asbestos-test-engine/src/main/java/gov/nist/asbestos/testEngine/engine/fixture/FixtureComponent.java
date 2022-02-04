@@ -5,7 +5,6 @@ import gov.nist.asbestos.client.client.FhirClient;
 import gov.nist.asbestos.client.events.UIEvent;
 import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
-import gov.nist.asbestos.client.resolver.SearchParms;
 import gov.nist.asbestos.http.operations.HttpBase;
 import gov.nist.asbestos.serviceproperties.ServiceProperties;
 import gov.nist.asbestos.serviceproperties.ServicePropertiesEnum;
@@ -13,7 +12,6 @@ import gov.nist.asbestos.simapi.validation.ValE;
 import gov.nist.asbestos.testEngine.engine.ActionReference;
 import org.hl7.fhir.r4.model.BaseResource;
 
-import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -164,7 +162,7 @@ public class FixtureComponent {
     public static Ref generateStaticResourceRef(ResourceWrapper wrapper, String fixturePath, String fhirPath, String testCollectionId, String testId) {
         URI uri;
         try {
-            uri = new URI(ServiceProperties.getInstance().getPropertyOrStop(ServicePropertiesEnum.FHIR_TOOLKIT_BASE)
+            uri = new URI(ServiceProperties.getInstance().getPropertyOrThrow(ServicePropertiesEnum.FHIR_TOOLKIT_BASE)
                     + "/static/staticResource/" + testCollectionId + "/" + testId);
         } catch (URISyntaxException e) {
             return null;

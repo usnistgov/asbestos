@@ -9,7 +9,6 @@ import gov.nist.asbestos.http.headers.Headers;
 import gov.nist.asbestos.serviceproperties.ServiceProperties;
 import gov.nist.asbestos.serviceproperties.ServicePropertiesEnum;
 import org.hl7.fhir.r4.model.BaseResource;
-import org.hl7.fhir.r4.model.Resource;
 
 import java.io.File;
 import java.net.URI;
@@ -35,7 +34,7 @@ public class UIEvent {
     }
 
     private String defaultHostPort() {
-        String value = ServiceProperties.getInstance().getPropertyOrStop(ServicePropertiesEnum.FHIR_TOOLKIT_BASE);
+        String value = ServiceProperties.getInstance().getPropertyOrThrow(ServicePropertiesEnum.FHIR_TOOLKIT_BASE);
         int index = value.indexOf("/asbestos");
         value = value.substring(0, index);
         value = value.substring("http://".length());

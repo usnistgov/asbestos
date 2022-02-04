@@ -71,7 +71,7 @@ public class DebugTestScriptRequest implements Runnable {
         String testSession = channelConfig.getTestSession();
         String proxyStr;
         ServicePropertiesEnum key = ServicePropertiesEnum.FHIR_TOOLKIT_BASE;
-        proxyStr = ServiceProperties.getInstance().getPropertyOrStop(key);
+        proxyStr = ServiceProperties.getInstance().getPropertyOrThrow(key);
         proxyStr += "/proxy/" + channelId;
         URI proxy;
         try {

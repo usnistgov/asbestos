@@ -46,7 +46,7 @@ public class GetDocumentRequest {
     static public String getURL(String id) {
         ServiceProperties serviceProperties = ServiceProperties.getInstance();
         return "http://" +
-                serviceProperties.getPropertyOrStop(ServicePropertiesEnum.FHIR_TOOLKIT_BASE) +
+                serviceProperties.getPropertyOrThrow(ServicePropertiesEnum.FHIR_TOOLKIT_BASE) +
                 "/log/document/" +
                 id;
     }

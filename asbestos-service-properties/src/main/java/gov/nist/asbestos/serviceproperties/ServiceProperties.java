@@ -106,7 +106,7 @@ public class ServiceProperties {
         return Optional.ofNullable(value);
     }
 
-    public String getPropertyOrStop(ServicePropertiesEnum key) {
+    public String getPropertyOrThrow(ServicePropertiesEnum key) {
         String value = getProperty(key.getKey());
         if (value == null)
             throw new RuntimeException(String.format("No value found for %s", key));

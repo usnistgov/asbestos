@@ -9,7 +9,6 @@ import java.util.logging.Logger;
 import org.hl7.fhir.r4.model.OperationOutcome;
 
 import java.net.URISyntaxException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -48,7 +47,7 @@ public class RelatedReport {
             this.url = wrapper.getRef().toString();
 
         if (this.url.contains("/proxy/")) {
-            String proxyLogUrl = ServiceProperties.getInstance().getPropertyOrStop(ServicePropertiesEnum.FHIR_TOOLKIT_BASE)
+            String proxyLogUrl = ServiceProperties.getInstance().getPropertyOrThrow(ServicePropertiesEnum.FHIR_TOOLKIT_BASE)
                     + "/log/native?url=" + this.url;
             HttpGetter getter = new HttpGetter();
             try {

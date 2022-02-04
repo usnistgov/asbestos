@@ -42,7 +42,7 @@ public class GetValidationRequest {
     public void run() {
         request.announce("GetValidationRequest");
         String resourceType = request.uriParts.get(3);
-        String base = ServiceProperties.getInstance().getPropertyOrStop(ServicePropertiesEnum.FHIR_VALIDATION_SERVER);
+        String base = ServiceProperties.getInstance().getPropertyOrThrow(ServicePropertiesEnum.FHIR_VALIDATION_SERVER);
         request.returnValue(base);
 
         String query = request.req.getQueryString();
@@ -83,7 +83,7 @@ public class GetValidationRequest {
                     "url parameter references resource that cannot be accessed by asbestos server");
             return;
         }
-        String validationServer = ServiceProperties.getInstance().getPropertyOrStop(ServicePropertiesEnum.FHIR_VALIDATION_SERVER);
+        String validationServer = ServiceProperties.getInstance().getPropertyOrThrow(ServicePropertiesEnum.FHIR_VALIDATION_SERVER);
         FhirClient fhirClient = new FhirClient()
                 .sendGzip(gzip)
                 .requestGzip(gzip);

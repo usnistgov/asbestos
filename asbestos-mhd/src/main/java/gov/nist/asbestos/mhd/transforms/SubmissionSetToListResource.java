@@ -22,7 +22,6 @@ import oasis.names.tc.ebxml_regrep.xsd.rim._3.RegistryPackageType;
 import oasis.names.tc.ebxml_regrep.xsd.rim._3.SlotType1;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
-import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.ListResource;
 import org.hl7.fhir.r4.model.Reference;
@@ -130,7 +129,7 @@ public class SubmissionSetToListResource {
 
         for (AssociationType1 assoc : assocs) {
             if (assoc.getAssociationType().endsWith("HasMember") && assoc.getSourceObject().equals(id)) {
-                String fhirBase = ServiceProperties.getInstance().getPropertyOrStop(ServicePropertiesEnum.FHIR_TOOLKIT_BASE) + "/proxy/" + channelConfig.asFullId();
+                String fhirBase = ServiceProperties.getInstance().getPropertyOrThrow(ServicePropertiesEnum.FHIR_TOOLKIT_BASE) + "/proxy/" + channelConfig.asFullId();
                 String reference = fhirBase +
                         "/DocumentReference/" + // TODO: Folder support
                         Utils.stripUrnPrefixes(assoc.getTargetObject());

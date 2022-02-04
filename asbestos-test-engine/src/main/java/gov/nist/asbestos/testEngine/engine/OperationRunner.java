@@ -264,7 +264,7 @@ public class OperationRunner {
                 setupActionSearch.setTestEngine(testEngine);
                 setupActionSearch.setTestCollectionId(testCollectionId);
                 setupActionSearch.setTestId(testId);
-                String internalBasePath = ServiceProperties.getInstance().getPropertyOrStop(ServicePropertiesEnum.FHIR_TOOLKIT_BASE)
+                String internalBasePath = ServiceProperties.getInstance().getPropertyOrThrow(ServicePropertiesEnum.FHIR_TOOLKIT_BASE)
                         .concat("/engine/")
                         .concat(code)
                         .concat("/")
@@ -310,7 +310,7 @@ public class OperationRunner {
             setupActionSearch.setTestEngine(testEngine);
             setupActionSearch.setTestCollectionId(testCollectionId);
             setupActionSearch.setTestId(testId);
-            String internalBasePath = ServiceProperties.getInstance().getPropertyOrStop(ServicePropertiesEnum.FHIR_TOOLKIT_BASE)
+            String internalBasePath = ServiceProperties.getInstance().getPropertyOrThrow(ServicePropertiesEnum.FHIR_TOOLKIT_BASE)
                     .concat("/engine/")
                     .concat(code)
                     .concat("/")

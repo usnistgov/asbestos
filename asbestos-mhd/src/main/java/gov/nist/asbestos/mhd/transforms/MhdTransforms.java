@@ -632,7 +632,7 @@ public class MhdTransforms {
     }
 
     public static void withNewBase(Reference reference) {
-        String newBase = ServiceProperties.getInstance().getPropertyOrStop(ServicePropertiesEnum.FHIR_TOOLKIT_BASE) + "/proxy/default__default";
+        String newBase = ServiceProperties.getInstance().getPropertyOrThrow(ServicePropertiesEnum.FHIR_TOOLKIT_BASE) + "/proxy/default__default";
         Ref ref = new Ref(reference.getReference());
         ref = ref.rebase(newBase);
         reference.setReference(ref.toString());

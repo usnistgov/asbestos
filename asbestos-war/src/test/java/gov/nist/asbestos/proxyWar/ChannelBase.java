@@ -10,7 +10,7 @@ import java.net.URISyntaxException;
 public class ChannelBase {
 
     public static URI getChannelBase(ChannelConfig channelConfig) {
-        String fhirToolkitBase = ServiceProperties.getInstance().getPropertyOrStop(ServicePropertiesEnum.FHIR_TOOLKIT_BASE);
+        String fhirToolkitBase = ServiceProperties.getInstance().getPropertyOrThrow(ServicePropertiesEnum.FHIR_TOOLKIT_BASE);
         try {
             return new URI(fhirToolkitBase + "/proxy/" + channelConfig.asFullId());
         } catch (URISyntaxException e) {

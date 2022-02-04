@@ -66,7 +66,7 @@ public class ChannelConfig {
 
     public URI proxyURI() {
         ServicePropertiesEnum key = ServicePropertiesEnum.FHIR_TOOLKIT_BASE;
-        String proxyStr = ServiceProperties.getInstance().getPropertyOrStop(key);
+        String proxyStr = ServiceProperties.getInstance().getPropertyOrThrow(key);
         proxyStr += "/proxy/" + testSession + "__" + channelName;
         try {
             return new URI(proxyStr);

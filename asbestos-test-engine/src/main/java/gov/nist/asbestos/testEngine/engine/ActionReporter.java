@@ -231,8 +231,8 @@ class ActionReporter implements TestDef {
     private String staticFixtureReport(FixtureLabels labels, FixtureComponent fixtureComponent, ResourceWrapper wrapper1, String refStrRaw) {
         Ref ref = wrapper1.getRef();
         if (ref != null) {
-            String base = ServiceProperties.getInstance().getPropertyOrStop(ServicePropertiesEnum.FHIR_TOOLKIT_UI_HOME_PAGE);
-            String server = ServiceProperties.getInstance().getPropertyOrStop(ServicePropertiesEnum.FHIR_TOOLKIT_BASE);
+            String base = ServiceProperties.getInstance().getPropertyOrThrow(ServicePropertiesEnum.FHIR_TOOLKIT_UI_HOME_PAGE);
+            String server = ServiceProperties.getInstance().getPropertyOrThrow(ServicePropertiesEnum.FHIR_TOOLKIT_BASE);
             UIEvent uiEvent = fixtureComponent.getCreatedByUIEvent();
             if (uiEvent == null) {
                 // Use Cases

@@ -38,7 +38,7 @@ public class FtkElementsServlet extends HttpServlet {
             //log.info("Creating default Channel in the default TestSession");
             String hapiFhirBase;
             ServicePropertiesEnum key = ServicePropertiesEnum.HAPI_FHIR_BASE;
-            hapiFhirBase = ServiceProperties.getInstance().getPropertyOrStop(key);
+            hapiFhirBase = ServiceProperties.getInstance().getPropertyOrThrow(key);
             ChannelConfig cconfig = new ChannelConfig()
                     .setEnvironment("default")
                     .setTestSession("default")

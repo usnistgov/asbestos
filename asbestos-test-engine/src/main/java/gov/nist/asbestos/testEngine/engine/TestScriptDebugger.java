@@ -21,7 +21,6 @@ import java.util.logging.Logger;
 import org.hl7.fhir.r4.model.Base;
 import org.hl7.fhir.r4.model.BaseResource;
 import org.hl7.fhir.r4.model.Enumeration;
-import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.TestReport;
 import org.hl7.fhir.r4.model.TestScript;
 
@@ -433,7 +432,7 @@ public class TestScriptDebugger implements TestScriptDebugInterface {
 
     static URI getAnalysisURI(UIEvent uiEvent, String directionStr) {
         try {
-            return new URI(ServiceProperties.getInstance().getPropertyOrStop(ServicePropertiesEnum.FHIR_TOOLKIT_BASE)
+            return new URI(ServiceProperties.getInstance().getPropertyOrThrow(ServicePropertiesEnum.FHIR_TOOLKIT_BASE)
                     + "/" + "analysis"
                     + "/" + "event"
                     + "/" + uiEvent.getTestSession()

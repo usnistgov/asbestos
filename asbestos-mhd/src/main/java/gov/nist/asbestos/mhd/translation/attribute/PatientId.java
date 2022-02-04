@@ -50,7 +50,7 @@ public class PatientId implements IVal {
     }
 
 //    Ref patientServer = new Ref("http://localhost:8080/fhir/fhir");
-    Ref patientServer = new Ref(ServiceProperties.getInstance().getPropertyOrStop(ServicePropertiesEnum.HAPI_FHIR_BASE));
+    Ref patientServer = new Ref(ServiceProperties.getInstance().getPropertyOrThrow(ServicePropertiesEnum.HAPI_FHIR_BASE));
 
 
     public Optional<Reference> getFhirReference() {

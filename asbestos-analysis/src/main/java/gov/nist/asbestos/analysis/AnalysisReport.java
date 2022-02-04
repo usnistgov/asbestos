@@ -157,7 +157,7 @@ public class AnalysisReport {
         List<String> errors = new ArrayList<>();
         boolean gzip = true;
         String resourceType = resource.getClass().getSimpleName();
-        String validationServer = ServiceProperties.getInstance().getPropertyOrStop(ServicePropertiesEnum.FHIR_VALIDATION_SERVER);
+        String validationServer = ServiceProperties.getInstance().getPropertyOrThrow(ServicePropertiesEnum.FHIR_VALIDATION_SERVER);
         FhirClient fhirClient = new FhirClient().setSupportRequest(true)
                 .sendGzip(gzip)
                 .requestGzip(gzip);
@@ -467,7 +467,7 @@ public class AnalysisReport {
     private Ref translateToProxyServerSide(Ref theRef) {
         Objects.requireNonNull(theRef);
         ServiceProperties serviceProperties = ServiceProperties.getInstance();
-        String proxyAddrPrefix = serviceProperties.getPropertyOrStop(ServicePropertiesEnum.FHIR_TOOLKIT_UI_HOME_PAGE);
+        String proxyAddrPrefix = serviceProperties.getPropertyOrThrow(ServicePropertiesEnum.FHIR_TOOLKIT_UI_HOME_PAGE);
 
         if (!theRef.asString().startsWith(proxyAddrPrefix))
             return theRef;
@@ -614,7 +614,7 @@ public class AnalysisReport {
                     return new Ref(location);
                 } else if (location.contains(String.format("/%s/",MhdTransforms.MhdListResourceName))) {
                     Ref ref = new Ref(location);
-                    String localBase = ServiceProperties.getInstance().getPropertyOrStop(ServicePropertiesEnum.FHIR_TOOLKIT_BASE);
+                    String localBase = ServiceProperties.getInstance().getPropertyOrThrow(ServicePropertiesEnum.FHIR_TOOLKIT_BASE);
                     if (ref.getBase().toString().startsWith(localBase)) {
                         // This opaque Id convention only applies to local channels
                         if (IdBuilder.isOpaqueLogicalId(IdBuilder.SS_OPAQUE_ID, ref.getId())) {
@@ -1097,7 +1097,7 @@ public class AnalysisReport {
         String id = new DocumentCache(ec).putDocumentCache(data, contentType);
         // this must match what is in GetDocumentRequest
         ServiceProperties serviceProperties = ServiceProperties.getInstance();
-        String url = serviceProperties.getPropertyOrStop(ServicePropertiesEnum.FHIR_TOOLKIT_BASE) +
+        String url = serviceProperties.getPropertyOrThrow(ServicePropertiesEnum.FHIR_TOOLKIT_BASE) +
                 "/log/document/" +
                 id;
         return url;

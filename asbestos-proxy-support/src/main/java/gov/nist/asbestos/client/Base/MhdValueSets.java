@@ -36,7 +36,7 @@ public class MhdValueSets {
     }
 
     public String getUrl(String name) {
-        File base = new File(ServiceProperties.getInstance().getPropertyOrStop(ServicePropertiesEnum.FHIR_TOOLKIT_BASE));
+        File base = new File(ServiceProperties.getInstance().getPropertyOrThrow(ServicePropertiesEnum.FHIR_TOOLKIT_BASE));
         return base.toString() + "/valueset/" + environment + "/" + name;
     }
 

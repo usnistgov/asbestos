@@ -13,7 +13,7 @@ public class XdsActorMapper {
     public URI getEndpoint(String siteName, String actorType, String transactionType, boolean isTls) {
         try {
             ServicePropertiesEnum key = (isTls ? ServicePropertiesEnum.TLS_XDS_TOOLKIT_BASE : ServicePropertiesEnum.XDS_TOOLKIT_BASE);
-            String xdsToolkitBase = ServiceProperties.getInstance().getPropertyOrStop(key);
+            String xdsToolkitBase = ServiceProperties.getInstance().getPropertyOrThrow(key);
             return new URI(
                     xdsToolkitBase +
                     "/sim/" +

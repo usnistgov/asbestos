@@ -76,7 +76,7 @@ public class Request {
         String url = uri.toString();
         if (url.startsWith("/asbestos"))
             url = url.substring("/asbestos".length());
-        url = ServiceProperties.getInstance().getPropertyOrStop(ServicePropertiesEnum.FHIR_TOOLKIT_BASE) + url;
+        url = ServiceProperties.getInstance().getPropertyOrThrow(ServicePropertiesEnum.FHIR_TOOLKIT_BASE) + url;
         if (query != null && !query.equals("") && !url.contains("?"))
             url = url + "?" + query;
         try {

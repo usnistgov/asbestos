@@ -48,7 +48,7 @@ public class FhirToolkitCapabilityStatement {
 
     public static BaseResource getCapabilityStatement(ServicePropertiesEnum key, String channelId) throws Exception {
         Objects.requireNonNull(key);
-        String capabilityStatementFileName = ServiceProperties.getInstance().getPropertyOrStop(key);
+        String capabilityStatementFileName = ServiceProperties.getInstance().getPropertyOrThrow(key);
 
         File capabilityStatementFile = Paths.get(FhirToolkitCapabilityStatement.class.getResource("/").toURI()).resolve(capabilityStatementFileName).toFile();
 

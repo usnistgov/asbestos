@@ -19,7 +19,6 @@ import org.hl7.fhir.r4.model.BaseResource;
 import org.hl7.fhir.r4.model.Bundle;
 
 import java.net.URI;
-import java.util.Arrays;
 import java.util.Objects;
 
 
@@ -108,7 +107,7 @@ public class PassthroughChannel extends BaseChannel /*implements IBaseChannel*/ 
 
             BaseResource resource = ParserBase.parse(responseIn.getResponseText(), format);
             if (resource instanceof Bundle) {
-                newBase = ServiceProperties.getInstance().getPropertyOrStop(ServicePropertiesEnum.FHIR_TOOLKIT_BASE) + "/proxy/" + channelConfig.asFullId();
+                newBase = ServiceProperties.getInstance().getPropertyOrThrow(ServicePropertiesEnum.FHIR_TOOLKIT_BASE) + "/proxy/" + channelConfig.asFullId();
                 boolean updated = false;
                 Bundle bundle = (Bundle) resource;
                 if (bundle.hasLink()) {

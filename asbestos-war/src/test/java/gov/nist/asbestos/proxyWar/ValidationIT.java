@@ -29,7 +29,7 @@ class ValidationIT {
 
     @Test
     void patient() throws URISyntaxException, IOException {
-        String validationServer = ServiceProperties.getInstance().getPropertyOrStop(ServicePropertiesEnum.FHIR_VALIDATION_SERVER);
+        String validationServer = ServiceProperties.getInstance().getPropertyOrThrow(ServicePropertiesEnum.FHIR_VALIDATION_SERVER);
         String patientStr = TestResource.get("/validation/patient.xml");
         BaseResource patient = ParserBase.parse(patientStr, Format.XML);
         FhirClient fhirClient = new FhirClient();
