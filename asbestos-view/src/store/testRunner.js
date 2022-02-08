@@ -41,6 +41,7 @@ export const testRunnerStore = {
             debug: null,
             useJson: true,
             useGzip: true,
+            useTlsProxy: false, // no client certificate is expected, no authentication is used
             colorMode: false,
             statusRight: false,
             hapiFhirBase: null,
@@ -97,6 +98,9 @@ export const testRunnerStore = {
         },
         setUseGzip(state, value) {
             state.useGzip = value
+        },
+        setUseTlsProxy(state, value) {
+            state.useTlsProxy = value
         },
         setDebug(state, value) {
             state.debug = value
@@ -520,7 +524,7 @@ export const testRunnerStore = {
         runTest({commit, rootState, state}, testId) {
            // console.log(`run ${testId}`)
             //commit('setCurrentTest', testId)
-            const url = `testrun/${rootState.base.channel.testSession}__${rootState.base.channel.channelName}/${state.currentTestCollectionName}/${testId}?_format=${state.useJson ? 'json' : 'xml'};_gzip=${state.useGzip}`
+            const url = `testrun/${rootState.base.channel.testSession}__${rootState.base.channel.channelName}/${state.currentTestCollectionName}/${testId}?_format=${state.useJson ? 'json' : 'xml'};_gzip=${state.useGzip};useTlsProxy=${state.useTlsProxy}`
             const promise = ENGINE.post(url)
             promise.then(result => {
                 const reports = result.data

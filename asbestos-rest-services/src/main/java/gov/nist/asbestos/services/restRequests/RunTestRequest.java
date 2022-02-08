@@ -4,8 +4,6 @@ import gov.nist.asbestos.services.servlet.ChannelConnector;
 import gov.nist.asbestos.client.Base.Request;
 import gov.nist.asbestos.client.client.FhirClient;
 import gov.nist.asbestos.client.client.Format;
-import gov.nist.asbestos.serviceproperties.ServiceProperties;
-import gov.nist.asbestos.serviceproperties.ServicePropertiesEnum;
 import gov.nist.asbestos.client.channel.ChannelConfig;
 import gov.nist.asbestos.simapi.validation.Val;
 import gov.nist.asbestos.testEngine.engine.ModularEngine;
@@ -50,12 +48,10 @@ public class RunTestRequest {
             return;
         }
         String testSession = channelConfig.getTestSession();
-        String proxyStr;
-        ServicePropertiesEnum key = ServicePropertiesEnum.FHIR_TOOLKIT_BASE;
-        proxyStr = ServiceProperties.getInstance().getPropertyOrThrow(key);
-        proxyStr += "/proxy/" + channelId;
+
         URI proxy;
-        proxy = new URI(proxyStr);
+        proxy = channelConfig.getProxyURI(request.isTlsProxy);
+
         File testDir = request.ec.getTest(testCollection, testName);
 
         File patientCacheDir = request.ec.getTestLogCacheDir(channelId);

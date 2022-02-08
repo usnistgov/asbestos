@@ -199,7 +199,7 @@ public class ProxyServlet extends HttpServlet {
             ITask backSideTask = clientTask.newTask();
             backSideTask.putDescription("PNR to target");
 
-            String proxyBase = new Ref(uri).getBase().withHostPort(hostport).toString();
+            String proxyBase = new Ref(uri).getBase().withHostPort(channelConfig.getScheme(), hostport).toString();
             String fhirBase = new Ref(requestIn.getRequestHeaders().getPathInfo()).getBase().toString();
             channel.setProxyBase(proxyBase);
             channel.setServerBase(fhirBase);
@@ -359,8 +359,10 @@ public class ProxyServlet extends HttpServlet {
         ITask clientTask = event.getClientTask();
         Headers inHeaders = Common.getRequestHeaders(req, verb);
         String hostport = inHeaders.getValue("host");
-        if (hostport == null || hostport.equals(""))
+        if (hostport == null || hostport.equals("")) {
             hostport = "localhost:8080";
+            log.info("hostport is null or empty, using default: " + hostport);
+        }
 
         inHeaders.add(new Header("x-client-addr", req.getRemoteAddr()));
 
@@ -377,6 +379,8 @@ public class ProxyServlet extends HttpServlet {
             channel.setup(simStore.getChannelConfig());
             channel.setReturnFormatType(Format.resultContentType(inHeaders));
             channel.setHostport(hostport);
+            String proxyBase = simStore.getChannelConfig().getProxyURI().toString();
+            channel.setProxyBase(proxyBase);
             channel.setTask(clientTask);
 
             // handle non-channel requests
@@ -419,10 +423,11 @@ public class ProxyServlet extends HttpServlet {
 
             // transform backend service response for client
             if (requestOut.isSuccess()) {
-                Ref ref = new Ref(uri);
+                // without hostport the Bundle searchset entry fullUrl starts with  "/asbestos/proxy" which is not absolute URL
+                Ref ref = new Ref(uri).withHostPort(simStore.getChannelConfig().getScheme(),channel.getHostport());
                 String requestedType;
                 requestedType = ref.getResourceType();
-                HttpBase responseOut = transformResponse(backSideTask, requestOut, channel, hostport, requestedType, uri.toString());
+                HttpBase responseOut = transformResponse(backSideTask, requestOut, channel, hostport, requestedType, ref.toString());
                 respond(resp, responseOut, inHeaders, clientTask, 200);
                 resp.setStatus(resp.SC_OK);
             } else {
@@ -819,6 +824,7 @@ public class ProxyServlet extends HttpServlet {
         if (simStore.isChannel())
             simStore.getStore();  // exception if proxy does not exist
         simStore.open();
+        simStore.getChannelConfig().setScheme(req.getScheme());
 
         log.fine(()->"Sim " + simStore.getChannelId() + " " +  simStore.getActorType() + " " + simStore.getResource());
 

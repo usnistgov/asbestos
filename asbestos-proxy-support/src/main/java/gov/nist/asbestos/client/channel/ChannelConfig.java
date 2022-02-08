@@ -26,6 +26,7 @@ public class ChannelConfig {
     private boolean writeLocked;
     private boolean logMhdCapabilityStatementRequest;
     private String[] mhdVersions;
+    private transient String scheme;
 
     public String toString() {
         return "Channel " + testSession + "__" + channelName +
@@ -64,8 +65,21 @@ public class ChannelConfig {
         return new URI(uriString);
     }
 
-    public URI proxyURI() {
-        ServicePropertiesEnum key = ServicePropertiesEnum.FHIR_TOOLKIT_BASE;
+    public URI getProxyURI() {
+        if ("https".equals(getScheme())) {
+            return getProxyURIx(ServicePropertiesEnum.HTTPS_FHIR_TOOLKIT_BASE);
+        }
+        return getProxyURIx(ServicePropertiesEnum.FHIR_TOOLKIT_BASE);
+    }
+
+    public URI getProxyURI(boolean isTls) {
+        if (isTls)
+            return getProxyURIx(ServicePropertiesEnum.HTTPS_FHIR_TOOLKIT_BASE);
+        else
+            return getProxyURIx(ServicePropertiesEnum.FHIR_TOOLKIT_BASE);
+    }
+
+    private URI getProxyURIx(ServicePropertiesEnum key) {
         String proxyStr = ServiceProperties.getInstance().getPropertyOrThrow(key);
         proxyStr += "/proxy/" + testSession + "__" + channelName;
         try {
@@ -208,5 +222,13 @@ public class ChannelConfig {
 
     public void setMhdVersions(String[] mhdVersions) {
         this.mhdVersions = mhdVersions;
+    }
+
+    public String getScheme() {
+        return scheme;
+    }
+
+    public void setScheme(String scheme) {
+        this.scheme = scheme;
     }
 }

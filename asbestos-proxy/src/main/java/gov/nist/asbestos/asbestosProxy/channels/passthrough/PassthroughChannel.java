@@ -107,7 +107,9 @@ public class PassthroughChannel extends BaseChannel /*implements IBaseChannel*/ 
 
             BaseResource resource = ParserBase.parse(responseIn.getResponseText(), format);
             if (resource instanceof Bundle) {
-                newBase = ServiceProperties.getInstance().getPropertyOrThrow(ServicePropertiesEnum.FHIR_TOOLKIT_BASE) + "/proxy/" + channelConfig.asFullId();
+                newBase = // ServiceProperties.getInstance().getPropertyOrThrow(ServicePropertiesEnum.FHIR_TOOLKIT_BASE)
+//                        + "/proxy/" + channelConfig.asFullId();
+                        channelConfig.getProxyURI().toString();
                 boolean updated = false;
                 Bundle bundle = (Bundle) resource;
                 if (bundle.hasLink()) {
@@ -163,11 +165,11 @@ public class PassthroughChannel extends BaseChannel /*implements IBaseChannel*/ 
 
             if (loc != null) {
                 Ref locRef = new Ref(loc.getValue());
-                Ref ref = locRef.rebase(proxyBase).withHostPort(proxyHostPort);
+                Ref ref = locRef.rebase(proxyBase).withHostPort(channelConfig.getScheme(), proxyHostPort);
                 loc.setValue(ref.toString());
             }
             if (loc2 != null) {
-                Ref ref = new Ref(loc2.getValue()).rebase(proxyBase).withHostPort(proxyHostPort);
+                Ref ref = new Ref(loc2.getValue()).rebase(proxyBase).withHostPort(channelConfig.getScheme(), proxyHostPort);
                 loc2.setValue(ref.toString());
             }
         }

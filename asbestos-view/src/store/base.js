@@ -3,7 +3,7 @@ import Vuex from 'vuex'
 
 Vue.use(Vuex)
 
-import {LOG, PROXY} from '../common/http-common'
+import { PROXY} from '../common/http-common'
 import {CHANNEL} from '../common/http-common'
 import {STARTUPSESSION} from "../common/http-common";
 import {newChannel} from '@/types/channel'
@@ -38,7 +38,6 @@ export const baseStore = {
                 'default',
             ],
             errors: [],
-            proxyBase: null,
             ftkInitialized: false,
             ftkChannelLoaded: false,
         }
@@ -49,9 +48,6 @@ export const baseStore = {
         },
         ftkChannelLoaded(state, value) {
             state.ftkChannelLoaded = value
-        },
-        setProxyBase(state, value) {
-            state.proxyBase = value
         },
         setError(state, error) {
             state.errors.push(error)
@@ -276,19 +272,6 @@ export const baseStore = {
                     console.error('channel/' + fullId + ' ' + e)
                 })
         },
-        loadProxyBase({commit, state}) {
-            if (state.proxyBase)
-                return
-            const url = `ProxyBase`
-            LOG.get(url)
-                .then(response => {
-                    commit('setProxyBase', response.data.value)
-                })
-                .catch (e => {
-                    commit('setError', url + ': ' + e)
-                    console.error('base.loadProxyBase' + ' ' + e)
-                })
-        }
     },
     getters: {
         getChannel: (state) => {
@@ -302,13 +285,6 @@ export const baseStore = {
         },
         getSessionConfig: (state) => {
             return state.sessionConfigs[state.session];
-        },
-        getProxyBase: (state) => (parms) => {
-            if (parms === null)
-                return state.proxyBase
-            const channelName = parms.channelName
-            const sessionId = parms.sessionId
-            return `${state.proxyBase}/${sessionId}__${channelName}`
         },
         getChannelId: (state) => {
             return `${state.channel.testSession}__${state.channel.channelName}`

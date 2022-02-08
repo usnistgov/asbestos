@@ -615,7 +615,7 @@ public class AnalysisReport {
                 } else if (location.contains(String.format("/%s/",MhdTransforms.MhdListResourceName))) {
                     Ref ref = new Ref(location);
                     String localBase = ServiceProperties.getInstance().getPropertyOrThrow(ServicePropertiesEnum.FHIR_TOOLKIT_BASE);
-                    if (ref.getBase().toString().startsWith(localBase)) {
+                    if (Ref.authoritySubstring(ref.getBase().toString()).startsWith(Ref.authoritySubstring(localBase))) {
                         // This opaque Id convention only applies to local channels
                         if (IdBuilder.isOpaqueLogicalId(IdBuilder.SS_OPAQUE_ID, ref.getId())) {
                             return ref;

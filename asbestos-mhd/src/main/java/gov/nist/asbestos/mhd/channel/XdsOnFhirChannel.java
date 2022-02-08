@@ -747,7 +747,7 @@ public class XdsOnFhirChannel extends BaseChannel /*implements IBaseChannel*/ {
         DocumentReference dr = trans.getDocumentReference(eo, channelConfig);
 
         if (dr.hasSubject())
-            MhdTransforms.withNewBase(dr.getSubject());
+            MhdTransforms.withNewBase(channelConfig.getProxyURI(), dr.getSubject());
 
         if (val.hasErrors())
             return MhdTransforms.operationOutcomefromVal(val);

@@ -90,7 +90,6 @@
                 next()
         },
         created() {
-            this.$store.dispatch('loadProxyBase')
         },
         methods: {
             go(there) {

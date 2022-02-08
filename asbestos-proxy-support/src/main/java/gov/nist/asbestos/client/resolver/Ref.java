@@ -22,7 +22,7 @@ public class Ref {
 
     public Ref(URI uri) {
         Objects.requireNonNull(uri);
-        this.uri = httpize(uri);
+        this.uri = uri; // httpize(uri);
     }
 
     public Ref(URL url) {
@@ -319,24 +319,27 @@ public class Ref {
 //        }
     }
 
-    public Ref withHostPort(String hostPort) {
-        String scheme = uri.getScheme();
-        if (scheme == null)
-            scheme = "http";
+    public Ref withHostPort(String scheme, String hostPort) {
         String[] hp = hostPort.split(":");
         if (hp.length == 2) {
             String host = hp[0];
             String port = hp[1];
 //            try {
 
-                return new Ref(new CustomUriBuilder()
-                        .setAuthority(host + ":" + port)
-                        .setPath(uri.getPath())
-                        .setScheme(uri.getScheme())
-                        .setQuery(uri.getQuery())
-                        .setFragment(uri.getFragment())
-                        .build()
-                );
+            if (scheme == null || "".equals(scheme)) {
+                scheme = uri.getScheme();
+                if (scheme == null || "".equals(scheme))
+                    scheme = "http"; // default fallback
+            }
+
+            return new Ref(new CustomUriBuilder()
+                    .setAuthority(host + ":" + port)
+                    .setPath(uri.getPath())
+                    .setScheme(scheme)
+                    .setQuery(uri.getQuery())
+                    .setFragment(uri.getFragment())
+                    .build()
+            );
 
 
 //                return new Ref(new URI(scheme
@@ -351,6 +354,7 @@ public class Ref {
         }
         return this;  // oops
     }
+
 
     public boolean isContained() {
         return uri.toString().startsWith("#") || hasAnchor();
@@ -445,6 +449,11 @@ public class Ref {
                 return new Ref(String.join("/", parts.subList(0, i)));
         }
         return new Ref(uri.toString());
+    }
+
+    public static String authoritySubstring(String l) {
+       String scheme = "://";
+       return l.substring(l.indexOf(scheme)+scheme.length());
     }
 
     // TODO needs test
@@ -585,7 +594,8 @@ public class Ref {
         }
         try {
             URI uri = new CustomUriBuilder(ref).build();
-            return httpize(uri);
+            return uri;
+//            return httpize(uri);
         } catch (Exception e) {
             throw new Error(e);
         }

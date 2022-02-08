@@ -1,4 +1,5 @@
 import Vue from 'vue'
+import {UtilFunctions} from "../common/http-common";
 
 export default {
     data() {
@@ -181,7 +182,7 @@ export default {
             }
         },
         clientBaseAddress() { // for client tests
-            return `${this.$store.state.base.proxyBase}/${this.sessionId}__${this.channelName}`
+            return `${UtilFunctions.getProxyBase()}/${this.sessionId}__${this.channelName}`
         },
         json: {
             get() {
@@ -194,6 +195,14 @@ export default {
             },
             get() {
                 return this.$store.state.testRunner.useGzip
+            }
+        },
+        tlsOption: {
+            set(use) {
+                this.$store.commit('setUseTlsProxy', use)
+            },
+            get() {
+                return this.$store.state.testRunner.useTlsProxy
             }
         },
         fullChannelId() {

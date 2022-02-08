@@ -67,7 +67,9 @@ public class HttpGetter extends HttpBase {
             //System.out.println(t.getMessage());
 //            }
         } catch (Throwable t) {
-            throw new Error("GET " + uri + "\n" + t.getMessage(), t);
+            String errorMsg = "GET " + uri + "\n" + t.getMessage();
+            logger.log(Level.SEVERE, errorMsg, t);
+            throw new Error(errorMsg, t);
         } finally {
             if (connection != null)
                 connection.disconnect();

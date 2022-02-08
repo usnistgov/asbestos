@@ -15,7 +15,7 @@
 
     <properties>
         <!-- begin ServiceProperties -->
-        <!-- itTestfhirToolkitBas is used for unit tests only -->
+        <!-- itTestfhirToolkitBase is used for unit tests only -->
         <itTestfhirToolkitBase>http://localhost:8877/asbestos</itTestfhirToolkitBase>
         <!-- HTTPS UI -->
         <fhirToolkitUIHomePage>https://fhirtoolkit.test:8082</fhirToolkitUIHomePage>
@@ -23,7 +23,10 @@
 <!--        <fhirToolkitUIHomePage>http://localhost:8082</fhirToolkitUIHomePage>-->
         <httpsFhirToolkitBase>https://fhirtoolkit.test:9743/asbestos</httpsFhirToolkitBase>
         <fhirToolkitBase>http://localhost:8081/asbestos</fhirToolkitBase>
-        <hapiFhirBase>http://localhost:7080/fhir</hapiFhirBase>
+        <!-- HTTP HapiFHIR -->
+<!--        <hapiFhirBase>http://localhost:7080/fhir</hapiFhirBase>-->
+        <!-- HTTPS HapiFHIR -->
+        <hapiFhirBase>https://fhirtoolkit.test:7081/fhir</hapiFhirBase>
         <fhirValidationServer>http://localhost:7080/fhir</fhirValidationServer>
         <xdsToolkitBase>http://localhost:8080/xdstools</xdsToolkitBase>
         <tlsXdsToolkitBase>https://localhost:8443/xdstools</tlsXdsToolkitBase>
@@ -233,6 +236,19 @@
                         <systemProperty>
                             <name>SERVICE_PROPERTIES</name>
                             <value>ittest-service.properties</value>
+                        </systemProperty>
+                        <!-- keystore.jks contains the self signed cert which has a trusted entry. This is a copy of the keystore used by the HapiFhir Tomcat. -->
+                        <systemProperty>
+                            <name>javax.net.ssl.trustStore</name>
+                            <value>${basedir}/src/test/etc/keystore.jks</value>
+                        </systemProperty>
+                        <systemProperty>
+                            <name>javax.net.ssl.trustStorePassword</name>
+                            <value>changeit</value>
+                        </systemProperty>
+                        <systemProperty>
+                            <name>javax.net.ssl.trustStoreType</name>
+                            <value>JKS</value>
                         </systemProperty>
                     </systemProperties>
                 </configuration>

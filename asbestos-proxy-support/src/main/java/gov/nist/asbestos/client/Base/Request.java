@@ -32,6 +32,7 @@ public class Request {
     public String channelId;
     public boolean isJson = true;
     public boolean isGzip = false;
+    public boolean isTlsProxy = false;
     private String query = null;
     private Map<String, String> parametersMap;
     private String type;
@@ -126,6 +127,7 @@ public class Request {
         if (qstring != null) {
             isJson = qstring.contains("_format=json");
             isGzip = qstring.contains("_gzip=true");
+            isTlsProxy = qstring.contains("useTlsProxy=true");
         }
     }
 

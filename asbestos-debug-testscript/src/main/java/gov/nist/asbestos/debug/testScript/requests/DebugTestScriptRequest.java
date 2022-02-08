@@ -4,8 +4,6 @@ import gov.nist.asbestos.client.Base.Request;
 import gov.nist.asbestos.client.client.FhirClient;
 import gov.nist.asbestos.client.client.Format;
 import gov.nist.asbestos.client.log.SimStore;
-import gov.nist.asbestos.serviceproperties.ServiceProperties;
-import gov.nist.asbestos.serviceproperties.ServicePropertiesEnum;
 import gov.nist.asbestos.client.channel.ChannelConfig;
 import gov.nist.asbestos.client.debug.StopDebugTestScriptException;
 import gov.nist.asbestos.client.debug.TestScriptDebugState;
@@ -18,7 +16,6 @@ import org.hl7.fhir.r4.model.TestReport;
 
 import java.io.File;
 import java.net.URI;
-import java.net.URISyntaxException;
 // 0 - "debug-testscript"
 // 1 - channelName (testSession__channelId)
 // 2 - testCollectionId
@@ -69,16 +66,8 @@ public class DebugTestScriptRequest implements Runnable {
         }
 
         String testSession = channelConfig.getTestSession();
-        String proxyStr;
-        ServicePropertiesEnum key = ServicePropertiesEnum.FHIR_TOOLKIT_BASE;
-        proxyStr = ServiceProperties.getInstance().getPropertyOrThrow(key);
-        proxyStr += "/proxy/" + channelId;
         URI proxy;
-        try {
-            proxy = new URI(proxyStr);
-        } catch (URISyntaxException e) {
-            throw new RuntimeException(e);
-        }
+        proxy = channelConfig.getProxyURI(request.isTlsProxy);
 
         File testDir = request.ec.getTest(testCollection, testName);
 

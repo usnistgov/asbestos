@@ -37,7 +37,8 @@ public class UIEvent {
         String value = ServiceProperties.getInstance().getPropertyOrThrow(ServicePropertiesEnum.FHIR_TOOLKIT_BASE);
         int index = value.indexOf("/asbestos");
         value = value.substring(0, index);
-        value = value.substring("http://".length());
+        String schemeAuthSeparator = "://";
+        value = value.substring(value.indexOf(schemeAuthSeparator)+schemeAuthSeparator.length());
         return value;
     }
 
@@ -134,9 +135,11 @@ public class UIEvent {
 
     public URI getURI() {
         try {
-            return new URI("http://" +
-            hostPort +
-            "/asbestos/log/" +
+            // Use the fhirToolkitBase because the hostPort property can have different https port supplied through the HTTPS channel POST header host value,
+            // which is not necessarily what is needed for server-to-server internal API calls
+            return new URI(
+            ServiceProperties.getInstance().getPropertyOrThrow(ServicePropertiesEnum.FHIR_TOOLKIT_BASE) +
+            "/log/" +
             testSession + "/" +
             channelId + "/" +
             resourceType + "/" +

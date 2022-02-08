@@ -90,7 +90,7 @@ public class RunSelftestRequest {
             request.returnObject(lastTime);
             request.resp.setStatus(request.resp.SC_OK);
         } else if (isRun) {
-            URI proxy = channelConfig.proxyURI();
+            URI proxy = channelConfig.getProxyURI();
 
             File patientCacheDir = request.ec.getTestLogCacheDir(channelName);
             File alternatePatientCacheDir = request.ec.getTestLogCacheDir("default__default");

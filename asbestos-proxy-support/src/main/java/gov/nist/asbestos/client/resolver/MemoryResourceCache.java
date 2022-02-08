@@ -1,7 +1,6 @@
 package gov.nist.asbestos.client.resolver;
 
 
-import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;

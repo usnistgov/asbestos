@@ -172,15 +172,15 @@
     <!-- end of grid -->
     <div v-if="channel && !isEditMode">
       <div>
-        <p class="caption">Channel Base Address: </p>
+        <p class="caption">HTTP Channel Base Address: </p>
         <span class="center">{{getChannelBase(false, channel)}}</span>
       </div>
-<!--      <div v-if="isHttpsMode()">-->
-<!--        <p class="caption">Optional HTTPS Channel Base Address: </p>-->
-<!--        <span class="center">{{getChannelBase(true, channel)}}</span>-->
-<!--      </div>-->
+      <div v-if="isHttpsMode">
+        <p class="caption">HTTPS Channel Base Address: </p>
+        <span class="center">{{getChannelBase(true, channel)}}</span>
+      </div>
       <div>
-        <p>Send to this URL and</p>
+        <p>Send to a channel base address above and</p>
         <ul>
           <li>Proxy will record your transaction</li>
           <li>Proxy will forward your transaction to
@@ -256,6 +256,9 @@ export default {
     },
     isEditMode() {
       return this.edit || this.channelIsNew
+    },
+    isHttpsMode() {
+      return UtilFunctions.isHttpsMode()
     },
 
   },
@@ -470,9 +473,6 @@ export default {
     copyOfChannel() {
       const chan = this.getChannel()
       return cloneDeep(chan)
-    },
-    isHttpsMode() {
-      return UtilFunctions.isHttpsMode()
     },
     getChannelBase(https, channel) {
       if (https)

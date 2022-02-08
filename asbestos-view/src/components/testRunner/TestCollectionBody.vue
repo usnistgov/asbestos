@@ -7,6 +7,11 @@
 
       <button :disabled="running" class="clearLogsButton" @click="doClearLogs()" title="Temporarily clear TestReports for this browser tab">&#x1f5d1; Clear Logs</button>
       <span v-if="!$store.state.testRunner.isClientTest">
+<!--            <template v-if="theChannelObj.channelType === 'mhd'">-->
+                <input type="checkbox" id="doTls" v-model="tlsOption">
+                <label for="doTls" title="">Use TLS?</label>
+                <div class="divider"></div>
+<!--            </template>-->
             <input type="checkbox" id="doGzip" v-model="gzip">
             <label for="doGzip">GZip?</label>
             <div class="divider"></div>

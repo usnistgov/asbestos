@@ -631,8 +631,10 @@ public class MhdTransforms {
         }
     }
 
-    public static void withNewBase(Reference reference) {
-        String newBase = ServiceProperties.getInstance().getPropertyOrThrow(ServicePropertiesEnum.FHIR_TOOLKIT_BASE) + "/proxy/default__default";
+    public static void withNewBase(URI base, Reference reference) {
+        // base could be http or https channel base
+        String newBase = //ServiceProperties.getInstance().getPropertyOrThrow(ServicePropertiesEnum.FHIR_TOOLKIT_BASE)
+                 base.toString().substring(0, base.toString().indexOf("/proxy")) + "/proxy/default__default";
         Ref ref = new Ref(reference.getReference());
         ref = ref.rebase(newBase);
         reference.setReference(ref.toString());
@@ -692,7 +694,7 @@ public class MhdTransforms {
             dm = trans.getDocumentManifest(ss, assocs, channelConfig);
 
         if (dm != null && dm.hasSubject())
-            MhdTransforms.withNewBase(dm.getSubject());
+            MhdTransforms.withNewBase(channelConfig.getProxyURI(), dm.getSubject());
 
 //        if (ss == null)
 //            val.add(new ValE("No SubmissionSet in query response.").asError());
@@ -733,7 +735,7 @@ public class MhdTransforms {
             listResource = trans.getListResource(ss, assocs, channelConfig);
 
         if (listResource != null && listResource.hasSubject())
-            MhdTransforms.withNewBase(listResource.getSubject());
+            MhdTransforms.withNewBase(channelConfig.getProxyURI(), listResource.getSubject());
 
 //        if (ss == null)
 //            val.add(new ValE("No SubmissionSet in query response.").asError());

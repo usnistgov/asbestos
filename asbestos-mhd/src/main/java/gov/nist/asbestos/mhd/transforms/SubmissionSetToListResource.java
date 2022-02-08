@@ -129,8 +129,8 @@ public class SubmissionSetToListResource {
 
         for (AssociationType1 assoc : assocs) {
             if (assoc.getAssociationType().endsWith("HasMember") && assoc.getSourceObject().equals(id)) {
-                String fhirBase = ServiceProperties.getInstance().getPropertyOrThrow(ServicePropertiesEnum.FHIR_TOOLKIT_BASE) + "/proxy/" + channelConfig.asFullId();
-                String reference = fhirBase +
+//                String fhirBase = ServiceProperties.getInstance().getPropertyOrThrow(ServicePropertiesEnum.FHIR_TOOLKIT_BASE) + "/proxy/" + channelConfig.asFullId();
+                String reference = channelConfig.getProxyURI() +
                         "/DocumentReference/" + // TODO: Folder support
                         Utils.stripUrnPrefixes(assoc.getTargetObject());
                 listResource.getEntry().add(new ListResource.ListEntryComponent(new Reference(reference)));

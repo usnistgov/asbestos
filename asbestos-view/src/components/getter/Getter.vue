@@ -50,7 +50,7 @@
                     <log-analyis-report
                             :session-id="sessionId"
                             :channel-name="channelName"
-                            :the-url="`${$store.getters.getProxyBase({channelName: channelName, sessionId: sessionId})}/metadata`"
+                            :the-url="`${getProxyBase({channelName: channelName, sessionId: sessionId})}/metadata`"
                             :gzip="gzip"
                             :use-proxy="useProxy"
                             :ignore-bad-refs="true"> </log-analyis-report>
@@ -65,7 +65,7 @@
 
 <script>
     import LogAnalyisReport from "../logViewer/LogAnalysisReport";
-    import {FHIRTOOLKITBASEURL} from "../../common/http-common";
+    import {FHIRTOOLKITBASEURL, UtilFunctions} from "../../common/http-common";
     import Vue from "vue"
     import VueSimpleAlert from "vue-simple-alert";
 
@@ -89,6 +89,13 @@
             }
         },
         methods : {
+            getProxyBase(parms)  {
+                if (parms === null)
+                    return UtilFunctions.getProxyBase()
+                const channelName = parms.channelName
+                const sessionId = parms.sessionId
+                return `${UtilFunctions.getProxyBase()}/${sessionId}__${channelName}`
+            },
             inspect() {
                 console.log(`running inspect`)
                 this.inspection = true
@@ -126,7 +133,7 @@
         },
         computed: {
             validateCallUrl() {
-                const url = this.$store.getters.getProxyBase({channelName: this.channelName, sessionId: this.sessionId}) + '/metadata'
+                const url = this.getProxyBase({channelName: this.channelName, sessionId: this.sessionId}) + '/metadata'
                 return this.validateCall('CapabilityStatement', url)
             },
         },
