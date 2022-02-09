@@ -1,5 +1,6 @@
 package gov.nist.asbestos.client.channel;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.serviceproperties.ServiceProperties;
 import gov.nist.asbestos.serviceproperties.ServicePropertiesEnum;
@@ -65,6 +66,7 @@ public class ChannelConfig {
         return new URI(uriString);
     }
 
+    @JsonIgnore
     public URI getProxyURI() {
         if ("https".equals(getScheme())) {
             return getProxyURIx(ServicePropertiesEnum.HTTPS_FHIR_TOOLKIT_BASE);
@@ -72,6 +74,7 @@ public class ChannelConfig {
         return getProxyURIx(ServicePropertiesEnum.FHIR_TOOLKIT_BASE);
     }
 
+    @JsonIgnore
     public URI getProxyURI(boolean isTls) {
         if (isTls)
             return getProxyURIx(ServicePropertiesEnum.HTTPS_FHIR_TOOLKIT_BASE);
@@ -224,6 +227,7 @@ public class ChannelConfig {
         this.mhdVersions = mhdVersions;
     }
 
+    @JsonIgnore
     public String getScheme() {
         return scheme;
     }
