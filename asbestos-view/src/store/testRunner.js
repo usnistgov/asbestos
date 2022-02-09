@@ -61,14 +61,13 @@ export const testRunnerStore = {
                 }
             },
 
-            filterTestCollectionsMhdVersion: function(state, rootState, tcObjs, mhdVersions) {
-                if (mhdVersions === undefined) {
-                    mhdVersions = rootState.base.channel.mhdVersions
-                }
-                if (mhdVersions !== null && Array.isArray(mhdVersions)) {
+            filterTestCollectionsMhdVersion: function(tcObjs, mhdVersions) {
+                if (mhdVersions !== null && (Array.isArray(mhdVersions) && mhdVersions.length > 0)) {
                     // console.log(String(tcObjs.map(e=>e.mhdVersion)))
-                    return tcObjs.filter(e => mhdVersions.includes(e.mhdVersion)).map(e => e.name)
+                    return tcObjs.filter(e => e.mhdVersion.split(',').some(r => mhdVersions.includes(r.trim())) ).map(e => e.name)
                 }
+                // this filter does not apply if channel did not specify any mhdVersion in its channel config
+                // return all tcObjs with a user-friendly name
                 return tcObjs.map(e => e.name)
             },
 
@@ -281,11 +280,11 @@ export const testRunnerStore = {
         },
     },
     getters: {
-        clientTestCollectionNames: (state,rootState) => (mhdVersions) => {
-            return state.filterTestCollectionsMhdVersion(state, rootState, state.clientTestCollectionObjs, mhdVersions)
+        clientTestCollectionNames: (state) => (mhdVersions) => {
+            return state.filterTestCollectionsMhdVersion(state.clientTestCollectionObjs, mhdVersions)
         },
-        serverTestCollectionNames: (state,rootState) => (mhdVersions) => {
-            return state.filterTestCollectionsMhdVersion(state, rootState, state.serverTestCollectionObjs, mhdVersions)
+        serverTestCollectionNames: (state) => (mhdVersions) => {
+            return state.filterTestCollectionsMhdVersion(state.serverTestCollectionObjs, mhdVersions)
         },
         allServerTestCollectionNames: (state) => {
             return state.serverTestCollectionObjs.map(e => e.name)
