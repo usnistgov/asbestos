@@ -20,6 +20,8 @@ public class Ref {
     private URI uri;
     private String anchor = null;
 
+    private URI sut;
+
     public Ref(URI uri) {
         Objects.requireNonNull(uri);
         this.uri = uri; // httpize(uri);
@@ -32,6 +34,11 @@ public class Ref {
     public Ref(String ref)  {
         Objects.requireNonNull(ref);
         uri = build(ref);
+    }
+
+    public Ref(String ref, URI sut) {
+        this(ref);
+        this.sut = sut;
     }
 
 //    public Ref(URI base, String resourceType, SearchParms searchParms) {
@@ -781,5 +788,9 @@ public class Ref {
 
     public static List<String> getResourceNames() {
         return resourceNames;
+    }
+
+    public URI getSut() {
+        return sut;
     }
 }

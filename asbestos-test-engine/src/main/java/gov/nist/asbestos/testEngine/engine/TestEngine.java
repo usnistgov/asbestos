@@ -574,7 +574,7 @@ public class TestEngine  implements TestDef {
                         throw new Error("fixture.autodelete is a required field");
 
                     if (fix.hasResource()) {
-                        Ref ref = new Ref(fix.getResource().getReference());
+                        Ref ref = new Ref(fix.getResource().getReference(), sut);
                         FixtureComponent fixtureComponent = fixtureMgr.add(id)
                                 .setStaticRef(ref)   // static means defined in this test
                                 .setVal(fVal);
