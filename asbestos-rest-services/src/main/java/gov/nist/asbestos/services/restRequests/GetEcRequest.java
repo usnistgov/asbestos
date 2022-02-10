@@ -20,6 +20,7 @@ public class GetEcRequest {
     }
 
     public GetEcRequest(Request request) {
+        request.setType(this.getClass().getSimpleName());
         this.request = request;
     }
 

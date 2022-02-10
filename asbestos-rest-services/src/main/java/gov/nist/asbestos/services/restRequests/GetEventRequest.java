@@ -40,6 +40,8 @@ public class GetEventRequest {
     }
 
     public GetEventRequest(Request request) {
+        request.setType(this.getClass().getSimpleName());
+
         this.request = request;
         String textMode = request.getParm("textMode");
         rawTextMode = (textMode != null && "raw".equals(textMode));

@@ -26,6 +26,7 @@ public class GetDocumentRequest {
     }
 
     public GetDocumentRequest(Request request) {
+        request.setType(this.getClass().getSimpleName());
         this.request = request;
     }
 

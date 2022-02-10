@@ -43,6 +43,8 @@ public class GetEventsForChannelRequest {
     }
 
     public GetEventsForChannelRequest(Request request) {
+        request.setType(this.getClass().getSimpleName());
+
         this.request = request;
         if (hasFilterEventParam(request))
             this.hasFilterEventId = true;
