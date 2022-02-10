@@ -9,7 +9,7 @@
       <span v-if="!$store.state.testRunner.isClientTest">
 <!--            <template v-if="theChannelObj.channelType === 'mhd'">-->
                 <input type="checkbox" id="doTls" v-model="tlsOption">
-                <label for="doTls" title="">Use TLS?</label>
+                <label for="doTls" title="Use TLS Proxy? References in response will be re-based using TLS proxy hostname and port.">Use TLS?</label>
                 <div class="divider"></div>
 <!--            </template>-->
             <input type="checkbox" id="doGzip" v-model="gzip">
