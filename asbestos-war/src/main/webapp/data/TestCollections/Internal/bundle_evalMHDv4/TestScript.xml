@@ -47,12 +47,6 @@
                     <extension url="urn:fixture-in">
                         <valueString value="response"/>
                     </extension>
-                    <extension url="urn:variable-in">
-                        <valueString value="isComprehensiveMetadataExpected"/>
-                    </extension>
-                    <extension url="urn:variable-in">
-                        <valueString value="isComprehensive"/>
-                    </extension>
                 </modifierExtension>
             </operation>
         </action>
@@ -159,7 +153,7 @@
                 <description value="Comprehensive Metadata only"/>
                 <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
                     <extension url="component">
-                        <valueString value="../../Library/PDBVal/CMPMETA4_ComprehensiveMetadataOnly.xml"/>
+                        <valueString value="../../Library/PDBVal/CMPMETA_ComprehensiveMetadataOnly.xml"/>
                     </extension>
                     <extension url="urn:fixture-in">
                         <valueString value="request"/>

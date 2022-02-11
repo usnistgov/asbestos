@@ -12,6 +12,15 @@
     <name value="SubjectAggregate"/>
     <description value="Evaluate Subject."/>
 
+    <variable>
+        <name value="scriptMHDv3.x"/>
+        <defaultValue value="../CheckSubject3.xml"/>
+    </variable>
+    <variable>
+        <name value="scriptMHDv4"/>
+        <defaultValue value="../CheckSubject4.xml"/>
+    </variable>
+
     <test>
         <description value="Subject assertions."/>
         <action>
@@ -19,7 +28,7 @@
                 <description value="Previous test action operation is analyzed using assertions."/>
                 <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
                     <extension url="component">
-                        <valueString value="../CheckSubject.xml"/>
+                        <valueString value="#{script:TestCollection.properties:MhdVersion}"/>
                     </extension>
                     <extension url="urn:fixture-in">
                         <valueString value="request"/>

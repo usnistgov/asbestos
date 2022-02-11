@@ -1,0 +1,46 @@
+<TestScript xmlns="http://hl7.org/fhir">
+    <modifierExtension url="urn:module">
+        <extension url="urn:fixture-in">
+            <valueString value="request"/>
+        </extension>
+        <extension url="urn:fixture-in">
+            <valueString value="response"/>
+        </extension>
+    </modifierExtension>
+
+    <id value="CheckSubject3"/>
+    <name value="subjectModule"/>
+    <description value="Check Subject."/>
+
+
+    <test>
+        <description value="Check Subject."/>
+
+        <action>
+            <assert id="SUBJ3_1">
+                <description value="{DocumentReference, DocumentManifest}.subject.reference is an absolute external reference or UUID."/>
+                <compareToSourceId value="request"/>
+                <compareToSourceExpression value="Bundle.entry.resource.all($this is DocumentReference or ($this is DocumentManifest) implies (subject.reference.startsWith('http') or subject.reference.startsWith('urn:uuid:')))"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+
+        <action>
+            <assert id="SUBJ3_2">
+                <description value="PDB: subject must reference a Patient."/>
+                <compareToSourceId value="request"/>
+                <compareToSourceExpression value="Bundle.entry.resource.where($this is DocumentReference or ($this is DocumentManifest)).subject.reference.select(contains('/Patient/')).allTrue()"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
+            <assert id="SUBJ3_3">
+                <description value="PDB: {DocumentReference, DocumentManifest}.subject.reference must reference same Patient"/>
+                <compareToSourceId value="request"/>
+                <compareToSourceExpression value="Bundle.entry.resource.where($this is DocumentReference or ($this is DocumentManifest)).select(subject.reference).distinct().count() = 1"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+
+    </test>
+</TestScript>

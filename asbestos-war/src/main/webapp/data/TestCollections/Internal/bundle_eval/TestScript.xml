@@ -11,8 +11,8 @@
         </extension>
     </modifierExtension>
 
-    <id value="singleDoc"/>
-    <name value="singleDoc"/>
+    <id value="singleDocMhdv3x"/>
+    <name value="singleDocMhdv3x"/>
     <description value="Evaluate PDB-request Bundle"/>
     <!--
       If this is a normal TestScript execution, these fixtures will be inserted by the TestEngine:
@@ -41,7 +41,7 @@
                 <description value="PDB in the request bundle is analyzed using FHIRPath assertions."/>
                 <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
                     <extension url="component">
-                        <valueString value="../../Library/PDBVal/RequestMessage.xml"/>
+                        <valueString value="../../Library/PDBVal/RM_RequestMessage.xml"/>
                     </extension>
                     <extension url="urn:fixture-in">
                         <valueString value="request"/>
@@ -62,7 +62,7 @@
                 <description value="PDB in the request bundle is analyzed using FHIRPath assertions."/>
                 <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
                     <extension url="component">
-                        <valueString value="../../Library/PDBVal/BundleRequirements.xml"/>
+                        <valueString value="../../Library/PDBVal/BR_BundleRequirements.xml"/>
                     </extension>
                     <extension url="urn:fixture-in">
                         <valueString value="request"/>
@@ -105,7 +105,7 @@
                 <description value="DocumentManifest requirements"/>
                 <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
                     <extension url="component">
-                        <valueString value="../../Library/PDBVal/DocumentManifestRequirements.xml"/>
+                        <valueString value="../../Library/PDBVal/DM_DocumentManifestRequirements.xml"/>
                     </extension>
                     <extension url="urn:fixture-in">
                         <valueString value="request"/>
@@ -118,6 +118,32 @@
         </action>
     </test>
 
+    <!-- Minimal Metadata only -->
+    <test>
+        <description value="If Minimal Metadata."/>
+        <action>
+            <operation>
+                <description value="Minimal Metadata only"/>
+                <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
+                    <extension url="component">
+                        <valueString value="../../Library/PDBVal/MINMETA3_MinimalMetadataOnly.xml"/>
+                    </extension>
+                    <extension url="urn:fixture-in">
+                        <valueString value="request"/>
+                    </extension>
+                    <extension url="urn:fixture-in">
+                        <valueString value="response"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="isComprehensiveMetadataExpected"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="isComprehensive"/>
+                    </extension>
+                </modifierExtension>
+            </operation>
+        </action>
+    </test>
 
     <!-- Comprehensive Metadata only -->
     <test>
@@ -127,7 +153,7 @@
                 <description value="Comprehensive Metadata only"/>
                 <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
                     <extension url="component">
-                        <valueString value="../../Library/PDBVal/ComprehensiveMetadataOnly.xml"/>
+                        <valueString value="../../Library/PDBVal/CMPMETA_ComprehensiveMetadataOnly.xml"/>
                     </extension>
                     <extension url="urn:fixture-in">
                         <valueString value="request"/>
@@ -154,7 +180,7 @@
                 <description value="Transaction response"/>
                 <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
                     <extension url="component">
-                        <valueString value="../../Library/PDBVal/TransactionResponse.xml"/>
+                        <valueString value="../../Library/PDBVal/TR_TransactionResponse.xml"/>
                     </extension>
                     <extension url="urn:fixture-in">
                         <valueString value="request"/>
@@ -166,9 +192,5 @@
             </operation>
         </action>
     </test>
-
-
-
-
 
 </TestScript>

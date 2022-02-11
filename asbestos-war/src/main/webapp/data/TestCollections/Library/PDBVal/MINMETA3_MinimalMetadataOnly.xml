@@ -1,0 +1,74 @@
+<TestScript xmlns="http://hl7.org/fhir">
+    <modifierExtension url="urn:module">
+        <extension url="urn:fixture-in">
+            <valueString value="request"/>
+        </extension>
+        <extension url="urn:fixture-in">
+            <valueString value="response"/>
+        </extension>
+        <extension url="urn:variable-in">
+            <valueString value="isComprehensiveMetadataExpected"/>
+        </extension>
+        <extension url="urn:variable-in">
+            <valueString value="isComprehensive"/>
+        </extension>
+    </modifierExtension>
+
+    <id value="MINMETA3_MinimalMetadataOnly"/>
+    <name value="minimalMetadataOnly"/>
+    <description value="Minimal Metadata only."/>
+
+    <variable>
+        <name value="isSubjectPresent"/>
+        <expression value="Bundle.entry.resource.select($this.subject.exists()).anyTrue()"/>
+        <sourceId value="request"/>
+    </variable>
+
+    <test>
+        <description value="Minimal Metadata only"/>
+        <action>
+            <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Conditional"/>
+            <assert id="MINMETA3_1">
+                <description value="Is Minimal Metadata expected or transaction is labeled as Minimal Metadata?"/>
+                <expression value="${isComprehensiveMetadataExpected}.not() or ${isComprehensive}.not()"/>
+                <operator value="equals"/>
+                <value value="true"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
+            <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Conditional"/>
+            <assert id="MINMETA3_2">
+                <description value="Subject is known, is it present consistently among bundle resources? If Subject is not present or not known, is it non-existent consistently among bundle resources?"/>
+                <compareToSourceId value="request"/>
+                <compareToSourceExpression value="Bundle.entry.resource.where($this is DocumentReference or ($this is DocumentManifest)).select(subject.exists()).distinct().count()=1"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
+            <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Conditional"/>
+            <assert id="MINMETA3_3">
+                <description value="Is Subject present?"/>
+                <compareToSourceId value="request"/>
+                <compareToSourceExpression value="${isSubjectPresent}=true"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
+            <operation>
+                <description value="Check Subject."/>
+                <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
+                    <extension url="component">
+                        <valueString value="../../Library/AggregateModule/Subject.xml"/>
+                    </extension>
+                    <extension url="urn:fixture-in">
+                        <valueString value="request"/>
+                    </extension>
+                    <extension url="urn:fixture-in">
+                        <valueString value="response"/>
+                    </extension>
+                </modifierExtension>
+            </operation>
+        </action>
+    </test>
+</TestScript>

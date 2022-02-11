@@ -8,14 +8,14 @@
         </extension>
     </modifierExtension>
 
-    <id value="documentManifestValidations"/>
+    <id value="DM_DocumentManifestRequirements"/>
     <name value="documentManifestValidations"/>
     <description value="DocumentManifest requirements."/>
 
     <test>
     <description value="DocumentManifest requirements."/>
     <action>
-        <assert id="FTKDM100">
+        <assert id="DM_1">
             <description value="DocumentManifest: masterIdentifier is required.|MHDSendingActorMetadataAttributeOptionality"/>
             <compareToSourceId value="request"/>
             <compareToSourceExpression value="Bundle.entry.resource.where(is(FHIR.DocumentManifest)).masterIdentifier.exists()"/>
@@ -23,7 +23,7 @@
         </assert>
     </action>
     <action>
-        <assert id="FTKDM200">
+        <assert id="DM_2">
             <description value="DocumentManifest: source is required.|MHDSendingActorMetadataAttributeOptionality"/>
             <compareToSourceId value="request"/>
             <compareToSourceExpression value="Bundle.entry.resource.where(is(FHIR.DocumentManifest)).source.exists()"/>
@@ -31,7 +31,7 @@
         </assert>
     </action>
         <action>
-            <assert id="FTKDM300">
+            <assert id="DM_3">
                 <description value="DocumentManifest: created is required.|MHDSendingActorMetadataAttributeOptionality"/>
                 <compareToSourceId value="request"/>
                 <compareToSourceExpression value="Bundle.entry.resource.where(is(FHIR.DocumentManifest)).created.exists()"/>
