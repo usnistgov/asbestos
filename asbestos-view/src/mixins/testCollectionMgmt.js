@@ -67,7 +67,7 @@ export default {
             this.endTestTime()
         },
         async doClearLogs(silent=false) {
-            if (silent || confirm('Clear all test reports for this Test Collection?')) {
+            if (silent || confirm('Temporarily clear all test reports for this Test Collection?')) {
                 await this.$store.commit('clearTestReports')
             }
         },
