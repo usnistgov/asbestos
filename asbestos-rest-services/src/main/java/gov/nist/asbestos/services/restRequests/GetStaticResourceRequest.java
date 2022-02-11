@@ -29,6 +29,7 @@ public class GetStaticResourceRequest {
     }
 
     public GetStaticResourceRequest(Request request) {
+        request.setType(this.getClass().getSimpleName());
         this.request = request;
     }
 

@@ -35,6 +35,7 @@ public class AddSessionRequest {
     }
 
     public AddSessionRequest(Request request) {
+        request.setType(this.getClass().getSimpleName());
         this.request = request;
     }
 

@@ -26,6 +26,7 @@ public class DeleteChannelRequest {
     }
 
     public DeleteChannelRequest(Request request) {
+        request.setType(this.getClass().getSimpleName());
         this.request = request;
     }
 

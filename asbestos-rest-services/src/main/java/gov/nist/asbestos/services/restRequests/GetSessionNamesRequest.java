@@ -23,6 +23,7 @@ public class GetSessionNamesRequest {
     }
 
     public GetSessionNamesRequest(Request request) {
+        request.setType(this.getClass().getSimpleName());
         this.request = request;
     }
 

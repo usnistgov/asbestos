@@ -22,6 +22,7 @@ public class GetValidationServerRequest {
     }
 
     public GetValidationServerRequest(Request request) {
+        request.setType(this.getClass().getSimpleName());
         this.request = request;
     }
 

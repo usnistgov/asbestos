@@ -25,7 +25,9 @@ public class GetSessionConfigRequest {
         return request.uriParts.size() == 5 && "testSession".equalsIgnoreCase(request.uriParts.get(3));
     }
 
-    public GetSessionConfigRequest(Request request) { this.request = request; }
+    public GetSessionConfigRequest(Request request) {
+        request.setType(this.getClass().getSimpleName());
+        this.request = request; }
 
     public void run() {
         String sessionId = request.uriParts.get(4);

@@ -36,6 +36,7 @@ public class DelSessionRequest {
     }
 
     public DelSessionRequest(Request request) {
+        request.setType(this.getClass().getSimpleName());
         this.request = request;
     }
 

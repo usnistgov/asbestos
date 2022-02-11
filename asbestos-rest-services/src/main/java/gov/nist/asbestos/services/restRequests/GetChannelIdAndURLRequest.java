@@ -30,6 +30,7 @@ public class GetChannelIdAndURLRequest {
     }
 
     public GetChannelIdAndURLRequest(Request request) {
+        request.setType(this.getClass().getSimpleName());
         this.request = request;
     }
 

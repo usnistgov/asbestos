@@ -36,6 +36,7 @@ public class GetValidationRequest {
     }
 
     public GetValidationRequest(Request request) {
+        request.setType(this.getClass().getSimpleName());
         this.request = request;
     }
 

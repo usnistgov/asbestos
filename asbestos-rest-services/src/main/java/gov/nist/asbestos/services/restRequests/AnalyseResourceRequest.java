@@ -36,6 +36,7 @@ public class AnalyseResourceRequest {
     }
 
     public AnalyseResourceRequest(Request request) {
+        request.setType(this.getClass().getSimpleName());
         this.request = request;
     }
 

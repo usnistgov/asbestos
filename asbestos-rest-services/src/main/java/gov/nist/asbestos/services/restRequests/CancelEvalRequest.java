@@ -21,6 +21,7 @@ public class CancelEvalRequest {
     }
 
     public CancelEvalRequest(Request request) {
+        request.setType(this.getClass().getSimpleName());
         this.request = request;
     }
 

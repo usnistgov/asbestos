@@ -31,6 +31,7 @@ public class LockChannelRequest {
     }
 
     public LockChannelRequest(Request request) {
+        request.setType(this.getClass().getSimpleName());
         this.request = request;
     }
 

@@ -28,6 +28,7 @@ public class GetLogEventAnalysisByEventRequest {
     private static Logger log = Logger.getLogger(GetLogEventAnalysisByEventRequest.class.getName());
 
     public GetLogEventAnalysisByEventRequest(Request request) {
+        request.setType(this.getClass().getSimpleName());
         model = new Model(request);
     }
 

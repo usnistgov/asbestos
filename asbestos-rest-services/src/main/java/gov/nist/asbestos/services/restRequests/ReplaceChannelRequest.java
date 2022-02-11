@@ -26,6 +26,7 @@ public class ReplaceChannelRequest extends CreateChannelRequest {
 
     public ReplaceChannelRequest(Request request) {
         super(request);
+        request.setType(this.getClass().getSimpleName());
     }
 
     public static boolean isRequest(Request request) {

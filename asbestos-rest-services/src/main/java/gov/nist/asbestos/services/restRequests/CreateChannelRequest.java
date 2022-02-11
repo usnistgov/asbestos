@@ -39,6 +39,7 @@ public class CreateChannelRequest {
     }
 
     public CreateChannelRequest(Request request) {
+        request.setType(this.getClass().getSimpleName());
         this.request = request;
     }
 

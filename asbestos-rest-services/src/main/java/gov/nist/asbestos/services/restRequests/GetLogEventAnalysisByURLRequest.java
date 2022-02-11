@@ -27,6 +27,7 @@ public class GetLogEventAnalysisByURLRequest {
     private static Logger log = Logger.getLogger(GetLogEventAnalysisByURLRequest.class.getName());
 
     public GetLogEventAnalysisByURLRequest(Request request) {
+        request.setType(this.getClass().getSimpleName());
         model = new Model(request);
     }
 

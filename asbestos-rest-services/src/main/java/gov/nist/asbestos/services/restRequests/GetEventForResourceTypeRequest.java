@@ -28,6 +28,7 @@ public class GetEventForResourceTypeRequest {
     }
 
     public GetEventForResourceTypeRequest(Request request) {
+        request.setType(this.getClass().getSimpleName());
         this.request = request;
     }
 

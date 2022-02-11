@@ -25,6 +25,7 @@ public class GetNativeUrlRequest {
     }
 
     public GetNativeUrlRequest(Request request) {
+        request.setType(this.getClass().getSimpleName());
         this.request = request;
     }
 
