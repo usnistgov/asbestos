@@ -16,7 +16,7 @@ public class AsbestosComponentPath {
 
     /**
      *
-     * Expected string convention: ${script:TestCollection.properties:propertyKey}
+     * Expected string convention: #{script:TestCollection.properties:propertyKey}
      * Expected TestScript variable = propKey, with a defaultValue containing the relative path, without any single quotes
      * This method pulls the defaultValue
      * @param tcProperties
