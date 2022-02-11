@@ -59,6 +59,7 @@
         <defaultValue value="true"/>
     </variable>
 
+
     <setup>
         <modifierExtension url="urn:noErrors"/>
         <action>
@@ -109,7 +110,7 @@
                 <description value="Module usage description: TestScript import call to bridge an aggregate TestScript."/>
                 <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
                     <extension url="component">
-                        <valueString value="../../Library/AggregateModule/MHDv3xBundleEvalAggregateResult.xml"/>
+                        <valueString value="../../Library/AggregateModule/MHDBundleEvalAggregateResult.xml"/>
                     </extension>
                     <extension url="urn:fixture-in">
                         <valueString value="pdb-bundle"/>
