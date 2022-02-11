@@ -212,7 +212,7 @@ export const debugTestScriptStore = {
                    }
                }
            }
-           console.log('Active debug testScriptIndex not found!') // Possible that breakpoint was never hit from the backend at all for this to happen
+           console.debug('Active debug testScriptIndex not found!') // Possible that breakpoint was never hit from the backend at all for this to happen
            return null
         },
         getIndexOfTestId: (state, getters, rootState) => (testId) => {
