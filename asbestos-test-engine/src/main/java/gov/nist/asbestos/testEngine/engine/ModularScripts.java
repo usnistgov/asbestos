@@ -100,7 +100,7 @@ public class ModularScripts {
                        Pattern p = Pattern.compile(String.format("(^.*/)(%s.xml\"$)",multiUse.getSourceComponentIdPart()) ,Pattern.MULTILINE);// Example: "line1\nline2\nvalueString": "../CheckSubject.xml"\nline\n
                        Matcher m = p.matcher(script);
                        if (m.find()) {
-                           scripts.replace(key, m.replaceFirst(String.format("$1%s.xml\"", multiUse.getNewScriptId())));
+                           scripts.replace(key, m.replaceAll(String.format("$1%s.xml\"", multiUse.getNewScriptId())));
                        }
                    }
                }
@@ -226,7 +226,7 @@ public class ModularScripts {
                                 }
                             }
                             if (isReplaced) {
-                                scripts.replace(fullComponentId, newValue);
+                                scripts.replace(newFullComponentId, newValue);
                             }
                         }
 
