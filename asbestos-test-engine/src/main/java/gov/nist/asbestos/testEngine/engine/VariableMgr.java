@@ -175,7 +175,7 @@ public class VariableMgr {
         if (update == null) {
             if (convertNullToEmptySet) {
                 final String emptySet = "{}";
-                update = String.format("%s/* %s Is an unresolved variable. This may be expected if an element is missing. Otherwise, check if it is defined in TestScript and confirm if the resource element exists as per the sourceId. */", emptySet, var.name);
+                update = String.format("%s/* %s is an unresolved variable. Here, null is represented as an empty set. This may be expected if an element is missing. Otherwise, check if it is defined in TestScript and confirm if the resource element exists as per the sourceId. */", emptySet, var.name);
             } else
                 return reference;
         }
