@@ -39,7 +39,7 @@ public class ComponentReference {
                     fixturesOut.add(p);
                 } else if (url.equals(ExtensionDef.variableIn)) {
                     Parameter p = new Parameter();
-                    p.setCallerName(value);
+                    p.setCallerName(AsbestosPropertyReference.getValue(propertiesMap, value));
                     variablesIn.add(p);
                 } else if (url.equals(ExtensionDef.variableInNoTranslation)) {
                     Parameter p = new Parameter().setVariable(true);
