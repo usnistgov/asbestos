@@ -6,6 +6,8 @@ import gov.nist.asbestos.client.Base.Returns;
 import gov.nist.asbestos.client.client.Format;
 import gov.nist.asbestos.fixture.FixturePlaceholderEnum;
 import gov.nist.asbestos.fixture.FixturePlaceholderParamEnum;
+
+import java.util.UUID;
 import java.util.logging.Logger;
 import org.jetbrains.annotations.NotNull;
 
@@ -64,7 +66,7 @@ public class GetFixtureStringRequest {
         Map<String, String> paramsMap = request.getParametersMap();
 
         String fixtureId = paramsMap.get(FixturePlaceholderParamEnum.fixtureId.name());
-        if (! isSafe(fixtureId)) {
+        if (! isSafeFileName(fixtureId)) {
             String message = "fixtureId parameter is not valid.";
             unexpectedMessage(message);
             return;
@@ -75,12 +77,12 @@ public class GetFixtureStringRequest {
         if (fixtureString == null) {
             // Try base Test Collection if the optional parameter is available
             String baseTestCollection = paramsMap.get(FixturePlaceholderParamEnum.baseTestCollection.name());
-            if (isSafe(baseTestCollection)) {
+            if (isSafeFileName(baseTestCollection)) {
                 String baseTestCollectionNameDecoded = URLDecoder.decode(baseTestCollection, StandardCharsets.UTF_8.toString());
                 String baseTestName = paramsMap.get(FixturePlaceholderParamEnum.baseTestName.name());
                 if (baseTestName == null) {
                     fixtureString = readFixtureString(baseTestCollectionNameDecoded, testName, fixtureId);
-                } else if (isSafe(baseTestName)) {
+                } else if (isSafeFileName(baseTestName)) {
                     // Try baseTestName
                     String baseTestNameDecoded = URLDecoder.decode(baseTestName, StandardCharsets.UTF_8.toString());
                     fixtureString = readFixtureString(baseTestCollectionNameDecoded, baseTestNameDecoded, fixtureId);
@@ -160,7 +162,12 @@ public class GetFixtureStringRequest {
                 "</OperationOutcome> ",message));
     }
 
-    private static boolean isSafe(String name) {
+    /**
+     * Mainly used to avoid unwanted path traversal using ..\
+     * @param name
+     * @return
+     */
+    private static boolean isSafeFileName(String name) {
         return name != null && !"".equals(name) && !name.contains(".");
     }
 
@@ -177,33 +184,43 @@ public class GetFixtureStringRequest {
            return null;
         }
         String placeholderName = fixtureString.substring(from+PLACEHOLDER_BEGIN.length(), to);
+        FixturePlaceholderEnum placeholderEnum = null;
         try {
-            FixturePlaceholderEnum.valueOf(placeholderName);
+            placeholderEnum = FixturePlaceholderEnum.valueOf(placeholderName);
         } catch (IllegalArgumentException iaex) {
             unexpectedMessage(String.format("%s fixture placeholder is not a registered enumeration type.", placeholderName));
             return null;
         }
 
         String paramValue = paramsMap.get(placeholderName);
+        String placeholderFixtureString = null;
         if (paramValue == null) {
-            // If null, expect a file name same name as the placeholder
-            // Example  @{BundleMetaProfileElement} = BundleMetaProfileElement.xml
-            paramValue = placeholderName;
-        }
-        if (isSafe(paramValue)) {
-            String placeholderFixtureString = readFixtureString(testCollection, testName, paramValue);
-            if (placeholderFixtureString != null) {
-                return replacePlaceholder(
-                        fixtureString.replaceAll(
-                                Pattern.quote(String.format("%s%s%s", PLACEHOLDER_BEGIN, placeholderName, PLACEHOLDER_END)), Matcher.quoteReplacement(placeholderFixtureString)), paramsMap);
-            } else {
-                unexpectedMessage(String.format("%s fixture string value is null", paramValue));
-                return null;
+            if (FixturePlaceholderEnum.RandomUUID.equals(placeholderEnum)) {
+                paramValue = FixturePlaceholderEnum.RandomUUID.toString();
+                placeholderFixtureString = UUID.randomUUID().toString();
             }
+            else {
+                // If null, expect a file name same name as the placeholder
+                // Example  @{BundleMetaProfileElement} = BundleMetaProfileElement.xml
+                paramValue = placeholderName;
+                if (isSafeFileName(paramValue)) {
+                    placeholderFixtureString = readFixtureString(testCollection, testName, paramValue);
+                } else {
+                    log.severe(String.format("%s is not safe",paramValue));
+                    return null;
+                }
+            }
+        if (placeholderFixtureString != null) {
+            return replacePlaceholder(
+                    fixtureString.replaceAll(
+                            Pattern.quote(String.format("%s%s%s", PLACEHOLDER_BEGIN, placeholderName, PLACEHOLDER_END)), Matcher.quoteReplacement(placeholderFixtureString)), paramsMap);
         } else {
-            log.severe(String.format("%s is not safe",paramValue));
+            unexpectedMessage(String.format("%s fixture string value is null", paramValue));
             return null;
         }
+     }
+        unexpectedMessage(String.format("unresolved placeholder %s", placeholderName));
+        return null;
     }
 
     private static String appendXmlFileExtension(String fileName) {

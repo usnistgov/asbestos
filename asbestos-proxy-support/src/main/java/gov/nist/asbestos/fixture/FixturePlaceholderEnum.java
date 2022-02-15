@@ -6,5 +6,6 @@ package gov.nist.asbestos.fixture;
 public enum FixturePlaceholderEnum {
     BundleMetaMinimalProfileElement,
     BundleMetaComprehensiveProfileElement,
-    SubmissionSetResourceElement
+    SubmissionSetResourceElement,
+    RandomUUID
 }
