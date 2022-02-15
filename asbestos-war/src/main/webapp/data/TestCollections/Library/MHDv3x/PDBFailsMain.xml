@@ -69,10 +69,6 @@
         <sourceId value="patient_bundle"/>
     </variable>
     <variable>
-        <name value="dependsOnTestId"/>
-        <defaultValue value="MHD_DocumentRecipient_minimal/1_Prerequisite_Single_Document_with_Binary"/>
-    </variable>
-    <variable>
         <name value="isComprehensiveMetadataExpected"/>
         <defaultValue value="true"/>
     </variable>
@@ -107,7 +103,7 @@
                         <valueString value="../DocumentResponderBaseAddress.xml"/>
                     </extension>
                     <extension url="urn:variable-in">
-                        <valueString value="dependsOnTestId"/>
+                        <valueString value="'#{TestCollection.properties:Id}/1_Prerequisite_Single_Document_with_Binary'"/>
                     </extension>
                     <extension url="urn:variable-out">
                         <valueString value="docRespBaseAddress"/>

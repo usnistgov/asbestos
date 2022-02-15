@@ -20,7 +20,7 @@
 
     <variable>
         <name value="scriptMHDv3.x"/>
-        <defaultValue value="CMPSUBJ3_SubjectExists.xml"/>
+        <defaultValue value="CMPMETA3_Assertions.xml"/>
     </variable>
     <variable>
         <name value="scriptMHDv4"/>
@@ -41,7 +41,7 @@
         </action>
         <action>
             <operation>
-                <description value="Assert subject exists."/>
+                <description value="Comprehensive metadata assertions only."/>
                 <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
                     <extension url="component">
                         <valueString value="#{script:TestCollection.properties:MhdVersion}"/>

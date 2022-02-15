@@ -1,0 +1,26 @@
+<TestScript xmlns="http://hl7.org/fhir">
+    <modifierExtension url="urn:module">
+        <extension url="urn:fixture-in">
+            <valueString value="request"/>
+        </extension>
+        <extension url="urn:fixture-in">
+            <valueString value="response"/>
+        </extension>
+    </modifierExtension>
+
+    <id value="DRP2_DocumentReferenceRequirements"/>
+    <name value="documentReferenceValidationsP2"/>
+    <description value="Evaluate PDB-request Bundle DocumentReference - MHDv3x only"/>
+
+    <test>
+    <description value="DocumentReference requirements."/>
+    <action>
+        <assert id="DRP2_1">
+            <description value="PDB: if DocumentReference.identifier carries the entryUUID then it shall be labeled official"/>
+            <compareToSourceId value="request"/>
+            <compareToSourceExpression value="Bundle.entry.resource.where($this is DocumentReference).all((identifier.value.startsWith('urn:uuid:') implies use = 'official'))"/>
+            <warningOnly value="false"/>
+        </assert>
+    </action>
+    </test>
+</TestScript>

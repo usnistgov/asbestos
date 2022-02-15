@@ -2,7 +2,7 @@
 
     <variable>
         <name value="expectedFailAssertionIdList"/>
-        <defaultValue value="('CMPMETA3_2'|'TR_1')"/>
+        <defaultValue value="('DRP2_1'|'TR_1')"/>
     </variable>
 
     <test>
@@ -15,7 +15,7 @@
                         <valueString value="../../Library/AggregateModule/MHDPDBFails.xml"/>
                     </extension>
                     <extension url="urn:variable-in">
-                        <valueString value="'true'"/>
+                        <valueString value="'false'"/>
                     </extension>
                     <extension url="urn:variable-in">
                         <valueString value="'?fixtureId=pdb'"/>

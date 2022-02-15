@@ -43,6 +43,7 @@
     "DR_9":         [{"mhdv4": "ITI-65_non-unContainedOption", "context": "MISSINGTEXTInMHD4"}],
     "DR_10":        [{"mhd": "DocumentReference", "context": ".masterIdentifier"}],
     "DR_11":        [{"mhd": "DocumentReference", "context": ".status"}],
+    "DRP2_1":        [{"mhdv3x": "DocumentReference", "context": ".identifier"}],
     "SSLIST_1":     [{"mhdv4": "ITI-65_RequestMessage", "context": "elements"}],
     "SSLIST_2":     [{"mhdv4": "ITI-65_RequestMessage", "context": "elements"},
                       {"mhdv4": "SubmissionSetTypeList", "context": ".extension:sourceId"}],
@@ -67,7 +68,8 @@
     "CMPMETA_3":   [{"mhdv4": "ITI-65_BundleResources", "context":"Bundle.meta.profile",
                       "verbatimPhraseToFocus": "Bundle.meta.profile"}],
     "CMPMETA_4":   [{"mhdComprehensive": "DocumentReference", "context": ".securityLabel"}],
-    "TR_1":         [{"mhd": "ITI-65_ResponseMessage", "context": "messageSemantics_p2"}],
+    "TR_1":         [{"mhd": "ITI-65_ResponseMessage", "context": "messageSemantics_p2",
+                      "verbatimPhraseToFocus": "To indicate success the overall http 200 response is used"}],
     "TR_2":         [{"mhd": "ITI-65_ResponseMessage", "context": "messageSemantics_p1"}],
     "TR_3":         [{"mhd": "ITI-65_ResponseMessage", "context": "messageSemantics_p1"}],
     "TR_4":         [{"mhd": "ITI-65_ResponseMessage", "context": "messageSemantics_p1",
@@ -273,6 +275,30 @@
       }
     },
     "mhdv3x": {
+      "DocumentReference": {
+        "common": {
+          "Source": {
+            "text": "IHE ITI"
+          },
+          "Profile": {
+            "text": "MHD Rev. 3.x - Trial Implementation"
+          },
+          "Metadata": {
+            "text": "Minimal or Comprehensive"
+          }
+        },
+        "context": {
+          ".identifier": {
+            "Section": {
+              "text": "Table 4.5.1.1-1: FHIR DocumentReference mapping to DocumentEntry"
+            },
+            "Element": {},
+            "SpecificationText": [{
+              "text": "When the DocumentReference.identifier carries the entryUUID then the DocumentReference.identifier.use shall be 'official'"
+            }]
+          }
+        }
+      }
     },
     "mhdv4": {
       "ITI-65_BundleResources": {

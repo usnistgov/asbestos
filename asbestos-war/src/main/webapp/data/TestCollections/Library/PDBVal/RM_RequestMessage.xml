@@ -70,14 +70,5 @@
             <warningOnly value="false"/>
         </assert>
     </action>
-    <action>
-        <assert id="RM_8">
-            <description value="PDB: if DocumentReference.identifier carries the entryUUID then it shall be labeled official"/>
-            <compareToSourceId value="request"/>
-            <compareToSourceExpression value="Bundle.entry.resource.where($this is DocumentReference).all((identifier.value.startsWith('urn:uuid:') implies use = 'official'))"/>
-
-            <warningOnly value="false"/>
-        </assert>
-    </action>
 </test>
 </TestScript>

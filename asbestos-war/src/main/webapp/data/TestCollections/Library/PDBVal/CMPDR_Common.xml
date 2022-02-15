@@ -1,0 +1,52 @@
+<TestScript  xmlns="http://hl7.org/fhir">
+    <modifierExtension url="urn:module">
+        <extension url="urn:fixture-in">
+            <valueString value="request"/>
+        </extension>
+        <extension url="urn:fixture-in">
+            <valueString value="response"/>
+        </extension>
+    </modifierExtension>
+
+    <url value=""/>
+    <name value="CMPDR_Common"/>
+    <status value="active"/>
+    <description value="DocumentReference comprehensive only."/>
+
+
+    <test>
+        <description value="Comprehensive Metadata only"/>
+        <action>
+            <assert id="CMPDR_1">
+                <description value="DocumentReference.content.format is required."/>
+                <compareToSourceId value="request"/>
+                <compareToSourceExpression value="Bundle.entry.resource.where($this is DocumentReference).all(content.format.exists())"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
+            <assert id="CMPDR_2">
+                <description value="DocumentReference.context.facilityType is required."/>
+                <compareToSourceId value="request"/>
+                <compareToSourceExpression value="Bundle.entry.resource.where($this is DocumentReference).all(context.facilityType.exists())"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
+            <assert id="CMPDR_3">
+                <description value="DocumentReference.content.attachment.language is required."/>
+                <compareToSourceId value="request"/>
+                <compareToSourceExpression value="Bundle.entry.resource.where($this is DocumentReference).all(content.attachment.language.exists())"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
+            <assert id="CMPDR_4">
+                <description value="DocumentReference.content.attachment.contentType is required."/>
+                <compareToSourceId value="request"/>
+                <compareToSourceExpression value="Bundle.entry.resource.where($this is DocumentReference).all(content.attachment.contentType.exists())"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+    </test>
+</TestScript>

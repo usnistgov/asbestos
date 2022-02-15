@@ -77,10 +77,10 @@
 
     <!-- DocumentReference requirements. -->
     <test>
-        <description value="DocumentReference requirements."/>
+        <description value="DocumentReference requirements - Part 1."/>
         <action>
             <operation>
-                <description value="DocumentReference requirements"/>
+                <description value="Module call. DocumentReference requirements - Part 1."/>
                 <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
                     <extension url="component">
                         <valueString value="../../Library/PDBVal/DR_DocumentReferenceRequirements.xml"/>
@@ -96,6 +96,25 @@
         </action>
     </test>
 
+    <test>
+        <description value="DocumentReference requirements - Part 2."/>
+        <action>
+            <operation>
+                <description value="Module call. DocumentReference requirements - Part 2."/>
+                <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
+                    <extension url="component">
+                        <valueString value="../../Library/PDBVal/DRP2_DocumentReferenceRequirements.xml"/>
+                    </extension>
+                    <extension url="urn:fixture-in">
+                        <valueString value="request"/>
+                    </extension>
+                    <extension url="urn:fixture-in">
+                        <valueString value="response"/>
+                    </extension>
+                </modifierExtension>
+            </operation>
+        </action>
+    </test>
 
     <!-- DocumentManifest requirements. -->
     <test>
@@ -147,7 +166,7 @@
 
     <!-- Comprehensive Metadata only -->
     <test>
-        <description value="If applicable, Comprehensive Metadata only."/>
+        <description value="If Comprehensive Metadata."/>
         <action>
             <operation>
                 <description value="Comprehensive Metadata only"/>
