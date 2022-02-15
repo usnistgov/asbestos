@@ -23,17 +23,20 @@ public class ExtrinsicId extends AbstractAttribute {
                 if (id.hasValue()) {
                     boolean isOfficial = id.hasUse() && id.getUse() == Identifier.IdentifierUse.OFFICIAL;
                     if (ResourceMgr.isUUID(id.getValue())) {
-                        if (!isOfficial)
-                            tr.add(new ValE("DocumentReference.identifier is UUID but not labeled as official").asWarning());
-                        else {
+                        if (!isOfficial) {
+                            /*
+                            Table 4.5.1.1-1
+                            When the DocumentReference.identifier carries the entryUUID then the DocumentReference.identifier.use shall be ‘official’
+                            Antecedent : entryUUID
+                            Consequent : then use = 'official'
+                             */
+                            tr.add(new ValE("DocumentReference.identifier is UUID but not labeled as official").asError());
+                        } else {
                             tr.add(new ValE("Official Identifier found").asTranslation());
 //                            resource.setAssignedId(id.getValue());
                             retVal = id.getValue();
                             break;
                         }
-                    } else {
-                        if (isOfficial)
-                            tr.add(new ValE("Identifier is labeled Official but is not UUID format").asError());
                     }
                 }
             }
