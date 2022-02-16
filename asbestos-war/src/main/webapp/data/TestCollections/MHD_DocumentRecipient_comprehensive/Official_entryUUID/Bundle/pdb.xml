@@ -30,7 +30,7 @@
                 </masterIdentifier>
                 <identifier>
                     <system value="urn:ietf:rfc:3986"/>
-                    <value value="${entryUUID}"/>
+                    <value value="urn:uuid:@{RandomUUID}"/>
                     <use value="official"/>
                 </identifier>
                 <type>

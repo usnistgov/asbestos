@@ -2,7 +2,7 @@
 
     <variable>
         <name value="expectedFailAssertionIdList"/>
-        <defaultValue value="(''|'TR_1')"/>
+        <defaultValue value="('DM_1'|'TR_1')"/>
     </variable>
 
     <test>
@@ -24,7 +24,7 @@
                         <valueString value="'3'"/>
                     </extension>
                     <extension url="urn:variable-in">
-                        <valueString value="'0'"/>
+                        <valueString value="'-1'"/>
                     </extension>
                     <extension url="urn:variable-in">
                         <valueString value="'0'"/>

@@ -48,5 +48,13 @@
                 <warningOnly value="false"/>
             </assert>
         </action>
+        <action>
+            <assert id="CMPDR_5">
+                <description value="DocumentReference.context.practiceSetting is required."/>
+                <compareToSourceId value="request"/>
+                <compareToSourceExpression value="Bundle.entry.resource.where($this is DocumentReference).all(context.practiceSetting.exists())"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
     </test>
 </TestScript>

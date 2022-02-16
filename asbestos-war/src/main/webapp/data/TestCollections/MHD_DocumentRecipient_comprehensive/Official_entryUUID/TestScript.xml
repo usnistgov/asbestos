@@ -1,18 +1,13 @@
 <TestScript xmlns="http://hl7.org/fhir">
 
-    <variable>
-        <name value="expectedFailAssertionIdList"/>
-        <defaultValue value="('TR_1')"/>
-    </variable>
-
     <test>
-        <description value="Submit Provide Document Bundle to MHD Document Recipient. If this transaction targets a DocumentRecipient coupled to an XDS DocumetDocumentReference contains a fixed id so the second time (or after) you submit it will fail with a message: Submission includes pre-assigned id which already exists. This is ok."/>
+        <description value="Submit Provide Document Bundle to MHD Document Recipient."/>
         <action>
             <operation>
                 <description value="Module usage description"/>
                 <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
                     <extension url="component">
-                        <valueString value="../../Library/AggregateModule/MHDPDBFails.xml"/>
+                        <valueString value="../../Library/AggregateModule/MHDPDBSuccess.xml"/>
                     </extension>
                     <extension url="urn:variable-in">
                         <valueString value="'true'"/>
@@ -24,13 +19,10 @@
                         <valueString value="'3'"/>
                     </extension>
                     <extension url="urn:variable-in">
-                        <valueString value="'0'"/>
+                        <valueString value="'1'"/>
                     </extension>
                     <extension url="urn:variable-in">
-                        <valueString value="'0'"/>
-                    </extension>
-                    <extension url="urn:variable-in">
-                        <valueString value="expectedFailAssertionIdList"/>
+                        <valueString value="'1'"/>
                     </extension>
                 </modifierExtension>
             </operation>
