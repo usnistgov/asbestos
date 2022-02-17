@@ -1,221 +1,29 @@
 <TestScript xmlns="http://hl7.org/fhir">
-    <fixture id="original-bundle">
-        <autocreate value="false"/>
-        <autodelete value="false"/>
-        <resource>
-            <reference value="Bundle/original.xml"/>
-        </resource>
-    </fixture>
-    <fixture id="replace-bundle">
-        <autocreate value="false"/>
-        <autodelete value="false"/>
-        <resource>
-            <reference value="Bundle/replace.xml"/>
-        </resource>
-    </fixture>
-    <fixture id="patient_bundle">
-        <!--
-           This patient comes out of the test Patient cache
-        -->
-        <autocreate value="false"/>
-        <autodelete value="false"/>
-        <resource>
-            <reference value="Patient/Alex_Alder"/>
-        </resource>
-    </fixture>
-    <variable>
-        <name value="DocRefUrl"/>
-        <expression value="Bundle.entry[0].response.location"/>
-        <sourceId value="original-response"/>
-    </variable>
-    <variable>
-        <name value="DocRefUrlReplace"/>
-        <expression value="Bundle.entry[0].response.location"/>
-        <sourceId value="replace-response"/>
-    </variable>
-    <variable>  <!-- referenced in pdb -->
-        <name value="requestPatientRef"/>
-        <expression value="Bundle.entry.fullUrl"/>
-        <sourceId value="patient_bundle"/>
-    </variable>
-    <variable>
-    	<name value="patientResourceId"/>
-    	<expression value="Bundle.entry.fullUrl"/>
-        <sourceId value="patient_bundle"/>
-    </variable>
-<!--    <variable>-->
-<!--        <name value="readbackPatientId"/>-->
-<!--        <expression value="Patient.identifier.value"/>-->
-<!--        <sourceId value="read-back"/>-->
-<!--    </variable>-->
-    <variable>
-        <name value="requestEntryCount"/>
-        <expression value="Bundle.entry.count()"/>
-        <sourceId value="original-bundle"/>
-    </variable>
-    <variable>
-        <name value="original"/>
-        <expression value="Bundle.entry[0].response.location"/>
-        <sourceId value="original-response"/>
-    </variable>
-    <variable>
-        <name value="isComprehensiveMetadataExpected"/>
-        <defaultValue value="true"/>
-    </variable>
 
-    <setup>
-        <action>
-            <operation>
-                <description value="send PDB."/>
-                <label value="create"/>
-                <type>
-                    <system value="https://github.com/usnistgov/asbestos/wiki/Testscript-Operation-Codes"/>
-                    <code value="mhd-pdb-transaction"/>
-                </type>
-                <sourceId value="original-bundle"/>
-                <responseId value="original-response"/>
-            </operation>
-        </action>
-    </setup>
     <test>
-        <description value="PDB Validations."/>
+        <description value="Submit Provide Document Bundle followed by a Replace."/>
         <action>
-            <modifierExtension url="urn:asbestos:test:action:expectFailure"/>
             <operation>
-                <description value="Module usage description: TestScript import call to bridge an aggregate TestScript."/>
+                <description value="Module usage description"/>
                 <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
                     <extension url="component">
-                        <valueString value="../../Library/AggregateModule/MHDBundleEvalAggregateResult.xml"/>
-                    </extension>
-                    <extension url="urn:fixture-in">
-                        <valueString value="original-bundle"/>
-                    </extension>
-                    <extension url="urn:fixture-in">
-                        <valueString value="original-response"/>
+                        <valueString value="../../Library/AggregateModule/DocumentReplace.xml"/>
                     </extension>
                     <extension url="urn:variable-in">
-                        <valueString value="isComprehensiveMetadataExpected"/>
-                    </extension>
-                </modifierExtension>
-            </operation>
-        </action>
-    </test>
-    <test>
-        <description value="Send Replacement DocumentReference."/>
-        <action>
-            <operation>
-                <description value="Submit."/>
-                <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
-                    <extension url="component">
-                        <valueString value="../../Library/SendPDB.xml"/>
-                    </extension>
-                    <extension url="urn:fixture-in">
-                        <valueString  value="replace-bundle"/>
-                    </extension>
-                    <extension url="urn:variable-in-no-translation">
-                        <valueString value="patientResourceId"/>
-                    </extension>
-                    <extension url="urn:variable-in-no-translation">
-                        <valueString value="original"/>
-                    </extension>
-                    <extension url="urn:fixture-out">
-                        <valueString value="replace-response"/>
-                    </extension>
-                </modifierExtension>
-            </operation>
-        </action>
-    </test>
-    <test>
-        <description value="PDB Validations."/>
-        <action>
-            <operation>
-                <description value="Module usage description: TestScript import call to bridge an aggregate TestScript."/>
-                <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
-                    <extension url="component">
-                        <valueString value="../../Library/AggregateModule/MHDBundleEvalAggregateResult.xml"/>
-                    </extension>
-                    <extension url="urn:fixture-in">
-                        <valueString value="replace-bundle"/>
-                    </extension>
-                    <extension url="urn:fixture-in">
-                        <valueString value="replace-response"/>
+                        <valueString value="'true'"/>
                     </extension>
                     <extension url="urn:variable-in">
-                        <valueString value="isComprehensiveMetadataExpected"/>
+                        <valueString value="'?fixtureId=original'"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="'?fixtureId=replace'"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="'3'"/>
                     </extension>
                 </modifierExtension>
             </operation>
-        </action>
-    </test>
-    <test>
-        <description value="Read back replacement."/>
-        <action>
-            <operation>
-                <description value="Replacement DocumentReference."/>
-                <label value="read-back"/>
-                <type>
-                    <code value="read"/>
-                </type>
-                <url value="${DocRefUrlReplace}"/>
-                <responseId value="readBackResponse"/>
-            </operation>
-        </action>
-        <action>
-            <assert>
-                <description value="... was successful."/>
-                <response value="okay"/>
-                <warningOnly value="false"/>
-            </assert>
-        </action>
-        <action>
-            <assert>
-                <description value="... returned a DocumentReference."/>
-                <resource value="DocumentReference"/>
-                <warningOnly value="false"/>
-            </assert>
-        </action>
-        <action>
-            <assert>
-                <description value="... status is current."/>
-                <expression value="DocumentReference.status = 'current'"/>
-                <warningOnly value="false"/>
-            </assert>
-        </action>
-    </test>
-    <test>
-      <modifierExtension url="urn:noErrors"/>
-        <description value="Read back original and verify it has status superseded."/>
-        <action>
-            <operation>
-                <description value="Original DocumentReference."/>
-                <label value="read-back"/>
-                <type>
-                    <code value="read"/>
-                </type>
-                <url value="${DocRefUrl}"/>
-                <responseId value="rereadBackResponse"/>
-            </operation>
-        </action>
-        <action>
-            <assert>
-                <description value="... was successful."/>
-                <response value="okay"/>
-                <warningOnly value="false"/>
-            </assert>
-        </action>
-        <action>
-            <assert>
-                <description value="... returned a DocumentReference."/>
-                <resource value="DocumentReference"/>
-                <warningOnly value="false"/>
-            </assert>
-        </action>
-        <action>
-            <assert>
-                <description value="... status is superseded."/>
-                <expression value="DocumentReference.status = 'superseded'"/>
-                <warningOnly value="false"/>
-            </assert>
         </action>
     </test>
 </TestScript>
+

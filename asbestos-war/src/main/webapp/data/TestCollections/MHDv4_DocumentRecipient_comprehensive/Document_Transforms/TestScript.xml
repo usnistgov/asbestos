@@ -13,10 +13,10 @@
                         <valueString value="'true'"/>
                     </extension>
                     <extension url="urn:variable-in">
-                        <valueString value="'?fixtureId=original'"/>
+                        <valueString value="'?fixtureId=original&amp;baseTestCollection=MHD_DocumentRecipient_comprehensive'"/>
                     </extension>
                     <extension url="urn:variable-in">
-                        <valueString value="'?fixtureId=transforms'"/>
+                        <valueString value="'?fixtureId=transforms&amp;baseTestCollection=MHD_DocumentRecipient_comprehensive'"/>
                     </extension>
                     <extension url="urn:variable-in">
                         <valueString value="'3'"/>

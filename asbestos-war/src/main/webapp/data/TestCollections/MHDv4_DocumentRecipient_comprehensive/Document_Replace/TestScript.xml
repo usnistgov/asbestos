@@ -1,22 +1,22 @@
 <TestScript xmlns="http://hl7.org/fhir">
 
     <test>
-        <description value="Submit Provide Document Bundle followed by a Transformation."/>
+        <description value="Submit Provide Document Bundle followed by a Replace."/>
         <action>
             <operation>
                 <description value="Module usage description"/>
                 <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
                     <extension url="component">
-                        <valueString value="../../Library/AggregateModule/DocumentTransforms.xml"/>
+                        <valueString value="../../Library/AggregateModule/DocumentReplace.xml"/>
                     </extension>
                     <extension url="urn:variable-in">
                         <valueString value="'true'"/>
                     </extension>
                     <extension url="urn:variable-in">
-                        <valueString value="'?fixtureId=original'"/>
+                        <valueString value="'?fixtureId=original&amp;baseTestCollection=MHD_DocumentRecipient_comprehensive'"/>
                     </extension>
                     <extension url="urn:variable-in">
-                        <valueString value="'?fixtureId=transforms'"/>
+                        <valueString value="'?fixtureId=replace&amp;baseTestCollection=MHD_DocumentRecipient_comprehensive'"/>
                     </extension>
                     <extension url="urn:variable-in">
                         <valueString value="'3'"/>
@@ -26,3 +26,4 @@
         </action>
     </test>
 </TestScript>
+
