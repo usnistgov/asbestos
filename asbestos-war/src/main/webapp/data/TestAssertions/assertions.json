@@ -53,21 +53,49 @@
                       "verbatimPhraseToFocus": "Bundle.meta.profile"}],
     "MINMETA4_2":   [{"mhdv4": "ITI-65_RequestMessage", "context": "elements"},
                       {"mhdv4": "SubmissionSetTypeList", "context": ".subject"},
-                      {"mhd": "DocumentReference", "context": ".subject"}],
+                      {"mhd": "DocumentReference", "context": ".subject"},
+                      {"mhd": "DocumentReference", "context": "MinMeta_mappingToXds"}],
     "MINMETA4_3":   [{"mhdv4": "SubmissionSetTypeList", "context": ".subject"},
-                      {"mhd": "DocumentReference", "context": ".subject"}],
+                      {"mhd": "DocumentReference", "context": ".subject"},
+                      {"mhd": "DocumentReference", "context": "MinMeta_mappingToXds"}],
     "SUBJ4_1":      [{"mhdv4": "patientReference"}],
     "SUBJ4_2":      [{"mhdv4": "patientReference", "verbatimPhraseToFocus": "FHIR Patient Resource"}],
     "SUBJ4_3":      [{"mhdv4": "ITI-65_RequestMessage", "context": "elements"},
                       {"xds": "4.2 ebRIM Representation", "context": "associatedPatient"}],
     "CMPMETA_1":   [{"mhdv4": "ITI-65_BundleResources", "context":"Bundle.meta.profile",
                       "verbatimPhraseToFocus": "Bundle.meta.profile"}],
+    "CMPMETA3_1":   [{"mhdComprehensive": "DocumentReference", "context": ".subject"}],
+    "CMPMETA3_2":   [{"mhdComprehensive": "DocumentManifest", "context": "mappingTable"}],
     "CMPMETA4_1":   [{"mhdv4": "ITI-65_RequestMessage", "context": "elements"},
                       {"mhdv4Comprehensive": "SubmissionSetTypeList", "context": ".subject"},
-                      {"mhdComprehensive": "DocumentReference", "context": ".subject"}],
+                      {"mhdComprehensive": "DocumentReference", "context": ".subject"},
+                      {"mhdv4Comprehensive": "SubmissionSetTypeList", "context": "CmpMeta_mappingToXds"}],
+    "CMPMETA4_2":   [{"mhdv4": "ITI-65_RequestMessage", "context": "elements"},
+                      {"mhdv4Comprehensive": "SubmissionSetTypeList", "context": ".extension:designationType"},
+                      {"mhdv4Comprehensive": "SubmissionSetTypeList", "context": "CmpMeta_mappingToXds"}],
     "CMPMETA_3":   [{"mhdv4": "ITI-65_BundleResources", "context":"Bundle.meta.profile",
                       "verbatimPhraseToFocus": "Bundle.meta.profile"}],
-    "CMPMETA_4":   [{"mhdComprehensive": "DocumentReference", "context": ".securityLabel"}],
+    "CMPMETA_4":   [{"mhdComprehensive": "DocumentReference", "context": ".securityLabel"},
+                  {"mhdComprehensive": "DocumentReference", "context": "CmpMeta_mappingToXds"},
+                  {"xds": "4.3.1 Submission Metadata Attribute Optionality"}],
+    "CMPDR_1":     [{"mhdComprehensive": "DocumentReference", "context": ".content.format"},
+                    {"mhdComprehensive": "DocumentReference", "context": "CmpMeta_mappingToXds"},
+                    {"xds": "4.3.1 Submission Metadata Attribute Optionality"}],
+    "CMPDR_2":     [{"mhdComprehensive": "DocumentReference", "context": ".content.attachment.language"},
+                    {"mhdComprehensive": "DocumentReference", "context": "CmpMeta_mappingToXds"},
+                    {"xds": "4.3.1 Submission Metadata Attribute Optionality"}],
+    "CMPDR_3":     [{"mhdComprehensive": "DocumentReference", "context": ".content.attachment.contentType"},
+                    {"mhdComprehensive": "DocumentReference", "context": "CmpMeta_mappingToXds"},
+                    {"xds": "4.3.1 Submission Metadata Attribute Optionality"}],
+    "CMPDR_4":     [{"mhdComprehensive": "DocumentReference", "context": ".context.facilityType"},
+                    {"mhdComprehensive": "DocumentReference", "context": "CmpMeta_mappingToXds"},
+                    {"xds": "4.3.1 Submission Metadata Attribute Optionality"}],
+    "CMPDR_5":     [{"mhdComprehensive": "DocumentReference", "context": ".context.practiceSetting"},
+                    {"mhdComprehensive": "DocumentReference", "context": "CmpMeta_mappingToXds"},
+                    {"xds": "4.3.1 Submission Metadata Attribute Optionality"}],
+    "CMPDR_6":     [{"mhdComprehensive": "DocumentReference", "context": ".context.sourcePatientInfo"},
+                    {"mhdComprehensive": "DocumentReference", "context": "CmpMeta_mappingToXds"},
+                    {"xds": "4.3.1 Submission Metadata Attribute Optionality"}],
     "TR_1":         [{"mhd": "ITI-65_ResponseMessage", "context": "messageSemantics_p2",
                       "verbatimPhraseToFocus": "To indicate success the overall http 200 response is used"}],
     "TR_2":         [{"mhd": "ITI-65_ResponseMessage", "context": "messageSemantics_p1"}],
@@ -101,16 +129,55 @@
           }
         },
         "context": {
+          ".extension:designationType": {
+            "Element": {},
+            "SpecificationText": [{
+              "text": "Control 1..1"
+            }]
+          },
           ".subject": {
             "Element": {},
             "SpecificationText": [{
               "text": "Control 1..1"
+            }]
+          },
+          "CmpMeta_mappingToXds": {
+            "ComprehensiveSubmissionSet": {
+              "text": "Mappings for XDS and MHD Mapping (XDS)",
+              "link": "https://profiles.ihe.net/ITI/MHD/StructureDefinition-IHE.MHD.Comprehensive.SubmissionSet-mappings.html#mappings-for-xds-and-mhd-mapping-xds"
+            },
+            "SpecificationText": [{
+              "text": "",
+              "comments": "Map of .extension:designationType is missing, should be contentTypeCode."
             }]
           }
         }
       }
     },
     "mhdComprehensive": {
+      "DocumentManifest": {
+        "common": {
+          "Source": {
+            "text": "IHE ITI"
+          },
+          "Profile": {
+            "text": "MHDv3.x"
+          },
+          "Metadata": {
+            "text": "Comprehensive"
+          }
+        },
+        "context": {
+          "mappingTable": {
+            "Table" : {
+              "text": "4.5.1.2-1: FHIR DocumentManifest mapping to SubmissionSet"
+            },
+            "SpecificationText": [{
+              "text": "<div style=\"display:grid;grid-template-columns: 1fr 1fr 1fr 1fr;\"><div class='bold'>FHIR DocumentManifest Resource Definition</div><div class='bold'>IHE constraint</div><div class='bold'>Document Sharing metadata</div><div class='bold'>Notes</div>\n<div>type</div><div></div><div>contentTypeCode</div><div></div></div>"
+            }]
+          }
+        }
+      },
       "DocumentReference": {
         "baseLink": "https://profiles.ihe.net/ITI/MHD/StructureDefinition-IHE.MHD.Comprehensive.DocumentReference-definitions.html#DocumentReference",
         "common": {
@@ -126,6 +193,42 @@
           }
         },
         "context": {
+          ".content.attachment.contentType": {
+            "Element": {},
+            "SpecificationText": [{
+              "text": "Control 1..1"
+            }]
+          },
+          ".content.attachment.language": {
+            "Element": {},
+            "SpecificationText": [{
+              "text": "Control 1..1"
+            }]
+          },
+          ".content.format": {
+            "Element": {},
+            "SpecificationText": [{
+              "text": "Control 1..1"
+            }]
+          },
+          ".context.facilityType": {
+            "Element": {},
+            "SpecificationText": [{
+              "text": "Control 1..1"
+            }]
+          },
+          ".context.practiceSetting": {
+            "Element": {},
+            "SpecificationText": [{
+              "text": "Control 1..1"
+            }]
+          },
+          ".context.sourcePatientInfo": {
+            "Element": {},
+            "SpecificationText": [{
+              "text": "Control 1..1"
+            }]
+          },
           ".subject": {
             "Element": {},
             "SpecificationText": [{
@@ -137,6 +240,12 @@
             "SpecificationText": [{
               "text": "Control 1..*"
             }]
+          },
+          "CmpMeta_mappingToXds": {
+            "ComprehensiveDocumentReference": {
+              "text": "Mappings for XDS and MHD Mapping (XDS)",
+              "link": "https://profiles.ihe.net/ITI/MHD/StructureDefinition-IHE.MHD.Comprehensive.DocumentReference-mappings.html#mappings-for-xds-and-mhd-mapping-xds"
+            }
           }
         }
       }
@@ -356,7 +465,7 @@
           },
           "elements": {
             "SpecificationText": [{
-              "text": "(Para 5.)<br>The Document Source shall assure all FHIR resource elements are consistent with the Document Sharing metadata requirements as specified for attributes ITI TF-3: Table 4.3.1-3 \"Sending Actor Metadata Attribute Optionality\". The Document Source that supports the Comprehensive Metadata or the XDS on FHIR Options shall assure consistency with column \"XDS DS\"; otherwise, the Document Source shall assure consistency with column \"XDR MS\". The Document Source shall not provide any entryUUID values.",
+              "text": "(Para 5.)<br>The Document Source shall assure all FHIR resource elements are consistent with the Document Sharing metadata requirements as specified for attributes ITI TF-3: <a target='_blank' href=\"https://profiles.ihe.net/ITI/TF/Volume3/ch-4.3.html#4.3.1\">Table 4.3.1-3 \"Sending Actor Metadata Attribute Optionality\"</a>. The Document Source that supports the Comprehensive Metadata or the XDS on FHIR Options shall assure consistency with column \"XDS DS\"; otherwise, the Document Source shall assure consistency with column \"XDR MS\". The Document Source shall not provide any entryUUID values.",
               "comments": "Other DocumentReference Identifiers values will be ignored by Toolkit. Toolkit will assign symbolic Id(s) in the submission to meet XDS requirements."
             }]
           },
@@ -645,6 +754,22 @@
             }]
           }
       }
+      },
+      "4.3.1 Submission Metadata Attribute Optionality" : {
+        "Source": {
+          "text": "IHE ITI TF"
+        },
+        "Profile": {
+          "text": "XDS",
+          "link": "https://profiles.ihe.net/ITI/TF/index.html"
+        },
+        "Volume:Section": {
+          "text": "3:4.3.1 Submission Metadata Attribute Optionality",
+          "link": "https://profiles.ihe.net/ITI/TF/Volume3/ch-4.3.html#4.3.1"
+        },
+        "SpecificationText": [{
+          "text": "This section lists which metadata attributes an actor shall provide when initiating a Submission Type Transaction."
+        }]
       }
     }
   }

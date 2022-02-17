@@ -2,7 +2,7 @@
 
     <variable>
         <name value="expectedFailAssertionIdList"/>
-        <defaultValue value="('DR_6'|'CMPDR_4'|'TR_1')"/>
+        <defaultValue value="('DR_6'|'CMPDR_3'|'TR_1')"/>
     </variable>
 
     <test>

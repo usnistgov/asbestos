@@ -26,14 +26,6 @@
         </action>
         <action>
             <assert id="CMPDR_2">
-                <description value="DocumentReference.context.facilityType is required."/>
-                <compareToSourceId value="request"/>
-                <compareToSourceExpression value="Bundle.entry.resource.where($this is DocumentReference).all(context.facilityType.exists())"/>
-                <warningOnly value="false"/>
-            </assert>
-        </action>
-        <action>
-            <assert id="CMPDR_3">
                 <description value="DocumentReference.content.attachment.language is required."/>
                 <compareToSourceId value="request"/>
                 <compareToSourceExpression value="Bundle.entry.resource.where($this is DocumentReference).all(content.attachment.language.exists())"/>
@@ -41,10 +33,18 @@
             </assert>
         </action>
         <action>
-            <assert id="CMPDR_4">
+            <assert id="CMPDR_3">
                 <description value="DocumentReference.content.attachment.contentType is required."/>
                 <compareToSourceId value="request"/>
                 <compareToSourceExpression value="Bundle.entry.resource.where($this is DocumentReference).all(content.attachment.contentType.exists())"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
+            <assert id="CMPDR_4">
+                <description value="DocumentReference.context.facilityType is required."/>
+                <compareToSourceId value="request"/>
+                <compareToSourceExpression value="Bundle.entry.resource.where($this is DocumentReference).all(context.facilityType.exists())"/>
                 <warningOnly value="false"/>
             </assert>
         </action>
