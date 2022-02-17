@@ -38,7 +38,7 @@
         </coding>
     </code>
     <subject>
-        <reference value="http://example.com/fhir/Patient/1"/>
+        <reference value="${patientResourceId}"/>
     </subject>
     <date value="2021-08-23T22:13:00-05:00"/>
     <entry>
