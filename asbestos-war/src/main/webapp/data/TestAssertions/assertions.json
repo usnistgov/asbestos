@@ -62,7 +62,7 @@
                       {"xds": "4.2 ebRIM Representation", "context": "associatedPatient"}],
     "CMPMETA_1":   [{"mhdv4": "ITI-65_BundleResources", "context":"Bundle.meta.profile",
                       "verbatimPhraseToFocus": "Bundle.meta.profile"}],
-    "CMPSUBJ4_1":   [{"mhdv4": "ITI-65_RequestMessage", "context": "elements"},
+    "CMPMETA4_1":   [{"mhdv4": "ITI-65_RequestMessage", "context": "elements"},
                       {"mhdv4Comprehensive": "SubmissionSetTypeList", "context": ".subject"},
                       {"mhdComprehensive": "DocumentReference", "context": ".subject"}],
     "CMPMETA_3":   [{"mhdv4": "ITI-65_BundleResources", "context":"Bundle.meta.profile",

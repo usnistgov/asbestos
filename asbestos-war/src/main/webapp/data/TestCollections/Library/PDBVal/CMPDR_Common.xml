@@ -56,5 +56,13 @@
                 <warningOnly value="false"/>
             </assert>
         </action>
+        <action>
+            <assert id="CMPDR_6">
+                <description value="DocumentReference.context.sourcePatientInfo is required."/>
+                <compareToSourceId value="request"/>
+                <compareToSourceExpression value="Bundle.entry.select(resource as DocumentReference).select(context.exists() and context.sourcePatientInfo.exists() and context.sourcePatientInfo.reference in contained.where(is(Patient)).id ).allTrue()"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
     </test>
 </TestScript>

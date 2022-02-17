@@ -24,7 +24,7 @@
     </variable>
     <variable>
         <name value="scriptMHDv4"/>
-        <defaultValue value="CMPSUBJ4_SubjectExists.xml"/>
+        <defaultValue value="CMPMETA4_Assertions.xml"/>
     </variable>
 
     <test>

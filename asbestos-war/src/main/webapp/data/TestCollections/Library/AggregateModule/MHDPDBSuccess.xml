@@ -25,10 +25,10 @@
         <name value="scriptMHDv3.x"/>
         <defaultValue value="../MHDv3x/PDBSuccessMain.xml"/>
     </variable>
-<!--    <variable>-->
-<!--        <name value="scriptMHDv4"/>-->
-<!--        <defaultValue value="../MHDv4/NotYetAvail.xml"/>-->
-<!--    </variable>-->
+    <variable>
+        <name value="scriptMHDv4"/>
+        <defaultValue value="../MHDv4/PDBSuccessMain.xml"/>
+    </variable>
 
     <test>
         <description value="Bundle evaluation assertions."/>

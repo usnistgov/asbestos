@@ -1,0 +1,28 @@
+<DocumentManifest xmlns="http://hl7.org/fhir">
+    <text>
+        <div xmlns="http://www.w3.org/1999/xhtml">Comment</div>
+        <status value="empty"/>
+    </text>
+
+
+    <masterIdentifier>
+        <system value="urn:ietf:rfc:3986"/>
+        <value value="urn:oid:1.2.129.6.58.92.88337.4"/>
+    </masterIdentifier>
+    <created value="2015-02-07T13:28:17.239+02:00"/>
+    <status value="current"/>
+    <type>
+        <coding>
+            <system value="http://snomed.info/sct"/>
+            <code value="225728007"/>
+            <display value="Accident and Emergency department"/>
+        </coding>
+    </type>
+    <subject>
+        <reference value="${patientResourceId}"/>
+    </subject>
+    <description value="Physical"/>
+    <content>
+        <reference value="urn:uuid:1e404af3-077f-4bee-b7a6-a9be97e1ce01"/>
+    </content>
+</DocumentManifest>

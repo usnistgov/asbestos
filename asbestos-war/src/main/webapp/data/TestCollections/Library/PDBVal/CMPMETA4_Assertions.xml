@@ -1,0 +1,54 @@
+<TestScript  xmlns="http://hl7.org/fhir">
+    <modifierExtension url="urn:module">
+        <extension url="urn:fixture-in">
+            <valueString value="request"/>
+        </extension>
+        <extension url="urn:fixture-in">
+            <valueString value="response"/>
+        </extension>
+    </modifierExtension>
+
+    <url value=""/>
+    <id value="CMPMETA4_Assertions"/>
+    <name value="CMPMETA4_Assertions"/>
+    <status value="active"/>
+    <description value="Check bundle resources."/>
+
+
+    <test>
+        <description value="Comprehensive Metadata only"/>
+        <action>
+            <assert id="CMPMETA4_1">
+                <description value="Subject is required."/>
+                <compareToSourceId value="request"/>
+                <compareToSourceExpression value="Bundle.entry.resource.where($this is DocumentReference or ($this is List and code.coding.code='submissionset')).all(subject.reference.exists())"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
+            <assert id="CMPMETA4_2">
+                <description value="ContentTypeCode is required."/>
+                <compareToSourceId value="request"/>
+                <compareToSourceExpression value="Bundle.entry.resource.where($this is List and code.coding.code='submissionset' and extension.exists()).extension.where(url ='http://profiles.ihe.net/ITI/MHD/StructureDefinition/ihe-designationType').select(count()=1 and first().value.value.exists()).empty().not().allTrue()"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+
+        <action>
+            <operation>
+                <description value="DocumentReference ."/>
+                <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
+                    <extension url="component">
+                        <valueString value="CMPDR_Common.xml"/>
+                    </extension>
+                    <extension url="urn:fixture-in">
+                        <valueString value="request"/>
+                    </extension>
+                    <extension url="urn:fixture-in">
+                        <valueString value="response"/>
+                    </extension>
+                </modifierExtension>
+            </operation>
+        </action>
+    </test>
+</TestScript>
