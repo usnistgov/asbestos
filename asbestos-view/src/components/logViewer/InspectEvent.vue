@@ -160,8 +160,8 @@
                         :session-id="sessionId"
                         :channel-name="channelName"
                         :event-id="eventId"
-                        :test-id="pdbValMhdAssertion"
-                        :test-collection="'Internal'"
+                        :test-id="'bundle_eval'"
+                        :test-collection="pdbValMhdAssertion"
                         :run-eval="true"
                         :no-inspect-label="true"
                         :modal-mode="modalMode"></eval-details>
@@ -331,14 +331,14 @@
                 if (!this.isPdbValDisabled) {
                     // console.log(this.bundleEvalMhdVersion)
                     if (this.modalMode === undefined || this.modalMode==='') {
-                        this.$store.commit('setTestCollectionName', 'Internal')
+                        this.$store.commit('setTestCollectionName', this.bundleEvalMhdVersion)
                         this.$store.dispatch('runSingleEventEval',
                             {
-                                testId: this.bundleEvalMhdVersion,
+                                testId: 'bundle_eval',
                                 eventId: this.eventId,
-                                testCollectionName: 'Internal'
+                                testCollectionName: this.bundleEvalMhdVersion
                             }).then(() => {
-                            this.$store.dispatch('loadTestScripts', [this.bundleEvalMhdVersion]).then(() => {
+                            this.$store.dispatch('loadTestScripts', ['bundle_eval']).then(() => {
                                 this.displayRequest = false;
                                 this.displayResponse = false;
                                 this.displayInspector = false;

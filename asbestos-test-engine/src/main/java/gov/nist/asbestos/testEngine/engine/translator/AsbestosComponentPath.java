@@ -40,7 +40,12 @@ public class AsbestosComponentPath {
                 return null;
             }
             if (EC.TEST_COLLECTION_PROPERTIES.equals(codeParts[1])) {
-                String propValue = tcProperties.getProperty(codeParts[2]);
+                String propKey = codeParts[2];
+                String propValue = tcProperties.getProperty(propKey);
+                if (propValue == null) {
+                    log.severe("Property value not found for key: " + propKey + ". tcProperties size is: " + tcProperties.size());
+                    return null;
+                }
                 String varNameToBe = codeParts[0].concat(propValue);
                 Optional<TestScript.TestScriptVariableComponent> optionalVar = variableComponentList.stream().filter(s -> varNameToBe.equals(s.getName())).findFirst();
                 if (optionalVar.isPresent()) {

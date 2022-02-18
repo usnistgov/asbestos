@@ -17,8 +17,8 @@ export const channelStore = {
                 'MHDv4'
             ],
             pdbAssertions: [
-                'bundle_eval',
-                'bundle_evalMHDv4'
+                'Internal',
+                'MHDv4_Internal'
             ]
         }
     }

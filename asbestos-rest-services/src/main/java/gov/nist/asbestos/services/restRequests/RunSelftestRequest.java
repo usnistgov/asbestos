@@ -82,7 +82,7 @@ public class RunSelftestRequest {
             GetClientTestEvalRequest clientEval = new GetClientTestEvalRequest(request);
             List<Event> events = clientEval.getEvents(simId);
 
-            clientEval.evalClientTest(testDirs, testSession, events, eventsToEvaluate);
+            clientEval.evalClientTest(testCollection, testDirs, testSession, events, eventsToEvaluate);
 
             GetClientTestEvalRequest.Summary summary = clientEval.buildSummary();
             lastTime.time = summary.time;

@@ -136,7 +136,7 @@ public class GetClientTestEvalRequest {
         // for one testId
         String testId = request.uriParts.get(7);
 
-        evalClientTest(testDirs, testSession, events, eventsToEvaluate);
+        evalClientTest(testCollection, testDirs, testSession, events, eventsToEvaluate);
 
         String myStr = saveLog(testLogDir, testId);
         request.returnString(myStr);
@@ -163,7 +163,7 @@ public class GetClientTestEvalRequest {
 
     // testDirs always has single entry
     // returns JSON response to client
-    public void evalClientTest(List<File> testDirs, String testSession, List<Event> events, int eventsToEvaluate) {
+    public void evalClientTest(String testCollectionId, List<File> testDirs, String testSession, List<Event> events, int eventsToEvaluate) {
         Map<String, File> testIds = testDirs.stream().collect(Collectors.toMap(File::getName, x -> x));
         //String testId = testDirs.get(0).getName();
 
@@ -193,9 +193,9 @@ public class GetClientTestEvalRequest {
                     ModularEngine modularEngine = new ModularEngine(testDir, testScript);
                     FixtureMgr fm = modularEngine.getFixtureMgr();
                     fm.setTestId(theTestId);
-                    fm.setTestCollectionId("Inspector");
+                    fm.setTestCollectionId(testCollectionId);
                     modularEngine.setTestId(theTestId);
-                    modularEngine.setTestCollection("Inspector");
+                    modularEngine.setTestCollection(testCollectionId);
                     modularEngine.setChannelId(request.fullChannelId());
                     modularEngine.addCache(testCollectionsBase);
                     modularEngine.setVal(new Val());

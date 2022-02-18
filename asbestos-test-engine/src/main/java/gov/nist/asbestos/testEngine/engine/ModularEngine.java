@@ -251,7 +251,7 @@ public class ModularEngine {
             if (modularScripts == null)
                 modularScripts = new ModularScripts(new EC(getMainTestEngine().getExternalCache()), getMainTestEngine().getTestCollectionId(), getMainTestEngine().getTestDef());
         } catch (Exception ex) {
-            log.severe("setModularScripts Exception: " + ex.toString());
+            log.log(Level.SEVERE, "setModularScripts Exception: " + ex.toString(), ex);
         }
         return this;
     }
