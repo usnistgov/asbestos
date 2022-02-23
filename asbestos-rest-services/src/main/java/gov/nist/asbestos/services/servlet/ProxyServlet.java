@@ -484,7 +484,6 @@ public class ProxyServlet extends HttpServlet {
 
     private void respondWithError(HttpServletRequest req, HttpServletResponse resp, Throwable t, Headers inHeaders, ITask
         clientTask) {
-        log.log(Level.SEVERE, t.toString(), t);
         Ref ref = new Ref(Common.buildURI(req));
 //        if (ref.isQuery()) {
 //            respond(resp, wrapInOutcome(t), inHeaders, clientTask, 403);

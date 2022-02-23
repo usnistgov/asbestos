@@ -47,7 +47,7 @@ public abstract class BaseChannel implements IBaseChannel {
     }
 
     public static String logReference(Logger log, String methodName, Throwable t) {
-        String error = String.format("An %s error occurred at %s.\nMessage: %s\nException: %s", methodName, new Date().toString(), t.getMessage(), t.toString());
+        String error = String.format("An %s error occurred at %s. Check server log based on the time this error occurred.\nMessage: %s\nException: %s", methodName, new Date().toString(), t.getMessage(), t.toString());
         log.log(Level.SEVERE, error, t);
         return error;
     }
