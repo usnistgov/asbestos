@@ -3,56 +3,56 @@
     <name value="twoDoc"/>
     <description value="Send valid Provide Document Bundle transaction containing two DocumentReferences. Comprehensive metadata is required."/>
     
-        <fixture id="referenceDocumentReference">
-        <autocreate value="false"/>
-        <autodelete value="false"/>
-        <resource>
-            <reference value="Internal/Comprehensive/DocumentReference/reference"/>
-        </resource>
-    </fixture>
-    <fixture id="referenceDocumentManifest">
-        <autocreate value="false"/>
-        <autodelete value="false"/>
-        <resource>
-            <reference value="Internal/Comprehensive/DocumentManifest/reference"/>
-        </resource>
-    </fixture>
-    <fixture id="documentManifest">
-        <autocreate value="false"/>
-        <autodelete value="false"/>
-        <extension url="urn:subFixture">
-          <extension url="urn:fhirPath">
-            <valueString value="Bundle.entry.where(resource.is(FHIR.DocumentManifest))"/>
-          </extension>
-          <extension url="urn:sourceId">
-            <valueString value="request"/>
-          </extension>
-      </extension>
-    </fixture>
-    <fixture id="documentReference1">
-        <autocreate value="false"/>
-        <autodelete value="false"/>
-        <extension url="urn:subFixture">
-          <extension url="urn:fhirPath">
-            <valueString value="Bundle.entry.where(resource.is(FHIR.DocumentReference))[0]"/>
-          </extension>
-          <extension url="urn:sourceId">
-            <valueString value="request"/>
-          </extension>
-      </extension>
-    </fixture>
-    <fixture id="documentReference2">
-        <autocreate value="false"/>
-        <autodelete value="false"/>
-        <extension url="urn:subFixture">
-          <extension url="urn:fhirPath">
-            <valueString value="Bundle.entry.where(resource.is(FHIR.DocumentReference))[1]"/>
-          </extension>
-          <extension url="urn:sourceId">
-            <valueString value="request"/>
-          </extension>
-      </extension>
-    </fixture>
+<!--   <fixture id="referenceDocumentReference">-->
+<!--        <autocreate value="false"/>-->
+<!--        <autodelete value="false"/>-->
+<!--        <resource>-->
+<!--            <reference value="Internal/Comprehensive/DocumentReference/reference"/>-->
+<!--        </resource>-->
+<!--    </fixture>-->
+<!--    <fixture id="referenceDocumentManifest">-->
+<!--        <autocreate value="false"/>-->
+<!--        <autodelete value="false"/>-->
+<!--        <resource>-->
+<!--            <reference value="Internal/Comprehensive/DocumentManifest/reference"/>-->
+<!--        </resource>-->
+<!--    </fixture>-->
+<!--    <fixture id="documentManifest">-->
+<!--        <autocreate value="false"/>-->
+<!--        <autodelete value="false"/>-->
+<!--        <extension url="urn:subFixture">-->
+<!--          <extension url="urn:fhirPath">-->
+<!--            <valueString value="Bundle.entry.where(resource.is(FHIR.DocumentManifest))"/>-->
+<!--          </extension>-->
+<!--          <extension url="urn:sourceId">-->
+<!--            <valueString value="request"/>-->
+<!--          </extension>-->
+<!--      </extension>-->
+<!--    </fixture>-->
+<!--    <fixture id="documentReference1">-->
+<!--        <autocreate value="false"/>-->
+<!--        <autodelete value="false"/>-->
+<!--        <extension url="urn:subFixture">-->
+<!--          <extension url="urn:fhirPath">-->
+<!--            <valueString value="Bundle.entry.where(resource.is(FHIR.DocumentReference))[0]"/>-->
+<!--          </extension>-->
+<!--          <extension url="urn:sourceId">-->
+<!--            <valueString value="request"/>-->
+<!--          </extension>-->
+<!--      </extension>-->
+<!--    </fixture>-->
+<!--    <fixture id="documentReference2">-->
+<!--        <autocreate value="false"/>-->
+<!--        <autodelete value="false"/>-->
+<!--        <extension url="urn:subFixture">-->
+<!--          <extension url="urn:fhirPath">-->
+<!--            <valueString value="Bundle.entry.where(resource.is(FHIR.DocumentReference))[1]"/>-->
+<!--          </extension>-->
+<!--          <extension url="urn:sourceId">-->
+<!--            <valueString value="request"/>-->
+<!--          </extension>-->
+<!--      </extension>-->
+<!--    </fixture>-->
     <variable>
         <name value="isComprehensiveMetadataExpected"/>
         <defaultValue value="true"/>
@@ -83,15 +83,6 @@
     <test>
 <!--        <name value="Evaluations"/> -->
         <description value="Test specific evaluations."/>
-
-        <action>
-          <assert>
-              <description value="Transaction labeled as Comprehensive metadata profile."/>
-              <compareToSourceId value="request"/>
-              <compareToSourceExpression value="Bundle.meta.profile='http://ihe.net/fhir/StructureDefinition/IHE_MHD_Provide_Comprehensive_DocumentBundle'"/>
-              <warningOnly value="false"/>
-          </assert>
-        </action>
         <action>
             <assert>
                 <description value="Request includes two DocumentReferences."/>
@@ -100,29 +91,29 @@
                 <warningOnly value="false"/>
             </assert>
         </action>
-        <action>
-            <assert>
-                <description value="DocumentManifest qualifies as Comprehensive Metadata."/>
-                <sourceId value="documentManifest"/>
-                <minimumId value="referenceDocumentManifest"/>
-                <warningOnly value="false"/>
-            </assert>
-        </action>
-        <action>
-            <assert>
-                <description value="DocumentReference 1 qualifies as Comprehensive Metadata."/>
-                <sourceId value="documentReference1"/>
-                <minimumId value="referenceDocumentReference"/>
-                <warningOnly value="false"/>
-            </assert>
-        </action>
-        <action>
-            <assert>
-                <description value="DocumentReference 2 qualifies as Comprehensive Metadata."/>
-                <sourceId value="documentReference2"/>
-                <minimumId value="referenceDocumentReference"/>
-                <warningOnly value="false"/>
-            </assert>
-        </action>
+<!--        <action>-->
+<!--            <assert>-->
+<!--                <description value="DocumentManifest qualifies as Comprehensive Metadata."/>-->
+<!--                <sourceId value="documentManifest"/>-->
+<!--                <minimumId value="referenceDocumentManifest"/>-->
+<!--                <warningOnly value="false"/>-->
+<!--            </assert>-->
+<!--        </action>-->
+<!--        <action>-->
+<!--            <assert>-->
+<!--                <description value="DocumentReference 1 qualifies as Comprehensive Metadata."/>-->
+<!--                <sourceId value="documentReference1"/>-->
+<!--                <minimumId value="referenceDocumentReference"/>-->
+<!--                <warningOnly value="false"/>-->
+<!--            </assert>-->
+<!--        </action>-->
+<!--        <action>-->
+<!--            <assert>-->
+<!--                <description value="DocumentReference 2 qualifies as Comprehensive Metadata."/>-->
+<!--                <sourceId value="documentReference2"/>-->
+<!--                <minimumId value="referenceDocumentReference"/>-->
+<!--                <warningOnly value="false"/>-->
+<!--            </assert>-->
+<!--        </action>-->
     </test>
 </TestScript>

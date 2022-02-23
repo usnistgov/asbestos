@@ -2,45 +2,46 @@
     <id value="singleDoc"/>
     <name value="singleDoc"/>
     <description value="Send valid Provide Document Bundle transaction containing a single DocumentReference. Minimal metadata is required."/>
-    
-        <fixture id="referenceDocumentReference">
-        <autocreate value="false"/>
-        <autodelete value="false"/>
-        <resource>
-            <reference value="Internal/Minimal/DocumentReference/reference"/>
-        </resource>
-    </fixture>
-    <fixture id="referenceDocumentManifest">
-        <autocreate value="false"/>
-        <autodelete value="false"/>
-        <resource>
-            <reference value="Internal/Minimal/DocumentManifest/reference"/>
-        </resource>
-    </fixture>
-    <fixture id="documentManifest">
-        <autocreate value="false"/>
-        <autodelete value="false"/>
-        <extension url="urn:subFixture">
-          <extension url="urn:fhirPath">
-            <valueString value="Bundle.entry.where(resource.is(FHIR.DocumentManifest))"/>
-          </extension>
-          <extension url="urn:sourceId">
-            <valueString value="request"/>
-          </extension>
-      </extension>
-    </fixture>
-    <fixture id="documentReference">
-        <autocreate value="false"/>
-        <autodelete value="false"/>
-        <extension url="urn:subFixture">
-          <extension url="urn:fhirPath">
-            <valueString value="Bundle.entry.where(resource.is(FHIR.DocumentReference))"/>
-          </extension>
-          <extension url="urn:sourceId">
-            <valueString value="request"/>
-          </extension>
-      </extension>
-    </fixture>
+
+    <!-- PDB Validations should cover all the assertions, assert using minimumId as commented below should not be needed. -->
+<!--    <fixture id="referenceDocumentReference">-->
+<!--        <autocreate value="false"/>-->
+<!--        <autodelete value="false"/>-->
+<!--        <resource>-->
+<!--            <reference value="Internal/Minimal/DocumentReference/reference"/>-->
+<!--        </resource>-->
+<!--    </fixture>-->
+<!--    <fixture id="referenceDocumentManifest">-->
+<!--        <autocreate value="false"/>-->
+<!--        <autodelete value="false"/>-->
+<!--        <resource>-->
+<!--            <reference value="Internal/Minimal/DocumentManifest/reference"/>-->
+<!--        </resource>-->
+<!--    </fixture>-->
+<!--    <fixture id="documentManifest">-->
+<!--        <autocreate value="false"/>-->
+<!--        <autodelete value="false"/>-->
+<!--        <extension url="urn:subFixture">-->
+<!--          <extension url="urn:fhirPath">-->
+<!--            <valueString value="Bundle.entry.where(resource.is(FHIR.DocumentManifest))"/>-->
+<!--          </extension>-->
+<!--          <extension url="urn:sourceId">-->
+<!--            <valueString value="request"/>-->
+<!--          </extension>-->
+<!--      </extension>-->
+<!--    </fixture>-->
+<!--    <fixture id="documentReference">-->
+<!--        <autocreate value="false"/>-->
+<!--        <autodelete value="false"/>-->
+<!--        <extension url="urn:subFixture">-->
+<!--          <extension url="urn:fhirPath">-->
+<!--            <valueString value="Bundle.entry.where(resource.is(FHIR.DocumentReference))"/>-->
+<!--          </extension>-->
+<!--          <extension url="urn:sourceId">-->
+<!--            <valueString value="request"/>-->
+<!--          </extension>-->
+<!--      </extension>-->
+<!--    </fixture>-->
     <variable>
         <name value="isComprehensiveMetadataExpected"/>
         <defaultValue value="false"/>
@@ -72,14 +73,6 @@
         <name value="Evaluations"/>
         <description value="Test specific."/>
         <action>
-          <assert>
-              <description value="Transaction labeled as Minimal metadata profile."/>
-              <compareToSourceId value="request"/>
-              <compareToSourceExpression value="Bundle.meta.profile='http://ihe.net/fhir/StructureDefinition/IHE_MHD_Provide_Minimal_DocumentBundle'"/>
-              <warningOnly value="false"/>
-          </assert>
-        </action>
-        <action>
             <assert>
                 <description value="Request includes one DocumentReference."/>
                 <compareToSourceId value="request"/>
@@ -87,21 +80,21 @@
                 <warningOnly value="false"/>
             </assert>
         </action>
-        <action>
-            <assert>
-                <description value="DocumentManifest qualifies as Minimal Metadata."/>
-                <sourceId value="documentManifest"/>
-                <minimumId value="referenceDocumentManifest"/>
-                <warningOnly value="false"/>
-            </assert>
-        </action>
-        <action>
-            <assert>
-                <description value="DocumentReference qualifies as Minimal Metadata."/>
-                <sourceId value="documentReference"/>
-                <minimumId value="referenceDocumentReference"/>
-                <warningOnly value="false"/>
-            </assert>
-        </action>
+<!--        <action>-->
+<!--            <assert>-->
+<!--                <description value="DocumentManifest qualifies as Minimal Metadata."/>-->
+<!--                <sourceId value="documentManifest"/>-->
+<!--                <minimumId value="referenceDocumentManifest"/>-->
+<!--                <warningOnly value="false"/>-->
+<!--            </assert>-->
+<!--        </action>-->
+<!--        <action>-->
+<!--            <assert>-->
+<!--                <description value="DocumentReference qualifies as Minimal Metadata."/>-->
+<!--                <sourceId value="documentReference"/>-->
+<!--                <minimumId value="referenceDocumentReference"/>-->
+<!--                <warningOnly value="false"/>-->
+<!--            </assert>-->
+<!--        </action>-->
     </test>
 </TestScript>
