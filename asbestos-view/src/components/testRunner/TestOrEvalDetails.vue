@@ -188,7 +188,7 @@
               window.open(`${scriptUrl}/${localTestId}/${name}`, "_blank");
           },
             async loadEventSummariesAndReRun() {
-                await this.$store.dispatch('loadEventSummaries', {session: this.sessionId, channel: this.channelName})
+                // await this.$store.dispatch('loadEventSummaries', {session: this.sessionId, channel: this.channelName})
                 await this.$store.dispatch('runEval', this.testId);
             },
             async loadTestScript() {

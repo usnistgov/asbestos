@@ -6,6 +6,7 @@ import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import gov.nist.asbestos.http.headers.Headers;
 
 import java.io.File;
+import java.util.Set;
 
 public class UITask {
     private int index;
@@ -15,6 +16,16 @@ public class UITask {
     private String requestBody;
     private String responseHeader;
     private String responseBody;
+
+    public UITask(File eventDir, String taskLabel, Set<TaskPartEnum> e) {
+        e.forEach(s -> {
+            if (s.equals(TaskPartEnum.REQUEST_HEADER)) {
+                requestHeader = readFile(eventDir, taskLabel, "request_header.txt", true );
+            } else if (s.equals(TaskPartEnum.RESPONSE_HEADER)) {
+                responseHeader = readFile(eventDir, taskLabel, "response_header.txt", true );
+            }
+        });
+    }
 
     public UITask(File eventDir, String taskLabel, boolean rawTextMode) {
         description = readFile(eventDir, taskLabel,"description.txt" , true);

@@ -347,12 +347,20 @@ export const testRunnerStore = {
                     commit('setError', ENGINE.baseURL  + url + ': ' + error)
                 })
         },
-        runEval({commit, state, rootState}, testId) {
+        runEval({commit, state, rootState, dispatch}, testId) {
+            console.debug('In runEval')
             const url = `clienteval/${rootState.base.channel.testSession}__${rootState.base.channel.channelName}/${state.eventEvalCount}/${state.currentTestCollectionName}/${testId}`
             ENGINE.get(url)
                 .then(response => {
-                    const reports = response.data
-                    commit('setClientTestResult', { testId: testId, reports: reports[testId]} )
+                    const report = response.data
+                    const eventReports = report[testId]
+                    commit('setClientTestResult', { testId: testId, reports: eventReports} )
+                    if (! rootState.log.loaded) {
+                        const eventIds = JSON.stringify(Object.keys(eventReports))
+                        // console.debug(">>>" + eventIds)
+                        dispatch('loadSpecificEventSummaries', {session: this.sessionId, channel: this.channelName, postData: eventIds})
+                    }
+
                 })
                 .catch(function (error) {
                     commit('setError', LOG.baseURL + url + ': ' + error)

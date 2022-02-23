@@ -35,6 +35,7 @@ export const logStore = {
             state.loaded = null
         },
         setEventSummaries(state, summaries) {
+            // console.debug('In setEventSummaries')
             state.eventSummaries = summaries
             state.loaded = true
         },
@@ -56,6 +57,43 @@ export const logStore = {
         }
     },
     actions: {
+        async loadSpecificEventSummaries({commit, rootState}, parms) {
+            const channel = parms.channel
+            const session = parms.session
+            commit('setLogChannel', channel)
+            commit('setLogSession', session)
+            if (rootState.base.channel === undefined || rootState.base.channel === null) {
+                const errorMsg = 'Channel object is undefined or null in logStore.loadEventSummaries'
+                commit('setError', errorMsg)
+                console.error(errorMsg)
+                return
+            }
+            if (rootState.base.channel.testSession === undefined || rootState.base.channel.testSession === null) {
+                const errorMsg = 'Session not set in logStore.loadEventSummaries'
+                commit('setError', errorMsg)
+                console.error(errorMsg)
+                return
+            }
+            if (!rootState.base.channel.channelName === undefined || rootState.base.channel.channelName === null) {
+                const errorMsg = 'Channel name not set in logStore.loadEventSummaries'
+                commit('setError', errorMsg)
+                console.error(errorMsg)
+                return
+            }
+            const url = UtilFunctions.getLogListUrl(parms, rootState.base.channel.testSession, rootState.base.channel.channelName)
+            // console.info("loadSpecificEventSummaries: " + url)
+            try {
+                const rawSummaries = await PROXY.post(url, parms.postData)
+                const eventSummaries = rawSummaries.data.sort((a, b) => {
+                    if (a.eventName < b.eventName) return 1
+                    return -1
+                })
+                commit('setEventSummaries', eventSummaries)
+            } catch (error) {
+                commit('setError', `${error} for LOGLIST/${url}`)
+                console.error(`${error} for ${url}`)
+            }
+        },
         async loadEventSummaries({commit, rootState}, parms) {
             const channel = parms.channel
             const session = parms.session

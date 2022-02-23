@@ -129,14 +129,14 @@ public class GetClientTestEvalRequest {
         SimId simId = SimId.buildFromRawId(request.uriParts.get(4));
         String testSession = simId.getTestSession().getValue();
 
-        List<Event> events = getEvents(simId);
+        List<Event> events = getEvents(simId, eventsToEvaluate);
 
         File testLogDir = request.ec.getTestLogCollectionDir(request.fullChannelId(), testCollection);
 
         // for one testId
         String testId = request.uriParts.get(7);
 
-        evalClientTest(testCollection, testDirs, testSession, events, eventsToEvaluate);
+        evalClientTest(testCollection, testDirs, testSession, events);
 
         String myStr = saveLog(testLogDir, testId);
         request.returnString(myStr);
@@ -150,12 +150,12 @@ public class GetClientTestEvalRequest {
         return myStr;
     }
 
-    public List<Event> getEvents(SimId simId) {
+    public List<Event> getEvents(SimId simId, int limit) {
         List<File> eventDirsSinceMarker = request.ec.getEventsSince(simId, null);
         eventDirsSinceMarker.sort(Comparator.comparing(File::getName).reversed());
         List<Event> events = eventDirsSinceMarker.stream().map(Event::new).sorted().collect(Collectors.toList());
         Collections.reverse(events);
-        return events;
+        return events.stream().limit(limit).collect(Collectors.toList());
     }
 
     List<Event> selectedEvents = new ArrayList<>();
@@ -163,7 +163,7 @@ public class GetClientTestEvalRequest {
 
     // testDirs always has single entry
     // returns JSON response to client
-    public void evalClientTest(String testCollectionId, List<File> testDirs, String testSession, List<Event> events, int eventsToEvaluate) {
+    public void evalClientTest(String testCollectionId, List<File> testDirs, String testSession, List<Event> events) {
         Map<String, File> testIds = testDirs.stream().collect(Collectors.toMap(File::getName, x -> x));
         //String testId = testDirs.get(0).getName();
 
@@ -183,8 +183,6 @@ public class GetClientTestEvalRequest {
             int testGoodCount = 0;
             String lastGoodEvent = null;
             for (Event event : events) {
-                if (eventCount >= eventsToEvaluate)
-                    break;
                 if (event.isSupportEvent())
                     continue;
                 selectedEvents.add(eventCount, event);

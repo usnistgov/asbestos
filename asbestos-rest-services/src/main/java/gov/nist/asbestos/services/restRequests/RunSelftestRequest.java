@@ -80,9 +80,9 @@ public class RunSelftestRequest {
             SimId simId = SimId.buildFromRawId(channelName);
 
             GetClientTestEvalRequest clientEval = new GetClientTestEvalRequest(request);
-            List<Event> events = clientEval.getEvents(simId);
+            List<Event> events = clientEval.getEvents(simId, eventsToEvaluate);
 
-            clientEval.evalClientTest(testCollection, testDirs, testSession, events, eventsToEvaluate);
+            clientEval.evalClientTest(testCollection, testDirs, testSession, events);
 
             GetClientTestEvalRequest.Summary summary = clientEval.buildSummary();
             lastTime.time = summary.time;

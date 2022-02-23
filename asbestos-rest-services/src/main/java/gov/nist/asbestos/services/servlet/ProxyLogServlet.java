@@ -62,7 +62,7 @@ public class ProxyLogServlet extends HttpServlet {
             else if (GetDocumentRequest.isRequest(request)) new GetDocumentRequest(request).run();
             else if (GetValidationServerRequest.isRequest(request)) new GetValidationServerRequest(request).run();
             else if (GetEventForResourceTypeRequest.isRequest(request)) new GetEventForResourceTypeRequest(request).run();
-            else if (GetEventsForChannelRequest.isRequest(request)) new GetEventsForChannelRequest(request).run();
+            else if (EventsForChannelRequest.isRequest(request)) new EventsForChannelRequest(request).doGet();
             else if (GetEcRequest.isRequest(request)) new GetEcRequest(request).run();
             else if (GetStartupSessionRequest.isRequest(request)) new GetStartupSessionRequest(request).run();
             else request.badRequest();
@@ -81,6 +81,7 @@ public class ProxyLogServlet extends HttpServlet {
             if (externalCache == null)
                 throw new Exception("External Cache not set");
             if (AnalyseResourceRequest.isRequest(request)) new AnalyseResourceRequest(request).run();
+            else if (EventsForChannelRequest.isPostRequest(request)) new EventsForChannelRequest(request).doPost();
             else
                 request.badRequest();
 

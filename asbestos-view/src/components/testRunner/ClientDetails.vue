@@ -36,6 +36,7 @@
 import colorizeTestReports from "../../mixins/colorizeTestReports";
 import ScriptStatus from "./ScriptStatus";
 import ScriptDetails from "./ScriptDetails";
+// import {UtilFunctions } from "../../common/http-common";
 
     export default {
     data() {
@@ -46,6 +47,35 @@ import ScriptDetails from "./ScriptDetails";
             }
         },
         methods: {
+        /*
+            eventDetail() {
+                const parms = {
+                    filterEventId : this.eventId,
+                    getSingleEvent: true
+                }
+
+                const url = UtilFunctions.getLogListUrl(parms, this.$store.state.base.channel.testSession, this.$store.state.base.channel.channelName)
+                const methodParams =
+                    {
+                        params: {
+                            summaries: 'true'
+                        }
+                    }
+                PROXY.get(url, methodParams)
+                    .then((response)=>
+                    {
+                        // console.log(response.data);
+                        this.currentEventSummary.splice(0)
+                        response.data.forEach((e,idx) => {
+                            // this.currentEventSummary.splice(idx, 1, response.data[idx])
+                            const summary = response.data[idx]
+                            return `${summary.verb} ${summary.resourceType} from ${summary.ipAddr}`
+                        })
+                    })
+                return null
+            },
+            */
+
             selectEvent() {
                 // currentEvent is this.$store.state.testRunner.currentEvent
                 // eventId is always set (passed from parent)
@@ -96,17 +126,24 @@ import ScriptDetails from "./ScriptDetails";
         },
         computed: {
             eventDetail() {
-                if (this.logSummariesNeedLoading || this.logSummariesNeedLoading2) {
-                    this.$store.dispatch('loadEventSummaries', {session: this.sessionId, channel: this.channelName})
-                }
-                if (this.$store.state.log.eventSummaries) {
-                    const summary = this.$store.state.log.eventSummaries.find(it =>
-                        it.eventName === this.eventId)
-                    if (summary)
-                        return `${summary.verb} ${summary.resourceType} from ${summary.ipAddr}`
-                }
-                return null
-            },
+                /*
+                        if (this.logSummariesNeedLoading || this.logSummariesNeedLoading2) {
+                            const parms = {
+                                filterEventId : this.eventId,
+                                getSingleEvent: true
+                            }
+                            this.$store.dispatch('loadEventSummaries', parms)
+                        }
+                 */
+                        if (this.$store.state.log.eventSummaries) {
+                            const summary = this.$store.state.log.eventSummaries.find(it =>
+                                it.eventName === this.eventId)
+                            if (summary)
+                                return `${summary.verb} ${summary.resourceType} from ${summary.ipAddr}`
+                        }
+                        return 'Loading...'
+                    },
+
             primaryTestReport() {
                   return (this.testReport && this.testReport.length > 0)
                       ? this.testReport[0]
@@ -118,6 +155,7 @@ import ScriptDetails from "./ScriptDetails";
             isFail() {
                 return this.eventResult[this.eventId].result === 'fail'
             },
+            /*
             logSummariesNeedLoading() {  // because of channel change
                 return !this.$store.state.log.eventSummaries ||
                     this.sessionId !== this.$store.state.log.session ||
@@ -130,6 +168,7 @@ import ScriptDetails from "./ScriptDetails";
                 const lastSummaryId = this.$store.state.log.eventSummaries[0].eventName
                 return lastEventId > lastSummaryId
             },
+             */
             testScript() {
                 return this.$store.state.testRunner.testScripts[this.testId]
             },

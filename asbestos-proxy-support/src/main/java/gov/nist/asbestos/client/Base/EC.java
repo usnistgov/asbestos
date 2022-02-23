@@ -27,6 +27,7 @@ import java.nio.file.Path;
 import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static gov.nist.asbestos.client.Base.Dirs.listOfDirectories;
 import static gov.nist.asbestos.client.Base.Dirs.listOfFiles;
@@ -400,30 +401,33 @@ public class EC {
         }
     }
 
-    public void buildJsonListingOfEventSummaries(HttpServletResponse resp, String testSession, String channelId, final String filterEventId, boolean isGetSingleEvent) throws IOException {
+    public void buildJsonListingOfEventSummaries(HttpServletResponse resp, String testSession, String channelId, final List<String> filterEventId, boolean isGetSingleEvent) throws IOException {
         File fhir = new EC(externalCache).fhirDir(testSession, channelId);
         List<String> resourceTypes = Dirs.dirListingAsStringList(fhir);
         List<EventSummary> eventSummaries = new ArrayList<>();
         for (String resourceType : resourceTypes) {
             File resourceDir = new File(fhir, resourceType);
             if (isGetSingleEvent) {
-                File eventFile = new File(resourceDir, filterEventId);
+                File eventFile = new File(resourceDir, filterEventId.get(0));
                 EventSummary summary = new EventSummary(eventFile);
                 summary.resourceType = resourceType;
-                summary.eventName = filterEventId;
+                summary.eventName = filterEventId.get(0);
                 eventSummaries.add(summary);
             } else {
                 List<String> eventIds = Dirs.dirListingAsStringList(resourceDir);
-                if (eventIds.size() > MAX_EVENT_LIMIT) {
-                    log.warning(String.format("eventIds limit of %d exceeded for %s/%s.", MAX_EVENT_LIMIT, testSession, channelId));
-                }
-                eventIds.stream().limit(MAX_EVENT_LIMIT).forEach(eventId -> {
+                Stream<String> s = filterEventId != null ? eventIds.stream() : eventIds.stream().limit(MAX_EVENT_LIMIT);
+                s.forEach(eventId -> {
                     File eventFile = new File(resourceDir, eventId);
                     EventSummary summary =
-                            (filterEventId != null && ! eventId.equalsIgnoreCase(filterEventId)) ?
-                                    new EventSummary() : new EventSummary(eventFile);
+                            filterEventId != null && ! filterEventId.stream().anyMatch(e -> e.equals(eventId)) ?
+                            new EventSummary() : new EventSummary(eventFile);
                     summary.resourceType = resourceType;
                     summary.eventName = eventId;
+                    if (filterEventId != null && filterEventId.size() > 1) {
+                        // load only these request properties below
+                        // `${summary.verb} ${summary.resourceType} ${summary.ipAddr}`
+                        summary.loadRequestUiTask(eventFile);
+                    }
                     eventSummaries.add(summary);
                 });
             }

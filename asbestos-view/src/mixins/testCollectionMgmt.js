@@ -26,6 +26,11 @@ export default {
         async testScriptNamesUpdated() {
             if (this.isClient) {
                 return this.$store.state.testRunner.testScriptNames.forEach(name => {
+                    // console.debug('In testScriptNamesUpdated: ' + name)
+                    // console.debug(this.$store.state.log.eventSummaries === undefined || this.$store.state.log.eventSummaries === null)
+                    // console.debug(this.$store.state.log.eventSummaries.length)
+                    // console.debug(this.$store.state.log.loaded )
+
                     this.doEval(name)
                 })
             }
@@ -48,11 +53,13 @@ export default {
             }
         },
         async doEval(testName) {  // client tests
+            // console.debug('In doEval')
             if (testName)
                 await this.$store.dispatch('runEval', testName)
         },
         // run all tests in collection
         async doRunAll()  {
+            // console.debug('In doRunAll')
             this.running = true
             this.beginTestTime()
             this.doClearLogs(true)
