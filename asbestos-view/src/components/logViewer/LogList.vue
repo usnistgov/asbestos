@@ -24,7 +24,7 @@
             </select>
         </div>
 
-        <template v-if="isLoading"><p class="loading">Loading...</p></template>
+        <template v-if="isLoading && currentPage===1"><p class="loading">Loading...</p></template>
         <template v-else>
             <template v-if="!needRefresh">
                 <div class="vdivider"></div>

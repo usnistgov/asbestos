@@ -257,7 +257,7 @@ export default {
   display: inline;
 }
 .loading {
-  color: #f5f5f5;
+  /*color: #f5f5f5;*/
   font-size: medium;
   font-weight: bolder;
   display: block;

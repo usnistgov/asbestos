@@ -8,6 +8,8 @@ import gov.nist.asbestos.client.log.SimStore;
 import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import gov.nist.asbestos.simapi.simCommon.SimId;
+
+import java.math.BigDecimal;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.hl7.fhir.common.hapi.validation.support.PrePopulatedValidationSupport;
@@ -437,10 +439,10 @@ public class EC {
         if (! eventIds.isEmpty()) {
             eventIds = eventIds.stream().sorted(Comparator.comparing(ProxyChannelEventId::getEventId).reversed()).collect(Collectors.toList());
 
-            int pageCount = eventIds.size() / itemsPerPage;
+            BigDecimal pageCount = new BigDecimal(String.valueOf(Math.ceil((double)eventIds.size() / (double)itemsPerPage)));
             Stream<ProxyChannelEventId> s = filterEventId != null ? eventIds.stream() : eventIds.stream().limit(MAX_EVENT_LIMIT);
             if (itemsPerPage > 0 && pageNum > 0) {
-                s = s.skip(itemsPerPage * pageNum -1).limit(itemsPerPage);
+                s = s.skip(itemsPerPage * (pageNum-1)).limit(itemsPerPage);
             }
             s.forEach(eventId -> {
                 String resourceType = eventId.getResourceType();
@@ -452,7 +454,7 @@ public class EC {
                 summary.resourceType = resourceType;
                 summary.eventName = eventId.getEventId();
                 if (pageNum == 1) {
-                    summary.setTotalPageableItems(pageCount);
+                    summary.setTotalPageableItems(pageCount.intValue());
                 }
                 if (itemsPerPage > 0 || ( filterEventId != null && filterEventId.size() > 1)) {
                     // load only these request properties below
