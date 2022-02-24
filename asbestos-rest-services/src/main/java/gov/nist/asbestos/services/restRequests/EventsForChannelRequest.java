@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.CollectionType;
 import gov.nist.asbestos.client.Base.Request;
+import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.http.headers.Header;
 import gov.nist.asbestos.http.headers.Headers;
 import gov.nist.asbestos.http.operations.Verb;
@@ -14,6 +15,7 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
 import java.io.IOException;
@@ -27,6 +29,8 @@ import java.io.IOException;
 // 6 - "getSingleEvent" only applies if eventId is present, return only the eventId full summary
 
 public class EventsForChannelRequest {
+    private static final String ITEMS_PER_PAGE = "itemsPerPage";
+    private static final String PAGE_NUM = "pageNum";
     private static Logger log = Logger.getLogger(EventsForChannelRequest.class.getName());
 
     private Request request;
@@ -73,7 +77,11 @@ public class EventsForChannelRequest {
         String query = request.req.getQueryString();
         if (query != null && query.contains("summaries=true")) {
             String filterEventId = (this.hasFilterEventId) ? request.uriParts.get(5): null;
-            request.ec.buildJsonListingOfEventSummaries(request.resp, request.uriParts.get(3), request.uriParts.get(4), Collections.singletonList(filterEventId), isSingleEventRequest(request));
+            List<String> ids = filterEventId != null ? Collections.singletonList(filterEventId) : null;
+            Map<String,String> qparms = Ref.parseParameters(query);
+            int itemsPerPage = qparms.containsKey(ITEMS_PER_PAGE) ? Integer.parseInt(qparms.get(ITEMS_PER_PAGE)) : -1;
+            int pageNum = qparms.containsKey(PAGE_NUM) ? Integer.parseInt(qparms.get(PAGE_NUM)) : -1;
+            request.ec.buildJsonListingOfEventSummaries(request.resp, request.uriParts.get(3), request.uriParts.get(4), ids, isSingleEventRequest(request), itemsPerPage, pageNum);
         } else
             request.ec.buildJsonListingOfResourceTypes(request.resp, request.uriParts.get(3), request.uriParts.get(4));
         request.ok();
@@ -90,7 +98,7 @@ public class EventsForChannelRequest {
 
         // get only these properties below
         // `${summary.verb} ${summary.resourceType} from ${summary.ipAddr}`
-        request.ec.buildJsonListingOfEventSummaries(request.resp, request.uriParts.get(3), request.uriParts.get(4), eventIds, isSingleEventRequest(request));
+        request.ec.buildJsonListingOfEventSummaries(request.resp, request.uriParts.get(3), request.uriParts.get(4), eventIds, isSingleEventRequest(request), -1, -1);
 
         request.ok();
     }

@@ -348,7 +348,7 @@ export const testRunnerStore = {
                 })
         },
         runEval({commit, state, rootState, dispatch}, testId) {
-            console.debug('In runEval')
+            // console.debug('In runEval')
             const url = `clienteval/${rootState.base.channel.testSession}__${rootState.base.channel.channelName}/${state.eventEvalCount}/${state.currentTestCollectionName}/${testId}`
             ENGINE.get(url)
                 .then(response => {

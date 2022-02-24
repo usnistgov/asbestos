@@ -51,6 +51,10 @@ public class Dirs {
     }
 
     public static List<String> dirListingAsStringList(File dir) {
+        return dirListingAsStringList(dir, true);
+    }
+
+    public static List<String> dirListingAsStringList(File dir, boolean sort) {
         List<String> contents = new ArrayList<>();
 
         File[] files = dir.listFiles();
@@ -61,7 +65,9 @@ public class Dirs {
                 if (file.getName().startsWith("_")) continue;
                 contents.add(file.getName());
             }
-            contents = contents.stream().sorted().collect(Collectors.toList());
+            if (sort) {
+                contents = contents.stream().sorted().collect(Collectors.toList());
+            }
         }
 
         return contents;

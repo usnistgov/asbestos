@@ -5,7 +5,7 @@
         :test-collection="testCollection"
         :session-id="sessionId"
         :channel-name="channelName"> </test-collection-header>
-<!--    <div v-if="isLoading" class="loading">Loading...</div>-->
+    <div v-if="!$store.state.log.loaded" class="loading">Loading...</div>
     <test-collection-body
         :test-collection="testCollection"
         :session-id="sessionId"
@@ -257,7 +257,7 @@ export default {
   display: inline;
 }
 .loading {
-  color: gray;
+  color: #f5f5f5;
   font-size: medium;
   font-weight: bolder;
   display: block;

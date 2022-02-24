@@ -25,7 +25,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -401,10 +400,28 @@ public class EC {
         }
     }
 
-    public void buildJsonListingOfEventSummaries(HttpServletResponse resp, String testSession, String channelId, final List<String> filterEventId, boolean isGetSingleEvent) throws IOException {
+    class ProxyChannelEventId {
+        private String eventId;
+        private String resourceType;
+
+        public ProxyChannelEventId(String eventId, String resourceType) {
+            this.eventId = eventId;
+            this.resourceType = resourceType;
+        }
+
+        public String getEventId() {
+            return eventId;
+        }
+
+        public String getResourceType() {
+            return resourceType;
+        }
+    }
+    public void buildJsonListingOfEventSummaries(HttpServletResponse resp, String testSession, String channelId, final List<String> filterEventId, boolean isGetSingleEvent, int itemsPerPage, int pageNum) throws IOException {
         File fhir = new EC(externalCache).fhirDir(testSession, channelId);
         List<String> resourceTypes = Dirs.dirListingAsStringList(fhir);
         List<EventSummary> eventSummaries = new ArrayList<>();
+        List<ProxyChannelEventId> eventIds = new ArrayList<>();
         for (String resourceType : resourceTypes) {
             File resourceDir = new File(fhir, resourceType);
             if (isGetSingleEvent) {
@@ -414,23 +431,37 @@ public class EC {
                 summary.eventName = filterEventId.get(0);
                 eventSummaries.add(summary);
             } else {
-                List<String> eventIds = Dirs.dirListingAsStringList(resourceDir);
-                Stream<String> s = filterEventId != null ? eventIds.stream() : eventIds.stream().limit(MAX_EVENT_LIMIT);
-                s.forEach(eventId -> {
-                    File eventFile = new File(resourceDir, eventId);
-                    EventSummary summary =
-                            filterEventId != null && ! filterEventId.stream().anyMatch(e -> e.equals(eventId)) ?
-                            new EventSummary() : new EventSummary(eventFile);
-                    summary.resourceType = resourceType;
-                    summary.eventName = eventId;
-                    if (filterEventId != null && filterEventId.size() > 1) {
-                        // load only these request properties below
-                        // `${summary.verb} ${summary.resourceType} ${summary.ipAddr}`
-                        summary.loadRequestUiTask(eventFile);
-                    }
-                    eventSummaries.add(summary);
-                });
+                eventIds.addAll( Dirs.dirListingAsStringList(resourceDir, false).stream().map(e -> new ProxyChannelEventId(e, resourceType)).collect(Collectors.toList()));
             }
+        }
+        if (! eventIds.isEmpty()) {
+            eventIds = eventIds.stream().sorted(Comparator.comparing(ProxyChannelEventId::getEventId).reversed()).collect(Collectors.toList());
+
+            int pageCount = eventIds.size() / itemsPerPage;
+            Stream<ProxyChannelEventId> s = filterEventId != null ? eventIds.stream() : eventIds.stream().limit(MAX_EVENT_LIMIT);
+            if (itemsPerPage > 0 && pageNum > 0) {
+                s = s.skip(itemsPerPage * pageNum -1).limit(itemsPerPage);
+            }
+            s.forEach(eventId -> {
+                String resourceType = eventId.getResourceType();
+                File resourceDir = new File(fhir, resourceType);
+                File eventFile = new File(resourceDir, eventId.getEventId());
+                EventSummary summary =
+                        itemsPerPage > 0 || (filterEventId != null && ! filterEventId.stream().anyMatch(e -> e.equals(eventId))) ?
+                                new EventSummary() : new EventSummary(eventFile);
+                summary.resourceType = resourceType;
+                summary.eventName = eventId.getEventId();
+                if (pageNum == 1) {
+                    summary.setTotalPageableItems(pageCount);
+                }
+                if (itemsPerPage > 0 || ( filterEventId != null && filterEventId.size() > 1)) {
+                    // load only these request properties below
+                    // `${summary.verb} ${summary.resourceType} ${summary.ipAddr}`
+                    summary.loadResponseUiTask(eventFile);
+                    summary.loadRequestUiTask(eventFile);
+                }
+                eventSummaries.add(summary);
+            });
         }
         String json = new Gson().toJson(eventSummaries);
         Returns.returnString(resp, json);

@@ -227,7 +227,7 @@ public class Ref {
         return getParametersAsMap(parms);
     }
 
-    public Map<String, String> getParametersAsMap(String parms) {
+    public static Map<String, String> getParametersAsMap(String parms) {
         Map<String, String> map = new HashMap<>();
 
         if (parms == null)

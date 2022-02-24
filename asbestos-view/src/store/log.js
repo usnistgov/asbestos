@@ -83,6 +83,7 @@ export const logStore = {
             const url = UtilFunctions.getLogListUrl(parms, rootState.base.channel.testSession, rootState.base.channel.channelName)
             // console.info("loadSpecificEventSummaries: " + url)
             try {
+                commit('resetLogLoaded')
                 const rawSummaries = await PROXY.post(url, parms.postData)
                 const eventSummaries = rawSummaries.data.sort((a, b) => {
                     if (a.eventName < b.eventName) return 1
@@ -123,9 +124,12 @@ export const logStore = {
                 const methodParams =
                     {
                         params: {
-                            summaries: 'true'
+                            summaries: 'true',
+                            itemsPerPage : ('itemsPerPage' in parms ? parms.itemsPerPage : -1),
+                            pageNum: ('page' in parms ? parms.page : -1)
                         }
                     }
+                commit('resetLogLoaded')
                 const rawSummaries = await PROXY.get(url, methodParams)
                 const eventSummaries = rawSummaries.data.sort((a, b) => {
                     if (a.eventName < b.eventName) return 1

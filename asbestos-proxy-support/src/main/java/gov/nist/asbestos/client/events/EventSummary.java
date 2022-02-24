@@ -11,6 +11,7 @@ public class EventSummary {
     String verb;
     Boolean status;
     String ipAddr;
+    Integer totalPageableItems;
 
     public EventSummary() {
     }
@@ -18,10 +19,8 @@ public class EventSummary {
     public EventSummary(File eventFile) {
         try {
             UITask uiTask = new UITask(eventFile, "task0");
-            String responseHeader = uiTask.getResponseHeader();
-            Headers headers = new Headers(responseHeader);
-            status = new Boolean (headers.getStatus() < 202);
-            loadHeader(uiTask);
+            readResponseHeader(uiTask);
+            readRequestHeader(uiTask);
         } catch (Exception e) {
             status = false;
         }
@@ -29,10 +28,20 @@ public class EventSummary {
 
     public void loadRequestUiTask(File eventFile) {
         UITask uiTask = new UITask(eventFile, "task0", Collections.singleton(TaskPartEnum.REQUEST_HEADER));
-        loadHeader(uiTask);
+        readRequestHeader(uiTask);
+    }
+    public void loadResponseUiTask(File eventFile) {
+        UITask uiTask = new UITask(eventFile, "task0", Collections.singleton(TaskPartEnum.RESPONSE_HEADER));
+        readResponseHeader(uiTask);
     }
 
-    private void loadHeader(UITask uiTask) {
+    private void readResponseHeader(UITask uiTask) {
+        String responseHeader = uiTask.getResponseHeader();
+        Headers headers = new Headers(responseHeader);
+        status = new Boolean (headers.getStatus() < 202);
+    }
+
+    private void readRequestHeader(UITask uiTask) {
         String requestHeader = uiTask.getRequestHeader();
         if (requestHeader != null) {
             Headers headers = new Headers(requestHeader);
@@ -42,5 +51,13 @@ public class EventSummary {
             verb = "NotAvail";
             ipAddr = "NotAvail";
         }
+    }
+
+    public Integer getTotalPageableItems() {
+        return totalPageableItems;
+    }
+
+    public void setTotalPageableItems(Integer totalPageableItems) {
+        this.totalPageableItems = totalPageableItems;
     }
 }
