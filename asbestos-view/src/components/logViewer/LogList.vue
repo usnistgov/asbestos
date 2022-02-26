@@ -3,29 +3,47 @@
         <div>
             <span class="tool-title">Events for Channel {{ channelName }}</span>
             <span class="divider"></span>
-
             <img id="reload" class="selectable" @click="loadEventSummaries()" src="../../assets/reload.png" title="Refresh Events"/>
             <div>
                 <img id="left" class="selectable" @click="pageLeft()" src="../../assets/left-arrow.png" title="Events"/>&nbsp;
-                {{'Page ' + currentPage + ' of ' + totalPageCount}}
+                <label for="pageNumSelect">Page</label>&nbsp;
+                <select id="pageNumSelect" v-model="pageNumValueHandler" v-bind:size="1">
+                    <option v-for="(pgNum, idx) in totalPageCount"
+                            v-bind:value="(pgNum)"
+                            :key="pgNum + idx"
+                    >
+                        {{ pgNum }}
+                    </option>
+                </select>
+                &nbsp; of &nbsp; <span class="selectable" @click="gotoLastPage" title="Go to last page"> {{ totalPageCount}}</span>&nbsp;
                 <img id="right" class="selectable" @click="pageRight()" src="../../assets/right-arrow.png" title="Events"/>
             </div>
+            <span v-show="!$store.state.log.loaded" class="yellowBkgText">Loading...</span>
             <div class="divider"></div>
         </div>
         <div>
-            Source IP addr filter:
-            <select v-model="selectedIP" v-bind:size="1">
+            <label for="selectedIPSelect">Source IP addr filter:</label>&nbsp;
+            <select id="selectedIPSelect" v-model="selectedIP" v-bind:size="1">
                 <option v-for="(coll, colli) in ipAddresses"
                         v-bind:value="coll"
                         :key="coll + colli"
                 >
                     {{ coll }}
                 </option>
-            </select>
+            </select>.
+            &nbsp;
+            <label for="pageSizeSelect">Page size:</label>&nbsp;
+            <select id="pageSizeSelect" v-model="pageSizeValueHandler" v-bind:size="1">
+                <option v-for="(pgSz, idx) in pageSizeValues"
+                        v-bind:value="pgSz"
+                        :key="pgSz + idx"
+                >
+                    {{ pgSz }}
+                </option>
+            </select>.
         </div>
 
-        <template v-if="isLoading && currentPage===1"><p class="loading">Loading...</p></template>
-        <template v-else>
+        <template>
             <template v-if="!needRefresh">
                 <div class="vdivider"></div>
 
@@ -70,11 +88,13 @@
                 selectedEvent: null,
                 selectedTask: 0,
                 selectedIP: "all",
+                previousPageSize: 25,
+                selectedPageSize: 25,
+                pageSizeValues: [5,10,25,50,100],
                 isLoading: false,
                 needRefresh: false,
                 currentPage: 1,
                 totalPageCount : 1,
-                itemsPerPage: 50,
             }
         },
         methods: {
@@ -86,6 +106,7 @@
                 // console.log('currentPage: ' + this.currentPage)
                 if (this.currentPage > 1) {
                     this.currentPage--
+                    this.previousPageSize = -1
                     this.loadEventSummaries()
                 }
             },
@@ -94,20 +115,39 @@
                 // console.log(JSON.stringify(this.$store.state.log.eventSummaries[0]))
                 if (this.currentPage < this.totalPageCount) {
                     this.currentPage++
+                    this.previousPageSize = -1
+                    this.loadEventSummaries()
+                }
+            },
+            gotoPage() {
+                if (this.currentPage != 1) {
+                    this.currentPage = 1
+                    this.previousPageSize = -1
+                    this.loadEventSummaries()
+                }
+            },
+            gotoLastPage() {
+                if (this.currentPage != this.totalPageCount) {
+                    this.currentPage = this.totalPageCount
+                    this.previousPageSize = -1
                     this.loadEventSummaries()
                 }
             },
             loadEventSummaries() {
                 this.needRefresh = false
                 this.isLoading = true
-                this.$store.dispatch('loadEventSummaries', {session: this.sessionId, channel: this.channelName, itemsPerPage: this.itemsPerPage, page: this.currentPage})
+                let paramsObj = {session: this.sessionId, channel: this.channelName, itemsPerPage: this.selectedPageSize, page: this.currentPage, previousPageSize: this.previousPageSize}
+                this.$store.dispatch('loadEventSummaries', paramsObj)
                     .then(() => {
                         this.isLoading = false
                         if ('totalPageableItems' in this.$store.state.log.eventSummaries[0]) {
                             const totalPageableItems = this.$store.state.log.eventSummaries[0].totalPageableItems
                             this.totalPageCount = totalPageableItems
                         }
-
+                        if ('newPageNum' in this.$store.state.log.eventSummaries[0]) {
+                            const newPageNum = this.$store.state.log.eventSummaries[0].newPageNum
+                            this.currentPage = newPageNum
+                        }
                     })
             },
             displayInstruction() {
@@ -126,6 +166,30 @@
                 addrs.push("all")
                 return addrs
             },
+            pageSizeValueHandler: {
+                set(val) {
+                    if (val === '' || val === undefined)
+                        return;
+                    this.previousPageSize = this.selectedPageSize
+                    this.selectedPageSize = val
+                    this.loadEventSummaries()
+                },
+                get() {
+                    return this.selectedPageSize
+                }
+            },
+            pageNumValueHandler: {
+                set(val) {
+                    if (val === '' || val === undefined)
+                        return;
+                    this.previousPageSize = this.selectedPageSize
+                    this.currentPage = val
+                    this.loadEventSummaries()
+                },
+                get() {
+                    return this.currentPage
+                }
+            }
         },
         watch: {
             'resourceType': 'loadEventSummaries',
@@ -140,5 +204,10 @@
 </script>
 
 <style scoped>
+    .yellowBkgText {
+        color: black;
+        background-color: yellow;
+        font-size: smaller;
+    }
 
 </style>

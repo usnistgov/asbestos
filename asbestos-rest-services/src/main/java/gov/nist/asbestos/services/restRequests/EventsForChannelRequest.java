@@ -31,6 +31,7 @@ import java.io.IOException;
 public class EventsForChannelRequest {
     private static final String ITEMS_PER_PAGE = "itemsPerPage";
     private static final String PAGE_NUM = "pageNum";
+    private static final String PREVIOUS_PAGE_SIZE = "previousPageSize";
     private static Logger log = Logger.getLogger(EventsForChannelRequest.class.getName());
 
     private Request request;
@@ -81,7 +82,8 @@ public class EventsForChannelRequest {
             Map<String,String> qparms = Ref.parseParameters(query);
             int itemsPerPage = qparms.containsKey(ITEMS_PER_PAGE) ? Integer.parseInt(qparms.get(ITEMS_PER_PAGE)) : -1;
             int pageNum = qparms.containsKey(PAGE_NUM) ? Integer.parseInt(qparms.get(PAGE_NUM)) : -1;
-            request.ec.buildJsonListingOfEventSummaries(request.resp, request.uriParts.get(3), request.uriParts.get(4), ids, isSingleEventRequest(request), itemsPerPage, pageNum);
+            int previousPageSize = qparms.containsKey(PREVIOUS_PAGE_SIZE) ? (Integer.parseInt(qparms.get(PREVIOUS_PAGE_SIZE)) != itemsPerPage ? Integer.parseInt(qparms.get(PREVIOUS_PAGE_SIZE)) : -1)  : -1;
+            request.ec.buildJsonListingOfEventSummaries(request.resp, request.uriParts.get(3), request.uriParts.get(4), ids, isSingleEventRequest(request), itemsPerPage, pageNum, previousPageSize);
         } else
             request.ec.buildJsonListingOfResourceTypes(request.resp, request.uriParts.get(3), request.uriParts.get(4));
         request.ok();
@@ -98,7 +100,7 @@ public class EventsForChannelRequest {
 
         // get only these properties below
         // `${summary.verb} ${summary.resourceType} from ${summary.ipAddr}`
-        request.ec.buildJsonListingOfEventSummaries(request.resp, request.uriParts.get(3), request.uriParts.get(4), eventIds, isSingleEventRequest(request), -1, -1);
+        request.ec.buildJsonListingOfEventSummaries(request.resp, request.uriParts.get(3), request.uriParts.get(4), eventIds, isSingleEventRequest(request), -1, -1, -1);
 
         request.ok();
     }

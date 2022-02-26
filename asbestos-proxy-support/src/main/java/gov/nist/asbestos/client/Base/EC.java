@@ -419,7 +419,7 @@ public class EC {
             return resourceType;
         }
     }
-    public void buildJsonListingOfEventSummaries(HttpServletResponse resp, String testSession, String channelId, final List<String> filterEventId, boolean isGetSingleEvent, int itemsPerPage, int pageNum) throws IOException {
+    public void buildJsonListingOfEventSummaries(HttpServletResponse resp, String testSession, String channelId, final List<String> filterEventId, boolean isGetSingleEvent, int itemsPerPage, int pageNum, int previousPageSize) throws IOException {
         File fhir = new EC(externalCache).fhirDir(testSession, channelId);
         List<String> resourceTypes = Dirs.dirListingAsStringList(fhir);
         List<EventSummary> eventSummaries = new ArrayList<>();
@@ -441,8 +441,9 @@ public class EC {
 
             BigDecimal pageCount = new BigDecimal(String.valueOf(Math.ceil((double)eventIds.size() / (double)itemsPerPage)));
             Stream<ProxyChannelEventId> s = filterEventId != null ? eventIds.stream() : eventIds.stream().limit(MAX_EVENT_LIMIT);
+            final int newPageNum = getNewPageNum(previousPageSize, pageNum, itemsPerPage);
             if (itemsPerPage > 0 && pageNum > 0) {
-                s = s.skip(itemsPerPage * (pageNum-1)).limit(itemsPerPage);
+                s = s.skip(itemsPerPage * ((newPageNum > -1 && newPageNum < pageCount.intValue()) ? newPageNum -1 : pageNum-1)).limit(itemsPerPage);
             }
             s.forEach(eventId -> {
                 String resourceType = eventId.getResourceType();
@@ -453,8 +454,12 @@ public class EC {
                                 new EventSummary() : new EventSummary(eventFile);
                 summary.resourceType = resourceType;
                 summary.eventName = eventId.getEventId();
-                if (pageNum == 1) {
+                if (eventSummaries.size() == 0) {
+                    // add to only first item in the eventSummary index
                     summary.setTotalPageableItems(pageCount.intValue());
+                    if (newPageNum > -1) {
+                        summary.setNewPageNum(newPageNum);
+                    }
                 }
                 if (itemsPerPage > 0 || ( filterEventId != null && filterEventId.size() > 1)) {
                     // load only these request properties below
@@ -467,6 +472,30 @@ public class EC {
         }
         String json = new Gson().toJson(eventSummaries);
         Returns.returnString(resp, json);
+    }
+
+    private int getNewPageNum(int previousPageSize, int previousPageNum, int currentItemsPerPage) {
+        if (previousPageNum > 1 && previousPageSize  > 0) {
+            int newPageNum = 1;
+            int currentPos = 0; //previousPageNum * (previousPageSize );
+            while ((currentPos+previousPageSize) < previousPageSize * previousPageNum) {
+                currentPos += previousPageSize;
+            }
+            while (currentPos+1 > newPageNum * currentItemsPerPage) {
+                newPageNum++;
+            }
+
+            return newPageNum;
+            /*
+            double adjustedPage = Math.ceil((double)currentPos / (double)(newPageNum * currentItemsPerPage));
+            if (currentItemsPerPage > previousPageSize) {
+                return new BigDecimal(Math.ceil(adjustedPage)).intValue();
+            } else {
+                return new BigDecimal(Math.floor(adjustedPage)).intValue();
+            }
+             */
+        }
+        return -1;
     }
 
     public void buildJsonListingOfResourceTypes(HttpServletResponse resp, String testSession, String channelId) {

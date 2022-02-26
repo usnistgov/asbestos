@@ -12,6 +12,7 @@ public class EventSummary {
     Boolean status;
     String ipAddr;
     Integer totalPageableItems;
+    Integer newPageNum;
 
     public EventSummary() {
     }
@@ -59,5 +60,13 @@ public class EventSummary {
 
     public void setTotalPageableItems(Integer totalPageableItems) {
         this.totalPageableItems = totalPageableItems;
+    }
+
+    public Integer getNewPageNum() {
+        return newPageNum;
+    }
+
+    public void setNewPageNum(Integer newPageNum) {
+        this.newPageNum = newPageNum;
     }
 }

@@ -126,7 +126,8 @@ export const logStore = {
                         params: {
                             summaries: 'true',
                             itemsPerPage : ('itemsPerPage' in parms ? parms.itemsPerPage : -1),
-                            pageNum: ('page' in parms ? parms.page : -1)
+                            pageNum: ('page' in parms ? parms.page : -1),
+                            previousPageSize: ('previousPageSize' in parms ? parms.previousPageSize : -1)
                         }
                     }
                 commit('resetLogLoaded')
