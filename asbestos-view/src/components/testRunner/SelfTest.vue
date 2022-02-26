@@ -46,7 +46,8 @@
                 allRun: false,
                 earliestRunTime: null,
                 hasNoRuns: true,
-                eventsForClientCollections: 30,
+                eventsForMinimalClientCollection: 56, /*  According to the EC channel directory, 56 events are generated for v3 Limited TC */
+                eventsForComprehensiveClientCollection: 93, /* According to the EC channel directory, 93 events generated for v3 Comprehensive TC */
             }
         },
         methods: {
@@ -56,7 +57,10 @@
                 this.running = false;
             },
             async loadStatus(type) {
-                const url = `selftest/${this.sessionId}__${this.channelName}/${this.testCollection}/${type}/${this.eventsForClientCollections}`;
+                const eventsForClientCollections =
+                    'MHD_DocumentRecipient_comprehensive' === this.testCollection ? this.eventsForComprehensiveClientCollection:
+                        'MHD_DocumentRecipient_minimal' === this.testCollection ? this.eventsForMinimalClientCollection: 30;
+                const url = `selftest/${this.sessionId}__${this.channelName}/${this.testCollection}/${type}/${eventsForClientCollections}`;
                 const promise = ENGINE.get(url);
                 promise
                     .then(response => {
