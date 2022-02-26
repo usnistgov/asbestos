@@ -1,6 +1,7 @@
 <template>
   <div>
     <div class="runallgroup">
+      <span v-if="loading" class="loadingTc">Loading...</span>
       <span v-if="running" class="running">Running</span><span v-if="running" class="timerFont">{{elapsedTestTime}}s</span>
       <div class="divider"></div>
       <div class="divider"></div>

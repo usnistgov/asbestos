@@ -5,7 +5,6 @@
         :test-collection="testCollection"
         :session-id="sessionId"
         :channel-name="channelName"> </test-collection-header>
-    <div v-if="!$store.state.log.loaded" class="loading">Loading...</div>
     <test-collection-body
         :test-collection="testCollection"
         :session-id="sessionId"
@@ -124,6 +123,9 @@ export default {
 }
 .running {
   background-color: lightgreen;
+}
+.loadingTc {
+  background-color: yellow;
 }
 .conformance-tests-header {
   background-color: #DBD9BE;

@@ -4,6 +4,7 @@ import {UtilFunctions} from "../common/http-common";
 export default {
     data() {
         return {
+            loading: false,
             running: false,
             // channelObj: this.theChannelObj,  // channel object
             testOpen: false,
@@ -85,6 +86,7 @@ export default {
         // },
         async loadTestCollection(testCollection) {
             // this.$store.dispatch('loadChannel', this.fullChannelId).then(() => {
+                this.loading = true
                 this.$store.commit('setTestCollectionName', testCollection)
                 this.$store.dispatch('loadCurrentTestCollection').then(() =>{
                     this.testScriptNamesUpdated()
@@ -103,6 +105,7 @@ export default {
                     }
                     promises.push(new Promise ((resolve  ) => {
                         console.log('Done loading scripts and reports')
+                        this.loading = false
                         resolve(true)
                     }))
                 Promise.all(promises)
