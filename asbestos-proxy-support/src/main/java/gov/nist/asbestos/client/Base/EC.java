@@ -439,11 +439,12 @@ public class EC {
         if (! eventIds.isEmpty()) {
             eventIds = eventIds.stream().sorted(Comparator.comparing(ProxyChannelEventId::getEventId).reversed()).collect(Collectors.toList());
 
+            int totalEventCount = eventIds.size();
             BigDecimal pageCount = new BigDecimal(String.valueOf(Math.ceil((double)eventIds.size() / (double)itemsPerPage)));
             Stream<ProxyChannelEventId> s = filterEventId != null ? eventIds.stream() : eventIds.stream().limit(MAX_EVENT_LIMIT);
-            final int newPageNum = getNewPageNum(previousPageSize, pageNum, itemsPerPage);
-            if (itemsPerPage > 0 && pageNum > 0) {
-                s = s.skip(itemsPerPage * ((newPageNum > -1 && newPageNum < pageCount.intValue()) ? newPageNum -1 : pageNum-1)).limit(itemsPerPage);
+            final int newPageNum = getNewPageNum(previousPageSize, pageNum, itemsPerPage, pageCount.intValue());
+            if (itemsPerPage > 0 && newPageNum > 0) {
+                s = s.skip(itemsPerPage * (newPageNum - 1)).limit(itemsPerPage);
             }
             s.forEach(eventId -> {
                 String resourceType = eventId.getResourceType();
@@ -456,8 +457,9 @@ public class EC {
                 summary.eventName = eventId.getEventId();
                 if (eventSummaries.size() == 0) {
                     // add to only first item in the eventSummary index
+                    summary.setTotalEventCount(totalEventCount);
                     summary.setTotalPageableItems(pageCount.intValue());
-                    if (newPageNum > -1) {
+                    if (newPageNum != pageNum) {
                         summary.setNewPageNum(newPageNum);
                     }
                 }
@@ -474,10 +476,15 @@ public class EC {
         Returns.returnString(resp, json);
     }
 
-    private int getNewPageNum(int previousPageSize, int previousPageNum, int currentItemsPerPage) {
-        if (previousPageNum > 1 && previousPageSize  > 0) {
+    private int getNewPageNum(int previousPageSize, int previousPageNum, int currentItemsPerPage, int pageCount) {
+        /**
+         * Example
+         * If PageSize was switched to 10 items per page from 25 items per page, current Page being 2, then,
+         * This method computes the equivalent of the page that contains the first item in Page 2 (Index 26). Result should be Page 3, ItemsPerPage 10. This range contains 21-30 index items.
+         */
+        if (previousPageNum > 1 && /* previousPageNum < pageCount   && */ previousPageSize  > 0 && currentItemsPerPage != previousPageSize) {
             int newPageNum = 1;
-            int currentPos = 0; //previousPageNum * (previousPageSize );
+            int currentPos = 0;
             while ((currentPos+previousPageSize) < previousPageSize * previousPageNum) {
                 currentPos += previousPageSize;
             }
@@ -485,17 +492,10 @@ public class EC {
                 newPageNum++;
             }
 
-            return newPageNum;
-            /*
-            double adjustedPage = Math.ceil((double)currentPos / (double)(newPageNum * currentItemsPerPage));
-            if (currentItemsPerPage > previousPageSize) {
-                return new BigDecimal(Math.ceil(adjustedPage)).intValue();
-            } else {
-                return new BigDecimal(Math.floor(adjustedPage)).intValue();
-            }
-             */
+            return (newPageNum < pageCount) ? newPageNum : 1;
         }
-        return -1;
+
+        return (previousPageNum  <= pageCount)? previousPageNum : 1;
     }
 
     public void buildJsonListingOfResourceTypes(HttpServletResponse resp, String testSession, String channelId) {

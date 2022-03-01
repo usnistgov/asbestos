@@ -11,6 +11,7 @@ public class EventSummary {
     String verb;
     Boolean status;
     String ipAddr;
+    Integer totalEventCount;
     Integer totalPageableItems;
     Integer newPageNum;
 
@@ -68,5 +69,13 @@ public class EventSummary {
 
     public void setNewPageNum(Integer newPageNum) {
         this.newPageNum = newPageNum;
+    }
+
+    public Integer getTotalEventCount() {
+        return totalEventCount;
+    }
+
+    public void setTotalEventCount(Integer totalEventCount) {
+        this.totalEventCount = totalEventCount;
     }
 }

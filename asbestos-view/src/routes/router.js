@@ -108,6 +108,13 @@ export const routes = [
                                 path: 'logs',
                                 components: { default: LogList },
                                 props: { default: true },
+                                children: [
+                                    {
+                                        path: ':pageSize/:pageNum',
+                                        components: { default: LogList },
+                                        props: { default: true },
+                                    }
+                                ]
                             },
                             {
                                 path: 'getter',

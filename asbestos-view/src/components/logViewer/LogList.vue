@@ -1,24 +1,28 @@
 <template>
     <div>
         <div>
-            <span class="tool-title">Events for Channel {{ channelName }}</span>
+            <span class="tool-title">{{totalEventCount.toLocaleString("en-US")}} Events for Channel {{ channelName }}</span>
             <span class="divider"></span>
             <img id="reload" class="selectable" @click="loadEventSummaries()" src="../../assets/reload.png" title="Refresh Events"/>
-            <div>
-                <img id="left" class="selectable" @click="pageLeft()" src="../../assets/left-arrow.png" title="Events"/>&nbsp;
-                <label for="pageNumSelect">Page</label>&nbsp;
-                <select id="pageNumSelect" v-model="pageNumValueHandler" v-bind:size="1">
-                    <option v-for="(pgNum, idx) in totalPageCount"
-                            v-bind:value="(pgNum)"
-                            :key="pgNum + idx"
-                    >
-                        {{ pgNum }}
-                    </option>
-                </select>
+             <div>
+
+                 <img id="left" class="selectable" @click="pageLeft()" src="../../assets/left-arrow.png" title="Events"/>&nbsp;
+                                Page {{currentPage}}
                 &nbsp; of &nbsp; <span class="selectable" @click="gotoLastPage" title="Go to last page"> {{ totalPageCount}}</span>&nbsp;
                 <img id="right" class="selectable" @click="pageRight()" src="../../assets/right-arrow.png" title="Events"/>
             </div>
-            <span v-show="!$store.state.log.loaded" class="yellowBkgText">Loading...</span>
+            <div v-if="totalPageCount > 1" class="pageNumLayoutMain">
+                <div class="leftPad"></div>
+                <div class="centerContent">
+                    <div class="pageNumNavMain">
+                        <div class="pageItem" v-for="(pgNum, idx) in totalPageCount"
+                             :key="pgNum + idx"
+                        ><span :class="{'currentPageNum':currentPage===pgNum,'selectable':currentPage!==pgNum}" @click="gotoPage(pgNum)">{{pgNum}}</span></div>
+                    </div>
+                </div>
+                <div class="rightPad"></div>
+            </div>
+            <span v-show="!$store.state.log.loaded" class="loadingBkgText">Loading...</span>
             <div class="divider"></div>
         </div>
         <div>
@@ -88,13 +92,15 @@
                 selectedEvent: null,
                 selectedTask: 0,
                 selectedIP: "all",
-                previousPageSize: 25,
-                selectedPageSize: 25,
+                defaultPageSize: 25,
+                previousPageSize: ('pageSize' in this.$router.currentRoute.params) ? ( this.$router.currentRoute.params['pageSize'] !== undefined && this.$router.currentRoute.params['pageSize'] !== '' ? parseInt(this.$router.currentRoute.params['pageSize']) : this.defaultPageSize) : 25,
+                selectedPageSize:  ('pageSize' in this.$router.currentRoute.params) ? ( this.$router.currentRoute.params['pageSize'] !== undefined && this.$router.currentRoute.params['pageSize'] !== '' ? parseInt(this.$router.currentRoute.params['pageSize']) : this.defaultPageSize) : 25,
                 pageSizeValues: [5,10,25,50,100],
                 isLoading: false,
                 needRefresh: false,
-                currentPage: 1,
+                currentPage: ('pageNum' in this.$router.currentRoute.params) ? ( this.$router.currentRoute.params['pageNum'] !== undefined && this.$router.currentRoute.params['pageNum'] !== '' ? parseInt(this.$router.currentRoute.params['pageNum']) : 1) : 1,
                 totalPageCount : 1,
+                totalEventCount: 0,
             }
         },
         methods: {
@@ -107,7 +113,10 @@
                 if (this.currentPage > 1) {
                     this.currentPage--
                     this.previousPageSize = -1
-                    this.loadEventSummaries()
+                    this.loadEventSummaries().then(() => {
+                        this.updatePagingRoute()
+                    })
+
                 }
             },
             pageRight() {
@@ -116,30 +125,43 @@
                 if (this.currentPage < this.totalPageCount) {
                     this.currentPage++
                     this.previousPageSize = -1
-                    this.loadEventSummaries()
+                    this.loadEventSummaries().then(() => {
+                        this.updatePagingRoute()
+                    })
+
                 }
             },
-            gotoPage() {
-                if (this.currentPage != 1) {
-                    this.currentPage = 1
+            gotoPage(pgNum) {
+                if (this.currentPage !== pgNum && pgNum > 0 && pgNum <= this.totalPageCount) {
+                    this.currentPage = pgNum
                     this.previousPageSize = -1
-                    this.loadEventSummaries()
+                    this.loadEventSummaries().then(() => {
+                        this.updatePagingRoute()
+                    })
+
                 }
             },
             gotoLastPage() {
                 if (this.currentPage != this.totalPageCount) {
                     this.currentPage = this.totalPageCount
                     this.previousPageSize = -1
-                    this.loadEventSummaries()
+                    this.loadEventSummaries().then(() => {
+                        this.updatePagingRoute()
+                    })
+
                 }
             },
-            loadEventSummaries() {
+            async loadEventSummaries() {
                 this.needRefresh = false
                 this.isLoading = true
                 let paramsObj = {session: this.sessionId, channel: this.channelName, itemsPerPage: this.selectedPageSize, page: this.currentPage, previousPageSize: this.previousPageSize}
-                this.$store.dispatch('loadEventSummaries', paramsObj)
+                return this.$store.dispatch('loadEventSummaries', paramsObj)
                     .then(() => {
                         this.isLoading = false
+                        if ('totalEventCount' in this.$store.state.log.eventSummaries[0]) {
+                            const totalEventCount = this.$store.state.log.eventSummaries[0].totalEventCount
+                            this.totalEventCount = totalEventCount
+                        }
                         if ('totalPageableItems' in this.$store.state.log.eventSummaries[0]) {
                             const totalPageableItems = this.$store.state.log.eventSummaries[0].totalPageableItems
                             this.totalPageCount = totalPageableItems
@@ -152,10 +174,22 @@
             },
             displayInstruction() {
                this.needRefresh = true
+            },
+            updatePagingRoute() {
+                const currentRoutePath = this.$router.currentRoute.path
+                const routePathToBe = `/session/${this.sessionId}/channel/${this.channelName}/logs/${this.selectedPageSize}/${this.currentPage}`
+                // console.log('loglist current route: ' + currentRoutePath)
+                // console.log('route to be: ' + routePathToBe)
+                if (currentRoutePath !== routePathToBe) {
+                    this.$router.replace(routePathToBe)
+                }
             }
         },
         created() {
-            this.loadEventSummaries()
+            this.loadEventSummaries().then(() => {
+                this.updatePagingRoute()
+            })
+
         },
         computed: {
             eventSummaries() {   // list { eventName: xx, resourceType: yy, verb: GET|POST, status: true|false }
@@ -172,7 +206,9 @@
                         return;
                     this.previousPageSize = this.selectedPageSize
                     this.selectedPageSize = val
-                    this.loadEventSummaries()
+                    this.loadEventSummaries().then(() => {
+                        this.updatePagingRoute()
+                    })
                 },
                 get() {
                     return this.selectedPageSize
@@ -184,7 +220,10 @@
                         return;
                     this.previousPageSize = this.selectedPageSize
                     this.currentPage = val
-                    this.loadEventSummaries()
+                    this.loadEventSummaries().then(() => {
+                        this.updatePagingRoute()
+                    })
+
                 },
                 get() {
                     return this.currentPage
@@ -196,7 +235,7 @@
             'channelName': 'displayInstruction',
         },
         props: [
-            'resourceType',  'sessionId', 'channelName',
+            'resourceType',  'sessionId', 'channelName', 'pageSize', 'pageNum'
         ],
         mixins: [eventMixin, errorHandlerMixin],
         name: "LogList"
@@ -204,10 +243,49 @@
 </script>
 
 <style scoped>
-    .yellowBkgText {
+    .loadingBkgText {
         color: black;
-        background-color: yellow;
         font-size: smaller;
+    }
+
+    .pageNumNavMain {
+        display: flex;
+        flex-flow: row wrap;
+        align-items: center;
+        max-width: 850px;
+        /*border: 1px solid black;*/
+    }
+    .pageItem {
+        font-size: xx-small;
+        width: 17px;
+        align-self: center;
+        text-align: right;
+    }
+
+    .pageNumLayoutMain {
+        display: flex;
+        horiz-align: center;
+        justify-content: space-evenly;
+        justify-self: center;
+        margin-top: 6px;
+    }
+    .leftPad {
+        width: 5%;
+    }
+    .centerContent {
+        max-width: 90%;
+        horiz-align: center;
+        justify-content: space-evenly;
+        justify-self: center;
+        border: 1px solid steelblue;
+    }
+    .rightPad {
+        width: 5%;
+    }
+    .currentPageNum {
+        color: black;
+        background-color: ivory;
+        border: 2px inset black ;
     }
 
 </style>
