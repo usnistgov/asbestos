@@ -135,14 +135,19 @@ import ScriptDetails from "./ScriptDetails";
                             this.$store.dispatch('loadEventSummaries', parms)
                         }
                  */
-                        if (this.$store.state.log.eventSummaries) {
+                try {
+                        if (this.$store.state.log.eventSummaries.length > 0) {
                             const summary = this.$store.state.log.eventSummaries.find(it =>
                                 it.eventName === this.eventId)
                             if (summary)
                                 return `${summary.verb} ${summary.resourceType} from ${summary.ipAddr}`
-                        }
-                        return 'Loading...'
-                    },
+                        } else
+                            return 'Loading...'
+                } catch {
+                    return "Exception"
+                }
+                return ''
+            },
 
             primaryTestReport() {
                   return (this.testReport && this.testReport.length > 0)

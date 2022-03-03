@@ -1,6 +1,7 @@
 package gov.nist.asbestos.services.restRequests;
 
 import gov.nist.asbestos.client.Base.Request;
+import gov.nist.asbestos.client.events.EventListing;
 import gov.nist.asbestos.http.headers.Header;
 import gov.nist.asbestos.http.headers.Headers;
 import gov.nist.asbestos.http.operations.Verb;
@@ -34,11 +35,8 @@ public class GetEventForResourceTypeRequest {
 
     public void run() {
         request.announce("GetEventForResourceTypeRequest");
-        request.ec.buildJsonListingOfEvents(
-                request.resp,
-                request.uriParts.get(3),
-                request.uriParts.get(4),
-                request.uriParts.get(5));
+        new EventListing(request.resp,  request.uriParts.get(3),request.uriParts.get(4), request.externalCache)
+                .buildJsonListingOfEvents(request.uriParts.get(5));
         request.ok();
     }
 

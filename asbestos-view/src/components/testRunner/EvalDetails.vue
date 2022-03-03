@@ -193,6 +193,7 @@
              */
             loadAssertions() {
                 // if (Object.keys(this.$store.state.testRunner.testAssertions).length === 0)
+                if (this.$store.state.testRunner.testAssertions === null)
                     this.$store.dispatch('loadTestAssertions')
             },
             reportAction(testi, actioni) {
@@ -257,8 +258,8 @@
         created() {
         },
         mounted() {
-            if (this.$store.state.testRunner.testAssertions === null)
-                this.loadAssertions()
+            // if (this.$store.state.testRunner.testAssertions === null)
+            //     this.loadAssertions()
         },
         mixins: [ errorHandlerMixin, colorizeTestReports, importMixin ],
         props: [

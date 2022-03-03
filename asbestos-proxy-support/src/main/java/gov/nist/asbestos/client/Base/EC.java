@@ -34,7 +34,6 @@ import static gov.nist.asbestos.client.Base.Dirs.listOfDirectories;
 import static gov.nist.asbestos.client.Base.Dirs.listOfFiles;
 
 public class EC {
-    private static final int MAX_EVENT_LIMIT = 5000;
     private static Logger log = Logger.getLogger(EC.class.getName());
     public File externalCache;
 
@@ -384,126 +383,6 @@ public class EC {
         return null;
     }
 
-    public void buildJsonListingOfEvents(HttpServletResponse resp, String testSession, String channelId, String resourceType) {
-        File fhir = new EC(externalCache).fhirDir(testSession, channelId);
-        File resourceTypeFile = new File(fhir, resourceType);
-
-        List<String> events = Dirs.dirListingAsStringList(resourceTypeFile);
-        returnJsonList(resp, events);
-    }
-
-    public void returnJsonList(HttpServletResponse resp, List<String> theList) {
-        String json = new Gson().toJson(theList);
-        resp.setContentType("application/json");
-        try {
-            resp.getOutputStream().print(json);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    class ProxyChannelEventId {
-        private String eventId;
-        private String resourceType;
-
-        public ProxyChannelEventId(String eventId, String resourceType) {
-            this.eventId = eventId;
-            this.resourceType = resourceType;
-        }
-
-        public String getEventId() {
-            return eventId;
-        }
-
-        public String getResourceType() {
-            return resourceType;
-        }
-    }
-    public void buildJsonListingOfEventSummaries(HttpServletResponse resp, String testSession, String channelId, final List<String> filterEventId, boolean isGetSingleEvent, int itemsPerPage, int pageNum, int previousPageSize) throws IOException {
-        File fhir = new EC(externalCache).fhirDir(testSession, channelId);
-        List<String> resourceTypes = Dirs.dirListingAsStringList(fhir);
-        List<EventSummary> eventSummaries = new ArrayList<>();
-        List<ProxyChannelEventId> eventIds = new ArrayList<>();
-        for (String resourceType : resourceTypes) {
-            File resourceDir = new File(fhir, resourceType);
-            if (isGetSingleEvent) {
-                File eventFile = new File(resourceDir, filterEventId.get(0));
-                EventSummary summary = new EventSummary(eventFile);
-                summary.resourceType = resourceType;
-                summary.eventName = filterEventId.get(0);
-                eventSummaries.add(summary);
-            } else {
-                eventIds.addAll( Dirs.dirListingAsStringList(resourceDir, false).stream().map(e -> new ProxyChannelEventId(e, resourceType)).collect(Collectors.toList()));
-            }
-        }
-        if (! eventIds.isEmpty()) {
-            eventIds = eventIds.stream().sorted(Comparator.comparing(ProxyChannelEventId::getEventId).reversed()).collect(Collectors.toList());
-
-            int totalEventCount = eventIds.size();
-            BigDecimal pageCount = new BigDecimal(String.valueOf(Math.ceil((double)eventIds.size() / (double)itemsPerPage)));
-            Stream<ProxyChannelEventId> s = filterEventId != null ? eventIds.stream() : eventIds.stream().limit(MAX_EVENT_LIMIT);
-            final int newPageNum = getNewPageNum(previousPageSize, pageNum, itemsPerPage, pageCount.intValue());
-            if (itemsPerPage > 0 && newPageNum > 0) {
-                s = s.skip(itemsPerPage * (newPageNum - 1)).limit(itemsPerPage);
-            }
-            s.forEach(eventId -> {
-                String resourceType = eventId.getResourceType();
-                File resourceDir = new File(fhir, resourceType);
-                File eventFile = new File(resourceDir, eventId.getEventId());
-                EventSummary summary =
-                        itemsPerPage > 0 || (filterEventId != null && ! filterEventId.stream().anyMatch(e -> e.equals(eventId))) ?
-                                new EventSummary() : new EventSummary(eventFile);
-                summary.resourceType = resourceType;
-                summary.eventName = eventId.getEventId();
-                if (eventSummaries.size() == 0) {
-                    // add to only first item in the eventSummary index
-                    summary.setTotalEventCount(totalEventCount);
-                    summary.setTotalPageableItems(pageCount.intValue());
-                    if (newPageNum != pageNum) {
-                        summary.setNewPageNum(newPageNum);
-                    }
-                }
-                if (itemsPerPage > 0 || ( filterEventId != null && filterEventId.size() > 1)) {
-                    // load only these request properties below
-                    // `${summary.verb} ${summary.resourceType} ${summary.ipAddr}`
-                    summary.loadResponseUiTask(eventFile);
-                    summary.loadRequestUiTask(eventFile);
-                }
-                eventSummaries.add(summary);
-            });
-        }
-        String json = new Gson().toJson(eventSummaries);
-        Returns.returnString(resp, json);
-    }
-
-    private int getNewPageNum(int previousPageSize, int previousPageNum, int currentItemsPerPage, int pageCount) {
-        /**
-         * Example
-         * If PageSize was switched to 10 items per page from 25 items per page, current Page being 2, then,
-         * This method computes the equivalent of the page that contains the first item in Page 2 (Index 26). Result should be Page 3, ItemsPerPage 10. This range contains 21-30 index items.
-         */
-        if (previousPageNum > 1 && /* previousPageNum < pageCount   && */ previousPageSize  > 0 && currentItemsPerPage != previousPageSize) {
-            int newPageNum = 1;
-            int currentPos = 0;
-            while ((currentPos+previousPageSize) < previousPageSize * previousPageNum) {
-                currentPos += previousPageSize;
-            }
-            while (currentPos+1 > newPageNum * currentItemsPerPage) {
-                newPageNum++;
-            }
-
-            return (newPageNum < pageCount) ? newPageNum : 1;
-        }
-
-        return (previousPageNum  <= pageCount)? previousPageNum : 1;
-    }
-
-    public void buildJsonListingOfResourceTypes(HttpServletResponse resp, String testSession, String channelId) {
-        File fhir = new EC(externalCache).fhirDir(testSession, channelId);
-
-        List<String> resourceTypes = Dirs.dirListingAsStringList(fhir);
-        new EC(externalCache).returnJsonList(resp, resourceTypes);
-    }
 
     public String getLastMarker(String testSession, String channelId) {
         File markerDir = getResourceType(testSession, channelId, MarkerType);

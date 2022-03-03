@@ -189,7 +189,9 @@
           },
             async loadEventSummariesAndReRun() {
                 // await this.$store.dispatch('loadEventSummaries', {session: this.sessionId, channel: this.channelName})
+                this.$store.commit('setRunning', true)
                 await this.$store.dispatch('runEval', this.testId);
+                this.$store.commit('setRunning', false)
             },
             async loadTestScript() {
                 if (this.$store.state.testRunner.testScripts[this.testId] === null)

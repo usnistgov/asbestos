@@ -1,7 +1,7 @@
 <template>
     <div>
         <log-nav v-if="!noNav" :index="index" :sessionId="sessionId" :channelName="channelName" title="Source: FhirChannel Events">
-<!--            <template v-if="isLoading"><span>Loading...</span></template>-->
+            <template v-if="isLoading"><span>Loading...</span></template>
         </log-nav>
 
         <div class="boxed">
@@ -305,7 +305,7 @@
             async loadEventSummaries() {
                 this.isLoading = true
                 await this.$store.dispatch('loadEventSummaries',
-                    {session: this.sessionId, channel: this.channelName, filterEventId: this.eventId})
+                    {testSession: this.sessionId, channel: this.channelName, filterEventId: this.eventId})
                     .then(() => this.isLoading = false)
                 this.getEvent()
             },

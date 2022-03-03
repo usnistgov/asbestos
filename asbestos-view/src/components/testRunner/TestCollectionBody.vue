@@ -1,13 +1,16 @@
 <template>
   <div>
     <div class="runallgroup">
-      <span v-if="loading" class="loadingTc">Loading...</span>
-      <span v-if="running" class="running">Running</span><span v-if="running" class="timerFont">{{elapsedTestTime}}s</span>
+      <span v-if="tcLoading" class="loadingTc">Loading...</span>
+      <span v-if="running" class="running">Running</span>
+        <span v-if="!$store.state.testRunner.isClientTest">
+        <span v-if="running" class="timerFont">{{elapsedTestTime}}s</span>
+        </span>
       <div class="divider"></div>
       <div class="divider"></div>
 
-      <button :disabled="running" class="clearLogsButton" @click="doClearLogs()" title="Temporarily clear TestReports for this browser tab">&#x1f5d1; Clear Logs</button>
       <span v-if="!$store.state.testRunner.isClientTest">
+            <button :disabled="running" class="clearLogsButton" @click="doClearLogs()" title="Temporarily clear TestReports for this browser tab">&#x1f5d1; Clear Logs</button>
 <!--            <template v-if="theChannelObj.channelType === 'mhd'">-->
                 <input type="checkbox" id="doTls" v-model="tlsOption">
                 <label for="doTls" title="Use TLS Proxy? References in response will be re-based using TLS proxy hostname and port.">Use TLS?</label>
@@ -144,6 +147,7 @@ export default {
        The following setCurrentTest to null will reset the expanded arrow indicator
        otherwise the arrow indicator is incorrect when navigating out of the test collection and back into to the same test collection after a test was previously opened.
        */
+      this.tcLoading = true
       this.$store.commit('setCurrentTest', null)
       this.loadTestCollection(this.testCollection).then(() => {
           if (this.isClient === false) {
@@ -176,6 +180,9 @@ export default {
       },
   },
   computed: {
+    running() {
+      return this.$store.state.testRunner.running
+    },
     selected() {
       return this.$store.state.testRunner.currentTest
     },

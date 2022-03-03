@@ -154,7 +154,7 @@
             async loadEventSummaries() {
                 this.needRefresh = false
                 this.isLoading = true
-                let paramsObj = {session: this.sessionId, channel: this.channelName, itemsPerPage: this.selectedPageSize, page: this.currentPage, previousPageSize: this.previousPageSize}
+                let paramsObj = {testSession: this.sessionId, channel: this.channelName, itemsPerPage: this.selectedPageSize, page: this.currentPage, previousPageSize: this.previousPageSize}
                 return this.$store.dispatch('loadEventSummaries', paramsObj)
                     .then(() => {
                         this.isLoading = false

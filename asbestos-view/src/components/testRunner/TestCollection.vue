@@ -125,7 +125,7 @@ export default {
   background-color: lightgreen;
 }
 .loadingTc {
-  background-color: yellow;
+  /*background-color: yellow;*/
 }
 .conformance-tests-header {
   background-color: #DBD9BE;

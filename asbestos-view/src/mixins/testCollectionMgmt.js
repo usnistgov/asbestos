@@ -4,8 +4,7 @@ import {UtilFunctions} from "../common/http-common";
 export default {
     data() {
         return {
-            loading: false,
-            running: false,
+            tcLoading: false,
             // channelObj: this.theChannelObj,  // channel object
             testOpen: false,
             evalCount: 30,
@@ -40,12 +39,12 @@ export default {
         async doRun(testName, testRoutePath) {  // server tests
             if (!testName)
                 return
-            this.running = true
+            this.$store.commit('setRunning',true)
             this.beginTestTime()
             this.$store.commit('setCurrentTest', null)
             await this.$store.dispatch('runTest', testName)
             this.$store.commit('setCurrentTest', testName)
-            this.running = false
+            this.$store.commit('setRunning',false)
             this.endTestTime()
             const currentRoutePath = this.$router.currentRoute.path
             const testRoutePathToBe = `${testRoutePath}/${testName}`
@@ -55,13 +54,16 @@ export default {
         },
         async doEval(testName) {  // client tests
             // console.debug('In doEval')
-            if (testName)
+            if (testName) {
+                this.$store.commit('setRunning',true)
                 await this.$store.dispatch('runEval', testName)
+                this.$store.commit('setRunning',false)
+            }
         },
         // run all tests in collection
         async doRunAll()  {
             // console.debug('In doRunAll')
-            this.running = true
+            this.$store.commit('setRunning',true)
             this.beginTestTime()
             this.doClearLogs(true)
             for (const name of this.scriptNames) {
@@ -71,7 +73,7 @@ export default {
                     await this.$store.dispatch('runTest', name)
                 }
             }
-            this.running = false
+            this.$store.commit('setRunning',false)
             this.endTestTime()
         },
         async doClearLogs(silent=false) {
@@ -86,7 +88,6 @@ export default {
         // },
         async loadTestCollection(testCollection) {
             // this.$store.dispatch('loadChannel', this.fullChannelId).then(() => {
-                this.loading = true
                 this.$store.commit('setTestCollectionName', testCollection)
                 this.$store.dispatch('loadCurrentTestCollection').then(() =>{
                     this.testScriptNamesUpdated()
@@ -105,7 +106,7 @@ export default {
                     }
                     promises.push(new Promise ((resolve  ) => {
                         console.log('Done loading scripts and reports')
-                        this.loading = false
+                        this.tcLoading = false
                         resolve(true)
                     }))
                 Promise.all(promises)

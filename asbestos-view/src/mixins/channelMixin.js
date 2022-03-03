@@ -31,11 +31,11 @@ export default {
                                         this.$store.commit('setChannelName', theChannelName);
                                         this.$store.commit('setChannelIsNew', false);
                                         this.$router.push(newRoute, () => {
-                                                console.log('push complete.')
+                                                // console.debug('push complete.')
                                                 return true
                                             }
                                             , () => {
-                                                console.log('push failed.')
+                                                console.error('Route push failed.')
                                                 return false
                                             });
                                     }

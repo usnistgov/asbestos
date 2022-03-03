@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.CollectionType;
 import gov.nist.asbestos.client.Base.Request;
+import gov.nist.asbestos.client.events.EventListing;
 import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.http.headers.Header;
 import gov.nist.asbestos.http.headers.Headers;
@@ -76,16 +77,23 @@ public class EventsForChannelRequest {
     public void doGet() throws IOException {
         request.announce("EventsForChannelRequest:doGet");
         String query = request.req.getQueryString();
+        EventListing eventListing = new EventListing(request.resp, request.uriParts.get(3), request.uriParts.get(4),  request.externalCache);
         if (query != null && query.contains("summaries=true")) {
-            String filterEventId = (this.hasFilterEventId) ? request.uriParts.get(5): null;
-            List<String> ids = filterEventId != null ? Collections.singletonList(filterEventId) : null;
-            Map<String,String> qparms = Ref.parseParameters(query);
-            int itemsPerPage = qparms.containsKey(ITEMS_PER_PAGE) ? Integer.parseInt(qparms.get(ITEMS_PER_PAGE)) : -1;
-            int pageNum = qparms.containsKey(PAGE_NUM) ? Integer.parseInt(qparms.get(PAGE_NUM)) : -1;
-            int previousPageSize = qparms.containsKey(PREVIOUS_PAGE_SIZE) ? (Integer.parseInt(qparms.get(PREVIOUS_PAGE_SIZE)) != itemsPerPage ? Integer.parseInt(qparms.get(PREVIOUS_PAGE_SIZE)) : -1)  : -1;
-            request.ec.buildJsonListingOfEventSummaries(request.resp, request.uriParts.get(3), request.uriParts.get(4), ids, isSingleEventRequest(request), itemsPerPage, pageNum, previousPageSize);
-        } else
-            request.ec.buildJsonListingOfResourceTypes(request.resp, request.uriParts.get(3), request.uriParts.get(4));
+            String loadEventId = (this.hasFilterEventId) ? request.uriParts.get(5): null;
+            if (isSingleEventRequest(request)) {
+                eventListing.buildJsonListingOfSingleEvent(loadEventId);
+            } else if (loadEventId != null) {
+                eventListing.buildJsonListingOfEventSummaries(Collections.singletonList(loadEventId), false);
+            } else {
+                Map<String,String> qparms = Ref.parseParameters(query);
+                int itemsPerPage = qparms.containsKey(ITEMS_PER_PAGE) ? Integer.parseInt(qparms.get(ITEMS_PER_PAGE)) : -1;
+                int pageNum = qparms.containsKey(PAGE_NUM) ? Integer.parseInt(qparms.get(PAGE_NUM)) : -1;
+                int previousPageSize = qparms.containsKey(PREVIOUS_PAGE_SIZE) ? (Integer.parseInt(qparms.get(PREVIOUS_PAGE_SIZE)) != itemsPerPage ? Integer.parseInt(qparms.get(PREVIOUS_PAGE_SIZE)) : -1)  : -1;
+                eventListing.buildJsonListingOfEventSummaries(itemsPerPage, pageNum, previousPageSize);
+            }
+        } else {
+            eventListing.buildJsonListingOfResourceTypes();
+        }
         request.ok();
     }
 
@@ -100,7 +108,9 @@ public class EventsForChannelRequest {
 
         // get only these properties below
         // `${summary.verb} ${summary.resourceType} from ${summary.ipAddr}`
-        request.ec.buildJsonListingOfEventSummaries(request.resp, request.uriParts.get(3), request.uriParts.get(4), eventIds, isSingleEventRequest(request), -1, -1, -1);
+
+        EventListing eventListing = new EventListing(request.resp, request.uriParts.get(3), request.uriParts.get(4),  request.externalCache);
+        eventListing.buildJsonListingOfEventSummaries(eventIds, true);
 
         request.ok();
     }

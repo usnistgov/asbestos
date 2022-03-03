@@ -221,7 +221,7 @@ public class GetClientTestEvalRequest {
                 }
             }
             if (testGoodCount > 0)
-                System.out.println("now");
+                log.log(Level.FINE, "Test has passing Events.");
         }
     }
 

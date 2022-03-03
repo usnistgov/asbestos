@@ -8,6 +8,7 @@ Vue.use(Vuex)
 export const testRunnerStore = {
     state() {
         return {
+            running: false,
             // testCollections (for listings in control panel)
             // loaded by action loadTestCollectionNames
             clientTestCollectionObjs: [],
@@ -77,6 +78,9 @@ export const testRunnerStore = {
         }
     },
     mutations: {
+        setRunning(state, value) {
+            state.running = value
+        },
         setAutoRoute(state, value) {
             state.autoRoute = value;
         },
@@ -349,20 +353,23 @@ export const testRunnerStore = {
         },
         runEval({commit, state, rootState, dispatch}, testId) {
             // console.debug('In runEval')
+            commit('setRunning',true)
             const url = `clienteval/${rootState.base.channel.testSession}__${rootState.base.channel.channelName}/${state.eventEvalCount}/${state.currentTestCollectionName}/${testId}`
             ENGINE.get(url)
                 .then(response => {
                     const report = response.data
                     const eventReports = report[testId]
                     commit('setClientTestResult', { testId: testId, reports: eventReports} )
-                    if (! rootState.log.loaded) {
-                        const eventIds = JSON.stringify(Object.keys(eventReports))
-                        // console.debug(">>>" + eventIds)
-                        dispatch('loadSpecificEventSummaries', {session: this.sessionId, channel: this.channelName, postData: eventIds})
-                    }
-
+                    commit('resetLogLoaded')
+                    const eventIds = JSON.stringify(Object.keys(eventReports))
+                    // console.debug(">>>" + eventIds)
+                    dispatch('loadSpecificEventSummaries', {testSession: rootState.base.channel.testSession, channel: rootState.base.channel.channelName, postData: eventIds})
+                        .then(() => {
+                            commit('setRunning',false)
+                        })
                 })
                 .catch(function (error) {
+                    commit('setRunning',false)
                     commit('setError', LOG.baseURL + url + ': ' + error)
                 })
         },
