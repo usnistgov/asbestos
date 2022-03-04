@@ -284,6 +284,9 @@ export const testRunnerStore = {
         },
     },
     getters: {
+        isRunning: (state) => {
+            return state.running
+        },
         clientTestCollectionNames: (state) => (mhdVersions) => {
             return state.filterTestCollectionsMhdVersion(state.clientTestCollectionObjs, mhdVersions)
         },
@@ -351,25 +354,48 @@ export const testRunnerStore = {
                     commit('setError', ENGINE.baseURL  + url + ': ' + error)
                 })
         },
-        runEval({commit, state, rootState, dispatch}, testId) {
+        async runEval({commit, state, rootState, dispatch}, testId) {
             // console.debug('In runEval')
-            commit('setRunning',true)
             const url = `clienteval/${rootState.base.channel.testSession}__${rootState.base.channel.channelName}/${state.eventEvalCount}/${state.currentTestCollectionName}/${testId}`
-            ENGINE.get(url)
+            return ENGINE.get(url)
                 .then(response => {
                     const report = response.data
                     const eventReports = report[testId]
                     commit('setClientTestResult', { testId: testId, reports: eventReports} )
-                    commit('resetLogLoaded')
-                    const eventIds = JSON.stringify(Object.keys(eventReports))
-                    // console.debug(">>>" + eventIds)
-                    dispatch('loadSpecificEventSummaries', {testSession: rootState.base.channel.testSession, channel: rootState.base.channel.channelName, postData: eventIds})
-                        .then(() => {
-                            commit('setRunning',false)
-                        })
+                    const setA_eventIds = Object.keys(eventReports) // may have newer events
+                    // console.debug('setA is array? ' + Array.isArray(setA_eventIds))
+                    // console.debug("setA>>>" + JSON.stringify(setA_eventIds))
+                    const setB_eventIds = Object.keys(rootState.log.eventSummaries) // previously loaded event summaries
+                    // console.debug('setB is array? ' + Array.isArray(setB_eventIds))
+                    // console.debug("setB>>>" + JSON.stringify(setB_eventIds))
+                    let postParams = null
+                    if (setB_eventIds.length > 0) {
+                        const aMinusB = setA_eventIds.filter(e => !setB_eventIds.includes(e))
+                        if (Array.isArray(aMinusB) ) {
+                            if (aMinusB.length > 0) {
+                                // console.debug('aMinusB')
+                             postParams = {
+                                 testSession: rootState.base.channel.testSession,
+                                 channel: rootState.base.channel.channelName,
+                                 postData: aMinusB,
+                                 prepend: true
+                             }
+                            } else if (aMinusB.length === 0) {
+                                console.debug('Same historical events already loaded.')
+                                return
+                            }
+                        }
+                    } else {
+                        // console.debug('aMinusB does not apply.')
+                        postParams = {
+                            testSession: rootState.base.channel.testSession,
+                            channel: rootState.base.channel.channelName,
+                            postData: setA_eventIds
+                        }
+                    }
+                    dispatch('loadSpecificEventSummaries', postParams)
                 })
                 .catch(function (error) {
-                    commit('setRunning',false)
                     commit('setError', LOG.baseURL + url + ': ' + error)
                 })
         },

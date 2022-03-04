@@ -1,7 +1,7 @@
 <template>
     <div>
         <div class="runallgroup">
-            <span v-if="running" class="running">Running</span>
+            <span v-if="selfTestRunning" class="running">Running</span>
         </div>
 
         <div>
@@ -11,8 +11,8 @@
                     <img src="../../assets/error.png" class="align-left">
                 </span>
                 <span v-else-if="hasNoRuns">
-                    <img src="../../assets/error.png" class="align-left">
-<!--                    <img src="../../assets/blank-circle.png" class="align-left">-->
+<!--                    <img src="../../assets/error.png" class="align-left">-->
+                    <img src="../../assets/blank-circle.png" class="align-left">
                 </span>
                 <span v-else>
                     <img src="../../assets/checked.png" class="align-left">
@@ -42,6 +42,7 @@
     export default {
         data() {
             return {
+                selfTestRunning: false,
                 hasFailures: false,
                 allRun: false,
                 earliestRunTime: null,
@@ -52,14 +53,14 @@
         },
         methods: {
             async runIt() {
-                this.running = true;
+                this.selfTestRunning = true;
                 await this.loadStatus('run');
-                this.running = false;
+                this.selfTestRunning = false;
             },
             async loadStatus(type) {
                 const eventsForClientCollections =
-                    'MHD_DocumentRecipient_comprehensive' === this.testCollection ? this.eventsForComprehensiveClientCollection:
-                        'MHD_DocumentRecipient_minimal' === this.testCollection ? this.eventsForMinimalClientCollection: 30;
+                    'MHD_DocumentSource_comprehensive' === this.testCollection ? this.eventsForComprehensiveClientCollection:
+                        'MHD_DocumentSource_minimal' === this.testCollection ? this.eventsForMinimalClientCollection: 30;
                 const url = `selftest/${this.sessionId}__${this.channelName}/${this.testCollection}/${type}/${eventsForClientCollections}`;
                 const promise = ENGINE.get(url);
                 promise

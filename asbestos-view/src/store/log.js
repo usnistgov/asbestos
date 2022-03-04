@@ -43,6 +43,12 @@ export const logStore = {
             state.eventSummaries = summaries
             state.loaded = true
         },
+        prependEventSummaries(state, summaries) {
+            // console.debug('In prependEventSummaries')
+            summaries.forEach((e,idx) => {
+                state.eventSummaries.splice(0 /* begin index */, 0/* remove=0 or insert */, summaries[idx])
+            })
+        },
         /*
         setLogSession(state, session) {
             state.session = session
@@ -98,7 +104,11 @@ export const logStore = {
                         if (a.eventName < b.eventName) return 1
                         return -1
                     })
-                    commit('setEventSummaries', eventSummaries)
+                    if ('prepend' in parms && parms.prepend === true) {
+                        commit('prependEventSummaries', eventSummaries)
+                    } else {
+                        commit('setEventSummaries', eventSummaries)
+                    }
                 } else {
                     console.error('loadSpecificEventSummaries:rawSummaries is not an array of length > 0.')
                 }

@@ -24,15 +24,18 @@ export default {
             this.$store.commit('setEventEvalCount', this.evalCount)
         },
         async testScriptNamesUpdated() {
+            // if (this.isClient) {
+            //     return this.$store.state.testRunner.testScriptNames.forEach(name => {
+            //         // console.debug('In testScriptNamesUpdated: ' + name)
+            //         // console.debug(this.$store.state.log.eventSummaries === undefined || this.$store.state.log.eventSummaries === null)
+            //         // console.debug(this.$store.state.log.eventSummaries.length)
+            //         // console.debug(this.$store.state.log.loaded )
+            //
+            //         this.doEval(name)
+            //     })
+            // }
             if (this.isClient) {
-                return this.$store.state.testRunner.testScriptNames.forEach(name => {
-                    // console.debug('In testScriptNamesUpdated: ' + name)
-                    // console.debug(this.$store.state.log.eventSummaries === undefined || this.$store.state.log.eventSummaries === null)
-                    // console.debug(this.$store.state.log.eventSummaries.length)
-                    // console.debug(this.$store.state.log.loaded )
-
-                    this.doEval(name)
-                })
+                this.doRunAll()
             }
         },
         // run testName of testCollection
@@ -52,12 +55,14 @@ export default {
                 this.$router.push(testRoutePathToBe)
             }
         },
-        async doEval(testName) {  // client tests
+        async doEval(testName) {  // run single client test
             // console.debug('In doEval')
             if (testName) {
                 this.$store.commit('setRunning',true)
+                this.beginTestTime()
                 await this.$store.dispatch('runEval', testName)
                 this.$store.commit('setRunning',false)
+                this.endTestTime()
             }
         },
         // run all tests in collection
@@ -65,7 +70,9 @@ export default {
             // console.debug('In doRunAll')
             this.$store.commit('setRunning',true)
             this.beginTestTime()
-            this.doClearLogs(true)
+            if (! this.isClient) {
+                this.doClearLogs(true)
+            }
             for (const name of this.scriptNames) {
                 if (this.isClient) { // collection is client or server
                     await this.$store.dispatch('runEval', name)
@@ -87,6 +94,8 @@ export default {
             // this.channelObj = await promise;
         // },
         async loadTestCollection(testCollection) {
+            // console.debug('In loadTestCollection')
+            this.tcLoading = true
             // this.$store.dispatch('loadChannel', this.fullChannelId).then(() => {
                 this.$store.commit('setTestCollectionName', testCollection)
                 this.$store.dispatch('loadCurrentTestCollection').then(() =>{
@@ -104,12 +113,18 @@ export default {
                         promises.push(this.$store.dispatch('loadTestReports', this.$store.state.testRunner.currentTestCollectionName))
                         promises.push(this.$store.dispatch('loadNonCurrentTcTestReports')) // for test dependency purposes
                     }
-                    promises.push(new Promise ((resolve  ) => {
-                        console.log('Done loading scripts and reports')
+                    // promises.push(new Promise ((resolve  ) => {
+                    //     console.log('Done loading scripts and reports')
+                    //     resolve(true)
+                    // }))
+                    // promises.push(new Promise(() =>
+                    // {
+                    //     this.tcLoading = false
+                    // }))
+                Promise.all(promises).then(() => {
                         this.tcLoading = false
-                        resolve(true)
-                    }))
-                Promise.all(promises)
+                        console.log('Done loading scripts and reports')
+                })
             })
             // })
         },
@@ -125,6 +140,7 @@ export default {
             this.$store.commit('setUseJson', false)
         },
         beginTestTime() {
+            clearInterval(this.testTimer)
             this.testTimerBeginTime = new Date()
             this.calcTestTime()
             if (this.testTimer === null) {
@@ -134,11 +150,15 @@ export default {
             }
         },
         calcTestTime() {
-            const currentTcName = this.$store.state.testRunner.currentTestCollectionName
-            if (this.tcTestTimerElapsedMilliSeconds[currentTcName] === undefined) {
-                Vue.set(this.tcTestTimerElapsedMilliSeconds,currentTcName,  0)
+            try {
+                const currentTcName = this.$store.state.testRunner.currentTestCollectionName
+                if (this.tcTestTimerElapsedMilliSeconds[currentTcName] === undefined || this.tcTestTimerElapsedMilliSeconds[currentTcName] === null) {
+                    Vue.set(this.tcTestTimerElapsedMilliSeconds, currentTcName, 0)
+                }
+                Vue.set(this.tcTestTimerElapsedMilliSeconds, currentTcName, new Date().getTime() - this.testTimerBeginTime.getTime())
+            } catch(e) {
+                console.error('calcTestTime exception: ' + e)
             }
-            Vue.set(this.tcTestTimerElapsedMilliSeconds, currentTcName,  new Date().getTime() - this.testTimerBeginTime.getTime())
         },
         endTestTime() {
             if (this.testTimer !== null) {
@@ -149,6 +169,9 @@ export default {
         },
     },
     computed: {
+        running() {
+            return this.$store.getters.isRunning
+        },
         theChannelObj() {
          return this.$store.state.base.channel
         },

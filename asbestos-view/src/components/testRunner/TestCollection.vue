@@ -124,8 +124,8 @@ export default {
 .running {
   background-color: lightgreen;
 }
-.loadingTc {
-  /*background-color: yellow;*/
+.tcLoading {
+  background-color: orange;
 }
 .conformance-tests-header {
   background-color: #DBD9BE;
