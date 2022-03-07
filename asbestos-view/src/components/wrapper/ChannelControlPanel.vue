@@ -34,7 +34,7 @@
                 <span class="tooltiptext">Config</span>
             </div>
         </div>
-        <select class="control-panel-list control-panel-font" size="10" v-model="cpChannelName">
+        <select :disabled="disabled" class="control-panel-list control-panel-font" size="10" v-model="cpChannelName">
             <option :key="chann + channeli"
                     v-bind:value="chann"
                     v-for="(chann, channeli) in channelNames"
@@ -294,6 +294,9 @@
             })
 
         },
+        props: [
+            'disabled'
+        ],
         watch: {},
         mixins: [channelMixin, testSessionMixin],
         name: "ChannelControlPanel"

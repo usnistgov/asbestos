@@ -48,16 +48,16 @@
                 <router-view name="session" class="main"> </router-view>
             </div>
             <div class="control-panel control-panel-font">
-                <session-control-panel class="solid-boxed"> </session-control-panel>
+                <session-control-panel :disabled="testIsRunning" class="solid-boxed"> </session-control-panel>
                 <div class="vdivider"></div>
-                <channel-control-panel class="solid-boxed"> </channel-control-panel>
+                <channel-control-panel :disabled="testIsRunning" class="solid-boxed"> </channel-control-panel>
                 <div class="vdivider"></div>
-                <general-control-panel class="solid-boxed"> </general-control-panel>
+                <general-control-panel :disabled="testIsRunning" class="solid-boxed"> </general-control-panel>
 <!--                <getter-control-panel class="solid-boxed"> </getter-control-panel>-->
                 <div class="vdivider"></div>
 <!--                <channel-log-control-panel class="solid-boxed"> </channel-log-control-panel>-->
 <!--                <div class="vdivider"></div>-->
-                <test-control-panel2 class="solid-boxed"> </test-control-panel2>
+                <test-control-panel2 :disabled="testIsRunning" class="solid-boxed"> </test-control-panel2>
                 <div class="vdivider"></div>
             </div>
         </div>
@@ -93,7 +93,10 @@
         },
         methods: {
             go(there) {
-                this.$router.push(there)
+                if (! this.testIsRunning)
+                    this.$router.push(there)
+                else
+                    alert('Navigation is disabled while test is running.')
             },
             clearErrors() {
                 this.$store.commit('clearError')
@@ -105,6 +108,9 @@
             }
         },
         computed: {
+            testIsRunning() {
+                return this.$store.getters.isRunning
+            },
             projectVersion() {
                 return PROJECTVERSION
             }

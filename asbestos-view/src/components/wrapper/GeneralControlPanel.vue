@@ -10,13 +10,20 @@
     export default {
         methods: {
             events() {
-                const route = `/session/${this.$store.state.base.channel.testSession}/channel/${this.$store.state.base.channel.channelName}/logs`
-                this.$router.push(route)
+                if (! this.disabled) {
+                    const route = `/session/${this.$store.state.base.channel.testSession}/channel/${this.$store.state.base.channel.channelName}/logs`
+                    this.$router.push(route)
+                }
             },
             getter() {
-                this.$router.push(`/session/${this.$store.state.base.channel.testSession}/channel/${this.$store.state.base.channel.channelName}/getter`)
+                if (! this.disabled) {
+                    this.$router.push(`/session/${this.$store.state.base.channel.testSession}/channel/${this.$store.state.base.channel.channelName}/getter`)
+                }
             },
         },
+        props: [
+            'disabled'
+        ],
         name: "GeneralControlPanel"
     }
 </script>

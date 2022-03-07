@@ -24,19 +24,16 @@ export default {
             this.$store.commit('setEventEvalCount', this.evalCount)
         },
         async testScriptNamesUpdated() {
-            // if (this.isClient) {
-            //     return this.$store.state.testRunner.testScriptNames.forEach(name => {
             //         // console.debug('In testScriptNamesUpdated: ' + name)
             //         // console.debug(this.$store.state.log.eventSummaries === undefined || this.$store.state.log.eventSummaries === null)
             //         // console.debug(this.$store.state.log.eventSummaries.length)
             //         // console.debug(this.$store.state.log.loaded )
-            //
-            //         this.doEval(name)
-            //     })
+            // This auto-run of client tests causes a potential for run-away tests if the test collection was switched to another one, causing the internal testScript Vue store to be corrupted.
+            // The result is a run test request is made up of invalid combination of testCollection + testId such as: documentRecipientMin (server test collection) + Single_Document (client test)
+            // Example: https://fhirtoolkit.test:9743/asbestos/engine/testScript/MHD_DocumentRecipient_minimal/Single_Document?crossdomain=true
+            // if (this.isClient) {
+            //     this.doRunAll()
             // }
-            if (this.isClient) {
-                this.doRunAll()
-            }
         },
         // run testName of testCollection
         async doRun(testName, testRoutePath) {  // server tests

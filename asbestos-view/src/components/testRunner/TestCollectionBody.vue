@@ -1,8 +1,8 @@
 <template>
   <div>
     <div class="runallgroup">
-      <span v-if="tcLoading" class="tcLoading">Loading...</span>
-      <span v-if="running" class="running">Running</span>
+      <span v-show="tcLoading" class="tcLoading">Loading</span>
+      <span v-show="running" class="running">Running</span>
 <!--        <span v-if="!$store.state.testRunner.isClientTest">-->
         <span v-if="running" class="timerFont">{{elapsedTestTime}}s</span>
 <!--        </span>-->
@@ -67,7 +67,7 @@
           <span class="large-text">{{ cleanTestName(name) }}</span>
           &nbsp;
           <span v-if="isClient">
-                            <button class="runallbutton" @click.stop="doEval(name)">Run</button>
+                            <button :disabled="running" class="runallbutton" @click.stop="doEval(name)">Run</button>
           </span>
           <span v-else-if="isDebugFeatureEnabled">
                           <template v-if="isPreviousDebuggerStillAttached(i)">

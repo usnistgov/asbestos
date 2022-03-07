@@ -11,7 +11,7 @@
       <div class="bold">
         Client:
       </div>
-      <select v-model="collection" v-bind:size="clientCollections.length" class="control-panel-list control-panel-font">
+      <select :disabled="disabled" v-model="collection" v-bind:size="clientCollections.length" class="control-panel-list control-panel-font">
         <option v-for="(coll, colli) in clientCollections"
                 v-bind:value="coll"
                 :key="coll + colli"
@@ -22,7 +22,7 @@
       <div class="bold">
         Server:
       </div>
-      <select v-model="collection" v-bind:size="serverCollections.length" class="control-panel-list control-panel-font">
+      <select :disabled="disabled" v-model="collection" v-bind:size="serverCollections.length" class="control-panel-list control-panel-font">
         <option v-for="(coll, colli) in serverCollections"
                 v-bind:value="coll"
                 :key="coll + colli"
@@ -160,6 +160,10 @@ export default {
   mounted() {
 
   },
+  props: [
+    'disabled'
+  ],
+
   watch: {
     // '$store.state.testRunner.currentTestCollectionName': 'collectionUpdated',
     'collection': 'openCollection',

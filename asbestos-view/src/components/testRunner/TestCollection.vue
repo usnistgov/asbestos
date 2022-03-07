@@ -122,6 +122,7 @@ export default {
   padding-bottom: 5px;
 }
 .running {
+    margin-left: 3px;
   background-color: lightgreen;
 }
 .tcLoading {

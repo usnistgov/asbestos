@@ -27,7 +27,7 @@
                 {{ sessionConfigDetails }}
             </div>
         </div>
-        <select class="control-panel-list control-panel-font" size="1" v-model="testSession">
+        <select :disabled="disabled" class="control-panel-list control-panel-font" size="1" v-model="testSession">
             <option :key="ts + tsi"
                     v-bind:value="ts"
                     v-for="(ts, tsi) in testSessionNames"
@@ -215,6 +215,9 @@
                 this.$bvToast.toast(msg, {noCloseButton: true, title: 'Error'})
             },
         },
+        props: [
+            'disabled'
+        ],
         mixins: [channelMixin, testSessionMixin],
         name: "SessionControlPanel"
     }
