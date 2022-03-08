@@ -18,7 +18,7 @@
                 <div class="divider"></div>
 
                 <span class="link-position solid-boxed pointer-cursor" @click.stop.prevent="copyToClipboard">Copy Event Link</span>
-                <input type="hidden" id="the-link" :value="eventLink">
+                <input type="hidden" id="the-link" value="">
 
                 <!-- From Client To Server -->
                 <div v-if="selectedEvent">
@@ -195,8 +195,21 @@
             }
         },
         methods: {
+            eventLink() {
+                /*
+                const re = new RegExp('(http.*)\\/(session.*)','i')
+                console.debug('window.location.href:' + window.location.href)
+                const toBe = window.location.href.replace(re, `$1${this.$router.currentRoute.path}`)
+                console.debug('toBe:' + toBe)
+                return toBe
+                */
+                // when this is used in computed function, window location path may not be up to date
+                // use this is a regular method (non-computed)
+                return window.location.href
+            },
             copyToClipboard() {
-                let linkToCopy = document.querySelector('#the-link')
+                let linkToCopy =  document.querySelector('#the-link')
+                linkToCopy.value = this.eventLink()
                 linkToCopy.setAttribute('type', 'text')
                 linkToCopy.select()
 
@@ -434,9 +447,6 @@
                     : null
 
                 return eSummary
-            },
-            eventLink() {
-                return window.location.href
             },
             modalModeEventLink() {
                 // Example http://localhost:8082/session/default/channel/limited/lognav/
