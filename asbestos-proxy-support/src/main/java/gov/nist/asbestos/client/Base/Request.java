@@ -141,10 +141,14 @@ public class Request {
         if (status == 200) {
             log.log(Level.FINE, ()->String.format("Status %d: URI=%s", status, uri));
         } else {
-            String requestType = null == getType() ? "UnknownRequestType." : getType();
+            String requestType = getRequestType();
             log.severe(String.format("%s Error Status: %d, URI=%s", requestType, status, uri));
         }
         resp.setStatus(status);
+    }
+
+    private String getRequestType() {
+        return null == getType() ? "UnknownRequestType." : getType();
     }
 
     public void badRequest() {
@@ -153,7 +157,7 @@ public class Request {
     }
 
     public void badRequest(String msg) {
-        log.severe(msg);
+        log.severe(String.format("%s: %s", getRequestType(), msg));
         setStatus(resp.SC_BAD_REQUEST);
     }
 
@@ -162,7 +166,7 @@ public class Request {
     public void serverError() { setStatus(resp.SC_INTERNAL_SERVER_ERROR);}
 
     public void serverError(Throwable t) {
-        log.log(Level.SEVERE, String.format("%s Error Message:  %s", getType(), t.toString()), t);
+        log.log(Level.SEVERE, String.format("%s Error Message:  %s", getRequestType(), t.toString()), t);
         setStatus(resp.SC_INTERNAL_SERVER_ERROR);
     }
 
