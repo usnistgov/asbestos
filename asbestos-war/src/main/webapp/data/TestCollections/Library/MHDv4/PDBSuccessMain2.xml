@@ -280,7 +280,7 @@
                 <description value="Module call: Verify updates to server."/>
                 <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
                     <extension url="component">
-                        <valueString value="../SearchDocRef.xml"/>
+                        <valueString value="../SDR_SearchResponse.xml"/>
                     </extension>
                     <extension url="urn:variable-in">
                         <valueString value="referenceMasterIdentifier"/>
@@ -308,7 +308,7 @@
                 <description value="Module call: Verify updates to server."/>
                 <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
                     <extension url="component">
-                        <valueString value="../SearchDocRef.xml"/>
+                        <valueString value="../SDR_SearchResponse.xml"/>
                     </extension>
                     <extension url="urn:variable-in">
                         <valueString value="referenceMasterIdentifier2"/>

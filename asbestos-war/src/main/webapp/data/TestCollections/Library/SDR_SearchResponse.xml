@@ -1,0 +1,76 @@
+<TestScript xmlns="http://hl7.org/fhir">
+    <modifierExtension url="urn:module">
+        <extension url="urn:variable-in">
+            <valueString  value="referenceMasterIdentifier"/>
+        </extension>
+        <extension url="urn:variable-in">
+            <valueString value="pdbReferenceStatus"/>
+        </extension>
+        <extension url="urn:variable-in">
+            <valueString value="patientIdentifierSearchParamValue"/>
+        </extension>
+        <extension url="urn:variable-in">
+            <valueString value="docRespBaseAddress"/>
+        </extension>
+        <extension url="urn:variable-in">
+            <valueString value="expectedDocRefCount"/>
+        </extension>
+    </modifierExtension>
+
+    <id value="SearchDocRefResponse"/>
+    <name value="SearchDocRefResponse"/>
+    <description value="Search response."/>
+
+
+    <test>
+        <description value="Test persistence to Document Responder."/>
+        <action>
+            <operation>
+                <description value="for DocumentReference."/>
+                <type>
+                    <code value="search"/>
+                </type>
+                <contentType value="json"/>
+                <url value="${docRespBaseAddress}/DocumentReference?identifier=${referenceMasterIdentifier}&amp;status=${pdbReferenceStatus}&amp;patient.identifier=${patientIdentifierSearchParamValue}"/>
+                <responseId value="reference-search"/>
+            </operation>
+        </action>
+        <action>
+            <assert id="SDR_1">
+                <description value="Returns 200."/>
+                <sourceId value="reference-search"/>
+                <response value="okay"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
+            <assert id="SDR_2">
+                <description value="Total DocumentReference(s) returned matches expected total."/>
+                <compareToSourceId value="reference-search"/>
+                <compareToSourceExpression value="Bundle.total = ${expectedDocRefCount}"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <!-- all resource(s) are documentref -->
+        <action>
+            <assert id="SDR_3">
+                <description value="Resource type is DocumentReference."/>
+                <compareToSourceId value="reference-search"/>
+                <compareToSourceExpression value="Bundle.entry.resource.all($this is DocumentReference)"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <!-- fullurl and id match -->
+        <!-- see https://hl7.org/fhir/bundle-definitions.html#Bundle.entry.fullUrl -->
+        <!-- and https://hl7.org/fhir/http.html#styleguide -->
+        <action>
+            <assert id="SDR_4">
+                <description value="fullUrl and Resource ID are the same."/>
+                <compareToSourceId value="reference-search"/>
+                <compareToSourceExpression value="Bundle.entry.all(fullUrl.matches('((http|https):\/\/([A-Za-z0-9\\-\\.\\:\\%\\$]*\/)+)?(.*/DocumentReference/).*') implies fullUrl.endsWith(resource.id)) and fullUrl.contains('/_history/').not()"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+
+    </test>
+</TestScript>

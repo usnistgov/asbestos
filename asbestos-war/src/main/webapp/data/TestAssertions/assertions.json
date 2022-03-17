@@ -9,6 +9,72 @@
     }
   },
   "assertionReferences": {
+    "BR_1":         [{"fhir": "Bundle", "context": ".entry.fullUrl-type"},
+      {"fhir": "resourceUrl-transaction", "verbatimPhraseToFocus": "Note"}],
+    "BR_2":         [{"fhir": "Bundle", "context":"bundleConstraint-bdl7"},
+      {"fhir": "restApi", "context":"transactionProcessingRules-uniqueResource"}],
+    "BR_3":         [{"fhir": "httpTransaction"},
+      {"fhir": "Bundle", "context":".entry.request.url"},
+      {"fhir": "Bundle", "context":".entry.request.method-cardinality"}
+    ],
+    "BR_4":         [{"fhir": "Bundle", "context":".entry.request.url", "verbatimPhraseToFocus": "Type"}],
+    "CMPMETA_1":   [{"mhdv4": "ITI-65_BundleResources", "context":"Bundle.meta.profile",
+      "verbatimPhraseToFocus": "Bundle.meta.profile"}],
+    "CMPMETA3_1":   [{"mhdComprehensive": "DocumentReference", "context": ".subject"}],
+    "CMPMETA3_2":   [{"mhdComprehensive": "DocumentManifest", "context": "mappingTable"}],
+    "CMPMETA4_1":   [{"mhdv4": "ITI-65_RequestMessage", "context": "elements"},
+      {"mhdv4Comprehensive": "SubmissionSetTypeList", "context": ".subject"},
+      {"mhdComprehensive": "DocumentReference", "context": ".subject"},
+      {"mhdv4Comprehensive": "SubmissionSetTypeList", "context": "CmpMeta_mappingToXds"}],
+    "CMPMETA4_2":   [{"mhdv4": "ITI-65_RequestMessage", "context": "elements"},
+      {"mhdv4Comprehensive": "SubmissionSetTypeList", "context": ".extension:designationType"},
+      {"mhdv4Comprehensive": "SubmissionSetTypeList", "context": "CmpMeta_mappingToXds"}],
+    "CMPMETA_3":   [{"mhdv4": "ITI-65_BundleResources", "context":"Bundle.meta.profile",
+      "verbatimPhraseToFocus": "Bundle.meta.profile"}],
+    "CMPMETA_4":   [{"mhdComprehensive": "DocumentReference", "context": ".securityLabel"},
+      {"mhdComprehensive": "DocumentReference", "context": "CmpMeta_mappingToXds"},
+      {"xds": "4.3.1 Submission Metadata Attribute Optionality"}],
+    "CMPDR_1":     [{"mhdComprehensive": "DocumentReference", "context": ".content.format"},
+      {"mhdComprehensive": "DocumentReference", "context": "CmpMeta_mappingToXds"},
+      {"xds": "4.3.1 Submission Metadata Attribute Optionality"}],
+    "CMPDR_2":     [{"mhdComprehensive": "DocumentReference", "context": ".content.attachment.language"},
+      {"mhdComprehensive": "DocumentReference", "context": "CmpMeta_mappingToXds"},
+      {"xds": "4.3.1 Submission Metadata Attribute Optionality"}],
+    "CMPDR_3":     [{"mhdComprehensive": "DocumentReference", "context": ".content.attachment.contentType"},
+      {"mhdComprehensive": "DocumentReference", "context": "CmpMeta_mappingToXds"},
+      {"xds": "4.3.1 Submission Metadata Attribute Optionality"}],
+    "CMPDR_4":     [{"mhdComprehensive": "DocumentReference", "context": ".context.facilityType"},
+      {"mhdComprehensive": "DocumentReference", "context": "CmpMeta_mappingToXds"},
+      {"xds": "4.3.1 Submission Metadata Attribute Optionality"}],
+    "CMPDR_5":     [{"mhdComprehensive": "DocumentReference", "context": ".context.practiceSetting"},
+      {"mhdComprehensive": "DocumentReference", "context": "CmpMeta_mappingToXds"},
+      {"xds": "4.3.1 Submission Metadata Attribute Optionality"}],
+    "CMPDR_6":     [{"mhdComprehensive": "DocumentReference", "context": ".context.sourcePatientInfo"},
+      {"mhdComprehensive": "DocumentReference", "context": "CmpMeta_mappingToXds"},
+      {"xds": "4.3.1 Submission Metadata Attribute Optionality"}],
+    "DR_1":         [{"mhd": "DocumentReference", "context": ".content"  }],
+    "DR_2":         [{"mhd": "DocumentReference", "context": ".content.attachment.url"}],
+    "DR_3":         [{"mhd": "DocumentReference", "context": ".content.attachment.contentType"}],
+    "DR_4":         [{"mhd": "DocumentReference", "context": ".content.attachment.data"}],
+    "DR_5":         [{"mhd": "ITI-65_BundleResources", "context": "binaryResourceInBundle"}],
+    "DR_6":         [{"mhd": "DocumentReference", "context": ".content.attachment.contentType"},
+      {"fhir": "Binary", "context": ".contentType"}],
+    "DR_7":         [{"mhdv4": "ITI-65_non-unContainedOption", "context": "sourcePatientInfo",
+      "verbatimPhraseToFocus": "Otherwise, when sourcePatientInfo is provided, the DocumentReference.context.sourcePatientInfo shall be a reference to a \"contained\" Patient Resource"}],
+    "DR_8":         [{"mhdv4": "ITI-65_non-unContainedOption", "context": "MISSINGTEXTInMHD4"}],
+    "DR_9":         [{"mhdv4": "ITI-65_non-unContainedOption", "context": "MISSINGTEXTInMHD4"}],
+    "DR_10":        [{"mhd": "DocumentReference", "context": ".masterIdentifier"}],
+    "DR_11":        [{"mhd": "DocumentReference", "context": ".status"}],
+    "DRP2_1":        [{"mhdv3x": "DocumentReference", "context": ".identifier"}],
+    "MINMETA4_1":   [{"mhdv4": "ITI-65_BundleResources", "context":"Bundle.meta.profile",
+      "verbatimPhraseToFocus": "Bundle.meta.profile"}],
+    "MINMETA4_2":   [{"mhdv4": "ITI-65_RequestMessage", "context": "elements"},
+      {"mhdv4": "SubmissionSetTypeList", "context": ".subject"},
+      {"mhd": "DocumentReference", "context": ".subject"},
+      {"mhd": "DocumentReference", "context": "MinMeta_mappingToXds"}],
+    "MINMETA4_3":   [{"mhdv4": "SubmissionSetTypeList", "context": ".subject"},
+      {"mhd": "DocumentReference", "context": ".subject"},
+      {"mhd": "DocumentReference", "context": "MinMeta_mappingToXds"}],
     "RM4_1":        [{"mhdv4": "ITI-65_RequestMessage", "context": "messageSemantics"}],
     "RM4_1_1":      [{"mhdv4": "ITI-65_RequestMessage", "context": "messageSemantics"}],
     "RM4_1_2":      [{"mhdv4": "ITI-65_RequestMessage", "context": "messageSemantics"},
@@ -21,81 +87,20 @@
                      {"mhdv4": "SubmissionSetTypeList", "context":"mappingToXds" }],
     "RM4_6":        [{"mhdv4": "ITI-65_RequestMessage", "context": "elements"},
                      {"mhd": "DocumentReference", "context": "MinMeta_mappingToXds"}],
-    "BR_1":         [{"fhir": "Bundle", "context": ".entry.fullUrl-type"},
-                     {"fhir": "resourceUrl-transaction", "verbatimPhraseToFocus": "Note"}],
-    "BR_2":         [{"fhir": "Bundle", "context":"bundleConstraint-bdl7"},
-                     {"fhir": "restApi", "context":"transactionProcessingRules-uniqueResource"}],
-    "BR_3":         [{"fhir": "httpTransaction"},
-                      {"fhir": "Bundle", "context":".entry.request.url"},
-                      {"fhir": "Bundle", "context":".entry.request.method-cardinality"}
-                     ],
-    "BR_4":         [{"fhir": "Bundle", "context":".entry.request.url", "verbatimPhraseToFocus": "Type"}],
-    "DR_1":         [{"mhd": "DocumentReference", "context": ".content"  }],
-    "DR_2":         [{"mhd": "DocumentReference", "context": ".content.attachment.url"}],
-    "DR_3":         [{"mhd": "DocumentReference", "context": ".content.attachment.contentType"}],
-    "DR_4":         [{"mhd": "DocumentReference", "context": ".content.attachment.data"}],
-    "DR_5":         [{"mhd": "ITI-65_BundleResources", "context": "binaryResourceInBundle"}],
-    "DR_6":         [{"mhd": "DocumentReference", "context": ".content.attachment.contentType"},
-                      {"fhir": "Binary", "context": ".contentType"}],
-    "DR_7":         [{"mhdv4": "ITI-65_non-unContainedOption", "context": "sourcePatientInfo",
-                      "verbatimPhraseToFocus": "Otherwise, when sourcePatientInfo is provided, the DocumentReference.context.sourcePatientInfo shall be a reference to a \"contained\" Patient Resource"}],
-    "DR_8":         [{"mhdv4": "ITI-65_non-unContainedOption", "context": "MISSINGTEXTInMHD4"}],
-    "DR_9":         [{"mhdv4": "ITI-65_non-unContainedOption", "context": "MISSINGTEXTInMHD4"}],
-    "DR_10":        [{"mhd": "DocumentReference", "context": ".masterIdentifier"}],
-    "DR_11":        [{"mhd": "DocumentReference", "context": ".status"}],
-    "DRP2_1":        [{"mhdv3x": "DocumentReference", "context": ".identifier"}],
+    "SDR_1":         [{"mhd": "ITI-67_ResponseMessage", "context": "messageSemantics_p3",
+                    "verbatimPhraseToFocus": "If the Find Document References message is processed successfully, whether or not any DocumentReference Resources are found, the HTTP status code shall be 200."}],
+    "SDR_2":         [{"fhir": "Bundle", "context": ".total"}],
+    "SDR_3":         [{"mhd": "ITI-67_ResponseMessage", "context": "messageSemantics_p3"}],
+    "SDR_4":         [{"fhir": "Bundle", "context": ".entry.fullUrl"}],
     "SSLIST_1":     [{"mhdv4": "ITI-65_RequestMessage", "context": "elements"}],
     "SSLIST_2":     [{"mhdv4": "ITI-65_RequestMessage", "context": "elements"},
                       {"mhdv4": "SubmissionSetTypeList", "context": ".extension:sourceId"}],
     "SSLIST_3":     [{"mhdv4": "ITI-65_RequestMessage", "context": "elements"},
                       {"mhdv4": "SubmissionSetTypeList", "context": ".date"}],
-    "MINMETA4_1":   [{"mhdv4": "ITI-65_BundleResources", "context":"Bundle.meta.profile",
-                      "verbatimPhraseToFocus": "Bundle.meta.profile"}],
-    "MINMETA4_2":   [{"mhdv4": "ITI-65_RequestMessage", "context": "elements"},
-                      {"mhdv4": "SubmissionSetTypeList", "context": ".subject"},
-                      {"mhd": "DocumentReference", "context": ".subject"},
-                      {"mhd": "DocumentReference", "context": "MinMeta_mappingToXds"}],
-    "MINMETA4_3":   [{"mhdv4": "SubmissionSetTypeList", "context": ".subject"},
-                      {"mhd": "DocumentReference", "context": ".subject"},
-                      {"mhd": "DocumentReference", "context": "MinMeta_mappingToXds"}],
     "SUBJ4_1":      [{"mhdv4": "patientReference"}],
     "SUBJ4_2":      [{"mhdv4": "patientReference", "verbatimPhraseToFocus": "FHIR Patient Resource"}],
     "SUBJ4_3":      [{"mhdv4": "ITI-65_RequestMessage", "context": "elements"},
                       {"xds": "4.2 ebRIM Representation", "context": "associatedPatient"}],
-    "CMPMETA_1":   [{"mhdv4": "ITI-65_BundleResources", "context":"Bundle.meta.profile",
-                      "verbatimPhraseToFocus": "Bundle.meta.profile"}],
-    "CMPMETA3_1":   [{"mhdComprehensive": "DocumentReference", "context": ".subject"}],
-    "CMPMETA3_2":   [{"mhdComprehensive": "DocumentManifest", "context": "mappingTable"}],
-    "CMPMETA4_1":   [{"mhdv4": "ITI-65_RequestMessage", "context": "elements"},
-                      {"mhdv4Comprehensive": "SubmissionSetTypeList", "context": ".subject"},
-                      {"mhdComprehensive": "DocumentReference", "context": ".subject"},
-                      {"mhdv4Comprehensive": "SubmissionSetTypeList", "context": "CmpMeta_mappingToXds"}],
-    "CMPMETA4_2":   [{"mhdv4": "ITI-65_RequestMessage", "context": "elements"},
-                      {"mhdv4Comprehensive": "SubmissionSetTypeList", "context": ".extension:designationType"},
-                      {"mhdv4Comprehensive": "SubmissionSetTypeList", "context": "CmpMeta_mappingToXds"}],
-    "CMPMETA_3":   [{"mhdv4": "ITI-65_BundleResources", "context":"Bundle.meta.profile",
-                      "verbatimPhraseToFocus": "Bundle.meta.profile"}],
-    "CMPMETA_4":   [{"mhdComprehensive": "DocumentReference", "context": ".securityLabel"},
-                  {"mhdComprehensive": "DocumentReference", "context": "CmpMeta_mappingToXds"},
-                  {"xds": "4.3.1 Submission Metadata Attribute Optionality"}],
-    "CMPDR_1":     [{"mhdComprehensive": "DocumentReference", "context": ".content.format"},
-                    {"mhdComprehensive": "DocumentReference", "context": "CmpMeta_mappingToXds"},
-                    {"xds": "4.3.1 Submission Metadata Attribute Optionality"}],
-    "CMPDR_2":     [{"mhdComprehensive": "DocumentReference", "context": ".content.attachment.language"},
-                    {"mhdComprehensive": "DocumentReference", "context": "CmpMeta_mappingToXds"},
-                    {"xds": "4.3.1 Submission Metadata Attribute Optionality"}],
-    "CMPDR_3":     [{"mhdComprehensive": "DocumentReference", "context": ".content.attachment.contentType"},
-                    {"mhdComprehensive": "DocumentReference", "context": "CmpMeta_mappingToXds"},
-                    {"xds": "4.3.1 Submission Metadata Attribute Optionality"}],
-    "CMPDR_4":     [{"mhdComprehensive": "DocumentReference", "context": ".context.facilityType"},
-                    {"mhdComprehensive": "DocumentReference", "context": "CmpMeta_mappingToXds"},
-                    {"xds": "4.3.1 Submission Metadata Attribute Optionality"}],
-    "CMPDR_5":     [{"mhdComprehensive": "DocumentReference", "context": ".context.practiceSetting"},
-                    {"mhdComprehensive": "DocumentReference", "context": "CmpMeta_mappingToXds"},
-                    {"xds": "4.3.1 Submission Metadata Attribute Optionality"}],
-    "CMPDR_6":     [{"mhdComprehensive": "DocumentReference", "context": ".context.sourcePatientInfo"},
-                    {"mhdComprehensive": "DocumentReference", "context": "CmpMeta_mappingToXds"},
-                    {"xds": "4.3.1 Submission Metadata Attribute Optionality"}],
     "TR_1":         [{"mhd": "ITI-65_ResponseMessage", "context": "messageSemantics_p2",
                       "verbatimPhraseToFocus": "To indicate success the overall http 200 response is used"}],
     "TR_2":         [{"mhd": "ITI-65_ResponseMessage", "context": "messageSemantics_p1"}],
@@ -109,7 +114,6 @@
     "TR_8":         [{"fhir": "restApi", "context": "transactionResponse-operationOutcome",
                       "verbatimPhraseToFocus": "For a failed transaction, the server returns a single OperationOutcome instead of a Bundle"}],
     "TR_9":         [{"mhd": "ITI-65_ResponseMessage", "context": "messageSemantics_p1", "verbatimPhraseToFocus": "contains one entry for each entry in the request"}]
-
   },
 
   "references": {
@@ -362,7 +366,7 @@
             "text": "IHE ITI"
           },
           "Profile": {
-            "text": "MHDv4",
+            "text": "MHDv3.x, MHDv4",
             "link": "https://profiles.ihe.net/ITI/MHD/toc.html"
           },
           "Transaction": {
@@ -381,8 +385,36 @@
             }]
           }
         }
+      },
+      "ITI-67_ResponseMessage": {
+        "common": {
+          "Source": {
+            "text": "IHE ITI"
+          },
+          "Profile": {
+            "text": "MHDv3.x, MHDv4",
+            "link": "https://profiles.ihe.net/ITI/MHD/toc.html"
+          },
+          "Transaction": {
+            "text": "ITI-67 Find Document References",
+            "link": "https://profiles.ihe.net/ITI/MHD/ITI-67.html"
+          },
+          "Volume:Section": {
+            "text": "2:3.67.4.2 Find Document References Response message",
+            "link": "https://profiles.ihe.net/ITI/MHD/ITI-67.html#236742-find-document-references-response-message"
+          }
+        },
+        "context": {
+          "messageSemantics_p3": {
+            "SpecificationText": [
+              {
+                "text": "If the Find Document References message is processed successfully, whether or not any DocumentReference Resources are found, the HTTP status code shall be 200. The Find Document References Response message shall be a Bundle Resource containing zero or more DocumentReference Resources. If the Document Responder is sending warnings, the Bundle Resource shall also contain an OperationOutcome Resource that contains those warnings."
+              }
+            ]
+          }
+        }
       }
-    },
+   },
     "mhdv3x": {
       "DocumentReference": {
         "common": {
@@ -613,12 +645,24 @@
         }
       },
       "Bundle": {
+        "baseLink": "https://hl7.org/fhir/bundle-definitions.html#Bundle",
         "common": {
           "Source": {
-            "text": "HL7 FHIR"
+            "text": "HL7 FHIR",
+            "link": "https://hl7.org/fhir/bundle-definitions.html#"
           }
         },
         "context": {
+          ".entry.fullUrl": {
+            "Section": {
+              "text": "2.36.7 Resource Bundle - Detailed Descriptions"
+            },
+            "Element": {},
+            "SpecificationText": [{
+              "text": "The Absolute URL for the resource. The fullUrl SHALL NOT disagree with the id in the resource - i.e. if the fullUrl is not a urn:uuid, the URL shall be version-independent URL consistent with the Resource.id. The fullUrl is a version independent reference to the resource.",
+              "comments": "See Invariant bdl-8: https://hl7.org/fhir/bundle-definitions.html#Bundle.entry"
+            }]
+          },
           ".entry.fullUrl-type": {
             "Section": {
               "text": "2.36 Resource Bundle - Content, 2.36.3 Resource Content",
@@ -645,10 +689,7 @@
             "Section": {
               "text": "2.36.7 Resource Bundle - Detailed Descriptions, "
             },
-            "Element": {
-             "text": "Bundle.entry.request.url",
-              "link": "https://hl7.org/fhir/bundle-definitions.html#Bundle.entry.request.url"
-            },
+            "Element": {},
             "SpecificationText": [{
               "text": "Type uri<br>Cardinality 1..1",
               "comments": "E.g. for a Patient Create, the method would be \"POST\" and the URL would be \"Patient\". For a Patient Update, the method would be PUT and the URL would be \"Patient/[id]\"."
@@ -662,6 +703,16 @@
             "SpecificationText": [{
               "text": "FullUrl must be unique in a bundle, or else entries with the same fullUrl must have different meta.versionId (except in history bundles)"
             }]
+          },
+          ".total": {
+              "Section": {
+                "text": "2.36.7 Resource Bundle - Detailed Descriptions"
+              },
+              "Element": {},
+              "SpecificationText": [{
+                "text": "If a set of search matches, this is the total number of entries of type 'match' across all pages in the search.",
+                "comments": "Only used if the bundle is a search result set. The total does not include resources such as OperationOutcome and included resources, only the total number of matching resources."
+              }]
           }
         }
       },

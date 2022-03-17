@@ -13,7 +13,7 @@
             <valueString value="docRespBaseAddress"/>
         </extension>
         <extension url="urn:variable-in">
-            <valueString value="expectDocRefTotal"/>
+            <valueString value="expectedDocRefCount"/>
         </extension>
     </modifierExtension>
 
@@ -22,34 +22,32 @@
     <status value="active"/>
 
     <test>
-      <description value="Test persistence to Document Responder."/>
-
+        <description value="Validate Search Response."/>
         <action>
             <operation>
-                <description value="for DocumentReference."/>
-                <type>
-                    <code value="search"/>
-                </type>
-                <contentType value="json"/>
-                <url value="${docRespBaseAddress}/DocumentReference?identifier=${referenceMasterIdentifier}&amp;status=${pdbReferenceStatus}&amp;patient.identifier=${patientIdentifierSearchParamValue}"/>
-                <responseId value="reference-search"/>
+                <description value="ITI-67 Response Validation module usage description."/>
+                <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
+                    <extension url="component">
+                        <valueString value="SDR_SearchResponse.xml"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString  value="referenceMasterIdentifier"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="pdbReferenceStatus"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="patientIdentifierSearchParamValue"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="docRespBaseAddress"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="expectedDocRefCount"/>
+                    </extension>
+                </modifierExtension>
             </operation>
         </action>
-        <action>
-            <assert>
-                <description value="Returns 200."/>
-                <sourceId value="reference-search"/>
-                <response value="okay"/>
-                <warningOnly value="false"/>
-            </assert>
-        </action>
-        <action>
-            <assert>
-                <description value="Total DocumentReference(s) returned matches expected total."/>
-                <compareToSourceId value="reference-search"/>
-                <compareToSourceExpression value="Bundle.total = ${expectDocRefTotal}"/>
-                <warningOnly value="false"/>
-            </assert>
-        </action>
     </test>
+
 </TestScript>
