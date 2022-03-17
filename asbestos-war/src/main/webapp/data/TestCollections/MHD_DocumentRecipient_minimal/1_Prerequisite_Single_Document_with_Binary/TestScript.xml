@@ -225,7 +225,7 @@
                 <description value="Module call: Verify update to server."/>
                 <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
                     <extension url="component">
-                        <valueString value="../../Library/SearchDocRef.xml"/>
+                        <valueString value="../../Library/SDR_SearchResponse.xml"/>
                     </extension>
                     <extension url="urn:variable-in">
                         <valueString value="referenceMasterIdentifier"/>
