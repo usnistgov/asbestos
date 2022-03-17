@@ -967,6 +967,7 @@ public class TestEngine  implements TestDef {
         if (hasDebugger())
             getDebugger().getState().pushParentExecutionIndex();
 
+        // probably not needed
         Set<String> moduleIds = new HashSet<>();
                 for (TestEngine te : modularEngine.getTestEngines()) {
                        moduleIds.addAll(te.moduleIds);
@@ -1004,7 +1005,12 @@ public class TestEngine  implements TestDef {
         modularEngine.add(testEngine1);
         testEngine1.parent = this;
         String moduleName = simpleName(componentReference.getComponentRef());
+        /*
         String moduleId = ComponentReference.assignModuleId(moduleIds, moduleName);
+        // moduleName always seems to be the same as moduleId
+        log.info("***** moduleId is : " + moduleId );
+
+        // use index postion instead of module string comparision?
         if (multiUseTestScriptName != null && moduleName.equals(moduleId)) {
            // Check modular scripts for multi-use script case
             String multiUseScriptId = modularEngine.getMultiUseScriptId(moduleName, simpleName(new File(multiUseTestScriptName)));
@@ -1013,6 +1019,8 @@ public class TestEngine  implements TestDef {
             moduleId = multiUseScriptId;
             testEngine1.setMultiUseTestScriptName(moduleId.concat(".xml"));
         }
+         */
+       String moduleId = modularEngine.getMultiUseScriptId(moduleName, (multiUseTestScriptName != null) ? simpleName(new File(multiUseTestScriptName)) : moduleName);
         moduleIds.add(moduleId);
         opReport.addModifierExtension(new Extension(ExtensionDef.moduleId, new StringType(moduleId)));
         opReport.addModifierExtension(new Extension(ExtensionDef.moduleName, new StringType(moduleName)));

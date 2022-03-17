@@ -1,10 +1,10 @@
 package gov.nist.asbestos.testEngine.engine;
 
-public class MultiUseScriptAllocator {
+public class MultiUseScriptId {
     private String sourceScriptId;
     private String newScriptId;
 
-    public MultiUseScriptAllocator(String sourceScriptId, String newScriptId) {
+    public MultiUseScriptId(String sourceScriptId, String newScriptId) {
         this.sourceScriptId = sourceScriptId;
         this.newScriptId = newScriptId;
     }
@@ -27,6 +27,9 @@ public class MultiUseScriptAllocator {
     }
 
     public static String getComponentPart(String s) {
-       return s.split("/")[1];
+        if (s.indexOf("/") > -1)
+            return s.split("/")[1];
+        else
+            return s;
     }
 }

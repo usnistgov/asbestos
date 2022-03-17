@@ -12,6 +12,8 @@ import gov.nist.asbestos.testEngine.engine.translator.ComponentReference;
 import org.apache.commons.io.FileUtils;
 
 import java.nio.file.Paths;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Logger;
 import org.hl7.fhir.r4.model.BaseResource;
@@ -38,8 +40,10 @@ public class ModularScripts {
     /*
     Multi use is where a module is reused multiple times within the scope of the main TestScript
     See minimalmetadataonly module and comprehensiveonly module to see how subject, checksubject modules are used.
+    operationId => MultiUseScriptId
      */
-    private final Map<String, MultiUseScriptAllocator> multiUseScriptOperationIdentifiers = new LinkedHashMap<>();
+    private final Map<String, MultiUseScriptId> multiUseScriptOperationIdentifiers = new LinkedHashMap<>();
+    private final Set<String> scriptKeySet = new HashSet<>();
     private String testCollectionName;
     private EC ec;
 
@@ -96,11 +100,15 @@ public class ModularScripts {
                for (String key: scripts.keySet()) {
                    String script = scripts.get(key);
                    if (script.contains(opId)) {
-                       MultiUseScriptAllocator multiUse = multiUseScriptOperationIdentifiers.get(opId);
-                       Pattern p = Pattern.compile(String.format("(^.*/)(%s.xml\"$)",multiUse.getSourceComponentIdPart()) ,Pattern.MULTILINE);// Example: "line1\nline2\nvalueString": "../CheckSubject.xml"\nline\n
+                       MultiUseScriptId multiUse = multiUseScriptOperationIdentifiers.get(opId);
+//                       Pattern p = Pattern.compile(String.format("(^.*/)(%s.xml\"$)",multiUse.getSourceComponentIdPart()) ,Pattern.MULTILINE);// Example: "line1\nline2\nvalueString": "../CheckSubject.xml"\nline\n
+                       Pattern p = Pattern.compile(String.format("(\"operation\".*\\s+\"id\": \"%s\",\\s+.*\\s+.*\\s+.*\\s+.*\\s+\"valueString\": \".*)(%s.xml\"$)" ,
+                               opId,
+                               multiUse.getSourceComponentIdPart()),
+                               Pattern.MULTILINE);
                        Matcher m = p.matcher(script);
                        if (m.find()) {
-                           scripts.replace(key, m.replaceAll(String.format("$1%s.xml\"", multiUse.getNewScriptId())));
+                           scripts.replace(key, m.replaceFirst(String.format("$1%s.xml\"", multiUse.getNewScriptId())));
                        }
                    }
                }
@@ -108,14 +116,46 @@ public class ModularScripts {
         }
     }
 
-    String getMultiUseScriptId(String moduleName, String simpleName) {
+    /**
+     * Resolves straightforward multiple imports. Example: TestScript imports TestScript2 many times. First import is OrigName. Second import is also OrigName but this method resolves the asbtsFiber call sequence.
+     * Assumes the order OrigName, Name1, Name..n, where Name is moduleName. OrigName is used for the first module call. Name..n is used for subsequent call.
+     * @param simpleModuleName
+     * @return
+     */
+    String getMultiUseScriptId(String simpleModuleName) {
+
+        String theScriptKey = null;
+        boolean asbtsFiber = false;
+        for ( String scriptKey : scripts.keySet()) {
+            boolean isMatch = (asbtsFiber) ? scriptKey.contains(String.format("/%s_asbtsFiber", simpleModuleName)) : scriptKey.endsWith(String.format("/%s",simpleModuleName)) ;
+           if (isMatch) {
+               if (scriptKeySet.contains(scriptKey)) {
+                  asbtsFiber = true;
+                  continue;
+               } else {
+                   theScriptKey = scriptKey;
+                   scriptKeySet.add(scriptKey);
+                   break;
+               }
+           }
+        }
+        return theScriptKey == null ? simpleModuleName : MultiUseScriptId.getComponentPart(theScriptKey);
+    }
+
+    /**
+     * Useful in the case where module is imported many times but only executed 1 time due to all others being conditional action executions.
+     * @param moduleName
+     * @param parentSimpleName
+     * @return
+     */
+    String getMultiUseScriptIdByParent(String moduleName, String parentSimpleName) {
         if (multiUseScriptOperationIdentifiers.size() > 0) {
             for (String opId : multiUseScriptOperationIdentifiers.keySet()) {
                 if (moduleName.equals(multiUseScriptOperationIdentifiers.get(opId).getSourceComponentIdPart())) {
                     // Check if same parent
                     for (String scriptKey : scripts.keySet()) {
                         if (scripts.get(scriptKey).contains(opId)) {
-                           if (simpleName.equals(MultiUseScriptAllocator.getComponentPart(scriptKey))) {
+                           if (parentSimpleName.equals(MultiUseScriptId.getComponentPart(scriptKey))) {
                                return multiUseScriptOperationIdentifiers.get(opId).getNewComponentIdPart();
                            }
                         }
@@ -125,6 +165,7 @@ public class ModularScripts {
         }
         return moduleName;
     }
+
 
     private List<ComponentPathValue> testActionsHandleImport(File testDef, String testId, TestScript testScript ) {
         List<ComponentPathValue> componentPathValues = new ArrayList<>();
@@ -206,7 +247,7 @@ public class ModularScripts {
 
                         String componentJson = ParserBase.encode(componentScript, Format.JSON);
                         if (! fullComponentId.equals(newFullComponentId)) {
-                            MultiUseScriptAllocator multiUseScriptAllocator = new MultiUseScriptAllocator(fullComponentId, newFullComponentId);
+                            MultiUseScriptId multiUseScriptAllocator = new MultiUseScriptId(fullComponentId, newFullComponentId);
                             multiUseScriptOperationIdentifiers.put(op.getId(), multiUseScriptAllocator);
 
 //                          log.fine("ModularScripts Pattern match failed for " + fullComponentId + " in " + componentFile.toString());

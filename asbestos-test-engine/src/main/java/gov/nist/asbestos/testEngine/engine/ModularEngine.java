@@ -256,9 +256,16 @@ public class ModularEngine {
         return this;
     }
 
-    public String getMultiUseScriptId(String moduleName, String simpleName) {
-        if (modularScripts != null)
-            return modularScripts.getMultiUseScriptId(moduleName, simpleName);
+    public String getMultiUseScriptId(String moduleName , String simpleName) {
+        if (modularScripts != null) {
+            // Try multiple-use module import scriptId by same parent TestScript
+            String scriptId = modularScripts.getMultiUseScriptId(moduleName);
+            if (moduleName.equals(scriptId)) {
+                // Try multiple-use scriptId import by different sources TestScript
+                return modularScripts.getMultiUseScriptIdByParent(moduleName, simpleName);
+            }
+            return scriptId;
+        }
         return moduleName;
     }
 }
