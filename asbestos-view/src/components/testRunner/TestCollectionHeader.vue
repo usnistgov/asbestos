@@ -30,7 +30,15 @@
 <!--                    <li>Once an adequate collection of messages has been sent to satisfy the tests, evaluate them further by clicking the-->
 <!--                    spyglass icon to evaluate against a set of assertions specific to each test.-->
 <!--                    This evaluation will include validating the response from the background server.</li>-->
-                    <li>Only the most recent messages will be evaluated.  Adjust the count below.</li>
+                    <li>Only the most recent messages will be evaluated.
+                        Adjust the count below.
+                        <template v-if="testCollection.endsWith('_DocumentSource_minimal')">
+                        If evaluating minimal metadata test collection run against an Asbestos self-test channel, use {{eventsForMinimalClientCollection}} most recent events.
+                        </template>
+                        <template v-if="testCollection.endsWith('_DocumentSource_comprehensive')">
+                        If evaluating comprehensive metadata tests run against an Asbestos self-test channel, use {{eventsForComprehensiveClientCollection}} most recent events.
+                        </template>
+                        </li>
                     <li>A test passes if one or more message evaluates correctly.</li>
                     <li>Click on a test to see the messages evaluated.  Click on a message to see the result of each
                         assertion that was evaluated.</li>

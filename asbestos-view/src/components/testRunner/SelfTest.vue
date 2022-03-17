@@ -47,8 +47,6 @@
                 allRun: false,
                 earliestRunTime: null,
                 hasNoRuns: true,
-                eventsForMinimalClientCollection: 56, /*  According to the EC channel directory, 56 events are generated for v3 Limited TC */
-                eventsForComprehensiveClientCollection: 93, /* According to the EC channel directory, 93 events generated for v3 Comprehensive TC */
             }
         },
         methods: {

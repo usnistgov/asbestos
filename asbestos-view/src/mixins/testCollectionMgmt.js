@@ -11,6 +11,8 @@ export default {
             testTimerBeginTime : new Date(),
             testTimer: null,
             tcTestTimerElapsedMilliSeconds: {},
+            eventsForMinimalClientCollection: 56, /*  According to the EC channel directory, 56 events are generated for v3 Limited TC */
+            eventsForComprehensiveClientCollection: 93, /* According to the EC channel directory, 93 events generated for v3 Comprehensive TC */
         }
     },
     methods: {
@@ -31,9 +33,10 @@ export default {
             // This auto-run of client tests causes a potential for run-away tests if the test collection was switched to another one, causing the internal testScript Vue store to be corrupted.
             // The result is a run test request is made up of invalid combination of testCollection + testId such as: documentRecipientMin (server test collection) + Single_Document (client test)
             // Example: https://fhirtoolkit.test:9743/asbestos/engine/testScript/MHD_DocumentRecipient_minimal/Single_Document?crossdomain=true
-            // if (this.isClient) {
-            //     this.doRunAll()
-            // }
+            // To overcome the run-away tests, test collection list boxes and other items will be disabled while tests are running.
+            if (this.isClient) {
+                this.doRunAll()
+            }
         },
         // run testName of testCollection
         async doRun(testName, testRoutePath) {  // server tests
