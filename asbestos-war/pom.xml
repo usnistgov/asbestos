@@ -136,6 +136,7 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>
                 <version>3.0.0-M3</version>
+<!--                <version>3.0.0-M5</version>-->
                 <executions>
                     <execution>
                         <goals>
@@ -148,9 +149,6 @@
                     <systemPropertyVariables>
                         <fhir.port>7080</fhir.port>
                         <proxy.port>8877</proxy.port>
-<!--                        <javax.net.ssl.trustStore>${basedir}/src/test/etc/keystore.jks</javax.net.ssl.trustStore>-->
-<!--                        <javax.net.ssl.trustStorePassword>changeit</javax.net.ssl.trustStorePassword>-->
-<!--                        <javax.net.ssl.trustStoreType>JKS</javax.net.ssl.trustStoreType>-->
                     </systemPropertyVariables>
                     <forkCount>1</forkCount>
                     <reuseForks>false</reuseForks>
@@ -202,67 +200,75 @@
                     </dependency>
                 </dependencies>
             </plugin>
+            <!-- begin
+            See Setting System Properties
+            https://www.eclipse.org/jetty/documentation/jetty-9/index.html
+            However, This set-system-properties did not work with deploy-war jetty maven goal
+            -->
+<!--            <plugin>-->
+<!--                <groupId>org.codehaus.mojo</groupId>-->
+<!--                <artifactId>properties-maven-plugin</artifactId>-->
+<!--                <version>1.0-alpha-2</version>-->
+<!--                <executions>-->
+<!--                    <execution>-->
+<!--                        <goals>-->
+<!--                            <goal>set-system-properties</goal>-->
+<!--                        </goals>-->
+<!--                        <configuration>-->
+<!--                            <properties>-->
+<!--                                <property>-->
+<!--                                    <name>javax.net.ssl.trustStore</name>-->
+<!--                                    <value>${basedir}/src/test/etc/keystore.jks</value>-->
+<!--                                </property>-->
+<!--                                <property>-->
+<!--                                    <name>javax.net.ssl.trustStorePassword</name>-->
+<!--                                    <value>changeit</value>-->
+<!--                                </property>-->
+<!--                                <property>-->
+<!--                                    <name>javax.net.ssl.trustStoreType</name>-->
+<!--                                    <value>JKS</value>-->
+<!--                                </property>-->
+<!--                            </properties>-->
+<!--                        </configuration>-->
+<!--                    </execution>-->
+<!--                </executions>-->
+<!--            </plugin>-->
+            <!-- end -->
             <plugin>
                 <groupId>org.eclipse.jetty</groupId>
                 <artifactId>jetty-maven-plugin</artifactId>
-                <version>9.4.31.v20200723</version>   <!--      -->
-                <configuration>
-                    <scanIntervalSeconds>0</scanIntervalSeconds>
-                    <contextHandlers>
-                        <contextHandler implementation="org.eclipse.jetty.maven.plugin.JettyWebAppContext">
-                            <war>${project.build.directory}/${project.name}.war</war>
-                            <contextPath>/asbestos</contextPath>
-                        </contextHandler>
-<!--                        <contextHandler implementation="org.eclipse.jetty.webapp.WebAppContext">-->
-<!--                            <war>${project.basedir}/../../hapi-fhir-jpaserver-starter/target/hapi-fhir-jpaserver.war</war>-->
-<!--                            <contextPath>/fhir</contextPath>-->
-<!--                        </contextHandler>-->
-                    </contextHandlers>
-                    <!-- Enter any systemProperties here. -->
-                    <jettyXml>${basedir}/src/test/etc/jetty.xml,${basedir}/src/test/etc/console-capture.xml,${basedir}/src/test/etc/jetty-http.xml,${basedir}/src/test/etc/jetty-ssl.xml,${basedir}/src/test/etc/jetty-https.xml,${basedir}/src/test/etc/jetty-ssl-context.xml</jettyXml>
-                    <!-- keystore is not used: ${basedir}/src/test/etc/jetty-ssl-context.xml -->
-                    <stopKey>alpha</stopKey>
-                    <stopPort>9099</stopPort>
+<!--                <version>9.4.31.v20200723</version>   &lt;!&ndash;      &ndash;&gt;-->
+                <version>9.4.45.v20220203</version>
+                <!--                <version>9.4.36.v20210114</version>-->
+                <!-- version 10 requires configuration updates -->
+<!--                <version>10.0.8</version>-->
 
-                    <systemProperties>
-                        <systemProperty>
-                            <name>jetty.realmProperties</name>
-                            <value>${basedir}/src/test/etc/realm.properties</value>
-                        </systemProperty>
-                        <systemProperty>
-                            <name>jetty.logs</name>
-                            <value>${basedir}/target</value>
-                        </systemProperty>
-                        <systemProperty>
-                            <name>EXTERNAL_CACHE</name>
-                            <value>${itTestsExternalCache}</value>
-                        </systemProperty>
-                        <systemProperty>
-                            <name>SERVICE_PROPERTIES</name>
-                            <value>ittest-service.properties</value>
-                        </systemProperty>
-                        <!-- keystore.jks contains the self signed cert which has a trusted entry. This is a copy of the keystore used by the HapiFhir Tomcat. -->
-                        <systemProperty>
-                            <name>javax.net.ssl.trustStore</name>
-                            <value>${basedir}/src/test/etc/keystore.jks</value>
-                        </systemProperty>
-                        <systemProperty>
-                            <name>javax.net.ssl.trustStorePassword</name>
-                            <value>changeit</value>
-                        </systemProperty>
-                        <systemProperty>
-                            <name>javax.net.ssl.trustStoreType</name>
-                            <value>JKS</value>
-                        </systemProperty>
-                    </systemProperties>
-                </configuration>
                 <executions>
+                    <!-- deploy-war has problems with recognizing trustStore Java system property -->
+<!--                    <execution>-->
+<!--                        <id>start-jetty</id>-->
+<!--                        <phase>pre-integration-test</phase>-->
+<!--                        <goals>-->
+<!--                         <goal>deploy-war</goal>-->
+<!--                        </goals>-->
+<!--                    </execution>-->
+                    <!-- use run-forked to use jvmArgs -->
                     <execution>
                         <id>start-jetty</id>
                         <phase>pre-integration-test</phase>
                         <goals>
-                            <goal>deploy-war</goal>
+                            <goal>run-forked</goal>
                         </goals>
+                        <configuration>
+                            <!-- jvmArgs only apply to the run-forked mode -->
+                            <jvmArgs>-Djavax.net.ssl.trustStore=${basedir}/src/test/etc/keystore.jks -Djavax.net.ssl.trustStorePassword=changeit -Djavax.net.ssl.trustStoreType=JKS -Djetty.realmProperties=${basedir}/src/test/etc/realm.properties -Djetty.logs=${basedir}/target -DEXTERNAL_CACHE=${itTestsExternalCache} -DSERVICE_PROPERTIES=ittest-service.properties</jvmArgs>
+                            <waitForChild>false</waitForChild>
+
+                            <!-- ,${basedir}/src/test/etc/jetty-ssl.xml,${basedir}/src/test/etc/jetty-https.xml,${basedir}/src/test/etc/jetty-ssl-context.xml -->
+                            <!-- if there is not https connector, this keystore/truststore is not used: ${basedir}/src/test/etc/jetty-ssl-context.xml -->
+
+                            <jettyXml>${basedir}/src/test/etc/console-capture.xml,${basedir}/src/test/etc/jetty.xml,${basedir}/src/test/etc/jetty-http.xml</jettyXml>
+                        </configuration>
                     </execution>
                     <execution>
                         <id>stop-jetty</id>
@@ -272,6 +278,70 @@
                         </goals>
                     </execution>
                 </executions>
+
+                <configuration>
+                    <!-- scanIntervalSeconds 0 means do not re-deploy for updated classes -->
+<!--                    <scanIntervalSeconds>0</scanIntervalSeconds>-->
+                    <!-- The Java trustStore systemProperties does is not stable with deploy-war goal. Either it works or fails unpredictably. -->
+<!--                    <systemProperties>-->
+<!--                        &lt;!&ndash; keystore.jks contains the self signed cert which has a trusted entry. This is a copy of the keystore used by the HapiFhir Tomcat. &ndash;&gt;-->
+<!--                        <systemProperty>-->
+<!--                            <name>javax.net.ssl.trustStore</name>-->
+<!--                            <value>${basedir}/src/test/etc/keystore.jks</value>-->
+<!--                        </systemProperty>-->
+<!--                        <systemProperty>-->
+<!--                            <name>javax.net.ssl.trustStorePassword</name>-->
+<!--                            <value>changeit</value>-->
+<!--                        </systemProperty>-->
+<!--                        <systemProperty>-->
+<!--                            <name>javax.net.ssl.trustStoreType</name>-->
+<!--                            <value>JKS</value>-->
+<!--                        </systemProperty>-->
+<!--                        <systemProperty>-->
+<!--                            <name>jetty.realmProperties</name>-->
+<!--                            <value>${basedir}/src/test/etc/realm.properties</value>-->
+<!--                        </systemProperty>-->
+<!--                        <systemProperty>-->
+<!--                            <name>jetty.logs</name>-->
+<!--                            <value>${basedir}/target</value>-->
+<!--                        </systemProperty>-->
+<!--                        <systemProperty>-->
+<!--                            <name>EXTERNAL_CACHE</name>-->
+<!--                            <value>${itTestsExternalCache}</value>-->
+<!--                        </systemProperty>-->
+<!--                        <systemProperty>-->
+<!--                            <name>SERVICE_PROPERTIES</name>-->
+<!--                            <value>ittest-service.properties</value>-->
+<!--                        </systemProperty>-->
+<!--                    </systemProperties>-->
+
+                    <webApp>
+                        <contextPath>/asbestos</contextPath>
+                    </webApp>
+
+                    <!-- begin
+                    this contextHandlers seciton below did not work with forked mode -->
+<!--                    <contextHandlers>-->
+<!--                        <contextHandler implementation="org.eclipse.jetty.maven.plugin.JettyWebAppContext">-->
+<!--                            <war>${project.build.directory}/${project.name}.war</war>-->
+<!--                            <contextPath>/asbestos</contextPath>-->
+<!--                        </contextHandler>-->
+
+                        <!--                        <contextHandler implementation="org.eclipse.jetty.webapp.WebAppContext">-->
+                        <!--                            <war>${project.basedir}/../../hapi-fhir-jpaserver-starter/target/hapi-fhir-jpaserver.war</war>-->
+                        <!--                            <contextPath>/fhir</contextPath>-->
+                        <!--                        </contextHandler>-->
+
+<!--                    </contextHandlers>-->
+                    <!-- end -->
+
+
+                    <stopKey>alpha</stopKey>
+                    <stopPort>9099</stopPort>
+
+
+                </configuration>
+
             </plugin>
         </plugins>
     </build>
