@@ -1,0 +1,1 @@
+Tests the MHD Document Source messages that are captured by the channel event log.

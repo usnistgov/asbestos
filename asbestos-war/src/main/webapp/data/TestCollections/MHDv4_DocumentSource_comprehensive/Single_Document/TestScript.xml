@@ -1,0 +1,44 @@
+<TestScript xmlns="http://hl7.org/fhir">
+    <id value="mhdv4singleDoc"/>
+    <name value="mhdv4singleDoc"/>
+    <description value="Send valid Provide Document Bundle transaction containing a single DocumentReference. Comprehensive metadata is required."/>
+    
+    <variable>
+        <name value="isComprehensiveMetadataExpected"/>
+        <defaultValue value="true"/>
+    </variable>
+
+    <test>
+        <description value="PDB Validations."/>
+        <action>
+            <operation>
+                <description value="Module usage description"/>
+                <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
+                    <extension url="component">
+                        <valueString value="../../Library/AggregateModule/MHDBundleEvalAggregateResult.xml"/>
+                    </extension>
+                    <extension url="urn:fixture-in">
+                        <valueString value="request"/>
+                    </extension>
+                    <extension url="urn:fixture-in">
+                        <valueString value="response"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="isComprehensiveMetadataExpected"/>
+                    </extension>
+                </modifierExtension>
+            </operation>
+        </action>
+    </test>
+    <test>
+        <description value="Test specific."/>
+        <action>
+            <assert>
+                <description value="Request includes one DocumentReference."/>
+                <compareToSourceId value="request"/>
+                <compareToSourceExpression value="Bundle.entry.where(resource.is(FHIR.DocumentReference)).count() = 1"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+    </test>
+</TestScript>
