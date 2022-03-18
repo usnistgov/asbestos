@@ -75,6 +75,7 @@
     <div v-if="$store.state.testRunner.isClientTest" class="second-instruction">
       Number of most recent events to evaluate:
       <input v-model="evalCount" placeholder="5">
+        <p>Tests are run automatically when this page is loaded.</p>
     </div>
 
 
