@@ -1,4 +1,3 @@
-import Vue from 'vue'
 import {UtilFunctions} from "../common/http-common";
 
 export default {
@@ -8,9 +7,6 @@ export default {
             // channelObj: this.theChannelObj,  // channel object
             testOpen: false,
             evalCount: 30,
-            testTimerBeginTime : new Date(),
-            testTimer: null,
-            tcTestTimerElapsedMilliSeconds: {},
             eventsForMinimalClientCollection: 56, /*  According to the EC channel directory, 56 events are generated for v3 Limited TC */
             eventsForComprehensiveClientCollection: 93, /* According to the EC channel directory, 93 events generated for v3 Comprehensive TC */
         }
@@ -97,9 +93,10 @@ export default {
             // console.debug('In loadTestCollection')
             this.tcLoading = true
             // this.$store.dispatch('loadChannel', this.fullChannelId).then(() => {
+            if (this.$store.state.testRunner.currentTestCollectionName !== testCollection) {
                 this.$store.commit('setTestCollectionName', testCollection)
+            }
                 this.$store.dispatch('loadCurrentTestCollection').then(() =>{
-                    this.testScriptNamesUpdated()
                     const requiredChannel = this.$store.state.testRunner.requiredChannel
                     if (requiredChannel) {
                         console.log(`required channel is ${requiredChannel}`)
@@ -123,6 +120,7 @@ export default {
                     // }))
                 Promise.all(promises).then(() => {
                         this.tcLoading = false
+                        this.testScriptNamesUpdated()
                         console.log('Done loading scripts and reports')
                 })
             })
@@ -140,30 +138,45 @@ export default {
             this.$store.commit('setUseJson', false)
         },
         beginTestTime() {
-            clearInterval(this.testTimer)
-            this.testTimerBeginTime = new Date()
-            this.calcTestTime()
-            if (this.testTimer === null) {
-                this.testTimer = setInterval(this.calcTestTime, 100);
-            } else {
-                console.error('testTimer is already active, beginTestTime is cancelled.')
+            // console.debug('In beginTestTime')
+            try {
+                if (this.$store.getters.testTimer !== null) {
+                    // clearInterval(this.$store.getters.testTimer)
+                    this.$store.commit('clearTestTimerInterval')
+                }
+                this.$store.commit('setTestTimerBeginTime', new Date())
+                this.calcTestTime()
+                if (this.$store.getters.testTimer === null) {
+                    this.$store.commit('setTestTimer', setInterval(this.calcTestTime, 100))
+                } else {
+                    console.error('testTimer is already active, beginTestTime is cancelled.')
+                }
+            } catch (e) {
+                console.error('beginTestTime error ' + e)
             }
         },
         calcTestTime() {
             try {
                 const currentTcName = this.$store.state.testRunner.currentTestCollectionName
-                if (this.tcTestTimerElapsedMilliSeconds[currentTcName] === undefined || this.tcTestTimerElapsedMilliSeconds[currentTcName] === null) {
-                    Vue.set(this.tcTestTimerElapsedMilliSeconds, currentTcName, 0)
+                if (currentTcName === undefined || currentTcName === null || currentTcName === '') {
+                    console.error('calcTestTime: currentTcName is invalid')
+                } else {
+                    if (this.$store.getters.tcTestTimerElapsed[currentTcName] === undefined || this.$store.getters.tcTestTimerElapsed[currentTcName] === null) {
+                        this.$store.commit('setTestTimerElapsed', {tcName: currentTcName, milliSeconds: 0})
+                    }
+                    const diffTm = new Date().getTime() - this.$store.getters.testTimerBeginTime.getTime()
+                    this.$store.commit('setTestTimerElapsed', {tcName: currentTcName, milliSeconds: diffTm})
+                    // console.debug(currentTcName + ' isNaN: ' + isNaN(this.$store.getters.tcTestTimerElapsed(currentTcName)))
                 }
-                Vue.set(this.tcTestTimerElapsedMilliSeconds, currentTcName, new Date().getTime() - this.testTimerBeginTime.getTime())
             } catch(e) {
                 console.error('calcTestTime exception: ' + e)
             }
         },
         endTestTime() {
             if (this.testTimer !== null) {
-                clearInterval(this.testTimer)
-                this.testTimer = null
+                // clearInterval(this.$store.getters.testTimer)
+                this.$store.commit('clearTestTimerInterval')
+                this.$store.commit('setTestTimer', null)
                 this.calcTestTime()
             }
         },
@@ -244,10 +257,14 @@ export default {
         },
         elapsedTestTime() {
             try {
-                const currentTcName = this.$store.state.testRunner.currentTestCollectionName
-                const s = this.tcTestTimerElapsedMilliSeconds[currentTcName] / 1000
+            // const currentTcName = this.$store.state.testRunner.currentTestCollectionName
+                const currentTcName = this.$store.getters.currentTcName
+                const s = this.$store.getters.tcTestTimerElapsed[currentTcName] / 1000
+                // console.debug( 'isNan ..' + isNaN(s) + '. got ... ' + s)
                 return Number(s).toFixed(1);
+            //     return Number(this.tcTestTimerElapsedMilliSeconds[this.$store.getters.currentTcName] / 1000).toFixed(1)
             } catch {
+                console.error('elapsedTestTime error')
                return 0
             }
         },

@@ -51,6 +51,10 @@ export const testRunnerStore = {
             ftkTestDependencies: {},
             nonCurrentTcTestReports: {},
 
+            testTimer: null,
+            testTimerBeginTime : new Date(),
+            tcTestTimerElapsedMilliSeconds: {},
+
             doReloadTestCollectionObjs: function(state, tcObj, tcObjs) {
                 if (tcObj in state) {
                     if (state[tcObj].length > 0) {
@@ -282,8 +286,33 @@ export const testRunnerStore = {
         addNonCurrentTcTestReport(state, paramObj) {
             Vue.set(state.nonCurrentTcTestReports, paramObj.testArtifactId, paramObj.testReport)
         },
+        setTestTimer(state, val) {
+            state.testTimer = val
+        },
+        setTestTimerBeginTime(state, val) {
+            state.testTimerBeginTime = val
+        },
+        setTestTimerElapsed (state, paramObj) {
+            Vue.set(state.tcTestTimerElapsedMilliSeconds, paramObj.tcName,  paramObj.milliSeconds)
+        },
+        clearTestTimerInterval(state) {
+            clearInterval(state.testTimer)
+        },
     },
     getters: {
+        testTimerBeginTime: (state) => {
+            return state.testTimerBeginTime
+        },
+        tcTestTimerElapsed: (state) =>
+        {
+           if (state.tcTestTimerElapsedMilliSeconds === undefined || state.tcTestTimerElapsedMilliSeconds === null)
+               return 0
+            else
+               return state.tcTestTimerElapsedMilliSeconds
+        },
+        testTimer: (state) => {
+            return state.testTimer
+        },
         isRunning: (state) => {
             return state.running
         },
@@ -340,6 +369,9 @@ export const testRunnerStore = {
             }
             return false
         },
+        currentTcName: (state) => {
+            return state.currentTestCollectionName
+        }
     },
     actions: {
         loadTestAssertions({commit}) {
