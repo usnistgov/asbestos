@@ -67,12 +67,15 @@
                             alt="External link" src="../../../assets/ext_link.png" style="vertical-align: top"/></span>
                     <span>&nbsp;</span>
                     <label :for="getFormInputId('expression')" :title="getEnumTypeShortDefinition('expression')"
-                           class="form-label">expression</label>
+                           class="form-label">expression.</label>
                     <span
                             :title="`Click to open the expression assert element detailed description in a new browser tab.`"
                             @click.stop="openHelp('expression')"
                             class="infoIconLink"><img
                             alt="External link" src="../../../assets/ext_link.png" style="vertical-align: top"/></span>
+                    <span style="font-size: x-small">NOTE: When writing FHIRPath expressions, use the FHIR Resource StructureDefinition from hl7.org/fhir/<i>resource</i>.</span>
+                    <!-- Inspector contents do not always align with the StructureDefinition
+                    since resource serialization can create superficial elements such as the Bundle.entry.resource[n].resourceType. -->
                 </div>
                 <div>
                  <textarea
