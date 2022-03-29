@@ -16,6 +16,7 @@ export const logStore = {
             // session: null,
             // channel: null,
             loaded: false,
+            proxyResponding: false,
             analysis: null,
             validationServer: null,
             validationResult: null,
@@ -43,6 +44,9 @@ export const logStore = {
             state.eventSummaries = summaries
             state.loaded = true
         },
+        setProxyResponding(state, value) {
+            state.proxyResponding = value
+        },
         prependEventSummaries(state, summaries) {
             // console.debug('In prependEventSummaries')
             summaries.forEach((e,idx) => {
@@ -59,6 +63,9 @@ export const logStore = {
          */
     },
     getters: {
+        isProxyResponding: state => {
+            return state.proxyResponding || (state.loaded !== null && state.loaded)
+        },
         ipAddresses: state => {
             const holder =  state.eventSummaries.map(x => {
                 return x.ipAddr
@@ -112,6 +119,7 @@ export const logStore = {
                 } else {
                     console.error('loadSpecificEventSummaries:rawSummaries is not an array of length > 0.')
                 }
+                commit('setProxyResponding', true)
             } catch (error) {
                 commit('setError', `${error} for LOGLIST/${url}`)
                 console.error(`${error} for ${url}`)
