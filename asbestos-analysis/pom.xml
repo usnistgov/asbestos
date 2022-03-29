@@ -5,7 +5,7 @@
     <parent>
         <artifactId>asbestos</artifactId>
         <groupId>gov.nist.asbestos</groupId>
-        <version>2.3.0-SNAPSHOT</version>
+        <version>4.0.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -15,19 +15,19 @@
         <dependency>
             <groupId>gov.nist.asbestos</groupId>
             <artifactId>asbestos-proxy-support</artifactId>
-            <version>2.3.0-SNAPSHOT</version>
+            <version>4.0.0-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>gov.nist.asbestos</groupId>
             <artifactId>asbestos-test-engine</artifactId>
-            <version>2.3.0-SNAPSHOT</version>
+            <version>4.0.0-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>gov.nist.asbestos</groupId>
             <artifactId>asbestos-mhd</artifactId>
-            <version>2.3.0-SNAPSHOT</version>
+            <version>4.0.0-SNAPSHOT</version>
         </dependency>
 
 <!--        <dependency>-->
