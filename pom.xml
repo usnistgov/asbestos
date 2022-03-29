@@ -4,7 +4,7 @@
 
     <groupId>gov.nist.asbestos</groupId>
     <artifactId>asbestos</artifactId>
-    <version>4.0.0-SNAPSHOT</version>
+    <version>4.0.0</version><!-- asbts -->
     <packaging>pom</packaging>
 
     <name>Asbestos</name>
@@ -55,7 +55,7 @@
             <id>Sunil_Ubuntu</id>
             <properties>
                 <build.profile.id>Sunil_Ubuntu</build.profile.id>
-                <toolkitApiVersion>7.7.0</toolkitApiVersion>
+                <toolkitApiVersion>7.7.2</toolkitApiVersion>
                 <itTestsExternalCache>/home/sunil/ec/asbts-it-tests</itTestsExternalCache>
             </properties>
         </profile>
