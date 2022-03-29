@@ -22,11 +22,6 @@
             <artifactId>simapi</artifactId>
             <version>4.0.0</version><!-- asbts -->
         </dependency>
-<!--        <dependency>-->
-<!--            <groupId>gov.nist.asbestos</groupId>-->
-<!--            <artifactId>asbestos-shared-objects</artifactId>-->
-<!--            <version>4.0.0</version><!-- asbts -->-->
-<!--        </dependency>-->
         <dependency>
             <groupId>gov.nist.asbestos</groupId>
             <artifactId>asbestos-codes-jaxb</artifactId>
@@ -37,12 +32,6 @@
             <artifactId>asbestos-service-properties</artifactId>
             <version>4.0.0</version><!-- asbts -->
         </dependency>
-<!--        <dependency>-->
-<!--            <groupId>gov.nist.asbestos</groupId>-->
-<!--            <artifactId>asbestos-service-properties</artifactId>-->
-<!--            <version>4.0.0</version><!-- asbts -->-->
-<!--            <scope>compile</scope>-->
-<!--        </dependency>-->
     </dependencies>
 
 </project>
