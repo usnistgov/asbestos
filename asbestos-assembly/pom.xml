@@ -32,6 +32,7 @@
         In other words, if Tomcat does not start in XdsToolkit then the xdsToolkitHttpPort is not used.
         -->
         <hapiFhirHttpPort>7080</hapiFhirHttpPort> <!-- NOTE: must be unique for Hapi FHIR catalina base server.xml, only used if not using the XDS Toolkit copy of Hapi FHIR webapp -->
+        <hapiFhirTlsPort>7081</hapiFhirTlsPort>
         <fhirValidationServer>http://localhost:7080/fhir</fhirValidationServer>
         <fhirToolkitHttpPort>9760</fhirToolkitHttpPort>
         <fhirToolkitTlsPort>9743</fhirToolkitTlsPort>
