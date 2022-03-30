@@ -120,6 +120,7 @@
                             <goal>single</goal>
                         </goals>
                         <configuration>
+                            <!-- Default output filename is: ${project.build.finalName} -->
                             <appendAssemblyId>false</appendAssemblyId>
                             <!-- begin Configure additional filters here: -->
 <!--                            <filters>-->
@@ -142,7 +143,7 @@
                             <finalName>docker</finalName>
                             <appendAssemblyId>false</appendAssemblyId>
                             <descriptors>
-                                <!-- The main configuration of this project is in the zip.xml descriptor file -->
+                                <!-- The main configuration of this project is in the docker-zip.xml descriptor file -->
                                 <descriptor>src/main/assembly/docker-zip.xml</descriptor>
                             </descriptors>
                         </configuration>
