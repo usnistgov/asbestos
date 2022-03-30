@@ -161,6 +161,7 @@ export const logStore = {
                             previousPageSize: ('previousPageSize' in parms ? parms.previousPageSize : -1)
                         }
                     }
+                commit('setProxyResponding', false)
                 commit('resetLogLoaded')
                 const rawSummaries = await PROXY.get(url, methodParams)
                 // console.log(JSON.stringify(rawSummaries.data))
