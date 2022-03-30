@@ -24,6 +24,9 @@
         <baseTomcatDir>${basedir}/bundled-tomcat-9.0.26</baseTomcatDir>
         <!-- The directory name given to the final Tomcat directory with the installed webapps, ie. bundled Tomcat -->
         <bundledTomcatDir>tomcat</bundledTomcatDir>
+        <!-- Docker files -->
+        <baseDockerFilesDirectory>${basedir}/docker-setup</baseDockerFilesDirectory>
+        <bundledDockerFilesDirectory>docker</bundledDockerFilesDirectory>
         <!--
         README.txt and Tomcat server.xml use the properties below.
         If only the xdsToolkitBase property shown above is used to point to an existing toolkit outside of the Asbestos installation directory,

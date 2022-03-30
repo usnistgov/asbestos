@@ -131,6 +131,29 @@
        </file>
        <!-- end Toolkit.properties -->
 
+       <!-- begin Docker files -->
+       <file>
+           <source>${baseDockerFilesDirectory}/Dockerfile</source>
+           <outputDirectory>${bundledDockerFilesDirectory}/</outputDirectory>
+           <filtered>true</filtered>
+       </file>
+       <file>
+           <source>${baseDockerFilesDirectory}/service.properties</source>
+           <outputDirectory>${bundledDockerFilesDirectory}/</outputDirectory>
+           <filtered>true</filtered>
+       </file>
+       <file>
+           <source>${baseDockerFilesDirectory}/serviceProperties.json</source>
+           <outputDirectory>${bundledDockerFilesDirectory}/</outputDirectory>
+           <filtered>true</filtered>
+       </file>
+       <file>
+           <source>${baseDockerFilesDirectory}/start.sh</source>
+           <outputDirectory>${bundledDockerFilesDirectory}/</outputDirectory>
+           <filtered>false</filtered>
+       </file>
+       <!-- end Docker files -->
+
    </files>
 </assembly>
 

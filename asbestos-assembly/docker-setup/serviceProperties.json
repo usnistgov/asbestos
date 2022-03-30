@@ -1,0 +1,6 @@
+{
+  "httpsFhirToolkitBase": "https://fhirtoolkit.test:${fhirToolkitTlsPort}/asbestos",
+  "fhirToolkitBase": "http://ehealthsuisse.ihe-europe.net:${fhirToolkitHttpPort}/asbestos",
+  "projectVersion": "${project.version}",
+  "startUpSession": "default"
+}

@@ -1,10 +1,12 @@
 FROM adoptopenjdk/openjdk11-openj9:alpine-slim
 MAINTAINER oliver egger <oliver.egger@ahdis.ch>
-EXPOSE 7080
-EXPOSE 9743
-EXPOSE 9760
-EXPOSE 9770
-EXPOSE 9773
+EXPOSE ${hapiFhirHttpPort}
+EXPOSE ${hapiFhirTlsPort}
+EXPOSE ${fhirToolkitTlsPort}
+EXPOSE ${fhirToolkitHttpPort}
+EXPOSE ${xdsToolkitHttpPort}
+EXPOSE ${xdsToolkitTlsPort}
+
 
 RUN apk add --no-cache bash
 RUN apk add --no-cache findutils 
@@ -29,5 +31,5 @@ ENTRYPOINT ./start.sh
 
 
 # docker build -t asbestos . 
-# docker run --name asbestos -p 9760:9760 -p 9770:9770 -p 9773:9773 -p 9743:9743 -p 7080:7080 asbestos 
+# docker run --name asbestos -p ${fhirToolkitHttpPort}:${fhirToolkitHttpPort}-p ${xdsToolkitHttpPort}:${xdsToolkitHttpPort} -p ${xdsToolkitTlsPort}:${xdsToolkitTlsPort} -p ${fhirToolkitTlsPort}:${fhirToolkitTlsPort} -p ${hapiFhirHttpPort}:${hapiFhirHttpPort} -p ${hapiFhirTlsPort}:${hapiFhirTlsPort} asbestos
 

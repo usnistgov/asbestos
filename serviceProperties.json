@@ -1,6 +1,0 @@
-{
-  "httpsFhirToolkitBase": "https://fhirtoolkit.test:9743/asbestos",
-  "fhirToolkitBase": "http://ehealthsuisse.ihe-europe.net:9760/asbestos",
-  "projectVersion": "2.2.1",
-  "startUpSession": "default"
-}
