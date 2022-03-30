@@ -119,7 +119,6 @@ export const logStore = {
                 } else {
                     console.error('loadSpecificEventSummaries:rawSummaries is not an array of length > 0.')
                 }
-                commit('setProxyResponding', true)
             } catch (error) {
                 commit('setError', `${error} for LOGLIST/${url}`)
                 console.error(`${error} for ${url}`)
@@ -176,6 +175,7 @@ export const logStore = {
                 } else {
                     console.error('loadEventSummaries:rawSummaries is not an array of length > 0.')
                 }
+                commit('setProxyResponding', true)
             } catch (error) {
                 commit('setError', `${error} for LOGLIST/${url}`)
                 console.error(`${error} for ${url}`)

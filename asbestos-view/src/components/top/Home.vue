@@ -16,12 +16,9 @@
         <p>XDS Toolkit is required for testing XDSonFHIR option and for running self tests in Setup.</p>
 
         <div class="selectable" @click="selfTest()"><img src="../../assets/reload.png"/>&nbsp;Refresh</div>
-        <div v-if="$store.getters.isProxyResponding">
+        <div v-if="isProxyResponding">
             <img src="../../assets/check.png">
             Proxy is responding at {{proxyBase()}}
-        </div>
-        <div v-else-if="$store.state.log.loaded===null">
-            Refreshing proxy status...
         </div>
         <div v-else>
             <img src="../../assets/cross.png">
@@ -200,6 +197,11 @@ kinds of channels: FHIR - data passed without modification and MHD - translation
             testHapi() {
                 this.$store.dispatch('hapiHeartbeat')
             },
+        },
+        computed: {
+            isProxyResponding() {
+                return this.$store.getters.isProxyResponding
+            }
         },
         created() {
             this.selfTest()
