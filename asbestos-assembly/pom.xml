@@ -26,7 +26,7 @@
         <bundledTomcatDir>tomcat</bundledTomcatDir>
         <!-- Docker files -->
         <baseDockerFilesDirectory>${basedir}/docker-setup</baseDockerFilesDirectory>
-        <bundledDockerFilesDirectory>docker</bundledDockerFilesDirectory>
+        <bundledDockerFilesDirectory>.</bundledDockerFilesDirectory>
         <!--
         README.txt and Tomcat server.xml use the properties below.
         If only the xdsToolkitBase property shown above is used to point to an existing toolkit outside of the Asbestos installation directory,
@@ -114,6 +114,7 @@
                 <artifactId>maven-assembly-plugin</artifactId>
                 <executions>
                     <execution>
+                        <id>asbestos</id>
                         <phase>package</phase>
                         <goals>
                             <goal>single</goal>
@@ -128,6 +129,21 @@
                             <descriptors>
                                 <!-- The main configuration of this project is in the zip.xml descriptor file -->
                                 <descriptor>src/main/assembly/zip.xml</descriptor>
+                            </descriptors>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>docker</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                        <configuration>
+                            <finalName>docker</finalName>
+                            <appendAssemblyId>false</appendAssemblyId>
+                            <descriptors>
+                                <!-- The main configuration of this project is in the zip.xml descriptor file -->
+                                <descriptor>src/main/assembly/docker-zip.xml</descriptor>
                             </descriptors>
                         </configuration>
                     </execution>

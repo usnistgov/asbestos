@@ -1,0 +1,43 @@
+<assembly xmlns="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2 http://maven.apache.org/xsd/assembly-1.1.2.xsd">
+    <id>zip</id>
+
+    <!--
+    NOTE
+    NOTE You must exclude the file which needs to be filtered.
+    NOTE
+    -->
+    <!-- If true, this adds an extra Asbestos folder on top of the Tomcat folder -->
+    <includeBaseDirectory>false</includeBaseDirectory>
+
+    <formats>
+        <format>zip</format>
+    </formats>
+
+    <files>
+       <!-- begin Docker files -->
+       <file>
+           <source>${baseDockerFilesDirectory}/Dockerfile</source>
+           <outputDirectory>${bundledDockerFilesDirectory}/</outputDirectory>
+           <filtered>true</filtered>
+       </file>
+       <file>
+           <source>${baseDockerFilesDirectory}/service.properties</source>
+           <outputDirectory>${bundledDockerFilesDirectory}/</outputDirectory>
+           <filtered>true</filtered>
+       </file>
+       <file>
+           <source>${baseDockerFilesDirectory}/serviceProperties.json</source>
+           <outputDirectory>${bundledDockerFilesDirectory}/</outputDirectory>
+           <filtered>true</filtered>
+       </file>
+       <file>
+           <source>${baseDockerFilesDirectory}/start.sh</source>
+           <outputDirectory>${bundledDockerFilesDirectory}/</outputDirectory>
+           <filtered>false</filtered>
+       </file>
+       <!-- end Docker files -->
+     </files>
+</assembly>
+
