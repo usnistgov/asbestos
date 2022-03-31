@@ -13,7 +13,7 @@
     <div class="vdivider"></div>
 
     <div class="left">
-      Description: <span v-html="$store.state.testRunner.collectionDescription"></span>
+      Description: <span v-html="testCollectionDescription"></span>
     </div>
 
     <div class="vdivider"></div>
@@ -31,7 +31,7 @@
 <!--                    spyglass icon to evaluate against a set of assertions specific to each test.-->
 <!--                    This evaluation will include validating the response from the background server.</li>-->
                     <li>Only the most recent messages will be evaluated.
-                        Adjust the count below.
+                        Adjust the count below *.
                         <template v-if="testCollection.endsWith('_DocumentSource_minimal')">
                         If evaluating minimal metadata test collection run against an Asbestos self-test channel, use {{eventsForMinimalClientCollection}} most recent events.
                         </template>
@@ -73,7 +73,7 @@
     </div>
 
     <div v-if="$store.state.testRunner.isClientTest" class="second-instruction">
-      Number of most recent events to evaluate:
+      * Number of most recent events to evaluate:
       <input v-model="evalCount" placeholder="5">
         <p>Tests are run automatically when this page is loaded.</p>
     </div>
@@ -92,7 +92,9 @@ export default {
     },
   },
   computed: {
-
+    testCollectionDescription() {
+        return this.$store.state.testRunner.collectionDescription
+    }
   },
   created() {
     // this.load(this.testCollection)

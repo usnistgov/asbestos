@@ -1,7 +1,12 @@
 <template>
     <div>
         <div>
-            <span class="tool-title">{{totalEventCount.toLocaleString("en-US")}} Events for Channel {{ channelName }}</span>
+            <span class="tool-title">
+            <template v-if="!needRefresh">
+                {{totalEventCount.toLocaleString("en-US")}}
+            </template>
+            Events for Channel {{ channelName }}
+            </span>
             <span class="divider"></span>
             <img id="reload" class="selectable" @click="loadEventSummaries()" src="../../assets/reload.png" title="Refresh Events"/>
              <div>
@@ -155,6 +160,7 @@
                 this.needRefresh = false
                 this.isLoading = true
                 let paramsObj = {testSession: this.sessionId, channel: this.channelName, itemsPerPage: this.selectedPageSize, page: this.currentPage, previousPageSize: this.previousPageSize}
+                const that = this
                 return this.$store.dispatch('loadEventSummaries', paramsObj)
                     .then(() => {
                         this.isLoading = false
@@ -171,11 +177,20 @@
                             this.currentPage = newPageNum
                         }
                     })
+                    .catch(function (error) {
+                        that.isLoading = false
+                        that.totalEventCount = 0
+                        that.totalPageCount = 0
+                        that.currentPage = 0
+                        console.error('loadEventSummaries Error: ' + error)
+                    })
+
             },
             displayInstruction() {
                this.needRefresh = true
             },
             updatePagingRoute() {
+                this.totalEventCount = 0
                 const currentRoutePath = this.$router.currentRoute.path
                 const routePathToBe = `/session/${this.sessionId}/channel/${this.channelName}/logs/${this.selectedPageSize}/${this.currentPage}`
                 // console.log('loglist current route: ' + currentRoutePath)

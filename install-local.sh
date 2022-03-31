@@ -109,6 +109,8 @@ unzip -qq fhir.zip
 echo "REMOVE FHIR.ZIP"
 rm -f fhir.zip
 
+echo "COPY DOCKER.ZIP"
+cp $DEVELOP/asbestos/asbestos-assembly/target/docker.zip /opt/
 
 echo "DONE"
 

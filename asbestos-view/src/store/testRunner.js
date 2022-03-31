@@ -391,7 +391,9 @@ export const testRunnerStore = {
             const url = `clienteval/${rootState.base.channel.testSession}__${rootState.base.channel.channelName}/${state.eventEvalCount}/${state.currentTestCollectionName}/${testId}`
             return ENGINE.get(url)
                 .then(response => {
+                    if (response !== null && response !== undefined && 'data' in response) {
                     const report = response.data
+                    if (testId in report && report[testId] !== null) {
                     const eventReports = report[testId]
                     commit('setClientTestResult', { testId: testId, reports: eventReports} )
                     const setA_eventIds = Object.keys(eventReports) // may have newer events
@@ -426,9 +428,15 @@ export const testRunnerStore = {
                         }
                     }
                     dispatch('loadSpecificEventSummaries', postParams)
+                    } else {
+                        console.debug('No testId in report or No events found for channel.')
+                    }
+                  } else {
+                    console.debug('Response from runEval is undefined or null.')
+                  }
                 })
                 .catch(function (error) {
-                    commit('setError', LOG.baseURL + url + ': ' + error)
+                    commit('setError', 'runEval Error: ' + LOG.baseURL + url + ': ' + error)
                 })
         },
         runSingleEventEval({commit, rootState}, parms) {
@@ -634,11 +642,16 @@ export const testRunnerStore = {
                 await promise
                 if ('testNames' in theResponse)
                     commit('setTestScriptNames', theResponse.testNames)  // sets testScriptNames
-                if ('requiredChannel' in theResponse)
+                if ('requiredChannel' in theResponse) {
                     commit('setRequiredChannel', theResponse.requiredChannel)  // sets requiredChannel
+                } else {
+                    commit('setRequiredChannel', null)
+                }
                 if ('description' in theResponse) {
                     const description = theResponse.description
                     commit('setCollectionDescription', description)  // sets collectionDescription
+                } else {
+                     commit('setCollectionDescription', '')
                 }
                 if ('isServerTest' in theResponse) {
                     const isClient =  ! theResponse.isServerTest

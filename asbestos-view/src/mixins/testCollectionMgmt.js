@@ -19,6 +19,18 @@ export default {
             return report.issued
         },
         setEvalCount() {
+        /*
+            const tcName = this.$store.state.testRunner.currentTestCollectionName
+            const mostRecentEventsNum = this.theChannelObj.testSession === 'default' && this.theChannelObj.channelName === 'limited' && tcName.endsWith('_DocumentSource_minimal')
+                                        ? this.eventsForMinimalClientCollection
+                                        : this.theChannelObj.testSession === 'default' && this.theChannelObj.channelName === 'limited' && tcName.endsWith('_DocumentSource_comprehensive')
+                                            ? this.eventsForComprehensiveClientCollection
+                                            : this.theChannelObj.testSession === 'default' && this.theChannelObj.channelName === 'xds' && tcName.endsWith('_DocumentSource_minimal')
+                                                ? this.eventsForMinimalClientCollection
+                                                : this.theChannelObj.testSession === 'default' && this.theChannelObj.channelName === 'xds' && tcName.endsWith('_DocumentSource_comprehensive')
+                                                    ? this.eventsForComprehensiveClientCollection
+                                                    : this.evalCount;
+                                                    */
             this.$store.commit('setEventEvalCount', this.evalCount)
         },
         async testScriptNamesUpdated() {
@@ -98,7 +110,7 @@ export default {
             }
                 this.$store.dispatch('loadCurrentTestCollection').then(() =>{
                     const requiredChannel = this.$store.state.testRunner.requiredChannel
-                    if (requiredChannel) {
+                    if (requiredChannel !== null && requiredChannel !== undefined) {
                         console.log(`required channel is ${requiredChannel}`)
                         this.$store.commit('setChannelId', requiredChannel)
                     }

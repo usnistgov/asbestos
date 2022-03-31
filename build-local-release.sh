@@ -47,6 +47,11 @@ if [ ! -f target/asbestos.zip ]; then
   exit -1
 fi
 
+if [ ! -f target/docker.zip ]; then
+  echo "build docker.zip failed"
+  exit -1
+fi
+
 echo "ALL BUILDS PASSED"
 
 echo "INSTALL LOCALLY"
