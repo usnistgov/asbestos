@@ -2,13 +2,14 @@
     <div>
         <div>
             <span class="tool-title">
-            <template v-if="!needRefresh">
+            <template v-if="!needRefresh && totalEventCount > 0">
                 {{totalEventCount.toLocaleString("en-US")}}
             </template>
             Events for Channel {{ channelName }}
             </span>
             <span class="divider"></span>
             <img id="reload" class="selectable" @click="loadEventSummaries()" src="../../assets/reload.png" title="Refresh Events"/>
+            <template v-if="!needRefresh && totalEventCount > 0">
              <div>
 
                  <img id="left" class="selectable" @click="pageLeft()" src="../../assets/left-arrow.png" title="Events"/>&nbsp;
@@ -27,9 +28,12 @@
                 </div>
                 <div class="rightPad"></div>
             </div>
+            </template>
+            <template v-else><div/></template>
             <span v-show="!$store.state.log.loaded" class="loadingBkgText">Loading...</span>
             <div class="divider"></div>
         </div>
+        <template v-if="!needRefresh && totalEventCount > 0">
         <div>
             <label for="selectedIPSelect">Source IP addr filter:</label>&nbsp;
             <select id="selectedIPSelect" v-model="selectedIP" v-bind:size="1">
@@ -51,6 +55,7 @@
                 </option>
             </select>.
         </div>
+        </template>
 
         <template>
             <template v-if="!needRefresh">
@@ -164,6 +169,8 @@
                 return this.$store.dispatch('loadEventSummaries', paramsObj)
                     .then(() => {
                         this.isLoading = false
+                        this.totalEventCount = 0
+                        this.totalPageCount = 0
                         if ('totalEventCount' in this.$store.state.log.eventSummaries[0]) {
                             const totalEventCount = this.$store.state.log.eventSummaries[0].totalEventCount
                             this.totalEventCount = totalEventCount
@@ -190,7 +197,6 @@
                this.needRefresh = true
             },
             updatePagingRoute() {
-                this.totalEventCount = 0
                 const currentRoutePath = this.$router.currentRoute.path
                 const routePathToBe = `/session/${this.sessionId}/channel/${this.channelName}/logs/${this.selectedPageSize}/${this.currentPage}`
                 // console.log('loglist current route: ' + currentRoutePath)

@@ -174,6 +174,7 @@ export const logStore = {
                     })
                     commit('setEventSummaries', eventSummaries)
                 } else {
+                    commit('setEventSummaries', [])
                     console.error('loadEventSummaries:rawSummaries is not an array of length > 0.')
                 }
                 commit('setProxyResponding', true)
