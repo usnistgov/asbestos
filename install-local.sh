@@ -83,7 +83,7 @@ echo "EXPAND XDSTOOLS"
 cd $INSTALL/tomcat/Toolkits/XdsToolkit/webapps
 mkdir xdstools
 cd xdstools
-unzip -qq ../xdstools.war
+jar -xf ../xdstools.war
 
 echo "REMOVE XDSTOOLS.WAR"
 rm -f ../xdstools.war
