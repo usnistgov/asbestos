@@ -620,7 +620,8 @@
           "link": "https://profiles.ihe.net/ITI/MHD/ITI-65.html#23654122-patient-identity"
         },
         "SpecificationText": [{
-          "text": "All DocumentReference.subject, and List.subject values shall be References to a FHIR Patient Resource that may be obtained through use of PDQm, PIXm, or by some other means. If the Patient Resource is accessible to both the Document Source and Document Recipient via an external reference, it shall be included as an external reference. Otherwise, the Patient Resource shall be included in the Bundle."
+          "text": "All DocumentReference.subject, and List.subject values shall be References to a FHIR Patient Resource that may be obtained through use of PDQm, PIXm, or by some other means. If the Patient Resource is accessible to both the Document Source and Document Recipient via an external reference, it shall be included as an external reference. Otherwise, the Patient Resource shall be included in the Bundle.",
+          "comments": "Patient is not a contained resource, but shall be included as an entry in the bundle."
         }]
       }
     },
