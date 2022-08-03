@@ -16,6 +16,8 @@ import java.util.List;
 
 public interface MhdProfileVersionInterface {
     MhdVersionEnum getMhdVersionEnum();
+    String getComprehensiveMetadataCanonicalUri();
+    String getMinimalMetadataCanonicalUri();
     Boolean isMinimalMetadata() throws Exception;
     boolean isBundleProfileDetected(Bundle bundle);
     void evalBundleProfile(Bundle bundle);

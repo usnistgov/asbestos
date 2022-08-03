@@ -3,8 +3,9 @@ package gov.nist.asbestos.mhd.channel;
 import java.util.Objects;
 
 public enum MhdVersionEnum {
-    MHDv3x("MHDv3.x", "MHD Profile - Rev 3.1"),
-    MHDv4("MHDv4", "MHD Profile - Rev 4.0.1. See https://profiles.ihe.net/ITI/MHD/toc.html");
+    MHDv3x("MHDv3.x", "MHD Profile - Rev 3.1. See https://profiles.ihe.net/ITI/MHD/history.html"),
+    MHDv4("MHDv4", "MHD Profile - Rev 4.0.1. See https://profiles.ihe.net/ITI/MHD/4.0.1/toc.html"),
+    MHDv410("MHDv410", "MHD Profile - Rev 4.1.0. See https://profiles.ihe.net/ITI/MHD/4.1.0/toc.html");
 
     private String version;
     private String mhdProfileRef;

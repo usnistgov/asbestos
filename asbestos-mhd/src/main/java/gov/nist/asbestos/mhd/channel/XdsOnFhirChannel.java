@@ -1,50 +1,72 @@
 package gov.nist.asbestos.mhd.channel;
 
-import gov.nist.asbestos.client.channel.BaseChannel;
-import gov.nist.asbestos.client.general.ChannelSupport;
-import gov.nist.asbestos.mhd.transforms.MhdTransforms;
-import gov.nist.asbestos.mhd.transforms.MhdV4;
-import gov.nist.asbestos.mhd.translation.search.DocManSQParamTranslator;
-import gov.nist.asbestos.mhd.util.XdsActorMapper;
-import gov.nist.asbestos.client.resolver.*;
-import gov.nist.asbestos.mhd.SubmittedObject;
-import gov.nist.asbestos.mhd.exceptions.TransformException;
 import gov.nist.asbestos.client.Base.ParserBase;
+import gov.nist.asbestos.client.channel.BaseChannel;
+import gov.nist.asbestos.client.channel.ChannelConfig;
 import gov.nist.asbestos.client.client.FhirClient;
 import gov.nist.asbestos.client.client.Format;
 import gov.nist.asbestos.client.events.Event;
 import gov.nist.asbestos.client.events.ITask;
+import gov.nist.asbestos.client.general.ChannelSupport;
+import gov.nist.asbestos.client.resolver.IdBuilder;
+import gov.nist.asbestos.client.resolver.Ref;
+import gov.nist.asbestos.client.resolver.ResourceCacheMgr;
+import gov.nist.asbestos.client.resolver.ResourceMgr;
+import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import gov.nist.asbestos.http.headers.Header;
 import gov.nist.asbestos.http.headers.Headers;
-import gov.nist.asbestos.http.operations.*;
-import gov.nist.asbestos.mhd.transactionSupport.*;
+import gov.nist.asbestos.http.operations.HttpBase;
+import gov.nist.asbestos.http.operations.HttpDelete;
+import gov.nist.asbestos.http.operations.HttpGetter;
+import gov.nist.asbestos.http.operations.HttpPost;
+import gov.nist.asbestos.http.operations.Verb;
+import gov.nist.asbestos.mhd.SubmittedObject;
+import gov.nist.asbestos.mhd.exceptions.TransformException;
+import gov.nist.asbestos.mhd.transactionSupport.AhqrSender;
+import gov.nist.asbestos.mhd.transactionSupport.AssigningAuthorities;
+import gov.nist.asbestos.mhd.transactionSupport.CodeTranslator;
+import gov.nist.asbestos.mhd.transactionSupport.FaultParser;
+import gov.nist.asbestos.mhd.transactionSupport.ProvideAndRegisterBuilder;
+import gov.nist.asbestos.mhd.transactionSupport.RetrieveContent;
+import gov.nist.asbestos.mhd.transactionSupport.XmlTools;
 import gov.nist.asbestos.mhd.transforms.BundleToRegistryObjectList;
 import gov.nist.asbestos.mhd.transforms.DocumentEntryToDocumentReference;
+import gov.nist.asbestos.mhd.transforms.MhdTransforms;
+import gov.nist.asbestos.mhd.transforms.MhdV4;
 import gov.nist.asbestos.mhd.translation.ContainedIdAllocator;
+import gov.nist.asbestos.mhd.translation.search.DocManSQParamTranslator;
 import gov.nist.asbestos.mhd.translation.search.FhirSq;
-import gov.nist.asbestos.serviceproperties.ServiceProperties;
-import gov.nist.asbestos.serviceproperties.ServicePropertiesEnum;
-import gov.nist.asbestos.client.channel.ChannelConfig;
+import gov.nist.asbestos.mhd.util.XdsActorMapper;
 import gov.nist.asbestos.simapi.tk.installation.Installation;
 import gov.nist.asbestos.simapi.validation.Val;
-import gov.nist.asbestos.utilities.*;
+import gov.nist.asbestos.utilities.ErrorType;
+import gov.nist.asbestos.utilities.MultipartSender;
+import gov.nist.asbestos.utilities.PnrWrapper;
+import gov.nist.asbestos.utilities.RegError;
+import gov.nist.asbestos.utilities.RegErrorList;
+import gov.nist.asbestos.utilities.RegistryResponseBuilder;
 import ihe.iti.xds_b._2007.ProvideAndRegisterDocumentSetRequestType;
 import oasis.names.tc.ebxml_regrep.xsd.lcm._3.SubmitObjectsRequest;
-import oasis.names.tc.ebxml_regrep.xsd.rim._3.*;
+import oasis.names.tc.ebxml_regrep.xsd.rim._3.ExtrinsicObjectType;
+import oasis.names.tc.ebxml_regrep.xsd.rim._3.IdentifiableType;
+import oasis.names.tc.ebxml_regrep.xsd.rim._3.RegistryObjectListType;
 import oasis.names.tc.ebxml_regrep.xsd.rs._3.RegistryResponseType;
 import org.apache.commons.codec.binary.Base64;
-
-import java.util.logging.Logger;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.*;
-import org.hl7.fhir.r4.model.Attachment;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 // TODO - honor the Prefer header - http://hl7.org/fhir/http.html#ops
@@ -564,6 +586,13 @@ public class XdsOnFhirChannel extends BaseChannel /*implements IBaseChannel*/ {
     }
 
 
+    /**
+     * Transform document sharing actor response
+     * @param sender
+     * @param responseOut
+     * @param requestedType
+     * @param search
+     */
     private void transformDSResponse(AhqrSender sender, HttpBase responseOut, String requestedType, String search) {
         responseOut.setResponseContentType(returnFormatType.getContentType());
         Ref searchRef = new Ref(search);
