@@ -5,8 +5,11 @@ import gov.nist.asbestos.client.resolver.IdBuilder;
 import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.client.resolver.ResourceMgr;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
+import gov.nist.asbestos.mhd.channel.MhdBundleProfile;
+import gov.nist.asbestos.mhd.channel.MhdBundleProfileEnum;
 import gov.nist.asbestos.mhd.channel.MhdProfileVersionInterface;
 import gov.nist.asbestos.mhd.channel.MhdVersionEnum;
+import gov.nist.asbestos.mhd.channel.ProfileVersionCanonicalUri;
 import gov.nist.asbestos.mhd.transactionSupport.AssigningAuthorities;
 import gov.nist.asbestos.mhd.transactionSupport.CodeTranslator;
 import gov.nist.asbestos.mhd.translation.attribute.ExtrinsicId;
@@ -16,8 +19,6 @@ import gov.nist.asbestos.simapi.validation.ValE;
 import oasis.names.tc.ebxml_regrep.xsd.rim._3.RegistryPackageType;
 import org.hl7.fhir.r4.model.BaseResource;
 import org.hl7.fhir.r4.model.Binary;
-import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.DocumentManifest;
 import org.hl7.fhir.r4.model.DocumentReference;
 import org.hl7.fhir.r4.model.Identifier;
@@ -31,11 +32,13 @@ import java.util.Objects;
 /**
  * V3.x specific implementation
  */
-public class MhdV3x implements MhdProfileVersionInterface {
+public class MhdV3x implements MhdProfileVersionInterface, ProfileVersionCanonicalUri  {
     static String comprehensiveMetadataProfile = "http://ihe.net/fhir/StructureDefinition/IHE_MHD_Provide_Comprehensive_DocumentBundle";
     static String minimalMetadataProfile = "http://ihe.net/fhir/StructureDefinition/IHE_MHD_Provide_Minimal_DocumentBundle";
     private static List<Class<?>> acceptableResourceTypes = Arrays.asList(DocumentManifest.class, DocumentReference.class, Binary.class, ListResource.class);
-    private static List<String> profiles = Arrays.asList(comprehensiveMetadataProfile, minimalMetadataProfile);
+    private static List<MhdBundleProfile> profiles = Arrays.asList(
+            new MhdBundleProfile(MhdBundleProfileEnum.COMPREHENSIVE, comprehensiveMetadataProfile),
+            new MhdBundleProfile(MhdBundleProfileEnum.MINIMAL, minimalMetadataProfile));
     private static String iheBundleResourceReference = "3.65.4.1.2.1 Bundle Resources";
     private static MhdVersionEnum mhdVersionEnum = MhdVersionEnum.MHDv3x;
     private Val val;
@@ -53,39 +56,25 @@ public class MhdV3x implements MhdProfileVersionInterface {
         this.mhdTransforms = mhdTransforms;
     }
 
+
     @Override
-    public MhdVersionEnum getMhdVersionEnum() {
+    public String getIheReference() {
+        return iheBundleResourceReference;
+    }
+
+    @Override
+    public ProfileVersionCanonicalUri profile() {
+        return this;
+    }
+
+    @Override
+    public MhdVersionEnum getMhdVersion() {
         return mhdVersionEnum;
     }
 
     @Override
-    public Boolean isMinimalMetadata() throws Exception {
-        if (isMinimalMetadata == null) {
-            throw new Exception("isMinimalMetadata is not initialized.");
-        }
-        return isMinimalMetadata;
-    }
-
-
-    @Override
-    public boolean isBundleProfileDetected(Bundle bundle) {
-        if (bundle.getMeta().getProfile().size() == 1) {
-            try {
-                CanonicalType bundleProfile = bundle.getMeta().getProfile().get(0);
-                return (profiles.contains(bundleProfile.asStringValue()));
-            } catch (Exception ex) {
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Checks bundle profile canonical URI
-     * @param bundle
-     */
-    @Override
-    public void evalBundleProfile(Bundle bundle) {
-        this.evalBundleProfile(val, bundle, profiles, iheBundleResourceReference);
+    public List<MhdBundleProfile> getAll() {
+        return profiles;
     }
 
     @Override

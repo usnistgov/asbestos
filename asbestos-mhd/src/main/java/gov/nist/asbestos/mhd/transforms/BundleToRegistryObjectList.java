@@ -5,6 +5,8 @@ import gov.nist.asbestos.client.Base.IVal;
 import gov.nist.asbestos.client.events.ITask;
 import gov.nist.asbestos.client.resolver.*;
 import gov.nist.asbestos.mhd.SubmittedObject;
+import gov.nist.asbestos.mhd.channel.MhdBundleProfile;
+import gov.nist.asbestos.mhd.channel.MhdBundleProfileEnum;
 import gov.nist.asbestos.mhd.channel.MhdProfileVersionInterface;
 import gov.nist.asbestos.mhd.exceptions.TransformException;
 import gov.nist.asbestos.mhd.transactionSupport.AssigningAuthorities;
@@ -61,6 +63,7 @@ public class BundleToRegistryObjectList implements IVal {
     private URI sqEndpoint = null;
 //    private File externalCache = Installation.instance().externalCache();
     private ChannelConfig channelConfig;
+    private MhdBundleProfile mhdBundleProfile;
 
 
     public BundleToRegistryObjectList(ChannelConfig channelConfig) {
@@ -317,7 +320,8 @@ public class BundleToRegistryObjectList implements IVal {
     private void scanBundleForAcceptability(MhdProfileVersionInterface mhdVersionSpecificImpl, Bundle bundle, ResourceMgr rMgr) {
         Objects.requireNonNull(mhdVersionSpecificImpl);
 
-        mhdVersionSpecificImpl.evalBundleProfile(bundle);
+        MhdBundleProfileEnum p = mhdVersionSpecificImpl.getBundleProfileType(bundle);
+        mhdBundleProfile = mhdVersionSpecificImpl.getBundleProfile(p);
 
         evalBundleType(bundle);
 
@@ -352,7 +356,7 @@ public class BundleToRegistryObjectList implements IVal {
                 } catch (Exception ex) {
                     resourceClassName = "(Unknown class)";
                 }
-                String profileRef = mhdVersionSpecificImpl.getMhdVersionEnum().getMhdProfileRef();
+                String profileRef = mhdVersionSpecificImpl.getIheReference();
                 val.add(new ValE(String.format("Resource type ${resource.resource.class.simpleName} %s is not part of %s and will be ignored", resourceClassName, profileRef))
                         .asWarning()
                         .add(new ValE(profileRef).asDoc()));

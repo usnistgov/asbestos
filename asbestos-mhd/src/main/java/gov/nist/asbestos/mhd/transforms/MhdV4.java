@@ -5,15 +5,24 @@ import gov.nist.asbestos.client.resolver.IdBuilder;
 import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.client.resolver.ResourceMgr;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
+import gov.nist.asbestos.mhd.channel.MhdBundleProfile;
+import gov.nist.asbestos.mhd.channel.MhdBundleProfileEnum;
 import gov.nist.asbestos.mhd.channel.MhdProfileVersionInterface;
 import gov.nist.asbestos.mhd.channel.MhdVersionEnum;
+import gov.nist.asbestos.mhd.channel.ProfileVersionCanonicalUri;
 import gov.nist.asbestos.mhd.transactionSupport.AssigningAuthorities;
 import gov.nist.asbestos.mhd.transactionSupport.CodeTranslator;
 import gov.nist.asbestos.mhd.util.Utils;
 import gov.nist.asbestos.simapi.validation.Val;
 import gov.nist.asbestos.simapi.validation.ValE;
 import oasis.names.tc.ebxml_regrep.xsd.rim._3.RegistryPackageType;
-import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.BaseResource;
+import org.hl7.fhir.r4.model.Binary;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.DocumentReference;
+import org.hl7.fhir.r4.model.Extension;
+import org.hl7.fhir.r4.model.Identifier;
+import org.hl7.fhir.r4.model.ListResource;
 import org.hl7.fhir.r4.model.codesystems.ListMode;
 
 import java.util.AbstractMap;
@@ -23,7 +32,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -57,15 +65,17 @@ import static gov.nist.asbestos.mhd.transforms.MhdV4Constants.iheSourceIdExtensi
  *      TODO - Contained option
  *      static String containedMetadataProfile = "http://profiles.ihe.net/ITI/MHD/4.0.1/StructureDefinition/IHE.MHD.UnContained.Comprehensive.ProvideBundle";
  */
-public class MhdV4 implements MhdProfileVersionInterface {
+public class MhdV4 implements MhdProfileVersionInterface, ProfileVersionCanonicalUri {
     private static final String SUBMISSION_SET_PROFILE = "https://profiles.ihe.net/ITI/MHD/4.0.1/StructureDefinition-IHE.MHD.Minimal.SubmissionSet.html#profile";
     private static String comprehensiveMetadataProfile = "http://profiles.ihe.net/ITI/MHD/StructureDefinition/IHE.MHD.Comprehensive.ProvideBundle";
     private static String minimalMetadataProfile = "http://profiles.ihe.net/ITI/MHD/StructureDefinition/IHE.MHD.Minimal.ProvideBundle";
-    private static Map<String, String> listTypeMap  =
+    static Map<String, String> listTypeMap  =
         Collections.unmodifiableMap(Stream.of(
                 new AbstractMap.SimpleEntry<>("submissionset", "http://profiles.ihe.net/ITI/MHD/CodeSystem/MHDlistTypes"))
                 .collect(Collectors.toMap(AbstractMap.SimpleEntry::getKey, AbstractMap.SimpleEntry::getValue)));
-    private static List<String> profiles = Arrays.asList(comprehensiveMetadataProfile, minimalMetadataProfile);
+    private static List<MhdBundleProfile> profiles = Arrays.asList(
+            new MhdBundleProfile(MhdBundleProfileEnum.COMPREHENSIVE, comprehensiveMetadataProfile),
+            new MhdBundleProfile(MhdBundleProfileEnum.MINIMAL, minimalMetadataProfile));
     private static String bundleResourcesRef = "3.65.4.1.2.1 Bundle Resources. See https://profiles.ihe.net/ITI/MHD/4.0.1/ITI-65.html#23654121-bundle-resources";
     private static List<Class<?>> acceptableResourceTypes = Arrays.asList(ListResource.class, DocumentReference.class, Binary.class);
     private static MhdVersionEnum mhdVersionEnum = MhdVersionEnum.MHDv4;
@@ -74,10 +84,6 @@ public class MhdV4 implements MhdProfileVersionInterface {
     private MhdTransforms mhdTransforms;
     private Boolean isMinimalMetadata = null;
 
-
-    @Override
-    public Supplier<String> getminpcrui =        () -> return null;
-
     public MhdV4(Val val, MhdTransforms mhdTransforms) {
         Objects.requireNonNull(val);
         Objects.requireNonNull(mhdTransforms);
@@ -85,33 +91,26 @@ public class MhdV4 implements MhdProfileVersionInterface {
         this.mhdTransforms = mhdTransforms;
     }
 
+    @Override
+    public ProfileVersionCanonicalUri profile() {
+        return this;
+    }
 
     @Override
-    public MhdVersionEnum getMhdVersionEnum() {
+    public MhdVersionEnum getMhdVersion() {
         return mhdVersionEnum;
     }
 
     @Override
-    public boolean isBundleProfileDetected(Bundle bundle) {
-        if (bundle.getMeta().getProfile().size() == 1) {
-            try {
-                CanonicalType bundleProfile = bundle.getMeta().getProfile().get(0);
-                return (getProfileCanonicalUris().contains(bundleProfile.asStringValue()));
-            } catch (Exception ex) {
-            }
-        }
-        return false;
-
+    public String getIheReference() {
+        return bundleResourcesRef;
     }
 
-    /**
-     *
-     * @param bundle
-     */
     @Override
-    public void evalBundleProfile(Bundle bundle) {
-        this.evalBundleProfile(val, bundle, profiles, bundleResourcesRef);
+    public List<MhdBundleProfile> getAll() {
+        return profiles;
     }
+
 
 
     @Override
@@ -158,21 +157,6 @@ public class MhdV4 implements MhdProfileVersionInterface {
         return null;
     }
 
-    /**
-     * Use discriminator to find if SS or Folder
-    */
-    public static boolean isCodedListType(BaseResource resource, String code) {
-        if (resource instanceof ListResource) {
-            ListResource listResource = (ListResource)resource;
-            String system = listTypeMap.get(code);
-            if (listResource.getCode().hasCoding(system, code)) {
-                if (listResource.getCode().getCoding().stream().filter(e -> system.equals(e.getSystem()) && code.equals(e.getCode())).count() == 1) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
 
     private RegistryPackageType createSubmissionSet(IdBuilder idBuilder, ResourceWrapper wrapper, ValE vale, ChannelConfig channelConfig, CodeTranslator codeTranslator, AssigningAuthorities assigningAuthorities) {
         ListResource listResource = (ListResource)wrapper.getResource();

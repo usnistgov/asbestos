@@ -203,7 +203,11 @@ public class XdsOnFhirChannel extends BaseChannel /*implements IBaseChannel*/ {
                             if (intf == null) {
                                 return false;
                             } else {
-                                return intf.isBundleProfileDetected(bundle);
+                                MhdBundleProfileEnum mbpe = intf.getBundleProfileType(bundle);
+                                if (mbpe != null && !(mbpe.ordinal() >= MhdBundleProfileEnum.ERROR.ordinal())) {
+                                   return true;
+                                }
+                                return false;
                             }
                         }
                     })
