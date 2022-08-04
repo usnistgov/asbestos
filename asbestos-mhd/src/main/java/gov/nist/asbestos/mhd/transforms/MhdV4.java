@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -54,10 +55,10 @@ import static gov.nist.asbestos.mhd.transforms.MhdV4Constants.iheSourceIdExtensi
  *       (To be verified by the DocumentSource tests and Inspector Inspect Request, ie. Assertion ID FTK4RM500 ?)
  *
  *      TODO - Contained option
- *      static String containedMetadataProfile = "http://profiles.ihe.net/ITI/MHD/StructureDefinition/IHE.MHD.UnContained.Comprehensive.ProvideBundle";
+ *      static String containedMetadataProfile = "http://profiles.ihe.net/ITI/MHD/4.0.1/StructureDefinition/IHE.MHD.UnContained.Comprehensive.ProvideBundle";
  */
 public class MhdV4 implements MhdProfileVersionInterface {
-    private static final String SUBMISSION_SET_PROFILE = "https://profiles.ihe.net/ITI/MHD/StructureDefinition-IHE.MHD.Minimal.SubmissionSet.html#profile";
+    private static final String SUBMISSION_SET_PROFILE = "https://profiles.ihe.net/ITI/MHD/4.0.1/StructureDefinition-IHE.MHD.Minimal.SubmissionSet.html#profile";
     private static String comprehensiveMetadataProfile = "http://profiles.ihe.net/ITI/MHD/StructureDefinition/IHE.MHD.Comprehensive.ProvideBundle";
     private static String minimalMetadataProfile = "http://profiles.ihe.net/ITI/MHD/StructureDefinition/IHE.MHD.Minimal.ProvideBundle";
     private static Map<String, String> listTypeMap  =
@@ -65,13 +66,17 @@ public class MhdV4 implements MhdProfileVersionInterface {
                 new AbstractMap.SimpleEntry<>("submissionset", "http://profiles.ihe.net/ITI/MHD/CodeSystem/MHDlistTypes"))
                 .collect(Collectors.toMap(AbstractMap.SimpleEntry::getKey, AbstractMap.SimpleEntry::getValue)));
     private static List<String> profiles = Arrays.asList(comprehensiveMetadataProfile, minimalMetadataProfile);
+    private static String bundleResourcesRef = "3.65.4.1.2.1 Bundle Resources. See https://profiles.ihe.net/ITI/MHD/4.0.1/ITI-65.html#23654121-bundle-resources";
     private static List<Class<?>> acceptableResourceTypes = Arrays.asList(ListResource.class, DocumentReference.class, Binary.class);
     private static MhdVersionEnum mhdVersionEnum = MhdVersionEnum.MHDv4;
 
     private Val val;
     private MhdTransforms mhdTransforms;
-    Boolean isMinimalMetadata = null;
+    private Boolean isMinimalMetadata = null;
 
+
+    @Override
+    public Supplier<String> getminpcrui =        () -> return null;
 
     public MhdV4(Val val, MhdTransforms mhdTransforms) {
         Objects.requireNonNull(val);
@@ -91,7 +96,7 @@ public class MhdV4 implements MhdProfileVersionInterface {
         if (bundle.getMeta().getProfile().size() == 1) {
             try {
                 CanonicalType bundleProfile = bundle.getMeta().getProfile().get(0);
-                return (profiles.contains(bundleProfile.asStringValue()));
+                return (getProfileCanonicalUris().contains(bundleProfile.asStringValue()));
             } catch (Exception ex) {
             }
         }
@@ -105,27 +110,9 @@ public class MhdV4 implements MhdProfileVersionInterface {
      */
     @Override
     public void evalBundleProfile(Bundle bundle) {
-        String docRef = "3.65.4.1.2.1 Bundle Resources. See https://profiles.ihe.net/ITI/MHD/ITI-65.html#23654121-bundle-resources";
-        if (bundle.getMeta().getProfile().size() != 1)
-            val.add(new ValE("No profile declaration present in bundle").asError()
-                    .add(new ValE(docRef).asDoc()));
-        try {
-            CanonicalType bundleProfile = bundle.getMeta().getProfile().get(0);
-            if (!profiles.contains(bundleProfile.asStringValue()))
-                val.add(new ValE("Do not understand profile declared in bundle - " + bundleProfile).asError()
-                        .add(new ValE(docRef).asDoc()));
-            if (bundleProfile.asStringValue().equals(minimalMetadataProfile))
-                isMinimalMetadata = new Boolean(true);
-        } catch (Exception e) {
-            val.add(new ValE("Bundle.meta.profile missing").asError()
-                    .add(new ValE(docRef).asDoc()));
-        }
+        this.evalBundleProfile(val, bundle, profiles, bundleResourcesRef);
     }
 
-    @Override
-    public Boolean isMinimalMetadata() throws Exception {
-        return isMinimalMetadata;
-    }
 
     @Override
     public List<Class<?>> getAcceptableResourceTypes() {

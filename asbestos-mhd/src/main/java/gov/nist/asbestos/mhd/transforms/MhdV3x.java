@@ -36,6 +36,7 @@ public class MhdV3x implements MhdProfileVersionInterface {
     static String minimalMetadataProfile = "http://ihe.net/fhir/StructureDefinition/IHE_MHD_Provide_Minimal_DocumentBundle";
     private static List<Class<?>> acceptableResourceTypes = Arrays.asList(DocumentManifest.class, DocumentReference.class, Binary.class, ListResource.class);
     private static List<String> profiles = Arrays.asList(comprehensiveMetadataProfile, minimalMetadataProfile);
+    private static String iheBundleResourceReference = "3.65.4.1.2.1 Bundle Resources";
     private static MhdVersionEnum mhdVersionEnum = MhdVersionEnum.MHDv3x;
     private Val val;
     Boolean isMinimalMetadata = null;
@@ -79,25 +80,12 @@ public class MhdV3x implements MhdProfileVersionInterface {
     }
 
     /**
-     * Checks bundle profile canonical URI and sets the property isMinimalMetadata
+     * Checks bundle profile canonical URI
      * @param bundle
      */
     @Override
     public void evalBundleProfile(Bundle bundle) {
-        if (bundle.getMeta().getProfile().size() != 1)
-            val.add(new ValE("No profile declaration present in bundle").asError()
-                    .add(new ValE("3.65.4.1.2.1 Bundle Resources").asDoc()));
-        try {
-            CanonicalType bundleProfile = bundle.getMeta().getProfile().get(0);
-            if (!profiles.contains(bundleProfile.asStringValue()))
-                val.add(new ValE("Do not understand profile declared in bundle - " + bundleProfile).asError()
-                        .add(new ValE("3.65.4.1.2.1 Bundle Resources").asDoc()));
-            if (bundleProfile.asStringValue().equals(minimalMetadataProfile))
-                isMinimalMetadata = new Boolean(true);
-        } catch (Exception e) {
-            val.add(new ValE("Bundle.meta.profile missing").asError()
-                    .add(new ValE("3.65.4.1.2.1 Bundle Resources").asDoc()));
-        }
+        this.evalBundleProfile(val, bundle, profiles, iheBundleResourceReference);
     }
 
     @Override
