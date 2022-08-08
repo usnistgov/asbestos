@@ -131,7 +131,7 @@ public class XdsOnFhirChannel extends BaseChannel /*implements IBaseChannel*/ {
         }
 
         // perform translation
-        RegistryObjectListType registryObjectListType = bundleToRegistryObjectList.build(mhdImpl, mhdTransforms, bundle);
+        RegistryObjectListType registryObjectListType = bundleToRegistryObjectList.build(mhdImpl,  bundle);
         if (bundleToRegistryObjectList.isResponseHasError()) {
             throw new TransformException(bundleToRegistryObjectList.getResponseBundle());
         }
@@ -643,7 +643,7 @@ public class XdsOnFhirChannel extends BaseChannel /*implements IBaseChannel*/ {
                         if (isMhdVersionSpecificImplInitialized()) {
                             Optional<String> matchParam = mhdImpl.hasSsQueryParam(paramList);
                             if (matchParam.isPresent()) {
-                                BaseResource resource = MhdTransforms.ssToListResource(mhdImpl, getCodeTranslator(), getExternalCache(), sender, channelConfig);
+                                BaseResource resource = MhdTransforms.ssToListResource(mhdImpl.getMhdVersion().getMhdImplClass(), getCodeTranslator(), getExternalCache(), sender, channelConfig);
                                 resourceResponse(responseOut, search, searchRef, resource);
                                 return;
                             } else {
@@ -684,7 +684,7 @@ public class XdsOnFhirChannel extends BaseChannel /*implements IBaseChannel*/ {
                     responseResourceGet(responseOut, fhirResource);
                 } else if (requestedType.equals(MhdTransforms.MhdListResourceName)) {
                     if (IdBuilder.isOpaqueLogicalId(IdBuilder.SS_OPAQUE_ID, searchRef.getId())) {
-                        BaseResource fhirResource = MhdTransforms.ssToListResource(getCodeTranslator(), getExternalCache(), sender, channelConfig);
+                        BaseResource fhirResource = MhdTransforms.ssToListResource(mhdImpl.getMhdVersion().getMhdImplClass(), getCodeTranslator(), getExternalCache(), sender, channelConfig);
                         responseResourceGet(responseOut, fhirResource);
                     } else {
                         responseOut.setResponseContentType(returnFormatType.getContentType());

@@ -7,10 +7,7 @@ import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import gov.nist.asbestos.mhd.transactionSupport.AssigningAuthorities;
 import gov.nist.asbestos.mhd.transactionSupport.CodeTranslator;
 import gov.nist.asbestos.mhd.transforms.MhdTransforms;
-import gov.nist.asbestos.mhd.transforms.MhdV4;
-import gov.nist.asbestos.mhd.transforms.MhdV410;
 import gov.nist.asbestos.simapi.validation.ValE;
-import net.sf.saxon.ma.map.MapFunctionSet;
 import oasis.names.tc.ebxml_regrep.xsd.rim._3.RegistryPackageType;
 import org.hl7.fhir.r4.model.BaseResource;
 import org.hl7.fhir.r4.model.Bundle;
@@ -18,14 +15,18 @@ import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.ListResource;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.logging.Logger;
 
 public interface MhdProfileVersionInterface {
+    static final Logger privateLogger = Logger.getLogger(MhdProfileVersionInterface.class.getName());
     static final List<MhdVersionEnum> ANY_VERSION = null;
-    String mhdProfileCanonicalUriExceptionStr = "Method must be hidden by implementation.";
+    String mhdProfileCanonicalUriExceptionStr = "Method must be hidden by implementation through a static method.";
     static Map<CanonicalUriCodeEnum, String> getAll() {throw new RuntimeException(mhdProfileCanonicalUriExceptionStr);}
     static Map<CanonicalUriCodeEnum, String> getProfiles() {throw new RuntimeException(mhdProfileCanonicalUriExceptionStr);}
     String getIheReference();
@@ -37,8 +38,7 @@ public interface MhdProfileVersionInterface {
        }
        return null;
     }
-    // FIXME:
-    // plan to is to consolidate all canonical uris in a impl-specific map
+
     default CanonicalUriCodeEnum detectBundleProfileType(Bundle bundle) throws Exception {
         try {
             if (bundle.getMeta().getProfile().size() != 1) {
@@ -79,31 +79,59 @@ public interface MhdProfileVersionInterface {
         return matchParam;
     }
 
+    static Map<CanonicalUriCodeEnum, String> getCanonicalUriMap(Class<? extends MhdProfileVersionInterface> myClass) {
+        try {
+            Method m = myClass.getDeclaredMethod("getAll", null);
+            if (m != null) {
+                try {
+                    return (Map<CanonicalUriCodeEnum, String>) m.invoke(null, null);
+                } catch (Exception ex) {
+                    privateLogger.warning("getCanonicalUriMap Invoke Exception" + ex.toString());
+                }
+            }
+        } catch (Exception ex) {
+            privateLogger.warning("getCanonicalUriMap getDeclaredMethod Exception" + ex.toString());
+        }
+        return null;
+    }
+
     static boolean isCodedListType(List<MhdVersionEnum> mhdVersionEnumList, BaseResource resource, String code) {
         if (resource instanceof ListResource) {
-            ListResource listResource = (ListResource)resource;
-            List<Map<String, String>> listTypeMap = new ArrayList<>();
+            ListResource listResource = (ListResource) resource;
 
-            for (MhdVersionEnum e : mhdVersionEnumList) {
-                Class<? extends MhdProfileVersionInterface> intf = e.getMhdImplClass();
-
-
+            if (mhdVersionEnumList == ANY_VERSION) {
+                mhdVersionEnumList = Arrays.asList(MhdVersionEnum.values());
             }
 
-            if (mhdVersionEnum == null || (mhdVersionEnum.contains(MhdVersionEnum.MHDv4))) {
-                listTypeMap.add(MhdV4.getAll());
-            }
-            if (mhdVersionEnum == null || (mhdVersionEnum.contains(MhdVersionEnum.MHDv410))) {
-                listTypeMap.add(MhdV410.listTypeMap);
-            }
+            for (MhdVersionEnum mhdVersionEnum : mhdVersionEnumList) {
+                Class<? extends MhdProfileVersionInterface> myClass = mhdVersionEnum.getMhdImplClass();
+                try {
+                    if (myClass != null) {
+                        try {
+                            Map<CanonicalUriCodeEnum, String> map = getCanonicalUriMap(myClass);
+                            for (Map.Entry<CanonicalUriCodeEnum, String> me : map.entrySet()) {
+                                if (me.getKey().getType().equals(code)) {
+                                    String system = me.getValue();
+                                    if (listResource.getCode().hasCoding(system, code)) {
+                                    /*
+                                    http://hl7.org/fhir/R4/datatypes-definitions.html#Coding.system
+                                    Check if cardinality is [1..1]
+                                    */
+                                        if (listResource.getCode().getCoding().stream().filter(e -> system.equals(e.getSystem()) && code.equals(e.getCode())).count() == 1) {
+                                            return true;
+                                        }
+                                    }
 
-            for (Map<String, String> m : listTypeMap) {
-                String system = m.get(code);
-                if (listResource.getCode().hasCoding(system, code)) {
-                    /* Check if cardinality is [1..1] */
-                    if (listResource.getCode().getCoding().stream().filter(e -> system.equals(e.getSystem()) && code.equals(e.getCode())).count() == 1)  {
-                        return true;
+                                }
+                            }
+
+                        } catch (Exception ex) {
+                            privateLogger.warning("getAll() method call failed: " + ex.toString());
+                        }
+                    } else {
                     }
+                } catch (Exception ex) {
+                    privateLogger.warning(ex.toString());
                 }
             }
         }

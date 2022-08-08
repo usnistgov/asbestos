@@ -4,6 +4,7 @@ import gov.nist.asbestos.client.channel.ChannelConfig;
 import gov.nist.asbestos.client.client.FhirClient;
 import gov.nist.asbestos.client.resolver.IdBuilder;
 import gov.nist.asbestos.client.resolver.ResourceCacheMgr;
+import gov.nist.asbestos.mhd.channel.CanonicalUriCodeEnum;
 import gov.nist.asbestos.mhd.channel.MhdProfileVersionInterface;
 import gov.nist.asbestos.mhd.exceptions.MetadataAttributeTranslationException;
 import gov.nist.asbestos.mhd.transactionSupport.CodeTranslator;
@@ -12,8 +13,6 @@ import gov.nist.asbestos.mhd.translation.attribute.DateTransform;
 import gov.nist.asbestos.mhd.translation.attribute.PatientId;
 import gov.nist.asbestos.mhd.translation.attribute.Slot;
 import gov.nist.asbestos.mhd.util.Utils;
-import gov.nist.asbestos.serviceproperties.ServiceProperties;
-import gov.nist.asbestos.serviceproperties.ServicePropertiesEnum;
 import gov.nist.asbestos.simapi.validation.Val;
 import gov.nist.asbestos.simapi.validation.ValE;
 import oasis.names.tc.ebxml_regrep.xsd.rim._3.AssociationType1;
@@ -36,15 +35,15 @@ public class SubmissionSetToListResource {
     private ResourceCacheMgr resourceCacheMgr = null;
     private ContainedIdAllocator containedIdAllocator = null;
     private FhirClient fhirClient = null;
-    private MhdProfileVersionInterface mhdImpl;
+    private Class<? extends MhdProfileVersionInterface> mhdClass;
 
-    public SubmissionSetToListResource(MhdProfileVersionInterface mhdImpl, ContainedIdAllocator containedIdAllocator, ResourceCacheMgr resourceCacheMgr, CodeTranslator codeTranslator, FhirClient fhirClient, Val val) {
+    public SubmissionSetToListResource(Class <? extends MhdProfileVersionInterface> mhdClass, ContainedIdAllocator containedIdAllocator, ResourceCacheMgr resourceCacheMgr, CodeTranslator codeTranslator, FhirClient fhirClient, Val val) {
         this.val = val;
         this.codeTranslator = codeTranslator;
         this.resourceCacheMgr = resourceCacheMgr;
         this.containedIdAllocator = containedIdAllocator;
         this.fhirClient = fhirClient;
-        this.mhdImpl = mhdImpl;
+        this.mhdClass = mhdClass;
     }
 
     public ListResource getListResource(RegistryPackageType ss, List<AssociationType1> assocs, ChannelConfig channelConfig) {
@@ -87,7 +86,7 @@ public class SubmissionSetToListResource {
             } else if ("urn:uuid:554ac39e-e3fe-47fe-b233-965d2a147832".equals(scheme)) {
                 // source ID
                 Identifier idr = new Identifier().setValue(Utils.addUrnOidPrefix(ei.getValue()));
-                listResource.addExtension(MhdV4Constants.iheSourceIdExtensionUrl, idr); // one required [1..1]
+                listResource.addExtension(MhdProfileVersionInterface.getCanonicalUriMap(mhdClass).get(CanonicalUriCodeEnum.IHESOURCEIDEXTENSION), idr); // one required [1..1]
             } else {
                 val.add(new ValE("SubmissionSetToListResource: Do not understand ExternalIdentifier identification scheme " + scheme).asError());
             }
@@ -102,13 +101,15 @@ public class SubmissionSetToListResource {
                         .setCodeTranslator(codeTranslator)
                         .setClassificationType(c);
                 xdsCode.setVal(val);
-                listResource.addExtension(MhdV4Constants.iheDesignationTypeExtensionUrl, xdsCode.asCodeableConcept()); // max is one [0..1]
+                listResource.addExtension(MhdProfileVersionInterface.getCanonicalUriMap(mhdClass).get(CanonicalUriCodeEnum.IHEDESIGNATIONTYPEEXTENSIONURL), xdsCode.asCodeableConcept()); // max is one [0..1]
             }
         }
 
         // List type is SubmissionSet
         {
-            CodeableConcept listCode = new CodeableConcept(new Coding(MhdV4Constants.ssListTypeCodeSystem, MhdV4Constants.ssListTypeCodeValue, null));
+            CanonicalUriCodeEnum e = CanonicalUriCodeEnum.SUBMISSIONSET;
+           String system = MhdProfileVersionInterface.getCanonicalUriMap(mhdClass).get(e);
+            CodeableConcept listCode = new CodeableConcept(new Coding( system, e.getCode(), null));
             listResource.setCode(listCode);
         }
 

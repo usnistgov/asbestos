@@ -7,8 +7,8 @@ public enum CanonicalUriCodeEnum {
     IHESOURCEIDEXTENSION("extension",""),
     IHEDESIGNATIONTYPEEXTENSIONURL("extension","");
 
-    private String code;
     private String type;
+    private String code;
 
     CanonicalUriCodeEnum(String type, String code) {
         this.type = type;

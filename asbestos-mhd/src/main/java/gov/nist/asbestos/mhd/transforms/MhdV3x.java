@@ -5,11 +5,9 @@ import gov.nist.asbestos.client.resolver.IdBuilder;
 import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.client.resolver.ResourceMgr;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
-import gov.nist.asbestos.mhd.channel.MhdBundleProfile;
 import gov.nist.asbestos.mhd.channel.CanonicalUriCodeEnum;
 import gov.nist.asbestos.mhd.channel.MhdProfileVersionInterface;
 import gov.nist.asbestos.mhd.channel.MhdVersionEnum;
-import gov.nist.asbestos.mhd.channel.MhdProfileVersionCanonicalUri;
 import gov.nist.asbestos.mhd.transactionSupport.AssigningAuthorities;
 import gov.nist.asbestos.mhd.transactionSupport.CodeTranslator;
 import gov.nist.asbestos.mhd.translation.attribute.ExtrinsicId;
@@ -25,22 +23,31 @@ import org.hl7.fhir.r4.model.DocumentReference;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.ListResource;
 
+import java.util.AbstractMap;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.logging.Logger;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 
 /**
  * V3.x specific implementation
  */
-public class MhdV3x implements MhdProfileVersionInterface, MhdProfileVersionCanonicalUri {
+public class MhdV3x implements MhdProfileVersionInterface {
     static String comprehensiveMetadataProfile = "http://ihe.net/fhir/StructureDefinition/IHE_MHD_Provide_Comprehensive_DocumentBundle";
     static String minimalMetadataProfile = "http://ihe.net/fhir/StructureDefinition/IHE_MHD_Provide_Minimal_DocumentBundle";
-    private static List<Class<?>> acceptableResourceTypes = Arrays.asList(DocumentManifest.class, DocumentReference.class, Binary.class, ListResource.class);
-    private static List<MhdBundleProfile> profiles = Arrays.asList(
-            new MhdBundleProfile(CanonicalUriCodeEnum.COMPREHENSIVE, comprehensiveMetadataProfile),
-            new MhdBundleProfile(CanonicalUriCodeEnum.MINIMAL, minimalMetadataProfile));
-    private static String iheBundleResourceReference = "3.65.4.1.2.1 Bundle Resources";
+    private static List<Class<?>> acceptableResourceTypes = Arrays.asList(DocumentManifest.class, DocumentReference.class, Binary.class, ListResource.class /* List not fully supported in V3 mode for now*/);
+    private static final Map<CanonicalUriCodeEnum, String> canonicalUriCodeEnumStringMap =
+            Collections.unmodifiableMap(Stream.of(
+                    new AbstractMap.SimpleEntry<>(CanonicalUriCodeEnum.COMPREHENSIVE, comprehensiveMetadataProfile),
+                    new AbstractMap.SimpleEntry<>(CanonicalUriCodeEnum.MINIMAL, minimalMetadataProfile))
+                    .collect(Collectors.toMap(AbstractMap.SimpleEntry::getKey, AbstractMap.SimpleEntry::getValue)));
+
+    private static final String IHE_BUNDLE_RESOURCE_REFERENCE_DOCREF = "3.65.4.1.2.1 Bundle Resources";
     private static MhdVersionEnum mhdVersionEnum = MhdVersionEnum.MHDv3x;
     private Val val;
     CanonicalUriCodeEnum mhdBundleProfileEnum;
@@ -49,13 +56,20 @@ public class MhdV3x implements MhdProfileVersionInterface, MhdProfileVersionCano
      */
     DocumentManifest documentManifest = null;
     MhdTransforms mhdTransforms;
+    private static final Logger logger = Logger.getLogger(MhdV3x.class.getName());
 
     public MhdV3x(Bundle b, Val val, MhdTransforms mhdTransforms) {
         Objects.requireNonNull(val);
         Objects.requireNonNull(mhdTransforms);
         this.val = val;
         this.mhdTransforms = mhdTransforms;
-        this.mhdBundleProfileEnum = detectBundleProfileType(b);
+        try {
+            this.mhdBundleProfileEnum = detectBundleProfileType(b);
+        } catch (Exception ex) {
+            this.mhdBundleProfileEnum = null;
+            logger.warning("mhdBundleProfileEnum is null. Exception: " + ex );
+        }
+
     }
 
     @Override
@@ -65,23 +79,15 @@ public class MhdV3x implements MhdProfileVersionInterface, MhdProfileVersionCano
 
     @Override
     public String getIheReference() {
-        return iheBundleResourceReference;
+        return IHE_BUNDLE_RESOURCE_REFERENCE_DOCREF;
     }
 
-    @Override
-    public MhdProfileVersionCanonicalUri profile() {
-        return this;
-    }
 
     @Override
     public MhdVersionEnum getMhdVersion() {
         return mhdVersionEnum;
     }
 
-    @Override
-    public List<MhdBundleProfile> getAll() {
-        return profiles;
-    }
 
     @Override
     public List<Class<?>> getAcceptableResourceTypes() {
@@ -161,4 +167,22 @@ public class MhdV3x implements MhdProfileVersionInterface, MhdProfileVersionCano
                 .getId(identifiers);
 
     }
+
+    /**
+     * Hides interface static method
+     * @return
+     */
+    public static Map<CanonicalUriCodeEnum, String> getProfiles() {
+        return canonicalUriCodeEnumStringMap.entrySet().stream()
+                .filter(e -> "profile".equals(e.getKey().getType())).collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue()));
+    }
+
+    /**
+     * Hides interface static method
+     * @return
+     */
+    public static Map<CanonicalUriCodeEnum, String> getAll() {
+        return canonicalUriCodeEnumStringMap;
+    }
+
 }

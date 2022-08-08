@@ -35,8 +35,6 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static gov.nist.asbestos.mhd.transforms.MhdV4Constants.iheDesignationTypeExtensionUrl;
-import static gov.nist.asbestos.mhd.transforms.MhdV4Constants.iheSourceIdExtensionUrl;
 
 /**
  * Mappings for XDS and MHD Mapping (XDS)
@@ -215,8 +213,8 @@ public class MhdV4 implements MhdProfileVersionInterface {
         // 3bdd: Submission set type classification
         mhdTransforms.addClassification(ss, MhdTransforms.URN_UUID__BDD_SUBMISSION_SET, mhdTransforms.getrMgr().allocateSymbolicId(), wrapper.getAssignedId());
 
-        if (listResource.hasExtension(iheDesignationTypeExtensionUrl)) {
-           Extension extension = listResource.getExtensionByUrl(iheDesignationTypeExtensionUrl);
+        if (listResource.hasExtension(getAll().get(CanonicalUriCodeEnum.IHEDESIGNATIONTYPEEXTENSIONURL))) {
+           Extension extension = listResource.getExtensionByUrl(getAll().get(CanonicalUriCodeEnum.IHEDESIGNATIONTYPEEXTENSIONURL));
            if (extension.getValue() instanceof CodeableConcept) {
               CodeableConcept codeableConcept = (CodeableConcept)extension.getValue();
                mhdTransforms.addClassificationFromCodeableConcept(ss, codeableConcept, CodeTranslator.CONTENTTYPECODE, wrapper.getAssignedId(), vale, codeTranslator);
@@ -257,8 +255,8 @@ public class MhdV4 implements MhdProfileVersionInterface {
         }
 
 
-        if (listResource.hasExtension(iheSourceIdExtensionUrl)) {
-           Extension extension = listResource.getExtensionByUrl(iheSourceIdExtensionUrl);
+        if (listResource.hasExtension(getAll().get(CanonicalUriCodeEnum.IHESOURCEIDEXTENSION))) {
+           Extension extension = listResource.getExtensionByUrl(getAll().get(CanonicalUriCodeEnum.IHESOURCEIDEXTENSION));
            if (extension.getValue() instanceof Identifier) {
                Identifier identifier = (Identifier)extension.getValue();
                mhdTransforms.addExternalIdentifier(ss, CodeTranslator.SS_SOURCEID, Utils.stripUrnPrefixes(identifier.getValue()), mhdTransforms.getrMgr().allocateSymbolicId(), wrapper.getAssignedId(), "XDSSubmissionSet.sourceId", null);
