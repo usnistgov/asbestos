@@ -6,10 +6,10 @@ import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.client.resolver.ResourceMgr;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import gov.nist.asbestos.mhd.channel.MhdBundleProfile;
-import gov.nist.asbestos.mhd.channel.MhdBundleProfileEnum;
+import gov.nist.asbestos.mhd.channel.CanonicalUriCodeEnum;
 import gov.nist.asbestos.mhd.channel.MhdProfileVersionInterface;
 import gov.nist.asbestos.mhd.channel.MhdVersionEnum;
-import gov.nist.asbestos.mhd.channel.ProfileVersionCanonicalUri;
+import gov.nist.asbestos.mhd.channel.MhdProfileVersionCanonicalUri;
 import gov.nist.asbestos.mhd.transactionSupport.AssigningAuthorities;
 import gov.nist.asbestos.mhd.transactionSupport.CodeTranslator;
 import gov.nist.asbestos.mhd.translation.attribute.ExtrinsicId;
@@ -19,6 +19,7 @@ import gov.nist.asbestos.simapi.validation.ValE;
 import oasis.names.tc.ebxml_regrep.xsd.rim._3.RegistryPackageType;
 import org.hl7.fhir.r4.model.BaseResource;
 import org.hl7.fhir.r4.model.Binary;
+import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.DocumentManifest;
 import org.hl7.fhir.r4.model.DocumentReference;
 import org.hl7.fhir.r4.model.Identifier;
@@ -32,30 +33,35 @@ import java.util.Objects;
 /**
  * V3.x specific implementation
  */
-public class MhdV3x implements MhdProfileVersionInterface, ProfileVersionCanonicalUri  {
+public class MhdV3x implements MhdProfileVersionInterface, MhdProfileVersionCanonicalUri {
     static String comprehensiveMetadataProfile = "http://ihe.net/fhir/StructureDefinition/IHE_MHD_Provide_Comprehensive_DocumentBundle";
     static String minimalMetadataProfile = "http://ihe.net/fhir/StructureDefinition/IHE_MHD_Provide_Minimal_DocumentBundle";
     private static List<Class<?>> acceptableResourceTypes = Arrays.asList(DocumentManifest.class, DocumentReference.class, Binary.class, ListResource.class);
     private static List<MhdBundleProfile> profiles = Arrays.asList(
-            new MhdBundleProfile(MhdBundleProfileEnum.COMPREHENSIVE, comprehensiveMetadataProfile),
-            new MhdBundleProfile(MhdBundleProfileEnum.MINIMAL, minimalMetadataProfile));
+            new MhdBundleProfile(CanonicalUriCodeEnum.COMPREHENSIVE, comprehensiveMetadataProfile),
+            new MhdBundleProfile(CanonicalUriCodeEnum.MINIMAL, minimalMetadataProfile));
     private static String iheBundleResourceReference = "3.65.4.1.2.1 Bundle Resources";
     private static MhdVersionEnum mhdVersionEnum = MhdVersionEnum.MHDv3x;
     private Val val;
-    Boolean isMinimalMetadata = null;
+    CanonicalUriCodeEnum mhdBundleProfileEnum;
     /**
      * Only used to count number of documentManifests in the Bundle.
      */
     DocumentManifest documentManifest = null;
     MhdTransforms mhdTransforms;
 
-    public MhdV3x(Val val, MhdTransforms mhdTransforms) {
+    public MhdV3x(Bundle b, Val val, MhdTransforms mhdTransforms) {
         Objects.requireNonNull(val);
         Objects.requireNonNull(mhdTransforms);
         this.val = val;
         this.mhdTransforms = mhdTransforms;
+        this.mhdBundleProfileEnum = detectBundleProfileType(b);
     }
 
+    @Override
+    public CanonicalUriCodeEnum getDetectedBundleProfile() {
+        return mhdBundleProfileEnum;
+    }
 
     @Override
     public String getIheReference() {
@@ -63,7 +69,7 @@ public class MhdV3x implements MhdProfileVersionInterface, ProfileVersionCanonic
     }
 
     @Override
-    public ProfileVersionCanonicalUri profile() {
+    public MhdProfileVersionCanonicalUri profile() {
         return this;
     }
 
@@ -136,7 +142,7 @@ public class MhdV3x implements MhdProfileVersionInterface, ProfileVersionCanonic
             mhdTransforms.addExternalIdentifier(ss, CodeTranslator.SS_SOURCEID, Utils.stripUrnPrefixes(dm.getMasterIdentifier().getValue()), mhdTransforms.getrMgr().allocateSymbolicId(), wrapper.getAssignedId(), "XDSSubmissionSet.sourceId", null);
         if (dm.hasSubject() && dm.getSubject().hasReference())
             mhdTransforms.addSubject(ss, wrapper,  new Ref(dm.getSubject()), CodeTranslator.SS_PID, "XDSSubmissionSet.patientId", vale, assigningAuthorities);
-        else if (isMinimalMetadata) {
+        else if (CanonicalUriCodeEnum.MINIMAL.equals(getDetectedBundleProfile())) {
             mhdTransforms.linkDummyPatient(wrapper, vale, channelConfig, assigningAuthorities, ss);
         }
         return ss;

@@ -5,8 +5,7 @@ import gov.nist.asbestos.client.Base.IVal;
 import gov.nist.asbestos.client.events.ITask;
 import gov.nist.asbestos.client.resolver.*;
 import gov.nist.asbestos.mhd.SubmittedObject;
-import gov.nist.asbestos.mhd.channel.MhdBundleProfile;
-import gov.nist.asbestos.mhd.channel.MhdBundleProfileEnum;
+import gov.nist.asbestos.mhd.channel.CanonicalUriCodeEnum;
 import gov.nist.asbestos.mhd.channel.MhdProfileVersionInterface;
 import gov.nist.asbestos.mhd.exceptions.TransformException;
 import gov.nist.asbestos.mhd.transactionSupport.AssigningAuthorities;
@@ -22,9 +21,6 @@ import javax.xml.namespace.QName;
 import java.net.URI;
 import java.util.*;
 
-/**
- *
- */
 
 // TODO enable runtime assertions with ClassLoader.getSystemClassLoader().setClassAssertionStatus("gov.nist");
 // TODO - add legalAuthenticator
@@ -63,7 +59,7 @@ public class BundleToRegistryObjectList implements IVal {
     private URI sqEndpoint = null;
 //    private File externalCache = Installation.instance().externalCache();
     private ChannelConfig channelConfig;
-    private MhdBundleProfile mhdBundleProfile;
+    private Map.Entry<CanonicalUriCodeEnum,String> mhdBundleProfile;
 
 
     public BundleToRegistryObjectList(ChannelConfig channelConfig) {
@@ -78,7 +74,7 @@ public class BundleToRegistryObjectList implements IVal {
         return null;
     }
 
-    public RegistryObjectListType build(MhdProfileVersionInterface mhdImpl, MhdTransforms mhdTransforms, Bundle bundle) {
+    public RegistryObjectListType build(MhdProfileVersionInterface mhdImpl, Bundle bundle) {
         Objects.requireNonNull(val);
         Objects.requireNonNull(bundle);
         Objects.requireNonNull(rMgr);
@@ -320,8 +316,13 @@ public class BundleToRegistryObjectList implements IVal {
     private void scanBundleForAcceptability(MhdProfileVersionInterface mhdVersionSpecificImpl, Bundle bundle, ResourceMgr rMgr) {
         Objects.requireNonNull(mhdVersionSpecificImpl);
 
-        MhdBundleProfileEnum p = mhdVersionSpecificImpl.getBundleProfileType(bundle);
-        mhdBundleProfile = mhdVersionSpecificImpl.getBundleProfile(p);
+        try {
+            CanonicalUriCodeEnum p = mhdVersionSpecificImpl.detectBundleProfileType(bundle);
+            mhdBundleProfile = mhdVersionSpecificImpl.getBundleProfile(p);
+        } catch (Exception ex) {
+            val.add(new ValE(ex.getMessage()).asError().add(new ValE(mhdVersionSpecificImpl.getIheReference()).asDoc()));
+        }
+
 
         evalBundleType(bundle);
 
@@ -441,9 +442,6 @@ public class BundleToRegistryObjectList implements IVal {
         return this;
     }
 
-    public BundleToRegistryObjectList setBundleProfile(CanonicalType bundleProfile) {
-        return this;
-    }
 
     public byte[] getDocumentContents(String id) {
         return documentContents.get(id);

@@ -703,13 +703,13 @@ public class MhdTransforms {
         return dm;
     }
 
-    public static BaseResource ssToListResource(CodeTranslator codeTranslator, File externalCache, AhqrSender sender, ChannelConfig channelConfig) {
+    public static BaseResource ssToListResource(MhdProfileVersionInterface mhdImpl, CodeTranslator codeTranslator, File externalCache, AhqrSender sender, ChannelConfig channelConfig) {
         Val val = new Val();
 
         ResourceCacheMgr resourceCacheMgr = new ResourceCacheMgr(externalCache);
         FhirClient fhirClient = new FhirClient()
                 .setResourceCacheMgr(resourceCacheMgr);
-        SubmissionSetToListResource trans = new SubmissionSetToListResource(new ContainedIdAllocator(), resourceCacheMgr, codeTranslator, fhirClient, val);
+        SubmissionSetToListResource trans = new SubmissionSetToListResource(mhdImpl, new ContainedIdAllocator(), resourceCacheMgr, codeTranslator, fhirClient, val);
 
         RegistryPackageType ss = null;
         List<AssociationType1> assocs = new ArrayList<>();

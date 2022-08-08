@@ -4,6 +4,7 @@ import gov.nist.asbestos.client.channel.ChannelConfig;
 import gov.nist.asbestos.client.client.FhirClient;
 import gov.nist.asbestos.client.resolver.IdBuilder;
 import gov.nist.asbestos.client.resolver.ResourceCacheMgr;
+import gov.nist.asbestos.mhd.channel.MhdProfileVersionInterface;
 import gov.nist.asbestos.mhd.exceptions.MetadataAttributeTranslationException;
 import gov.nist.asbestos.mhd.transactionSupport.CodeTranslator;
 import gov.nist.asbestos.mhd.translation.ContainedIdAllocator;
@@ -34,14 +35,16 @@ public class SubmissionSetToListResource {
     private CodeTranslator codeTranslator = null;
     private ResourceCacheMgr resourceCacheMgr = null;
     private ContainedIdAllocator containedIdAllocator = null;
-    FhirClient fhirClient = null;
+    private FhirClient fhirClient = null;
+    private MhdProfileVersionInterface mhdImpl;
 
-    public SubmissionSetToListResource(ContainedIdAllocator containedIdAllocator, ResourceCacheMgr resourceCacheMgr, CodeTranslator codeTranslator, FhirClient fhirClient, Val val) {
+    public SubmissionSetToListResource(MhdProfileVersionInterface mhdImpl, ContainedIdAllocator containedIdAllocator, ResourceCacheMgr resourceCacheMgr, CodeTranslator codeTranslator, FhirClient fhirClient, Val val) {
         this.val = val;
         this.codeTranslator = codeTranslator;
         this.resourceCacheMgr = resourceCacheMgr;
         this.containedIdAllocator = containedIdAllocator;
         this.fhirClient = fhirClient;
+        this.mhdImpl = mhdImpl;
     }
 
     public ListResource getListResource(RegistryPackageType ss, List<AssociationType1> assocs, ChannelConfig channelConfig) {

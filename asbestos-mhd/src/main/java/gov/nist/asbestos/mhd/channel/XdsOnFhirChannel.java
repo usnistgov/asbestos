@@ -32,7 +32,6 @@ import gov.nist.asbestos.mhd.transactionSupport.XmlTools;
 import gov.nist.asbestos.mhd.transforms.BundleToRegistryObjectList;
 import gov.nist.asbestos.mhd.transforms.DocumentEntryToDocumentReference;
 import gov.nist.asbestos.mhd.transforms.MhdTransforms;
-import gov.nist.asbestos.mhd.transforms.MhdV4;
 import gov.nist.asbestos.mhd.translation.ContainedIdAllocator;
 import gov.nist.asbestos.mhd.translation.search.DocManSQParamTranslator;
 import gov.nist.asbestos.mhd.translation.search.FhirSq;
@@ -171,6 +170,12 @@ public class XdsOnFhirChannel extends BaseChannel /*implements IBaseChannel*/ {
         return os.toString();
     }
 
+    /**
+     * Returns a defaultVersion of implementation or an implementation based on bundle profile if it is recognized
+     * @param bundle
+     * @param val
+     * @return
+     */
     private MhdProfileVersionInterface getMhdVersionSpecificImpl(Bundle bundle, Val val) {
         Objects.requireNonNull(channelConfig);
         String[] acceptableMhdVersions = channelConfig.getMhdVersions();
@@ -189,6 +194,9 @@ public class XdsOnFhirChannel extends BaseChannel /*implements IBaseChannel*/ {
     }
 
     private MhdProfileVersionInterface findMhdImpl(Bundle bundle, String[] acceptableMhdVersions, MhdVersionEnum defaultVersion, Val val) {
+        Objects.requireNonNull(bundle);
+        Objects.requireNonNull(acceptableMhdVersions);
+        Objects.requireNonNull(val);
         Objects.requireNonNull(mhdTransforms);
 
         MhdVersionEnum bundleVersion = defaultVersion;
@@ -199,15 +207,12 @@ public class XdsOnFhirChannel extends BaseChannel /*implements IBaseChannel*/ {
                         if (e == null) {
                             return false;
                         } else {
-                            MhdProfileVersionInterface intf = MhdImplFactory.getImplementation(e, val, mhdTransforms);
+                            MhdProfileVersionInterface intf = MhdImplFactory.getImplementation(bundle, e, val, mhdTransforms);
                             if (intf == null) {
                                 return false;
                             } else {
-                                MhdBundleProfileEnum mbpe = intf.getBundleProfileType(bundle);
-                                if (mbpe != null && !(mbpe.ordinal() >= MhdBundleProfileEnum.ERROR.ordinal())) {
-                                   return true;
-                                }
-                                return false;
+                                CanonicalUriCodeEnum mbpe = intf.getDetectedBundleProfile();
+                                return CanonicalUriCodeEnum.isValid(mbpe);
                             }
                         }
                     })
@@ -218,7 +223,7 @@ public class XdsOnFhirChannel extends BaseChannel /*implements IBaseChannel*/ {
         } catch (Exception ex) {
             log.warning("findMhdImpl Exception: " + ex.toString());
         }
-        return MhdImplFactory.getImplementation(bundleVersion, val, mhdTransforms);
+        return MhdImplFactory.getImplementation(bundle, bundleVersion, val, mhdTransforms);
     }
 
     public static byte[] lastDocument;
@@ -634,18 +639,21 @@ public class XdsOnFhirChannel extends BaseChannel /*implements IBaseChannel*/ {
                 } else if (requestedType.equals(MhdTransforms.MhdListResourceName)) {
                     List<String> paramList = DocManSQParamTranslator.parseParms(search);
                     String error = "";
-                    if (paramList != null && !paramList.isEmpty()) {
-                        Optional<String> matchParam = paramList.stream().filter(s -> s.contains("code=submissionset") || s.contains("code%3dsubmissionset")).findAny();
-                        if (matchParam.isPresent()) {
-                            BaseResource resource = MhdTransforms.ssToListResource(getCodeTranslator(), getExternalCache(), sender, channelConfig);
-                            resourceResponse(responseOut, search, searchRef, resource);
-                            return;
-                        } else {
-                            error = "Missing required code parameter. See https://profiles.ihe.net/ITI/MHD/ITI-66.html#23664121-query-search-parameters";
+                    try {
+                        if (isMhdVersionSpecificImplInitialized()) {
+                            Optional<String> matchParam = mhdImpl.hasSsQueryParam(paramList);
+                            if (matchParam.isPresent()) {
+                                BaseResource resource = MhdTransforms.ssToListResource(mhdImpl, getCodeTranslator(), getExternalCache(), sender, channelConfig);
+                                resourceResponse(responseOut, search, searchRef, resource);
+                                return;
+                            } else {
+                                throw new Exception("mhdImpl not initialized.");
+                            }
                         }
-                    } else {
-                        error = "Search param is empty or null. See https://profiles.ihe.net/ITI/MHD/ITI-66.html#23664121-query-search-parameters";
+                    } catch (Exception ex) {
+                        error = ex.toString();
                     }
+
                     if (returnFormatType.equals(Format.JSON)) {
                         responseOut.setResponseText(String.format("{\"errorString\":\"%s\"}", error));
                     } else {
@@ -830,7 +838,7 @@ public class XdsOnFhirChannel extends BaseChannel /*implements IBaseChannel*/ {
                     String resourceName = resource.fhirType();
                     String logicalId = submittedObject.getUid();
                     if (MhdTransforms.MhdListResourceName.equals(resourceName)) {
-                        if (MhdV4.isCodedListType(resource, "submissionset")) {
+                        if (MhdProfileVersionInterface.isCodedListType(MhdProfileVersionInterface.ANY_VERSION, resource, "submissionset")) {
                             logicalId = IdBuilder.makeOpaqueLogicalId(IdBuilder.SS_OPAQUE_ID, logicalId);
                         }
                     }

@@ -5,11 +5,10 @@ import gov.nist.asbestos.client.resolver.IdBuilder;
 import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.client.resolver.ResourceMgr;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
-import gov.nist.asbestos.mhd.channel.MhdBundleProfile;
-import gov.nist.asbestos.mhd.channel.MhdBundleProfileEnum;
+import gov.nist.asbestos.mhd.channel.CanonicalUriCodeEnum;
 import gov.nist.asbestos.mhd.channel.MhdProfileVersionInterface;
 import gov.nist.asbestos.mhd.channel.MhdVersionEnum;
-import gov.nist.asbestos.mhd.channel.ProfileVersionCanonicalUri;
+import gov.nist.asbestos.mhd.channel.MhdProfileVersionCanonicalUri;
 import gov.nist.asbestos.mhd.transactionSupport.AssigningAuthorities;
 import gov.nist.asbestos.mhd.transactionSupport.CodeTranslator;
 import gov.nist.asbestos.mhd.util.Utils;
@@ -18,6 +17,7 @@ import gov.nist.asbestos.simapi.validation.ValE;
 import oasis.names.tc.ebxml_regrep.xsd.rim._3.RegistryPackageType;
 import org.hl7.fhir.r4.model.BaseResource;
 import org.hl7.fhir.r4.model.Binary;
+import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.DocumentReference;
 import org.hl7.fhir.r4.model.Extension;
@@ -28,10 +28,12 @@ import org.hl7.fhir.r4.model.codesystems.ListMode;
 import java.util.AbstractMap;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -65,34 +67,42 @@ import static gov.nist.asbestos.mhd.transforms.MhdV4Constants.iheSourceIdExtensi
  *      TODO - Contained option
  *      static String containedMetadataProfile = "http://profiles.ihe.net/ITI/MHD/4.0.1/StructureDefinition/IHE.MHD.UnContained.Comprehensive.ProvideBundle";
  */
-public class MhdV4 implements MhdProfileVersionInterface, ProfileVersionCanonicalUri {
-    private static final String SUBMISSION_SET_PROFILE = "https://profiles.ihe.net/ITI/MHD/4.0.1/StructureDefinition-IHE.MHD.Minimal.SubmissionSet.html#profile";
+public class MhdV4 implements MhdProfileVersionInterface, MhdProfileVersionCanonicalUri {
+    private static final String SUBMISSION_SET_PROFILE_DOCREF = "https://profiles.ihe.net/ITI/MHD/4.0.1/StructureDefinition-IHE.MHD.Minimal.SubmissionSet.html#profile";
+    private static final String BUNDLE_RESOURCES_DOC_REF = "3.65.4.1.2.1 Bundle Resources. See https://profiles.ihe.net/ITI/MHD/4.0.1/ITI-65.html#23654121-bundle-resources";
     private static String comprehensiveMetadataProfile = "http://profiles.ihe.net/ITI/MHD/StructureDefinition/IHE.MHD.Comprehensive.ProvideBundle";
     private static String minimalMetadataProfile = "http://profiles.ihe.net/ITI/MHD/StructureDefinition/IHE.MHD.Minimal.ProvideBundle";
-    static Map<String, String> listTypeMap  =
+    private static final Map<CanonicalUriCodeEnum, String> canonicalUriCodeEnumStringMap =
         Collections.unmodifiableMap(Stream.of(
-                new AbstractMap.SimpleEntry<>("submissionset", "http://profiles.ihe.net/ITI/MHD/CodeSystem/MHDlistTypes"))
+                new AbstractMap.SimpleEntry<>(CanonicalUriCodeEnum.SUBMISSIONSET, "http://profiles.ihe.net/ITI/MHD/CodeSystem/MHDlistTypes"),
+                new AbstractMap.SimpleEntry<>(CanonicalUriCodeEnum.COMPREHENSIVE, comprehensiveMetadataProfile),
+                new AbstractMap.SimpleEntry<>(CanonicalUriCodeEnum.MINIMAL, minimalMetadataProfile))
                 .collect(Collectors.toMap(AbstractMap.SimpleEntry::getKey, AbstractMap.SimpleEntry::getValue)));
-    private static List<MhdBundleProfile> profiles = Arrays.asList(
-            new MhdBundleProfile(MhdBundleProfileEnum.COMPREHENSIVE, comprehensiveMetadataProfile),
-            new MhdBundleProfile(MhdBundleProfileEnum.MINIMAL, minimalMetadataProfile));
-    private static String bundleResourcesRef = "3.65.4.1.2.1 Bundle Resources. See https://profiles.ihe.net/ITI/MHD/4.0.1/ITI-65.html#23654121-bundle-resources";
     private static List<Class<?>> acceptableResourceTypes = Arrays.asList(ListResource.class, DocumentReference.class, Binary.class);
     private static MhdVersionEnum mhdVersionEnum = MhdVersionEnum.MHDv4;
 
     private Val val;
     private MhdTransforms mhdTransforms;
-    private Boolean isMinimalMetadata = null;
+    private CanonicalUriCodeEnum mhdBundleProfileEnum;
+    private static final Logger logger = Logger.getLogger(MhdV4.class.getName());
 
-    public MhdV4(Val val, MhdTransforms mhdTransforms) {
+    public MhdV4(Bundle bundle, Val val, MhdTransforms mhdTransforms) {
         Objects.requireNonNull(val);
         Objects.requireNonNull(mhdTransforms);
         this.val = val;
         this.mhdTransforms = mhdTransforms;
+        try {
+            this.mhdBundleProfileEnum = detectBundleProfileType(bundle);
+        } catch (Exception ex) {
+            this.mhdBundleProfileEnum = null;
+            logger.warning("mhdBundleProfileEnum is null. Exception: " + ex );
+        }
     }
 
+
+
     @Override
-    public ProfileVersionCanonicalUri profile() {
+    public MhdProfileVersionCanonicalUri profile() {
         return this;
     }
 
@@ -102,14 +112,36 @@ public class MhdV4 implements MhdProfileVersionInterface, ProfileVersionCanonica
     }
 
     @Override
-    public String getIheReference() {
-        return bundleResourcesRef;
+    public CanonicalUriCodeEnum getDetectedBundleProfile() {
+        return mhdBundleProfileEnum;
     }
 
     @Override
-    public List<MhdBundleProfile> getAll() {
-        return profiles;
+    public String getIheReference() {
+        return BUNDLE_RESOURCES_DOC_REF;
     }
+
+    /**
+     * Hides interface static method
+     * @return
+     */
+    public static Map<CanonicalUriCodeEnum, String> getProfiles() {
+        return canonicalUriCodeEnumStringMap.entrySet().stream()
+                .filter(e -> "profile".equals(e.getKey().getType())).collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue()));
+    }
+
+    /**
+     * Hides interface static method
+     * @return
+     */
+    public static Map<CanonicalUriCodeEnum, String> getAll() {
+        return canonicalUriCodeEnumStringMap;
+    }
+
+
+
+
+
 
 
 
@@ -148,9 +180,9 @@ public class MhdV4 implements MhdProfileVersionInterface, ProfileVersionCanonica
         vale.setMsg("The Document Recipient shall transform the Bundle content into a proper message for the Given grouped Actor. " +
                 "(Document Recipient is grouped with XDS Document Source. " +
                 "Transformation task: Transforming List to SubmissionSet.)" +
-                "https://profiles.ihe.net/ITI/MHD/ITI-65.html#23654131-grouping-with-actors-in-other-document-sharing-profiles");
+                "https://profiles.ihe.net/ITI/MHD/4.0.1/ITI-65.html#23654131-grouping-with-actors-in-other-document-sharing-profiles");
 
-        if (isCodedListType(resource, "submissionset")) {
+        if (MhdProfileVersionInterface.isCodedListType(Arrays.asList(getMhdVersion()), resource, "submissionset")) {
             return createSubmissionSet(idBuilder, wrapper, vale, channelConfig, codeTranslator, assigningAuthorities);
         }
 
@@ -166,7 +198,7 @@ public class MhdV4 implements MhdProfileVersionInterface, ProfileVersionCanonica
                 vale.add(new ValE("SubmissionSet of ListResource type has Identifier (entryUUID)").asError()
                         .addIheRequirement("2:3.65.4.1.2 Message Semantics: " +
                                 "The Document Source shall not provide any entryUUID values."
-                        + "See https://profiles.ihe.net/ITI/MHD/ITI-65.html#2365412-message-semantics"));
+                        + "See https://profiles.ihe.net/ITI/MHD/4.0.1/ITI-65.html#2365412-message-semantics"));
         }
 
         RegistryPackageType ss = new RegistryPackageType();
@@ -180,10 +212,10 @@ public class MhdV4 implements MhdProfileVersionInterface, ProfileVersionCanonica
         if (listResource.hasMode()) {
             if (!ListMode.WORKING.equals(listResource.getMode())) {
                 vale.add(new ValE("Mode Required Pattern: working")
-                .addIheRequirement(SUBMISSION_SET_PROFILE));
+                .addIheRequirement(SUBMISSION_SET_PROFILE_DOCREF));
             }
         } else {
-            vale.add(new ValE("Mode is required [1..1]").addIheRequirement(SUBMISSION_SET_PROFILE));
+            vale.add(new ValE("Mode is required [1..1]").addIheRequirement(SUBMISSION_SET_PROFILE_DOCREF));
         }
 
         if (listResource.hasDate())
@@ -205,20 +237,20 @@ public class MhdV4 implements MhdProfileVersionInterface, ProfileVersionCanonica
         if (listResource.hasIdentifier()) {
             if (listResource.getIdentifier().size() < 2) {
                vale.add(new ValE("Minimum List identifier cardinality is less than 2. Should be 2..*")
-                       .addIheRequirement("https://profiles.ihe.net/ITI/MHD/StructureDefinition-IHE.MHD.Minimal.SubmissionSet.html"));
+                       .addIheRequirement("https://profiles.ihe.net/ITI/MHD/4.0.1/StructureDefinition-IHE.MHD.Minimal.SubmissionSet.html"));
             } else {
                 long systemIdCount = listResource.getIdentifier().stream()
                         .filter(e -> e.hasUse() && Identifier.IdentifierUse.OFFICIAL.equals(e.getUse())).count();
                 if (systemIdCount < 1) {
                     vale.add(new ValE("should be at least one OFFICIAL type identifier")
-                            .addIheRequirement("https://profiles.ihe.net/ITI/MHD/StructureDefinition-IHE.MHD.Minimal.SubmissionSet-definitions.html#List.identifier"));
+                            .addIheRequirement("https://profiles.ihe.net/ITI/MHD/4.0.1/StructureDefinition-IHE.MHD.Minimal.SubmissionSet-definitions.html#List.identifier"));
                 }
                 long usualIdCount = listResource.getIdentifier().stream()
                         .filter(e -> e.hasUse() && Identifier.IdentifierUse.USUAL.equals(e.getUse()) && MhdTransforms.URN_IETF_RFC_3986.equals(e.getSystem())).count();
                 if (usualIdCount < 1) {
                     vale.add(new ValE("1) Expecting an OID (URI) according to ITI TF Vol 3:4.2.3.3.12 SubmissionSet.uniqueId. " +
                             "2) MHD v4.0.1: If the value is a full URI, then the system SHALL be "+ MhdTransforms.URN_IETF_RFC_3986 +".")
-                    .addIheRequirement("https://profiles.ihe.net/ITI/MHD/StructureDefinition-IHE.MHD.Minimal.SubmissionSet-definitions.html#List.identifier:uniqueId.value"));
+                    .addIheRequirement("https://profiles.ihe.net/ITI/MHD/4.0.1/StructureDefinition-IHE.MHD.Minimal.SubmissionSet-definitions.html#List.identifier:uniqueId.value"));
                 } else {
                     Optional<Identifier> usualIdentifier = IdBuilder.getUsualTypeIdentifier(listResource);
                     if (usualIdentifier.isPresent()) {
@@ -246,7 +278,7 @@ public class MhdV4 implements MhdProfileVersionInterface, ProfileVersionCanonica
 
         if (listResource.hasSubject() && listResource.getSubject().hasReference()) {
             mhdTransforms.addSubject(ss, wrapper, new Ref(listResource.getSubject()), CodeTranslator.SS_PID, "XDSSubmissionSet.patientId", vale, assigningAuthorities);
-        } else if (isMinimalMetadata) {
+        } else if (CanonicalUriCodeEnum.MINIMAL.equals(getDetectedBundleProfile())) {
             mhdTransforms.linkDummyPatient(wrapper, vale, channelConfig, assigningAuthorities, ss);
         }
 
@@ -263,5 +295,7 @@ public class MhdV4 implements MhdProfileVersionInterface, ProfileVersionCanonica
     public String getExtrinsicId(ValE valE, ResourceMgr rMgr, List<Identifier> identifiers) {
         return rMgr.allocateSymbolicId();
     }
+
+
 }
 
