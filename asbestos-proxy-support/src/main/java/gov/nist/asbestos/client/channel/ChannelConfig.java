@@ -26,6 +26,9 @@ public class ChannelConfig {
     private String xdsSiteName;       // point to XDS server if channel type is MHD
     private boolean writeLocked;
     private boolean logMhdCapabilityStatementRequest;
+    /**
+     * When more than mhdVersion is specified, then the profile canonical must be unique. Otherwise, only single mhdVersion should be specified.
+     */
     private String[] mhdVersions;
     private transient String scheme;
 

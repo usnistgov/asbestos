@@ -3,7 +3,9 @@ package gov.nist.asbestos.mhd.channel;
 public enum CanonicalUriCodeEnum {
     COMPREHENSIVE( "profile", "comprehensive"),
     MINIMAL("profile", "minimal" ),
-    SUBMISSIONSET("extension", "submissionset" );
+    SUBMISSIONSET("extension", "submissionset" ),
+    IHESOURCEIDEXTENSION("extension",""),
+    IHEDESIGNATIONTYPEEXTENSIONURL("extension","");
 
     private String code;
     private String type;

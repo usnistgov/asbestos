@@ -126,7 +126,7 @@
           </div>
         </div>
 
-        <label class="grid-name">MHD Version Support</label>
+        <label class="grid-name">MHD Version Support Option</label>
         <div v-if="isEditMode" class="grid-item" >
           <select size="5" multiple="multiple" v-model="channel.mhdVersions">
             <option :key="eKey"
@@ -135,7 +135,7 @@
               {{ e }}
             </option>
           </select>
-            No selection is required. If no options are selected, channel validation is based on the PDB bundle profile. All test collections are displayed if no options are selected. If option(s) are selected, test collections are filtered based on the option selection.
+            No selection is required if PDB Profile Canonical URI is unique and differentiable. I.e., if no Options are selected, channel validation is based on the PDB bundle profile. All test collections are displayed if no Options are selected. If Option(s) are selected, test collections are filtered based on Option selection.
         </div>
         <div v-else>
             <template v-if="Array.isArray(channel.mhdVersions) && channel.mhdVersions.length > 0">

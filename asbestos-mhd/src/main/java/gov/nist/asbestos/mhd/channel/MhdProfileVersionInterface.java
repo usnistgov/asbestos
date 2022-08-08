@@ -46,9 +46,9 @@ public interface MhdProfileVersionInterface {
             }
 
             CanonicalType bundleProfile = bundle.getMeta().getProfile().get(0);
-            for (Map.Entry<CanonicalUriCodeEnum,String> mbp : getAll().entrySet()) {
-                if (mbp.equals(bundleProfile.asStringValue())) {
-                   return mbp.getKey();
+            for (Map.Entry<CanonicalUriCodeEnum,String> me : getProfiles().entrySet()) {
+                if (me.equals(bundleProfile.asStringValue())) {
+                   return me.getKey();
                 }
             }
         } catch (Exception e) {
@@ -56,6 +56,11 @@ public interface MhdProfileVersionInterface {
         }
         throw new Exception("Unrecognized bundle profile.");
     }
+
+    /**
+     *
+     * @return null if unknown type
+     */
     CanonicalUriCodeEnum getDetectedBundleProfile();
     List<Class<?>> getAcceptableResourceTypes();
     RegistryPackageType buildSubmissionSet(ResourceWrapper wrapper, ValE vale, IdBuilder idBuilder, ChannelConfig channelConfig, CodeTranslator codeTranslator, AssigningAuthorities assigningAuthorities);

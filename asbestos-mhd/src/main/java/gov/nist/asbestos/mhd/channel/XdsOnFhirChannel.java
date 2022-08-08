@@ -178,11 +178,11 @@ public class XdsOnFhirChannel extends BaseChannel /*implements IBaseChannel*/ {
      */
     private MhdProfileVersionInterface getMhdVersionSpecificImpl(Bundle bundle, Val val) {
         Objects.requireNonNull(channelConfig);
-        String[] acceptableMhdVersions = channelConfig.getMhdVersions();
+        String[] allowedMhdVersions = channelConfig.getMhdVersions();
 
-        if (acceptableMhdVersions != null) {
+        if (allowedMhdVersions != null) {
             // Allow only from the Accept list
-            return findMhdImpl(bundle, acceptableMhdVersions, defaultVersion, val);
+            return findMhdImpl(bundle, allowedMhdVersions, defaultVersion, val);
         } else {
             // All MHD versions are implicitly acceptable by channelConfig.
             // Auto-detect based on Bundle profile
@@ -211,8 +211,8 @@ public class XdsOnFhirChannel extends BaseChannel /*implements IBaseChannel*/ {
                             if (intf == null) {
                                 return false;
                             } else {
-                                CanonicalUriCodeEnum mbpe = intf.getDetectedBundleProfile();
-                                return CanonicalUriCodeEnum.isValid(mbpe);
+                                CanonicalUriCodeEnum ce = intf.getDetectedBundleProfile();
+                                return ce != null;
                             }
                         }
                     })

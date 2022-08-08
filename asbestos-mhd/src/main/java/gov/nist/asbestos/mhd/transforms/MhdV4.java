@@ -8,7 +8,6 @@ import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import gov.nist.asbestos.mhd.channel.CanonicalUriCodeEnum;
 import gov.nist.asbestos.mhd.channel.MhdProfileVersionInterface;
 import gov.nist.asbestos.mhd.channel.MhdVersionEnum;
-import gov.nist.asbestos.mhd.channel.MhdProfileVersionCanonicalUri;
 import gov.nist.asbestos.mhd.transactionSupport.AssigningAuthorities;
 import gov.nist.asbestos.mhd.transactionSupport.CodeTranslator;
 import gov.nist.asbestos.mhd.util.Utils;
@@ -28,7 +27,6 @@ import org.hl7.fhir.r4.model.codesystems.ListMode;
 import java.util.AbstractMap;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -67,7 +65,7 @@ import static gov.nist.asbestos.mhd.transforms.MhdV4Constants.iheSourceIdExtensi
  *      TODO - Contained option
  *      static String containedMetadataProfile = "http://profiles.ihe.net/ITI/MHD/4.0.1/StructureDefinition/IHE.MHD.UnContained.Comprehensive.ProvideBundle";
  */
-public class MhdV4 implements MhdProfileVersionInterface, MhdProfileVersionCanonicalUri {
+public class MhdV4 implements MhdProfileVersionInterface {
     private static final String SUBMISSION_SET_PROFILE_DOCREF = "https://profiles.ihe.net/ITI/MHD/4.0.1/StructureDefinition-IHE.MHD.Minimal.SubmissionSet.html#profile";
     private static final String BUNDLE_RESOURCES_DOC_REF = "3.65.4.1.2.1 Bundle Resources. See https://profiles.ihe.net/ITI/MHD/4.0.1/ITI-65.html#23654121-bundle-resources";
     private static String comprehensiveMetadataProfile = "http://profiles.ihe.net/ITI/MHD/StructureDefinition/IHE.MHD.Comprehensive.ProvideBundle";
@@ -76,7 +74,9 @@ public class MhdV4 implements MhdProfileVersionInterface, MhdProfileVersionCanon
         Collections.unmodifiableMap(Stream.of(
                 new AbstractMap.SimpleEntry<>(CanonicalUriCodeEnum.SUBMISSIONSET, "http://profiles.ihe.net/ITI/MHD/CodeSystem/MHDlistTypes"),
                 new AbstractMap.SimpleEntry<>(CanonicalUriCodeEnum.COMPREHENSIVE, comprehensiveMetadataProfile),
-                new AbstractMap.SimpleEntry<>(CanonicalUriCodeEnum.MINIMAL, minimalMetadataProfile))
+                new AbstractMap.SimpleEntry<>(CanonicalUriCodeEnum.MINIMAL, minimalMetadataProfile),
+                new AbstractMap.SimpleEntry<>(CanonicalUriCodeEnum.IHESOURCEIDEXTENSION, "http://profiles.ihe.net/ITI/MHD/StructureDefinition/ihe-sourceId"),
+                new AbstractMap.SimpleEntry<>(CanonicalUriCodeEnum.IHEDESIGNATIONTYPEEXTENSIONURL, "http://profiles.ihe.net/ITI/MHD/StructureDefinition/ihe-designationType"))
                 .collect(Collectors.toMap(AbstractMap.SimpleEntry::getKey, AbstractMap.SimpleEntry::getValue)));
     private static List<Class<?>> acceptableResourceTypes = Arrays.asList(ListResource.class, DocumentReference.class, Binary.class);
     private static MhdVersionEnum mhdVersionEnum = MhdVersionEnum.MHDv4;
@@ -100,11 +100,6 @@ public class MhdV4 implements MhdProfileVersionInterface, MhdProfileVersionCanon
     }
 
 
-
-    @Override
-    public MhdProfileVersionCanonicalUri profile() {
-        return this;
-    }
 
     @Override
     public MhdVersionEnum getMhdVersion() {
@@ -137,12 +132,6 @@ public class MhdV4 implements MhdProfileVersionInterface, MhdProfileVersionCanon
     public static Map<CanonicalUriCodeEnum, String> getAll() {
         return canonicalUriCodeEnumStringMap;
     }
-
-
-
-
-
-
 
 
     @Override
