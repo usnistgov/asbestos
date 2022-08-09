@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+//FIXME: bring over methods from MHdv4 here
 public class MhdV4Common {
     /**
      * Use discriminator to find if SS or Folder

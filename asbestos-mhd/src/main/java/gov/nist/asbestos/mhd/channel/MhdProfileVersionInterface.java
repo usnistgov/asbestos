@@ -39,6 +39,10 @@ public interface MhdProfileVersionInterface {
        return null;
     }
 
+    default String getDocBase(String ref) {
+        return String.format("%s/%s", getMhdVersion().getMhdDocBase(), ref);
+    }
+
     default CanonicalUriCodeEnum detectBundleProfileType(Bundle bundle) throws Exception {
         try {
             if (bundle.getMeta().getProfile().size() != 1) {

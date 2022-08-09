@@ -64,8 +64,8 @@ import java.util.stream.Stream;
  *      static String containedMetadataProfile = "http://profiles.ihe.net/ITI/MHD/4.0.1/StructureDefinition/IHE.MHD.UnContained.Comprehensive.ProvideBundle";
  */
 public class MhdV4 implements MhdProfileVersionInterface {
-    private static final String SUBMISSION_SET_PROFILE_DOCREF = "https://profiles.ihe.net/ITI/MHD/4.0.1/StructureDefinition-IHE.MHD.Minimal.SubmissionSet.html#profile";
-    private static final String BUNDLE_RESOURCES_DOC_REF = "3.65.4.1.2.1 Bundle Resources. See https://profiles.ihe.net/ITI/MHD/4.0.1/ITI-65.html#23654121-bundle-resources";
+    private final String SUBMISSION_SET_PROFILE_DOCREF = getDocBase( "StructureDefinition-IHE.MHD.Minimal.SubmissionSet.html#profile");
+    private final String BUNDLE_RESOURCES_DOC_REF = String.format("3.65.4.1.2.1 Bundle Resources. %s",  getDocBase("ITI-65.html#23654121-bundle-resources"));
     private static String comprehensiveMetadataProfile = "http://profiles.ihe.net/ITI/MHD/StructureDefinition/IHE.MHD.Comprehensive.ProvideBundle";
     private static String minimalMetadataProfile = "http://profiles.ihe.net/ITI/MHD/StructureDefinition/IHE.MHD.Minimal.ProvideBundle";
     private static final Map<CanonicalUriCodeEnum, String> canonicalUriCodeEnumStringMap =
@@ -167,7 +167,7 @@ public class MhdV4 implements MhdProfileVersionInterface {
         vale.setMsg("The Document Recipient shall transform the Bundle content into a proper message for the Given grouped Actor. " +
                 "(Document Recipient is grouped with XDS Document Source. " +
                 "Transformation task: Transforming List to SubmissionSet.)" +
-                "https://profiles.ihe.net/ITI/MHD/4.0.1/ITI-65.html#23654131-grouping-with-actors-in-other-document-sharing-profiles");
+                getDocBase("ITI-65.html#23654131-grouping-with-actors-in-other-document-sharing-profiles"));
 
         if (MhdProfileVersionInterface.isCodedListType(Arrays.asList(getMhdVersion()), resource, "submissionset")) {
             return createSubmissionSet(idBuilder, wrapper, vale, channelConfig, codeTranslator, assigningAuthorities);
@@ -185,7 +185,7 @@ public class MhdV4 implements MhdProfileVersionInterface {
                 vale.add(new ValE("SubmissionSet of ListResource type has Identifier (entryUUID)").asError()
                         .addIheRequirement("2:3.65.4.1.2 Message Semantics: " +
                                 "The Document Source shall not provide any entryUUID values."
-                        + "See https://profiles.ihe.net/ITI/MHD/4.0.1/ITI-65.html#2365412-message-semantics"));
+                        + getDocBase("ITI-65.html#2365412-message-semantics")));
         }
 
         RegistryPackageType ss = new RegistryPackageType();
@@ -224,20 +224,20 @@ public class MhdV4 implements MhdProfileVersionInterface {
         if (listResource.hasIdentifier()) {
             if (listResource.getIdentifier().size() < 2) {
                vale.add(new ValE("Minimum List identifier cardinality is less than 2. Should be 2..*")
-                       .addIheRequirement("https://profiles.ihe.net/ITI/MHD/4.0.1/StructureDefinition-IHE.MHD.Minimal.SubmissionSet.html"));
+                       .addIheRequirement(getDocBase( "StructureDefinition-IHE.MHD.Minimal.SubmissionSet.html")));
             } else {
                 long systemIdCount = listResource.getIdentifier().stream()
                         .filter(e -> e.hasUse() && Identifier.IdentifierUse.OFFICIAL.equals(e.getUse())).count();
                 if (systemIdCount < 1) {
                     vale.add(new ValE("should be at least one OFFICIAL type identifier")
-                            .addIheRequirement("https://profiles.ihe.net/ITI/MHD/4.0.1/StructureDefinition-IHE.MHD.Minimal.SubmissionSet-definitions.html#List.identifier"));
+                            .addIheRequirement(getDocBase( "StructureDefinition-IHE.MHD.Minimal.SubmissionSet-definitions.html#List.identifier")));
                 }
                 long usualIdCount = listResource.getIdentifier().stream()
                         .filter(e -> e.hasUse() && Identifier.IdentifierUse.USUAL.equals(e.getUse()) && MhdTransforms.URN_IETF_RFC_3986.equals(e.getSystem())).count();
                 if (usualIdCount < 1) {
                     vale.add(new ValE("1) Expecting an OID (URI) according to ITI TF Vol 3:4.2.3.3.12 SubmissionSet.uniqueId. " +
                             "2) MHD v4.0.1: If the value is a full URI, then the system SHALL be "+ MhdTransforms.URN_IETF_RFC_3986 +".")
-                    .addIheRequirement("https://profiles.ihe.net/ITI/MHD/4.0.1/StructureDefinition-IHE.MHD.Minimal.SubmissionSet-definitions.html#List.identifier:uniqueId.value"));
+                    .addIheRequirement(getDocBase( "StructureDefinition-IHE.MHD.Minimal.SubmissionSet-definitions.html#List.identifier:uniqueId.value")));
                 } else {
                     Optional<Identifier> usualIdentifier = IdBuilder.getUsualTypeIdentifier(listResource);
                     if (usualIdentifier.isPresent()) {
