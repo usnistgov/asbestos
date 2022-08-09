@@ -16,7 +16,6 @@ import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.ListResource;
 
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -76,7 +75,8 @@ public interface MhdProfileVersionInterface {
         if (paramList == null) {
             throw new Exception(String.format("Search param cannot be empty or null. See %s/ITI-66.html#23664121-query-search-parameters", getMhdVersion().getMhdDocBase()));
         }
-        Optional<String> matchParam = paramList.stream().filter(s -> s.contains("code=submissionset") || s.contains("code%3dsubmissionset")).findAny();
+        final String ssCode = CanonicalUriCodeEnum.SUBMISSIONSET.getCode();
+        Optional<String> matchParam = paramList.stream().filter(s -> s.contains("code=" + ssCode) || s.contains("code%3d" + ssCode)).findAny();
         if (! matchParam.isPresent()) {
             throw new Exception(String.format("Search param is empty or null. See %s/ITI-66.html#23664121-query-search-parameters", getMhdVersion().getMhdDocBase()));
         }

@@ -225,6 +225,8 @@
                 }
                 return ['']
             },
+            //FIXME: make this test collection version specific
+            // use this.$store.state.testRunner.currentTestCollectionName
             getReferencePropertyLink(refMap, referenceProperty) {
                 // const specRef = rawTable[referenceProperty]
                 const specRef = this.referenceTable(refMap)[referenceProperty]
