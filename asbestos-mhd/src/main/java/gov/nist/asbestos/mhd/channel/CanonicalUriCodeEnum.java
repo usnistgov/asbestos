@@ -1,17 +1,17 @@
 package gov.nist.asbestos.mhd.channel;
 
 public enum CanonicalUriCodeEnum {
-    COMPREHENSIVE( "profile", "comprehensive"),
-    MINIMAL("profile", "minimal" ),
-    SUBMISSIONSET("extension", "submissionset" ),
-    IHESOURCEIDEXTENSION("extension",""),
-    IHEDESIGNATIONTYPEEXTENSIONURL("extension","");
+    COMPREHENSIVE( UriCodeTypeEnum.PROFILE, "comprehensive"),
+    MINIMAL(UriCodeTypeEnum.PROFILE , "minimal" ),
+    SUBMISSIONSET(UriCodeTypeEnum.EXTENSION, "submissionset" ),
+    IHESOURCEIDEXTENSION(UriCodeTypeEnum.EXTENSION ,""),
+    IHEDESIGNATIONTYPEEXTENSIONURL(UriCodeTypeEnum.EXTENSION,"");
 
-    private String type;
+    private UriCodeTypeEnum type;
     private String code;
 
-    CanonicalUriCodeEnum(String type, String code) {
-        this.type = type;
+    CanonicalUriCodeEnum(UriCodeTypeEnum uriCodeTypeEnum, String code) {
+        this.type = uriCodeTypeEnum;
         this.code = code;
     }
 
@@ -19,7 +19,7 @@ public enum CanonicalUriCodeEnum {
             return code;
     }
 
-    public String getType() {
+    public UriCodeTypeEnum getType() {
         return type;
     }
 }

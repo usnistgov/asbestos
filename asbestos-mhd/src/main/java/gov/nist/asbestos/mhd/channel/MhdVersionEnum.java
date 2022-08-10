@@ -17,6 +17,7 @@ public enum MhdVersionEnum {
     private String version;
     private String mhdDocBase;
     private Class<? extends MhdProfileVersionInterface> mhdImplClass;
+    private Class<? extends MhdCanonicalUriCodeInterface> uriCodesClass;
 
     MhdVersionEnum(String version,  Class<? extends MhdProfileVersionInterface> mhdImplClass, String mhdDocBase) {
         this.version = version;

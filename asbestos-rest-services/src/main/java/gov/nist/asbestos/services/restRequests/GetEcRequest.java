@@ -17,9 +17,9 @@ import java.util.logging.Logger;
 public class GetEcRequest {
     private static final Logger logger = Logger.getLogger(GetEcRequest.class.getName());
 
-    public static boolean isRequest(Request request) {
+    public static boolean isRequest(Request request) throws Exception {
         Objects.requireNonNull(request);
-        throw new RuntimeException("Unsupported method, use runRequest.");
+        throw new Exception("Unsupported method, use runRequest.");
     }
 
     public static boolean runRequest(Request request) {

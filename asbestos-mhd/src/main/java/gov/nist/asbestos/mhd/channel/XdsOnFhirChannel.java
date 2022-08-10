@@ -838,7 +838,7 @@ public class XdsOnFhirChannel extends BaseChannel /*implements IBaseChannel*/ {
                     String resourceName = resource.fhirType();
                     String logicalId = submittedObject.getUid();
                     if (MhdTransforms.MhdListResourceName.equals(resourceName)) {
-                        if (MhdProfileVersionInterface.isCodedListType(MhdProfileVersionInterface.ANY_VERSION, resource, "submissionset")) {
+                        if (MhdProfileVersionInterface.isCodedListType(MhdProfileVersionInterface.ANY_VERSION, resource,CanonicalUriCodeEnum.SUBMISSIONSET.getCode() )) {
                             logicalId = IdBuilder.makeOpaqueLogicalId(IdBuilder.SS_OPAQUE_ID, logicalId);
                         }
                     }

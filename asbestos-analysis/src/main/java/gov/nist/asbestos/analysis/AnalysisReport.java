@@ -12,9 +12,9 @@ import gov.nist.asbestos.client.resolver.IdBuilder;
 import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import gov.nist.asbestos.http.headers.Headers;
+import gov.nist.asbestos.mhd.channel.CanonicalUriCodeEnum;
 import gov.nist.asbestos.mhd.channel.MhdProfileVersionInterface;
 import gov.nist.asbestos.mhd.transforms.MhdTransforms;
-import gov.nist.asbestos.mhd.transforms.MhdV4;
 import gov.nist.asbestos.serviceproperties.ServiceProperties;
 import gov.nist.asbestos.serviceproperties.ServicePropertiesEnum;
 import gov.nist.asbestos.simapi.validation.Val;
@@ -23,13 +23,19 @@ import gov.nist.asbestos.testEngine.engine.FhirPathEngineBuilder;
 import gov.nist.asbestos.testEngine.engine.TestEngine;
 import gov.nist.asbestos.testEngine.engine.assertion.MinimumId;
 import gov.nist.asbestos.utilities.ResourceHasMethodsFilter;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.hl7.fhir.r4.model.*;
 
 import java.io.File;
 import java.net.URISyntaxException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class AnalysisReport {
     private static final Logger log = Logger.getLogger(AnalysisReport.class.getName());
@@ -626,7 +632,7 @@ public class AnalysisReport {
                         ResourceWrapper resourceWrapper = new ResourceWrapper(ref);
                         BaseResource baseResource = resourceWrapper.getResource();
                         if (baseResource != null) {
-                            if (baseResource instanceof ListResource && MhdProfileVersionInterface.isCodedListType(MhdProfileVersionInterface.ANY_VERSION, baseResource, "submissionset") ) {
+                            if (baseResource instanceof ListResource && MhdProfileVersionInterface.isCodedListType(MhdProfileVersionInterface.ANY_VERSION, baseResource, CanonicalUriCodeEnum.SUBMISSIONSET.getCode()) ) {
                                return ref;
                             }
                         }
@@ -643,7 +649,7 @@ public class AnalysisReport {
         for (Bundle.BundleEntryComponent bundleEntryComponent : bundle.getEntry()) {
             Resource componentResource = bundleEntryComponent.getResource();
             if (componentResource instanceof DocumentManifest
-                    || (componentResource instanceof ListResource && MhdProfileVersionInterface.isCodedListType(MhdProfileVersionInterface.ANY_VERSION, componentResource, "submissionset"))) {
+                    || (componentResource instanceof ListResource && MhdProfileVersionInterface.isCodedListType(MhdProfileVersionInterface.ANY_VERSION, componentResource,CanonicalUriCodeEnum.SUBMISSIONSET.getCode() ))) {
                 ResourceWrapper wrapper = new ResourceWrapper(componentResource);
                 String fullUrl = bundleEntryComponent.getFullUrl();
                 if (!Strings.isNullOrEmpty(fullUrl)) {

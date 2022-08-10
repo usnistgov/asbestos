@@ -8,6 +8,7 @@ import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import gov.nist.asbestos.mhd.channel.CanonicalUriCodeEnum;
 import gov.nist.asbestos.mhd.channel.MhdProfileVersionInterface;
 import gov.nist.asbestos.mhd.channel.MhdVersionEnum;
+import gov.nist.asbestos.mhd.channel.UriCodeTypeEnum;
 import gov.nist.asbestos.mhd.transactionSupport.AssigningAuthorities;
 import gov.nist.asbestos.mhd.transactionSupport.CodeTranslator;
 import gov.nist.asbestos.mhd.translation.attribute.ExtrinsicId;
@@ -38,14 +39,7 @@ import java.util.stream.Stream;
  * V3.x specific implementation
  */
 public class MhdV3x implements MhdProfileVersionInterface {
-    static String comprehensiveMetadataProfile = "http://ihe.net/fhir/StructureDefinition/IHE_MHD_Provide_Comprehensive_DocumentBundle";
-    static String minimalMetadataProfile = "http://ihe.net/fhir/StructureDefinition/IHE_MHD_Provide_Minimal_DocumentBundle";
     private static List<Class<?>> acceptableResourceTypes = Arrays.asList(DocumentManifest.class, DocumentReference.class, Binary.class, ListResource.class /* List not fully supported in V3 mode for now*/);
-    private static final Map<CanonicalUriCodeEnum, String> canonicalUriCodeEnumStringMap =
-            Collections.unmodifiableMap(Stream.of(
-                    new AbstractMap.SimpleEntry<>(CanonicalUriCodeEnum.COMPREHENSIVE, comprehensiveMetadataProfile),
-                    new AbstractMap.SimpleEntry<>(CanonicalUriCodeEnum.MINIMAL, minimalMetadataProfile))
-                    .collect(Collectors.toMap(AbstractMap.SimpleEntry::getKey, AbstractMap.SimpleEntry::getValue)));
 
     private static final String IHE_BUNDLE_RESOURCE_REFERENCE_DOCREF = "3.65.4.1.2.1 Bundle Resources";
     private static MhdVersionEnum mhdVersionEnum = MhdVersionEnum.MHDv3x;
@@ -168,21 +162,5 @@ public class MhdV3x implements MhdProfileVersionInterface {
 
     }
 
-    /**
-     * Hides interface static method
-     * @return
-     */
-    public static Map<CanonicalUriCodeEnum, String> getProfiles() {
-        return canonicalUriCodeEnumStringMap.entrySet().stream()
-                .filter(e -> "profile".equals(e.getKey().getType())).collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue()));
-    }
-
-    /**
-     * Hides interface static method
-     * @return
-     */
-    public static Map<CanonicalUriCodeEnum, String> getAll() {
-        return canonicalUriCodeEnumStringMap;
-    }
 
 }
