@@ -106,9 +106,9 @@ class Pnr1IT {
 
         MhdTransforms mhdTransforms = new MhdTransforms(rMgr, val, new NoOpTask());
 
-        MhdProfileVersionInterface mhdVersionSpecificImpl = MhdImplFactory.getImplementation(MhdVersionEnum.MHDv3x, val, mhdTransforms);
+        MhdProfileVersionInterface mhdVersionSpecificImpl = MhdImplFactory.getImplementation(bundle, MhdVersionEnum.MHDv3x, val, mhdTransforms);
 
-        RegistryObjectListType registryObjectListType = bundleToRegistryObjectList.build(mhdVersionSpecificImpl, mhdTransforms, bundle);
+        RegistryObjectListType registryObjectListType = bundleToRegistryObjectList.build(mhdVersionSpecificImpl,  bundle);
 
         if (val.hasErrors())
             fail(ValFactory.toJson(new ValErrors(val)));

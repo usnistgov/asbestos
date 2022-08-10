@@ -126,7 +126,7 @@ class DocumentEntryTestxxx {
         MhdTransforms mhdTransforms = new MhdTransforms(rMgr, val, task);
 
         // Translate XDS back to DocRef
-        ExtrinsicObjectType extrinsicObjectType = mhdTransforms.createExtrinsicObject(new MhdV3x(val,mhdTransforms), resource, new ValE(val), new IdBuilder(true), null, codeTranslator,
+        ExtrinsicObjectType extrinsicObjectType = mhdTransforms.createExtrinsicObject(new MhdV3x(null,val,mhdTransforms), resource, new ValE(val), new IdBuilder(true), null, codeTranslator,
                 assigningAuthorities);
 
         DocumentEntryToDocumentReference documentEntryToDocumentReference = new DocumentEntryToDocumentReference();

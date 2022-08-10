@@ -30,7 +30,8 @@ public interface MhdProfileVersionInterface {
     static Map<CanonicalUriCodeEnum, String> getProfiles() {throw new RuntimeException(mhdProfileCanonicalUriExceptionStr);}
     String getIheReference();
     default Map.Entry<CanonicalUriCodeEnum,String> getBundleProfile(CanonicalUriCodeEnum profileEnum) {
-       for (Map.Entry<CanonicalUriCodeEnum, String> mbp : getProfiles().entrySet()) {
+        Map<CanonicalUriCodeEnum,String> theMap = MhdProfileVersionInterface.getCanonicalUriMap(getMhdVersion().getMhdImplClass());
+        for (Map.Entry<CanonicalUriCodeEnum, String> mbp : theMap.entrySet()) {
            if (mbp.getKey().equals(profileEnum)) {
                return mbp;
            }
@@ -49,13 +50,14 @@ public interface MhdProfileVersionInterface {
             }
 
             CanonicalType bundleProfile = bundle.getMeta().getProfile().get(0);
-            for (Map.Entry<CanonicalUriCodeEnum,String> me : getProfiles().entrySet()) {
-                if (me.equals(bundleProfile.asStringValue())) {
+            Map<CanonicalUriCodeEnum,String> theMap = MhdProfileVersionInterface.getCanonicalUriMap(getMhdVersion().getMhdImplClass());
+            for (Map.Entry<CanonicalUriCodeEnum,String> me : theMap.entrySet()) {
+                if (me.getKey().getType().equals("profile") && me.getValue().equals(bundleProfile.asStringValue())) {
                    return me.getKey();
                 }
             }
         } catch (Exception e) {
-            throw new Exception("Bundle.meta.profile missing");
+            throw new Exception("Bundle.meta.profile missing? Exception: " + e.toString());
         }
         throw new Exception("Unrecognized bundle profile.");
     }

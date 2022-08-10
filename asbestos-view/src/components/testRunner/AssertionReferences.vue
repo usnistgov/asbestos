@@ -225,26 +225,42 @@
                 }
                 return ['']
             },
-            //FIXME: make this test collection version specific
-            // use this.$store.state.testRunner.currentTestCollectionName
             getReferencePropertyLink(refMap, referenceProperty) {
                 // const specRef = rawTable[referenceProperty]
                 const specRef = this.referenceTable(refMap)[referenceProperty]
                     if ('link' in specRef) {
-                        return [specRef.link]
+                        return [this.mhdVersionSpecificLink(specRef.link)]
                     } else if (Object.keys(specRef).length === 0
-                        /* Element property type is an Empty object, a dynamically populated table property at runtime */
+                        /* "Element": {} property type is an Empty object, a dynamically populated table property at runtime */
                         && 'context' in refMap) {
                         // build context link off the baseLink
                         const rawTable = this.getRawTable(refMap)
                         if ('baseLink' in  rawTable) {
                             const baseLink = rawTable.baseLink
-                            return [baseLink.concat(refMap.context)]
+                            return [this.mhdVersionSpecificLink(baseLink.concat(refMap.context))]
                         } else {
                             console.warn('context link nor baseLink is not available for ' + JSON.stringify(refMap) + ' referenceProperty ' + JSON.stringify(referenceProperty))
                         }
                     }
                     return []
+            },
+            mhdVersionSpecificLink(linkUrl) {
+                //FIXME: make this test collection version specific
+                // use this.$store.state.testRunner.currentTestCollectionName
+                const currentMhdUrlBase = 'https://profiles.ihe.net/ITI/MHD'
+                if (linkUrl.startsWith(currentMhdUrlBase)) {
+                    const currentTcName = this.$store.state.testRunner.currentTestCollectionName
+                    var tcObj = this.$store.state.testRunner.serverTestCollectionObjs.filter(e => e.name === currentTcName)
+                    console.debug('tcObj length: ' + tcObj.length)
+                    console.debug(tcObj[0].mhdVersion)
+                    const mhdVersionSpecificDocBase = this.$store.state.testRunner.testAssertions.docBase[tcObj[0].mhdVersion]
+                    console.debug(mhdVersionSpecificDocBase)
+                    const re = new RegExp(`^${currentMhdUrlBase}`,'i') // ^start line, {pattern}
+                    if (linkUrl.match(re) !== null) {
+                        return linkUrl.replace(re, mhdVersionSpecificDocBase)
+                    }
+                }
+                return linkUrl
             }
 
         }
