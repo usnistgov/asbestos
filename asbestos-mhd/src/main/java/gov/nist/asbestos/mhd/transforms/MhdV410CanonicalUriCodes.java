@@ -10,15 +10,17 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class MhdV3xCanonicalUriCodes implements MhdCanonicalUriCodeInterface {
-    static String comprehensiveMetadataProfile = "http://ihe.net/fhir/StructureDefinition/IHE_MHD_Provide_Comprehensive_DocumentBundle";
-    static String minimalMetadataProfile = "http://ihe.net/fhir/StructureDefinition/IHE_MHD_Provide_Minimal_DocumentBundle";
-    private final Map<CanonicalUriCodeEnum, String> canonicalUriCodeEnumStringMap =
+public class MhdV410CanonicalUriCodes implements MhdCanonicalUriCodeInterface {
+    private static String comprehensiveMetadataProfile = "https://profiles.ihe.net/ITI/MHD/StructureDefinition/IHE.MHD.Comprehensive.ProvideBundle";
+    private static String minimalMetadataProfile = "https://profiles.ihe.net/ITI/MHD/StructureDefinition/IHE.MHD.Minimal.ProvideBundle";
+    private static final Map<CanonicalUriCodeEnum, String> canonicalUriCodeEnumStringMap =
             Collections.unmodifiableMap(Stream.of(
+                    new AbstractMap.SimpleEntry<>(CanonicalUriCodeEnum.SUBMISSIONSET, "https://profiles.ihe.net/ITI/MHD/CodeSystem/MHDlistTypes"),
                     new AbstractMap.SimpleEntry<>(CanonicalUriCodeEnum.COMPREHENSIVE, comprehensiveMetadataProfile),
-                    new AbstractMap.SimpleEntry<>(CanonicalUriCodeEnum.MINIMAL, minimalMetadataProfile))
+                    new AbstractMap.SimpleEntry<>(CanonicalUriCodeEnum.MINIMAL, minimalMetadataProfile),
+                    new AbstractMap.SimpleEntry<>(CanonicalUriCodeEnum.IHESOURCEIDEXTENSION, "https://profiles.ihe.net/ITI/MHD/StructureDefinition/ihe-sourceId"),
+                    new AbstractMap.SimpleEntry<>(CanonicalUriCodeEnum.IHEDESIGNATIONTYPEEXTENSIONURL, "https://profiles.ihe.net/ITI/MHD/StructureDefinition/ihe-designationType"))
                     .collect(Collectors.toMap(AbstractMap.SimpleEntry::getKey, AbstractMap.SimpleEntry::getValue)));
-
 
     @Override
     public Map<CanonicalUriCodeEnum, String> getUriCodesByType(UriCodeTypeEnum uriCodeTypeEnum) {
@@ -30,5 +32,6 @@ public class MhdV3xCanonicalUriCodes implements MhdCanonicalUriCodeInterface {
     public Map<CanonicalUriCodeEnum, String> getUriCodeMap() {
         return canonicalUriCodeEnumStringMap;
     }
+
 
 }

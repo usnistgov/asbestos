@@ -6,7 +6,9 @@ import gov.nist.asbestos.client.events.ITask;
 import gov.nist.asbestos.client.resolver.*;
 import gov.nist.asbestos.mhd.SubmittedObject;
 import gov.nist.asbestos.mhd.channel.CanonicalUriCodeEnum;
+import gov.nist.asbestos.mhd.channel.MhdCanonicalUriCodeInterface;
 import gov.nist.asbestos.mhd.channel.MhdProfileVersionInterface;
+import gov.nist.asbestos.mhd.channel.MhdVersionEnum;
 import gov.nist.asbestos.mhd.exceptions.TransformException;
 import gov.nist.asbestos.mhd.transactionSupport.AssigningAuthorities;
 import gov.nist.asbestos.mhd.transactionSupport.CodeTranslator;
@@ -317,8 +319,8 @@ public class BundleToRegistryObjectList implements IVal {
         Objects.requireNonNull(mhdVersionSpecificImpl);
 
         try {
-            CanonicalUriCodeEnum p = mhdVersionSpecificImpl.detectBundleProfileType(bundle);
-            mhdBundleProfile = mhdVersionSpecificImpl.getBundleProfile(p);
+            MhdCanonicalUriCodeInterface uriImpl = mhdVersionSpecificImpl.getUriCodesClass();
+            mhdBundleProfile = uriImpl.detectBundleProfileType(bundle);
         } catch (Exception ex) {
             val.add(new ValE(ex.getMessage()).asError().add(new ValE(mhdVersionSpecificImpl.getIheReference()).asDoc()));
         }

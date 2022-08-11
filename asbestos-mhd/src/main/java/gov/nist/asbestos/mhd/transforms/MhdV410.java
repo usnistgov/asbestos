@@ -18,27 +18,14 @@ import org.hl7.fhir.r4.model.DocumentReference;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.ListResource;
 
-import java.util.AbstractMap;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class MhdV410 implements MhdProfileVersionInterface {
     private final String BUNDLE_RESOURCES_DOC_REF = String.format("3.65.4.1.2.1 Bundle Resources. %s",  getDocBase("ITI-65.html#23654121-bundle-resources"));
-    private static String comprehensiveMetadataProfile = "https://profiles.ihe.net/ITI/MHD/StructureDefinition/IHE.MHD.Comprehensive.ProvideBundle";
-    private static String minimalMetadataProfile = "https://profiles.ihe.net/ITI/MHD/StructureDefinition/IHE.MHD.Minimal.ProvideBundle";
-    private static final Map<CanonicalUriCodeEnum, String> canonicalUriCodeEnumStringMap =
-            Collections.unmodifiableMap(Stream.of(
-                    new AbstractMap.SimpleEntry<>(CanonicalUriCodeEnum.SUBMISSIONSET, "https://profiles.ihe.net/ITI/MHD/CodeSystem/MHDlistTypes"),
-                    new AbstractMap.SimpleEntry<>(CanonicalUriCodeEnum.COMPREHENSIVE, comprehensiveMetadataProfile),
-                    new AbstractMap.SimpleEntry<>(CanonicalUriCodeEnum.MINIMAL, minimalMetadataProfile),
-                    new AbstractMap.SimpleEntry<>(CanonicalUriCodeEnum.IHESOURCEIDEXTENSION, "https://profiles.ihe.net/ITI/MHD/StructureDefinition/ihe-sourceId"),
-                    new AbstractMap.SimpleEntry<>(CanonicalUriCodeEnum.IHEDESIGNATIONTYPEEXTENSIONURL, "https://profiles.ihe.net/ITI/MHD/StructureDefinition/ihe-designationType"))
-                    .collect(Collectors.toMap(AbstractMap.SimpleEntry::getKey, AbstractMap.SimpleEntry::getValue)));
     private static List<Class<?>> acceptableResourceTypes = Arrays.asList(ListResource.class, DocumentReference.class, Binary.class);
     private static MhdVersionEnum mhdVersionEnum = MhdVersionEnum.MHDv410;
 
@@ -51,7 +38,7 @@ public class MhdV410 implements MhdProfileVersionInterface {
         this.val = val;
         this.mhdTransforms = mhdTransforms;
         try {
-            this.mhdBundleProfileEnum = detectBundleProfileType(bundle);
+            this.mhdBundleProfileEnum = getUriCodesClass().detectBundleProfileType(bundle).getKey();
         } catch (Exception ex) {
             this.mhdBundleProfileEnum = null;
             logger.warning("mhdBundleProfileEnum is null. Exception: " + ex );
@@ -72,23 +59,6 @@ public class MhdV410 implements MhdProfileVersionInterface {
     @Override
     public String getIheReference() {
         return BUNDLE_RESOURCES_DOC_REF;
-    }
-
-    /**
-     * Hides interface static method
-     * @return
-     */
-    public static Map<CanonicalUriCodeEnum, String> getProfiles() {
-        return canonicalUriCodeEnumStringMap.entrySet().stream()
-                .filter(e -> "profile".equals(e.getKey().getType())).collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue()));
-    }
-
-    /**
-     * Hides interface static method
-     * @return
-     */
-    public static Map<CanonicalUriCodeEnum, String> getAll() {
-        return canonicalUriCodeEnumStringMap;
     }
 
 

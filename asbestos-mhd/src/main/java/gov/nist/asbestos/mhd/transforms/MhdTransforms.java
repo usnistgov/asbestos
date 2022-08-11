@@ -703,7 +703,7 @@ public class MhdTransforms {
         return dm;
     }
 
-    public static BaseResource ssToListResource(Class <? extends MhdProfileVersionInterface> mhdImpl, CodeTranslator codeTranslator, File externalCache, AhqrSender sender, ChannelConfig channelConfig) {
+    public static BaseResource ssToListResource(MhdProfileVersionInterface mhdImpl, CodeTranslator codeTranslator, File externalCache, AhqrSender sender, ChannelConfig channelConfig) {
         Val val = new Val();
 
         ResourceCacheMgr resourceCacheMgr = new ResourceCacheMgr(externalCache);

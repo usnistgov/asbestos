@@ -643,7 +643,7 @@ public class XdsOnFhirChannel extends BaseChannel /*implements IBaseChannel*/ {
                         if (isMhdVersionSpecificImplInitialized()) {
                             Optional<String> matchParam = mhdImpl.hasSsQueryParam(paramList);
                             if (matchParam.isPresent()) {
-                                BaseResource resource = MhdTransforms.ssToListResource(mhdImpl.getMhdVersion().getMhdImplClass(), getCodeTranslator(), getExternalCache(), sender, channelConfig);
+                                BaseResource resource = MhdTransforms.ssToListResource(mhdImpl, getCodeTranslator(), getExternalCache(), sender, channelConfig);
                                 resourceResponse(responseOut, search, searchRef, resource);
                                 return;
                             } else {
@@ -684,7 +684,7 @@ public class XdsOnFhirChannel extends BaseChannel /*implements IBaseChannel*/ {
                     responseResourceGet(responseOut, fhirResource);
                 } else if (requestedType.equals(MhdTransforms.MhdListResourceName)) {
                     if (IdBuilder.isOpaqueLogicalId(IdBuilder.SS_OPAQUE_ID, searchRef.getId())) {
-                        BaseResource fhirResource = MhdTransforms.ssToListResource(mhdImpl.getMhdVersion().getMhdImplClass(), getCodeTranslator(), getExternalCache(), sender, channelConfig);
+                        BaseResource fhirResource = MhdTransforms.ssToListResource(mhdImpl, getCodeTranslator(), getExternalCache(), sender, channelConfig);
                         responseResourceGet(responseOut, fhirResource);
                     } else {
                         responseOut.setResponseContentType(returnFormatType.getContentType());
@@ -838,7 +838,8 @@ public class XdsOnFhirChannel extends BaseChannel /*implements IBaseChannel*/ {
                     String resourceName = resource.fhirType();
                     String logicalId = submittedObject.getUid();
                     if (MhdTransforms.MhdListResourceName.equals(resourceName)) {
-                        if (MhdProfileVersionInterface.isCodedListType(MhdProfileVersionInterface.ANY_VERSION, resource,CanonicalUriCodeEnum.SUBMISSIONSET.getCode() )) {
+
+                        if (MhdCanonicalUriCodeInterface.isCodedAsAListType(MhdCanonicalUriCodeInterface.ANY_VERSION, resource,CanonicalUriCodeEnum.SUBMISSIONSET )) {
                             logicalId = IdBuilder.makeOpaqueLogicalId(IdBuilder.SS_OPAQUE_ID, logicalId);
                         }
                     }

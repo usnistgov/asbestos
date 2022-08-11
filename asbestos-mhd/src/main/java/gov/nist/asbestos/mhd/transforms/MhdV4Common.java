@@ -5,6 +5,7 @@ import gov.nist.asbestos.client.resolver.IdBuilder;
 import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import gov.nist.asbestos.mhd.channel.CanonicalUriCodeEnum;
+import gov.nist.asbestos.mhd.channel.MhdCanonicalUriCodeInterface;
 import gov.nist.asbestos.mhd.channel.MhdProfileVersionInterface;
 import gov.nist.asbestos.mhd.transactionSupport.AssigningAuthorities;
 import gov.nist.asbestos.mhd.transactionSupport.CodeTranslator;
@@ -21,12 +22,14 @@ import org.hl7.fhir.r4.model.codesystems.ListMode;
 
 import java.util.Arrays;
 import java.util.Optional;
+import java.util.logging.Logger;
 
 public class MhdV4Common {
     private final String SUBMISSION_SET_PROFILE_DOCREF_SUFFIX =  "StructureDefinition-IHE.MHD.Minimal.SubmissionSet.html#profile";
     private MhdProfileVersionInterface mhdImpl;
     private MhdTransforms mhdTransforms;
     private Class<? extends MhdProfileVersionInterface> mhdImplClass;
+    private static Logger logger = Logger.getLogger(MhdV4Common.class.getName());
 
 
     public MhdV4Common(MhdProfileVersionInterface mhdImpl, MhdTransforms mhdTransforms) {
@@ -37,14 +40,22 @@ public class MhdV4Common {
 
     public RegistryPackageType buildSubmissionSet(ResourceWrapper wrapper, Val val , ValE vale, IdBuilder idBuilder, ChannelConfig channelConfig, CodeTranslator codeTranslator, AssigningAuthorities assigningAuthorities) {
 
-        BaseResource resource = wrapper.getResource();
-        vale.setMsg("The Document Recipient shall transform the Bundle content into a proper message for the Given grouped Actor. " +
-                "(Document Recipient is grouped with XDS Document Source. " +
-                "Transformation task: Transforming List to SubmissionSet.)" +
-                mhdImpl.getDocBase("ITI-65.html#23654131-grouping-with-actors-in-other-document-sharing-profiles"));
+        try {
+            BaseResource resource = wrapper.getResource();
+            vale.setMsg("The Document Recipient shall transform the Bundle content into a proper message for the Given grouped Actor. " +
+                    "(Document Recipient is grouped with XDS Document Source. " +
+                    "Transformation task: Transforming List to SubmissionSet.)" +
+                    mhdImpl.getDocBase("ITI-65.html#23654131-grouping-with-actors-in-other-document-sharing-profiles"));
 
-        if (MhdProfileVersionInterface.isCodedListType(Arrays.asList(mhdImpl.getMhdVersion()), resource, CanonicalUriCodeEnum.SUBMISSIONSET.getCode())) {
-            return createSubmissionSet(idBuilder, wrapper, val, vale, channelConfig, codeTranslator, assigningAuthorities);
+//            Class<? extends MhdCanonicalUriCodeInterface> myCodesClass = mhdImpl.getMhdVersion().getUriCodesClass();
+//            if (myCodesClass != null) {
+//                MhdCanonicalUriCodeInterface codesImpl = myCodesClass.getDeclaredConstructor().newInstance();
+                if (MhdCanonicalUriCodeInterface.isCodedAsAListType(Arrays.asList(mhdImpl.getMhdVersion()), resource, CanonicalUriCodeEnum.SUBMISSIONSET)) {
+                    return createSubmissionSet(idBuilder, wrapper, val, vale, channelConfig, codeTranslator, assigningAuthorities);
+                }
+//            }
+        } catch (Exception ex) {
+            logger.warning(ex.toString());
         }
 
         return null;
@@ -87,13 +98,15 @@ public class MhdV4Common {
         // 3bdd: Submission set type classification
         mhdTransforms.addClassification(ss, MhdTransforms.URN_UUID__BDD_SUBMISSION_SET, mhdTransforms.getrMgr().allocateSymbolicId(), wrapper.getAssignedId());
 
-        if (listResource.hasExtension(MhdProfileVersionInterface.getCanonicalUriMap(mhdImplClass).get(CanonicalUriCodeEnum.IHEDESIGNATIONTYPEEXTENSIONURL))) {
-            Extension extension = listResource.getExtensionByUrl(MhdProfileVersionInterface.getCanonicalUriMap(mhdImplClass).get(CanonicalUriCodeEnum.IHEDESIGNATIONTYPEEXTENSIONURL));
-            if (extension.getValue() instanceof CodeableConcept) {
-                CodeableConcept codeableConcept = (CodeableConcept)extension.getValue();
-                mhdTransforms.addClassificationFromCodeableConcept(ss, codeableConcept, CodeTranslator.CONTENTTYPECODE, wrapper.getAssignedId(), vale, codeTranslator);
+        MhdCanonicalUriCodeInterface myCodesImpl = null;
+
+            if (listResource.hasExtension(myCodesImpl.getUriCodeMap().get(CanonicalUriCodeEnum.IHEDESIGNATIONTYPEEXTENSIONURL))) {
+                Extension extension = listResource.getExtensionByUrl(myCodesImpl.getUriCodeMap().get(CanonicalUriCodeEnum.IHEDESIGNATIONTYPEEXTENSIONURL));
+                if (extension.getValue() instanceof CodeableConcept) {
+                    CodeableConcept codeableConcept = (CodeableConcept) extension.getValue();
+                    mhdTransforms.addClassificationFromCodeableConcept(ss, codeableConcept, CodeTranslator.CONTENTTYPECODE, wrapper.getAssignedId(), vale, codeTranslator);
+                }
             }
-        }
 
         if (listResource.hasIdentifier()) {
             if (listResource.getIdentifier().size() < 2) {
@@ -129,8 +142,8 @@ public class MhdV4Common {
         }
 
 
-        if (listResource.hasExtension(MhdProfileVersionInterface.getCanonicalUriMap(mhdImplClass).get(CanonicalUriCodeEnum.IHESOURCEIDEXTENSION))) {
-            Extension extension = listResource.getExtensionByUrl(MhdProfileVersionInterface.getCanonicalUriMap(mhdImplClass).get(CanonicalUriCodeEnum.IHESOURCEIDEXTENSION));
+        if (listResource.hasExtension(myCodesImpl.getUriCodeMap().get(CanonicalUriCodeEnum.IHESOURCEIDEXTENSION))) {
+            Extension extension = listResource.getExtensionByUrl(myCodesImpl.getUriCodeMap().get(CanonicalUriCodeEnum.IHESOURCEIDEXTENSION));
             if (extension.getValue() instanceof Identifier) {
                 Identifier identifier = (Identifier)extension.getValue();
                 mhdTransforms.addExternalIdentifier(ss, CodeTranslator.SS_SOURCEID, Utils.stripUrnPrefixes(identifier.getValue()), mhdTransforms.getrMgr().allocateSymbolicId(), wrapper.getAssignedId(), "XDSSubmissionSet.sourceId", null);

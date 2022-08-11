@@ -35,9 +35,9 @@ public class SubmissionSetToListResource {
     private ResourceCacheMgr resourceCacheMgr = null;
     private ContainedIdAllocator containedIdAllocator = null;
     private FhirClient fhirClient = null;
-    private Class<? extends MhdProfileVersionInterface> mhdClass;
+    private MhdProfileVersionInterface mhdClass;
 
-    public SubmissionSetToListResource(Class <? extends MhdProfileVersionInterface> mhdClass, ContainedIdAllocator containedIdAllocator, ResourceCacheMgr resourceCacheMgr, CodeTranslator codeTranslator, FhirClient fhirClient, Val val) {
+    public SubmissionSetToListResource(MhdProfileVersionInterface mhdClass, ContainedIdAllocator containedIdAllocator, ResourceCacheMgr resourceCacheMgr, CodeTranslator codeTranslator, FhirClient fhirClient, Val val) {
         this.val = val;
         this.codeTranslator = codeTranslator;
         this.resourceCacheMgr = resourceCacheMgr;
@@ -86,7 +86,7 @@ public class SubmissionSetToListResource {
             } else if ("urn:uuid:554ac39e-e3fe-47fe-b233-965d2a147832".equals(scheme)) {
                 // source ID
                 Identifier idr = new Identifier().setValue(Utils.addUrnOidPrefix(ei.getValue()));
-                listResource.addExtension(MhdProfileVersionInterface.getCanonicalUriMap(mhdClass).get(CanonicalUriCodeEnum.IHESOURCEIDEXTENSION), idr); // one required [1..1]
+                listResource.addExtension(mhdClass.getUriCodesClass().getUriCodeMap().get(CanonicalUriCodeEnum.IHESOURCEIDEXTENSION), idr); // one required [1..1]
             } else {
                 val.add(new ValE("SubmissionSetToListResource: Do not understand ExternalIdentifier identification scheme " + scheme).asError());
             }
@@ -101,14 +101,14 @@ public class SubmissionSetToListResource {
                         .setCodeTranslator(codeTranslator)
                         .setClassificationType(c);
                 xdsCode.setVal(val);
-                listResource.addExtension(MhdProfileVersionInterface.getCanonicalUriMap(mhdClass).get(CanonicalUriCodeEnum.IHEDESIGNATIONTYPEEXTENSIONURL), xdsCode.asCodeableConcept()); // max is one [0..1]
+                listResource.addExtension(mhdClass.getUriCodesClass().getUriCodeMap().get(CanonicalUriCodeEnum.IHEDESIGNATIONTYPEEXTENSIONURL), xdsCode.asCodeableConcept()); // max is one [0..1]
             }
         }
 
         // List type is SubmissionSet
         {
             CanonicalUriCodeEnum e = CanonicalUriCodeEnum.SUBMISSIONSET;
-           String system = MhdProfileVersionInterface.getCanonicalUriMap(mhdClass).get(e);
+           String system = mhdClass.getUriCodesClass().getUriCodeMap().get(e);
             CodeableConcept listCode = new CodeableConcept(new Coding( system, e.getCode(), null));
             listResource.setCode(listCode);
         }

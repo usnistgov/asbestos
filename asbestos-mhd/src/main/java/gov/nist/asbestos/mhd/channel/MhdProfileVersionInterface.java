@@ -17,12 +17,21 @@ import java.util.logging.Logger;
 
 public interface MhdProfileVersionInterface {
     static final Logger privateLogger = Logger.getLogger(MhdProfileVersionInterface.class.getName());
-    static final String GET_ALL_URI_CODES = "getAllUriCodes";
-    static final String GET_URI_CODES = "getUriCodes";
     String getIheReference();
 
+    default MhdCanonicalUriCodeInterface getUriCodesClass() {
+        try {
+            Class<? extends MhdCanonicalUriCodeInterface> myCodesClass = getMhdVersion().getUriCodesClass();
+            return myCodesClass.getDeclaredConstructor().newInstance();
+        } catch (Exception ex) {
+            privateLogger.warning("getUriCodesClass Exception: " + ex.toString());
+            return null;
+        }
+    }
 
-    default String getDocBase(String ref) {
+    CanonicalUriCodeEnum getDetectedBundleProfile();
+
+        default String getDocBase(String ref) {
         return String.format("%s/%s", getMhdVersion().getMhdDocBase(), ref);
     }
 

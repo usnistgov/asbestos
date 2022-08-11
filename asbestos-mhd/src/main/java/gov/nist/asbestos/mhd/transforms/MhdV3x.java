@@ -58,7 +58,7 @@ public class MhdV3x implements MhdProfileVersionInterface {
         this.val = val;
         this.mhdTransforms = mhdTransforms;
         try {
-            this.mhdBundleProfileEnum = detectBundleProfileType(b);
+            this.mhdBundleProfileEnum = getUriCodesClass().detectBundleProfileType(b).getKey();
         } catch (Exception ex) {
             this.mhdBundleProfileEnum = null;
             logger.warning("mhdBundleProfileEnum is null. Exception: " + ex );

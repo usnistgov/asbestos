@@ -13,6 +13,7 @@ import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import gov.nist.asbestos.http.headers.Headers;
 import gov.nist.asbestos.mhd.channel.CanonicalUriCodeEnum;
+import gov.nist.asbestos.mhd.channel.MhdCanonicalUriCodeInterface;
 import gov.nist.asbestos.mhd.channel.MhdProfileVersionInterface;
 import gov.nist.asbestos.mhd.transforms.MhdTransforms;
 import gov.nist.asbestos.serviceproperties.ServiceProperties;
@@ -632,7 +633,7 @@ public class AnalysisReport {
                         ResourceWrapper resourceWrapper = new ResourceWrapper(ref);
                         BaseResource baseResource = resourceWrapper.getResource();
                         if (baseResource != null) {
-                            if (baseResource instanceof ListResource && MhdProfileVersionInterface.isCodedListType(MhdProfileVersionInterface.ANY_VERSION, baseResource, CanonicalUriCodeEnum.SUBMISSIONSET.getCode()) ) {
+                            if (baseResource instanceof ListResource && MhdCanonicalUriCodeInterface.isCodedAsAListType(MhdCanonicalUriCodeInterface.ANY_VERSION, baseResource, CanonicalUriCodeEnum.SUBMISSIONSET) ) {
                                return ref;
                             }
                         }
@@ -649,7 +650,7 @@ public class AnalysisReport {
         for (Bundle.BundleEntryComponent bundleEntryComponent : bundle.getEntry()) {
             Resource componentResource = bundleEntryComponent.getResource();
             if (componentResource instanceof DocumentManifest
-                    || (componentResource instanceof ListResource && MhdProfileVersionInterface.isCodedListType(MhdProfileVersionInterface.ANY_VERSION, componentResource,CanonicalUriCodeEnum.SUBMISSIONSET.getCode() ))) {
+                    || (componentResource instanceof ListResource && MhdCanonicalUriCodeInterface.isCodedAsAListType(MhdCanonicalUriCodeInterface.ANY_VERSION, componentResource,CanonicalUriCodeEnum.SUBMISSIONSET ))) {
                 ResourceWrapper wrapper = new ResourceWrapper(componentResource);
                 String fullUrl = bundleEntryComponent.getFullUrl();
                 if (!Strings.isNullOrEmpty(fullUrl)) {
