@@ -28,14 +28,12 @@ public class MhdV4Common {
     private final String SUBMISSION_SET_PROFILE_DOCREF_SUFFIX =  "StructureDefinition-IHE.MHD.Minimal.SubmissionSet.html#profile";
     private MhdProfileVersionInterface mhdImpl;
     private MhdTransforms mhdTransforms;
-    private Class<? extends MhdProfileVersionInterface> mhdImplClass;
     private static Logger logger = Logger.getLogger(MhdV4Common.class.getName());
 
 
     public MhdV4Common(MhdProfileVersionInterface mhdImpl, MhdTransforms mhdTransforms) {
         this.mhdImpl = mhdImpl;
         this.mhdTransforms = mhdTransforms;
-        this.mhdImplClass = mhdImpl.getMhdVersion().getMhdImplClass();
     }
 
     public RegistryPackageType buildSubmissionSet(ResourceWrapper wrapper, Val val , ValE vale, IdBuilder idBuilder, ChannelConfig channelConfig, CodeTranslator codeTranslator, AssigningAuthorities assigningAuthorities) {
@@ -98,7 +96,7 @@ public class MhdV4Common {
         // 3bdd: Submission set type classification
         mhdTransforms.addClassification(ss, MhdTransforms.URN_UUID__BDD_SUBMISSION_SET, mhdTransforms.getrMgr().allocateSymbolicId(), wrapper.getAssignedId());
 
-        MhdCanonicalUriCodeInterface myCodesImpl = null;
+        MhdCanonicalUriCodeInterface myCodesImpl = mhdImpl.getUriCodesClass();
 
             if (listResource.hasExtension(myCodesImpl.getUriCodeMap().get(CanonicalUriCodeEnum.IHEDESIGNATIONTYPEEXTENSIONURL))) {
                 Extension extension = listResource.getExtensionByUrl(myCodesImpl.getUriCodeMap().get(CanonicalUriCodeEnum.IHEDESIGNATIONTYPEEXTENSIONURL));

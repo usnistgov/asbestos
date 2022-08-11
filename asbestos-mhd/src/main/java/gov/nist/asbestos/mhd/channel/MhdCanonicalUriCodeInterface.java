@@ -70,7 +70,7 @@ public interface MhdCanonicalUriCodeInterface {
                                 http://hl7.org/fhir/R4/datatypes-definitions.html#Coding.system
                                 Check if cardinality is [1..1]
                                 */
-                                if (listResource.getCode().getCoding().stream().filter(e -> system.equals(e.getSystem()) && code.equals(e.getCode())).count() == 1) {
+                                if (listResource.getCode().getCoding().stream().filter(e -> system.equals(e.getSystem()) && code.toString().equals(e.getCode())).count() == 1) {
                                     return true;
                                 }
                             }

@@ -178,6 +178,11 @@ public class XdsOnFhirChannel extends BaseChannel /*implements IBaseChannel*/ {
      */
     private MhdProfileVersionInterface getMhdVersionSpecificImpl(Bundle bundle, Val val) {
         Objects.requireNonNull(channelConfig);
+
+        if (isMhdVersionSpecificImplInitialized()) {
+            return mhdImpl;
+        }
+
         String[] allowedMhdVersions = channelConfig.getMhdVersions();
 
         if (allowedMhdVersions != null) {
@@ -640,16 +645,20 @@ public class XdsOnFhirChannel extends BaseChannel /*implements IBaseChannel*/ {
                     List<String> paramList = DocManSQParamTranslator.parseParms(search);
                     String error = "";
                     try {
+                        if (paramList == null) {
+                            throw new Exception("paramList is null.");
+                        }
                         if (isMhdVersionSpecificImplInitialized()) {
+                           mhdImpl = getMhdVersionSpecificImpl(
+                        }
                             Optional<String> matchParam = mhdImpl.hasSsQueryParam(paramList);
                             if (matchParam.isPresent()) {
                                 BaseResource resource = MhdTransforms.ssToListResource(mhdImpl, getCodeTranslator(), getExternalCache(), sender, channelConfig);
                                 resourceResponse(responseOut, search, searchRef, resource);
                                 return;
                             } else {
-                                throw new Exception("mhdImpl not initialized.");
+                                throw new Exception("Missing required code parameter.");
                             }
-                        }
                     } catch (Exception ex) {
                         error = ex.toString();
                     }

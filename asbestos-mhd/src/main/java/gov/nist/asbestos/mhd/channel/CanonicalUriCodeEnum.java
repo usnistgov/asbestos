@@ -22,4 +22,9 @@ public enum CanonicalUriCodeEnum {
     public UriCodeTypeEnum getType() {
         return type;
     }
+
+    @Override
+    public String toString() {
+        return code;
+    }
 }
