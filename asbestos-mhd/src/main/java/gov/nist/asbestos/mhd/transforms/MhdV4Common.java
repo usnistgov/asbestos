@@ -28,12 +28,14 @@ public class MhdV4Common {
     private final String SUBMISSION_SET_PROFILE_DOCREF_SUFFIX =  "StructureDefinition-IHE.MHD.Minimal.SubmissionSet.html#profile";
     private MhdProfileVersionInterface mhdImpl;
     private MhdTransforms mhdTransforms;
+    private CanonicalUriCodeEnum canonicalUriCodeEnum;
     private static Logger logger = Logger.getLogger(MhdV4Common.class.getName());
 
 
-    public MhdV4Common(MhdProfileVersionInterface mhdImpl, MhdTransforms mhdTransforms) {
+    public MhdV4Common(MhdProfileVersionInterface mhdImpl, MhdTransforms mhdTransforms, CanonicalUriCodeEnum canonicalUriCodeEnum) {
         this.mhdImpl = mhdImpl;
         this.mhdTransforms = mhdTransforms;
+        this.canonicalUriCodeEnum = canonicalUriCodeEnum;
     }
 
     public RegistryPackageType buildSubmissionSet(ResourceWrapper wrapper, Val val , ValE vale, IdBuilder idBuilder, ChannelConfig channelConfig, CodeTranslator codeTranslator, AssigningAuthorities assigningAuthorities) {
@@ -150,7 +152,7 @@ public class MhdV4Common {
 
         if (listResource.hasSubject() && listResource.getSubject().hasReference()) {
             mhdTransforms.addSubject(ss, wrapper, new Ref(listResource.getSubject()), CodeTranslator.SS_PID, "XDSSubmissionSet.patientId", vale, assigningAuthorities);
-        } else if (CanonicalUriCodeEnum.MINIMAL.equals(mhdImpl.getDetectedBundleProfile())) {
+        } else if (CanonicalUriCodeEnum.MINIMAL.equals(canonicalUriCodeEnum)) {
             mhdTransforms.linkDummyPatient(wrapper, vale, channelConfig, assigningAuthorities, ss);
         }
 

@@ -1,6 +1,7 @@
 package gov.nist.asbestos.mhd.translation.test;
 
 import gov.nist.asbestos.client.Base.ParserBase;
+import gov.nist.asbestos.client.channel.ChannelConfig;
 import gov.nist.asbestos.client.client.FhirClient;
 import gov.nist.asbestos.client.events.Event;
 import gov.nist.asbestos.client.events.ITask;
@@ -8,17 +9,19 @@ import gov.nist.asbestos.client.events.NoOpTask;
 import gov.nist.asbestos.client.log.SimStore;
 import gov.nist.asbestos.client.resolver.ResourceCacheMgr;
 import gov.nist.asbestos.client.resolver.ResourceMgr;
+import gov.nist.asbestos.mhd.channel.CanonicalUriCodeEnum;
+import gov.nist.asbestos.mhd.channel.MhdCanonicalUriCodeInterface;
 import gov.nist.asbestos.mhd.channel.MhdImplFactory;
 import gov.nist.asbestos.mhd.channel.MhdProfileVersionInterface;
+import gov.nist.asbestos.mhd.channel.MhdVersionEnum;
 import gov.nist.asbestos.mhd.transactionSupport.AssigningAuthorities;
 import gov.nist.asbestos.mhd.transactionSupport.CodeTranslator;
 import gov.nist.asbestos.mhd.transactionSupport.CodeTranslatorBuilder;
 import gov.nist.asbestos.mhd.transforms.BundleToRegistryObjectList;
-import gov.nist.asbestos.client.channel.ChannelConfig;
-import gov.nist.asbestos.mhd.channel.MhdVersionEnum;
 import gov.nist.asbestos.mhd.transforms.MhdTransforms;
 import gov.nist.asbestos.simapi.simCommon.SimId;
 import gov.nist.asbestos.simapi.validation.Val;
+import gov.nist.asbestos.simapi.validation.ValE;
 import gov.nist.asbestos.simapi.validation.ValErrors;
 import gov.nist.asbestos.simapi.validation.ValFactory;
 import oasis.names.tc.ebxml_regrep.xsd.rim._3.RegistryObjectListType;
@@ -36,8 +39,13 @@ import java.net.URISyntaxException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.logging.Logger;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 @Disabled("The Test suffix from the class name can be removed so that it would be ignored until the errors are fixed.")
 class BuildRegistryObjectListTest {
@@ -49,6 +57,7 @@ class BuildRegistryObjectListTest {
     private FhirClient fhirClient;
     private String testSession = "default";
     private String channelId = "test";
+    private static final Logger logger = Logger.getLogger(BuildRegistryObjectListTest.class.getName());
 
     @BeforeAll
     static void beforeAll() throws URISyntaxException {
@@ -95,18 +104,30 @@ class BuildRegistryObjectListTest {
         rMgr.setBundle(bundle);
         rMgr.getResourceMgrConfig().internalOnly();
 
-        BundleToRegistryObjectList xlate = new BundleToRegistryObjectList(null);
+//        MhdTransforms mhdTransforms = new MhdTransforms(rMgr, val, new NoOpTask());
+
+        MhdProfileVersionInterface mhdVersionSpecificImpl = MhdImplFactory.getImplementation(MhdVersionEnum.MHDv3x );
+
+        Map.Entry<CanonicalUriCodeEnum, String> mhdBundleProfile = null;
+        try {
+            MhdCanonicalUriCodeInterface uriImpl = mhdVersionSpecificImpl.getUriCodesClass();
+            mhdBundleProfile = uriImpl.detectBundleProfileType(bundle);
+        } catch (Exception ex) {
+            logger.severe(ex.toString());
+            val.add(new ValE(ex.getMessage()).asError().add(new ValE(mhdVersionSpecificImpl.getIheReference()).asDoc()));
+        }
+
+        BundleToRegistryObjectList xlate = new BundleToRegistryObjectList(null, mhdBundleProfile);
         xlate
                 .setCodeTranslator(codeTranslator)
                 .setResourceMgr(rMgr)
                 .setAssigningAuthorities(AssigningAuthorities.allowAny())
+                .setMhdTransforms(new MhdTransforms( rMgr, val, new NoOpTask()))
                 .setVal(val);
 
-        MhdTransforms mhdTransforms = new MhdTransforms(rMgr, val, new NoOpTask());
 
-        MhdProfileVersionInterface mhdVersionSpecificImpl = MhdImplFactory.getImplementation(bundle, MhdVersionEnum.MHDv3x, val, mhdTransforms);
 
-        RegistryObjectListType rol = xlate.buildRegistryObjectList(mhdVersionSpecificImpl);
+        RegistryObjectListType rol = xlate.buildRegistryObjectList(mhdVersionSpecificImpl, val);
         if (val.hasErrors())
             fail( ValFactory.toJson(new ValErrors(val)));
         else

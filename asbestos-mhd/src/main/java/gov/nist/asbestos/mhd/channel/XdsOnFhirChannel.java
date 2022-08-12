@@ -63,10 +63,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 // TODO - honor the Prefer header - http://hl7.org/fhir/http.html#ops
 public class XdsOnFhirChannel extends BaseChannel /*implements IBaseChannel*/ {
@@ -84,8 +84,7 @@ public class XdsOnFhirChannel extends BaseChannel /*implements IBaseChannel*/ {
 
     public XdsOnFhirChannel(ChannelConfig simConfig) {
         this.channelConfig = simConfig;
-        this.val = new Val();
-        this.mhdImpl = getMhdVersionSpecificImpl(simConfig, val);
+        this.mhdImpl = getMhdVersionSpecificImpl(simConfig);
     }
 
     private String transformPDBToPNR(Bundle bundle, URI toAddr, ITask task) {
@@ -96,6 +95,7 @@ public class XdsOnFhirChannel extends BaseChannel /*implements IBaseChannel*/ {
         fhirClient.setResourceCacheMgr(resourceCacheMgr);
 
         ResourceMgr rMgr = new ResourceMgr();
+        Val val = new Val();
         rMgr.setVal(val);
         rMgr.setFhirClient(fhirClient);
         rMgr.setTask(task);
@@ -113,6 +113,8 @@ public class XdsOnFhirChannel extends BaseChannel /*implements IBaseChannel*/ {
         bundleToRegistryObjectList.setAssigningAuthorities(AssigningAuthorities.allowAny());
         bundleToRegistryObjectList.setIdBuilder(new IdBuilder(true));
         bundleToRegistryObjectList.setTask(task);
+        bundleToRegistryObjectList.setMhdTransforms(new MhdTransforms(rMgr, val, task));
+
 
         try {
             HttpGetter requestIn = new HttpGetter();
@@ -127,15 +129,15 @@ public class XdsOnFhirChannel extends BaseChannel /*implements IBaseChannel*/ {
         rMgr.setBundle(bundle);
 
         // Setup MHD specific implementation
-        if (! isMhdVersionSpecificImplInitialized()) {
-            mhdTransforms = new MhdTransforms(rMgr, val, task);
+//        if (! isMhdVersionSpecificImplInitialized()) {
+//            mhdTransforms = new MhdTransforms(rMgr, val, task);
 //            mhdImpl = getMhdVersionSpecificImpl(bundle, val);
-        } else {
-            throw new RuntimeException("MhdVersionSpecificImpl already initialized");
-        }
+//        } else {
+//            throw new RuntimeException("MhdVersionSpecificImpl already initialized");
+//        }
 
         // perform translation
-        RegistryObjectListType registryObjectListType = bundleToRegistryObjectList.build(mhdImpl,  bundle);
+        RegistryObjectListType registryObjectListType = bundleToRegistryObjectList.build(mhdImpl, bundle);
         if (bundleToRegistryObjectList.isResponseHasError()) {
             throw new TransformException(bundleToRegistryObjectList.getResponseBundle());
         }
@@ -176,22 +178,17 @@ public class XdsOnFhirChannel extends BaseChannel /*implements IBaseChannel*/ {
 
     /**
      *
-     * @param val
      * @return
      */
-    private MhdProfileVersionInterface getMhdVersionSpecificImpl(ChannelConfig channelConfig, Val val) {
+    private MhdProfileVersionInterface getMhdVersionSpecificImpl(ChannelConfig channelConfig) {
         Objects.requireNonNull(channelConfig);
-
-        if (isMhdVersionSpecificImplInitialized()) {
-            return mhdImpl;
-        }
 
         String[] allowedMhdVersions = channelConfig.getMhdVersions();
 
-        if (allowedMhdVersions != null) {
+        if (allowedMhdVersions != null && allowedMhdVersions.length == 1) {
             // Allow only from the Accept list
             MhdVersionEnum mhdVersion = MhdVersionEnum.find(allowedMhdVersions[0]);
-            return MhdImplFactory.getImplementation(mhdVersion, val, mhdTransforms);
+            return MhdImplFactory.getImplementation(mhdVersion);
 
         } /* else {
             // All MHD versions are implicitly acceptable by channelConfig.
@@ -202,8 +199,9 @@ public class XdsOnFhirChannel extends BaseChannel /*implements IBaseChannel*/ {
             return findMhdImpl(bundle, list.toArray(new String[list.size()]), defaultVersion, val);
         }
         */
-       logger.warning("allowedMhdVersions cannot be null.");
-       return null;
+        MhdVersionEnum defaultMhdVersion = MhdVersionEnum.MHDv3x;
+       logger.warning("allowedMhdVersions cannot be null or empty, defaulting to " + defaultMhdVersion.toString());
+       return MhdImplFactory.getImplementation(defaultMhdVersion);
     }
 
     /*
@@ -258,7 +256,6 @@ public class XdsOnFhirChannel extends BaseChannel /*implements IBaseChannel*/ {
     @Override
     public void transformRequest(HttpPost requestIn, HttpPost requestOut)  {
         Objects.requireNonNull(channelConfig);
-        bundleToRegistryObjectList = new BundleToRegistryObjectList(channelConfig);
         byte[] request = requestIn.getRequest();
         String contentType = requestIn.getRequestContentType();
         IBaseResource resource;
@@ -287,6 +284,14 @@ public class XdsOnFhirChannel extends BaseChannel /*implements IBaseChannel*/ {
         }
         Bundle bundle = (Bundle) resource;
         requestBundle = bundle;
+        try {
+            Map.Entry<CanonicalUriCodeEnum, String> me =  mhdImpl.getUriCodesClass().detectBundleProfileType(bundle);
+            bundleToRegistryObjectList = new BundleToRegistryObjectList(channelConfig, me);
+        } catch (Exception ex) {
+           OperationOutcome oo = new OperationOutcome();
+           oo.setIssue(Arrays.asList(new OperationOutcome.OperationOutcomeIssueComponent().setSeverity(OperationOutcome.IssueSeverity.ERROR).setDiagnostics(ex.toString())));
+            throw new TransformException(oo);
+        }
 
 
         String soapString = transformPDBToPNR(bundle, toAddr, getTask());

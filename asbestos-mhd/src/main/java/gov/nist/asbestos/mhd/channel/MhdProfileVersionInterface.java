@@ -7,6 +7,7 @@ import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import gov.nist.asbestos.mhd.transactionSupport.AssigningAuthorities;
 import gov.nist.asbestos.mhd.transactionSupport.CodeTranslator;
 import gov.nist.asbestos.mhd.transforms.MhdTransforms;
+import gov.nist.asbestos.simapi.validation.Val;
 import gov.nist.asbestos.simapi.validation.ValE;
 import oasis.names.tc.ebxml_regrep.xsd.rim._3.RegistryPackageType;
 import org.hl7.fhir.r4.model.Identifier;
@@ -29,7 +30,7 @@ public interface MhdProfileVersionInterface {
         }
     }
 
-    CanonicalUriCodeEnum getDetectedBundleProfile();
+//    CanonicalUriCodeEnum getDetectedBundleProfile();
 
         default String getDocBase(String ref) {
         return String.format("%s/%s", getMhdVersion().getMhdDocBase(), ref);
@@ -37,8 +38,7 @@ public interface MhdProfileVersionInterface {
 
 
     List<Class<?>> getAcceptableResourceTypes();
-    RegistryPackageType buildSubmissionSet(ResourceWrapper wrapper, ValE vale, IdBuilder idBuilder, ChannelConfig channelConfig, CodeTranslator codeTranslator, AssigningAuthorities assigningAuthorities);
-    MhdTransforms getMhdTransforms();
+    RegistryPackageType buildSubmissionSet(MhdTransforms mhdTransforms, ResourceWrapper wrapper, Val val, ValE vale, IdBuilder idBuilder, ChannelConfig channelConfig, CodeTranslator codeTranslator, AssigningAuthorities assigningAuthorities, CanonicalUriCodeEnum canonicalUriCodeEnum);
     String getExtrinsicId(ValE valE, ResourceMgr rMgr, List<Identifier> identifiers);
     MhdVersionEnum getMhdVersion();
 

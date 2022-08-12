@@ -1,18 +1,16 @@
 package gov.nist.asbestos.asbestosProxy.channels.passthrough;
 
-import gov.nist.asbestos.client.channel.BaseChannel;
 import gov.nist.asbestos.client.Base.ParserBase;
+import gov.nist.asbestos.client.channel.BaseChannel;
+import gov.nist.asbestos.client.channel.ChannelConfig;
 import gov.nist.asbestos.client.client.Format;
+import gov.nist.asbestos.client.events.Event;
 import gov.nist.asbestos.client.general.ChannelSupport;
 import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.http.headers.Header;
-import gov.nist.asbestos.http.operations.HttpDelete;
-import gov.nist.asbestos.serviceproperties.ServiceProperties;
-import gov.nist.asbestos.serviceproperties.ServicePropertiesEnum;
-import gov.nist.asbestos.client.channel.ChannelConfig;
-import gov.nist.asbestos.client.events.Event;
 import gov.nist.asbestos.http.headers.Headers;
 import gov.nist.asbestos.http.operations.HttpBase;
+import gov.nist.asbestos.http.operations.HttpDelete;
 import gov.nist.asbestos.http.operations.HttpGetter;
 import gov.nist.asbestos.http.operations.HttpPost;
 import org.hl7.fhir.r4.model.BaseResource;
@@ -26,7 +24,8 @@ public class PassthroughChannel extends BaseChannel /*implements IBaseChannel*/ 
     private String serverBase;
     private String proxyBase;
 
-    public PassthroughChannel() {
+    public PassthroughChannel(ChannelConfig simConfig) {
+        this.channelConfig = simConfig;
     }
 
     @Override

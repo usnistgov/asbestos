@@ -2,16 +2,12 @@ package gov.nist.asbestos.proxyWar;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import gov.nist.asbestos.client.channel.ChannelConfig;
+import gov.nist.asbestos.client.channel.ChannelConfigFactory;
 import gov.nist.asbestos.http.operations.HttpDelete;
 import gov.nist.asbestos.http.operations.HttpGetter;
 import gov.nist.asbestos.http.operations.HttpPost;
-import gov.nist.asbestos.client.channel.ChannelConfig;
-import gov.nist.asbestos.client.channel.ChannelConfigFactory;
 import gov.nist.asbestos.http.operations.HttpPut;
-import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.OperationOutcome;
-import org.hl7.fhir.r4.model.Patient;
-import org.hl7.fhir.r4.model.Resource;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 

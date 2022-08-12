@@ -2,7 +2,7 @@
     <id value="xds"/>
     <meta>
         <lastUpdated value="2013-07-01T13:11:33Z"/>
-        <profile value="http://ihe.net/fhir/tag/iti-65"/>
+        <profile value="http://ihe.net/fhir/StructureDefinition/IHE_MHD_Provide_Minimal_DocumentBundle"/>
     </meta>
     <type value="transaction"/>
     <entry>

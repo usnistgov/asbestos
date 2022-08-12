@@ -13,14 +13,12 @@ import gov.nist.asbestos.simapi.validation.Val;
 import gov.nist.asbestos.simapi.validation.ValE;
 import oasis.names.tc.ebxml_regrep.xsd.rim._3.RegistryPackageType;
 import org.hl7.fhir.r4.model.Binary;
-import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.DocumentReference;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.ListResource;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 import java.util.logging.Logger;
 
 
@@ -56,22 +54,19 @@ public class MhdV4 implements MhdProfileVersionInterface {
     private static List<Class<?>> acceptableResourceTypes = Arrays.asList(ListResource.class, DocumentReference.class, Binary.class);
     private static MhdVersionEnum mhdVersionEnum = MhdVersionEnum.MHDv4;
 
-    private Val val;
-    private MhdTransforms mhdTransforms;
     private CanonicalUriCodeEnum mhdBundleProfileEnum;
     private static final Logger logger = Logger.getLogger(MhdV4.class.getName());
 
-    public MhdV4(Bundle bundle, Val val, MhdTransforms mhdTransforms) {
-        Objects.requireNonNull(val);
-        Objects.requireNonNull(mhdTransforms);
-        this.val = val;
-        this.mhdTransforms = mhdTransforms;
+    public MhdV4() {
+        /*
         try {
             this.mhdBundleProfileEnum = getUriCodesClass().detectBundleProfileType(bundle).getKey();
         } catch (Exception ex) {
             this.mhdBundleProfileEnum = null;
             logger.warning("mhdBundleProfileEnum is null. Exception: " + ex );
         }
+
+         */
     }
 
 
@@ -106,7 +101,7 @@ public class MhdV4 implements MhdProfileVersionInterface {
      * @return
      */
     @Override
-    public RegistryPackageType buildSubmissionSet(ResourceWrapper wrapper, ValE vale, IdBuilder idBuilder, ChannelConfig channelConfig, CodeTranslator codeTranslator, AssigningAuthorities assigningAuthorities) {
+    public RegistryPackageType buildSubmissionSet(MhdTransforms mhdTransforms, ResourceWrapper wrapper, Val val, ValE vale, IdBuilder idBuilder, ChannelConfig channelConfig, CodeTranslator codeTranslator, AssigningAuthorities assigningAuthorities, CanonicalUriCodeEnum canonicalUriCodeEnum) {
 
         /*
         if resource is of ListResource class type
@@ -120,24 +115,16 @@ public class MhdV4 implements MhdProfileVersionInterface {
             create a  new method to buildRegistryPackageType
          */
 
-        return new MhdV4Common(this, mhdTransforms).buildSubmissionSet( wrapper, val, vale, idBuilder, channelConfig, codeTranslator, assigningAuthorities);
+        return new MhdV4Common(this, mhdTransforms, canonicalUriCodeEnum).buildSubmissionSet( wrapper, val, vale, idBuilder, channelConfig, codeTranslator, assigningAuthorities);
     }
 
 
 
-    @Override
-    public MhdTransforms getMhdTransforms() {
-        return mhdTransforms;
-    }
 
     @Override
     public String getExtrinsicId(ValE valE, ResourceMgr rMgr, List<Identifier> identifiers) {
         return rMgr.allocateSymbolicId();
     }
 
-    @Override
-    public CanonicalUriCodeEnum getDetectedBundleProfile() {
-        return mhdBundleProfileEnum;
-    }
 }
 
