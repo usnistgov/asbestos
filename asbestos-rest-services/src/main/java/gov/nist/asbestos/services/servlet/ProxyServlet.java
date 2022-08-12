@@ -180,9 +180,7 @@ public class ProxyServlet extends HttpServlet {
             if (channelType == null)
                 throw new Error("Sim " + simStore.getChannelId() + " does not define a Channel Type.");
             IChannelBuilder channelBuilder = proxyMap.get(channelType);
-            channel = channelBuilder.build();
-
-            channel.setup(simStore.getChannelConfig());
+            channel = channelBuilder.build(simStore.getChannelConfig());
 
             channel.setReturnFormatType(Format.resultContentType(inHeaders));
 
@@ -374,9 +372,8 @@ public class ProxyServlet extends HttpServlet {
             if (channelType == null)
                 throw new Exception("Sim " + simStore.getChannelId() + " does not define a Channel Type.");
             IChannelBuilder channelBuilder = proxyMap.get(channelType);
-            BaseChannel channel = channelBuilder.build();
+            BaseChannel channel = channelBuilder.build(simStore.getChannelConfig());
 
-            channel.setup(simStore.getChannelConfig());
             channel.setReturnFormatType(Format.resultContentType(inHeaders));
             channel.setHostport(hostport);
             String proxyBase = simStore.getChannelConfig().getProxyURI().toString();

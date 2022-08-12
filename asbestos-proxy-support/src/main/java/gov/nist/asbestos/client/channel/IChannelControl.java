@@ -10,7 +10,6 @@ import gov.nist.asbestos.client.channel.ChannelConfig;
  */
 
 public interface IChannelControl {
-    void setup(ChannelConfig simConfig);
     void teardown();
     void validateConfig(ChannelConfig simConfig);
     // throws Exception if error

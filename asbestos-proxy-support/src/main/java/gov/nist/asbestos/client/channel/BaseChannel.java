@@ -41,10 +41,6 @@ public abstract class BaseChannel implements IBaseChannel {
         return channelConfig.asChannelId();
     }
 
-    @Override
-    public void setup(ChannelConfig simConfig) {
-        this.channelConfig = simConfig;
-    }
 
     public static String logReference(Logger log, String methodName, Throwable t) {
         String error = String.format("An %s error occurred at %s. Check server log based on the time this error occurred.\nMessage: %s\nException: %s", methodName, new Date().toString(), t.getMessage(), t.toString());

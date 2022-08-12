@@ -54,41 +54,5 @@ public interface MhdProfileVersionInterface {
         return matchParam;
     }
 
-    /*
-    static Map<CanonicalUriCodeEnum, String> getCanonicalUriMap(Class<? extends MhdProfileVersionInterface> myClass) {
-        try {
-            Method m = myClass.getDeclaredMethod(GET_ALL_URI_CODES, null);
-            if (m != null) {
-                try {
-                    return (Map<CanonicalUriCodeEnum, String>) m.invoke(null, null);
-                } catch (Exception ex) {
-                    privateLogger.warning("getCanonicalUriMap Invoke Exception" + ex.toString());
-                }
-            }
-        } catch (Exception ex) {
-            privateLogger.warning("getCanonicalUriMap getDeclaredMethod Exception" + ex.toString());
-        }
-        return null;
-    }
-
-    static Map<CanonicalUriCodeEnum, String> getCanonicalUriMapByType(Class<? extends MhdProfileVersionInterface> myClass, UriCodeTypeEnum uriCodeTypeEnum) {
-        try {
-            Method m = myClass.getDeclaredMethod(GET_URI_CODES, UriCodeTypeEnum.class);
-            if (m != null) {
-                try {
-                    return (Map<CanonicalUriCodeEnum, String>) m.invoke(null, uriCodeTypeEnum);
-                } catch (Exception ex) {
-                    privateLogger.warning("getCanonicalUriMapByType Invoke Exception" + ex.toString());
-                }
-            }
-        } catch (Exception ex) {
-            privateLogger.warning("getCanonicalUriMapByType getDeclaredMethod Exception" + ex.toString());
-        }
-        return null;
-    }
-     */
-
-
-
 
 }

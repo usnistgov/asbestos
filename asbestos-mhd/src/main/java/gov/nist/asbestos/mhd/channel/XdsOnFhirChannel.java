@@ -80,12 +80,16 @@ public class XdsOnFhirChannel extends BaseChannel /*implements IBaseChannel*/ {
     private MhdTransforms mhdTransforms;
     private MhdVersionEnum defaultVersion = MhdVersionEnum.MHDv3x;
     private MhdProfileVersionInterface mhdImpl;
+    private static final Logger  logger = Logger.getLogger(XdsOnFhirChannel.class.getName());
 
-    public XdsOnFhirChannel() {}
+    public XdsOnFhirChannel(ChannelConfig simConfig) {
+        this.channelConfig = simConfig;
+        this.val = new Val();
+        this.mhdImpl = getMhdVersionSpecificImpl(simConfig, val);
+    }
 
     private String transformPDBToPNR(Bundle bundle, URI toAddr, ITask task) {
         Objects.requireNonNull(task);
-        Val val = new Val();
 
         FhirClient fhirClient = new FhirClient();
         ResourceCacheMgr resourceCacheMgr = new ResourceCacheMgr(getExternalCache());
@@ -125,7 +129,7 @@ public class XdsOnFhirChannel extends BaseChannel /*implements IBaseChannel*/ {
         // Setup MHD specific implementation
         if (! isMhdVersionSpecificImplInitialized()) {
             mhdTransforms = new MhdTransforms(rMgr, val, task);
-            mhdImpl = getMhdVersionSpecificImpl(bundle, val);
+//            mhdImpl = getMhdVersionSpecificImpl(bundle, val);
         } else {
             throw new RuntimeException("MhdVersionSpecificImpl already initialized");
         }
@@ -171,12 +175,11 @@ public class XdsOnFhirChannel extends BaseChannel /*implements IBaseChannel*/ {
     }
 
     /**
-     * Returns a defaultVersion of implementation or an implementation based on bundle profile if it is recognized
-     * @param bundle
+     *
      * @param val
      * @return
      */
-    private MhdProfileVersionInterface getMhdVersionSpecificImpl(Bundle bundle, Val val) {
+    private MhdProfileVersionInterface getMhdVersionSpecificImpl(ChannelConfig channelConfig, Val val) {
         Objects.requireNonNull(channelConfig);
 
         if (isMhdVersionSpecificImplInitialized()) {
@@ -187,8 +190,10 @@ public class XdsOnFhirChannel extends BaseChannel /*implements IBaseChannel*/ {
 
         if (allowedMhdVersions != null) {
             // Allow only from the Accept list
-            return findMhdImpl(bundle, allowedMhdVersions, defaultVersion, val);
-        } else {
+            MhdVersionEnum mhdVersion = MhdVersionEnum.find(allowedMhdVersions[0]);
+            return MhdImplFactory.getImplementation(mhdVersion, val, mhdTransforms);
+
+        } /* else {
             // All MHD versions are implicitly acceptable by channelConfig.
             // Auto-detect based on Bundle profile
             List<String> list = Arrays.stream(MhdVersionEnum.values())
@@ -196,15 +201,16 @@ public class XdsOnFhirChannel extends BaseChannel /*implements IBaseChannel*/ {
                     .collect(Collectors.toList());
             return findMhdImpl(bundle, list.toArray(new String[list.size()]), defaultVersion, val);
         }
+        */
+       logger.warning("allowedMhdVersions cannot be null.");
+       return null;
     }
 
-    private MhdProfileVersionInterface findMhdImpl(Bundle bundle, String[] acceptableMhdVersions, MhdVersionEnum defaultVersion, Val val) {
-        Objects.requireNonNull(bundle);
-        Objects.requireNonNull(acceptableMhdVersions);
+    /*
+    private MhdProfileVersionInterface findMhdImpl(MhdVersionEnum mhdVersion, Val val) {
         Objects.requireNonNull(val);
         Objects.requireNonNull(mhdTransforms);
 
-        MhdVersionEnum bundleVersion = defaultVersion;
         try {
             Optional<MhdVersionEnum> optionalMhdVersionEnum = Arrays.stream(acceptableMhdVersions)
                     .map(MhdVersionEnum::find)
@@ -228,8 +234,9 @@ public class XdsOnFhirChannel extends BaseChannel /*implements IBaseChannel*/ {
         } catch (Exception ex) {
             log.warning("findMhdImpl Exception: " + ex.toString());
         }
-        return MhdImplFactory.getImplementation(bundle, bundleVersion, val, mhdTransforms);
+        return MhdImplFactory.getImplementation(mhdVersion, val, mhdTransforms);
     }
+     */
 
     public static byte[] lastDocument;
     public static String lastDocumentStr;
@@ -647,9 +654,6 @@ public class XdsOnFhirChannel extends BaseChannel /*implements IBaseChannel*/ {
                     try {
                         if (paramList == null) {
                             throw new Exception("paramList is null.");
-                        }
-                        if (isMhdVersionSpecificImplInitialized()) {
-                           mhdImpl = getMhdVersionSpecificImpl(
                         }
                             Optional<String> matchParam = mhdImpl.hasSsQueryParam(paramList);
                             if (matchParam.isPresent()) {

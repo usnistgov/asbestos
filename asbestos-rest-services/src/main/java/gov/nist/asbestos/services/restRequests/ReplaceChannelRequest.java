@@ -50,6 +50,11 @@ public class ReplaceChannelRequest extends CreateChannelRequest {
             log.fine("REPLACE Channel " + rawRequest);
             ChannelConfig channelConfigAsPerBody = ChannelConfigFactory.convert(rawRequest);
 
+            if (channelConfigAsPerTheUri.getMhdVersions() == null || channelConfigAsPerTheUri.getMhdVersions().length == 0) {
+                returnPlainTextResponse(request.resp, HttpServletResponse.SC_BAD_REQUEST, "mhdVersion must be selected.");
+                return;
+            }
+
             if (!channelConfigAsPerTheUri.asChannelId().equals(channelConfigAsPerBody.asChannelId())) { // The supplied entity must match the resource at URI being replaced
                returnPlainTextResponse(request.resp, HttpServletResponse.SC_BAD_REQUEST, "Provided request body ChannelID does not match the ChannelID in the request URI.");
                return;

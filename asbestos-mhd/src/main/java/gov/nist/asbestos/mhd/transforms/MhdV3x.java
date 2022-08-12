@@ -52,24 +52,20 @@ public class MhdV3x implements MhdProfileVersionInterface {
     MhdTransforms mhdTransforms;
     private static final Logger logger = Logger.getLogger(MhdV3x.class.getName());
 
-    public MhdV3x(Bundle b, Val val, MhdTransforms mhdTransforms) {
+    public MhdV3x(Val val, MhdTransforms mhdTransforms) {
         Objects.requireNonNull(val);
         Objects.requireNonNull(mhdTransforms);
         this.val = val;
         this.mhdTransforms = mhdTransforms;
-        try {
-            this.mhdBundleProfileEnum = getUriCodesClass().detectBundleProfileType(b).getKey();
-        } catch (Exception ex) {
-            this.mhdBundleProfileEnum = null;
-            logger.warning("mhdBundleProfileEnum is null. Exception: " + ex );
-        }
-
     }
+
+
 
     @Override
     public CanonicalUriCodeEnum getDetectedBundleProfile() {
         return mhdBundleProfileEnum;
     }
+
 
     @Override
     public String getIheReference() {
