@@ -1,0 +1,59 @@
+<TestScript xmlns="http://hl7.org/fhir">
+    <modifierExtension url="urn:module">
+        <extension url="urn:fixture-in">
+            <valueString value="request"/>
+        </extension>
+        <extension url="urn:fixture-in">
+            <valueString value="response"/>
+        </extension>
+    </modifierExtension>
+
+    <id value="SSLIST410_SubmissionSetListRequirements"/>
+    <name value="ssListValidationsMHDv410"/>
+    <description value="List (SubmissionSet) requirements."/>
+
+    <test>
+        <description value="List (SubmissionSet) type assertions."/>
+        <action>
+            <assert id="SSLIST_1">
+                <description value="The Document Source shall not provide any entryUUID values."/>
+                <compareToSourceId value="request"/>
+                <compareToSourceExpression value="Bundle.entry.resource.where($this is List and code.coding.code='submissionset').where(identifier.use='official' implies identifier.value.empty() or identifier.value.startsWith('urn:uuid').not()).exists()"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
+            <assert id="SSLIST410_2">
+                <description value="sourceId: The Document Source shall assure all FHIR resource elements are consistent with the Document Sharing metadata requirements."/>
+                <compareToSourceId value="request"/>
+                <compareToSourceExpression value="Bundle.entry.resource.where($this is List and code.coding.code='submissionset' and extension.exists()).extension.where(url ='https://profiles.ihe.net/ITI/MHD/StructureDefinition/ihe-sourceId').select(count()=1 and first().value.value.exists()).empty().not().allTrue()"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
+            <assert id="SSLIST_3">
+                <description value="date: The Document Source shall assure all FHIR resource elements are consistent with the Document Sharing metadata requirements."/>
+                <compareToSourceId value="request"/>
+                <compareToSourceExpression value="Bundle.entry.resource.where($this is List and code.coding.code='submissionset' and date.exists()).date.empty().not()"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
+            <assert id="SSLIST_4">
+                <description value="uniqueId is required."/>
+                <compareToSourceId value="request"/>
+                <compareToSourceExpression value="Bundle.entry.resource.where($this is List and code.coding.code='submissionset').identifier.where(use='usual' and value.exists()).exists()"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
+            <assert id="SSLIST_5">
+                <description value="status is current."/>
+                <compareToSourceId value="request"/>
+                <compareToSourceExpression value="Bundle.entry.resource.where($this is List and code.coding.code='submissionset' and status='current').exists()"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+
+    </test>
+</TestScript>

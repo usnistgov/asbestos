@@ -23,6 +23,11 @@
         <name value="scriptMHDv4"/>
         <defaultValue value="../../MHDv4_Internal/bundle_eval/TestScript.xml"/>
     </variable>
+    <variable>
+        <name value="scriptMHDv410"/>
+        <defaultValue value="../../MHDv410_Internal/bundle_eval/TestScript.xml"/>
+    </variable>
+
     <test>
         <description value="Bundle evaluation assertions."/>
         <action>

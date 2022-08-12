@@ -26,6 +26,10 @@
         <name value="scriptMHDv4"/>
         <defaultValue value="CMPMETA4_Assertions.xml"/>
     </variable>
+    <variable>
+        <name value="scriptMHDv410"/>
+        <defaultValue value="CMPMETA410_Assertions.xml"/>
+    </variable>
 
     <test>
         <description value="Comprehensive Metadata only"/>

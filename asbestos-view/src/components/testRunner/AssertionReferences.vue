@@ -251,10 +251,10 @@
                 if (linkUrl.startsWith(currentMhdUrlBase)) {
                     const currentTcName = this.$store.state.testRunner.currentTestCollectionName
                     var tcObj = this.$store.state.testRunner.serverTestCollectionObjs.filter(e => e.name === currentTcName)
-                    console.debug('tcObj length: ' + tcObj.length)
-                    console.debug(tcObj[0].mhdVersion)
+                    // console.debug('tcObj length: ' + tcObj.length)
+                    // console.debug(tcObj[0].mhdVersion)
                     const mhdVersionSpecificDocBase = this.$store.state.testRunner.testAssertions.docBase[tcObj[0].mhdVersion]
-                    console.debug(mhdVersionSpecificDocBase)
+                    // console.debug(mhdVersionSpecificDocBase)
                     const re = new RegExp(`^${currentMhdUrlBase}`,'i') // ^start line, {pattern}
                     if (linkUrl.match(re) !== null) {
                         return linkUrl.replace(re, mhdVersionSpecificDocBase)

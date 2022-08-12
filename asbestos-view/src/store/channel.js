@@ -14,7 +14,8 @@ export const channelStore = {
             ],
             mhdVersions: [
                 'MHDv3.x',
-                'MHDv4'
+                'MHDv4',
+                'MHDv410'
             ],
             pdbAssertions: [
                 'Internal',

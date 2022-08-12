@@ -83,6 +83,8 @@
     "RM4_3":        [{"mhdv4": "ITI-65_RequestMessage", "context": "messageSemantics"}],
     "RM4_4":        [{"mhdv4": "ITI-65_BundleResources", "context":"Bundle.meta.profile",
                       "verbatimPhraseToFocus": "Bundle.meta.profile"}],
+    "RM410_4":        [{"mhdv4": "ITI-65_BundleResources", "context":"Bundle.meta.profile",
+                      "verbatimPhraseToFocus": "Bundle.meta.profile"}],
     "RM4_5":        [{"mhdv4": "SubmissionSetTypeList", "context": "attributeMap" },
                      {"mhdv4": "SubmissionSetTypeList", "context":"mappingToXds" }],
     "RM4_6":        [{"mhdv4": "ITI-65_RequestMessage", "context": "elements"},
@@ -95,8 +97,14 @@
     "SSLIST_1":     [{"mhdv4": "ITI-65_RequestMessage", "context": "elements"}],
     "SSLIST_2":     [{"mhdv4": "ITI-65_RequestMessage", "context": "elements"},
                       {"mhdv4": "SubmissionSetTypeList", "context": ".extension:sourceId"}],
+    "SSLIST410_2":     [{"mhdv4": "ITI-65_RequestMessage", "context": "elements"},
+                      {"mhdv4": "SubmissionSetTypeList", "context": ".extension:sourceId"}],
     "SSLIST_3":     [{"mhdv4": "ITI-65_RequestMessage", "context": "elements"},
                       {"mhdv4": "SubmissionSetTypeList", "context": ".date"}],
+    "SSLIST_4":     [{"mhdv4": "ITI-65_RequestMessage", "context": "elements"},
+                    {"mhdv4": "SubmissionSetTypeList", "context": ".identifier"}],
+    "SSLIST_5":     [{"mhdv4": "ITI-65_RequestMessage", "context": "elements"},
+                    {"mhdv4": "SubmissionSetTypeList", "context": ".status"}],
     "SUBJ4_1":      [{"mhdv4": "patientReference"}],
     "SUBJ4_2":      [{"mhdv4": "patientReference", "verbatimPhraseToFocus": "FHIR Patient Resource"}],
     "SUBJ4_3":      [{"mhdv4": "ITI-65_RequestMessage", "context": "elements"},
@@ -574,6 +582,21 @@
           },
           ".date": {
             "Element": {},
+            "SpecificationText": [{
+              "text": "Control 1..1"
+            }]
+          },
+          ".identifier": {
+            "Element": {},
+            "SpecificationText": [{
+              "text": "Control 2..*"
+            }]
+          },
+          ".status": {
+            "Element": {},
+            "Pattern Value": {
+              "text": "current"
+            },
             "SpecificationText": [{
               "text": "Control 1..1"
             }]
