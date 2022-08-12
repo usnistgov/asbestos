@@ -128,7 +128,7 @@
 
         <label class="grid-name">MHD Version Support Option</label>
         <div v-if="isEditMode" class="grid-item" >
-          <select size="5"  v-model="channel.mhdVersions">
+          <select size="5" multiple="multiple"  v-model="channel.mhdVersions">
             <option :key="eKey"
                     :value="e"
                     v-for="(e,eKey) in $store.state.channel.mhdVersions">

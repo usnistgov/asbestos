@@ -200,7 +200,7 @@ public class XdsOnFhirChannel extends BaseChannel /*implements IBaseChannel*/ {
         }
         */
         MhdVersionEnum defaultMhdVersion = MhdVersionEnum.MHDv3x;
-       logger.warning("allowedMhdVersions cannot be null or empty, defaulting to " + defaultMhdVersion.toString());
+       logger.warning("allowedMhdVersions cannot be null, empty, or more than one version, defaulting to " + defaultMhdVersion.toString());
        return MhdImplFactory.getImplementation(defaultMhdVersion);
     }
 
