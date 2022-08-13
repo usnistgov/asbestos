@@ -245,22 +245,37 @@
                     return []
             },
             mhdVersionSpecificLink(linkUrl) {
-                //FIXME: make this test collection version specific
                 // use this.$store.state.testRunner.currentTestCollectionName
                 const currentMhdUrlBase = 'https://profiles.ihe.net/ITI/MHD'
                 if (linkUrl.startsWith(currentMhdUrlBase)) {
-                    const currentTcName = this.$store.state.testRunner.currentTestCollectionName
-                    var tcObj = this.$store.state.testRunner.serverTestCollectionObjs.filter(e => e.name === currentTcName)
-                    // console.debug('tcObj length: ' + tcObj.length)
-                    // console.debug(tcObj[0].mhdVersion)
-                    const mhdVersionSpecificDocBase = this.$store.state.testRunner.testAssertions.docBase[tcObj[0].mhdVersion]
-                    // console.debug(mhdVersionSpecificDocBase)
-                    const re = new RegExp(`^${currentMhdUrlBase}`,'i') // ^start line, {pattern}
-                    if (linkUrl.match(re) !== null) {
-                        return linkUrl.replace(re, mhdVersionSpecificDocBase)
+                    let tcMhdVersion = this.getTcMhdVersion()
+                    if (tcMhdVersion !== undefined) {
+                        // console.debug(tcObj[0].mhdVersion)
+                        const mhdVersionSpecificDocBase = this.$store.state.testRunner.testAssertions.docBase[tcMhdVersion]
+                        // console.debug(mhdVersionSpecificDocBase)
+                        const re = new RegExp(`^${currentMhdUrlBase}`, 'i') // ^start line, {pattern}
+                        if (linkUrl.match(re) !== null) {
+                            return linkUrl.replace(re, mhdVersionSpecificDocBase)
+                        }
                     }
                 }
                 return linkUrl
+            },
+            getTcMhdVersion() {
+                const currentTcName = this.$store.state.testRunner.currentTestCollectionName
+                let tcCollectionObjs = null
+                try {
+                    if (this.$store.state.testRunner.isClientTest) {
+                        tcCollectionObjs = this.$store.state.testRunner.clientTestCollectionObjs
+                    } else {
+                        tcCollectionObjs = this.$store.state.testRunner.serverTestCollectionObjs
+                    }
+                    return tcCollectionObjs.filter(e => e.name === currentTcName)[0].mhdVersion
+                } catch (e) {
+                    console.error('getTcMhdVersion error ' + e)
+                }
+                console.error('Undefined tcMhdVersion')
+                return undefined
             }
 
         }
