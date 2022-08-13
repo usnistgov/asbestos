@@ -1,0 +1,31 @@
+<TestScript xmlns="http://hl7.org/fhir">
+
+    <test>
+        <description value="Submit Provide Document Bundle to MHD Document Recipient."/>
+        <action>
+            <operation>
+                <description value="Module usage description"/>
+                <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
+                    <extension url="component">
+                        <valueString value="../../Library/AggregateModule/MHDPDBSuccess2.xml"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="'true'"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="'?fixtureId=pdb&amp;baseTestCollection=MHD_DocumentRecipient_comprehensive'"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="'5'"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="'1'"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="'1'"/>
+                    </extension>
+                </modifierExtension>
+            </operation>
+        </action>
+    </test>
+</TestScript>
