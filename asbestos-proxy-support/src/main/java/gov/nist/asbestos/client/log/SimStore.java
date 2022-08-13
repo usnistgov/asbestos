@@ -120,6 +120,13 @@ public class SimStore {
             throw new ChannelDoesNotExistException("Channel does not exist");
         File file = new File(getChannelDir(), CHANNEL_CONFIG_FILE);
         channelConfig = ChannelConfigFactory.load(file);
+        if (channelConfig == null) {
+            throw new RuntimeException("channelConfig cannot be null.");
+        } else {
+            if (channelConfig.getMhdVersions() == null) {
+                channelConfig.setMhdVersions(new String[]{});
+            }
+        }
         channelId = getSimId(channelConfig);
         channelId.validate();
         return this;
