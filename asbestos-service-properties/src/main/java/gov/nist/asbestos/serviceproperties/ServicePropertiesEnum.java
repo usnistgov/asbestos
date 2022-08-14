@@ -3,7 +3,7 @@ package gov.nist.asbestos.serviceproperties;
 import java.util.Optional;
 
 public enum ServicePropertiesEnum {
-    MHD_CAPABILITY_STATEMENT_FILE("mhdCapabilityStatementFile"),
+    MHD_CAPABILITY_STATEMENT_FILE("mhdChannelCapabilityStatementFile"),
     EMPTY_CAPABILITY_STATEMENT_FILE("emptyCapabilityStatementFile"),
     XDS_TOOLKIT_BASE("xdsToolkitBase"),
     TLS_XDS_TOOLKIT_BASE("tlsXdsToolkitBase"),
@@ -12,8 +12,8 @@ public enum ServicePropertiesEnum {
     FHIR_TOOLKIT_BASE("fhirToolkitBase"),
     FHIR_TOOLKIT_VERSION("fhirToolkitVersion"),
     HAPI_FHIR_BASE("hapiFhirBase"),
-    LIMITED_CHANNEL_CAPABILITY_STATMENT_FILE("limitedChannelCapabilityStatementFile"),
-    XDS_CHANNEL_CAPABILITY_STATEMENT_FILE("xdsChannelCapabilityStatementFile"),
+//    LIMITED_CHANNEL_CAPABILITY_STATMENT_FILE("limitedChannelCapabilityStatementFile"),
+//    XDS_CHANNEL_CAPABILITY_STATEMENT_FILE("xdsChannelCapabilityStatementFile"),
     FHIR_VALIDATION_SERVER("fhirValidationServer"),
     STARTUP_SESSION_ID("startUpSession");
 

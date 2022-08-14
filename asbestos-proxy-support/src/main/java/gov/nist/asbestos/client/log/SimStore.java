@@ -122,11 +122,12 @@ public class SimStore {
         channelConfig = ChannelConfigFactory.load(file);
         if (channelConfig == null) {
             throw new RuntimeException("channelConfig cannot be null.");
-        } else {
+        } /* else {
             if (channelConfig.getMhdVersions() == null) {
                 channelConfig.setMhdVersions(new String[]{});
             }
         }
+            */
         channelId = getSimId(channelConfig);
         channelId.validate();
         return this;

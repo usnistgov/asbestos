@@ -56,9 +56,9 @@ import java.util.regex.Pattern;
 import java.util.stream.IntStream;
 
 public class ProxyServlet extends HttpServlet {
-    private static Logger log = Logger.getLogger(ProxyServlet.class.getName());
     private static File externalCache = null;
     private Map<String, IChannelBuilder> proxyMap = new HashMap<>();
+    private static Logger log = Logger.getLogger(ProxyServlet.class.getName());
 
     public ProxyServlet() {
         super();
@@ -312,7 +312,9 @@ public class ProxyServlet extends HttpServlet {
     private void doGetCapabilityStatement(HttpServletRequest req, HttpServletResponse resp, SimStore simStore, URI uri, Verb verb, Headers inHeaders, String channelId) {
         if (simStore == null) return;
 
-        boolean isLoggingEnabled = simStore.getChannelConfig().isLogMhdCapabilityStatementRequest();
+        ChannelConfig channelConfig = simStore.getChannelConfig();
+
+        boolean isLoggingEnabled = channelConfig.isLogMhdCapabilityStatementRequest();
 
         ITask clientTask = (isLoggingEnabled ? simStore.newEvent().getClientTask() : new NoOpTask());
         try {
@@ -320,7 +322,7 @@ public class ProxyServlet extends HttpServlet {
             if (hostport == null || hostport.equals(""))
                 hostport = "localhost:8080";
 
-            String channelType = simStore.getChannelConfig().getChannelType();
+            String channelType = channelConfig.getChannelType();
             if (channelType == null)
                 throw new Exception("Sim " + simStore.getChannelId() + " does not define a Channel Type.");
 
@@ -328,18 +330,22 @@ public class ProxyServlet extends HttpServlet {
 
             byte[] inBody = getRequestBody(req);
             HttpBase requestIn = logClientRequestIn(clientTask, inHeaders, inBody, verb);
+            //FIXME: channelId is now session__channelname
+            /*
             String enumFindKey = String.format("%sChannelCapabilityStatementFile", channelId);
             Optional<ServicePropertiesEnum> spEnum = ServicePropertiesEnum.find(enumFindKey);
             ServicePropertiesEnum capabilityStatementFile;
             if (! spEnum.isPresent()) {
+                log.warning("ServicePropertiesEnum not found: " + enumFindKey + ". Using an empty capability statement.");
                 capabilityStatementFile = ServicePropertiesEnum.EMPTY_CAPABILITY_STATEMENT_FILE;
             } else {
                 capabilityStatementFile = spEnum.get();
             }
-            BaseResource baseResource = FhirToolkitCapabilityStatement.getCapabilityStatement(capabilityStatementFile, channelId);
-            String versionId = ((CapabilityStatement)baseResource).getVersion();
+             */
+            CapabilityStatement capabilityStatement = FhirToolkitCapabilityStatement.getCapabilityStatement(ServicePropertiesEnum.MHD_CAPABILITY_STATEMENT_FILE, channelConfig);
+            String versionId = capabilityStatement.getVersion();
             resp.addHeader("ETag", String.format("W/\"%s\"", versionId.hashCode()));
-            respond(resp, baseResource, inHeaders, clientTask, 200);
+            respond(resp, capabilityStatement, inHeaders, clientTask, 200);
         } catch (Exception ex) {
             // Following call did not work in IntelliJ Jetty runner without any Jetty XML config:
             // resp.sendError(500, ex.toString());.

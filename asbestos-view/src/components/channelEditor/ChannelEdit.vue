@@ -128,7 +128,7 @@
 
         <label class="grid-name">MHD Version Support Option</label>
         <div v-if="isEditMode" class="grid-item" >
-          <select size="5" multiple="multiple"  v-model="channel.mhdVersions">
+          <select size="5" multiple="multiple"  v-model="channelMhdVersionSupport">
             <option :key="eKey"
                     :value="e"
                     v-for="(e,eKey) in $store.state.channel.mhdVersions">
@@ -142,7 +142,7 @@
               {{channel.mhdVersions.join(", ")}}
             </template>
           <template v-else>
-            Auto-select based on bundle profile
+            Use default
           </template>
         </div>
 
@@ -260,7 +260,22 @@ export default {
     isHttpsMode() {
       return UtilFunctions.isHttpsMode()
     },
-
+    channelMhdVersionSupport: {
+      set(val)
+      {
+        if (val === '' || val === undefined)
+          return
+       this.channel.mhdVersions = val
+      },
+      get()
+      {
+        if (this.channel.mhdVersions !== undefined && Array.isArray(this.channel.mhdVersions) && this.channel.mhdVersions.length > 0) {
+          return this.channel.mhdVersions
+        } else {
+            return []
+        }
+      }
+    }
   },
   mounted() {
   },

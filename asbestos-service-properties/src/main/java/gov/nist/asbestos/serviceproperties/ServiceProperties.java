@@ -109,7 +109,7 @@ public class ServiceProperties {
     public String getPropertyOrThrow(ServicePropertiesEnum key) {
         String value = getProperty(key.getKey());
         if (value == null)
-            throw new RuntimeException(String.format("No value found for %s", key));
+            throw new RuntimeException(String.format("Property name %s not found in %s.", key, SERVICE_PROPERTIES_FILE_NAME));
         return value;
     }
 
