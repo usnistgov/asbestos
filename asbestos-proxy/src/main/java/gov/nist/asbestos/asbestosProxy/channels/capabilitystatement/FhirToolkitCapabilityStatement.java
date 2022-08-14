@@ -127,7 +127,9 @@ public class FhirToolkitCapabilityStatement {
                 default: throw new Exception("Unrecognized xdsSiteName: " + xdsSitename);
             }
 
-            systemInteractionComponents.add( new CapabilityStatement.SystemInteractionComponent().setDocumentation(doc));
+            systemInteractionComponents.add( new CapabilityStatement.SystemInteractionComponent()
+                    .setCode(CapabilityStatement.SystemRestfulInteraction.TRANSACTION)
+                    .setDocumentation(doc));
         }
        return systemInteractionComponents;
     }

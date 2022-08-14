@@ -63,6 +63,7 @@ class CapabilityStatementTest {
         assert capabilityStatement.hasRest();
         String profile = new MhdV3xCanonicalUriCodes().getUriCodeMap().get(CanonicalUriCodeEnum.COMPREHENSIVE);
         assert profile.equals( capabilityStatement.getRest().get(0).getInteraction().get(0).getDocumentation());
+        assert CapabilityStatement.SystemRestfulInteraction.TRANSACTION.equals( capabilityStatement.getRest().get(0).getInteraction().get(0).getCode());
     }
     @Test
     void testMhd3xMinCapabilityStatement() throws Exception {
@@ -78,6 +79,7 @@ class CapabilityStatementTest {
         assert capabilityStatement.hasRest();
         String profile = new MhdV3xCanonicalUriCodes().getUriCodeMap().get(CanonicalUriCodeEnum.MINIMAL);
         assert profile.equals( capabilityStatement.getRest().get(0).getInteraction().get(0).getDocumentation());
+        assert CapabilityStatement.SystemRestfulInteraction.TRANSACTION.equals( capabilityStatement.getRest().get(0).getInteraction().get(0).getCode());
     }
     @Test
     void testMhd4MinCapabilityStatement() throws Exception {
@@ -93,6 +95,7 @@ class CapabilityStatementTest {
         assert capabilityStatement.hasRest();
         String profile = new MhdV4CanonicalUriCodes().getUriCodeMap().get(CanonicalUriCodeEnum.MINIMAL);
         assert profile.equals( capabilityStatement.getRest().get(0).getInteraction().get(0).getDocumentation());
+        assert CapabilityStatement.SystemRestfulInteraction.TRANSACTION.equals( capabilityStatement.getRest().get(0).getInteraction().get(0).getCode());
     }
     @Test
     void testMhd4CompCapabilityStatement() throws Exception {
@@ -108,6 +111,7 @@ class CapabilityStatementTest {
         assert capabilityStatement.hasRest();
         String profile = new MhdV4CanonicalUriCodes().getUriCodeMap().get(CanonicalUriCodeEnum.COMPREHENSIVE);
         assert profile.equals( capabilityStatement.getRest().get(0).getInteraction().get(0).getDocumentation());
+        assert CapabilityStatement.SystemRestfulInteraction.TRANSACTION.equals( capabilityStatement.getRest().get(0).getInteraction().get(0).getCode());
     }
     @Test
     void testMhd410MinCapabilityStatement() throws Exception {
@@ -123,6 +127,7 @@ class CapabilityStatementTest {
         assert capabilityStatement.hasRest();
         String profile = new MhdV410CanonicalUriCodes().getUriCodeMap().get(CanonicalUriCodeEnum.MINIMAL);
         assert profile.equals( capabilityStatement.getRest().get(0).getInteraction().get(0).getDocumentation());
+        assert CapabilityStatement.SystemRestfulInteraction.TRANSACTION.equals( capabilityStatement.getRest().get(0).getInteraction().get(0).getCode());
     }
     @Test
     void testMhd410CompCapabilityStatement() throws Exception {
@@ -138,6 +143,7 @@ class CapabilityStatementTest {
         assert capabilityStatement.hasRest();
         String profile = new MhdV410CanonicalUriCodes().getUriCodeMap().get(CanonicalUriCodeEnum.COMPREHENSIVE);
         assert profile.equals( capabilityStatement.getRest().get(0).getInteraction().get(0).getDocumentation());
+        assert CapabilityStatement.SystemRestfulInteraction.TRANSACTION.equals( capabilityStatement.getRest().get(0).getInteraction().get(0).getCode());
     }
 
 
