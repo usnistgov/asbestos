@@ -128,7 +128,7 @@
 
         <label class="grid-name">MHD Version Support Option</label>
         <div v-if="isEditMode" class="grid-item" >
-          <select size="5" multiple="multiple"  v-model="channelMhdVersionSupport">
+          <select size="1"  v-model="channelMhdVersionSupport">
             <option :key="eKey"
                     :value="e"
                     v-for="(e,eKey) in $store.state.channel.mhdVersions">
@@ -265,14 +265,14 @@ export default {
       {
         if (val === '' || val === undefined)
           return
-       this.channel.mhdVersions = val
+       this.channel.mhdVersions = [val]
       },
       get()
       {
         if (this.channel.mhdVersions !== undefined && Array.isArray(this.channel.mhdVersions) && this.channel.mhdVersions.length > 0) {
-          return this.channel.mhdVersions
+          return this.channel.mhdVersions[0]
         } else {
-            return []
+            return ''
         }
       }
     }
