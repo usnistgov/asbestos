@@ -13,6 +13,7 @@ import gov.nist.asbestos.serviceproperties.ServicePropertiesEnum;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
 import org.hl7.fhir.r4.model.BaseResource;
@@ -121,17 +122,27 @@ public class FhirToolkitCapabilityStatement {
             MhdCanonicalUriCodeInterface intf = myUriCodesClass.getDeclaredConstructor().newInstance();
 
             String doc;
+            Map<CanonicalUriCodeEnum, String> map = intf.getUriCodesByType(UriCodeTypeEnum.PROFILE);
             switch (xdsSitename) {
-                case XDS_LIMITED_META_SIM: doc = intf.getUriCodesByType(UriCodeTypeEnum.PROFILE).get(CanonicalUriCodeEnum.MINIMAL); break;
-                case XDS_COMPREHENSIVE_META_SIM: doc = intf.getUriCodesByType(UriCodeTypeEnum.PROFILE).get(CanonicalUriCodeEnum.COMPREHENSIVE); break;
+                case XDS_LIMITED_META_SIM:
+                        doc = map.get(CanonicalUriCodeEnum.MINIMAL);
+                        systemInteractionComponents.add(getInteractionComponent(doc));
+                        /* FALL THROUGH */
+                case XDS_COMPREHENSIVE_META_SIM:
+                        doc = map.get(CanonicalUriCodeEnum.COMPREHENSIVE);
+                        systemInteractionComponents.add(getInteractionComponent(doc));
+                        break;
                 default: throw new Exception("Unrecognized xdsSiteName: " + xdsSitename);
             }
 
-            systemInteractionComponents.add( new CapabilityStatement.SystemInteractionComponent()
-                    .setCode(CapabilityStatement.SystemRestfulInteraction.TRANSACTION)
-                    .setDocumentation(doc));
         }
        return systemInteractionComponents;
+    }
+
+    private static CapabilityStatement.SystemInteractionComponent getInteractionComponent(String doc) {
+        return new CapabilityStatement.SystemInteractionComponent()
+                .setCode(CapabilityStatement.SystemRestfulInteraction.TRANSACTION)
+                .setDocumentation(doc);
     }
 
 }

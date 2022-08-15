@@ -77,8 +77,14 @@ class CapabilityStatementTest {
         CapabilityStatement capabilityStatement = getCapabilityStatement(ServicePropertiesEnum.MHD_CAPABILITY_STATEMENT_FILE, channelConfig);
         assert capabilityStatement != null;
         assert capabilityStatement.hasRest();
-        String profile = new MhdV3xCanonicalUriCodes().getUriCodeMap().get(CanonicalUriCodeEnum.MINIMAL);
-        assert profile.equals( capabilityStatement.getRest().get(0).getInteraction().get(0).getDocumentation());
+        {
+            String profile = new MhdV3xCanonicalUriCodes().getUriCodeMap().get(CanonicalUriCodeEnum.MINIMAL);
+            assert profile.equals(capabilityStatement.getRest().get(0).getInteraction().get(0).getDocumentation());
+        }
+        {
+            String profile = new MhdV3xCanonicalUriCodes().getUriCodeMap().get(CanonicalUriCodeEnum.COMPREHENSIVE);
+            assert profile.equals(capabilityStatement.getRest().get(0).getInteraction().get(1).getDocumentation());
+        }
         assert CapabilityStatement.SystemRestfulInteraction.TRANSACTION.equals( capabilityStatement.getRest().get(0).getInteraction().get(0).getCode());
     }
     @Test
@@ -93,8 +99,14 @@ class CapabilityStatementTest {
         CapabilityStatement capabilityStatement = getCapabilityStatement(ServicePropertiesEnum.MHD_CAPABILITY_STATEMENT_FILE, channelConfig);
         assert capabilityStatement != null;
         assert capabilityStatement.hasRest();
-        String profile = new MhdV4CanonicalUriCodes().getUriCodeMap().get(CanonicalUriCodeEnum.MINIMAL);
-        assert profile.equals( capabilityStatement.getRest().get(0).getInteraction().get(0).getDocumentation());
+        {
+            String profile = new MhdV4CanonicalUriCodes().getUriCodeMap().get(CanonicalUriCodeEnum.MINIMAL);
+            assert profile.equals(capabilityStatement.getRest().get(0).getInteraction().get(0).getDocumentation());
+        }
+        {
+            String profile = new MhdV4CanonicalUriCodes().getUriCodeMap().get(CanonicalUriCodeEnum.COMPREHENSIVE);
+            assert profile.equals(capabilityStatement.getRest().get(0).getInteraction().get(1).getDocumentation());
+        }
         assert CapabilityStatement.SystemRestfulInteraction.TRANSACTION.equals( capabilityStatement.getRest().get(0).getInteraction().get(0).getCode());
     }
     @Test
@@ -125,8 +137,14 @@ class CapabilityStatementTest {
         CapabilityStatement capabilityStatement = getCapabilityStatement(ServicePropertiesEnum.MHD_CAPABILITY_STATEMENT_FILE, channelConfig);
         assert capabilityStatement != null;
         assert capabilityStatement.hasRest();
-        String profile = new MhdV410CanonicalUriCodes().getUriCodeMap().get(CanonicalUriCodeEnum.MINIMAL);
-        assert profile.equals( capabilityStatement.getRest().get(0).getInteraction().get(0).getDocumentation());
+        {
+            String profile = new MhdV410CanonicalUriCodes().getUriCodeMap().get(CanonicalUriCodeEnum.MINIMAL);
+            assert profile.equals(capabilityStatement.getRest().get(0).getInteraction().get(0).getDocumentation());
+        }
+        {
+            String profile = new MhdV410CanonicalUriCodes().getUriCodeMap().get(CanonicalUriCodeEnum.COMPREHENSIVE);
+            assert profile.equals(capabilityStatement.getRest().get(0).getInteraction().get(1).getDocumentation());
+        }
         assert CapabilityStatement.SystemRestfulInteraction.TRANSACTION.equals( capabilityStatement.getRest().get(0).getInteraction().get(0).getCode());
     }
     @Test
