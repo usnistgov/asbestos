@@ -67,9 +67,10 @@ public class MhdV4Common {
 
         if (listResource.hasIdentifier()) {
             if (listResource.getIdentifier().stream().anyMatch(i -> i.hasValue() && i.getValue().startsWith("urn:uuid:")))
-                vale.add(new ValE("SubmissionSet of ListResource type has Identifier (entryUUID)").asError()
+                vale.add(new ValE("SubmissionSet of ListResource type has Identifier (entryUUID)")
+                        .asError()
                         .addIheRequirement("2:3.65.4.1.2 Message Semantics: " +
-                                "The Document Source shall not provide any entryUUID values."
+                                "SubmissionSet of ListResource type Identifer cannot contain an entryUUID."
                                 + mhdImpl.getDocBase("ITI-65.html#2365412-message-semantics")));
         }
 
@@ -82,12 +83,15 @@ public class MhdV4Common {
         ss.setObjectType("urn:oasis:names:tc:ebxml-regrep:ObjectType:RegistryObject:RegistryPackage");
 
         if (listResource.hasMode()) {
-            if (!ListMode.WORKING.equals(listResource.getMode())) {
+            if (! ListMode.WORKING.equals(listResource.getMode())) {
                 vale.add(new ValE("Mode Required Pattern: working")
+                        .asError()
                         .addIheRequirement(mhdImpl.getDocBase(SUBMISSION_SET_PROFILE_DOCREF_SUFFIX)));
             }
         } else {
-            vale.add(new ValE("Mode is required [1..1]").addIheRequirement(mhdImpl.getDocBase(SUBMISSION_SET_PROFILE_DOCREF_SUFFIX)));
+            vale.add(new ValE("Mode is required [1..1]")
+                    .asError()
+                    .addIheRequirement(mhdImpl.getDocBase(SUBMISSION_SET_PROFILE_DOCREF_SUFFIX)));
         }
 
         if (listResource.hasDate())
@@ -111,12 +115,14 @@ public class MhdV4Common {
         if (listResource.hasIdentifier()) {
             if (listResource.getIdentifier().size() < 2) {
                 vale.add(new ValE("Minimum List identifier cardinality is less than 2. Should be 2..*")
+                        .asError()
                         .addIheRequirement(mhdImpl.getDocBase( "StructureDefinition-IHE.MHD.Minimal.SubmissionSet.html")));
             } else {
                 long systemIdCount = listResource.getIdentifier().stream()
                         .filter(e -> e.hasUse() && Identifier.IdentifierUse.OFFICIAL.equals(e.getUse())).count();
                 if (systemIdCount < 1) {
                     vale.add(new ValE("should be at least one OFFICIAL type identifier")
+                            .asError()
                             .addIheRequirement(mhdImpl.getDocBase( "StructureDefinition-IHE.MHD.Minimal.SubmissionSet-definitions.html#List.identifier")));
                 }
                 long usualIdCount = listResource.getIdentifier().stream()
@@ -124,6 +130,7 @@ public class MhdV4Common {
                 if (usualIdCount < 1) {
                     vale.add(new ValE("1) Expecting an OID (URI) according to ITI TF Vol 3:4.2.3.3.12 SubmissionSet.uniqueId. " +
                             "2) MHD v4.0.1: If the value is a full URI, then the system SHALL be "+ MhdTransforms.URN_IETF_RFC_3986 +".")
+                            .asError()
                             .addIheRequirement(mhdImpl.getDocBase( "StructureDefinition-IHE.MHD.Minimal.SubmissionSet-definitions.html#List.identifier:uniqueId.value")));
                 } else {
                     Optional<Identifier> usualIdentifier = IdBuilder.getUsualTypeIdentifier(listResource);
@@ -135,7 +142,9 @@ public class MhdV4Common {
                                 "XDSSubmissionSet.uniqueId", idBuilder);
                         wrapper.setAssignedUid(Utils.stripUrnPrefixes(idValue));
                     } else {
-                        vale.add(new ValE("Unexpected error finding an USUAL type Identifier"));
+                        vale.add(new ValE("Unexpected error finding an USUAL type Identifier")
+                                .asError()
+                                .addIheRequirement(mhdImpl.getDocBase( "StructureDefinition-IHE.MHD.Minimal.SubmissionSet-definitions.html#List.identifier")));
                     }
                 }
             }

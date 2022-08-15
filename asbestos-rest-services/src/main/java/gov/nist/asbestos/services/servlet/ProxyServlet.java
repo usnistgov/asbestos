@@ -1,16 +1,21 @@
 package gov.nist.asbestos.services.servlet;
 
 
-import gov.nist.asbestos.client.channel.BaseChannel;
-import gov.nist.asbestos.client.channel.IBaseChannel;
 import gov.nist.asbestos.asbestosProxy.channel.IChannelBuilder;
 import gov.nist.asbestos.asbestosProxy.channel.PassthroughChannelBuilder;
 import gov.nist.asbestos.asbestosProxy.channel.XdsOnFhirChannelBuilder;
 import gov.nist.asbestos.asbestosProxy.channels.capabilitystatement.FhirToolkitCapabilityStatement;
 import gov.nist.asbestos.client.Base.EC;
 import gov.nist.asbestos.client.Base.ParserBase;
+import gov.nist.asbestos.client.channel.BaseChannel;
+import gov.nist.asbestos.client.channel.ChannelConfig;
+import gov.nist.asbestos.client.channel.ChannelConfigFactory;
+import gov.nist.asbestos.client.channel.IBaseChannel;
 import gov.nist.asbestos.client.client.Format;
-import gov.nist.asbestos.client.events.*;
+import gov.nist.asbestos.client.events.Event;
+import gov.nist.asbestos.client.events.ITask;
+import gov.nist.asbestos.client.events.NoOpTask;
+import gov.nist.asbestos.client.events.UIEvent;
 import gov.nist.asbestos.client.log.SimStore;
 import gov.nist.asbestos.client.resolver.ChannelUrl;
 import gov.nist.asbestos.client.resolver.Ref;
@@ -25,14 +30,9 @@ import gov.nist.asbestos.http.support.Common;
 import gov.nist.asbestos.http.util.Gzip;
 import gov.nist.asbestos.mhd.exceptions.TransformException;
 import gov.nist.asbestos.serviceproperties.ServicePropertiesEnum;
-import gov.nist.asbestos.client.channel.ChannelConfig;
-import gov.nist.asbestos.client.channel.ChannelConfigFactory;
 import gov.nist.asbestos.simapi.simCommon.SimId;
 import gov.nist.asbestos.simapi.tk.installation.Installation;
 import org.apache.commons.io.IOUtils;
-import java.util.logging.Level;
-
-import java.util.logging.Logger;
 import org.hl7.fhir.r4.model.BaseResource;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CapabilityStatement;
@@ -52,6 +52,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Pattern;
 import java.util.stream.IntStream;
 
@@ -330,7 +332,6 @@ public class ProxyServlet extends HttpServlet {
 
             byte[] inBody = getRequestBody(req);
             HttpBase requestIn = logClientRequestIn(clientTask, inHeaders, inBody, verb);
-            //FIXME: channelId is now session__channelname
             /*
             String enumFindKey = String.format("%sChannelCapabilityStatementFile", channelId);
             Optional<ServicePropertiesEnum> spEnum = ServicePropertiesEnum.find(enumFindKey);
