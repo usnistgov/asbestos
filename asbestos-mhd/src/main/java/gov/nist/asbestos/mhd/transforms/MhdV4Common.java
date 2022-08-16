@@ -18,7 +18,6 @@ import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.ListResource;
-import org.hl7.fhir.r4.model.codesystems.ListMode;
 
 import java.util.Arrays;
 import java.util.Optional;
@@ -83,7 +82,7 @@ public class MhdV4Common {
         ss.setObjectType("urn:oasis:names:tc:ebxml-regrep:ObjectType:RegistryObject:RegistryPackage");
 
         if (listResource.hasMode()) {
-            if (! ListMode.WORKING.equals(listResource.getMode())) {
+            if (! ListResource.ListMode.WORKING.equals(listResource.getMode())) {
                 vale.add(new ValE("Mode Required Pattern: working")
                         .asError()
                         .addIheRequirement(mhdImpl.getDocBase(SUBMISSION_SET_PROFILE_DOCREF_SUFFIX)));
