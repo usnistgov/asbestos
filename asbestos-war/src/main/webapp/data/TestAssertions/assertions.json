@@ -478,7 +478,7 @@
           "Bundle.meta.profile": {
             "SpecificationText": [{
               "text": "The FHIR Bundle.meta.profile shall have the following value depending on the Actor implementation of no options (Minimal Metadata), Comprehensive Metadata Option, or UnContained References Option...",
-              "comments": "<span>1:33.2.3 UnContained Reference Option</span><br>https://profiles.ihe.net/ITI/MHD/1332_actor_options.html#13323-uncontained-reference-option<br>The UnContained Reference Option is not compatible with the XDS on FHIR Option. A system may be able to support both options, but only one will be able to be used at a given deployment.<br>UnContained References Option is not yet supported in Toolkit."
+              "comments": "<span>According to MHD, no options (Minimal Metadata) means there is no Profile present to validate against, and the submission is treated as Minimal Metadata.</span><br><span>1:33.2.3 UnContained Reference Option</span><br>https://profiles.ihe.net/ITI/MHD/1332_actor_options.html#13323-uncontained-reference-option<br>The UnContained Reference Option is not compatible with the XDS on FHIR Option. A system may be able to support both options, but only one will be able to be used at a given deployment.<br>UnContained References Option is not yet supported in Toolkit."
             }]
           }
         }

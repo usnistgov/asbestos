@@ -252,10 +252,15 @@
                     if (tcMhdVersion !== undefined) {
                         // console.debug(tcObj[0].mhdVersion)
                         const mhdVersionSpecificDocBase = this.$store.state.testRunner.testAssertions.docBase[tcMhdVersion]
-                        // console.debug(mhdVersionSpecificDocBase)
-                        const re = new RegExp(`^${currentMhdUrlBase}`, 'i') // ^start line, {pattern}
-                        if (linkUrl.match(re) !== null) {
-                            return linkUrl.replace(re, mhdVersionSpecificDocBase)
+                        const fixedDocLink = '.pdf'
+                        if (! mhdVersionSpecificDocBase.endsWith(fixedDocLink)) {
+                            // console.debug(mhdVersionSpecificDocBase)
+                            const re = new RegExp(`^${currentMhdUrlBase}`, 'i') // ^start line, {pattern}
+                            if (linkUrl.match(re) !== null) {
+                                return linkUrl.replace(re, mhdVersionSpecificDocBase)
+                            }
+                        } else {
+                            return mhdVersionSpecificDocBase
                         }
                     }
                 }
@@ -265,12 +270,19 @@
                 const currentTcName = this.$store.state.testRunner.currentTestCollectionName
                 let tcCollectionObjs = null
                 try {
-                    if (this.$store.state.testRunner.isClientTest) {
-                        tcCollectionObjs = this.$store.state.testRunner.clientTestCollectionObjs
+                    // Are assertions being run from Inspector?
+                    const pdbValTcIndex = this.$store.state.channel.pdbAssertions.indexOf(currentTcName)
+                    if (pdbValTcIndex > -1) {
+                        return this.$store.state.channel.mhdVersions[pdbValTcIndex]
                     } else {
-                        tcCollectionObjs = this.$store.state.testRunner.serverTestCollectionObjs
+                        // Conformance test area: client or server?
+                        if (this.$store.state.testRunner.isClientTest) {
+                            tcCollectionObjs = this.$store.state.testRunner.clientTestCollectionObjs
+                        } else {
+                            tcCollectionObjs = this.$store.state.testRunner.serverTestCollectionObjs
+                        }
+                        return tcCollectionObjs.filter(e => e.name === currentTcName)[0].mhdVersion
                     }
-                    return tcCollectionObjs.filter(e => e.name === currentTcName)[0].mhdVersion
                 } catch (e) {
                     console.error('getTcMhdVersion error ' + e)
                 }

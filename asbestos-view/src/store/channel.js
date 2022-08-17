@@ -12,6 +12,9 @@ export const channelStore = {
                 'fhir',
                 'mhd'
             ],
+            // The mhdVersions array index is linked to pdbAssertions array index.
+            // You must update the pdbAssertions array if mhdVersions array was updated.
+            // See also assertions.json docBase URLs.
             mhdVersions: [
                 'MHDv3.x',
                 'MHDv4',
@@ -19,7 +22,8 @@ export const channelStore = {
             ],
             pdbAssertions: [
                 'Internal',
-                'MHDv4_Internal'
+                'MHDv4_Internal',
+                'MHDv410_Internal'
             ]
         }
     }
