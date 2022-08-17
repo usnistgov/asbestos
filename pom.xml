@@ -4,7 +4,7 @@
 
     <groupId>gov.nist.asbestos</groupId>
     <artifactId>asbestos</artifactId>
-    <version>4.1.0-SNAPSHOT</version><!-- asbts -->
+    <version>4.1.0</version><!-- asbts -->
     <packaging>pom</packaging>
 
     <name>Asbestos</name>
