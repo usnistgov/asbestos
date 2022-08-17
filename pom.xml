@@ -57,7 +57,7 @@
             <id>Sunil_Ubuntu</id>
             <properties>
                 <build.profile.id>Sunil_Ubuntu</build.profile.id>
-                <toolkitApiVersion>7.7.2</toolkitApiVersion>
+                <toolkitApiVersion>7.8.0</toolkitApiVersion>
                 <itTestsExternalCache>/home/sunil/ec/asbts-it-tests</itTestsExternalCache>
             </properties>
         </profile>
@@ -68,7 +68,7 @@
             <id>cat</id>
             <properties>
                 <build.profile.id>cat</build.profile.id>
-                <toolkitApiVersion>7.7.0</toolkitApiVersion>
+                <toolkitApiVersion>7.8.0</toolkitApiVersion>
                 <itTestsExternalCache>/C:/Users/skb1/ec/asbts-it-tests</itTestsExternalCache>
             </properties>
         </profile>
