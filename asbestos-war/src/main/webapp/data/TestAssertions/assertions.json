@@ -83,6 +83,8 @@
     "RM4_3":        [{"mhdv4": "ITI-65_RequestMessage", "context": "messageSemantics"}],
     "RM4_4":        [{"mhdv4": "ITI-65_BundleResources", "context":"Bundle.meta.profile",
                       "verbatimPhraseToFocus": "Bundle.meta.profile"}],
+    "RM410_4":        [{"mhdv4": "ITI-65_BundleResources", "context":"Bundle.meta.profile",
+                      "verbatimPhraseToFocus": "Bundle.meta.profile"}],
     "RM4_5":        [{"mhdv4": "SubmissionSetTypeList", "context": "attributeMap" },
                      {"mhdv4": "SubmissionSetTypeList", "context":"mappingToXds" }],
     "RM4_6":        [{"mhdv4": "ITI-65_RequestMessage", "context": "elements"},
@@ -95,8 +97,14 @@
     "SSLIST_1":     [{"mhdv4": "ITI-65_RequestMessage", "context": "elements"}],
     "SSLIST_2":     [{"mhdv4": "ITI-65_RequestMessage", "context": "elements"},
                       {"mhdv4": "SubmissionSetTypeList", "context": ".extension:sourceId"}],
+    "SSLIST410_2":     [{"mhdv4": "ITI-65_RequestMessage", "context": "elements"},
+                      {"mhdv4": "SubmissionSetTypeList", "context": ".extension:sourceId"}],
     "SSLIST_3":     [{"mhdv4": "ITI-65_RequestMessage", "context": "elements"},
                       {"mhdv4": "SubmissionSetTypeList", "context": ".date"}],
+    "SSLIST_4":     [{"mhdv4": "ITI-65_RequestMessage", "context": "elements"},
+                    {"mhdv4": "SubmissionSetTypeList", "context": ".identifier"}],
+    "SSLIST_5":     [{"mhdv4": "ITI-65_RequestMessage", "context": "elements"},
+                    {"mhdv4": "SubmissionSetTypeList", "context": ".status"}],
     "SUBJ4_1":      [{"mhdv4": "patientReference"}],
     "SUBJ4_2":      [{"mhdv4": "patientReference", "verbatimPhraseToFocus": "FHIR Patient Resource"}],
     "SUBJ4_3":      [{"mhdv4": "ITI-65_RequestMessage", "context": "elements"},
@@ -114,6 +122,12 @@
     "TR_8":         [{"fhir": "restApi", "context": "transactionResponse-operationOutcome",
                       "verbatimPhraseToFocus": "For a failed transaction, the server returns a single OperationOutcome instead of a Bundle"}],
     "TR_9":         [{"mhd": "ITI-65_ResponseMessage", "context": "messageSemantics_p1", "verbatimPhraseToFocus": "contains one entry for each entry in the request"}]
+  },
+
+  "docBase" : {
+    "MHDv3.x": "https://www.ihe.net/uploadedFiles/Documents/ITI/IHE_ITI_Suppl_MHD_Rev3-2_TI_2020-08-28.pdf",
+    "MHDv4": "https://profiles.ihe.net/ITI/MHD/4.0.1",
+    "MHDv410": "https://profiles.ihe.net/ITI/MHD/4.1.0"
   },
 
   "references": {
@@ -572,6 +586,21 @@
               "text": "Control 1..1"
             }]
           },
+          ".identifier": {
+            "Element": {},
+            "SpecificationText": [{
+              "text": "Control 2..*"
+            }]
+          },
+          ".status": {
+            "Element": {},
+            "Pattern Value": {
+              "text": "current"
+            },
+            "SpecificationText": [{
+              "text": "Control 1..1"
+            }]
+          },
           ".subject": {
             "Element": {},
             "Metadata": {
@@ -620,7 +649,8 @@
           "link": "https://profiles.ihe.net/ITI/MHD/ITI-65.html#23654122-patient-identity"
         },
         "SpecificationText": [{
-          "text": "All DocumentReference.subject, and List.subject values shall be References to a FHIR Patient Resource that may be obtained through use of PDQm, PIXm, or by some other means. If the Patient Resource is accessible to both the Document Source and Document Recipient via an external reference, it shall be included as an external reference. Otherwise, the Patient Resource shall be included in the Bundle."
+          "text": "All DocumentReference.subject, and List.subject values shall be References to a FHIR Patient Resource that may be obtained through use of PDQm, PIXm, or by some other means. If the Patient Resource is accessible to both the Document Source and Document Recipient via an external reference, it shall be included as an external reference. Otherwise, the Patient Resource shall be included in the Bundle.",
+          "comments": "Patient is not a contained resource, but shall be included as an entry in the bundle."
         }]
       }
     },

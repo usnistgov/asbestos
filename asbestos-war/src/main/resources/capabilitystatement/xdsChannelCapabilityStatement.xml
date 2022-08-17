@@ -23,10 +23,10 @@
         </telecom>
     </contact>
     <contact>
-        <name value="Bill Majurski" />
+        <name value="Sunil Bhaskarla" />
         <telecom>
             <system value="email" />
-            <value value="bmajur@gmail.com" />
+            <value value="sunil.bhaskarla@nist.gov" />
         </telecom>
     </contact>
     <description value="This CapabilityStatement describes the MHD Document Recipient actor as supported by the FHIRToolkit." />

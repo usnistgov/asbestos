@@ -1,0 +1,39 @@
+<TestScript xmlns="http://hl7.org/fhir">
+
+    <variable>
+        <name value="expectedFailAssertionIdList"/>
+        <defaultValue value="('DR_10'|'TR_1')"/>
+    </variable>
+
+    <test>
+        <description value="Submit a request containing a PDB and evaluate response."/>
+        <action>
+            <operation>
+                <description value="Module usage description"/>
+                <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
+                    <extension url="component">
+                        <valueString value="../../Library/AggregateModule/MHDPDBFails.xml"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="'true'"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="'?fixtureId=pdb'"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="'3'"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="'0'"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="'-1'"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="expectedFailAssertionIdList"/>
+                    </extension>
+                </modifierExtension>
+            </operation>
+        </action>
+    </test>
+</TestScript>

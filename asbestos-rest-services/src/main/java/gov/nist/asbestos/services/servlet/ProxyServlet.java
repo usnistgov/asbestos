@@ -1,16 +1,21 @@
 package gov.nist.asbestos.services.servlet;
 
 
-import gov.nist.asbestos.client.channel.BaseChannel;
-import gov.nist.asbestos.client.channel.IBaseChannel;
 import gov.nist.asbestos.asbestosProxy.channel.IChannelBuilder;
 import gov.nist.asbestos.asbestosProxy.channel.PassthroughChannelBuilder;
 import gov.nist.asbestos.asbestosProxy.channel.XdsOnFhirChannelBuilder;
 import gov.nist.asbestos.asbestosProxy.channels.capabilitystatement.FhirToolkitCapabilityStatement;
 import gov.nist.asbestos.client.Base.EC;
 import gov.nist.asbestos.client.Base.ParserBase;
+import gov.nist.asbestos.client.channel.BaseChannel;
+import gov.nist.asbestos.client.channel.ChannelConfig;
+import gov.nist.asbestos.client.channel.ChannelConfigFactory;
+import gov.nist.asbestos.client.channel.IBaseChannel;
 import gov.nist.asbestos.client.client.Format;
-import gov.nist.asbestos.client.events.*;
+import gov.nist.asbestos.client.events.Event;
+import gov.nist.asbestos.client.events.ITask;
+import gov.nist.asbestos.client.events.NoOpTask;
+import gov.nist.asbestos.client.events.UIEvent;
 import gov.nist.asbestos.client.log.SimStore;
 import gov.nist.asbestos.client.resolver.ChannelUrl;
 import gov.nist.asbestos.client.resolver.Ref;
@@ -25,14 +30,9 @@ import gov.nist.asbestos.http.support.Common;
 import gov.nist.asbestos.http.util.Gzip;
 import gov.nist.asbestos.mhd.exceptions.TransformException;
 import gov.nist.asbestos.serviceproperties.ServicePropertiesEnum;
-import gov.nist.asbestos.client.channel.ChannelConfig;
-import gov.nist.asbestos.client.channel.ChannelConfigFactory;
 import gov.nist.asbestos.simapi.simCommon.SimId;
 import gov.nist.asbestos.simapi.tk.installation.Installation;
 import org.apache.commons.io.IOUtils;
-import java.util.logging.Level;
-
-import java.util.logging.Logger;
 import org.hl7.fhir.r4.model.BaseResource;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CapabilityStatement;
@@ -52,13 +52,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Pattern;
 import java.util.stream.IntStream;
 
 public class ProxyServlet extends HttpServlet {
-    private static Logger log = Logger.getLogger(ProxyServlet.class.getName());
     private static File externalCache = null;
     private Map<String, IChannelBuilder> proxyMap = new HashMap<>();
+    private static Logger log = Logger.getLogger(ProxyServlet.class.getName());
 
     public ProxyServlet() {
         super();
@@ -180,9 +182,7 @@ public class ProxyServlet extends HttpServlet {
             if (channelType == null)
                 throw new Error("Sim " + simStore.getChannelId() + " does not define a Channel Type.");
             IChannelBuilder channelBuilder = proxyMap.get(channelType);
-            channel = channelBuilder.build();
-
-            channel.setup(simStore.getChannelConfig());
+            channel = channelBuilder.build(simStore.getChannelConfig());
 
             channel.setReturnFormatType(Format.resultContentType(inHeaders));
 
@@ -314,7 +314,9 @@ public class ProxyServlet extends HttpServlet {
     private void doGetCapabilityStatement(HttpServletRequest req, HttpServletResponse resp, SimStore simStore, URI uri, Verb verb, Headers inHeaders, String channelId) {
         if (simStore == null) return;
 
-        boolean isLoggingEnabled = simStore.getChannelConfig().isLogMhdCapabilityStatementRequest();
+        ChannelConfig channelConfig = simStore.getChannelConfig();
+
+        boolean isLoggingEnabled = channelConfig.isLogMhdCapabilityStatementRequest();
 
         ITask clientTask = (isLoggingEnabled ? simStore.newEvent().getClientTask() : new NoOpTask());
         try {
@@ -322,7 +324,7 @@ public class ProxyServlet extends HttpServlet {
             if (hostport == null || hostport.equals(""))
                 hostport = "localhost:8080";
 
-            String channelType = simStore.getChannelConfig().getChannelType();
+            String channelType = channelConfig.getChannelType();
             if (channelType == null)
                 throw new Exception("Sim " + simStore.getChannelId() + " does not define a Channel Type.");
 
@@ -330,18 +332,21 @@ public class ProxyServlet extends HttpServlet {
 
             byte[] inBody = getRequestBody(req);
             HttpBase requestIn = logClientRequestIn(clientTask, inHeaders, inBody, verb);
+            /*
             String enumFindKey = String.format("%sChannelCapabilityStatementFile", channelId);
             Optional<ServicePropertiesEnum> spEnum = ServicePropertiesEnum.find(enumFindKey);
             ServicePropertiesEnum capabilityStatementFile;
             if (! spEnum.isPresent()) {
+                log.warning("ServicePropertiesEnum not found: " + enumFindKey + ". Using an empty capability statement.");
                 capabilityStatementFile = ServicePropertiesEnum.EMPTY_CAPABILITY_STATEMENT_FILE;
             } else {
                 capabilityStatementFile = spEnum.get();
             }
-            BaseResource baseResource = FhirToolkitCapabilityStatement.getCapabilityStatement(capabilityStatementFile, channelId);
-            String versionId = ((CapabilityStatement)baseResource).getVersion();
+             */
+            CapabilityStatement capabilityStatement = FhirToolkitCapabilityStatement.getCapabilityStatement(ServicePropertiesEnum.MHD_CAPABILITY_STATEMENT_FILE, channelConfig);
+            String versionId = capabilityStatement.getVersion();
             resp.addHeader("ETag", String.format("W/\"%s\"", versionId.hashCode()));
-            respond(resp, baseResource, inHeaders, clientTask, 200);
+            respond(resp, capabilityStatement, inHeaders, clientTask, 200);
         } catch (Exception ex) {
             // Following call did not work in IntelliJ Jetty runner without any Jetty XML config:
             // resp.sendError(500, ex.toString());.
@@ -374,9 +379,8 @@ public class ProxyServlet extends HttpServlet {
             if (channelType == null)
                 throw new Exception("Sim " + simStore.getChannelId() + " does not define a Channel Type.");
             IChannelBuilder channelBuilder = proxyMap.get(channelType);
-            BaseChannel channel = channelBuilder.build();
+            BaseChannel channel = channelBuilder.build(simStore.getChannelConfig());
 
-            channel.setup(simStore.getChannelConfig());
             channel.setReturnFormatType(Format.resultContentType(inHeaders));
             channel.setHostport(hostport);
             String proxyBase = simStore.getChannelConfig().getProxyURI().toString();

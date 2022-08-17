@@ -2,27 +2,43 @@ package gov.nist.asbestos.mhd.transforms;
 
 
 import gov.nist.asbestos.client.Base.IVal;
+import gov.nist.asbestos.client.channel.ChannelConfig;
 import gov.nist.asbestos.client.events.ITask;
-import gov.nist.asbestos.client.resolver.*;
+import gov.nist.asbestos.client.resolver.IdBuilder;
+import gov.nist.asbestos.client.resolver.Ref;
+import gov.nist.asbestos.client.resolver.ResourceMgr;
+import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import gov.nist.asbestos.mhd.SubmittedObject;
+import gov.nist.asbestos.mhd.channel.CanonicalUriCodeEnum;
 import gov.nist.asbestos.mhd.channel.MhdProfileVersionInterface;
 import gov.nist.asbestos.mhd.exceptions.TransformException;
 import gov.nist.asbestos.mhd.transactionSupport.AssigningAuthorities;
 import gov.nist.asbestos.mhd.transactionSupport.CodeTranslator;
-import gov.nist.asbestos.client.channel.ChannelConfig;
 import gov.nist.asbestos.simapi.validation.Val;
 import gov.nist.asbestos.simapi.validation.ValE;
-import oasis.names.tc.ebxml_regrep.xsd.rim._3.*;
-import org.hl7.fhir.r4.model.*;
+import oasis.names.tc.ebxml_regrep.xsd.rim._3.AssociationType1;
+import oasis.names.tc.ebxml_regrep.xsd.rim._3.ExtrinsicObjectType;
+import oasis.names.tc.ebxml_regrep.xsd.rim._3.RegistryObjectListType;
+import oasis.names.tc.ebxml_regrep.xsd.rim._3.RegistryPackageType;
+import org.hl7.fhir.r4.model.BaseResource;
+import org.hl7.fhir.r4.model.Binary;
+import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Configuration;
+import org.hl7.fhir.r4.model.DocumentManifest;
+import org.hl7.fhir.r4.model.DocumentReference;
+import org.hl7.fhir.r4.model.OperationOutcome;
+import org.hl7.fhir.r4.model.Reference;
 
 import javax.xml.bind.JAXBElement;
 import javax.xml.namespace.QName;
 import java.net.URI;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
-/**
- *
- */
 
 // TODO enable runtime assertions with ClassLoader.getSystemClassLoader().setClassAssertionStatus("gov.nist");
 // TODO - add legalAuthenticator
@@ -61,10 +77,13 @@ public class BundleToRegistryObjectList implements IVal {
     private URI sqEndpoint = null;
 //    private File externalCache = Installation.instance().externalCache();
     private ChannelConfig channelConfig;
+    private Map.Entry<CanonicalUriCodeEnum,String> mhdBundleProfile;
+    private MhdTransforms mhdTransforms;
 
 
-    public BundleToRegistryObjectList(ChannelConfig channelConfig) {
+    public BundleToRegistryObjectList(ChannelConfig channelConfig, Map.Entry<CanonicalUriCodeEnum, String> mhdBundleProfile) {
         this.channelConfig = channelConfig;
+        this.mhdBundleProfile = mhdBundleProfile;
     }
 
     public SubmittedObject findSubmittedObject(BaseResource resource) {
@@ -75,7 +94,7 @@ public class BundleToRegistryObjectList implements IVal {
         return null;
     }
 
-    public RegistryObjectListType build(MhdProfileVersionInterface mhdImpl, MhdTransforms mhdTransforms, Bundle bundle) {
+    public RegistryObjectListType build(MhdProfileVersionInterface mhdImpl, Bundle bundle) {
         Objects.requireNonNull(val);
         Objects.requireNonNull(bundle);
         Objects.requireNonNull(rMgr);
@@ -83,16 +102,15 @@ public class BundleToRegistryObjectList implements IVal {
 
         scanBundleForAcceptability(mhdImpl, bundle, rMgr);
 
-        return buildRegistryObjectList(mhdImpl);
+        return buildRegistryObjectList(mhdImpl, val);
     }
 
 
     // TODO handle List/Folder or signal error
-    public RegistryObjectListType buildRegistryObjectList(MhdProfileVersionInterface mhdVersionSpecificImpl) {
+    public RegistryObjectListType buildRegistryObjectList(MhdProfileVersionInterface mhdVersionSpecificImpl, Val val) {
         Objects.requireNonNull(mhdVersionSpecificImpl);
         Objects.requireNonNull(val);
         Objects.requireNonNull(rMgr);
-        MhdTransforms mhdTransforms = mhdVersionSpecificImpl.getMhdTransforms();
 
         //rMgr.setBundle(bundle);
         //scanBundleForAcceptability(bundle, rMgr);
@@ -111,7 +129,7 @@ public class BundleToRegistryObjectList implements IVal {
             ValE vale = new ValE(val);
             BaseResource resource = wrapper.getResource();
 
-            RegistryPackageType ss = mhdVersionSpecificImpl.buildSubmissionSet(wrapper, vale, idBuilder, channelConfig, codeTranslator, assigningAuthorities);
+            RegistryPackageType ss = mhdVersionSpecificImpl.buildSubmissionSet(mhdTransforms, wrapper, val, vale, idBuilder, channelConfig, codeTranslator, assigningAuthorities, mhdBundleProfile.getKey());
             if (ss != null) {
                 theSs = ss;
                 ssVale = vale;
@@ -317,7 +335,7 @@ public class BundleToRegistryObjectList implements IVal {
     private void scanBundleForAcceptability(MhdProfileVersionInterface mhdVersionSpecificImpl, Bundle bundle, ResourceMgr rMgr) {
         Objects.requireNonNull(mhdVersionSpecificImpl);
 
-        mhdVersionSpecificImpl.evalBundleProfile(bundle);
+
 
         evalBundleType(bundle);
 
@@ -352,7 +370,7 @@ public class BundleToRegistryObjectList implements IVal {
                 } catch (Exception ex) {
                     resourceClassName = "(Unknown class)";
                 }
-                String profileRef = mhdVersionSpecificImpl.getMhdVersionEnum().getMhdProfileRef();
+                String profileRef = mhdVersionSpecificImpl.getIheReference();
                 val.add(new ValE(String.format("Resource type ${resource.resource.class.simpleName} %s is not part of %s and will be ignored", resourceClassName, profileRef))
                         .asWarning()
                         .add(new ValE(profileRef).asDoc()));
@@ -437,9 +455,6 @@ public class BundleToRegistryObjectList implements IVal {
         return this;
     }
 
-    public BundleToRegistryObjectList setBundleProfile(CanonicalType bundleProfile) {
-        return this;
-    }
 
     public byte[] getDocumentContents(String id) {
         return documentContents.get(id);
@@ -473,6 +488,11 @@ public class BundleToRegistryObjectList implements IVal {
 
     public BundleToRegistryObjectList setSqEndpoint(URI sqEndpoint) {
         this.sqEndpoint = sqEndpoint;
+        return this;
+    }
+
+    public BundleToRegistryObjectList setMhdTransforms(MhdTransforms mhdTransforms) {
+        this.mhdTransforms = mhdTransforms;
         return this;
     }
 }

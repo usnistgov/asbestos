@@ -1,0 +1,84 @@
+<TestScript xmlns="http://hl7.org/fhir">
+    <modifierExtension url="urn:module">
+        <extension url="urn:fixture-in">
+            <valueString value="request"/>
+        </extension>
+        <extension url="urn:fixture-in">
+            <valueString value="response"/>
+        </extension>
+    </modifierExtension>
+
+    <id value="RM410_RequestMessage"/>
+    <name value="MHDv410RequestMessage"/>
+    <description value="Evaluate PDB-request Bundle"/>
+
+    <test>
+        <name value="Request message"/>
+        <description value="PDB Request."/>
+        <action>
+            <assert id="RM4_1">
+                <description value="Is sending an HTTP POST request method."/>
+                <requestMethod value="post"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
+            <assert id="RM4_1_1">
+                <description value="Is composed of a FHIR Bundle Resource."/>
+                <sourceId value="request"/>
+                <resource value="Bundle"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
+            <assert id="RM4_1_2">
+                <description value="Is a FHIR &quot;transaction&quot;."/>
+                <compareToSourceId value="request"/>
+                <compareToSourceExpression value="Bundle.type = 'transaction'"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
+            <assert id="RM4_2">
+                <description value="Bundle contains one SubmissionSet type List Resource.|MHDv4BundleResources"/>
+                <compareToSourceId value="request"/>
+                <compareToSourceExpression value="Bundle.entry.resource.where(is(List) and $this.code.coding.code='submissionset').count() = 1"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+
+        <action>
+            <assert id="RM4_3">
+                <description value="Bundle contains one or more DocumentReference resources.|MHDPDBOnePlusDocumentReference"/>
+                <compareToSourceId value="request"/>
+                <compareToSourceExpression value="Bundle.entry.resource.where($this is DocumentReference).count() >= 1"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
+            <assert id="RM410_4">
+                <description value="Bundle.meta.profile: Minimal Metadata or Comprehensive Metadata."/>
+                <compareToSourceId value="request"/>
+                <compareToSourceExpression value="Bundle.meta.profile = 'https://profiles.ihe.net/ITI/MHD/StructureDefinition/IHE.MHD.Minimal.ProvideBundle' or Bundle.meta.profile='https://profiles.ihe.net/ITI/MHD/StructureDefinition/IHE.MHD.Comprehensive.ProvideBundle'"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
+            <assert id="RM4_5">
+                <description value="SubmissionSet type List links to only DocumentReferences that are in Bundle."/>
+                <compareToSourceId value="request"/>
+                <compareToSourceExpression value="Bundle.entry.resource.where($this is List and code.coding.code='submissionset').select(entry.item.reference) ~ (Bundle.entry.where(resource is DocumentReference).fullUrl)"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
+            <assert id="RM4_6">
+                <description value="DocumentReference: The Document Source shall not provide any entryUUID values."/>
+                <compareToSourceId value="request"/>
+                <compareToSourceExpression value="Bundle.entry.resource.where($this is DocumentReference).where(identifier.use='official' implies identifier.value.empty() or identifier.value.startsWith('urn:uuid').not()).exists()"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+    </test>
+
+</TestScript>

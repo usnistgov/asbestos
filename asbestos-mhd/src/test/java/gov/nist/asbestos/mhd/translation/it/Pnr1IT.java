@@ -9,14 +9,17 @@ import gov.nist.asbestos.client.events.NoOpTask;
 import gov.nist.asbestos.client.resolver.IdBuilder;
 import gov.nist.asbestos.client.resolver.ResourceCacheMgr;
 import gov.nist.asbestos.client.resolver.ResourceMgr;
+import gov.nist.asbestos.mhd.channel.CanonicalUriCodeEnum;
 import gov.nist.asbestos.mhd.channel.MhdImplFactory;
 import gov.nist.asbestos.mhd.channel.MhdProfileVersionInterface;
+import gov.nist.asbestos.mhd.channel.MhdVersionEnum;
+import gov.nist.asbestos.mhd.channel.UriCodeTypeEnum;
 import gov.nist.asbestos.mhd.transactionSupport.AssigningAuthorities;
 import gov.nist.asbestos.mhd.transactionSupport.CodeTranslator;
 import gov.nist.asbestos.mhd.transactionSupport.ProvideAndRegisterBuilder;
 import gov.nist.asbestos.mhd.transforms.BundleToRegistryObjectList;
-import gov.nist.asbestos.mhd.channel.MhdVersionEnum;
 import gov.nist.asbestos.mhd.transforms.MhdTransforms;
+import gov.nist.asbestos.mhd.transforms.MhdV3xCanonicalUriCodes;
 import gov.nist.asbestos.mhd.translation.ContainedIdAllocator;
 import gov.nist.asbestos.simapi.tk.installation.Installation;
 import gov.nist.asbestos.simapi.validation.Val;
@@ -29,7 +32,11 @@ import gov.nist.asbestos.utilities.RegError;
 import gov.nist.asbestos.utilities.RegErrorList;
 import ihe.iti.xds_b._2007.ProvideAndRegisterDocumentSetRequestType;
 import oasis.names.tc.ebxml_regrep.xsd.lcm._3.SubmitObjectsRequest;
-import oasis.names.tc.ebxml_regrep.xsd.rim._3.*;
+import oasis.names.tc.ebxml_regrep.xsd.rim._3.AssociationType1;
+import oasis.names.tc.ebxml_regrep.xsd.rim._3.ExtrinsicObjectType;
+import oasis.names.tc.ebxml_regrep.xsd.rim._3.IdentifiableType;
+import oasis.names.tc.ebxml_regrep.xsd.rim._3.RegistryObjectListType;
+import oasis.names.tc.ebxml_regrep.xsd.rim._3.RegistryPackageType;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
 import org.junit.jupiter.api.BeforeAll;
@@ -45,9 +52,14 @@ import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
+import java.util.stream.Collectors;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 class Pnr1IT {
     private static Val val;
@@ -83,7 +95,9 @@ class Pnr1IT {
         rMgr.setVal(val);
         rMgr.setFhirClient(fhirClient);
 
-        bundleToRegistryObjectList = new BundleToRegistryObjectList(null);
+        Map<CanonicalUriCodeEnum, String> m = new MhdV3xCanonicalUriCodes().getUriCodesByType(UriCodeTypeEnum.PROFILE);
+        Map<CanonicalUriCodeEnum, String> myMap = m.entrySet().stream().filter(me -> me.getKey().equals(CanonicalUriCodeEnum.COMPREHENSIVE)).collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue()));
+        bundleToRegistryObjectList = new BundleToRegistryObjectList(null, myMap.entrySet().iterator().next());
         bundleToRegistryObjectList.setVal(val);
         bundleToRegistryObjectList.setCodeTranslator(codeTranslator);
         bundleToRegistryObjectList.setResourceMgr(rMgr);
@@ -106,9 +120,9 @@ class Pnr1IT {
 
         MhdTransforms mhdTransforms = new MhdTransforms(rMgr, val, new NoOpTask());
 
-        MhdProfileVersionInterface mhdVersionSpecificImpl = MhdImplFactory.getImplementation(MhdVersionEnum.MHDv3x, val, mhdTransforms);
+        MhdProfileVersionInterface mhdVersionSpecificImpl = MhdImplFactory.getImplementation(MhdVersionEnum.MHDv3x);
 
-        RegistryObjectListType registryObjectListType = bundleToRegistryObjectList.build(mhdVersionSpecificImpl, mhdTransforms, bundle);
+        RegistryObjectListType registryObjectListType = bundleToRegistryObjectList.build(mhdVersionSpecificImpl,  bundle);
 
         if (val.hasErrors())
             fail(ValFactory.toJson(new ValErrors(val)));

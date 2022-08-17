@@ -1,11 +1,23 @@
 package gov.nist.asbestos.asbestosProxy.channels.capabilitystatement;
 
 import gov.nist.asbestos.client.Base.ParserBase;
+import gov.nist.asbestos.client.channel.ChannelConfig;
 import gov.nist.asbestos.client.client.Format;
+import gov.nist.asbestos.client.log.SimStoreFactory;
+import gov.nist.asbestos.mhd.channel.CanonicalUriCodeEnum;
+import gov.nist.asbestos.mhd.channel.MhdCanonicalUriCodeInterface;
+import gov.nist.asbestos.mhd.channel.MhdVersionEnum;
+import gov.nist.asbestos.mhd.channel.UriCodeTypeEnum;
 import gov.nist.asbestos.serviceproperties.ServiceProperties;
 import gov.nist.asbestos.serviceproperties.ServicePropertiesEnum;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
+
 import org.hl7.fhir.r4.model.BaseResource;
+import org.hl7.fhir.r4.model.CapabilityStatement;
 
 import java.io.File;
 import java.net.URI;
@@ -16,6 +28,9 @@ import java.util.Optional;
 import java.util.regex.Pattern;
 
 public class FhirToolkitCapabilityStatement {
+    public static final String XDS_LIMITED_META_SIM = "default__asbtslimited";
+    public static final String XDS_COMPREHENSIVE_META_SIM = "default__asbtsrr";
+
     private static Logger logger = Logger.getLogger(FhirToolkitCapabilityStatement.class.getName());
 
     /**
@@ -41,13 +56,16 @@ public class FhirToolkitCapabilityStatement {
                 }
             }
         } catch (Exception ex) {
-            logger.info("isCapabilityStatementRequest: " + ex.toString());
+            logger.severe("isCapabilityStatementRequest: " + ex.toString());
         }
         return false;
     }
 
-    public static BaseResource getCapabilityStatement(ServicePropertiesEnum key, String channelId) throws Exception {
+    public static CapabilityStatement getCapabilityStatement(ServicePropertiesEnum key, ChannelConfig channelConfig) throws Exception {
         Objects.requireNonNull(key);
+        Objects.requireNonNull(channelConfig);
+
+        String channelId = channelConfig.getChannelName();
         String capabilityStatementFileName = ServiceProperties.getInstance().getPropertyOrThrow(key);
 
         File capabilityStatementFile = Paths.get(FhirToolkitCapabilityStatement.class.getResource("/").toURI()).resolve(capabilityStatementFileName).toFile();
@@ -55,6 +73,7 @@ public class FhirToolkitCapabilityStatement {
         if (capabilityStatementFile != null && capabilityStatementFile.exists()) {
             // Replace any ${} parameters in the File stream such as the ${ProxyBase}
             String statementContent = new String(Files.readAllBytes(capabilityStatementFile.toPath()));
+            /*
             statementContent = statementContent.replaceAll(Pattern.quote("${channelId}"), channelId);
             for (ServicePropertiesEnum paramKey: ServicePropertiesEnum.values()) {
                     String param = String.format("${%s}", paramKey.getKey());
@@ -67,13 +86,63 @@ public class FhirToolkitCapabilityStatement {
                         }
                     }
                 }
+             */
 
             // Comments in XML are also parsed as part of the BaseResource. As noticed in the JSON Format, XML begin/end comments are not necessarily meaningful when it gets parsed
             Format format = ParserBase.getFormat(capabilityStatementFile);
             BaseResource baseResource = ParserBase.parse(statementContent, format);
-           return baseResource;
+            if (baseResource instanceof CapabilityStatement) {
+                CapabilityStatement capabilityStatement = (CapabilityStatement) baseResource;
+                try {
+                    List<CapabilityStatement.SystemInteractionComponent> interactionComponents = getChannelInteractions(channelConfig.getXdsSiteName(), channelConfig.getMhdVersions());
+                    CapabilityStatement.CapabilityStatementRestComponent restComponent = new CapabilityStatement.CapabilityStatementRestComponent();
+                    restComponent.setMode(CapabilityStatement.RestfulCapabilityMode.SERVER);
+                    restComponent.setInteraction(interactionComponents);
+                    capabilityStatement.addRest(restComponent);
+                } catch (Exception ex) {
+                    logger.warning(ex.toString());
+                } finally {
+                    return capabilityStatement;
+                }
+            } else {
+                throw new RuntimeException("File does not contain a CapabilityStatement resource.");
+            }
+
         }
         throw new RuntimeException(String.format("Error: File '%s' was not found.", capabilityStatementFile.toString()));
+    }
+
+    private static List<CapabilityStatement.SystemInteractionComponent> getChannelInteractions(String xdsSitename, String[] mhdVersions ) throws Exception {
+        if (mhdVersions == null || (mhdVersions != null && mhdVersions.length == 0)) {
+            throw new Exception("channelConfig mhdVersion must be specified.");
+        }
+        List<CapabilityStatement.SystemInteractionComponent> systemInteractionComponents = new ArrayList<>();
+        for (String s : mhdVersions) {
+            Class<? extends MhdCanonicalUriCodeInterface> myUriCodesClass = MhdVersionEnum.find(s).getUriCodesClass();
+            MhdCanonicalUriCodeInterface intf = myUriCodesClass.getDeclaredConstructor().newInstance();
+
+            String doc;
+            Map<CanonicalUriCodeEnum, String> map = intf.getUriCodesByType(UriCodeTypeEnum.PROFILE);
+            switch (xdsSitename) {
+                case XDS_LIMITED_META_SIM:
+                        doc = map.get(CanonicalUriCodeEnum.MINIMAL);
+                        systemInteractionComponents.add(getInteractionComponent(doc));
+                        /* FALL THROUGH */
+                case XDS_COMPREHENSIVE_META_SIM:
+                        doc = map.get(CanonicalUriCodeEnum.COMPREHENSIVE);
+                        systemInteractionComponents.add(getInteractionComponent(doc));
+                        break;
+                default: throw new Exception("Unrecognized xdsSiteName: " + xdsSitename);
+            }
+
+        }
+       return systemInteractionComponents;
+    }
+
+    private static CapabilityStatement.SystemInteractionComponent getInteractionComponent(String doc) {
+        return new CapabilityStatement.SystemInteractionComponent()
+                .setCode(CapabilityStatement.SystemRestfulInteraction.TRANSACTION)
+                .setDocumentation(doc);
     }
 
 }

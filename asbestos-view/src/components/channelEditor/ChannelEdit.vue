@@ -126,23 +126,23 @@
           </div>
         </div>
 
-        <label class="grid-name">MHD Version Support</label>
+        <label class="grid-name">MHD Version Support Option</label>
         <div v-if="isEditMode" class="grid-item" >
-          <select size="5" multiple="multiple" v-model="channel.mhdVersions">
+          <select size="1"  v-model="channelMhdVersionSupport">
             <option :key="eKey"
                     :value="e"
                     v-for="(e,eKey) in $store.state.channel.mhdVersions">
               {{ e }}
             </option>
           </select>
-            No selection is required. If no options are selected, channel validation is based on the PDB bundle profile. All test collections are displayed if no options are selected. If option(s) are selected, test collections are filtered based on the option selection.
+<!--            No selection is required if PDB Profile Canonical URI is unique and differentiable. I.e., if no Options are selected, channel validation is based on the PDB bundle profile. All test collections are displayed if no Options are selected. If Option(s) are selected, test collections are filtered based on Option selection.-->
         </div>
         <div v-else>
             <template v-if="Array.isArray(channel.mhdVersions) && channel.mhdVersions.length > 0">
               {{channel.mhdVersions.join(", ")}}
             </template>
           <template v-else>
-            Auto-select based on bundle profile
+            Use default
           </template>
         </div>
 
@@ -260,7 +260,22 @@ export default {
     isHttpsMode() {
       return UtilFunctions.isHttpsMode()
     },
-
+    channelMhdVersionSupport: {
+      set(val)
+      {
+        if (val === '' || val === undefined)
+          return
+       this.channel.mhdVersions = [val]
+      },
+      get()
+      {
+        if (this.channel.mhdVersions !== undefined && Array.isArray(this.channel.mhdVersions) && this.channel.mhdVersions.length > 0) {
+          return this.channel.mhdVersions[0]
+        } else {
+            return ''
+        }
+      }
+    }
   },
   mounted() {
   },

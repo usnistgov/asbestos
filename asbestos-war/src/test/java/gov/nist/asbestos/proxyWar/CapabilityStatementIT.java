@@ -2,22 +2,21 @@ package gov.nist.asbestos.proxyWar;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import gov.nist.asbestos.asbestosProxy.channels.capabilitystatement.FhirToolkitCapabilityStatement;
+import gov.nist.asbestos.client.channel.ChannelConfig;
+import gov.nist.asbestos.client.channel.ChannelConfigFactory;
 import gov.nist.asbestos.http.operations.HttpDelete;
 import gov.nist.asbestos.http.operations.HttpGetter;
 import gov.nist.asbestos.http.operations.HttpPost;
-import gov.nist.asbestos.client.channel.ChannelConfig;
-import gov.nist.asbestos.client.channel.ChannelConfigFactory;
 import gov.nist.asbestos.http.operations.HttpPut;
-import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.OperationOutcome;
-import org.hl7.fhir.r4.model.Patient;
-import org.hl7.fhir.r4.model.Resource;
+import gov.nist.asbestos.mhd.channel.MhdVersionEnum;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -45,6 +44,7 @@ public class CapabilityStatementIT {
 
 
     private static void deleteAndRecreateMhdTestChannel(String channelName, boolean csloggingEnabled) throws URISyntaxException, IOException {
+        String[] mhdVersions = new String[]{MhdVersionEnum.MHDv410.getVersion()};
         // create
         ChannelConfig channelConfig = new ChannelConfig()
                 .setTestSession("default")
@@ -52,8 +52,9 @@ public class CapabilityStatementIT {
                 .setEnvironment("default")
                 .setActorType("fhir")
                 .setChannelType("mhd")
-                .setXdsSiteName("bogus__rr")
-                .setLogMhdCapabilityStatementRequest(csloggingEnabled); // XdsSiteName is not used for this test
+                .setXdsSiteName(FhirToolkitCapabilityStatement.XDS_COMPREHENSIVE_META_SIM)
+                .setLogMhdCapabilityStatementRequest(csloggingEnabled);
+                channelConfig.setMhdVersions(mhdVersions);
 
         String channelLocation = "http://localhost:"+ proxyPort + "/asbestos/rw/channel/default__" + channelName;
 

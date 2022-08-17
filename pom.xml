@@ -4,7 +4,7 @@
 
     <groupId>gov.nist.asbestos</groupId>
     <artifactId>asbestos</artifactId>
-    <version>4.0.0</version><!-- asbts -->
+    <version>4.1.0-SNAPSHOT</version><!-- asbts -->
     <packaging>pom</packaging>
 
     <name>Asbestos</name>
@@ -19,7 +19,9 @@
         <hapi.version>5.4.0</hapi.version>   <!--   4.1.0  -->
         <jersey.version>2.33</jersey.version>   <!--     must align with xdstoolkit -->
         <!-- NOTE: Needs to match XDS Toolkit "jackson.version" maven property since introducing the SimulatorBuilder API into Asbestos. Otherwise, fasterxml errors will be thrown due to mismatch libraries. -->
-        <jackson.version>2.11.3</jackson.version>   <!--  2.6.3   -->
+<!--        <jackson.version>2.11.3</jackson.version>   -->
+        <jackson.version>2.12.6.1</jackson.version>
+
     </properties>
 
     <profiles>
@@ -55,7 +57,7 @@
             <id>Sunil_Ubuntu</id>
             <properties>
                 <build.profile.id>Sunil_Ubuntu</build.profile.id>
-                <toolkitApiVersion>7.7.2</toolkitApiVersion>
+                <toolkitApiVersion>7.8.0</toolkitApiVersion>
                 <itTestsExternalCache>/home/sunil/ec/asbts-it-tests</itTestsExternalCache>
             </properties>
         </profile>
@@ -66,7 +68,7 @@
             <id>cat</id>
             <properties>
                 <build.profile.id>cat</build.profile.id>
-                <toolkitApiVersion>7.7.0</toolkitApiVersion>
+                <toolkitApiVersion>7.8.0</toolkitApiVersion>
                 <itTestsExternalCache>/C:/Users/skb1/ec/asbts-it-tests</itTestsExternalCache>
             </properties>
         </profile>

@@ -6,6 +6,7 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import gov.nist.asbestos.client.Base.ParserBase;
+import gov.nist.asbestos.client.channel.ChannelConfig;
 import gov.nist.asbestos.client.client.FhirClient;
 import gov.nist.asbestos.client.events.Event;
 import gov.nist.asbestos.client.events.ITask;
@@ -13,19 +14,21 @@ import gov.nist.asbestos.client.log.SimStore;
 import gov.nist.asbestos.client.resolver.IdBuilder;
 import gov.nist.asbestos.client.resolver.ResourceCacheMgr;
 import gov.nist.asbestos.client.resolver.ResourceMgr;
+import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import gov.nist.asbestos.mhd.transactionSupport.AssigningAuthorities;
 import gov.nist.asbestos.mhd.transactionSupport.CodeTranslator;
-import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import gov.nist.asbestos.mhd.transforms.BundleToRegistryObjectList;
+import gov.nist.asbestos.mhd.transforms.DocumentEntryToDocumentReference;
 import gov.nist.asbestos.mhd.transforms.MhdTransforms;
-import gov.nist.asbestos.mhd.channel.MhdVersionEnum;
 import gov.nist.asbestos.mhd.transforms.MhdV3x;
 import gov.nist.asbestos.mhd.translation.ContainedIdAllocator;
-import gov.nist.asbestos.mhd.transforms.DocumentEntryToDocumentReference;
-import gov.nist.asbestos.client.channel.ChannelConfig;
 import gov.nist.asbestos.simapi.simCommon.SimId;
 import gov.nist.asbestos.simapi.tk.installation.Installation;
-import gov.nist.asbestos.simapi.validation.*;
+import gov.nist.asbestos.simapi.validation.Val;
+import gov.nist.asbestos.simapi.validation.ValE;
+import gov.nist.asbestos.simapi.validation.ValErrors;
+import gov.nist.asbestos.simapi.validation.ValFactory;
+import gov.nist.asbestos.simapi.validation.ValWarnings;
 import oasis.names.tc.ebxml_regrep.xsd.rim._3.ExtrinsicObjectType;
 import org.hl7.fhir.r4.model.*;
 import org.junit.jupiter.api.BeforeAll;
@@ -110,7 +113,7 @@ class DocumentEntryTestxxx {
 
 
         // Translate DocRef to XDS
-        BundleToRegistryObjectList bundleToRegistryObjectList = new BundleToRegistryObjectList(null);
+        BundleToRegistryObjectList bundleToRegistryObjectList = new BundleToRegistryObjectList(null, null);
         bundleToRegistryObjectList.setVal(val);
         bundleToRegistryObjectList.setCodeTranslator(codeTranslator);
         bundleToRegistryObjectList.setResourceMgr(rMgr);
@@ -126,7 +129,7 @@ class DocumentEntryTestxxx {
         MhdTransforms mhdTransforms = new MhdTransforms(rMgr, val, task);
 
         // Translate XDS back to DocRef
-        ExtrinsicObjectType extrinsicObjectType = mhdTransforms.createExtrinsicObject(new MhdV3x(val,mhdTransforms), resource, new ValE(val), new IdBuilder(true), null, codeTranslator,
+        ExtrinsicObjectType extrinsicObjectType = mhdTransforms.createExtrinsicObject(new MhdV3x(), resource, new ValE(val), new IdBuilder(true), null, codeTranslator,
                 assigningAuthorities);
 
         DocumentEntryToDocumentReference documentEntryToDocumentReference = new DocumentEntryToDocumentReference();
