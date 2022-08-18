@@ -4,7 +4,7 @@
 
     <groupId>gov.nist.asbestos</groupId>
     <artifactId>asbestos</artifactId>
-    <version>4.1.0</version><!-- asbts -->
+    <version>4.2.0-SNAPSHOT</version><!-- asbts -->
     <packaging>pom</packaging>
 
     <name>Asbestos</name>
@@ -43,7 +43,7 @@
             </activation>
             <properties>
                 <build.profile.id>Sunil</build.profile.id>
-                <toolkitApiVersion>7.8.0-SNAPSHOT</toolkitApiVersion>
+                <toolkitApiVersion>7.9.0-SNAPSHOT</toolkitApiVersion>
                 <itTestsExternalCache>/C:/Users/skb1/ec/asbts-it-tests</itTestsExternalCache>
                 <!-- itTestsExternalCache:
                 Remember to copy the environment directory from the ec_shared directory, otherwise, some it-tests will fail due to missing codes.xml file.
