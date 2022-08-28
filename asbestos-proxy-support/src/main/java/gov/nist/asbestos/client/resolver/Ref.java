@@ -327,39 +327,53 @@ public class Ref {
     }
 
     public Ref withHostPort(String scheme, String hostPort) {
-        String[] hp = hostPort.split(":");
-        if (hp.length == 2) {
-            String host = hp[0];
-            String port = hp[1];
-//            try {
+        if (hostPort == null || "".equals(hostPort))
+            return this;  // oops. Going to be a relative URI at best.
 
-            if (scheme == null || "".equals(scheme)) {
-                scheme = uri.getScheme();
-                if (scheme == null || "".equals(scheme))
-                    scheme = "http"; // default fallback
+        if (scheme == null || "".equals(scheme)) {
+            scheme = uri.getScheme();
+            if (scheme == null || "".equals(scheme))
+                scheme = "http"; // default fallback
+        }
+
+        String[] hp = hostPort.split(":");
+        if (hp.length <= 2) {
+            String host = hp[0];
+            String port = null;
+            if (hp.length == 2) {
+                port = hp[1];
+            } else if (hp.length == 1) {
+                if ("http".equals(scheme)) {
+                    port = "80";
+                } else if ("https".equals(scheme)) {
+                    port = "443";
+                }
             }
 
-            return new Ref(new CustomUriBuilder()
-                    .setAuthority(host + ":" + port)
-                    .setPath(uri.getPath())
-                    .setScheme(scheme)
-                    .setQuery(uri.getQuery())
-                    .setFragment(uri.getFragment())
-                    .build()
-            );
+            if (port == null)  {
+                log.severe("Ref port cannot be null");
+                return this;
+            }
 
 
-//                return new Ref(new URI(scheme
-//                        + "://"
-//                        + host
-//                        + ":"
-//                        + port
-//                        + uri.getPath()));
-//            } catch (URISyntaxException e) {
-//                throw new Error(e);
-//            }
+            try {
+                return new Ref(new CustomUriBuilder()
+                        .setAuthority(host + ":" + port)
+                        .setPath(uri.getPath())
+                        .setScheme(scheme)
+                        .setQuery(uri.getQuery())
+                        .setFragment(uri.getFragment())
+                        .build()
+                );
+            } catch (Exception ex) {
+                log.severe("Ref withHostPort Exception: " + ex.toString());
+                return this;
+            }
+
+        } else {
+            log.severe("Ref unexpected host request header value parts: " + hp.length + " in " + hostPort);
+            return this;
         }
-        return this;  // oops
     }
 
 
