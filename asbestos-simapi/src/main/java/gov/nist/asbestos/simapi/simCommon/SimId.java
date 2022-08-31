@@ -11,7 +11,7 @@ import java.util.Objects;
  */
 public class SimId {
 
-    private static final String SEPARATOR = "__";
+    public static final String SESSION_CHANNEL_SEPARATOR = "__";
     private static final String SLASH = "/";
 
     private TestSession testSession = null;
@@ -85,8 +85,8 @@ public class SimId {
         Objects.requireNonNull(testSession);
         Objects.requireNonNull(id);
         testSession.clean();
-        if (testSession.getValue().contains(SEPARATOR))
-            throw new RuntimeException(SEPARATOR + " is illegal in simulator testSession name");
+        if (testSession.getValue().contains(SESSION_CHANNEL_SEPARATOR))
+            throw new RuntimeException(SESSION_CHANNEL_SEPARATOR + " is illegal in simulator testSession name");
         if (testSession.getValue().contains(SLASH))
             throw new RuntimeException(SLASH + " is illegal in simulator testSession name");
 
@@ -115,7 +115,7 @@ public class SimId {
         return Objects.hash(testSession, _id, actorType, environmentName, fhir);
     }
 
-    public String toString() { return testSession.toString() + SEPARATOR + _id; }
+    public String toString() { return testSession.toString() + SESSION_CHANNEL_SEPARATOR + _id; }
 
     public void validate() {
          String reason = validateState();

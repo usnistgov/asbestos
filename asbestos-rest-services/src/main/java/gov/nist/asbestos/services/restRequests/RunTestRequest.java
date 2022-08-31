@@ -1,5 +1,6 @@
 package gov.nist.asbestos.services.restRequests;
 
+import gov.nist.asbestos.client.Base.EC;
 import gov.nist.asbestos.services.servlet.ChannelConnector;
 import gov.nist.asbestos.client.Base.Request;
 import gov.nist.asbestos.client.client.FhirClient;
@@ -57,8 +58,8 @@ public class RunTestRequest {
         File testDir = request.ec.getTest(testCollection, testName);
 
         final File patientCacheDir = getPatientCacheDir(channelId);
-        final File catPatientCacheDir = getPatientCacheDir("default__external_patient");
-        final File alternatePatientCacheDir = getPatientCacheDir("default__default");
+        final File catPatientCacheDir = getPatientCacheDir(EC.EXTERNAL_PATIENT_SERVER.toString());
+        final File alternatePatientCacheDir = getPatientCacheDir(EC.DEFAULT.toString());
 
         FhirClient fhirClient = new FhirClient()
                 .setFormat(request.isJson ? Format.JSON : Format.XML)

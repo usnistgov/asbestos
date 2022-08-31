@@ -10,15 +10,17 @@
             This initialization can be re-run at any time.
             If the Toolkit External Cache is cleared these must be run again to re-initialize the individual caches.
             Once the individual caches are established for the default channel it is available for testing on any channel.
-
+        </p>
+        <p>
             To store the static resources in a different server/channel, manually select the channel and the
             test collection (both on the right side of the window) and use RunAll button to load. For example, Connectathon (CAT) patients
-            may use an external patient FHIR R/W server, in this case, the Test Patients test collection must be run against the external_patients channel.
-            The search order of a patient is 1) current channel, 2) CAT external_patients channel, and 3) default channel.
-
+            may use an external patient FHIR R/W server, in this case, the Test Patients test collection must be run against the external_patients channel in order to build the channel cache entry.
+            In this case the search order of a patient is 1) current channel, 2) CAT external_patients channel, and 3) default channel.
+        </p>
+        <p>
             This channel-specific cache will only be used for this channel.
             The cache on the default channel is always available for when there is no channel-specific cache
-            available. Said another way, the channel-specific cache (the one you chose) is checked first. If CAT external patients are used, it will be checked next.  Then the
+            available. Said another way, the channel-specific cache (the one you chose) is checked first. If CAT external patients are used, it will be checked next or the
             default channel cache is checked last.
         </p>
 

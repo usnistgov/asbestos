@@ -62,17 +62,20 @@ public class PatientId implements IVal {
         String id = getId();
         List<String> searchParams = new ArrayList<>();
         searchParams.add("identifier=" + system + "|" + id);
-        Ref[] patientServer = {
-                new Ref(ServiceProperties.getInstance().getPropertyOrThrow(ServicePropertiesEnum.CAT_PATIENT_FHIR_BASE)),
-                new Ref(ServiceProperties.getInstance().getPropertyOrThrow(ServicePropertiesEnum.HAPI_FHIR_BASE))
+        Optional<String>[] patientServerBase = new Optional[]{
+                ServiceProperties.getInstance().getProperty(ServicePropertiesEnum.CAT_EXTERNAL_PATIENT_SERVER_FHIR_BASE),
+                ServiceProperties.getInstance().getProperty(ServicePropertiesEnum.HAPI_FHIR_BASE)
         };
 
         List<ResourceWrapper> results = null;
-        for (Ref r : patientServer) {
+        for (Optional<String> o : patientServerBase) {
             try {
-                results = fhirClient.search(r, Patient.class, searchParams, true, false);
-                if (!results.isEmpty())
-                    break;
+                if (o.isPresent()) {
+                    Ref r = new Ref(o.get());
+                    results = fhirClient.search(r, Patient.class, searchParams, true, false);
+                    if (!results.isEmpty())
+                        break;
+                }
             } catch (Exception ex) {
                 logger.warning(ex.toString());
             }
