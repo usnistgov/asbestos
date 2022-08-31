@@ -7,6 +7,8 @@ import gov.nist.asbestos.client.client.Format;
 import gov.nist.asbestos.client.channel.ChannelConfig;
 import gov.nist.asbestos.simapi.validation.Val;
 import gov.nist.asbestos.testEngine.engine.ModularEngine;
+import org.jetbrains.annotations.NotNull;
+
 import java.util.logging.Logger;
 
 import java.io.File;
@@ -54,10 +56,9 @@ public class RunTestRequest {
 
         File testDir = request.ec.getTest(testCollection, testName);
 
-        File patientCacheDir = request.ec.getTestLogCacheDir(channelId);
-        File alternatePatientCacheDir = request.ec.getTestLogCacheDir("default__default");
-        patientCacheDir.mkdirs();
-        alternatePatientCacheDir.mkdirs();
+        final File patientCacheDir = getPatientCacheDir(channelId);
+        final File catPatientCacheDir = getPatientCacheDir("default__external_patient");
+        final File alternatePatientCacheDir = getPatientCacheDir("default__default");
 
         FhirClient fhirClient = new FhirClient()
                 .setFormat(request.isJson ? Format.JSON : Format.XML)
@@ -73,6 +74,7 @@ public class RunTestRequest {
                 .setFhirClient(fhirClient)
                 .setTestCollection(testCollection)
                 .addCache(patientCacheDir)
+                .addCache(catPatientCacheDir)
                 .addCache(alternatePatientCacheDir)
                 .setModularScripts()
                 .runTest()
@@ -82,5 +84,12 @@ public class RunTestRequest {
         String json = modularEngine.reportsAsJson();
         request.returnString(json);
         request.ok();
+    }
+
+    @NotNull
+    private File getPatientCacheDir(String channelId) {
+        File patientCacheDir = request.ec.getTestLogCacheDir(channelId);
+        patientCacheDir.mkdirs();
+        return patientCacheDir;
     }
 }

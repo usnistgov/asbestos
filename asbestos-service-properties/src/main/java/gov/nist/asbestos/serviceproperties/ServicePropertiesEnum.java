@@ -12,6 +12,7 @@ public enum ServicePropertiesEnum {
     FHIR_TOOLKIT_BASE("fhirToolkitBase"),
     FHIR_TOOLKIT_VERSION("fhirToolkitVersion"),
     HAPI_FHIR_BASE("hapiFhirBase"),
+    CAT_PATIENT_FHIR_BASE("patientServerBase"),
 //    LIMITED_CHANNEL_CAPABILITY_STATMENT_FILE("limitedChannelCapabilityStatementFile"),
 //    XDS_CHANNEL_CAPABILITY_STATEMENT_FILE("xdsChannelCapabilityStatementFile"),
     FHIR_VALIDATION_SERVER("fhirValidationServer"),

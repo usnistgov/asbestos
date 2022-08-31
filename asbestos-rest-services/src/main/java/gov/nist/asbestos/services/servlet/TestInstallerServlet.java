@@ -110,16 +110,17 @@ public class TestInstallerServlet  extends HttpServlet {
                     }
                     log.info(String.format("Refreshing channel %s", name));
                     switch (name) {
-                        case "default": {
-                            configureDefaultChannel(externalChannels, name);
+                        case "default":
+                            configureFhirChannel(externalChannels, name, ServicePropertiesEnum.HAPI_FHIR_BASE);
                             break;
-                        }
+                        case "external_patient":
+                            configureFhirChannel(externalChannels, name, ServicePropertiesEnum.CAT_PATIENT_FHIR_BASE);
+                            break;
                         case "xds": /* FALLTHROUGH */
                         case "selftest_comprehensive":
-                        case "limited": {
+                        case "limited":
                             configureXdsChannels(externalChannels, name);
                             break;
-                        }
                     }
                 }
             }
@@ -209,9 +210,9 @@ public class TestInstallerServlet  extends HttpServlet {
         }
     }
 
-    private void configureDefaultChannel(File externalChannels, String name) {
+    private void configureFhirChannel(File externalChannels, String name, ServicePropertiesEnum spEnum) {
         log.info("Configure " + name + " channel");
-        Optional<String> hapFhirBase = ServiceProperties.getInstance().getProperty(ServicePropertiesEnum.HAPI_FHIR_BASE);
+        Optional<String> hapFhirBase = ServiceProperties.getInstance().getProperty(spEnum);
         if (hapFhirBase.isPresent()) {
             File configFile = getChannelConfigFile(externalChannels, name);
             ChannelConfig channelConfig = ChannelConfigFactory.load(configFile);

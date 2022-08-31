@@ -13,6 +13,7 @@ import gov.nist.asbestos.testEngine.engine.ModularEngine;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.hl7.fhir.r4.model.TestReport;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.net.URI;
@@ -71,10 +72,9 @@ public class DebugTestScriptRequest implements Runnable {
 
         File testDir = request.ec.getTest(testCollection, testName);
 
-        File patientCacheDir = request.ec.getTestLogCacheDir(channelId);
-        File alternatePatientCacheDir = request.ec.getTestLogCacheDir("default__default");
-        patientCacheDir.mkdirs();
-        alternatePatientCacheDir.mkdirs();
+        final File patientCacheDir = getPatientCacheDir(channelId);
+        final File catPatientCacheDir = getPatientCacheDir("default__external_patient");
+        final File alternatePatientCacheDir = getPatientCacheDir("default__default");
 
         FhirClient fhirClient = new FhirClient()
                 .setFormat(request.isJson ? Format.JSON : Format.XML)
@@ -94,6 +94,7 @@ public class DebugTestScriptRequest implements Runnable {
                     .setFhirClient(fhirClient)
                     .setTestCollection(testCollection)
                     .addCache(patientCacheDir)
+                    .addCache(catPatientCacheDir)
                     .addCache(alternatePatientCacheDir)
                     .setModularScripts()
                     .runTest();
@@ -112,5 +113,12 @@ public class DebugTestScriptRequest implements Runnable {
             }
         }
 
+    }
+
+    @NotNull
+    private File getPatientCacheDir(String channelId) {
+        File patientCacheDir = request.ec.getTestLogCacheDir(channelId);
+        patientCacheDir.mkdirs();
+        return patientCacheDir;
     }
 }
