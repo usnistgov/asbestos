@@ -1,0 +1,72 @@
+<Patient xmlns="http://hl7.org/fhir">
+    <meta>
+        <versionId value="1"/>
+        <lastUpdated value="2022-09-01T20:20:01.441+00:00"/>
+        <source value="#0ljDxzACAH9jawHm"/>
+        <profile value="http://ihe.net/fhir/StructureDefinition/IHE.PDQm.PatientResource"/>
+    </meta>
+    <text>
+        <status value="generated"/>
+        <div xmlns="http://www.w3.org/1999/xhtml">
+            <div class="hapiHeaderText">William
+                <b>EXTRA-ONE </b>
+            </div>
+            <table class="hapiPropertyTable">
+                <tbody>
+                    <tr>
+                        <td>Identifier</td>
+                        <td>IHERED-2654</td>
+                    </tr>
+                    <tr>
+                        <td>Address</td>
+                        <td>
+                            <span>East Walnut Street </span>
+                            <br/>
+                            <span>Garden City </span>
+                            <span>Kansas </span>
+                            <span>USA </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Date of birth</td>
+                        <td>
+                            <span>05 April 1952</span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </text>
+    <identifier>
+        <system value="urn:oid:1.3.6.1.4.1.21367.13.20.1000"/>
+        <value value="IHERED-2654"/>
+    </identifier>
+    <identifier>
+        <system value="urn:oid:1.3.6.1.4.1.21367.13.20.2000"/>
+        <value value="IHEGREEN-2654"/>
+    </identifier>
+    <identifier>
+        <system value="urn:oid:1.3.6.1.4.1.21367.13.20.3000"/>
+        <value value="IHEBLUE-2654"/>
+    </identifier>
+    <identifier>
+        <system value="urn:oid:1.3.6.1.4.1.21367.3000.1.6"/>
+        <value value="IHEFACILITY-2654"/>
+    </identifier>
+    <active value="true"/>
+    <name>
+        <use value="official"/>
+        <family value="EXTRA-ONE"/>
+        <given value="William"/>
+    </name>
+    <gender value="male"/>
+    <birthDate value="1952-04-05"/>
+    <address>
+        <use value="home"/>
+        <line value="East Walnut Street"/>
+        <city value="Garden City"/>
+        <state value="Kansas"/>
+        <postalCode value="67846"/>
+        <country value="USA"/>
+    </address>
+</Patient>
