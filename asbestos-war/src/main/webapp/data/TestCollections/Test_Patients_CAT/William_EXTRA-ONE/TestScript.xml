@@ -1,13 +1,17 @@
 <TestScript xmlns="http://hl7.org/fhir">
   <description value="Build Patient resource cache if not already present."/>
-<!--	<fixture id="thePatient">-->
-<!--		<autocreate value="false"/>-->
-<!--		<autodelete value="false"/>-->
-
-<!--		<resource>-->
-<!--			<reference value="Patient/patient.xml"/>-->
-<!--		</resource>-->
-<!--	</fixture>-->
+	<fixture id="thePatient">
+		<autocreate value="false"/>
+		<autodelete value="false"/>
+		<extension url="urn:subFixture">
+			<extension url="urn:fhirPath">
+				<valueString value="Bundle.entry[0]"/>
+			</extension>
+			<extension url="urn:sourceId">
+				<valueString value="pdb-bundle"/>
+			</extension>
+		</extension>
+	</fixture>
 	<variable>
 		<name value="FirstName"/>
 		<expression value="Patient.name.given"/>
@@ -32,13 +36,13 @@
 				<description value="Get fixture string"/>
 				<modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
 					<extension url="component">
-						<valueString value="../GetFixtureString.xml"/>
+						<valueString value="../../Library/GetFixtureString.xml"/>
 					</extension>
 					<extension url="urn:variable-in">
-						<valueString value="expectedFixtureBundleEntryCount"/>
+						<valueString value="'1'"/>
 					</extension>
 					<extension url="urn:variable-in">
-						<valueString value="getFixtureParams"/>
+						<valueString value="'?fixtureId=patient&amp;baseTestCollection=Test_Patients&amp;resourceType=Patient'"/>
 					</extension>
 					<extension url="urn:fixture-out">
 						<valueString value="pdb-bundle"/>

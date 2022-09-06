@@ -6,9 +6,9 @@ import gov.nist.asbestos.client.Base.Returns;
 import gov.nist.asbestos.client.client.Format;
 import gov.nist.asbestos.fixture.FixturePlaceholderEnum;
 import gov.nist.asbestos.fixture.FixturePlaceholderParamEnum;
-
-import java.util.UUID;
-import java.util.logging.Logger;
+import org.hl7.fhir.r4.model.BaseResource;
+import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Resource;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
@@ -16,7 +16,10 @@ import java.io.IOException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.Arrays;
 import java.util.Map;
+import java.util.UUID;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -72,16 +75,16 @@ public class GetFixtureStringRequest {
             return;
         }
 
-        String resourceDirectory = paramsMap.get(FixturePlaceholderParamEnum.resourceType.name());
-        if (resourceDirectory != null) {
-            if (!isSafeFileName(resourceDirectory)) {
+        String resourceType = paramsMap.get(FixturePlaceholderParamEnum.resourceType.name());
+        if (resourceType != null) {
+            if (!isSafeFileName(resourceType)) {
                 String message = FixturePlaceholderParamEnum.resourceType.name() + " parameter is not valid.";
                 unexpectedMessage(message);
                 return;
             }
         }
 
-        String fixtureString =  readFixtureString(testCollection, testName, fixtureId, resourceDirectory);
+        String fixtureString =  readFixtureString(testCollection, testName, fixtureId, resourceType);
         if (fixtureString == null) {
             // Try base Test Collection if the optional parameter is available
             String baseTestCollection = paramsMap.get(FixturePlaceholderParamEnum.baseTestCollection.name());
@@ -89,11 +92,11 @@ public class GetFixtureStringRequest {
                 String baseTestCollectionNameDecoded = URLDecoder.decode(baseTestCollection, StandardCharsets.UTF_8.toString());
                 String baseTestName = paramsMap.get(FixturePlaceholderParamEnum.baseTestName.name());
                 if (baseTestName == null) {
-                    fixtureString = readFixtureString(baseTestCollectionNameDecoded, testName, fixtureId, resourceDirectory);
+                    fixtureString = readFixtureString(baseTestCollectionNameDecoded, testName, fixtureId, resourceType);
                 } else if (isSafeFileName(baseTestName)) {
                     // Try baseTestName
                     String baseTestNameDecoded = URLDecoder.decode(baseTestName, StandardCharsets.UTF_8.toString());
-                    fixtureString = readFixtureString(baseTestCollectionNameDecoded, baseTestNameDecoded, fixtureId, resourceDirectory);
+                    fixtureString = readFixtureString(baseTestCollectionNameDecoded, baseTestNameDecoded, fixtureId, resourceType);
                 }
             }
         }
@@ -104,7 +107,14 @@ public class GetFixtureStringRequest {
                 try {
                     // Parse to see if the whole thing is a parsable Fixture
                     Format outFormat = Format.JSON; // TODO: this should honor the TestScript Operation contentType value
-                    String jsonStr = ParserBase.encode(ParserBase.parse(fixtureString, Format.XML), outFormat);
+                    BaseResource assembledResource =  ParserBase.parse(fixtureString, Format.XML);
+                    String jsonStr = null;
+                    if (assembledResource instanceof Bundle) {
+                        jsonStr = ParserBase.encode(assembledResource, outFormat);
+                    } else {
+                        Bundle outBundle = ParserBase.bundleWith(Arrays.asList((Resource)assembledResource));
+                        jsonStr = ParserBase.encode(outBundle, outFormat);
+                    }
                     Returns.returnString(request.resp, jsonStr);
                     return;
                 } catch (Exception ex) {

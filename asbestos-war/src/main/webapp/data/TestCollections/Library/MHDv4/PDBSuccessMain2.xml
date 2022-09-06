@@ -28,7 +28,7 @@
         <autocreate value="false"/>
         <autodelete value="false"/>
         <resource>
-            <reference value="Patient/Alex_Alder"/>
+            <reference value="Patient/William_EXTRA-ONE"/>
         </resource>
     </fixture>
     <fixture id="submittedDocRef">
