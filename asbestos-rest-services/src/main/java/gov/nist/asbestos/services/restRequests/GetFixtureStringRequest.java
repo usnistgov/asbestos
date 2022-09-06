@@ -28,7 +28,7 @@ import java.util.regex.Pattern;
 // 5 - testCollectionId
 // 6 - testId
 // Example: https://fhirtoolkit.test:9743/asbestos/engine/getFixtureString/default__limited/MHD_DocumentRecipient_minimal/Missing_DocumentManifest
-//  ?fixtureId=pdb&[baseTestCollection=&baseTestName=]&[fixtureElementPlaceholder=LocalFixtureReferenceFileName]
+//  ?fixtureId=pdb&[baseTestCollection=&baseTestName=]&[fixtureElementPlaceholder=LocalFixtureReferenceFileName]&[resourceType=DirectoryName]
 // See @FixturePlaceholderParamEnum for complete search order reference.
 // fixtureId is searched for in the current test Collection, test name, Bundle,
 // if not found, the fall back location is ../../Common[Test.properties:hidden=true].
@@ -67,13 +67,21 @@ public class GetFixtureStringRequest {
 
         String fixtureId = paramsMap.get(FixturePlaceholderParamEnum.fixtureId.name());
         if (! isSafeFileName(fixtureId)) {
-            String message = "fixtureId parameter is not valid.";
+            String message = FixturePlaceholderParamEnum.fixtureId.name() + " parameter is not valid.";
             unexpectedMessage(message);
             return;
         }
 
+        String resourceDirectory = paramsMap.get(FixturePlaceholderParamEnum.resourceType.name());
+        if (resourceDirectory != null) {
+            if (!isSafeFileName(resourceDirectory)) {
+                String message = FixturePlaceholderParamEnum.resourceType.name() + " parameter is not valid.";
+                unexpectedMessage(message);
+                return;
+            }
+        }
 
-        String fixtureString =  readFixtureString(testCollection, testName, fixtureId);
+        String fixtureString =  readFixtureString(testCollection, testName, fixtureId, resourceDirectory);
         if (fixtureString == null) {
             // Try base Test Collection if the optional parameter is available
             String baseTestCollection = paramsMap.get(FixturePlaceholderParamEnum.baseTestCollection.name());
@@ -81,11 +89,11 @@ public class GetFixtureStringRequest {
                 String baseTestCollectionNameDecoded = URLDecoder.decode(baseTestCollection, StandardCharsets.UTF_8.toString());
                 String baseTestName = paramsMap.get(FixturePlaceholderParamEnum.baseTestName.name());
                 if (baseTestName == null) {
-                    fixtureString = readFixtureString(baseTestCollectionNameDecoded, testName, fixtureId);
+                    fixtureString = readFixtureString(baseTestCollectionNameDecoded, testName, fixtureId, resourceDirectory);
                 } else if (isSafeFileName(baseTestName)) {
                     // Try baseTestName
                     String baseTestNameDecoded = URLDecoder.decode(baseTestName, StandardCharsets.UTF_8.toString());
-                    fixtureString = readFixtureString(baseTestCollectionNameDecoded, baseTestNameDecoded, fixtureId);
+                    fixtureString = readFixtureString(baseTestCollectionNameDecoded, baseTestNameDecoded, fixtureId, resourceDirectory);
                 }
             }
         }
@@ -116,14 +124,18 @@ public class GetFixtureStringRequest {
 
     }
 
-    private String readFixtureString(String testCollection, String testName, String fixtureId) throws IOException {
+    private String readFixtureString(String testCollection, String testName, String fixtureId, String resourceDirectory) throws IOException {
         File testDir = request.ec.getTest(testCollection, testName);
         if (testDir == null || !testDir.exists() || !testDir.isDirectory()) {
             unexpectedMessage(String.format("TestId not found: %s/%s.", testCollection, testName));
             return null;
         }
 
-        File fixtureFile = getFixtureFile(fixtureId, testDir, "Bundle");
+        if (resourceDirectory == null) {
+            resourceDirectory = "Bundle";
+        }
+
+        File fixtureFile = getFixtureFile(fixtureId, testDir, resourceDirectory);
         if (! fixtureFile.exists()) {
             // Try Common
             fixtureFile = getFixtureFile(fixtureId, testDir, "..".concat(File.separator).concat("Common"));
@@ -204,7 +216,7 @@ public class GetFixtureStringRequest {
                 // Example  @{BundleMetaProfileElement} = BundleMetaProfileElement.xml
                 paramValue = placeholderName;
                 if (isSafeFileName(paramValue)) {
-                    placeholderFixtureString = readFixtureString(testCollection, testName, paramValue);
+                    placeholderFixtureString = readFixtureString(testCollection, testName, paramValue, null);
                 } else {
                     log.severe(String.format("%s is not safe",paramValue));
                     return null;
