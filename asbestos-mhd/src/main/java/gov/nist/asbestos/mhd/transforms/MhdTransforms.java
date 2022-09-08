@@ -22,6 +22,8 @@ import gov.nist.asbestos.mhd.translation.attribute.AuthorRole;
 import gov.nist.asbestos.mhd.translation.attribute.DateTransform;
 import gov.nist.asbestos.mhd.translation.search.FhirSq;
 import gov.nist.asbestos.mhd.util.Utils;
+import gov.nist.asbestos.serviceproperties.ServiceProperties;
+import gov.nist.asbestos.serviceproperties.ServicePropertiesEnum;
 import gov.nist.asbestos.simapi.validation.Val;
 import gov.nist.asbestos.simapi.validation.ValE;
 import oasis.names.tc.ebxml_regrep.xsd.rim._3.*;
@@ -691,7 +693,7 @@ public class MhdTransforms {
         if (ss != null)
             dm = trans.getDocumentManifest(ss, assocs, channelConfig);
 
-        if (dm != null && dm.hasSubject())
+        if (dm != null && dm.hasSubject() && ! ServiceProperties.getInstance().getProperty(ServicePropertiesEnum.CAT_EXTERNAL_PATIENT_SERVER_FHIR_BASE).isPresent())
             MhdTransforms.withNewBase(channelConfig.getProxyURI(), dm.getSubject());
 
 //        if (ss == null)
@@ -732,7 +734,7 @@ public class MhdTransforms {
         if (ss != null)
             listResource = trans.getListResource(ss, assocs, channelConfig);
 
-        if (listResource != null && listResource.hasSubject())
+        if (listResource != null && listResource.hasSubject() && ! ServiceProperties.getInstance().getProperty(ServicePropertiesEnum.CAT_EXTERNAL_PATIENT_SERVER_FHIR_BASE).isPresent())
             MhdTransforms.withNewBase(channelConfig.getProxyURI(), listResource.getSubject());
 
 //        if (ss == null)

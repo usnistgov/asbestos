@@ -13,11 +13,14 @@ import gov.nist.asbestos.http.operations.HttpBase;
 import gov.nist.asbestos.http.operations.HttpDelete;
 import gov.nist.asbestos.http.operations.HttpGetter;
 import gov.nist.asbestos.http.operations.HttpPost;
+import gov.nist.asbestos.serviceproperties.ServiceProperties;
+import gov.nist.asbestos.serviceproperties.ServicePropertiesEnum;
 import org.hl7.fhir.r4.model.BaseResource;
 import org.hl7.fhir.r4.model.Bundle;
 
 import java.net.URI;
 import java.util.Objects;
+import java.util.Optional;
 
 
 public class PassthroughChannel extends BaseChannel /*implements IBaseChannel*/ {
@@ -106,38 +109,41 @@ public class PassthroughChannel extends BaseChannel /*implements IBaseChannel*/ 
 
             BaseResource resource = ParserBase.parse(responseIn.getResponseText(), format);
             if (resource instanceof Bundle) {
-                newBase = // ServiceProperties.getInstance().getPropertyOrThrow(ServicePropertiesEnum.FHIR_TOOLKIT_BASE)
-//                        + "/proxy/" + channelConfig.asFullId();
-                        channelConfig.getProxyURI().toString();
-                boolean updated = false;
                 Bundle bundle = (Bundle) resource;
-                if (bundle.hasLink()) {
-                    Bundle.BundleLinkComponent linkComponent = bundle.getLink("self");
-                    if (linkComponent != null) {
-                        if (linkComponent.hasUrl()) {
-                            linkComponent.setUrl(new Ref(linkComponent.getUrl()).rebase(newBase).toString());
-                            //linkComponent.setUrl(newBase);
-                            updated = true;
-                        }
-                    }
-                }
-                for (Bundle.BundleEntryComponent component : bundle.getEntry()) {
-                    if (component.hasResponse()) {
-                        Bundle.BundleEntryResponseComponent responseComponent = component.getResponse();
-                        if (responseComponent.hasLocation()) {
-                            String location = responseComponent.getLocation();
-                            Ref locRef = new Ref(location);
-                            if (!locRef.isRelative()) {
-                                locRef.rebase(newBase);
-                                responseComponent.setLocation(locRef.toString());
+                boolean updated = false;
+                Optional<String> externalPatientBase = ServiceProperties.getInstance().getProperty(ServicePropertiesEnum.CAT_EXTERNAL_PATIENT_SERVER_FHIR_BASE);
+                if (! (externalPatientBase.isPresent() && externalPatientBase.get().equals(channelConfig.getFhirBase()))) {
+                    newBase = // ServiceProperties.getInstance().getPropertyOrThrow(ServicePropertiesEnum.FHIR_TOOLKIT_BASE)
+//                        + "/proxy/" + channelConfig.asFullId();
+                            channelConfig.getProxyURI().toString();
+                    if (bundle.hasLink()) {
+                        Bundle.BundleLinkComponent linkComponent = bundle.getLink("self");
+                        if (linkComponent != null) {
+                            if (linkComponent.hasUrl()) {
+                                linkComponent.setUrl(new Ref(linkComponent.getUrl()).rebase(newBase).toString());
+                                //linkComponent.setUrl(newBase);
                                 updated = true;
                             }
                         }
                     }
-                    if (component.hasFullUrl()) {
-                        Ref fullUrl = new Ref(component.getFullUrl());
-                        if (fullUrl.isAbsolute()) {
-                            component.setFullUrl(fullUrl.rebase(newBase).toString());
+                    for (Bundle.BundleEntryComponent component : bundle.getEntry()) {
+                        if (component.hasResponse()) {
+                            Bundle.BundleEntryResponseComponent responseComponent = component.getResponse();
+                            if (responseComponent.hasLocation()) {
+                                String location = responseComponent.getLocation();
+                                Ref locRef = new Ref(location);
+                                if (!locRef.isRelative()) {
+                                    locRef.rebase(newBase);
+                                    responseComponent.setLocation(locRef.toString());
+                                    updated = true;
+                                }
+                            }
+                        }
+                        if (component.hasFullUrl()) {
+                            Ref fullUrl = new Ref(component.getFullUrl());
+                            if (fullUrl.isAbsolute()) {
+                                component.setFullUrl(fullUrl.rebase(newBase).toString());
+                            }
                         }
                     }
                 }
