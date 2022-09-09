@@ -316,10 +316,18 @@ public class MhdTransforms {
             tr.add(new ValE("content.attachment.contentType not present").asError());
         else
             eo.setMimeType(content.getAttachment().getContentType());
-
+        /*
         if (dr.getDate() != null) {
             vale.addTr(new ValE("creationTime"));
             addSlot(eo, "creationTime", translateDateTime(dr.getDate()));
+        }
+         */
+        {
+            Date creationDate = content.getAttachment().getCreation();
+            if (creationDate != null) {
+                vale.addTr(new ValE("creationTime"));
+                addSlot(eo, "creationTime", translateDateTime(creationDate));
+            }
         }
         if (dr.hasStatus()) {
             vale.addTr(new ValE("availabilityStatus"));

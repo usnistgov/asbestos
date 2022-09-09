@@ -194,8 +194,10 @@ public class DocumentEntryToDocumentReference implements IVal {
                     }
                 } else if ("creationTime".equals(name)) {
                     try {
+                        /*
                         dr.setDate(DateTransform.dtmToDate(value1));
-                        //attachment.setCreation(DateTransform.dtmToDate(value1));
+                         */
+                        attachment.setCreation(DateTransform.dtmToDate(value1));
                     } catch (MetadataAttributeTranslationException e) {
                         val.add(new ValE(e.getMessage()).asError());
                     }
