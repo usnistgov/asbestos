@@ -43,7 +43,7 @@
         <assert id="BR_4">
             <description value="Bundle.entry.request.url"/>
             <compareToSourceId value="request"/>
-            <compareToSourceExpression value="Bundle.entry.all(request.url = resource.resourceType or request.url = fullUrl)"/>
+            <compareToSourceExpression value="Bundle.entry.all(request.url = resource.type().name or request.url = fullUrl)"/>
             <warningOnly value="false"/>
         </assert>
     </action>
