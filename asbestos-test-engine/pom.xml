@@ -5,7 +5,7 @@
     <parent>
         <artifactId>asbestos</artifactId>
         <groupId>gov.nist.asbestos</groupId>
-        <version>4.1.1</version><!-- asbts -->
+        <version>4.1.2</version><!-- asbts -->
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -15,17 +15,17 @@
         <dependency>
             <groupId>gov.nist.asbestos</groupId>
             <artifactId>asbestos-utilities</artifactId>
-            <version>4.1.1</version><!-- asbts -->
+            <version>4.1.2</version><!-- asbts -->
         </dependency>
         <dependency>
             <groupId>gov.nist.asbestos</groupId>
             <artifactId>asbestos-service-properties</artifactId>
-            <version>4.1.1</version><!-- asbts -->
+            <version>4.1.2</version><!-- asbts -->
         </dependency>
         <dependency>
             <groupId>gov.nist.asbestos</groupId>
             <artifactId>asbestos-proxy-support</artifactId>
-            <version>4.1.1</version><!-- asbts -->
+            <version>4.1.2</version><!-- asbts -->
         </dependency>
     </dependencies>
 </project>
