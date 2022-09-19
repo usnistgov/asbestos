@@ -135,6 +135,7 @@
               {{ e }}
             </option>
           </select>
+          Only used with Channel Type mhd
 <!--            No selection is required if PDB Profile Canonical URI is unique and differentiable. I.e., if no Options are selected, channel validation is based on the PDB bundle profile. All test collections are displayed if no Options are selected. If Option(s) are selected, test collections are filtered based on Option selection.-->
         </div>
         <div v-else>
@@ -142,7 +143,7 @@
               {{channel.mhdVersions.join(", ")}}
             </template>
           <template v-else>
-            Use default
+            Use default (MHDv3.x)
           </template>
         </div>
 

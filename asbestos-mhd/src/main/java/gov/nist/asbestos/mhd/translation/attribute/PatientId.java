@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.logging.Logger;
 
 public class PatientId implements IVal {
     private String patientid = "";
@@ -24,6 +25,7 @@ public class PatientId implements IVal {
     private ResourceCacheMgr resourceCacheMgr = null;
     private Val val;
     private FhirClient fhirClient = null;
+    private Logger logger = Logger.getLogger(PatientId.class.getName());
 
     public PatientId setPatientid(String patientid) {
         this.patientid = patientid;
@@ -50,7 +52,6 @@ public class PatientId implements IVal {
     }
 
 //    Ref patientServer = new Ref("http://localhost:8080/fhir/fhir");
-    Ref patientServer = new Ref(ServiceProperties.getInstance().getPropertyOrThrow(ServicePropertiesEnum.HAPI_FHIR_BASE));
 
 
     public Optional<Reference> getFhirReference() {
@@ -61,10 +62,27 @@ public class PatientId implements IVal {
         String id = getId();
         List<String> searchParams = new ArrayList<>();
         searchParams.add("identifier=" + system + "|" + id);
-        List<ResourceWrapper> results = fhirClient.search(patientServer, Patient.class, searchParams, true, false);
+        Optional<String>[] patientServerBase = new Optional[]{
+                ServiceProperties.getInstance().getProperty(ServicePropertiesEnum.CAT_EXTERNAL_PATIENT_SERVER_FHIR_BASE),
+                ServiceProperties.getInstance().getProperty(ServicePropertiesEnum.HAPI_FHIR_BASE)
+        };
+
+        List<ResourceWrapper> results = null;
+        for (Optional<String> o : patientServerBase) {
+            try {
+                if (o.isPresent()) {
+                    Ref r = new Ref(o.get());
+                    results = fhirClient.search(r, Patient.class, searchParams, true, false);
+                    if (!results.isEmpty())
+                        break;
+                }
+            } catch (Exception ex) {
+                logger.warning(ex.toString());
+            }
+        }
 
         //List<ResourceWrapper> results = resourceCacheMgr.search(null, Patient.class, searchParams, true);
-        if (results.isEmpty()) {
+        if (results == null || (results !=null && results.isEmpty())) {
             val.add(new ValE("DocumentEntryToDocumentReference: cannot find Patient resource for " + system + "|" + id).asError());
             return Optional.empty();
         }

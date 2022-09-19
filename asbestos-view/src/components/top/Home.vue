@@ -108,6 +108,10 @@ kinds of channels: FHIR - data passed without modification and MHD - translation
         - leads to the integrated HAPI FHIR Server.  It performs no translation.  Logging only.
         <br /><br />
 
+        <span class="bold">external_patient</span>
+        - If the <span class="fixedWidthFont">patientServerBase</span> setting in Service Properties is enabled with a proper FHIR base, then it leads to the external FHIR Server used for Connectathon patient reference testing purposes. Conformance Tests will use the external reference instead of the integrated patient reference. This is not used for local testing purpose. Channel performs no translation.  Logging only
+        <br /><br />
+
         <span class="bold">sut</span>
         - a placeholder for your System Under Test. This is used for server testing only.
         Use the Channel Editor (Config in the Channels Control panel) to

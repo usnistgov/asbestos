@@ -19,6 +19,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.logging.Logger;
 
 // TODO author, related, binary (content.attachment), logical id, identifier (entryUUID), legalAuthenticator, sourcePatientInfo, sourcePatientId
 public class DocumentEntryToDocumentReference implements IVal {
@@ -27,6 +28,7 @@ public class DocumentEntryToDocumentReference implements IVal {
     private ResourceCacheMgr resourceCacheMgr = null;
     private ContainedIdAllocator containedIdAllocator = null;
     FhirClient fhirClient = null;
+    private static Logger log = Logger.getLogger(DocumentEntryToDocumentReference.class.getName());
 
     public DocumentReference getDocumentReference(ExtrinsicObjectType eo, ChannelConfig channelConfig) {
         Objects.requireNonNull(eo);
@@ -192,10 +194,18 @@ public class DocumentEntryToDocumentReference implements IVal {
                     } catch (MetadataAttributeTranslationException e) {
                         val.add(new ValE(e.getMessage()).asError());
                     }
-                } else if ("creationTime".equals(name)) {
+                } else if ("urn:ftk:DocumentReference.date".equals(name)) {
                     try {
                         dr.setDate(DateTransform.dtmToDate(value1));
-                        //attachment.setCreation(DateTransform.dtmToDate(value1));
+                    } catch (Exception ex) {
+                        log.severe("De2Dr setDate Exception: " + ex.toString());
+                    }
+                } else if ("creationTime".equals(name)) {
+                    try {
+                        /*
+                        dr.setDate(DateTransform.dtmToDate(value1));
+                         */
+                        attachment.setCreation(DateTransform.dtmToDate(value1));
                     } catch (MetadataAttributeTranslationException e) {
                         val.add(new ValE(e.getMessage()).asError());
                     }

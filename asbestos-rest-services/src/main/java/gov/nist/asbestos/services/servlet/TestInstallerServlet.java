@@ -1,12 +1,12 @@
 package gov.nist.asbestos.services.servlet;
 
 import gov.nist.asbestos.client.Base.EC;
+import gov.nist.asbestos.client.channel.ChannelConfig;
+import gov.nist.asbestos.client.channel.ChannelConfigFactory;
 import gov.nist.asbestos.client.log.SimStore;
 import gov.nist.asbestos.http.operations.HttpGetter;
 import gov.nist.asbestos.serviceproperties.ServiceProperties;
 import gov.nist.asbestos.serviceproperties.ServicePropertiesEnum;
-import gov.nist.asbestos.client.channel.ChannelConfig;
-import gov.nist.asbestos.client.channel.ChannelConfigFactory;
 import gov.nist.asbestos.simapi.tk.installation.Installation;
 import gov.nist.toolkit.configDatatypes.server.SimulatorProperties;
 import gov.nist.toolkit.toolkitApi.DocumentRegRep;
@@ -15,9 +15,7 @@ import gov.nist.toolkit.toolkitApi.ToolkitServiceException;
 import gov.nist.toolkit.toolkitServicesCommon.SimConfig;
 import gov.nist.toolkit.toolkitServicesCommon.resource.SimIdResource;
 import org.apache.commons.io.FileUtils;
-import java.util.logging.Level;
 import org.apache.http.HttpStatus;
-import java.util.logging.Logger;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -29,6 +27,8 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Optional;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class TestInstallerServlet  extends HttpServlet {
     private static Logger log = Logger.getLogger(TestInstallerServlet.class.getName());
@@ -110,16 +110,17 @@ public class TestInstallerServlet  extends HttpServlet {
                     }
                     log.info(String.format("Refreshing channel %s", name));
                     switch (name) {
-                        case "default": {
-                            configureDefaultChannel(externalChannels, name);
+                        case EC.DEFAULT_CHANNEL_NAME:
+                            configureFhirChannel(externalChannels, name, ServicePropertiesEnum.HAPI_FHIR_BASE);
                             break;
-                        }
+                        case EC.EXTERNAL_PATIENT_SERVER_CHANNEL_NAME:
+                            configureFhirChannel(externalChannels, name, ServicePropertiesEnum.CAT_EXTERNAL_PATIENT_SERVER_FHIR_BASE);
+                            break;
                         case "xds": /* FALLTHROUGH */
                         case "selftest_comprehensive":
-                        case "limited": {
+                        case "limited":
                             configureXdsChannels(externalChannels, name);
                             break;
-                        }
                     }
                 }
             }
@@ -209,9 +210,9 @@ public class TestInstallerServlet  extends HttpServlet {
         }
     }
 
-    private void configureDefaultChannel(File externalChannels, String name) {
+    private void configureFhirChannel(File externalChannels, String name, ServicePropertiesEnum spEnum) {
         log.info("Configure " + name + " channel");
-        Optional<String> hapFhirBase = ServiceProperties.getInstance().getProperty(ServicePropertiesEnum.HAPI_FHIR_BASE);
+        Optional<String> hapFhirBase = ServiceProperties.getInstance().getProperty(spEnum);
         if (hapFhirBase.isPresent()) {
             File configFile = getChannelConfigFile(externalChannels, name);
             ChannelConfig channelConfig = ChannelConfigFactory.load(configFile);

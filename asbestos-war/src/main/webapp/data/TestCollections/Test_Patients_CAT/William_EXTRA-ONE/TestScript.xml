@@ -1,0 +1,171 @@
+<TestScript xmlns="http://hl7.org/fhir">
+  <description value="Build Patient resource cache if not already present."/>
+	<fixture id="thePatient">
+		<autocreate value="false"/>
+		<autodelete value="false"/>
+		<extension url="urn:subFixture">
+			<extension url="urn:fhirPath">
+				<valueString value="Bundle.entry[0]"/>
+			</extension>
+			<extension url="urn:sourceId">
+				<valueString value="pdb-bundle"/>
+			</extension>
+		</extension>
+	</fixture>
+	<variable>
+		<name value="FirstName"/>
+		<expression value="Patient.name.given"/>
+		<sourceId value="thePatient"/>
+	</variable>
+	<variable>
+		<name value="LastName"/>
+		<expression value="Patient.name.family"/>
+		<sourceId value="thePatient"/>
+	</variable>
+	<variable>
+		<name value="birthDate"/>
+		<expression value="Patient.birthDate"/>
+		<sourceId value="thePatient"/>
+	</variable>
+
+
+	<setup>
+		<modifierExtension url="urn:noErrors"/>
+		<action>
+			<operation>
+				<description value="Get fixture string"/>
+				<modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
+					<extension url="component">
+						<valueString value="../../Library/GetFixtureString.xml"/>
+					</extension>
+					<extension url="urn:variable-in">
+						<valueString value="'1'"/>
+					</extension>
+					<extension url="urn:variable-in">
+						<valueString value="'?fixtureId=patient&amp;baseTestCollection=Test_Patients&amp;resourceType=Patient'"/>
+					</extension>
+					<extension url="urn:fixture-out">
+						<valueString value="pdb-bundle"/>
+					</extension>
+				</modifierExtension>
+			</operation>
+		</action>
+	</setup>
+	<test>
+		<description value="Patient query."/>
+		<action>
+			<operation>
+				<description value="search for patient."/>
+				<type>
+					<code value="search"/>
+				</type>
+				<resource value="Patient"> </resource>
+				<contentType value="json"> </contentType>
+				<params value="?given=${FirstName}&amp;family=${LastName}&amp;birthdate=${birthDate}"> </params>
+				<responseId value="patient-search"/>
+			</operation>
+		</action>
+		<action>
+			<assert>
+				<description value="ok status."/>
+				<sourceId value="patient-search"/>
+				<response value="okay"/>
+				<warningOnly value="false"/>
+			</assert>
+		</action>
+		<action>
+			<assert>
+				<description value="No OperationOutcome."/>
+				<compareToSourceId value="patient-search"/>
+				<compareToSourceExpression value="Bundle.entry.response.outcome.where(is(FHIR.OperationOutcome)).empty()"/>
+				<warningOnly value="false"/>
+			</assert>
+		</action>
+		<action>
+			<assert>
+				<description value="no more than one Patient resource for this person is allowed."/>
+				<expression value="Bundle.total"/>
+				<operator value="lessThan"/>
+				<value value="2"/>
+				<warningOnly value="false"/>
+			</assert>
+		</action>
+	</test>
+
+	<test>
+		<description value="Does the Patient need loading?"/>
+		<!-- this would normally run because it is in a different test
+     The extension changes that - a previous failure causes this not to run
+    -->
+    <modifierExtension url="urn:noErrors"/>
+		<action>
+			<!-- This search is necessary to trigger Cache loading in TestEngine#doPostProcessing() -->
+			<operation>
+				<description value="Second search for patient. Needed for building of Patient cache."/>
+				<type>
+					<code value="search"/>
+				</type>
+				<resource value="Patient"> </resource>
+				<contentType value="json"> </contentType>
+				<params value="?given=${FirstName}&amp;family=${LastName}&amp;birthdate=${birthDate}"> </params>
+				<responseId value="patient-search"/>
+			</operation>
+		</action>
+  </test>
+	<test>
+	  <description value="Build cache entry."/>
+    <action>
+      <assert>
+        <description value="Verify response is a Bundle."/>
+        <resource value="Bundle"/>
+        <sourceId value="patient-search"/>
+	  		<warningOnly value="false"/>
+			</assert>
+    </action>
+    <action>
+      <assert>
+        <description value="Bundle contains single entry."/>
+        <expression value="Bundle.total"/>
+        <operator value="equals"/>
+        <value value="1"/>
+        <sourceId value="patient-search"/>
+	  		<warningOnly value="false"/>
+			</assert>
+    </action>
+    <action>
+      <assert>
+        <description value="Entry has fullUrl attribute."/>
+        <compareToSourceId value="patient-search"/>
+        <compareToSourceExpression value="Bundle.entry[0].fullUrl.empty().not()"/>
+	  		<warningOnly value="false"/>
+			</assert>
+    </action>
+    <action>
+      <assert>
+        <description value="Entry contains a Patient resource."/>
+        <compareToSourceId value="patient-search"/>
+        <compareToSourceExpression value="Bundle.entry[0].resource is Patient"/>
+	  		<warningOnly value="false"/>
+			</assert>
+    </action>
+    <action>
+      <assert>
+        <description value="Patient has familyName, givenName and dob."/>
+        <compareToSourceId value="patient-search"/>
+        <compareToSourceExpression value="Bundle.entry[0].resource.name.family.exists() and Bundle.entry[0].resource.name.given.exists() and Bundle.entry[0].resource.birthDate.exists()"/>
+	  		<warningOnly value="false"/>
+			</assert>
+    </action>
+    <action>
+      <operation>
+        <description value="Save to cache."/>
+        <type>
+          <system value="https://github.com/usnistgov/asbestos/wiki/Testscript-Operation-Codes"/>
+          <code value="save-to-cache"/>
+        </type>
+        <url value="${FirstName}_${LastName}"/>
+        <sourceId value="patient-search"/>
+      </operation>      
+    </action>
+	</test>
+</TestScript>

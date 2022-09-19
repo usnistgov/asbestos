@@ -1,21 +1,23 @@
 package gov.nist.asbestos.debug.testScript.requests;
 
+import gov.nist.asbestos.client.Base.EC;
 import gov.nist.asbestos.client.Base.Request;
+import gov.nist.asbestos.client.channel.ChannelConfig;
 import gov.nist.asbestos.client.client.FhirClient;
 import gov.nist.asbestos.client.client.Format;
-import gov.nist.asbestos.client.log.SimStore;
-import gov.nist.asbestos.client.channel.ChannelConfig;
 import gov.nist.asbestos.client.debug.StopDebugTestScriptException;
 import gov.nist.asbestos.client.debug.TestScriptDebugState;
+import gov.nist.asbestos.client.log.SimStore;
 import gov.nist.asbestos.simapi.simCommon.SimId;
 import gov.nist.asbestos.simapi.validation.Val;
 import gov.nist.asbestos.testEngine.engine.ModularEngine;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.hl7.fhir.r4.model.TestReport;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.net.URI;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 // 0 - "debug-testscript"
 // 1 - channelName (testSession__channelId)
 // 2 - testCollectionId
@@ -71,10 +73,9 @@ public class DebugTestScriptRequest implements Runnable {
 
         File testDir = request.ec.getTest(testCollection, testName);
 
-        File patientCacheDir = request.ec.getTestLogCacheDir(channelId);
-        File alternatePatientCacheDir = request.ec.getTestLogCacheDir("default__default");
-        patientCacheDir.mkdirs();
-        alternatePatientCacheDir.mkdirs();
+        final File patientCacheDir = getPatientCacheDir(channelId);
+        final File catPatientCacheDir = getPatientCacheDir(EC.EXTERNAL_PATIENT_SERVER.toString());
+        final File alternatePatientCacheDir = getPatientCacheDir(EC.DEFAULT.toString());
 
         FhirClient fhirClient = new FhirClient()
                 .setFormat(request.isJson ? Format.JSON : Format.XML)
@@ -94,6 +95,7 @@ public class DebugTestScriptRequest implements Runnable {
                     .setFhirClient(fhirClient)
                     .setTestCollection(testCollection)
                     .addCache(patientCacheDir)
+                    .addCache(catPatientCacheDir)
                     .addCache(alternatePatientCacheDir)
                     .setModularScripts()
                     .runTest();
@@ -112,5 +114,12 @@ public class DebugTestScriptRequest implements Runnable {
             }
         }
 
+    }
+
+    @NotNull
+    private File getPatientCacheDir(String channelId) {
+        File patientCacheDir = request.ec.getTestLogCacheDir(channelId);
+        patientCacheDir.mkdirs();
+        return patientCacheDir;
     }
 }

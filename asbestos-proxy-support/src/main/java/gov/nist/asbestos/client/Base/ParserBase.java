@@ -4,12 +4,16 @@ import ca.uhn.fhir.context.FhirContext;
 import gov.nist.asbestos.client.client.Format;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.BaseResource;
+import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.OperationOutcome;
+import org.hl7.fhir.r4.model.Resource;
 
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 
 
 public class ParserBase {
@@ -73,4 +77,26 @@ public class ParserBase {
     public static Format getFormat(File resourceFile) {
         return resourceFile.toString().endsWith("json") ? Format.JSON : Format.XML;
     }
+
+    public static Bundle bundleWith(List<Resource> in) {
+        Bundle bundle = new Bundle();
+
+        for (Resource resource : in) {
+            Bundle.BundleEntryComponent entry = new Bundle.BundleEntryComponent();
+            bundle.addEntry(entry);
+            if (resource instanceof OperationOutcome) {
+                Bundle.BundleEntryResponseComponent resp = new Bundle.BundleEntryResponseComponent();
+                resp.setStatus("500");
+                resp.setOutcome((OperationOutcome)resource);
+            } else {
+                entry.setResource(resource);
+                Bundle.BundleEntryResponseComponent resp = new Bundle.BundleEntryResponseComponent();
+                entry.setResponse(resp);
+                resp.setStatus("200");
+            }
+        }
+
+        return bundle;
+    }
+
 }

@@ -5,8 +5,9 @@ package gov.nist.asbestos.fixture;
  * Every placeholder param, is used with the following convention @{x} in TestScript, where x is the enum String name.
  */
 public enum FixturePlaceholderEnum {
+    RandomUUID,
     BundleMetaMinimalProfileElement,
     BundleMetaComprehensiveProfileElement,
     SubmissionSetResourceElement,
-    RandomUUID
+    SubmissionSetRequestUrlElement
 }

@@ -2,33 +2,45 @@ package gov.nist.asbestos.client.Base;
 
 import com.google.gson.Gson;
 import gov.nist.asbestos.client.client.FhirClient;
-import gov.nist.asbestos.client.events.EventSummary;
 import gov.nist.asbestos.client.events.UIEvent;
 import gov.nist.asbestos.client.log.SimStore;
 import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import gov.nist.asbestos.simapi.simCommon.SimId;
-
-import java.math.BigDecimal;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import gov.nist.asbestos.simapi.simCommon.TestSession;
 import org.hl7.fhir.common.hapi.validation.support.PrePopulatedValidationSupport;
 import org.hl7.fhir.r4.hapi.ctx.HapiWorkerContext;
-import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.Base;
+import org.hl7.fhir.r4.model.BaseResource;
+import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Resource;
+import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.r4.utils.FHIRPathEngine;
 
-import javax.servlet.http.HttpServletResponse;
 import javax.xml.bind.JAXBException;
-import java.io.*;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Properties;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static gov.nist.asbestos.client.Base.Dirs.listOfDirectories;
 import static gov.nist.asbestos.client.Base.Dirs.listOfFiles;
@@ -48,11 +60,16 @@ public class EC {
     public static final String TEST_COLLECTION_PROPERTIES = "TestCollection.properties";
     public static final String TEST_PROPERTIES = "Test.properties";
     public static final String HIDDEN_KEY_NAME = "Hidden"; // TODO: make an enum
+    public static final String DEFAULT_CHANNEL_NAME = "default";
+    public static final String EXTERNAL_PATIENT_SERVER_CHANNEL_NAME = "external_patient";
+    public static final SimId DEFAULT = new SimId(TestSession.DEFAULT_TEST_SESSION, DEFAULT_CHANNEL_NAME);
+    public static final SimId EXTERNAL_PATIENT_SERVER = new SimId(TestSession.DEFAULT_TEST_SESSION, EXTERNAL_PATIENT_SERVER_CHANNEL_NAME);
 
 
     public EC(File externalCache) {
         this.externalCache = externalCache;
     }
+
 
     // channelId is testSession__channelName
     public File getCache(String channelId, String resourceType) {

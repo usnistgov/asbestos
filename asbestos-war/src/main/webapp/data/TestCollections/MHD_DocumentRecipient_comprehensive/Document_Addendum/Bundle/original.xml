@@ -79,6 +79,7 @@
                         <contentType value="text/plain"/>
                         <url value="urn:uuid:3fdc72f4-a11d-4a9d-9260-a9f745779e03"/>
                         <language value="en-us"/>
+                        <creation value="2015-02-07T13:28:17.239+02:00"/>
                     </attachment>
                     <format>
                         <system value="http://ihe.net/fhir/ihe.formatcode.fhir/CodeSystem/formatcode"/>
@@ -90,7 +91,7 @@
         </resource>
         <request>
             <method value="POST"/>
-            <url value="urn:uuid:1e404af3-077f-4bee-b7a6-a9be97e1ce01"/>
+            <url value="DocumentReference"/>
         </request>
     </entry>
     <entry>
@@ -100,7 +101,7 @@
         </resource>
         <request>
             <method value="POST"/>
-            <url value="urn:uuid:3fdc72f4-a11d-4a9d-9260-a9f745779e02"/>
+             @{SubmissionSetRequestUrlElement}
         </request>
     </entry>
     <entry>
@@ -116,7 +117,7 @@
         </resource>
         <request>
             <method value="POST"/>
-            <url value="urn:uuid:3fdc72f4-a11d-4a9d-9260-a9f745779e03"/>
+            <url value="Binary"/>
         </request>
     </entry>
 </Bundle>

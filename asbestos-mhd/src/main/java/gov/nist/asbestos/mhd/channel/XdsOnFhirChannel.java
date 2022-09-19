@@ -36,6 +36,8 @@ import gov.nist.asbestos.mhd.translation.ContainedIdAllocator;
 import gov.nist.asbestos.mhd.translation.search.DocManSQParamTranslator;
 import gov.nist.asbestos.mhd.translation.search.FhirSq;
 import gov.nist.asbestos.mhd.util.XdsActorMapper;
+import gov.nist.asbestos.serviceproperties.ServiceProperties;
+import gov.nist.asbestos.serviceproperties.ServicePropertiesEnum;
 import gov.nist.asbestos.simapi.tk.installation.Installation;
 import gov.nist.asbestos.simapi.validation.Val;
 import gov.nist.asbestos.utilities.ErrorType;
@@ -805,7 +807,7 @@ public class XdsOnFhirChannel extends BaseChannel /*implements IBaseChannel*/ {
 
         DocumentReference dr = trans.getDocumentReference(eo, channelConfig);
 
-        if (dr.hasSubject())
+        if (dr.hasSubject() && ! ServiceProperties.getInstance().getProperty(ServicePropertiesEnum.CAT_EXTERNAL_PATIENT_SERVER_FHIR_BASE).isPresent())
             MhdTransforms.withNewBase(channelConfig.getProxyURI(), dr.getSubject());
 
         if (val.hasErrors())
