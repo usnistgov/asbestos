@@ -438,7 +438,7 @@ public class AnalysisReport {
                     if (operationComponent.hasResult()) {
                         if (operationComponent.getResult().equals(TestReport.TestReportActionResult.ERROR)) {
 //                            return new Checked(MinimumId.getReport(operationComponent.getMessage()));
-                            throw new Error(operationComponent.getMessage());
+                            throw new Error(operationComponent.toString());
                         }
                     }
                 }
@@ -493,7 +493,7 @@ public class AnalysisReport {
             }
 
         } catch (URISyntaxException e) {
-            generalErrors.add("Error extracting FHIRBASE - " + e.getMessage());
+            generalErrors.add("Error extracting FHIRBASE - " + e.toString());
             return null;
         }
         return resourceRef;
@@ -863,7 +863,9 @@ public class AnalysisReport {
             try {
                 buildRelated(new ResourceWrapper(domainResource));
             } catch (Throwable t) {
-                generalErrors.add("Do not know how to load DomainResource " + domainResource.getClass().getName() + " - " + t.getMessage());
+                String errorStr = "Do not know how to load DomainResource " + domainResource.getClass().getName() + " - " + t.toString();
+                generalErrors.add(errorStr);
+                log.warning(errorStr);
             }
         }  else if (baseResource instanceof Binary) {
             try {
@@ -1227,7 +1229,7 @@ public class AnalysisReport {
                 log.info("Read " + ref.asString());
                 wrapper = fhirClient.readResource(ref);
             } catch (Throwable e) {
-                generalErrors.add(e.getMessage());
+                generalErrors.add(e.toString());
                 if (contextResourceBundle == null)
                     return null;
                 wrapper = new ResourceWrapper(ref).setContext((Bundle)contextResourceBundle.getResource());
