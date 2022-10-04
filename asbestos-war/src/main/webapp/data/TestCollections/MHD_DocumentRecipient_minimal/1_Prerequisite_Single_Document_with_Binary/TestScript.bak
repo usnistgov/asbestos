@@ -1,0 +1,250 @@
+<TestScript xmlns="http://hl7.org/fhir">
+    <fixture id="submittedDocRef">
+        <autocreate value="false"/>
+        <autodelete value="false"/>
+        <extension url="urn:subFixture">
+            <extension url="urn:fhirPath">
+                <valueString value="Bundle.entry[0]"/>
+            </extension>
+            <extension url="urn:sourceId">
+                <valueString value="pdb-bundle"/>
+            </extension>
+        </extension>
+    </fixture>
+    <fixture id="patient_bundle">
+        <!--
+           This patient comes out of the test Patient cache
+        -->
+        <autocreate value="false"/>
+        <autodelete value="false"/>
+        <resource>
+            <reference value="Patient/William_EXTRA-ONE"/>
+        </resource>
+    </fixture>
+    <variable>
+        <name value="DocRefUrl"/>
+        <expression value="Bundle.entry[0].response.location"/>
+        <sourceId value="pdb-response"/>
+    </variable>
+    <variable>  <!-- referenced in pdb -->
+        <name value="requestPatientRef"/>
+        <expression value="Bundle.entry.fullUrl"/>
+        <sourceId value="patient_bundle"/>
+    </variable>
+    <variable>
+    	<name value="patientResourceId"/>
+    	<expression value="Bundle.entry.fullUrl"/>
+        <sourceId value="patient_bundle"/>
+    </variable>
+<!--    <variable>-->
+<!--        <name value="readbackPatientId"/>-->
+<!--        <expression value="Patient.identifier.value"/>-->
+<!--        <sourceId value="read-back"/>-->
+<!--    </variable>-->
+    <variable>
+        <name value="requestEntryCount"/>
+        <expression value="Bundle.entry.count()"/>
+        <sourceId value="pdb-bundle"/>
+    </variable>
+    <variable>
+        <name value="manifestMasterIdentifier"/>
+        <expression value="Bundle.entry.select(resource as DocumentManifest).masterIdentifier.value"/>
+        <sourceId value="pdb-bundle"/>
+    </variable>
+    <variable>
+        <name value="pdbManifestStatus"/>
+        <expression value="Bundle.entry.select(resource as DocumentManifest).status.value"/>
+        <sourceId value="pdb-bundle"/>
+    </variable>
+    <variable>
+        <name value="referenceMasterIdentifier"/>
+        <expression value="Bundle.entry.select(resource as DocumentReference).masterIdentifier.value"/>
+        <sourceId value="pdb-bundle"/>
+    </variable>
+    <variable>
+        <name value="pdbReferenceStatus"/>
+        <expression value="Bundle.entry.select(resource as DocumentReference).status.value"/>
+        <sourceId value="pdb-bundle"/>
+    </variable>
+    <variable>
+        <name value="patientIdentifier"/>
+        <defaultValue value="Bundle.entry.select(resource as Patient).identifier[0]"/>
+    </variable>
+    <variable>
+        <name value="patientIdentifierSearchParamValue"/>
+        <expression value="${patientIdentifier}.system.value + '|' + ${patientIdentifier}.value.value"/>
+        <sourceId value="patient_bundle"/>
+    </variable>
+    <variable>
+        <name value="isComprehensiveMetadataExpected"/>
+        <defaultValue value="false"/>
+    </variable>
+
+    <setup>
+        <modifierExtension url="urn:noErrors"/>
+        <action>
+            <operation>
+                <description value="Get fixture string"/>
+                <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
+                    <extension url="component">
+                        <valueString value="../../Library/GetFixtureString.xml"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="'3'"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="'?fixtureId=pdb'"/>
+                    </extension>
+                    <extension url="urn:fixture-out">
+                        <valueString value="pdb-bundle"/>
+                    </extension>
+                </modifierExtension>
+            </operation>
+        </action>
+    </setup>
+    <test>
+        <modifierExtension url="urn:noErrors"/>
+        <description value="Submit."/>
+        <action>
+            <operation>
+                <description value="Submit Provide Document Bundle to MHD Document Recipient."/>
+                <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
+                    <extension url="component">
+                        <valueString value="../../Library/SendPDB.xml"/>
+                    </extension>
+                    <extension url="urn:fixture-in">
+                        <valueString  value="pdb-bundle"/>
+                    </extension>
+                    <extension url="urn:variable-in-no-translation">
+                        <valueString value="patientResourceId"/>
+                    </extension>
+                    <extension url="urn:fixture-out">
+                        <valueString value="pdb-response"/>
+                    </extension>
+                </modifierExtension>
+            </operation>
+        </action>
+    </test>
+    <test>
+        <description value="PDB Validations."/>
+        <action>
+            <operation>
+                <description value="Module usage description"/>
+                <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
+                    <extension url="component">
+                        <valueString value="../../Library/AggregateModule/MHDBundleEvalAggregateResult.xml"/>
+                    </extension>
+                    <extension url="urn:fixture-in">
+                        <valueString value="pdb-bundle"/>
+                    </extension>
+                    <extension url="urn:fixture-in">
+                        <valueString value="pdb-response"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="isComprehensiveMetadataExpected"/>
+                    </extension>
+                </modifierExtension>
+            </operation>
+        </action>
+    </test>
+    <test>
+      <modifierExtension url="urn:noErrors"/>
+        <description value="Read back the DocumentReference and validate."/>
+        <action>
+            <operation>
+                <description value="Read back the DocumentReference and validate."/>
+                <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
+                    <extension url="component">
+                        <valueString value="../../Library/ReadValidateMinDocRef.xml"/>
+                    </extension>
+                    <extension url="urn:fixture-in">
+                        <valueString  value="submittedDocRef"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="DocRefUrl"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="patientResourceId"/>
+                    </extension>
+                </modifierExtension>
+            </operation>
+        </action>
+    </test>
+    <test>
+        <modifierExtension url="urn:noErrors"/>
+        <description value="DocumentResponder base address exists."/>
+        <action>
+            <operation>
+                <description value="Extract the base address from the PDB response location."/>
+                <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
+                    <extension url="component">
+                        <valueString value="../../Library/VerifyDocumentResponderBaseAddress.xml"/>
+                    </extension>
+                    <extension url="urn:fixture-in">
+                        <valueString  value="pdb-response"/>
+                    </extension>
+                    <extension url="urn:variable-out">
+                        <valueString value="docRespBaseAddress"/>
+                    </extension>
+                </modifierExtension>
+            </operation>
+        </action>
+    </test>
+    <test>
+        <description value="Search DocumentManifest."/>
+        <action>
+            <operation>
+                <description value="Verify update to server."/>
+                <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
+                    <extension url="component">
+                        <valueString value="../../Library/SearchDocumentManifest.xml"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString  value="manifestMasterIdentifier"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="pdbManifestStatus"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="patientIdentifierSearchParamValue"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="docRespBaseAddress"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="'1'"/>
+                    </extension>
+                </modifierExtension>
+            </operation>
+        </action>
+    </test>
+    <test>
+        <description value="Search DocumentReference."/>
+        <action>
+            <operation>
+                <description value="Module call: Verify update to server."/>
+                <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
+                    <extension url="component">
+                        <valueString value="../../Library/SDR_SearchResponse.xml"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="referenceMasterIdentifier"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="pdbReferenceStatus"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="patientIdentifierSearchParamValue"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="docRespBaseAddress"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="'1'"/>
+                    </extension>
+                </modifierExtension>
+            </operation>
+        </action>
+    </test>
+
+</TestScript>
