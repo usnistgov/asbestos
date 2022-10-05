@@ -71,7 +71,7 @@
                 it from starting up a Tomcat which would potentially take up the port as defined by the xdsToolkitHttpPort. In other words, if Tomcat does not start in XdsToolkit then the xdsToolkitHttpPort is not used.
                 -->
                 <hapiFhirHttpPort>7080</hapiFhirHttpPort>
-                <fhirValidationServer>http://localhost:7080/fhir/fhir</fhirValidationServer>
+                <fhirValidationServer>http://localhost:7080/fhir</fhirValidationServer> <!-- FHIR base without the ending slash -->
                 <fhirToolkitHttpPort>9760</fhirToolkitHttpPort>
                 <fhirToolkitTlsPort>9443</fhirToolkitTlsPort>
                 <xdsToolkitHttpPort>8080</xdsToolkitHttpPort>
