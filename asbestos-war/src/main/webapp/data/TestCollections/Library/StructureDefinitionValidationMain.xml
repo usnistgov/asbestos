@@ -1,0 +1,42 @@
+<TestScript xmlns="http://hl7.org/fhir">
+    <modifierExtension url="urn:module">
+        <extension url="urn:fixture-in">
+            <valueString value="theResource"/>
+        </extension>
+        <extension url="urn:variable-in">
+            <valueString value="validationServer"/>
+        </extension>
+        <extension url="urn:variable-in">
+            <valueString value="profile"/>
+        </extension>
+        <extension url="urn:variable-in">
+            <valueString value="resourceType"/>
+        </extension>
+        <extension url="urn:variable-in">
+            <valueString value="mhdVersion"/>
+        </extension>
+
+    </modifierExtension>
+
+    <id value="StructureDefinitionValidationMain"/>
+    <name value="StructureDefinitionValidationMain"/>
+    <description value="This TestScript is a bridge that links the parent TestScript to the imported module component."/>
+
+
+    <test>
+        <description value="Structure definition based resource validation."/>
+        <action>
+            <operation>
+                <description value="Validation call."/>
+                <label value="validate"/>
+                <type>
+                    <system value="https://hl7.org/fhir/codesystem-testscript-operation-codes.html"/>
+                    <code value="validate"/>
+                </type>
+                <url value="${validationServer}/${resourceType}/$validate?profile=${profile}${mhdVersion}"/>
+                <sourceId value="theResource"/>
+                <responseId value="validationResponse"/>
+            </operation>
+        </action>
+    </test>
+</TestScript>
