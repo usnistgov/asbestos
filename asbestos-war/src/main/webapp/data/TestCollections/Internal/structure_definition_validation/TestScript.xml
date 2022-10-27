@@ -24,10 +24,6 @@
         <name value="responseResourceProfile"/>
         <defaultValue value=""/>
     </variable>
-    <variable>
-        <name value="mhdVersion"/>
-        <defaultValue value="MHDv3.x"/>
-    </variable>
 
     <test>
         <description value="Request - Structure definition based resource validation."/>
@@ -45,10 +41,7 @@
                         <valueString value="validationServer"/>
                     </extension>
                     <extension url="urn:variable-in">
-                        <valueString value="requestResourceProfile"/>
-                    </extension>
-                    <extension url="urn:variable-in">
-                        <valueString value="mhdVersion"/>
+                        <valueString value="profile"/>
                     </extension>
                 </modifierExtension>
             </operation>
