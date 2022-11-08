@@ -7,20 +7,29 @@
             <valueString value="validationServer"/>
         </extension>
         <extension url="urn:variable-in">
-            <valueString value="profile"/>
-        </extension>
-        <extension url="urn:variable-in">
             <valueString value="resourceType"/>
         </extension>
         <extension url="urn:variable-in">
-            <valueString value="mhdVersion"/>
+            <valueString value="profile"/>
         </extension>
-
     </modifierExtension>
 
     <id value="StructureDefinitionValidationMain"/>
     <name value="StructureDefinitionValidationMain"/>
     <description value="This TestScript is a bridge that links the parent TestScript to the imported module component."/>
+
+    <variable>
+        <name value="validationServer"/>
+        <defaultValue value="@directModuleCallValuePlaceholder"/>
+    </variable>
+    <variable>
+        <name value="resourceType"/>
+        <defaultValue value="@directModuleCallValuePlaceholder"/>
+    </variable>
+    <variable>
+        <name value="profile"/>
+        <defaultValue value="@directModuleCallValuePlaceholder"/>
+    </variable>
 
 
     <test>
@@ -33,7 +42,7 @@
                     <system value="https://hl7.org/fhir/codesystem-testscript-operation-codes.html"/>
                     <code value="validate"/>
                 </type>
-                <url value="${validationServer}/${resourceType}/$validate?profile=${profile}${mhdVersion}"/>
+                <url value="${validationServer}/${resourceType}/$validate?profile=${profile}"/>
                 <sourceId value="theResource"/>
                 <responseId value="validationResponse"/>
             </operation>
