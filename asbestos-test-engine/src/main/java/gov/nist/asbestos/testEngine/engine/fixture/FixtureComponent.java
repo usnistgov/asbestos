@@ -137,7 +137,7 @@ public class FixtureComponent {
         }
 
         if (!optWrapper.isPresent())
-            throw new Error("Static Fixture " + staticRef + " cannot be loaded. Check " + getTestCollectionId() + "/" + getTestId());
+            throw new Error("Static Fixture " + staticRef + " cannot be loaded. Check " + getTestCollectionId() + "/" + getTestId() + ".");
         resourceWrapper = optWrapper.get();
     }
 
