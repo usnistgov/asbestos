@@ -20,15 +20,15 @@
 
     <variable>
         <name value="validationServer"/>
-        <defaultValue value="@directModuleCallValuePlaceholder"/>
+        <defaultValue value="@inspectorModeTsModuleCallValuePlaceholder"/>
     </variable>
     <variable>
         <name value="resourceType"/>
-        <defaultValue value="@directModuleCallValuePlaceholder"/>
+        <defaultValue value="@inspectorModeTsModuleCallValuePlaceholder"/>
     </variable>
     <variable>
         <name value="profile"/>
-        <defaultValue value="@directModuleCallValuePlaceholder"/>
+        <defaultValue value="@inspectorModeTsModuleCallValuePlaceholder"/>
     </variable>
 
 

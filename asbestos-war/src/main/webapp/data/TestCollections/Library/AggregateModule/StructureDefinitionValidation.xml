@@ -12,10 +12,12 @@
     <name value="StructureDefinitionValidation"/>
     <description value="This TestScript is a bridge that links the parent TestScript to the imported module component."/>
 
-    <variable>
-        <name value="scriptMHDv3.x"/>
-        <defaultValue value="../../Internal/structure_definition_validation/TestScript.xml"/>
-    </variable>
+<!--
+MHD v3.x does not have an official FHIR based IG.
+See https://profiles.ihe.net/ITI/MHD/history.html.
+
+This module should not be used or called by any of the MHDv3.x Test Collection TestScripts.
+-->
     <variable>
         <name value="scriptMHDv4"/>
         <defaultValue value="../../MHDv4_Internal/structure_definition_validation/TestScript.xml"/>

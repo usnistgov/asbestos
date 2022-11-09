@@ -133,6 +133,7 @@
             </operation>
         </action>
     </test>
+    <!-- There is no IG for the MHDv3.x profile, because it was a PDF-only profile. -->
     <test>
         <description value="PDB Validations."/>
         <action>

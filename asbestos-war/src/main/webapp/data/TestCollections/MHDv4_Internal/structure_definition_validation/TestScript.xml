@@ -8,12 +8,16 @@
         </extension>
     </modifierExtension>
 
-    <id value="StructureDefinitionValidationv3x"/>
-    <name value="StructureDefinitionValidationv3x"/>
+    <id value="MHDv4StructureDefinitionValidation"/>
+    <name value="MHDv4StructureDefinitionValidation"/>
     <description value="This TestScript is a bridge that links the parent TestScript to the imported module component."/>
 
     <variable>
         <name value="validationServer"/>
+        <defaultValue value=""/>
+    </variable>
+    <variable>
+        <name value="resourceType"/>
         <defaultValue value=""/>
     </variable>
     <variable>
@@ -41,7 +45,36 @@
                         <valueString value="validationServer"/>
                     </extension>
                     <extension url="urn:variable-in">
-                        <valueString value="profile"/>
+                        <valueString value="resourceType"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="requestResourceProfile"/>
+                    </extension>
+                </modifierExtension>
+            </operation>
+        </action>
+    </test>
+
+    <test>
+        <description value="Response - Structure definition based resource validation."/>
+        <action>
+            <operation>
+                <description value="Test action operation is analyzed using assertions."/>
+                <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
+                    <extension url="component">
+                        <valueString value="../../Library/StructureDefinitionValidationMain.xml"/>
+                    </extension>
+                    <extension url="urn:fixture-in">
+                        <valueString value="response"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="validationServer"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="resourceType"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="responseResourceProfile"/>
                     </extension>
                 </modifierExtension>
             </operation>
