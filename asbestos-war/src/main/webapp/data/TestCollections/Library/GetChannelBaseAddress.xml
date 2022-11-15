@@ -1,0 +1,67 @@
+<TestScript  xmlns="http://hl7.org/fhir">
+    <modifierExtension url="urn:module">
+        <extension url="urn:variable-in">
+            <valueString value="expectedBundleEntryCount"/>
+        </extension>
+        <extension url="urn:variable-in">
+            <valueString value="fixtureStringParams"/>
+        </extension>
+        <extension url="urn:fixture-out">
+            <valueString value="pdb-bundle"/>
+        </extension>
+    </modifierExtension>
+
+    <url value=""/>
+    <name value="GetFixtureString"/>
+    <status value="active"/>
+    <description value="Get a fixture that was built using placeholders."/>
+
+    <test>
+        <modifierExtension url="urn:noErrors"/>
+        <description value="Make an internal call to get a test fixture."/>
+        <action>
+            <operation>
+                <description value="replaces placeholders."/>
+                <type>
+                    <system value="https://github.com/usnistgov/asbestos/wiki/Testscript-Operation-Codes"/>
+                    <code value="getFixtureString"/>
+                </type>
+                <contentType value="json"/>
+                <url value="${fixtureStringParams}"/>
+                <responseId value="pdb-bundle"/>
+            </operation>
+        </action>
+        <action>
+            <assert>
+                <description value="Status is 200."/>
+                <sourceId value="pdb-bundle"/>
+                <response value="okay"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
+            <assert>
+                <description value="returns Bundle."/>
+                <resource value="Bundle"/>
+                <sourceId value="pdb-bundle"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
+            <assert>
+                <description value="Bundle count is 1."/>
+                <compareToSourceId value="pdb-bundle"/>
+                <compareToSourceExpression value="Bundle.count() = 1"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
+            <assert>
+                <description value="Bundle entry count matches expected number."/>
+                <compareToSourceId value="pdb-bundle"/>
+                <compareToSourceExpression value="Bundle.entry.count() = ${expectedBundleEntryCount}"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+    </test>
+</TestScript>

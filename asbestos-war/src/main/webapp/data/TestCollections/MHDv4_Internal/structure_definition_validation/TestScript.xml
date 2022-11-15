@@ -29,6 +29,28 @@
         <defaultValue value=""/>
     </variable>
 
+
+    <setup>
+        <modifierExtension url="urn:noErrors"/>
+        <action>
+            <operation>
+                <description value="Get validation server base address"/>
+                <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
+                    <extension url="component">
+                        <valueString value="../Library/Get?.xml"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="?"/>
+                    </extension>
+                    <extension url="urn:fixture-out">
+                        <valueString value="?"/>
+                    </extension>
+                </modifierExtension>
+            </operation>
+        </action>
+    </setup>
+
+
     <test>
         <description value="Request - Structure definition based resource validation."/>
         <action>
