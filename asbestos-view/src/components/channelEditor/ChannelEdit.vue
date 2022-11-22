@@ -110,6 +110,23 @@
         </div>
         <div v-else class="grid-item">{{ channel.xdsSiteName }}</div>
 
+        <label class="grid-name">Enable Channel Event Logging?</label>
+        <div v-if="isEditMode" class="grid-item">
+          <input type="radio" id="enableChannelEventLoggingRadioInput" value="true" v-model="channel.enableChannelEventLogging">
+          <label for="enableChannelEventLoggingRadioInput">Yes</label>
+          <input type="radio" id="logCapStmt" value="false" v-model="channel.enableChannelEventLogging">
+          <label for="logCapStmt">No</label>
+        </div>
+        <div v-else class="grid-item">
+          <div v-if="channel.enableChannelEventLogging">
+            Yes
+          </div>
+          <div v-else>
+            No
+          </div>
+        </div>
+
+        <!--
         <label v-if="channel.channelType === 'mhd'" class="grid-name">Log MHD Capability Statement Request?</label>
         <div v-if="channel.channelType === 'mhd' && isEditMode" class="grid-item">
           <input type="radio" id="noLogCapStmt" value="false" v-model="channel.logMhdCapabilityStatementRequest">
@@ -125,6 +142,7 @@
             No
           </div>
         </div>
+        -->
 
         <label class="grid-name">MHD Version Support Option</label>
         <div v-if="isEditMode" class="grid-item" >

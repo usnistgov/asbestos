@@ -13,8 +13,6 @@ import java.util.logging.Logger;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.Arrays;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 // 0 - empty
 // 1 - app context
 // 2  "rw" or "accessGuard"
@@ -50,10 +48,6 @@ public class CreateChannelRequest {
             log.fine(()->"CREATE Channel " + rawRequest);
         }
         ChannelConfig channelConfig = ChannelConfigFactory.convert(rawRequest);
-
-        if ("fhir".equalsIgnoreCase(channelConfig.getChannelType()) && channelConfig.isLogMhdCapabilityStatementRequest()) {
-            channelConfig.setLogMhdCapabilityStatementRequest(false);
-        }
 
 
         boolean isInvalidChannelName = ! SimStore.isValidCharsPattern().matcher(channelConfig.asChannelId()).matches()

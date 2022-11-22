@@ -25,7 +25,7 @@ public class ChannelConfig {
     private String fhirBase = null;   // points to fhir server is channel type if FHIR
     private String xdsSiteName;       // point to XDS server if channel type is MHD
     private boolean writeLocked;
-    private boolean logMhdCapabilityStatementRequest;
+    private boolean enableChannelEventLogging;
     /**
      * When more than mhdVersion is specified, then the profile canonical must be unique. Otherwise, only single mhdVersion should be specified.
      */
@@ -173,13 +173,13 @@ public class ChannelConfig {
                 Objects.equals(fhirBase, that.fhirBase) &&
                 Objects.equals(xdsSiteName, that.xdsSiteName) &&
                 Objects.equals(writeLocked, that.writeLocked) &&
-                Objects.equals(logMhdCapabilityStatementRequest, that.logMhdCapabilityStatementRequest) &&
+                Objects.equals(enableChannelEventLogging, that.enableChannelEventLogging) &&
                 Arrays.equals(mhdVersions, that.mhdVersions);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(environment, testSession, channelName, actorType, channelType, includeValidation, fhirBase, xdsSiteName, writeLocked, logMhdCapabilityStatementRequest)
+        return Objects.hash(environment, testSession, channelName, actorType, channelType, includeValidation, fhirBase, xdsSiteName, writeLocked, enableChannelEventLogging)
                 + Arrays.deepHashCode(mhdVersions);
     }
 
@@ -209,12 +209,12 @@ public class ChannelConfig {
         return this;
     }
 
-    public boolean isLogMhdCapabilityStatementRequest() {
-        return logMhdCapabilityStatementRequest;
+    public boolean isEnableChannelEventLogging() {
+        return enableChannelEventLogging;
     }
 
-    public ChannelConfig setLogMhdCapabilityStatementRequest(boolean logMhdCapabilityStatementRequest) {
-        this.logMhdCapabilityStatementRequest = logMhdCapabilityStatementRequest;
+    public ChannelConfig setEnableChannelEventLogging(boolean enableChannelEventLogging) {
+        this.enableChannelEventLogging = enableChannelEventLogging;
         return this;
     }
 

@@ -16,7 +16,6 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -53,7 +52,7 @@ public class CapabilityStatementIT {
                 .setActorType("fhir")
                 .setChannelType("mhd")
                 .setXdsSiteName(FhirToolkitCapabilityStatement.XDS_COMPREHENSIVE_META_SIM)
-                .setLogMhdCapabilityStatementRequest(csloggingEnabled);
+                .setEnableChannelEventLogging(csloggingEnabled);
                 channelConfig.setMhdVersions(mhdVersions);
 
         String channelLocation = "http://localhost:"+ proxyPort + "/asbestos/rw/channel/default__" + channelName;
