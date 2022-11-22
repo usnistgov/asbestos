@@ -43,6 +43,7 @@
                     <code value="validate"/>
                 </type>
                 <url value="${validationServer}/${resourceType}/$validate?profile=${profile}"/>
+                <method value="post"/>
                 <sourceId value="theResource"/>
                 <responseId value="validationResponse"/>
             </operation>

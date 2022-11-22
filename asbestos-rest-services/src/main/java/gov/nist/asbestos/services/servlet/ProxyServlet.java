@@ -197,7 +197,7 @@ public class ProxyServlet extends HttpServlet {
 
             // interaction between proxy and target service
             ITask backSideTask = clientTask.newTask();
-            backSideTask.putDescription("PNR to target");
+            backSideTask.putDescription("POST to target");
 
             String proxyBase = new Ref(uri).getBase().withHostPort(channelConfig.getScheme(), hostport).toString();
             String fhirBase = new Ref(requestIn.getRequestHeaders().getPathInfo()).getBase().toString();
