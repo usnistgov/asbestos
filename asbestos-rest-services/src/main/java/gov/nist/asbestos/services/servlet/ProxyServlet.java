@@ -7,6 +7,7 @@ import gov.nist.asbestos.asbestosProxy.channel.XdsOnFhirChannelBuilder;
 import gov.nist.asbestos.asbestosProxy.channels.capabilitystatement.FhirToolkitCapabilityStatement;
 import gov.nist.asbestos.client.Base.EC;
 import gov.nist.asbestos.client.Base.ParserBase;
+import gov.nist.asbestos.client.Base.Returns;
 import gov.nist.asbestos.client.channel.BaseChannel;
 import gov.nist.asbestos.client.channel.ChannelConfig;
 import gov.nist.asbestos.client.channel.ChannelConfigFactory;
@@ -291,14 +292,14 @@ public class ProxyServlet extends HttpServlet {
         SimStore simStore = getSimStore(req, resp, uri, verb);
         String channelType = simStore.getChannelConfig().getChannelType();
 
-        // Only the MHD capability statement
+        // Handle the MHD channel capability statement request
         if ("mhd".equals(channelType)) {
             try {
                 Optional<URI> proxyBaseURI = getProxyBase(uri);
                  if (proxyBaseURI.isPresent()) {
                      Headers inHeaders = Common.getRequestHeaders(req, verb);
                     if (FhirToolkitCapabilityStatement.isCapabilityStatementRequest(proxyBaseURI.get(), inHeaders.getPathInfo())) {
-                        doGetCapabilityStatement(req, resp, simStore, uri, verb, inHeaders, simStore.getChannelConfig().asChannelId());
+                        getMhdCapabilityStatement(req, resp, simStore, uri, verb, inHeaders, simStore.getChannelConfig().asChannelId());
                         return; // EXIT
                     }
                 }
@@ -311,7 +312,7 @@ public class ProxyServlet extends HttpServlet {
         doGetOrDelete(req, resp, simStore, uri, verb);
     }
 
-    private void doGetCapabilityStatement(HttpServletRequest req, HttpServletResponse resp, SimStore simStore, URI uri, Verb verb, Headers inHeaders, String channelId) {
+    private void getMhdCapabilityStatement(HttpServletRequest req, HttpServletResponse resp, SimStore simStore, URI uri, Verb verb, Headers inHeaders, String channelId) {
         if (simStore == null) return;
 
         ChannelConfig channelConfig = simStore.getChannelConfig();
@@ -360,30 +361,42 @@ public class ProxyServlet extends HttpServlet {
     private void doGetOrDelete(HttpServletRequest req, HttpServletResponse resp, SimStore simStore, URI uri, Verb verb)  {
         if (simStore == null) return;
 
-        Event event = simStore.newEvent();
-        ITask clientTask = event.getClientTask();
-        Headers inHeaders = Common.getRequestHeaders(req, verb);
-        String hostport = inHeaders.getValue("host");
-        if (hostport == null || hostport.equals("")) {
-            hostport = "localhost:8080";
-            log.info("hostport is null or empty, using default: " + hostport);
-        }
-
-        inHeaders.add(new Header("x-client-addr", req.getRemoteAddr()));
-
-        boolean isSearch = !new Ref(uri).hasId();
-
+        Headers inHeaders = null;
+        ITask clientTask = null;
         try {
+            inHeaders = Common.getRequestHeaders(req, verb);
+            if (inHeaders == null) {
+                Returns.returnOperationOutcome(resp,
+                        OperationOutcome.IssueSeverity.FATAL,
+                        OperationOutcome.IssueType.INCOMPLETE,
+                        "inHeaders is null.");
+                return;
+            }
 
-            String channelType = simStore.getChannelConfig().getChannelType();
+            String hostport = inHeaders.getValue("host");
+            if (hostport == null || hostport.equals("")) {
+                hostport = "localhost:8080";
+                log.info("hostport is null or empty, using default: " + hostport);
+            }
+
+            inHeaders.add(new Header("x-client-addr", req.getRemoteAddr()));
+
+//            boolean isSearch = !new Ref(uri).hasId();
+
+            ChannelConfig channelConfig = simStore.getChannelConfig();
+            boolean isLoggingEnabled = channelConfig.isEnableChannelEventLogging();
+
+            clientTask = (isLoggingEnabled ? simStore.newEvent().getClientTask() : new NoOpTask());
+
+            String channelType = channelConfig.getChannelType();
             if (channelType == null)
                 throw new Exception("Sim " + simStore.getChannelId() + " does not define a Channel Type.");
             IChannelBuilder channelBuilder = proxyMap.get(channelType);
-            BaseChannel channel = channelBuilder.build(simStore.getChannelConfig());
+            BaseChannel channel = channelBuilder.build(channelConfig);
 
             channel.setReturnFormatType(Format.resultContentType(inHeaders));
             channel.setHostport(hostport);
-            String proxyBase = simStore.getChannelConfig().getProxyURI().toString();
+            String proxyBase = channelConfig.getProxyURI().toString();
             channel.setProxyBase(proxyBase);
             channel.setTask(clientTask);
 
@@ -428,7 +441,7 @@ public class ProxyServlet extends HttpServlet {
             // transform backend service response for client
             if (requestOut.isSuccess()) {
                 // without hostport the Bundle searchset entry fullUrl starts with  "/asbestos/proxy" which is not absolute URL
-                Ref ref = new Ref(uri).withHostPort(simStore.getChannelConfig().getScheme(),channel.getHostport());
+                Ref ref = new Ref(uri).withHostPort(channelConfig.getScheme(),channel.getHostport());
                 String requestedType;
                 requestedType = ref.getResourceType();
                 HttpBase responseOut = transformResponse(backSideTask, requestOut, channel, hostport, requestedType, ref.toString());
@@ -442,7 +455,6 @@ public class ProxyServlet extends HttpServlet {
             resp.setStatus(resp.SC_OK);
         } catch (Throwable t) {
             respondWithError(req, resp, t, inHeaders, clientTask);
-            //resp.setStatus(resp.SC_INTERNAL_SERVER_ERROR);
         }
     }
 
