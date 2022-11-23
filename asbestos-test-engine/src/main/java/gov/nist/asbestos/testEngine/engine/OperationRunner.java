@@ -15,6 +15,7 @@ import org.hl7.fhir.r4.model.TestScript;
 import java.net.URI;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 
 public class OperationRunner {
     private String label;
@@ -293,12 +294,29 @@ public class OperationRunner {
                     where 'null' is a link to something like: https://fhirtoolkit.test:8082/session/default/channel/limited/collection/MHDv4_DocumentRecipient_minimal/test/null
                      */
                 }
-        } else if ("getFixtureString".equals(code)) {
+        } else if ("ftkInternalRequest".equals(code)) {
+            if (! op.hasRequestHeader()) {
+                reporter.reportError("ftkInternalRequest missing a requestHeader code.");
+                return;
+            }
+
+            final String ftkInternalCode = "x-ftkInternalOperationCode";
+            String ftkInternalRequestCode = null;
+            Optional<TestScript.SetupActionOperationRequestHeaderComponent> headerComponent =  op.getRequestHeader().stream()
+                    .filter(s -> s.hasField() && s.getField().equals("x-ftkInternalOperationCode")).findFirst();
+            if (headerComponent.isPresent()) {
+               ftkInternalRequestCode = headerComponent.get().getValue();
+            }
+            if (ftkInternalRequestCode == null) {
+                reporter.reportError(String.format("%s headerComponent not found.", ftkInternalCode));
+                return;
+            }
+            if ("ftkLoadFixture".equals(ftkInternalRequestCode)) {
             SetupActionSearch setupActionSearch = new SetupActionSearch(actionReference, fixtureMgr, isFollowedByAssert)
                     .setVal(val)
                     .setFhirClient(fhirClient)
                     .setSut(sut)
-                    .setType(String.format("%s.%s.search", type , code))
+                    .setType(String.format("%s.%s.%s.search", type, code, ftkInternalRequestCode))
                     .setTestReport(testReport);
             setupActionSearch
                     .setVal(val)
@@ -312,7 +330,7 @@ public class OperationRunner {
             setupActionSearch.setTestId(testId);
             String internalBasePath = ServiceProperties.getInstance().getPropertyOrThrow(ServicePropertiesEnum.FHIR_TOOLKIT_BASE)
                     .concat("/engine/")
-                    .concat(code)
+                    .concat(ftkInternalRequestCode)
                     .concat("/")
                     .concat(testEngine.getChannelId())
                     .concat("/")
@@ -332,6 +350,7 @@ public class OperationRunner {
                     where 'null' is a link to something like: https://fhirtoolkit.test:8082/session/default/channel/limited/collection/MHDv4_DocumentRecipient_minimal/test/null
                  */
             }
+        }
         } else {
             reporter.reportError("do not understand code.code of " + code);
         }

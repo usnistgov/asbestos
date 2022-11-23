@@ -36,7 +36,7 @@
 				<description value="Get fixture string"/>
 				<modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
 					<extension url="component">
-						<valueString value="../../Library/GetFixtureString.xml"/>
+						<valueString value="../../Library/FtkInternalRequest.xml"/>
 					</extension>
 					<extension url="urn:variable-in">
 						<valueString value="'1'"/>

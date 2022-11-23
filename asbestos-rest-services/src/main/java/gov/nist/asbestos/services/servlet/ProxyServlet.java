@@ -140,7 +140,10 @@ public class ProxyServlet extends HttpServlet {
         return hostport;
     }
 
-    // http://host:port/asbestos/proxy/testSession__channelId
+    /**
+     * Handles HTTP POST requests in the form of:
+     * http://host:port/asbestos/proxy/testSession__channelId
+      */
     @Override
     public void doPost(HttpServletRequest req, HttpServletResponse resp)  {
         URI uri = Common.buildURI(req);

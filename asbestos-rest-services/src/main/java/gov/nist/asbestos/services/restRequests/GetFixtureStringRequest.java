@@ -26,11 +26,11 @@ import java.util.regex.Pattern;
 // 0 - empty
 // 1 - web server application context
 // 2 - "engine"
-// 3 - "getFixtureString"
+// 3 - "ftkLoadFixture"
 // 4 - channelId
 // 5 - testCollectionId
 // 6 - testId
-// Example: https://fhirtoolkit.test:9743/asbestos/engine/getFixtureString/default__limited/MHD_DocumentRecipient_minimal/Missing_DocumentManifest
+// Example: https://fhirtoolkit.test:9743/asbestos/engine/ftkLoadFixture/default__limited/MHD_DocumentRecipient_minimal/Missing_DocumentManifest
 //  ?fixtureId=pdb&[baseTestCollection=&baseTestName=]&[fixtureElementPlaceholder=LocalFixtureReferenceFileName]&[resourceType=DirectoryName]
 // See @FixturePlaceholderParamEnum for complete search order reference.
 // fixtureId is searched for in the current test Collection, test name, Bundle,
@@ -57,13 +57,13 @@ public class GetFixtureStringRequest {
     public static boolean isRequest(Request request) {
         if (request.uriParts.size() == 7) {
             String uriPart3 = request.uriParts.get(3);
-            return "getFixtureString".equals(uriPart3);
+            return "ftkLoadFixture".equals(uriPart3);
         }
         return false;
     }
 
     public void run() throws IOException {
-        request.announce("GetFixtureStringRequest");
+        request.announce("FtkLoadFixture - GetFixtureStringRequest");
 
         // Read fixtureId File
         Map<String, String> paramsMap = request.getParametersMap();
@@ -84,7 +84,7 @@ public class GetFixtureStringRequest {
             }
         }
 
-        String fixtureString =  readFixtureString(testCollection, testName, fixtureId, resourceType);
+        String fixtureString =  loadFixture(testCollection, testName, fixtureId, resourceType);
         if (fixtureString == null) {
             // Try base Test Collection if the optional parameter is available
             String baseTestCollection = paramsMap.get(FixturePlaceholderParamEnum.baseTestCollection.name());
@@ -92,11 +92,11 @@ public class GetFixtureStringRequest {
                 String baseTestCollectionNameDecoded = URLDecoder.decode(baseTestCollection, StandardCharsets.UTF_8.toString());
                 String baseTestName = paramsMap.get(FixturePlaceholderParamEnum.baseTestName.name());
                 if (baseTestName == null) {
-                    fixtureString = readFixtureString(baseTestCollectionNameDecoded, testName, fixtureId, resourceType);
+                    fixtureString = loadFixture(baseTestCollectionNameDecoded, testName, fixtureId, resourceType);
                 } else if (isSafeFileName(baseTestName)) {
                     // Try baseTestName
                     String baseTestNameDecoded = URLDecoder.decode(baseTestName, StandardCharsets.UTF_8.toString());
-                    fixtureString = readFixtureString(baseTestCollectionNameDecoded, baseTestNameDecoded, fixtureId, resourceType);
+                    fixtureString = loadFixture(baseTestCollectionNameDecoded, baseTestNameDecoded, fixtureId, resourceType);
                 }
             }
         }
@@ -134,7 +134,7 @@ public class GetFixtureStringRequest {
 
     }
 
-    private String readFixtureString(String testCollection, String testName, String fixtureId, String resourceDirectory) throws IOException {
+    private String loadFixture(String testCollection, String testName, String fixtureId, String resourceDirectory) throws IOException {
         File testDir = request.ec.getTest(testCollection, testName);
         if (testDir == null || !testDir.exists() || !testDir.isDirectory()) {
             unexpectedMessage(String.format("TestId not found: %s/%s.", testCollection, testName));
@@ -226,7 +226,7 @@ public class GetFixtureStringRequest {
                 // Example  @{BundleMetaProfileElement} = BundleMetaProfileElement.xml
                 paramValue = placeholderName;
                 if (isSafeFileName(paramValue)) {
-                    placeholderFixtureString = readFixtureString(testCollection, testName, paramValue, null);
+                    placeholderFixtureString = loadFixture(testCollection, testName, paramValue, null);
                 } else {
                     log.severe(String.format("%s is not safe",paramValue));
                     return null;

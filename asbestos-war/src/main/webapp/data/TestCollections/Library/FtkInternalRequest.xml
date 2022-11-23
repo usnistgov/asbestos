@@ -12,22 +12,26 @@
     </modifierExtension>
 
     <url value=""/>
-    <name value="GetFixtureString"/>
+    <name value="FtkInternalRequest"/>
     <status value="active"/>
     <description value="Get a fixture that was built using placeholders."/>
 
     <test>
         <modifierExtension url="urn:noErrors"/>
-        <description value="Make an internal call to get a test fixture."/>
+        <description value="Make an internal call to load a test fixture."/>
         <action>
             <operation>
                 <description value="replaces placeholders."/>
                 <type>
                     <system value="https://github.com/usnistgov/asbestos/wiki/Testscript-Operation-Codes"/>
-                    <code value="getFixtureString"/>
+                    <code value="ftkInternalRequest"/>
                 </type>
                 <contentType value="json"/>
                 <url value="${fixtureStringParams}"/>
+                <requestHeader>
+                   <field value="x-ftkInternalOperationCode"/>
+                   <value value="ftkLoadFixture"/>
+                </requestHeader>
                 <responseId value="pdb-bundle"/>
             </operation>
         </action>
