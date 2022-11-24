@@ -120,13 +120,16 @@
                 <description value="Get fixture string"/>
                 <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
                     <extension url="component">
-                        <valueString value="../FtkInternalRequest.xml"/>
+                        <valueString value="FtkInternalRequest.xml"/>
                     </extension>
                     <extension url="urn:variable-in">
-                        <valueString value="expectedFixtureBundleEntryCount"/>
+                        <valueString value="'ftkLoadFixture'"/>
                     </extension>
                     <extension url="urn:variable-in">
                         <valueString value="getFixtureParams"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="expectedFixtureBundleEntryCount"/>
                     </extension>
                     <extension url="urn:fixture-out">
                         <valueString value="pdb-bundle"/>

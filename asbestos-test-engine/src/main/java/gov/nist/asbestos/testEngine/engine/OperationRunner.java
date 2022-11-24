@@ -300,10 +300,10 @@ public class OperationRunner {
                 return;
             }
 
-            final String ftkInternalCode = "x-ftkInternalOperationCode";
+            final String ftkInternalCode = "x-ftkInternalRequestCode";
             String ftkInternalRequestCode = null;
             Optional<TestScript.SetupActionOperationRequestHeaderComponent> headerComponent =  op.getRequestHeader().stream()
-                    .filter(s -> s.hasField() && s.getField().equals("x-ftkInternalOperationCode")).findFirst();
+                    .filter(s -> s.hasField() && s.getField().equals("x-ftkInternalRequestCode")).findFirst();
             if (headerComponent.isPresent()) {
                ftkInternalRequestCode = headerComponent.get().getValue();
             }

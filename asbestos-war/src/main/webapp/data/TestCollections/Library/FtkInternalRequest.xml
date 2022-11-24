@@ -1,10 +1,13 @@
 <TestScript  xmlns="http://hl7.org/fhir">
     <modifierExtension url="urn:module">
         <extension url="urn:variable-in">
-            <valueString value="expectedBundleEntryCount"/>
+            <valueString value="ftkInternalRequestCode"/>
         </extension>
         <extension url="urn:variable-in">
             <valueString value="fixtureStringParams"/>
+        </extension>
+        <extension url="urn:variable-in">
+            <valueString value="expectedBundleEntryCount"/>
         </extension>
         <extension url="urn:fixture-out">
             <valueString value="pdb-bundle"/>
@@ -14,14 +17,14 @@
     <url value=""/>
     <name value="FtkInternalRequest"/>
     <status value="active"/>
-    <description value="Get a fixture that was built using placeholders."/>
+    <description value="Internal request."/>
 
     <test>
         <modifierExtension url="urn:noErrors"/>
         <description value="Make an internal call to load a test fixture."/>
         <action>
             <operation>
-                <description value="replaces placeholders."/>
+                <description value="TestScript operation."/>
                 <type>
                     <system value="https://github.com/usnistgov/asbestos/wiki/Testscript-Operation-Codes"/>
                     <code value="ftkInternalRequest"/>
@@ -29,8 +32,8 @@
                 <contentType value="json"/>
                 <url value="${fixtureStringParams}"/>
                 <requestHeader>
-                   <field value="x-ftkInternalOperationCode"/>
-                   <value value="ftkLoadFixture"/>
+                   <field value="x-ftkInternalRequestCode"/>
+                   <value value="${ftkInternalRequestCode}"/>
                 </requestHeader>
                 <responseId value="pdb-bundle"/>
             </operation>

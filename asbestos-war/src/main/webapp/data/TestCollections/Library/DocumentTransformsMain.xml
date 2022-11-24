@@ -76,10 +76,13 @@
                         <valueString value="FtkInternalRequest.xml"/>
                     </extension>
                     <extension url="urn:variable-in">
-                        <valueString value="expectedFixtureBundleEntryCount"/>
+                        <valueString value="'ftkLoadFixture'"/>
                     </extension>
                     <extension url="urn:variable-in">
-                        <valueString value="getOriginalFixtureParams"/>
+                        <valueString value="getTransformsFixtureParams"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="expectedFixtureBundleEntryCount"/>
                     </extension>
                     <extension url="urn:fixture-out">
                         <valueString value="original-bundle"/>
@@ -95,10 +98,13 @@
                         <valueString value="FtkInternalRequest.xml"/>
                     </extension>
                     <extension url="urn:variable-in">
-                        <valueString value="expectedFixtureBundleEntryCount"/>
+                        <valueString value="'ftkLoadFixture'"/>
                     </extension>
                     <extension url="urn:variable-in">
                         <valueString value="getTransformsFixtureParams"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="expectedFixtureBundleEntryCount"/>
                     </extension>
                     <extension url="urn:fixture-out">
                         <valueString value="transforms-bundle"/>
