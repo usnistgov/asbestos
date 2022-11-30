@@ -4,13 +4,13 @@
             <valueString value="ftkInternalRequestCode"/>
         </extension>
         <extension url="urn:variable-in">
-            <valueString value="fixtureStringParams"/>
+            <valueString value="queryStringParams"/>
         </extension>
         <extension url="urn:variable-in">
             <valueString value="expectedBundleEntryCount"/>
         </extension>
         <extension url="urn:fixture-out">
-            <valueString value="pdb-bundle"/>
+            <valueString value="returns-bundle"/>
         </extension>
     </modifierExtension>
 
@@ -21,7 +21,7 @@
 
     <test>
         <modifierExtension url="urn:noErrors"/>
-        <description value="Make an internal call to load a test fixture."/>
+        <description value="Make an internal call to get a bundle that contain test fixture(s) or other test building resources."/>
         <action>
             <operation>
                 <description value="TestScript operation."/>
@@ -30,12 +30,12 @@
                     <code value="ftkInternalRequest"/>
                 </type>
                 <contentType value="json"/>
-                <url value="${fixtureStringParams}"/>
+                <url value="${queryStringParams}"/>
                 <requestHeader>
                    <field value="x-ftkInternalRequestCode"/>
                    <value value="${ftkInternalRequestCode}"/>
                 </requestHeader>
-                <responseId value="pdb-bundle"/>
+                <responseId value="returns-bundle"/>
             </operation>
         </action>
         <action>
@@ -50,14 +50,14 @@
             <assert>
                 <description value="returns Bundle."/>
                 <resource value="Bundle"/>
-                <sourceId value="pdb-bundle"/>
+                <sourceId value="returns-bundle"/>
                 <warningOnly value="false"/>
             </assert>
         </action>
         <action>
             <assert>
                 <description value="Bundle count is 1."/>
-                <compareToSourceId value="pdb-bundle"/>
+                <compareToSourceId value="returns-bundle"/>
                 <compareToSourceExpression value="Bundle.count() = 1"/>
                 <warningOnly value="false"/>
             </assert>
@@ -65,7 +65,7 @@
         <action>
             <assert>
                 <description value="Bundle entry count matches expected number."/>
-                <compareToSourceId value="pdb-bundle"/>
+                <compareToSourceId value="returns-bundle"/>
                 <compareToSourceExpression value="Bundle.entry.count() = ${expectedBundleEntryCount}"/>
                 <warningOnly value="false"/>
             </assert>

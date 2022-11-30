@@ -1,49 +1,61 @@
 <TestScript xmlns="http://hl7.org/fhir">
     <modifierExtension url="urn:module">
         <extension url="urn:fixture-in">
-            <valueString value="response"/>
-        </extension>
-        <extension url="urn:fixture-in">
             <valueString value="request"/>
         </extension>
-        <extension url="urn:variable-in">
-            <valueString value="requestResourceProfile"/>
-        </extension>
-        <extension url="urn:variable-in">
-            <valueString value="responseResourceType"/>
+        <extension url="urn:fixture-in">
+            <valueString value="response"/>
         </extension>
     </modifierExtension>
 
-
-    <!-- this testscript can be generic since profile is parameterized -->
 
     <id value="MHDv4StructureDefinitionValidation"/>
     <name value="MHDv4StructureDefinitionValidation"/>
     <description value="Validation server is the channel Id, which is composed of testSession and channelName, joined by two underscore characters. For example, testSession__channelName. This channel Id will be resolved to a FHIR base address through an internal operation module call."/>
 
     <variable>
-        <name value="validationServer"/>
+        <name value="validationServerChannelId"/>
         <defaultValue value="default__default"/>
     </variable>
     <variable>
-        <name value="resourceType"/>
+        <name value="validationServerFhirBase"/>
+        <expression value="${patientIdentifier}.system.value + '|' + ${patientIdentifier}.value.value"/>
+        <sourceId value="validationParamsDataBundle"/>
+    </variable>
+    <variable>
+        <name value="requestResourceType"/>
         <defaultValue value="Bundle"/>
+    </variable>
+    <variable>
+        <name value="responseResourceType"/>
+        <defaultValue value="Bundle"/>
+    </variable>
+    <variable>
+        <name value="requestValidationQueryParameters"/>
+        <defaultValue value="?profile=https://profiles.ihe.net/ITI/MHD/StructureDefinition/IHE.MHD.Comprehensive.ProvideBundle#4.0.1"/>
     </variable>
 
     <setup>
         <modifierExtension url="urn:noErrors"/>
         <action>
             <operation>
-                <description value="Get validation server base address"/>
+                <description value="Gets a bundle with the validation data resources in the same order as the request query parameters."/>
                 <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
                     <extension url="component">
-                        <valueString value="../Library/Get?.xml"/>
+                        <valueString value="../Library/FtkInternalRequest.xml"/>
                     </extension>
                     <extension url="urn:variable-in">
-                        <valueString value="?"/>
+                        <valueString value="'ftkGetIgValidationParamsDataBundle'"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="'?validationServerChannelId=${validationServerChannelId}&amp;requestResourceType=&amp;responseResourceType=&amp;'"/>
+                        <valueString value="'#{TestCollection.properties:Id}/1_Prerequisite_Single_Document_with_Binary'"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="'3'"/>
                     </extension>
                     <extension url="urn:fixture-out">
-                        <valueString value="?"/>
+                        <valueString value="validationParamsDataBundle"/>
                     </extension>
                 </modifierExtension>
             </operation>
@@ -64,13 +76,13 @@
                         <valueString value="request"/>
                     </extension>
                     <extension url="urn:variable-in">
-                        <valueString value="validationServer"/>
+                        <valueString value="validationServerFhirBase"/>
                     </extension>
                     <extension url="urn:variable-in">
-                        <valueString value="resourceType"/>
+                        <valueString value="requestResourceType"/>
                     </extension>
                     <extension url="urn:variable-in">
-                        <valueString value="requestResourceProfile"/>
+                        <valueString value="requestValidationQueryParameters"/>
                     </extension>
                 </modifierExtension>
             </operation>
@@ -94,10 +106,10 @@
                         <valueString value="validationServer"/>
                     </extension>
                     <extension url="urn:variable-in">
-                        <valueString value="resourceType"/>
+                        <valueString value="responseResourceType"/>
                     </extension>
                     <extension url="urn:variable-in">
-                        <valueString value="responseResourceProfile"/>
+                        <valueString value="''"/>
                     </extension>
                 </modifierExtension>
             </operation>

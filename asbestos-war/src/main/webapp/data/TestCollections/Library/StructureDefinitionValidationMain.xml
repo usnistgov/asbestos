@@ -10,13 +10,13 @@
             <valueString value="resourceType"/>
         </extension>
         <extension url="urn:variable-in">
-            <valueString value="profile"/>
+            <valueString value="queryParameters"/>
         </extension>
     </modifierExtension>
 
     <id value="StructureDefinitionValidationMain"/>
     <name value="StructureDefinitionValidationMain"/>
-    <description value="This TestScript has the following parameters: 1) Validation server is the fhir base, 2) resourceType is the resource type to validate, 3) profile is the canonical URL obtained from the IHE FHIR-based IG Message Semantics page, suffixed with an optional version number specified as #n.n.n where n is an integer equal to or greater than 0. If version is omitted, it implies latest version or the version automatically selected by the validation server. When this script is imported as a module, the variables with defaultValues are overridden with the input parameter extensions."/>
+    <description value="This TestScript has the following parameters: 1) Validation server is the FHIR base, 2) resourceType is the resource type to validate, 3) queryParameters is ?profile=value, where value is the canonical URL obtained from the IHE FHIR-based IG Message Semantics page, suffixed with an optional version number specified as #n.n.n where n is an integer equal to or greater than 0. If version is omitted, it implies latest version or the version automatically selected by the validation server. When this script is imported as a module, the variables with defaultValues are overridden with the input parameter extensions."/>
 
     <variable>
         <name value="validationServer"/>
@@ -27,7 +27,7 @@
         <defaultValue value="@inspectorModeTsModuleCallValuePlaceholder"/>
     </variable>
     <variable>
-        <name value="profile"/>
+        <name value="queryParameters"/>
         <defaultValue value="@inspectorModeTsModuleCallValuePlaceholder"/>
     </variable>
 
@@ -42,7 +42,7 @@
                     <system value="https://hl7.org/fhir/codesystem-testscript-operation-codes.html"/>
                     <code value="validate"/>
                 </type>
-                <url value="${validationServer}/${resourceType}/$validate?profile=${profile}"/>
+                <url value="${validationServer}/${resourceType}/$validate${queryParameters}"/>
                 <method value="post"/>
                 <sourceId value="theResource"/>
                 <responseId value="validationResponse"/>

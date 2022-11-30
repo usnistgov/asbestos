@@ -39,7 +39,7 @@ public class ComponentReference {
                     fixturesOut.add(p);
                 } else if (url.equals(ExtensionDef.variableIn)) {
                     Parameter p = new Parameter();
-                    p.setCallerName(AsbestosPropertyReference.getValue(propertiesMap, value));
+                    p.setCallerName(AsbestosPropertyReference.getValue(propertiesMap, value)); // When an interpolated variable is used, the final variable name must be defined
                     variablesIn.add(p);
                 } else if (url.equals(ExtensionDef.variableInNoTranslation)) {
                     Parameter p = new Parameter().setVariable(true);
