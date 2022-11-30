@@ -16,7 +16,7 @@
 
     <id value="StructureDefinitionValidationMain"/>
     <name value="StructureDefinitionValidationMain"/>
-    <description value="This TestScript is a bridge that links the parent TestScript to the imported module component."/>
+    <description value="This TestScript has the following parameters: 1) Validation server is the fhir base, 2) resourceType is the resource type to validate, 3) profile is the canonical URL obtained from the IHE FHIR-based IG Message Semantics page, suffixed with an optional version number specified as #n.n.n where n is an integer equal to or greater than 0. If version is omitted, it implies latest version or the version automatically selected by the validation server. When this script is imported as a module, the variables with defaultValues are overridden with the input parameter extensions."/>
 
     <variable>
         <name value="validationServer"/>
