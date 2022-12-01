@@ -15,6 +15,9 @@
         <extension url="urn:variable-in">
             <valueString value="expectedDocRefCount"/>
         </extension>
+        <extension url="urn:variable-in">
+            <valueString value="igValidationRequestQueryParameters"/>
+        </extension>
     </modifierExtension>
 
     <id value="MHDPDBSuccessAggregate"/>

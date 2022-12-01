@@ -6,6 +6,9 @@
         <extension url="urn:fixture-in">
             <valueString value="response"/>
         </extension>
+        <extension url="urn:variable-in">
+            <valueString value="validationRequestQueryParameters"/>
+        </extension>
     </modifierExtension>
 
 
@@ -32,7 +35,6 @@
     </variable>
     <variable>
         <name value="validationRequestQueryParameters"/>
-        <defaultValue value="?profile=https://profiles.ihe.net/ITI/MHD/StructureDefinition/IHE.MHD.Comprehensive.ProvideBundle#4.0.1"/>
     </variable>
 
     <setup>
