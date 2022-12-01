@@ -1,7 +1,7 @@
 <TestScript  xmlns="http://hl7.org/fhir">
     <modifierExtension url="urn:module">
         <extension url="urn:variable-in">
-            <valueString value="ftkInternalRequestCode"/>
+            <valueString value="internalFtkRequestCode"/>
         </extension>
         <extension url="urn:variable-in">
             <valueString value="queryStringParams"/>
@@ -15,7 +15,7 @@
     </modifierExtension>
 
     <url value=""/>
-    <name value="FtkInternalRequest"/>
+    <name value="InternalFtkRequest"/>
     <status value="active"/>
     <description value="Internal request."/>
 
@@ -27,13 +27,13 @@
                 <description value="TestScript operation."/>
                 <type>
                     <system value="https://github.com/usnistgov/asbestos/wiki/Testscript-Operation-Codes"/>
-                    <code value="ftkInternalRequest"/>
+                    <code value="internalFtkRequest"/>
                 </type>
                 <contentType value="json"/>
                 <url value="${queryStringParams}"/>
                 <requestHeader>
-                   <field value="x-ftkInternalRequestCode"/>
-                   <value value="${ftkInternalRequestCode}"/>
+                   <field value="x-internalFtkRequestCode"/>
+                   <value value="${internalFtkRequestCode}"/>
                 </requestHeader>
                 <responseId value="returns-bundle"/>
             </operation>

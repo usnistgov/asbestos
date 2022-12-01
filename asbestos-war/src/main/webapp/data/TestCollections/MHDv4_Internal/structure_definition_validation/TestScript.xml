@@ -19,7 +19,7 @@
     </variable>
     <variable>
         <name value="validationServerFhirBase"/>
-        <expression value="${patientIdentifier}.system.value + '|' + ${patientIdentifier}.value.value"/>
+        <expression value="Bundle.entry[0].resource.data.decode('base64')"/>
         <sourceId value="validationParamsDataBundle"/>
     </variable>
     <variable>
@@ -31,7 +31,7 @@
         <defaultValue value="Bundle"/>
     </variable>
     <variable>
-        <name value="requestValidationQueryParameters"/>
+        <name value="validationRequestQueryParameters"/>
         <defaultValue value="?profile=https://profiles.ihe.net/ITI/MHD/StructureDefinition/IHE.MHD.Comprehensive.ProvideBundle#4.0.1"/>
     </variable>
 
@@ -42,17 +42,17 @@
                 <description value="Gets a bundle with the validation data resources in the same order as the request query parameters."/>
                 <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
                     <extension url="component">
-                        <valueString value="../Library/FtkInternalRequest.xml"/>
+                        <valueString value="../Library/InternalFtkRequest.xml"/>
                     </extension>
                     <extension url="urn:variable-in">
-                        <valueString value="'ftkGetIgValidationParamsDataBundle'"/>
+                        <valueString value="'getFtkChannelFhirBase'"/>
                     </extension>
                     <extension url="urn:variable-in">
-                        <valueString value="'?validationServerChannelId=${validationServerChannelId}&amp;requestResourceType=&amp;responseResourceType=&amp;'"/>
+                        <valueString value="'?channelId=${validationServerChannelId}'"/>
                         <valueString value="'#{TestCollection.properties:Id}/1_Prerequisite_Single_Document_with_Binary'"/>
                     </extension>
                     <extension url="urn:variable-in">
-                        <valueString value="'3'"/>
+                        <valueString value="'1'"/>
                     </extension>
                     <extension url="urn:fixture-out">
                         <valueString value="validationParamsDataBundle"/>
@@ -82,7 +82,7 @@
                         <valueString value="requestResourceType"/>
                     </extension>
                     <extension url="urn:variable-in">
-                        <valueString value="requestValidationQueryParameters"/>
+                        <valueString value="validationRequestQueryParameters"/>
                     </extension>
                 </modifierExtension>
             </operation>

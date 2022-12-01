@@ -203,7 +203,7 @@ public class VariableMgr {
                 return externalVariables.get(variableName);
             } else {
             /*
-            Is this an anonymous variable in a TestScript Module reference call?
+            Is this an anonymous variable (coded as a string literal) in a TestScript Module component reference call?
              If there is no local variable defined, attempt the value as an evaluable expression assigned to an anonymous variable.
             If the expression yields an empty string, then it is a genuine error that the variable is an unreferenced variable error.
             Anonymous variables are only traceable in the TestReport if the Test is Passes, and shown in the Called Module: report section.
@@ -221,7 +221,7 @@ public class VariableMgr {
                 if (anonExpValue != null && !"".equals(anonExpValue)) {
                    return anonExpValue;
                 } else {
-                    String error = "Variable " + variableName + " is referenced but not defined";
+                    String error = "Variable " + variableName + " is referenced but not defined.";
                     if (errorAsValue)
                         return error;
                     reporter.reportError(error);

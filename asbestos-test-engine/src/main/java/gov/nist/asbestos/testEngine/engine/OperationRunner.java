@@ -300,7 +300,7 @@ public class OperationRunner {
                 return;
             }
 
-            final String ftkInternalCode = "x-ftkInternalRequestCode";
+            final String ftkInternalCode = "x-internalFtkRequestCode";
             String ftkInternalRequestCode = null;
             Optional<TestScript.SetupActionOperationRequestHeaderComponent> headerComponent =  op.getRequestHeader().stream()
                     .filter(s -> s.hasField() && s.getField().equals("x-ftkInternalRequestCode")).findFirst();
@@ -311,7 +311,7 @@ public class OperationRunner {
                 reporter.reportError(String.format("%s headerComponent not found.", ftkInternalCode));
                 return;
             }
-            if ("ftkLoadFixture".equals(ftkInternalRequestCode)) {
+            if ("loadFtkFixture".equals(ftkInternalRequestCode)) {
             SetupActionSearch setupActionSearch = new SetupActionSearch(actionReference, fixtureMgr, isFollowedByAssert)
                     .setVal(val)
                     .setFhirClient(fhirClient)
