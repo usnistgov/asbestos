@@ -33,7 +33,7 @@
         <defaultValue value="'${docRefLocation}'.substring(0,${indexOfdocRefInLocation})"/>
     </variable>
     <!--
-    When variables are referenced inside another variable, remember that only the fully interpolated variable will have to be evaluated by FHIRClient's evalForString against a resource.
+    When variables are referenced inside another variable, remember that only the fully interpolated variable will have to be evaluated by FHIRClient's evalForString against a resource. This is the final variable which composes all other variables, the final variable will be evaluated (all other variables are just substitutions into the final variable.)
     Care needs to be taken when coding up a FHIRPath this way.
     -->
     <variable>
