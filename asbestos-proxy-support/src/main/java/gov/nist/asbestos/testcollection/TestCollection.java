@@ -1,4 +1,4 @@
-package gov.nist.asbestos.services.servlet;
+package gov.nist.asbestos.testcollection;
 
 import java.util.List;
 

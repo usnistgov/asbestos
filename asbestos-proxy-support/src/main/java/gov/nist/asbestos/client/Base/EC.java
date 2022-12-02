@@ -59,7 +59,6 @@ public class EC {
     public static final String TRASH_CAN = "trashcan";
     public static final String TEST_COLLECTION_PROPERTIES = "TestCollection.properties";
     public static final String TEST_PROPERTIES = "Test.properties";
-    public static final String HIDDEN_KEY_NAME = "Hidden"; // TODO: make an enum
     public static final String DEFAULT_CHANNEL_NAME = "default";
     public static final String EXTERNAL_PATIENT_SERVER_CHANNEL_NAME = "external_patient";
     public static final SimId DEFAULT = new SimId(TestSession.DEFAULT_TEST_SESSION, DEFAULT_CHANNEL_NAME);

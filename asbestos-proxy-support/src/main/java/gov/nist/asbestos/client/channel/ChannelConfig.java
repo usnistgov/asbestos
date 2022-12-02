@@ -27,7 +27,7 @@ public class ChannelConfig {
     private boolean writeLocked;
     private boolean logMhdCapabilityStatementRequest;
     /**
-     * When more than mhdVersion is specified, then the profile canonical must be unique. Otherwise, only single mhdVersion should be specified.
+     * When more than mhdVersion is specified, then the canonical profile must be unique. Otherwise, only single mhdVersion should be specified.
      */
     private String[] mhdVersions;
     private transient String scheme;

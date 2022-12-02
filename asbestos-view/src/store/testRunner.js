@@ -66,10 +66,10 @@ export const testRunnerStore = {
                 }
             },
 
-            filterTestCollectionsMhdVersion: function(tcObjs, mhdVersions) {
-                if (mhdVersions !== null && (Array.isArray(mhdVersions) && mhdVersions.length > 0)) {
-                    // console.log(String(tcObjs.map(e=>e.mhdVersion)))
-                    return tcObjs.filter(e => e.mhdVersion.split(',').some(r => mhdVersions.includes(r.trim())) ).map(e => e.name)
+            filterTestCollectionsByFhirIgNames: function(tcObjs, fhirIgNames) {
+                if (fhirIgNames !== null && (Array.isArray(fhirIgNames) && fhirIgNames.length > 0)) {
+                    // console.log(String(tcObjs.map(e=>e.fhirIgName)))
+                    return tcObjs.filter(e => e.fhirIgName.split(',').some(r => fhirIgNames.includes(r.trim())) ).map(e => e.name)
                 }
                 // this filter does not apply if channel did not specify any mhdVersion in its channel config
                 // return all tcObjs with a user-friendly name
@@ -316,11 +316,11 @@ export const testRunnerStore = {
         isRunning: (state) => {
             return state.running
         },
-        clientTestCollectionNames: (state) => (mhdVersions) => {
-            return state.filterTestCollectionsMhdVersion(state.clientTestCollectionObjs, mhdVersions)
+        clientTestCollectionNames: (state) => (fhirIgNames) => {
+            return state.filterTestCollectionsByFhirIgNames(state.clientTestCollectionObjs, fhirIgNames)
         },
-        serverTestCollectionNames: (state) => (mhdVersions) => {
-            return state.filterTestCollectionsMhdVersion(state.serverTestCollectionObjs, mhdVersions)
+        serverTestCollectionNames: (state) => (fhirIgNames) => {
+            return state.filterTestCollectionsByFhirIgNames(state.serverTestCollectionObjs, fhirIgNames)
         },
         allServerTestCollectionNames: (state) => {
             return state.serverTestCollectionObjs.map(e => e.name)
