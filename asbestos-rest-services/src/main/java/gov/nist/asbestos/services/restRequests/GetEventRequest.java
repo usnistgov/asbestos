@@ -17,6 +17,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
 
+import static gov.nist.asbestos.client.client.Format.quickEscapeXml;
+
 // 0 - empty
 // 1 - app context  (asbestos)
 // 2 - "log"
@@ -140,7 +142,7 @@ public class GetEventRequest {
         b.append("<h3>Request</h3>");
         b.append("<pre>").append(uiTask.getRequestHeader()).append("</pre>");
         if (format != null && format == Format.XML) {
-            b.append("<pre>").append(quickEscape(uiTask.getRequestBody())).append("</pre>");
+            b.append("<pre>").append(quickEscapeXml(uiTask.getRequestBody())).append("</pre>");
         } else {
             b.append("<pre>").append(uiTask.getRequestBody()).append("</pre>");
         }
@@ -148,14 +150,11 @@ public class GetEventRequest {
         b.append("<h3>Response</h3>");
         b.append("<pre>").append(uiTask.getResponseHeader()).append("</pre>");
         if (format != null && format == Format.XML) {
-            b.append("<pre>").append(quickEscape(uiTask.getResponseBody())).append("</pre>");
+            b.append("<pre>").append(quickEscapeXml(uiTask.getResponseBody())).append("</pre>");
         } else {
             b.append("<pre>").append(uiTask.getResponseBody()).append("</pre>");
         }
     }
 
-    private static String quickEscape(String in) {
-        Objects.requireNonNull(in);
-        return in.replaceAll("<","&lt;");
-    }
+
 }

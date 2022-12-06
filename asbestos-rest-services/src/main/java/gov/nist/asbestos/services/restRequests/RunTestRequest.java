@@ -8,8 +8,8 @@ import gov.nist.asbestos.client.client.Format;
 import gov.nist.asbestos.client.channel.ChannelConfig;
 import gov.nist.asbestos.simapi.validation.Val;
 import gov.nist.asbestos.testEngine.engine.ModularEngine;
-import org.jetbrains.annotations.NotNull;
 
+import java.util.Objects;
 import java.util.logging.Logger;
 
 import java.io.File;
@@ -87,8 +87,8 @@ public class RunTestRequest {
         request.ok();
     }
 
-    @NotNull
     private File getPatientCacheDir(String channelId) {
+        Objects.requireNonNull(channelId);
         File patientCacheDir = request.ec.getTestLogCacheDir(channelId);
         patientCacheDir.mkdirs();
         return patientCacheDir;

@@ -12,10 +12,10 @@ import gov.nist.asbestos.simapi.simCommon.SimId;
 import gov.nist.asbestos.simapi.validation.Val;
 import gov.nist.asbestos.testEngine.engine.ModularEngine;
 import org.hl7.fhir.r4.model.TestReport;
-import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.net.URI;
+import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 // 0 - "debug-testscript"
@@ -116,8 +116,8 @@ public class DebugTestScriptRequest implements Runnable {
 
     }
 
-    @NotNull
     private File getPatientCacheDir(String channelId) {
+        Objects.requireNonNull(channelId);
         File patientCacheDir = request.ec.getTestLogCacheDir(channelId);
         patientCacheDir.mkdirs();
         return patientCacheDir;

@@ -5,6 +5,7 @@ import gov.nist.asbestos.http.headers.Headers;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public enum Format {
     JSON,
@@ -54,5 +55,10 @@ public enum Format {
 
     public static List<String> getFormats() {
         return formats;
+    }
+
+    public static String quickEscapeXml(String in) {
+        Objects.requireNonNull(in);
+        return in.replaceAll("<","&lt;");
     }
 }

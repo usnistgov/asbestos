@@ -1,4 +1,4 @@
-package gov.nist.asbestos.fixture;
+package gov.nist.asbestos.services.fixture;
 
 /**
  * Search order is (*if resourceType or Directory is unspecified, then Bundle, otherwise resourceDirectory instead of Bundle)

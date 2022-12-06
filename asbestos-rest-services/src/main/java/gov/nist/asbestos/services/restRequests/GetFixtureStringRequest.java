@@ -4,24 +4,18 @@ import gov.nist.asbestos.client.Base.ParserBase;
 import gov.nist.asbestos.client.Base.Request;
 import gov.nist.asbestos.client.Base.Returns;
 import gov.nist.asbestos.client.client.Format;
-import gov.nist.asbestos.fixture.FixturePlaceholderEnum;
-import gov.nist.asbestos.fixture.FixturePlaceholderParamEnum;
+import gov.nist.asbestos.services.fixture.FixturePlaceholderParamEnum;
+import gov.nist.asbestos.services.fixture.FixturePlaceholderReplacer;
 import org.hl7.fhir.r4.model.BaseResource;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Resource;
-import org.jetbrains.annotations.NotNull;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.Map;
-import java.util.UUID;
 import java.util.logging.Logger;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 // 0 - empty
 // 1 - web server application context
@@ -39,15 +33,15 @@ import java.util.regex.Pattern;
 // then the fall back search location is CurrentTestCollection\Common[Test.properties:hidden=true]\Name
 
 public class GetFixtureStringRequest {
-    public static final String PLACEHOLDER_BEGIN = "@{";
-    public static final String PLACEHOLDER_END = "}";
     private static Logger log = Logger.getLogger(GetFixtureStringRequest.class.getName());
 
     private Request request;
     private String testCollection;
     private String testName;
+    private FixturePlaceholderReplacer fixturePlaceholder;
 
-    public GetFixtureStringRequest(Request request) throws IOException {
+
+    public GetFixtureStringRequest(Request request, FixturePlaceholderReplacer fixturePlaceholder) throws IOException {
         request.setType(this.getClass().getSimpleName());
         this.request = request;
         this.testCollection = request.uriParts.get(5);
@@ -84,22 +78,7 @@ public class GetFixtureStringRequest {
             }
         }
 
-        String fixtureString =  loadFixture(testCollection, testName, fixtureId, resourceType);
-        if (fixtureString == null) {
-            // Try base Test Collection if the optional parameter is available
-            String baseTestCollection = paramsMap.get(FixturePlaceholderParamEnum.baseTestCollection.name());
-            if (isSafeFileName(baseTestCollection)) {
-                String baseTestCollectionNameDecoded = URLDecoder.decode(baseTestCollection, StandardCharsets.UTF_8.toString());
-                String baseTestName = paramsMap.get(FixturePlaceholderParamEnum.baseTestName.name());
-                if (baseTestName == null) {
-                    fixtureString = loadFixture(baseTestCollectionNameDecoded, testName, fixtureId, resourceType);
-                } else if (isSafeFileName(baseTestName)) {
-                    // Try baseTestName
-                    String baseTestNameDecoded = URLDecoder.decode(baseTestName, StandardCharsets.UTF_8.toString());
-                    fixtureString = loadFixture(baseTestCollectionNameDecoded, baseTestNameDecoded, fixtureId, resourceType);
-                }
-            }
-        }
+        String fixtureString =  fixturePlaceholder.
 
         if (fixtureString != null) {
             fixtureString = replacePlaceholder(fixtureString, paramsMap);
@@ -134,33 +113,6 @@ public class GetFixtureStringRequest {
 
     }
 
-    private String loadFixture(String testCollection, String testName, String fixtureId, String resourceDirectory) throws IOException {
-        File testDir = request.ec.getTest(testCollection, testName);
-        if (testDir == null || !testDir.exists() || !testDir.isDirectory()) {
-            unexpectedMessage(String.format("TestId not found: %s/%s.", testCollection, testName));
-            return null;
-        }
-
-        if (resourceDirectory == null) {
-            resourceDirectory = "Bundle";
-        }
-
-        File fixtureFile = getFixtureFile(fixtureId, testDir, resourceDirectory);
-        if (! fixtureFile.exists()) {
-            // Try Common
-            fixtureFile = getFixtureFile(fixtureId, testDir, "..".concat(File.separator).concat("Common"));
-            if (! fixtureFile.exists()) {
-                return null;
-            }
-        }
-
-        return new String(Files.readAllBytes(fixtureFile.toPath()));
-    }
-
-    @NotNull
-    private File getFixtureFile(String fixtureId, File testDir, String location) {
-        return new File(testDir, location.concat(File.separator.concat(appendXmlFileExtension(fixtureId))));
-    }
 
     private void unexpectedMessage(String message) throws IOException {
         log.warning("GetFixtureStringRequest unexpectedMessage: " + message);
@@ -184,68 +136,7 @@ public class GetFixtureStringRequest {
                 "</OperationOutcome> ",message));
     }
 
-    /**
-     * Mainly used to avoid unwanted path traversal using ..\
-     * @param name
-     * @return
-     */
-    private static boolean isSafeFileName(String name) {
-        return name != null && !"".equals(name) && !name.contains(".");
-    }
 
 
-    private String replacePlaceholder(String fixtureString, final Map<String, String> paramsMap) throws IOException {
-        int from =  fixtureString.indexOf(PLACEHOLDER_BEGIN);
-        if (from == -1) {
-            // Done, no more placeholders exist to replace
-            return fixtureString;
-        }
-        int to = fixtureString.indexOf(PLACEHOLDER_END, from);
-        if (to == -1) {
-           unexpectedMessage(String.format("Placeholder at %d has no closing.", from));
-           return null;
-        }
-        String placeholderName = fixtureString.substring(from+PLACEHOLDER_BEGIN.length(), to);
-        FixturePlaceholderEnum placeholderEnum = null;
-        try {
-            placeholderEnum = FixturePlaceholderEnum.valueOf(placeholderName);
-        } catch (IllegalArgumentException iaex) {
-            unexpectedMessage(String.format("%s fixture placeholder is not a registered enumeration type.", placeholderName));
-            return null;
-        }
 
-        String paramValue = paramsMap.get(placeholderName);
-        String placeholderFixtureString = null;
-        if (paramValue == null) {
-            if (FixturePlaceholderEnum.RandomUUID.equals(placeholderEnum)) {
-                paramValue = FixturePlaceholderEnum.RandomUUID.toString();
-                placeholderFixtureString = UUID.randomUUID().toString();
-            }
-            else {
-                // If null, expect a file name same name as the placeholder
-                // Example  @{BundleMetaProfileElement} = BundleMetaProfileElement.xml
-                paramValue = placeholderName;
-                if (isSafeFileName(paramValue)) {
-                    placeholderFixtureString = loadFixture(testCollection, testName, paramValue, null);
-                } else {
-                    log.severe(String.format("%s is not safe",paramValue));
-                    return null;
-                }
-            }
-        if (placeholderFixtureString != null) {
-            return replacePlaceholder(
-                    fixtureString.replaceAll(
-                            Pattern.quote(String.format("%s%s%s", PLACEHOLDER_BEGIN, placeholderName, PLACEHOLDER_END)), Matcher.quoteReplacement(placeholderFixtureString)), paramsMap);
-        } else {
-            unexpectedMessage(String.format("%s fixture string value is null", paramValue));
-            return null;
-        }
-     }
-        unexpectedMessage(String.format("unresolved placeholder %s", placeholderName));
-        return null;
-    }
-
-    private static String appendXmlFileExtension(String fileName) {
-       return fileName.concat(".xml");
-    }
 }
