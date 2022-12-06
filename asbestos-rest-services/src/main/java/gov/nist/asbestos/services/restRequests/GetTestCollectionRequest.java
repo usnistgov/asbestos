@@ -2,6 +2,8 @@ package gov.nist.asbestos.services.restRequests;
 
 import gov.nist.asbestos.client.Base.EC;
 import gov.nist.asbestos.client.Base.Request;
+import gov.nist.asbestos.testcollection.TestCollectionPropertiesEnum;
+
 import java.util.logging.Logger;
 
 import java.util.Arrays;
@@ -21,7 +23,6 @@ import java.util.stream.Collectors;
 
 public class GetTestCollectionRequest {
 
-    private static final String DEPENDS_ON_KEY_NAME = "DependsOn"; // TODO: Make an enum
     public static final String TC_SEPARATOR = "/";
     private final String collectionName;
 
@@ -70,11 +71,11 @@ public class GetTestCollectionRequest {
         TestCollection tc = new TestCollection();
         tc.description = request.ec.getTestCollectionDescription(collectionName);
         Properties props = request.ec.getTestCollectionProperties(collectionName);
-        tc.isServerTest = !"client".equals(props.getProperty("TestType"));
+        tc.isServerTest = !"client".equals(props.getProperty(TestCollectionPropertiesEnum.TestType.name()));
         tc.testNames = request.ec.getTestsInCollection(collectionName);
-        tc.requiredChannel = props.getProperty("Channel");
+        tc.requiredChannel = props.getProperty(TestCollectionPropertiesEnum.Channel.name());
 
-        String dependsOnValue = props.getProperty(DEPENDS_ON_KEY_NAME);
+        String dependsOnValue = props.getProperty(TestCollectionPropertiesEnum.DependsOn.name());
         Map<String, String[]> tempMap = loadTestCollectionDependencies(dependsOnValue);
         if (tempMap != null) {
            tc.testDependencies = tempMap;
@@ -123,7 +124,7 @@ public class GetTestCollectionRequest {
                 String testNameTrimmed = testName.trim();
                 Properties props = request.ec.getTestProperties(collectionName, testNameTrimmed);
                 if (props != null) {
-                    String dependsOnValue = props.getProperty(DEPENDS_ON_KEY_NAME);
+                    String dependsOnValue = props.getProperty(TestCollectionPropertiesEnum.DependsOn.name());
                     List<String> list = getTestLevelPrefixedDependsOnList(dependsOnValue);
                     if (list != null) {
                         map.put(tcPrefix(testNameTrimmed), list.toArray(new String[list.size()]));
