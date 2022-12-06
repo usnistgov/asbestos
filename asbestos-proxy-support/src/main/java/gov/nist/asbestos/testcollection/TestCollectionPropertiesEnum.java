@@ -1,5 +1,8 @@
 package gov.nist.asbestos.testcollection;
 
+/**
+ * An enumeration of Test Collection properties
+ */
 public enum TestCollectionPropertiesEnum {
     /**
      * Test Collection Id

@@ -126,7 +126,7 @@
         </resource>
         <request>
             <method value="POST"/>
-             @{SubmissionSetRequestUrlElement}
+             <!--@{SubmissionSetRequestUrlElement}-->
         </request>
     </entry>
 </Bundle>

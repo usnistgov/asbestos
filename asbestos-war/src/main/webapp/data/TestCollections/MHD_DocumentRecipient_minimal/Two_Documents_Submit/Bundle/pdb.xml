@@ -2,7 +2,7 @@
     <id value="xds"/>
     <meta>
         <lastUpdated value="2013-07-01T13:11:33Z"/>
-        @{BundleMetaMinimalProfileElement}
+        <!--@{BundleMetaMinimalProfileElement}-->
     </meta>
     <type value="transaction"/>
     <entry>
@@ -58,7 +58,7 @@
     <entry>
         <fullUrl value="urn:uuid:1.2.129.6.58.922.88336.3"/>
         <resource>
-            @{SubmissionSetResourceElement}
+            <!--@{SubmissionSetResourceElement}-->
         </resource>
         <request>
             <method value="POST"/>

@@ -8,6 +8,7 @@ import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import gov.nist.asbestos.simapi.simCommon.SimId;
 import gov.nist.asbestos.simapi.simCommon.TestSession;
+import gov.nist.asbestos.testcollection.TestCollectionPropertiesEnum;
 import org.hl7.fhir.common.hapi.validation.support.PrePopulatedValidationSupport;
 import org.hl7.fhir.r4.hapi.ctx.HapiWorkerContext;
 import org.hl7.fhir.r4.model.Base;
@@ -131,7 +132,7 @@ public class EC {
     public boolean isHiddenTest(File testDir) {
         Properties props = getTestProperties(testDir);
         if (props != null) {
-            String hiddenValue = props.getProperty(EC.HIDDEN_KEY_NAME);
+            String hiddenValue = props.getProperty(TestCollectionPropertiesEnum.Hidden.name());
             return "true".equals(hiddenValue);
         }
         return false;

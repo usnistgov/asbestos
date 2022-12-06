@@ -4,8 +4,11 @@ import gov.nist.asbestos.client.Base.ParserBase;
 import gov.nist.asbestos.client.Base.Request;
 import gov.nist.asbestos.client.Base.Returns;
 import gov.nist.asbestos.client.client.Format;
+import gov.nist.asbestos.services.fixture.FixturePartsLoader;
 import gov.nist.asbestos.services.fixture.FixturePlaceholderParamEnum;
 import gov.nist.asbestos.services.fixture.FixturePlaceholderReplacer;
+import gov.nist.asbestos.services.fixture.SimpleFixturePlaceholderReplacer;
+import gov.nist.asbestos.services.fixture.XmlPlaceholderReplacer;
 import org.hl7.fhir.r4.model.BaseResource;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Resource;
@@ -14,8 +17,11 @@ import java.io.IOException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
+
+import static gov.nist.asbestos.services.fixture.FixturePartsLoader.isSafeFileName;
 
 // 0 - empty
 // 1 - web server application context
@@ -38,7 +44,6 @@ public class GetFixtureStringRequest {
     private Request request;
     private String testCollection;
     private String testName;
-    private FixturePlaceholderReplacer fixturePlaceholder;
 
 
     public GetFixtureStringRequest(Request request, FixturePlaceholderReplacer fixturePlaceholder) throws IOException {
@@ -78,38 +83,54 @@ public class GetFixtureStringRequest {
             }
         }
 
-        String fixtureString =  fixturePlaceholder.
+        try {
+            FixturePartsLoader fixturePartsLoader = new FixturePartsLoader(request.ec, testCollection, testName, paramsMap);
+            String fixtureString  = fixturePartsLoader.loadFixture(fixtureId, resourceType);
 
-        if (fixtureString != null) {
-            fixtureString = replacePlaceholder(fixtureString, paramsMap);
+            List<FixturePlaceholderReplacer> fixturePlaceholderReplacers = Arrays.asList(
+                    new SimpleFixturePlaceholderReplacer(fixturePartsLoader),
+                    new XmlPlaceholderReplacer(fixturePartsLoader));
+
+
+            for (FixturePlaceholderReplacer fixturePlaceholderReplacer : fixturePlaceholderReplacers) {
+                if (fixtureString != null) {
+                    fixtureString = fixturePlaceholderReplacer.replacePlaceholders(fixtureString);
+                } else {
+                    String message = "Class: <" + fixturePlaceholderReplacer.getClass().getSimpleName() + "> returned null fixtureString." ;
+                    log.severe(message);
+                    unexpectedMessage(message);
+                    return;
+                }
+            }
+
             if (fixtureString != null) {
                 try {
-                    // Parse to see if the whole thing is a parsable Fixture
+                    // Parse to see if the whole thing is a parsable Fixture after fixture part replacements
                     Format outFormat = Format.JSON; // TODO: this should honor the TestScript Operation contentType value
-                    BaseResource assembledResource =  ParserBase.parse(fixtureString, Format.XML);
+                    BaseResource assembledResource = ParserBase.parse(fixtureString, Format.XML);
                     String jsonStr = null;
                     if (assembledResource instanceof Bundle) {
                         jsonStr = ParserBase.encode(assembledResource, outFormat);
                     } else {
-                        Bundle outBundle = ParserBase.bundleWith(Arrays.asList((Resource)assembledResource));
+                        Bundle outBundle = ParserBase.bundleWith(Arrays.asList((Resource) assembledResource));
                         jsonStr = ParserBase.encode(outBundle, outFormat);
                     }
                     Returns.returnString(request.resp, jsonStr);
                     return;
                 } catch (Exception ex) {
-                    unexpectedMessage("ParserBase Exception: " + ex.toString());
+                    unexpectedMessage("GetFixtureStringRequest ParserBase Exception: " + ex.toString());
                     return;
                 }
             } else {
-                unexpectedMessage("replacePlaceholder is null.");
+                unexpectedMessage("fixtureString is null.");
                 return;
             }
-        } else {
-            String message = "fixtureString is null.";
-            log.severe(message);
-            unexpectedMessage(message);
-            return;
+
+        } catch (Exception ex) {
+            log.severe(ex.toString());
+            unexpectedMessage(ex.toString());
         }
+        return;
 
     }
 

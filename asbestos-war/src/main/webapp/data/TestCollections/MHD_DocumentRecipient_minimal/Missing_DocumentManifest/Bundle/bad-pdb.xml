@@ -2,7 +2,7 @@
     <id value="xds"/>
     <meta>
         <lastUpdated value="2013-07-01T13:11:33Z"/>
-        @{BundleMetaMinimalProfileElement}
+        <!--@{BundleMetaMinimalProfileElement}-->
     </meta>
     <type value="transaction"/>
     <entry>

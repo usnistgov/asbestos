@@ -1,24 +1,27 @@
 package gov.nist.asbestos.services.fixture;
 
-import java.util.Map;
 import java.util.UUID;
 
-public class FtkFixtureAttributeValue extends FixturePlaceholderReplacer {
+public class SimpleFixturePlaceholderReplacer extends FixturePlaceholderReplacer {
     private static final String PLACEHOLDER_BEGIN = "@{";
     private static final String PLACEHOLDER_END = "}";
 
     @Override
-    String getBeginText() {
+    public String getBeginText() {
         return PLACEHOLDER_BEGIN;
     }
 
     @Override
-    String getEndText() {
+    public String getEndText() {
         return PLACEHOLDER_END;
     }
 
+    public SimpleFixturePlaceholderReplacer(FixturePartsLoader fixturePartsLoader) {
+        super(fixturePartsLoader);
+    }
+
     @Override
-    String getReplacementText(String placeholderName, Map<String, String> paramsMap) throws Exception {
+    public String getReplacementText(String placeholderName) throws Exception {
         AttributeValuePlaceholderEnum placeholderEnum;
         try {
             placeholderEnum = AttributeValuePlaceholderEnum.valueOf(placeholderName);
