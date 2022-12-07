@@ -46,7 +46,7 @@ public class GetFixtureStringRequest {
     private String testName;
 
 
-    public GetFixtureStringRequest(Request request, FixturePlaceholderReplacer fixturePlaceholder) throws IOException {
+    public GetFixtureStringRequest(Request request) throws IOException {
         request.setType(this.getClass().getSimpleName());
         this.request = request;
         this.testCollection = request.uriParts.get(5);
@@ -87,6 +87,7 @@ public class GetFixtureStringRequest {
             FixturePartsLoader fixturePartsLoader = new FixturePartsLoader(request.ec, testCollection, testName, paramsMap);
             String fixtureString  = fixturePartsLoader.loadFixture(fixtureId, resourceType);
 
+            // TODO: make this channel specific if needed
             List<FixturePlaceholderReplacer> fixturePlaceholderReplacers = Arrays.asList(
                     new SimpleFixturePlaceholderReplacer(fixturePartsLoader),
                     new XmlPlaceholderReplacer(fixturePartsLoader));
