@@ -22,10 +22,6 @@
         <name value="expectedFixtureResponseDocRefCount"/>
         <defaultValue value="1"/>
     </variable>
-    <variable>
-        <name value="igValidationRequestQueryParameters"/>
-        <defaultValue value="?profile=https://profiles.ihe.net/ITI/MHD/StructureDefinition/IHE.MHD.Comprehensive.ProvideBundle#4.0.1"/>
-    </variable>
 
 
     <test>
@@ -53,7 +49,7 @@
                         <valueString value="expectedFixtureResponseDocRefCount"/>
                     </extension>
                     <extension url="urn:variable-in">
-                        <valueString value="igValidationRequestQueryParameters"/>
+                        <valueString value="#{TestCollection.properties:FhirIgVersion}"/>
                     </extension>
                 </modifierExtension>
             </operation>

@@ -10,7 +10,10 @@
             <valueString value="resourceType"/>
         </extension>
         <extension url="urn:variable-in">
-            <valueString value="queryParameters"/>
+            <valueString value="pdbBundleProfile"/>
+        </extension>
+        <extension url="urn:variable-in">
+            <valueString value="igVersion"/>
         </extension>
     </modifierExtension>
 
@@ -27,13 +30,27 @@
         <defaultValue value="@inspectorModeTsModuleCallValuePlaceholder"/>
     </variable>
     <variable>
-        <name value="queryParameters"/>
+        <name value="pdbBundleProfile"/>
+        <defaultValue value="@inspectorModeTsModuleCallValuePlaceholder"/>
+    </variable>
+    <variable>
+        <name value="igVersion"/>
         <defaultValue value="@inspectorModeTsModuleCallValuePlaceholder"/>
     </variable>
 
 
     <test>
-        <description value="Structure definition based resource validation."/>
+    <description value="Structure definition based resource validation - specific IG Version."/>
+    <action>
+        <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Conditional"/>
+        <assert>
+            <description value="Use specific profile version?"/>
+            <expression value="'${igVersion}'.length() > 0"/>
+            <operator value="equals"/>
+            <value value="true"/>
+            <warningOnly value="true"/>
+        </assert>
+    </action>
         <action>
             <operation>
                 <description value="Validation call."/>
@@ -42,7 +59,35 @@
                     <system value="https://hl7.org/fhir/codesystem-testscript-operation-codes.html"/>
                     <code value="validate"/>
                 </type>
-                <url value="${validationServer}/${resourceType}/$validate${queryParameters}"/>
+                <url value="${validationServer}/${resourceType}/$validate?profile=${pdbBundleProfile}#${igVersion}"/>
+                <method value="post"/>
+                <sourceId value="theResource"/>
+                <responseId value="validationResponse"/>
+            </operation>
+        </action>
+    </test>
+
+    <test>
+    <description value="Structure definition based resource validation - server default profile (latest IG version)."/>
+    <action>
+        <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Conditional"/>
+        <assert>
+            <description value="Use server default profile version?"/>
+            <expression value="'${igVersion}'.length() == 0"/>
+            <operator value="equals"/>
+            <value value="true"/>
+            <warningOnly value="true"/>
+        </assert>
+    </action>
+        <action>
+            <operation>
+                <description value="Validation call."/>
+                <label value="validate"/>
+                <type>
+                    <system value="https://hl7.org/fhir/codesystem-testscript-operation-codes.html"/>
+                    <code value="validate"/>
+                </type>
+                <url value="${validationServer}/${resourceType}/$validate?profile=${pdbBundleProfile}"/>
                 <method value="post"/>
                 <sourceId value="theResource"/>
                 <responseId value="validationResponse"/>

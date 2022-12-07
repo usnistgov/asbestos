@@ -16,7 +16,7 @@
             <valueString value="expectedDocRefCount"/>
         </extension>
         <extension url="urn:variable-in">
-            <valueString value="igValidationRequestQueryParameters"/>
+            <valueString value="fhirIgVersion"/> <!-- must include the # prefix if this variable used, example: #n.n.n -->
         </extension>
     </modifierExtension>
 
@@ -44,7 +44,7 @@
                 <description value="Previous test action operation is analyzed using assertions."/>
                 <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
                     <extension url="component">
-                        <valueString value="#{script:TestCollection.properties:MhdVersion}"/>
+                        <valueString value="#{script:TestCollection.properties:FhirIgName}"/>
                     </extension>
                     <extension url="urn:variable-in">
                         <valueString value="isComprehensiveMetadataExpected"/>
@@ -60,6 +60,9 @@
                     </extension>
                     <extension url="urn:variable-in">
                         <valueString value="expectedDocRefCount"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="fhirIgVersion"/>
                     </extension>
                 </modifierExtension>
             </operation>

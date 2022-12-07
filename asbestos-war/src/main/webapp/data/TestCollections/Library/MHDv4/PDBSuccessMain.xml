@@ -15,6 +15,9 @@
         <extension url="urn:variable-in">
             <valueString value="expectedDocRefCount"/>
         </extension>
+        <extension url="urn:variable-in">
+            <valueString value="igVersion"/>
+        </extension>
     </modifierExtension>
 
     <id value="MHDv4PDBSuccessMain"/>
@@ -83,6 +86,11 @@
         <expression value="Bundle.entry[0].response.location"/>
         <sourceId value="pdb-response"/>
     </variable>
+    <variable>
+        <name value="pdbBundleProfile"/>
+        <expression value="Bundle.meta.profile"/>
+        <sourceId value="pdb-bundle"/>
+    </variable>
 
     <setup>
         <modifierExtension url="urn:noErrors"/>
@@ -126,6 +134,31 @@
                     </extension>
                     <extension url="urn:variable-in-no-translation">
                         <valueString value="patientResourceId"/>
+                    </extension>
+                </modifierExtension>
+            </operation>
+        </action>
+    </test>
+    <test>
+        <description value="FHIR IG-based Validation."/>
+        <action>
+            <operation>
+                <description value="Module usage description"/>
+                <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
+                    <extension url="component">
+                        <valueString value="../AggregateModule/StructureDefinitionValidation.xml"/>
+                    </extension>
+                    <extension url="urn:fixture-in">
+                        <valueString value="pdb-bundle"/>
+                    </extension>
+                    <extension url="urn:fixture-in">
+                        <valueString value="pdb-response"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="pdbBundleProfile"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="igVersion"/>
                     </extension>
                 </modifierExtension>
             </operation>

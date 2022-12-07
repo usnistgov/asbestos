@@ -32,7 +32,7 @@
                 <description value="Previous test action operation is analyzed using assertions."/>
                 <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
                     <extension url="component">
-                        <valueString value="#{script:TestCollection.properties:MhdVersion}"/>
+                        <valueString value="#{script:TestCollection.properties:FhirIgName}"/>
                     </extension>
                     <extension url="urn:fixture-in">
                         <valueString value="request"/>

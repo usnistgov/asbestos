@@ -7,8 +7,12 @@
             <valueString value="response"/>
         </extension>
         <extension url="urn:variable-in">
-            <valueString value="validationRequestQueryParameters"/>
+            <valueString value="pdbBundleProfile"/>
         </extension>
+        <extension url="urn:variable-in">
+            <valueString value="igVersion"/>
+        </extension>
+
     </modifierExtension>
 
 
@@ -33,9 +37,7 @@
         <name value="responseResourceType"/>
         <defaultValue value="Bundle"/>
     </variable>
-    <variable>
-        <name value="validationRequestQueryParameters"/>
-    </variable>
+
 
     <setup>
         <modifierExtension url="urn:noErrors"/>
@@ -51,7 +53,6 @@
                     </extension>
                     <extension url="urn:variable-in">
                         <valueString value="'?channelId=${validationServerChannelId}'"/>
-                        <valueString value="'#{TestCollection.properties:Id}/1_Prerequisite_Single_Document_with_Binary'"/>
                     </extension>
                     <extension url="urn:variable-in">
                         <valueString value="'1'"/>
@@ -63,8 +64,6 @@
             </operation>
         </action>
     </setup>
-
-
     <test>
         <description value="Request - Structure definition based resource validation."/>
         <action>
@@ -84,39 +83,43 @@
                         <valueString value="requestResourceType"/>
                     </extension>
                     <extension url="urn:variable-in">
-                        <valueString value="validationRequestQueryParameters"/>
+                        <valueString value="pdbBundleProfile"/>
                     </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="igVersion"/>
+                    </extension>
+
                 </modifierExtension>
             </operation>
         </action>
     </test>
 
     <!-- this should be conditional on the responseResourceType, if matches (ex. Bundle), call $validate without a profile -->
-    <test>
-        <description value="Response - Structure definition based resource validation."/>
-        <action>
-            <operation>
-                <description value="Test action operation is analyzed using assertions."/>
-                <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
-                    <extension url="component">
-                        <valueString value="../../Library/StructureDefinitionValidationMain.xml"/>
-                    </extension>
-                    <extension url="urn:fixture-in">
-                        <valueString value="response"/>
-                    </extension>
-                    <extension url="urn:variable-in">
-                        <valueString value="validationServer"/>
-                    </extension>
-                    <extension url="urn:variable-in">
-                        <valueString value="responseResourceType"/>
-                    </extension>
-                    <extension url="urn:variable-in">
-                        <valueString value="''"/>
-                    </extension>
-                </modifierExtension>
-            </operation>
-        </action>
-    </test>
+<!--    <test>-->
+<!--        <description value="Response - Structure definition based resource validation."/>-->
+<!--        <action>-->
+<!--            <operation>-->
+<!--                <description value="Test action operation is analyzed using assertions."/>-->
+<!--                <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">-->
+<!--                    <extension url="component">-->
+<!--                        <valueString value="../../Library/StructureDefinitionValidationMain.xml"/>-->
+<!--                    </extension>-->
+<!--                    <extension url="urn:fixture-in">-->
+<!--                        <valueString value="response"/>-->
+<!--                    </extension>-->
+<!--                    <extension url="urn:variable-in">-->
+<!--                        <valueString value="validationServer"/>-->
+<!--                    </extension>-->
+<!--                    <extension url="urn:variable-in">-->
+<!--                        <valueString value="responseResourceType"/>-->
+<!--                    </extension>-->
+<!--                    <extension url="urn:variable-in">-->
+<!--                        <valueString value="''"/>-->
+<!--                    </extension>-->
+<!--                </modifierExtension>-->
+<!--            </operation>-->
+<!--        </action>-->
+<!--    </test>-->
 
 
 

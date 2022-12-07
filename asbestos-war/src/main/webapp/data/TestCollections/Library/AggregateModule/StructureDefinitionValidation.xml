@@ -6,6 +6,12 @@
         <extension url="urn:fixture-in">
             <valueString value="response"/>
         </extension>
+        <extension url="urn:variable-in">
+            <valueString value="pdbBundleProfile"/>
+        </extension>
+        <extension url="urn:variable-in">
+            <valueString value="igVersion"/>
+        </extension>
     </modifierExtension>
 
     <id value="StructureDefinitionValidation"/>
@@ -34,13 +40,19 @@ This module should not be used or called by any of the MHDv3.x Test Collection T
                 <description value="Test action operation is analyzed using assertions."/>
                 <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
                     <extension url="component">
-                        <valueString value="#{script:TestCollection.properties:MhdVersion}"/>
+                        <valueString value="#{script:TestCollection.properties:FhirIgName}"/>
                     </extension>
                     <extension url="urn:fixture-in">
                         <valueString value="request"/>
                     </extension>
                     <extension url="urn:fixture-in">
                         <valueString value="response"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="pdbBundleProfile"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="igVersion"/>
                     </extension>
                 </modifierExtension>
             </operation>
