@@ -357,7 +357,7 @@ public class EC {
                 channelId = parts[1];
         }
         File fhir = fhirDir(testSession, channelId);
-        if (resourceType.equals("null")) {
+        if (resourceType == null || resourceType.equals("null")) {
             resourceType = resourceTypeForEvent(fhir, eventName);
             if (resourceType == null) {
                 return null;

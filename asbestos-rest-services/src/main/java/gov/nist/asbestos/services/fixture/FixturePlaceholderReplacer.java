@@ -9,7 +9,18 @@ public abstract class FixturePlaceholderReplacer {
     private static Logger log = Logger.getLogger(FixturePlaceholderReplacer.class.getName());
     FixturePartsLoader fixturePartsLoader;
 
+    /**
+     * String or substring thereof must not clash with other replacer class begin text tokens
+     * example: <!--@{}--> clashes with @{}
+     * @return
+     */
     public abstract String getBeginText();
+    /**
+     * String or substring thereof must not clash with other replacer class begin text tokens
+     * example: <!--@{}--> clashes with @{}
+     * @return
+     */
+
     public abstract String getEndText();
     abstract String getReplacementText(String placeholderName) throws Exception;
 

@@ -584,7 +584,7 @@ public class XdsOnFhirChannel extends BaseChannel /*implements IBaseChannel*/ {
                 rrt = new RegistryResponseBuilder().fromInputStream(new ByteArrayInputStream(registryResponse.getBytes()));
             } catch (Exception e) {
                 String logReference = logReference(log, "XdsOnFhirChannel#transform", e);
-                returnErrorInOperationOutcome(logReference.concat("Check server log for more details."), responseOut);
+                returnErrorInOperationOutcome(logReference.concat(". Check server log for more details."), responseOut);
                 return;
             }
             RegErrorList regErrorList = RegistryResponseBuilder.asErrorList(rrt);

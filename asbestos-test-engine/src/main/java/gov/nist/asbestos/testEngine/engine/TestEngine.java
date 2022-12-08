@@ -19,10 +19,6 @@ import gov.nist.asbestos.testEngine.engine.fixture.FixtureSub;
 import gov.nist.asbestos.testEngine.engine.translator.ComponentDefinition;
 import gov.nist.asbestos.testEngine.engine.translator.ComponentReference;
 import gov.nist.asbestos.testEngine.engine.translator.Parameter;
-import java.util.logging.Level;
-
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Reference;
@@ -39,6 +35,8 @@ import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -757,7 +755,7 @@ public class TestEngine  implements TestDef {
             } catch (Throwable t) {
                 String error = String.format("TestEngine#doOperation: %s", t.toString());
                 log.log(Level.SEVERE, error, t);
-                report.setMessage(error.concat("Check server log for details."));
+                report.setMessage(error.concat(". Check server log for details."));
                 report.setResult(TestReport.TestReportActionResult.ERROR);
             }
             propagateStatus(testReport);
@@ -1770,14 +1768,14 @@ public class TestEngine  implements TestDef {
 
     void reportOperation(ResourceWrapper wrapper, Reporter reporter, TestScript.SetupActionOperationComponent op) {
         if (parent != null) {
-            if (op.getType().getCode().equals("getFixtureString")) {
+            if (op.getType().getCode().equals("internalFtkRequest")) { // getFixtureString
                 // This is required for reporting purposes. Some sub-fixtures within the parent TestScript may use the output fixture of this operation, which is not yet available without this step.
                 // Even though this 'missing fixture' is not critical at this point, reporting method likes to dump the entire TestScript state
                 String lastOp = this.fixtureMgr.getLastOp();
                 if (lastOp != null) {
                     parent.getFixtureMgr().put(lastOp, this.fixtureMgr.get(lastOp));
                 } else {
-                    log.severe("Error: lastOp is null. lastOp should be non-empty when getFixtureString is used. Check fixture-out parameter mapping.");
+                    log.severe("Error: lastOp is null. lastOp should be non-empty when internalFtkRequest (getFixtureString) is used. Check fixture-out parameter mapping.");
                 }
             }
             new ActionReporter()

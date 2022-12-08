@@ -30,7 +30,7 @@ import static gov.nist.asbestos.services.fixture.FixturePartsLoader.isSafeFileNa
 // 4 - channelId
 // 5 - testCollectionId
 // 6 - testId
-// Example: https://fhirtoolkit.test:9743/asbestos/engine/ftkLoadFixture/default__limited/MHD_DocumentRecipient_minimal/Missing_DocumentManifest
+// Example: https://fhirtoolkit.test:9743/asbestos/engine/loadFtkFixture/default__limited/MHD_DocumentRecipient_minimal/Missing_DocumentManifest
 //  ?fixtureId=pdb&[baseTestCollection=&baseTestName=]&[fixtureElementPlaceholder=LocalFixtureReferenceFileName]&[resourceType=DirectoryName]
 // See @FixturePlaceholderParamEnum for complete search order reference.
 // fixtureId is searched for in the current test Collection, test name, Bundle,
@@ -56,13 +56,13 @@ public class GetFixtureStringRequest {
     public static boolean isRequest(Request request) {
         if (request.uriParts.size() == 7) {
             String uriPart3 = request.uriParts.get(3);
-            return "ftkLoadFixture".equals(uriPart3);
+            return "loadFtkFixture".equals(uriPart3);
         }
         return false;
     }
 
     public void run() throws IOException {
-        request.announce("FtkLoadFixture - GetFixtureStringRequest");
+        request.announce("loadFtkFixture");
 
         // Read fixtureId File
         Map<String, String> paramsMap = request.getParametersMap();
@@ -89,8 +89,8 @@ public class GetFixtureStringRequest {
 
             // TODO: make this channel specific if needed
             List<FixturePlaceholderReplacer> fixturePlaceholderReplacers = Arrays.asList(
-                    new SimpleFixturePlaceholderReplacer(fixturePartsLoader),
-                    new XmlPlaceholderReplacer(fixturePartsLoader));
+                    new XmlPlaceholderReplacer(fixturePartsLoader),
+                    new SimpleFixturePlaceholderReplacer(fixturePartsLoader));
 
 
             for (FixturePlaceholderReplacer fixturePlaceholderReplacer : fixturePlaceholderReplacers) {
