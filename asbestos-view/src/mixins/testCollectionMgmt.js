@@ -133,7 +133,12 @@ export default {
                 Promise.all(promises).then(() => {
                         this.tcLoading = false
                         this.testScriptNamesUpdated()
-                        console.log('Done loading scripts and reports')
+                        console.log('Done loading scripts and reports.')
+                }).catch(error => {
+                    this.tcLoading = false
+                    const errorMsg = 'Error loading TestScripts and/or TestReports. Check server log for details. ' + error
+                    this.$store.commit('setError', errorMsg)
+                    console.error(errorMsg)
                 })
             })
             // })

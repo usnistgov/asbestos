@@ -4,7 +4,7 @@
             <valueString value="theResource"/>
         </extension>
         <extension url="urn:variable-in">
-            <valueString value="validationServer"/>
+            <valueString value="validationServerFhirBase"/>
         </extension>
         <extension url="urn:variable-in">
             <valueString value="resourceType"/>
@@ -22,7 +22,7 @@
     <description value="This TestScript has the following parameters: 1) Validation server is the FHIR base, 2) resourceType is the resource type to validate, 3) queryParameters is ?profile=value, where value is the canonical URL obtained from the IHE FHIR-based IG Message Semantics page, suffixed with an optional version number specified as #n.n.n where n is an integer equal to or greater than 0. If version is omitted, it implies latest version or the version automatically selected by the validation server. When this script is imported as a module, the variables with defaultValues are overridden with the input parameter extensions."/>
 
     <variable>
-        <name value="validationServer"/>
+        <name value="validationServerFhirBase"/>
         <defaultValue value="@inspectorModeTsModuleCallValuePlaceholder"/>
     </variable>
     <variable>
@@ -59,7 +59,7 @@
                     <system value="https://hl7.org/fhir/codesystem-testscript-operation-codes.html"/>
                     <code value="validate"/>
                 </type>
-                <url value="${validationServer}/${resourceType}/$validate?profile=${pdbBundleProfile}#${igVersion}"/>
+                <url value="${validationServerFhirBase}/${resourceType}/$validate?profile=${pdbBundleProfile}#${igVersion}"/>
                 <method value="post"/>
                 <sourceId value="theResource"/>
                 <responseId value="validationResponse"/>
@@ -87,7 +87,7 @@
                     <system value="https://hl7.org/fhir/codesystem-testscript-operation-codes.html"/>
                     <code value="validate"/>
                 </type>
-                <url value="${validationServer}/${resourceType}/$validate?profile=${pdbBundleProfile}"/>
+                <url value="${validationServerFhirBase}/${resourceType}/$validate?profile=${pdbBundleProfile}"/>
                 <method value="post"/>
                 <sourceId value="theResource"/>
                 <responseId value="validationResponse"/>

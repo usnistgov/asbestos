@@ -16,6 +16,7 @@ import java.net.URI;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.regex.Pattern;
 
 public class OperationRunner {
     private String label;
@@ -294,7 +295,7 @@ public class OperationRunner {
                     where 'null' is a link to something like: https://fhirtoolkit.test:8082/session/default/channel/limited/collection/MHDv4_DocumentRecipient_minimal/test/null
                      */
                 }
-        } else if ("ftkInternalRequest".equals(code)) {
+        } else if ("internalFtkRequest".equals(code)) {
             if (! op.hasRequestHeader()) {
                 reporter.reportError("ftkInternalRequest missing a requestHeader code.");
                 return;
@@ -303,9 +304,15 @@ public class OperationRunner {
             final String ftkInternalCode = "x-internalFtkRequestCode";
             String ftkInternalRequestCode = null;
             Optional<TestScript.SetupActionOperationRequestHeaderComponent> headerComponent =  op.getRequestHeader().stream()
-                    .filter(s -> s.hasField() && s.getField().equals("x-ftkInternalRequestCode")).findFirst();
+                    .filter(s -> s.hasField() && s.getField().equals(ftkInternalCode)).findFirst();
             if (headerComponent.isPresent()) {
-               ftkInternalRequestCode = headerComponent.get().getValue();
+               String value = headerComponent.get().getValue();
+               if (value != null && value.startsWith("${") && value.endsWith("}")) {
+                    String variableName = value.replaceFirst(Pattern.quote("${"), "").replaceFirst("}", "");
+                    if (externalVariables != null && externalVariables.containsKey(variableName)) {
+                        ftkInternalRequestCode = externalVariables.get(variableName);
+                    }
+                }
             }
             if (ftkInternalRequestCode == null) {
                 reporter.reportError(String.format("%s headerComponent not found.", ftkInternalCode));
@@ -350,7 +357,9 @@ public class OperationRunner {
                     where 'null' is a link to something like: https://fhirtoolkit.test:8082/session/default/channel/limited/collection/MHDv4_DocumentRecipient_minimal/test/null
                  */
             }
-        }
+        } else {
+                reporter.reportError("do not understand request code of " + ftkInternalCode +":" + ftkInternalRequestCode);
+            }
         } else {
             reporter.reportError("do not understand code.code of " + code);
         }
