@@ -16,7 +16,7 @@
             <valueString value="expectedDocRefCount"/>
         </extension>
         <extension url="urn:variable-in">
-            <valueString value="fhirIgVersion"/> <!-- must include the # prefix if this variable used, example: #n.n.n -->
+            <valueString value="fhirIgVersion"/>
         </extension>
     </modifierExtension>
 

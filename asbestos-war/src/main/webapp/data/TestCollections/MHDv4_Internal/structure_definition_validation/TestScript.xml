@@ -46,7 +46,7 @@
                 <description value="Gets a bundle with the validation data resources in the same order as the request query parameters."/>
                 <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
                     <extension url="component">
-                        <valueString value="../Library/InternalFtkRequest.xml"/>
+                        <valueString value="../../Library/InternalFtkRequest.xml"/>
                     </extension>
                     <extension url="urn:variable-in">
                         <valueString value="'getFtkChannelFhirBase'"/>

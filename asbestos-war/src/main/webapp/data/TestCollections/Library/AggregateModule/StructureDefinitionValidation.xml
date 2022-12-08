@@ -22,8 +22,9 @@
 MHD v3.x does not have an official FHIR based IG.
 See https://profiles.ihe.net/ITI/MHD/history.html.
 
-This module should not be used or called by any of the MHDv3.x Test Collection TestScripts.
+This module should not be used or called by any of the MHDv3.x Test Collection TestScripts or any other test collections which do not have an official FHIR IG published.
 -->
+
     <variable>
         <name value="scriptMHDv4"/>
         <defaultValue value="../../MHDv4_Internal/structure_definition_validation/TestScript.xml"/>

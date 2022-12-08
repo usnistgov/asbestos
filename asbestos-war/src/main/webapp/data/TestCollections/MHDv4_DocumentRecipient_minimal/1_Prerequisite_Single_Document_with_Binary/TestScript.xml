@@ -49,7 +49,7 @@
                         <valueString value="expectedFixtureResponseDocRefCount"/>
                     </extension>
                     <extension url="urn:variable-in">
-                        <valueString value="#{TestCollection.properties:FhirIgVersion}"/>
+                        <valueString value="'#{TestCollection.properties:FhirIgVersion}'"/>
                     </extension>
                 </modifierExtension>
             </operation>
